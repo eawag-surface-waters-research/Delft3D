@@ -1,6 +1,6 @@
 subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
                     & ws        ,tsd       ,rsedeq    , &
-                    & sour      ,sink                        )
+                    & sour_ex   ,sour_im   ,sink      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -43,12 +43,6 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
     !
     implicit none
     !
-    !type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    !real(fp) , pointer :: eps
-    real(fp) :: eps
 
 !
 ! Call variables
@@ -60,13 +54,15 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
     real(fp), intent(in)  :: ws
     real(fp)              :: tsd
     real(fp), intent(in)  :: rsedeq
-    real(fp), intent(out) :: sour
+    real(fp), intent(out) :: sour_ex
+    real(fp), intent(out) :: sour_im
     real(fp), intent(out) :: sink
 
 !
 ! Local variables
 !
     real(fp) :: b
+    real(fp) :: eps
     real(fp) :: hots
     real(fp) :: u
     real(fp) :: ulog
@@ -113,8 +109,9 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
           !
        endif
        hots = wsl/tsd
-       sour = rsedeq*hots/h0
-       sink = hots/h1
+       sour_ex = rsedeq*hots/h0
+       sour_im = (hots-wsl)/h1
+       sink    = wsl/h1
     else
        sink = wsl/h1
     endif

@@ -326,8 +326,8 @@ type gd_sedpar
     real(fp) :: csoil     !  concentration at bed used in hindered settling formulation
     real(fp) :: mdcuni    !  mud content / mud fraction uniform value (non-zero only
                           !  if mud is not included simulation)
-    real(fp) :: kssilt    !  ks value for silt to be used in soulsby 2004 formulation
-    real(fp) :: kssand    !  ks value for sand (not yet used)
+    real(fp) :: kssilt    !  ks value for silt for Soulsby 2004 formulation
+    real(fp) :: kssand    !  ks value for sand 
     !
     ! reals
     !
@@ -364,6 +364,7 @@ type gd_sedpar
     real(fp)      , dimension(:)    , pointer :: tcguni     !  Calibration factor on critical shear stress in Van Rijn (2004) uniform values
     real(fp)      , dimension(:)    , pointer :: mudcnt     !  mud content / mud fraction field (non-zero only if mud
                                                             !  is not included simulation)
+    real(fp)      , dimension(:)    , pointer :: pmcrit     !  Critical mud fraction for non-cohesive behaviour
     integer       , dimension(:)    , pointer :: nseddia    !  Number of characteristic sediment diameters
     integer       , dimension(:)    , pointer :: sedtyp     !  Sediment type: 0=total/1=noncoh/2=coh
     character(10) , dimension(:)    , pointer :: inisedunit !  'm' or 'kg/m2' : Initial sediment at bed specified as thickness ([m]) or density ([kg/m2])
@@ -384,6 +385,7 @@ type gd_sedpar
                                  ! fraction only)
     character(256) :: flsmdc     ! mud content / mud fraction file (only if mud is not
                                  ! included in simulation)
+    character(256) :: flspmc     ! critical mud fraction for non-cohesive behaviour file
 end type gd_sedpar
 
 type gd_trapar
@@ -486,6 +488,7 @@ subroutine initsedpar(gdsedpar)
     nullify(gdsedpar%sdbuni)
     nullify(gdsedpar%tcguni)
     nullify(gdsedpar%mudcnt)
+    nullify(gdsedpar%pmcrit)
     nullify(gdsedpar%sedtrcfac)
     !
     nullify(gdsedpar%nseddia)
@@ -536,6 +539,7 @@ subroutine clrsedpar(istat     ,gdsedpar  )
     if (associated(gdsedpar%sdbuni))     deallocate(gdsedpar%sdbuni,     STAT = istat)
     if (associated(gdsedpar%tcguni))     deallocate(gdsedpar%tcguni,     STAT = istat)
     if (associated(gdsedpar%mudcnt))     deallocate(gdsedpar%mudcnt,     STAT = istat)
+    if (associated(gdsedpar%pmcrit))     deallocate(gdsedpar%pmcrit,     STAT = istat)
     !
     if (associated(gdsedpar%nseddia))    deallocate(gdsedpar%nseddia,    STAT = istat)
     if (associated(gdsedpar%sedtyp))     deallocate(gdsedpar%sedtyp,     STAT = istat)

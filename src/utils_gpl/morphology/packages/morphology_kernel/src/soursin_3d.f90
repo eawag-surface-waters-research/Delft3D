@@ -1,7 +1,7 @@
 subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicksed    , &
                     & r0          ,vicmol      ,sigmol      ,seddif      ,rhosol      , &
                     & caks        ,ws          ,aks         , &
-                    & sour        ,sink                                               )
+                    & sour_ex     ,sour_im     ,sink        )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -55,7 +55,8 @@ subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicks
     real(fp), intent(in)  :: vicmol
     real(fp), intent(in)  :: ws
     real(fp), intent(in)  :: aks
-    real(fp), intent(out) :: sour
+    real(fp), intent(out) :: sour_ex
+    real(fp), intent(out) :: sour_im
     real(fp), intent(out) :: sink
 !
 ! Local variables
@@ -140,14 +141,16 @@ subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicks
        !
        ! Compute explicit source and implicit sink terms
        !
-       sour = alpha2*caksrho*diffus/dz
-       sink = alpha2*diffus/dz + alpha1*ws
+       sour_ex = alpha2*caksrho*diffus/dz
+       sour_im = alpha2*diffus/dz
+       sink    = alpha1*ws
        !
        ! Source and sink terms are calculated per unit
        ! volume
        !
-       sour = max(0.0_fp, sour) / thick0
-       sink = max(0.0_fp, sink) / thick1
+       sour_ex = max(0.0_fp, sour_ex) / thick0
+       sour_im = max(0.0_fp, sour_im) / thick1
+       sink    = max(0.0_fp, sink) / thick1
     else
        !
        ! (if downward diffusion into the bed would occur)
@@ -155,7 +158,8 @@ subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicks
        ! use simple estimate for settling flux out of
        ! bottom SAND cell
        !
-       sour = 0.0_fp
-       sink = ws/thick1
+       sour_ex = 0.0_fp
+       sour_im = 0.0_fp
+       sink    = ws/thick1
     endif
 end subroutine soursin_3d

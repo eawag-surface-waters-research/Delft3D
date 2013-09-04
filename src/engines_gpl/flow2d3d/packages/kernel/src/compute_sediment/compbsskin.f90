@@ -72,7 +72,6 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
                                     ! grid orientation
     real(fp), intent(in)  :: kssilt ! roughness height silt
     real(fp), intent(in)  :: kssand ! roughness height sand
-                                    !(not yet used)
     real(fp), intent(in)  :: thcmud ! Total hickness of mud layers
                                     !(to be replaced by mudcnt in future)
     real(fp), intent(out) :: taumax ! resulting (maximum) bed shear stress muddy silt bed

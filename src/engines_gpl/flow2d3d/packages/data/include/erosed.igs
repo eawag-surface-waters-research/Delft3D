@@ -111,8 +111,9 @@ type sv_erosed
                                                   !  v component
     real(fp), dimension(:,:), pointer :: sutot    !  sum of sbcu, sbwu, sswu
     real(fp), dimension(:,:), pointer :: svtot    !  sum of sbcv, sbwv, sswv
-    real(fp), dimension(:,:), pointer :: sinkse   !  suspended sediment sink term
-    real(fp), dimension(:,:), pointer :: sourse   !  suspended sediment source term
+    real(fp), dimension(:,:), pointer :: sinkse   !  suspended sediment sink term (including sour_im)
+    real(fp), dimension(:,:), pointer :: sourse   !  suspended sediment source term (explicit part)
+    real(fp), dimension(:,:), pointer :: sour_im  !  suspended sediment source term (implicit part)
     real(fp), dimension(:)  , pointer :: dzduu    !  bedslope in u direction in u point
     real(fp), dimension(:)  , pointer :: dzdvv    !  bedslope in v direction in v point
     real(fp), dimension(:,:), pointer :: taurat   !  excess bed shear ratio

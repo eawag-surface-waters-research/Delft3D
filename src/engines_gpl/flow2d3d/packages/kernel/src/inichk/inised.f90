@@ -87,6 +87,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:)         , pointer :: sdbuni
     real(fp)      , dimension(:)         , pointer :: sedtrcfac
     real(fp)      , dimension(:)         , pointer :: mudcnt
+    real(fp)      , dimension(:)         , pointer :: pmcrit
     real(fp)      , dimension(:)         , pointer :: tcguni
     integer       , dimension(:)         , pointer :: nseddia
     integer       , dimension(:)         , pointer :: sedtyp
@@ -96,6 +97,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     logical                              , pointer :: anymud
     character(256)                       , pointer :: flsdia
     character(256)                       , pointer :: flsmdc
+    character(256)                       , pointer :: flspmc
     real(fp)                             , pointer :: factcr
 !
 ! Global variables
@@ -166,6 +168,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     sedtrcfac           => gdp%gdsedpar%sedtrcfac
     tcguni              => gdp%gdsedpar%tcguni
     mudcnt              => gdp%gdsedpar%mudcnt
+    pmcrit              => gdp%gdsedpar%pmcrit
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
     inisedunit          => gdp%gdsedpar%inisedunit
@@ -174,6 +177,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     anymud              => gdp%gdsedpar%anymud
     flsdia              => gdp%gdsedpar%flsdia
     flsmdc              => gdp%gdsedpar%flsmdc
+    flspmc              => gdp%gdsedpar%flspmc
     factcr              => gdp%gdmorpar%factcr
     !
     nmlb    = gdp%d%nmlb
@@ -279,7 +283,22 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        if (error) goto 9999
     endif
     do nm = 1, nmmax
-       mudcnt(nm) = max(0.0_fp, min(1.0_fp, mudcnt(nm)))
+       mudcnt(nm) = max(0.0_fp, min(mudcnt(nm), 1.0_fp))
+    enddo
+    !
+    ! Read array PMCRIT
+    !
+    if (flspmc /= ' ') then
+       !
+       ! Space varying data has been specified
+       ! Use routine that also read the depth file to read the data
+       !
+       call depfil(lundia    ,error     ,flspmc    ,fmttmp    , &
+                 & pmcrit    ,1         ,1         ,gdp%griddim)
+       if (error) goto 9999
+    endif
+    do nm = 1, nmmax
+       pmcrit(nm) = min(pmcrit(nm), 1.0_fp)
     enddo
     !
     ! Initialise suspended sediment diameter

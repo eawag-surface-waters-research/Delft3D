@@ -90,6 +90,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)         , dimension(:)    , pointer :: tcguni
     real(fp)         , dimension(:)    , pointer :: gamflc
     real(fp)         , dimension(:)    , pointer :: mudcnt
+    real(fp)         , dimension(:)    , pointer :: pmcrit
     integer          , dimension(:)    , pointer :: nseddia
     integer          , dimension(:)    , pointer :: sedtyp
     character(10)    , dimension(:)    , pointer :: inisedunit
@@ -100,6 +101,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     logical                            , pointer :: bsskin
     character(256)                     , pointer :: flsdia
     character(256)                     , pointer :: flsmdc
+    character(256)                     , pointer :: flspmc
     character(256)   , dimension(:)    , pointer :: dll_function_settle
     character(256)   , dimension(:)    , pointer :: dll_name_settle
     integer(pntrsize), dimension(:)    , pointer :: dll_handle_settle
@@ -185,6 +187,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     sdbuni               => gdsedpar%sdbuni
     thcmud               => gdsedpar%thcmud
     mudcnt               => gdsedpar%mudcnt
+    pmcrit               => gdsedpar%pmcrit
     nseddia              => gdsedpar%nseddia
     sedtyp               => gdsedpar%sedtyp
     inisedunit           => gdsedpar%inisedunit
@@ -194,6 +197,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     bsskin               => gdsedpar%bsskin
     flsdia               => gdsedpar%flsdia
     flsmdc               => gdsedpar%flsmdc
+    flspmc               => gdsedpar%flspmc
     dll_function_settle  => gdtrapar%dll_function_settle
     dll_name_settle      => gdtrapar%dll_name_settle
     dll_handle_settle    => gdtrapar%dll_handle_settle
@@ -236,6 +240,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        if (istat==0) allocate (gdsedpar%flstcg    (                      max(1,lsed)), stat = istat)
        !
        if (istat==0) allocate (gdsedpar%mudcnt    (nmlb:nmub            ), stat = istat)
+       if (istat==0) allocate (gdsedpar%pmcrit    (nmlb:nmub            ), stat = istat)
        if (istat==0) allocate (gdsedpar%sedd50fld (nmlb:nmub            ), stat = istat)
        !
        if (istat/=0) then
@@ -271,6 +276,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        thcmud        => gdsedpar%thcmud
        !
        mudcnt        => gdsedpar%mudcnt
+       pmcrit        => gdsedpar%pmcrit
        sedd50fld     => gdsedpar%sedd50fld
        gamflc        => gdsedpar%gamflc
        tcguni        => gdsedpar%tcguni
@@ -288,6 +294,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     enddo
     flsdbd              = ' '
     flsmdc              = ' '
+    flspmc              = ' '
     flsdia              = ' '
     dll_function_settle = ' '
     dll_usrfil_settle   = ' '
@@ -312,6 +319,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     thcmud       = rmissval
     !
     mudcnt       = rmissval
+    pmcrit       = -1.0
     sedd50fld    = rmissval
     !
     tcguni       = 1.5
@@ -362,6 +370,24 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           call write_error(errmsg, unit=lundia)
           error = .true.
           return
+       endif
+       !
+       ! Sand-mud interaction parameters
+       !
+       call prop_get_string(sed_ptr, 'SedimentOverall', 'PmCrit', flspmc)
+       !
+       ! Intel 7.0 crashes on an inquire statement when file = ' '
+       !
+       if (flspmc == ' ') then
+          ex = .false.
+       else
+          call combinepaths(filsed, flspmc)
+          inquire (file = flspmc, exist = ex)
+       endif
+       if (.not. ex) then
+          flspmc = ' '
+          call prop_get(sed_ptr, '*', 'PmCrit', pmcrit(1))
+          pmcrit = min(pmcrit(1), 1.0_fp)
        endif
        !
        ! Get bed shear skin stress parameters
@@ -865,6 +891,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     real(fp)        , dimension(:)    , pointer :: sedtrcfac
     real(fp)        , dimension(:)    , pointer :: tcguni
     real(fp)        , dimension(:)    , pointer :: gamflc
+    real(fp)        , dimension(:)    , pointer :: pmcrit
     integer         , dimension(:)    , pointer :: nseddia
     integer         , dimension(:)    , pointer :: sedtyp
     character(10)   , dimension(:)    , pointer :: inisedunit
@@ -875,6 +902,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     logical                           , pointer :: bsskin
     character(256)                    , pointer :: flsdia
     character(256)                    , pointer :: flsmdc
+    character(256)                    , pointer :: flspmc
     character(256)  , dimension(:)    , pointer :: dll_function_settle
     character(256)  , dimension(:)    , pointer :: dll_name_settle
     character(256)  , dimension(:)    , pointer :: dll_usrfil_settle
@@ -914,6 +942,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     sedtrcfac            => gdsedpar%sedtrcfac
     tcguni               => gdsedpar%tcguni
     gamflc               => gdsedpar%gamflc
+    pmcrit               => gdsedpar%pmcrit
     nseddia              => gdsedpar%nseddia
     sedtyp               => gdsedpar%sedtyp
     inisedunit           => gdsedpar%inisedunit
@@ -924,6 +953,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     bsskin               => gdsedpar%bsskin
     flsdia               => gdsedpar%flsdia
     flsmdc               => gdsedpar%flsmdc
+    flspmc               => gdsedpar%flspmc
     dll_function_settle  => gdtrapar%dll_function_settle
     dll_name_settle      => gdtrapar%dll_name_settle
     dll_usrfil_settle    => gdtrapar%dll_usrfil_settle
@@ -952,6 +982,15 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
        endif
        flsmdc = ' '
        mdcuni = 0.0_fp
+       !
+       ! Sand-mud interaction
+       !
+       txtput1 = 'Sand mud interaction with critical mud fraction'
+       if (flspmc /= ' ') then
+          write (lundia, '(3a)') txtput1, ':  ', trim(flspmc)
+       else
+          write (lundia, '(2a,e12.4)') txtput1, ':', pmcrit(1)
+       endif
     else
        if (flsmdc /= ' ') then
           txtput1 = 'File mud content'
@@ -960,9 +999,18 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
           txtput1 = 'Uniform mud content'
           write (lundia, '(2a,e12.4)') txtput1, ':', mdcuni
        endif
+       !
+       ! Sand-mud interaction
+       !
+       if (flspmc /= ' ' .or. comparereal(pmcrit(1),0.0_fp) > 0) then
+          errmsg = 'Sand mud interaction ignored: no mud fraction simulated.'
+          call write_warning(errmsg, unit=lundia)
+       endif
+       flspmc = ' '
+       pmcrit = -1.0_fp
     endif
     if (bsskin) then
-       txtput1 = 'Skin friction soulsby 2004'
+       txtput1 = 'Skin friction Soulsby 2004'
        write (lundia, '(a)') txtput1
        txtput1 = 'Kssilt '
        write (lundia, '(2a,f12.6)') txtput1,':', kssilt

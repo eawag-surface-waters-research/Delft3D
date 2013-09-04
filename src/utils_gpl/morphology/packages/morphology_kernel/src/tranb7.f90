@@ -1,5 +1,5 @@
 subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
-                & sbot      ,ssus      ,vonkar    )
+                & sbot      ,ssus      ,vonkar    ,mudfrac   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -41,13 +41,14 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
 !
 ! Call variables
 !
-    real(fp)               , intent(in)  :: d50   ! grain size diameter (first specified diameter)
-    real(fp)               , intent(in)  :: d90   ! grain size diameter (first specified diameter)
-    real(fp)               , intent(in)  :: h     ! water depth
-    real(fp)               , intent(out) :: sbot  ! bed load transport
-    real(fp)               , intent(out) :: ssus  ! suspended sediment transport
-    real(fp)               , intent(in)  :: utot  ! flow velocity
-    real(fp), dimension(30), intent(in)  :: par   ! sediment parameter list
+    real(fp)               , intent(in)  :: d50     ! grain size diameter (first specified diameter)
+    real(fp)               , intent(in)  :: d90     ! grain size diameter (first specified diameter)
+    real(fp)               , intent(in)  :: h       ! water depth
+    real(fp)               , intent(in)  :: mudfrac ! fraction of mud
+    real(fp)               , intent(out) :: sbot    ! bed load transport
+    real(fp)               , intent(out) :: ssus    ! suspended sediment transport
+    real(fp)               , intent(in)  :: utot    ! flow velocity
+    real(fp), dimension(30), intent(in)  :: par     ! sediment parameter list
     real(fp)               , intent(in)  :: vonkar
 !
 ! Local variables
@@ -56,6 +57,7 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     real(fp)       :: ah
     real(fp)       :: alf1
     real(fp)       :: beta   ! lowest level of integration interval over vertical
+    real(fp)       :: betam  !  power coefficient for adjusting critical bed shear stress for sand-mud interaction
     real(fp)       :: ca
     real(fp)       :: del
     real(fp)       :: dstar
@@ -91,6 +93,7 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     alf1 = par(11)
     rksc = par(13)
     ws = par(14)
+    betam = par(15)
     !
     if (h/rksc<1.33 .or. utot<1.E-3) then
        return
@@ -104,7 +107,7 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     tbc = .125*rhowat*fc*utot**2
     tbce = rmuc*tbc
     thetcr = shld(dstar)
-    tbcr = (rhosol - rhowat)*ag*d50*thetcr
+    tbcr = (rhosol - rhowat)*ag*d50*thetcr*(1.0+mudfrac)**betam
     t = (tbce - tbcr)/tbcr
     !
     if (t<.000001) t = .000001

@@ -53,6 +53,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
     real(fp), dimension(:,:)         , pointer :: fixfac
     real(fp), dimension(:,:)         , pointer :: sinkse
     real(fp), dimension(:,:)         , pointer :: sourse
+    real(fp), dimension(:,:)         , pointer :: sour_im
     integer                          , pointer :: lundia
     integer                          , pointer :: ntstep
     real(fp)                         , pointer :: morfac
@@ -111,6 +112,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
     fixfac              => gdp%gderosed%fixfac
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
+    sour_im             => gdp%gderosed%sour_im
     lundia              => gdp%gdinout%lundia
     ntstep              => gdp%gdinttim%ntstep
     morfac              => gdp%gdmorpar%morfac
@@ -145,7 +147,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
              thick0 = thick(kmaxsd)*h0
              thick1 = thick(kmaxsd)*h1
              dz     = (hdt*morfac/cdryb(l)) &
-                    & * (sourse(nm, l)*thick0 - sinkse(nm, l)*thick1*r0(nm, kmaxsd, ll))
+                    & * (sourse(nm, l)*thick0 - (sinkse(nm, l)+sour_im(nm, l))*thick1*r0(nm, kmaxsd, ll))
              if (abs(dz) > h1*dzmax) then
                 reducfac = (h1*dzmax)/abs(dz)
                 if (reducfac < 0.01 .and. nst>=itmor .and. bedupd) then
@@ -164,8 +166,9 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
                       call prterr(lundia, 'Z013', trim(message))
                    endif
                  endif
-                 sourse(nm, l) = sourse(nm, l)*reducfac
-                 sinkse(nm, l) = sinkse(nm, l)*reducfac
+                 sourse(nm, l)  = sourse(nm, l) *reducfac
+                 sour_im(nm, l) = sour_im(nm, l)*reducfac
+                 sinkse(nm, l)  = sinkse(nm, l) *reducfac
               endif
               !
               ! Apply reduction factor to source and sink
@@ -178,9 +181,10 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
               ! estimate sink term based on previous cell
               ! concentration
               !
-              if (sinkse(nm,l)*r0(nm,kmaxsd,ll) < sourse(nm,l)) then
-                 sinkse(nm, l) = sinkse(nm, l)*fixfac(nm,l)
-                 sourse(nm, l) = sourse(nm, l)*fixfac(nm,l)
+              if ((sinkse(nm,l)+sour_im(nm,l))*r0(nm,kmaxsd,ll) < sourse(nm,l)) then
+                 sinkse(nm, l)  = sinkse(nm, l) *fixfac(nm,l)
+                 sourse(nm, l)  = sourse(nm, l) *fixfac(nm,l)
+                 sour_im(nm, l) = sour_im(nm, l)*fixfac(nm,l)
                  do k = 1, kmax
                     rsedeq(nm, k, l) = rsedeq(nm, k, l)*fixfac(nm,l)
                  enddo

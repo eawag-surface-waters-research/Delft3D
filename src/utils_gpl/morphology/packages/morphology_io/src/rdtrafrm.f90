@@ -1036,6 +1036,9 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(2)  = 1.0_fp
        parkeyw(3) = 'Aks'
        parkeyw(4) = 'WSettle'
+       nparopt    = 1
+       parkeyw(5) = 'BetaM'
+       pardef(5)  = 0.0_fp
     !elseif (iform == 8) then
     !   name       = 'Van Rijn / Ribberink (1994)'
     !   nparreq    = 14

@@ -97,6 +97,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: ws0
     real(fp)         , dimension(:)      , pointer :: salmax
     real(fp)         , dimension(:)      , pointer :: mudcnt
+    real(fp)         , dimension(:)      , pointer :: pmcrit
     integer          , dimension(:)      , pointer :: nseddia
     integer          , dimension(:)      , pointer :: sedtyp
     logical                              , pointer :: anymud
@@ -155,6 +156,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: svtot
     real(fp)         , dimension(:,:)    , pointer :: sinkse
     real(fp)         , dimension(:,:)    , pointer :: sourse
+    real(fp)         , dimension(:,:)    , pointer :: sour_im
     real(fp)         , dimension(:,:)    , pointer :: taurat
     real(fp)         , dimension(:)      , pointer :: ust2
     real(fp)         , dimension(:)      , pointer :: umod
@@ -362,6 +364,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: z0cur
     real(fp)                      :: z0rou
     real(fp)                      :: zvelb
+    real(fp), dimension(lsedtot)  :: E            ! erosion velocity [m/s]
     real(fp), dimension(0:kmax2d) :: dcww2d
     real(fp), dimension(0:kmax2d) :: sddf2d
     real(fp), dimension(0:kmax2d) :: ws2d
@@ -401,6 +404,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ws0                 => gdp%gdsedpar%ws0
     salmax              => gdp%gdsedpar%salmax
     mudcnt              => gdp%gdsedpar%mudcnt
+    pmcrit              => gdp%gdsedpar%pmcrit
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
     anymud              => gdp%gdsedpar%anymud
@@ -464,6 +468,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     svtot               => gdp%gderosed%svtot
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
+    sour_im             => gdp%gderosed%sour_im
     srcmax              => gdp%gderosed%srcmax
     taurat              => gdp%gderosed%taurat
     ust2                => gdp%gderosed%ust2
@@ -521,40 +526,41 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        !
        ! Allocate using the gdp structure itself instead of the local pointers
        !
-                     allocate (gdp%gderosed%bc_mor_array(lsedtot*2)              , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dbodsd(lsedtot,gdp%d%nmlb:gdp%d%nmub), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dcwwlc(0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dzduu (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dzdvv (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%epsclc(0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%epswlc(0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%fixfac(gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%rsdqlc(kmax)                         , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcuu (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcvv (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwuu (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwvv (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sddflc(0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sinkse(gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sourse(gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%srcmax(gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswuu (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswvv (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sutot (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%svtot (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%taurat(gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%umod  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%ust2  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%uuu   (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%vvv   (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%wslc  (0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%zumod (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+                     allocate (gdp%gderosed%bc_mor_array(lsedtot*2)               , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dbodsd (lsedtot,gdp%d%nmlb:gdp%d%nmub), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dcwwlc (0:kmax)                       , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dzduu  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dzdvv  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%epsclc (0:kmax)                       , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%epswlc (0:kmax)                       , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%fixfac (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%rsdqlc (kmax)                         , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbcu   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbcuu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbcv   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbcvv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbwu   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbwuu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbwv   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbwvv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sddflc (0:kmax)                       , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sinkse (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sourse (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sour_im(gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%srcmax (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sswu   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sswuu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sswv   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sswvv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sutot  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%svtot  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%taurat (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%umod   (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%ust2   (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%uuu    (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%vvv    (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%wslc   (0:kmax)                       , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%zumod  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
        if (istat/=0) then
           call prterr(lundia, 'U021', 'Erosed: memory alloc error')
           call d3stop(1, gdp)
@@ -582,6 +588,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        sddflc              => gdp%gderosed%sddflc
        sinkse              => gdp%gderosed%sinkse
        sourse              => gdp%gderosed%sourse
+       sour_im             => gdp%gderosed%sour_im
        srcmax              => gdp%gderosed%srcmax
        sswu                => gdp%gderosed%sswu
        sswuu               => gdp%gderosed%sswuu
@@ -627,9 +634,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     !
     ! Reset Sourse and Sinkse arrays for all (nm,l)
     !
-    kmxsed = 1
-    sourse = 0.0_fp
-    sinkse = 0.0_fp
+    kmxsed  = 1
+    sinkse  = 0.0_fp
+    sourse  = 0.0_fp
+    sour_im = 0.0_fp
     !
     ! Reset Sediment diffusion arrays for (nm,k,l)
     !
@@ -1203,7 +1211,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                                &  siglc(kmaxsd)     ,thicklc(kmaxsd),r0(nm,kmxsed(nm,l) ,ll)    , &
                                &  vicmol            ,sigmol(ll)     ,seddif(nm,kmxsed(nm,l)-1,l), &
                                &  rhosol(l)         ,caks_ss3d      ,ws(nm,kmxsed(nm,l),l)      , &
-                               &  aks_ss3d          ,sourse(nm,l)   ,sinkse(nm,l) )
+                               &  aks_ss3d          ,sourse(nm,l)   ,sour_im(nm,l)      , &
+                               &  sinkse(nm,l) )
                 ! Impose relatively large vertical diffusion
                 ! coefficients for sediment in layer interfaces from
                 ! bottom of reference cell downwards, to ensure little
@@ -1265,8 +1274,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! Galappatti time scale and source and sink terms
                 !
                 call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
-                              & ws(nm,kfsmin(nm),l)    ,tsd           ,rsedeq(nm,kfsmin(nm),l),            &
-                              & sourse(nm,l)  ,sinkse(nm,l)  ,gdp                      )
+                              & ws(nm,kfsmin(nm),l),tsd      ,rsedeq(nm,kfsmin(nm),l)  , &
+                              & sourse(nm,l)  ,sour_im(nm,l) ,sinkse(nm,l)  )
              endif ! suspfrac
           endif ! kmaxlc = 1
           if (suspfrac) then
@@ -1385,6 +1394,44 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              sbvv(nm, l) = sbcvv(nm, l) + sbwvv(nm, l) + sswvv(nm, l)
           enddo
        endif
+    enddo
+    !
+    ! Update sourse fluxes due to sand-mud interaction
+    !
+    do nm = 1, nmmax
+        if (pmcrit(nm)<0.0_fp) cycle
+        if (mudfrac(nm)<=0.0_fp .or. mudfrac(nm)>=1.0_fp) cycle
+        !
+        ! Compute erosion velocities
+        !
+        E = 0.0_fp        
+        do l = 1, lsed
+            ll = lstart + l
+            kmaxsd = kmxsed (nm,l)
+            if (frac(nm,l)>0.0_fp)  E(l) = (sourse(nm,l) - sour_im(nm,l)*r0(nm,kmaxsd,ll))/(cdryb(l)*frac(nm,l))
+        enddo
+        !
+        ! Recompute erosion velocities
+        !
+        call sand_mud(lsed, E, frac(nm,:), mudfrac(nm), sedtyp, pmcrit(nm))
+        !
+        ! Recompute erosion fluxes
+        ! only explicit part of erosion flux is changed 
+        ! (is effectively the same as changing the equilibrium concentration)
+        !
+        do l = 1, lsed
+            ll = lstart + l
+            kmaxsd = kmxsed (nm,l)
+            sourse(nm,l) = frac(nm,l)*cdryb(l)*E(l) + sour_im(nm,l)*r0(nm,kmaxsd,ll)
+        enddo
+    enddo
+    !
+    ! Add implicit part of source term to sinkse
+    !
+    do l = 1, lsed
+        do nm = 1, nmmax
+            sinkse(nm, l) = sinkse(nm, l) + sour_im(nm, l)
+        enddo
     enddo
     !
     ! Finally fill sour and sink arrays for both sand and silt
