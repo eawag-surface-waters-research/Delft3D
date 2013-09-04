@@ -2,6 +2,7 @@ module iso_c_utils
   use iso_c_binding
   implicit none
 
+  ! always use max stringlen for c arrays otherwise you have to specify lengths by hand
   integer(c_int), parameter :: MAXSTRINGLEN = 1024
 contains
   ! Utility functions, move these to interop module
@@ -59,7 +60,7 @@ contains
   pure function string_to_char_array(string) result(char_array)
     ! pass only trimmed strings to this one
     character(len=*), intent(in) :: string
-    character(kind=c_char,len=1) :: char_array(len(string)+1)
+    character(kind=c_char,len=1) :: char_array(MAXSTRINGLEN)
     integer :: i
     do i = 1, len(string)
        char_array(i:i) = string(i:i)
