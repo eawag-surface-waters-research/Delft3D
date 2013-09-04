@@ -18,24 +18,51 @@ contains
     end do
   end function strlen
 
-  pure function char_array_to_string(char_array, length)
-    integer(c_int), intent(in) :: length
-    character(c_char),intent(in) :: char_array(length)
-    character(len=length) :: char_array_to_string
+
+  integer(c_int) pure function strcmp(char_array1, char_array2)
+    character(c_char), intent(in) :: char_array1(MAXSTRINGLEN)
+    character(c_char), intent(in) :: char_array2(MAXSTRINGLEN)
+
+    character(len=strlen(char_array1)) :: string1
+    character(len=strlen(char_array2)) :: string2
+
+    string1 = trim(char_array_to_string(char_array1))
+    string2 = trim(char_array_to_string(char_array1))
+    strcmp = 0
+    if (llt(string1,string2)) strcmp = -1
+    if (lgt(string1,string2)) strcmp = 1
+
+  end function strcmp
+
+
+
+  subroutine strcpy(str1, str2)
+    character(c_char), intent(in) :: str1(MAXSTRINGLEN)
+    character(c_char), intent(out) :: str2(MAXSTRINGLEN)
+
     integer :: i
-    do i = 1, length
-       char_array_to_string(i:i) = char_array(i)
+    str2 = ' '
+    do i=1,(strlen(str1) + 1)
+       str2(i) = str1(i)
+    end do
+  end subroutine strcpy
+
+  pure function char_array_to_string(char_array) result(string)
+    character(c_char),intent(in) :: char_array(MAXSTRINGLEN)
+    character(len=strlen(char_array)) :: string
+    integer :: i
+    do i = 1, strlen(char_array)
+       string(i:i) = char_array(i)
     enddo
   end function char_array_to_string
 
-  pure function string_to_char_array(string, length)
-    character(len=length), intent(in) :: string
-    integer(c_int),intent(in) :: length
-    character(kind=c_char,len=1) :: string_to_char_array(length+1)
+  pure function string_to_char_array(string) result(char_array)
+    character(len=*), intent(in) :: string
+    character(kind=c_char,len=1) :: char_array(len(string)+1)
     integer :: i
-    do i = 1, length
-       string_to_char_array(i) = string(i:i)
+    do i = 1, len(string)
+       char_array(i) = string(i:i)
     enddo
-    string_to_char_array(length+1) = C_NULL_CHAR
+    char_array(len(string)+1) = C_NULL_CHAR
   end function string_to_char_array
 end module iso_c_utils

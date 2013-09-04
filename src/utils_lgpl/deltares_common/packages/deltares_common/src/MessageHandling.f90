@@ -257,7 +257,7 @@ recursive subroutine SetMessage(level, string)
 
    if (associated(f_callback).and. .not. alreadyInCallback) then
       alreadyInCallback = .true.
-      c_string(1:len(trim(string))+1) = string_to_char_array(trim(string), len(trim(string)))
+      c_string(1:len(trim(string))+1) = string_to_char_array(trim(string))
       call f_callback(level, c_string)
       alreadyInCallback = .false.
    end if
