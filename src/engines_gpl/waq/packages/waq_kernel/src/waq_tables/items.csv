@@ -477,7 +477,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "ExtUVPOC2 ","x"," ",   0.100000    ,"(m2/gC)             ","UV specific extinction coefficient POC2           ","volume    ","volume    "," ","                              "
 "ExtUVPOC3 ","x"," ",   0.100000    ,"(m2/gC)             ","UV specific extinction coefficient POC3           ","volume    ","volume    "," ","                              "
 "ExtUVPOC4 ","x"," ",   0.100000    ,"(m2/gC)             ","UV specific extinction coefficient POC4           ","volume    ","volume    "," ","                              "
-"ExtVlIM1  ","x"," ",   0.100000E-01,"(m2/gDM)            ","VL specific extinction coefficient M1             ","volume    ","volume    "," ","                              "
+"ExtVlIM1  ","x"," ",   0.100000E-01,"(m2/gDM)            ","VL specific extinction coefficient IM1             ","volume    ","volume    "," ","                              "
 "ExtVlIM2  ","x"," ",   0.100000E-01,"(m2/gDM)            ","VL specific extinction coefficient IM2            ","volume    ","volume    "," ","                              "
 "ExtVlIM3  ","x"," ",   0.100000E-01,"(m2/gDM)            ","VL specific extinction coefficient IM3            ","volume    ","volume    "," ","                              "
 "ExtVlBak  ","x"," ",   0.800000E-01,"(1/m)               ","background extinction visible light               ","volume    ","volume    "," ","                              "
