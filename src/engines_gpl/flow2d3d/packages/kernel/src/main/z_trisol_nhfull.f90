@@ -268,6 +268,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer(pntrsize)                    , pointer :: guv
     integer(pntrsize)                    , pointer :: gvu
     integer(pntrsize)                    , pointer :: gvv
+    integer(pntrsize)                    , pointer :: hkru
+    integer(pntrsize)                    , pointer :: hkrv
     integer(pntrsize)                    , pointer :: hrms
     integer(pntrsize)                    , pointer :: hu
     integer(pntrsize)                    , pointer :: hu0
@@ -718,6 +720,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     guv                 => gdp%gdr_i_ch%guv
     gvu                 => gdp%gdr_i_ch%gvu
     gvv                 => gdp%gdr_i_ch%gvv
+    hkru                => gdp%gdr_i_ch%hkru
+    hkrv                => gdp%gdr_i_ch%hkrv
     hrms                => gdp%gdr_i_ch%hrms
     hu                  => gdp%gdr_i_ch%hu
     hu0                 => gdp%gdr_i_ch%hu0
@@ -2008,6 +2012,16 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                           & r(vmean)  ,r(v0)     ,r(v1)     ,r(dzv0)   ,r(dzv1)   , &
                           & r(dzs1)   ,r(sig)    ,i(kfsmx0) ,r(gvv)    ,r(qyk)    , &
                           & gdp       )
+             !
+             ! Recalculate DPU/DPV (depth at velocity points)
+             !
+             call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
+                       &  zmodel    , &
+                       &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
+                       &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
+                       &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
+                       &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
+                       &  r(thick)  ,gdp       )
           endif
        endif
        !
