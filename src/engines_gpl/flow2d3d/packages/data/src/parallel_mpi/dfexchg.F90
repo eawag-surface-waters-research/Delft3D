@@ -38,6 +38,7 @@ subroutine dfexchg ( iptr, ks, ke, itype, nm_pos, gdp)
 !
 !
 !!--declarations----------------------------------------------------------------
+    use flow2d3d_timers
     use dfparall
     use globaldata
     !
@@ -64,6 +65,8 @@ subroutine dfexchg ( iptr, ks, ke, itype, nm_pos, gdp)
     ! if not parallel, return
     !
     if (.not.parll) return
+    !
+    call timer_start(timer_dfexchg, gdp)
     !
     lundia => gdp%gdinout%lundia
     !
@@ -92,5 +95,5 @@ subroutine dfexchg ( iptr, ks, ke, itype, nm_pos, gdp)
        call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
-
+    call timer_stop(timer_dfexchg, gdp)
 end subroutine dfexchg

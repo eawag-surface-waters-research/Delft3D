@@ -45,6 +45,7 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
 #ifdef HAVE_MPI
     use mpi
 #endif
+    use flow2d3d_timers
     use dfparall
     use globaldata
     !
@@ -72,6 +73,8 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
     !
     if (.not.parll) return
     !
+    call timer_start(timer_dfreduce, gdp)
+    !
     lundia => gdp%gdinout%lundia
     ioptr = 0
     !
@@ -91,5 +94,5 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
     else if ( itype == dfdble ) then
        call cparrd ( ioptr, iptr, ilen, gdp )
     endif
-
+    call timer_stop(timer_dfreduce, gdp)
 end subroutine dfreduce

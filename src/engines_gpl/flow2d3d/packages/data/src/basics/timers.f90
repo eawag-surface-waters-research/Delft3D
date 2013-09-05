@@ -225,8 +225,11 @@ integer, parameter :: timer_cucnp_vih           = timer_cucnp_advdiffv + 1
 integer, parameter :: timer_cucnp_rowsc         = timer_cucnp_vih + 1
 integer, parameter :: timer_cucnp_lhs           = timer_cucnp_rowsc + 1
 integer, parameter :: timer_cucnp_vihsec        = timer_cucnp_lhs + 1
+! *** in parallel routines ***
+integer, parameter :: timer_dfexchg             = timer_cucnp_vihsec + 1
+integer, parameter :: timer_dfreduce            = timer_dfexchg + 1
 ! Total number of timers
-integer, parameter :: numtimers                 = timer_cucnp_vihsec
+integer, parameter :: numtimers                 = timer_dfreduce
 contains
 !
 !
@@ -407,6 +410,9 @@ subroutine timers_init (gdp)
     gdp%gdtimers%names(timer_cucnp_rowsc)      = 'cucnp_rowscale'
     gdp%gdtimers%names(timer_cucnp_lhs)        = 'cucnp_lhs'
     gdp%gdtimers%names(timer_cucnp_vihsec)     = 'cucnp_vihsec'
+    ! *** in parallel routines ***
+    gdp%gdtimers%names(timer_dfexchg)          = 'dfexchg'
+    gdp%gdtimers%names(timer_dfreduce)         = 'dfreduce'
     !
     ! starttime = -1.0 denotes that the related timer is not started
     !
@@ -712,6 +718,13 @@ subroutine timers_finish (gdp)
                write(lundia, '(a)') '|---------------------------------------------------------------------|'
                write(lundia, '(a)') '| *** In cucnp ***                                                    |'
                write(lundia, '(a)') '|---------------------------------------------------------------------|'
+          elseif (i == timer_dfexchg) then
+               write(lundia, 111) 'Total in cucnp:     ', timetot(sumtime), timetot(starttime), &
+                                                      & timetot(sumtime_cpu), timetot(starttime_cpu)
+               timetot = 0
+               write(lundia, '(a)') '|---------------------------------------------------------------------|'
+               write(lundia, '(a)') '| *** In parallel routines ***                                        |'
+               write(lundia, '(a)') '|---------------------------------------------------------------------|'
           endif
           write(lundia,111) names(i), &
                &       usedcp(i,sumtime)    , usedcp(i,starttime)    , &
@@ -721,7 +734,7 @@ subroutine timers_finish (gdp)
           timetot(sumtime_cpu) = timetot(sumtime_cpu) + usedcp(i,sumtime_cpu)
           timetot(starttime_cpu) = timetot(starttime_cpu) + usedcp(i,starttime_cpu)
        enddo
-       write(lundia, 111) 'Total in cucnp:     ', timetot(sumtime), timetot(starttime), &
+       write(lundia, 111) 'Total in parallel:  ', timetot(sumtime), timetot(starttime), &
                                                       & timetot(sumtime_cpu), timetot(starttime_cpu)
     endif
     write(lundia,'(a)') '|---------------------------------------------------------------------|'
@@ -785,6 +798,7 @@ subroutine timers_finish (gdp)
         write(lundia,'(a)') '|                 tritra                                              |'
         write(lundia,'(a)') '|                 difu                                                |'
         write(lundia,'(a)') '|                 cucnp                                               |'
+        write(lundia,'(a)') '|                 parallel routines                                   |'
         write(lundia,'(a)') '|The Delft3D-FLOW source code is needed to interpret these timers     |' 
     endif
     write(lundia,'(a)') '|---------------------------------------------------------------------|'
