@@ -12,8 +12,8 @@ echo Generating version number in '%1' ...
 
 set SCRIPT_DIRECTORY=%~dp0
 
-set SVNVERSION=%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe
-set VN=%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe
+set SVNVERSION="%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe"
+set VN="%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe"
 
 set version=000000
 
@@ -54,6 +54,6 @@ if exist %1 (
 )
 
 rem Generate version number source module using version_number.exe
-"%VN%" "%version%" "%3" "%1.svn" "%1"
+%VN% "%version%" "%3" "%1.svn" "%1"
 
 :end
