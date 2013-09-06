@@ -41,11 +41,11 @@ character(20)  :: major
 character(20)  :: minor
 character(20)  :: revision
 character(20)  :: value
-character(256) :: inputFile
-character(256) :: line
-character(256) :: outputFile
-character(256) :: vnInputFile
-character(256) :: versionString
+character(500) :: inputFile
+character(500) :: line
+character(500) :: outputFile
+character(500) :: vnInputFile
+character(500) :: versionString
 !
 ! body
 versionString = '@(#)Deltares, version_number, version 1.00.00.00; Sep 22, 2008'
