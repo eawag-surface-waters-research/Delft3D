@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -69,8 +69,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
-if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.h ..\.. .\include\version_number.ini
+if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc ..\.. .\include\version_number.ini
 </Command>
     </PreBuildEvent>
     <CustomBuildStep>
@@ -98,8 +98,8 @@ if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\m
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
-if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.h ..\.. .\include\version_number.ini
+if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc ..\.. .\include\version_number.ini
 </Command>
     </PreBuildEvent>
     <CustomBuildStep>
@@ -125,8 +125,8 @@ if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\m
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
-if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.h ..\.. .\include\version_number.ini
+if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc ..\.. .\include\version_number.ini
 </Command>
     </PreBuildEvent>
     <ClCompile>
@@ -147,8 +147,8 @@ if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\m
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
-if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.h ..\.. .\include\version_number.ini
+if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc ..\.. .\include\version_number.ini
 </Command>
     </PreBuildEvent>
     <ClCompile>
