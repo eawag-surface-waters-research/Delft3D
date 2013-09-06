@@ -386,7 +386,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        ! Van Rijn (1984, modified)
        !
        call tranb7(utot      ,di50       ,d90       ,h1        ,par        , &
-                 & sbot      ,ssus      ,vonkar    )
+                 & sbot      ,ssus       ,vonkar    ,mudfrac)
        !
        sbc_total = .true.
        sus_total = .true.

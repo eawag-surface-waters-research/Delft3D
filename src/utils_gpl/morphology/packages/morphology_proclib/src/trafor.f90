@@ -144,6 +144,7 @@
       real(fp)                           :: T_relax     !< O  T_relax                                            (-)                 
       real(fp)                           :: DSS         !< O  Dss of ISS fraction output                         (m)                 
       real(fp)                           :: SourSe      !< O  SourSe for ISS frac                                (kg/m3/s)           
+      real(fp)                           :: sour_im     !< O  SourSe for ISS frac (implicit part)                (kg/m3/s)           
       real(fp)                           :: SinkSe      !< O  SinkSe for ISS frac                                (1/s)               
 !
       real(4)                            :: flxsrc      !< F  source flux for ISS frac                           (kg/m3/d)
@@ -551,7 +552,7 @@
                   call soursin_2d(UEff2D    ,UStar    ,LocalDepth ,LocalDepth, &
                                 & Wsettle   ,T_relax  ,rsedeq(1)  ,   &
 !output
-                                & SourSe    ,SinkSe   )
+                                & SourSe    ,sour_im  ,SinkSe   )
                else
                   ! 3D model
                   call soursin_3d(LocalDepth    , thick0  , thick1    , sig(kmaxsd), &
@@ -559,7 +560,7 @@
                                 & seddif(kmaxsd), RhoSolid, caks_ss3d , ws(kmaxsd) , &
                                 & aks_ss3d      , &
 !output
-                                & SourSe  , SinkSe     )
+                                & SourSe        , sour_im , SinkSe     )
                endif
                !
                !dz = (SourSe*thick0 - SinkSe*conc*thick1)*DELT*day2sec*MorFac/RhoBed
