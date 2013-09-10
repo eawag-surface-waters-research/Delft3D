@@ -962,7 +962,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                    & r(hkru)   ,r(hkrv)   ,r(s1)     ,d(dps)    ,r(u1)     , &
                    & r(v1)     ,r(umean)  ,r(vmean)  ,r(r1)     ,r(rtur1)  , &
                    & r(guu)    ,r(gvv)    ,r(qxk)    ,r(qyk)    ,r(dzu1)   , &
-                   & r(dzv1)   ,r(sig)    ,gdp       )
+                   & r(dzv1)   ,r(dzs1)   ,r(sig)    ,gdp       )
     endif
     !
     ! Convert the coordinates of the fixed gate using DPU/DPV as reference

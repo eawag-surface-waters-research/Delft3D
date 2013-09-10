@@ -285,6 +285,13 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (lerror) call d3stop(1, gdp)
     endif
     !
+    ! Check whether the ratio in layer thickness of the two bottom layers is not too large
+    !
+    if (thick(2)/thick(1) > 1.5_fp) then
+       call prterr(lundia, 'U190', 'Ratio in layer thickness of the two bottom layers is larger than 1.5.')
+       write (lundia, *)'           May lead to inaccurate representation of the bottom boundary layer.'
+    endif
+    !
     if (zmodel) then
        !
        ! locate and read 'Zbot' record

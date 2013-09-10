@@ -62,35 +62,35 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer     , intent(out) :: ibaroc    !  Description and declaration in numeco.igs
-    integer     , intent(out) :: icreep    !  Description and declaration in tricom.igs
-    integer                   :: iter1     !  Description and declaration in numeco.igs
-    integer     , intent(in)  :: keva      !  Description and declaration in tricom.igs
-    integer     , intent(in)  :: kmax      !  Description and declaration in esm_alloc_int.f90
-    integer     , intent(in)  :: ktemp     !  Description and declaration in tricom.igs
-    integer     , intent(in)  :: lstsci    !  Description and declaration in esm_alloc_int.f90
-    integer                   :: lundia    !  Description and declaration in inout.igs
-    integer                   :: lunmd     !  Description and declaration in inout.igs
-    integer                   :: nrrec     !  Pointer to the record number in the MD-file
-    integer                   :: nudge     !  Description and declaration in procs.igs
-    logical     , intent(in)  :: zmodel    !  Description and declaration in procs.igs
-    logical                   :: old_corio !  Description and declaration in numeco.igs
-    real(fp)                  :: dco       !  Description and declaration in numeco.igs
-    real(fp)                  :: dgcuni
-    real(fp)                  :: drycrt    !  Description and declaration in numeco.igs
-    real(fp)                  :: dryflc    !  Description and declaration in numeco.igs
-    real(fp)                  :: fwfac     !  Description and declaration in numeco.igs
-    real(fp)                  :: gammax    !  Description and declaration in numeco.igs
-    real(fp)                  :: nudvic    !  Description and declaration in numeco.igs
-    character(*)              :: mdfrec    !  Standard rec. length in MD-file (300)
-    character(1), intent(out) :: evaint    !  Description and declaration in tricom.igs
-    character(1)              :: forfuv    !  Description and declaration in tricom.igs
-    character(1)              :: forfww    !  Description and declaration in tricom.igs
-    character(1), intent(out) :: temint    !  Description and declaration in tricom.igs
-    character(13)             :: trasol    !  Description and declaration in tricom.igs
-    character(6)              :: momsol
-    character(8)              :: dpsopt    !  Description and declaration in numeco.igs
-    character(8)              :: dpuopt
+    integer      , intent(out) :: ibaroc    !  Description and declaration in numeco.igs
+    integer      , intent(out) :: icreep    !  Description and declaration in tricom.igs
+    integer                    :: iter1     !  Description and declaration in numeco.igs
+    integer      , intent(in)  :: keva      !  Description and declaration in tricom.igs
+    integer      , intent(in)  :: kmax      !  Description and declaration in esm_alloc_int.f90
+    integer      , intent(in)  :: ktemp     !  Description and declaration in tricom.igs
+    integer      , intent(in)  :: lstsci    !  Description and declaration in esm_alloc_int.f90
+    integer                    :: lundia    !  Description and declaration in inout.igs
+    integer                    :: lunmd     !  Description and declaration in inout.igs
+    integer                    :: nrrec     !  Pointer to the record number in the MD-file
+    integer                    :: nudge     !  Description and declaration in procs.igs
+    logical      , intent(in)  :: zmodel    !  Description and declaration in procs.igs
+    logical                    :: old_corio !  Description and declaration in numeco.igs
+    real(fp)                   :: dco       !  Description and declaration in numeco.igs
+    real(fp)                   :: dgcuni
+    real(fp)                   :: drycrt    !  Description and declaration in numeco.igs
+    real(fp)                   :: dryflc    !  Description and declaration in numeco.igs
+    real(fp)                   :: fwfac     !  Description and declaration in numeco.igs
+    real(fp)                   :: gammax    !  Description and declaration in numeco.igs
+    real(fp)                   :: nudvic    !  Description and declaration in numeco.igs
+    character(*)               :: mdfrec    !  Standard rec. length in MD-file (300)
+    character(1) , intent(out) :: evaint    !  Description and declaration in tricom.igs
+    character(1)               :: forfuv    !  Description and declaration in tricom.igs
+    character(1)               :: forfww    !  Description and declaration in tricom.igs
+    character(1) , intent(out) :: temint    !  Description and declaration in tricom.igs
+    character(13)              :: trasol    !  Description and declaration in tricom.igs
+    character(6)               :: momsol
+    character(8)               :: dpsopt    !  Description and declaration in numeco.igs
+    character(8)               :: dpuopt
 !
 ! Local variables
 !
@@ -104,7 +104,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     logical                     :: lvalue
     logical                     :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     real(fp)                    :: rdef   ! Help var. containing default va- lue(s) for real variable 
-    real(fp), dimension(1)      :: rval   ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
+    real(fp)     , dimension(1) :: rval   ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
     character(13)               :: cdef   ! Default value when CHULP not found 
     character(13)               :: chulp  ! Help character variable 
     character(13), dimension(3) :: traopt ! Transport model options cyclic-method and van leer-2 

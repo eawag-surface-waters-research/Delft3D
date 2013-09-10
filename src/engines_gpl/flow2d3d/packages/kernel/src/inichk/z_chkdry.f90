@@ -7,7 +7,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                   & hkru      ,hkrv      ,s1        ,dps       ,u1        , &
                   & v1        ,umean     ,vmean     ,r1        ,rtur1     , &
                   & guu       ,gvv       ,qxk       ,qyk       ,dzu1      , &
-                  & dzv1      ,zk        ,gdp       )
+                  & dzv1      ,dzs1      ,zk        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -61,6 +61,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer        , pointer :: lundia
     real(fp)       , pointer :: drycrt
     real(fp)       , pointer :: dryflc
     logical        , pointer :: zmodel
@@ -112,6 +113,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: umean  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: vmean  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur)              :: rtur1  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzu1   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzv1   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: qxk    !  Description and declaration in esm_alloc_real.f90
@@ -123,27 +125,30 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
 !             
 ! Local variables
 !
-    integer :: k      ! Help var. 
-    integer :: kkmin   ! Help var. 
-    integer :: kkmax   ! Help var. 
-    integer :: kd
-    integer :: ku
-    integer :: l      ! Help var. 
-    integer :: mask   ! Help var. 
-    integer :: ndm    ! Help var. NM-ICY 
-    integer :: nm     ! Help var. loops 1,nmmax and j,nmmaxj 
-    integer :: nmd
-    integer :: nmu
-    integer :: num
-    real(fp):: hnm
-    real(fp):: drytrsh
-    real(fp):: hucres
-    real(fp):: hvcres
-    real(fp):: s1u
-    real(fp):: s1v
+    integer  :: k       ! Help var. 
+    integer  :: kkmin   ! Help var. 
+    integer  :: kkmax   ! Help var. 
+    integer  :: kd      
+    integer  :: ku      
+    integer  :: l       ! Help var. 
+    integer  :: mask    ! Help var. 
+    integer  :: ndm     ! Help var. NM-ICY 
+    integer  :: nm      ! Help var. loops 1,nmmax and j,nmmaxj 
+    integer  :: nmd
+    integer  :: nmu
+    integer  :: num
+    real(fp) :: dzfound ! Thinnest layer found in the initial grid distribution
+    real(fp) :: hnm
+    real(fp) :: drytrsh
+    real(fp) :: hucres
+    real(fp) :: hvcres
+    real(fp) :: s1u
+    real(fp) :: s1v
+    logical  :: found
 !
 !! executable statements -------------------------------------------------------
 !
+    lundia             => gdp%gdinout%lundia
     zmodel             => gdp%gdprocs%zmodel
     drycrt             => gdp%gdnumeco%drycrt
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
@@ -244,6 +249,28 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
              endif
           endif
        enddo
+       !
+       ! Check whether the minimum layer thickness (0.1*Dryflc) is smaller 
+       ! than one of the internal layers for the Z-model, 
+       ! so exluding the bottom and free-surface layers, which can be thin
+       !
+       dzfound     = drytrsh
+       found       = .false.
+       do nm = 1, nmmax
+          if (kfs(nm) == 1) then
+             do k = kfsmin(nm)+1, kfsmax(nm)-1
+                if (dzmin > dzs1(nm,k)) then
+                   found  = .true.
+                   dzfound = min(dzfound, dzs1(nm,k))
+                endif
+            enddo
+          endif
+       enddo
+       if (found) then
+          call prterr(lundia, 'U190',  'Minimum layer thickness (0.1*Dryflc) is too large for the vertical')
+          write (lundia, '(a,f10.4,a)')'            grid layering. Decrease Dryflc to smaller than ', 10.0_fp*dzfound, ' m,'
+          write (lundia, '(a)')        '            to avoid problems with the vertical layering.'
+       endif
     endif
     !
     ! Calculate HU and HV

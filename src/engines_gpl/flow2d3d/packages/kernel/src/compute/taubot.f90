@@ -812,7 +812,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ust  = sqrt(umod*taubpu(nm))
              if (ust > waveps) then
                 !
-                ! Limit exponent used in computation ofz0urou to 40 to avoid over/underflow
+                ! Limit exponent used in computation of z0urou to 40 to avoid over/underflow
                 ! 
                 cfurou(nm, 1) = min(umod/ust,40.0_fp)
                 if (kmax > 1) then
