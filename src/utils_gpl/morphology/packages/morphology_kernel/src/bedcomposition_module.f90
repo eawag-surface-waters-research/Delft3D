@@ -66,6 +66,7 @@ public  allocmorlyr
 public  clrmorlyr
 public  bedcomp_use_bodsed
 public  initpreload
+public  lyrdiffusion
 !
 public bedcomp_getpointer_integer
 public bedcomp_getpointer_logical
@@ -114,6 +115,9 @@ type bedcomp_settings
     !
     ! integers
     !
+    integer :: idiffusion !  switch for diffusion between layers
+                          !  0: no diffusion
+                          !  1: diffusion
     integer :: iporosity  !  switch for porosity (simulate porosity if iporosity > 0)
                           !  0: porosity included in densities, set porosity to 0
                           !  1: ...
@@ -126,8 +130,8 @@ type bedcomp_settings
     integer :: nfrac      !  number of sediment fractions
     integer :: neulyr     !  number of Eulerian underlayers
     integer :: nlalyr     !  number of Lagrangian underlayers
-    integer :: nlyr       !  number of layers (transport + exchange +
-                          !  under layers)
+    integer :: nlyr       !  number of layers (transport + exchange + under layers)
+    integer :: ndiff      !  number of diffusion coefficients in vertical direction
     integer :: nmlb       !  start index of segments
     integer :: nmub       !  nm end index
     integer :: updbaselyr !  switch for computing composition of base layer
@@ -141,28 +145,29 @@ type bedcomp_settings
     !
     type (morlyrnumericstype) , pointer :: morlyrnum ! structure containing numerical settings
     integer  , dimension(:)   , pointer :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
-    real(fp) , dimension(:)   , pointer :: thexlyr   ! thickness of exchange layer
-    real(fp) , dimension(:)   , pointer :: thtrlyr   ! thickness of transport layer
+    real(fp) , dimension(:,:) , pointer :: kdiff     ! diffusion coefficients for mixing between layers, units : m2/s
     real(fp) , dimension(:)   , pointer :: phi       ! D50 diameter expressed on phi scale
     real(fp) , dimension(:)   , pointer :: rhofrac   ! density of fraction (specific density or including pores)
     real(fp) , dimension(:)   , pointer :: sigphi    ! standard deviation expressed on phi scale
+    real(fp) , dimension(:)   , pointer :: thexlyr   ! thickness of exchange layer
+    real(fp) , dimension(:)   , pointer :: thtrlyr   ! thickness of transport layer
+    real(fp) , dimension(:)   , pointer :: zdiff     ! depth below bed level for which diffusion coefficients are defined, units : m
     ! 
     ! logicals
     !
-    logical :: exchlyr    !  flag for use of exchange layer (underlayer
-                          !  bookkeeping system)
+    logical :: exchlyr    !  flag for use of exchange layer (underlayer bookkeeping system)
     !
     ! characters
     !
 end type bedcomp_settings
 !
 type bedcomp_state
-    real(fp)   , dimension(:,:)  , pointer :: preload  ! historical largest load, units : kg
-    real(fp)   , dimension(:,:)  , pointer :: svfrac   ! 1 - porosity coefficient, units : -
     real(prec) , dimension(:,:)  , pointer :: bodsed   ! Array with total sediment, units : kg /m2
     real(fp)   , dimension(:)    , pointer :: dpsed    ! Total depth sediment layer, units : m
     real(fp)   , dimension(:,:,:), pointer :: msed     ! composition of morphological layers: mass of sediment fractions, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: preload  ! historical largest load, units : kg
     real(fp)   , dimension(:,:)  , pointer :: sedshort ! sediment shortage in transport layer, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: svfrac   ! 1 - porosity coefficient, units : -
     real(fp)   , dimension(:,:)  , pointer :: thlyr    ! thickness of morphological layers, units : m
 end type bedcomp_state
 !
@@ -175,6 +180,7 @@ end type bedcomp_work
 type bedcomp_data
    type (bedcomp_settings), pointer :: settings
    type (bedcomp_state)   , pointer :: state
+   type (bedcomp_work)    , pointer :: work
 end type bedcomp_data
 
 contains
@@ -1219,6 +1225,146 @@ end subroutine lyrsedimentation_eulerian
 !
 !
 !==============================================================================
+subroutine lyrdiffusion(this, dt)
+!!--description-----------------------------------------------------------------
+!
+!    Function:
+!     - lyrdiffusion implements the mixing between the layers through diffusion
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    !
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type(bedcomp_data)                                    :: this    
+    real(fp)                                 , intent(in) :: dt 
+    !
+    ! Local variables
+    !
+    integer                                            :: k
+    integer                                            :: l
+    integer                                            :: nd
+    integer                                            :: nlyrloc
+    integer                                            :: nm
+    real(fp)                                           :: flx
+    real(fp)                                           :: kd
+    real(fp)                                           :: pth
+    real(fp)                                           :: zd
+    integer                                  , pointer :: ndiff 
+    integer                                  , pointer :: nlyr
+    real(fp), dimension(:,:)                 , pointer :: a
+    real(fp), dimension(:)                   , pointer :: rhofrac
+    real(fp), dimension(:)                   , pointer :: zdiff
+    real(fp), dimension(:,:)                 , pointer :: kdiff
+    real(fp), dimension(:,:)                 , pointer :: svfrac
+    real(fp), dimension(:,:)                 , pointer :: thlyr
+    real(fp), dimension(:,:,:)               , pointer :: msed
+    real(fp), dimension(:)                   , pointer :: svfrac2
+    real(fp), dimension(:,:)                 , pointer :: msed2
+!
+!! executable statements -------------------------------------------------------
+!
+    if (this%settings%iunderlyr==1) return
+    if (this%settings%idiffusion<1) return
+    kdiff       => this%settings%kdiff
+    ndiff       => this%settings%ndiff
+    nlyr        => this%settings%nlyr
+    rhofrac     => this%settings%rhofrac
+    zdiff       => this%settings%zdiff
+    svfrac      => this%state%svfrac
+    msed        => this%state%msed
+    thlyr       => this%state%thlyr
+    msed2       => this%work%msed2
+    svfrac2     => this%work%svfrac2
+    allocate(a(-1:1,nlyr))
+    do nm = this%settings%nmlb,this%settings%nmub
+        nlyrloc = 0
+        a       = 0.0_fp
+        do k = 1, nlyr
+            if (comparereal(thlyr(k,nm),0.0_fp) == 0) cycle
+            nlyrloc = nlyrloc+1
+            msed2(:,nlyrloc) = msed(:,k,nm)
+            svfrac2(nlyrloc) = svfrac(k,nm)*thlyr(k,nm)
+            !
+            if (nlyrloc==1) then
+                flx = 0.0_fp
+            else
+                !
+                ! Compute diffusion coefficient at interface between layers
+                ! through linear interpolation
+                ! Extrapolation is performed by assuming constant values
+                !
+                do while (nd < ndiff .and. zdiff(nd) < zd )
+                    nd = nd + 1
+                enddo
+                !
+                if (nd == 1) then
+                    kd = kdiff(nd, nm)
+                elseif (nd <= ndiff .and. zd < zdiff(ndiff)) then
+                    kd = kdiff(nd-1, nm) + (zd - zdiff(nd-1))/(zdiff(nd)-zdiff(nd-1)) * (kdiff(nd, nm) - kdiff(nd-1, nm))
+                else
+                    kd = kdiff(nd, nm)
+                endif
+                !
+                flx = 0.5_fp * dt * kd/(pth+thlyr(k,nm))
+            endif
+            !
+            if (nlyrloc>1) then
+                a( 0,nlyrloc-1) = a( 0,nlyrloc-1) + flx/pth ! diff flux from k-1 to k
+                a(+1,nlyrloc-1) = -flx/thlyr(k,nm)          ! diff flux from k to k-1
+                a(-1,nlyrloc)   = -flx/pth                  ! diff flux from k-1 to k
+                a( 0,nlyrloc)   = 1.0_fp + flx/thlyr(k,nm)  ! diff flux from k to k-1
+            else
+                !a(-1,1) = 0.0_fp
+                a( 0,1) = 0.0_fp
+            endif
+            !
+            pth               = thlyr(k,nm) 
+            thlyr(nlyrloc,nm) = thlyr(k,nm)
+        enddo
+        !
+        ! double sweep - sweep down
+        !
+        do k = 1, nlyrloc
+            if (k>1) then
+                svfrac2(k) = svfrac2(k) - a(-1,k)*svfrac2(k-1)
+                msed2(:,k) = msed2(:,k) - a(-1,k)*msed2(:,k-1)
+                a( 0,k)    = a( 0,k)    - a(-1,k)*a(+1,k)
+                !a(-1,k)    = 0.0_fp
+            endif
+            !
+            svfrac2(k) = svfrac2(k)/a( 0,k)
+            msed2(:,k) = msed2(:,k)/a( 0,k)
+            a(+1,k)    = a(+1,k)   /a( 0,k)
+            !a( 0,k)    = 1.0_fp
+        enddo
+        !
+        ! double sweep - sweep up
+        !
+        do k = nlyrloc-1, 1, -1
+            svfrac2(k) = svfrac2(k) - a(+1,k)*svfrac2(k+1)
+            msed2(:,k) = msed2(:,k) - a(+1,k)*msed2(:,k+1)
+            !a(+1,k)    = 0.0_fp
+        enddo
+        !
+        do k = 1, nlyrloc
+            msed(:,k,nm) = msed2(:,k)
+            svfrac(k,nm) = svfrac2(k)/thlyr(k,nm)
+        enddo
+        do k = nlyrloc+1,nlyr
+            svfrac(k,nm) = 1.0_fp
+            msed(:,k,nm) = 0.0_fp
+            thlyr(k,nm)  = 0.0_fp
+        enddo
+    enddo
+    deallocate(a)
+end subroutine lyrdiffusion
+!
+!
+!
+!==============================================================================
 subroutine detthcmud(this, thcmud)
 !!--description-----------------------------------------------------------------
 !
@@ -1769,12 +1915,14 @@ function initmorlyr(this) result (istat)
     !
     type (bedcomp_settings), pointer   :: settings
     type (bedcomp_state   ), pointer   :: state
+    type (bedcomp_work    ), pointer   :: work
     !
     !! executable statements -------------------------------------------------------
     !
     istat = 0
     if (istat == 0) allocate (settings, stat = istat)
     if (istat == 0) allocate (state   , stat = istat)
+    if (istat == 0) allocate (work    , stat = istat)
     if (istat /= 0) then
        !error
        return
@@ -1787,10 +1935,12 @@ function initmorlyr(this) result (istat)
     endif
     !
     settings%keuler     = 2
+    settings%ndiff      = 0
     settings%nfrac      = 0
     settings%nlyr       = 0
     settings%nmlb       = 0
     settings%nmub       = 0
+    settings%idiffusion = 0
     settings%iunderlyr  = 1
     settings%iporosity  = 0
     settings%exchlyr    = .false.
@@ -1800,12 +1950,14 @@ function initmorlyr(this) result (istat)
     settings%thlalyr    = rmissval
     settings%updbaselyr = 1
     !
-    nullify(settings%thexlyr)
-    nullify(settings%thtrlyr)
-    nullify(settings%sedtyp)
+    nullify(settings%kdiff)
     nullify(settings%phi)
     nullify(settings%rhofrac)
+    nullify(settings%sedtyp)
     nullify(settings%sigphi)
+    nullify(settings%thexlyr)
+    nullify(settings%thtrlyr)
+    nullify(settings%zdiff)
     !
     nullify(state%preload)
     nullify(state%svfrac)
@@ -1815,8 +1967,13 @@ function initmorlyr(this) result (istat)
     nullify(state%thlyr)
     nullify(state%sedshort)
     !
+    nullify(work%msed2)
+    nullify(work%thlyr2)
+    nullify(work%svfrac2)
+    !
     this%settings => settings
     this%state    => state
+    this%work     => work
 end function initmorlyr
 !
 !
@@ -1880,6 +2037,10 @@ function allocmorlyr(this) result (istat)
     if (istat == 0) settings%sigphi = 0.0_fp
     !
     if (settings%iunderlyr==2) then
+       if (istat == 0) allocate (settings%kdiff(settings%ndiff,nmlb:nmub), stat = istat)
+       if (istat == 0) settings%kdiff = 0.0_fp
+       if (istat == 0) allocate (settings%zdiff(settings%ndiff), stat = istat)
+       if (istat == 0) settings%zdiff = 0.0_fp
        if (istat == 0) allocate (settings%thtrlyr(nmlb:nmub), stat = istat)
        if (istat == 0) settings%thtrlyr = 0.0_fp
        if (settings%exchlyr) then
@@ -1897,6 +2058,8 @@ function allocmorlyr(this) result (istat)
        if (istat == 0) allocate (state%preload(settings%nlyr,nmlb:nmub), stat = istat)
        if (istat == 0) state%preload = 0.0_fp
     endif
+    !
+    if (istat == 0) istat = allocwork(this,this%work)
 end function allocmorlyr
 !
 !
@@ -1982,9 +2145,11 @@ function clrmorlyr(this) result (istat)
     !
     if (associated(this%settings)) then
        settings => this%settings
+       if (associated(settings%kdiff))     deallocate(settings%kdiff    , STAT = istat)
        if (associated(settings%morlyrnum)) deallocate(settings%morlyrnum, STAT = istat)
-       if (associated(settings%thexlyr))   deallocate(settings%thexlyr , STAT = istat)
-       if (associated(settings%thtrlyr))   deallocate(settings%thtrlyr , STAT = istat)
+       if (associated(settings%thexlyr))   deallocate(settings%thexlyr  , STAT = istat)
+       if (associated(settings%thtrlyr))   deallocate(settings%thtrlyr  , STAT = istat)
+       if (associated(settings%zdiff))     deallocate(settings%zdiff    , STAT = istat)
        !
        if (associated(settings%sedtyp))    deallocate(settings%sedtyp , STAT = istat)
        if (associated(settings%phi))       deallocate(settings%phi    , STAT = istat)
@@ -2117,12 +2282,16 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
+    case ('diffusion_model_type','idiffusion')
+       val => this%settings%idiffusion
     case ('bed_layering_type','iunderlyr')
        val => this%settings%iunderlyr
     case ('porosity_model_type','iporosity')
        val => this%settings%iporosity
     case ('keuler')
        val => this%settings%keuler
+    case ('number_of_diffusion_values','ndiff')
+       val => this%settings%ndiff
     case ('number_of_layers','nlyr')
        val => this%settings%nlyr
     case ('maxnumshortwarning')
@@ -2217,7 +2386,7 @@ function bedcomp_getpointer_fp_1darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('dpsed')
+    case ('total_sediment_thickness','dpsed')
        val => this%state%dpsed
     case ('sediment_density')
        val => this%settings%rhofrac
@@ -2225,6 +2394,8 @@ function bedcomp_getpointer_fp_1darray(this, variable, val) result (istat)
        val => this%settings%thexlyr
     case ('thickness_of_transport_layer','thtrlyr')
        val => this%settings%thtrlyr
+    case ('diffusion_levels','zdiff')
+       val => this%settings%zdiff
     case default
        val => NULL()
     end select
@@ -2261,6 +2432,8 @@ function bedcomp_getpointer_fp_2darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
+    case ('diffusion_coefficients','kdiff')
+       val => this%settings%kdiff
     case ('solid_volume_fraction','svfrac')
        val => this%state%svfrac
     case ('layer_thickness','thlyr')
@@ -2339,7 +2512,7 @@ function bedcomp_getpointer_prec_2darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('bodsed')
+    case ('total_sediment_mass','bodsed')
        val => this%state%bodsed
     case default
        val => NULL()

@@ -70,6 +70,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
 ! Local variables
 !
     real(fp)                 :: rmissval
+    real(fp)                 :: temp
     real(fp)                 :: thunlyr
     integer                  :: i
     integer                  :: istat
@@ -84,40 +85,45 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     character(40)            :: txtput1
     character(80)            :: bndname
     character(256)           :: errmsg
+    character(256)           :: fildiff
     logical                  :: log_temp
     logical                  :: ex
     logical                  :: found
     type(tree_data), pointer :: morbound_ptr
     character(MAXTABLECLENGTH), dimension(:), allocatable         :: parnames
     !
-    logical                         , pointer :: exchlyr
-    !logical                         , pointer :: lfbedfrm
-    logical                                   :: lfbedfrm = .false.
-    real(fp)                        , pointer :: bed
-    real(fp)                        , pointer :: minmass
-    real(fp)                        , pointer :: theulyr
-    real(fp)                        , pointer :: thlalyr
-    real(fp)         , dimension(:) , pointer :: thexlyr
-    real(fp)         , dimension(:) , pointer :: thtrlyr
-    real(fp)                        , pointer :: ttlalpha
-    real(fp)                        , pointer :: ttlmin
-    integer                         , pointer :: iporosity
-    integer                         , pointer :: iunderlyr
-    integer                         , pointer :: maxwarn
-    integer                         , pointer :: neulyr
-    integer                         , pointer :: nmlb
-    integer                         , pointer :: nmub
-    integer                         , pointer :: nfrac
-    integer                         , pointer :: nlalyr
-    integer                         , pointer :: ttlform
-    integer                         , pointer :: telform
-    integer                         , pointer :: updbaselyr
-    type(handletype)                , pointer :: bcmfile
-    type(cmpbndtype) , dimension(:) , pointer :: cmpbnd
-    character(256)                  , pointer :: bcmfilnam
-    character(256)                  , pointer :: flcomp
-    character(256)                  , pointer :: ttlfil
-    character(256)                  , pointer :: telfil
+    logical                             , pointer :: exchlyr
+    !logical                             , pointer :: lfbedfrm
+    logical                                       :: lfbedfrm = .false.
+    real(fp)                            , pointer :: bed
+    real(fp)                            , pointer :: minmass
+    real(fp)                            , pointer :: theulyr
+    real(fp)                            , pointer :: thlalyr
+    real(fp)         , dimension(:)     , pointer :: thexlyr
+    real(fp)         , dimension(:)     , pointer :: thtrlyr
+    real(fp)                            , pointer :: ttlalpha
+    real(fp)                            , pointer :: ttlmin
+    real(fp)         , dimension(:,:)   , pointer :: kdiff
+    real(fp)         , dimension(:)     , pointer :: zdiff
+    integer                             , pointer :: idiffusion
+    integer                             , pointer :: iporosity
+    integer                             , pointer :: iunderlyr
+    integer                             , pointer :: maxwarn
+    integer                             , pointer :: ndiff
+    integer                             , pointer :: neulyr
+    integer                             , pointer :: nmlb
+    integer                             , pointer :: nmub
+    integer                             , pointer :: nfrac
+    integer                             , pointer :: nlalyr
+    integer                             , pointer :: ttlform
+    integer                             , pointer :: telform
+    integer                             , pointer :: updbaselyr
+    type(handletype)                    , pointer :: bcmfile
+    type(cmpbndtype) , dimension(:)     , pointer :: cmpbnd
+    character(256)                      , pointer :: bcmfilnam
+    character(256)                      , pointer :: flcomp
+    character(256)                      , pointer :: ttlfil
+    character(256)                      , pointer :: telfil
 !
 !! executable statements -------------------------------------------------------
 !
@@ -146,6 +152,8 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     if (istat == 0) istat = bedcomp_getpointer_realfp (gdmorlyr, 'MinMassShortWarning' , minmass)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'MaxNumShortWarning'  , maxwarn)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'IPorosity'           , iporosity)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'Ndiff'               , ndiff)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'IDiffusion'          , idiffusion)
     if (istat /= 0) then
        errmsg = 'Memory problem in RDMORLYR'
        call write_error(errmsg, unit=lundia)
@@ -363,6 +371,29 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        !
        call prop_get(mor_ptr, 'Numerics', 'MinMassShortWarning', minmass)
        call prop_get(mor_ptr, 'Numerics', 'MaxNumShortWarning' , maxwarn)
+       !
+       ! Mixing between layers
+       !
+       call prop_get_integer(mor_ptr, 'Underlayer', 'IDiffusion', idiffusion)       
+       txtput1 = 'Mixing between layers'
+       if (idiffusion>0) then
+          txtput2 = '                 YES'
+       else
+          txtput2 = '                  NO'
+       endif
+       write (lundia, '(3a)') txtput1, ':', txtput2
+       if (idiffusion>0) then
+           call prop_get_integer(mor_ptr, 'Underlayer', 'NDiff', ndiff)
+           txtput1 = '# diffusion coefficients in z-direction'
+           write (lundia, '(2a,i20)') txtput1, ':', ndiff
+           if (ndiff < 0) then
+              errmsg = 'Number of diffusion coefficients should be 0 or more in ' // trim(filmor)
+              call write_error(errmsg, unit=lundia)
+              error = .true.
+              return
+           endif
+       endif
+       !
     case default
     endselect
     !
@@ -377,6 +408,42 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     !
     select case (iunderlyr)
     case(2)
+       if (idiffusion>0) then
+           !
+           ! Diffusion coefficient
+           !
+           istat = bedcomp_getpointer_realfp(gdmorlyr, 'Kdiff', kdiff)
+           if (istat == 0) istat = bedcomp_getpointer_realfp(gdmorlyr, 'Zdiff', zdiff)
+           if (istat /= 0) then
+               errmsg = 'Memory problem in RDMORLYR'
+               call write_error(errmsg, unit=lundia)
+               error = .true.
+               return
+           endif
+           !
+           fildiff = ''
+           call prop_get(mor_ptr, 'Underlayer', 'Diffusion', fildiff)
+           !
+           ! Intel 7.0 crashes on an inquire statement when file = ' '
+           !
+           if (fildiff == ' ') fildiff = 'dummyname'
+           inquire (file = fildiff, exist = ex)
+           if (.not. ex) then
+               txtput1 = 'Constant diffusion coefficient'
+               temp = 0.0_fp
+               call prop_get(mor_ptr, 'Underlayer', 'Diffusion', temp)
+               kdiff = temp
+               zdiff = 0.0_fp
+               write (lundia, '(2a,e20.4)') txtput1,':', temp
+           else
+               txtput1 = 'Diffusion coefficient from file'
+               write (lundia, '(3a)') txtput1,':', trim(fildiff)
+               !
+               call rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
+                            & zdiff     ,griddim   ,error     )
+               if (error) return
+           endif
+       endif
        !
        ! Get the following pointers after allocating the memory for the arrays
        !
@@ -426,9 +493,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                 error = .true.
                 return
              endif
-             do nm = 1, griddim%nmmax
-                thtrlyr(nm) = thtrlyr(1)
-             enddo
+             thtrlyr(:) = thtrlyr(1)
              !
              write(lundia,'(2a,e20.4)') txtput1, ':', thtrlyr(1)
           endif
@@ -508,9 +573,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                    error = .true.
                    return
                 endif
-                do nm = 1, griddim%nmmax
-                   thexlyr(nm) = thexlyr(1)
-                enddo
+                thexlyr(:) = thexlyr(1)
                 !
                 write(lundia,'(2a,e20.4)') txtput1, ':', thexlyr(1)
              endif
@@ -724,5 +787,176 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     deallocate(parnames, stat = istat)
     !
 end subroutine rdmorlyr
+
+
+subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
+                   & zdiff     ,griddim   ,error     )
+!!--description-----------------------------------------------------------------
+!
+! Reads attribute file for diffusion coefficient in bed
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    use properties
+    use message_module
+    use grid_dimens_module, only: griddimtype
+    !
+    implicit none
+!
+! Global variables
+!
+    type (griddimtype)                                  , pointer     :: griddim
+    integer                                             , intent(in)  :: lundia  !  Description and declaration in inout.igs
+    integer                                             , intent(in)  :: ndiff   !  Description and declaration in bedcomposition module
+    real(fp), dimension(ndiff)                          , intent(out) :: zdiff   !  Description and declaration in bedcomposition module
+    real(fp), dimension(ndiff,griddim%nmlb:griddim%nmub), intent(out) :: kdiff   !  Description and declaration in bedcomposition module
+    character(*)                                                      :: fildiff
+    logical                                             , intent(out) :: error
+!
+! Local variables
+!
+    integer                               :: i
+    integer                               :: ilyr
+    integer                               :: istat
+    integer                               :: nm
+    integer                               :: nmlb
+    integer                               :: nmub
+    logical                               :: ex
+    real(fp)                              :: rmissval
+    real(fp)                              :: temp
+    character(10)                         :: versionstring
+    character(80)                         :: parname
+    character(11)                         :: fmttmp   ! Format file ('formatted  ') 
+    character(256)                        :: filename
+    character(300)                        :: message
+    character(40)                         :: txtput1
+    type(tree_data), pointer              :: mor_ptr
+    type(tree_data), pointer              :: layer_ptr
+!
+!! executable statements -------------------------------------------------------
+!
+    !
+    rmissval      = -999.0_fp
+    versionstring = 'n.a.'
+    fmttmp        = 'formatted'
+    error         = .false.
+    !
+    ! Create Initial Morphology branch in input tree
+    !
+    call tree_create  ( "Diffusion input", mor_ptr )
+    !
+    ! Read diffusion-file into tree data structure
+    !
+    call prop_file('ini', trim(fildiff), mor_ptr, istat)
+    if (istat /= 0) then
+       select case (istat)
+       case(1)
+          call write_error(FILE_NOT_FOUND//trim(fildiff), unit=lundia)
+       case(3)
+          call write_error(PREMATURE_EOF//trim(fildiff), unit=lundia)
+       case default
+          call write_error(FILE_READ_ERROR//trim(fildiff), unit=lundia)
+       endselect
+       error = .true.
+       return
+    endif
+    !
+    ! Check version number of mor input file
+    !
+    call prop_get_string(mor_ptr,'DiffusionFileInformation','FileVersion',versionstring)
+    if (trim(versionstring) == '01.00') then
+        !
+        ilyr = 0
+        !
+        do i = 1,size(mor_ptr%child_nodes) ! loop over child_nodes
+            !
+            ! Does sed_ptr contain a child with name 'Level' (converted to lower case)?
+            !
+            layer_ptr => mor_ptr%child_nodes(i)%node_ptr
+            parname = tree_get_name( layer_ptr )
+            call small(parname,len(parname))
+            if ( trim(parname) /= 'level') cycle
+            !
+            ! Increment ilyr, but do not exceed ndiff
+            !
+            ilyr = ilyr+1
+            if (ilyr>ndiff) then
+                call write_error('Diffusion file contains more levels than specified by NDIFF parameter.', unit=lundia)
+                error = .true.
+                return
+            endif
+            filename = ' '
+            call prop_get_string(layer_ptr, '*', 'Kdiff', filename)
+            !
+            ! Intel 7.0 crashes on an inquire statement when file = ' '
+            !
+            if (filename == ' ') filename = 'dummyname'
+            inquire (file = filename, exist = ex)
+            if (.not. ex) then
+                !
+                ! Constant diffusion
+                !
+                temp = rmissval
+                call prop_get(layer_ptr, '*', 'Kdiff', temp)
+                if (comparereal(temp,rmissval) == 0) then
+                    write (message,'(a,i2,a,a)')  &
+                        & 'Missing KDIFF keyword for level ',ilyr,' in file ',trim(fildiff)
+                    call write_error(message, unit=lundia)
+                    error = .true.
+                    return
+                endif
+                kdiff(ilyr,:) = temp
+            else
+                !
+                ! Spatially varying diffusion coefficient
+                !
+                call depfil(lundia    ,error     ,filename  ,fmttmp    , &
+                          & kdiff(ilyr,nmlb)     ,1         ,1         ,griddim   )
+                if (error) then
+                   message = 'Unable to read diffusion coefficients from ' // trim(filename)
+                   call write_error(message, unit=lundia)
+                   return
+                endif
+            endif
+            temp = rmissval
+            call prop_get(layer_ptr, '*', 'Zdiff', temp)
+            if (comparereal(temp,rmissval) == 0) then
+                write (message,'(a,i2,a,a)')  &
+                    & 'Missing ZDIFF keyword for level ',ilyr,' in file ',trim(fildiff)
+                call write_error(message, unit=lundia)
+                error = .true.
+                return
+            endif
+            zdiff(ilyr) = temp
+            if (ilyr>1 .and. zdiff(ilyr) <= zdiff(ilyr-1)) then
+                write (message,'(a,i2,a,i2,a,a)')  &
+                    & '*** ERROR Depth of level ',i, &
+                    & ' is smaller than that of level ',i-1,' in file ',trim(fildiff)
+                call write_error(message, unit=lundia)
+                error = .true.
+                return
+            endif
+        enddo ! child nodes
+        !
+        ! Setting values for remaining levels equal to that of level ilyr
+        !
+        if (ilyr < ndiff) then
+            write (message, '(a,i2,a,i2,a, a)')  &
+                & 'Number of levels [',ilyr,'] smaller than NDIFF [', ndiff, '] in file ',trim(fildiff)
+            call write_warning(message, unit=lundia)
+            write (message, '(a,i2)') &
+                & 'Setting values for remaining levels equal to that of level ',ilyr
+            call write_warning(message, unit=lundia)
+            do i= ilyr+1, ndiff
+                kdiff(i,:) = kdiff(ilyr,:)
+                zdiff(i)   = zdiff(ilyr)
+            enddo
+        endif
+    else
+        call write_error('Invalid file version of '//trim(fildiff), unit=lundia)
+        error = .true.
+    endif 
+    !
+end subroutine rdinidiff
 
 end module m_rdmorlyr

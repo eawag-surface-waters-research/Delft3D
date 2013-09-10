@@ -1063,6 +1063,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           else
              call writemessages(gdp%messages, lundia)
           endif
+          call lyrdiffusion(gdp%gdmorlyr, hdtmor)
           !
           ! Apply composition boundary conditions
           !
