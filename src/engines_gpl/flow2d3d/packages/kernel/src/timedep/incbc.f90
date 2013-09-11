@@ -9,8 +9,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                & u0        ,v0        ,grmasu    ,grmasv    ,cfurou    , &
                & cfvrou    ,qtfrac    ,qtfrct    ,qtfrt2    ,thick     , &
                & dzu1      ,dzv1      ,thklay    ,kcu       ,kcv       , &
-               & kfu       ,kfv       ,timhr     ,nambnd    ,typbnd    , &
-               & gdp       )
+               & kfu       ,kfv       ,kcs       ,timhr     ,nambnd    , &
+               & typbnd    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -139,6 +139,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer , dimension(8, nrob)                                       , intent(in)  :: nob    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
@@ -191,6 +192,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                             :: k              ! Loop variable 
     integer                             :: k1st
     integer                             :: k2nd
+    integer                             :: kcsi           ! Local value of kcs(npbi, mpbi), 1 for boundary points in the partition, -1 for halo points.
     integer                             :: kfuv           ! Value of KCU or KCV in boundary point
     integer                             :: kp             ! First array index of array CIRC2/3D pointing to the nr. of row/column in array IROCOL
     integer                             :: kpc            ! First array index of array CIRC2/3D pointing to the column number in arra IROCOL 
@@ -382,7 +384,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           udir = .true.
           vdir = .false.
           wlvl = s0(npbi, mpbi)
-          if (kfu(npbt,mpbt) == 1) then
+          if (kfu(npbt,mpbt) == 1 .and. kcs(npbi,mpbi) == 1) then
              width = guu(npbt,mpbt)
           else
              width = 0.0_fp
@@ -391,7 +393,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           udir = .false.
           vdir = .true.
           wlvl = s0(npbi, mpbi)
-          if (kfv(npbt,mpbt) == 1) then
+          if (kfv(npbt,mpbt) == 1 .and. kcs(npbi,mpbi) == 1) then
              width = gvv(npbt,mpbt)
           else
              width = 0.0_fp
@@ -475,6 +477,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        ! Determine direction dependent parameters
        !
        ttfhsum = 0.0
+       kcsi  = kcs(npbi, mpbi)
        if (nob(4,n) > 0) then
           udir  = .true.
           vdir  = .false.
@@ -550,8 +553,9 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              !
              !  qtfrac(n)  = dpvel*width
           endif
-          qtfrct(n1) = qtfrct(n1) + qtfrac(n)
-          
+          if (kcsi==1) then ! only sum up discharge weights for boundary cells strictly inside this partition
+             qtfrct(n1) = qtfrct(n1) + qtfrac(n)
+          endif          
 
        elseif (nob(3,n) == 2) then
           !
@@ -564,22 +568,45 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              ! No differentiation in the approach is needed because
              ! QXK/QYK = zero at the top layers anyway
              !
-             q0avg = 0.0
-             if (udir) then
-                do k = 1, kmax
-                   q0avg = q0avg + qxk(npbt, mpbt, k)
-                enddo
-             elseif (vdir) then
-                do k = 1, kmax
-                   q0avg = q0avg + qyk(npbt, mpbt, k)
-                enddo
-             else
+             if (kcsi==1) then ! only sum up discharge for boundary cells strictly inside this partition
+                q0avg = 0.0
+                if (udir) then
+                   do k = 1, kmax
+                      q0avg = q0avg + qxk(npbt, mpbt, k)
+                   enddo
+                elseif (vdir) then
+                   do k = 1, kmax
+                      q0avg = q0avg + qyk(npbt, mpbt, k)
+                   enddo
+                else
+                endif
+                qtfrct(n1) = qtfrct(n1) + q0avg
              endif
-             qtfrct(n1) = qtfrct(n1) + q0avg
           endif
        else
        endif
     enddo
+    !
+    ! Update the discharge for total discharge or QH boundaries for the overall domain by summing up among those
+    !
+    if (parll) then
+       call dfsync(gdp)
+       allocate( qtfrct_global(nobcgl), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in incbc')
+          call d3stop(1, gdp)
+       endif
+       qtfrct_global = 0.0_fp
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
+       call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
+       do n1 = 1, nto
+          if(typbnd(n1)=='T' .or. ((n1>ntof) .and. (n1<=ntof + ntoq))) then  ! total discharge or QH boundary
+             qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
+          endif
+       enddo
+       if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
+    endif 
+    !
     ! Update QH values if necessary
     ! Necessary if: the discharge is not in the selected range
     ! or the QH table has not yet been read: itbct(5,ito)<0
@@ -608,26 +635,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        !
        qtfrt2(ito) = qtfrct(ito)
     enddo
-    !
-    ! Update the total discharge boundaries for the overall domain by summing up among those  (typbnd(n1)=='T')
-    !
-    if (parll) then
-       call dfsync(gdp)
-       allocate( qtfrct_global(nobcgl), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in incbc')
-          call d3stop(1, gdp)
-       endif
-       qtfrct_global = 0.0_fp
-       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
-       call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
-       do n1 = 1, nto
-          if(typbnd(n1)=='T') then
-             qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
-          endif
-       enddo
-       if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
-    endif 
     !
     ! Enable relaxation in following time steps if thetqh>0
     !

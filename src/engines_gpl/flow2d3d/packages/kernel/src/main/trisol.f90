@@ -1341,8 +1341,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
              & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
              & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
              & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
-             & i(kfu)    ,i(kfv)    ,timhr     ,ch(nambnd),ch(typbnd), &
-             & gdp       )
+             & i(kfu)    ,i(kfv)    ,i(kcs)    ,timhr     ,ch(nambnd), &
+             & ch(typbnd),gdp       )
     call timer_stop(timer_incbc, gdp)
     !
     ! Boundary conditions; hydrodynamic conditions Riemann with wave forcing
@@ -2405,8 +2405,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
              & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
              & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
              & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
-             & i(kfu)    ,i(kfv)    ,timhr     ,ch(nambnd),ch(typbnd), &
-             & gdp       )
+             & i(kfu)    ,i(kfv)    ,i(kcs)    ,timhr     ,ch(nambnd), & 
+             & ch(typbnd),gdp       )
     call timer_stop(timer_incbc, gdp)
     !
     ! Constituent (excl. turbulence & secondary flow)
