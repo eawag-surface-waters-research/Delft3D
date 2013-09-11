@@ -1,4 +1,16 @@
 @echo off
+
+REM update_version.cmd replaces the depricated make_revision.bat
+REM
+REM All occurrences of make_revision.bat should be replaced by update_version.cmd
+REM Argument conversion:
+REM make_revision.bat m1 m2 m3 m4 m5
+REM must be replaced by:
+REM update_version.cmd m5 m2 m3
+REM See issue Delft3D-16419
+
+
+
 setlocal enableextensions
 
 rem Program will replace %1 by the %1.svn and will replace VERSION_BUILD_NUMBER by a corresponding svn version using svnversion command

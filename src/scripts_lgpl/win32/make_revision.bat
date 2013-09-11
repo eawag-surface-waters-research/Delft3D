@@ -1,5 +1,16 @@
 @ECHO OFF
 
+REM make_revision.bat is depricated
+REM
+REM All occurrences should be replaced by update_version.cmd
+REM Argument conversion:
+REM make_revision.bat m1 m2 m3 m4 m5
+REM must be replaced by:
+REM update_version.cmd m5 m2 m3
+REM See issue Delft3D-16419
+
+
+
 REM =====================================
 REM Arguments
 REM =====================================
