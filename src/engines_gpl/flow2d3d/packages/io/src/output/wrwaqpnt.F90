@@ -95,7 +95,6 @@
 !            write the 'total' lgrid table (currently a full matrix)
 
 #ifdef HAVE_FC_FORM_BINARY
-
       open  ( lunout , file=trim(filnam)//'lgt', form='binary' )
 #else
       open  ( lunout , file=trim(filnam)//'lgt', form = 'unformatted', access='stream')
@@ -113,7 +112,6 @@
 !            write the lgrid tabel with zero's and bounds
 
 #ifdef HAVE_FC_FORM_BINARY
-
       open  ( lunout , file=trim(filnam)//'lgo', form='binary' )
 #else
       open  ( lunout , file=trim(filnam)//'lgo', form = 'unformatted', access='stream')
@@ -151,7 +149,6 @@
 
 !            make the 'from' 'to' pointer table and the aggregation table
 #ifdef HAVE_FC_FORM_BINARY
-
       open  ( lunout , file=trim(filnam)//'poi', form='binary' )
 #else
       open  ( lunout , file=trim(filnam)//'poi', form = 'unformatted', access='stream')
@@ -222,6 +219,8 @@
          else                                    ! the dido aggregation file
             read  ( lunaggr , * ) iapnt(1:mnmax)
             close ( lunaggr )
+            noseg = 0
+            nobnd = 0
             do i = 1, mnmax
                noseg = MAX( noseg,  iapnt(i) )
                nobnd = MAX( nobnd, -iapnt(i) )
@@ -276,7 +275,6 @@
 
 !            write the aggregated lgrid tabel with zero's and bounds
 #ifdef HAVE_FC_FORM_BINARY
-
       open  ( lunout , file=trim(filnam)//'lga', form='binary' )
 #else
       open  ( lunout , file=trim(filnam)//'lga', form = 'unformatted', access='stream')
