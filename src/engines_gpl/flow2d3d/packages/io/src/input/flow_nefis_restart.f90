@@ -2,8 +2,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
                             & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                             & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                             & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                            & dp        ,kcu       ,kcv       ,ex_nfs    ,namcon    , &
-                            & coninit   ,gdp       )
+                            & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -82,8 +81,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer                                                                                  :: lundia
     integer                                                                    , intent(in)  :: mmax
     integer                                                                    , intent(in)  :: nmaxus
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kcu
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kcv
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: kfu
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: kfv
     integer, dimension(lstsci)                                                               :: coninit ! Flag=1 if constituent is initialized, all 0 upon entry
@@ -624,18 +621,11 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
           s1(n-nfg+1,m-mfg+1) = s1_g(n,m) 
           u1(n-nfg+1,m-mfg+1,1:kmax) = u1_g(n,m,1:kmax)
           v1(n-nfg+1,m-mfg+1,1:kmax) = v1_g(n,m,1:kmax)
-          ! copy also kfu and kfv flags, but keep closed boundaries closed
-          ! This allows restarting a single domain from a trim-file of a DD simulation for debugging purposes
-          if (kcu(n-nfg+1,m-mfg+1)==0) then
-              kfu(n-nfg+1,m-mfg+1) = 0
-          else
-              kfu(n-nfg+1,m-mfg+1) = kfu_g(n,m)
-          endif
-          if (kcv(n-nfg+1,m-mfg+1)==0) then
-              kfv(n-nfg+1,m-mfg+1) = 0
-          else
-              kfv(n-nfg+1,m-mfg+1) = kfv_g(n,m)
-          endif
+          ! copy also kfu and kfv flags, however closed boundaries should remain closed
+          ! unfortunately kcu/kcv are not yet initialized. The check: if (kcuv==0) kfuv=0
+          ! will be carried out later on.
+          kfu(n-nfg+1,m-mfg+1) = kfu_g(n,m)
+          kfv(n-nfg+1,m-mfg+1) = kfv_g(n,m)
        enddo 
     enddo 
     if (has_umean /= 0) then

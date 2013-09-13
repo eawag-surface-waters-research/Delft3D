@@ -179,7 +179,10 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     do nm = 1, nmmax
        kfs(nm) = min(1, kcs(nm))
-       if (.not.kfuv_from_restart) then
+       if (kfuv_from_restart) then
+          if (kcu(nm)==0) kfu(nm) = 0
+          if (kcv(nm)==0) kfv(nm) = 0
+       else
           kfu(nm) = min(1, kcu(nm))
           kfv(nm) = min(1, kcv(nm))
        endif

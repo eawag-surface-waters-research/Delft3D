@@ -2,8 +2,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                 & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                 & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                & dp        ,kcu       ,kcv       ,namcon    ,coninit   , &
-                & gdp       )
+                & dp        ,namcon    ,coninit   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -71,8 +70,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     integer                                                                                  :: lundia !  Description and declaration in inout.igs
     integer                                                                    , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: kcv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(lstsci)                                                              :: coninit ! Flag=1 if constituent is initialized, all 0 upon entry
@@ -163,8 +160,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                 & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                                 & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                                 & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                                & dp        ,kcu       ,kcv       ,ex_nfs    ,namcon    , &
-                                & coninit   ,gdp       )
+                                & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
              & trim(filtmp) // trim(datetime) // ', ' // trim(filtmp) // ' and ' // trim(restid) // '.dat/.def')

@@ -65,7 +65,6 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     real(fp)       , pointer :: drycrt
     real(fp)       , pointer :: dryflc
     logical        , pointer :: zmodel
-    logical        , pointer :: kfuv_from_restart
     real(fp)       , pointer :: dzmin
     
 !
@@ -151,7 +150,6 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     lundia             => gdp%gdinout%lundia
     zmodel             => gdp%gdprocs%zmodel
     drycrt             => gdp%gdnumeco%drycrt
-    kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     dzmin              => gdp%gdzmodel%dzmin
     !
     drytrsh = drycrt

@@ -7,7 +7,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
               & lstsci    ,ltur      ,namcon    ,s1        ,u1        , &
               & v1        ,r1        ,rtur1     ,decay     ,umnldf    , &
               & vmnldf    ,kfu       ,kfv       ,dp        ,lsed      , &
-              & kcu       ,kcv       ,gdp       )
+              & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -84,8 +84,6 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                                                     :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: nrrec  !!  Pointer to the record number in the MD-file
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kcv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfv    !  Description and declaration in esm_alloc_int.f90
     logical                                                       , intent(in)  :: const  !  Description and declaration in procs.igs
@@ -278,8 +276,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                  & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                  & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                 & dp        ,kcu       ,kcv       ,namcon    ,coninit   , &
-                 & gdp       )
+                 & dp        ,namcon    ,coninit   ,gdp       )
     endif
     !
     ! locate 'Filic' record for initial cond. in extra input file
