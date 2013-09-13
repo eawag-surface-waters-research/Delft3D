@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.11"
+set version "2.12"
 
 global debug
 set debug 0
@@ -1315,7 +1315,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
       }
       puts $scriptfile "\nrem Start mormerge\n"
       puts $scriptfile "set PATH=$exedir;%PATH%"
-      puts $scriptfile "start /b [spaceSafe $mergeexe] -i [file tail $inputfilename] -w [spaceSafe $rundir] -r $runid >$screenfile 2>&1"
+      puts $scriptfile "start /b [spaceSafe $mergeexe] -i [file tail $inputfilename] -w $rundir -r $runid >$screenfile 2>&1"
       if { $localrun } {
          puts $scriptfile "\nrem Copy rundir data back to modeldir\n"
          puts $scriptfile "copy /Y $screenfile $rundir"
