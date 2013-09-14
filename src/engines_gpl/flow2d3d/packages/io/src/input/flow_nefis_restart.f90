@@ -215,10 +215,11 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     
     if (inode == master) then
        ierror = crenef(fds, dat_file, def_file, ' ', 'r')
-       if (ierror/= 0) then
-          error = .true.
-          goto 9999
-       endif
+    endif
+    call dfbroadc_gdp ( ierror, 1, dfint, gdp )
+    if (ierror/= 0) then
+       error = .true.
+       goto 9999
     endif
     ex_nfs = .true.
     write(lundia, '(a)') 'Restarting from ' // trim(dat_file) // ' and ' // trim(def_file)

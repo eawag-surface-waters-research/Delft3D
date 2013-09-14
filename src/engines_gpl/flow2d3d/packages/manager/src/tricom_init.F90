@@ -1539,10 +1539,8 @@ subroutine tricom_init(olv_handle, gdp)
            if (inode==master) then
                ierror = flow_to_wave_init(runid     , it01   , tscale       , &
                                         & nproc     , mudlay ,.true. )
-           else
-               ierror = 0
            endif
-           call dfreduce( ierror, 1, dfint, dfmax, gdp )
+           call dfbroadc_gdp ( ierror, 1, dfint, gdp )
        else
           ierror = flow_to_wave_init(runid     , it01   , tscale       , &
                                    & numdomains, mudlay ,.false. )

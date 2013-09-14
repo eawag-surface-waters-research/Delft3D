@@ -138,10 +138,11 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     def_file = restid(1:lrid)//'.def'
     if (inode == master) then    
        ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
-       if (ierror/= 0) then
-          error = .true.
-          goto 9999
-       endif
+    endif
+    call dfbroadc_gdp ( ierror, 1, dfint, gdp )
+    if (ierror/= 0) then
+       error = .true.
+       goto 9999
     endif
     !
     ! initialize group index constant data
