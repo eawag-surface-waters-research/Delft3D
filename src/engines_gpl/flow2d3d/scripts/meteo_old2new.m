@@ -271,8 +271,8 @@ end % switch filetype
             fprintf(fout,'%s%-50.4f%s\n','x_llcorner      =    ',grid.x_llcorner,'# Xcoordinate of lower left corner of grid (in units specified in grid_unit)');
             fprintf(fout,'%s%-50.4f%s\n','y_llcorner      =    ',grid.y_llcorner,'# Ycoordinate of lower left corner of grid (in units specified in grid_unit)');
         else
-            fprintf(fout,'%s%-50.4f%s\n','x_llcentre      =    ',grid.x_llcentre,'# Xcoordinate of lower left corner of grid (in units specified in grid_unit)');
-            fprintf(fout,'%s%-50.4f%s\n','y_llcentre      =    ',grid.y_llcentre,'# Ycoordinate of lower left corner of grid (in units specified in grid_unit)');
+            fprintf(fout,'%s%-50.4f%s\n','x_llcenter      =    ',grid.x_llcentre,'# Xcoordinate of lower left corner of grid (in units specified in grid_unit)');
+            fprintf(fout,'%s%-50.4f%s\n','y_llcenter      =    ',grid.y_llcentre,'# Ycoordinate of lower left corner of grid (in units specified in grid_unit)');
         end
         fprintf(fout,'%s%-50.4f%s\n','dx              =    ',grid.dx,'# Grid dimension dx (in units specified in grid_unit)');
         fprintf(fout,'%s%-50.4f%s\n','dy              =    ',grid.dy,'# Grid dimension dy (in units specified in grid_unit)');
