@@ -259,16 +259,17 @@
      &                    finno3   )
 
          case ( 4 )     ! = oil model
-            call oildsp ( lgrid    , nmaxp    , concp    , volumep  , area     ,
-     &                    npart    , mpart    , wpart    , radius   , nodye    ,
-     &                    npwndw   , nopart   , idelt    , wvelo    , const    ,
-     &                    lunut    , nosubs   , noslay   , lgrid2   , mmaxp    ,
-     &                    xb       , yb       , kpart    , mapsub   , isfile   ,
-     &                    nfract   , mstick   , nstick   , fstick   , xa       ,
-     &                    ya       , pg(1)    , lsettl   , xpart    , ypart    ,
-     &                    zpart    , za       , locdep   , dpsp     , tcktot   ,
-     &                    substi   , hmin     , npmax    , rhow     , amassd   ,
-     &                    ioptrad  )
+            call oildsp ( lgrid    , nmaxp    , concp    , volumep  , area     ,    
+     &                    npart    , mpart    , wpart    , radius   , nodye    ,    
+     &                    npwndw   , nopart   , itime    , idelt    , wvelo    ,    
+     &                    const    , lunut    , nosubs   , noslay   , lgrid2   ,    
+     &                    mmaxp    , xb       , yb       , kpart    , mapsub   ,    
+     &                    isfile   , nfract   , mstick   , nstick   , fstick   ,    
+     &                    xa       , ya       , pg(1)    , lsettl   , xpart    ,    
+     &                    ypart    , zpart    , za       , locdep   , dpsp     ,    
+     &                    tcktot   , substi   , hmin     , npmax    , rhow     ,    
+     &                    amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    
+     &                    efdisp   , fidisp   , nrowsmax)
 
       end select
 
