@@ -30,20 +30,22 @@ module oildsp_mod
    contains
         subroutine oildsp ( lgrid   , nmax    , conc    , volume  , area    ,    &
                             npart   , mpart   , wpart   , radius  , nodye   ,    &
-                            npwndw  , nopart  , idelt   , wvelo   , const   ,    &
-                            lun2    , nosubs  , nolay   , lgrid2  , mmax    ,    &
-                            xb      , yb      , kpart   , mapsub  , isfile  ,    &
-                            nfract  , mstick  , nstick  , fstick  , xa      ,    &
-                            ya      , pg      , lsettl  , xpart   , ypart   ,    &
-                            zpart   , za      , locdep  , dps     , tcktot  ,    &
-                            substi  , hmin    , npmax   , rhow    , amassd  ,    &
-                            ioptrad )
+                            npwndw  , nopart  , itime   , idelt   , wvelo   ,    &
+                            const   , lun2    , nosubs  , nolay   , lgrid2  ,    &
+                            mmax    , xb      , yb      , kpart   , mapsub  ,    &
+                            isfile  , nfract  , mstick  , nstick  , fstick  ,    &
+                            xa      , ya      , pg      , lsettl  , xpart   ,    &
+                            ypart   , zpart   , za      , locdep  , dps     ,    &
+                            tcktot  , substi  , hmin    , npmax   , rhow    ,    &
+                            amassd  , ioptrad , ndisapp , idisset , tydisp  ,    &
+                            efdisp  , fidisp  , nrowsmax )
 
       use precision
       use typos
 
       implicit none
 
+      integer   (ip), intent(in   ) :: itime
       integer  ( ip), intent(in   ) :: idelt
       integer  ( ip), intent(in   ) :: lun2
       integer  ( ip), intent(in   ) :: nfract
@@ -90,6 +92,12 @@ module oildsp_mod
       integer  ( ip), intent(in   ) :: mstick (nosubs)
       real     ( rp), pointer       :: amassd  (:,:)
       real     ( rp), pointer       :: wpart   (:,:)
+      integer  ( ip), intent(in   ) :: ndisapp
+      integer  ( ip), pointer       :: idisset(:)
+      integer  ( ip), pointer       :: tydisp (:)
+      real     ( rp), pointer       :: efdisp (:)
+      character( 256),pointer       :: fidisp (:)
+      integer  ( ip), intent(in   ) :: nrowsmax 
 
       fstick = 0.0
       radius = 0.0
