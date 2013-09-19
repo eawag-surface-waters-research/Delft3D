@@ -62,8 +62,13 @@ set BUILD_NUMBER=000000
 CD "%MODDIR%"
 IF EXIST "%SVN_DIR%\svnversion.exe" (
     echo %0: executing %SVN_DIR%\svnversion.exe -n
-    FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
-)					         
+    FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i
+    IF "%BUILD_NUMBER" == "000000" (
+        REM use old svn version 1.7 for use on TeamCity Buildserver which does not support 1.8 yet
+        echo %0: executing %SVN_DIR%\svnversion-17.exe -n
+        FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion-17.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
+        )
+)
 
 REM ==========================================================================
 REM If the source has been obtained using a svn export command, the "exported"
