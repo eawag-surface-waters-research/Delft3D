@@ -71,6 +71,10 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">flow2d3d_openda</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flow2d3d_openda</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flow2d3d_openda</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flow2d3d_openda</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
