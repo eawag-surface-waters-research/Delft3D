@@ -97,8 +97,10 @@ module partmem
       logical  ( ip)           :: ldiffh
       real     ( rp)           :: rhow
       integer  ( ip)           :: stickdf
+      integer  ( ip)           :: ndisapp
       integer  ( ip)           :: ini_opt
       character(256)           :: ini_file
+      character(256)           :: idp_file
       integer  ( ip)           :: nosta
       integer  ( ip)           :: iptset
       real     ( rp)           :: window(4)
@@ -166,6 +168,10 @@ module partmem
       real     ( rp), pointer  :: ystat  (:)
       integer  ( ip), pointer  :: ipset  (:)
       real     ( rp), pointer  :: recovr (:)
+      integer  ( ip), pointer  :: idisset(:)
+      integer  ( ip), pointer  :: tydisp (:)
+      real     ( rp), pointer  :: efdisp (:)
+      character( 256),pointer  :: fidisp (:)
       character( 20), pointer  :: nmdyer (:)
       integer  ( ip), pointer  :: iwtime (:)
       real     ( rp), pointer  :: xwaste (:)

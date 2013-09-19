@@ -41,6 +41,7 @@ module global_pointers
       character     (len=20   ) ,  pointer, dimension(:       ) :: subsud
       character     (len=40   ) ,  pointer, dimension(:       ) :: title
       character     (len=256  ) ,  pointer, dimension(:       ) :: finud
+      character     (len=256  ) ,  pointer, dimension(:       ) :: fidisp
 
       integer       (sp       ) ,  pointer, dimension(:       ) :: floil
       integer       (sp       ) ,  pointer, dimension(:       ) :: ictmax
@@ -84,6 +85,8 @@ module global_pointers
       integer       (sp       ) ,  pointer, dimension(:       ) :: stoil
       integer       (sp       ) ,  pointer, dimension(:       ) :: cellpnt
       integer       (sp       ) ,  pointer, dimension(:       ) :: flowpnt
+      integer       (sp       ) ,  pointer, dimension(:       ) :: tydisp
+      integer       (sp       ) ,  pointer, dimension(:       ) :: idisset
 
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: elt_dims
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: ibuff
@@ -155,6 +158,7 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:       ) :: zlevel
       real          (sp       ) ,  pointer, dimension(:       ) :: zpart
       real          (sp       ) ,  pointer, dimension(:       ) :: zwaste
+      real          (sp       ) ,  pointer, dimension(:       ) :: efdisp
 
       real          (sp       ) ,  pointer, dimension(:,:     ) :: aconc
       real          (sp       ) ,  pointer, dimension(:,:     ) :: aconud
