@@ -5469,7 +5469,10 @@ src/utils_lgpl/nefis/tests/test_999/test_06.c -text
 src/utils_lgpl/nefis/tests/test_999/test_16.c -text
 src/utils_lgpl/nefis/tests/test_999/test_999_1.c -text
 src/utils_lgpl/nefis/tests/test_999/test_999_16.c -text
+src/utils_lgpl/ods/Makefile.am -text
 src/utils_lgpl/ods/ods_vs2008.sln -text
+src/utils_lgpl/ods/packages/Makefile.am -text
+src/utils_lgpl/ods/packages/ods/Makefile.am -text
 src/utils_lgpl/ods/packages/ods/include/ods.h -text
 src/utils_lgpl/ods/packages/ods/include/ods.inc -text
 src/utils_lgpl/ods/packages/ods/include/portable.h -text
@@ -5566,6 +5569,7 @@ src/utils_lgpl/ods/packages/ods/src/trinint.h -text
 src/utils_lgpl/ods/packages/ods/src/utils.c -text
 src/utils_lgpl/ods/packages/ods/src/waspro.c -text
 src/utils_lgpl/ods/packages/ods/src/waspro.h -text
+src/utils_lgpl/ods/packages/ods/srcf/Makefile.am -text
 src/utils_lgpl/ods/packages/ods/srcf/getlga.f -text
 src/utils_lgpl/ods/packages/ods/srcf/mor_sys.f -text
 src/utils_lgpl/ods/packages/ods/srcf/ods_f.u2d -text

@@ -23,7 +23,6 @@
 !     END
 
 !#endif
-
       subroutine ods_mor_nef_com_dim
 !#ifdef WINNT
 !    *                 [ALIAS:'_ods_mor_nef_com_dim']
@@ -204,7 +203,6 @@
 !-----------------------------------------------------------------------
       end
 
-
       subroutine ods_mor_nef_com_par
 !#ifdef WINNT
 !    *                 [ALIAS:'_ods_mor_nef_com_par']
@@ -378,7 +376,6 @@
       return
 !-----------------------------------------------------------------------
       end
-
       subroutine ods_mor_nef_com_tme
 !#ifdef WINNT
 !    *                 [ALIAS:'_ods_mor_nef_com_tme']
@@ -618,7 +615,6 @@
 !-----------------------------------------------------------------------
       end
 
-
       subroutine ods_mor_nef_com_mat
 !#ifdef WINNT
 !    *                 [ALIAS:'_ods_mor_nef_com_mat']
@@ -856,7 +852,6 @@
       return
 !-----------------------------------------------------------------------
       end
-
       subroutine comdim( datfds  , deffds , okee   , npar   ,
      *                   nmax    , mmax   , kmax   , ntcur  ,
      *                   ntwav   , nthwb  , ntran  , ntbot  ,
@@ -945,7 +940,6 @@
 !     WRITE(rpt,*) 'Exit : comdim'
       end
 
-
       subroutine compar( datfds , deffds , okee   , tmlcdp , iplmnk ,
      *                   npar   , partyp , parcod , parlst , paruni )
 !
@@ -1030,7 +1024,6 @@
       paruni(npar) = '-'
       return
       end
-
       subroutine commat( datfds , deffds , okee   , npar   ,
      *                   nmax   , mmax   , kmax   , ntcur  ,
      *                   ntwav  , nthwb  , nthwg  , ntran  ,
@@ -1421,7 +1414,6 @@
  1000 continue
       return
       end
-
       subroutine comtme( datfds , deffds , okee   , npar    ,
      *                   nmax   , mmax   , kmax   , ntcur   ,
      *                   ntwav  , nthwb  , nthwg  , ntran   ,
@@ -1593,7 +1585,6 @@
 !
       return
       end
-
 ! =====================================================================
       subroutine mapcom
 ! ---------------------------------------------------------------------
@@ -1844,7 +1835,6 @@
 !     ENDDO
 !     write(rpt,*) 'Exit : mapcom'
       end
-
       subroutine nefout(name,error)
       character name*(*)
       integer error
@@ -1855,7 +1845,6 @@
 !     endif
       return
       end
-
       subroutine tr2wav (u1, v1, uzeta, vzeta, xcor, ycor,
      *                   guu, gvv, nmax, mmax, kcs, kfu, kfv,
      .                   ivar,alfas,alfa,misval)
@@ -2056,7 +2045,6 @@
       Endif
       return
       end
-
       subroutine travec(ivar,ingrp,deffds,datfds,xcor,ycor,u1,v1,
      *                  guu,gvv,u,v,alfas,kcs,kfu,kfv,
      *                  kcu,kcv,nmax,mmax,kmax,misval)
@@ -2277,7 +2265,6 @@
    10 continue
       RETURN
       END
-
       subroutine tramat( xdata  , rbuffs  , nmax   , mmax   )
 !
 ! Subroutine to transpose a matrix stored in the buffer

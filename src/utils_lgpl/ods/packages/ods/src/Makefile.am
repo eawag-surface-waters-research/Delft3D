@@ -1,9 +1,12 @@
 
 include $(top_srcdir)/common.am
-noinst_LTLIBRARIES = libODS.la
+#noinst_LTLIBRARIES = libODS.la
+lib_LTLIBRARIES = libODS.la
 
 #-------------------------------------------------------------------------------
 #Sources
+
+libODS_la_LIBADD = ../srcf/libODSf.la ../../../../nefis/packages/nefis/src_so/libNefisSO.la
 
 # Language: C language
 libODS_la_SOURCES =           \
@@ -15,7 +18,6 @@ libODS_la_SOURCES =           \
                 geotext.c    \
                 getdim.c     \
                 getgrd.c     \
-                getlga.f     \
                 getloc.c     \
                 getmat.c     \
                 getpar.c     \
@@ -32,27 +34,25 @@ libODS_la_SOURCES =           \
 		julian.h     \
 		m3hbuf.c     \
 		mappix.c     \
-		mor_sys.f    \
 		morbagr.c    \
 		morcom.c     \
 		ods_bna.c    \
 		ods_conv.c   \
 		ods_gnf.c    \
 		ods_spcf.c   \
-		odsaux.f     \
 		odserr.c     \
 		odsver.c     \
 		opnclose.c   \
 		pharmap.c    \
 		phidi2c.c    \
-		phidias.f    \
 		readline.c   \
 		samples.c    \
 		shyfem.c     \
 		tekasc.c     \
 		tekasc2d.c   \
-		tri_his.f    \
 		tridro.c     \
 		trinint.c    \
 		utils.c	     \
 		waspro.c
+
+INCLUDES = -I${srcdir}/../include -I${srcdir}/../../../../nefis/packages/nefis/include
