@@ -43,8 +43,8 @@ EXTRA_DIST = \
 #-------------------------------------------------------------------------------
 #Libraries
 
-libNefisSO_la_LIBADD = \
-	-lltdl
+#libNefisSO_la_LIBADD = \
+#	-lltdl
 
 BUILT_SOURCES = ./always \
 	../include/nefis_version.h
