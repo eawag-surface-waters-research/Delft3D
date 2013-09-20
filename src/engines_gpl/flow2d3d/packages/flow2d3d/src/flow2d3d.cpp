@@ -120,6 +120,11 @@ Flow2D3D::Flow2D3D (
 
     FLOW2D3D = this;
 
+	if (DH == NULL) {
+		this->flowol = NULL;
+		return;
+	}
+
     this->config             = this->DH->start;
     this->dd                 = NULL;
     this->log                = DH->log;

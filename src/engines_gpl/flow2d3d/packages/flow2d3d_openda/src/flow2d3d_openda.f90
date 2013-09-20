@@ -81,6 +81,7 @@ function Initialize_openda(componentID, schemID) result(retVal)
     !
     ! initialize the FLOW2D3D part
     !
+    call FLOWOL_Nullify ! no on line vis when running in OpenDA
     retval = Initialize(componentID, schemID)
     !
     call allocate_d3d_states(1)

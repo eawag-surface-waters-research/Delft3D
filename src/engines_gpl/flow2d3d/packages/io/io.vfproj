@@ -126,7 +126,9 @@
 		<File RelativePath="src\input\rdusrf.f90"/>
 		<File RelativePath="src\input\rdusrp.f90"/>
 		<File RelativePath="src\input\rdwaqpar.f90"/>
-		<File RelativePath="src\input\rdxyzo.f90"/>
+		<File RelativePath="src\input\rdxyzo.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\input\reacmp.f90"/>
 		<File RelativePath="src\input\read_triana.f90"/>
 		<File RelativePath="src\input\readmd.f90">

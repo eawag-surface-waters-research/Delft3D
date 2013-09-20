@@ -582,8 +582,8 @@ FLOWOL_RetractFunction (
 #endif
     }
 
+void STDCALL
+FLOWOL_Nullify () {
+	FLOW2D3D = new Flow2D3D(NULL);
+    }
 }
-
-
-
-

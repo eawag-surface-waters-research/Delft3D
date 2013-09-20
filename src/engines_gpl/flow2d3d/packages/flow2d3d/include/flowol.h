@@ -93,6 +93,7 @@ class FlowOL {
 #   define FLOWOL_RetractFunction    FC_FUNC(flowol_retractfunction,FLOWOL_RETRACTFUNCTION)
 #   define FLOWOL_SetDescription     FC_FUNC(flowol_setdescription,FLOWOL_SETDESCRIPTION)
 #   define FLOWOL_Timestep           FC_FUNC(flowol_timestep,FLOWOL_TIMESTEP)
+#   define FLOWOL_Nullify            FC_FUNC(flowol_nullify,FLOWOL_NULLIFY)
 #else
 // WIN32
 #   define FLOWOL_ArrayShape         FLOWOL_ARRAYSHAPE
@@ -105,6 +106,7 @@ class FlowOL {
 #   define FLOWOL_RetractFunction    FLOWOL_RETRACTFUNCTION
 #   define FLOWOL_SetDescription     FLOWOL_SETDESCRIPTION
 #   define FLOWOL_Timestep           FLOWOL_TIMESTEP
+#   define FLOWOL_Nullify            FLOWOL_NULLIFY
 #endif
 
 #if defined (WIN32)
@@ -126,6 +128,7 @@ extern "C" {
     void STDCALL FLOWOL_Retract_Function     (const char *, int);
     void STDCALL FLOWOL_SetDescription       (const char *, int, const char *, int);
     void STDCALL FLOWOL_Timestep             (int *);
+    void STDCALL FLOWOL_Nullify              (void);
 #else
     void STDCALL FLOWOL_ArrayShape           (const char *, int *, int [], int);
     void STDCALL FLOWOL_ChangeDirectory      (const char *, int);
@@ -137,5 +140,6 @@ extern "C" {
     void STDCALL FLOWOL_Retract_Function     (const char *, int);
     void STDCALL FLOWOL_SetDescription       (const char *, const char *, int, int);
     void STDCALL FLOWOL_Timestep             (int *);
+    void STDCALL FLOWOL_Nullify              (void);
 #endif
 }
