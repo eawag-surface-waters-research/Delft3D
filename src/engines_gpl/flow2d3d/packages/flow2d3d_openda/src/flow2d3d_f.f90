@@ -248,6 +248,8 @@ function Finalize(componentID, schemID) result(retVal)
 
     ! body
     retval = trisim_finish(openda_olv_handle, gdp)
+    
+    call vsemfinish
 
     call gdpDealloc(componentID, schemID)
 
