@@ -92,6 +92,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     real(fp)                                      :: poros
     real(fp)                                      :: svf
     real(prec)       , dimension(:,:)   , pointer :: bodsed
+    real(fp)         , dimension(:,:)   , pointer :: mfluff
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
     real(fp)         , dimension(:,:)   , pointer :: svfrac
@@ -126,6 +127,31 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     !
     istat   = 0
     success = .false.
+    ! 
+    ! Fluff layer
+    !
+    if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
+       mfluff => gdp%gdmorpar%flufflyr%mfluff
+       !
+       ! Try restart
+       !
+       if (restid /= ' ') then
+           call restart_bodsed ( &
+                  & error     ,restid    ,i_restart ,mfluff    , &
+                  & lsedtot   ,nmaxus    ,mmax      ,success   , &
+                  & 'MFLUFF'  ,gdp       )
+       endif
+       !
+       ! Otherwise initialization to zero
+       ! (future: should be possible to define initial value in <.mor> file)
+       !
+       if (.not.success) then
+            mfluff = 0.0_fp
+       endif
+    endif 
+    !
+    ! Bed layers
+    !
     select case(iunderlyr)
     case(2)
        !
@@ -156,7 +182,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
        !
        call restart_bodsed ( &
               & error     ,restid    ,i_restart ,bodsed    , &
-              & lsedtot   ,nmaxus    ,mmax      ,success   ,gdp       )
+              & lsedtot   ,nmaxus    ,mmax      ,success   , &
+              & 'BODSED'  ,gdp       )
     endif
     if (.not.success) then
        !

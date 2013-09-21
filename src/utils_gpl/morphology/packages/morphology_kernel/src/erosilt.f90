@@ -3,9 +3,10 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
                  & frac     ,oldmudfrac,flmd2l    ,iform    , &
                  & par      ,numintpar ,numrealpar,numstrpar, &
                  & dllfunc  ,dllhandle ,intpar    ,realpar  , &
-                 & strpar   , &
+                 & strpar   ,iflufflyr ,mflufftot ,fracf    , &
 ! output:
-                 & error    ,wstau     ,sinkse    ,sourse   )
+                 & error    ,wstau     ,sinktot   ,sourse   , &
+                 & sourf    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -36,11 +37,10 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Computes sediment fluxes at the bed using
-!              the Partheniades-Krone formulations.
-!              Arrays SOURSE and SINKSE are filled
-! Method used:
-!
+!    Function: Computes sediment fluxes for cohesive sediment fractions
+!              at the bed and the fluff layer. Internally implemented
+!              are the Partheniades-Krone formulations, optional external
+!              lib may be used.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -53,6 +53,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     implicit none
     !
     integer                             , intent(in)    :: iform
+    integer                             , intent(in)    :: iflufflyr
     integer                             , intent(in)    :: numintpar
     integer                             , intent(in)    :: numrealpar
     integer                             , intent(in)    :: numstrpar
@@ -60,21 +61,27 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     integer                                             :: lundia   !  Description and declaration in inout.igs
     integer       , dimension(numintpar), intent(inout) :: intpar
     integer(pntrsize)                   , intent(in)    :: dllhandle
-    real(fp)       , dimension(0:kmax)  , intent(in)    :: ws
-    real(fp)                            , intent(out)   :: wstau
+    !
+    real(fp)                            , intent(in)    :: fixfac
+    real(fp)                            , intent(in)    :: frac
+    real(fp)                            , intent(in)    :: fracf
+    real(fp)                            , intent(in)    :: mflufftot
+    real(fp)     , dimension(30)        , intent(inout) :: par
+    real(fp)                            , intent(out)   :: sinktot
+    real(fp)                            , intent(out)   :: sourf
+    real(fp)                            , intent(out)   :: sourse
+    real(fp)                            , intent(in)    :: srcmax
     real(fp)       , dimension(kmax)    , intent(in)    :: thick
     real(fp)                            , intent(in)    :: thick0
     real(fp)                            , intent(in)    :: thick1
-    real(fp)                            , intent(in)    :: fixfac
-    real(fp)                            , intent(in)    :: srcmax
-    real(fp)                            , intent(in)    :: frac
-    real(fp)     , dimension(30)        , intent(inout) :: par
-    real(fp)                            , intent(out)   :: sinkse
-    real(fp)                            , intent(out)   :: sourse
+    real(fp)       , dimension(0:kmax)  , intent(in)    :: ws
+    real(fp)                            , intent(out)   :: wstau
+    !
     real(hp)     , dimension(numrealpar), intent(inout) :: realpar
+    !
     logical                             , intent(out)   :: error
-    logical                             , intent(in)    :: oldmudfrac
     logical                             , intent(in)    :: flmd2l
+    logical                             , intent(in)    :: oldmudfrac
     character(256), dimension(numstrpar), intent(inout) :: strpar
     character(256)                      , intent(in)    :: dllfunc
 !
@@ -82,6 +89,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
 !
     integer  :: k
     real(fp) :: sour
+    real(fp) :: sour_fluff
     real(fp) :: sink
     real(fp) :: taub
     real(fp) :: taum
@@ -89,6 +97,10 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     real(fp) :: tcrdep
     real(fp) :: tcrero
     real(fp) :: eropar
+    real(fp) :: tcrflf
+    real(fp) :: parfl0
+    real(fp) :: parfl1
+    real(fp) :: depeff
     !
     ! Interface to dll is in High precision!
     !
@@ -138,12 +150,26 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           eropar = par(11)
           tcrdep = par(12)
           tcrero = par(13)
+          tcrflf = par(14)
+          parfl0 = par(15)
+          parfl1 = par(16)
+          depeff = par(17)
           !
           ! Default Partheniades-Krone formula
           !
           taum = max(0.0_fp, taub/tcrero - 1.0_fp)
           sour = eropar * taum
-          if (tcrdep > 0.0_fp) then
+          !
+          ! Erosion from fluff layer
+          !
+          if (iflufflyr>0) then
+            taum       = max(0.0_fp, taub - tcrflf)
+            sour_fluff = min(mflufftot*parfl1,parfl0)*taum
+          endif
+          !
+          if (depeff > 0.0_fp) then
+             sink = depeff
+          elseif (tcrdep > 0.0_fp) then
              sink = max(0.0_fp , 1.0_fp-taub/tcrdep)
           else
              sink = 0.0_fp
@@ -184,26 +210,30 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           !
           ! Output parameters
           !
-          sour    = real(sour_dll,fp)
-          sink    = real(sink_dll,fp)
+          sour       = real(sour_dll,fp)
+          sink       = real(sink_dll,fp)
+          sour_fluff = 0.0_fp
        else
           write (errmsg,'(a,i0,a)') 'Invalid transport formula ',iform,' for mud fraction.'
           call write_error(errmsg, unit=lundia)
        endif
     endif
     !
-    wstau         = ws(kmax) * sink
+    wstau         = ws(kmax) * sink ! used for flmd2l
     !
     if (.not.flmd2l) then
        if (oldmudfrac) then
-          sour = fixfac * sour
+          sour       = fixfac * sour
+          sour_fluff = 0.0_fp
        else
-          sour = fixfac * frac * sour
+          sour       = fixfac * frac  * sour
+          sour_fluff =          fracf * sour_fluff
        endif
     endif
     !
-    sour   = min(sour, srcmax)
+    sour    = min(sour, srcmax)
     !
-    sourse = sour / thick0
-    sinkse = wstau / thick1
+    sourf   = sour_fluff / thick0
+    sourse  = sour       / thick0
+    sinktot = wstau      / thick1
 end subroutine erosilt

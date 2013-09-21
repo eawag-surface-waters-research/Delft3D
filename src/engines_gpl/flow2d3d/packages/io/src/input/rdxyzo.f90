@@ -287,9 +287,11 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! Check whether the ratio in layer thickness of the two bottom layers is not too large
     !
-    if (thick(2)/thick(1) > 1.5_fp) then
-       call prterr(lundia, 'U190', 'Ratio in layer thickness of the two bottom layers is larger than 1.5.')
-       write (lundia, *)'           May lead to inaccurate representation of the bottom boundary layer.'
+    if (kmax>1) then
+       if (thick(2)/thick(1) > 1.5_fp) then
+          call prterr(lundia, 'U190', 'Ratio in layer thickness of the two bottom layers is larger than 1.5.')
+          write (lundia, *)'           May lead to inaccurate representation of the bottom boundary layer.'
+       endif
     endif
     !
     if (zmodel) then

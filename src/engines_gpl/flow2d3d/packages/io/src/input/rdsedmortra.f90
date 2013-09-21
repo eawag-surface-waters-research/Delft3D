@@ -127,7 +127,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     ! Read data from that file
     !
     call rdmor(lundia     ,error     ,filmor    ,lsec      ,lsedtot    , &
-             & nmaxus     ,nto       , &
+             & lsed       ,nmaxus     ,nto       , &
              & nambnd     ,gdp%gdinttim%julday  ,mor_ptr   ,gdp%gdsedpar, &
              &gdp%gdmorpar,fwfacmor  ,gdp%gdmorlyr, gdp%griddim)
     if (error) goto 999

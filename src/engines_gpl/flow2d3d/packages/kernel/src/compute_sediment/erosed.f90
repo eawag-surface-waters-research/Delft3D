@@ -155,6 +155,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: sinkse
     real(fp)         , dimension(:,:)    , pointer :: sourse
     real(fp)         , dimension(:,:)    , pointer :: sour_im
+    real(fp)         , dimension(:,:)    , pointer :: sinkf
+    real(fp)         , dimension(:,:)    , pointer :: sourf
     real(fp)         , dimension(:,:)    , pointer :: taurat
     real(fp)         , dimension(:)      , pointer :: ust2
     real(fp)         , dimension(:)      , pointer :: umod
@@ -198,7 +200,10 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     logical                              , pointer :: flmd2l
     real(prec)       , dimension(:,:)    , pointer :: bodsed 
     real(fp)         , dimension(:)      , pointer :: sedtrcfac
+    integer                              , pointer :: iflufflyr
     integer                              , pointer :: iunderlyr
+    real(fp)         , dimension(:,:)    , pointer :: depfac
+    real(fp)         , dimension(:,:)    , pointer :: mfluff
     include 'flow_steps_f.inc'
 !
 ! Local parameters
@@ -314,15 +319,21 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: dt
     real(fp)                      :: ee
     real(fp)                      :: fi
+    real(fp)                      :: fracf
     real(fp)                      :: grkg
     real(fp)                      :: grm2tot
     real(fp)                      :: grm2
     real(fp)                      :: grlyrs
     real(fp)                      :: h0
     real(fp)                      :: h1
+    real(fp)                      :: mflufftot
     real(fp)                      :: rc
+    real(fp)                      :: mfltot
     real(fp)                      :: sag
     real(fp)                      :: salinity
+    real(fp)                      :: sinkfluff
+    real(fp)                      :: sinktot
+    real(fp)                      :: sourfluff
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
     real(fp)                      :: taks
     real(fp)                      :: taks0
@@ -456,6 +467,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     sour_im             => gdp%gderosed%sour_im
+    sinkf               => gdp%gdmorpar%flufflyr%sinkf
+    sourf               => gdp%gdmorpar%flufflyr%sourf
+    iflufflyr           => gdp%gdmorpar%flufflyr%iflufflyr
     srcmax              => gdp%gderosed%srcmax
     taurat              => gdp%gderosed%taurat
     ust2                => gdp%gderosed%ust2
@@ -499,6 +513,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     oldmudfrac          => gdp%gdmorpar%oldmudfrac
     flmd2l              => gdp%gdprocs%flmd2l
     hdt                 => gdp%gdnumeco%hdt
+    depfac              => gdp%gdmorpar%flufflyr%depfac
+    mfluff              => gdp%gdmorpar%flufflyr%mfluff
     !
     nm_pos =  1
     if (ifirst == 1) then
@@ -618,6 +634,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sinkse  = 0.0_fp
     sourse  = 0.0_fp
     sour_im = 0.0_fp
+    ! source and sink terms fluff layer
+    if (iflufflyr>0) then
+        sinkf = 0.0_fp
+        sourf = 0.0_fp
+    endif
     !
     ! Reset Sediment diffusion arrays for (nm,k,l)
     !
@@ -1002,6 +1023,15 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        endif
        dll_strings(SP_RUNID) = gdp%runid
        !
+       ! total mass in fluff layer
+       !
+       mfltot = 0.0_fp
+       if (iflufflyr>0) then
+            do l = 1, lsedtot
+                mfltot = mfltot + max(0.0_fp,mfluff(l,nm))
+            enddo
+       endif
+       !
        do l = 1, lsedtot
           !
           ! fraction specific quantities
@@ -1034,6 +1064,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 wslc(k)   = ws(nm, k, l)
              enddo
              !
+             ! Fluff layer parameters
+             !
+             fracf   = 0.0_fp
+             if (iflufflyr>0) then
+                if (mfltot>0.0_fp) fracf   = max(0.0_fp,mfluff(l,nm))/mfltot
+             endif
+             !
              kmaxsd = kmax ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
              thick0        = thick(kmaxsd) * h0
              thick1        = thick(kmaxsd) * h1
@@ -1042,9 +1079,24 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
                         & par(1,l)    ,max_integers,max_reals   ,max_strings , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
-                        & dll_strings  , &
-                        & error ,wstau(nm) ,sinkse(nm,l) ,sourse(nm,l))
+                        & dll_strings  ,iflufflyr ,mflufftot ,fracf    , &
+                        & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
              if (error) call d3stop(1, gdp)
+             !
+             if (iflufflyr>0) then
+                if (iflufflyr==2) then
+                   sinkf(l,nm)  = sinktot*(1.0_fp - depfac(l,nm))
+                   sinkse(nm,l) = sinktot*depfac(l,nm)
+                else
+                   sinkf(l,nm)  = sinktot
+                   sinkse(nm,l) = 0.0_fp
+                endif
+                !
+                sourf(l,nm)  = sourfluff
+             else
+                sinkse(nm,l) = sinktot
+                sourse(nm,l) = sourse(nm,l) + sourfluff ! sourfluff should actually always be 0 already
+             endif
              !
              if (kmax > 1) then 
                 !
@@ -1430,14 +1482,22 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     enddo
     !
     ! Finally fill sour and sink arrays for both sand and silt
-    ! note that sourse and sinkse arrays are required for BOTT3D
+    ! note that sourse/sinkse and sourf/sinkf arrays are required for BOTT3D
     !
     do l = 1, lsed
        ll = lstart + l
        do nm = 1, nmmax
           k = kmxsed(nm,l)
+          !
+          !  sourse/sinkse/sourf/sinkf are defined per unit volume
+          !  in sigma-model the sour/sink terms are defined per content of cell 
+          !
           sour(nm, k, ll) = sour(nm, k, ll) + sourse(nm, l)
           sink(nm, k, ll) = sink(nm, k, ll) + sinkse(nm, l)
+          if (iflufflyr>0) then
+             sour(nm, k, ll) = sour(nm, k, ll) + sourf(l, nm)
+             sink(nm, k, ll) = sink(nm, k, ll) + sinkf(l, nm)
+          endif
        enddo
        call dfexchg( sour(:,:,l),1, kmax, dfloat, nm_pos, gdp)
        call dfexchg( sink(:,:,l),1, kmax, dfloat, nm_pos, gdp)

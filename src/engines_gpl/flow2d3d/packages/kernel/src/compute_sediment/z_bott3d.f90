@@ -130,6 +130,10 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     real(fp), dimension(:,:,:)           , pointer :: fluxv
     real(fp), dimension(:)               , pointer :: duneheight
     real(fp)                             , pointer :: dzmin
+    integer                              , pointer :: iflufflyr
+    real(fp), dimension(:,:)             , pointer :: mfluff
+    real(fp), dimension(:,:)             , pointer :: sinkf
+    real(fp), dimension(:,:)             , pointer :: sourf
 !
 ! Local parameters
 !
@@ -315,6 +319,10 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     fluxv               => gdp%gdflwpar%fluxv
     duneheight          => gdp%gdbedformpar%duneheight
     dzmin               => gdp%gdzmodel%dzmin
+    iflufflyr           => gdp%gdmorpar%flufflyr%iflufflyr
+    mfluff              => gdp%gdmorpar%flufflyr%mfluff
+    sinkf               => gdp%gdmorpar%flufflyr%sinkf
+    sourf               => gdp%gdmorpar%flufflyr%sourf
     !
     lstart  = max(lsal, ltem)
     bedload = .false.
@@ -759,114 +767,125 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
              !
              ! note: do not update bottom sediment at open boundary pnts
              !
-             if (kcs(nm)*kfs(nm) == 1) then
-                nmu     = nm + icx
-                num     = nm + icy
-                nmd     = nm - icx
-                ndm     = nm - icy
-                trndiv  = 0.0_fp
-                sedflx  = 0.0_fp
-                eroflx  = 0.0_fp
-                gsqsinv = 1.0_fp/gsqs(nm)
-                if (sus/=0.0_fp .and. .not. bedload) then
-                   if (neglectentrainment) then
-                      !
-                      ! mass balance based on fluxes: entrainment and deposition
-                      ! does not lead to erosion/sedimentation.
-                      !
-                      if (snelli) then
-                        !
-                        ! Only cross-shore component
-                        !
-                        trndiv = trndiv + gsqsinv &
-                               &          *(ssuu(nmd,l)*guu(nmd) - ssuu(nm,l)*guu(nm))
-                      else
-                        trndiv = trndiv + gsqsinv                                   &
-                               &          *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm)    &
-                               &            + ssvv(ndm, l)*gvv(ndm) - ssvv(nm, l)*gvv(nm))
-                      endif
-                   else
-                      !
-                      ! mass balance includes entrainment and deposition
-                      !
-                      if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
-                         !
-                         ! l runs from 1 to lsedtot, kmxsed is defined for 1:lsed
-                         ! The first lsed fractions are the suspended fractions,
-                         ! so this goes right
-                         !
-                         k = kmxsed(nm, l)
-                      else
-                         k = kfsmin(nm)
-                      endif
-                      thick0 = volum1(nm,k) * gsqsinv
-                      thick1 = volum1(nm,k) * gsqsinv
-                      sedflx = sinkse(nm,l) * r1(nm,k,ll) * thick1
-                      eroflx = sourse(nm,l)               * thick0
-                      !
-                      ! add suspended transport correction vector
-                      !
-                      if (snelli) then
-                         !
-                         ! Only cross-shore component
-                         !
-                         trndiv = trndiv + gsqsinv                                     &
-                                &          *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm))
-                      else
-                         trndiv = trndiv + gsqsinv                                     &
-                                &          *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm) &
-                                &            +svcor(ndm,l)*gvv(ndm)-svcor(nm,l)*gvv(nm))
-                      endif
-                   endif
-                endif
-                if (bed /= 0.0_fp) then
+             if (kcs(nm)*kfs(nm) /= 1) cycle
+             !
+             nmu     = nm + icx
+             num     = nm + icy
+             nmd     = nm - icx
+             ndm     = nm - icy
+             trndiv  = 0.0_fp
+             sedflx  = 0.0_fp
+             eroflx  = 0.0_fp
+             gsqsinv = 1.0_fp/gsqs(nm)
+             if (sus/=0.0_fp .and. .not. bedload) then
+                if (neglectentrainment) then
+                   !
+                   ! mass balance based on fluxes: entrainment and deposition
+                   ! does not lead to erosion/sedimentation.
+                   !
                    if (snelli) then
                      !
                      ! Only cross-shore component
                      !
-                     trndiv = trndiv + gsqsinv                                     &
-                            &          *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm))
+                     trndiv = trndiv + gsqsinv &
+                            &          *(ssuu(nmd,l)*guu(nmd) - ssuu(nm,l)*guu(nm))
                    else
-                     trndiv = trndiv + gsqsinv                                     &
-                            &          *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm)   &
-                            &            +sbvv(ndm,l)*gvv(ndm)-sbvv(nm,l)*gvv(nm))
+                     trndiv = trndiv + gsqsinv                                   &
+                            &          *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm)    &
+                            &            + ssvv(ndm, l)*gvv(ndm) - ssvv(nm, l)*gvv(nm))
+                   endif
+                else
+                   !
+                   ! mass balance includes entrainment and deposition
+                   !
+                   if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+                      !
+                      ! l runs from 1 to lsedtot, kmxsed is defined for 1:lsed
+                      ! The first lsed fractions are the suspended fractions,
+                      ! so this goes right
+                      !
+                      k = kmxsed(nm, l)
+                   else
+                      k = kfsmin(nm)
+                   endif
+                   thick0 = volum1(nm,k) * gsqsinv
+                   thick1 = volum1(nm,k) * gsqsinv
+                   sedflx = sinkse(nm,l) * r1(nm,k,ll) * thick1
+                   eroflx = sourse(nm,l)               * thick0
+                   !
+                   ! Update fluff layer
+                   !
+                   if (iflufflyr>0) then
+                      mfluff(l, nm) = mfluff(l, nm) + &
+                                    & hdt*(  sinkf(l, nm)*r1(nm, k, ll)*thick1   &
+                                    &      - sourf(l, nm)              *thick0  )
+                   endif
+                   !
+                   ! add suspended transport correction vector
+                   !
+                   if (snelli) then
+                      !
+                      ! Only cross-shore component
+                      !
+                      trndiv = trndiv + gsqsinv                                     &
+                             &          *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm))
+                   else
+                      trndiv = trndiv + gsqsinv                                     &
+                             &          *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm) &
+                             &            +svcor(ndm,l)*gvv(ndm)-svcor(nm,l)*gvv(nm))
                    endif
                 endif
-                dsdnm = (trndiv+sedflx-eroflx) * hdt * morfac
-                !
-                ! Warn if bottom changes are very large,
-                ! depth change NOT LIMITED
-                !
-                dhmax = 0.05_fp
-                h1 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                if (abs(dsdnm) > dhmax*h1*cdryb(1) .and. bedupd) then
-                   !
-                   ! Only write bed change warning when bed updating is true
-                   ! (otherwise no problem)
-                   ! Limit the number of messages with bedchangemessmax
-                   ! (otherwise tri-diag will grow very fast)
-                   !
-                   bedchangemesscount = bedchangemesscount + 1
-                   if (bedchangemesscount <= bedchangemessmax) then
-                      call nm_to_n_and_m(nm, n, m, gdp)
-                      write (lundia, '(a,f5.1,a,i0,a,i0,a,i0,a)') &
-                          & '*** WARNING Bed change exceeds ' , dhmax*100.0_fp, ' % of waterdepth after ', ntstep,  &
-                          & ' timesteps, location (m,n) = (', m,',',n,')'
-                   endif
+             endif
+             if (bed /= 0.0_fp) then
+                if (snelli) then
+                  !
+                  ! Only cross-shore component
+                  !
+                  trndiv = trndiv + gsqsinv                                     &
+                         &          *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm))
+                else
+                  trndiv = trndiv + gsqsinv                                     &
+                         &          *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm)   &
+                         &            +sbvv(ndm,l)*gvv(ndm)-sbvv(nm,l)*gvv(nm))
                 endif
+             endif
+             !
+             dsdnm = (trndiv+sedflx-eroflx) * hdt * morfac
+             !
+             ! Warn if bottom changes are very large,
+             ! depth change NOT LIMITED
+             !
+             dhmax = 0.05_fp
+             h1 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+             if (abs(dsdnm) > dhmax*h1*cdryb(1) .and. bedupd) then
                 !
-                ! Update dbodsd value at nm
+                ! Only write bed change warning when bed updating is true
+                ! (otherwise no problem)
+                ! Limit the number of messages with bedchangemessmax
+                ! (otherwise tri-diag will grow very fast)
                 !
-                dbodsd(l, nm) = dbodsd(l, nm) + dsdnm
-                !
-                call updwaqflxsed(nst, nm, l, trndiv, sedflx, eroflx, gdp)
-             endif ! kcs*kfs = 1
+                bedchangemesscount = bedchangemesscount + 1
+                if (bedchangemesscount <= bedchangemessmax) then
+                   call nm_to_n_and_m(nm, n, m, gdp)
+                   write (lundia, '(a,f5.1,a,i0,a,i0,a,i0,a)') &
+                       & '*** WARNING Bed change exceeds ' , dhmax*100.0_fp, ' % of waterdepth after ', ntstep,  &
+                       & ' timesteps, location (m,n) = (', m,',',n,')'
+                endif
+             endif
+             !
+             ! Update dbodsd value at nm
+             !
+             dbodsd(l, nm) = dbodsd(l, nm) + dsdnm
+             !
+             call updwaqflxsed(nst, nm, l, trndiv, sedflx, eroflx, gdp)
           enddo    ! nm
        enddo       ! l
        if (bedchangemesscount > bedchangemessmax) then
           write (lundia,'(12x,a,i0,a)') 'Bed change messages skipped (more than ',bedchangemessmax,')'
           write (lundia,'(12x,2(a,i0))') 'Total number of Bed change messages for timestep ',ntstep,' : ',bedchangemesscount
        endif
+       !
+       call fluff_burial(gdp%gdmorpar%flufflyr, dbodsd, lsed, lsedtot, gdp%d%nmlb, gdp%d%nmub, hdt, morfac)
        !
        nm_pos = 2
        call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
@@ -876,127 +895,127 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
        ! of dry banks
        !
        do nm = 1, nmmax
+          !
+          ! If this is a cell in which sediment processes are active then ...
+          !
+          if (kcs(nm)*kfs(nm)*kfsed(nm) /= 1) cycle
+          !
           nmu = nm + icx
           num = nm + icy
           nmd = nm - icx
           ndm = nm - icy
+          totdbodsd = 0.0_fp
+          do l = 1, lsedtot
+             totdbodsd = totdbodsd + dbodsd(l, nm)
+          enddo
           !
-          ! If this is a cell in which sediment processes are active then ...
+          ! If this is a cell in erosion is occuring (accretion is not
+          ! distributed to dry points) then...
           !
-          if (kcs(nm)*kfs(nm)*kfsed(nm) == 1) then
-             totdbodsd = 0.0_fp
-             do l = 1, lsedtot
-                totdbodsd = totdbodsd + dbodsd(l, nm)
-             enddo
+          if (totdbodsd < 0.0_fp) then
              !
-             ! If this is a cell in erosion is occuring (accretion is not
-             ! distributed to dry points) then...
+             ! Note: contrary to the previous implementation, this new
+             ! implementation erodes the sediment from nm and
+             ! re-distributes the eroded volume based on the composition
+             ! of the neighbouring cells, replenishing the sediment volume
+             ! at grid point nm with sediment of a different composition
+             ! than that what was eroded. This new implementation is mass
+             ! conserving per fraction. Furthermore, re-distribution takes
+             ! place only in case of net TOTAL erosion, i.e. not of
+             ! individual fractions.
              !
-             if (totdbodsd < 0.0_fp) then
+             gsqsmin    = gsqs(nm)
+             totfixfrac = 0.0_fp
+             !
+             from_ndm = kfsed(ndm)==0 .and. kcs(ndm) /= 0 .and. kcs(ndm)<3 .and. kcv(ndm)==1 .and. dps(ndm)<dps(nm)
+             if (from_ndm) then
+                gsqsmin = min(gsqsmin,gsqs(ndm))
+                do l = 1, lsedtot
+                   totfixfrac = totfixfrac + fixfac(ndm, l)*frac(ndm, l)
+                enddo
+             endif
+             !
+             from_nmd = kfsed(nmd)==0 .and. kcs(nmd) /= 0 .and. kcs(nmd)<3 .and. kcu(nmd)==1 .and. dps(nmd)<dps(nm)
+             if (from_nmd) then
+                gsqsmin = min(gsqsmin,gsqs(nmd))
+                do l = 1, lsedtot
+                   totfixfrac = totfixfrac + fixfac(nmd, l)*frac(nmd, l)
+                enddo
+             endif
+             !
+             from_nmu = kfsed(nmu)==0 .and. kcs(nmu) /= 0 .and. kcs(nmu)<3 .and. kcu(nm)==1 .and. dps(nmu)<dps(nm)
+             if (from_nmu) then
+                gsqsmin = min(gsqsmin,gsqs(nmu))
+                do l = 1, lsedtot
+                   totfixfrac = totfixfrac + fixfac(nmu, l)*frac(nmu, l)
+                enddo
+             endif
+             !
+             from_num = kfsed(num)==0 .and. kcs(num) /= 0 .and. kcs(num)<3 .and. kcv(nm)==1 .and. dps(num)<dps(nm)
+             if (from_num) then
+                gsqsmin = min(gsqsmin,gsqs(num))
+                do l = 1, lsedtot
+                   totfixfrac = totfixfrac + fixfac(num, l)*frac(num, l)
+                enddo
+             endif
+             !
+             ! Re-distribute THET % of erosion in nm to surrounding cells
+             ! THETSD is a user-specified maximum value, range 0-1
+             !
+             if (totfixfrac > 1.0e-7_fp) then
                 !
-                ! Note: contrary to the previous implementation, this new
-                ! implementation erodes the sediment from nm and
-                ! re-distributes the eroded volume based on the composition
-                ! of the neighbouring cells, replenishing the sediment volume
-                ! at grid point nm with sediment of a different composition
-                ! than that what was eroded. This new implementation is mass
-                ! conserving per fraction. Furthermore, re-distribution takes
-                ! place only in case of net TOTAL erosion, i.e. not of
-                ! individual fractions.
+                ! Compute local re-distribution factor THET
                 !
-                gsqsmin    = gsqs(nm)
-                totfixfrac = 0.0_fp
-                !
-                from_ndm = kfsed(ndm)==0 .and. kcs(ndm) /= 0 .and. kcs(ndm)<3 .and. kcv(ndm)==1 .and. dps(ndm)<dps(nm)
-                if (from_ndm) then
-                   gsqsmin = min(gsqsmin,gsqs(ndm))
-                   do l = 1, lsedtot
-                      totfixfrac = totfixfrac + fixfac(ndm, l)*frac(ndm, l)
-                   enddo
+                if (hmaxth > sedthr) then
+                   h1   = real(dps(nm),fp) + s1(nm)
+                   thet = (h1 - sedthr)/(hmaxth - sedthr)*thetsd
+                   thet = min(thet, thetsd)
+                else
+                   thet = thetsd
                 endif
                 !
-                from_nmd = kfsed(nmd)==0 .and. kcs(nmd) /= 0 .and. kcs(nmd)<3 .and. kcu(nmd)==1 .and. dps(nmd)<dps(nm)
-                if (from_nmd) then
-                   gsqsmin = min(gsqsmin,gsqs(nmd))
-                   do l = 1, lsedtot
-                      totfixfrac = totfixfrac + fixfac(nmd, l)*frac(nmd, l)
-                   enddo
-                endif
+                ! Combine some constant factors in variable THET
+                ! Note: TOTDBODSD<0.0 and thus THET>0.0 !
                 !
-                from_nmu = kfsed(nmu)==0 .and. kcs(nmu) /= 0 .and. kcs(nmu)<3 .and. kcu(nm)==1 .and. dps(nmu)<dps(nm)
-                if (from_nmu) then
-                   gsqsmin = min(gsqsmin,gsqs(nmu))
-                   do l = 1, lsedtot
-                      totfixfrac = totfixfrac + fixfac(nmu, l)*frac(nmu, l)
-                   enddo
-                endif
+                thet = -gsqsmin * totdbodsd * thet / totfixfrac
                 !
-                from_num = kfsed(num)==0 .and. kcs(num) /= 0 .and. kcs(num)<3 .and. kcv(nm)==1 .and. dps(num)<dps(nm)
-                if (from_num) then
-                   gsqsmin = min(gsqsmin,gsqs(num))
-                   do l = 1, lsedtot
-                      totfixfrac = totfixfrac + fixfac(num, l)*frac(num, l)
-                   enddo
-                endif
-                !
-                ! Re-distribute THET % of erosion in nm to surrounding cells
-                ! THETSD is a user-specified maximum value, range 0-1
-                !
-                if (totfixfrac > 1.0e-7_fp) then
+                do l = 1, lsedtot
                    !
-                   ! Compute local re-distribution factor THET
+                   ! update dbodsd values in this cell and surrounding cells
+                   ! adjust bedload transport rates to include this erosion
+                   ! process.
                    !
-                   if (hmaxth > sedthr) then
-                      h1   = real(dps(nm),fp) + s1(nm)
-                      thet = (h1 - sedthr)/(hmaxth - sedthr)*thetsd
-                      thet = min(thet, thetsd)
-                   else
-                      thet = thetsd
+                   if (from_ndm) then
+                      dv             = thet*fixfac(ndm, l)*frac(ndm, l)
+                      dbodsd(l, ndm) = dbodsd(l, ndm) - dv/gsqs(ndm)
+                      dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
+                      sbvv(ndm, l)   = sbvv(ndm, l) + dv/(hdt*morfac*gvv(ndm))
                    endif
                    !
-                   ! Combine some constant factors in variable THET
-                   ! Note: TOTDBODSD<0.0 and thus THET>0.0 !
+                   if (from_nmd) then
+                      dv             = thet*fixfac(nmd, l)*frac(nmd, l)
+                      dbodsd(l, nmd) = dbodsd(l, nmd) - dv/gsqs(nmd)
+                      dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
+                      sbuu(nmd, l)   = sbuu(nmd, l) + dv/(hdt*morfac*guu(nmd))
+                   endif
                    !
-                   thet = -gsqsmin * totdbodsd * thet / totfixfrac
+                   if (from_nmu) then
+                      dv             = thet*fixfac(nmu, l)*frac(nmu, l)
+                      dbodsd(l, nmu) = dbodsd(l, nmu) - dv/gsqs(nmu)
+                      dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
+                      sbuu(nm, l)    = sbuu(nm, l) - dv/(hdt*morfac*guu(nm))
+                   endif
                    !
-                   do l = 1, lsedtot
-                      !
-                      ! update dbodsd values in this cell and surrounding cells
-                      ! adjust bedload transport rates to include this erosion
-                      ! process.
-                      !
-                      if (from_ndm) then
-                         dv             = thet*fixfac(ndm, l)*frac(ndm, l)
-                         dbodsd(l, ndm) = dbodsd(l, ndm) - dv/gsqs(ndm)
-                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbvv(ndm, l)   = sbvv(ndm, l) + dv/(hdt*morfac*gvv(ndm))
-                      endif
-                      !
-                      if (from_nmd) then
-                         dv             = thet*fixfac(nmd, l)*frac(nmd, l)
-                         dbodsd(l, nmd) = dbodsd(l, nmd) - dv/gsqs(nmd)
-                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbuu(nmd, l)   = sbuu(nmd, l) + dv/(hdt*morfac*guu(nmd))
-                      endif
-                      !
-                      if (from_nmu) then
-                         dv             = thet*fixfac(nmu, l)*frac(nmu, l)
-                         dbodsd(l, nmu) = dbodsd(l, nmu) - dv/gsqs(nmu)
-                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbuu(nm, l)    = sbuu(nm, l) - dv/(hdt*morfac*guu(nm))
-                      endif
-                      !
-                      if (from_num) then
-                         dv = thet*fixfac(num, l)*frac(num, l)
-                         dbodsd(l, num) = dbodsd(l, num) - dv/gsqs(num)
-                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbvv(nm, l)    = sbvv(nm, l) - dv/(hdt*morfac*gvv(nm))
-                      endif
-                   enddo ! l
-                endif    ! totfixfrac > 1.0e-7
-             endif       ! totdbodsd < 0.0
-          endif          ! kcs*kfs*kfsed == 1
-       enddo             ! nm
+                   if (from_num) then
+                      dv = thet*fixfac(num, l)*frac(num, l)
+                      dbodsd(l, num) = dbodsd(l, num) - dv/gsqs(num)
+                      dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
+                      sbvv(nm, l)    = sbvv(nm, l) - dv/(hdt*morfac*gvv(nm))
+                   endif
+                enddo ! l
+             endif    ! totfixfrac > 1.0e-7
+          endif       ! totdbodsd < 0.0
+       enddo          ! nm
        !
        nm_pos = 2
        call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)

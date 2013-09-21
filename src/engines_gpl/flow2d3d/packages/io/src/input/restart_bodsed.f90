@@ -1,5 +1,6 @@
 subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
-                         & lsedtot   ,nmaxus    ,mmax      ,success   ,gdp       )
+                         & lsedtot   ,nmaxus    ,mmax      ,success   , &
+                         & elmnam    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -55,6 +56,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     logical                                                                 , intent(out) :: success
     real(prec), dimension(lsedtot, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: bodsed
     character(*)                                                                          :: restid
+    character(*)                                                                          :: elmnam
 !
 ! Local variables
 !
@@ -135,7 +137,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     !
     allocate(sbuff(nmaxus, mmax, rst_lsedtot, 1))
     !
-    ierror = getelt(fds , 'map-sed-series', 'BODSED', uindex, 1, &
+    ierror = getelt(fds , 'map-sed-series', elmnam, uindex, 1, &
                  & mmax*nmaxus*rst_lsedtot*4, sbuff )
     if (ierror/= 0) goto 9999
     do l = 1, lsedtot

@@ -845,10 +845,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
                  & iopsus    ,gdsedpar  ,gdtrapar  )
 !!--description-----------------------------------------------------------------
 !
-! Read sediment parameters from an input file
-! File type:
-!    ASCII-file if file version below 02.00
-!    INI  -file if file version is 02.00 or higher
+! Report sediment parameter to diag file
 !
 !!--declarations----------------------------------------------------------------
     use precision

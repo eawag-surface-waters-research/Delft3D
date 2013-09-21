@@ -174,7 +174,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     ! fwfac set by rdmor
     !
     call rdmor  (lundia, error, filmor, lsec, stm%lsedtot, &
-               & nmaxus, nto, nambnd, julrefday, morfil_tree, &
+               & stm%lsed, nmaxus, nto, nambnd, julrefday, morfil_tree, &
                & stm%gdsedpar, stm%gdmorpar, stm%fwfac, stm%gdmorlyr, &
                & griddim)
     !

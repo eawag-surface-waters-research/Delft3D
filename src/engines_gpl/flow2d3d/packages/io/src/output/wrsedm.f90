@@ -432,6 +432,11 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                  & 1         ,0         ,grpnam    ,gdp       )
+       !
+       ! Add fluff fields
+       !
+       call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                   & 1         ,0         ,grpnam    ,gdp       )
     case (2)
        !
        ! Write data to file
@@ -1413,6 +1418,12 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                  & 2         ,fds       ,grpnam    ,gdp       )
+       if (error) goto 9999
+       !
+       ! Add fluff fields
+       !
+       call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                   & 2         ,fds       ,grpnam    ,gdp       )
        if (error) goto 9999
        !
        ! write errormessage if error occurred and set error = .true.

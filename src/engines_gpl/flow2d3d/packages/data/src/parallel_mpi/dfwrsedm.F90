@@ -512,6 +512,12 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        !
        call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                  & 1         ,0         ,grnam5    ,gdp       )
+       !
+       ! Add fluff fields
+       !
+       call dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                     & 1         ,0         ,grnam5    ,gdp       )
+       !
        call defnewgrp(nefiswrsedm ,filnam    ,grnam5   ,gdp)
        !
        ! Get start celidt for writing
@@ -1633,6 +1639,12 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     !
     call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
               & 2         ,fds       ,grnam5    ,gdp       )
+    if (error) goto 9999
+    !
+    ! Add fluff fields
+    !
+    call dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                  & 2         ,fds       ,grnam5    ,gdp       )
     if (error) goto 9999
     !
     if (inode == master) ierror = clsnef(fds)

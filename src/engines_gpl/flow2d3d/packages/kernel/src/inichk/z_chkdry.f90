@@ -250,7 +250,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        !
        ! Check whether the minimum layer thickness (0.1*Dryflc) is smaller 
        ! than one of the internal layers for the Z-model, 
-       ! so exluding the bottom and free-surface layers, which can be thin
+       ! so excluding the bottom and free-surface layers, which can be thin
        !
        dzfound     = drytrsh
        found       = .false.

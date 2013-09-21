@@ -71,6 +71,7 @@ libDataParallelMPI_la_SOURCES = \
 	 dfgather.F90 \
 	 dfgather_grddim.F90 \
 	 dfwrirst.F90 \
+	 dfwrmfluff.F90 \
 	 dfwrmorm1.F90 \
 	 dfwrmorm2.F90 \
 	 dfwrsedm.F90 \

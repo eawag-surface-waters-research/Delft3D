@@ -40,7 +40,7 @@ public echomor
 contains
 
 subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
-               & nmaxus    ,nto       , &
+               & lsed      ,nmaxus    ,nto       , &
                & nambnd    ,julday    ,mor_ptr   ,gdsedpar  ,gdmorpar  , &
                & fwfac     ,gdmorlyr  ,griddim   )
 !!--description-----------------------------------------------------------------
@@ -76,7 +76,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                                , pointer :: morfactable
     integer                                , pointer :: nxx
     integer                                , pointer :: nmudfrac
-    integer                , dimension(:)  , pointer :: sedtyp
     real(fp)                               , pointer :: morfac
     real(fp)                               , pointer :: thresh
     real(fp)                               , pointer :: aksfac
@@ -148,15 +147,16 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                        , intent(in)  :: nto
     integer                                      :: lundia  !  Description and declaration in inout.igs
     integer                        , intent(in)  :: lsec
+    integer                        , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
     integer                        , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     logical                        , intent(out) :: error
     character(*)                                 :: filmor
     character(20) , dimension(nto)               :: nambnd  !  Description and declaration in esm_alloc_char.f90
-    type(tree_data)                          , pointer     :: mor_ptr
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    type (gd_morpar)                         , pointer     :: gdmorpar
-    type (bedcomp_data)                      , pointer     :: gdmorlyr
-    real(fp)                                 , intent(out) :: fwfac
+    type(tree_data)                , pointer     :: mor_ptr
+    type (gd_sedpar)               , pointer     :: gdsedpar
+    type (gd_morpar)               , pointer     :: gdmorpar
+    type (bedcomp_data)            , pointer     :: gdmorlyr
+    real(fp)                       , intent(out) :: fwfac
 !
 ! Local variables
 !
@@ -282,7 +282,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     bcmfilnam           => gdmorpar%bcmfilnam
     nmudfrac            => gdsedpar%nmudfrac
     namsed              => gdsedpar%namsed
-    sedtyp              => gdsedpar%sedtyp
     anymud              => gdsedpar%anymud
     pangle              => gdmorpar%pangle
     fpco                => gdmorpar%fpco
@@ -863,6 +862,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        endif
     enddo
     !
+    if (anymud) then
+       call rdflufflyr(lundia    ,error    ,filmor    ,lsed , &
+                     & mor_ptr   ,gdmorpar%flufflyr   ,griddim)
+    endif
+    !
     call rdmorlyr (lundia    ,error     ,filmor    , &
                  & nmaxus    ,nto       , &
                  & nambnd    ,version   ,lsedtot   ,namsed    , &
@@ -1065,7 +1069,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
                  & nambnd    ,gdsedpar  ,gdmorpar  )
 !!--description-----------------------------------------------------------------
 !
-! Reads attribute file for 3D morphology computation
+! Report morphology settings to diag file
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1140,7 +1144,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     logical                                , pointer :: oldmudfrac
     logical                                , pointer :: varyingmorfac
     logical                                , pointer :: multi
-    logical                                , pointer :: anymud
     logical                                , pointer :: eulerisoglm
     logical                                , pointer :: glmisoeuler
     character(256)                         , pointer :: bcmfilnam
@@ -1249,7 +1252,6 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     nmudfrac            => gdsedpar%nmudfrac
     namsed              => gdsedpar%namsed
     sedtyp              => gdsedpar%sedtyp
-    anymud              => gdsedpar%anymud
     pangle              => gdmorpar%pangle
     fpco                => gdmorpar%fpco
     factcr              => gdmorpar%factcr
@@ -1685,6 +1687,291 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     write (lundia, *)
     !
     deallocate(parnames)
+    !
+    call echoflufflyr(lundia    ,error    ,gdmorpar%flufflyr)
 end subroutine echomor
+
+subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr,griddim)
+!!--description-----------------------------------------------------------------
+!
+! Read fluff layer parameters from an input file
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    use properties
+    use morphology_data_module
+    use message_module, only: write_error !, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use grid_dimens_module, only: griddimtype
+    !
+    implicit none
+!
+! Global variables
+!
+    character(*)                                           :: filmor
+    type(fluffy_type)                        , pointer     :: flufflyr
+    type(tree_data)                          , pointer     :: mor_ptr
+    integer                                  , intent(in)  :: lsed     ! number of suspended fractions
+    integer                                                :: lundia
+    logical                                  , intent(out) :: error
+    type (griddimtype)                       , pointer :: griddim
+!
+! Local variables
+!
+    integer                         , pointer :: iflufflyr
+    real(fp)      , dimension(:,:)  , pointer :: bfluff0
+    real(fp)      , dimension(:,:)  , pointer :: bfluff1
+    real(fp)      , dimension(:,:)  , pointer :: depfac
+    !
+    integer                   :: i
+    integer                   :: istat
+    integer                   :: l
+    integer                   :: nm
+    integer                   :: nmlb
+    integer                   :: nmub
+    real(fp)                  :: rmissval
+    logical                   :: ex
+    logical                   :: success
+    character(256)            :: filfluff
+    character(11)             :: fmttmp       ! Format file ('formatted  ') 
+    character(256)            :: parname
+    character(256)            :: errmsg
+!
+!! executable statements -------------------------------------------------------
+!
+    iflufflyr            => flufflyr%iflufflyr
+    !
+    error      = .false.
+    rmissval   = -999.0
+    fmttmp     = 'formatted'
+    !
+    call prop_get(mor_ptr, 'FluffLayer', 'Type', iflufflyr)
+    if (iflufflyr==0) return
+    !
+    nmlb = griddim%nmlb
+    nmub = griddim%nmub
+    !
+    istat = allocfluffy(flufflyr, lsed, nmlb, nmub)
+    !
+    if (istat/=0) then
+       errmsg = 'RDFLUFFLYR: memory alloc error'
+       call write_error(errmsg, unit=lundia)
+       error = .true.
+       return
+    endif
+    !
+    depfac  => flufflyr%depfac
+    bfluff0 => flufflyr%bfluff0
+    bfluff1 => flufflyr%bfluff1
+    !
+    if (iflufflyr==1) then
+        bfluff0 = 0.0_fp
+        bfluff1 = 0.0_fp
+        !
+        ! Burial term 1 fluff layer constant in time:
+        ! uniform or spatially varying value
+        !
+        filfluff = ''
+        call prop_get_string(mor_ptr, 'FluffLayer', 'BurFluff0', filfluff)
+        !
+        ! Intel 7.0 crashes on an inquire statement when file = ' '
+        !
+        if (filfluff == ' ') filfluff = 'dummyname'
+        inquire (file = filfluff, exist = ex)
+        !
+        if (ex) then
+            !
+            ! read data from file
+            !
+            call depfil(lundia    ,error     ,filfluff  ,fmttmp    , &
+                      & bfluff0   ,lsed      ,1         ,griddim)
+            if (error) then
+                errmsg = 'Unable to read burial term 1 from ' // trim(filfluff)
+                call write_error(errmsg, unit=lundia)
+                return
+            endif
+            flufflyr%bfluff0_fil = filfluff
+            !
+            ! check input
+            !
+            do nm = nmlb, nmub
+                if (bfluff0(1,nm) < 0.0_fp .and. bfluff0(1,nm) /= rmissval ) then
+                    errmsg = 'Burial term 1 should be positive in ' // trim(filfluff)
+                    call write_error(errmsg, unit=lundia)
+                    return
+                endif
+            enddo
+        else
+            filfluff = ' '
+            call prop_get(mor_ptr, 'FluffLayer', 'BurFluff0', bfluff0(1,1))
+            if (bfluff0(1,1) < 0.0_fp) then
+                errmsg = 'Burial term 1 should be positive in ' // trim(filmor)
+                call write_error(errmsg, unit=lundia)
+                return
+            endif
+            bfluff0(1,:) = bfluff0(1,1)
+        endif
+        do l = 2, lsed
+            bfluff0(l,:) = bfluff0(1,:)
+        enddo
+        !
+        ! Burial term 2 fluff layer constant in time:
+        ! uniform or spatially varying value
+        !
+        filfluff = ''
+        call prop_get_string(mor_ptr, 'FluffLayer', 'BurFluff1', filfluff)
+        !
+        ! Intel 7.0 crashes on an inquire statement when file = ' '
+        !
+        if (filfluff == ' ') filfluff = 'dummyname'
+        inquire (file = filfluff, exist = ex)
+        !
+        if (ex) then
+            !
+            ! read data from file
+            !
+            call depfil(lundia    ,error     ,filfluff  ,fmttmp    , &
+                      & bfluff1   ,lsed      ,1         ,griddim)
+            if (error) then
+                errmsg = 'Unable to read burial term 2 from ' // trim(filfluff)
+                call write_error(errmsg, unit=lundia)
+                return
+            endif
+            flufflyr%bfluff1_fil = filfluff
+            !
+            ! check input
+            !
+            do nm = nmlb, nmub
+                if (bfluff1(1,nm) < 0.0_fp .and. bfluff1(1,nm) /= rmissval ) then
+                    errmsg = 'Burial term 2 should be positive in ' // trim(filfluff)
+                    call write_error(errmsg, unit=lundia)
+                    return
+                endif
+            enddo
+        else
+            filfluff = ' '
+            call prop_get(mor_ptr, 'FluffLayer', 'BurFluff1', bfluff1(1,1))
+            if (bfluff1(1,1) < 0.0_fp ) then
+                errmsg = 'Burial term 2 should be positive in ' // trim(filmor)
+                call write_error(errmsg, unit=lundia)
+                return
+            endif
+            bfluff1(1,:) = bfluff1(1,1)
+        endif
+        do l = 2, lsed
+            bfluff1(l,:) = bfluff1(1,:)
+        enddo
+        !
+    elseif (iflufflyr==2) then
+        depfac = 0.0_fp   
+        !
+        ! Deposition factor constant in time:
+        ! uniform or spatially varying value
+        !
+        filfluff = ''
+        call prop_get_string(mor_ptr, 'FluffLayer', 'DepFac', filfluff)
+        !
+        ! Intel 7.0 crashes on an inquire statement when file = ' '
+        !
+        if (filfluff == ' ') filfluff = 'dummyname'
+        inquire (file = filfluff, exist = ex)
+        !
+        if (ex) then
+            !
+            ! read data from file
+            !
+            call depfil(lundia    ,error     ,filfluff  ,fmttmp    , &
+                      & depfac    ,lsed      ,1         ,griddim)
+            if (error) then
+                errmsg = 'Unable to read deposition factor from ' // trim(filfluff)
+                call write_error(errmsg, unit=lundia)
+                return
+            endif
+            flufflyr%depfac_fil = filfluff
+            !
+            ! check input
+            !
+            do nm = nmlb, nmub
+                if ((depfac(1,nm) < 0.0_fp .or. depfac(1,nm)>1.0_fp) .and. depfac(1,nm) /= rmissval  ) then
+                    errmsg = 'Deposition factor should be between 0 and 1 in ' // trim(filfluff)
+                    call write_error(errmsg, unit=lundia)
+                    return
+                endif
+            enddo
+        else
+            filfluff = ' '
+            call prop_get(mor_ptr, 'FluffLayer', 'DepFac', depfac(1,1))
+            if (depfac(1,1) < 0.0_fp .or. depfac(1,1) > 1.0_fp) then
+                errmsg = 'Deposition factor should be between 0 and 1 in ' // trim(filmor)
+                call write_error(errmsg, unit=lundia)
+                return
+            endif
+            depfac(1,:) = depfac(1,1)
+        endif
+    endif
+    do l = 2, lsed
+        depfac(l,:) = depfac(1,:)
+    enddo                                                                                                                                                             
+end subroutine rdflufflyr
+
+subroutine echoflufflyr(lundia    ,error    ,flufflyr)
+!!--description-----------------------------------------------------------------
+!
+! Report fluff layer settings to diag file
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    use morphology_data_module
+    !
+    implicit none
+!
+! Global variables
+!
+    type(fluffy_type)                        , pointer     :: flufflyr
+    integer                                                :: lundia
+    logical                                  , intent(out) :: error
+!
+! Local variables
+!
+    integer         , pointer :: iflufflyr
+    !
+    character(30)             :: txtput1
+    character(10)             :: txtput2
+!
+!! executable statements -------------------------------------------------------
+!
+    error      = .false.
+    iflufflyr            => flufflyr%iflufflyr
+    if (iflufflyr==0) return
+    !
+    write (lundia, '(a)')   '*** Start  of fluff layer input'
+    txtput1 = 'Fluff layer mechanism'
+    write (lundia, '(2a,i20)') txtput1, ':', iflufflyr
+    !
+    if (iflufflyr==1) then
+        txtput1 = 'Burial coefficient 1'
+        if (flufflyr%bfluff0_fil /= ' ') then
+            write(lundia,'(3a)') txtput1, ':', trim(flufflyr%bfluff0_fil)
+        else
+            write(lundia,'(2a,e20.4)') txtput1, ':', flufflyr%bfluff0(1,1)
+        endif
+        !
+        txtput1 = 'Burial coefficient 2'
+        if (flufflyr%bfluff1_fil /= ' ') then
+            write(lundia,'(3a)') txtput1, ':', trim(flufflyr%bfluff1_fil)
+        else
+            write(lundia,'(2a,e20.4)') txtput1, ':', flufflyr%bfluff1(1,1)
+        endif
+    elseif (iflufflyr==2) then
+        txtput1 = 'Deposition factor'
+        if (flufflyr%depfac_fil /= ' ') then
+            write(lundia,'(3a)') txtput1, ':', trim(flufflyr%depfac_fil)
+        else
+            write(lundia,'(2a,e20.4)') txtput1, ':', flufflyr%depfac(1,1)
+        endif
+    endif
+    !
+    write (lundia, '(a)')   '*** End    of fluff layer input'
+    write (lundia, *)
+end subroutine echoflufflyr
 
 end module m_rdmor

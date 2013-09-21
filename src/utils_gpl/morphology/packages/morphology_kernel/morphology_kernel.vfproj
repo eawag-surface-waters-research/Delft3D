@@ -58,6 +58,7 @@
 		<File RelativePath=".\src\erosilt.f90"/>
 		<File RelativePath=".\src\factor3d2d.f90"/>
 		<File RelativePath=".\src\fgyint.f90"/>
+		<File RelativePath=".\src\fluff_burial.f90"/>
 		<File RelativePath=".\src\getfixfac.f90"/>
 		<File RelativePath=".\src\morphology_data_module.f90"/>
 		<File RelativePath=".\src\osmom.f90"/>

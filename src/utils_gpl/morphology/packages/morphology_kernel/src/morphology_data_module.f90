@@ -48,6 +48,7 @@ public bedbndtype
 public cmpbndtype
 public gd_sedpar
 public gd_trapar
+public fluffy_type
 
 !
 ! public routines
@@ -58,6 +59,7 @@ public initsedpar
 public clrsedpar
 public inittrapar
 public clrtrapar
+public allocfluffy
 
 integer, parameter, public :: RP_TIME  =  1
 integer, parameter, public :: RP_EFUMN =  2
@@ -198,14 +200,52 @@ type cmpbndtype
                                        !  (4) last used record in table
 end type cmpbndtype
 
+type fluffy_type
+    !
+    ! doubles (hp)
+    !
+    !
+    ! single / doubles (fp)
+    !
+    !
+    ! singles (sp)
+    !
+    !
+    ! integers
+    !
+    integer :: iflufflyr  !  switch for fluff layer concept
+                          !  0: no fluff layer
+                          !  1: all mud to fluff layer, burial to bed layers
+                          !  2: part mud to fluff layer, other part to bed layers (no burial) 
+    !
+    ! pointers
+    !
+    real(fp)      , dimension(:,:)  , pointer :: mfluff        ! composition of fluff layer: mass of mud fractions, units : kg /m2
+    real(fp)      , dimension(:,:)  , pointer :: bfluff0       ! burial parameter fluff layer (only when FluffLayer=1) [kg/m2/s]
+    real(fp)      , dimension(:,:)  , pointer :: bfluff1       ! burial parameter fluff layer (only when FluffLayer=1) [1/s]
+    real(fp)      , dimension(:,:)  , pointer :: depfac        ! Deposition factor to fluff layer (only when FluffLayer=2) [-]
+    real(fp)      , dimension(:,:)  , pointer :: sinkf         ! Settling to fluff layer []
+    real(fp)      , dimension(:,:)  , pointer :: sourf         ! Source from fluff layer [] 
+    ! 
+    ! logicals
+    !
+    !
+    ! characters
+    !
+    character(256) :: bfluff0_fil      !  name of file for burial parameter 1
+    character(256) :: bfluff1_fil      !  name of file for burial parameter 2
+    character(256) :: depfac_fil       !  name of file for deposition factor
+    !
+end type fluffy_type
+
 type gd_morpar
     !
-    ! doubles
+    ! doubles (hp)
     !
     real(hp):: morft      !  morphological time
     real(hp):: morft0     !  initial morphological time
     !
-    ! single / doubles
+    ! single / doubles (fp)
     !
     real(fp):: morfac     !  morphological timescale factor
     real(fp):: thresh     !  threshold value for slowing erosion near a fixed layer (m)
@@ -244,7 +284,7 @@ type gd_morpar
     real(fp):: wetslope   !  maximum wet bed slope (used for avalanching)
     real(fp):: avaltime   !  time scale in seconds (used for avalanching)
     !
-    ! singles
+    !  (sp)
     !
     !
     ! integers
@@ -283,6 +323,7 @@ type gd_morpar
     !
     ! pointers
     !
+    type (fluffy_type)                  , pointer :: flufflyr   ! data for optional fluff layer
     type (handletype)                             :: bcmfile    ! tables containing morphological boundary conditions
     type (handletype)                             :: morfacfile ! table  containing morphological factor
     type (moroutputtype)                , pointer :: moroutput  ! structure containing morphology output options
@@ -724,6 +765,7 @@ subroutine initmorpar(gdmorpar)
     istat = 0
     allocate (gdmorpar%moroutput  , stat = istat)
     allocate (gdmorpar%mornum     , stat = istat)
+    allocate (gdmorpar%flufflyr   , stat = istat)
     !
     pangle              => gdmorpar%pangle
     fpco                => gdmorpar%fpco
@@ -845,7 +887,109 @@ subroutine initmorpar(gdmorpar)
     nullify(gdmorpar%cmpbnd)
     nullify(gdmorpar%xx)
     nullify(gdmorpar%mergebuf)
+    !
+    call initfluffy(gdmorpar%flufflyr)
 end subroutine initmorpar
+!
+!
+!
+!============================================================================== 
+subroutine initfluffy(flufflyr)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Initialize a fluff layer data structure.
+!
+!!--declarations----------------------------------------------------------------
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (fluffy_type)                   , pointer     :: flufflyr
+    !
+    ! Local variables
+    !
+!
+!! executable statements -------------------------------------------------------
+!
+    flufflyr%iflufflyr = 0
+    !
+    nullify(flufflyr%mfluff)
+    nullify(flufflyr%bfluff0)
+    nullify(flufflyr%bfluff1)
+    nullify(flufflyr%depfac)
+    !
+    flufflyr%bfluff0_fil = ' '
+    flufflyr%bfluff1_fil = ' '
+    flufflyr%depfac_fil  = ' '
+end subroutine initfluffy
+!
+!
+!
+!============================================================================== 
+function allocfluffy(flufflyr, lsed, nmlb, nmub) result(istat)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Allocate a fluff layer data structure.
+!
+!!--declarations----------------------------------------------------------------
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (fluffy_type)                   , pointer     :: flufflyr
+    integer                                            :: istat
+    integer                              , intent(in)  :: lsed
+    integer                              , intent(in)  :: nmlb
+    integer                              , intent(in)  :: nmub
+    !
+    ! Local variables
+    !
+!
+!! executable statements -------------------------------------------------------
+!
+                  allocate(flufflyr%mfluff(lsed,nmlb:nmub), stat = istat)
+    if (istat==0) allocate(flufflyr%sinkf(lsed,nmlb:nmub), stat = istat)
+    if (istat==0) allocate(flufflyr%sourf(lsed,nmlb:nmub), stat = istat)
+    !
+    select case (flufflyr%iflufflyr)
+    case (1)
+       if (istat==0) allocate(flufflyr%bfluff0(lsed,nmlb:nmub), stat = istat)
+       if (istat==0) allocate(flufflyr%bfluff1(lsed,nmlb:nmub), stat = istat)
+    case (2)
+       if (istat==0) allocate(flufflyr%depfac(lsed,nmlb:nmub), stat = istat)
+    endselect
+end function allocfluffy
+!
+!
+!
+!============================================================================== 
+subroutine clrfluffy(istat, flufflyr)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Clean up a fluff layer data structure.
+!
+!!--declarations----------------------------------------------------------------
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (fluffy_type)                   , pointer     :: flufflyr
+    integer                              , intent(out) :: istat
+    !
+    ! Local variables
+    !
+!
+!! executable statements -------------------------------------------------------
+!
+    flufflyr%iflufflyr = 0
+    !
+    if (associated(flufflyr%mfluff))      deallocate(flufflyr%mfluff,      STAT = istat)
+    if (associated(flufflyr%bfluff0))     deallocate(flufflyr%bfluff0,     STAT = istat)
+    if (associated(flufflyr%bfluff1))     deallocate(flufflyr%bfluff1,     STAT = istat)
+    if (associated(flufflyr%depfac))      deallocate(flufflyr%depfac,      STAT = istat)
+    if (associated(flufflyr%sinkf))       deallocate(flufflyr%sinkf,       STAT = istat)
+    if (associated(flufflyr%sourf))       deallocate(flufflyr%sourf,       STAT = istat)
+end subroutine clrfluffy
 !
 !
 !
@@ -891,6 +1035,10 @@ subroutine clrmorpar(istat, gdmorpar)
     if (associated(gdmorpar%mornum))    deallocate(gdmorpar%mornum,    STAT = istat)
     call cleartable(gdmorpar%bcmfile)
     call cleartable(gdmorpar%morfacfile)
+    if (associated(gdmorpar%flufflyr)) then
+        call clrfluffy(istat, gdmorpar%flufflyr)
+        deallocate(gdmorpar%flufflyr, STAT = istat)
+    endif
     !
 end subroutine clrmorpar
 !

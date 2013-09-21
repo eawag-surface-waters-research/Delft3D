@@ -857,7 +857,7 @@ end subroutine getpardef
 subroutine echotrafrm(lundia    ,gdtrapar    ,ifrac     )
 !!--description-----------------------------------------------------------------
 !
-! Display transport formula and associated parameters
+! Report transport formula and associated parameters to diag file
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -950,6 +950,15 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(2)  = 0.0_fp
        parkeyw(3) = 'TcrEro'
        pardef(3)  = 0.0_fp
+       nparopt    = 4
+       parkeyw(4) = 'TcrFluff'
+       pardef(4)  = 0.0_fp
+       parkeyw(5) = 'ParFluff0'
+       pardef(5)  = 0.0_fp
+       parkeyw(6) = 'ParFluff1'
+       pardef(6)  = 0.0_fp
+       parkeyw(7) = 'DepEff'
+       pardef(7)  = 0.0_fp
     elseif (iform == -2) then
        name       = 'Van Rijn (2007): TRANSPOR2004'
        nparopt    = 7

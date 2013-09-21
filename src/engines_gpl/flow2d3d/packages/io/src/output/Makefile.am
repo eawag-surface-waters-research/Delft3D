@@ -96,6 +96,7 @@ libIOOutput_la_SOURCES = \
          wrirst.f90 \
          wrkenc.f90 \
          wrkent.f90 \
+         wrmfluff.f90 \
          wrmorm.f90 \
          wrmorm1.f90 \
          wrmorm2.f90 \
