@@ -18,8 +18,7 @@ INCLUDES = \
 
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
-	-I$(top_builddir)/utils_lgpl/esmfsm/include \
-	-I$(top_builddir)/third_party_open/openda/core/native/include
+	-I$(top_builddir)/utils_lgpl/esmfsm/include @ODA_INCDIR@
 
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
@@ -46,7 +45,9 @@ libflow2d3d_openda_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 libflow2d3d_openda_la_LIBADD = \
-	$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la
+	$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la @LTL_CTA@
+
+libflow2d3d_openda_la_LDFLAGS = -version-info 0:0:0 @ODA_LIB@
 
 
 BUILT_SOURCES = \

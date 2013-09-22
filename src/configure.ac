@@ -274,6 +274,32 @@ CXX=$MPICXX
 [])
 AM_CONDITIONAL(HAVE_MPI, [test "x$with_mpi" != xno])
 
+# MVL
+# Checks for OpenDA if user selects this.
+#
+# User gives path to OpenDA libraries using --with-openda
+INT_OPENDA="todo";
+INT_OPENDA_VERSION="NO"
+ODA_SRC=""
+ODA_INCDIR=""
+ODA_LIB=""
+LTL_CTA=""
+AC_ARG_WITH(openda,
+              AS_HELP_STRING([--with-openda=PATH],
+                             [Try to use 'PATH/include' to find the OPENDA
+                              headers and 'PATH/lib' to find the OPENDA libraries.]),
+      [
+       OPENDA_DIR=${withval}
+       ODA_SRC=flow2d3d_openda
+       ODA_INCDIR="-I$OPENDA_DIR/include"
+       LTL_CTA="$OPENDA_DIR/lib/libcta.la"
+       ODA_LIB=" -lcta"
+      ],[])
+AC_SUBST(ODA_SRC)
+AC_SUBST(ODA_INCDIR)
+AC_SUBST(ODA_LIB)
+AC_SUBST(LTL_CTA)
+
 
 dnl Already create the libtool script here, because we're using it to detect .dylib/.so extension (works for >=2.2)
 LT_OUTPUT

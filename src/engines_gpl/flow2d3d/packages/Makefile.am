@@ -9,5 +9,4 @@ SUBDIRS = \
      kernel_dd_f \
      kernel \
      manager \
-     flow2d3d \
-     flow2d3d_openda
+     flow2d3d @ODA_SRC@
