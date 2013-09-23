@@ -917,6 +917,8 @@ subroutine initfluffy(flufflyr)
     nullify(flufflyr%bfluff0)
     nullify(flufflyr%bfluff1)
     nullify(flufflyr%depfac)
+    nullify(flufflyr%sinkf)
+    nullify(flufflyr%sourf)
     !
     flufflyr%bfluff0_fil = ' '
     flufflyr%bfluff1_fil = ' '
