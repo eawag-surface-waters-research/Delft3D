@@ -162,7 +162,7 @@
       integer                            :: iform       !<    transport formula number (integer of TraFrm)
       integer                            :: istat       !<    error status flag
       integer                            :: segtype     !<    segment type (surface, column, bottom, all)
-      integer                            :: dllhandle   !<    handle for shared sediment transport formula library
+      integer(pntrsize)                  :: dllhandle   !<    handle for shared sediment transport formula library
       integer                            :: lsecfl      !<    1 if secondary flow included, 0 otherwise
       integer                            :: nsegments2D !<    number of segments (noseg) in one layer
       integer                            :: nlayers     !<    number of layers in delwaq model
@@ -205,7 +205,13 @@
       integer                            :: kmaxsd      !<    flag depth-averaged (2) or 3D (3)!
       integer                            :: k           !<    layer number
       integer                            :: kmaxloc     !<    local number of layers (less or equal kmax)
-      
+!
+      integer                            :: iflufflyr
+      real(fp)                           :: mflufftot
+      real(fp)                           :: fracf
+      real(fp)                           :: SinkTot
+      real(fp)                           :: SourFl
+!
       real(fp), dimension(:), allocatable:: par         !<    old array for real transport formula parameters
       real(hp), dimension(:), allocatable:: realpar     !<    real transport formula parameters
       integer, dimension(:), allocatable :: intpar      !<    integer transport formula parameters
@@ -591,14 +597,19 @@
             !   par(2) = tcrdep(nm,l)
             !endif
             !
+            iflufflyr = 0
+            mflufftot = 0.0_fp
+            fracf     = 0.0_fp
             call erosilt(thick    ,kmax      ,ws       ,lundia   , &
                        & thick0   ,thick1    ,fixfac   ,srcmax   , &
                        & frac     ,oldmudfrac,flmd2l   ,iform    , &
                        & par      ,MAX_IP    ,MAX_RP   ,MAX_SP   , &
                        & dllfunc  ,dllhandle ,intpar   ,realpar  , &
-                       & strpar   , &
+                       & strpar   ,iflufflyr ,mflufftot,fracf    , &
 ! output:
-                       & error    ,wstau     ,SinkSe   ,SourSe   )
+                       & error    ,wstau     ,SinkTot  ,SourSe   , &
+                       & SourFl   )
+            SinkSe = SinkTot
          endif
          !
          !if (sourse > 0.0) then
