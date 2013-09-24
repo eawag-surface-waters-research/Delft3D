@@ -355,7 +355,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
              call timer_start(timer_tritra_rest, gdp)
              if (f_lam < 0.0) then
                 call hds_wf(kfs      ,dps      ,s0       ,xz       ,yz       , &
-                          & nmax     ,mmax     ,theta    ,rlabda   , &
+                          & nmax     ,mmax     ,theta    ,rlabda   ,lundia   , &
                           & hbd      ,f_lam    ,gdp      )
              endif
              if (disform == 'R2004') then
@@ -538,7 +538,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
              call timer_start(timer_tritra_rest, gdp)
              if (f_lam < 0.0) then
                 call hds_wf(kfs      ,dps      ,s0       ,xz       ,yz       , &
-                          & nmax     ,mmax     ,theta    ,rlabda   , &
+                          & nmax     ,mmax     ,theta    ,rlabda   ,lundia   , &
                           & hbd      ,f_lam    ,gdp      )
              endif
              if (disform == 'R2004') then

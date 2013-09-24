@@ -1,5 +1,5 @@
 subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
-                & nmax      ,mmax      ,theta     ,rlabda    ,&
+                & nmax      ,mmax      ,theta     ,rlabda    ,lundia    ,&
                 & hbd       ,f_lam     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -50,40 +50,49 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
 !
 ! Global variables
 !
-    integer                                                     , intent(in)  :: mmax
-    integer                                                     , intent(in)  :: nmax
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in ) :: kfs     !  Description and declaration in esm_alloc_int.f90 
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: theta
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: rlabda  !  Description and declaration in esm_alloc_real.f90 
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xcor    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ycor    !  Description and declaration in esm_alloc_real.f90 
+    integer                                                        , intent(in)  :: mmax
+    integer                                                        , intent(in)  :: nmax
+    integer                                                                      :: lundia  !  Description and declaration in inout.igs
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in ) :: kfs     !  Description and declaration in esm_alloc_int.f90 
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: theta
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: rlabda  !  Description and declaration in esm_alloc_real.f90 
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: xcor    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: ycor    !  Description and declaration in esm_alloc_real.f90 
     real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s1      !  Description and declaration in esm_alloc_real.f90 
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: hbd     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                                                    , intent(in)  :: f_lam
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: s1      !  Description and declaration in esm_alloc_real.f90 
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(out) :: hbd     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                                                       , intent(in)  :: f_lam
 !
 ! Local variables
 !
-    integer                 :: j
-    integer                 :: m
-    integer                 :: pos
-    integer                 :: mx
-    integer                 :: n
-    real(fp)                :: f_lamt
-    real(fp)                :: fic
-    real(fp)                :: fis
-    real(fp)                :: grut
-    real(fp)                :: grvt
-    real(fp)                :: hdps
-    real(fp)                :: mrun
-    real(fp)                :: mrup
-    real(fp)                :: mrvn
-    real(fp)                :: mrvp
-    real(fp)                :: sdx
-    real(fp), dimension(1:mmax) :: dx
+    integer                             :: j
+    integer                             :: m
+    integer                             :: pos
+    integer                             :: mx
+    integer                             :: n
+    integer                             :: istat
+    real(fp)                            :: f_lamt
+    real(fp)                            :: fic
+    real(fp)                            :: fis
+    real(fp)                            :: grut
+    real(fp)                            :: grvt
+    real(fp)                            :: hdps
+    real(fp)                            :: mrun
+    real(fp)                            :: mrup
+    real(fp)                            :: mrvn
+    real(fp)                            :: mrvp
+    real(fp)                            :: sdx
+    real(fp), dimension(:), allocatable :: dx
+    real(fp), dimension(:), allocatable :: dy
 !
 ! executable statements -------------------------------------------------------
 !
+                  allocate (dx(mmax), stat = istat)
+    if (istat==0) allocate (dy(nmax), stat = istat)
+    if (istat /= 0) then
+       call prterr(lundia, 'P004', 'memory alloc error in hds_wf, roller module')
+       call d3stop(1, gdp)
+    endif    !
     dx(1) = 0.0 
     if (f_lam < 0.0) f_lamt=-f_lam
     do m = 1, mmax
@@ -145,10 +154,10 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
              mx  = 1
              sdx = 0.0
              do pos = n+1,nmax,1
-                dx(mx + 1) = ycor(pos, m) - ycor(n, m)
-                if (kfs(pos, m)==1 .and. dx(mx + 1)<f_lamt*rlabda(n,m)) then
+                dy(mx + 1) = ycor(pos, m) - ycor(n, m)
+                if (kfs(pos, m)==1 .and. dy(mx + 1)<f_lamt*rlabda(n,m)) then
                    mx  = mx + 1
-                   sdx = sdx + dx(mx)
+                   sdx = sdx + dy(mx)
                 else
                    exit
                 endif
@@ -156,7 +165,7 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
              if (sdx>0.0) then
                 do j = 1, mx
                    hdps= max(real(dps(n + j - 1, m),fp)+s1(n + j - 1, m),0.01_fp)
-                   mrvp = mrvp + hdps*(dx(mx) - dx(j))/sdx
+                   mrvp = mrvp + hdps*(dy(mx) - dy(j))/sdx
                 enddo
              else
                 hdps = max(real(dps(n, m),fp)+s1(n, m),0.01_fp)
@@ -168,10 +177,10 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
              mx  = 1
              sdx = 0.0
              do pos = n-1,1,-1
-                dx(mx + 1) = ycor(n, m) - ycor(pos, m)
-                if (kfs(pos, m)==1 .and. dx(mx + 1)<f_lamt*rlabda(n,m)) then
+                dy(mx + 1) = ycor(n, m) - ycor(pos, m)
+                if (kfs(pos, m)==1 .and. dy(mx + 1)<f_lamt*rlabda(n,m)) then
                    mx  = mx + 1
-                   sdx = sdx + dx(mx)
+                   sdx = sdx + dy(mx)
                 else
                    exit
                 endif
@@ -179,7 +188,7 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
              if (sdx>0.0) then
                 do j = 1, mx
                    hdps= max(real(dps(n - j + 1, m),fp)+s1(n - j + 1, m),0.01_fp)
-                   mrvn = mrvn + hdps*(dx(mx) - dx(j))/sdx
+                   mrvn = mrvn + hdps*(dy(mx) - dy(j))/sdx
                 enddo
              else
                 hdps = max(real(dps(n, m),fp)+s1(n, m),0.01_fp)
@@ -202,4 +211,6 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
           endif
        enddo
     enddo
+    if (allocated(dx)) deallocate(dx, stat=istat)
+    if (allocated(dy)) deallocate(dy, stat=istat)
 end subroutine hds_wf

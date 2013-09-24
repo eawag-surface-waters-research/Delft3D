@@ -1,6 +1,6 @@
 subroutine hds(kfs       ,dps       ,s1        ,xcor      ,ycor      , &
              & nmax      ,mmax      ,theta     ,rlabda    ,grmasu    , &
-             & grmasv    ,grfacu    ,grfacv    ,f_lam     , &
+             & grmasv    ,grfacu    ,grfacv    ,f_lam     ,lundia    , &
              & gdp      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -53,6 +53,7 @@ subroutine hds(kfs       ,dps       ,s1        ,xcor      ,ycor      , &
 !
 integer                                                        , intent(in)  :: mmax
 integer                                                        , intent(in)  :: nmax
+integer                                                                      :: lundia  !  Description and declaration in inout.igs
 integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfs     !  Description and declaration in esm_alloc_int.f90 
 real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasu  !  Description and declaration in esm_alloc_real.f90
 real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasv  !  Description and declaration in esm_alloc_real.f90
@@ -68,27 +69,35 @@ real(fp)                                                       , intent(in)  :: 
 !
 ! Local variables
 !
-    integer                     :: j
-    integer                     :: m
-    integer                     :: pos
-    integer                     :: mx
-    integer                     :: n
-    real(fp)                    :: fic
-    real(fp)                    :: fis
-    real(fp)                    :: grt
-    real(fp)                    :: grut
-    real(fp)                    :: gruvt
-    real(fp)                    :: grvt
-    real(fp)                    :: hdps
-    real(fp)                    :: mrun
-    real(fp)                    :: mrup
-    real(fp)                    :: mrvn
-    real(fp)                    :: mrvp
-    real(fp)                    :: sdx
-    real(fp), dimension(1:mmax) :: dx
+    integer                             :: j
+    integer                             :: m
+    integer                             :: pos
+    integer                             :: mx
+    integer                             :: n
+    integer                             :: istat
+    real(fp)                            :: fic
+    real(fp)                            :: fis
+    real(fp)                            :: grt
+    real(fp)                            :: grut
+    real(fp)                            :: gruvt
+    real(fp)                            :: grvt
+    real(fp)                            :: hdps
+    real(fp)                            :: mrun
+    real(fp)                            :: mrup
+    real(fp)                            :: mrvn
+    real(fp)                            :: mrvp
+    real(fp)                            :: sdx
+    real(fp), dimension(:), allocatable :: dx
+    real(fp), dimension(:), allocatable :: dy
 !
 ! executable statements -------------------------------------------------------
 !
+                 allocate (dx(mmax), stat = istat)
+   if (istat==0) allocate (dy(nmax), stat = istat)
+   if (istat /= 0) then
+      call prterr(lundia, 'P004', 'memory alloc error in hds, roller module')
+      call d3stop(1, gdp)
+   endif
    dx(1) = 0.0 
    do m = 1, mmax
        do n = 1, nmax
@@ -155,10 +164,10 @@ real(fp)                                                       , intent(in)  :: 
              mx  = 1
              sdx = 0.0
              do pos = n+1,nmax,1
-                dx(mx + 1) = ycor(pos, m) - ycor(n, m)
-                if (kfs(pos, m)==1 .and. dx(mx + 1)<f_lam*rlabda(n,m)) then
+                dy(mx + 1) = ycor(pos, m) - ycor(n, m)
+                if (kfs(pos, m)==1 .and. dy(mx + 1)<f_lam*rlabda(n,m)) then
                    mx  = mx + 1
-                   sdx = sdx + dx(mx)
+                   sdx = sdx + dy(mx)
                 else
                    exit
                 endif
@@ -168,7 +177,7 @@ real(fp)                                                       , intent(in)  :: 
                    hdps = max(real(dps(n + j - 1, m),fp)+s1(n + j - 1, m),0.01_fp)
                    grt  = sqrt((grmasu(n + j - 1, m)/hdps)**2 + &
                              & (grmasv(n + j - 1, m)/hdps)**2   )
-                   mrvp = mrvp + grt*(dx(mx) - dx(j))/sdx
+                   mrvp = mrvp + grt*(dy(mx) - dy(j))/sdx
                 enddo
              else
                 hdps = max(real(dps(n, m),fp)+s1(n, m),0.01_fp)
@@ -182,10 +191,10 @@ real(fp)                                                       , intent(in)  :: 
              sdx = 0.0
              !
              do pos = n-1,1,-1
-                dx(mx + 1) = ycor(n, m) - ycor(pos, m)
-                if (kfs(pos, m)==1 .and. dx(mx + 1)<f_lam*rlabda(n,m)) then
+                dy(mx + 1) = ycor(n, m) - ycor(pos, m)
+                if (kfs(pos, m)==1 .and. dy(mx + 1)<f_lam*rlabda(n,m)) then
                    mx  = mx + 1
-                   sdx = sdx + dx(mx)
+                   sdx = sdx + dy(mx)
                 else
                    exit
                 endif
@@ -195,7 +204,7 @@ real(fp)                                                       , intent(in)  :: 
                    hdps = max(real(dps(n - j + 1, m),fp)+s1(n - j + 1, m),0.01_fp)
                    grt  = sqrt((grmasu(n - j + 1, m)/hdps)**2 + &
                              & (grmasv(n - j + 1, m)/hdps)**2   )
-                   mrvn = mrvn + grt*(dx(mx) - dx(j))/sdx
+                   mrvn = mrvn + grt*(dy(mx) - dy(j))/sdx
                 enddo
              else
                 hdps = max(real(dps(n, m),fp)+s1(n, m),0.01_fp)
@@ -227,4 +236,6 @@ real(fp)                                                       , intent(in)  :: 
          endif
        enddo
     enddo
+    if (allocated(dx)) deallocate(dx, stat=istat)
+    if (allocated(dy)) deallocate(dy, stat=istat)
 end subroutine hds

@@ -1712,7 +1712,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           if (f_lam > 0.0) then
              call hds(i(kfs)   ,d(dps)   ,r(s1)    ,r(xz)    ,r(yz)    , &
                     & nmax     ,mmax     ,r(teta)  ,r(rlabda),r(grmasu), &
-                    & r(grmasv),r(grfacu),r(grfacv),f_lam    , &
+                    & r(grmasv),r(grfacu),r(grfacv),f_lam    ,lundia   , &
                     & gdp       )
           endif
           call timer_stop(timer_massfl, gdp)
@@ -2729,7 +2729,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           if (f_lam > 0.0) then
              call hds(i(kfs)   ,d(dps)   ,r(s1)    ,r(xz)    ,r(yz)    , &
                     & nmax     ,mmax     ,r(teta)  ,r(rlabda),r(grmasu), &
-                    & r(grmasv),r(grfacu),r(grfacv),f_lam    , &
+                    & r(grmasv),r(grfacu),r(grfacv),f_lam    ,lundia   , &
                     & gdp       )
           endif
           call timer_stop(timer_massfl, gdp)
