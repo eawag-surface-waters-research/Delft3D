@@ -329,6 +329,12 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia ,'U021' ,errtxt )
           ierror = ierror + 1
        endif
+       if (roller) then
+          if(.not. wave) then
+             call prterr(lundia    ,'P004'    ,'Roller model is activiated.  Wave process must be activataed')
+             ierror = ierror + 1
+          endif
+       endif
        !
        ! warnings
        !
