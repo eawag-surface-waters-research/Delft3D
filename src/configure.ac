@@ -274,7 +274,7 @@ CXX=$MPICXX
 [])
 AM_CONDITIONAL(HAVE_MPI, [test "x$with_mpi" != xno])
 
-# MVL
+#
 # Checks for OpenDA if user selects this.
 #
 # User gives path to OpenDA libraries using --with-openda
