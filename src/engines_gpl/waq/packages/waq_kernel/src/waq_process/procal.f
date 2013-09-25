@@ -57,7 +57,7 @@
       integer      , intent(in   ) :: noq2        ! Number of exchanges in second direction
       integer      , intent(in   ) :: noq3        ! Number of exchanges in third direction
       integer      , intent(in   ) :: noq4        ! Number of exchanges in the water bed
-      character(20), intent(in   ) :: pronam      ! Name of this process
+      character(10), intent(in   ) :: pronam      ! Name of this process
       integer      , intent(in   ) :: pronvr      ! Not used
       integer      , intent(in   ) :: prvtyp( * ) ! Not used
       integer      , intent(in   ) :: iproc       ! Process number
@@ -458,16 +458,16 @@
 !     assumed from dll
 
 !JVB  WRITE(32,*) 'calling from dll:',PRONAM(1:6)
-            ierror = perf_function(dll_opb, pronam(1:6),                                          ! &
+            ierror = perf_function(dll_opb, pronam,                                          ! &
      &                             pmsa   , flux   , ipoint , increm , noseg  ,                   ! &
      &                             noflux , iexpnt , iknmrk , noq1   , noq2   ,                   ! &
      &                             noq3   , noq4   )
             if ( ierror .ne. 0 ) then
                call getmlu(lunrep)
                write(*,*) 'ERROR : requested module not in process library DLL'
-               write(*,*) 'module: ', pronam(1:6)
+               write(*,*) 'module: ', pronam
                write(lunrep,*) 'ERROR     : requested module not in process library DLL'
-               write(lunrep,*) 'module    : ', pronam(1:6)
+               write(lunrep,*) 'module    : ', pronam
                write(lunrep,*) 'dll handle: ', dll_opb
                call srstop(1)
             endif

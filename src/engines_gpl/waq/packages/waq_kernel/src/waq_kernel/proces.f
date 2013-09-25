@@ -849,7 +849,7 @@ c
       REAL                A(*)           , FLUX(*)        ,
      +                    DERIV(*)       , STOCHI(*)      ,
      +                    VOLUME(*)      , FLXDMP(*)
-      CHARACTER*20        PRONAM(*)
+      CHARACTER*10        PRONAM(*)
       integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
 C
 C     Local

@@ -102,7 +102,7 @@ C
       REAL          DEFAUL(*)     , STOCHI(*)     , DSTO(*)      ,
      +              VSTO(*)
       CHARACTER*(*) LCH
-      CHARACTER*20  PRONAM(*)
+      CHARACTER*10  PRONAM(*)
 C
 C     Local declarations
 C
@@ -214,7 +214,7 @@ C
       IF ( NVELN .GT. 0 ) THEN
          READ (LUNWRP, ERR=900, END=900) ( IVPNW(K)  , K = 1 , NOSYS )
       ENDIF
-      READ (LUNWRP, ERR=900, END=900) ( PRONAM(K)(1:6), K = 1 , NPROC )
+      READ (LUNWRP, ERR=900, END=900) ( PRONAM(K)  , K = 1 , NPROC )
       READ (LUNWRP, ERR=900, END=900) ( PROGRD(K)  , K = 1 , NPROC )
       READ (LUNWRP, ERR=900, END=900) ( PRONDT(K)  , K = 1 , NPROC )
       READ (LUNWRP, ERR=900, END=900) ( VARARR(K)  , K = 1 , NOVAR )

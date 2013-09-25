@@ -109,7 +109,7 @@ C
       IF ( NVELN .GT. 0 ) THEN
          WRITE (LUWRKP) ( IVPNW(K)  , K = 1 , NOSYS )
       ENDIF
-      WRITE (LUWRKP) ( PRONAM(K)(1:6), K = 1 , NPROC )
+      WRITE (LUWRKP) ( PRONAM(K), K = 1 , NPROC )
       WRITE (LUWRKP) ( PROGRD(K), K = 1 , NPROC )
       WRITE (LUWRKP) ( PRONDT(K), K = 1 , NPROC )
       WRITE (LUWRKP) ( VARARR(K), K = 1 , NOVAR )
