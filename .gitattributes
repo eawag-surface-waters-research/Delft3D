@@ -3465,7 +3465,6 @@ src/third_party_open/subversion/bin/win32/svnraisetreeconflict.exe -text
 src/third_party_open/subversion/bin/win32/svnrdump.exe -text
 src/third_party_open/subversion/bin/win32/svnserve.exe -text
 src/third_party_open/subversion/bin/win32/svnsync.exe -text
-src/third_party_open/subversion/bin/win32/svnversion-17.exe -text
 src/third_party_open/subversion/bin/win32/svnversion.exe -text
 src/third_party_open/subversion/bin/win32/uninst.exe -text
 src/third_party_open/subversion/bin/win32/zlib1.dll -text
