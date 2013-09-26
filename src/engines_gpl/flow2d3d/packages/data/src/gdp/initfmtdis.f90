@@ -44,7 +44,7 @@ subroutine initfmtdis(gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    character*37, dimension(:) , pointer :: fmtdis
+    character*39, dimension(:) , pointer :: fmtdis
 !
 ! Global variables
 !
@@ -55,17 +55,17 @@ subroutine initfmtdis(gdp       )
     !
     ! Initialize statics for fmtdis
     !
-    fmtdis(1)  = '(a1,i5,                     t125 ,a1)'
-    fmtdis(2)  = '(a20,a1,a42,a3,a1,          t125 ,a1)'
-    fmtdis(3)  = '(a20,a1,a10,a1,a30,         t125 ,a1)'
-    fmtdis(4)  = '(2(a20,a1),                 t125 ,a1)'
-    fmtdis(5)  = '(a20,                       t125 ,a1)'
-    fmtdis(6)  = '(a20,                       t125 ,a1)'
-    fmtdis(7)  = '(a20,a1,a15,a1,             t125 ,a1)'
-    fmtdis(8)  = '(a20,i9,                    t125 ,a1)'
-    fmtdis(9)  = '(a20,a1, a7,a1,             t125 ,a1)'
-    fmtdis(10) = '(a20,a1,a10,a1,             t125 ,a1)'
-    fmtdis(11) = '(a20,a1,a36,a1,1x,2(a10,a1),t125 ,a1)'
-    fmtdis(12) = '(a20,i6,                    t125 ,a1)'
-    fmtdis(13) = '(f16.4, 8g14.6,             t125 ,a1)'
+    fmtdis(1)  = '(a1,i5,                      t125 ,a1)'
+    fmtdis(2)  = '(a20,a1,a42,a3,a1,           t125 ,a1)'
+    fmtdis(3)  = '(a20,a1,a10,a1,a30,          t125 ,a1)'
+    fmtdis(4)  = '(2(a20,a1),                  t125 ,a1)'
+    fmtdis(5)  = '(a20,                        t125 ,a1)'
+    fmtdis(6)  = '(a20,                        t125 ,a1)'
+    fmtdis(7)  = '(a20,a1,a15,a1,              t125 ,a1)'
+    fmtdis(8)  = '(a20,i9,                     t125 ,a1)'
+    fmtdis(9)  = '(a20,a1, a7,a1,              t125 ,a1)'
+    fmtdis(10) = '(a20,a1,a10,a1,              t125 ,a1)'
+    fmtdis(11) = '(a20,a1,a36,a1,1x,2(a10,a1), t125 ,a1)'
+    fmtdis(12) = '(a20,i6,                     t125 ,a1)'
+    fmtdis(13) = '(f16.4,  8g14.6,             t125 ,a1)'
 end subroutine initfmtdis

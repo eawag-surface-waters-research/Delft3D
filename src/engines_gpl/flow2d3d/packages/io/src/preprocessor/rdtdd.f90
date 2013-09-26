@@ -52,7 +52,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
     real(fp)                   , pointer :: tstop
     real(fp)                   , pointer :: dt
     character*20, dimension(:) , pointer :: keywrd
-    character*37, dimension(:) , pointer :: fmtdis
+    character*39, dimension(:) , pointer :: fmtdis
 !
 ! Global variables
 !
@@ -109,7 +109,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
     !
     !-----Define writing format for FMTDIS(13)
     !
-    write (fmtdis(13)(8:9), '(i2.2)') nrval
+    write (fmtdis(13)(8:10), '(i3.3)') nrval
     !
     !-----Count number of records in the file
     !     File is build with NSRC time records including LSTSC+2 data fields

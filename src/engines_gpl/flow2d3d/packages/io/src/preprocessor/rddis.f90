@@ -67,7 +67,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)                   , pointer :: tstop
     real(fp)                   , pointer :: dt
     character*20, dimension(:) , pointer :: keywrd
-    character*37, dimension(:) , pointer :: fmtdis
+    character*39, dimension(:) , pointer :: fmtdis
 !
 ! Global variables
 !

@@ -102,7 +102,7 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     real(fp)         :: uvmagn      ! Velocity manitude read from file 
     real(fp)         :: workx       ! Work X 
     real(fp)         :: worky       ! Work Y 
-    character(15)    :: fmtdis
+    character(16)    :: fmtdis
     character(20)    :: errmsg      ! String containing error message 
 !
 !! executable statements -------------------------------------------------------
@@ -126,13 +126,13 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     !
     ! Define reading format
     !
-    fmtdis = '(f16.4,..g14.6)'
+    fmtdis = '(f16.4,...g14.6)'
     if (dismmt(isrc)=='Y') then
        nread = 3 + lstsc
     else
        nread = 1 + lstsc
     endif
-    write (fmtdis(8:9), '(i2.2)') nread
+    write (fmtdis(8:10), '(i3.3)') nread
     !
     ! Read discharges and concentrations 
     ! as long as time read < time now

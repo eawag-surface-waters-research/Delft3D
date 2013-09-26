@@ -54,7 +54,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     real(fp)                   , pointer :: dt
     real(fp)                   , pointer :: tunit
     character*20, dimension(:) , pointer :: keywrd
-    character*37, dimension(:) , pointer :: fmtdis
+    character*39, dimension(:) , pointer :: fmtdis
 !
 ! Global variables
 !
@@ -144,7 +144,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     if (mxlrec>125) then
        do nb = 1, mxfmtd
           ix = index(fmtdis(nb), 't125')
-          if (ix/=0) write (fmtdis(nb)(ix + 1:ix + 3), '(i3)') mxlrec
+          if (ix/=0) write (fmtdis(nb)(ix + 1:ix + 4), '(i4)') mxlrec
        enddo
     endif
     !
@@ -282,7 +282,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        ! Define format for number of values NRVAL
        !
-       write (fmtdis(13)(8:9), '(i2)') nrval
+       write (fmtdis(13)(8:10), '(i3)') nrval
        !
        ! Define table name
        !

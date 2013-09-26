@@ -31,6 +31,6 @@
 !
     type gd_fmtdis
 !
-       character*37 :: fmtdis(mxfmtd)
+       character*39 :: fmtdis(mxfmtd)
 !
     end type gd_fmtdis
