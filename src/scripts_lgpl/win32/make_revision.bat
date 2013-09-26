@@ -35,6 +35,7 @@ CD %2
 SET MODDIR=%CD%
 
 SET SVN_DIR=%TOPDIR%\third_party_open\subversion\bin\win32
+SET SVN_DIR17=%TOPDIR%\third_party_open\subversion\bin\win32-17
 SET CMD_DIR=%TOPDIR%\third_party_open\commandline\bin\win32
 SET VN_DIR=%TOPDIR%\third_party_open\version_number\bin\win32
 
@@ -63,10 +64,11 @@ CD "%MODDIR%"
 IF EXIST "%SVN_DIR%\svnversion.exe" (
     echo %0: executing %SVN_DIR%\svnversion.exe -n
     FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i
-    IF "%BUILD_NUMBER" == "000000" (
+    IF %BUILD_NUMBER% == 000000 (
+        echo Hans build nr = %BUILD_NUMBER%
         REM use old svn version 1.7 for use on TeamCity Buildserver which does not support 1.8 yet
-        echo %0: executing %SVN_DIR%\svnversion-17.exe -n
-        FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion-17.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
+        echo %0: executing %SVN_DIR17%\svnversion.exe -n
+        FOR /F "tokens=*" %%i IN ('call "%SVN_DIR17%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
         )
 )
 
