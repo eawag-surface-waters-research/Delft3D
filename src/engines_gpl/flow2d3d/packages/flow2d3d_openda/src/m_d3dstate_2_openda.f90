@@ -40,19 +40,19 @@ integer, parameter :: storage_only_at_ctastate = 0         ! storage level: from
 integer, parameter :: storage_only_to_disk     = 1         ! storage level: from COSTA state to disk
 integer, parameter :: storage_whole_range      = 2         ! storage level: to disk, all the 
                                                            ! way from d3d level 
-integer            :: max_instances_in_memory = 256        ! maximum number of instances in memory
+integer,save       :: max_instances_in_memory = 256        ! maximum number of instances in memory
 
 integer, parameter :: UNCREATED_STATE = -1
 integer, parameter :: UNCREATED_HANDLE = -1
 
-integer            :: instance_count = 0                   ! actual #instances
-integer            :: current_instance = no_instance_yet   ! currently active instance
-integer            :: instances_in_memory = 0              ! current number of instances in memory
-
-integer            :: state_handles(0:instance_block_size) = UNCREATED_STATE ! COSTA state handles
-logical            :: state_in_memory(0:instance_block_size) ! flag: is the state in memory or on file?
+integer,save       :: instance_count = 0                   ! actual #instances
+integer,save       :: current_instance = no_instance_yet   ! currently active instance
+integer,save       :: instances_in_memory = 0              ! current number of instances in memory
+                   
+integer,save       :: state_handles(0:instance_block_size) = UNCREATED_STATE ! COSTA state handles
+logical,save       :: state_in_memory(0:instance_block_size) ! flag: is the state in memory or on file?
 character(len=256) :: file_names(0:instance_block_size)      ! State file names
-integer            :: file_handles(0:instance_block_size) = UNCREATED_HANDLE   ! COSTA state files handles
+integer,save       :: file_handles(0:instance_block_size) = UNCREATED_HANDLE   ! COSTA state files handles
 
 
 public :: d3da_create_instance, d3da_select_new_instance, d3da_store_current_instance,&
@@ -60,9 +60,9 @@ public :: d3da_create_instance, d3da_select_new_instance, d3da_store_current_ins
           max_instances_in_memory, d3da_select_instance_from_restartfile, &
           d3da_store_current_instance_restartfile, d3da_reset_all, d3da_close_cta_state_files
 
-character(len=10)  :: state_file_extension = '.txt'           ! default: ascii; other possible value: nc (netcdf)
+character(len=10),save  :: state_file_extension = '.txt'           ! default: ascii; other possible value: nc (netcdf)
 
-integer, dimension(9), public :: sub_core_offsets = 0
+integer, dimension(9), save, public :: sub_core_offsets = 0
 
 contains
 
@@ -464,6 +464,7 @@ subroutine d3da_create_cta_state_vector(isbackground, ierr)
   !Local variables
   integer :: sfilename
   character(len=10) :: instance_as_string
+  logical           :: init_phase
   ! Sub-treevectors
   integer ::s_core, s_pseudo, s_output
   ! Sub-treevectors
@@ -486,8 +487,11 @@ subroutine d3da_create_cta_state_vector(isbackground, ierr)
   ! the first check is if the file already has been opened.
 
   !
-  
-  if (state_handles(current_instance) == UNCREATED_STATE) then
+  init_phase=state_handles(current_instance) == UNCREATED_STATE
+  print *, 'Call to  d3da_create_cta_state_vector'
+  print *, 'current_instance=',current_instance
+  print *, 'init_phase=',init_phase
+  if (init_phase) then
     ! this will in general be the case for new instances. Costa will create a handle
     ! for the treevector. Later, when the tv is filled, memory will be allocated. 
     ! However, if a handle already exists, no new tv-handles will be created. Later,
@@ -628,24 +632,26 @@ subroutine d3da_create_cta_state_vector(isbackground, ierr)
    ! and retrieve it again (cumbersome, but occurs only here in initialization)
   call d3da_get_ctastate_from_d3d(ierr)
 
-  ! compute offsets for variables in state vector
-  sub_core_offsets(1) = 1
-  call CTA_TREEVECTOR_GETSIZE(s_sep   , nsub ,ierr)
-  sub_core_offsets(2) = sub_core_offsets(1) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_u     , nsub,ierr)
-  sub_core_offsets(3) = sub_core_offsets(2) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_v     , nsub,ierr)
-  sub_core_offsets(4) = sub_core_offsets(3) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_dp    , nsub,ierr)
-  sub_core_offsets(5) = sub_core_offsets(4) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_umnldf, nsub,ierr)
-  sub_core_offsets(6) = sub_core_offsets(5) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_vmnldf, nsub,ierr)
-  sub_core_offsets(7) = sub_core_offsets(6) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_rtur1 , nsub,ierr)
-  sub_core_offsets(8) = sub_core_offsets(7) + nsub
-  call CTA_TREEVECTOR_GETSIZE(s_r1    , nsub,ierr)
-  sub_core_offsets(9) = sub_core_offsets(8) + nsub
+  if (init_phase) then
+     ! compute offsets for variables in state vector
+     sub_core_offsets(1) = 1
+     call CTA_TREEVECTOR_GETSIZE(s_sep   , nsub ,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(2) = sub_core_offsets(1) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_u     , nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(3) = sub_core_offsets(2) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_v     , nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(4) = sub_core_offsets(3) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_dp    , nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(5) = sub_core_offsets(4) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_umnldf, nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(6) = sub_core_offsets(5) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_vmnldf, nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(7) = sub_core_offsets(6) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_rtur1 , nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(8) = sub_core_offsets(7) + nsub
+     call CTA_TREEVECTOR_GETSIZE(s_r1    , nsub,ierr); if (ierr/=CTA_OK) goto 9999
+     sub_core_offsets(9) = sub_core_offsets(8) + nsub
+  endif 
 
   return
 
