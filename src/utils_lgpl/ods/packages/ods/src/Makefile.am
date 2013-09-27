@@ -55,4 +55,4 @@ libODS_la_SOURCES =           \
 		utils.c	     \
 		waspro.c
 
-INCLUDES = -I${srcdir}/../include -I${srcdir}/../../../../nefis/packages/nefis/include
+INCLUDES = -I${srcdir}/../include -I${srcdir}/../../../../nefis/packages/nefis/include -Dlinux
