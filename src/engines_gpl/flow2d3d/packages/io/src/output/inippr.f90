@@ -322,7 +322,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
        ! Definition, declaration and writing of group 2 to the HIS DAT 
        ! and HIS DEF files following the NEFIS description 
        ! 
-       if (iphisi > 0 .or. ipmap(1) > 0) then 
+       if (iphisi > 0 .or. ipmap(1) > -1) then 
           ! 
           ! Writing output to ascii file tri-prt.<runid> as is requested through 
           ! the use of keyword PRHIS in the MD-file 
