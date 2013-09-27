@@ -42,9 +42,10 @@ contains
                         chispl   , nosta    , nmstat   , xstat    , ystat    ,  &
                         nstat    , mstat    , nplsta   , mplsta   , ihstrt   ,  &
                         ihstop   , ihstep   , ihplot   , finam    , kpart    ,  &
-                        mnmax2   , nfract   , lsettl   , mstick   , elt_names,  &
-                        elt_types, elt_dims , elt_bytes, rbuffr   , zpart    ,  &
-                        za       , locdep   , dps      , tcktot   , lgrid3   )
+                        mnmax2   , noseglp  , nfract   , lsettl   , mstick   ,  &
+                        elt_names, elt_types, elt_dims , elt_bytes, rbuffr   ,  &
+                        zpart    , za       , locdep   , dps      , tcktot   ,  &
+                        lgrid3   )
 
       type(PlotGrid)                   pg
       character(len=*), pointer, dimension(:) :: nmstat
@@ -78,7 +79,7 @@ contains
 
       integer(ip) :: idelt     ,ihstep    ,ihstop
       integer(ip) :: lun1      ,lun2      ,mmax
-      integer(ip) :: mnmax2    ,modtyp    ,nfract    ,ihstrt
+      integer(ip) :: mnmax2    ,noseglp   ,modtyp    ,nfract    ,ihstrt
       integer(ip) :: nmax      ,nolay     ,nopart
       integer(ip) :: nosubs    ,npwndw    ,itime     ,nosta
       real   (sp) :: pblay

@@ -222,9 +222,10 @@
      &              chispl   , nosta    , nmstat   , xstat    , ystat    ,
      &              nstat    , mstat    , nplsta   , mplsta   , ihstrtp  ,
      &              ihstopp  , ihstepp  , ihplot   , fnamep(13),kpart    ,
-     &              mnmax2   , nfract   , lsettl   , mstick   , elt_names,
-     &              elt_types, elt_dims , elt_bytes, rbuffr   , zpart    ,
-     &              za       , locdep   , dpsp     , tcktot   , lgrid3   )
+     &              mnmax2   , noseglp  , nfract   , lsettl   , mstick   ,
+     &              elt_names, elt_types, elt_dims , elt_bytes, rbuffr   ,
+     &              zpart    , za       , locdep   , dpsp     , tcktot   ,
+     &              lgrid3   )
 
       if ( itime .ge. itstopp ) goto 9999 ! <=== here the simulation loop ends
 
