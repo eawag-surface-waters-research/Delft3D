@@ -75,6 +75,7 @@ real(hp)                          :: zpos2       ! vertical position at 2 [m]
 integer            :: kfs1, kfs2
 integer            :: m1, m2
 integer            :: n1, n2, nm1, nm2
+integer, save      :: write_count = 0
 real(hp)           :: ag
 real(hp)           :: olddis
 real(hp)           :: timsec
@@ -130,6 +131,13 @@ filenm  = dll_strings( 2)  ! user-specified file name (keyword: CulvertFile)
 !
 !! executable statements -------------------------------------------------------
 write(*,*) 'plugin_culvert.dll : culvert : called'
+if (write_count < 100) then
+   write(*,*) 'plugin_culvert.dll : culvert : called'
+   write_count = write_count + 1
+   if (write_count == 100) then
+      write(*,*) 'plugin_culvert.dll : message suppressed'
+   endif
+endif
 !
 ! The output argument error_message MUST have value ' ' to continue the calculation.
 !

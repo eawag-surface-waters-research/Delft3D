@@ -80,6 +80,7 @@ logical           , intent(out) :: sbc_total     ! true: bed load magnitude retu
 integer            :: l
 integer            :: m
 integer            :: n, nm
+integer, save      :: write_count = 0
 real(hp)           :: ag
 real(hp)           :: chezy
 real(hp)           :: d10, d50, d90, dss, dstar
@@ -157,7 +158,13 @@ filenm  = dll_strings( 2)  ! user-specified file name (keyword: InputFile)
 !
 !! executable statements -------------------------------------------------------
 !
-write(*,*) 'plugin_delftflow_traform.dll : enghan : called'
+if (write_count < 100) then
+   write(*,*) 'plugin_delftflow_traform.dll : enghan : called'
+   write_count = write_count + 1
+   if (write_count == 100) then
+      write(*,*) 'plugin_delftflow_traform.dll : message suppressed'
+   endif
+endif
 ! The output argument error_message MUST have value ' ' to continue the calculation.
 !
 error_message = ' '

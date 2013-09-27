@@ -66,6 +66,7 @@ integer            :: k
 integer            :: l
 integer            :: m
 integer            :: n, nm
+integer, save      :: write_count = 0
 real(hp)           :: ag
 real(hp)           :: cconc, chezy, conc, csoil
 real(hp)           :: d50, dss
@@ -139,7 +140,13 @@ filenm  = dll_strings( 2)  ! user-specified file name (keyword: SettleInput)
 !
 !! executable statements -------------------------------------------------------
 !
-write(*,*) 'plugin_delftflow_traform.dll : settle : called'
+if (write_count < 100) then
+   write(*,*) 'plugin_delftflow_traform.dll : settle : called'
+   write_count = write_count + 1
+   if (write_count == 100) then
+      write(*,*) 'plugin_delftflow_traform.dll : message suppressed'
+   endif
+endif
 ! The output argument error_message MUST have value ' ' to continue the calculation.
 !
 error_message = ' '
