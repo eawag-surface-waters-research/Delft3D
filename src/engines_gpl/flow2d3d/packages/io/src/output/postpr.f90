@@ -779,6 +779,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                     & r(r1)     ,r(dicuv)  ,r(dicww)  ,r(discum) ,r(rbuff)  , &
                     & r(windu)  ,r(windv)  ,r(dzu1)   ,r(dzv1)   ,kmaxz     , &
                     & r(hu)     ,r(hv)     ,r(thick)  ,gdp       )
+          ! when parallel, dfsync is needed to make sure all the com files (from each domain) are completed.
+          call dfsync (gdp) 
           if (couplemod .and. coupleact) then
              call timer_start(timer_wait, gdp)
              call syncflowcouple_send(1, gdp%gdcoup%flowtocouple, &

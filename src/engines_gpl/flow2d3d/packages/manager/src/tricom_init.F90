@@ -1536,6 +1536,8 @@ subroutine tricom_init(olv_handle, gdp)
        !
        call timer_start(timer_wait, gdp)
        if (parll) then
+           ! when parallel, dfsync is needed to make sure the master process is the last one to be finished.
+           call dfsync (gdp)
            if (inode==master) then
                ierror = flow_to_wave_init(runid     , it01   , tscale       , &
                                         & nproc     , mudlay ,.true. )
