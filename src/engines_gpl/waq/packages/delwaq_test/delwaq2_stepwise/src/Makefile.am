@@ -18,8 +18,6 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
         -I$(top_builddir)/engines_gpl/waq/packages/delftio/src/diof90
 
-MPILIBS += $(MPILIBS_ADDITIONAL)
-
 #-------------------------------------------------------------------------------
 #Sources
 delwaq2_SOURCES = block.f \
@@ -55,7 +53,6 @@ delwaq2_LDADD = \
     $(top_builddir)/utils/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
     $(top_builddir)/utils/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
     $(top_builddir)/utils/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
-    $(MPILIBS) \
     -lpthread
 
 # To be added when using Intel 11:

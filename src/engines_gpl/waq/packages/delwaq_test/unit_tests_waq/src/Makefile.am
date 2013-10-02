@@ -12,8 +12,6 @@ bin_PROGRAMS = unit_tests_waq
 FMODULES += \
         -I$(top_builddir)/utils_lgpl/ftnunit/packages/ftnunit/src
 
-MPILIBS += $(MPILIBS_ADDITIONAL)
- 
 #-------------------------------------------------------------------------------
 #Sources
 unit_tests_waq_SOURCES = \
@@ -49,5 +47,4 @@ unit_tests_waq_LDADD = \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
     $(top_builddir)/utils_lgpl/ftnunit/packages/ftnunit/src/libftnunit.la \
-    $(MPILIBS) \
     -lpthread
