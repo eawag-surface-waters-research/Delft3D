@@ -310,7 +310,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
        ! Now set flags for which parameters are to be read/written from/to the COM-file
        ! for the present COM-fileversion
        !
-       if (actualcomfileversion > 3.54_fp) then
+       if (actualcomfileversion > 3.5499_fp) then
           only_distot_from_com = .false.
        else
           only_distot_from_com = .true.
