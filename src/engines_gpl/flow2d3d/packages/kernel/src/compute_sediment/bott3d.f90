@@ -1019,12 +1019,14 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           !
           ! Update layers and obtain the depth change
           !
+          call psemnefis
           if (updmorlyr(gdp%gdmorlyr, dbodsd, depchg, gdp%messages) /= 0) then
              call writemessages(gdp%messages, lundia)
              call d3stop(1, gdp)
           else
              call writemessages(gdp%messages, lundia)
           endif
+          call vsemnefis
           call lyrdiffusion(gdp%gdmorlyr, hdtmor)
           !
           ! Apply composition boundary conditions

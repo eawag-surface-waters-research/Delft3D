@@ -1682,6 +1682,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     ! Update sediment administration for dumping only
     ! dbodsd is filled (kg/m^2 sediment added to a cell)
     !
+    call psemnefis
     if (cmpupd) then
        allocate(dz_dummy(gdp%d%nmlb:gdp%d%nmub), stat=istat)
        if (updmorlyr(gdp%gdmorlyr, dbodsd, dz_dummy, gdp%messages) /= 0) then
@@ -1692,4 +1693,5 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        endif
        deallocate(dz_dummy, stat=istat)
     endif
+    call vsemnefis
 end subroutine dredge
