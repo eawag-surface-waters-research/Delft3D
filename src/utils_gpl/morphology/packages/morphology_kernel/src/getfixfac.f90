@@ -60,7 +60,7 @@ subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
 !! executable statements -------------------------------------------------------
 !
     call psemnefis
-    call getalluvthick(bedcomp, fixfac, nmlb, nmub, nval, runid)
+    call getalluvthick(bedcomp, fixfac, nmlb, nmub, nval)
     call vsemnefis    !
     ! The FIXFAC array contains at this stage the sediment thickness!
     !
