@@ -200,10 +200,11 @@ end subroutine bedcomposition_module_info
 !
 !
 !==============================================================================
-function updmorlyr(this, dbodsd, dz, messages) result (istat)
+recursive function updmorlyr(this, dbodsd, dz, messages) result (istat)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Update underlayer bookkeeping system for erosion/sedimentation
+!    Recursive is added to assure the stack safety for domain decomposition for win64 version.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1407,11 +1408,12 @@ end subroutine detthcmud
 !
 !
 !==============================================================================
-subroutine getalluvthick(this, seddep, nmfrom, nmto, nval)
+recursive subroutine getalluvthick(this, seddep, nmfrom, nmto, nval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Determine sediment thickness optionally per sediment fraction
 !    DEPRECATED FUNCTIONALITY; use getsedthick instead.
+!    Recursive is added to assure the stack safety for domain decomposition for win64 version.
 !
 !!--declarations----------------------------------------------------------------
     use precision 

@@ -59,9 +59,7 @@ subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    call psemnefis
     call getalluvthick(bedcomp, fixfac, nmlb, nmub, nval)
-    call vsemnefis    !
     ! The FIXFAC array contains at this stage the sediment thickness!
     !
     thresh = max(1.0e-10_fp,ffthresh)
