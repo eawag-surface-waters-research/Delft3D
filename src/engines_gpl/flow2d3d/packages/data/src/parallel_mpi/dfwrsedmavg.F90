@@ -209,14 +209,16 @@ subroutine dfwrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
           & 'Average bed-load transport v-direction (v point)'    , &
           & 3       ,nmaxgl ,mmaxgl  ,lsedtot  ,0        ,0       , &
           & lundia  ,gdp    )
-       call addelm(nefiswrsedmavg,'SSUUA',' ',transpunit ,'REAL',4  , &
-          & 'Average suspended-load transport u-direction (u point)', &
-          & 3       ,nmaxgl  ,mmaxgl   ,lsed     ,0        ,0       , &
-          & lundia  ,gdp     )
-       call addelm(nefiswrsedmavg,'SSVVA',' ',transpunit ,'REAL',4  , &
-          & 'Average suspended-load transport v-direction (v point)', &
-          & 3      ,nmaxgl  ,mmaxgl   ,lsed     ,0        ,0        , &
-          & lundia ,gdp     )
+       if (lsed > 0) then
+          call addelm(nefiswrsedmavg,'SSUUA',' ',transpunit ,'REAL',4  , &
+             & 'Average suspended-load transport u-direction (u point)', &
+             & 3       ,nmaxgl  ,mmaxgl   ,lsed     ,0        ,0       , &
+             & lundia  ,gdp     )
+          call addelm(nefiswrsedmavg,'SSVVA',' ',transpunit ,'REAL',4  , &
+             & 'Average suspended-load transport v-direction (v point)', &
+             & 3      ,nmaxgl  ,mmaxgl   ,lsed     ,0        ,0        , &
+             & lundia ,gdp     )
+       endif
        call defnewgrp(nefiswrsedmavg ,filnam    ,grnam7   ,gdp)
        !
        ! Get start celidt for writing
@@ -339,77 +341,79 @@ subroutine dfwrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
     if (inode == master) then
        ierror = putelt(fds, grnam7, 'SBVVA', uindex, 1, glbarr4)
     endif
-    if (ierror/= 0) goto 9999
-    !
-    ! group 7: element 'SSUUA'
-    !
-    !i = 0
-    allocate( rsbuff(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed, 1) )
-    do l = 1, lsed
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             !i        = i+1
-             call n_and_m_to_nm(n, m, nm, gdp)             
-             if ( dmorft > 0.0_hp ) then
-                !sbuff(i) = real(ssuuc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
-                rsbuff(n,m,l,1) = real(ssuuc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),fp)
-             else
-                !sbuff(i) =  0.0_sp
-                rsbuff(n,m,l,1) =  0.0_fp
-             endif
+    if (ierror /= 0) goto 9999
+    if (lsed > 0) then
+       !
+       ! group 7: element 'SSUUA'
+       !
+       !i = 0
+       allocate( rsbuff(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed, 1) )
+       do l = 1, lsed
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                !i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)             
+                if ( dmorft > 0.0_hp ) then
+                   !sbuff(i) = real(ssuuc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
+                   rsbuff(n,m,l,1) = real(ssuuc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),fp)
+                else
+                   !sbuff(i) =  0.0_sp
+                   rsbuff(n,m,l,1) =  0.0_fp
+                endif
+             enddo
           enddo
        enddo
-    enddo
-    !ierror = putelt(fds, grnam7, 'SSUUA', uindex, 1, sbuff)
-    call dfgather(rsbuff,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rsbuff)
-    if (inode == master) then
-       ierror = putelt(fds, grnam7, 'SSUUA', uindex, 1, glbarr4)
-    endif
-    if (ierror/= 0) goto 9999
-    !
-    ! group 7: element 'SSVVA'
-    !
-    !i = 0
-    allocate( rsbuff(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed, 1) )
-    do l = 1, lsed
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             !i        = i+1
-             call n_and_m_to_nm(n, m, nm, gdp)
-             if ( dmorft > 0.0_hp ) then
-                !sbuff(i) = real(ssvvc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
-                rsbuff(n,m,l,1) = real(ssvvc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),fp)
-             else
-                !sbuff(i) =  0.0_sp
-                rsbuff(n,m,l,1) =  0.0_fp
-             endif
+       !ierror = putelt(fds, grnam7, 'SSUUA', uindex, 1, sbuff)
+       call dfgather(rsbuff,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rsbuff)
+       if (inode == master) then
+          ierror = putelt(fds, grnam7, 'SSUUA', uindex, 1, glbarr4)
+       endif
+       if (ierror/= 0) goto 9999
+       !
+       ! group 7: element 'SSVVA'
+       !
+       !i = 0
+       allocate( rsbuff(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed, 1) )
+       do l = 1, lsed
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                !i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)
+                if ( dmorft > 0.0_hp ) then
+                   !sbuff(i) = real(ssvvc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
+                   rsbuff(n,m,l,1) = real(ssvvc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),fp)
+                else
+                   !sbuff(i) =  0.0_sp
+                   rsbuff(n,m,l,1) =  0.0_fp
+                endif
+             enddo
           enddo
        enddo
-    enddo
-    !ierror = putelt(fds, grnam7, 'SSVVA', uindex, 1, sbuff)
-    call dfgather(rsbuff,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rsbuff)
-    if (inode == master) then
-       ierror = putelt(fds, grnam7, 'SSVVA', uindex, 1, glbarr4)
+       !ierror = putelt(fds, grnam7, 'SSVVA', uindex, 1, sbuff)
+       call dfgather(rsbuff,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rsbuff)
+       if (inode == master) then
+          ierror = putelt(fds, grnam7, 'SSVVA', uindex, 1, glbarr4)
+       endif
+       if (ierror/= 0) goto 9999
     endif
-    if (ierror/= 0) goto 9999
     !
     if (inode == master) ierror = clsnef(fds)
     !

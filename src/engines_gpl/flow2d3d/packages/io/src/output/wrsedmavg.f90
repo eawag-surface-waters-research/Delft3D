@@ -32,8 +32,8 @@ subroutine wrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
 !
 !    Function: Writes the time varying data for sediment (4 & 5)
 !              to the NEFIS MAP-DAT file
-!              SOutput is performed conform the times of the map
-!              file and only in case lsed > 0.
+!              Output is performed conform the times of the map
+!              file and only in case lsedtot > 0 (lsed may be zero!).
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -183,14 +183,16 @@ subroutine wrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
           & 'Average bed-load transport v-direction (v point)'    , &
           & 3       ,nmaxus ,mmax    ,lsedtot  ,0        ,0       , &
           & lundia  ,gdp    )
-       call addelm(nefiswrsedmavg,'SSUUA',' ',transpunit ,'REAL',4  , &
-          & 'Average suspended-load transport u-direction (u point)', &
-          & 3       ,nmaxus  ,mmax     ,lsed     ,0        ,0       , &
-          & lundia  ,gdp     )
-       call addelm(nefiswrsedmavg,'SSVVA',' ',transpunit ,'REAL',4  , &
-          & 'Average suspended-load transport v-direction (v point)', &
-          & 3      ,nmaxus  ,mmax     ,lsed     ,0        ,0        , &
-          & lundia ,gdp     )
+       if (lsed > 0) then
+          call addelm(nefiswrsedmavg,'SSUUA',' ',transpunit ,'REAL',4  , &
+             & 'Average suspended-load transport u-direction (u point)', &
+             & 3       ,nmaxus  ,mmax     ,lsed     ,0        ,0       , &
+             & lundia  ,gdp     )
+          call addelm(nefiswrsedmavg,'SSVVA',' ',transpunit ,'REAL',4  , &
+             & 'Average suspended-load transport v-direction (v point)', &
+             & 3      ,nmaxus  ,mmax     ,lsed     ,0        ,0        , &
+             & lundia ,gdp     )
+       endif
        call defnewgrp(nefiswrsedmavg ,filnam    ,grnam7   ,gdp)
        !
        ! Get start celidt for writing
@@ -275,60 +277,62 @@ subroutine wrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
     enddo
     ierror = putelt(fds, grnam7, 'SBVVA', uindex, 1, sbuff)
     if (ierror/= 0) goto 9999
-    !
-    ! group 7: element 'SSUUA'
-    !
-    i = 0
-    do l = 1, lsed
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             i        = i+1
-             call n_and_m_to_nm(n, m, nm, gdp)             
-             if ( dmorft > 0.0_hp ) then
-                sbuff(i) = real(ssuuc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
-             else
-                sbuff(i) =  0.0_sp
-             endif
+    if (lsed > 0) then
+       !
+       ! group 7: element 'SSUUA'
+       !
+       i = 0
+       do l = 1, lsed
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)             
+                if ( dmorft > 0.0_hp ) then
+                   sbuff(i) = real(ssuuc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
+                else
+                   sbuff(i) =  0.0_sp
+                endif
+             enddo
           enddo
        enddo
-    enddo
-    ierror = putelt(fds, grnam7, 'SSUUA', uindex, 1, sbuff)
-    if (ierror/= 0) goto 9999
-    !
-    ! group 7: element 'SSVVA'
-    !
-    i = 0
-    do l = 1, lsed
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             i        = i+1
-             call n_and_m_to_nm(n, m, nm, gdp)
-             if ( dmorft > 0.0_hp ) then
-                sbuff(i) = real(ssvvc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
-             else
-                sbuff(i) =  0.0_sp
-             endif
+       ierror = putelt(fds, grnam7, 'SSUUA', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! group 7: element 'SSVVA'
+       !
+       i = 0
+       do l = 1, lsed
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)
+                if ( dmorft > 0.0_hp ) then
+                   sbuff(i) = real(ssvvc(nm, l)/rhol/(real(dmorft*86400.0_hp,fp)),sp)
+                else
+                   sbuff(i) =  0.0_sp
+                endif
+             enddo
           enddo
        enddo
-    enddo
-    ierror = putelt(fds, grnam7, 'SSVVA', uindex, 1, sbuff)
-    if (ierror/= 0) goto 9999
+       ierror = putelt(fds, grnam7, 'SSVVA', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+    endif
     !
     ierror = clsnef(fds)
     !

@@ -278,15 +278,17 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        !
        ! map-sed-series
        !
-       call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
-          & 'Settling velocity per layer'                                , &
-          & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lsed      ,0     , &
-          & lundia    ,gdp       )
-       if (kmax==1) then
-          call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
-             & 'Equilibrium concentration of sediment (2D only)'            , &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lsed      ,0     , &
+       if (lsed > 0) then
+          call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
+             & 'Settling velocity per layer'                                , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lsed      ,0     , &
              & lundia    ,gdp       )
+          if (kmax==1) then
+             call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
+                & 'Equilibrium concentration of sediment (2D only)'            , &
+                & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lsed      ,0     , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (moroutput%uuuvvv) then
           call addelm(nefiswrsedm,'UUU',' ','[  M/S  ]','REAL',4            , &
@@ -384,44 +386,46 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           & 'Bed-load transport v-direction (v point)'                   , &
           & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
           & lundia    ,gdp       )
-       call addelm(nefiswrsedm,'SSUU',' ',transpunit ,'REAL',4           , &
-          & 'Suspended-load transport u-direction (u point)'             , &
-          & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrsedm,'SSVV',' ',transpunit ,'REAL',4           , &
-          & 'Suspended-load transport v-direction (v point)'             , &
-          & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-          & lundia    ,gdp       )
-       if (moroutput%suvcor) then
-         call addelm(nefiswrsedm,'SUCOR',' ',transpunit ,'REAL',4          , &
-            & 'Near-bed transport correction u-direction (u point)'        , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SVCOR',' ',transpunit ,'REAL',4          , &
-            & 'Near-bed transport correction v-direction (v point)'        , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%sourcesink) then
-         call addelm(nefiswrsedm,'SOURSE',' ','[       ]' ,'REAL',4        , &
-            & 'Source term suspended sediment fractions'                   , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SINKSE',' ','[       ]' ,'REAL',4        , &
-            & 'Sink term suspended sediment fractions'                     , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%aks) then
-          call addelm(nefiswrsedm,'AKS',' ','[   M   ]','REAL',4            , &
-             & 'Near-bed reference concentration height'                    , &
+       if (lsed > 0) then
+          call addelm(nefiswrsedm,'SSUU',' ',transpunit ,'REAL',4           , &
+             & 'Suspended-load transport u-direction (u point)'             , &
+             & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrsedm,'SSVV',' ',transpunit ,'REAL',4           , &
+             & 'Suspended-load transport v-direction (v point)'             , &
+             & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+             & lundia    ,gdp       )
+          if (moroutput%suvcor) then
+            call addelm(nefiswrsedm,'SUCOR',' ',transpunit ,'REAL',4          , &
+               & 'Near-bed transport correction u-direction (u point)'        , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SVCOR',' ',transpunit ,'REAL',4          , &
+               & 'Near-bed transport correction v-direction (v point)'        , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%sourcesink) then
+            call addelm(nefiswrsedm,'SOURSE',' ','[       ]' ,'REAL',4        , &
+               & 'Source term suspended sediment fractions'                   , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SINKSE',' ','[       ]' ,'REAL',4        , &
+               & 'Sink term suspended sediment fractions'                     , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%aks) then
+             call addelm(nefiswrsedm,'AKS',' ','[   M   ]','REAL',4            , &
+                & 'Near-bed reference concentration height'                    , &
+                & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
+          call addelm(nefiswrsedm,'RCA',' ','[ KG/M3 ]','REAL',4            , &
+             & 'Near-bed reference concentration of sediment'               , &
              & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
              & lundia    ,gdp       )
        endif
-       call addelm(nefiswrsedm,'RCA',' ','[ KG/M3 ]','REAL',4            , &
-          & 'Near-bed reference concentration of sediment'               , &
-          & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
-          & lundia    ,gdp       )
        call addelm(nefiswrsedm,'DPS',' ','[   M   ]','REAL',4            , &
           & 'Bottom depth (zeta point)'                                  , &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
@@ -589,35 +593,37 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        ierror     = putelt(fds, grnam4, 'MORFT',  uindex, 1, morft)
        if (ierror/=0) goto 9999
     endif ! inode==master
-    !
-    ! group 5: element 'WS'
-    !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout, 1:lsed) )
-    do k=1,kmaxout
-       rbuff4(:, :, k, 1:lsed) = ws(:, :, smlay(k), 1:lsed)
-    enddo
-    call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierror = putelt(fds, grnam5, 'WS', uindex, 1, glbarr4)
-    endif
-    if (ierror/=0) goto 9999
-    !
-    if (kmax==1) then
+    if (lsed > 0) then
        !
-       ! group 5: element 'RSEDEQ'
-       ! kmax=1: don't use kmaxout/smlay
+       ! group 5: element 'WS'
        !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed) )
-       do k=1,kmax
-          rbuff4(:, :, k, 1:lsed) = rsedeq(:, :, k, 1:lsed)
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout, 1:lsed) )
+       do k=1,kmaxout
+          rbuff4(:, :, k, 1:lsed) = ws(:, :, smlay(k), 1:lsed)
        enddo
        call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
        deallocate(rbuff4)
        if (inode == master) then
-          ierror = putelt(fds, grnam5, 'RSEDEQ', uindex, 1, glbarr4)
+          ierror = putelt(fds, grnam5, 'WS', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
+       !
+       if (kmax==1) then
+          !
+          ! group 5: element 'RSEDEQ'
+          ! kmax=1: don't use kmaxout/smlay
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed) )
+          do k=1,kmax
+             rbuff4(:, :, k, 1:lsed) = rsedeq(:, :, k, 1:lsed)
+          enddo
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'RSEDEQ', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
     endif
     !
     if (moroutput%uuuvvv) then
@@ -1159,85 +1165,9 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        ierror = putelt(fds, grnam5, 'SBVV', uindex, 1, glbarr4)
     endif
     if (ierror/=0) goto 9999
-    !
-    ! group 5: element 'SSUU'
-    !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
-    do l = 1, lsed
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             rbuff4(n, m, l, 1) = ssuu(n, m, l)/rhol
-          enddo
-       enddo
-    enddo
-    call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierror = putelt(fds, grnam5, 'SSUU', uindex, 1, glbarr4)
-    endif
-    if (ierror/=0) goto 9999
-    !
-    ! group 5: element 'SSVV'
-    !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
-    do l = 1, lsed
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             rbuff4(n, m, l, 1) = ssvv(n, m, l)/rhol
-          enddo
-       enddo
-    enddo
-    call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierror = putelt(fds, grnam5, 'SSVV', uindex, 1, glbarr4)
-    endif
-    if (ierror/=0) goto 9999
-    !
-    ! group 5: element 'SUCOR'
-    !
-    if (moroutput%suvcor) then
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
-       do l = 1, lsed
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do m = 1, mmax
-             do n = 1, nmaxus
-                call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff4(n, m, l, 1) = sucor(nm, l)/rhol
-             enddo
-          enddo
-       enddo
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SUCOR', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
+    if (lsed > 0) then
        !
-       ! group 5: element 'SVCOR'
+       ! group 5: element 'SSUU'
        !
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
        do l = 1, lsed
@@ -1251,68 +1181,166 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           end select
           do m = 1, mmax
              do n = 1, nmaxus
-                call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff4(n, m, l, 1) = svcor(nm, l)/rhol
+                rbuff4(n, m, l, 1) = ssuu(n, m, l)/rhol
              enddo
           enddo
        enddo
        call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
        deallocate(rbuff4)
        if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SVCOR', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    ! group 5: element 'SOURSE'
-    !
-    if (moroutput%sourcesink) then
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
-       if (associated(sourse)) then
-          do l = 1, lsed
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sourse(nm, l)
-                enddo
-             enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsed, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SOURSE', uindex, 1, glbarr4)
+          ierror = putelt(fds, grnam5, 'SSUU', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
        !
-       ! group 5: element 'SINKSE'
+       ! group 5: element 'SSVV'
        !
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
-       if (associated(sinkse)) then
-          do l = 1, lsed
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sinkse(nm, l)
-                enddo
+       do l = 1, lsed
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                rbuff4(n, m, l, 1) = ssvv(n, m, l)/rhol
              enddo
           enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsed, 1) = -999.0
-       endif
+       enddo
        call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
        deallocate(rbuff4)
        if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SINKSE', uindex, 1, glbarr4)
+          ierror = putelt(fds, grnam5, 'SSVV', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
-    endif
-    !
-    ! group 5: element 'AKS'
-    !
-    if (moroutput%aks) then
+       !
+       ! group 5: element 'SUCOR'
+       !
+       if (moroutput%suvcor) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
+          do l = 1, lsed
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff4(n, m, l, 1) = sucor(nm, l)/rhol
+                enddo
+             enddo
+          enddo
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SUCOR', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SVCOR'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
+          do l = 1, lsed
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff4(n, m, l, 1) = svcor(nm, l)/rhol
+                enddo
+             enddo
+          enddo
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SVCOR', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
+       !
+       ! group 5: element 'SOURSE'
+       !
+       if (moroutput%sourcesink) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
+          if (associated(sourse)) then
+             do l = 1, lsed
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sourse(nm, l)
+                   enddo
+                enddo
+             enddo
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsed, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SOURSE', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SINKSE'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
+          if (associated(sinkse)) then
+             do l = 1, lsed
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sinkse(nm, l)
+                   enddo
+                enddo
+             enddo
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsed, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SINKSE', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
+       !
+       ! group 5: element 'AKS'
+       !
+       if (moroutput%aks) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
+          do l = 1, lsed
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   !
+                   ! near-bed reference concentration of sediment
+                   !
+                   rbuff4(n, m, l, 1) = aks(n, m, l)
+                enddo
+             enddo
+          enddo
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'AKS', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
+       !
+       ! group 5: element 'RCA'
+       !
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
        do l = 1, lsed
           do m = 1, mmax
@@ -1320,37 +1348,17 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                 !
                 ! near-bed reference concentration of sediment
                 !
-                rbuff4(n, m, l, 1) = aks(n, m, l)
+                rbuff4(n, m, l, 1) = rca(n, m, l)
              enddo
           enddo
        enddo
        call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
        deallocate(rbuff4)
        if (inode == master) then
-          ierror = putelt(fds, grnam5, 'AKS', uindex, 1, glbarr4)
+          ierror = putelt(fds, grnam5, 'RCA', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
     endif
-    !
-    ! group 5: element 'RCA'
-    !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
-    do l = 1, lsed
-       do m = 1, mmax
-          do n = 1, nmaxus
-             !
-             ! near-bed reference concentration of sediment
-             !
-             rbuff4(n, m, l, 1) = rca(n, m, l)
-          enddo
-       enddo
-    enddo
-    call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierror = putelt(fds, grnam5, 'RCA', uindex, 1, glbarr4)
-    endif
-    if (ierror/=0) goto 9999
     !
     ! group 5: element 'DPS'
     !

@@ -198,15 +198,17 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        ! map-sed-series
        !
-       call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
-          & 'Settling velocity per layer'                                , &
-          & 4         ,nmaxus    ,mmax      ,kmaxout   ,lsed      ,0     , &
-          & lundia    ,gdp       )
-       if (kmax==1) then
-          call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
-             & 'Equilibrium concentration of sediment (2D only)'            , &
-             & 4         ,nmaxus    ,mmax      ,kmax      ,lsed      ,0     , &
+       if (lsed > 0) then
+          call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
+             & 'Settling velocity per layer'                                , &
+             & 4         ,nmaxus    ,mmax      ,kmaxout   ,lsed      ,0     , &
              & lundia    ,gdp       )
+          if (kmax==1) then
+             call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
+                & 'Equilibrium concentration of sediment (2D only)'            , &
+                & 4         ,nmaxus    ,mmax      ,kmax      ,lsed      ,0     , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (moroutput%uuuvvv) then
           call addelm(nefiswrsedm,'UUU',' ','[  M/S  ]','REAL',4            , &
@@ -304,44 +306,46 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           & 'Bed-load transport v-direction (v point)'                   , &
           & 3         ,nmaxus    ,mmax      ,lsedtot   ,0         ,0     , &
           & lundia    ,gdp       )
-       call addelm(nefiswrsedm,'SSUU',' ',transpunit ,'REAL',4           , &
-          & 'Suspended-load transport u-direction (u point)'             , &
-          & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrsedm,'SSVV',' ',transpunit ,'REAL',4           , &
-          & 'Suspended-load transport v-direction (v point)'             , &
-          & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-          & lundia    ,gdp       )
-       if (moroutput%suvcor) then
-         call addelm(nefiswrsedm,'SUCOR',' ',transpunit ,'REAL',4          , &
-            & 'Near-bed transport correction u-direction (u point)'        , &
-            & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SVCOR',' ',transpunit ,'REAL',4          , &
-            & 'Near-bed transport correction v-direction (v point)'        , &
-            & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%sourcesink) then
-         call addelm(nefiswrsedm,'SOURSE',' ','[KG/M3/S]' ,'REAL',4        , &
-            & 'Source term suspended sediment fractions'                   , &
-            & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SINKSE',' ','[  1/S  ]' ,'REAL',4        , &
-            & 'Sink term suspended sediment fractions'                     , &
-            & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%aks) then
-          call addelm(nefiswrsedm,'AKS',' ','[   M   ]','REAL',4            , &
-             & 'Near-bed reference concentration height'                    , &
+       if (lsed > 0) then
+          call addelm(nefiswrsedm,'SSUU',' ',transpunit ,'REAL',4           , &
+             & 'Suspended-load transport u-direction (u point)'             , &
+             & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrsedm,'SSVV',' ',transpunit ,'REAL',4           , &
+             & 'Suspended-load transport v-direction (v point)'             , &
+             & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+             & lundia    ,gdp       )
+          if (moroutput%suvcor) then
+            call addelm(nefiswrsedm,'SUCOR',' ',transpunit ,'REAL',4          , &
+               & 'Near-bed transport correction u-direction (u point)'        , &
+               & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SVCOR',' ',transpunit ,'REAL',4          , &
+               & 'Near-bed transport correction v-direction (v point)'        , &
+               & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%sourcesink) then
+            call addelm(nefiswrsedm,'SOURSE',' ','[KG/M3/S]' ,'REAL',4        , &
+               & 'Source term suspended sediment fractions'                   , &
+               & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SINKSE',' ','[  1/S  ]' ,'REAL',4        , &
+               & 'Sink term suspended sediment fractions'                     , &
+               & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%aks) then
+             call addelm(nefiswrsedm,'AKS',' ','[   M   ]','REAL',4            , &
+                & 'Near-bed reference concentration height'                    , &
+                & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
+          call addelm(nefiswrsedm,'RCA',' ','[ KG/M3 ]','REAL',4            , &
+             & 'Near-bed reference concentration of sediment'               , &
              & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
              & lundia    ,gdp       )
        endif
-       call addelm(nefiswrsedm,'RCA',' ','[ KG/M3 ]','REAL',4            , &
-          & 'Near-bed reference concentration of sediment'               , &
-          & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
-          & lundia    ,gdp       )
        call addelm(nefiswrsedm,'DPS',' ','[   M   ]','REAL',4            , &
           & 'Bottom depth (zeta point)'                                  , &
           & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
@@ -445,42 +449,45 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        uindex (2,1) = celidt
        uindex (3,1) = 1 ! increment in time
        !
-       ! element 'WS'
-       !
-       call sbuff_checksize(lsed*(kmaxout)*mmax*nmaxus)
-       i = 0
-       do l = 1, lsed
-          do k = 1, kmaxout
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   i        = i+1
-                   sbuff(i) = real(ws(n, m, smlay(k), l),sp)
-                enddo
-             enddo
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'WS', uindex, 1, sbuff)
-       if (ierror/=0) goto 9999
-       !
-       if (kmax==1) then
+       if (lsed > 0) then
           !
-          ! element 'RSEDEQ'
-          ! kmax=1: don't use kmaxout/smlay
+          ! element 'WS'
           !
-          call sbuff_checksize(lsed*kmax*mmax*nmaxus)
+          call sbuff_checksize(lsed*(kmaxout)*mmax*nmaxus)
           i = 0
           do l = 1, lsed
-             do k = 1, kmax
+             do k = 1, kmaxout
                 do m = 1, mmax
                    do n = 1, nmaxus
                       i        = i+1
-                      sbuff(i) = real(rsedeq(n, m, k, l),sp)
+                      sbuff(i) = real(ws(n, m, smlay(k), l),sp)
                    enddo
                 enddo
              enddo
           enddo
-          ierror = putelt(fds, grpnam, 'RSEDEQ', uindex, 1, sbuff)
+          ierror = putelt(fds, grpnam, 'WS', uindex, 1, sbuff)
           if (ierror/=0) goto 9999
+          !
+          if (kmax==1) then
+             !
+             ! element 'RSEDEQ'
+             ! kmax=1: don't use kmaxout/smlay
+             !
+             call sbuff_checksize(lsed*kmax*mmax*nmaxus)
+             i = 0
+             do l = 1, lsed
+                do k = 1, kmax
+                   do m = 1, mmax
+                      do n = 1, nmaxus
+                         i        = i+1
+                         sbuff(i) = real(rsedeq(n, m, k, l),sp)
+                      enddo
+                   enddo
+                enddo
+             enddo
+             ierror = putelt(fds, grpnam, 'RSEDEQ', uindex, 1, sbuff)
+             if (ierror/=0) goto 9999
+          endif
        endif
        !
        if (moroutput%uuuvvv) then
@@ -984,79 +991,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        enddo
        ierror = putelt(fds, grpnam, 'SBVV', uindex, 1, sbuff)
        if (ierror/=0) goto 9999
-       !
-       ! element 'SSUU'
-       !
-       call sbuff_checksize(lsed*mmax*nmaxus)
-       i = 0
-       do l = 1, lsed
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                sbuff(i) = real(ssuu(n, m, l)/rhol,sp)
-             enddo
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'SSUU', uindex, 1, sbuff)
-       if (ierror/=0) goto 9999
-       !
-       ! element 'SSVV'
-       !
-       call sbuff_checksize(lsed*mmax*nmaxus)
-       i = 0
-       do l = 1, lsed
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                sbuff(i) = real(ssvv(n, m, l)/rhol,sp)
-             enddo
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'SSVV', uindex, 1, sbuff)
-       if (ierror/=0) goto 9999
-       !
-       ! element 'SUCOR'
-       !
-       if (moroutput%suvcor) then
-          call sbuff_checksize(lsed*mmax*nmaxus)
-          i = 0
-          do l = 1, lsed
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   i        = i+1
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   sbuff(i) = real(sucor(nm, l)/rhol,sp)
-                enddo
-             enddo
-          enddo
-          ierror = putelt(fds, grpnam, 'SUCOR', uindex, 1, sbuff)
-          if (ierror/=0) goto 9999
+       if (lsed > 0) then
           !
-          ! element 'SVCOR'
+          ! element 'SSUU'
           !
           call sbuff_checksize(lsed*mmax*nmaxus)
           i = 0
@@ -1072,94 +1009,166 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    i        = i+1
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   sbuff(i) = real(svcor(nm, l)/rhol,sp)
+                   sbuff(i) = real(ssuu(n, m, l)/rhol,sp)
                 enddo
              enddo
           enddo
-          ierror = putelt(fds, grpnam, 'SVCOR', uindex, 1, sbuff)
+          ierror = putelt(fds, grpnam, 'SSUU', uindex, 1, sbuff)
           if (ierror/=0) goto 9999
-       endif
-       !
-       ! element 'SOURSE'
-       !
-       if (moroutput%sourcesink) then
+          !
+          ! element 'SSVV'
+          !
           call sbuff_checksize(lsed*mmax*nmaxus)
-          if (associated(sourse)) then
+          i = 0
+          do l = 1, lsed
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   i        = i+1
+                   sbuff(i) = real(ssvv(n, m, l)/rhol,sp)
+                enddo
+             enddo
+          enddo
+          ierror = putelt(fds, grpnam, 'SSVV', uindex, 1, sbuff)
+          if (ierror/=0) goto 9999
+          !
+          ! element 'SUCOR'
+          !
+          if (moroutput%suvcor) then
+             call sbuff_checksize(lsed*mmax*nmaxus)
              i = 0
              do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
                 do m = 1, mmax
                    do n = 1, nmaxus
                       i        = i+1
                       call n_and_m_to_nm(n, m, nm, gdp)
-                      sbuff(i) = real(sourse(nm, l),sp)
+                      sbuff(i) = real(sucor(nm, l)/rhol,sp)
                    enddo
                 enddo
              enddo
-          else
-             sbuff(1:lsed*mmax*nmaxus) = -999.0
-          endif
-          ierror = putelt(fds, grpnam, 'SOURSE', uindex, 1, sbuff)
-          if (ierror/=0) goto 9999
-          !
-          ! element 'SINKSE'
-          !
-          call sbuff_checksize(lsed*mmax*nmaxus)
-          if (associated(sinkse)) then
+             ierror = putelt(fds, grpnam, 'SUCOR', uindex, 1, sbuff)
+             if (ierror/=0) goto 9999
+             !
+             ! element 'SVCOR'
+             !
+             call sbuff_checksize(lsed*mmax*nmaxus)
              i = 0
              do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
                 do m = 1, mmax
                    do n = 1, nmaxus
                       i        = i+1
                       call n_and_m_to_nm(n, m, nm, gdp)
-                      sbuff(i) = real(sinkse(nm, l),sp)
+                      sbuff(i) = real(svcor(nm, l)/rhol,sp)
                    enddo
                 enddo
              enddo
-          else
-             sbuff(1:lsedtot*mmax*nmaxus) = -999.0
+             ierror = putelt(fds, grpnam, 'SVCOR', uindex, 1, sbuff)
+             if (ierror/=0) goto 9999
           endif
-          ierror = putelt(fds, grpnam, 'SINKSE', uindex, 1, sbuff)
-          if (ierror/=0) goto 9999
-       endif
-       !
-       ! element 'AKS'
-       !
-       if (moroutput%aks) then
+          !
+          ! element 'SOURSE'
+          !
+          if (moroutput%sourcesink) then
+             call sbuff_checksize(lsed*mmax*nmaxus)
+             if (associated(sourse)) then
+                i = 0
+                do l = 1, lsed
+                   do m = 1, mmax
+                      do n = 1, nmaxus
+                         i        = i+1
+                         call n_and_m_to_nm(n, m, nm, gdp)
+                         sbuff(i) = real(sourse(nm, l),sp)
+                      enddo
+                   enddo
+                enddo
+             else
+                sbuff(1:lsed*mmax*nmaxus) = -999.0
+             endif
+             ierror = putelt(fds, grpnam, 'SOURSE', uindex, 1, sbuff)
+             if (ierror/=0) goto 9999
+             !
+             ! element 'SINKSE'
+             !
+             call sbuff_checksize(lsed*mmax*nmaxus)
+             if (associated(sinkse)) then
+                i = 0
+                do l = 1, lsed
+                   do m = 1, mmax
+                      do n = 1, nmaxus
+                         i        = i+1
+                         call n_and_m_to_nm(n, m, nm, gdp)
+                         sbuff(i) = real(sinkse(nm, l),sp)
+                      enddo
+                   enddo
+                enddo
+             else
+                sbuff(1:lsedtot*mmax*nmaxus) = -999.0
+             endif
+             ierror = putelt(fds, grpnam, 'SINKSE', uindex, 1, sbuff)
+             if (ierror/=0) goto 9999
+          endif
+          !
+          ! element 'AKS'
+          !
+          if (moroutput%aks) then
+             call sbuff_checksize(lsed*mmax*nmaxus)
+             i = 0
+             do l = 1, lsed
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      !
+                      ! near-bed reference concentration height
+                      !
+                      i        = i+1
+                      sbuff(i) = real(aks(n, m, l),sp)
+                   enddo
+                enddo
+             enddo
+             ierror = putelt(fds, grpnam, 'AKS', uindex, 1, sbuff)
+             if (ierror/=0) goto 9999
+          endif
+          !
+          ! element 'RCA'
+          !
           call sbuff_checksize(lsed*mmax*nmaxus)
           i = 0
           do l = 1, lsed
              do m = 1, mmax
                 do n = 1, nmaxus
                    !
-                   ! near-bed reference concentration height
+                   ! near-bed reference concentration of sediment
                    !
                    i        = i+1
-                   sbuff(i) = real(aks(n, m, l),sp)
+                   sbuff(i) = real(rca(n, m, l),sp)
                 enddo
              enddo
           enddo
-          ierror = putelt(fds, grpnam, 'AKS', uindex, 1, sbuff)
+          ierror = putelt(fds, grpnam, 'RCA', uindex, 1, sbuff)
           if (ierror/=0) goto 9999
        endif
-       !
-       ! element 'RCA'
-       !
-       call sbuff_checksize(lsed*mmax*nmaxus)
-       i = 0
-       do l = 1, lsed
-          do m = 1, mmax
-             do n = 1, nmaxus
-                !
-                ! near-bed reference concentration of sediment
-                !
-                i        = i+1
-                sbuff(i) = real(rca(n, m, l),sp)
-             enddo
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'RCA', uindex, 1, sbuff)
-       if (ierror/=0) goto 9999
        !
        ! element 'DPS'
        !

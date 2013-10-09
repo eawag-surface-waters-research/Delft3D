@@ -77,6 +77,7 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
 !! executable statements -------------------------------------------------------
 !
     if (gdp%gdmorpar%flufflyr%iflufflyr==0) return
+    if (lsed == 0) return
     !
     nefiselem => gdp%nefisio%nefiselem(nefiswrsedm)
     celidt  => nefiselem%celidt
