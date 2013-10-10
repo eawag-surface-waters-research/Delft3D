@@ -268,7 +268,8 @@ subroutine mkmap(code      ,x1        ,y1        ,m1        ,n1        , &
                 if (      (code(i1    , j1    )==1 .or. code(i1    , j1    )==-1 .or. code(i1    , j1    )==3) &
                   & .and. (code(i1 + 1, j1    )==1 .or. code(i1 + 1, j1    )==-1 .or. code(i1 + 1, j1    )==3) &
                   & .and. (code(i1 + 1, j1 + 1)==1 .or. code(i1 + 1, j1 + 1)==-1 .or. code(i1 + 1, j1 + 1)==3) &
-                  & .and. (code(i1    , j1 + 1)==1 .or. code(i1    , j1 + 1)==-1 .or. code(i1    , j1 + 1)==3) ) then
+                  & .and. (code(i1    , j1 + 1)==1 .or. code(i1    , j1 + 1)==-1 .or. code(i1    , j1 + 1)==3) &
+                  & .and. (code(i1    , j1    )==1 .or. code(i1 + 1, j1    )==1 .or. code(i1 + 1, j1 + 1)==1 .or. code(i1    , j1 + 1)==1)) then
                    !
                    ! grid2 point is covered by 4 valid grid1 points
                    !
