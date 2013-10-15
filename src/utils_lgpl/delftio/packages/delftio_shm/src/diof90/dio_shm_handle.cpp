@@ -112,7 +112,7 @@ DioShmHandle::DioShmHandle(
     if (this->mmfHandle == NULL)
     {
         this->mmfHandle =
-            CreateFileMapping(    (HANDLE)0xFFFFFFFF,
+            CreateFileMapping(  INVALID_HANDLE_VALUE,
                                 NULL,
                                 PAGE_READWRITE,
                                 0,
@@ -120,6 +120,12 @@ DioShmHandle::DioShmHandle(
                                 name
                                 );
 
+		DWORD dwError_CFM = GetLastError();
+		if (dwError_CFM != 0 && dwError_CFM != ERROR_ALREADY_EXISTS ) 
+		{
+			fprintf(stderr,
+                       "Error creating Memory Mapped File: %lu\n", dwError_CFM);
+		}
 
         if (this->mmfHandle != NULL)
         {
