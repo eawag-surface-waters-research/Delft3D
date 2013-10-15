@@ -178,6 +178,7 @@ C
       IERR = IERR + 1
 C
   910 CONTINUE
+      if ( timon ) call timstop ( ithandl )
       RETURN
 C
 C     output formats
