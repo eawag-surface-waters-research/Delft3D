@@ -114,7 +114,7 @@ subroutine org_readtable(this, filnam, refjulday, errorstring)
 !
 ! Local parameters
 !
-    integer, parameter :: MAXFLD    = 100
+    integer, parameter :: MAXFLD    = 200
     integer, parameter :: MAXERRSTR = 256
     integer, parameter :: MAXLINE   = 1600
     integer, parameter :: INT_READ  = 1  ! used by itype

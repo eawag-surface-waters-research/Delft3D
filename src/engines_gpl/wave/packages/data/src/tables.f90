@@ -116,14 +116,19 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
 ! Local parameters
 !
     integer, parameter :: MAXFLD = 200
+    integer, parameter :: MAXERRSTR = 256
+    integer, parameter :: MAXLINE   = 1600
+    integer, parameter :: INT_READ  = 1  ! used by itype
+    integer, parameter :: REAL_READ = 2  ! used by itype
+    integer, parameter :: CHAR_READ = 3  ! used by itype
 !
 ! Global variables
 !
-    integer            ,intent(in)  :: lunbcm
-    integer            ,intent(in)  :: refjulday
-    character(*)       ,intent(in)  :: filnam
-    character(256)     ,intent(out) :: errorstring
-    type(tablefiletype)             :: this
+    integer                  ,intent(in)  :: lunbcm
+    integer                  ,intent(in)  :: refjulday
+    character(*)             ,intent(in)  :: filnam
+    character(MAXERRSTR)     ,intent(out) :: errorstring
+    type(tablefiletype)                   :: this
 !
 ! Local variables
 !
@@ -159,7 +164,7 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
     character(MAXTABLECLENGTH), dimension(:), allocatable :: cfield
     character(10)                                         :: stri1
     character(10)                                         :: stri2
-    character(512)                                        :: line
+    character(MAXLINE)                                    :: line
     !
     type(tabletype)           , dimension(:), pointer     :: tables => NULL()
     type(tabletype)                         , pointer     :: table
