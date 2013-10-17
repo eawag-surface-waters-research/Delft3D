@@ -124,7 +124,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                                  , intent(out) :: iopsus
     integer                                  , intent(in)  :: nmlb
     integer                                  , intent(in)  :: nmub
-    character(256)                           , intent(in)  :: filsed
+    character(len=*)                         , intent(in)  :: filsed
     type(tree_data)                          , pointer     :: sed_ptr
     type (gd_sedpar)                         , pointer     :: gdsedpar
     type (gd_trapar)                         , pointer     :: gdtrapar
@@ -1449,7 +1449,7 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     integer                         , intent(out) :: lsedtot ! Total number of sediment fractions
     integer                         , intent(in)  :: lundia  ! Unit of diagnostic file
     logical                         , intent(out) :: error
-    character(256)                  , intent(in)  :: filsed
+    character(len=*)                , intent(in)  :: filsed
     type (gd_sedpar)                , pointer     :: gdsedpar
     type(tree_data)                 , pointer     :: sed_ptr
 !
