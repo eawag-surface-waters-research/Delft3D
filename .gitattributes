@@ -3554,8 +3554,14 @@ src/third_party_open/triangle/tricall2.c -text
 src/third_party_open/vcredist/README.txt -text
 src/third_party_open/vcredist/x64/Microsoft.VC100.CRT/msvcp100.dll -text
 src/third_party_open/vcredist/x64/Microsoft.VC100.CRT/msvcr100.dll -text
+src/third_party_open/vcredist/x64/Microsoft.VC110.CRT/msvcp110.dll -text
+src/third_party_open/vcredist/x64/Microsoft.VC110.CRT/msvcr110.dll -text
+src/third_party_open/vcredist/x64/Microsoft.VC110.CRT/vccorlib110.dll -text
 src/third_party_open/vcredist/x86/Microsoft.VC100.CRT/msvcp100.dll -text
 src/third_party_open/vcredist/x86/Microsoft.VC100.CRT/msvcr100.dll -text
+src/third_party_open/vcredist/x86/Microsoft.VC110.CRT/msvcp110.dll -text
+src/third_party_open/vcredist/x86/Microsoft.VC110.CRT/msvcr110.dll -text
+src/third_party_open/vcredist/x86/Microsoft.VC110.CRT/vccorlib110.dll -text
 src/third_party_open/version_number/Makefile.am -text
 src/third_party_open/version_number/Subversion_license_info.txt -text
 src/third_party_open/version_number/bin/win32/version_number.exe -text
