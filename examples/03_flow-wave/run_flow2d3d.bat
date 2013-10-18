@@ -1,10 +1,10 @@
 @ echo off
     rem
-    rem This script is an example for running Delft3D-FLOW
+    rem This script is an example for running Delft3D-FLOW 6.00 online with Delft3D-WAVE (Windows)
     rem Adapt and use it for your own purpose
     rem
     rem adri.mourits@deltares.nl
-    rem 01 Mar 2011
+    rem 16 Oct 2013
     rem 
     rem
     rem This script starts a single-domain Delft3D-FLOW computation online with Delft3D-WAVE on Windows
@@ -21,7 +21,7 @@ set mdwfile=r17.mdw
 
 
     rem
-    rem Set the directory containing delftflow.exe
+    rem Set the directories containing the executables
     rem
 set ARCH=win32
 set D3D_HOME=..\..\bin
@@ -35,10 +35,11 @@ set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
     rem
 
 
-    rem Run
+    rem Start FLOW
 set PATH=%flowexedir%;%PATH%
 start "Hydrodynamic simulation" "%flowexedir%\d_hydro.exe" %argfile%
 
+    rem Start WAVE
 title Wave simulation
 set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%PATH%
 "%waveexedir%\wave.exe" %mdwfile% 1
