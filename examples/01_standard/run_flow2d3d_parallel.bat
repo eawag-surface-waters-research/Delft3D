@@ -5,15 +5,24 @@
     rem
     rem edwin.spee@deltares.nl
     rem adri.mourits@deltares.nl
-    rem 11 Apr 2011
+    rem 23 Oct 2013
     rem 
     rem
     rem This script starts a single-domain Delft3D-FLOW computation on Windows
     rem parallel
     rem
     rem When using mpich2 for the first time on a machine:
-    rem Execute "smpd -install"
-    rem 
+    rem Execute "smpd -install" as administrator:
+    rem     "Start" -> "All programs" -> "Accessories", right-click "Command Prompt", "Run as Administrator"
+    rem     In this command box:
+    rem         cd ..\..\bin\win32\flow2d3d\bin
+    rem         (or when not compiled yet)
+    rem         cd ..\..\src\third_party_open\mpich2\bin
+    rem         (both paths above are relative to the location of this script "run_flow2d3d_parallel.bat")
+    rem         smpd -install
+    rem     When there is an smpd already running on the machine, it must be ended first, using the Microsoft Task Manager
+
+
 
     rem
     rem Set the config file here

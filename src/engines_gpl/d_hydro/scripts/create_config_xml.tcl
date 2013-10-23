@@ -13,7 +13,7 @@
 #
 
 proc createConfigXML { args } {
-    set version "Deltares, create_config_xml.tcl, Version 1.00"
+    set version "Deltares, create_config_xml.tcl, Version 1.01"
     set fileversion "1.00"
 
     set result ""
@@ -23,6 +23,7 @@ proc createConfigXML { args } {
     set out  ""
     set sp 0
     set wait "false"
+    set dol 1
 
     # Read arguments
     set argcount  [llength $args]
@@ -34,6 +35,10 @@ proc createConfigXML { args } {
             "-ddb" {
                 incr argnumber
                 set ddb [lindex $args $argnumber]
+            }
+            "-dol" {
+                incr argnumber
+                set dol [lindex $args $argnumber]
             }
             "-m"      -
             "-mdf" {
@@ -84,6 +89,9 @@ proc createConfigXML { args } {
     }
     if {$wait!="true" && $wait!="false"} {
         set result "$result ERROR: in createConfigXML: argument \"-wait\" must be \"true\" or \"false\".\n"
+    }
+    if {$dol!=0 && $dol!=1} {
+        set result "$result ERROR: in createConfigXML: argument \"-dol\" must be \"0\" or \"1\".\n"
     }
     if {$result != ""} {
         return $result
@@ -145,22 +153,24 @@ proc createConfigXML { args } {
     puts $outfile "                <crashOnAbort>true</crashOnAbort>"
     puts $outfile "        -->"
     puts $outfile "    </flow2D3D>"
-    puts $outfile "    <delftOnline>"
-    puts $outfile "        <enabled>true</enabled>"
-    puts $outfile "        <urlFile>$urlfile</urlFile>"
-    puts $outfile "        <waitOnStart>$wait</waitOnStart>"
-    puts $outfile "        <clientControl>true</clientControl>    <!-- client allowed to start, step, stop, terminate -->"
-    puts $outfile "        <clientWrite>false</clientWrite>    <!-- client allowed to modify data -->"
-    puts $outfile "        <!--"
-    puts $outfile "            Options/alternatives:"
-    puts $outfile "            1) Change port range:"
-    puts $outfile "                <tcpPortRange start=\"51001\" end=\"51099\"/>"
-    puts $outfile "            2) More output to screen (silent, error, info, trace. default: error):"
-    puts $outfile "                <verbosity>trace</verbosity>"
-    puts $outfile "            3) Force stack trace to be written (Linux only):"
-    puts $outfile "                <crashOnAbort>true</crashOnAbort>"
-    puts $outfile "        -->"
-    puts $outfile "    </delftOnline>"
+    if {$dol} {
+        puts $outfile "    <delftOnline>"
+        puts $outfile "        <enabled>true</enabled>"
+        puts $outfile "        <urlFile>$urlfile</urlFile>"
+        puts $outfile "        <waitOnStart>$wait</waitOnStart>"
+        puts $outfile "        <clientControl>true</clientControl>    <!-- client allowed to start, step, stop, terminate -->"
+        puts $outfile "        <clientWrite>false</clientWrite>    <!-- client allowed to modify data -->"
+        puts $outfile "        <!--"
+        puts $outfile "            Options/alternatives:"
+        puts $outfile "            1) Change port range:"
+        puts $outfile "                <tcpPortRange start=\"51001\" end=\"51099\"/>"
+        puts $outfile "            2) More output to screen (silent, error, info, trace. default: error):"
+        puts $outfile "                <verbosity>trace</verbosity>"
+        puts $outfile "            3) Force stack trace to be written (Linux only):"
+        puts $outfile "                <crashOnAbort>true</crashOnAbort>"
+        puts $outfile "        -->"
+        puts $outfile "    </delftOnline>"
+    }
     puts $outfile "</deltaresHydro>"
     close $outfile
 }

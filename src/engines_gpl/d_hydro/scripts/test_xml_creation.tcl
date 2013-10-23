@@ -13,6 +13,10 @@ set res [createConfigXML -ddb "$runid.ddb" -sp -wait "true" -out "config -d_hydr
 if {$res != ""} {
     puts $res
 }
+set res [createConfigXML -mdf "$runid.mdf" -wait "false" -out "config -d_hydro2.3 newtoo version $version.xml" -dol 0]
+if {$res != ""} {
+    puts $res
+}
 
 puts "No error messages expected above.\n"
 # The following calls should generate a proper error message and no output file
@@ -42,7 +46,7 @@ if {$res != ""} {
 }
 
 puts "Expected error message: wrong argument:"
-set res [createConfigXML -mdb "f34.mdf" -out "config_d_hydro_7.xml"]
+set res [createConfigXML -mdb "f34.mdf" -out "config_d_hydro_7.xml" -dol "yes"]
 if {$res != ""} {
     puts $res
 }
