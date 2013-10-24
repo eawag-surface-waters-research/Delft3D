@@ -115,9 +115,9 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
 !
 ! Local parameters
 !
-    integer, parameter :: MAXFLD = 200
+    integer, parameter :: MAXFLD = 400
     integer, parameter :: MAXERRSTR = 256
-    integer, parameter :: MAXLINE   = 1600
+    integer, parameter :: MAXLINE   = 4096
     integer, parameter :: INT_READ  = 1  ! used by itype
     integer, parameter :: REAL_READ = 2  ! used by itype
     integer, parameter :: CHAR_READ = 3  ! used by itype
@@ -1074,7 +1074,9 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
           errorstring = 'Line parse error'
        endif
     endif
-    write(errorstring,'(A,A,A,A,I4,A,A,A,A)') &
+    write(*,*)":", line,":"
+    !write(errorstring,'(I100)') size(line)
+    write(errorstring,'(A,A,A,A,I4,A,A100,A,A)') &
        & 'Reading ',trim(filnam),char(10), &
        & 'Line ',iline,': ',trim(line),char(10), &
        & trim(errorstring)
