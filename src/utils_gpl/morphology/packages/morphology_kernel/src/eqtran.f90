@@ -309,7 +309,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
                 & susw      ,sbcu      ,sbcv      ,sbwu      ,sbwv      , &
-                & sswu      ,sswv      ,tetacr    ,error     ,message   )
+                & sswu      ,sswv      ,tetacr    ,conc2d    ,error     , &
+                & message   )
        !
        if (error) then
           call write_error(message, unit=lundia)

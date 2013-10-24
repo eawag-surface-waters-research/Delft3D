@@ -6,7 +6,8 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
                 & susw      ,sbcu      ,sbcv      ,sbwu      ,sbwv      , &
-                & sswu      ,sswv      ,tetacr    ,error     ,message   )
+                & sswu      ,sswv      ,tetacr    ,conc2d    ,error     , &
+                & message   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                     
@@ -86,6 +87,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp)                        , intent(out)  :: taurat
     real(fp)                        , intent(out)  :: caks
     real(fp)                        , intent(out)  :: caks_ss3d
+    real(fp)                        , intent(out)  :: conc2d
     real(fp), dimension(kmax)       , intent(inout):: concin   ! if (i2d3d==2 .or. epspar) then output else input
     real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(out)  :: sbcu
@@ -133,6 +135,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp):: gamtcr
     !
     integer  :: k
+    real(fp) :: avgcu
     real(fp) :: avgu
     real(fp) :: bakdif
     real(fp) :: delm
@@ -168,6 +171,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp) :: uwbih
     real(fp) :: uwc
     real(fp) :: v
+    real(fp) :: z
     real(fp) :: zusus
 !
 !! executable statements -------------------------------------------------------
@@ -329,6 +333,29 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
           enddo
        endif
     endif
+    !
+    ! Compute depth-averaged velocity, representative concentration and transport
+    !
+    ! imaginary "depth-averaged current" which has a logarithmic
+    ! velocity profile, and a velocity at the bottom zeta point equivalent
+    ! to that calculated by the model for 3D current and waves is
+    ! calculated in bedbc2004/ (also 1993??) = u2dhim
+    !
+    avgu     = 0.0_fp
+    avgcu    = 0.0_fp
+    if (zumod > 0.0_fp) then
+       do k = 1, kmax
+          z     = (1.0_fp + sig(k)) * h1
+          u     = log(1.0_fp + z/z0rou)
+          avgu  = avgu  + u*thick(k)
+          avgcu = avgcu + u*rsedeq(k)*thick(k)
+       enddo
+       conc2d = avgcu / max(avgu,eps)
+       avgu   = avgu * umod / log(1.0_fp + zumod/z0rou)
+    else
+       conc2d = 0.0_fp
+    endif
+    !
     if (scour) then
        utot = ustarc * chezy / sag
     else
