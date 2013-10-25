@@ -1074,11 +1074,11 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
           errorstring = 'Line parse error'
        endif
     endif
-    write(*,*)":", line,":"
-    !write(errorstring,'(I100)') size(line)
-    write(errorstring,'(A,A,A,A,I4,A,A100,A,A)') &
+    ! note that: the error message only shows the first 100 characters of the line
+    ! to avoid to put a long line in the errorstring.
+    write(errorstring,'(A,A,A,A,I4,A,A100,A,A)') &   
        & 'Reading ',trim(filnam),char(10), &
-       & 'Line ',iline,': ',trim(line),char(10), &
+       & 'Line ',iline,': ',trim(line(:100)),char(10), &
        & trim(errorstring)
 210 continue
     !
