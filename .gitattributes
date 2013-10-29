@@ -65,6 +65,7 @@ examples/03_flow-wave/r17.mdw -text
 examples/03_flow-wave/run_flow2d3d.bat -text
 examples/03_flow-wave/run_flow2d3d.sh -text
 examples/03_flow-wave/run_flow2d3d_parallel.bat -text
+examples/03_flow-wave/run_flow2d3d_parallel_wave.sh -text
 examples/03_flow-wave/sedsand.sed -text
 examples/03_flow-wave/wind_01.wnd -text
 examples/04_fluidmud/README -text
