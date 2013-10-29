@@ -49,6 +49,8 @@
       L = INDEX(REC,'Missing Value')
       IF (L .NE. 0) THEN
          kw_found = .true.
+         i = index(rec, '=') + 1
+         read(rec(i:), *, iostat=istat) xymiss
       ENDIF
 
       if (kw_found) then
@@ -71,6 +73,15 @@
 !
       call ecrrea (x     , mc    , nc    , lun   , mdim  , ndim  )
       call ecrrea (y     , mc    , nc    , lun   , mdim  , ndim  )
+      do j=1,nc
+         do i=1,mc
+            if (x(i,j)==xymiss .and. y(i,j)==xymiss) then
+               x(i,j)=0.0
+               y(i,j)=0.0
+            endif
+         enddo
+      enddo
+
 !
       goto 9999
 !
