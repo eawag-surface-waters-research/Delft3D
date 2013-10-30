@@ -10,6 +10,8 @@ Compiling on Windows
      Visual Studio 2008, including Fortran compiler Intel 11.0 (11.1)
      OR
      Visual Studio 2010, including Fortran compiler Intel 12.0 (Intel(R) Visual Fortran Composer XE 2011)
+     OR
+     Visual Studio 2012, including Fortran compiler Intel 13.0 (Intel(R) Visual Fortran Composer XE 2013)
   1) Open "src\d_hydro_open_source.sln" in Visual Studio 2008
      OR
      Open "src\d_hydro_open_source_vs2010.sln" in Visual Studio 2010
