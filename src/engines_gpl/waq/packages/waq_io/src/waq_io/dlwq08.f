@@ -162,7 +162,25 @@
       call opt1   ( icopt1  , lun     , 18      , lchar   , filtype ,
      &              ldummy  , ldummy  , 0       , ierr2   , iwar    )
       if ( ierr2  .gt. 0 ) goto 10
-      if ( icopt1 .eq. BINARY ) goto 10
+      if ( icopt1 .eq. BINARY ) then
+         ip = scan ( lchar(18), '.', back = .true. )              ! look for the file type
+         if ( lchar(18)(ip:ip+3) .eq. '.map' ) then               ! if .map, it is a map-file
+            read ( lun(18) ) cdummy(1:160)                        ! read title of simulation
+            if ( cdummy(114:120) .eq. 'mass/m2' ) then            !  at end of third line ...
+               write ( lunut , 2070 )
+            else if ( masspm2 ) then
+               write ( lunut , 2080 )
+               ierr = ierr + 1
+            else
+               write ( lunut , 2090 )
+               iwar = iwar + 1
+            endif
+         else
+            write ( lunut , 2100 )
+            iwar = iwar + 1
+         endif
+         goto 10
+      endif
 
 !        Make the file a .map file instead of the previous .wrk file
 
@@ -267,5 +285,9 @@
  2040 format (  /,' ERROR, keyword not supported: ',A )
  2050 format (    ' ERROR reading input!' )
  2060 format (  /,' Block of input data is ordered per substance' )
+ 2070 format (  /,' Binary initials file is .map file with bed substances in mass/m2!' )
+ 2080 format (  /,' ERROR: initials file is .map file with bed substances in mass/gridcell rather than mass/m2!' )
+ 2090 format (  /,' WARNING: Binary initials file is .map file with bed substances in mass/gridcell!' )
+ 2100 format (  /,' WARNING: Binary initials file is assumed to have bed substances in mass/gridcell!' )
 
       end
