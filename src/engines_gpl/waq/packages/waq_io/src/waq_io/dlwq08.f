@@ -175,8 +175,11 @@
                write ( lunut , 2090 )
                iwar = iwar + 1
             endif
-         else
+         else if ( masspm2 ) then
             write ( lunut , 2100 )
+            ierr = ierr + 1
+         else
+            write ( lunut , 2110 )
             iwar = iwar + 1
          endif
          goto 10
@@ -288,6 +291,7 @@
  2070 format (  /,' Binary initials file is .map file with bed substances in mass/m2!' )
  2080 format (  /,' ERROR: initials file is .map file with bed substances in mass/gridcell rather than mass/m2!' )
  2090 format (  /,' WARNING: Binary initials file is .map file with bed substances in mass/gridcell!' )
- 2100 format (  /,' WARNING: Binary initials file is assumed to have bed substances in mass/gridcell!' )
+ 2100 format (  /,' ERROR: Binary initials file is assumed to have bed substances in mass/gridcell rather than mass/m2!' )
+ 2110 format (  /,' WARNING: Binary initials file is assumed to have bed substances in mass/gridcell!' )
 
       end
