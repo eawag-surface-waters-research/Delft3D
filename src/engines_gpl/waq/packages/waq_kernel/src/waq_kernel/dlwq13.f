@@ -73,21 +73,23 @@ C
       enddo
 
       if ( nonan /= 0 ) then
-          write (lun(19),*)
-     &     ' Corrected concentrations as written to the restart file:'
-          write (lun(19),*) ' Number of values reset to zero: ', nonan
-          write (lun(19),*) ' Total number in the array:      ',
-     &         notot*noseg
-          write (lun(19),*)
-     &     ' This may indicate that the computation was unstable'
+         write (lun(19),*) ' Corrected concentrations as written to the restart file:'
+         write (lun(19),*) ' Number of values reset from NaN to zero: ', nonan
+         write (lun(19),*) ' Total amount of numbers in the array: ', notot*noseg
+         write (lun(19),*) ' This may indicate that the computation was unstable'
       endif
 
 C
-C      write standard restart file
-C
-      CALL DHOPNF ( LUN(23), LCHAR(23), 23    , 1     , IERR  )
-      WRITE ( LUN(23) ) ITIME , CONC
-      CLOSE ( LUN(23) )
+C      write standard restart file. Not done any more. CONC of passive
+!                                   substances is in mass/m2 now. That
+!                                   is incompatible with the old .res file
+!                                   that is in mass/gridcell. The old file
+!                                   is still supported for input only because
+!                                   of backward compatibility.
+!
+!     CALL DHOPNF ( LUN(23), LCHAR(23), 23    , 1     , IERR  )
+!     WRITE ( LUN(23) ) ITIME , CONC
+!     CLOSE ( LUN(23) )
 C
 C     write restart file in .map format
 C
@@ -99,8 +101,11 @@ C
          ENDIF
    10 CONTINUE
       WRITE ( * , * ) ' Invalid name of restart MAP file !'
+      write ( * , * ) ' Restart file written to restart_temporary.map !'
       WRITE (LUN(19),*) ' Invalid name of restart MAP file !'
-      CALL SRSTOP(1)
+      write (lun(19),*) ' Restart file written to restart_temporary.map !'
+      lcharmap = 'restart_temporary.map'
+!     CALL SRSTOP(1)
    20 CALL DHOPNF ( LUN(23), LCHARMAP, 23    , 1     , IERR  )
       WRITE ( LUN(23) ) ( MNAME(K) , K=1,4 )
       WRITE ( LUN(23) )   NOTOT    , NOSEG
