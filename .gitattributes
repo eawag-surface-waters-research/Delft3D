@@ -3915,6 +3915,7 @@ src/tools_lgpl/matlab/quickplot/cleanup.m -text
 src/tools_lgpl/matlab/quickplot/countmlines.m -text
 src/tools_lgpl/matlab/quickplot/determine_revision.m -text
 src/tools_lgpl/matlab/quickplot/fstrrep.m -text
+src/tools_lgpl/matlab/quickplot/make_all.m -text
 src/tools_lgpl/matlab/quickplot/make_colormaps.m -text
 src/tools_lgpl/matlab/quickplot/make_d3dmatlab.m -text
 src/tools_lgpl/matlab/quickplot/make_ecoplot.m -text
