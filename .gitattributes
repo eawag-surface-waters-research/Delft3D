@@ -3963,6 +3963,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/@qp_data_resource/qp_data_resource.m -te
 src/tools_lgpl/matlab/quickplot/progsrc/@qp_data_resource/subsref.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/Contents.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/arbcross.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/asciiwind.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/average_trim.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/bct_io.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/calldll.m -text
@@ -4151,7 +4152,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/ap2ep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/arcgrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/arcgridfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/asciiload.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/asciiwind.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/asciiwindfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/aukepc.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/aukepcfil.m -text
@@ -4425,7 +4425,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/tba_plotellipses.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tdelft3d.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tekal.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tekal2tba.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/tekalsort.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/thindam.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tick.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/topodescription.m -text
