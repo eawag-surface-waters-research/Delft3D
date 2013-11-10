@@ -35,7 +35,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\lib\$(PlatformName)\$(ConfigurationName)\dynamic" ConfigurationType="typeDynamicLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\d3dwaq_openpb.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\x64" IgnoreDefaultLibraryNames="LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)" SubSystem="subSystemWindows" LinkDLL="true" AdditionalDependencies="pthreadVC2.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>

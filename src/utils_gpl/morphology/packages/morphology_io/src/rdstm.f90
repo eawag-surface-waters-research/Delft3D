@@ -73,7 +73,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
 ! Call variables
 !
     type (stmtype)              , intent(out) :: stm
-    type (griddimtype)          , pointer     :: griddim
+    type (griddimtype)  , target, intent(in)  :: griddim
     character(*)                , intent(in)  :: filsed
     character(*)                , intent(in)  :: filmor
     character(*)                , intent(in)  :: filtrn

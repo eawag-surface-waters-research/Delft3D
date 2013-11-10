@@ -133,7 +133,6 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     type (moroutputtype)                   , pointer :: moroutput
     type (mornumericstype)                 , pointer :: mornum
     type (bedbndtype)      , dimension(:)  , pointer :: morbnd
-    type (griddimtype)                     , pointer :: griddim
 !
 ! Local parameters
 !
@@ -157,6 +156,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     type (gd_morpar)               , pointer     :: gdmorpar
     type (bedcomp_data)            , pointer     :: gdmorlyr
     real(fp)                       , intent(out) :: fwfac
+    type (griddimtype)  , target   , intent(in)  :: griddim
 !
 ! Local variables
 !
@@ -1713,7 +1713,7 @@ subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr
     integer                                  , intent(in)  :: lsed     ! number of suspended fractions
     integer                                                :: lundia
     logical                                  , intent(out) :: error
-    type (griddimtype)                       , pointer :: griddim
+    type (griddimtype)            , target   , intent(in)  :: griddim
 !
 ! Local variables
 !

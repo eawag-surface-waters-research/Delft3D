@@ -64,7 +64,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     type (gd_morpar)                                , pointer     :: gdmorpar
     type (gd_sedpar)                                , pointer     :: gdsedpar
     type (bedcomp_data)                             , pointer     :: gdmorlyr
-    type (griddimtype)                              , pointer     :: griddim
+    type (griddimtype)                   , target   , intent(in)  :: griddim
     type(tree_data)                                 , pointer     :: mor_ptr
 !
 ! Local variables
@@ -805,7 +805,7 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
 !
 ! Global variables
 !
-    type (griddimtype)                                  , pointer     :: griddim
+    type (griddimtype)                       , target   , intent(in)  :: griddim
     integer                                             , intent(in)  :: lundia  !  Description and declaration in inout.igs
     integer                                             , intent(in)  :: ndiff   !  Description and declaration in bedcomposition module
     real(fp), dimension(ndiff)                          , intent(out) :: zdiff   !  Description and declaration in bedcomposition module
