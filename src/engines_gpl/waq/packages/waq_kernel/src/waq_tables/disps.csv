@@ -14,7 +14,6 @@ dispit,dispsu,dispsc
 "VertDisp  ","As        ",   1.00000
 "VertDisp  ","Va        ",   1.00000
 "VertDisp  ","Ni        ",   1.00000
-"VertDisp  ","BODC      ",   1.00000
 "VertDisp  ","Green     ",   1.00000
 "VertDisp  ","Diat      ",   1.00000
 "VertDisp  ","NO3       ",   1.00000
@@ -82,10 +81,6 @@ dispit,dispsu,dispsc
 "VertDisp  ","Opal      ",   1.00000
 "VertDisp  ","MPB1peli  ",   1.00000
 "VertDisp  ","MPB2psam  ",   1.00000
-"VertDisp  ","Mnd1Diat-m",   1.00000
-"VertDisp  ","Mnd2Flag-m",   1.00000
-"VertDisp  ","Mnd3Diat-f",   1.00000
-"VertDisp  ","Mnd4Flag-f",   1.00000
 "VertDisp  ","BLOOMALG01",   1.00000
 "VertDisp  ","BLOOMALG02",   1.00000
 "VertDisp  ","BLOOMALG03",   1.00000
@@ -148,7 +143,6 @@ dispit,dispsu,dispsc
 "HorzDisp  ","As        ",   1.00000
 "HorzDisp  ","Va        ",   1.00000
 "HorzDisp  ","Ni        ",   1.00000
-"HorzDisp  ","BODC      ",   1.00000
 "HorzDisp  ","Green     ",   1.00000
 "HorzDisp  ","Diat      ",   1.00000
 "HorzDisp  ","NO3       ",   1.00000
@@ -208,10 +202,6 @@ dispit,dispsu,dispsc
 "HorzDisp  ","Opal      ",   1.00000
 "HorzDisp  ","MPB1peli  ",   1.00000
 "HorzDisp  ","MPB2psam  ",   1.00000
-"HorzDisp  ","Mnd1Diat-m",   1.00000
-"HorzDisp  ","Mnd2Flag-m",   1.00000
-"HorzDisp  ","Mnd3Diat-f",   1.00000
-"HorzDisp  ","Mnd4Flag-f",   1.00000
 "HorzDisp  ","BLOOMALG01",   1.00000
 "HorzDisp  ","BLOOMALG02",   1.00000
 "HorzDisp  ","BLOOMALG03",   1.00000
@@ -270,7 +260,6 @@ dispit,dispsu,dispsc
 "HorzDispV ","As        ",   1.00000
 "HorzDispV ","Va        ",   1.00000
 "HorzDispV ","Ni        ",   1.00000
-"HorzDispV ","BODC      ",   1.00000
 "HorzDispV ","Green     ",   1.00000
 "HorzDispV ","Diat      ",   1.00000
 "HorzDispV ","NO3       ",   1.00000
@@ -330,10 +319,6 @@ dispit,dispsu,dispsc
 "HorzDispV ","Opal      ",   1.00000
 "HorzDispV ","MPB1peli  ",   1.00000
 "HorzDispV ","MPB2psam  ",   1.00000
-"HorzDispV ","Mnd1Diat-m",   1.00000
-"HorzDispV ","Mnd2Flag-m",   1.00000
-"HorzDispV ","Mnd3Diat-f",   1.00000
-"HorzDispV ","Mnd4Flag-f",   1.00000
 "HorzDispV ","BLOOMALG01",   1.00000
 "HorzDispV ","BLOOMALG02",   1.00000
 "HorzDispV ","BLOOMALG03",   1.00000
