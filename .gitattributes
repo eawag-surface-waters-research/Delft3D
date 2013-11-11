@@ -2914,8 +2914,17 @@ src/third_party_open/intel_fortran/lib/win32/libifcoremd.dll -text
 src/third_party_open/intel_fortran/lib/win32/libifportmd.dll -text
 src/third_party_open/intel_fortran/lib/win32/libmmd.dll -text
 src/third_party_open/kdtree2/LICENSE -text
+src/third_party_open/kdtree2/Makefile.am -text
+src/third_party_open/kdtree2/README -text
+src/third_party_open/kdtree2/autogen.sh -text
+src/third_party_open/kdtree2/configure -text
+src/third_party_open/kdtree2/configure.ac -text
+src/third_party_open/kdtree2/kdtree2-README -text
+src/third_party_open/kdtree2/m4/ax_check_compile_flag.m4 -text
+src/third_party_open/kdtree2/src-f90/Makefile.am -text
 src/third_party_open/kdtree2/src-f90/kdtree2.31.vfproj -text
 src/third_party_open/kdtree2/src-f90/kdtree2.f90 -text
+src/third_party_open/kdtree2/src-f90/kdtree2_test.f90 -text
 src/third_party_open/lexyacc/bin/win32/byacc.exe -text
 src/third_party_open/lexyacc/bin/win32/cygwin1.dll -text
 src/third_party_open/lexyacc/bin/win32/flex.exe -text
