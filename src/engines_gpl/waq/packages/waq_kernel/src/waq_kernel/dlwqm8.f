@@ -80,7 +80,6 @@
       real                      :: vfrom, vto             ! 'from' and 'to' new volume
       real                      :: dq, e1, e3, s          ! support variables for the limiter
       real                      :: cfrm1, ctop1           ! concentration of from-1 and to+1 cell
-      real                      :: dqtr, dqtot            ! help variables for balances
 
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqm8", ithandl )
@@ -164,16 +163,10 @@
             endif
             if ( btest(iopt,3) ) then             ! balances active
                if ( iqdmp(iq) .gt. 0 ) then       ! balances to be updated
-                  if ( flowtot(iq) .gt. 0.0 ) then
-                     dqtr = flowtot(iq)*bound(isys,-ifrom)*idt
+                  if ( dq .gt. 0.0 ) then
+                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dq
                   else
-                     dqtr = flowtot(iq)*conc (isys, ito  )*idt
-                  endif
-                  dqtot = dq + dqtr
-                  if ( dqtot .gt. 0.0 ) then
-                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dqtot
-                  else
-                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dqtot
+                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dq
                   endif
                endif
             endif
@@ -193,16 +186,10 @@
             endif
             if ( btest(iopt,3) ) then             ! balances active
                if ( iqdmp(iq) .gt. 0 ) then       ! balances to be updated
-                  if ( flowtot(iq) .gt. 0.0 ) then
-                     dqtr = flowtot(iq)*conc (isys, ifrom)*idt
+                  if ( dq .gt. 0.0 ) then
+                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dq
                   else
-                     dqtr = flowtot(iq)*bound(isys,-ito  )*idt
-                  endif
-                  dqtot = dq + dqtr
-                  if ( dqtot .gt. 0.0 ) then
-                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dqtot
-                  else
-                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dqtot
+                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dq
                   endif
                endif
             endif
@@ -247,16 +234,10 @@
 
             if ( btest(iopt,3) ) then             ! balances active
                if ( iqdmp(iq) .gt. 0 ) then       ! balances to be updated
-                  if ( flowtot(iq) .gt. 0.0 ) then
-                     dqtr = flowtot(iq)*conc (isys, ifrom)*idt
+                  if ( dq .gt. 0.0 ) then
+                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dq
                   else
-                     dqtr = flowtot(iq)*conc (isys, ito  )*idt
-                  endif
-                  dqtot = dq + dqtr
-                  if ( dqtot .gt. 0.0 ) then
-                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dqtot
-                  else
-                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dqtot
+                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dq
                   endif
                endif
             endif
