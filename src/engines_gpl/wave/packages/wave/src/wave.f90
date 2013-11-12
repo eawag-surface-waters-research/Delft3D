@@ -191,6 +191,16 @@ program waves_main
          x_fp = real(swan_grids(i_swan)%x, fp)
          y_fp = real(swan_grids(i_swan)%y, fp)
          !
+         success  = gridtometeo(   swan_grids(i_swan)%grid_name, &
+                              &    swan_grids(i_swan)%nmax     , &
+                              &    swan_grids(i_swan)%mmax     , &
+                              & 1, swan_grids(i_swan)%nmax     , &
+                              & 1, swan_grids(i_swan)%mmax     , &
+                              &    swan_grids(i_swan)%kcs      , &
+                              &    x_fp                        , &
+                              &    y_fp                        )
+         call checkmeteoresult_wave(success)
+         !
          ! Read the meteo files
          !
          do i_meteo = 1, swan_run%dom(i_swan)%n_meteofiles_dom
@@ -199,16 +209,6 @@ program waves_main
                                  & swan_grids(i_swan)%sferic                  , &
                                  & swan_grids(i_swan)%mmax                    , &
                                  & swan_grids(i_swan)%nmax                    )
-            call checkmeteoresult_wave(success)
-            !
-            success  = gridtometeo(   swan_grids(i_swan)%grid_name, &
-                                 &    swan_grids(i_swan)%nmax     , &
-                                 &    swan_grids(i_swan)%mmax     , &
-                                 & 1, swan_grids(i_swan)%nmax     , &
-                                 & 1, swan_grids(i_swan)%mmax     , &
-                                 &    swan_grids(i_swan)%kcs      , &
-                                 &    x_fp                        , &
-                                 &    y_fp                        )
             call checkmeteoresult_wave(success)
          enddo
          !
