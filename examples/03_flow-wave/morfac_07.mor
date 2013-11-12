@@ -1,5 +1,5 @@
- 7.0000000e+000     [-]       :MORFAC, morphological scale factor
- 7.2000000e+002     [min]     :MORSTT, spin-up interval before morphological changes
+ 7.0000000e+002     [-]       :MORFAC, morphological scale factor
+ 6.0000000e+001     [min]     :MORSTT, spin-up interval before morphological changes
  5.0000001e-002     [m]       :THRESH, threshold sediment thickness
 .true.                        :MORUPD, update bathymetry during FLOW simulation
 .true.                        :EQMBC,  equilibrium sediment concentration profile at open boundary
