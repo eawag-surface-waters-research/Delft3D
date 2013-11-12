@@ -329,12 +329,8 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
           else
              !
              ! The read DPS is placed in array DP
-             ! The flag rst_dp is used to set DPSOPT=DP
-             ! This ensures that the DP values are copied into DPS in subroutine caldps
-             ! Differences may occur when DPU/DPV depend on (the original) DP
              !
              write(lundia, '(a)') 'Bed level data read from restart file.'
-             rst_dp = .true.
              allocate(dp_g(nmaxgl,mmaxgl), stat = ier1)
              if (ier1 /= 0) then
                 call prterr(lundia, 'G020', 'dp_g')
@@ -568,6 +564,13 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     call dfbroadc_gdp ( dp_from_map_file, 1, dfint, gdp )
     call dfbroadc_gdp ( has_umean, 1, dfint, gdp)
     call dfbroadc_gdp ( coninit, lstsci, dfint, gdp)
+    !
+    ! If dp_from_map_file then the read DPS is placed in array DP
+    ! The flag rst_dp is used to set DPSOPT=DP
+    ! This ensures that the DP values are copied into DPS in subroutine caldps
+    ! Differences may occur when DPU/DPV depend on (the original) DP
+    !
+    rst_dp = dp_from_map_file
 
     call dfsync(gdp)
       
