@@ -108,13 +108,29 @@ FlowOL::FlowOL (
 
         char * url = this->dol->Handle ();
         this->dh->log->Write (Log::MAJOR, "DOL handle is \"%s\"", url);
-
-        FILE * f = fopen (urlFile, "w");
+		
+		// When running parallel using MPI:
+		// Each partition writes an URL file named "urlFile_rank"
+		char * urlFileFull = new char [strlen(urlFile) + 10]; /* 10: _rank + EOL */
+		strcpy(urlFileFull,urlFile);
+		// MPI_Init call is needed here,
+		// but will only be executed when DOL is switched on
+		// This call is definetely before the mpi_init call in the Fortran part (dfinitmpi.F90)
+		// In Fortran, check whether MPI_Init is already called (with DOL) or not (without DOL)
+		MPI_Init(NULL, NULL);
+		int MPIsize;
+		MPI_Comm_size (MPI_COMM_WORLD, &MPIsize);
+		if (MPIsize > 1) {
+			int rank;
+			MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+			sprintf(urlFileFull, "%s_%d", urlFile, rank);
+			}
+        FILE * f = fopen (urlFileFull, "w");
         if (f == NULL)
-            throw new Exception ("Cannot create URL file \"%s\": %s", urlFile, strerror (errno));
-
+            throw new Exception ("Cannot create URL file \"%s\": %s", urlFileFull, strerror (errno));
         fprintf (f, "%s\n", url);
         fclose (f);
+		delete [] urlFileFull;
         }
 
     catch (DOL::Exception * ex) {

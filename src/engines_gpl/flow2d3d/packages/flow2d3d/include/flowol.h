@@ -41,6 +41,7 @@
 
 #ifdef WITH_DELFTONLINE
 #include "DelftOnline.h"
+#include <mpi.h>
 #endif
 
 //-------------------------------------------------------------------------------

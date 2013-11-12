@@ -127,15 +127,15 @@ subroutine dfinitmpi
        !
        ! early return if MPI was already initialized before...
        !
-       if (mpi_is_initialized) return
-
+       if (.not. mpi_is_initialized) then
 #ifdef HAVE_MPI
-       call mpi_init ( ierr )
+          call mpi_init ( ierr )
 #endif
-       if ( ierr /= MPI_SUCCESS ) then
-          write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_init - return code is ',ierr
-          write (6,*) trim(msgstr)
-          call cstop( 1, char(0) )
+          if ( ierr /= MPI_SUCCESS ) then
+             write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_init - return code is ',ierr
+             write (6,*) trim(msgstr)
+             call cstop( 1, char(0) )
+          endif
        endif
     endif
     !
