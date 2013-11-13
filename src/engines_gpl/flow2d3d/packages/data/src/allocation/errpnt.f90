@@ -45,6 +45,7 @@ subroutine errpnt(pntnam    ,soort     ,callty    ,gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer              , pointer :: lundia
 !
 ! Global variables
 !
@@ -54,11 +55,11 @@ subroutine errpnt(pntnam    ,soort     ,callty    ,gdp       )
 !
 ! Local variables
 !
-    integer                        :: lundia ! Unit number of diagnostic file =0 No sub-system defined or diagnostic file is not open 
+!   NONE
 !
 !! executable statements -------------------------------------------------------
 !
-    call getlun(lundia, gdp)
+    lundia => gdp%gdinout%lundia
     if (lundia /= 0) then
        write (lundia, *) '*** ERROR in ', soort, ' array ', callty, ' of ', pntnam
        write (lundia, *) '          Contact Deltares'

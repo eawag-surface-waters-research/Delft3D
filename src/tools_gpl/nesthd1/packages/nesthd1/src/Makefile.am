@@ -26,7 +26,6 @@ nesthd1_SOURCES = \
         files.f \
         findmn.f \
         getdim.f \
-        getlun.f \
         gtpoint.f \
         increm.f \
         inigrd_n.f \

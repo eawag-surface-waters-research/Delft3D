@@ -66,8 +66,6 @@ subroutine gdp_dump(gdp       )
     !      write(*,*) GDP % gdcoup
     write (*, *) 'GDP % gddatusr'
     write (*, *) gdp%gddatusr
-    write (*, *) 'GDP % gddiagno'
-    write (*, *) gdp%gddiagno
     write (*, *) 'GDP % D'
     write (*, *) gdp%d
     ! write (*, *) 'GDP % gddpmveg'
@@ -121,8 +119,6 @@ subroutine gdp_dump(gdp       )
     write (*, *) 'GDP % gdnonhyd'
     write (*, *) gdp%gdnonhyd
     !
-    write (*, *) 'GDP % gddefsub'
-    write (*, *) gdp%gddefsub
     write (*, *) 'GDP % gdf0isf1'
     write (*, *) gdp%gdf0isf1
     ! write (*, *) 'GDP % gdincbc'

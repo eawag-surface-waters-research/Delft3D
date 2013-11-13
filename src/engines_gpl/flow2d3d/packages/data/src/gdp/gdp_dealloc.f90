@@ -122,7 +122,6 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdconstd, STAT = istat)
     deallocate (gdp%gdcoup  , STAT = istat)
     deallocate (gdp%gddatusr, STAT = istat)
-    deallocate (gdp%gddiagno, STAT = istat)
 
     if (associated(gdp%gddischarge%capacity)) deallocate (gdp%gddischarge%capacity, STAT = istat)
     deallocate (gdp%gddischarge, STAT = istat)
@@ -262,7 +261,6 @@ subroutine gdp_dealloc(gdp)
         if (associated(gdp%gdculver%dll_handle  )) deallocate (gdp%gdculver%dll_handle  , STAT = istat)
     endif
     deallocate (gdp%gdculver, STAT = istat)
-    deallocate (gdp%gddefsub, STAT = istat)
     call clrflwpar(istat, gdp)
     deallocate (gdp%gdflwpar, STAT = istat)
     !

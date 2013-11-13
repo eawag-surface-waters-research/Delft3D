@@ -38,7 +38,6 @@ libKernelGeneral_la_SOURCES = \
          copykcuv.f90 \
          d3stop.f90 \
          dattim.f90 \
-         defsub.f90 \
          delfil.f90 \
          delnef.f90 \
          distance_gdp.f90 \
@@ -78,7 +77,6 @@ libKernelGeneral_la_SOURCES = \
          regel.f90 \
          rmdel.f90 \
          setcurrentdatetime.f90 \
-         setlun.f90 \
          sortindices.f90 \
          srckey.f90 \
          step_to_screen.f90 \

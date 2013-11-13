@@ -22,7 +22,6 @@ nesthd2_SOURCES = \
         dimbnd.f \
         files.f \
         getdim.f \
-        getlun.f \
         getwgh.f \
         hyd2dh.f \
         nest_hd2.f \

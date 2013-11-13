@@ -46,7 +46,6 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">
-		<File RelativePath=".\include\diagno.inc"/>
 		<File RelativePath=".\include\dimnhd1.inc"/>
 		<File RelativePath=".\include\params.inc"/>
 		<File RelativePath=".\include\tri-dyn.inc"/>
@@ -63,7 +62,6 @@
 		<File RelativePath=".\src\files.f"/>
 		<File RelativePath=".\src\findmn.f"/>
 		<File RelativePath=".\src\getdim.f"/>
-		<File RelativePath=".\src\getlun.f"/>
 		<File RelativePath=".\src\gtpoint.f"/>
 		<File RelativePath=".\src\increm.f"/>
 		<File RelativePath=".\src\inigrd_n.f"/>

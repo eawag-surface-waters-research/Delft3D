@@ -488,9 +488,5 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        endif
     endif
     !
-    ! Define Unit number LUNDIA in DIAGNO.INC for Delft3D-FLOW
-    !
-    call setlun(lundia    ,'flow'    ,gdp       )
-    !
  9999 continue
 end subroutine iniid

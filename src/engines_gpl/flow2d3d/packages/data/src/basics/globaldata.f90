@@ -72,7 +72,6 @@ module globaldata
     include 'constd.igs'
     include 'coup.igs'
     include 'datusr.igs'
-    include 'diagno.igs'
     include 'discharge.igs'
     include 'dimens.igs'
     include 'dpmveg.igs'
@@ -115,7 +114,6 @@ module globaldata
     !
     include 'cline.igs'
     include 'culver.igs'
-    include 'defsub.igs'
     include 'dredge.igs'
     include 'erosed.igs'
     include 'f0isf1.igs'
@@ -160,7 +158,6 @@ module globaldata
        type (gd_constd)   , pointer :: gdconstd
        type (gd_coup)     , pointer :: gdcoup
        type (gd_datusr)   , pointer :: gddatusr
-       type (gd_diagno)   , pointer :: gddiagno
        type (gd_discharge), pointer :: gddischarge
        type (gd_dimens)   , pointer :: d
        type (griddimtype) , pointer :: griddim
@@ -209,7 +206,6 @@ module globaldata
        !
        type (sv_cline)    , pointer :: gdcline
        type (sv_culver)   , pointer :: gdculver
-       type (sv_defsub)   , pointer :: gddefsub
        type (sv_dredge)   , pointer :: gddredge
        type (gd_trapar)   , pointer :: gdtrapar
        type (sv_erosed)   , pointer :: gderosed

@@ -1,4 +1,4 @@
-subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
+subroutine tdatmain(runid, alone, filmrs, nuerr, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -53,7 +53,6 @@ subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
 !
     integer                    :: nuerr  ! Exit code: 0 := ok, < 0 then error
     logical       , intent(in) :: alone  ! TRUE when flow runs stand-alone, FALSE when flow is part of morsys 
-    character(4)  , intent(in) :: subsys ! Sub-system definition of Delft3D here SUBSYS = 'flow' 
     character(*)  , intent(in) :: runid
     character(12) , intent(in) :: filmrs ! File name for DELFT3D_MOR FLOW input file (MD-flow.xxx) 
 !
@@ -72,10 +71,6 @@ subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
     ! Initialize local parameters
     !
     nuerr  = 0
-    !
-    ! Initialize sub-system for Delft3D-FLOW
-    !
-    call defsub(subsys, gdp)
     !
     ! Call to major routine to create time dependent data files
     !

@@ -121,7 +121,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     character(256) , pointer            :: comfil       ! Communication file name 
     character(256) , pointer            :: filmd        ! File name for MD FLOW file 
     character(256) , pointer            :: trifil       ! File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def) 
-    character(4)                        :: subsys       ! Sub-system definition of Delft3D here SUBSYS = 'flow' 
     character(5)                        :: filid
     character(5)   , pointer            :: versio       ! Version nr. of the current package 
 !! executable statements -------------------------------------------------------
@@ -187,7 +186,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     
     init     = .true.
     filmrs   = ' '
-    subsys   = 'flow'
     alone    = .true.
     !
     iphisi   = 0
@@ -243,7 +241,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     ! Run TDATOM
     !
     if (.not.parll .or. inode == master) then
-       call tdatmain(runid, alone, subsys, filmrs, icheck, gdp) 
+       call tdatmain(runid, alone, filmrs, icheck, gdp) 
     endif
     call dfbroadc_gdp(icheck, 1, dfint,gdp)
     call dfsync(gdp)
@@ -276,10 +274,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
           call d3stop(1         ,gdp       )
        endif
     endif
-    !
-    ! Initialize sub-system for Delft3D-FLOW
-    !
-    call defsub(subsys    ,gdp       )
     !
     ! Start FLOW simulation program
     !

@@ -798,14 +798,11 @@
 !   -------------------------
 ! IERR        I*4                  Error code number as output from
 !                                  function ERRPRT
-! LUNDIA      I*4                  Unit number of diagnostic file
-!                                  =0 No sub-system defined or diagno-
-!                                     stic file is not open
 !-----------------------------------------------------------------------
 !
 !  declarations and specifications
 !
-      integer        errptr,ierr  ,lundia
+      integer        errptr,ierr
 !
       character*(*)  pntnam,soort ,callty
 !
@@ -832,19 +829,10 @@
            errpnt = -1
          else
 !-----------------------------------------------------------------------
-!----------Get diagnostic unit
+!----------Write message to screen
 !-----------------------------------------------------------------------
-           call    GETLUN(lundia)
-!-----------------------------------------------------------------------
-!----------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-           if (lundia .eq. 0) then
-             write(*,*)      '*** ERROR FMM error ',ierr , ' occured ?! '
-             write(*,*)      '          Contact Deltares'
-           else
-             write(lundia,*) '*** ERROR FMM error ',ierr , ' occured ?! '
-             write(lundia,*) '          Contact Deltares'
-           endif
+           write(*,*)      '*** ERROR FMM error ',ierr , ' occured ?! '
+           write(*,*)      '          Contact Deltares'
            call    CSTOP (1         ,CHAR (0))
          endif
       else if (ierr   .eq. 8) then
@@ -853,19 +841,10 @@
 !-----------------------------------------------------------------------
          errpnt = -10000000
 !-----------------------------------------------------------------------
-!--------Get diagnostic unit
+!--------Write message to screen
 !-----------------------------------------------------------------------
-         call    GETLUN(lundia)
-!-----------------------------------------------------------------------
-!--------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-         if (lundia .eq. 0) then
-            write(*,*)      '*** ERROR Not enough memory to define ', soort ,' array'
-            write(*,*)      '          Contact Deltares'
-         else
-            write(lundia,*) '*** ERROR Not enough memory to define ', soort ,' array'
-            write(lundia,*) '          Contact Deltares'
-         endif
+         write(*,*)      '*** ERROR Not enough memory to define ', soort ,' array'
+         write(*,*)      '          Contact Deltares'
          call    CSTOP (1         ,CHAR (0))
       else if (ierr   .eq. 25) then
 !-----------------------------------------------------------------------
@@ -873,19 +852,10 @@
 !-----------------------------------------------------------------------
          errpnt = -20000000
 !-----------------------------------------------------------------------
-!--------Get diagnostic unit
+!--------Write message to screen
 !-----------------------------------------------------------------------
-         call    GETLUN(lundia)
-!-----------------------------------------------------------------------
-!--------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-         if (lundia .eq. 0) then
-            write(*,*)      '*** ERROR Pointer for ',soort , ' array of wrong type'
-            write(*,*)      '          Contact Deltares'
-         else
-            write(lundia,*) '*** ERROR Pointer for ',soort , ' array of wrong type'
-            write(lundia,*) '          Contact Deltares'
-         endif
+         write(*,*)      '*** ERROR Pointer for ',soort , ' array of wrong type'
+         write(*,*)      '          Contact Deltares'
          call    CSTOP (1         ,CHAR (0))
       else if (ierr   .eq. 6) then
 !-----------------------------------------------------------------------
@@ -893,19 +863,10 @@
 !-----------------------------------------------------------------------
          errpnt = -30000000
 !-----------------------------------------------------------------------
-!--------Get diagnostic unit
+!--------Write message to screen
 !-----------------------------------------------------------------------
-         call    GETLUN(lundia)
-!-----------------------------------------------------------------------
-!--------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-         if (lundia .eq. 0) then
-            write(*,*)      '*** ERROR Pointer name of ',soort , ' array to long'
-            write(*,*)      '          Contact Deltares'
-         else
-            write(lundia,*) '*** ERROR Pointer name of ',soort , ' array to long'
-            write(lundia,*) '          Contact Deltares'
-         endif
+         write(*,*)      '*** ERROR Pointer name of ',soort , ' array to long'
+         write(*,*)      '          Contact Deltares'
          call    CSTOP (1         ,CHAR (0))
       else if (ierr   .eq. 7) then
 !-----------------------------------------------------------------------
@@ -913,35 +874,17 @@
 !-----------------------------------------------------------------------
          errpnt = -41000000
 !-----------------------------------------------------------------------
-!--------Get diagnostic unit
+!--------Write message to screen
 !-----------------------------------------------------------------------
-         call    GETLUN(lundia)
-!-----------------------------------------------------------------------
-!--------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-         if (lundia .eq. 0) then
-            write(*,*)      '*** ERROR Pointer for ',pntnam, ' array of wrong type'
-            write(*,*)      '          Contact Deltares'
-         else
-            write(lundia,*) '*** ERROR Pointer for ',pntnam, ' array of wrong type'
-            write(lundia,*) '          Contact Deltares'
-         endif
+         write(*,*)      '*** ERROR Pointer for ',pntnam, ' array of wrong type'
+         write(*,*)      '          Contact Deltares'
          call    CSTOP (1         ,CHAR (0))
       else if (ierr  .ne. 0) then
 !-----------------------------------------------------------------------
-!--------Get diagnostic unit
+!--------Write message to screen
 !-----------------------------------------------------------------------
-         call    GETLUN(lundia)
-!-----------------------------------------------------------------------
-!--------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-         if (lundia .eq. 0) then
-            write(*,*)      '*** ERROR Unexpected memory error: ', ierr  ,' from FMM routine ERRPRT'
-            write(*,*)      '          Contact Deltares'
-         else
-            write(lundia,*) '*** ERROR Unexpected memory error: ', ierr  ,' from FMM routine ERRPRT'
-            write(lundia,*) '          Contact Deltares'
-         endif
+         write(*,*)      '*** ERROR Unexpected memory error: ', ierr  ,' from FMM routine ERRPRT'
+         write(*,*)      '          Contact Deltares'
          call    CSTOP (1         ,CHAR (0))
       else
 !-----------------------------------------------------------------------
@@ -949,19 +892,10 @@
 !-----------------------------------------------------------------------
          if (callty .eq. 'getprt') then
 !-----------------------------------------------------------------------
-!-----------Get diagnostic unit
+!-----------Write message to screen
 !-----------------------------------------------------------------------
-            call GETLUN(lundia)
-!-----------------------------------------------------------------------
-!-----------Write message to screen (LUNDIA=0) or diagnostic (LUNDIA<>0)
-!-----------------------------------------------------------------------
-            if (lundia .eq. 0) then
-               write(*,*)      '*** ERROR Unexpected memory error: ', ierr  ,' from FMM routine ERRPRT'
-               write(*,*)      '          Contact Deltares'
-            else
-               write(lundia,*) '*** ERROR Unexpected memory error: ', ierr  ,' from FMM routine ERRPRT'
-               write(lundia,*) '          Contact Deltares'
-            endif
+            write(*,*)      '*** ERROR Unexpected memory error: ', ierr  ,' from FMM routine ERRPRT'
+            write(*,*)      '          Contact Deltares'
             call CSTOP (1         ,CHAR (0))
          endif
       endif

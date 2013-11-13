@@ -34,7 +34,6 @@ libDataAllocation_la_SOURCES = \
          esm_alloc_char.f90 \
          esm_alloc_int.f90 \
          esm_alloc_real.f90 \
-         getlun.f90 \
          getpointer.f90 \
          gtcpnt.f90 \
          gtdpnt.f90 \
