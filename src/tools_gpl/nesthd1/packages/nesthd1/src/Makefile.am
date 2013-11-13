@@ -4,8 +4,7 @@ bin_PROGRAMS = nesthd1
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-        -I$(top_srcdir)/tools_gpl/nesthd1/packages/nesthd1/include \
-        -I$(top_srcdir)/utils_lgpl/esmfsm/include
+        -I$(top_srcdir)/tools_gpl/nesthd1/packages/nesthd1/include
 
 FMODULES += \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
@@ -26,24 +25,20 @@ nesthd1_SOURCES = \
         files.f \
         findmn.f \
         getdim.f \
-        gtpoint.f \
         increm.f \
         inigrd_n.f \
-        mkpoint.f \
         nearmn.f \
         pinpol.f \
         reabnd.f \
         reargf.f \
         wrinst.f \
-        wrista.f \
-        zero.f
+        wrista.f
 
 #-------------------------------------------------------------------------------
 #Libraries
 
 nesthd1_LDADD = \
         $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
-        $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
         $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         -ldl \
         $(FCLIBS) $(CCLIBS)

@@ -46,12 +46,9 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">
-		<File RelativePath=".\include\dimnhd1.inc"/>
 		<File RelativePath=".\include\params.inc"/>
-		<File RelativePath=".\include\tri-dyn.inc"/>
 		<File RelativePath=".\include\version_number.ini"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\avundf.f"/>
 		<File RelativePath=".\src\dattim.f90"/>
 		<File RelativePath=".\src\detang.f"/>
 		<File RelativePath=".\src\detnst.f"/>
@@ -62,17 +59,10 @@
 		<File RelativePath=".\src\files.f"/>
 		<File RelativePath=".\src\findmn.f"/>
 		<File RelativePath=".\src\getdim.f"/>
-		<File RelativePath=".\src\gtpoint.f"/>
 		<File RelativePath=".\src\increm.f"/>
 		<File RelativePath=".\src\inigrd_n.f"/>
-		<File RelativePath=".\src\memlib.f90"/>
-		<File RelativePath=".\src\mkpoint.f"/>
 		<File RelativePath=".\src\nearmn.f"/>
-		<File RelativePath=".\src\nesthd1.f90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
+		<File RelativePath=".\src\nesthd1.f90"/>
 		<File RelativePath=".\src\nesthd1_version.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
@@ -89,6 +79,5 @@
 		<File RelativePath=".\src\reargf.f"/>
 		<File RelativePath=".\src\small.f90"/>
 		<File RelativePath=".\src\wrinst.f"/>
-		<File RelativePath=".\src\wrista.f"/>
-		<File RelativePath=".\src\zero.f"/></Filter></Files>
+		<File RelativePath=".\src\wrista.f"/></Filter></Files>
 	<Globals/></VisualStudioProject>

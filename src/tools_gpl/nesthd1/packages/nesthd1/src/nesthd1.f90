@@ -35,8 +35,7 @@
 ! version            : v1.0
 ! date               : June 1997
 ! programmer         : Lamber Hulsen/Theo van der Kaaij
-! version            : 1.50.01 - AVUNDF for PC underflow
-!                                SECURE without license test
+! version            : 1.50.01
 !
 ! function           :    determine nest stations, weight factors and
 !                         angles in an overall model to generate
@@ -59,56 +58,38 @@
 
       use precision
       use nesthd1_version_module
-      include      'fsm.i'
-      include      'tri-dyn.inc'
 !
-!     Obsolete Fortran 77 code for fixed dimensions
-!     (only for comparison)
+      integer      , dimension(:)    , allocatable :: ipx
+      integer      , dimension(:)    , allocatable :: ipy
+      integer      , dimension(:)    , allocatable :: itotpx
+      integer      , dimension(:)    , allocatable :: itotpy
 !
-!     integer       lun   (  7   ),
-!    &              ipx   (maxnrp), ipy   (maxnrp),
-!    &              itotpx(maxnrp), itotpy(maxnrp)
+      integer      , dimension(:,:)  , allocatable :: icom1
+      integer      , dimension(:,:)  , allocatable :: icom2
+      integer      , dimension(:,:)  , allocatable :: mcbsp
+      integer      , dimension(:,:)  , allocatable :: ncbsp
 !
-!     integer       icom1 ( mmax  , nmax  )       ,
-!    &              icom2 ( mmax  , nmax  )       ,
-!    &              mcbsp ( maxbnd, 2     )       ,
-!    &              ncbsp ( maxbnd, 2     )
+      integer      , dimension(:,:,:), allocatable :: mcnes
+      integer      , dimension(:,:,:), allocatable :: ncnes
 !
-!     integer       mcnes ( maxbnd, 2, 4     )    ,
-!    &              ncnes ( maxbnd, 2, 4     )
+      real         , dimension(:)    , allocatable :: angle
 !
-!     real          angle ( maxbnd)
+      real         , dimension(:,:)  , allocatable :: x1
+      real         , dimension(:,:)  , allocatable :: x2
+      real         , dimension(:,:)  , allocatable :: y1
+      real         , dimension(:,:)  , allocatable :: y2
+      real         , dimension(:,:)  , allocatable :: xbnd
+      real         , dimension(:,:)  , allocatable :: ybnd
 !
-!     real          x1    ( mmax  , nmax  )       ,
-!    &              x2    ( mmax  , nmax  )       ,
-!    &              y1    ( mmax  , nmax  )       ,
-!    &              y2    ( mmax  , nmax  )       ,
-!    &              xbnd  ( maxbnd, 2     )       ,
-!    &              ybnd  ( maxbnd, 2     )
-!     real          weight( maxbnd, 2, 4     )
-!     character*  1 typbnd (maxbnd)
-!     character* 20 nambnd (maxbnd)
-
+      real         , dimension(:,:,:), allocatable :: weight
+!
+      character(1) , dimension(:)    , allocatable :: typbnd
+      character(20), dimension(:)    , allocatable :: nambnd
+!
       integer       lun   (  7   )
       character*80  filnam (7)
       character*80  CIDENT
-      logical       fout
       logical       spher_crs, spher_det
-
-
-!     FMM pointers
-!
-      integer x1    ,y1    ,icom1
-      integer x2    ,y2    ,icom2
-      integer typbnd,nambnd
-      integer angle ,mcbsp ,ncbsp
-      integer xbnd  ,ybnd  ,mcnes ,ncnes
-      integer weight
-      integer ipx   ,ipy
-      integer itotpx,itotpy
-      integer :: fsmstatus
-      integer :: fsm_flags
-      integer :: mcid
 !
 !     Version string
 !
@@ -118,10 +99,6 @@
 !---- 0. Initialisation
 !-----------------------------------------------------------------------
       lunscr = 6
-
-      mcid = 0
-      fsm_flags = FSM_SILENT
-      fsmstatus = fsmini(mcid, fsm_flags)
 
 !-----------------------------------------------------------------------
 !---- 1. Open all files
@@ -137,86 +114,98 @@
       call getdim(lun   , mmax1 , nmax1  , &
      &            mmax2 , nmax2 , maxnrp , maxbnd )
 !
-!     Make FMM pointers
+      allocate(ipx   (maxnrp), STAT = istat)
+      allocate(ipy   (maxnrp), STAT = istat)
+      allocate(itotpx(maxnrp), STAT = istat)
+      allocate(itotpy(maxnrp), STAT = istat)
 !
-      call mkpoint(lun(6) , mmax1 , nmax1  , &
-     &             mmax2  , nmax2 , maxnrp , maxbnd )
+      allocate(icom1 ( mmax1 , nmax1 ), STAT = istat)
+      allocate(icom2 ( mmax2 , nmax2 ), STAT = istat)
+      allocate(mcbsp ( maxbnd, 2     ), STAT = istat)
+      allocate(ncbsp ( maxbnd, 2     ), STAT = istat)
 !
-!     Get FMM pointers
+      allocate(mcnes ( maxbnd, 2, 4     ), STAT = istat)
+      allocate(ncnes ( maxbnd, 2, 4     ), STAT = istat)
 !
-      call gtpoint(x1     ,y1     ,icom1 , &
-     &             x2     ,y2     ,icom2 , &
-     &             typbnd ,nambnd , &
-     &             angle  ,mcbsp  ,ncbsp , &
-     &             xbnd   ,ybnd   ,mcnes ,ncnes, &
-     &             weight , &
-     &             ipx    ,ipy    ,itotpx,itotpy)
+      allocate(angle ( maxbnd), STAT = istat)
+!
+      allocate(x1    ( mmax1 , nmax1 ), STAT = istat)
+      allocate(x2    ( mmax2 , nmax2 ), STAT = istat)
+      allocate(y1    ( mmax1 , nmax1 ), STAT = istat)
+      allocate(y2    ( mmax2 , nmax2 ), STAT = istat)
+      allocate(xbnd  ( maxbnd, 2     ), STAT = istat)
+      allocate(ybnd  ( maxbnd, 2     ), STAT = istat)
+!
+      allocate(weight( maxbnd, 2, 4     ), STAT = istat)
+!
+      allocate(typbnd (maxbnd), STAT = istat)
+      allocate(nambnd (maxbnd), STAT = istat)
 
 !-----------------------------------------------------------------------
 !---- 3. Zeroise arrays
 !-----------------------------------------------------------------------
 
-      call zeroi1 (i(mcbsp) ,maxbnd*2     )
-      call zeroi1 (i(ncbsp) ,maxbnd*2     )
-      call zeroi1 (i(icom1) ,mmax1  *nmax1 )
-      call zeroi1 (i(icom2) ,mmax2  *nmax2 )
+      mcbsp = 0
+      ncbsp = 0
+      icom1 = 0
+      icom2 = 0
 
-      call zeroi1 (i(mcnes) ,maxbnd*2     *4     )
-      call zeroi1 (i(ncnes) ,maxbnd*2     *4     )
+      mcnes = 0
+      ncnes = 0
 
-      call zeror1 (r(angle) ,maxbnd,0.    )
+      angle = 0.0
 
-      call zeror1 (r(x1)    ,mmax1  *nmax1  ,0.    )
-      call zeror1 (r(x2)    ,mmax2  *nmax2  ,0.    )
-      call zeror1 (r(y1)    ,mmax1  *nmax1  ,0.    )
-      call zeror1 (r(y2)    ,mmax2  *nmax2  ,0.    )
+      x1    = 0.0
+      x2    = 0.0
+      y1    = 0.0
+      y2    = 0.0
 
-      call zeror1 (r(weight),maxbnd*2     *4     ,0.    )
+      weight= 0.0
 
 !-----------------------------------------------------------------------
 !---- 4. Read grid and boundary data models
 !-----------------------------------------------------------------------
 
-      call reargf(lun(1)    ,r(x1)    ,r(y1)    ,mmax1  ,nmax1  ,mc1   ,nc1, &
+      call reargf(lun(1)    ,x1       ,y1       ,mmax1  ,nmax1  ,mc1   ,nc1, &
                 & spher_crs )
 
-      call zeroi1(i(ipx)   ,maxnrp)
-      call zeroi1(i(ipy)   ,maxnrp)
-      call zeroi1(i(itotpx),maxnrp)
-      call zeroi1(i(itotpy),maxnrp)
-      call inigrd(lun(2),ifout ,nmax1 ,mmax1 ,i(icom1),i(ipx) ,i(ipy) , &
-     &            i(itotpx),i(itotpy),idum                             )
+      ipx = 0
+      ipy = 0
+      itotpx = 0
+      itotpy = 0
+      call inigrd(lun(2),ifout ,nmax1 ,mmax1 ,icom1, ipx,ipy, &
+     &            itotpx,itotpy,idum                          )
 
       if (ifout .ne. 0) stop 'Error in grid enclosure overall model'
 
-      call reargf(lun(3)   ,r(x2)  ,r(y2) ,mmax2  ,nmax2  ,mc2   ,nc2   , &
+      call reargf(lun(3)   ,x2  ,y2 ,mmax2  ,nmax2  ,mc2   ,nc2   , &
                &  spher_det)
       if (spher_crs .neqv. spher_det) stop 'Coarse and detailled model should be in the same coordinate system'
 
-      call zeroi1(i(ipx)   ,maxnrp)
-      call zeroi1(i(ipy)   ,maxnrp)
-      call zeroi1(i(itotpx),maxnrp)
-      call zeroi1(i(itotpy),maxnrp)
-      call inigrd(lun(4),ifout ,nmax2 ,mmax2 ,i(icom2),i(ipx) ,i(ipy) , &
-     &            i(itotpx),i(itotpy),idum                          )
+      ipx = 0
+      ipy = 0
+      itotpx = 0
+      itotpy = 0
+      call inigrd(lun(4),ifout ,nmax2 ,mmax2 ,icom2, ipx,ipy, &
+     &            itotpx,itotpy,idum                          )
       if (ifout .ne. 0) stop 'Error in grid enclosure detailed model'
 
       call dimbnd(lun(5), nobnd )
       if (nobnd .gt. maxbnd) stop 'Enlarge maxbnd'
-      call reabnd(lun(5),i(mcbsp), i(ncbsp), ch(typbnd), ch(nambnd), &
+      call reabnd(lun(5),mcbsp, ncbsp, typbnd, nambnd, &
      &            nobnd)
 
 !-----------------------------------------------------------------------
 !---- 5. Determine weight factors water level boundary
 !-----------------------------------------------------------------------
 
-      call detxy (i(mcbsp) , i(ncbsp) , r(x2) , r(y2) , i(icom2) , &
-     &            r(xbnd)  , r(ybnd)  , mmax2  , nmax2 , maxbnd, &
+      call detxy (mcbsp , ncbsp , x2     , y2    , icom2 , &
+     &            xbnd  , ybnd  , mmax2  , nmax2 , maxbnd, &
      &            nobnd , 'WL'                          )
 
-      call detnst(r(x1)   , r(y1)   , i(icom1), r(xbnd) , r(ybnd)  , &
-     &            i(mcbsp), i(ncbsp), i(mcnes), i(ncnes), r(weight), &
-     &            mmax1   , nmax1   , mc1     , nc1     , maxbnd, &
+      call detnst(x1      , y1      , icom1   , xbnd    , ybnd     , &
+     &            mcbsp   , ncbsp   , mcnes   , ncnes   , weight   , &
+     &            mmax1   , nmax1   , mc1     , nc1     , maxbnd   , &
      &            nobnd   , spher_crs                   )
 
 !-----------------------------------------------------------------------
@@ -224,27 +213,27 @@
 !        file and write stations to trisula input file
 !-----------------------------------------------------------------------
 
-      call wrinst(lun(6)   , i(mcbsp) , i(ncbsp) , i(mcnes) , i(ncnes), &
-     &            r(weight), r(angle) , maxbnd   , nobnd    , 'WL'    )
+      call wrinst(lun(6)   , mcbsp    , ncbsp    , mcnes    , ncnes   , &
+     &            weight   , angle    , maxbnd   , nobnd    , 'WL'    )
 
-      call wrista(lun(7), i(mcnes) , i(ncnes) , maxbnd)
+      call wrista(lun(7), mcnes    , ncnes    , maxbnd)
 
 !-----------------------------------------------------------------------
 !---- 7. Determine weight factors velocity boundary but first
 !        zeroise arrays
 !-----------------------------------------------------------------------
 
-      call zeroi1(i(mcnes) ,maxbnd*2     *4     )
-      call zeroi1(i(ncnes) ,maxbnd*2     *4     )
+      mcnes = 0
+      ncnes = 0
 
-      call zeror1(r(weight),maxbnd*2     *4     ,0.    )
+      weight = 0.0
 
-      call detxy  (i(mcbsp) ,i(ncbsp) ,r(x2) ,r(y2) ,i(icom2) , &
-     &             r(xbnd)  ,r(ybnd)  ,mmax2 ,nmax2 , maxbnd, &
+      call detxy  (mcbsp    ,ncbsp    ,x2    ,y2    ,icom2    , &
+     &             xbnd     ,ybnd     ,mmax2 ,nmax2 ,maxbnd   , &
      &             nobnd    , 'UV'                          )
 
-      call detnst (r(x1)   ,r(y1)   ,i(icom1) ,r(xbnd) ,r(ybnd)  , &
-     &             i(mcbsp),i(ncbsp),i(mcnes) ,i(ncnes),r(weight), &
+      call detnst (x1      ,y1      ,icom1    ,xbnd    ,ybnd     , &
+     &             mcbsp   ,ncbsp   ,mcnes    ,ncnes   ,weight   , &
      &             mmax1   , nmax1  ,mc1      ,nc1     ,maxbnd   , &
      &             nobnd   , spher_crs                           )
 
@@ -252,24 +241,23 @@
 !---- 8. Determine angles velocity boundary
 !-----------------------------------------------------------------------
 
-      call detang (r(xbnd)  ,r(ybnd),r(angle) ,i(mcbsp) ,i(ncbsp) , &
-     &             i(icom2) ,mmax2  ,nmax2    ,maxbnd   ,nobnd )
+      call detang (xbnd     ,ybnd   ,angle    ,mcbsp    ,ncbsp    , &
+     &             icom2    ,mmax2  ,nmax2    ,maxbnd   ,nobnd )
 
 !-----------------------------------------------------------------------
 !---- 9. Write weight factors/angles velocity boundary
 !-----------------------------------------------------------------------
 
-      call wrinst(lun(6)   ,i(mcbsp) ,i(ncbsp) ,i(mcnes) ,i(ncnes) ,    &
-     &            r(weight),r(angle) ,maxbnd   ,nobnd    ,'UV'        )
+      call wrinst(lun(6)   ,mcbsp    ,ncbsp    ,mcnes    ,ncnes    , &
+     &            weight   ,angle    ,maxbnd   ,nobnd    ,'UV'        )
 
-      call wrista(lun(7), i(mcnes) , i(ncnes) , maxbnd)
+      call wrista(lun(7), mcnes    , ncnes    , maxbnd)
 
 !-----------------------------------------------------------------------
 !---- end program
 !-----------------------------------------------------------------------
 
       call clsfil(lun   ,7     )
-      !call fsmend()
 
  9000 continue
       endprogram nesthd1
