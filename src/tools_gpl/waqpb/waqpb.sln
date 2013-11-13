@@ -1,6 +1,12 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb_import", "waqpb_import", "{077CD778-2A04-45CA-9122-F5636263F09C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb_lib", "waqpb_lib", "{D2C06F9F-76E0-453A-937F-45220EC510FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb_export", "waqpb_export", "{3179B36B-7418-46CC-93D8-C98B8C17F257}"
+EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waqpb_export", "packages\waqpb_export\waqpb_export.vfproj", "{C1B7594C-6BCD-4F5B-8277-D565AD576C2D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A7BAFE5D-1301-48F8-878B-9BECB3DDE241} = {A7BAFE5D-1301-48F8-878B-9BECB3DDE241}
@@ -8,12 +14,6 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waqpb_export", "packages\wa
 		{0C8D0AC5-B140-498B-B383-05CE14C138B1} = {0C8D0AC5-B140-498B-B383-05CE14C138B1}
 		{2587ADEA-13B7-4BE1-BFB4-588FF22027DF} = {2587ADEA-13B7-4BE1-BFB4-588FF22027DF}
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb_import", "waqpb_import", "{077CD778-2A04-45CA-9122-F5636263F09C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb_lib", "waqpb_lib", "{D2C06F9F-76E0-453A-937F-45220EC510FA}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb_export", "waqpb_export", "{3179B36B-7418-46CC-93D8-C98B8C17F257}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waqpb_import", "packages\waqpb_import\waqpb_import.vfproj", "{4E16B4C4-4809-47C2-91B5-F57A89222558}"
 EndProject
@@ -60,8 +60,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C1B7594C-6BCD-4F5B-8277-D565AD576C2D} = {3179B36B-7418-46CC-93D8-C98B8C17F257}
 		{4E16B4C4-4809-47C2-91B5-F57A89222558} = {077CD778-2A04-45CA-9122-F5636263F09C}
 		{F890CF86-BCA9-4527-9C17-EED27DFAE904} = {D2C06F9F-76E0-453A-937F-45220EC510FA}
+		{C1B7594C-6BCD-4F5B-8277-D565AD576C2D} = {3179B36B-7418-46CC-93D8-C98B8C17F257}
 	EndGlobalSection
 EndGlobal
