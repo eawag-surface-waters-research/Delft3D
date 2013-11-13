@@ -116,7 +116,7 @@ C     Logical Units : -
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
       LOGICAL  IM1OPT , IM2OPT , IM3OPT , IM4OPT , IM5OPT , IM6OPT ,
-     *         FFFOPT , QQQOPT , WATOPT , HVTOPT, TWOFRC
+     *         FFFOPT , QQQOPT , WATOPT , HVTOPT , TWOFRC , QUALOPT
       INTEGER  IP1 ,IP2 ,IP3 ,IP4 ,IP5 ,IP6 ,IP7 ,IP8 ,IP9 ,IP10,
      J         IP11,IP12,IP13,IP14,IP15,IP16,IP17,IP18,IP19,IP20,
      J         IP21,IP22,IP23,IP24,IP25,IP26,IP27,IP28,IP29,IP30,
@@ -370,7 +370,8 @@ C
 C        Compute F-values or not
       IF ( IN34 .EQ. 0 .AND. IN35 .EQ. 0 .AND.
      *     IN36 .EQ. 0 .AND. IN37 .EQ. 0 .AND.
-     *     IN38 .EQ. 0 .AND. IN39 .EQ. 0       ) THEN
+     *     IN38 .EQ. 0 .AND. IN39 .EQ. 0 .AND.
+     *     IN49 .EQ. 0 .AND. IN50 .EQ. 0       ) THEN
          FFFOPT = .TRUE.
       ELSE
          FFFOPT = .FALSE.
@@ -378,17 +379,24 @@ C        Compute F-values or not
 C        Compute Q-values or not
       IF ( IN43 .EQ. 0 .AND. IN44 .EQ. 0 .AND.
      *     IN45 .EQ. 0 .AND. IN46 .EQ. 0 .AND.
-     *     IN47 .EQ. 0                               ) THEN
+     *     IN47 .EQ. 0                         ) THEN
          QQQOPT = .TRUE.
       ELSE
          QQQOPT = .FALSE.
       ENDIF
 C        Compute Waterphase-values or not
       IF ( IN33 .EQ. 0 .AND. IN41 .EQ. 0 .AND.
-     *     IN42 .EQ. 0                               ) THEN
+     *     IN42 .EQ. 0 .AND. IN49 .EQ. 0 .AND.
+     *     IN50 .EQ. 0                         ) THEN
          WATOPT = .TRUE.
       ELSE
          WATOPT = .FALSE.
+      ENDIF
+C        Compute qual or not
+      IF ( IN49 .EQ. 0 .AND. IN50 .EQ. 0       ) THEN
+         QUALOPT = .TRUE.
+      ELSE
+         QUALOPT = .FALSE.
       ENDIF
       DELT = PMSA(IP22)
       IF (DELT  .LT. 1E-20 )  CALL ERRSYS ('DELT in PARTMP zero', 1 )
@@ -493,7 +501,7 @@ C***********************************************************************
 C**** Processes connected to the HEAVY METAL PARTITIONING
 C***********************************************************************
 C
-C       Convert DOC (g/m2) to (g) FOR SEDIMENT
+C       Convert DOC (g/m3) to (g/m2) FOR SEDIMENT
 C
         FAC6C = FAC6
         IF (SEDIME) FAC6C = FAC6 * POR * THICK
@@ -714,7 +722,8 @@ C@      Concentration free dissolved MP and DOC waterphase
              ENDIF
            ENDIF
 C@      Quality of MP adsorbens waterphase
-           PMSA(IP33) = FDIS2
+           FDIS       = FDIS2
+           PMSA(IP33) = FDIS
            PMSA(IP41) = CDIS
            PMSA(IP42) = CDOC
         ENDIF
@@ -774,6 +783,8 @@ C
           ENDIF
         ENDIF
         FSULF = 1. - FDIS
+        FDOC  = 0.0
+        CDOC  = 0.0
 
         PMSA(IP33) = FDIS
         PMSA(IP40) = FSULF
@@ -789,36 +800,36 @@ C
 C
 C     Addition of former process MPQUAL
 C
-      FDIS   = PMSA(IP33)
-      FDOC   = PMSA(IP34)
-      CDIS   = PMSA(IP41)
-      CDOC   = PMSA(IP42)
-      SS     = PMSA(IP19)
+      QUAL  = 0.0
+      KDALL = 0.0
+      IF ( .NOT. QUALOPT ) THEN
+         IF ( DMS1 .GE. 1E-20 )  THEN
+C
+C           Compute in g/g
+C
+            QUAL = MP * (1.0 - FDIS - FDOC) / DMS1
+C
+C           Overall partitioning coefficient
+C
+            IF ( (CDIS + CDOC) .GE. 1E-20 ) THEN
+C                        g/g     g/m3         = m3/g
+               KDALL = QUAL / (CDIS + CDOC)
+            ELSE
+               KDALL = 0.0
+            ENDIF
+C
+C           Convert to mg/kg (QUAL) or to l/kg (KDALL)
+C
+            QUAL  = QUAL * 1.E6
+            KDALL = KDALL * 1.E6
 
-      IF ( SS .GE. 1E-20 )  THEN
-C
-C        Compute in g/g
-C
-         QUAL = MP * (1.0 - FDIS - FDOC) / SS
-C
-C---       Overall partitioning coefficient
-C
-           IF ( (CDIS + CDOC) .GE. 1E-20 ) THEN
-C                     g/g     g/m3         = m3/g
-              KDALL = QUAL / (CDIS + CDOC)
-           ELSE
-              KDALL = 0.0
-           ENDIF
-      ELSE
-         QUAL  = 0.0
-         KDALL = 0.0
+         ENDIF
       ENDIF
 C
 C     Output
-C     Convert to mg/kg (PMSA49) or to l/kg (PMSA50)
 C
-      PMSA (IP49) = QUAL * 1.E6
-      PMSA (IP50) = KDALL * 1.E6
+      PMSA (IP49) = QUAL
+      PMSA (IP50) = KDALL
 
       ENDIF
       ENDIF

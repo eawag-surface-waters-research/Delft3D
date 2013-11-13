@@ -196,7 +196,9 @@
 		<File RelativePath=".\src\waq_utils\dattim.f"/>
 		<File RelativePath=".\src\waq_utils\delwaq_loads.f"/>
 		<File RelativePath=".\src\waq_utils\dhagg2.f"/>
-		<File RelativePath=".\src\waq_utils\dhaggr.f"/>
+		<File RelativePath=".\src\waq_utils\dhaggr.f">
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhagkm.f"/>
 		<File RelativePath=".\src\waq_utils\dhc20m.f"/>
 		<File RelativePath=".\src\waq_utils\dhcarg.f"/>
@@ -205,20 +207,28 @@
 		<File RelativePath=".\src\waq_utils\dhctim.f"/>
 		<File RelativePath=".\src\waq_utils\dhcwrd.f"/>
 		<File RelativePath=".\src\waq_utils\dhdag2.f"/>
-		<File RelativePath=".\src\waq_utils\dhdagg.f"/>
+		<File RelativePath=".\src\waq_utils\dhdagg.f">
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhdelf.f"/>
 		<File RelativePath=".\src\waq_utils\dherrs.f"/>
 		<File RelativePath=".\src\waq_utils\dhfext.f"/>
 		<File RelativePath=".\src\waq_utils\DHGARG.F"/>
 		<File RelativePath=".\src\waq_utils\dhggd.f"/>
 		<File RelativePath=".\src\waq_utils\dhgnam.f"/>
-		<File RelativePath=".\src\waq_utils\dhgpoi.f"/>
-		<File RelativePath=".\src\waq_utils\dhgvar.f"/>
+		<File RelativePath=".\src\waq_utils\dhgpoi.f">
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
+		<File RelativePath=".\src\waq_utils\dhgvar.f">
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhgwrd.f"/>
 		<File RelativePath=".\src\waq_utils\DHHASP.F"/>
 		<File RelativePath=".\src\waq_utils\dhimov.f"/>
 		<File RelativePath=".\src\waq_utils\dhisys.f"/>
-		<File RelativePath=".\src\waq_utils\dhkmrk.f"/>
+		<File RelativePath=".\src\waq_utils\dhkmrk.f">
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhkmst.f"/>
 		<File RelativePath=".\src\waq_utils\dhlic.f"/>
 		<File RelativePath=".\src\waq_utils\dhltim.f"/>

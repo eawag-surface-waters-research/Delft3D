@@ -130,7 +130,9 @@
 		<File RelativePath=".\src\proc_preprocess\wrtoys.f"/>
 		<File RelativePath=".\src\proc_preprocess\wrwrko.f"/></Filter>
 		<Filter Name="waq_io">
-		<File RelativePath=".\src\waq_io\bound.f"/>
+		<File RelativePath=".\src\waq_io\bound.f">
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_io\check.f"/>
 		<File RelativePath=".\src\waq_io\compact_usefor.f"/>
 		<File RelativePath=".\src\waq_io\compute_matrix.f"/>
