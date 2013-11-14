@@ -3885,6 +3885,8 @@ src/tools_lgpl/matlab/fopen_debug/fopen.m -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/README.TXT -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/SplashScreenStarter.sln -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/SplashScreenStarter.vcproj -text
+src/tools_lgpl/matlab/quickplot/SplashScreen/SplashScreenStarter.vcxproj -text
+src/tools_lgpl/matlab/quickplot/SplashScreen/SplashScreenStarter_v2010.sln -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/finish/CloseSplashScreen.cpp -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/finish/make_CloseSplashScreen.m -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/include/FileImageLoader.h -text
