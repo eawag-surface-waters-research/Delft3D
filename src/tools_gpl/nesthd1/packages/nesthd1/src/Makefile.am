@@ -13,7 +13,6 @@ nesthd1_SOURCES = \
         nesthd1_version.F90 \
         distance.f90 \
         nesthd1.f90 \
-        memlib.f90 \
         small.f90 \
         newlun.f90 \
         dattim.f90 \
