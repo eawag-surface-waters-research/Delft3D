@@ -1,4 +1,4 @@
-subroutine initveg3d(gdp       )
+subroutine initveg3d(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -38,26 +38,14 @@ subroutine initveg3d(gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer                              , pointer :: itplant
-    integer                              , pointer :: nveg
-    real(fp)                             , pointer :: clplant
-    character(256)                       , pointer :: filvg3d
 !
 !! executable statements -------------------------------------------------------
 !
-    itplant    => gdp%gdveg3d%itplant
-    nveg       => gdp%gdveg3d%nveg
-    clplant    => gdp%gdveg3d%clplant
-    filvg3d    => gdp%gdveg3d%filvg3d
-    !
-    itplant   = 0
-    nveg      = 0
+    gdp%gdveg3d%itplant   = 0
+    gdp%gdveg3d%nveg      = 0
     nullify(gdp%gdveg3d%planttype)
     nullify(gdp%gdveg3d%nplants)
-    clplant   = 0.0
-    filvg3d   = ' '
+    gdp%gdveg3d%clplant   = 0.0_fp
+    gdp%gdveg3d%filvg3d   = ' '
     nullify(gdp%gdveg3d%vegs)
 end subroutine initveg3d
