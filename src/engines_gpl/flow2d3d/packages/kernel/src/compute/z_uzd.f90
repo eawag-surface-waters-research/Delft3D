@@ -113,7 +113,6 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     logical                 , pointer :: wave
     logical                 , pointer :: roller
     logical                 , pointer :: xbeach
-    logical                 , pointer :: dpmveg
     integer                 , pointer :: nh_level
     logical                 , pointer :: nonhyd
     real(fp)                , pointer :: dzmin
@@ -361,7 +360,6 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     wave       => gdp%gdprocs%wave
     roller     => gdp%gdprocs%roller
     xbeach     => gdp%gdprocs%xbeach
-    dpmveg     => gdp%gdprocs%dpmveg
     dpsopt     => gdp%gdnumeco%dpsopt
     nh_level   => gdp%gdnonhyd%nh_level
     nonhyd     => gdp%gdprocs%nonhyd

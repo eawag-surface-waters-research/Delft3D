@@ -154,7 +154,7 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     logical                , pointer :: iweflg
     logical                , pointer :: struct
     logical                , pointer :: lftrto
-    logical                , pointer :: dpmveg
+    logical                , pointer :: veg3d
     logical                , pointer :: fldry
     logical                , pointer :: fltd
     logical                , pointer :: solrad_read
@@ -270,7 +270,7 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     iweflg      => gdp%gdprocs%iweflg
     struct      => gdp%gdprocs%struct
     lftrto      => gdp%gdprocs%lftrto
-    dpmveg      => gdp%gdprocs%dpmveg
+    veg3d       => gdp%gdprocs%veg3d
     alfas       => gdp%gdr_i_ch%alfas
     c           => gdp%gdr_i_ch%c
     cfurou      => gdp%gdr_i_ch%cfurou
@@ -526,11 +526,11 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
                 & r(xy2)    ,r(y3)     ,gdp       )
     endif
     !
-    ! Read and initialize Directional Point Model of Vegetation input if dpmveg = .true.
+    ! Read and initialize (Rigid) 3D Vegetation Model input if veg3d = .true.
     !
-    if (dpmveg) then
-       call rddpmveg(mmax      ,nmax      ,nmaxus    , &
-                   & r(xz)     ,r(yz)     ,gdp       )
+    if (veg3d) then
+       call rdveg3d(mmax      ,nmax      ,nmaxus    , &
+                  & r(xz)     ,r(yz)     ,gdp       )
     endif
     !
     ! Allocate arrays for 2D advection solver

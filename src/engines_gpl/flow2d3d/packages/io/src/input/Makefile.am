@@ -70,7 +70,7 @@ libIOInput_la_SOURCES = \
          rdbndd.f90 \
          rdcul.f90 \
          rddept.f90 \
-         rddpmveg.f90 \
+         rdveg3d.f90 \
          rddredge.f90 \
          rdfcio.f90 \
          rdfour.f90 \

@@ -53,7 +53,7 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical , pointer :: dpmveg
+    logical , pointer :: veg3d
 !
 ! Global variables
 !
@@ -93,7 +93,7 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    dpmveg     => gdp%gdprocs%dpmveg
+    veg3d     => gdp%gdprocs%veg3d
     !
     ! either: general local weir (3D); quadratic friction (KSPU=3)
     ! or    : rigid sheet, linear friction (KSPU=5), or CDW (quadratic as well)
@@ -124,9 +124,9 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
        enddo
     enddo
     !
-    ! Directional Point Model of Vegetation
+    ! (Rigid) 3D Vegetation Model
     !
-    if (dpmveg) then
+    if (veg3d) then
        do k = 1, kmax
           ndm  = -icy
           nmu  = icx

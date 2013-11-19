@@ -74,7 +74,7 @@ module globaldata
     include 'datusr.igs'
     include 'discharge.igs'
     include 'dimens.igs'
-    include 'dpmveg.igs'
+    include 'veg3d.igs'
     include 'exttim.igs'
     include 'flwpar.igs'
     include 'fmtbcc.igs'
@@ -161,7 +161,7 @@ module globaldata
        type (gd_discharge), pointer :: gddischarge
        type (gd_dimens)   , pointer :: d
        type (griddimtype) , pointer :: griddim
-       type (gd_dpmveg)   , pointer :: gddpmveg
+       type (gd_veg3d)    , pointer :: gdveg3d
        type (gd_exttim)   , pointer :: gdexttim
        type (gd_flwpar)   , pointer :: gdflwpar
        type (gd_fmtbcc)   , pointer :: gdfmtbcc

@@ -68,8 +68,8 @@ subroutine gdp_dump(gdp       )
     write (*, *) gdp%gddatusr
     write (*, *) 'GDP % D'
     write (*, *) gdp%d
-    ! write (*, *) 'GDP % gddpmveg'
-    ! write (*, *) gdp%gddpmveg
+    ! write (*, *) 'GDP % gdveg3d'
+    ! write (*, *) gdp%gdveg3d
     write (*, *) 'GDP % gdexttim'
     write (*, *) gdp%gdexttim
     write (*, *) 'GDP % gdfmtbcc'

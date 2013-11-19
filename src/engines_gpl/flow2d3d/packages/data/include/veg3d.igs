@@ -37,12 +37,12 @@ type dpm_vegetation
    character(80)                   :: typename ! name of this type of vegetation
 end type dpm_vegetation
 
-type gd_dpmveg
+type gd_veg3d
    real(fp)                                     :: clplant   ! Turbulence length scale coefficient between stems
    integer                                      :: itplant   ! Number of time steps between updates of plant arrays
    integer                                      :: nveg      ! number of vegetation types
    integer, dimension(:,:), pointer             :: planttype ! (n,m) vegetation type reference in this cell
    real(fp), dimension(:,:), pointer            :: nplants   ! (n,m) # plants per m2
    type (dpm_vegetation), dimension(:), pointer :: vegs      ! vegs (nveg) all vegetation descriptions
-   character(256)                               :: fildpmv   ! DPMV input file as indicated by keyword Filpla in md-file
-end type gd_dpmveg
+   character(256)                               :: filvg3d   ! 3D vegetation input file as indicated by keyword Filpla in md-file
+end type gd_veg3d

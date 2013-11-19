@@ -50,7 +50,7 @@ libDataGDP_la_SOURCES = \
          initcoup.f90 \
          initculver.f90 \
          initdischarge.f90 \
-         initdpmveg.f90 \
+         initveg3d.f90 \
          initdredge.f90 \
          initerosed.f90 \
          initf0isf1.f90 \

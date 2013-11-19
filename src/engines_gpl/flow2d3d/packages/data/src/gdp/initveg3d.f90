@@ -1,4 +1,4 @@
-subroutine initdpmveg(gdp       )
+subroutine initveg3d(gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -43,29 +43,21 @@ subroutine initdpmveg(gdp       )
     !
     integer                              , pointer :: itplant
     integer                              , pointer :: nveg
-    integer, dimension(:,:)              , pointer :: planttype
-    real(fp), dimension(:,:)             , pointer :: nplants
     real(fp)                             , pointer :: clplant
-    character(256)                       , pointer :: fildpmv
-    type (dpm_vegetation), dimension(:)  , pointer :: vegs
-    type (gd_dpmveg)                     , pointer :: gddpmveg
+    character(256)                       , pointer :: filvg3d
 !
 !! executable statements -------------------------------------------------------
 !
-    itplant    => gdp%gddpmveg%itplant
-    nveg       => gdp%gddpmveg%nveg
-    planttype  => gdp%gddpmveg%planttype
-    nplants    => gdp%gddpmveg%nplants
-    clplant    => gdp%gddpmveg%clplant
-    fildpmv    => gdp%gddpmveg%fildpmv
-    vegs       => gdp%gddpmveg%vegs
-    gddpmveg   => gdp%gddpmveg
+    itplant    => gdp%gdveg3d%itplant
+    nveg       => gdp%gdveg3d%nveg
+    clplant    => gdp%gdveg3d%clplant
+    filvg3d    => gdp%gdveg3d%filvg3d
     !
     itplant   = 0
     nveg      = 0
-    nullify(gdp%gddpmveg%planttype)
-    nullify(gdp%gddpmveg%nplants)
+    nullify(gdp%gdveg3d%planttype)
+    nullify(gdp%gdveg3d%nplants)
     clplant   = 0.0
-    fildpmv   = ' '
-    nullify(gdp%gddpmveg%vegs)
-end subroutine initdpmveg
+    filvg3d   = ' '
+    nullify(gdp%gdveg3d%vegs)
+end subroutine initveg3d

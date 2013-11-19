@@ -67,7 +67,7 @@ type gd_procs
    logical :: cnstwv               = .false. ! Constant wave field for complete model domain
                                              !    IMPORTANT can only be true if wave=true .and. roller=false
    logical :: lftrto               = .false. ! Trachytope based roughness
-   logical :: dpmveg               = .false. ! Directional Point Model of Vegetation
+   logical :: veg3d                = .false. ! (Rigid) 3D Vegetation Model
    logical :: snelli               = .false. ! Snellius
    logical :: lrdamp               = .false. ! Low Reynolds Damping
    logical :: sbkol                = .false. ! Online coupling with Sobek

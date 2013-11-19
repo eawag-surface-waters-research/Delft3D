@@ -112,7 +112,7 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     logical                 , pointer :: wave
     logical                 , pointer :: roller
     logical                 , pointer :: xbeach
-    logical                 , pointer :: dpmveg
+    logical                 , pointer :: veg3d
     integer                 , pointer :: mfg
     integer                 , pointer :: nfg
     real(fp), dimension(:,:)          , pointer :: mom_m_velchange     ! momentum du/dt term
@@ -353,7 +353,7 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     wave       => gdp%gdprocs%wave
     roller     => gdp%gdprocs%roller
     xbeach     => gdp%gdprocs%xbeach
-    dpmveg     => gdp%gdprocs%dpmveg
+    veg3d      => gdp%gdprocs%veg3d
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
     !
@@ -858,12 +858,12 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
                 !
                 ! DIFFUSION IN VERTICAL DIRECTION
                 !
-                if (.not. dpmveg) then
+                if (.not. veg3d) then
                    ap1 = 1.0
                    ap2 = 1.0
                 else
                    !
-                   ! Directional Point Model of Vegetation
+                   ! (Rigid) 3D Vegetation Model
                    !
                    dia = 0.5*(diapl(nm, kdo) + diapl(nmu, kdo))
                    rn  = 0.5*(rnpl (nm, kdo) + rnpl (nmu, kdo))

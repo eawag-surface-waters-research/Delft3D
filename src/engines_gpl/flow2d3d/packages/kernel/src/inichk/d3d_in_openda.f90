@@ -548,7 +548,7 @@ subroutine compute_secundary_state(gdp       )
     logical                              , pointer :: nonhyd
     logical                              , pointer :: roller
     logical                              , pointer :: lftrto
-    logical                              , pointer :: dpmveg
+    logical                              , pointer :: veg3d
     include 'tri-dyn.igd'
     real(fp)      , dimension(:)         , pointer :: rhosol
     integer                              , pointer :: lturi
@@ -669,7 +669,7 @@ subroutine compute_secundary_state(gdp       )
     nonhyd              => gdp%gdprocs%nonhyd
     roller              => gdp%gdprocs%roller
     lftrto              => gdp%gdprocs%lftrto
-    dpmveg              => gdp%gdprocs%dpmveg
+    veg3d               => gdp%gdprocs%veg3d
     alfas               => gdp%gdr_i_ch%alfas
     areau               => gdp%gdr_i_ch%areau
     areav               => gdp%gdr_i_ch%areav
@@ -1261,12 +1261,12 @@ subroutine compute_secundary_state(gdp       )
                  & r(dddeta) ,r(dzdksi) ,r(dzdeta) ,gdp       )
     endif
     !
-    ! Directional Point Model of Vegetation
+    ! (Rigid) 3D Vegetation Model
     !
-    if (dpmveg) then
-       call upddpmveg(mmax      ,nmax      ,kmax      ,r(sig)    ,r(thick)  , &
-                    & d(dps)    ,i(kfs)    ,r(s0)     ,r(u1)     ,r(v1)     , &
-                    & r(diapl)  ,r(rnpl)   ,gdp       )
+    if (veg3d) then
+       call updveg3d(mmax      ,nmax      ,kmax      ,r(sig)    ,r(thick)  , &
+                   & d(dps)    ,i(kfs)    ,r(s0)     ,r(u1)     ,r(v1)     , &
+                   & r(diapl)  ,r(rnpl)   ,gdp       )
     endif
     if (varyingmorfac) then
        !

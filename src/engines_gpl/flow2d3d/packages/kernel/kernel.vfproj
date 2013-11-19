@@ -445,7 +445,7 @@
 		<File RelativePath="src\timedep\updbcq.f90"/>
 		<File RelativePath="src\timedep\updbct.f90"/>
 		<File RelativePath="src\timedep\upddis.f90"/>
-		<File RelativePath="src\timedep\upddpmveg.f90"/>
+		<File RelativePath="src\timedep\updveg3d.f90"/>
 		<File RelativePath="src\timedep\updeva.f90"/>
 		<File RelativePath="src\timedep\updtem.f90"/>
 		<File RelativePath="src\timedep\wetdis.f90"/>

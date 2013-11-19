@@ -1,4 +1,4 @@
-subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
+subroutine updveg3d(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
                    & dps       ,kfs       ,s1        ,u1        ,v1        , &
                    & diapl     ,rnpl      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -133,9 +133,9 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
 !! executable statements -------------------------------------------------------
 !
     amiss      => gdp%gdconst%amiss
-    planttype  => gdp%gddpmveg%planttype
-    nplants    => gdp%gddpmveg%nplants
-    vegs       => gdp%gddpmveg%vegs
+    planttype  => gdp%gdveg3d%planttype
+    nplants    => gdp%gdveg3d%nplants
+    vegs       => gdp%gdveg3d%vegs
     lundia     => gdp%gdinout%lundia
     ag         => gdp%gdphysco%ag
     rhow       => gdp%gdphysco%rhow
@@ -300,4 +300,4 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
           enddo
        enddo
     enddo
-end subroutine upddpmveg
+end subroutine updveg3d

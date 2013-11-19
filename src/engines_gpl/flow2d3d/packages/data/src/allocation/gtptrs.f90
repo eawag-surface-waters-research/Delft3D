@@ -1437,7 +1437,7 @@ subroutine gtptrs(gdp)
     w0         = gtrpnt('w0'    , gdp)
     s00        = gtrpnt('s00'   , gdp)
     !
-    ! Define pointers for Directional Point Model of Vegetation
+    ! Define pointers for (Rigid) 3D Vegetation Model
     !
     diapl      = gtrpnt('diapl' ,gdp)
     rnpl       = gtrpnt('rnpl'  ,gdp)

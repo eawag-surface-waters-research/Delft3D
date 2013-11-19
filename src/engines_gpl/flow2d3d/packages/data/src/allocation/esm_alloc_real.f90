@@ -103,7 +103,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     logical                 , pointer :: sedim
     logical                 , pointer :: zmodel
     logical                 , pointer :: roller
-    logical                 , pointer :: dpmveg
+    logical                 , pointer :: veg3d
     logical                 , pointer :: bubble
     real(fp), dimension(:,:), pointer :: ustokes
     real(fp), dimension(:,:), pointer :: vstokes
@@ -119,7 +119,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     integer           :: istat
     integer           :: kfacrl   ! Multiplication factor; 1 if ROLLER='Y', else 0 
     integer           :: kfaccdw  ! Multiplication factor; 1 if CDWSTRUCT='Y', else 0 
-    integer           :: kfacdpmv ! Multiplication factor; 1 if DPMV='Y', else 0 
+    integer           :: kfacvg3d ! Multiplication factor; 1 if VEG3D='Y', else 0 
     integer           :: kfacwv   ! Multiplication factor; 1 if WAVE=TRUE, else 0
     integer           :: kfacz    ! Multiplication factor; 1 if ZMODEL=TRUE 1, else 0
     integer           :: laak     ! Length of aak array in combination with length of rbuff array, lmax <= 1 
@@ -149,7 +149,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     sedim      => gdp%gdprocs%sedim
     zmodel     => gdp%gdprocs%zmodel
     roller     => gdp%gdprocs%roller
-    dpmveg     => gdp%gdprocs%dpmveg
+    veg3d      => gdp%gdprocs%veg3d
     bubble     => gdp%gdprocs%bubble
     nrpntr     => gdp%gdpointrs%nrpntr
     ncmax      => gdp%d%ncmax
@@ -214,9 +214,9 @@ subroutine esm_alloc_real(lundia, error, gdp)
        kfaccdw = 1
     endif
     !
-    kfacdpmv = 0
-    if (dpmveg) then
-       kfacdpmv = 1
+    kfacvg3d = 0
+    if (veg3d) then
+       kfacvg3d = 1
     endif
     !
     ! check 32bit/64bit:
@@ -3496,20 +3496,20 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ! END arrays for: non-hydrostatic pressure (NOT verified)
     !
     !
-    ! BEGIN arrays for: Directional Point Model for Vegetation
+    ! BEGIN arrays for: (Rigid) 3D Vegetation Model
     !
     !
     pntnam = 'diapl'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*kfacdpmv, gdp)
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*kfacvg3d, gdp)
                              !  plant stem diameter (m)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'rnpl'          !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*kfacdpmv, gdp)
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*kfacvg3d, gdp)
                              !  number of stems per horizontal unit area (1/m2)
     if (ierr<= - 9) goto 9999
     !
-    ! END arrays for: Directional Point Model for Vegetation
+    ! END arrays for: (Rigid) 3D Vegetation Model
     !
     !
     ! The following list of scalar reals have to be placed in shared memory,

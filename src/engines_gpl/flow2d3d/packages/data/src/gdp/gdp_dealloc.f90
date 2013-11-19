@@ -71,7 +71,7 @@ subroutine gdp_dealloc(gdp)
     logical :: localculvert
     logical :: localdrogue
     logical :: locallftrto
-    logical :: localdpmveg
+    logical :: localveg3d
     logical :: localbubble
     logical :: localscour
     logical :: success
@@ -98,7 +98,7 @@ subroutine gdp_dealloc(gdp)
     localculvert     = gdp%gdprocs%culvert
     localdrogue      = gdp%gdprocs%drogue
     locallftrto      = gdp%gdprocs%lftrto
-    localdpmveg      = gdp%gdprocs%dpmveg
+    localveg3d       = gdp%gdprocs%veg3d
     localbubble      = gdp%gdprocs%bubble
     localscour       = gdp%gdscour%scour
     !
@@ -127,19 +127,19 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gddischarge, STAT = istat)
     deallocate (gdp%d          , STAT = istat)
     deallocate (gdp%griddim    , STAT = istat)
-    if (localdpmveg) then
-       do i=1,gdp%gddpmveg%nveg
-          if (associated(gdp%gddpmveg%vegs(i)%dia   )) deallocate (gdp%gddpmveg%vegs(i)%dia   , STAT = istat)
-          if (associated(gdp%gddpmveg%vegs(i)%nstem )) deallocate (gdp%gddpmveg%vegs(i)%nstem , STAT = istat)
-          if (associated(gdp%gddpmveg%vegs(i)%cdcoef)) deallocate (gdp%gddpmveg%vegs(i)%cdcoef, STAT = istat)
-          if (associated(gdp%gddpmveg%vegs(i)%rho   )) deallocate (gdp%gddpmveg%vegs(i)%rho   , STAT = istat)
-          if (associated(gdp%gddpmveg%vegs(i)%z     )) deallocate (gdp%gddpmveg%vegs(i)%z     , STAT = istat)
+    if (localveg3d) then
+       do i=1,gdp%gdveg3d%nveg
+          if (associated(gdp%gdveg3d%vegs(i)%dia   )) deallocate (gdp%gdveg3d%vegs(i)%dia   , STAT = istat)
+          if (associated(gdp%gdveg3d%vegs(i)%nstem )) deallocate (gdp%gdveg3d%vegs(i)%nstem , STAT = istat)
+          if (associated(gdp%gdveg3d%vegs(i)%cdcoef)) deallocate (gdp%gdveg3d%vegs(i)%cdcoef, STAT = istat)
+          if (associated(gdp%gdveg3d%vegs(i)%rho   )) deallocate (gdp%gdveg3d%vegs(i)%rho   , STAT = istat)
+          if (associated(gdp%gdveg3d%vegs(i)%z     )) deallocate (gdp%gdveg3d%vegs(i)%z     , STAT = istat)
        enddo
-       if (associated(gdp%gddpmveg%vegs     )) deallocate (gdp%gddpmveg%vegs     , STAT = istat)
-       if (associated(gdp%gddpmveg%planttype)) deallocate (gdp%gddpmveg%planttype, STAT = istat)
-       if (associated(gdp%gddpmveg%nplants  )) deallocate (gdp%gddpmveg%nplants  , STAT = istat)
+       if (associated(gdp%gdveg3d%vegs     )) deallocate (gdp%gdveg3d%vegs     , STAT = istat)
+       if (associated(gdp%gdveg3d%planttype)) deallocate (gdp%gdveg3d%planttype, STAT = istat)
+       if (associated(gdp%gdveg3d%nplants  )) deallocate (gdp%gdveg3d%nplants  , STAT = istat)
     endif
-    deallocate (gdp%gddpmveg, STAT = istat)
+    deallocate (gdp%gdveg3d , STAT = istat)
     deallocate (gdp%gdexttim, STAT = istat)
     deallocate (gdp%gdfmtbcc, STAT = istat)
     deallocate (gdp%gdfmtbct, STAT = istat)

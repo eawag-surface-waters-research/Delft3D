@@ -108,7 +108,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     logical                 , pointer :: wave
     logical                 , pointer :: roller
     logical                 , pointer :: xbeach
-    logical                 , pointer :: dpmveg
+    logical                 , pointer :: veg3d
     real(fp), dimension(:,:)          , pointer :: mom_m_velchange     ! momentum du/dt term
     real(fp), dimension(:,:)          , pointer :: mom_m_densforce     ! density force term in u dir
     real(fp), dimension(:,:)          , pointer :: mom_m_flowresist    ! vegetation and porous plates in u dir
@@ -312,7 +312,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     wave       => gdp%gdprocs%wave
     roller     => gdp%gdprocs%roller
     xbeach     => gdp%gdprocs%xbeach
-    dpmveg     => gdp%gdprocs%dpmveg
+    veg3d      => gdp%gdprocs%veg3d
     !
     ! INITIALISATION
     !
@@ -712,12 +712,12 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
                    iadc = max(1 - (kspu(nm, k) + kspu(nm, kup)), 0)
                 endif
                 h0i = 1.0/hu(nm)
-                if (.not. dpmveg) then
+                if (.not. veg3d) then
                    ap1 = 1.0
                    ap2 = 1.0
                 else
                    !
-                   ! Directional Point Model of Vegetation
+                   ! (Rigid) 3D Vegetation Model
                    !
                    dia  = 0.5 * ( diapl(nm,kdo) + diapl(nmu,kdo) )
                    rn   = 0.5 * (  rnpl(nm,kdo) +  rnpl(nmu,kdo) )

@@ -106,7 +106,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     logical                             , pointer :: wind
     logical                             , pointer :: const
     logical                             , pointer :: wave
-    logical                             , pointer :: dpmveg
+    logical                             , pointer :: veg3d
     real(fp)                            , pointer :: cde
     real(fp)                            , pointer :: cmukep
     real(fp)                            , pointer :: cep1
@@ -294,7 +294,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     !  Von Karman constant set in subroutine TEKCOF
     !
     eps         => gdp%gdconst%eps
-    clplant     => gdp%gddpmveg%clplant
+    clplant     => gdp%gdveg3d%clplant
     lundia      => gdp%gdinout%lundia
     hdt         => gdp%gdnumeco%hdt
     rhow        => gdp%gdphysco%rhow
@@ -307,7 +307,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     wind        => gdp%gdprocs%wind
     const       => gdp%gdprocs%const
     wave        => gdp%gdprocs%wave
-    dpmveg      => gdp%gdprocs%dpmveg
+    veg3d       => gdp%gdprocs%veg3d
     cde         => gdp%gdturcoe%cde
     cmukep      => gdp%gdturcoe%cmukep
     cep1        => gdp%gdturcoe%cep1
@@ -632,12 +632,12 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 dz1  = thick(k    ) * h0
                 dz2  = thick(k + 1) * h0
                 dz   = 0.5 * (thick(k) + thick(k + 1)) * h0
-                if (.not. dpmveg) then
+                if (.not. veg3d) then
                    apd = 1.0
                    apu = 1.0
                 else
                    !
-                   ! Directional Point Model of Vegetation
+                   ! (Rigid) 3D Vegetation Model
                    !
                    apd = 1.0 - diapl(nm,k )*diapl(nm,k )*rnpl(nm,k )*pi*0.25
                    apu = 1.0 - diapl(nm,ku)*diapl(nm,ku)*rnpl(nm,ku)*pi*0.25
@@ -668,9 +668,9 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
              enddo
           enddo
           !
-          ! Directional Point Model of Vegetation
+          ! (Rigid) 3D Vegetation Model
           !
-          if (dpmveg) then
+          if (veg3d) then
              do nm = 1, nmmax
                 h0 = max(0.01_fp,s1(nm)+real(dps(nm),fp))
                 if (kfs(nm) == 1) then
@@ -851,7 +851,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           !
           ! plants eps
           !
-          if (dpmveg) then
+          if (veg3d) then
              do nm = 1,nmmax
                 h0 = max (0.01_fp , s1(nm)+real(dps(nm),fp))
                 if (kfs(nm) == 1) then

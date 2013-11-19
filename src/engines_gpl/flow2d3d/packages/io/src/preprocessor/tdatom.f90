@@ -116,7 +116,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     logical                         , pointer :: roller 
     logical                         , pointer :: wavcmp 
     logical                         , pointer :: cnstwv 
-    logical                         , pointer :: dpmveg 
+    logical                         , pointer :: veg3d 
     logical                         , pointer :: snelli 
     logical                         , pointer :: lrdamp 
     logical                         , pointer :: sbkol 
@@ -360,7 +360,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     roller      => gdp%gdprocs%roller 
     wavcmp      => gdp%gdprocs%wavcmp 
     cnstwv      => gdp%gdprocs%cnstwv 
-    dpmveg      => gdp%gdprocs%dpmveg 
+    veg3d       => gdp%gdprocs%veg3d 
     snelli      => gdp%gdprocs%snelli 
     lrdamp      => gdp%gdprocs%lrdamp 
     sbkol       => gdp%gdprocs%sbkol 
@@ -387,7 +387,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     const       = .false. 
     couplemod   = .false. 
     culvert     = .false. 
-    dpmveg      = .false. 
+    veg3d       = .false. 
     dredge      = .false. 
     drogue      = .false. 
     htur2d      = .false. 
@@ -467,7 +467,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & htur2d    ,mudlay    , & 
                  & flmd2l    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , & 
                  & culvert   ,dredge    ,cdwstruct ,snelli    ,cnstwv    , & 
-                 & dpmveg    ,waveol    ,lrdamp    ,sbkol     ,bubble    , & 
+                 & veg3d     ,waveol    ,lrdamp    ,sbkol     ,bubble    , & 
                  & nfl       ,nflmod    ,gdp       ) 
         if (error) goto 9990 
         !

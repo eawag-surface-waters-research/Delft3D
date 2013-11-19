@@ -4,7 +4,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
                & htur2d    ,mudlay    , &
                & flmd2d    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , &
                & culvert   ,dredge    ,cdwstruct ,snelli    ,cnstwv    , &
-               & dpmveg    ,waveol    ,lrdamp    ,sbkol     ,bubble    , &
+               & veg3d     ,waveol    ,lrdamp    ,sbkol     ,bubble    , &
                & nfl       ,nflmod    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -116,7 +116,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     logical                      :: const     !  Description and declaration in procs.igs
     logical                      :: culvert   !  Description and declaration in procs.igs    
     logical                      :: flmd2d    !  Description and declaration in procs.igs
-    logical                      :: dpmveg    !  Description and declaration in procs.igs
+    logical                      :: veg3d     !  Description and declaration in procs.igs
     logical                      :: dredge    !  Description and declaration in procs.igs
     logical                      :: snelli    !  Description and declaration in procs.igs
     logical                      :: cnstwv    !  Description and declaration in procs.igs
@@ -291,7 +291,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     bubble  = .false.
     cnstwv  = .false.
     const   = .false.
-    dpmveg  = .false.
+    veg3d   = .false.
     dredge  = .false.
     drogue  = .false.
     lrdamp  = .false.
@@ -316,7 +316,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
               & sedim     ,const     ,secflo    ,wind      ,drogue    , &
               & wave      ,mudlay    ,flmd2d    ,roller    , &
               & wavcmp    ,ncmax     ,culvert   ,dredge    ,filbar    , &
-              & filcdw    ,snelli    ,cnstwv    ,dpmveg    ,waveol    , &
+              & filcdw    ,snelli    ,cnstwv    ,veg3d     ,waveol    , &
               & filbub    ,lrdamp    ,sbkol     ,bubble    ,nfl       , &
               & nflmod    ,soort     ,gdp       )
     if (error) goto 9999

@@ -90,7 +90,7 @@
 		<File RelativePath="src\input\rdbndd.f90"/>
 		<File RelativePath="src\input\rdcul.f90"/>
 		<File RelativePath="src\input\rddept.f90"/>
-		<File RelativePath="src\input\rddpmveg.f90"/>
+		<File RelativePath="src\input\rdveg3d.f90"/>
 		<File RelativePath="src\input\rddredge.f90"/>
 		<File RelativePath="src\input\rdfcio.f90"/>
 		<File RelativePath="src\input\rdfour.f90"/>

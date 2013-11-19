@@ -196,7 +196,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     logical                              , pointer :: roller
     logical                              , pointer :: wavcmp
     logical                              , pointer :: lftrto
-    logical                              , pointer :: dpmveg
+    logical                              , pointer :: veg3d
     logical                              , pointer :: sbkol
     logical                              , pointer :: nfl
     logical                              , pointer :: bubble
@@ -706,7 +706,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     nsrcd               => gdp%d%nsrcd
     ndro                => gdp%d%ndro
     nsluv               => gdp%d%nsluv
-    itplant             => gdp%gddpmveg%itplant
+    itplant             => gdp%gdveg3d%itplant
     lundia              => gdp%gdinout%lundia
     timsec              => gdp%gdinttim%timsec
     timhr               => gdp%gdinttim%timhr
@@ -760,7 +760,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     roller              => gdp%gdprocs%roller
     wavcmp              => gdp%gdprocs%wavcmp
     lftrto              => gdp%gdprocs%lftrto
-    dpmveg              => gdp%gdprocs%dpmveg
+    veg3d               => gdp%gdprocs%veg3d
     sbkol               => gdp%gdprocs%sbkol
     nfl                 => gdp%gdprocs%nfl
     bubble              => gdp%gdprocs%bubble
@@ -1223,14 +1223,14 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     call init_mom_output(gdp)
     !
-    if (dpmveg) then
+    if (veg3d) then
        !
        ! update vegetation arrays if necessary
        !
        if (mod(nst,itplant) == 0) then
-          call upddpmveg(mmax      ,nmax      ,kmax      ,r(sig)    ,r(thick)  , &
-                       & d(dps)    ,i(kfs)    ,r(s0)     ,r(u1)     ,r(v1)     , &
-                       & r(diapl)  ,r(rnpl)   ,gdp       )
+          call updveg3d(mmax      ,nmax      ,kmax      ,r(sig)    ,r(thick)  , &
+                      & d(dps)    ,i(kfs)    ,r(s0)     ,r(u1)     ,r(v1)     , &
+                      & r(diapl)  ,r(rnpl)   ,gdp       )
        endif
     endif
     call timer_stop(timer_trisol_ini, gdp)

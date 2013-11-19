@@ -46,7 +46,7 @@ libKernelTimedep_la_SOURCES = \
          updbcq.f90 \
          updbct.f90 \
          upddis.f90 \
-         upddpmveg.f90 \
+         updveg3d.f90 \
          updeva.f90 \
          updtem.f90 \
          wetdis.f90 \

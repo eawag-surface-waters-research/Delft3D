@@ -4,7 +4,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 & sedim     ,const     ,secflo    ,wind      ,drogue    , &
                 & wave      ,mudlay    ,flmd2d    ,roller    , &
                 & wavcmp    ,ncmax     ,culvert   ,dredge    ,filbar    , &
-                & filcdw    ,snelli    ,cnstwv    ,dpmveg    ,waveol    , &
+                & filcdw    ,snelli    ,cnstwv    ,veg3d     ,waveol    , &
                 & filbub    ,lrdamp    ,sbkol     ,bubble    ,nfl       , &
                 & nflmod    ,soort     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -56,7 +56,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     character(256)                      , pointer :: culverfile
-    character(256)                      , pointer :: fildpmv
+    character(256)                      , pointer :: filvg3d
     character(256)                      , pointer :: dredgefile
     real(fp)                            , pointer :: dco
     logical                             , pointer :: tps_from_com  !  Description and declaration in procs.igs    
@@ -84,7 +84,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     logical        , intent(out) :: const   !  Description and declaration in procs.igs
     logical        , intent(out) :: culvert !  Description and declaration in procs.igs   
     logical                      :: flmd2d  !  Description and declaration in procs.igs
-    logical        , intent(out) :: dpmveg  !  Description and declaration in procs.igs
+    logical        , intent(out) :: veg3d   !  Description and declaration in procs.igs
     logical        , intent(out) :: dredge
     logical        , intent(out) :: drogue  !  Description and declaration in procs.igs
     logical                      :: error   !! Flag=TRUE if an error is encountered
@@ -131,7 +131,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !! executable statements -------------------------------------------------------
 !
     culverfile        => gdp%gdculver%culverfile
-    fildpmv           => gdp%gddpmveg%fildpmv
+    filvg3d           => gdp%gdveg3d%filvg3d
     dredgefile        => gdp%gddredge%dredgefile
     dco               => gdp%gdnumeco%dco
     tps_from_com      => gdp%gdprocs%tps_from_com
@@ -358,12 +358,12 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     filcdw = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'Filcdw', filcdw)
     !
-    ! Directional Point Model of Vegetation
+    ! (Rigid) 3D Vegetation Model
     !
-    fildpmv = ' '
-    call prop_get_string(gdp%mdfile_ptr, '*', 'Filpla', fildpmv)
-    if (fildpmv /= ' ') then
-       dpmveg = .true.
+    filvg3d = ' '
+    call prop_get_string(gdp%mdfile_ptr, '*', 'Filpla', filvg3d)
+    if (filvg3d /= ' ') then
+       veg3d = .true.
     endif
     !
     ! Low Reynolds damping on viscosity/diffusivity

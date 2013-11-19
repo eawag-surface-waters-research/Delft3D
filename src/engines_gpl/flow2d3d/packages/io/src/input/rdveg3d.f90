@@ -1,5 +1,5 @@
-subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
-                  & xz        ,yz        ,gdp       )
+subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
+                 & xz        ,yz        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -54,9 +54,9 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     integer, dimension(:,:)              , pointer :: planttype
     real(fp), dimension(:,:)             , pointer :: nplants
     real(fp)                             , pointer :: clplant
-    character(256)                       , pointer :: fildpmv
+    character(256)                       , pointer :: filvg3d
     type (dpm_vegetation), dimension(:)  , pointer :: vegs
-    type (gd_dpmveg)                     , pointer :: gddpmveg
+    type (gd_veg3d)                      , pointer :: gdveg3d
     integer                              , pointer :: lundia
 !
 ! Global variables
@@ -102,7 +102,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     character(len=1), dimension(:), pointer :: data_ptr
     logical                                 :: success
     logical                                 :: error
-    type(tree_data)               , pointer :: dpmv_ptr
+    type(tree_data)               , pointer :: vg3d_ptr
     type(tree_data)               , pointer :: link_ptr
     type(tree_data)               , pointer :: link_ptr2
     type(tree_data)               , pointer :: node_ptr
@@ -112,40 +112,40 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
 !
     amiss      => gdp%gdconst%amiss
     imiss      => gdp%gdconst%imiss
-    itplant    => gdp%gddpmveg%itplant
-    nveg       => gdp%gddpmveg%nveg
-    planttype  => gdp%gddpmveg%planttype
-    nplants    => gdp%gddpmveg%nplants
-    clplant    => gdp%gddpmveg%clplant
-    fildpmv    => gdp%gddpmveg%fildpmv
-    vegs       => gdp%gddpmveg%vegs
-    gddpmveg   => gdp%gddpmveg
+    itplant    => gdp%gdveg3d%itplant
+    nveg       => gdp%gdveg3d%nveg
+    planttype  => gdp%gdveg3d%planttype
+    nplants    => gdp%gdveg3d%nplants
+    clplant    => gdp%gdveg3d%clplant
+    filvg3d    => gdp%gdveg3d%filvg3d
+    vegs       => gdp%gdveg3d%vegs
+    gdveg3d    => gdp%gdveg3d
     lundia     => gdp%gdinout%lundia
     !
     versionnrlow   = 0.01_fp
     versionnrhigh  = 0.02_fp ! With rho
     versionnrinput = '00.00'
-    call tree_create_node( gdp%input_tree, 'DPM Vegetation', dpmv_ptr )
-    call tree_put_data( dpmv_ptr, transfer(trim(fildpmv),node_value), 'STRING' )
+    call tree_create_node( gdp%input_tree, 'DPM Vegetation', vg3d_ptr )
+    call tree_put_data( vg3d_ptr, transfer(trim(filvg3d),node_value), 'STRING' )
     !
     ! Put pla-file in input tree
     !
-    call prop_file('ini',trim(fildpmv),dpmv_ptr,istat)
+    call prop_file('ini',trim(filvg3d),vg3d_ptr,istat)
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', fildpmv)
+          call prterr(lundia, 'G004', filvg3d)
        case(3)
-          call prterr(lundia, 'G006', fildpmv)
+          call prterr(lundia, 'G006', filvg3d)
        case default
-          call prterr(lundia, 'G007', fildpmv)
+          call prterr(lundia, 'G007', filvg3d)
        endselect
        call d3stop(1, gdp)
     endif
     !
     ! Put polygon file in input tree (optional)
     !
-    call tree_get_node_by_name( dpmv_ptr, 'DPMVFileInformation', node_ptr )
+    call tree_get_node_by_name( vg3d_ptr, 'VegetationFileInformation', node_ptr )
     call tree_get_node_by_name( node_ptr, 'PolygonFile', pol_ptr )
     if (associated (pol_ptr)) then
        call tree_get_data_string(pol_ptr,polygonfile,success)
@@ -161,23 +161,23 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
           endselect
           call d3stop(1, gdp)
        endif
-     else
+    else
      !
      ! A polygon file is not obliged
      !
     endif
     !
-    ! Check version number of dpmv input file
+    ! Check version number of 3D vegetation input file
     !
-    call prop_get_string(dpmv_ptr,'DPMVFileInformation','FileVersion',versionnrinput)
+    call prop_get_string(vg3d_ptr,'VegetationFileInformation','FileVersion',versionnrinput)
     read(versionnrinput,fmt=*,iostat=istat) versionnr
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'Unable to read version number from DPMV input file')
+       call prterr(lundia, 'U021', 'Unable to read version number from 3D vegetation input file')
        call d3stop(1, gdp)
     endif
     if (       comparereal(versionnr,versionnrlow ) == -1 &
         & .or. comparereal(versionnr,versionnrhigh) ==  1  ) then
-       write (message,'(3(a,f5.2))') 'DPMV input file version number (',versionnr, ') must be between ', &
+       write (message,'(3(a,f5.2))') '3D vegetation input file version number (',versionnr, ') must be between ', &
            & versionnrlow, ' and ', versionnrhigh
        call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
@@ -186,9 +186,9 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     ! Read ItPlant
     !
     itplant = imiss
-    call prop_get_integer(dpmv_ptr,'DPMVOverall','ItPlant',itplant)
+    call prop_get_integer(vg3d_ptr,'General','ItPlant',itplant)
     if (itplant == imiss) then
-       write (message,'(a,a)') 'Parameter ItPlant not found in file',trim(fildpmv)
+       write (message,'(a,a)') 'Parameter ItPlant not found in file',trim(filvg3d)
        call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
@@ -196,9 +196,9 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     ! Read ClPlant
     !
     clplant = amiss
-    call prop_get(dpmv_ptr,'DPMVOverall','ClPlant',clplant)
+    call prop_get(vg3d_ptr,'General','ClPlant',clplant)
     if (comparereal(clplant,amiss) == 0) then
-       write (message,'(a,a)') 'Parameter ClPlant not found in file',trim(fildpmv)
+       write (message,'(a,a)') 'Parameter ClPlant not found in file',trim(filvg3d)
        call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
@@ -214,12 +214,12 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     nveg  = 0
     narea = 0
     npmax = 0
-    if ( associated(dpmv_ptr%child_nodes) ) then
-       do i = 1,size(dpmv_ptr%child_nodes)
+    if ( associated(vg3d_ptr%child_nodes) ) then
+       do i = 1,size(vg3d_ptr%child_nodes)
           !
-          ! Does dpmv_ptr contain a child with name 'Vegetation'?
+          ! Does vg3d_ptr contain a child with name 'Vegetation'?
           !
-          link_ptr => dpmv_ptr%child_nodes(i)%node_ptr
+          link_ptr => vg3d_ptr%child_nodes(i)%node_ptr
           parname = tree_get_name( link_ptr )
           if ( parname == 'vegetation') then
              !
@@ -265,19 +265,19 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     !
     ! Allocate arrays used during computation
     !
-                  allocate (gdp%gddpmveg%planttype(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
-    if (istat==0) allocate (gdp%gddpmveg%nplants  (gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
-    if (istat==0) allocate (gdp%gddpmveg%vegs(nveg), stat = istat)
+                  allocate (gdp%gdveg3d%planttype(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
+    if (istat==0) allocate (gdp%gdveg3d%nplants  (gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
+    if (istat==0) allocate (gdp%gdveg3d%vegs(nveg), stat = istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'DPMVeg: memory alloc error')
+       call prterr(lundia, 'U021', 'VEG3D: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
     ! update local pointers
     !
-    planttype  => gdp%gddpmveg%planttype
-    nplants    => gdp%gddpmveg%nplants
-    vegs       => gdp%gddpmveg%vegs
+    planttype  => gdp%gdveg3d%planttype
+    nplants    => gdp%gdveg3d%nplants
+    vegs       => gdp%gdveg3d%vegs
     !
     ! Allocate local arrays used for nplant input file in dep-format
     !
@@ -294,7 +294,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     nplants   = 0.0
     !
     write (lundia,*)
-    write (lundia,'(a)') '*** Start of Directional Point Model of Vegetation input'
+    write (lundia,'(a)') '*** Start of Rigid 3D Vegetation Model input'
     write (lundia,'(a,i0)')    '    Number of vegetations: ',nveg
     write (lundia,'(a,i0)')    '    Number of areas      : ',narea
     write (lundia,'(a,i0)')    '    ItPlant              : ',itplant
@@ -304,12 +304,12 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     !
     cntveg  = 0
     cntarea = 0
-    if ( associated(dpmv_ptr%child_nodes) ) then
-       do i = 1,size(dpmv_ptr%child_nodes)
+    if ( associated(vg3d_ptr%child_nodes) ) then
+       do i = 1,size(vg3d_ptr%child_nodes)
           !
-          ! Does dpmv_ptr contain a child with name 'vegetation'?
+          ! Does vg3d_ptr contain a child with name 'vegetation'?
           !
-          link_ptr => dpmv_ptr%child_nodes(i)%node_ptr
+          link_ptr => vg3d_ptr%child_nodes(i)%node_ptr
           parname = tree_get_name( link_ptr )
           if ( parname == 'vegetation') then
              !
@@ -341,13 +341,13 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
              !
              ! Allocate arrays in structure vegs(cntveg)
              !
-                           allocate (gdp%gddpmveg%vegs(cntveg)%dia   (nvps), stat = istat)
-             if (istat==0) allocate (gdp%gddpmveg%vegs(cntveg)%nstem (nvps), stat = istat)
-             if (istat==0) allocate (gdp%gddpmveg%vegs(cntveg)%cdcoef(nvps), stat = istat)
-             if (istat==0) allocate (gdp%gddpmveg%vegs(cntveg)%rho   (nvps), stat = istat)
-             if (istat==0) allocate (gdp%gddpmveg%vegs(cntveg)%z     (nvps), stat = istat)
+                           allocate (gdp%gdveg3d%vegs(cntveg)%dia   (nvps), stat = istat)
+             if (istat==0) allocate (gdp%gdveg3d%vegs(cntveg)%nstem (nvps), stat = istat)
+             if (istat==0) allocate (gdp%gdveg3d%vegs(cntveg)%cdcoef(nvps), stat = istat)
+             if (istat==0) allocate (gdp%gdveg3d%vegs(cntveg)%rho   (nvps), stat = istat)
+             if (istat==0) allocate (gdp%gdveg3d%vegs(cntveg)%z     (nvps), stat = istat)
              if (istat/=0) then
-                call prterr(lundia, 'U021', 'DPMVeg: memory alloc error')
+                call prterr(lundia, 'U021', 'VEG3D: memory alloc error')
                 call d3stop(1, gdp)
              endif
              !
@@ -556,4 +556,4 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     deallocate(xpol)
     deallocate(ypol)
     deallocate(nplantdep)
-end subroutine rddpmveg
+end subroutine rdveg3d
