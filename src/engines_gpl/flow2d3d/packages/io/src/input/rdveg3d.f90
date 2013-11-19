@@ -122,10 +122,10 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
     gdveg3d    => gdp%gdveg3d
     lundia     => gdp%gdinout%lundia
     !
-    versionnrlow   = 0.01_fp
-    versionnrhigh  = 0.02_fp ! With rho
+    versionnrlow   = 1.00_fp
+    versionnrhigh  = 1.99_fp
     versionnrinput = '00.00'
-    call tree_create_node( gdp%input_tree, 'DPM Vegetation', vg3d_ptr )
+    call tree_create_node( gdp%input_tree, '3D Vegetation', vg3d_ptr )
     call tree_put_data( vg3d_ptr, transfer(trim(filvg3d),node_value), 'STRING' )
     !
     ! Put pla-file in input tree
@@ -140,6 +140,16 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
        case default
           call prterr(lundia, 'G007', filvg3d)
        endselect
+       call d3stop(1, gdp)
+    endif
+    !
+    ! "[DPMVFileInformation]" in input file? This old type is not supported anymore
+    !
+    call tree_get_node_by_name( vg3d_ptr, 'DPMVFileInformation', node_ptr )
+    if (associated(node_ptr)) then
+       write (message,'(3a)') 'Name "[DPMVFileInformation]" found in file "',trim(filvg3d), &
+           & '". This file is too old. Use version 1.00 or higher. See the manual.' 
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -177,8 +187,7 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
     endif
     if (       comparereal(versionnr,versionnrlow ) == -1 &
         & .or. comparereal(versionnr,versionnrhigh) ==  1  ) then
-       write (message,'(3(a,f5.2))') '3D vegetation input file version number (',versionnr, ') must be between ', &
-           & versionnrlow, ' and ', versionnrhigh
+       write (message,'(a,f5.2,a)') '3D vegetation input file version number (',versionnr, ') must be 1.xx'
        call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
@@ -551,7 +560,7 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
     !      endif
     !   enddo
     !enddo
-    write (lundia,'(a)') '*** End of DPM Vegetation input'
+    write (lundia,'(a)') '*** End of Rigid 3D Vegetation Model input'
     write (lundia,*)
     deallocate(xpol)
     deallocate(ypol)
