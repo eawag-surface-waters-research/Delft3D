@@ -255,22 +255,11 @@ rem ===========================
 :flow2d3d_openda
 rem    echo "installing flow2d3d_openda . . ."
 rem
-rem    set dest_bin="!dest_main!\win32\flow2d3d\bin"
-rem    set dest_default="!dest_main!\win32\flow2d3d\default"
-rem    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
-rem    set dest_plugins="!dest_main!\win32\plugins\bin"
-
-rem    call :makeDir !dest_bin!
-rem    call :makeDir !dest_default!
-rem    call :makeDir !dest_scripts!
-rem    call :makeDir !dest_plugins!
-rem
-rem    set ErrorLevel_opendadll=0
-rem    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll !dest_bin!
+rem    copy engines_gpl\flow2d3d\bin\x64\Release\flow2d3d_openda.dll !dest_bin!
 rem    if NOT %ErrorLevel%==0 (
 rem        set ErrorLevel_opendadll=1
 rem    )
-rem    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda_sp.dll !dest_bin!
+rem    copy engines_gpl\flow2d3d\bin\x64\Release\flow2d3d_openda_sp.dll !dest_bin!
 rem    if NOT !ErrorLevel!==0 (
 rem        if NOT !ErrorLevel_opendadll!==0 (
 rem            set GlobalErrorLevel=1
@@ -278,29 +267,7 @@ rem        )
 rem    )
 rem    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
 rem    set ErrorLevel=0
-rem    call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m               !dest_scripts!
-rem    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                !dest_bin!
-rem    call :copyFile "third_party_open\mpich2\bin\*.exe"                        !dest_bin!
-rem    call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_bin!
-rem    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_bin!
-rem    call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll       !dest_bin!
-rem    call :copyFile "third_party_open\openda\core\native\lib\win32\*.dll"      !dest_bin!
-rem    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
-rem    call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
-rem    call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
-rem    call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_plugins!
-rem    rem
-rem    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-rem    rem Some (older) libraries will be overwritten.
-rem    rem
-rem    if !compiler_dir!=="" (
-rem        rem Compiler_dir not set
-rem    ) else (
-rem        rem "Compiler_dir:!compiler_dir!"
-rem        set localstring="!compiler_dir!*.dll"
-rem        rem Note the awkward usage of !-characters
-rem        call :copyFile !!localstring! !dest_bin!!
-rem    )
+rem    call :copyFile "third_party_open\openda\core\native\lib\win64\*.dll"      !dest_bin!
 goto :endproc
 
 
@@ -568,8 +535,8 @@ rem ====================
 :mormerge
     echo "installing mormerge . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
+    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_scripts="!dest_main!\win64\flow2d3d\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_scripts!
@@ -605,7 +572,7 @@ rem ===================
 
     call :makeDir !dest_bin!
 
-    call :copyFile third_party_open\pthreads\bin\x64\pthreadVC2.dll    !dest_bin!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                  !dest_bin!
     call :copyFile tools_gpl\nesthd1\packages\nesthd1\x64\Release\nesthd1.exe !dest_bin!
 goto :endproc
 
@@ -621,7 +588,7 @@ rem ===================
 
     call :makeDir !dest_bin!
 
-    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll    !dest_bin!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                  !dest_bin!
     call :copyFile tools_gpl\nesthd2\packages\nesthd2\x64\Release\nesthd2.exe !dest_bin!
 goto :endproc
 
@@ -648,7 +615,7 @@ rem ===================
 :nestwq2
     rem echo "installing nestwq2 . . ."
 
-    rem set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    rem set dest_bin="!dest_main!\win64\flow2d3d\bin"
 
     rem call :makeDir !dest_bin!
 
