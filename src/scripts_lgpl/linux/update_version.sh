@@ -30,7 +30,9 @@ SVN_VERSION="000000";
 cd $MODDIR
 if svnversion . >/dev/null 2>/dev/null ; then
    SVN_VERSION=`svnversion -n $MODDIR`;
-   if [[ "$SVN_VERSION"=~"^exported.*" ]] || [[ "$SVN_VERSION"=~"^Unversioned.*" ]]; then
+
+#   if [[ "$SVN_VERSION" =~ ^.*exported.*$ || "$SVN_VERSION" =~ ^Unversioned.* ]]; then
+   if [[ "$SVN_VERSION" =~ ^exported.*$ || "$SVN_VERSION" =~ ^Unversioned.*$ ]]; then
       SVN_VERSION="000000"
    fi
 fi;
