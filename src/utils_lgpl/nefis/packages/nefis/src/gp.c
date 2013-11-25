@@ -201,7 +201,8 @@ BUInt8 GP_read_file_pointers  ( BInt4   fds    ,
         n_read  = GP_read_file ( fds, string, start, n_bytes/2 );
         n_read  = 2 * n_read;
         if ( nefis[set].daf_neutral == TRUE ||
-             nefis[set].dat_neutral == TRUE    )
+             nefis[set].dat_neutral == TRUE ||
+             nefis[set].def_neutral == TRUE    )
         {
             BUInt4 tmp_bytes;
             tmp_bytes = (BUInt4) n_bytes/2;
