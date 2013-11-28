@@ -98,7 +98,7 @@ VPATH = @srcdir@
 ds-install: install
 	( \
 	    cd $(top_builddir) ; \
-	    ./install.sh ../bin \
+	    ./install.sh $(prefix) \
 	)
 
 # Improved version_number:

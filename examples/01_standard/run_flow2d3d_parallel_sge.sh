@@ -79,6 +79,21 @@ echo ----------------------------------------------------------------------
     ### command="d3d.run -nproc "$NHOSTS" -input "$inputfile" -back no
     ### eval $command
 
+    ### The use of hydra instead of mpd is adviced. hydra is the default for mpich2 version 1.4.1
+    ### From the README:
+    ### hydra
+    ### -----
+    ### Hydra is the default process management framework that uses existing 
+    ### daemons on nodes (e.g., ssh, pbs, slurm, sge) to start MPI processes. 
+    ### More information on Hydra can be found at 
+    ### http://wiki.mcs.anl.gov/mpich2/index.php/Using_the_Hydra_Process_Manager
+    ### 
+    ### mpd
+    ### ---
+    ### MPD was the traditional process manager in MPICH2. The file 
+    ### mpich2-1.4.1/src/pm/mpd/README has more information about interactive commands 
+    ### for managing the ring of MPDs. The MPD process manager is now deprecated.
+
     ### General for MPICH2, startup your MPICH2 communication network (you
     ### can check if it is already there with mpdtrace).
 mpdboot -n $NHOSTS -f $(pwd)/machinefile --ncpus=2

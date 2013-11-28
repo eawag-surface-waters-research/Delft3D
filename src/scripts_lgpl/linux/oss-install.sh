@@ -38,7 +38,8 @@ function install_all () {
 
     d_hydro
     flow2d3d
-    flow2d3d_openda
+    # flow2d3d_openda is currently not added to the Linux installation
+    #flow2d3d_openda
     waq
     wave
     plugin_culvert
@@ -64,7 +65,8 @@ function delft3d_flow () {
 
     d_hydro
     flow2d3d
-    flow2d3d_openda
+    # flow2d3d_openda is currently not added to the Linux installation
+    #flow2d3d_openda
     plugin_culvert
     plugin_delftflow_traform
     mormerge
@@ -87,11 +89,14 @@ function d_hydro () {
     mkdir -p $dest_bin
     mkdir -p $dest_menu
 
-    copyFile "bin/d_hydro.exe" 					    $dest_bin
-    copyFile "engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
+    copyFile "$prefix/bin/d_hydro.exe" 					    $dest_bin
+    copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
 
     echo "Gathering libraries for d_hydro..."
-    cp -u `$gatherScript bin/d_hydro.exe | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/d_hydro.exe | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/d_hydro.exe
+
     return
 }
 
@@ -113,20 +118,27 @@ function flow2d3d () {
     mkdir -p $dest_scripts
     mkdir -p $dest_plugins
 
-    copyFile "lib/libflow2d3d.so"                           $dest_bin
-    copyFile "lib/libflow2d3d_sp.so"                        $dest_bin
+    if [ -f $prefix/lib/libflow2d3d.so ]; then
+        copyFile "$prefix/lib/libflow2d3d.so"                           $dest_bin
+        # chrpath -r \$ORIGIN $dest_bin/libflow2d3d.so
+    fi
+    if [ -f $prefix/lib/libflow2d3d_sp.so ]; then
+        copyFile "$prefix/lib/libflow2d3d_sp.so"                        $dest_bin
+        # chrpath -r \$ORIGIN $dest_bin/libflow2d3d_sp.so
+    fi
     # For some reason, libflow2d3d.so depends on libDelftOnline.so.0 instead of libDelftOnline.so. Both are links to libDelftOnline.so.0.0.0
-    copyFile "lib/libDelftOnline.so.0"                      $dest_bin
-    copyFile "lib/libDelftOnline.so.0"                      $dest_plugins
-    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
-    copyFile "bin/esm_create"                               $dest_bin
-    copyFile "bin/esm_delete"                               $dest_bin
-    copyFile "bin/esm_info"                                 $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/*"               $dest_default
+    copyFile "$prefix/lib/libDelftOnline.so.0"                      $dest_bin
+    copyFile "$prefix/lib/libDelftOnline.so.0"                      $dest_plugins
+    copyFile "$srcdir/engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
+    copyFile "$prefix/bin/esm_create"                               $dest_bin
+    copyFile "$prefix/bin/esm_delete"                               $dest_bin
+    copyFile "$prefix/bin/esm_info"                                 $dest_bin
+    copyFile "$srcdir/engines_gpl/flow2d3d/default/*"               $dest_default
 
     echo "Gathering libraries for flow2d3d..."
-    cp -u `$gatherScript lib/libflow2d3d*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_bin
-    cp -u `$gatherScript lib/libDelftOnline.so | eval grep -v $gatherFilter` $dest_plugins
+    cp -u `$gatherScript $prefix/lib/libflow2d3d*.so $prefix/lib/libDelftOnline.so $prefix/bin/esm_* | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/lib/libDelftOnline.so | eval grep -v $gatherFilter` $dest_plugins
+
     return
 }
 
@@ -148,20 +160,27 @@ function flow2d3d_openda () {
     mkdir -p $dest_scripts
     mkdir -p $dest_plugins
 
-    copyFile "lib/libflow2d3d_openda.so"                    $dest_bin
-    copyFile "lib/libflow2d3d_openda_sp.so"                 $dest_bin
+    if [ -f $prefix/lib/libflow2d3d_openda.so ]; then
+        copyFile "$prefix/lib/libflow2d3d_openda.so"                    $dest_bin
+        # chrpath -r \$ORIGIN $dest_bin/libflow2d3d_openda.so
+    fi
+    if [ -f $prefix/lib/libflow2d3d_openda_sp.so ]; then
+        copyFile "$prefix/lib/libflow2d3d_openda_sp.so"                 $dest_bin
+        # chrpath -r \$ORIGIN $dest_bin/libflow2d3d_openda_sp.so
+    fi
     # For some reason, libflow2d3d.so depends on libDelftOnline.so.0 instead of libDelftOnline.so. Both are links to libDelftOnline.so.0.0.0
-    copyFile "lib/libDelftOnline.so.0"                      $dest_bin
-    copyFile "lib/libDelftOnline.so.0"                      $dest_plugins
-    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
-    copyFile "bin/esm_create"                               $dest_bin
-    copyFile "bin/esm_delete"                               $dest_bin
-    copyFile "bin/esm_info"                                 $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/*.*"             $dest_default
+    copyFile "$prefix/lib/libDelftOnline.so.0"                      $dest_bin
+    copyFile "$prefix/lib/libDelftOnline.so.0"                      $dest_plugins
+    copyFile "$srcdir/engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
+    copyFile "$prefix/bin/esm_create"                               $dest_bin
+    copyFile "$prefix/bin/esm_delete"                               $dest_bin
+    copyFile "$prefix/bin/esm_info"                                 $dest_bin
+    copyFile "$srcdir/engines_gpl/flow2d3d/default/*.*"             $dest_default
 
     echo "Gathering libraries for flow2d3d_openda..."
-    cp -u `$gatherScript lib/libflow2d3d_openda*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_bin
-    cp -u `$gatherScript lib/libDelftOnline.so | eval grep -v $gatherFilter` $dest_plugins
+    cp -u `$gatherScript $prefix/lib/libflow2d3d_openda*.so $prefix/lib/libDelftOnline.so $prefix/bin/esm_* | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/lib/libDelftOnline.so | eval grep -v $gatherFilter` $dest_plugins
+
     return
 }
 
@@ -179,13 +198,17 @@ function waq () {
     mkdir -p $dest_bin
     mkdir -p $dest_default
 
-    copyFile "bin/delwaq1"                    $dest_bin
-    copyFile "bin/delwaq2"                    $dest_bin
-    copyFile "lib/libwaq_plugin_wasteload.so" $dest_bin
-    copyFile "engines_gpl/waq/default/*"          $dest_default
+    copyFile "$prefix/bin/delwaq1"                    $dest_bin
+    copyFile "$prefix/bin/delwaq2"                    $dest_bin
+    copyFile "$prefix/lib/libwaq_plugin_wasteload.so" $dest_bin
+    copyFile "$srcdir/engines_gpl/waq/default/*"          $dest_default
 
     echo "Gathering libraries for delwaq..."
-    cp -u `$gatherScript bin/delwaq1 bin/delwaq2 | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/delwaq1
+    # chrpath -r \$ORIGIN $dest_bin/delwaq2
+
     return
 }
 
@@ -207,15 +230,18 @@ function wave () {
     mkdir -p $dest_swan_bin
     mkdir -p $dest_swan_scripts
 
-    copyFile "bin/wave.exe"                                  $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/dioconfig.ini"    $dest_default
-    copyFile "third_party_open/swan/bin/linux/*.*"           $dest_swan_bin
-    copyFile "third_party_open/swan/scripts/swan_install.sh" $dest_swan_scripts/swan.sh
+    copyFile "$prefix/bin/wave.exe"                                  $dest_bin
+    copyFile "$srcdir/engines_gpl/flow2d3d/default/dioconfig.ini"    $dest_default
+    copyFile "$srcdir/third_party_open/swan/bin/linux/*.*"           $dest_swan_bin
+    copyFile "$srcdir/third_party_open/swan/scripts/swan_install.sh" $dest_swan_scripts/swan.sh
 
     echo "Gathering libraries for wave..."
-    cp -u `$gatherScript bin/wave.exe | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/wave.exe | eval grep -v $gatherFilter` $dest_bin
     echo "Gathering libraries for swan..."
-    cp -u `$gatherScript third_party_open/swan/bin/linux/*.exe | eval grep -v $gatherFilter` $dest_swan_bin
+    cp -u `$gatherScript $srcdir/third_party_open/swan/bin/linux/*.exe | eval grep -v $gatherFilter` $dest_swan_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/wave.exe
+
     return
 }
 
@@ -231,10 +257,13 @@ function plugin_culvert () {
 
     mkdir -p $dest_bin
 
-    copyFile "lib/libplugin_culvert.so" $dest_bin/plugin_culvert.so
+    copyFile "$prefix/lib/libplugin_culvert.so" $dest_bin/plugin_culvert.so
 
     echo "Gathering libraries for plugin_culvert..."
-    cp -u `$gatherScript lib/libplugin_culvert.so | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/lib/libplugin_culvert.so | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/plugin_culvert.so
+
     return
 }
 
@@ -250,10 +279,13 @@ function plugin_delftflow_traform () {
 
     mkdir -p $dest_bin
 
-    copyFile "lib/libplugin_delftflow_traform.so" $dest_bin/plugin_delftflow_traform.so
+    copyFile "$prefix/lib/libplugin_delftflow_traform.so" $dest_bin/plugin_delftflow_traform.so
 
     echo "Gathering libraries for plugin_delftflow_traform..."
-    cp -u `$gatherScript lib/libplugin_delftflow_traform.so | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/lib/libplugin_delftflow_traform.so | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/plugin_delftflow_traform.so
+
     return
 }
 
@@ -269,10 +301,13 @@ function datsel () {
 
     mkdir -p $dest_bin
 
-    copyFile "bin/datsel" $dest_bin
+    copyFile "$prefix/bin/datsel" $dest_bin
 
     echo "Gathering libraries for datsel..."
-    cp -u `$gatherScript bin/datsel | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/datsel | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/datsel
+
     return
 }
 
@@ -288,10 +323,13 @@ function kubint () {
 
     mkdir -p $dest_bin
 
-    copyFile "bin/kubint" $dest_bin
+    copyFile "$prefix/bin/kubint" $dest_bin
 
     echo "Gathering libraries for kubint..."
-    cp -u `$gatherScript bin/kubint | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/kubint | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/kubint
+
     return
 }
 
@@ -307,10 +345,13 @@ function lint () {
 
     mkdir -p $dest_bin
 
-    copyFile "bin/lint" $dest_bin
+    copyFile "$prefix/bin/lint" $dest_bin
 
     echo "Gathering libraries for lint..."
-    cp -u `$gatherScript bin/lint | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/lint | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/lint
+
     return
 }
 
@@ -328,11 +369,14 @@ function mormerge () {
     mkdir -p $dest_bin
     mkdir -p $dest_scripts
 
-    copyFile "engines_gpl/flow2d3d/scripts/mormerge.tcl" $dest_scripts
-    copyFile "bin/mormerge.exe"                          $dest_bin
+    copyFile "$srcdir/engines_gpl/flow2d3d/scripts/mormerge.tcl" $dest_scripts
+    copyFile "$prefix/bin/mormerge.exe"                          $dest_bin
 
     echo "Gathering libraries for mormerge..."
-    cp -u `$gatherScript bin/mormerge.exe | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/mormerge.exe | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/mormerge.exe
+
     return
 }
 
@@ -348,10 +392,13 @@ function vs () {
 
     mkdir -p $dest
 
-    copyFile "bin/vs" $dest
+    copyFile "$prefix/bin/vs" $dest
 
     echo "Gathering libraries for vs..."
-    cp -u `$gatherScript bin/vs | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/vs | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest/vs
+
     return
 }
 
@@ -367,10 +414,13 @@ function nesthd1 () {
 
     mkdir -p $dest_bin
 
-    copyFile "bin/nesthd1" $dest_bin
+    copyFile "$prefix/bin/nesthd1" $dest_bin
 
     echo "Gathering libraries for nesthd1..."
-    cp -u `$gatherScript bin/nesthd1 | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/nesthd1 | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/nesthd1
+
     return
 }
 
@@ -386,10 +436,13 @@ function nesthd2 () {
 
     mkdir -p $dest_bin
 
-    copyFile "bin/nesthd2" $dest_bin
+    copyFile "$prefix/bin/nesthd2" $dest_bin
 
     echo "Gathering libraries for nesthd2..."
-    cp -u `$gatherScript bin/nesthd2 | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/nesthd2 | eval grep -v $gatherFilter` $dest_bin
+
+    # chrpath -r \$ORIGIN $dest_bin/nesthd2
+
     return
 }
 
@@ -408,38 +461,51 @@ echo oss-install...
 # 0. defaults:
 project=
 dest_main=
+prefix=
+srcdir=
 
 if [ "$2" == '' ]; then
     # Install all engines, assume the first argument is a target directory
 
-    dest_main=$1
+    prefix=$1
     project=install_all
-    echo Target directory: $dest_main
+    echo Target directory: $prefix
     echo Source          : all engines
 else
     # Install the package/engine specified by the first argument. The second argument is assumed to be the target directory.
 
-    dest_main=$2
+    prefix=$2
     project=$1
-    echo Target directory: $dest_main
+    echo Target directory: $prefix
     echo Source          : package/engine $project
 fi
 
-if [ "$dest_main" == '' ]; then
+if [ "$prefix" == '' ]; then
     echo "ERROR: No target directory specified as argument of oss-install.sh"
     exit 1
 fi
 
+
 # Change to directory tree where this batch file resides (necessary when oss-install.sh is called from outside of oss/trunk/src)
-curdir=`pwd`
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 cd $scriptdir/../..
+srcdir=`pwd`
+
+# Set dest_main
+if [ "$prefix" == "$srcdir" ]; then
+    # This was the default. Changing this to "dest_main=$prefix" will cause too much confusion.
+    dest_main=$prefix/../bin
+else
+    # Also a bit awkward: we are going to copy binaries from $prefix/bin and $prefix/lib to $prefix/lnx.
+    dest_main=$prefix
+fi
 
 
 $project
 
-cd $curdir
+cd $srcdir
 
 
 exit $globalErrorLevel
+

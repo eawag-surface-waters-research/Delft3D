@@ -72,11 +72,27 @@ echo ----------------------------------------------------------------------
     ### General for MPICH2, startup your MPICH2 communication network (you
     ### can check if it is already there with mpdtrace).
     ###
+    ### The use of hydra instead of mpd is adviced. hydra is the default for mpich2 version 1.4.1
+    ### From the README:
+    ### hydra
+    ### -----
+    ### Hydra is the default process management framework that uses existing 
+    ### daemons on nodes (e.g., ssh, pbs, slurm, sge) to start MPI processes. 
+    ### More information on Hydra can be found at 
+    ### http://wiki.mcs.anl.gov/mpich2/index.php/Using_the_Hydra_Process_Manager
+    ### 
+    ### mpd
+    ### ---
+    ### MPD was the traditional process manager in MPICH2. The file 
+    ### mpich2-1.4.1/src/pm/mpd/README has more information about interactive commands 
+    ### for managing the ring of MPDs. The MPD process manager is now deprecated.
+mpd &
+
+
     ### Optionally:
     ### Add option --rsh=/usr/bin/rsh to mpdboot
     ### This is needed when the following error appears:
     ### mpdboot_xh5000 (handle_mpd_output 420): from mpd on xh5001, invalid port info: no_port
-mpd &
 mpdboot -n $NHOSTS -f $(pwd)/machinefile --ncpus=2
 
 # link mpich debug rubbish to /dev/null
