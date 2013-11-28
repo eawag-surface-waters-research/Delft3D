@@ -155,7 +155,7 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
     !
     ! Put polygon file in input tree (optional)
     !
-    call tree_get_node_by_name( vg3d_ptr, 'VegetationFileInformation', node_ptr )
+    call tree_get_node_by_name( vg3d_ptr, 'General', node_ptr )
     call tree_get_node_by_name( node_ptr, 'PolygonFile', pol_ptr )
     if (associated (pol_ptr)) then
        call tree_get_data_string(pol_ptr,polygonfile,success)
@@ -440,7 +440,7 @@ subroutine rdveg3d(mmax      ,nmax      ,nmaxus    , &
                 ! Polygon used for nplants specification
                 !
                 if ( .not. associated(pol_ptr) ) then
-                   write(message,'(a)') 'Using polygons but no polygon file specified '
+                   write(message,'(a)') 'Using polygons but no polygon file specified in group [General]'
                    call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 endif
