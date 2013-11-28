@@ -482,7 +482,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           udir  = .true.
           vdir  = .false.
           if (use_zavg_for_qtot) then
-             dpvel = max(0.0_fp, hu(npbt, mpbt)-s0(npbi, mpbi)+zavg(n1))
+             dpvel = max(0.0_fp, hu(npbt, mpbt)-s0(npbt, mpbt)+zavg(n1))
           else
              dpvel = max(0.0_fp, hu(npbt, mpbt))
           endif
@@ -508,7 +508,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           udir  = .false.
           vdir  = .true.
           if (use_zavg_for_qtot) then
-             dpvel = max(0.0_fp, hv(npbt, mpbt)-s0(npbi, mpbi)+zavg(n1))
+             dpvel = max(0.0_fp, hv(npbt, mpbt)-s0(npbt, mpbt)+zavg(n1))
           else
              dpvel = max(0.0_fp, hv(npbt, mpbt))
           endif
