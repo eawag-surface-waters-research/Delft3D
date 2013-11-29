@@ -49,9 +49,9 @@ module globaldata
     use message_module
     use ec_typedefs
     use bedcomposition_module, only:bedcomp_data
-    use morphology_data_module, only:gd_morpar, gd_sedpar, moroutputtype, &
+    use morphology_data_module, only:morpar_type, sedpar_type, moroutputtype, &
                               & mornumericstype, bedbndtype, cmpbndtype, &
-                              & gd_trapar
+                              & trapar_type, sedtra_type
     use grid_dimens_module, only: griddimtype
     !
     ! dio_plt_rw is only used for coup.igs.
@@ -115,7 +115,6 @@ module globaldata
     include 'cline.igs'
     include 'culver.igs'
     include 'dredge.igs'
-    include 'erosed.igs'
     include 'f0isf1.igs'
     include 'incbc.igs'
     include 'incbcc.igs'
@@ -178,7 +177,7 @@ module globaldata
        type (gd_keywtd)   , pointer :: gdkeywtd
        type (gd_luntmp)   , pointer :: gdluntmp
        type (gd_massbal)  , pointer :: gdmassbal
-       type (gd_morpar)   , pointer :: gdmorpar
+       type (morpar_type) , pointer :: gdmorpar
        type (gd_mudcoe)   , pointer :: gdmudcoe
        type (gd_nfl)      , pointer :: gdnfl
        type (gd_numeco)   , pointer :: gdnumeco
@@ -190,7 +189,7 @@ module globaldata
        type (gd_rdpara)   , pointer :: gdrdpara
        type (gd_rivpro)   , pointer :: gdrivpro
        type (gd_scour)    , pointer :: gdscour
-       type (gd_sedpar)   , pointer :: gdsedpar
+       type (sedpar_type) , pointer :: gdsedpar
        type (gd_sobek)    , pointer :: gdsobek
        type (gd_stations) , pointer :: gdstations
        type (gd_tfzeta)   , pointer :: gdtfzeta
@@ -207,8 +206,8 @@ module globaldata
        type (sv_cline)    , pointer :: gdcline
        type (sv_culver)   , pointer :: gdculver
        type (sv_dredge)   , pointer :: gddredge
-       type (gd_trapar)   , pointer :: gdtrapar
-       type (sv_erosed)   , pointer :: gderosed
+       type (trapar_type) , pointer :: gdtrapar
+       type (sedtra_type) , pointer :: gderosed
        type (sv_f0isf1)   , pointer :: gdf0isf1
        type (sv_incbc)    , pointer :: gdincbc
        type (sv_incbcc)   , pointer :: gdincbcc

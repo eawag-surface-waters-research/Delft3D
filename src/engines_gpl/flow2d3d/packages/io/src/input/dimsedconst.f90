@@ -49,7 +49,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     !
     character(20)    , dimension(:)     , pointer :: namsed
     integer          , dimension(:)     , pointer :: sedtyp
-    type (gd_sedpar)                    , pointer :: gdsedpar
+    type (sedpar_type)                  , pointer :: gdsedpar
 !
 ! Global variables
 !

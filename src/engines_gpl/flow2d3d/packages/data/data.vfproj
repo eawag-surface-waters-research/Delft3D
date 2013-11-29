@@ -62,9 +62,7 @@
 		<File RelativePath="include\dddata.igs"/>
 		<File RelativePath="include\dfparall.igs"/>
 		<File RelativePath="include\dimens.igs"/>
-		<File RelativePath="include\veg3d.igs"/>
 		<File RelativePath="include\dredge.igs"/>
-		<File RelativePath="include\erosed.igs"/>
 		<File RelativePath="include\exttim.igs"/>
 		<File RelativePath="include\f0isf1.igs"/>
 		<File RelativePath="include\flow_steps_f.inc"/>
@@ -126,6 +124,7 @@
 		<File RelativePath="include\updbct.igs"/>
 		<File RelativePath="include\upddis.igs"/>
 		<File RelativePath="include\usrpar.igs"/>
+		<File RelativePath="include\veg3d.igs"/>
 		<File RelativePath="include\wrfous.igs"/>
 		<File RelativePath="include\wrfouv.igs"/>
 		<File RelativePath="include\wrirst.igs"/>
@@ -190,7 +189,6 @@
 		<File RelativePath="src\gdp\clradv2d.f90"/>
 		<File RelativePath="src\gdp\clrbedformpar.f90"/>
 		<File RelativePath="src\gdp\clrdredge.f90"/>
-		<File RelativePath="src\gdp\clrerosed.f90"/>
 		<File RelativePath="src\gdp\clrflwpar.f90"/>
 		<File RelativePath="src\gdp\clrmassbal.f90"/>
 		<File RelativePath="src\gdp\clrtrachy.f90"/>
@@ -208,9 +206,7 @@
 		<File RelativePath="src\gdp\initcoup.f90"/>
 		<File RelativePath="src\gdp\initculver.f90"/>
 		<File RelativePath="src\gdp\initdischarge.f90"/>
-		<File RelativePath="src\gdp\initveg3d.f90"/>
 		<File RelativePath="src\gdp\initdredge.f90"/>
-		<File RelativePath="src\gdp\initerosed.f90"/>
 		<File RelativePath="src\gdp\initf0isf1.f90"/>
 		<File RelativePath="src\gdp\initflwpar.f90"/>
 		<File RelativePath="src\gdp\initfmtbcc.f90"/>
@@ -240,6 +236,7 @@
 		<File RelativePath="src\gdp\initupdbcc.f90"/>
 		<File RelativePath="src\gdp\initupdbct.f90"/>
 		<File RelativePath="src\gdp\initupddis.f90"/>
+		<File RelativePath="src\gdp\initveg3d.f90"/>
 		<File RelativePath="src\gdp\initwaqpar.f90"/>
 		<File RelativePath="src\gdp\initwrirst.f90"/>
 		<File RelativePath="src\gdp\initwrline.f90"/>

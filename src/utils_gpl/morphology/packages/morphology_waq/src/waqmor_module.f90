@@ -33,7 +33,7 @@ use waqsim_module
 
 contains
 
-subroutine morini2waqdef(gdmorpar, gdsedpar, gdtrapar, waqmor)
+subroutine morini2waqdef(morpar, sedpar, trapar, waqmor)
 !!--description-----------------------------------------------------------------
 !
 ! Convert morphology ini properties to waq process definition
@@ -49,9 +49,9 @@ subroutine morini2waqdef(gdmorpar, gdsedpar, gdtrapar, waqmor)
 !
 ! Call variables
 !
-    type (gd_morpar)                         , pointer     :: gdmorpar
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    type (gd_trapar)                         , pointer     :: gdtrapar
+    type (morpar_type)                       , pointer     :: morpar
+    type (sedpar_type)                       , pointer     :: sedpar
+    type (trapar_type)                       , pointer     :: trapar
     type (waqsimtype)                        , target      :: waqmor
 !
 ! Local variables
@@ -75,8 +75,8 @@ subroutine morini2waqdef(gdmorpar, gdsedpar, gdtrapar, waqmor)
 !
     nISS = 0
     nIBS = 0
-    do i = 1, size(gdsedpar%sedtyp,1)
-       if (gdsedpar%sedtyp(i)==SEDTYP_NONCOHESIVE_TOTALLOAD) then
+    do i = 1, size(sedpar%sedtyp,1)
+       if (sedpar%sedtyp(i)==SEDTYP_NONCOHESIVE_TOTALLOAD) then
           nIBS = nIBS+1
        else
           nISS = nISS+1
@@ -125,68 +125,68 @@ subroutine morini2waqdef(gdmorpar, gdsedpar, gdtrapar, waqmor)
           write(num(5:7),'(I3.3)') i
        endif
        !
-       if (j<=nISS) call addpar(waqmor, 'type'  //num, IVAL=gdsedpar%sedtyp(j))
-       call addpar(waqmor, 'rho'   //num, RVAL=gdsedpar%rhosol(j))
-       call addpar(waqmor, 'rhobed'//num, RVAL=gdsedpar%cdryb(j))
-       if (gdsedpar%sedtyp(j) /= SEDTYP_COHESIVE) then
-          call addpar(waqmor, 'dmin'  //num, RVAL=exp(gdsedpar%logseddia(2,1,j)))
-          call addpar(waqmor, 'dmax'  //num, RVAL=exp(gdsedpar%logseddia(2,gdsedpar%nseddia(j),j)))
-          call addpar(waqmor, 'd50'   //num, RVAL=gdsedpar%sedd50(j))
-          call addpar(waqmor, 'd90'   //num, RVAL=gdsedpar%sedd90(j))
-          call addpar(waqmor, 'logstd'//num, RVAL=gdsedpar%logsedsig(j))
+       if (j<=nISS) call addpar(waqmor, 'type'  //num, IVAL=sedpar%sedtyp(j))
+       call addpar(waqmor, 'rho'   //num, RVAL=sedpar%rhosol(j))
+       call addpar(waqmor, 'rhobed'//num, RVAL=sedpar%cdryb(j))
+       if (sedpar%sedtyp(j) /= SEDTYP_COHESIVE) then
+          call addpar(waqmor, 'dmin'  //num, RVAL=exp(sedpar%logseddia(2,1,j)))
+          call addpar(waqmor, 'dmax'  //num, RVAL=exp(sedpar%logseddia(2,sedpar%nseddia(j),j)))
+          call addpar(waqmor, 'd50'   //num, RVAL=sedpar%sedd50(j))
+          call addpar(waqmor, 'd90'   //num, RVAL=sedpar%sedd90(j))
+          call addpar(waqmor, 'logstd'//num, RVAL=sedpar%logsedsig(j))
        endif
-       call addpar(waqmor, 'IniThk'//num, RVAL=gdsedpar%sdbuni(j))
-       call addpar(waqmor, 'TraFrm'//num, IVAL=gdtrapar%iform(j))
+       call addpar(waqmor, 'IniThk'//num, RVAL=sedpar%sdbuni(j))
+       call addpar(waqmor, 'TraFrm'//num, IVAL=trapar%iform(j))
        !
        trapar = 'TrPa'
        do ipar = 1,10
           write(trapar(5:6),'(I2.2)') ipar
-          if (gdtrapar%iparfld(ipar+10,j) /= 0) then
+          if (trapar%iparfld(ipar+10,j) /= 0) then
              ! spatially varying field
-             call addfld(waqmor, trapar//num, RVAL=gdtrapar%parfld(:,gdtrapar%iparfld(ipar+10,j)))
-          elseif (gdtrapar%par(ipar+10,j) /= 0.0) then
-             call addpar(waqmor, trapar//num, RVAL=gdtrapar%par(ipar+10,j))
+             call addfld(waqmor, trapar//num, RVAL=trapar%parfld(:,trapar%iparfld(ipar+10,j)))
+          elseif (trapar%par(ipar+10,j) /= 0.0) then
+             call addpar(waqmor, trapar//num, RVAL=trapar%par(ipar+10,j))
           endif
        enddo
        !
-       gdmorpar%moroutput%sbcuv = .true.
-       if (gdmorpar%moroutput%sbcuv) then
+       morpar%moroutput%sbcuv = .true.
+       if (morpar%moroutput%sbcuv) then
           call addoutput(waqmor, 'SBCx'//num)
           call addoutput(waqmor, 'SBCy'//num)
        endif
-       !if (gdmorpar%moroutput%sbcuuvv)  call addoutput(waqmor, '???')
-       if (gdmorpar%moroutput%sbwuv) then
+       !if (morpar%moroutput%sbcuuvv)  call addoutput(waqmor, '???')
+       if (morpar%moroutput%sbwuv) then
           call addoutput(waqmor, 'SBWx'//num)
           call addoutput(waqmor, 'SBWy'//num)
        endif
-       !if (gdmorpar%moroutput%sbwuuvv)  call addoutput(waqmor, '???')
-       if (gdmorpar%moroutput%sswuv) then
+       !if (morpar%moroutput%sbwuuvv)  call addoutput(waqmor, '???')
+       if (morpar%moroutput%sswuv) then
           call addoutput(waqmor, 'SSWx'//num)
           call addoutput(waqmor, 'SSWy'//num)
        endif
-       !if (gdmorpar%moroutput%sswuuvv)  call addoutput(waqmor, '???')
-       !if (gdmorpar%moroutput%suvcor)  call addoutput(waqmor, '???')
-       if (gdmorpar%moroutput%sourcesink .and. j<=nISS) then
+       !if (morpar%moroutput%sswuuvv)  call addoutput(waqmor, '???')
+       !if (morpar%moroutput%suvcor)  call addoutput(waqmor, '???')
+       if (morpar%moroutput%sourcesink .and. j<=nISS) then
           call addoutput(waqmor, 'SourSe'//num)
           call addoutput(waqmor, 'SinkSe'//num)
        endif
-       if (gdmorpar%moroutput%frac)  call addoutput(waqmor, 'frac'//num)
+       if (morpar%moroutput%frac)  call addoutput(waqmor, 'frac'//num)
     enddo
     !
-    if (gdmorpar%moroutput%AKS) call addoutput(waqmor, 'aks')
-    !if (gdmorpar%moroutput%cumavg)  call addoutput(waqmor, '???')
-    if (gdmorpar%moroutput%dg)  call addoutput(waqmor, 'DG_mix')
-    if (gdmorpar%moroutput%dm)  call addoutput(waqmor, 'DM_mix')
-    !if (gdmorpar%moroutput%dzduuvv)  call addoutput(waqmor, '???')
-    if (gdmorpar%moroutput%fixfac)  call addoutput(waqmor, 'fixfac')
-    !if (gdmorpar%moroutput%hidexp)  call addoutput(waqmor, '???')
-    if (gdmorpar%moroutput%mudfrac)  call addoutput(waqmor, 'fracMud')
-    !if (gdmorpar%moroutput%percentiles)  call addoutput(waqmor, '???')
-    !if (gdmorpar%moroutput%taurat)  call addoutput(waqmor, '???')
-    if (gdmorpar%moroutput%umod)  call addoutput(waqmor, 'UMor')
-    if (gdmorpar%moroutput%zumod) call addoutput(waqmor, 'zUMor')
-    if (gdmorpar%moroutput%ustar) call addoutput(waqmor, 'UStar')
-    if (gdmorpar%moroutput%uuuvvv) then
+    if (morpar%moroutput%AKS) call addoutput(waqmor, 'aks')
+    !if (morpar%moroutput%cumavg)  call addoutput(waqmor, '???')
+    if (morpar%moroutput%dg)  call addoutput(waqmor, 'DG_mix')
+    if (morpar%moroutput%dm)  call addoutput(waqmor, 'DM_mix')
+    !if (morpar%moroutput%dzduuvv)  call addoutput(waqmor, '???')
+    if (morpar%moroutput%fixfac)  call addoutput(waqmor, 'fixfac')
+    !if (morpar%moroutput%hidexp)  call addoutput(waqmor, '???')
+    if (morpar%moroutput%mudfrac)  call addoutput(waqmor, 'fracMud')
+    !if (morpar%moroutput%percentiles)  call addoutput(waqmor, '???')
+    !if (morpar%moroutput%taurat)  call addoutput(waqmor, '???')
+    if (morpar%moroutput%umod)  call addoutput(waqmor, 'UMor')
+    if (morpar%moroutput%zumod) call addoutput(waqmor, 'zUMor')
+    if (morpar%moroutput%ustar) call addoutput(waqmor, 'UStar')
+    if (morpar%moroutput%uuuvvv) then
        call addoutput(waqmor, 'UxMor')
        call addoutput(waqmor, 'UyMor')
     endif
@@ -195,9 +195,9 @@ subroutine morini2waqdef(gdmorpar, gdsedpar, gdtrapar, waqmor)
     call addpar(waqmor, 'ksRip', RVAL=0.01_fp) ! probably need to add process to compute this ...
     call addprocess(waqmor, 'Z0') ! z0cur and z0rou
     !
-    call addpar(waqmor, 'ThrNonErod', RVAL=gdmorpar%thresh)
+    call addpar(waqmor, 'ThrNonErod', RVAL=morpar%thresh)
     !
-    if (gdmorpar%bedupd) then
+    if (morpar%bedupd) then
        call addprocess(waqmor, 'BedUpdate')
        call addoutput(waqmor, 'dZB')
     endif

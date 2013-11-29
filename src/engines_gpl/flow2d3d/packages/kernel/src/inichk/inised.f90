@@ -42,6 +42,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     use globaldata
     use bedcomposition_module
+    use morphology_data_module, only: allocsedtra
     use sediment_basics_module
     !
     implicit none
@@ -131,20 +132,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !! executable statements -------------------------------------------------------
 !
     iform               => gdp%gdtrapar%iform
-    dm                  => gdp%gderosed%dm
-    dg                  => gdp%gderosed%dg
-    dgsd                => gdp%gderosed%dg
-    dxx                 => gdp%gderosed%dxx
-    frac                => gdp%gderosed%frac
-    mudfrac             => gdp%gderosed%mudfrac
-    sandfrac            => gdp%gderosed%sandfrac
-    hidexp              => gdp%gderosed%hidexp
-    sbuuc               => gdp%gderosed%sbuuc
-    sbvvc               => gdp%gderosed%sbvvc
-    ssuuc               => gdp%gderosed%ssuuc
-    ssvvc               => gdp%gderosed%ssvvc
-    sucor               => gdp%gderosed%sucor
-    svcor               => gdp%gderosed%svcor
     nxx                 => gdp%gdmorpar%nxx
     xx                  => gdp%gdmorpar%xx
     ihidexp             => gdp%gdmorpar%ihidexp
@@ -189,59 +176,23 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     fmttmp = 'formatted'
     istat  = 0
-    if (.not. associated(gdp%gderosed%dm)) then
-                     allocate (gdp%gderosed%dm      (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dg      (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dgsd    (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dxx     (gdp%d%nmlb:gdp%d%nmub,nxx)    , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%frac    (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%mudfrac (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sandfrac(gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%hidexp  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbuuc   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbvvc   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%ssuuc   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%ssvvc   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sucor   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%svcor   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'Inised: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       !
-       dm                  => gdp%gderosed%dm
-       dg                  => gdp%gderosed%dg
-       dgsd                => gdp%gderosed%dgsd
-       dxx                 => gdp%gderosed%dxx
-       frac                => gdp%gderosed%frac
-       mudfrac             => gdp%gderosed%mudfrac
-       sandfrac            => gdp%gderosed%sandfrac
-       hidexp              => gdp%gderosed%hidexp
-       sbuuc               => gdp%gderosed%sbuuc
-       sbvvc               => gdp%gderosed%sbvvc
-       ssuuc               => gdp%gderosed%ssuuc
-       ssvvc               => gdp%gderosed%ssvvc
-       sucor               => gdp%gderosed%sucor
-       svcor               => gdp%gderosed%svcor
-       !
-       dm       = 0.0_fp
-       dg       = 0.0_fp
-       dgsd     = 0.0_fp
-       dxx      = 0.0_fp
-       frac     = 0.0_fp
-       mudfrac  = 0.0_fp
-       sandfrac = 0.0_fp
-       hidexp   = 0.0_fp
-       sucor    = 0.0_fp
-       svcor    = 0.0_fp
-    endif
+    call allocsedtra(gdp%gderosed, gdp%d%kmax, lsed, lsedtot, &
+                   & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx)
     !
-    ! Initialise cumulative sediment transport arrays
-    !
-    sbuuc = 0.0_fp
-    sbvvc = 0.0_fp
-    ssuuc = 0.0_fp
-    ssvvc = 0.0_fp
+    dm                  => gdp%gderosed%dm
+    dg                  => gdp%gderosed%dg
+    dgsd                => gdp%gderosed%dgsd
+    dxx                 => gdp%gderosed%dxx
+    frac                => gdp%gderosed%frac
+    mudfrac             => gdp%gderosed%mudfrac
+    sandfrac            => gdp%gderosed%sandfrac
+    hidexp              => gdp%gderosed%hidexp
+    sbuuc               => gdp%gderosed%e_sbnc
+    sbvvc               => gdp%gderosed%e_sbtc
+    ssuuc               => gdp%gderosed%e_ssnc
+    ssvvc               => gdp%gderosed%e_sstc
+    sucor               => gdp%gderosed%e_scrn
+    svcor               => gdp%gderosed%e_scrt
     !
     ! Start filling array SEDD50FLD
     !

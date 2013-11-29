@@ -47,7 +47,7 @@ subroutine initmerge (nmmax, lsed, runid, gdp)
     integer                              , pointer :: mergehandle
     real(hp)              , dimension(:) , pointer :: mergebuf
     character(256)                       , pointer :: mmsyncfilnam
-    type (gd_morpar)                     , pointer :: gdmorpar
+    type (morpar_type)                   , pointer :: gdmorpar
 !
 ! Global variables
 !

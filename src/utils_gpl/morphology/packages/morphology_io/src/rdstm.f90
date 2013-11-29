@@ -46,10 +46,10 @@ public clrstm
 type stmtype
     integer                                                :: iopsus
     real(fp)                                               :: fwfac
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    type (gd_morpar)                         , pointer     :: gdmorpar
-    type (bedcomp_data)                      , pointer     :: gdmorlyr
-    type (gd_trapar)                         , pointer     :: gdtrapar
+    type(sedpar_type)                        , pointer     :: sedpar
+    type(morpar_type)                        , pointer     :: morpar
+    type(bedcomp_data)                       , pointer     :: morlyr
+    type(trapar_type)                        , pointer     :: trapar
     integer                                                :: lsed
     integer                                                :: lsedtot
     real(fp)      , dimension(:), allocatable              :: facdss
@@ -72,8 +72,8 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
 !
 ! Call variables
 !
-    type (stmtype)              , intent(out) :: stm
-    type (griddimtype)  , target, intent(in)  :: griddim
+    type(stmtype)               , intent(out) :: stm
+    type(griddimtype)   , target, intent(in)  :: griddim
     character(*)                , intent(in)  :: filsed
     character(*)                , intent(in)  :: filmor
     character(*)                , intent(in)  :: filtrn
@@ -88,8 +88,8 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
 !
 ! Local variables
 !
-    type (tree_data)                         , pointer     :: sedfil_tree
-    type (tree_data)                         , pointer     :: morfil_tree
+    type(tree_data)             , pointer     :: sedfil_tree
+    type(tree_data)             , pointer     :: morfil_tree
     integer                   :: istat
     integer                   :: lstsci
     integer                   :: nto
@@ -106,15 +106,15 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
 !
     error = .false.
     !
-    allocate(stm%gdsedpar , stat = istat)
-    allocate(stm%gdmorpar , stat = istat)
-    allocate(stm%gdtrapar , stat = istat)
-    allocate(stm%gdmorlyr , stat = istat)
+    allocate(stm%sedpar , stat = istat)
+    allocate(stm%morpar , stat = istat)
+    allocate(stm%trapar , stat = istat)
+    allocate(stm%morlyr , stat = istat)
     !
-    call initsedpar(stm%gdsedpar)
-    call initmorpar(stm%gdmorpar)
-    call inittrapar(stm%gdtrapar)
-    istat = initmorlyr (stm%gdmorlyr)
+    call initsedpar(stm%sedpar)
+    call initmorpar(stm%morpar)
+    call inittrapar(stm%trapar)
+    istat = initmorlyr (stm%morlyr)
     !
     call tree_create  ( "Sediment input", sedfil_tree )
     call tree_create  ( "Morphology input", morfil_tree )
@@ -125,11 +125,11 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     nto    = size(nambnd,1)
     !
     ! Open filsed file and determine the number of sediment fractions
-    ! lsed and lsedtot. Fill names and sediment types in gdsedpar.
+    ! lsed and lsedtot. Fill names and sediment types in sedpar.
     ! Keep sediment file information in sedfil_tree.
     !
     call count_sed(lundia, error, stm%lsed, stm%lsedtot, filsed, &
-                 & stm%gdsedpar, sedfil_tree)
+                 & stm%sedpar, sedfil_tree)
     if (error) goto 999
     !
     lstsci = max(0,lsal,ltem) + stm%lsed
@@ -144,38 +144,38 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
        stm%namcon(ltem) = 'TEMPERATURE'
     endif
     do l=1,stm%lsed
-       stm%namcon(max(0,lsal,ltem) + l) = stm%gdsedpar%namsed(l)
+       stm%namcon(max(0,lsal,ltem) + l) = stm%sedpar%namsed(l)
     enddo
     !
     ! Read sediment and transport parameters
     !
     ! facdss set by rdsed
     ! iopsus set by rdsed
-    ! gdsedpar filled by rdsed
-    ! gdtrapar set by rdtrafrm
+    ! sedpar filled by rdsed
+    ! trapar set by rdtrafrm
     ! sedfil_tree NEEDS TO BE SET
     !
     ! Sediment input has been placed in input_tree in subroutine count_sed
     ! get pointer
     !
-    call initrafrm(lundia, error, stm%lsedtot, stm%gdtrapar)
+    call initrafrm(lundia, error, stm%lsedtot, stm%trapar)
     if (error) goto 999
     !
     call rdsed  (lundia, error, lsal, ltem, stm%lsed, &
                & stm%lsedtot, lstsci, ltur, stm%facdss, stm%namcon, &
                & stm%iopsus, nmlb, nmub, filsed, &
-               & sedfil_tree, stm%gdsedpar, stm%gdtrapar)
+               & sedfil_tree, stm%sedpar, stm%trapar)
     !
     ! Read morphology parameters
     !
-    ! gdmorpar filled by rdmor
-    ! gdmorlyr filled by rdmor
+    ! morpar filled by rdmor
+    ! morlyr filled by rdmor
     ! morfil_tree set by rdmor
     ! fwfac set by rdmor
     !
     call rdmor  (lundia, error, filmor, lsec, stm%lsedtot, &
                & stm%lsed, nmaxus, nto, nambnd, julrefday, morfil_tree, &
-               & stm%gdsedpar, stm%gdmorpar, stm%fwfac, stm%gdmorlyr, &
+               & stm%sedpar, stm%morpar, stm%fwfac, stm%morlyr, &
                & griddim)
     !
     ! Some other parameters are transport formula specific. Use the value
@@ -183,21 +183,21 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     !
     ipardef = 0
     rpardef = 0.0_fp
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 1, stm%gdmorpar%iopsus)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 2, stm%gdmorpar%aksfac)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 3, stm%gdmorpar%rdc)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 4, stm%gdmorpar%rdw)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 5, stm%gdmorpar%iopkcw)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 6, stm%gdmorpar%epspar)
-    call setpardef(ipardef, rpardef, NPARDEF, -2, 1, stm%gdmorpar%iopsus)
-    call setpardef(ipardef, rpardef, NPARDEF, -2, 2, stm%gdmorpar%pangle)
-    call setpardef(ipardef, rpardef, NPARDEF, -2, 3, stm%gdmorpar%fpco)
-    call setpardef(ipardef, rpardef, NPARDEF, -2, 4, stm%gdmorpar%subiw)
-    call setpardef(ipardef, rpardef, NPARDEF, -2, 5, stm%gdmorpar%epspar)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 1, stm%morpar%iopsus)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 2, stm%morpar%aksfac)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 3, stm%morpar%rdc)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 4, stm%morpar%rdw)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 5, stm%morpar%iopkcw)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 6, stm%morpar%epspar)
+    call setpardef(ipardef, rpardef, NPARDEF, -2, 1, stm%morpar%iopsus)
+    call setpardef(ipardef, rpardef, NPARDEF, -2, 2, stm%morpar%pangle)
+    call setpardef(ipardef, rpardef, NPARDEF, -2, 3, stm%morpar%fpco)
+    call setpardef(ipardef, rpardef, NPARDEF, -2, 4, stm%morpar%subiw)
+    call setpardef(ipardef, rpardef, NPARDEF, -2, 5, stm%morpar%epspar)
     !
     call rdtrafrm(lundia, error, filtrn, stm%lsedtot, &
-                & ipardef, rpardef, NPARDEF, stm%gdtrapar, &
-                & stm%gdsedpar%sedtyp, stm%gdsedpar%sedblock, &
+                & ipardef, rpardef, NPARDEF, stm%trapar, &
+                & stm%sedpar%sedtyp, stm%sedpar%sedblock, &
                 & griddim)
     if (error) goto 999
     !--------------------------------------------------------------------------
@@ -205,18 +205,18 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     ! Echo sediment and transport parameters
     !
     call echosed(lundia, error, stm%lsed, stm%lsedtot, stm%facdss, &
-               & stm%iopsus, stm%gdsedpar, stm%gdtrapar)
+               & stm%iopsus, stm%sedpar, stm%trapar)
     if (error) goto 999
     !
     ! Echo morphology parameters
     !
     call echomor(lundia, error, lsec, stm%lsedtot, nto, &
-               & nambnd, stm%gdsedpar, stm%gdmorpar)
+               & nambnd, stm%sedpar, stm%morpar)
     !
 999 continue
     !
     ! we should deallocate sedfil_tree, morfil_tree but
-    ! we can't deallocate sedfil_tree since parts are referenced from stm%gdsedpar
+    ! we can't deallocate sedfil_tree since parts are referenced from stm%sedpar
 end subroutine rdstm
 
 function clrstm(stm) result(istat)
@@ -231,7 +231,7 @@ function clrstm(stm) result(istat)
 !
 ! Call variables
 !
-    type (stmtype)  , intent(inout) :: stm
+    type(stmtype)   , intent(inout) :: stm
     integer                         :: istat
 !
 ! Local variables
@@ -241,10 +241,10 @@ function clrstm(stm) result(istat)
 !! executable statements -------------------------------------------------------
 !
     istat = 0
-    call clrsedpar(istat, stm%gdsedpar)
-    if (istat==0) call clrmorpar(istat, stm%gdmorpar)
-    if (istat==0) call clrtrapar(istat, stm%gdtrapar)
-    if (istat==0) istat = clrmorlyr(stm%gdmorlyr)
+    call clrsedpar(istat, stm%sedpar)
+    if (istat==0) call clrmorpar(istat, stm%morpar)
+    if (istat==0) call clrtrapar(istat, stm%trapar)
+    if (istat==0) istat = clrmorlyr(stm%morlyr)
 end function clrstm
 
 end module m_rdstm

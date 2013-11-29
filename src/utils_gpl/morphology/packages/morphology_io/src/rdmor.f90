@@ -41,8 +41,8 @@ contains
 
 subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                & lsed      ,nmaxus    ,nto       , &
-               & nambnd    ,julday    ,mor_ptr   ,gdsedpar  ,gdmorpar  , &
-               & fwfac     ,gdmorlyr  ,griddim   )
+               & nambnd    ,julday    ,mor_ptr   ,sedpar    ,morpar    , &
+               & fwfac     ,morlyr    ,griddim   )
 !!--description-----------------------------------------------------------------
 !
 ! Reads attribute file for 3D morphology computation
@@ -128,11 +128,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     logical                                , pointer :: glmisoeuler
     character(256)                         , pointer :: bcmfilnam
     character(20)          , dimension(:)  , pointer :: namsed
-    type (handletype)                      , pointer :: bcmfile
-    type (handletype)                      , pointer :: morfacfile
-    type (moroutputtype)                   , pointer :: moroutput
-    type (mornumericstype)                 , pointer :: mornum
-    type (bedbndtype)      , dimension(:)  , pointer :: morbnd
+    type(handletype)                       , pointer :: bcmfile
+    type(handletype)                       , pointer :: morfacfile
+    type(moroutputtype)                    , pointer :: moroutput
+    type(mornumericstype)                  , pointer :: mornum
+    type(bedbndtype)       , dimension(:)  , pointer :: morbnd
 !
 ! Local parameters
 !
@@ -152,11 +152,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     character(*)                                 :: filmor
     character(20) , dimension(nto)               :: nambnd  !  Description and declaration in esm_alloc_char.f90
     type(tree_data)                , pointer     :: mor_ptr
-    type (gd_sedpar)               , pointer     :: gdsedpar
-    type (gd_morpar)               , pointer     :: gdmorpar
-    type (bedcomp_data)            , pointer     :: gdmorlyr
+    type(sedpar_type)              , pointer     :: sedpar
+    type(morpar_type)              , pointer     :: morpar
+    type(bedcomp_data)             , pointer     :: morlyr
     real(fp)                       , intent(out) :: fwfac
-    type (griddimtype)  , target   , intent(in)  :: griddim
+    type(griddimtype)   , target   , intent(in)  :: griddim
 !
 ! Local variables
 !
@@ -209,7 +209,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     ! allocate memory for boundary conditions
     !
     istat = 0
-    allocate (gdmorpar%morbnd(nto), stat = istat)
+    allocate (morpar%morbnd(nto), stat = istat)
     !
     if (istat /= 0) then
        call write_error('RDMOR: memory alloc error',unit=lundia)
@@ -219,76 +219,76 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     !
     ! Let local variables point to fields within data structures
     !
-    morfac              => gdmorpar%morfac
-    thresh              => gdmorpar%thresh
-    aksfac              => gdmorpar%aksfac
-    rwave               => gdmorpar%rwave
-    alfabs              => gdmorpar%alfabs
-    alfabn              => gdmorpar%alfabn
-    camax               => gdmorpar%camax
-    dzmax               => gdmorpar%dzmax
-    sus                 => gdmorpar%sus
-    bed                 => gdmorpar%bed
-    tmor                => gdmorpar%tmor
-    thetsd              => gdmorpar%thetsd
-    susw                => gdmorpar%susw
-    sedthr              => gdmorpar%sedthr
-    hmaxth              => gdmorpar%hmaxth
-    bedw                => gdmorpar%bedw
-    rdc                 => gdmorpar%rdc
-    rdw                 => gdmorpar%rdw
-    espir               => gdmorpar%espir
-    ashld               => gdmorpar%ashld
-    bshld               => gdmorpar%bshld
-    cshld               => gdmorpar%cshld
-    dshld               => gdmorpar%dshld
-    coulfri             => gdmorpar%coulfri
-    flfdrat             => gdmorpar%flfdrat
-    alfpa               => gdmorpar%alfpa
-    thcrpa              => gdmorpar%thcrpa
-    asklhe              => gdmorpar%asklhe
-    mwwjhe              => gdmorpar%mwwjhe
-    i10                 => gdmorpar%i10
-    i50                 => gdmorpar%i50
-    i90                 => gdmorpar%i90
-    ihidexp             => gdmorpar%ihidexp
-    itmor               => gdmorpar%itmor
-    iopkcw              => gdmorpar%iopkcw
-    islope              => gdmorpar%islope
-    morfacpar           => gdmorpar%morfacpar
-    morfacrec           => gdmorpar%morfacrec
-    morfactable         => gdmorpar%morfactable
-    nxx                 => gdmorpar%nxx
-    bcmfile             => gdmorpar%bcmfile
-    morfacfile          => gdmorpar%morfacfile
-    moroutput           => gdmorpar%moroutput
-    mornum              => gdmorpar%mornum
-    morbnd              => gdmorpar%morbnd
-    wetslope            => gdmorpar%wetslope
-    avaltime            => gdmorpar%avaltime
-    xx                  => gdmorpar%xx
-    bedupd              => gdmorpar%bedupd
-    cmpupd              => gdmorpar%cmpupd
-    eqmbcsand           => gdmorpar%eqmbcsand
-    eqmbcmud            => gdmorpar%eqmbcmud
-    densin              => gdmorpar%densin
-    rouse               => gdmorpar%rouse
-    epspar              => gdmorpar%epspar
-    updinf              => gdmorpar%updinf
-    neglectentrainment  => gdmorpar%neglectentrainment
-    oldmudfrac          => gdmorpar%oldmudfrac
-    varyingmorfac       => gdmorpar%varyingmorfac
-    multi               => gdmorpar%multi
-    bcmfilnam           => gdmorpar%bcmfilnam
-    nmudfrac            => gdsedpar%nmudfrac
-    namsed              => gdsedpar%namsed
-    anymud              => gdsedpar%anymud
-    pangle              => gdmorpar%pangle
-    fpco                => gdmorpar%fpco
-    factcr              => gdmorpar%factcr
-    subiw               => gdmorpar%subiw
-    eulerisoglm         => gdmorpar%eulerisoglm
-    glmisoeuler         => gdmorpar%glmisoeuler
+    morfac              => morpar%morfac
+    thresh              => morpar%thresh
+    aksfac              => morpar%aksfac
+    rwave               => morpar%rwave
+    alfabs              => morpar%alfabs
+    alfabn              => morpar%alfabn
+    camax               => morpar%camax
+    dzmax               => morpar%dzmax
+    sus                 => morpar%sus
+    bed                 => morpar%bed
+    tmor                => morpar%tmor
+    thetsd              => morpar%thetsd
+    susw                => morpar%susw
+    sedthr              => morpar%sedthr
+    hmaxth              => morpar%hmaxth
+    bedw                => morpar%bedw
+    rdc                 => morpar%rdc
+    rdw                 => morpar%rdw
+    espir               => morpar%espir
+    ashld               => morpar%ashld
+    bshld               => morpar%bshld
+    cshld               => morpar%cshld
+    dshld               => morpar%dshld
+    coulfri             => morpar%coulfri
+    flfdrat             => morpar%flfdrat
+    alfpa               => morpar%alfpa
+    thcrpa              => morpar%thcrpa
+    asklhe              => morpar%asklhe
+    mwwjhe              => morpar%mwwjhe
+    i10                 => morpar%i10
+    i50                 => morpar%i50
+    i90                 => morpar%i90
+    ihidexp             => morpar%ihidexp
+    itmor               => morpar%itmor
+    iopkcw              => morpar%iopkcw
+    islope              => morpar%islope
+    morfacpar           => morpar%morfacpar
+    morfacrec           => morpar%morfacrec
+    morfactable         => morpar%morfactable
+    nxx                 => morpar%nxx
+    bcmfile             => morpar%bcmfile
+    morfacfile          => morpar%morfacfile
+    moroutput           => morpar%moroutput
+    mornum              => morpar%mornum
+    morbnd              => morpar%morbnd
+    wetslope            => morpar%wetslope
+    avaltime            => morpar%avaltime
+    xx                  => morpar%xx
+    bedupd              => morpar%bedupd
+    cmpupd              => morpar%cmpupd
+    eqmbcsand           => morpar%eqmbcsand
+    eqmbcmud            => morpar%eqmbcmud
+    densin              => morpar%densin
+    rouse               => morpar%rouse
+    epspar              => morpar%epspar
+    updinf              => morpar%updinf
+    neglectentrainment  => morpar%neglectentrainment
+    oldmudfrac          => morpar%oldmudfrac
+    varyingmorfac       => morpar%varyingmorfac
+    multi               => morpar%multi
+    bcmfilnam           => morpar%bcmfilnam
+    nmudfrac            => sedpar%nmudfrac
+    namsed              => sedpar%namsed
+    anymud              => sedpar%anymud
+    pangle              => morpar%pangle
+    fpco                => morpar%fpco
+    factcr              => morpar%factcr
+    subiw               => morpar%subiw
+    eulerisoglm         => morpar%eulerisoglm
+    glmisoeuler         => morpar%glmisoeuler
     !
     do j = 1, nto
        morbnd(j)%icond = 1
@@ -809,7 +809,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     !
     ! allocate memory for percentiles
     !
-    allocate (gdmorpar%xx(nxx), stat = istat)
+    allocate (morpar%xx(nxx), stat = istat)
     !
     if (istat /= 0) then
        errmsg = 'RDMOR: memory alloc error'
@@ -820,7 +820,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     !
     ! Update local pointer
     !
-    xx => gdmorpar%xx
+    xx => morpar%xx
     !
     ! Copy and sort percentiles
     !
@@ -864,13 +864,13 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     !
     if (anymud) then
        call rdflufflyr(lundia    ,error    ,filmor    ,lsed , &
-                     & mor_ptr   ,gdmorpar%flufflyr   ,griddim)
+                     & mor_ptr   ,morpar%flufflyr     ,griddim)
     endif
     !
     call rdmorlyr (lundia    ,error     ,filmor    , &
                  & nmaxus    ,nto       , &
                  & nambnd    ,version   ,lsedtot   ,namsed    , &
-                 & gdmorpar  ,gdmorlyr  ,gdsedpar  ,mor_ptr   , &
+                 & morpar    ,morlyr    ,sedpar    ,mor_ptr   , &
                  & griddim   )
     !
     deallocate(itype)
@@ -1066,7 +1066,7 @@ end subroutine rdmor1
 
 
 subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
-                 & nambnd    ,gdsedpar  ,gdmorpar  )
+                 & nambnd    ,sedpar    ,morpar    )
 !!--description-----------------------------------------------------------------
 !
 ! Report morphology settings to diag file
@@ -1148,11 +1148,11 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     logical                                , pointer :: glmisoeuler
     character(256)                         , pointer :: bcmfilnam
     character(20)          , dimension(:)  , pointer :: namsed
-    type (handletype)                      , pointer :: bcmfile
-    type (handletype)                      , pointer :: morfacfile
-    type (moroutputtype)                   , pointer :: moroutput
-    type (mornumericstype)                 , pointer :: mornum
-    type (bedbndtype)      , dimension(:)  , pointer :: morbnd
+    type(handletype)                       , pointer :: bcmfile
+    type(handletype)                       , pointer :: morfacfile
+    type(moroutputtype)                    , pointer :: moroutput
+    type(mornumericstype)                  , pointer :: mornum
+    type(bedbndtype)       , dimension(:)  , pointer :: morbnd
 !
 ! Local parameters
 !
@@ -1167,8 +1167,8 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     integer                        , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
     logical                        , intent(out) :: error
     character(20) , dimension(nto)               :: nambnd  !  Description and declaration in ckdim.f90
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    type (gd_morpar)                         , pointer     :: gdmorpar
+    type(sedpar_type)              , pointer     :: sedpar
+    type(morpar_type)              , pointer     :: morpar
 !
 ! Local variables
 !
@@ -1190,76 +1190,76 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     !
     ! Let local variables point to fields within data structures
     !
-    morfac              => gdmorpar%morfac
-    thresh              => gdmorpar%thresh
-    aksfac              => gdmorpar%aksfac
-    rwave               => gdmorpar%rwave
-    alfabs              => gdmorpar%alfabs
-    alfabn              => gdmorpar%alfabn
-    camax               => gdmorpar%camax
-    dzmax               => gdmorpar%dzmax
-    sus                 => gdmorpar%sus
-    bed                 => gdmorpar%bed
-    tmor                => gdmorpar%tmor
-    thetsd              => gdmorpar%thetsd
-    susw                => gdmorpar%susw
-    sedthr              => gdmorpar%sedthr
-    hmaxth              => gdmorpar%hmaxth
-    bedw                => gdmorpar%bedw
-    rdc                 => gdmorpar%rdc
-    rdw                 => gdmorpar%rdw
-    espir               => gdmorpar%espir
-    ashld               => gdmorpar%ashld
-    bshld               => gdmorpar%bshld
-    cshld               => gdmorpar%cshld
-    dshld               => gdmorpar%dshld
-    coulfri             => gdmorpar%coulfri
-    flfdrat             => gdmorpar%flfdrat
-    alfpa               => gdmorpar%alfpa
-    thcrpa              => gdmorpar%thcrpa
-    asklhe              => gdmorpar%asklhe
-    mwwjhe              => gdmorpar%mwwjhe
-    i10                 => gdmorpar%i10
-    i50                 => gdmorpar%i50
-    i90                 => gdmorpar%i90
-    ihidexp             => gdmorpar%ihidexp
-    itmor               => gdmorpar%itmor
-    iopkcw              => gdmorpar%iopkcw
-    islope              => gdmorpar%islope
-    morfacpar           => gdmorpar%morfacpar
-    morfacrec           => gdmorpar%morfacrec
-    morfactable         => gdmorpar%morfactable
-    nxx                 => gdmorpar%nxx
-    bcmfile             => gdmorpar%bcmfile
-    morfacfile          => gdmorpar%morfacfile
-    moroutput           => gdmorpar%moroutput
-    mornum              => gdmorpar%mornum
-    morbnd              => gdmorpar%morbnd
-    xx                  => gdmorpar%xx
-    bedupd              => gdmorpar%bedupd
-    cmpupd              => gdmorpar%cmpupd
-    eqmbcsand           => gdmorpar%eqmbcsand
-    eqmbcmud            => gdmorpar%eqmbcmud
-    densin              => gdmorpar%densin
-    rouse               => gdmorpar%rouse
-    epspar              => gdmorpar%epspar
-    updinf              => gdmorpar%updinf
-    neglectentrainment  => gdmorpar%neglectentrainment
-    oldmudfrac          => gdmorpar%oldmudfrac
-    varyingmorfac       => gdmorpar%varyingmorfac
-    multi               => gdmorpar%multi
-    bcmfilnam           => gdmorpar%bcmfilnam
-    nmudfrac            => gdsedpar%nmudfrac
-    namsed              => gdsedpar%namsed
-    sedtyp              => gdsedpar%sedtyp
-    pangle              => gdmorpar%pangle
-    fpco                => gdmorpar%fpco
-    factcr              => gdmorpar%factcr
-    wetslope            => gdmorpar%wetslope
-    avaltime            => gdmorpar%avaltime
-    subiw               => gdmorpar%subiw
-    eulerisoglm         => gdmorpar%eulerisoglm
-    glmisoeuler         => gdmorpar%glmisoeuler
+    morfac              => morpar%morfac
+    thresh              => morpar%thresh
+    aksfac              => morpar%aksfac
+    rwave               => morpar%rwave
+    alfabs              => morpar%alfabs
+    alfabn              => morpar%alfabn
+    camax               => morpar%camax
+    dzmax               => morpar%dzmax
+    sus                 => morpar%sus
+    bed                 => morpar%bed
+    tmor                => morpar%tmor
+    thetsd              => morpar%thetsd
+    susw                => morpar%susw
+    sedthr              => morpar%sedthr
+    hmaxth              => morpar%hmaxth
+    bedw                => morpar%bedw
+    rdc                 => morpar%rdc
+    rdw                 => morpar%rdw
+    espir               => morpar%espir
+    ashld               => morpar%ashld
+    bshld               => morpar%bshld
+    cshld               => morpar%cshld
+    dshld               => morpar%dshld
+    coulfri             => morpar%coulfri
+    flfdrat             => morpar%flfdrat
+    alfpa               => morpar%alfpa
+    thcrpa              => morpar%thcrpa
+    asklhe              => morpar%asklhe
+    mwwjhe              => morpar%mwwjhe
+    i10                 => morpar%i10
+    i50                 => morpar%i50
+    i90                 => morpar%i90
+    ihidexp             => morpar%ihidexp
+    itmor               => morpar%itmor
+    iopkcw              => morpar%iopkcw
+    islope              => morpar%islope
+    morfacpar           => morpar%morfacpar
+    morfacrec           => morpar%morfacrec
+    morfactable         => morpar%morfactable
+    nxx                 => morpar%nxx
+    bcmfile             => morpar%bcmfile
+    morfacfile          => morpar%morfacfile
+    moroutput           => morpar%moroutput
+    mornum              => morpar%mornum
+    morbnd              => morpar%morbnd
+    xx                  => morpar%xx
+    bedupd              => morpar%bedupd
+    cmpupd              => morpar%cmpupd
+    eqmbcsand           => morpar%eqmbcsand
+    eqmbcmud            => morpar%eqmbcmud
+    densin              => morpar%densin
+    rouse               => morpar%rouse
+    epspar              => morpar%epspar
+    updinf              => morpar%updinf
+    neglectentrainment  => morpar%neglectentrainment
+    oldmudfrac          => morpar%oldmudfrac
+    varyingmorfac       => morpar%varyingmorfac
+    multi               => morpar%multi
+    bcmfilnam           => morpar%bcmfilnam
+    nmudfrac            => sedpar%nmudfrac
+    namsed              => sedpar%namsed
+    sedtyp              => sedpar%sedtyp
+    pangle              => morpar%pangle
+    fpco                => morpar%fpco
+    factcr              => morpar%factcr
+    wetslope            => morpar%wetslope
+    avaltime            => morpar%avaltime
+    subiw               => morpar%subiw
+    eulerisoglm         => morpar%eulerisoglm
+    glmisoeuler         => morpar%glmisoeuler
     !
     ! output values to file
     !
@@ -1688,7 +1688,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     !
     deallocate(parnames)
     !
-    call echoflufflyr(lundia    ,error    ,gdmorpar%flufflyr)
+    call echoflufflyr(lundia    ,error    ,morpar%flufflyr)
 end subroutine echomor
 
 subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr,griddim)
@@ -1713,7 +1713,7 @@ subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr
     integer                                  , intent(in)  :: lsed     ! number of suspended fractions
     integer                                                :: lundia
     logical                                  , intent(out) :: error
-    type (griddimtype)            , target   , intent(in)  :: griddim
+    type(griddimtype)             , target   , intent(in)  :: griddim
 !
 ! Local variables
 !

@@ -32,7 +32,6 @@ libDataGDP_la_SOURCES = \
          clradv2d.f90 \
          clrbedformpar.f90 \
          clrdredge.f90 \
-         clrerosed.f90 \
          clrflwpar.f90 \
          clrmassbal.f90 \
          clrtrachy.f90 \
@@ -52,7 +51,6 @@ libDataGDP_la_SOURCES = \
          initdischarge.f90 \
          initveg3d.f90 \
          initdredge.f90 \
-         initerosed.f90 \
          initf0isf1.f90 \
          initflwpar.f90 \
          initfmtbcc.f90 \

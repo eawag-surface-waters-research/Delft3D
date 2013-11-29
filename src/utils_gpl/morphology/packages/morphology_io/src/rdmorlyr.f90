@@ -33,7 +33,7 @@ contains
 
 subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                   & nmaxus    ,nto       ,nambnd    ,version   , &
-                  & lsedtot   ,namsed    ,gdmorpar  ,gdmorlyr  ,gdsedpar  , &
+                  & lsedtot   ,namsed    ,morpar    ,morlyr    ,sedpar    , &
                   & mor_ptr   ,griddim   )
 !!--description-----------------------------------------------------------------
 !
@@ -61,10 +61,10 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     character(*)                                                  :: filmor
     character(20)             , dimension(nto)                    :: nambnd   !  Description and declaration in esm_alloc_char.f90
     character(20)             , dimension(lsedtot)                :: namsed   !  Names of all sediment fractions 
-    type (gd_morpar)                                , pointer     :: gdmorpar
-    type (gd_sedpar)                                , pointer     :: gdsedpar
-    type (bedcomp_data)                             , pointer     :: gdmorlyr
-    type (griddimtype)                   , target   , intent(in)  :: griddim
+    type(morpar_type)                               , pointer     :: morpar
+    type(sedpar_type)                               , pointer     :: sedpar
+    type(bedcomp_data)                              , pointer     :: morlyr
+    type(griddimtype)                    , target   , intent(in)  :: griddim
     type(tree_data)                                 , pointer     :: mor_ptr
 !
 ! Local variables
@@ -128,32 +128,32 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
 !! executable statements -------------------------------------------------------
 !
     !lfbedfrm            => gdp%gdbedformpar%lfbedfrm
-    bed                 => gdmorpar%bed
-    ttlalpha            => gdmorpar%ttlalpha
-    ttlmin              => gdmorpar%ttlmin
-    ttlform             => gdmorpar%ttlform
-    telform             => gdmorpar%telform
-    bcmfile             => gdmorpar%bcmfile
-    bcmfilnam           => gdmorpar%bcmfilnam
-    flcomp              => gdmorpar%flcomp
-    ttlfil              => gdmorpar%ttlfil
-    telfil              => gdmorpar%telfil
+    bed                 => morpar%bed
+    ttlalpha            => morpar%ttlalpha
+    ttlmin              => morpar%ttlmin
+    ttlform             => morpar%ttlform
+    telform             => morpar%telform
+    bcmfile             => morpar%bcmfile
+    bcmfilnam           => morpar%bcmfilnam
+    flcomp              => morpar%flcomp
+    ttlfil              => morpar%ttlfil
+    telfil              => morpar%telfil
     !
-    istat = bedcomp_getpointer_integer(gdmorlyr, 'IUnderLyr', iunderlyr)
-    if (istat == 0) istat = bedcomp_getpointer_logical(gdmorlyr, 'ExchLyr'             , exchlyr)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'NLaLyr'              , nlalyr)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'NEuLyr'              , neulyr)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'NFrac'               , nfrac)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'nmLb'                , nmlb)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'nmUb'                , nmub)
-    if (istat == 0) istat = bedcomp_getpointer_realfp (gdmorlyr, 'ThEuLyr'             , theulyr)
-    if (istat == 0) istat = bedcomp_getpointer_realfp (gdmorlyr, 'ThLaLyr'             , thlalyr)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'UpdBaseLyr'          , updbaselyr)
-    if (istat == 0) istat = bedcomp_getpointer_realfp (gdmorlyr, 'MinMassShortWarning' , minmass)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'MaxNumShortWarning'  , maxwarn)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'IPorosity'           , iporosity)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'Ndiff'               , ndiff)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdmorlyr, 'IDiffusion'          , idiffusion)
+    istat = bedcomp_getpointer_integer(morlyr, 'IUnderLyr', iunderlyr)
+    if (istat == 0) istat = bedcomp_getpointer_logical(morlyr, 'ExchLyr'             , exchlyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'NLaLyr'              , nlalyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'NEuLyr'              , neulyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'NFrac'               , nfrac)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'nmLb'                , nmlb)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'nmUb'                , nmub)
+    if (istat == 0) istat = bedcomp_getpointer_realfp (morlyr, 'ThEuLyr'             , theulyr)
+    if (istat == 0) istat = bedcomp_getpointer_realfp (morlyr, 'ThLaLyr'             , thlalyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'UpdBaseLyr'          , updbaselyr)
+    if (istat == 0) istat = bedcomp_getpointer_realfp (morlyr, 'MinMassShortWarning' , minmass)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'MaxNumShortWarning'  , maxwarn)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'IPorosity'           , iporosity)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'Ndiff'               , ndiff)
+    if (istat == 0) istat = bedcomp_getpointer_integer(morlyr, 'IDiffusion'          , idiffusion)
     if (istat /= 0) then
        errmsg = 'Memory problem in RDMORLYR'
        call write_error(errmsg, unit=lundia)
@@ -172,7 +172,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     ! allocate memory for boundary conditions
     !
     istat = 0
-    allocate (gdmorpar%cmpbnd(nto), stat = istat)
+    allocate (morpar%cmpbnd(nto), stat = istat)
     if (istat==0) allocate(parnames(2*lsedtot), stat = istat)
     !
     if (istat /= 0) then
@@ -182,7 +182,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        return
     endif
     !
-    cmpbnd              => gdmorpar%cmpbnd
+    cmpbnd              => morpar%cmpbnd
     !
     do j = 1, nto
        cmpbnd(j)%icond = 1
@@ -193,7 +193,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     ! the data tree read from the input file
     !
     if (version < 2) then
-       if (allocmorlyr(gdmorlyr) /= 0) then
+       if (allocmorlyr(morlyr) /= 0) then
           errmsg = 'RDMORLYR: memory alloc error'
           call write_error(errmsg, unit=lundia)
           error = .true.
@@ -397,7 +397,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     case default
     endselect
     !
-    if (allocmorlyr(gdmorlyr) /= 0) then
+    if (allocmorlyr(morlyr) /= 0) then
        errmsg = 'RDMORLYR: memory alloc error'
        call write_error(errmsg, unit=lundia)
        error = .true.
@@ -412,8 +412,8 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
            !
            ! Diffusion coefficient
            !
-           istat = bedcomp_getpointer_realfp(gdmorlyr, 'Kdiff', kdiff)
-           if (istat == 0) istat = bedcomp_getpointer_realfp(gdmorlyr, 'Zdiff', zdiff)
+           istat = bedcomp_getpointer_realfp(morlyr, 'Kdiff', kdiff)
+           if (istat == 0) istat = bedcomp_getpointer_realfp(morlyr, 'Zdiff', zdiff)
            if (istat /= 0) then
                errmsg = 'Memory problem in RDMORLYR'
                call write_error(errmsg, unit=lundia)
@@ -447,7 +447,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        !
        ! Get the following pointers after allocating the memory for the arrays
        !
-       istat = bedcomp_getpointer_realfp(gdmorlyr, 'ThTrLyr', thtrlyr)
+       istat = bedcomp_getpointer_realfp(morlyr, 'ThTrLyr', thtrlyr)
        if (istat /= 0) then
           errmsg = 'Memory problem in RDMORLYR'
           call write_error(errmsg, unit=lundia)
@@ -528,7 +528,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        end select
        !
        if (exchlyr) then
-          istat = bedcomp_getpointer_realfp(gdmorlyr, 'ThExLyr', thexlyr)
+          istat = bedcomp_getpointer_realfp(morlyr, 'ThExLyr', thexlyr)
           if (istat /= 0) then
              errmsg = 'Memory problem in RDMORLYR'
              call write_error(errmsg, unit=lundia)
@@ -774,15 +774,15 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
        !
        ! porosity is fraction dependent and included in cdryb densities
        !
-       call setbedfracprop(gdmorlyr, gdsedpar%sedtyp, gdsedpar%sedd50, &
-             & gdsedpar%logsedsig, gdsedpar%cdryb)
+       call setbedfracprop(morlyr, sedpar%sedtyp, sedpar%sedd50, &
+             & sedpar%logsedsig, sedpar%cdryb)
     else
        !
        ! porosity is simulated, the cdryb values are ignored
        !
-       call setbedfracprop(gdmorlyr, gdsedpar%sedtyp, gdsedpar%sedd50, &
-             & gdsedpar%logsedsig, gdsedpar%rhosol)
-       ! gdsedpar%cdryb = gdsedpar%rhosol
+       call setbedfracprop(morlyr, sedpar%sedtyp, sedpar%sedd50, &
+             & sedpar%logsedsig, sedpar%rhosol)
+       ! sedpar%cdryb = sedpar%rhosol
     endif
     deallocate(parnames, stat = istat)
     !
@@ -805,7 +805,7 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
 !
 ! Global variables
 !
-    type (griddimtype)                       , target   , intent(in)  :: griddim
+    type(griddimtype)                        , target   , intent(in)  :: griddim
     integer                                             , intent(in)  :: lundia  !  Description and declaration in inout.igs
     integer                                             , intent(in)  :: ndiff   !  Description and declaration in bedcomposition module
     real(fp), dimension(ndiff)                          , intent(out) :: zdiff   !  Description and declaration in bedcomposition module

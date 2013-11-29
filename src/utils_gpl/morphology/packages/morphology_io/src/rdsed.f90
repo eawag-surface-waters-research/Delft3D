@@ -43,7 +43,7 @@ contains
 subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                & lsedtot   ,lstsci    ,ltur      ,facdss    ,namcon    , &
                & iopsus    ,nmlb      ,nmub      ,filsed    , &
-               & sed_ptr   ,gdsedpar  ,gdtrapar  )
+               & sed_ptr   ,sedpar    ,trapar    )
 !!--description-----------------------------------------------------------------
 !
 ! Read sediment parameters from an input file
@@ -62,7 +62,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     implicit none
     !
-    ! The following list of pointer parameters is used to point inside the gd* structures
+    ! The following list of pointer parameters is used to point inside sedpar and trapar
     !
     real(fp)                           , pointer :: csoil
     real(fp)                           , pointer :: mdcuni
@@ -126,8 +126,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                                  , intent(in)  :: nmub
     character(len=*)                         , intent(in)  :: filsed
     type(tree_data)                          , pointer     :: sed_ptr
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    type (gd_trapar)                         , pointer     :: gdtrapar
+    type(sedpar_type)                        , pointer     :: sedpar
+    type(trapar_type)                        , pointer     :: trapar
 !
 ! Local variables
 !
@@ -164,84 +164,84 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    csoil                => gdsedpar%csoil
-    mdcuni               => gdsedpar%mdcuni
-    kssilt               => gdsedpar%kssilt
-    kssand               => gdsedpar%kssand
-    nmudfrac             => gdsedpar%nmudfrac
-    rhosol               => gdsedpar%rhosol
-    logseddia            => gdsedpar%logseddia
-    logsedsig            => gdsedpar%logsedsig
-    sedd10               => gdsedpar%sedd10
-    sedd50               => gdsedpar%sedd50
-    sedd50fld            => gdsedpar%sedd50fld
-    seddm                => gdsedpar%seddm
-    sedd90               => gdsedpar%sedd90
-    cdryb                => gdsedpar%cdryb
-    dstar                => gdsedpar%dstar
-    taucr                => gdsedpar%taucr
-    tetacr               => gdsedpar%tetacr
-    ws0                  => gdsedpar%ws0
-    wsm                  => gdsedpar%wsm
-    salmax               => gdsedpar%salmax
-    sdbuni               => gdsedpar%sdbuni
-    thcmud               => gdsedpar%thcmud
-    mudcnt               => gdsedpar%mudcnt
-    pmcrit               => gdsedpar%pmcrit
-    nseddia              => gdsedpar%nseddia
-    sedtyp               => gdsedpar%sedtyp
-    inisedunit           => gdsedpar%inisedunit
-    namsed               => gdsedpar%namsed
-    flsdbd               => gdsedpar%flsdbd
-    anymud               => gdsedpar%anymud
-    bsskin               => gdsedpar%bsskin
-    flsdia               => gdsedpar%flsdia
-    flsmdc               => gdsedpar%flsmdc
-    flspmc               => gdsedpar%flspmc
-    dll_function_settle  => gdtrapar%dll_function_settle
-    dll_name_settle      => gdtrapar%dll_name_settle
-    dll_handle_settle    => gdtrapar%dll_handle_settle
-    dll_usrfil_settle    => gdtrapar%dll_usrfil_settle
-    iform                => gdtrapar%iform
-    flstrn               => gdtrapar%flstrn
+    csoil                => sedpar%csoil
+    mdcuni               => sedpar%mdcuni
+    kssilt               => sedpar%kssilt
+    kssand               => sedpar%kssand
+    nmudfrac             => sedpar%nmudfrac
+    rhosol               => sedpar%rhosol
+    logseddia            => sedpar%logseddia
+    logsedsig            => sedpar%logsedsig
+    sedd10               => sedpar%sedd10
+    sedd50               => sedpar%sedd50
+    sedd50fld            => sedpar%sedd50fld
+    seddm                => sedpar%seddm
+    sedd90               => sedpar%sedd90
+    cdryb                => sedpar%cdryb
+    dstar                => sedpar%dstar
+    taucr                => sedpar%taucr
+    tetacr               => sedpar%tetacr
+    ws0                  => sedpar%ws0
+    wsm                  => sedpar%wsm
+    salmax               => sedpar%salmax
+    sdbuni               => sedpar%sdbuni
+    thcmud               => sedpar%thcmud
+    mudcnt               => sedpar%mudcnt
+    pmcrit               => sedpar%pmcrit
+    nseddia              => sedpar%nseddia
+    sedtyp               => sedpar%sedtyp
+    inisedunit           => sedpar%inisedunit
+    namsed               => sedpar%namsed
+    flsdbd               => sedpar%flsdbd
+    anymud               => sedpar%anymud
+    bsskin               => sedpar%bsskin
+    flsdia               => sedpar%flsdia
+    flsmdc               => sedpar%flsmdc
+    flspmc               => sedpar%flspmc
+    dll_function_settle  => trapar%dll_function_settle
+    dll_name_settle      => trapar%dll_name_settle
+    dll_handle_settle    => trapar%dll_handle_settle
+    dll_usrfil_settle    => trapar%dll_usrfil_settle
+    iform                => trapar%iform
+    flstrn               => trapar%flstrn
     !
     rmissval = -999.0_fp
     !
     istat = 0
-    if (.not. associated(gdsedpar%sedd50)) then
+    if (.not. associated(sedpar%sedd50)) then
        !
        ! allocation of namsed, rhosol and sedtyp have been allocated in count_sed routine
        !
-       if (istat==0) allocate (gdsedpar%sedblock  (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%nseddia   (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%logseddia (2, 101,                   lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%logsedsig (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%sedd10    (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%sedd50    (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%seddm     (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%sedd90    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%sedblock  (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%nseddia   (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%logseddia (2, 101,                   lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%logsedsig (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%sedd10    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%sedd50    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%seddm     (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%sedd90    (                          lsedtot), stat = istat)
        !
-       if (istat==0) allocate (gdsedpar%cdryb     (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%dstar     (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%taucr     (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%tetacr    (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%sdbuni    (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%sedtrcfac (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%flsdbd    (                          lsedtot), stat = istat)
-       if (istat==0) allocate (gdsedpar%inisedunit(                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%cdryb     (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%dstar     (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%taucr     (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%tetacr    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%sdbuni    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%sedtrcfac (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%flsdbd    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (sedpar%inisedunit(                          lsedtot), stat = istat)
        !
-       if (istat==0) allocate (gdsedpar%ws0       (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (gdsedpar%wsm       (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (gdsedpar%salmax    (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (gdsedpar%tcguni    (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (gdsedpar%gamflc    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%ws0       (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%wsm       (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%salmax    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%tcguni    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%gamflc    (                      max(1,lsed)), stat = istat)
        !
-       if (istat==0) allocate (gdsedpar%thcmud    (nmlb:nmub            ), stat = istat)
-       if (istat==0) allocate (gdsedpar%flstcg    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%thcmud    (nmlb:nmub            ), stat = istat)
+       if (istat==0) allocate (sedpar%flstcg    (                      max(1,lsed)), stat = istat)
        !
-       if (istat==0) allocate (gdsedpar%mudcnt    (nmlb:nmub            ), stat = istat)
-       if (istat==0) allocate (gdsedpar%pmcrit    (nmlb:nmub            ), stat = istat)
-       if (istat==0) allocate (gdsedpar%sedd50fld (nmlb:nmub            ), stat = istat)
+       if (istat==0) allocate (sedpar%mudcnt    (nmlb:nmub            ), stat = istat)
+       if (istat==0) allocate (sedpar%pmcrit    (nmlb:nmub            ), stat = istat)
+       if (istat==0) allocate (sedpar%sedd50fld (nmlb:nmub            ), stat = istat)
        !
        if (istat/=0) then
           errmsg = 'RDSED: memory alloc error'
@@ -252,45 +252,45 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        ! update local pointers
        !
-       nseddia       => gdsedpar%nseddia
-       logseddia     => gdsedpar%logseddia
-       logsedsig     => gdsedpar%logsedsig
-       sedd10        => gdsedpar%sedd10
-       sedd50        => gdsedpar%sedd50
-       seddm         => gdsedpar%seddm
-       sedd90        => gdsedpar%sedd90
+       nseddia       => sedpar%nseddia
+       logseddia     => sedpar%logseddia
+       logsedsig     => sedpar%logsedsig
+       sedd10        => sedpar%sedd10
+       sedd50        => sedpar%sedd50
+       seddm         => sedpar%seddm
+       sedd90        => sedpar%sedd90
        !
-       cdryb         => gdsedpar%cdryb
-       dstar         => gdsedpar%dstar
-       taucr         => gdsedpar%taucr
-       tetacr        => gdsedpar%tetacr
-       sdbuni        => gdsedpar%sdbuni
-       sedtrcfac     => gdsedpar%sedtrcfac
-       flsdbd        => gdsedpar%flsdbd
-       inisedunit    => gdsedpar%inisedunit
+       cdryb         => sedpar%cdryb
+       dstar         => sedpar%dstar
+       taucr         => sedpar%taucr
+       tetacr        => sedpar%tetacr
+       sdbuni        => sedpar%sdbuni
+       sedtrcfac     => sedpar%sedtrcfac
+       flsdbd        => sedpar%flsdbd
+       inisedunit    => sedpar%inisedunit
        !
-       ws0           => gdsedpar%ws0
-       wsm           => gdsedpar%wsm
-       salmax        => gdsedpar%salmax
+       ws0           => sedpar%ws0
+       wsm           => sedpar%wsm
+       salmax        => sedpar%salmax
        !
-       thcmud        => gdsedpar%thcmud
+       thcmud        => sedpar%thcmud
        !
-       mudcnt        => gdsedpar%mudcnt
-       pmcrit        => gdsedpar%pmcrit
-       sedd50fld     => gdsedpar%sedd50fld
-       gamflc        => gdsedpar%gamflc
-       tcguni        => gdsedpar%tcguni
-       flstcg        => gdsedpar%flstcg
+       mudcnt        => sedpar%mudcnt
+       pmcrit        => sedpar%pmcrit
+       sedd50fld     => sedpar%sedd50fld
+       gamflc        => sedpar%gamflc
+       tcguni        => sedpar%tcguni
+       flstcg        => sedpar%flstcg
        !
        !
-       ! end check on assocation of gdsedpar%sedd50
+       ! end check on assocation of sedpar%sedd50
        !
     endif 
     !
     ! Initialization of the just allocated arrays
     !
     do i = 1,lsedtot
-       gdsedpar%sedblock(i)%node_name => null()
+       sedpar%sedblock(i)%node_name => null()
     enddo
     flsdbd              = ' '
     flsmdc              = ' '
@@ -428,7 +428,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              !
              exit
           enddo
-          gdsedpar%sedblock(l) = sedblock_ptr
+          sedpar%sedblock(l) = sedblock_ptr
           !
           rhosol(l) = rmissval
           call prop_get(sedblock_ptr, '*', 'RhoSol', rhosol(l))
@@ -632,7 +632,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        call rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
                   & facdss    ,sedtyp    ,rhosol    ,sedd50    ,salmax    , &
                   & ws0       ,wsm       ,sdbuni    ,flsdbd    ,cdryb     , &
-                  & gdsedpar%sedblock    ,version   ,error     )
+                  & sedpar%sedblock      ,version   ,error     )
        close (luninp)
        if (error) return
        !
@@ -842,7 +842,7 @@ end subroutine opensedfil
 
 
 subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
-                 & iopsus    ,gdsedpar  ,gdtrapar  )
+                 & iopsus    ,sedpar    ,trapar    )
 !!--description-----------------------------------------------------------------
 !
 ! Report sediment parameter to diag file
@@ -864,8 +864,8 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     integer                                                :: lundia  !  Description and declaration in inout.igs
     logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
     real(fp)      , dimension(lsed)                        :: facdss  !  Description and declaration in rjdim.f90
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    type (gd_trapar)                         , pointer     :: gdtrapar
+    type(sedpar_type)                        , pointer     :: sedpar
+    type(trapar_type)                        , pointer     :: trapar
 !
 ! Local variables
 !
@@ -920,41 +920,41 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    csoil                => gdsedpar%csoil
-    mdcuni               => gdsedpar%mdcuni
-    kssilt               => gdsedpar%kssilt
-    kssand               => gdsedpar%kssand
-    rhosol               => gdsedpar%rhosol
-    logseddia            => gdsedpar%logseddia
-    logsedsig            => gdsedpar%logsedsig
-    sedd10               => gdsedpar%sedd10
-    sedd50               => gdsedpar%sedd50
-    seddm                => gdsedpar%seddm
-    sedd90               => gdsedpar%sedd90
-    cdryb                => gdsedpar%cdryb
-    ws0                  => gdsedpar%ws0
-    wsm                  => gdsedpar%wsm
-    salmax               => gdsedpar%salmax
-    sdbuni               => gdsedpar%sdbuni
-    sedtrcfac            => gdsedpar%sedtrcfac
-    tcguni               => gdsedpar%tcguni
-    gamflc               => gdsedpar%gamflc
-    pmcrit               => gdsedpar%pmcrit
-    nseddia              => gdsedpar%nseddia
-    sedtyp               => gdsedpar%sedtyp
-    inisedunit           => gdsedpar%inisedunit
-    namsed               => gdsedpar%namsed
-    flsdbd               => gdsedpar%flsdbd
-    flstcg               => gdsedpar%flstcg
-    anymud               => gdsedpar%anymud
-    bsskin               => gdsedpar%bsskin
-    flsdia               => gdsedpar%flsdia
-    flsmdc               => gdsedpar%flsmdc
-    flspmc               => gdsedpar%flspmc
-    dll_function_settle  => gdtrapar%dll_function_settle
-    dll_name_settle      => gdtrapar%dll_name_settle
-    dll_usrfil_settle    => gdtrapar%dll_usrfil_settle
-    iform                => gdtrapar%iform
+    csoil                => sedpar%csoil
+    mdcuni               => sedpar%mdcuni
+    kssilt               => sedpar%kssilt
+    kssand               => sedpar%kssand
+    rhosol               => sedpar%rhosol
+    logseddia            => sedpar%logseddia
+    logsedsig            => sedpar%logsedsig
+    sedd10               => sedpar%sedd10
+    sedd50               => sedpar%sedd50
+    seddm                => sedpar%seddm
+    sedd90               => sedpar%sedd90
+    cdryb                => sedpar%cdryb
+    ws0                  => sedpar%ws0
+    wsm                  => sedpar%wsm
+    salmax               => sedpar%salmax
+    sdbuni               => sedpar%sdbuni
+    sedtrcfac            => sedpar%sedtrcfac
+    tcguni               => sedpar%tcguni
+    gamflc               => sedpar%gamflc
+    pmcrit               => sedpar%pmcrit
+    nseddia              => sedpar%nseddia
+    sedtyp               => sedpar%sedtyp
+    inisedunit           => sedpar%inisedunit
+    namsed               => sedpar%namsed
+    flsdbd               => sedpar%flsdbd
+    flstcg               => sedpar%flstcg
+    anymud               => sedpar%anymud
+    bsskin               => sedpar%bsskin
+    flsdia               => sedpar%flsdia
+    flsmdc               => sedpar%flsmdc
+    flspmc               => sedpar%flspmc
+    dll_function_settle  => trapar%dll_function_settle
+    dll_name_settle      => trapar%dll_name_settle
+    dll_usrfil_settle    => trapar%dll_usrfil_settle
+    iform                => trapar%iform
     !
     rmissval = -999.0_fp
     !
@@ -1400,7 +1400,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
           !
        endif
        !
-       call echotrafrm(lundia      ,gdtrapar   ,l         )
+       call echotrafrm(lundia      ,trapar     ,l         )
        if (dll_function_settle(l) /= ' ') then
           !
           ! User defined settling velocity function
@@ -1429,7 +1429,7 @@ end subroutine echosed
 
 
 subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
-                   & filsed    ,gdsedpar  ,sed_ptr   )
+                   & filsed    ,sedpar    ,sed_ptr   )
 !!--description-----------------------------------------------------------------
 !
 ! - Determines number of sediment fractions from sediment input file
@@ -1450,7 +1450,7 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     integer                         , intent(in)  :: lundia  ! Unit of diagnostic file
     logical                         , intent(out) :: error
     character(len=*)                , intent(in)  :: filsed
-    type (gd_sedpar)                , pointer     :: gdsedpar
+    type(sedpar_type)               , pointer     :: sedpar
     type(tree_data)                 , pointer     :: sed_ptr
 !
 ! Local variables
@@ -1592,9 +1592,9 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     !
     ! rhosol, namsed and sedtyp must always be allocated
     !
-                    allocate (gdsedpar%rhosol(lsedtot), stat = istat)
-    if (istat == 0) allocate (gdsedpar%namsed(lsedtot), stat = istat)
-    if (istat == 0) allocate (gdsedpar%sedtyp(lsedtot), stat = istat)
+                    allocate (sedpar%rhosol(lsedtot), stat = istat)
+    if (istat == 0) allocate (sedpar%namsed(lsedtot), stat = istat)
+    if (istat == 0) allocate (sedpar%sedtyp(lsedtot), stat = istat)
     if (istat /= 0) then
        call write_error('Memory allocation error in COUNT_SED', unit=lundia)
     endif
@@ -1604,12 +1604,12 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     do j = 1,size(typsedim)
        select case (typsedim(j)) 
           case (SEDTYP_NONCOHESIVE_TOTALLOAD)
-             gdsedpar%namsed(ibl) = namsedim(j)
-             gdsedpar%sedtyp(ibl) = typsedim(j)
+             sedpar%namsed(ibl) = namsedim(j)
+             sedpar%sedtyp(ibl) = typsedim(j)
              ibl = ibl+1
           case (SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE)
-             gdsedpar%namsed(i) = namsedim(j)
-             gdsedpar%sedtyp(i) = typsedim(j)
+             sedpar%namsed(i) = namsedim(j)
+             sedpar%sedtyp(i) = typsedim(j)
              i = i+1
           case default
              ! not a sediment block, so continue

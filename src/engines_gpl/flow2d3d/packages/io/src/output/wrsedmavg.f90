@@ -116,10 +116,10 @@ subroutine wrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
     first               => nefiselem%first
     celidt              => nefiselem%celidt
     dm                  => gdp%gderosed%dm
-    sbuuc               => gdp%gderosed%sbuuc
-    sbvvc               => gdp%gderosed%sbvvc
-    ssuuc               => gdp%gderosed%ssuuc
-    ssvvc               => gdp%gderosed%ssvvc
+    sbuuc               => gdp%gderosed%e_sbnc
+    sbvvc               => gdp%gderosed%e_sbtc
+    ssuuc               => gdp%gderosed%e_ssnc
+    ssvvc               => gdp%gderosed%e_sstc
     morft               => gdp%gdmorpar%morft
     morft0              => gdp%gdmorpar%morft0
     sus                 => gdp%gdmorpar%sus

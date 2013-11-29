@@ -44,14 +44,14 @@ end interface setpardef
 
 contains
 
-subroutine initrafrm(lundia    ,error     ,lsedtot   ,gdtrapar  )
+subroutine initrafrm(lundia    ,error     ,lsedtot   ,trapar    )
 !!--description-----------------------------------------------------------------
 !
 ! Reads transport formula and parameters
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use morphology_data_module, only: gd_trapar, MAX_RP, MAX_IP, MAX_SP
+    use morphology_data_module, only: trapar_type, MAX_RP, MAX_IP, MAX_SP
     use message_module
     !
     implicit none
@@ -61,7 +61,7 @@ subroutine initrafrm(lundia    ,error     ,lsedtot   ,gdtrapar  )
     integer                   , intent(in)   :: lundia
     logical                   , intent(out)  :: error
     integer                   , intent(in)   :: lsedtot !  Description and declaration in iidim.f90
-    type (gd_trapar)          , pointer      :: gdtrapar
+    type (trapar_type)        , pointer      :: trapar
 !
 ! Local variables
 !
@@ -98,44 +98,44 @@ subroutine initrafrm(lundia    ,error     ,lsedtot   ,gdtrapar  )
 !
 !! executable statements -------------------------------------------------------
 !
-    max_integers         => gdtrapar%max_integers
-    max_reals            => gdtrapar%max_reals
-    max_strings          => gdtrapar%max_strings
-    max_integers_settle  => gdtrapar%max_integers_settle
-    max_reals_settle     => gdtrapar%max_reals_settle
-    max_strings_settle   => gdtrapar%max_strings_settle
-    npar                 => gdtrapar%npar
+    max_integers         => trapar%max_integers
+    max_reals            => trapar%max_reals
+    max_strings          => trapar%max_strings
+    max_integers_settle  => trapar%max_integers_settle
+    max_reals_settle     => trapar%max_reals_settle
+    max_strings_settle   => trapar%max_strings_settle
+    npar                 => trapar%npar
     !
     istat = 0
-    if (.not. associated(gdtrapar%par)) then
-                     allocate (gdtrapar%par    (npar,lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%parfil (npar,lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%iparfld(npar,lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%iform       (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%flstrn      (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%name        (lsedtot), stat = istat)
+    if (.not. associated(trapar%par)) then
+                     allocate (trapar%par    (npar,lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%parfil (npar,lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%iparfld(npar,lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%iform       (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%flstrn      (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%name        (lsedtot), stat = istat)
        !
        max_integers = MAX_IP
        max_reals    = MAX_RP
        max_strings  = MAX_SP
-       if (istat==0) allocate (gdtrapar%dll_handle  (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_name    (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_function(lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_usrfil  (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_integers(max_integers), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_reals   (max_reals   ), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_strings (max_strings ), stat = istat)
+       if (istat==0) allocate (trapar%dll_handle  (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_name    (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_function(lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_usrfil  (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_integers(max_integers), stat = istat)
+       if (istat==0) allocate (trapar%dll_reals   (max_reals   ), stat = istat)
+       if (istat==0) allocate (trapar%dll_strings (max_strings ), stat = istat)
        !
        max_integers_settle =  5
        max_reals_settle    = 21
        max_strings_settle  =  2
-       if (istat==0) allocate (gdtrapar%dll_handle_settle  (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_name_settle    (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_function_settle(lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_usrfil_settle  (lsedtot), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_integers_settle(max_integers_settle), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_reals_settle   (max_reals_settle   ), stat = istat)
-       if (istat==0) allocate (gdtrapar%dll_strings_settle (max_strings_settle ), stat = istat)
+       if (istat==0) allocate (trapar%dll_handle_settle  (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_name_settle    (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_function_settle(lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_usrfil_settle  (lsedtot), stat = istat)
+       if (istat==0) allocate (trapar%dll_integers_settle(max_integers_settle), stat = istat)
+       if (istat==0) allocate (trapar%dll_reals_settle   (max_reals_settle   ), stat = istat)
+       if (istat==0) allocate (trapar%dll_strings_settle (max_strings_settle ), stat = istat)
        !
        if (istat/=0) then
           errmsg = 'IniTraFrm: memory alloc error'
@@ -145,12 +145,12 @@ subroutine initrafrm(lundia    ,error     ,lsedtot   ,gdtrapar  )
        endif
     endif
     !
-    par           => gdtrapar%par
-    parfil        => gdtrapar%parfil
-    iparfld       => gdtrapar%iparfld
-    iform         => gdtrapar%iform
-    flstrn        => gdtrapar%flstrn
-    name          => gdtrapar%name
+    par           => trapar%par
+    parfil        => trapar%parfil
+    iparfld       => trapar%iparfld
+    iform         => trapar%iform
+    flstrn        => trapar%flstrn
+    name          => trapar%name
     !
     iform   = -999
     flstrn  = ' '
@@ -159,13 +159,13 @@ subroutine initrafrm(lundia    ,error     ,lsedtot   ,gdtrapar  )
     parfil  = ' '
     iparfld = 0
     !
-    dll_function  => gdtrapar%dll_function
-    dll_name      => gdtrapar%dll_name
-    dll_handle    => gdtrapar%dll_handle
-    dll_usrfil    => gdtrapar%dll_usrfil
-    dll_integers  => gdtrapar%dll_integers
-    dll_reals     => gdtrapar%dll_reals
-    dll_strings   => gdtrapar%dll_strings
+    dll_function  => trapar%dll_function
+    dll_name      => trapar%dll_name
+    dll_handle    => trapar%dll_handle
+    dll_usrfil    => trapar%dll_usrfil
+    dll_integers  => trapar%dll_integers
+    dll_reals     => trapar%dll_reals
+    dll_strings   => trapar%dll_strings
     !
     dll_function  = ' '
     dll_name      = ' '
@@ -175,13 +175,13 @@ subroutine initrafrm(lundia    ,error     ,lsedtot   ,gdtrapar  )
     dll_reals     = 0.0_hp
     dll_strings   = ' '
     !
-    dll_function_settle  => gdtrapar%dll_function_settle
-    dll_name_settle      => gdtrapar%dll_name_settle
-    dll_handle_settle    => gdtrapar%dll_handle_settle
-    dll_usrfil_settle    => gdtrapar%dll_usrfil_settle
-    dll_integers_settle  => gdtrapar%dll_integers_settle
-    dll_reals_settle     => gdtrapar%dll_reals_settle
-    dll_strings_settle   => gdtrapar%dll_strings_settle
+    dll_function_settle  => trapar%dll_function_settle
+    dll_name_settle      => trapar%dll_name_settle
+    dll_handle_settle    => trapar%dll_handle_settle
+    dll_usrfil_settle    => trapar%dll_usrfil_settle
+    dll_integers_settle  => trapar%dll_integers_settle
+    dll_reals_settle     => trapar%dll_reals_settle
+    dll_strings_settle   => trapar%dll_strings_settle
     !
     dll_function_settle  = ' '
     dll_name_settle      = ' '
@@ -194,7 +194,7 @@ end subroutine initrafrm
 
 
 subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
-                  & ipardef   ,rpardef   ,npardef   ,gdtrapar  , &
+                  & ipardef   ,rpardef   ,npardef   ,trapar    , &
                   & sedtyp    ,sedblock  ,dims      )
 !!--description-----------------------------------------------------------------
 !
@@ -214,7 +214,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     integer                      , intent(in)   :: lundia
     logical                      , intent(out)  :: error
     integer                      , intent(in)   :: lsedtot !  Description and declaration in iidim.f90
-    type (gd_trapar)             , target       :: gdtrapar
+    type (trapar_type)           , target       :: trapar
     character(*)                 , intent(in)   :: filtrn
     integer, dimension(2,npardef), intent(in)   :: ipardef
     real(fp), dimension(npardef) , intent(in)   :: rpardef
@@ -255,29 +255,29 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
 !
 !! executable statements -------------------------------------------------------
 !
-    max_integers         => gdtrapar%max_integers
-    max_reals            => gdtrapar%max_reals
-    max_strings          => gdtrapar%max_strings
-    max_integers_settle  => gdtrapar%max_integers_settle
-    max_reals_settle     => gdtrapar%max_reals_settle
-    max_strings_settle   => gdtrapar%max_strings_settle
-    npar                 => gdtrapar%npar
-    nparfld              => gdtrapar%nparfld
+    max_integers         => trapar%max_integers
+    max_reals            => trapar%max_reals
+    max_strings          => trapar%max_strings
+    max_integers_settle  => trapar%max_integers_settle
+    max_reals_settle     => trapar%max_reals_settle
+    max_strings_settle   => trapar%max_strings_settle
+    npar                 => trapar%npar
+    nparfld              => trapar%nparfld
     !
-    iform         => gdtrapar%iform
-    flstrn        => gdtrapar%flstrn
-    name          => gdtrapar%name
-    par           => gdtrapar%par
-    parfil        => gdtrapar%parfil
-    iparfld       => gdtrapar%iparfld
+    iform         => trapar%iform
+    flstrn        => trapar%flstrn
+    name          => trapar%name
+    par           => trapar%par
+    parfil        => trapar%parfil
+    iparfld       => trapar%iparfld
     !
-    dll_name      => gdtrapar%dll_name
-    dll_function  => gdtrapar%dll_function
-    dll_handle    => gdtrapar%dll_handle
-    dll_usrfil    => gdtrapar%dll_usrfil
-    dll_integers  => gdtrapar%dll_integers
-    dll_reals     => gdtrapar%dll_reals
-    dll_strings   => gdtrapar%dll_strings
+    dll_name      => trapar%dll_name
+    dll_function  => trapar%dll_function
+    dll_handle    => trapar%dll_handle
+    dll_usrfil    => trapar%dll_usrfil
+    dll_integers  => trapar%dll_integers
+    dll_reals     => trapar%dll_reals
+    dll_strings   => trapar%dll_strings
     !
     error = .false.
     !
@@ -345,7 +345,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
        if (error) return
     enddo
     !
-    call rdtraparfld(lundia    ,error     ,lsedtot   ,gdtrapar  , &
+    call rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
                    & dims      )
     write (lundia, *)
     !
@@ -649,7 +649,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
 end subroutine rdtrafrm0
 
 
-subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,gdtrapar  , &
+subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
                      & dims      )
 !!--description-----------------------------------------------------------------
 !
@@ -667,7 +667,7 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,gdtrapar  , &
     integer                      , intent(in)   :: lundia
     logical                      , intent(out)  :: error
     integer                      , intent(in)   :: lsedtot !  Description and declaration in iidim.f90
-    type (gd_trapar)             , target       :: gdtrapar
+    type (trapar_type)           , target       :: trapar
     type (griddimtype), target   , intent(in)   :: dims    !  grid dimensions
 !
 ! Local variables
@@ -687,27 +687,27 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,gdtrapar  , &
 !
 !! executable statements -------------------------------------------------------
 !
-    npar          => gdtrapar%npar
-    nparfld       => gdtrapar%nparfld
-    parfil        => gdtrapar%parfil
-    iparfld       => gdtrapar%iparfld
+    npar          => trapar%npar
+    nparfld       => trapar%nparfld
+    parfil        => trapar%parfil
+    iparfld       => trapar%iparfld
     !
     error  = .false.
     fmttmp = 'formatted'
     istat  = 0
     !
-    allocate(gdtrapar%parfld(dims%nmlb:dims%nmub,nparfld), stat=istat)
+    allocate(trapar%parfld(dims%nmlb:dims%nmub,nparfld), stat=istat)
     if (istat/=0) then
        error = .true.
        return
     endif
-    parfld        => gdtrapar%parfld
+    parfld        => trapar%parfld
     !
     do ll = 1, lsedtot
        do i = 1, npar
-          j = gdtrapar%iparfld(i,ll)
+          j = trapar%iparfld(i,ll)
           if (j>0) then
-             filename = gdtrapar%parfil(i,ll)
+             filename = trapar%parfil(i,ll)
              write (lundia, '(a,a)') 'Reading: ',trim(filename)
              call depfil(lundia     ,error      ,filename   ,fmttmp    , &
                        & parfld(:,j),1          ,1          ,dims      )
@@ -854,21 +854,21 @@ subroutine getpardef(ipardef   ,rpardef   ,npardef   ,iform     ,pardef    )
 end subroutine getpardef
 
 
-subroutine echotrafrm(lundia    ,gdtrapar    ,ifrac     )
+subroutine echotrafrm(lundia    ,trapar      ,ifrac     )
 !!--description-----------------------------------------------------------------
 !
 ! Report transport formula and associated parameters to diag file
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use morphology_data_module, only: gd_trapar
+    use morphology_data_module, only: trapar_type
     !
     implicit none
 !
 ! Call variables
 !
     integer                                      :: lundia  !  Description and declaration in inout.igs
-    type(gd_trapar)                , intent(in)  :: gdtrapar
+    type(trapar_type)              , intent(in)  :: trapar
     integer                        , intent(in)  :: ifrac
 !
 ! Local variables
@@ -883,24 +883,24 @@ subroutine echotrafrm(lundia    ,gdtrapar    ,ifrac     )
 !
 !! executable statements -------------------------------------------------------
 !
-    write (lundia, '(a,a)') '    Formula name              : ',trim(gdtrapar%name(ifrac))
-    if (gdtrapar%iform(ifrac)==15) then
-       write (lundia, '(a,a)') '    Dynamic library           : ',trim(gdtrapar%dll_name(ifrac))
-       write (lundia, '(a,a)') '    Function in library       : ',trim(gdtrapar%dll_function(ifrac))
-       if (gdtrapar%dll_usrfil(ifrac) /= ' ') then
-          write (lundia, '(a,a)') '    Input file for function   : ',trim(gdtrapar%dll_usrfil(ifrac))
+    write (lundia, '(a,a)') '    Formula name              : ',trim(trapar%name(ifrac))
+    if (trapar%iform(ifrac)==15) then
+       write (lundia, '(a,a)') '    Dynamic library           : ',trim(trapar%dll_name(ifrac))
+       write (lundia, '(a,a)') '    Function in library       : ',trim(trapar%dll_function(ifrac))
+       if (trapar%dll_usrfil(ifrac) /= ' ') then
+          write (lundia, '(a,a)') '    Input file for function   : ',trim(trapar%dll_usrfil(ifrac))
        endif
     else
-       write (lundia, '(a,i3)') '    Transport formula used    :', gdtrapar%iform(ifrac)
-       call traparams(gdtrapar%iform(ifrac),dummy, &
+       write (lundia, '(a,i3)') '    Transport formula used    :', trapar%iform(ifrac)
+       call traparams(trapar%iform(ifrac),dummy, &
                     & nparreq   ,nparopt   ,parkeyw   ,pardef    ,nodef     )
        !
        if (nparreq>0 .or. nparopt>0) then
           do i = 1, nparreq+nparopt
-             if (gdtrapar%iparfld(10+i,ifrac)==0) then
-                write (lundia, '(3a,e12.4)') '    ',parkeyw(i),' :',gdtrapar%par(10+i,ifrac)
+             if (trapar%iparfld(10+i,ifrac)==0) then
+                write (lundia, '(3a,e12.4)') '    ',parkeyw(i),' :',trapar%par(10+i,ifrac)
              else
-                write (lundia, '(4a)') '    ',parkeyw(i),' : ',trim(gdtrapar%parfil(10+i,ifrac))
+                write (lundia, '(4a)') '    ',parkeyw(i),' : ',trim(trapar%parfil(10+i,ifrac))
              endif
           enddo
        endif

@@ -41,13 +41,14 @@ private
 !
 ! public data types
 !
-public gd_morpar
+public morpar_type
 public moroutputtype
 public mornumericstype
 public bedbndtype
 public cmpbndtype
-public gd_sedpar
-public gd_trapar
+public sedpar_type
+public trapar_type
+public sedtra_type
 public fluffy_type
 
 !
@@ -59,6 +60,9 @@ public initsedpar
 public clrsedpar
 public inittrapar
 public clrtrapar
+public initsedtra
+public allocsedtra
+public clrsedtra
 public allocfluffy
 
 integer, parameter, public :: RP_TIME  =  1
@@ -238,7 +242,7 @@ type fluffy_type
     !
 end type fluffy_type
 
-type gd_morpar
+type morpar_type
     !
     ! doubles (hp)
     !
@@ -358,9 +362,9 @@ type gd_morpar
     character(256) :: telfil       !  name of file containing exchange layer thickness
     character(256) :: ttlfil       !  name of file containing transport layer thickness
     !
-end type gd_morpar
+end type morpar_type
 
-type gd_sedpar
+type sedpar_type
     !
     ! doubles
     !
@@ -427,9 +431,9 @@ type gd_sedpar
     character(256) :: flsmdc     ! mud content / mud fraction file (only if mud is not
                                  ! included in simulation)
     character(256) :: flspmc     ! critical mud fraction for non-cohesive behaviour file
-end type gd_sedpar
+end type sedpar_type
 
-type gd_trapar
+type trapar_type
     !
     ! doubles
     !
@@ -476,17 +480,79 @@ type gd_trapar
     !
     !
     ! characters
-end type gd_trapar
+end type trapar_type
+
+type sedtra_type
+    real(fp)         , dimension(:)      , pointer :: bc_mor_array !(lsedtot*2)
+    !
+    real(fp)         , dimension(:)      , pointer :: dcwwlc   !(0:kmax)
+    real(fp)         , dimension(:)      , pointer :: epsclc   !(0:kmax)
+    real(fp)         , dimension(:)      , pointer :: epswlc   !(0:kmax)
+    real(fp)         , dimension(:)      , pointer :: rsdqlc   !(1:kmax)
+    real(fp)         , dimension(:)      , pointer :: sddflc   !(0:kmax)
+    real(fp)         , dimension(:)      , pointer :: wslc     !(0:kmax)
+    !
+    real(fp)         , dimension(:)      , pointer :: e_dzdn   !(nu1:nu2)         dzduu in structured Delft3D-FLOW
+    real(fp)         , dimension(:)      , pointer :: e_dzdt   !(nu1:nu2)         dzdvv in structured Delft3D-FLOW
+    !
+    real(fp)         , dimension(:,:)    , pointer :: e_sbcn   !(nu1:nu2,lsedtot) sbcuu in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sbct   !(nu1:nu2,lsedtot) sbcvv in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sbwn   !(nu1:nu2,lsedtot) sbwuu in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sbwt   !(nu1:nu2,lsedtot) sbwvv in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sswn   !(nu1:nu2,lsedtot) sswuu in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sswt   !(nu1:nu2,lsedtot) sswvv in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_scrn   !(nu1:nu2,lsedtot) sucor in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_scrt   !(nu1:nu2,lsedtot) svcor in structured Delft3D-FLOW
+    !
+    real(fp)         , dimension(:,:)    , pointer :: e_sbnc   !(nu1:nu2,lsedtot) sbuuc in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sbtc   !(nu1:nu2,lsedtot) sbvvc in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_ssnc   !(nu1:nu2,lsedtot) ssuuc in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sstc   !(nu1:nu2,lsedtot) ssvvc in structured Delft3D-FLOW
+    !
+    real(fp)         , dimension(:,:)    , pointer :: frac     !(nu1:nu2,lsedtot) effective fraction of sediment in bed available for transport
+    real(fp)         , dimension(:)      , pointer :: mudfrac  !(nu1:nu2)         effective mud fraction in the part of the bed exposed to transport
+    real(fp)         , dimension(:)      , pointer :: sandfrac !(nu1:nu2)         effective sand fraction in the part of the bed exposed to transport (mud excluded)
+    real(fp)         , dimension(:)      , pointer :: dm       !(nu1:nu2)         arithmetic mean sediment diameter of the part of the bed exposed to transport (mud excluded)
+    real(fp)         , dimension(:)      , pointer :: dg       !(nu1:nu2)         geometric mean sediment diameter of the part of the bed exposed to transport (mud excluded)
+    real(fp)         , dimension(:)      , pointer :: dgsd     !(nu1:nu2)         geometric standard deviation of particle size mix of the part of the bed exposed to transport (mud excluded)
+    real(fp)         , dimension(:,:)    , pointer :: dxx      !(nu1:nu2,nxx)     sediment diameter corresponding to percentile xx (mud excluded)
+    real(fp)         , dimension(:,:)    , pointer :: hidexp   !(nu1:nu2,lsedtot) hiding-exposure factor correcting the shear stress (sand-gravel mixtures)
+    !
+    real(fp)         , dimension(:)      , pointer :: uuu      !(nc1:nc2)
+    real(fp)         , dimension(:)      , pointer :: vvv      !(nc1:nc2)
+    real(fp)         , dimension(:)      , pointer :: umod     !(nc1:nc2)
+    real(fp)         , dimension(:)      , pointer :: zumod    !(nc1:nc2)
+    real(fp)         , dimension(:)      , pointer :: ust2     !(nc1:nc2)
+    !
+    real(fp)         , dimension(:,:)    , pointer :: sinkse   !(nc1:nc2,lsed)
+    real(fp)         , dimension(:,:)    , pointer :: sourse   !(nc1:nc2,lsed)
+    real(fp)         , dimension(:,:)    , pointer :: sour_im  !(nc1:nc2,lsed)
+    !
+    real(fp)         , dimension(:,:)    , pointer :: dbodsd   !(lsedtot,nc1:nc2)
+    !
+    real(fp)         , dimension(:,:)    , pointer :: sbcx     !(nc1:nc2,lsedtot) sbcu in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sbcy     !(nc1:nc2,lsedtot) sbcv in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sbwx     !(nc1:nc2,lsedtot) sbwu in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sbwy     !(nc1:nc2,lsedtot) sbwv in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sswx     !(nc1:nc2,lsedtot) sswu in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sswy     !(nc1:nc2,lsedtot) sswv in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sxtot    !(nc1:nc2,lsedtot)
+    real(fp)         , dimension(:,:)    , pointer :: sytot    !(nc1:nc2,lsedtot)
+    !
+    real(fp)         , dimension(:,:)    , pointer :: srcmax   !(nc1:nc2,lsedtot)
+    real(fp)         , dimension(:,:)    , pointer :: fixfac   !(nc1:nc2,lsedtot)
+    real(fp)         , dimension(:,:)    , pointer :: taurat   !(nc1:nc2,lsedtot)
+end type sedtra_type
 
 contains
 !
 !
 !
 !============================================================================== 
-subroutine initsedpar(gdsedpar)
+subroutine initsedtra(sedtra)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a gd_sedpar data structure.
+!    Function: - Initialize a sedtra_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -495,7 +561,7 @@ subroutine initsedpar(gdsedpar)
     !
     ! Function/routine arguments
     !
-    type (gd_sedpar)                         , pointer     :: gdsedpar
+    type (sedtra_type)                                       :: sedtra
     !
     ! Local variables
     !
@@ -503,101 +569,74 @@ subroutine initsedpar(gdsedpar)
 !
 !! executable statements -------------------------------------------------------
 !
-    gdsedpar%mdcuni   = 0.0
-    gdsedpar%nmudfrac = 0
-    gdsedpar%flsdia   = ' '
-    gdsedpar%flsmdc   = ' '
+    nullify(sedtra%bc_mor_array)
     !
-    nullify(gdsedpar%sedblock)
-    nullify(gdsedpar%rhosol)
+    nullify(sedtra%dcwwlc)
+    nullify(sedtra%epsclc)
+    nullify(sedtra%epswlc)
+    nullify(sedtra%rsdqlc)
+    nullify(sedtra%sddflc)
+    nullify(sedtra%wslc)
     !
-    nullify(gdsedpar%logseddia)
-    nullify(gdsedpar%logsedsig)
-    nullify(gdsedpar%sedd10)
-    nullify(gdsedpar%sedd50)
-    nullify(gdsedpar%sedd50fld)
-    nullify(gdsedpar%sedd90)
+    nullify(sedtra%e_dzdn)
+    nullify(sedtra%e_dzdt)
     !
-    nullify(gdsedpar%cdryb)
-    nullify(gdsedpar%dstar)
-    nullify(gdsedpar%taucr)
-    nullify(gdsedpar%tetacr)
-    nullify(gdsedpar%gamflc)
-    nullify(gdsedpar%ws0)
-    nullify(gdsedpar%wsm)
-    nullify(gdsedpar%salmax)
-    nullify(gdsedpar%sdbuni)
-    nullify(gdsedpar%tcguni)
-    nullify(gdsedpar%mudcnt)
-    nullify(gdsedpar%pmcrit)
-    nullify(gdsedpar%sedtrcfac)
+    nullify(sedtra%e_sbcn)
+    nullify(sedtra%e_sbct)
+    nullify(sedtra%e_sbwn)
+    nullify(sedtra%e_sbwt)
+    nullify(sedtra%e_sswn)
+    nullify(sedtra%e_sswt)
+    nullify(sedtra%e_scrn)
+    nullify(sedtra%e_scrt)
     !
-    nullify(gdsedpar%nseddia)
-    nullify(gdsedpar%sedtyp)
+    nullify(sedtra%e_sbnc)
+    nullify(sedtra%e_sbtc)
+    nullify(sedtra%e_ssnc)
+    nullify(sedtra%e_sstc)
     !
-    nullify(gdsedpar%inisedunit)
-    nullify(gdsedpar%namsed)
-    nullify(gdsedpar%flsdbd)
-    nullify(gdsedpar%flstcg)
-end subroutine initsedpar
-!
-!
-!
-!========
-subroutine clrsedpar(istat     ,gdsedpar  )
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Clean up a gd_sedpar data structure.
-!
-!!--declarations----------------------------------------------------------------
-    implicit none
+    nullify(sedtra%frac)
+    nullify(sedtra%mudfrac)
+    nullify(sedtra%sandfrac)
+    nullify(sedtra%dm)
+    nullify(sedtra%dg)
+    nullify(sedtra%dgsd)
+    nullify(sedtra%dxx)
+    nullify(sedtra%hidexp)
     !
-    ! Function/routine arguments
+    nullify(sedtra%uuu)
+    nullify(sedtra%vvv)
+    nullify(sedtra%umod)
+    nullify(sedtra%zumod)
+    nullify(sedtra%ust2)
     !
-    type (gd_sedpar)                         , pointer     :: gdsedpar
-    integer                                  , intent(out) :: istat
-!
-!! executable statements -------------------------------------------------------
-!
-    if (associated(gdsedpar%sedblock))   deallocate(gdsedpar%sedblock,   STAT = istat) ! the actual data tree should be deleted as part of the whole sed_ptr tree.
-    if (associated(gdsedpar%rhosol))     deallocate(gdsedpar%rhosol,     STAT = istat)
+    nullify(sedtra%sinkse)
+    nullify(sedtra%sourse)
+    nullify(sedtra%sour_im)
     !
-    if (associated(gdsedpar%logseddia))  deallocate(gdsedpar%logseddia,  STAT = istat)
-    if (associated(gdsedpar%logsedsig))  deallocate(gdsedpar%logsedsig,  STAT = istat)
-    if (associated(gdsedpar%sedd10))     deallocate(gdsedpar%sedd10,     STAT = istat)
-    if (associated(gdsedpar%sedd50))     deallocate(gdsedpar%sedd50,     STAT = istat)
-    if (associated(gdsedpar%sedd50fld))  deallocate(gdsedpar%sedd50fld,  STAT = istat)
-    if (associated(gdsedpar%sedd90))     deallocate(gdsedpar%sedd90,     STAT = istat)
+    nullify(sedtra%dbodsd)
     !
-    if (associated(gdsedpar%cdryb))      deallocate(gdsedpar%cdryb,      STAT = istat)
-    if (associated(gdsedpar%dstar))      deallocate(gdsedpar%dstar,      STAT = istat)
-    if (associated(gdsedpar%taucr))      deallocate(gdsedpar%taucr,      STAT = istat)
-    if (associated(gdsedpar%tetacr))     deallocate(gdsedpar%tetacr,     STAT = istat)
-    if (associated(gdsedpar%gamflc))     deallocate(gdsedpar%gamflc,     STAT = istat)
-    if (associated(gdsedpar%ws0))        deallocate(gdsedpar%ws0,        STAT = istat)
-    if (associated(gdsedpar%wsm))        deallocate(gdsedpar%wsm,        STAT = istat)
-    if (associated(gdsedpar%salmax))     deallocate(gdsedpar%salmax,     STAT = istat)
-    if (associated(gdsedpar%sdbuni))     deallocate(gdsedpar%sdbuni,     STAT = istat)
-    if (associated(gdsedpar%tcguni))     deallocate(gdsedpar%tcguni,     STAT = istat)
-    if (associated(gdsedpar%mudcnt))     deallocate(gdsedpar%mudcnt,     STAT = istat)
-    if (associated(gdsedpar%pmcrit))     deallocate(gdsedpar%pmcrit,     STAT = istat)
+    nullify(sedtra%sbcx)
+    nullify(sedtra%sbcy)
+    nullify(sedtra%sbwx)
+    nullify(sedtra%sbwy)
+    nullify(sedtra%sswx)
+    nullify(sedtra%sswy)
+    nullify(sedtra%sxtot)
+    nullify(sedtra%sytot)
     !
-    if (associated(gdsedpar%nseddia))    deallocate(gdsedpar%nseddia,    STAT = istat)
-    if (associated(gdsedpar%sedtyp))     deallocate(gdsedpar%sedtyp,     STAT = istat)
-    !
-    if (associated(gdsedpar%inisedunit)) deallocate(gdsedpar%inisedunit, STAT = istat)
-    if (associated(gdsedpar%namsed))     deallocate(gdsedpar%namsed,     STAT = istat)
-    if (associated(gdsedpar%flsdbd))     deallocate(gdsedpar%flsdbd,     STAT = istat)
-    if (associated(gdsedpar%flstcg))     deallocate(gdsedpar%flstcg,     STAT = istat)
-end subroutine clrsedpar
+    nullify(sedtra%srcmax)
+    nullify(sedtra%fixfac)
+    nullify(sedtra%taurat)
+end subroutine initsedtra
 !
 !
 !
 !============================================================================== 
-subroutine initmorpar(gdmorpar)
+subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a gd_morpar data structure.
+!    Function: - Allocate the arrays of sedtra_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -606,7 +645,318 @@ subroutine initmorpar(gdmorpar)
     !
     ! Function/routine arguments
     !
-    type (gd_morpar)                     , pointer :: gdmorpar
+    type (sedtra_type)                                       :: sedtra
+    integer                                    , intent(in)  :: kmax
+    integer                                    , intent(in)  :: lsed
+    integer                                    , intent(in)  :: lsedtot
+    integer                                    , intent(in)  :: nc1
+    integer                                    , intent(in)  :: nc2
+    integer                                    , intent(in)  :: nu1
+    integer                                    , intent(in)  :: nu2
+    integer                                    , intent(in)  :: nxx
+    !
+    ! Local variables
+    !
+    integer                                                  :: istat
+!
+!! executable statements -------------------------------------------------------
+!
+    allocate(sedtra%bc_mor_array (lsedtot*2), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%dcwwlc  (0:kmax), STAT = istat)
+    if (istat==0) allocate(sedtra%epsclc  (0:kmax), STAT = istat)
+    if (istat==0) allocate(sedtra%epswlc  (0:kmax), STAT = istat)
+    if (istat==0) allocate(sedtra%rsdqlc  (1:kmax), STAT = istat)
+    if (istat==0) allocate(sedtra%sddflc  (0:kmax), STAT = istat)
+    if (istat==0) allocate(sedtra%wslc    (0:kmax), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%e_dzdn  (nu1:nu2), STAT = istat)
+    if (istat==0) allocate(sedtra%e_dzdt  (nu1:nu2), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%e_sbcn  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sbct  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sbwn  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sbwt  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sswn  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sswt  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_scrn  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_scrt  (nu1:nu2,lsedtot), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%e_sbnc  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sbtc  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_ssnc  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sstc  (nu1:nu2,lsedtot), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%frac    (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%mudfrac (nu1:nu2), STAT = istat)
+    if (istat==0) allocate(sedtra%sandfrac(nu1:nu2), STAT = istat)
+    if (istat==0) allocate(sedtra%dm      (nu1:nu2), STAT = istat)
+    if (istat==0) allocate(sedtra%dg      (nu1:nu2), STAT = istat)
+    if (istat==0) allocate(sedtra%dgsd    (nu1:nu2), STAT = istat)
+    if (istat==0) allocate(sedtra%dxx     (nu1:nu2,nxx), STAT = istat)
+    if (istat==0) allocate(sedtra%hidexp  (nu1:nu2,lsedtot), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%uuu     (nc1:nc2), STAT = istat)
+    if (istat==0) allocate(sedtra%vvv     (nc1:nc2), STAT = istat)
+    if (istat==0) allocate(sedtra%umod    (nc1:nc2), STAT = istat)
+    if (istat==0) allocate(sedtra%zumod   (nc1:nc2), STAT = istat)
+    if (istat==0) allocate(sedtra%ust2    (nc1:nc2), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%sinkse  (nc1:nc2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%sourse  (nc1:nc2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%sour_im (nc1:nc2,lsed), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%dbodsd  (lsedtot,nc1:nc2), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%sbcx    (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sbcy    (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sbwx    (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sbwy    (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sswx    (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sswy    (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sxtot   (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%sytot   (nc1:nc2,lsedtot), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%srcmax  (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%fixfac  (nc1:nc2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%taurat  (nc1:nc2,lsedtot), STAT = istat)
+    !
+    sedtra%e_scrn   = 0.0_fp
+    sedtra%e_scrt   = 0.0_fp
+    !
+    sedtra%e_sbnc   = 0.0_fp
+    sedtra%e_sbtc   = 0.0_fp
+    sedtra%e_ssnc   = 0.0_fp
+    sedtra%e_sstc   = 0.0_fp
+    !
+    sedtra%frac     = 0.0_fp
+    sedtra%mudfrac  = 0.0_fp
+    sedtra%sandfrac = 0.0_fp
+    sedtra%dm       = 0.0_fp
+    sedtra%dg       = 0.0_fp
+    sedtra%dgsd     = 0.0_fp
+    sedtra%dxx      = 0.0_fp
+    sedtra%hidexp   = 1.0_fp
+    !
+    sedtra%ust2     = 0.0_fp
+    !
+    sedtra%dbodsd   = 0.0_fp
+    !
+    sedtra%fixfac   = 1.0_fp
+end subroutine allocsedtra
+!
+!
+!
+!============================================================================== 
+subroutine clrsedtra(istat, sedtra)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Clear the arrays of sedtra_type data structure.
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    !
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (sedtra_type)                         , pointer     :: sedtra
+    integer                                    , intent(out) :: istat
+    !
+    ! Local variables
+    !
+    ! NONE
+!
+!! executable statements -------------------------------------------------------
+!
+    if (associated(sedtra%bc_mor_array))   deallocate(sedtra%bc_mor_array, STAT = istat)
+    !
+    if (associated(sedtra%dcwwlc  ))   deallocate(sedtra%dcwwlc  , STAT = istat)
+    if (associated(sedtra%epsclc  ))   deallocate(sedtra%epsclc  , STAT = istat)
+    if (associated(sedtra%epswlc  ))   deallocate(sedtra%epswlc  , STAT = istat)
+    if (associated(sedtra%rsdqlc  ))   deallocate(sedtra%rsdqlc  , STAT = istat)
+    if (associated(sedtra%sddflc  ))   deallocate(sedtra%sddflc  , STAT = istat)
+    if (associated(sedtra%wslc    ))   deallocate(sedtra%wslc    , STAT = istat)
+    !
+    if (associated(sedtra%e_dzdn  ))   deallocate(sedtra%e_dzdn  , STAT = istat)
+    if (associated(sedtra%e_dzdt  ))   deallocate(sedtra%e_dzdt  , STAT = istat)
+    !
+    if (associated(sedtra%e_sbcn  ))   deallocate(sedtra%e_sbcn  , STAT = istat)
+    if (associated(sedtra%e_sbct  ))   deallocate(sedtra%e_sbct  , STAT = istat)
+    if (associated(sedtra%e_sbwn  ))   deallocate(sedtra%e_sbwn  , STAT = istat)
+    if (associated(sedtra%e_sbwt  ))   deallocate(sedtra%e_sbwt  , STAT = istat)
+    if (associated(sedtra%e_sswn  ))   deallocate(sedtra%e_sswn  , STAT = istat)
+    if (associated(sedtra%e_sswt  ))   deallocate(sedtra%e_sswt  , STAT = istat)
+    if (associated(sedtra%e_scrn  ))   deallocate(sedtra%e_scrn  , STAT = istat)
+    if (associated(sedtra%e_scrt  ))   deallocate(sedtra%e_scrt  , STAT = istat)
+    !
+    if (associated(sedtra%e_sbnc  ))   deallocate(sedtra%e_sbnc  , STAT = istat)
+    if (associated(sedtra%e_sbtc  ))   deallocate(sedtra%e_sbtc  , STAT = istat)
+    if (associated(sedtra%e_ssnc  ))   deallocate(sedtra%e_ssnc  , STAT = istat)
+    if (associated(sedtra%e_sstc  ))   deallocate(sedtra%e_sstc  , STAT = istat)
+    !
+    if (associated(sedtra%frac    ))   deallocate(sedtra%frac    , STAT = istat)
+    if (associated(sedtra%mudfrac ))   deallocate(sedtra%mudfrac , STAT = istat)
+    if (associated(sedtra%sandfrac))   deallocate(sedtra%sandfrac, STAT = istat)
+    if (associated(sedtra%dm      ))   deallocate(sedtra%dm      , STAT = istat)
+    if (associated(sedtra%dg      ))   deallocate(sedtra%dg      , STAT = istat)
+    if (associated(sedtra%dgsd    ))   deallocate(sedtra%dgsd    , STAT = istat)
+    if (associated(sedtra%dxx     ))   deallocate(sedtra%dxx     , STAT = istat)
+    if (associated(sedtra%hidexp  ))   deallocate(sedtra%hidexp  , STAT = istat)
+    !
+    if (associated(sedtra%uuu     ))   deallocate(sedtra%uuu     , STAT = istat)
+    if (associated(sedtra%vvv     ))   deallocate(sedtra%vvv     , STAT = istat)
+    if (associated(sedtra%umod    ))   deallocate(sedtra%umod    , STAT = istat)
+    if (associated(sedtra%zumod   ))   deallocate(sedtra%zumod   , STAT = istat)
+    if (associated(sedtra%ust2    ))   deallocate(sedtra%ust2    , STAT = istat)
+    !
+    if (associated(sedtra%sinkse  ))   deallocate(sedtra%sinkse  , STAT = istat)
+    if (associated(sedtra%sourse  ))   deallocate(sedtra%sourse  , STAT = istat)
+    if (associated(sedtra%sour_im ))   deallocate(sedtra%sour_im , STAT = istat)
+    !
+    if (associated(sedtra%dbodsd  ))   deallocate(sedtra%dbodsd  , STAT = istat)
+    !
+    if (associated(sedtra%sbcx    ))   deallocate(sedtra%sbcx    , STAT = istat)
+    if (associated(sedtra%sbcy    ))   deallocate(sedtra%sbcy    , STAT = istat)
+    if (associated(sedtra%sbwx    ))   deallocate(sedtra%sbwx    , STAT = istat)
+    if (associated(sedtra%sbwy    ))   deallocate(sedtra%sbwy    , STAT = istat)
+    if (associated(sedtra%sswx    ))   deallocate(sedtra%sswx    , STAT = istat)
+    if (associated(sedtra%sswy    ))   deallocate(sedtra%sswy    , STAT = istat)
+    if (associated(sedtra%sxtot   ))   deallocate(sedtra%sxtot   , STAT = istat)
+    if (associated(sedtra%sytot   ))   deallocate(sedtra%sytot   , STAT = istat)
+    !
+    if (associated(sedtra%srcmax  ))   deallocate(sedtra%srcmax  , STAT = istat)
+    if (associated(sedtra%fixfac  ))   deallocate(sedtra%fixfac  , STAT = istat)
+    if (associated(sedtra%taurat  ))   deallocate(sedtra%taurat  , STAT = istat)
+end subroutine clrsedtra
+!
+!
+!
+!============================================================================== 
+subroutine initsedpar(sedpar)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Initialize a sedpar_type data structure.
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    !
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (sedpar_type)                                     :: sedpar
+    !
+    ! Local variables
+    !
+    ! None
+!
+!! executable statements -------------------------------------------------------
+!
+    sedpar%mdcuni   = 0.0
+    sedpar%nmudfrac = 0
+    sedpar%flsdia   = ' '
+    sedpar%flsmdc   = ' '
+    !
+    nullify(sedpar%sedblock)
+    nullify(sedpar%rhosol)
+    !
+    nullify(sedpar%logseddia)
+    nullify(sedpar%logsedsig)
+    nullify(sedpar%sedd10)
+    nullify(sedpar%sedd50)
+    nullify(sedpar%sedd50fld)
+    nullify(sedpar%sedd90)
+    !
+    nullify(sedpar%cdryb)
+    nullify(sedpar%dstar)
+    nullify(sedpar%taucr)
+    nullify(sedpar%tetacr)
+    nullify(sedpar%gamflc)
+    nullify(sedpar%ws0)
+    nullify(sedpar%wsm)
+    nullify(sedpar%salmax)
+    nullify(sedpar%sdbuni)
+    nullify(sedpar%tcguni)
+    nullify(sedpar%mudcnt)
+    nullify(sedpar%pmcrit)
+    nullify(sedpar%sedtrcfac)
+    !
+    nullify(sedpar%nseddia)
+    nullify(sedpar%sedtyp)
+    !
+    nullify(sedpar%inisedunit)
+    nullify(sedpar%namsed)
+    nullify(sedpar%flsdbd)
+    nullify(sedpar%flstcg)
+end subroutine initsedpar
+!
+!
+!
+!========
+subroutine clrsedpar(istat     ,sedpar  )
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Clean up a sedpar_type data structure.
+!
+!!--declarations----------------------------------------------------------------
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (sedpar_type)                       , pointer     :: sedpar
+    integer                                  , intent(out) :: istat
+!
+!! executable statements -------------------------------------------------------
+!
+    if (associated(sedpar%sedblock))   deallocate(sedpar%sedblock,   STAT = istat) ! the actual data tree should be deleted as part of the whole sed_ptr tree.
+    if (associated(sedpar%rhosol))     deallocate(sedpar%rhosol,     STAT = istat)
+    !
+    if (associated(sedpar%logseddia))  deallocate(sedpar%logseddia,  STAT = istat)
+    if (associated(sedpar%logsedsig))  deallocate(sedpar%logsedsig,  STAT = istat)
+    if (associated(sedpar%sedd10))     deallocate(sedpar%sedd10,     STAT = istat)
+    if (associated(sedpar%sedd50))     deallocate(sedpar%sedd50,     STAT = istat)
+    if (associated(sedpar%sedd50fld))  deallocate(sedpar%sedd50fld,  STAT = istat)
+    if (associated(sedpar%sedd90))     deallocate(sedpar%sedd90,     STAT = istat)
+    !
+    if (associated(sedpar%cdryb))      deallocate(sedpar%cdryb,      STAT = istat)
+    if (associated(sedpar%dstar))      deallocate(sedpar%dstar,      STAT = istat)
+    if (associated(sedpar%taucr))      deallocate(sedpar%taucr,      STAT = istat)
+    if (associated(sedpar%tetacr))     deallocate(sedpar%tetacr,     STAT = istat)
+    if (associated(sedpar%gamflc))     deallocate(sedpar%gamflc,     STAT = istat)
+    if (associated(sedpar%ws0))        deallocate(sedpar%ws0,        STAT = istat)
+    if (associated(sedpar%wsm))        deallocate(sedpar%wsm,        STAT = istat)
+    if (associated(sedpar%salmax))     deallocate(sedpar%salmax,     STAT = istat)
+    if (associated(sedpar%sdbuni))     deallocate(sedpar%sdbuni,     STAT = istat)
+    if (associated(sedpar%tcguni))     deallocate(sedpar%tcguni,     STAT = istat)
+    if (associated(sedpar%mudcnt))     deallocate(sedpar%mudcnt,     STAT = istat)
+    if (associated(sedpar%pmcrit))     deallocate(sedpar%pmcrit,     STAT = istat)
+    !
+    if (associated(sedpar%nseddia))    deallocate(sedpar%nseddia,    STAT = istat)
+    if (associated(sedpar%sedtyp))     deallocate(sedpar%sedtyp,     STAT = istat)
+    !
+    if (associated(sedpar%inisedunit)) deallocate(sedpar%inisedunit, STAT = istat)
+    if (associated(sedpar%namsed))     deallocate(sedpar%namsed,     STAT = istat)
+    if (associated(sedpar%flsdbd))     deallocate(sedpar%flsdbd,     STAT = istat)
+    if (associated(sedpar%flstcg))     deallocate(sedpar%flstcg,     STAT = istat)
+end subroutine clrsedpar
+!
+!
+!
+!============================================================================== 
+subroutine initmorpar(morpar)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Initialize a morpar_type data structure.
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    !
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (morpar_type)                   , target  :: morpar
     !
     ! Local variables
     !
@@ -691,120 +1041,120 @@ subroutine initmorpar(gdmorpar)
 !
 !! executable statements -------------------------------------------------------
 !
-    morft               => gdmorpar%morft
-    morft0              => gdmorpar%morft0
-    morfac              => gdmorpar%morfac
-    thresh              => gdmorpar%thresh
-    aksfac              => gdmorpar%aksfac
-    rwave               => gdmorpar%rwave
-    alfabs              => gdmorpar%alfabs
-    alfabn              => gdmorpar%alfabn
-    camax               => gdmorpar%camax
-    dzmax               => gdmorpar%dzmax
-    sus                 => gdmorpar%sus
-    bed                 => gdmorpar%bed
-    tmor                => gdmorpar%tmor
-    thetsd              => gdmorpar%thetsd
-    susw                => gdmorpar%susw
-    sedthr              => gdmorpar%sedthr
-    hmaxth              => gdmorpar%hmaxth
-    bedw                => gdmorpar%bedw
-    rdc                 => gdmorpar%rdc
-    rdw                 => gdmorpar%rdw
-    espir               => gdmorpar%espir
-    ashld               => gdmorpar%ashld
-    bshld               => gdmorpar%bshld
-    cshld               => gdmorpar%cshld
-    dshld               => gdmorpar%dshld
-    coulfri             => gdmorpar%coulfri
-    flfdrat             => gdmorpar%flfdrat
-    alfpa               => gdmorpar%alfpa
-    thcrpa              => gdmorpar%thcrpa
-    asklhe              => gdmorpar%asklhe
-    mwwjhe              => gdmorpar%mwwjhe
-    ttlalpha            => gdmorpar%ttlalpha
-    ttlmin              => gdmorpar%ttlmin
-    wetslope            => gdmorpar%wetslope
-    avaltime            => gdmorpar%avaltime
+    morft               => morpar%morft
+    morft0              => morpar%morft0
+    morfac              => morpar%morfac
+    thresh              => morpar%thresh
+    aksfac              => morpar%aksfac
+    rwave               => morpar%rwave
+    alfabs              => morpar%alfabs
+    alfabn              => morpar%alfabn
+    camax               => morpar%camax
+    dzmax               => morpar%dzmax
+    sus                 => morpar%sus
+    bed                 => morpar%bed
+    tmor                => morpar%tmor
+    thetsd              => morpar%thetsd
+    susw                => morpar%susw
+    sedthr              => morpar%sedthr
+    hmaxth              => morpar%hmaxth
+    bedw                => morpar%bedw
+    rdc                 => morpar%rdc
+    rdw                 => morpar%rdw
+    espir               => morpar%espir
+    ashld               => morpar%ashld
+    bshld               => morpar%bshld
+    cshld               => morpar%cshld
+    dshld               => morpar%dshld
+    coulfri             => morpar%coulfri
+    flfdrat             => morpar%flfdrat
+    alfpa               => morpar%alfpa
+    thcrpa              => morpar%thcrpa
+    asklhe              => morpar%asklhe
+    mwwjhe              => morpar%mwwjhe
+    ttlalpha            => morpar%ttlalpha
+    ttlmin              => morpar%ttlmin
+    wetslope            => morpar%wetslope
+    avaltime            => morpar%avaltime
     !
-    ihidexp             => gdmorpar%ihidexp
-    itmor               => gdmorpar%itmor
-    iopkcw              => gdmorpar%iopkcw
-    iopsus              => gdmorpar%iopsus
-    islope              => gdmorpar%islope
-    morfacpar           => gdmorpar%morfacpar
-    morfacrec           => gdmorpar%morfacrec
-    morfactable         => gdmorpar%morfactable
-    nxx                 => gdmorpar%nxx
-    morbnd              => gdmorpar%morbnd
-    cmpbnd              => gdmorpar%cmpbnd
-    mergebuf            => gdmorpar%mergebuf
-    xx                  => gdmorpar%xx
-    ttlform             => gdmorpar%ttlform
-    telform             => gdmorpar%telform
+    ihidexp             => morpar%ihidexp
+    itmor               => morpar%itmor
+    iopkcw              => morpar%iopkcw
+    iopsus              => morpar%iopsus
+    islope              => morpar%islope
+    morfacpar           => morpar%morfacpar
+    morfacrec           => morpar%morfacrec
+    morfactable         => morpar%morfactable
+    nxx                 => morpar%nxx
+    morbnd              => morpar%morbnd
+    cmpbnd              => morpar%cmpbnd
+    mergebuf            => morpar%mergebuf
+    xx                  => morpar%xx
+    ttlform             => morpar%ttlform
+    telform             => morpar%telform
     !
-    bedupd              => gdmorpar%bedupd
-    cmpupd              => gdmorpar%cmpupd
-    eqmbcsand           => gdmorpar%eqmbcsand
-    eqmbcmud            => gdmorpar%eqmbcmud
-    densin              => gdmorpar%densin
-    rouse               => gdmorpar%rouse
-    epspar              => gdmorpar%epspar
-    updinf              => gdmorpar%updinf
-    neglectentrainment  => gdmorpar%neglectentrainment
-    oldmudfrac          => gdmorpar%oldmudfrac
-    varyingmorfac       => gdmorpar%varyingmorfac
-    multi               => gdmorpar%multi
+    bedupd              => morpar%bedupd
+    cmpupd              => morpar%cmpupd
+    eqmbcsand           => morpar%eqmbcsand
+    eqmbcmud            => morpar%eqmbcmud
+    densin              => morpar%densin
+    rouse               => morpar%rouse
+    epspar              => morpar%epspar
+    updinf              => morpar%updinf
+    neglectentrainment  => morpar%neglectentrainment
+    oldmudfrac          => morpar%oldmudfrac
+    varyingmorfac       => morpar%varyingmorfac
+    multi               => morpar%multi
     !
-    bcmfilnam           => gdmorpar%bcmfilnam
-    flcomp              => gdmorpar%flcomp
-    mmsyncfilnam        => gdmorpar%mmsyncfilnam
-    ttlfil              => gdmorpar%ttlfil
-    telfil              => gdmorpar%telfil
+    bcmfilnam           => morpar%bcmfilnam
+    flcomp              => morpar%flcomp
+    mmsyncfilnam        => morpar%mmsyncfilnam
+    ttlfil              => morpar%ttlfil
+    telfil              => morpar%telfil
     !
     istat = 0
-    allocate (gdmorpar%moroutput  , stat = istat)
-    allocate (gdmorpar%mornum     , stat = istat)
-    allocate (gdmorpar%flufflyr   , stat = istat)
+    allocate (morpar%moroutput  , STAT = istat)
+    allocate (morpar%mornum     , STAT = istat)
+    allocate (morpar%flufflyr   , STAT = istat)
     !
-    pangle              => gdmorpar%pangle
-    fpco                => gdmorpar%fpco
-    factcr              => gdmorpar%factcr
-    subiw               => gdmorpar%subiw
-    eulerisoglm         => gdmorpar%eulerisoglm
-    glmisoeuler         => gdmorpar%glmisoeuler
+    pangle              => morpar%pangle
+    fpco                => morpar%fpco
+    factcr              => morpar%factcr
+    subiw               => morpar%subiw
+    eulerisoglm         => morpar%eulerisoglm
+    glmisoeuler         => morpar%glmisoeuler
     !
-    gdmorpar%moroutput%transptype  = 2
+    morpar%moroutput%transptype  = 2
     !
-    gdmorpar%moroutput%aks         = .false.
-    gdmorpar%moroutput%cumavg      = .false.
-    gdmorpar%moroutput%dg          = .false.
-    gdmorpar%moroutput%dgsd        = .false.
-    gdmorpar%moroutput%dm          = .false.
-    gdmorpar%moroutput%dzduuvv     = .false.
-    gdmorpar%moroutput%fixfac      = .false.
-    gdmorpar%moroutput%hidexp      = .false.
-    gdmorpar%moroutput%frac        = .false.
-    gdmorpar%moroutput%mudfrac     = .false.
-    gdmorpar%moroutput%sandfrac    = .false.
-    gdmorpar%moroutput%percentiles = .false.
-    gdmorpar%moroutput%sbcuv       = .false.
-    gdmorpar%moroutput%sbcuuvv     = .false.
-    gdmorpar%moroutput%sbwuv       = .false.
-    gdmorpar%moroutput%sbwuuvv     = .false.
-    gdmorpar%moroutput%sswuv       = .false.
-    gdmorpar%moroutput%sswuuvv     = .false.
-    gdmorpar%moroutput%suvcor      = .false.
-    gdmorpar%moroutput%sourcesink  = .false.
-    gdmorpar%moroutput%taurat      = .false.
-    gdmorpar%moroutput%umod        = .false.
-    gdmorpar%moroutput%ustar       = .false.
-    gdmorpar%moroutput%uuuvvv      = .false.
-    gdmorpar%moroutput%zumod       = .false.
+    morpar%moroutput%aks         = .false.
+    morpar%moroutput%cumavg      = .false.
+    morpar%moroutput%dg          = .false.
+    morpar%moroutput%dgsd        = .false.
+    morpar%moroutput%dm          = .false.
+    morpar%moroutput%dzduuvv     = .false.
+    morpar%moroutput%fixfac      = .false.
+    morpar%moroutput%hidexp      = .false.
+    morpar%moroutput%frac        = .false.
+    morpar%moroutput%mudfrac     = .false.
+    morpar%moroutput%sandfrac    = .false.
+    morpar%moroutput%percentiles = .false.
+    morpar%moroutput%sbcuv       = .false.
+    morpar%moroutput%sbcuuvv     = .false.
+    morpar%moroutput%sbwuv       = .false.
+    morpar%moroutput%sbwuuvv     = .false.
+    morpar%moroutput%sswuv       = .false.
+    morpar%moroutput%sswuuvv     = .false.
+    morpar%moroutput%suvcor      = .false.
+    morpar%moroutput%sourcesink  = .false.
+    morpar%moroutput%taurat      = .false.
+    morpar%moroutput%umod        = .false.
+    morpar%moroutput%ustar       = .false.
+    morpar%moroutput%uuuvvv      = .false.
+    morpar%moroutput%zumod       = .false.
     !
-    gdmorpar%mornum%upwindbedload            = .true.
-    gdmorpar%mornum%laterallyaveragedbedload = .false.
-    gdmorpar%mornum%maximumwaterdepth        = .false.
+    morpar%mornum%upwindbedload            = .true.
+    morpar%mornum%laterallyaveragedbedload = .false.
+    morpar%mornum%maximumwaterdepth        = .false.
     !
     rmissval           = -999.0_fp
     imissval           = -999
@@ -883,12 +1233,12 @@ subroutine initmorpar(gdmorpar)
     varyingmorfac      = .false.
     multi              = .false.
     !
-    nullify(gdmorpar%morbnd)
-    nullify(gdmorpar%cmpbnd)
-    nullify(gdmorpar%xx)
-    nullify(gdmorpar%mergebuf)
+    nullify(morpar%morbnd)
+    nullify(morpar%cmpbnd)
+    nullify(morpar%xx)
+    nullify(morpar%mergebuf)
     !
-    call initfluffy(gdmorpar%flufflyr)
+    call initfluffy(morpar%flufflyr)
 end subroutine initmorpar
 !
 !
@@ -904,7 +1254,7 @@ subroutine initfluffy(flufflyr)
     !
     ! Function/routine arguments
     !
-    type (fluffy_type)                   , pointer     :: flufflyr
+    type (fluffy_type)                   , target      :: flufflyr
     !
     ! Local variables
     !
@@ -949,16 +1299,16 @@ function allocfluffy(flufflyr, lsed, nmlb, nmub) result(istat)
 !
 !! executable statements -------------------------------------------------------
 !
-                  allocate(flufflyr%mfluff(lsed,nmlb:nmub), stat = istat)
-    if (istat==0) allocate(flufflyr%sinkf(lsed,nmlb:nmub), stat = istat)
-    if (istat==0) allocate(flufflyr%sourf(lsed,nmlb:nmub), stat = istat)
+                  allocate(flufflyr%mfluff(lsed,nmlb:nmub), STAT = istat)
+    if (istat==0) allocate(flufflyr%sinkf(lsed,nmlb:nmub), STAT = istat)
+    if (istat==0) allocate(flufflyr%sourf(lsed,nmlb:nmub), STAT = istat)
     !
     select case (flufflyr%iflufflyr)
     case (1)
-       if (istat==0) allocate(flufflyr%bfluff0(lsed,nmlb:nmub), stat = istat)
-       if (istat==0) allocate(flufflyr%bfluff1(lsed,nmlb:nmub), stat = istat)
+       if (istat==0) allocate(flufflyr%bfluff0(lsed,nmlb:nmub), STAT = istat)
+       if (istat==0) allocate(flufflyr%bfluff1(lsed,nmlb:nmub), STAT = istat)
     case (2)
-       if (istat==0) allocate(flufflyr%depfac(lsed,nmlb:nmub), stat = istat)
+       if (istat==0) allocate(flufflyr%depfac(lsed,nmlb:nmub), STAT = istat)
     endselect
 end function allocfluffy
 !
@@ -996,10 +1346,10 @@ end subroutine clrfluffy
 !
 !
 !============================================================================== 
-subroutine clrmorpar(istat, gdmorpar)
+subroutine clrmorpar(istat, morpar)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Clean up a gd_morpar data structure.
+!    Function: - Clean up a morpar_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use table_handles
@@ -1008,7 +1358,7 @@ subroutine clrmorpar(istat, gdmorpar)
     !
     ! Function/routine arguments
     !
-    type (gd_morpar)                     , pointer     :: gdmorpar
+    type (morpar_type)                   , pointer     :: morpar
     integer                              , intent(out) :: istat
     !
     ! Local variables
@@ -1018,28 +1368,28 @@ subroutine clrmorpar(istat, gdmorpar)
 !
 !! executable statements -------------------------------------------------------
 !
-    morbnd              => gdmorpar%morbnd
+    morbnd              => morpar%morbnd
     !
-    if (associated(gdmorpar%morbnd)) then
-       do i = 1, size(gdmorpar%morbnd)
+    if (associated(morpar%morbnd)) then
+       do i = 1, size(morpar%morbnd)
           if (associated(morbnd(i)%idir))      deallocate(morbnd(i)%idir,      STAT = istat)
           if (associated(morbnd(i)%nm))        deallocate(morbnd(i)%nm,        STAT = istat)
           if (associated(morbnd(i)%nxmx))      deallocate(morbnd(i)%nxmx,      STAT = istat)
           if (associated(morbnd(i)%alfa_dist)) deallocate(morbnd(i)%alfa_dist, STAT = istat)
           if (associated(morbnd(i)%alfa_mag))  deallocate(morbnd(i)%alfa_mag,  STAT = istat)
        enddo
-       deallocate(gdmorpar%morbnd, STAT = istat)
+       deallocate(morpar%morbnd, STAT = istat)
     endif
-    if (associated(gdmorpar%cmpbnd))    deallocate(gdmorpar%cmpbnd,    STAT = istat)
-    if (associated(gdmorpar%xx))        deallocate(gdmorpar%xx,        STAT = istat)
-    if (associated(gdmorpar%mergebuf))  deallocate(gdmorpar%mergebuf,  STAT = istat)
-    if (associated(gdmorpar%moroutput)) deallocate(gdmorpar%moroutput, STAT = istat)
-    if (associated(gdmorpar%mornum))    deallocate(gdmorpar%mornum,    STAT = istat)
-    call cleartable(gdmorpar%bcmfile)
-    call cleartable(gdmorpar%morfacfile)
-    if (associated(gdmorpar%flufflyr)) then
-        call clrfluffy(istat, gdmorpar%flufflyr)
-        deallocate(gdmorpar%flufflyr, STAT = istat)
+    if (associated(morpar%cmpbnd))    deallocate(morpar%cmpbnd,    STAT = istat)
+    if (associated(morpar%xx))        deallocate(morpar%xx,        STAT = istat)
+    if (associated(morpar%mergebuf))  deallocate(morpar%mergebuf,  STAT = istat)
+    if (associated(morpar%moroutput)) deallocate(morpar%moroutput, STAT = istat)
+    if (associated(morpar%mornum))    deallocate(morpar%mornum,    STAT = istat)
+    call cleartable(morpar%bcmfile)
+    call cleartable(morpar%morfacfile)
+    if (associated(morpar%flufflyr)) then
+        call clrfluffy(istat, morpar%flufflyr)
+        deallocate(morpar%flufflyr, STAT = istat)
     endif
     !
 end subroutine clrmorpar
@@ -1047,10 +1397,10 @@ end subroutine clrmorpar
 !
 !
 !============================================================================== 
-subroutine inittrapar(gdtrapar  )
+subroutine inittrapar(trapar  )
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a gd_trapar data structure.
+!    Function: - Initialize a trapar_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1059,7 +1409,7 @@ subroutine inittrapar(gdtrapar  )
     !
     ! Function/routine arguments
     !
-    type (gd_trapar)                     , pointer     :: gdtrapar
+    type (trapar_type)                   , target      :: trapar
     !
     ! Local variables
     !
@@ -1070,39 +1420,39 @@ subroutine inittrapar(gdtrapar  )
     !
     ! Note: 30 is hardcoded in sediment transport formulae
     !
-    gdtrapar%npar    = 30
-    gdtrapar%nparfld = 0
+    trapar%npar    = 30
+    trapar%nparfld = 0
     !
-    nullify(gdtrapar%dll_function_settle)
-    nullify(gdtrapar%dll_name_settle)
-    nullify(gdtrapar%dll_handle_settle)
-    nullify(gdtrapar%dll_integers_settle)
-    nullify(gdtrapar%dll_reals_settle)
-    nullify(gdtrapar%dll_strings_settle)
-    nullify(gdtrapar%dll_usrfil_settle)
-    nullify(gdtrapar%dll_function)
-    nullify(gdtrapar%dll_name)
-    nullify(gdtrapar%dll_handle)
-    nullify(gdtrapar%dll_integers)
-    nullify(gdtrapar%dll_reals)
-    nullify(gdtrapar%dll_strings)
-    nullify(gdtrapar%dll_usrfil)
-    nullify(gdtrapar%flstrn)
-    nullify(gdtrapar%iform)
-    nullify(gdtrapar%name)
-    nullify(gdtrapar%par)
-    nullify(gdtrapar%parfil)
-    nullify(gdtrapar%iparfld)
-    nullify(gdtrapar%parfld)
+    nullify(trapar%dll_function_settle)
+    nullify(trapar%dll_name_settle)
+    nullify(trapar%dll_handle_settle)
+    nullify(trapar%dll_integers_settle)
+    nullify(trapar%dll_reals_settle)
+    nullify(trapar%dll_strings_settle)
+    nullify(trapar%dll_usrfil_settle)
+    nullify(trapar%dll_function)
+    nullify(trapar%dll_name)
+    nullify(trapar%dll_handle)
+    nullify(trapar%dll_integers)
+    nullify(trapar%dll_reals)
+    nullify(trapar%dll_strings)
+    nullify(trapar%dll_usrfil)
+    nullify(trapar%flstrn)
+    nullify(trapar%iform)
+    nullify(trapar%name)
+    nullify(trapar%par)
+    nullify(trapar%parfil)
+    nullify(trapar%iparfld)
+    nullify(trapar%parfld)
 end subroutine inittrapar
 !
 !
 !
 !============================================================================== 
-subroutine clrtrapar(istat     ,gdtrapar  )
+subroutine clrtrapar(istat     ,trapar  )
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Clean up a gd_trapar data structure.
+!    Function: - Clean up a trapar_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1111,7 +1461,7 @@ subroutine clrtrapar(istat     ,gdtrapar  )
     !
     ! Function/routine arguments
     !
-    type (gd_trapar)                     , pointer     :: gdtrapar
+    type (trapar_type)                   , pointer     :: trapar
     integer                              , intent(out) :: istat
     !
     ! Local variables
@@ -1122,39 +1472,39 @@ subroutine clrtrapar(istat     ,gdtrapar  )
 !
 !! executable statements -------------------------------------------------------
 !
-    if (associated(gdtrapar%dll_handle)) then
-       do i = 1,size(gdtrapar%dll_handle)
-          if (gdtrapar%dll_handle_settle(i) /= 0) then
-             error = close_shared_library(gdtrapar%dll_handle_settle(i))
+    if (associated(trapar%dll_handle)) then
+       do i = 1,size(trapar%dll_handle)
+          if (trapar%dll_handle_settle(i) /= 0) then
+             error = close_shared_library(trapar%dll_handle_settle(i))
           endif
-          if (gdtrapar%dll_handle(i) /= 0) then
-             error = close_shared_library(gdtrapar%dll_handle(i))
+          if (trapar%dll_handle(i) /= 0) then
+             error = close_shared_library(trapar%dll_handle(i))
           endif
        enddo
     endif
     !
-    if (associated(gdtrapar%dll_function_settle)) deallocate(gdtrapar%dll_function_settle, STAT = istat)
-    if (associated(gdtrapar%dll_name_settle    )) deallocate(gdtrapar%dll_name_settle    , STAT = istat)
-    if (associated(gdtrapar%dll_handle_settle  )) deallocate(gdtrapar%dll_handle_settle  , STAT = istat)
-    if (associated(gdtrapar%dll_integers_settle)) deallocate(gdtrapar%dll_integers_settle, STAT = istat)
-    if (associated(gdtrapar%dll_reals_settle   )) deallocate(gdtrapar%dll_reals_settle   , STAT = istat)
-    if (associated(gdtrapar%dll_strings_settle )) deallocate(gdtrapar%dll_strings_settle , STAT = istat)
-    if (associated(gdtrapar%dll_usrfil_settle  )) deallocate(gdtrapar%dll_usrfil_settle  , STAT = istat)
+    if (associated(trapar%dll_function_settle)) deallocate(trapar%dll_function_settle, STAT = istat)
+    if (associated(trapar%dll_name_settle    )) deallocate(trapar%dll_name_settle    , STAT = istat)
+    if (associated(trapar%dll_handle_settle  )) deallocate(trapar%dll_handle_settle  , STAT = istat)
+    if (associated(trapar%dll_integers_settle)) deallocate(trapar%dll_integers_settle, STAT = istat)
+    if (associated(trapar%dll_reals_settle   )) deallocate(trapar%dll_reals_settle   , STAT = istat)
+    if (associated(trapar%dll_strings_settle )) deallocate(trapar%dll_strings_settle , STAT = istat)
+    if (associated(trapar%dll_usrfil_settle  )) deallocate(trapar%dll_usrfil_settle  , STAT = istat)
     !
-    if (associated(gdtrapar%dll_function)) deallocate(gdtrapar%dll_function, STAT = istat)
-    if (associated(gdtrapar%dll_name    )) deallocate(gdtrapar%dll_name    , STAT = istat)
-    if (associated(gdtrapar%dll_handle  )) deallocate(gdtrapar%dll_handle  , STAT = istat)
-    if (associated(gdtrapar%dll_integers)) deallocate(gdtrapar%dll_integers, STAT = istat)
-    if (associated(gdtrapar%dll_reals   )) deallocate(gdtrapar%dll_reals   , STAT = istat)
-    if (associated(gdtrapar%dll_strings )) deallocate(gdtrapar%dll_strings , STAT = istat)
-    if (associated(gdtrapar%dll_usrfil  )) deallocate(gdtrapar%dll_usrfil  , STAT = istat)
-    if (associated(gdtrapar%flstrn      )) deallocate(gdtrapar%flstrn      , STAT = istat)
-    if (associated(gdtrapar%iform       )) deallocate(gdtrapar%iform       , STAT = istat)
-    if (associated(gdtrapar%name        )) deallocate(gdtrapar%name        , STAT = istat)
-    if (associated(gdtrapar%par         )) deallocate(gdtrapar%par         , STAT = istat)
-    if (associated(gdtrapar%parfil      )) deallocate(gdtrapar%parfil      , STAT = istat)
-    if (associated(gdtrapar%iparfld     )) deallocate(gdtrapar%iparfld     , STAT = istat)
-    if (associated(gdtrapar%parfld      )) deallocate(gdtrapar%parfld      , STAT = istat)
+    if (associated(trapar%dll_function)) deallocate(trapar%dll_function, STAT = istat)
+    if (associated(trapar%dll_name    )) deallocate(trapar%dll_name    , STAT = istat)
+    if (associated(trapar%dll_handle  )) deallocate(trapar%dll_handle  , STAT = istat)
+    if (associated(trapar%dll_integers)) deallocate(trapar%dll_integers, STAT = istat)
+    if (associated(trapar%dll_reals   )) deallocate(trapar%dll_reals   , STAT = istat)
+    if (associated(trapar%dll_strings )) deallocate(trapar%dll_strings , STAT = istat)
+    if (associated(trapar%dll_usrfil  )) deallocate(trapar%dll_usrfil  , STAT = istat)
+    if (associated(trapar%flstrn      )) deallocate(trapar%flstrn      , STAT = istat)
+    if (associated(trapar%iform       )) deallocate(trapar%iform       , STAT = istat)
+    if (associated(trapar%name        )) deallocate(trapar%name        , STAT = istat)
+    if (associated(trapar%par         )) deallocate(trapar%par         , STAT = istat)
+    if (associated(trapar%parfil      )) deallocate(trapar%parfil      , STAT = istat)
+    if (associated(trapar%iparfld     )) deallocate(trapar%iparfld     , STAT = istat)
+    if (associated(trapar%parfld      )) deallocate(trapar%parfld      , STAT = istat)
 end subroutine clrtrapar
 
 end module morphology_data_module

@@ -120,7 +120,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     logical                              , pointer :: struct
     logical                              , pointer :: sedim
     real(fp)                             , pointer :: eps
-    integer                              , pointer :: ifirst
     real(fp)         , dimension(:)      , pointer :: bc_mor_array
     real(fp)         , dimension(:,:)    , pointer :: dbodsd
     real(fp)         , dimension(:)      , pointer :: dcwwlc
@@ -445,7 +444,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     vicmol              => gdp%gdphysco%vicmol
     gammax              => gdp%gdnumeco%gammax
     eps                 => gdp%gdconst%eps
-    ifirst              => gdp%gderosed%ifirst
     bc_mor_array        => gdp%gderosed%bc_mor_array
     dbodsd              => gdp%gderosed%dbodsd
     dcwwlc              => gdp%gderosed%dcwwlc
@@ -453,8 +451,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     dg                  => gdp%gderosed%dg
     dgsd                => gdp%gderosed%dgsd
     dxx                 => gdp%gderosed%dxx
-    dzduu               => gdp%gderosed%dzduu
-    dzdvv               => gdp%gderosed%dzdvv
+    dzduu               => gdp%gderosed%e_dzdn
+    dzdvv               => gdp%gderosed%e_dzdt
     epsclc              => gdp%gderosed%epsclc
     epswlc              => gdp%gderosed%epswlc
     fixfac              => gdp%gderosed%fixfac
@@ -463,21 +461,21 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sandfrac            => gdp%gderosed%sandfrac
     hidexp              => gdp%gderosed%hidexp
     rsdqlc              => gdp%gderosed%rsdqlc
-    sbcu                => gdp%gderosed%sbcu
-    sbcv                => gdp%gderosed%sbcv
-    sbcuu               => gdp%gderosed%sbcuu
-    sbcvv               => gdp%gderosed%sbcvv
-    sbwu                => gdp%gderosed%sbwu
-    sbwv                => gdp%gderosed%sbwv
-    sbwuu               => gdp%gderosed%sbwuu
-    sbwvv               => gdp%gderosed%sbwvv
+    sbcu                => gdp%gderosed%sbcx
+    sbcv                => gdp%gderosed%sbcy
+    sbcuu               => gdp%gderosed%e_sbcn
+    sbcvv               => gdp%gderosed%e_sbct
+    sbwu                => gdp%gderosed%sbwx
+    sbwv                => gdp%gderosed%sbwy
+    sbwuu               => gdp%gderosed%e_sbwn
+    sbwvv               => gdp%gderosed%e_sbwt
     sddflc              => gdp%gderosed%sddflc
-    sswu                => gdp%gderosed%sswu
-    sswv                => gdp%gderosed%sswv
-    sswuu               => gdp%gderosed%sswuu
-    sswvv               => gdp%gderosed%sswvv
-    sutot               => gdp%gderosed%sutot
-    svtot               => gdp%gderosed%svtot
+    sswu                => gdp%gderosed%sswx
+    sswv                => gdp%gderosed%sswy
+    sswuu               => gdp%gderosed%e_sswn
+    sswvv               => gdp%gderosed%e_sswt
+    sutot               => gdp%gderosed%sxtot
+    svtot               => gdp%gderosed%sytot
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     sour_im             => gdp%gderosed%sour_im
@@ -538,94 +536,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     mfluff              => gdp%gdmorpar%flufflyr%mfluff
     !
     nm_pos =  1
-    if (ifirst == 1) then
-       ifirst = 0
-       !
-       ! Allocate using the gdp structure itself instead of the local pointers
-       !
-                     allocate (gdp%gderosed%bc_mor_array(lsedtot*2)               , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dbodsd (lsedtot,gdp%d%nmlb:gdp%d%nmub), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dcwwlc (0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dzduu  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dzdvv  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%epsclc (0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%epswlc (0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%fixfac (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%rsdqlc (kmax)                         , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcu   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcuu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcv   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbcvv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwu   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwuu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwv   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbwvv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sddflc (0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sinkse (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sourse (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sour_im(gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%srcmax (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswu   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswuu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswv   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sswvv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sutot  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%svtot  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%taurat (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%umod   (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%ust2   (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%uuu    (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%vvv    (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%wslc   (0:kmax)                       , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%zumod  (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'Erosed: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       !
-       ! update local pointers
-       !
-       bc_mor_array        => gdp%gderosed%bc_mor_array
-       dbodsd              => gdp%gderosed%dbodsd
-       dcwwlc              => gdp%gderosed%dcwwlc
-       dzduu               => gdp%gderosed%dzduu
-       dzdvv               => gdp%gderosed%dzdvv
-       epsclc              => gdp%gderosed%epsclc
-       epswlc              => gdp%gderosed%epswlc
-       fixfac              => gdp%gderosed%fixfac
-       rsdqlc              => gdp%gderosed%rsdqlc
-       sbcu                => gdp%gderosed%sbcu
-       sbcuu               => gdp%gderosed%sbcuu
-       sbcv                => gdp%gderosed%sbcv
-       sbcvv               => gdp%gderosed%sbcvv
-       sbwu                => gdp%gderosed%sbwu
-       sbwuu               => gdp%gderosed%sbwuu
-       sbwv                => gdp%gderosed%sbwv
-       sbwvv               => gdp%gderosed%sbwvv
-       sddflc              => gdp%gderosed%sddflc
-       sinkse              => gdp%gderosed%sinkse
-       sourse              => gdp%gderosed%sourse
-       sour_im             => gdp%gderosed%sour_im
-       srcmax              => gdp%gderosed%srcmax
-       sswu                => gdp%gderosed%sswu
-       sswuu               => gdp%gderosed%sswuu
-       sswv                => gdp%gderosed%sswv
-       sswvv               => gdp%gderosed%sswvv
-       sutot               => gdp%gderosed%sutot
-       svtot               => gdp%gderosed%svtot
-       taurat              => gdp%gderosed%taurat
-       umod                => gdp%gderosed%umod
-       ust2                => gdp%gderosed%ust2
-       uuu                 => gdp%gderosed%uuu
-       vvv                 => gdp%gderosed%vvv
-       wslc                => gdp%gderosed%wslc
-       zumod               => gdp%gderosed%zumod
-       !
-       ust2   = 0.0_fp
-       dbodsd = 0.0_fp
-       fixfac = 1.0_fp
-       hidexp = 1.0_fp
-    endif
     if (scour) then
        !
        ! Second parameter is zero: save taubmx(*) in gdp%gdscour

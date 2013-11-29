@@ -264,7 +264,7 @@ subroutine gdp_dealloc(gdp)
     call clrflwpar(istat, gdp)
     deallocate (gdp%gdflwpar, STAT = istat)
     !
-    call clrerosed(istat, gdp)
+    call clrsedtra(istat, gdp%gderosed)
     call clrsedpar(istat, gdp%gdsedpar)
     call clrmorpar(istat, gdp%gdmorpar)
     call clrtrapar(istat, gdp%gdtrapar)
