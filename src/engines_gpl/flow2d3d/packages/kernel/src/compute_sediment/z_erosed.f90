@@ -79,8 +79,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     !
     real(fp)                             , pointer :: gammax
     real(fp)                             , pointer :: ag
-    real(fp)                             , pointer :: z0
-    real(fp)                             , pointer :: z0v
     real(fp)                             , pointer :: vicmol
     integer                              , pointer :: nmudfrac
     real(fp)         , dimension(:)      , pointer :: rhosol
@@ -114,11 +112,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: hdt
     logical                              , pointer :: multi
-    logical                              , pointer :: wind
-    logical                              , pointer :: salin
     logical                              , pointer :: wave
-    logical                              , pointer :: struct
-    logical                              , pointer :: sedim
     real(fp)                             , pointer :: eps
     real(fp)         , dimension(:)      , pointer :: bc_mor_array
     real(fp)         , dimension(:,:)    , pointer :: dbodsd
@@ -182,14 +176,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: timsec
     real(fp)                             , pointer :: camax
     real(fp)                             , pointer :: aksfac
-    real(fp)                             , pointer :: rwave
     real(fp)                             , pointer :: rdc
-    real(fp)                             , pointer :: rdw
-    real(fp)                             , pointer :: pangle
-    real(fp)                             , pointer :: fpco
-    integer                              , pointer :: iopsus
     integer                              , pointer :: iopkcw
-    integer                              , pointer :: subiw
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
@@ -304,6 +292,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: j
     integer                       :: k
     integer                       :: k2d
+    integer                       :: kbed
     integer                       :: kmaxsd
     integer                       :: kn
     integer                       :: ku
@@ -329,6 +318,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: caks_ss3d
     real(fp)                      :: chezy
     real(fp)                      :: conc2d
+    real(fp)                      :: delr
     real(fp)                      :: di50
     real(fp)                      :: difbot
     real(fp)                      :: drho
@@ -343,6 +333,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: grlyrs
     real(fp)                      :: h0
     real(fp)                      :: h1
+    real(fp)                      :: rc
     real(fp)                      :: mfltot
     real(fp)                      :: sag
     real(fp)                      :: salinity
@@ -351,8 +342,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: sourfluff
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
     real(fp)                      :: taks
+    real(fp)                      :: taks0
     real(fp)                      :: tauadd
     real(fp)                      :: taub
+    real(fp)                      :: tauc
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
     real(fp), dimension(kmax)     :: thicklc    
@@ -365,9 +358,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: tsigmol   ! temporary variable for sigmol
     real(fp)                      :: tws0
     real(fp)                      :: twsk
+    real(fp)                      :: u
     real(fp)                      :: ubed
     real(fp)                      :: umean
     real(fp)                      :: ustarc
+    real(fp)                      :: utot
+    real(fp)                      :: v
     real(fp)                      :: vbed
     real(fp)                      :: velb
     real(fp)                      :: velm
@@ -395,11 +391,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    wind                => gdp%gdprocs%wind
-    salin               => gdp%gdprocs%salin
     wave                => gdp%gdprocs%wave
-    struct              => gdp%gdprocs%struct
-    sedim               => gdp%gdprocs%sedim
     nmudfrac            => gdp%gdsedpar%nmudfrac
     rhosol              => gdp%gdsedpar%rhosol
     cdryb               => gdp%gdsedpar%cdryb
@@ -421,11 +413,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     anymud              => gdp%gdsedpar%anymud
     sedtrcfac           => gdp%gdsedpar%sedtrcfac
     thresh              => gdp%gdmorpar%thresh
-    sus                 => gdp%gdmorpar%sus
-    bed                 => gdp%gdmorpar%bed
-    susw                => gdp%gdmorpar%susw
     sedthr              => gdp%gdmorpar%sedthr
-    bedw                => gdp%gdmorpar%bedw
     i10                 => gdp%gdmorpar%i10
     i50                 => gdp%gdmorpar%i50
     i90                 => gdp%gdmorpar%i90
@@ -439,8 +427,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ffthresh            => gdp%gdmorpar%thresh
     morfac              => gdp%gdmorpar%morfac
     ag                  => gdp%gdphysco%ag
-    z0                  => gdp%gdphysco%z0
-    z0v                 => gdp%gdphysco%z0v
     vicmol              => gdp%gdphysco%vicmol
     gammax              => gdp%gdnumeco%gammax
     eps                 => gdp%gdconst%eps
@@ -502,19 +488,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     epspar              => gdp%gdmorpar%epspar 
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
-    wave                => gdp%gdprocs%wave
     scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
     camax               => gdp%gdmorpar%camax
     aksfac              => gdp%gdmorpar%aksfac
-    rwave               => gdp%gdmorpar%rwave
     rdc                 => gdp%gdmorpar%rdc
-    rdw                 => gdp%gdmorpar%rdw
-    pangle              => gdp%gdmorpar%pangle
-    fpco                => gdp%gdmorpar%fpco
-    iopsus              => gdp%gdmorpar%iopsus
     iopkcw              => gdp%gdmorpar%iopkcw
-    subiw               => gdp%gdmorpar%subiw
     ubot_from_com       => gdp%gdprocs%ubot_from_com
     max_integers        => gdp%gdtrapar%max_integers
     max_reals           => gdp%gdtrapar%max_reals
@@ -775,11 +754,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        nmd  = nm - icx
        ndm  = nm - icy
        call nm_to_n_and_m(nm, n, m, gdp)
-       ! Morphology reset the kmaxlc.
+       ! In z-layer use kmaxlc, siglc and thicklc for morphology (like sigma-layer).
        if (kmax>1) then  
           !
           ! 3D CASE
           !
+          kbed    = kfsmin(nm)
           thicklc = 0.0_fp
           klc     = 1
           do k = kfsmax(nm),kfsmin(nm),-1
@@ -793,6 +773,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              siglc(klc) = siglc(klc - 1) - 0.5_fp*(thicklc(klc) + thicklc(klc - 1))
           enddo
        else
+           kbed    = 1
            kmaxlc  = 1
            thicklc = 1.0_fp
        endif
@@ -810,6 +791,15 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        umean = umean / h1
        vmean = vmean / h1
        velm = sqrt(umean**2+vmean**2)
+       !
+       ubed = (u0eul(nm,kbed) + u0eul(nmd,kbed))/ku
+       vbed = (v0eul(nm,kbed) + v0eul(ndm,kbed))/kv
+       velb = sqrt(ubed**2 + vbed**2)
+       if (kmaxlc>1) then
+          zvelb = 0.5_fp*thicklc(kmaxlc)*h1
+       else
+          zvelb = h1/ee
+       endif
        !
        ! Calculate current related roughness
        !
@@ -834,7 +824,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           call compbsskin   (umean   , vmean     , h1      , wave    , &
                            & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
-                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmaxlc), &
+                          & kssand  , thcmud(nm), taub    , rhowat(nm,kbed), &
                            & vicmol  )
        else
           !
@@ -843,27 +833,59 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           taub = taubmx(nm)
        endif
        !
+       ustarc = umod(nm)*vonkar/log(1.0_fp + zumod(nm)/z0rou)
        if (scour) then
           !
-          ! Calculate extra stress (tauadd) for point = nm,
-          ! if so required by user input.
+          ! Calculate extra stress (tauadd) for point = nm, if so required by
+          ! user input. Increment TAUB(MX) and USTARC.
           !
           call shearx(tauadd, nm, gdp)
           taub = sqrt(taub**2 + tauadd**2)
+          !
+          tauc = rhowat(nm,kmax)*ustarc**2
+          tauc = sqrt(tauc**2 + tauadd**2)
+          ustarc = sqrt(tauc/rhowat(nm,kbed))
        else
           tauadd = 0.0_fp
        endif
        !
+       ! Compute effective depth averaged velocity
+       !
+       utot  = ustarc * chezy / sag
+       u     = utot * uuu(nm) / (umod(nm)+eps)
+       v     = utot * vvv(nm) / (umod(nm)+eps)
+       !
        if (lsal > 0) then
-          salinity = r0(nm, kmaxlc, lsal)
+          salinity = r0(nm, kbed, lsal)
        else
           salinity = saleqs
        endif
        if (ltem > 0) then
-          temperature = r0(nm, kmaxlc, ltem)
+          temperature = r0(nm, kbed, ltem)
        else
           temperature = temeqs
        endif
+       !
+       taks0 = 0.0_fp
+       !
+       ! Calculate Van Rijn's reference height
+       !
+       if (iopkcw==1) then
+          rc = 30.0_fp*z0cur
+       else
+          rc = rdc
+       endif
+       taks0 = max(aksfac*rc, 0.01_fp*h1)
+       !
+       if (wave .and. tp(nm)>0.0_fp) then
+          delr  = 0.025_fp
+          taks0 = max(0.5_fp*delr, taks0)
+       endif
+       !
+       ! Limit maximum aks to 20% of water depth
+       ! (may be used when water depth becomes very small)
+       !
+       taks0 = min(taks0, 0.2_fp*h1)
        !
        ! Input parameters are passed via dll_reals/integers/strings-arrays
        !
@@ -873,6 +895,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           call d3stop(1, gdp)
        endif
        dll_reals(RP_TIME ) = real(timsec    ,hp)
+       dll_reals(RP_EFUMN) = real(u         ,hp)
+       dll_reals(RP_EFVMN) = real(v         ,hp)
+       dll_reals(RP_EFVLM) = real(utot      ,hp)
        dll_reals(RP_UCHAR) = real(uuu(nm)   ,hp)
        dll_reals(RP_VCHAR) = real(vvv(nm)   ,hp)
        dll_reals(RP_VELCH) = real(umod(nm)  ,hp)
@@ -895,7 +920,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_D10MX) = real(dxx(nm,i10),hp)
        dll_reals(RP_D90MX) = real(dxx(nm,i90),hp)
        dll_reals(RP_MUDFR) = real(mudfrac(nm),hp)
-       dll_reals(RP_RHOWT) = real(rhowat(nm,kmaxlc),hp) ! Density of water
+       dll_reals(RP_RHOWT) = real(rhowat(nm,kbed),hp) ! Density of water
        dll_reals(RP_SALIN) = real(salinity       ,hp)
        dll_reals(RP_TEMP ) = real(temperature    ,hp)
        dll_reals(RP_GRAV ) = real(ag             ,hp)
@@ -912,12 +937,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_SNDFR) = real(sandfrac(nm)   ,hp)
        dll_reals(RP_DGSD ) = real(dgsd(nm)       ,hp)
        if (ltur >= 1) then
-          dll_reals(RP_KTUR ) = real(rtur0(nm,kmaxlc,1),hp)
+          dll_reals(RP_KTUR ) = real(rtur0(nm,kbed,1),hp)
        endif
        dll_reals(RP_UMEAN) = real(umean     ,hp)
        dll_reals(RP_VMEAN) = real(vmean     ,hp)
        dll_reals(RP_VELMN) = real(velm      ,hp)
-
+       dll_reals(RP_USTAR) = real(ustarc         ,hp)
        !
        if (max_integers < MAX_IP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
@@ -967,7 +992,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_D50  ) = 0.0_hp
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
-             dll_reals(RP_SETVL) = real(ws(nm, kfsmin(nm), l)  ,hp) ! Vertical velocity near bedlevel
+             dll_reals(RP_SETVL) = real(ws(nm, kbed, l)  ,hp) ! Vertical velocity near bedlevel
+             if (flmd2l) then
+                 par(11,l) = entr(nm)
+             endif
              !
              klc = 0
              dcwwlc = 0.0_fp
@@ -1055,7 +1083,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! This code is copied from inised (uniform sedd50)
              !
              di50     = sedd50fld(nm)
-             drho     = (rhosol(l)-rhowat(nm,kmaxlc)) / rhowat(nm,kmaxlc)
+             drho     = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
              dstar(l) = di50 * (drho*ag/vicmol**2)**0.3333_fp
              if (dstar(l) < 1.0_fp) then
                 if (iform(l) == -2) then
@@ -1078,7 +1106,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              else
                 tetacr(l) = 0.055_fp
              endif
-             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kmaxlc)) * ag * di50 * tetacr(l)
+             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kbed)) * ag * di50 * tetacr(l)
           endif
           !
           if (suspfrac) then
@@ -1086,7 +1114,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = dss(nm, l)
              tsalmax = salmax(l)
              tws0    = ws0(l)
-             twsk    = ws(nm, kfsmin(nm), l)
+             twsk    = ws(nm, kbed, l)
           else
              !
              ! use dummy values for bedload fractions
@@ -1107,7 +1135,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           par(1,l) = ag
           par(2,l) = rhowat(nm,kmax) ! rhow
           par(3,l) = rhosol(l)
-          par(4,l) = (rhosol(l)-rhowat(nm,kmaxlc)) / rhowat(nm,kmaxlc)
+          par(4,l) = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
           par(5,l) = 1.0E-6     ! rnu    from md-tran.*
           par(6,l) = di50
           !
@@ -1207,16 +1235,17 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! diffusivity
                 !
                 do k2d = 0, kmax2d
-                   ws2d(k2d)   = ws(nm, kfsmin(nm), l)
+                   ws2d(k2d)   = ws(nm, kbed, l)
                    dcww2d(k2d) = 0.0_fp
                 enddo
-                trsedeq = rsedeq(nm, kfsmin(nm), l)
+                trsedeq = rsedeq(nm, kbed, l)
              else
                 trsedeq =  0.0_fp
              endif
+             taks = taks0
              !
-             if (lsecfl > 0) then ! Not in case of local 2D in 3D model; only in real 2D, so k=1 is okay here
-                spirint = r0(nm,1,lsecfl)
+             if (lsecfl > 0) then
+                spirint = r0(nm, kbed, lsecfl)
              else
                 spirint = 0.0_fp
              endif
@@ -1240,14 +1269,15 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
+                aks   (nm, l)    = taks
                 dss   (nm, l)    = tdss
-                rsedeq(nm, kfsmin(nm), l) = trsedeq
-                kmxsed(nm, l)    = kfsmin(nm)
+                rsedeq(nm, kbed, l) = trsedeq
+                kmxsed(nm, l)    = kbed
                 !
                 ! Galappatti time scale and source and sink terms
                 !
                 call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
-                              & ws(nm,kfsmin(nm),l),tsd      ,rsedeq(nm,kfsmin(nm),l)  , &
+                              & ws(nm,kbed,l) ,tsd           ,rsedeq(nm,kbed,l),         &
                               & sourse(nm,l)  ,sour_im(nm,l) ,sinkse(nm,l)  )
              endif ! suspfrac
           endif ! kmaxlc = 1
@@ -1328,8 +1358,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbcuu     ,sbcvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & .true.    ,rhowat    ,kmaxlc    ,dps       ,gsqs      , &
-              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+              & .true.    ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+              & gdp       )
     endif
     !
     ! Bed-slope and sediment availability effects for
@@ -1341,8 +1372,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbwuu     ,sbwvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & .false.   ,rhowat    ,kmaxlc    ,dps       ,gsqs      , &
-              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+              & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+              & gdp       )
     endif
     !
     ! Sediment availability effects for
@@ -1354,8 +1386,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sswuu     ,sswvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.false.   , &
-              & .false.   ,rhowat    ,kmaxlc    ,dps       ,gsqs      , &
-              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+              & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+              & gdp       )
     endif
     !
     ! Summation of current-related and wave-related transports

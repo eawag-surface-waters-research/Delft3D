@@ -4,7 +4,8 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                         & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
                         & hu        ,hv        ,dm        ,hidexp    ,slopecor  , &
                         & avalan    ,rhowat    ,kmax      ,dps       ,gsqs      , &
-                        & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+                        & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+                        & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -80,6 +81,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                                                                                    !!  ceeds in the Y-dir.
     integer                                               , intent(in)  :: icy     !!  Increment in the Y-dir. (see ICX)
     integer                                               , intent(in)  :: kmax    !  Number of layers
+    integer                                               , intent(in)  :: kbed    !  Index of near bed layer
     integer                                               , intent(in)  :: lsedtot !!  Total number of sediment fractions
     integer                                               , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
     logical                                               , intent(in)  :: avalan
@@ -363,7 +365,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                       if (di50spatial) then
                          di50 = sqrt(sedd50fld(nm)*sedd50fld(nm2))
                       endif
-                      delta   = (rhosol(l) - rhowat(nm,kmax))/rhowat(nm,kmax)
+                      delta   = (rhosol(l) - rhowat(nm,kbed))/rhowat(nm,kbed)
                       shield  = ust2avg/ag/delta/di50
                       !
                       if (shield/=0.0_fp) then

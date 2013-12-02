@@ -398,22 +398,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       ! work up through layers integrating transport
                       ! below aksu
                       !
-                      !do k = kmax, 1, -1
-                      !   kvalue = k
-                      !   htdif  = aksu/hu(nm) - (1.0 + sig(k) - thick(k)/2.0)
-                      !   !
-                      !   ! if layer containing aksu
-                      !   !
-                      !   if (htdif <= thick(k)) then
-                      !      cumflux = cumflux + fluxu(nm, k, ll)*htdif/thick(k)
-                      !      exit
-                      !   else
-                      !      cumflux = cumflux + fluxu(nm, k, ll)
-                      !   endif
-                      !enddo
-                      !cumflux = cumflux/guu(nm)
-                      !
-                      ! morphology
                       htdif = aksu / hu(nm)                                          
                       zusum = 0.0_fp
                       do k = kfumin(nm), kfumax(nm)

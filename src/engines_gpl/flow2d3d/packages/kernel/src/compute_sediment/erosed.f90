@@ -77,8 +77,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     !
     real(fp)                             , pointer :: gammax
     real(fp)                             , pointer :: ag
-    real(fp)                             , pointer :: z0
-    real(fp)                             , pointer :: z0v
     real(fp)                             , pointer :: vicmol
     integer                              , pointer :: nmudfrac
     real(fp)         , dimension(:)      , pointer :: rhosol
@@ -112,11 +110,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: hdt
     logical                              , pointer :: multi
-    logical                              , pointer :: wind
-    logical                              , pointer :: salin
     logical                              , pointer :: wave
-    logical                              , pointer :: struct
-    logical                              , pointer :: sedim
     real(fp)                             , pointer :: eps
     real(fp)         , dimension(:)      , pointer :: bc_mor_array
     real(fp)         , dimension(:,:)    , pointer :: dbodsd
@@ -287,6 +281,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: j
     integer                       :: k
     integer                       :: k2d
+    integer                       :: kbed
     integer                       :: kmaxsd
     integer                       :: kn
     integer                       :: ku
@@ -325,8 +320,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: grlyrs
     real(fp)                      :: h0
     real(fp)                      :: h1
-    real(fp)                      :: mflufftot
-    real(fp)                      :: rc
+     real(fp)                      :: rc
     real(fp)                      :: mfltot
     real(fp)                      :: sag
     real(fp)                      :: salinity
@@ -382,11 +376,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    wind                => gdp%gdprocs%wind
-    salin               => gdp%gdprocs%salin
     wave                => gdp%gdprocs%wave
-    struct              => gdp%gdprocs%struct
-    sedim               => gdp%gdprocs%sedim
     nmudfrac            => gdp%gdsedpar%nmudfrac
     rhosol              => gdp%gdsedpar%rhosol
     cdryb               => gdp%gdsedpar%cdryb
@@ -408,10 +398,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     anymud              => gdp%gdsedpar%anymud
     sedtrcfac           => gdp%gdsedpar%sedtrcfac
     thresh              => gdp%gdmorpar%thresh
-    bed                 => gdp%gdmorpar%bed
-    susw                => gdp%gdmorpar%susw
     sedthr              => gdp%gdmorpar%sedthr
-    bedw                => gdp%gdmorpar%bedw
     i10                 => gdp%gdmorpar%i10
     i50                 => gdp%gdmorpar%i50
     i90                 => gdp%gdmorpar%i90
@@ -425,8 +412,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ffthresh            => gdp%gdmorpar%thresh
     morfac              => gdp%gdmorpar%morfac
     ag                  => gdp%gdphysco%ag
-    z0                  => gdp%gdphysco%z0
-    z0v                 => gdp%gdphysco%z0v
     vicmol              => gdp%gdphysco%vicmol
     gammax              => gdp%gdnumeco%gammax
     eps                 => gdp%gdconst%eps
@@ -752,6 +737,16 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        nmd  = nm - icx
        ndm  = nm - icy
        call nm_to_n_and_m(nm, n, m, gdp)
+       ! In z-layer use kmaxlc, siglc and thicklc for morphology (like sigma-layer).
+       if (kmax>1) then  
+          !
+          ! 3D CASE
+          !
+          kbed    = kmax
+
+       else
+           kbed    = 1
+       endif
        !
        ! Compute depth-averaged velocity components at cell centre
        !
@@ -765,8 +760,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        enddo
        velm = sqrt(umean**2+vmean**2)
        !
-       ubed = (u0eul(nm,kmax) + u0eul(nmd,kmax))/ku
-       vbed = (v0eul(nm,kmax) + v0eul(ndm,kmax))/kv
+       ubed = (u0eul(nm,kbed) + u0eul(nmd,kbed))/ku
+       vbed = (v0eul(nm,kbed) + v0eul(ndm,kbed))/kv
        velb = sqrt(ubed**2 + vbed**2)
        if (kmax>1) then
           zvelb = 0.5_fp*thick(kmax)*h1
@@ -797,7 +792,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           call compbsskin   (umean   , vmean     , h1      , wave    , &
                            & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
-                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmax), &
+                           & kssand  , thcmud(nm), taub    , rhowat(nm,kbed), &
                            & vicmol  )
        else
           !
@@ -817,7 +812,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           tauc = rhowat(nm,kmax)*ustarc**2
           tauc = sqrt(tauc**2 + tauadd**2)
-          ustarc = sqrt(tauc/rhowat(nm,kmax))
+          ustarc = sqrt(tauc/rhowat(nm,kbed))
        else
           tauadd = 0.0_fp
        endif
@@ -829,12 +824,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        v     = utot * vvv(nm) / (umod(nm)+eps)
        !
        if (lsal > 0) then
-          salinity = r0(nm, kmax, lsal)
+          salinity = r0(nm, kbed, lsal)
        else
           salinity = saleqs
        endif
        if (ltem > 0) then
-          temperature = r0(nm, kmax, ltem)
+          temperature = r0(nm, kbed, ltem)
        else
           temperature = temeqs
        endif
@@ -893,7 +888,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_D10MX) = real(dxx(nm,i10),hp)
        dll_reals(RP_D90MX) = real(dxx(nm,i90),hp)
        dll_reals(RP_MUDFR) = real(mudfrac(nm),hp)
-       dll_reals(RP_RHOWT) = real(rhowat(nm,kmax),hp) ! Density of water
+       dll_reals(RP_RHOWT) = real(rhowat(nm,kbed),hp) ! Density of water
        dll_reals(RP_SALIN) = real(salinity       ,hp)
        dll_reals(RP_TEMP ) = real(temperature    ,hp)
        dll_reals(RP_GRAV ) = real(ag             ,hp)
@@ -910,7 +905,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_SNDFR) = real(sandfrac(nm)   ,hp)
        dll_reals(RP_DGSD ) = real(dgsd(nm)       ,hp)
        if (ltur >= 1) then
-          dll_reals(RP_KTUR ) = real(rtur0(nm,kmax,1),hp)
+          dll_reals(RP_KTUR ) = real(rtur0(nm,kbed,1),hp)
        endif
        dll_reals(RP_UMEAN) = real(umean          ,hp)
        dll_reals(RP_VMEAN) = real(vmean          ,hp)
@@ -965,7 +960,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_D50  ) = 0.0_hp
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
-             dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
+             dll_reals(RP_SETVL) = real(ws(nm, kbed, l)  ,hp) ! Vertical velocity near bedlevel
              if (flmd2l) then
                  par(11,l) = entr(nm)
              endif
@@ -989,7 +984,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
                         & par(1,l)    ,max_integers,max_reals   ,max_strings , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
-                        & dll_strings  ,iflufflyr ,mflufftot ,fracf    , &
+                        & dll_strings  ,iflufflyr ,mfltot ,fracf    , &
                         & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
              if (error) call d3stop(1, gdp)
              !
@@ -1049,7 +1044,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! This code is copied from inised (uniform sedd50)
              !
              di50     = sedd50fld(nm)
-             drho     = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
+             drho     = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
              dstar(l) = di50 * (drho*ag/vicmol**2)**0.3333_fp
              if (dstar(l) < 1.0_fp) then
                 if (iform(l) == -2) then
@@ -1072,7 +1067,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              else
                 tetacr(l) = 0.055_fp
              endif
-             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kmax)) * ag * di50 * tetacr(l)
+             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kbed)) * ag * di50 * tetacr(l)
           endif
           !
           if (suspfrac) then
@@ -1080,7 +1075,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = dss(nm, l)
              tsalmax = salmax(l)
              tws0    = ws0(l)
-             twsk    = ws(nm, kmax, l)
+             twsk    = ws(nm, kbed, l)
           else
              !
              ! use dummy values for bedload fractions
@@ -1101,7 +1096,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           par(1,l) = ag
           par(2,l) = rhowat(nm,kmax) ! rhow
           par(3,l) = rhosol(l)
-          par(4,l) = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
+          par(4,l) = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
           par(5,l) = 1.0E-6     ! rnu    from md-tran.*
           par(6,l) = di50
           !
@@ -1113,8 +1108,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              !
              if (suspfrac) then
                 !
-                ! Fill local 1dv arrays with fall velocity and
-                ! diffusivity
+                ! Fill local 1dv arrays with fall velocity and diffusivity
                 !
                 do k = 0, kmax
                    wslc(k)   = ws(nm, k, l)
@@ -1189,17 +1183,17 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! diffusivity
                 !
                 do k2d = 0, kmax2d
-                   ws2d(k2d)   = ws(nm, 1, l)
+                   ws2d(k2d)   = ws(nm, kbed, l)
                    dcww2d(k2d) = 0.0_fp
                 enddo
-                trsedeq = rsedeq(nm, 1, l)
+                trsedeq = rsedeq(nm, kbed, l)
              else
                 trsedeq =  0.0_fp
              endif
              taks = taks0
              !
              if (lsecfl > 0) then
-                spirint = r0(nm,1,lsecfl)
+                spirint = r0(nm, kbed, lsecfl)
              else
                 spirint = 0.0_fp
              endif
@@ -1225,13 +1219,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              if (suspfrac) then
                 aks   (nm, l)    = taks
                 dss   (nm, l)    = tdss
-                rsedeq(nm, 1, l) = trsedeq
-                kmxsed(nm, l)    = 1
+                rsedeq(nm, kbed, l) = trsedeq
+                kmxsed(nm, l)    = kbed
                 !
                 ! Galappatti time scale and source and sink terms
                 !
                 call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
-                              & ws(nm,1,l)    ,tsd           ,rsedeq(nm,1,l),            &
+                              & ws(nm,kbed,l) ,tsd           ,rsedeq(nm,kbed,l),         &
                               & sourse(nm,l)  ,sour_im(nm,l) ,sinkse(nm,l)  )
              endif ! suspfrac
           endif ! kmax = 1
@@ -1313,7 +1307,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
               & .true.    ,rhowat    ,kmax      ,dps       ,gsqs      , &
-              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+              & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+              & gdp       )
     endif
     !
     ! Bed-slope and sediment availability effects for
@@ -1326,7 +1321,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
               & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
-              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+              & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+              & gdp       )
     endif
     !
     ! Sediment availability effects for
@@ -1339,7 +1335,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.false.   , &
               & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
-              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
+              & guu       ,gvv       ,guv       ,gvu       ,kbed      , &
+              & gdp       )
     endif
     !
     ! Summation of current-related and wave-related transports
