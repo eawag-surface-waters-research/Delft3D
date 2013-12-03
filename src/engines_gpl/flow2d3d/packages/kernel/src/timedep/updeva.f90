@@ -139,6 +139,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
        precipt = rval(1) / 3600000.0_fp
        if (rval(2) < -998.0_fp) then
           keva = 1
+          call prterr(lundia, 'G051', 'Missing value found for evaporation in input file. The evaporative mass flux will be calculated internally.')
        else
           evapor = rval(2) * rhow / 3600000.0_fp
        endif

@@ -55,6 +55,7 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     real(fp)          , pointer :: timhr
     real(fp)          , pointer :: dt
     integer           , pointer :: luneva
+    integer           , pointer :: keva
     real(fp)          , pointer :: evapor
     real(fp)          , pointer :: precipt
     real(fp)          , pointer :: devapo
@@ -100,6 +101,7 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     timhr       => gdp%gdinttim%timhr
     itdate      => gdp%gdexttim%itdate
     tzone       => gdp%gdexttim%tzone
+    keva        => gdp%gdtricom%keva
     !
     first = .false.
     if (evaint == 'Y') then
@@ -121,9 +123,13 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
           ! Update evaporation (block function)
           !
           do nm = 1, nmmax
-             evap(nm)   = devapo
              precip(nm) = dpreci
           enddo
+          if (keva /= 1) then
+             do nm = 1, nmmax
+                evap(nm)   = devapo
+             enddo
+          endif
        endif
        !
        ! Read new time dependent input
@@ -142,9 +148,13 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
        ! Update evaporation (step interpolation)
        !
        do nm = 1, nmmax
-          evap(nm) = evapor
           precip(nm) = precipt
        enddo
+       if (keva /= 1) then
+          do nm = 1, nmmax
+             evap(nm) = evapor
+          enddo
+       endif
     endif
     !    
     if (prcp_file) then
