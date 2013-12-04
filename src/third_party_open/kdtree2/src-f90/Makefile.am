@@ -10,5 +10,4 @@ libkdtree2f_la_SOURCES = \
 kdtree2_test_SOURCES = \
 	kdtree2_test.f90
 
-kdtree2_test_LDADD = .libs/libkdtree2f.la
-kdtree2_test_LDFLAGS = -static
+kdtree2_test_LDADD = libkdtree2f.la

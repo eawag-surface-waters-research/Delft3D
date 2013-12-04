@@ -38,7 +38,7 @@ AX_CHECK_COMPILE_FLAG([-fpe0], [FCFLAGS="$FCFLAGS -fpe0"], [], [])
 AX_CHECK_COMPILE_FLAG([-fno-alias], [FCFLAGS="$FCFLAGS -fno-alias"], [], []) 
 AX_CHECK_COMPILE_FLAG([-Wall], [FCFLAGS="$FCFLAGS -Wall"], [], []) 
 AX_CHECK_COMPILE_FLAG([-fomit-framepointers], [FCFLAGS="$FCFLAGS -fomit-framepointers"], [], []) 
-FCFLAGS="$FCFLAGS -O3 -u"
+FCFLAGS="$FCFLAGS -O3"
 
 AC_LANG_POP
 

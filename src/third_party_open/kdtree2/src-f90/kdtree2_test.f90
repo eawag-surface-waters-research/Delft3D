@@ -104,7 +104,7 @@ end do
 return
 end function searches_per_second
 
-  real function average_number_within_ball(tree,navg,r2) result(res)
+  real(kdkind) function average_number_within_ball(tree,navg,r2) result(res)
     ! return the arithmetical average number of points within ball of size
     ! 'r2'
     !
@@ -122,7 +122,7 @@ end function searches_per_second
        if (cnt .gt. 0) sum = sum + real(cnt)
     end do
 
-res = sum/real(navg)
+res = sum/real(navg, kdkind)
     return
 end function average_number_within_ball
 
@@ -143,7 +143,7 @@ program kd_tree_test
 
   type(kdtree2_result),allocatable :: results(:), resultsb(:)
   integer :: nnbrute, rind
-  real :: t0, t1, sps, avgnum, maxdeviation
+  real(kdkind) :: t0, t1, sps, avgnum, maxdeviation
   real(kdkind) :: rv
   integer, parameter :: nnn = 5
   integer, parameter :: nr2 = 5

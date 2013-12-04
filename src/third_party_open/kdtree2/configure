@@ -14653,7 +14653,7 @@ else
   :
 fi
 
-FCFLAGS="$FCFLAGS -O3 -u"
+FCFLAGS="$FCFLAGS -O3"
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
