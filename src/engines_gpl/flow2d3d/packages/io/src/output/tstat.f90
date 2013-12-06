@@ -19,7 +19,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
                & wave      ,rca       ,zrca      ,windu     ,windv     , &
                & zwndsp    ,zwnddr    ,patm      ,zairp     ,wind      , &
-               & gdp       )
+               & precip    ,evap      ,zprecp   ,zevap     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -138,6 +138,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windu  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windv  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: precip !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: evap   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                , intent(out) :: zalfas !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                              :: zdir
     real(fp)  , dimension(nostat)                                                , intent(out) :: zdps   !  Description and declaration in esm_alloc_real.f90
@@ -151,6 +153,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(nostat)                                                , intent(out) :: zwndsp
     real(fp)  , dimension(nostat)                                                , intent(out) :: zwnddr
     real(fp)  , dimension(nostat)                                                , intent(out) :: zairp
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zprecp !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zevap  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                , intent(out) :: zwl    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zdicww !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zrich  !  Description and declaration in esm_alloc_real.f90
@@ -659,6 +663,22 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           !
           zairp(ii) = patm(n, m)
           !
+       enddo
+    endif
+    !
+    ! Store precipitation and evaporation in defined stations
+    !
+    if (flwoutput%air) then
+       zprecp = -999.0_fp
+       zevap   = -999.0_fp
+       do ii = 1, nostat
+          m = mnstat(1, ii)
+          if (m<0) cycle
+          n = mnstat(2, ii)
+          if (n<0) cycle
+          !
+          zprecp(ii) = precip(n, m)
+          zevap(ii)  = evap(n, m)
        enddo
     endif
     !

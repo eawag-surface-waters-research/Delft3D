@@ -1823,11 +1823,26 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Evaporation in kg/m2s (*RHOW)
                              !  Evaporation in m/s
     if (ierr<= - 9) goto 9999
+    
     !
-    pntnam = 'precip'          !  Global data
+    pntnam = 'zevap'         !  Global data
+    ierr = mkfpnt(pntnam, nostat, gdp)
+                             !  Pointer of array ZEVAP
+                             !  Evaporation at the monitoring
+                             !  stations
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'precip'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array EVAP
+                             !  Pointer of array PRECIP
                              !  Precipitation in m/s
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'zprecp'       !  Global data
+    ierr = mkfpnt(pntnam, nostat, gdp)
+                             !  Pointer of array ZPRECP
+                             !  Precipitation at the monitoring
+                             !  stations
     if (ierr<= - 9) goto 9999
     !
     !

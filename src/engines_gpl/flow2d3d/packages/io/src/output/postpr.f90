@@ -180,6 +180,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: enstro
     integer(pntrsize)                    , pointer :: entr
     integer(pntrsize)                    , pointer :: eroll1
+    integer(pntrsize)                    , pointer :: evap
     integer(pntrsize)                    , pointer :: ewave1
     integer(pntrsize)                    , pointer :: fltr
     integer(pntrsize)                    , pointer :: fxw
@@ -299,6 +300,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: zwndsp
     integer(pntrsize)                    , pointer :: zwnddr
     integer(pntrsize)                    , pointer :: zairp
+    integer(pntrsize)                    , pointer :: zprecp
+    integer(pntrsize)                    , pointer :: zevap
     integer(pntrsize)                    , pointer :: dzs1
     integer(pntrsize)                    , pointer :: dzu1
     integer(pntrsize)                    , pointer :: dzv1
@@ -532,6 +535,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     enstro              => gdp%gdr_i_ch%enstro
     entr                => gdp%gdr_i_ch%entr
     eroll1              => gdp%gdr_i_ch%eroll1
+    evap                => gdp%gdr_i_ch%evap
     ewave1              => gdp%gdr_i_ch%ewave1
     fltr                => gdp%gdr_i_ch%fltr
     fxw                 => gdp%gdr_i_ch%fxw
@@ -651,6 +655,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     zwndsp              => gdp%gdr_i_ch%zwndsp
     zwnddr              => gdp%gdr_i_ch%zwnddr
     zairp               => gdp%gdr_i_ch%zairp
+    zprecp              => gdp%gdr_i_ch%zprecp
+    zevap               => gdp%gdr_i_ch%zevap
     dzs1                => gdp%gdr_i_ch%dzs1
     dzu1                => gdp%gdr_i_ch%dzu1
     dzv1                => gdp%gdr_i_ch%dzv1
@@ -958,7 +964,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
                    & wave      ,r(rca)    ,r(zrca)   ,r(windu)  ,r(windv)  , &
                    & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
-                   gdp       )
+                   & r(precip) ,r(evap)   ,r(zprecp),r(zevap)  ,gdp       )
           ftstat = .true.
        endif
        !
@@ -1006,7 +1012,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                        & r(ztur)   ,r(zvort)  ,r(zenst)  ,r(hydprs) ,r(fltr)   , &
                        & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,r(zdps)   , &
                        & r(zwndsp) ,r(zwnddr) ,r(zairp)  ,wind      ,sferic    , &
-                       & gdp       )
+                       & r(zprecp),r(zevap)  ,gdp       )
           if (error) goto 9999
           if (dredge .and. .not. dadsmonly) then
              call wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &

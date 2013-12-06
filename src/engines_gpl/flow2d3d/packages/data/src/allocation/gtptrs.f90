@@ -517,6 +517,8 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: wrkc3
     integer(pntrsize), pointer :: wrkc4
     integer(pntrsize), pointer :: zwork
+    integer(pntrsize), pointer :: zevap
+    integer(pntrsize), pointer :: zprecp
     integer , pointer :: lmax
     integer , pointer :: kc
     integer , pointer :: ndro
@@ -867,6 +869,8 @@ subroutine gtptrs(gdp)
     zwndsp     => gdp%gdr_i_ch%zwndsp
     zwnddr     => gdp%gdr_i_ch%zwnddr
     zairp      => gdp%gdr_i_ch%zairp
+    zprecp     => gdp%gdr_i_ch%zprecp
+    zevap      => gdp%gdr_i_ch%zevap
     drhodx     => gdp%gdr_i_ch%drhodx
     drhody     => gdp%gdr_i_ch%drhody
     dzs0       => gdp%gdr_i_ch%dzs0
@@ -1420,6 +1424,8 @@ subroutine gtptrs(gdp)
     zwndsp     = gtrpnt('zwndsp', gdp)
     zwnddr     = gtrpnt('zwnddr', gdp)
     zairp      = gtrpnt('zairp' , gdp)
+    zprecp     = gtrpnt('zprecp', gdp)    
+    zevap      = gtrpnt('zevap' , gdp)
     !
     ! Define pointers for sub-grid viscosity
     !

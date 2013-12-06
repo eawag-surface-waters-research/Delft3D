@@ -7,7 +7,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                   & ztur      ,zvort     ,zenst     ,hydprs    ,fltr      , &
                   & ctr       ,atr       ,dtr       ,velt      ,zdps      , &
                   & zwndsp    ,zwnddr    ,zairp     ,wind      ,sferic    , &
-                  & gdp       )
+                  & zprecp   ,zevap     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -104,6 +104,8 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     real(fp)     , dimension(nostat)                             :: ztauks !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: zwl    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: zwndsp !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: zprecp !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: zevap  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: zwnddr !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: zairp  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat, 0:kmax)                     :: zdicww !  Description and declaration in esm_alloc_real.f90
@@ -353,15 +355,25 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                 & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
              call addelm(nefiswrthis,'PATM',' ','[  N/M2 ]','REAL',4              , &
-                & 'Air pressure                                                  ', &
+                & 'Air pressure                                                     ', &
+                & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
+          if (flwoutput%air) then
+             call addelm(nefiswrthis,'ZPRECP',' ','[M3 S-1M-2]','REAL',4           , &
+                & 'Instantaneous precipitation rate in station                      ', &
+                & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+             call addelm(nefiswrthis,'ZEVAP',' ','[M3 S-1M-2]','REAL',4             , &
+                & 'Instantaneous evaporation rate in station                        ', &
                 & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (zmodel) then
              if (selhis(2:2)=='Y') then
-                call addelm(nefiswrthis,'HYDPRES',' ','[  N/M2 ]','REAL',4              , &
+                call addelm(nefiswrthis,'HYDPRES',' ','[  N/M2 ]','REAL',4           , &
                    & 'Non-hydrostatic pressure at station (zeta point)              ', &
-                   & 2         ,nostatgl  ,kmaxout_restr,0         ,0         ,0      , &
+                   & 2         ,nostatgl  ,kmaxout_restr,0         ,0         ,0     , &
                    & lundia    ,gdp       )
              endif
           endif
@@ -369,9 +381,9 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              & '(X,Y) coordinates of monitoring stations                      ', &
              & 2         ,2         ,nostatgl  ,0         ,0         ,0      , &
              & lundia    ,gdp       )
-          call addelm(nefiswrthis,'MNSTAT',' ','[   -   ]','INTEGER',4              , &
+          call addelm(nefiswrthis,'MNSTAT',' ','[   -   ]','INTEGER',4         , &
              & '(M,N) indices of monitoring stations                          ', &
-             & 2         ,2         ,nostatgl  ,0         ,0         ,0      , &
+             & 2         ,2         ,nostatgl  ,0         ,0         ,0        , &
              & lundia    ,gdp       )
           call addelm(nefiswrthis,'DPS',' ','[   M   ]','REAL',4              , &
              & 'Depth in station                                              ', & ! same as in wrihis
@@ -583,6 +595,15 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           call wrthis_n(station, nostat, ierror, zwnddr, 'ZWNDDIR')
           if (ierror/=0) goto 999
           call wrthis_n(station, nostat, ierror, zairp, 'PATM')
+          if (ierror/=0) goto 999
+       endif
+       !
+       ! group 3: element 'ZPRECP' and 'ZEVAP'
+       !
+       if (flwoutput%air) then
+          call wrthis_n(station, nostat, ierror, zprecp, 'ZPRECP')
+          if (ierror/=0) goto 999
+          call wrthis_n(station, nostat, ierror, zevap, 'ZEVAP')
           if (ierror/=0) goto 999
        endif
        !

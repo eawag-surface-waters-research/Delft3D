@@ -345,6 +345,8 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: zwndsp
     integer(pntrsize) , pointer :: zwnddr
     integer(pntrsize) , pointer :: zairp
+    integer(pntrsize) , pointer :: zevap
+    integer(pntrsize) , pointer :: zprecp
     integer(pntrsize) , pointer :: drhodx
     integer(pntrsize) , pointer :: drhody
     integer(pntrsize) , pointer :: dzs0
@@ -1345,6 +1347,10 @@ function getpointer(pntnam, gdp)
        returnval = zwnddr
     case ('zairp')
        returnval = zairp
+    case ('zprecp')
+       returnval = zprecp
+    case ('zevap')
+       returnval = zevap
     case ('drhodx')
        returnval = drhodx
     case ('drhody')
