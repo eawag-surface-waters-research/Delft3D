@@ -455,35 +455,33 @@ function nesthd2 () {
 echo oss-install...
 
 # Example calls:
-# > install.cmd <dest directory>              # Install entire solution
-# > install.cmd flow2d3d <dest directory>     # Install only project flow2d3d (and its dependencies)
+# > install.cmd <prefix> <dest directory>              # Install entire solution
+# > install.cmd <prefix> <dest directory> flow2d3d     # Install only project flow2d3d (and its dependencies)
 
 # 0. defaults:
-project=
-dest_main=
-prefix=
+prefix=$1
+dest_main=$2
+project=$3
 srcdir=
 
-if [ "$2" == '' ]; then
-    # Install all engines, assume the first argument is a target directory
-
-    prefix=$1
-    project=install_all
-    echo Target directory: $prefix
-    echo Source          : all engines
-else
-    # Install the package/engine specified by the first argument. The second argument is assumed to be the target directory.
-
-    prefix=$2
-    project=$1
-    echo Target directory: $prefix
-    echo Source          : package/engine $project
-fi
-
 if [ "$prefix" == '' ]; then
-    echo "ERROR: No target directory specified as argument of oss-install.sh"
+    echo "ERROR: No prefix directory specified as argument of oss-install.sh"
     exit 1
 fi
+
+if [ "$dest_main" == '' ]; then
+    echo "ERROR: No destination directory specified as argument of oss-install.sh"
+    exit 1
+fi
+
+if [ "$project" == '' ]; then
+    # Install all engines
+    project=install_all
+fi
+
+echo Prefix          : $prefix
+echo Target directory: $dest_main
+echo Project         : $project
 
 
 # Change to directory tree where this batch file resides (necessary when oss-install.sh is called from outside of oss/trunk/src)
@@ -491,16 +489,6 @@ scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 cd $scriptdir/../..
 srcdir=`pwd`
-
-# Set dest_main
-if [ "$prefix" == "$srcdir" ]; then
-    # This was the default. Changing this to "dest_main=$prefix" will cause too much confusion.
-    dest_main=$prefix/../bin
-else
-    # Also a bit awkward: we are going to copy binaries from $prefix/bin and $prefix/lib to $prefix/lnx.
-    dest_main=$prefix
-fi
-
 
 $project
 
