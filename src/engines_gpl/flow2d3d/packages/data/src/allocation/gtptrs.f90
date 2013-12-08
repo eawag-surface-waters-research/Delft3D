@@ -426,7 +426,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: kcu
     integer(pntrsize), pointer :: kcv
     integer(pntrsize), pointer :: kfs
-    integer(pntrsize), pointer :: kfsed
     integer(pntrsize), pointer :: kfu
     integer(pntrsize), pointer :: kfv
     integer(pntrsize), pointer :: kspu
@@ -435,7 +434,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: kzs
     integer(pntrsize), pointer :: kzu
     integer(pntrsize), pointer :: kzv
-    integer(pntrsize), pointer :: kmxsed
     integer(pntrsize), pointer :: mnbar
     integer(pntrsize), pointer :: mnbnd
     integer(pntrsize), pointer :: mndro
@@ -910,7 +908,6 @@ subroutine gtptrs(gdp)
     kcu        => gdp%gdr_i_ch%kcu
     kcv        => gdp%gdr_i_ch%kcv
     kfs        => gdp%gdr_i_ch%kfs
-    kfsed      => gdp%gdr_i_ch%kfsed
     kfu        => gdp%gdr_i_ch%kfu
     kfv        => gdp%gdr_i_ch%kfv
     kspu       => gdp%gdr_i_ch%kspu
@@ -919,7 +916,6 @@ subroutine gtptrs(gdp)
     kzs        => gdp%gdr_i_ch%kzs
     kzu        => gdp%gdr_i_ch%kzu
     kzv        => gdp%gdr_i_ch%kzv
-    kmxsed     => gdp%gdr_i_ch%kmxsed
     mnbar      => gdp%gdr_i_ch%mnbar
     mnbnd      => gdp%gdr_i_ch%mnbnd
     mndro      => gdp%gdr_i_ch%mndro
@@ -1040,7 +1036,6 @@ subroutine gtptrs(gdp)
     kcv        = gtipnt('kcv'   , gdp)
     kcv45      = gtipnt('kcv45' , gdp)
     kfs        = gtipnt('kfs'   , gdp)
-    kfsed      = gtipnt('kfsed' , gdp)
     kfsmax     = gtipnt('kfsmax', gdp)
     kfsmin     = gtipnt('kfsmin', gdp)
     kfsmx0     = gtipnt('kfsmx0', gdp)
@@ -1061,7 +1056,6 @@ subroutine gtptrs(gdp)
     kfvmn0     = gtipnt('kfvmn0', gdp)
     kfvz0      = gtipnt('kfvz0' , gdp)
     kfvz1      = gtipnt('kfvz1' , gdp)
-    kmxsed     = gtipnt('kmxsed', gdp)
     kspu       = gtipnt('kspu'  , gdp)
     kspv       = gtipnt('kspv'  , gdp)
     kstp       = gtipnt('kstp'  , gdp)

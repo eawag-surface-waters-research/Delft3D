@@ -1,7 +1,7 @@
 subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
                   & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
                   & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
-                  & kmxsed    ,kfsmx0    ,gdp       )
+                  & kfsmx0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -45,6 +45,7 @@ subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
     implicit none
     !
     type(globdat),target :: gdp
+    integer , dimension(:,:)             , pointer :: kmxsed
 !
 ! Global variables
 !
@@ -59,7 +60,6 @@ subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: kfsmx0 !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: kcs    !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: kfs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)            , intent(in)  :: kmxsed !  Description and declaration in iidim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: gsqs   !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lstsci)  , intent(in)  :: ws     !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                  :: aakl   !  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of concentration in (N,M,K) with concentration in (N,M,K-1)
@@ -78,6 +78,8 @@ subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    kmxsed              => gdp%gderosed%kmxsed
+    !
     ! Vertical advection; particles fall downward
     !                     No fluxes through free surface
     !                     No fluxes through bottom sand layer for 'sand'

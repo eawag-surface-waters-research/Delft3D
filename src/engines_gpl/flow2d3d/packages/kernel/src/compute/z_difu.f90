@@ -15,7 +15,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                 & dzs1      ,areau     ,areav     ,volum0    ,volum1    , &
                 & guu       ,gvv       ,bruvai    ,sedtyp    ,seddif    , &
                 & ws        ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
-                & eqmbcmud  ,lsts      ,kmxsed    ,gdp       )
+                & eqmbcmud  ,lsts      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -118,7 +118,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     integer                                                                :: lsts      ! Description and declaration in esm_alloc_int.f90
     integer                                                                :: lsal      ! Description and declaration in iidim.f90 
     integer, dimension(lsed)                                 , intent(in)  :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh    
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, lsed)          , intent(in)  :: kmxsed    ! Description and declaration in esm_alloc_int.f90
     integer                                                                :: lundia    ! Description and declaration in inout.igs
     integer                                                                :: nmmax     ! Description and declaration in dimens.igs
     integer                                                                :: nmmaxj    ! Description and declaration in dimens.igs
@@ -562,7 +561,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           call z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
                     & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
                     & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
-                    & kmxsed    ,kfsmx0    ,gdp       )
+                    & kfsmx0    ,gdp       )
           call timer_stop(timer_difu_difws, gdp)
        endif         
        !

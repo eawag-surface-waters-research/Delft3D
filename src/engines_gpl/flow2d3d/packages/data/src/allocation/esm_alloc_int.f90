@@ -446,18 +446,6 @@ subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
                               ! Non-active (0) or active (1) zeta point (time-dependent)
     if (ierr <= -9) goto 9999
     !
-    ! arrays for sediment calculations
-    !
-    pntnam = 'kmxsed'        !  Global data
-    ierr = mkipnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr <= -9) goto 9999
-    !
-    pntnam = 'kfsed'         !  Global data
-    ierr = mkipnt(pntnam, nmaxddb*mmaxddb*kfacvr, gdp)
-                             !  no description (yet)
-    if (ierr <= -9) goto 9999
-    !
     ! work arrays
     !
     pntnam = 'iwrk1'         !  Global data

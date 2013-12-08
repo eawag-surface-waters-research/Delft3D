@@ -498,7 +498,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "engines", "engines", "{1703
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waq_run_processes", "waq_run_processes", "{1EFD0944-E2EE-4363-9D66-E571EE28B182}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqbp", "waqbp", "{F71A5B73-9C19-4DA4-AB05-308C7547E6BE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "waqpb", "waqpb", "{F71A5B73-9C19-4DA4-AB05-308C7547E6BE}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waq_run_processes", "tools_gpl\waq_run_processes\packages\waq_run_processes\waq_run_processes.vfproj", "{0F7D56F9-0C51-484D-8BDE-09E021CD3CB4}"
 	ProjectSection(ProjectDependencies) = postProject

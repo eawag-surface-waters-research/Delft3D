@@ -390,7 +390,6 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: kzs
     integer(pntrsize) , pointer :: kzu
     integer(pntrsize) , pointer :: kzv
-    integer(pntrsize) , pointer :: kmxsed
     integer(pntrsize) , pointer :: mnbar
     integer(pntrsize) , pointer :: mnbnd
     integer(pntrsize) , pointer :: mndro
@@ -743,7 +742,6 @@ function getpointer(pntnam, gdp)
     kzs        => gdp%gdr_i_ch%kzs
     kzu        => gdp%gdr_i_ch%kzu
     kzv        => gdp%gdr_i_ch%kzv
-    kmxsed     => gdp%gdr_i_ch%kmxsed
     mnbar      => gdp%gdr_i_ch%mnbar
     mnbnd      => gdp%gdr_i_ch%mnbnd
     mndro      => gdp%gdr_i_ch%mndro
@@ -1429,8 +1427,6 @@ function getpointer(pntnam, gdp)
        returnval = kzu
     case ('kzv')
        returnval = kzv
-    case ('kmxsed')
-       returnval = kmxsed
     case ('mnbar')
        returnval = mnbar
     case ('mnbnd')

@@ -12,7 +12,7 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
               & dtdksi    ,dtdeta    ,aak       ,bbk       ,cck       , &
               & bdddx     ,bddx      ,bdx       ,bux       ,buux      , &
               & buuux     ,uvdwk     ,vvdwk     ,areau     ,areav     , &
-              & aakl      ,bbkl      ,cckl      ,ddkl      ,kmxsed    , &
+              & aakl      ,bbkl      ,cckl      ,ddkl      , &
               & eqmbcsand ,eqmbcmud  ,seddif    ,volum0    ,volum1    , &
               & rscale    ,bruvai    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -138,7 +138,6 @@ integer, dimension(gdp%d%nmlb:gdp%d%nmub)                             :: kfu    
 integer, dimension(gdp%d%nmlb:gdp%d%nmub)                             :: kfv       !  Description and declaration in esm_alloc_int.f90
 integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: kadu      !  Description and declaration in esm_alloc_int.f90
 integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: kadv      !  Description and declaration in esm_alloc_int.f90
-integer, dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                       :: kmxsed    !  Description and declaration in esm_alloc_int.f90
 integer, dimension(lsed)                                , intent(in)  :: sedtyp    !! sediment type: 0=total/1=noncoh/2=coh
 logical                                                 , intent(in)  :: eqmbcsand !  Description and declaration in morpar.igs
 logical                                                 , intent(in)  :: eqmbcmud  !  Description and declaration in morpar.igs
@@ -607,7 +606,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        call dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
                  & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
                  & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
-                 & kmxsed    ,gdp       )
+                 & gdp       )
        call timer_stop(timer_difu_difws, gdp)
     endif
     !

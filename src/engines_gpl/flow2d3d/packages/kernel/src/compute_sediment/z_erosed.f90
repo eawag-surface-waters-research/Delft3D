@@ -5,10 +5,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                   & z0urou    ,z0vrou    ,sour      ,sink      ,rhowat    , &
                   & ws        ,rsedeq    ,z0ucur    ,z0vcur    ,sigmol    , &
                   & taubmx    ,s1        ,uorb      ,tp        ,sigdif    , &
-                  & lstsci    ,thick     ,dicww     ,kmxsed    ,kcs       , &
+                  & lstsci    ,thick     ,dicww     ,kcs       , &
                   & kcu       ,kcv       ,guv       ,gvu       ,sbuu      , &
                   & sbvv      ,seddif    ,hrms      ,ltur      , &
-                  & teta      ,rlabda    ,aks       ,kfsed     ,saleqs    , &
+                  & teta      ,rlabda    ,aks       ,saleqs    , &
                   & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
                   & hv        ,rca       ,dss       ,ubot      ,rtur0     , &
                   & temeqs    ,gsqs      ,guu       ,gvv       ,kfsmin    , &
@@ -127,6 +127,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: epswlc
     real(fp)         , dimension(:,:)    , pointer :: fixfac
     real(fp)         , dimension(:,:)    , pointer :: frac
+    integer          , dimension(:)      , pointer :: kfsed
+    integer , dimension(:,:)             , pointer :: kmxsed
     real(fp)         , dimension(:)      , pointer :: mudfrac
     real(fp)         , dimension(:)      , pointer :: sandfrac
     real(fp)         , dimension(:,:)    , pointer :: hidexp
@@ -230,10 +232,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcv     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs     !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfsed   !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: kmxsed  !  Description and declaration in esm_alloc_int.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: aks     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr    !  Description and declaration in esm_alloc_real.f90
@@ -443,6 +443,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     epswlc              => gdp%gderosed%epswlc
     fixfac              => gdp%gderosed%fixfac
     frac                => gdp%gderosed%frac
+    kfsed               => gdp%gderosed%kfsed
+    kmxsed              => gdp%gderosed%kmxsed
     mudfrac             => gdp%gderosed%mudfrac
     sandfrac            => gdp%gderosed%sandfrac
     hidexp              => gdp%gderosed%hidexp

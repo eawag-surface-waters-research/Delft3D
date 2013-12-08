@@ -1,4 +1,4 @@
-subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
+subroutine red_soursin(nmmax     ,kmax      ,thick     , &
                      & lsal      ,ltem      ,lsed      ,lsedtot   , &
                      & dps       ,s0        ,s1        ,r0        , &
                      & rsedeq    ,nst       , &
@@ -50,6 +50,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer , dimension(:,:)         , pointer :: kmxsed
     real(fp), dimension(:,:)         , pointer :: fixfac
     real(fp), dimension(:,:)         , pointer :: sinkse
     real(fp), dimension(:,:)         , pointer :: sourse
@@ -80,7 +81,6 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
     integer                                                   , intent(in)  :: lsed
     integer                                                   , intent(in)  :: lsedtot
     integer                                                   , intent(in)  :: nst
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)        , intent(in)  :: kmxsed
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0
@@ -109,6 +109,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    kmxsed              => gdp%gderosed%kmxsed
     fixfac              => gdp%gderosed%fixfac
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse

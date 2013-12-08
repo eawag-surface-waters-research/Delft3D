@@ -189,12 +189,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     logical                              , pointer :: bubble
     integer                              , pointer :: lsedtot
     integer(pntrsize)                    , pointer :: rsedeq
-    integer(pntrsize)                    , pointer :: kmxsed
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: seddif
     integer(pntrsize)                    , pointer :: aks
-    integer(pntrsize)                    , pointer :: kfsed
     integer(pntrsize)                    , pointer :: entr
     integer(pntrsize)                    , pointer :: wstau
     integer(pntrsize)                    , pointer :: rca
@@ -961,12 +959,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     ssvv                => gdp%gdr_i_ch%ssvv
     lsedtot             => gdp%d%lsedtot    
     rsedeq              => gdp%gdr_i_ch%rsedeq        
-    kmxsed              => gdp%gdr_i_ch%kmxsed
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     seddif              => gdp%gdr_i_ch%seddif
     aks                 => gdp%gdr_i_ch%aks
-    kfsed               => gdp%gdr_i_ch%kfsed
     wstau               => gdp%gdr_i_ch%wstau
     entr                => gdp%gdr_i_ch%entr
     bedupd              => gdp%gdmorpar%bedupd
@@ -1618,10 +1614,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
                      & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                      & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
+                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                      & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                      & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                     & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
+                     & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                      & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
                      & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
@@ -1654,7 +1650,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                     & r(dzs1)   ,r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) , &
                     & r(guu)    ,r(gvv)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
                     & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
-                    & eqmbcmud  ,lsts      ,i(kmxsed) ,gdp       )
+                    & eqmbcmud  ,lsts      ,gdp       )
           !
           ! z_difu can be called again for correction
           !
@@ -1759,11 +1755,11 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & lsal      ,ltem      ,i(kfs)    ,i(kfu)    ,i(kfv)    , &
                       & r(r1)     ,r(s0)     ,i(kcs)    , &
                       & d(dps)    ,r(gsqs)   ,r(guu)    , &
-                      & r(gvv)    ,r(s1)     ,r(thick)  ,i(kmxsed) ,r(dp)     , &
+                      & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                       & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
                       & r(hv)     ,r(aks)    ,r(sig)    ,r(u1)     ,r(v1)     , &
-                      & sscomp    ,i(kfsed)  ,i(iwrk1)  , &
+                      & sscomp    ,i(iwrk1)  , &
                       & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
                       & i(kcv)    ,icx       ,icy       ,timhr     , &
                       & nto       ,r(volum0) ,r(volum1) ,r(dzs1)   ,r(dzu1)   , &
@@ -2398,10 +2394,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
                      & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                      & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
+                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                      & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                      & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                     & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
+                     & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                      & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
                      & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
@@ -2434,7 +2430,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                     & r(dzs1)   ,r(areav)  ,r(areau)  ,r(volum0) ,r(volum1) , &
                     & r(gvv)    ,r(guu)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
                     & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
-                    & eqmbcmud  ,lsts      ,i(kmxsed) ,gdp       )
+                    & eqmbcmud  ,lsts      ,gdp       )
           !
           ! z_difu can be called again for correction
           !
@@ -2674,11 +2670,11 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & lsal      ,ltem      ,i(kfs)    ,i(kfu)    ,i(kfv)    , &
                       & r(r1)     ,r(s0)     ,i(kcs)    , &
                       & d(dps)    ,r(gsqs)   ,r(guu)    , &
-                      & r(gvv)    ,r(s1)     ,r(thick)  ,i(kmxsed) ,r(dp)     , &
+                      & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                       & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
                       & r(hv)     ,r(aks)    ,r(sig)    ,r(u1)     ,r(v1)     , &
-                      & sscomp    ,i(kfsed)  ,i(iwrk1)  , &
+                      & sscomp    ,i(iwrk1)  , &
                       & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
                       & i(kcv)    ,icx       ,icy       ,timhr     , &
                       & nto       ,r(volum0) ,r(volum1) ,r(dzs1)   ,r(dzu1)   , &

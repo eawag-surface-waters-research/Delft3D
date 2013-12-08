@@ -14,7 +14,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                 & aak       ,bbk       ,cck       ,bdddx     ,bddx      , &
                 & bdx       ,bux       ,buux      ,buuux     , &
                 & uvdwk     ,vvdwk     ,aakl      ,bbkl      ,cckl      , &
-                & ddkl      ,kmxsed    ,eqmbcsand ,seddif    ,cgc       , &
+                & ddkl      ,eqmbcsand ,seddif    ,cgc       , &
                 & theta     ,wsu       ,wsv       ,xcor      ,ycor      , &
                 & vicuv     ,c         ,tp        ,qxkw      ,qykw      , &
                 & qxkr      ,qykr      ,grmasu    ,grmasv    ,eqmbcmud  , &
@@ -118,7 +118,6 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmin       !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kadu         !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kadv         !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)              :: kmxsed       !  Description and declaration in esm_alloc_int.f90
     logical                                                         :: eqmbcsand    !  Description and declaration in morpar.igs
     logical                                                         :: eqmbcmud     !  Description and declaration in morpar.igs
     logical                                                         :: eulerisoglm  !  Description and declaration in morpar.igs
@@ -308,7 +307,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                         & dtdksi    ,dtdeta    ,aak       ,bbk       ,cck       , &
                         & bdddx     ,bddx      ,bdx       ,bux       ,buux      , &
                         & buuux     ,uvdwk     ,vvdwk     ,areau     ,areav     , &
-                        & aakl      ,bbkl      ,cckl      ,ddkl      ,kmxsed    , &
+                        & aakl      ,bbkl      ,cckl      ,ddkl      , &
                         & eqmbcsand ,eqmbcmud  ,seddif    ,volum0    ,volum1    , &
                         & rscale    ,bruvai    ,gdp       )
              else
@@ -326,7 +325,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                         & dtdksi    ,dtdeta    ,aak       ,bbk       ,cck       , &
                         & bdddx     ,bddx      ,bdx       ,bux       ,buux      , &
                         & buuux     ,uvdwk     ,vvdwk     ,areau     ,areav     , &
-                        & aakl      ,bbkl      ,cckl      ,ddkl      ,kmxsed    , &
+                        & aakl      ,bbkl      ,cckl      ,ddkl      , &
                         & eqmbcsand ,eqmbcmud  ,seddif    ,volum0    ,volum1    , &
                         & rscale    ,bruvai    ,gdp       )
              endif
@@ -441,7 +440,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                     & uvdwk     ,vvdwk     ,areau     ,areav     ,volum0    , &
                     & volum1    ,aakl      ,bbkl      ,cckl      ,ddkl      , &
                     & bruvai    ,stage     ,eqmbcsand ,eqmbcmud  ,sedtyp    , &
-                    & seddif    ,kmxsed    ,gdp       )
+                    & seddif    ,gdp       )
           call timer_stop(timer_tritra_rest, gdp)
        else
        endif
@@ -491,7 +490,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                         & dtdeta    ,dtdksi    ,aak       ,bbk       ,cck       , &
                         & bdddx     ,bddx      ,bdx       ,bux       ,buux      , &
                         & buuux     ,uvdwk     ,vvdwk     ,areav     ,areau     , &
-                        & aakl      ,bbkl      ,cckl      ,ddkl      ,kmxsed    , &
+                        & aakl      ,bbkl      ,cckl      ,ddkl      , &
                         & eqmbcsand ,eqmbcmud  ,seddif    ,volum0    ,volum1    , &
                         & rscale    ,bruvai    ,gdp       )
              else
@@ -509,7 +508,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                         & dtdeta    ,dtdksi    ,aak       ,bbk       ,cck       , &
                         & bdddx     ,bddx      ,bdx       ,bux       ,buux      , &
                         & buuux     ,uvdwk     ,vvdwk     ,areav     ,areau     , &
-                        & aakl      ,bbkl      ,cckl      ,ddkl      ,kmxsed    , &
+                        & aakl      ,bbkl      ,cckl      ,ddkl      , &
                         & eqmbcsand ,eqmbcmud  ,seddif    ,volum0    ,volum1    , &
                         & rscale    ,bruvai    ,gdp       )
              endif
@@ -620,7 +619,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                     & uvdwk     ,vvdwk     ,areav     ,areau     ,volum0    , &
                     & volum1    ,aakl      ,bbkl      ,cckl      ,ddkl      , &
                     & bruvai    ,stage     ,eqmbcsand ,eqmbcmud  ,sedtyp    , &
-                    & seddif    ,kmxsed    ,gdp       )
+                    & seddif    ,gdp       )
           call timer_stop(timer_tritra_rest, gdp)
        else
        endif

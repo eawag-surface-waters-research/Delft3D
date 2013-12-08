@@ -423,7 +423,6 @@ type gd_r_i_ch
        integer(pntrsize) :: kcu        !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kcv        !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfs        !  Description and declaration in esm_alloc_int.f90
-       integer(pntrsize) :: kfsed      !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfu        !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfv        !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kspu       !  Description and declaration in esm_alloc_int.f90

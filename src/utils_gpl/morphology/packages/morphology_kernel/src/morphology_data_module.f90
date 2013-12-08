@@ -483,6 +483,9 @@ type trapar_type
 end type trapar_type
 
 type sedtra_type
+    integer          , dimension(:)      , pointer :: kfsed    !(nc1:nc2)
+    integer          , dimension(:,:)    , pointer :: kmxsed   !(nc1:nc2,lsed)
+    !
     real(fp)         , dimension(:)      , pointer :: bc_mor_array !(lsedtot*2)
     !
     real(fp)         , dimension(:)      , pointer :: dcwwlc   !(0:kmax)
@@ -569,6 +572,9 @@ subroutine initsedtra(sedtra)
 !
 !! executable statements -------------------------------------------------------
 !
+    nullify(sedtra%kfsed)
+    nullify(sedtra%kmxsed)
+    !
     nullify(sedtra%bc_mor_array)
     !
     nullify(sedtra%dcwwlc)
@@ -661,7 +667,10 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
 !
 !! executable statements -------------------------------------------------------
 !
-    allocate(sedtra%bc_mor_array (lsedtot*2), STAT = istat)
+                  allocate(sedtra%kfsed   (nc1:nc2)     , STAT = istat)
+    if (istat==0) allocate(sedtra%kmxsed  (nc1:nc2,lsed), STAT = istat)
+    !
+    if (istat==0) allocate(sedtra%bc_mor_array (lsedtot*2), STAT = istat)
     !
     if (istat==0) allocate(sedtra%dcwwlc  (0:kmax), STAT = istat)
     if (istat==0) allocate(sedtra%epsclc  (0:kmax), STAT = istat)
@@ -721,6 +730,9 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     if (istat==0) allocate(sedtra%fixfac  (nc1:nc2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%taurat  (nc1:nc2,lsedtot), STAT = istat)
     !
+    sedtra%kfsed    = 0
+    sedtra%kmxsed   = 0
+    !
     sedtra%e_scrn   = 0.0_fp
     sedtra%e_scrt   = 0.0_fp
     !
@@ -769,6 +781,9 @@ subroutine clrsedtra(istat, sedtra)
 !
 !! executable statements -------------------------------------------------------
 !
+    if (associated(sedtra%kfsed   ))   deallocate(sedtra%kfsed   , STAT = istat)
+    if (associated(sedtra%kmxsed  ))   deallocate(sedtra%kmxsed  , STAT = istat)
+    !
     if (associated(sedtra%bc_mor_array))   deallocate(sedtra%bc_mor_array, STAT = istat)
     !
     if (associated(sedtra%dcwwlc  ))   deallocate(sedtra%dcwwlc  , STAT = istat)

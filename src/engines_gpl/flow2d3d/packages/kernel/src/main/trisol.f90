@@ -512,13 +512,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: kcu
     integer(pntrsize)                    , pointer :: kcv
     integer(pntrsize)                    , pointer :: kfs
-    integer(pntrsize)                    , pointer :: kfsed
     integer(pntrsize)                    , pointer :: kfu
     integer(pntrsize)                    , pointer :: kfv
     integer(pntrsize)                    , pointer :: kspu
     integer(pntrsize)                    , pointer :: kspv
     integer(pntrsize)                    , pointer :: kstp
-    integer(pntrsize)                    , pointer :: kmxsed
     integer(pntrsize)                    , pointer :: mnbar
     integer(pntrsize)                    , pointer :: mnbnd
     integer(pntrsize)                    , pointer :: mndro
@@ -1076,13 +1074,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     kcu                 => gdp%gdr_i_ch%kcu
     kcv                 => gdp%gdr_i_ch%kcv
     kfs                 => gdp%gdr_i_ch%kfs
-    kfsed               => gdp%gdr_i_ch%kfsed
     kfu                 => gdp%gdr_i_ch%kfu
     kfv                 => gdp%gdr_i_ch%kfv
     kspu                => gdp%gdr_i_ch%kspu
     kspv                => gdp%gdr_i_ch%kspv
     kstp                => gdp%gdr_i_ch%kstp
-    kmxsed              => gdp%gdr_i_ch%kmxsed
     mnbar               => gdp%gdr_i_ch%mnbar
     mnbnd               => gdp%gdr_i_ch%mnbnd
     mndro               => gdp%gdr_i_ch%mndro
@@ -1989,10 +1985,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
                  & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                  & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                 & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
+                 & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                  & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                  & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                 & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
+                 & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                  & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                  & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,gdp       )
@@ -2018,7 +2014,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
                  & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  , &
                  & r(wrkb16) ,r(wrkb17) ,r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  , &
-                 & r(wrkc4)  ,i(kmxsed) ,eqmbcsand ,r(seddif) ,r(cgc)    , &
+                 & r(wrkc4)  ,eqmbcsand ,r(seddif) ,r(cgc)    , &
                  & r(teta)   ,r(wsu)    ,r(wsv)    ,r(xcor)   ,r(ycor)   , &
                  & r(vicuv)  ,r(c)      ,r(tp)     ,r(qxkw)   ,r(qykw)   , &
                  & r(qxkr)   ,r(qykr)   ,r(grmasu) ,r(grmasv) ,eqmbcmud  , &
@@ -2214,11 +2210,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & lsedtot   ,lsal      ,ltem      ,i(kfs)    ,i(kfu)    , &
                     & i(kfv)    ,r(r1)     ,r(s0)     ,i(kcs)    , &
                     & d(dps)    ,r(gsqs)   ,r(guu)    , &
-                    & r(gvv)    ,r(s1)     ,r(thick)  ,i(kmxsed) ,r(dp)     , &
+                    & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                     & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                     & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
                     & r(hv)     ,r(aks)    ,r(sig)    ,r(umor)   ,r(vmor)   , &
-                    & sscomp    ,i(kfsed)  ,i(iwrk1)  , &
+                    & sscomp    ,i(iwrk1)  , &
                     & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,gdp       )
@@ -3054,10 +3050,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
                     & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                     & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                    & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
+                    & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                     & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                    & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
+                    & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                     & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                     & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,gdp       )
@@ -3083,7 +3079,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
                  & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  , &
                  & r(wrkb16) ,r(wrkb17) ,r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  , &
-                 & r(wrkc4)  ,i(kmxsed) ,eqmbcsand ,r(seddif) ,r(cgc)    , &
+                 & r(wrkc4)  ,eqmbcsand ,r(seddif) ,r(cgc)    , &
                  & r(teta)   ,r(wsu)    ,r(wsv)    ,r(xcor)   ,r(ycor)   , &
                  & r(vicuv)  ,r(c)      ,r(tp)     ,r(qxkw)   ,r(qykw)   , &
                  & r(qxkr)   ,r(qykr)   ,r(grmasu) ,r(grmasv) ,eqmbcmud  , &
@@ -3279,11 +3275,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & lsedtot   ,lsal      ,ltem      ,i(kfs)    ,i(kfu)    , &
                     & i(kfv)    ,r(r1)     ,r(s0)     ,i(kcs)    , &
                     & d(dps)    ,r(gsqs)   ,r(guu)    , &
-                    & r(gvv)    ,r(s1)     ,r(thick)  ,i(kmxsed) ,r(dp)     , &
+                    & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                     & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                     & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
                     & r(hv)     ,r(aks)    ,r(sig)    ,r(umor)   ,r(vmor)   , &
-                    & sscomp    ,i(kfsed)  ,i(iwrk1)  , &
+                    & sscomp    ,i(iwrk1)  , &
                     & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,gdp       )

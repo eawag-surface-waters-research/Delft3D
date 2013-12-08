@@ -49,7 +49,7 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
     include 'tri-dyn.igd'
     integer(pntrsize) , pointer :: dps
     integer(pntrsize) , pointer :: s1
-    integer(pntrsize) , pointer :: kfsed
+    integer , dimension(:) , pointer :: kfsed
     integer , pointer :: nmmax
     integer , pointer :: lsedtot
 !
@@ -71,10 +71,10 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
     lsedtot   => gdp%d%lsedtot
     dps       => gdp%gdr_i_ch%dps
     s1        => gdp%gdr_i_ch%s1
-    kfsed     => gdp%gdr_i_ch%kfsed
+    kfsed     => gdp%gderosed%kfsed
     !
     morhr = real(morft*24.0_hp,fp)
     call dredge(nmmax   ,lsedtot ,nst     , &
-              & cdryb   ,d(dps)  ,dbodsd  ,i(kfsed), &
+              & cdryb   ,d(dps)  ,dbodsd  ,kfsed   , &
               & r(s1)   ,timhr   ,morhr   ,gdp     )
 end subroutine dredgedump
