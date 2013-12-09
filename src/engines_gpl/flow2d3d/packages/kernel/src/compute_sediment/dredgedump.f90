@@ -47,11 +47,11 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer(pntrsize) , pointer :: dps
-    integer(pntrsize) , pointer :: s1
-    integer , dimension(:) , pointer :: kfsed
-    integer , pointer :: nmmax
-    integer , pointer :: lsedtot
+    integer(pntrsize)     , pointer :: dps
+    integer(pntrsize)     , pointer :: s1
+    integer , dimension(:), pointer :: kfsed
+    integer               , pointer :: nmmax
+    integer               , pointer :: lsedtot
 !
 ! Global variables
 !
@@ -63,7 +63,7 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
 !
 ! Local variables
 !
-    real(fp)                                                        :: morhr
+    real(fp) :: morhr
 !
 !! executable statements -------------------------------------------------------
 !

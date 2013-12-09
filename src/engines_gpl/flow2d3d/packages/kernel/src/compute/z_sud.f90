@@ -283,7 +283,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     itr     = 0
     flood   = .false.
     !
-    ! Compute depth averaged velocities	UMEAN and total depths in velocity points HU
+    ! Compute depth averaged velocities UMEAN and total depths in velocity points HU
     !
     ! This is necessary because umean and hu are computed based on the velocities near the free surface only
     ! in Z_CHECKU (for flooding purposes) 

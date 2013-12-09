@@ -702,10 +702,10 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                          ffloc0 = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
                          ffloc  = (ffloc0-1.0_fp) * min(1.0_fp,salint/salmax(l)) + 1.0_fp
                          !
-			             ! Calibration parameter for flocculation
-			             !
-			             ffloc = ffloc * gamflc(l)
-			             !
+                         ! Calibration parameter for flocculation
+                         !
+                         ffloc = ffloc * gamflc(l)
+                         !
                          ffloc  = max(min(ffloc , 10.0_fp) , 1.0_fp)
                       endif
                    else
