@@ -96,8 +96,7 @@ integer, parameter :: timer_trisol              = timer_postpr + 1
 integer, parameter :: timer_tricom_rest         = timer_trisol + 1
 ! *** in trisol ***
 integer, parameter :: timer_trisol_ini          = timer_tricom_rest + 1
-integer, parameter :: timer_trisol_gtd          = timer_trisol_ini + 1
-integer, parameter :: timer_trisol_fluidmud     = timer_trisol_gtd + 1
+integer, parameter :: timer_trisol_fluidmud     = timer_trisol_ini + 1
 integer, parameter :: timer_nodal_factor        = timer_trisol_fluidmud + 1
 integer, parameter :: timer_incmeteo            = timer_nodal_factor + 1
 integer, parameter :: timer_incbc               = timer_incmeteo + 1
@@ -281,7 +280,6 @@ subroutine timers_init (gdp)
     gdp%gdtimers%names(timer_tricom_rest)      = 'Tricom_rest'
     ! *** in trisol ***
     gdp%gdtimers%names(timer_trisol_ini)       = 'trisol_ini'
-    gdp%gdtimers%names(timer_trisol_gtd)       = 'trisol_gettabledata'
     gdp%gdtimers%names(timer_trisol_fluidmud)  = 'trisol_fluidmud'
     gdp%gdtimers%names(timer_nodal_factor)     = 'nodal_factor'
     gdp%gdtimers%names(timer_incmeteo)         = 'incmeteo'

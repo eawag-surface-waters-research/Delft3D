@@ -143,9 +143,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer                              , pointer :: itdiag
     integer                              , pointer :: julday
     integer                              , pointer :: ntstep
-    real(fp)              , dimension(:) , pointer :: xx
     logical                              , pointer :: densin
-    real(fp)                             , pointer :: hdt
+    real(fp)                             , pointer :: dtsec
     character(6)                         , pointer :: momsol
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
@@ -522,7 +521,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer      :: nmaxddb
     integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters
     integer      :: ifirst_dens !  Flag to initialize the water density array
-    real(fp)     :: timest
     logical      :: sscomp    
     logical      :: success      
     character(8) :: stage       ! First or second half time step
@@ -615,9 +613,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     itdiag              => gdp%gdinttim%itdiag
     julday              => gdp%gdinttim%julday
     ntstep              => gdp%gdinttim%ntstep
-    xx                  => gdp%gdmorpar%xx
     densin              => gdp%gdmorpar%densin
-    hdt                 => gdp%gdnumeco%hdt
+    dtsec               => gdp%gdtricom%dtsec
     momsol              => gdp%gdnumeco%momsol
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
@@ -1034,7 +1031,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     ! (see routine CHKZMOD)!!!
     !
     if (rtcact) then
-       call rtc_comm_get(((nst*2)+2)*hdt, r(cbuvrt), nsluv, gdp)
+       call rtc_comm_get((nst+1)*dtsec, r(cbuvrt), nsluv, gdp)
     endif
     if (kc > 0 .or. nrcmp > 0) then
        call timer_start(timer_nodal_factor, gdp)
@@ -1529,7 +1526,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                                      & i(kfu)   ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
                                      & i(kfv)   ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
                                      & r(r1)    ,r(s0)      ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                     & hdt      ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
+                                     & dtsec    ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
                                      & r(vmean) ,gdp        )
           endif
           !
@@ -1738,7 +1735,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                      & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
                      & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,gdp       )
+                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,dtsec     ,1         , &
+                     & gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
           call timer_start(timer_difu, gdp)
@@ -1767,7 +1765,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                     & r(guu)    ,r(gvv)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
                     & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
                     & eqmbcmud  ,lsts      ,gdp       )    
-          timest = 2.0_fp*hdt
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
                   & lstsci    ,r(r0)     ,r(r1)     ,r(qxk)    ,r(qyk)    , &
                   & r(u1)     ,r(v1)     ,&
@@ -1776,7 +1773,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                   & i(kfu)    ,i(kfuz0)  ,i(kfv)    ,i(kfvz0)  , &
                   & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  , &
                   & i(kfumn0) ,i(kfumx0) ,i(kfvmn0) ,i(kfvmx0) ,r(sigdif) , &
-                  & timest    ,icx       ,icy       ,gdp       )
+                  & dtsec     ,icx       ,icy       ,gdp       )
           call timer_stop(timer_tritra, gdp)
           call timer_stop(timer_difu, gdp)
        endif
@@ -1943,7 +1940,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                       & i(kcv)    ,icx       ,icy       ,timhr     , &
                       & nto       ,r(volum0) ,r(volum1) ,r(dzs1)   ,r(dzu1)   , &
                       & r(dzv1)   ,i(kfsmin) ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                      & i(kfvmax) ,gdp       )
+                      & i(kfvmax) ,dtsec     ,gdp       )
           call timer_stop(timer_bott3d, gdp)
           if (bedupd) then
              ! icx = nmaxddb

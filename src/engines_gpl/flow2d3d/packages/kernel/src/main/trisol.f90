@@ -157,19 +157,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                              , pointer :: itdiag
     integer                              , pointer :: julday
     integer                              , pointer :: ntstep
-    real(fp)                             , pointer :: morfac
-    real(fp)                             , pointer :: sus
-    real(fp)                             , pointer :: bed
     logical                              , pointer :: bedupd
-    integer                              , pointer :: morfacpar
-    integer                              , pointer :: morfacrec
-    integer                              , pointer :: morfactable
-    type (handletype)                    , pointer :: morfacfile
-    real(fp)              , dimension(:) , pointer :: xx
     logical                              , pointer :: eqmbcsand
     logical                              , pointer :: eqmbcmud
     logical                              , pointer :: densin
-    logical                              , pointer :: varyingmorfac
     real(fp)                             , pointer :: hdt
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
@@ -615,7 +606,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)       :: vmor
     logical                 :: sscomp
     logical                 :: success
-    real(fp), dimension(1)  :: value
     character(8)            :: stage       ! First or second half time step 
 !
 !! executable statements -------------------------------------------------------
@@ -719,19 +709,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     itdiag              => gdp%gdinttim%itdiag
     julday              => gdp%gdinttim%julday
     ntstep              => gdp%gdinttim%ntstep
-    morfac              => gdp%gdmorpar%morfac
-    sus                 => gdp%gdmorpar%sus
-    bed                 => gdp%gdmorpar%bed
     bedupd              => gdp%gdmorpar%bedupd
-    morfacpar           => gdp%gdmorpar%morfacpar
-    morfacrec           => gdp%gdmorpar%morfacrec
-    morfactable         => gdp%gdmorpar%morfactable
-    morfacfile          => gdp%gdmorpar%morfacfile
-    xx                  => gdp%gdmorpar%xx
     eqmbcsand           => gdp%gdmorpar%eqmbcsand
     eqmbcmud            => gdp%gdmorpar%eqmbcmud
     densin              => gdp%gdmorpar%densin
-    varyingmorfac       => gdp%gdmorpar%varyingmorfac
     eulerisoglm         => gdp%gdmorpar%eulerisoglm
     hdt                 => gdp%gdnumeco%hdt
     rhow                => gdp%gdphysco%rhow
@@ -1240,18 +1221,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     ! Set time dependent data
     !
-    if (varyingmorfac) then
-       !
-       ! Varying MorFac
-       ! MorFac is only updated at the beginning of the FIRST half timestep
-       !
-       call timer_start(timer_trisol_gtd, gdp)
-       call flw_gettabledata(morfacfile , morfactable, &
-              & morfacpar  , 1          , morfacrec  , &
-              & value      , timhr      , julday     , gdp )
-       morfac = value(1)
-       call timer_stop(timer_trisol_gtd, gdp)
-    endif
     call timer_start(timer_trisol_fluidmud, gdp)
     if (flmd2l) then
        !
@@ -1991,7 +1960,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                  & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
-                 & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,gdp       )
+                 & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
+                 & 1         ,gdp       )
           call timer_stop(timer_erosed, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
@@ -2217,7 +2187,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & sscomp    ,i(iwrk1)  , &
                     & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
-                    & nto       ,r(volum0) ,r(volum1) ,gdp       )
+                    & nto       ,r(volum0) ,r(volum1) ,hdt       , gdp       )
           if (bedupd) then
                 !
                 ! Recalculate DPU/DPV (depth at velocity points)
@@ -3056,7 +3026,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                     & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
-                    & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,gdp       )
+                    & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
+                    & 2         ,gdp       )
           call timer_stop(timer_erosed, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
@@ -3282,7 +3253,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & sscomp    ,i(iwrk1)  , &
                     & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
-                    & nto       ,r(volum0) ,r(volum1) ,gdp       )
+                    & nto       ,r(volum0) ,r(volum1) ,hdt       ,gdp       )
           if (bedupd) then
                 !
                 ! Recalculate DPU/DPV (depth at velocity points)

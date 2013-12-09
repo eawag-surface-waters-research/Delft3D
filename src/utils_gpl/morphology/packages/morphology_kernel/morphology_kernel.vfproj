@@ -84,5 +84,6 @@
 		<File RelativePath=".\src\tranb4.f90"/>
 		<File RelativePath=".\src\tranb5.f90"/>
 		<File RelativePath=".\src\tranb7.f90"/>
+		<File RelativePath=".\src\updmorfac.f90"/>
 		<File RelativePath=".\src\wave.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

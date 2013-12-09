@@ -4510,6 +4510,7 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/tranb3.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/tranb4.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/tranb5.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/tranb7.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/updmorfac.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/wave.f90 -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c.vcproj -text

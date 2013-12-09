@@ -63,6 +63,7 @@ libMorphologyKernel_la_SOURCES = \
          tranb4.f90 \
          tranb5.f90 \
          tranb7.f90 \
+         updmorfac.f90 \
          wave.f90
 
 #-------------------------------------------------------------------------------

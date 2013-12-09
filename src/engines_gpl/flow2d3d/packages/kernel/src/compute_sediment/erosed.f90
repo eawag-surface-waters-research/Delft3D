@@ -11,7 +11,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 & teta      ,rlabda    ,aks       ,saleqs    , &
                 & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
                 & hv        ,rca       ,dss       ,ubot      ,rtur0     , &
-                & temeqs    ,gsqs      ,guu       ,gvv       ,gdp       )
+                & temeqs    ,gsqs      ,guu       ,gvv       ,dt        , &
+                & icall     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -108,7 +109,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: nxx
     real(fp)         , dimension(:)      , pointer :: xx
     real(fp)                             , pointer :: morfac
-    real(fp)                             , pointer :: hdt
+    logical                              , pointer :: varyingmorfac
     logical                              , pointer :: multi
     logical                              , pointer :: wave
     real(fp)                             , pointer :: eps
@@ -126,7 +127,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: fixfac
     real(fp)         , dimension(:,:)    , pointer :: frac
     integer          , dimension(:)      , pointer :: kfsed
-    integer , dimension(:,:)             , pointer :: kmxsed
+    integer          , dimension(:,:)    , pointer :: kmxsed
     real(fp)         , dimension(:)      , pointer :: mudfrac
     real(fp)         , dimension(:)      , pointer :: sandfrac
     real(fp)         , dimension(:,:)    , pointer :: hidexp
@@ -174,6 +175,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     logical                              , pointer :: epspar
     logical                              , pointer :: ubot_from_com
     real(fp)                             , pointer :: timsec
+    real(fp)                             , pointer :: timhr
+    integer                              , pointer :: julday
     real(fp)                             , pointer :: camax
     real(fp)                             , pointer :: aksfac
     real(fp)                             , pointer :: rdc
@@ -207,6 +210,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 !
 ! Global variables
 !
+    integer                                                   , intent(in)  :: icall   !  Number of call during time step (1st or 2nd)
     integer                                                   , intent(in)  :: icx     !  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
     integer                                                   , intent(in)  :: icy     !  Increment in the Y-dir. (see ICX)
     integer                                                   , intent(in)  :: kmax    !  Description and declaration in esm_alloc_int.f90
@@ -226,6 +230,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
+    real(fp)                                                  , intent(in)  :: dt
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: aks     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr    !  Description and declaration in esm_alloc_real.f90
@@ -310,7 +315,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: difbot
     real(fp)                      :: drho
     real(fp)                      :: dstari
-    real(fp)                      :: dt
+    real(fp)                      :: dtmor
     real(fp)                      :: ee
     real(fp)                      :: fi
     real(fp)                      :: fracf
@@ -320,7 +325,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: grlyrs
     real(fp)                      :: h0
     real(fp)                      :: h1
-     real(fp)                      :: rc
+    real(fp)                      :: rc
     real(fp)                      :: mfltot
     real(fp)                      :: sag
     real(fp)                      :: salinity
@@ -411,6 +416,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     mwwjhe              => gdp%gdmorpar%mwwjhe
     ffthresh            => gdp%gdmorpar%thresh
     morfac              => gdp%gdmorpar%morfac
+    varyingmorfac       => gdp%gdmorpar%varyingmorfac
     ag                  => gdp%gdphysco%ag
     vicmol              => gdp%gdphysco%vicmol
     gammax              => gdp%gdnumeco%gammax
@@ -477,6 +483,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     vicmol              => gdp%gdphysco%vicmol
     scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
+    timhr               => gdp%gdinttim%timhr
+    julday              => gdp%gdinttim%julday
     camax               => gdp%gdmorpar%camax
     aksfac              => gdp%gdmorpar%aksfac
     rdc                 => gdp%gdmorpar%rdc
@@ -497,9 +505,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     kssand              => gdp%gdsedpar%kssand
     oldmudfrac          => gdp%gdmorpar%oldmudfrac
     flmd2l              => gdp%gdprocs%flmd2l
-    hdt                 => gdp%gdnumeco%hdt
     depfac              => gdp%gdmorpar%flufflyr%depfac
     mfluff              => gdp%gdmorpar%flufflyr%mfluff
+    !
+    if (varyingmorfac .and. icall==1) then
+       call updmorfac(gdp%gdmorpar, timhr, julday)
+    endif
     !
     nm_pos =  1
     if (scour) then
@@ -602,7 +613,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! user specified threshold. Also get maximum erosion source SRCMAX
     ! (used for cohesive sediments).
     !
-    dt = hdt * morfac
+    dtmor = dt * morfac
     !
     call getfixfac(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot, &
                  & nmmax       , fixfac    , ffthresh  )
@@ -624,7 +635,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! If user-specified THRESH is <= 0.0, the erosion flux is effectively not limited by FIXFAC since ffthresh is 1e-10
                 ! but by the amount of sediment that is available
                 !
-                srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dt
+                srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dtmor
              enddo
           endif
           !
@@ -745,9 +756,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           ! 3D CASE
           !
           kbed    = kmax
-
        else
-           kbed    = 1
+          kbed    = 1
        endif
        !
        ! Compute depth-averaged velocity components at cell centre
@@ -1241,7 +1251,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! Note: previous implementation forgot to multiply source/
     !       sink terms with the thickness for the 2Dh case
     !
-    call   red_soursin (nmmax     ,kmax      ,thick     ,kmxsed    , &
+    call   red_soursin (nmmax     ,kmax      ,thick     , &
                       & lsal      ,ltem      ,lsed      ,lsedtot   , &
                       & dps       ,s0        ,s1        ,r0        , &
                       & rsedeq    ,nst       , &

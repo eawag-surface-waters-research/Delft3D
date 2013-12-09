@@ -160,7 +160,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer                              , pointer :: itdiag
     integer                              , pointer :: julday
     integer                              , pointer :: ntstep
-    real(fp)              , dimension(:) , pointer :: xx
     logical                              , pointer :: densin
     real(fp)                             , pointer :: hdt
     real(fp)                             , pointer :: rhow
@@ -638,7 +637,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     itdiag              => gdp%gdinttim%itdiag
     julday              => gdp%gdinttim%julday
     ntstep              => gdp%gdinttim%ntstep
-    xx                  => gdp%gdmorpar%xx
     densin              => gdp%gdmorpar%densin
     hdt                 => gdp%gdnumeco%hdt
     rhow                => gdp%gdphysco%rhow
@@ -1618,11 +1616,12 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                      & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
                      & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
-                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
+                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                      & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
                      & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,gdp       )
+                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,hdt       ,1         , &
+                     & gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
           call timer_start(timer_difu, gdp)
@@ -1764,7 +1763,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & i(kcv)    ,icx       ,icy       ,timhr     , &
                       & nto       ,r(volum0) ,r(volum1) ,r(dzs1)   ,r(dzu1)   , &
                       & r(dzv1)   ,i(kfsmin) ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                      & i(kfvmax) ,gdp       )
+                      & i(kfvmax) ,hdt       ,gdp       )
           call timer_stop(timer_bott3d, gdp)
           if (bedupd) then
              ! Check for drying in waterlevel points in the X-direction
@@ -2398,11 +2397,12 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                      & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
                      & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
-                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
+                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                      & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
                      & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,gdp       )
+                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,hdt       ,2         , &
+                     & gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
           call timer_start(timer_difu, gdp)
@@ -2679,7 +2679,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & i(kcv)    ,icx       ,icy       ,timhr     , &
                       & nto       ,r(volum0) ,r(volum1) ,r(dzs1)   ,r(dzu1)   , &
                       & r(dzv1)   ,i(kfsmin) ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                      & i(kfvmax) ,gdp       )
+                      & i(kfvmax) ,hdt       ,gdp       )
           call timer_stop(timer_bott3d, gdp)
           if (bedupd) then
              !icx = nmaxddb

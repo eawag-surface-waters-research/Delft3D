@@ -9,7 +9,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 & sscomp    ,kcsbot    , &
                 & guv       ,gvu       ,rca       ,kcu       , &
                 & kcv       ,icx       ,icy       ,timhr     , &
-                & nto       ,volum0    ,volum1    ,gdp       )
+                & nto       ,volum0    ,volum1    ,dt        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -92,7 +92,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     logical                              , pointer :: cmpupd
     logical                              , pointer :: neglectentrainment
     logical                              , pointer :: multi
-    real(fp)                             , pointer :: hdt
     logical                              , pointer :: wind
     logical                              , pointer :: temp
     logical                              , pointer :: const
@@ -158,6 +157,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     logical                                            , intent(in)  :: sscomp
+    real(fp)                                           , intent(in)  :: dt
     real(fp)                                                         :: timhr
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)   , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: depchg !  Description and declaration in esm_alloc_real.f90
@@ -236,7 +236,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp) :: gsqsmin
     real(fp) :: gsqsinv
     real(fp) :: h1
-    real(fp) :: hdtmor
+    real(fp) :: dtmor
     real(fp) :: htdif
     real(fp) :: rate
     real(fp) :: r1avg
@@ -269,7 +269,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     cmpupd              => gdp%gdmorpar%cmpupd
     neglectentrainment  => gdp%gdmorpar%neglectentrainment
     multi               => gdp%gdmorpar%multi
-    hdt                 => gdp%gdnumeco%hdt
     wind                => gdp%gdprocs%wind
     temp                => gdp%gdprocs%temp
     const               => gdp%gdprocs%const
@@ -313,7 +312,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     !
     lstart  = max(lsal, ltem)
     bedload = .false.
-    hdtmor  = hdt*morfac
+    dtmor   = dt*morfac
     nm_pos  = 1
     !
     ! parallel case: exchange arrays in the overlapping regions
@@ -597,9 +596,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     if (nst >= itmor) then
        !
        ! Increment morphological time
-       ! Note: hdt in seconds, morft in days!
+       ! Note: dtmor in seconds, morft in days!
        !
-       morft = morft + hdtmor/86400.0_fp
+       morft = morft + dtmor/86400.0_fp
        !
        ! Bed boundary conditions: transport condition
        !
@@ -762,8 +761,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    !
                    if (iflufflyr>0) then
                       mfluff(l, nm) = mfluff(l, nm) + &
-                                    & hdt*(  sinkf(l, nm)*r1(nm, k, ll)*thick1   &
-                                    &      - sourf(l, nm)              *thick0  )
+                                    & dt*(  sinkf(l, nm)*r1(nm, k, ll)*thick1   &
+                                    &     - sourf(l, nm)              *thick0  )
                    endif
                    !
                    ! add suspended transport correction vector
@@ -795,7 +794,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 endif
              endif
              !
-             dsdnm = (trndiv+sedflx-eroflx) * hdt * morfac
+             dsdnm = (trndiv+sedflx-eroflx) * dtmor
              !
              ! Warn if bottom changes are very large,
              ! depth change NOT LIMITED
@@ -830,7 +829,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           write (lundia,'(12x,2(a,i0))') 'Total number of Bed change messages for timestep ',ntstep,' : ',bedchangemesscount
        endif
        !
-       call fluff_burial(gdp%gdmorpar%flufflyr, dbodsd, lsed, lsedtot, gdp%d%nmlb, gdp%d%nmub, hdt, morfac)
+       call fluff_burial(gdp%gdmorpar%flufflyr, dbodsd, lsed, lsedtot, gdp%d%nmlb, gdp%d%nmub, dt, morfac)
        !
        nm_pos = 2
        call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
@@ -934,28 +933,28 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       dv             = thet*fixfac(ndm, l)*frac(ndm, l)
                       dbodsd(l, ndm) = dbodsd(l, ndm) - dv/gsqs(ndm)
                       dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                      sbvv(ndm, l)   = sbvv(ndm, l) + dv/(hdt*morfac*gvv(ndm))
+                      sbvv(ndm, l)   = sbvv(ndm, l) + dv/(dtmor*gvv(ndm))
                    endif
                    !
                    if (from_nmd) then
                       dv             = thet*fixfac(nmd, l)*frac(nmd, l)
                       dbodsd(l, nmd) = dbodsd(l, nmd) - dv/gsqs(nmd)
                       dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                      sbuu(nmd, l)   = sbuu(nmd, l) + dv/(hdt*morfac*guu(nmd))
+                      sbuu(nmd, l)   = sbuu(nmd, l) + dv/(dtmor*guu(nmd))
                    endif
                    !
                    if (from_nmu) then
                       dv             = thet*fixfac(nmu, l)*frac(nmu, l)
                       dbodsd(l, nmu) = dbodsd(l, nmu) - dv/gsqs(nmu)
                       dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                      sbuu(nm, l)    = sbuu(nm, l) - dv/(hdt*morfac*guu(nm))
+                      sbuu(nm, l)    = sbuu(nm, l) - dv/(dtmor*guu(nm))
                    endif
                    !
                    if (from_num) then
                       dv = thet*fixfac(num, l)*frac(num, l)
                       dbodsd(l, num) = dbodsd(l, num) - dv/gsqs(num)
                       dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                      sbvv(nm, l)    = sbvv(nm, l) - dv/(hdt*morfac*gvv(nm))
+                      sbvv(nm, l)    = sbvv(nm, l) - dv/(dtmor*gvv(nm))
                    endif
                 enddo ! l
              endif    ! totfixfrac > 1.0e-7
@@ -992,14 +991,14 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        !
        do l = 1, lsedtot
           do nm = 1, nmmax
-             sbuuc(nm, l) = sbuuc(nm, l) + sbuu(nm, l) * hdtmor
-             sbvvc(nm, l) = sbvvc(nm, l) + sbvv(nm, l) * hdtmor
+             sbuuc(nm, l) = sbuuc(nm, l) + sbuu(nm, l) * dtmor
+             sbvvc(nm, l) = sbvvc(nm, l) + sbvv(nm, l) * dtmor
           enddo
        enddo
        do l = 1, lsed
           do nm = 1, nmmax
-             ssuuc(nm, l) = ssuuc(nm, l) + ssuu(nm, l) * hdtmor
-             ssvvc(nm, l) = ssvvc(nm, l) + ssvv(nm, l) * hdtmor
+             ssuuc(nm, l) = ssuuc(nm, l) + ssuu(nm, l) * dtmor
+             ssvvc(nm, l) = ssvvc(nm, l) + ssvv(nm, l) * dtmor
           enddo
        enddo
        !
@@ -1027,7 +1026,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           else
              call writemessages(gdp%messages, lundia)
           endif
-          call lyrdiffusion(gdp%gdmorlyr, hdtmor)
+          call lyrdiffusion(gdp%gdmorlyr, dtmor)
           !
           ! Apply composition boundary conditions
           !
@@ -1135,7 +1134,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                         & alfa_dist * (bc_mor_array(2)-bc_mor_array(1))
                 endif
                 !
-                depchg(nm) = depchg(nm) - rate * alfa_mag * hdtmor
+                depchg(nm) = depchg(nm) - rate * alfa_mag * dtmor
              end select
           enddo ! ib (boundary point)
        enddo    ! jb (open boundary)
