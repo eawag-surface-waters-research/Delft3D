@@ -35,6 +35,8 @@ libMorphologyKernel_la_SOURCES = \
          calseddf2004.f90 \
          compdiam.f90 \
          comphidexp.f90 \
+         compbsskin.f90 \
+         compsandfrac.f90 \
          eqtran.f90 \
          erosilt.f90 \
          factor3d2d.f90 \

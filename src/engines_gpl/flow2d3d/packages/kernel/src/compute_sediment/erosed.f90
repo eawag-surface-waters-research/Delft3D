@@ -320,7 +320,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: fi
     real(fp)                      :: fracf
     real(fp)                      :: grkg
-    real(fp)                      :: grm2tot
     real(fp)                      :: grm2
     real(fp)                      :: grlyrs
     real(fp)                      :: h0
@@ -822,7 +821,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           call shearx(tauadd, nm, gdp)
           taub = sqrt(taub**2 + tauadd**2)
           !
-          tauc = rhowat(nm,kmax)*ustarc**2
+          tauc = rhowat(nm,kbed)*ustarc**2
           tauc = sqrt(tauc**2 + tauadd**2)
           ustarc = sqrt(tauc/rhowat(nm,kbed))
        else
@@ -925,7 +924,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_USTAR) = real(ustarc         ,hp)
        !
        if (max_integers < MAX_IP) then
-          write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
+          write(errmsg,'(a)') 'Insufficient space to pass integer values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
@@ -934,7 +933,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_integers(IP_M    ) = m
        !
        if (max_strings < MAX_SP) then
-          write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
+          write(errmsg,'(a)') 'Insufficient space to pass strings to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
@@ -1106,7 +1105,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_DSTAR) = real(dstar(l),hp)
           dll_reals(RP_SETVL) = real(twsk    ,hp) ! Vertical velocity near bedlevel
           par(1,l) = ag
-          par(2,l) = rhowat(nm,kmax) ! rhow
+          par(2,l) = rhowat(nm,kbed) ! rhow
           par(3,l) = rhosol(l)
           par(4,l) = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
           par(5,l) = 1.0E-6     ! rnu    from md-tran.*

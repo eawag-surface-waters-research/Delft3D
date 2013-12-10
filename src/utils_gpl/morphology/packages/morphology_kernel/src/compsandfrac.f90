@@ -40,8 +40,6 @@ subroutine compsandfrac(frac      ,seddm     ,nmmax     ,lsedtot   , &
 !!--declarations----------------------------------------------------------------
     use precision
     !
-    use globaldata
-    !
     implicit none
 !
 ! Parameters

@@ -1011,8 +1011,6 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/adjust_bedload.f90
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/avalan.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bndmorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bott3d.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compbsskin.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compsandfrac.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compthick.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredgedump.f90 -text
@@ -4478,8 +4476,10 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/bedtr1993.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/bedtr2004.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/calseddf1993.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/calseddf2004.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/compbsskin.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/compdiam.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/comphidexp.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/compsandfrac.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/eqtran.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/erosilt.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/factor3d2d.f90 -text

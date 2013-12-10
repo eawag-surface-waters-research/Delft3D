@@ -52,8 +52,10 @@
 		<File RelativePath=".\src\bedtr2004.f90"/>
 		<File RelativePath=".\src\calseddf1993.f90"/>
 		<File RelativePath=".\src\calseddf2004.f90"/>
+		<File RelativePath=".\src\compbsskin.f90"/>
 		<File RelativePath=".\src\compdiam.f90"/>
 		<File RelativePath=".\src\comphidexp.f90"/>
+		<File RelativePath=".\src\compsandfrac.f90"/>
 		<File RelativePath=".\src\eqtran.f90"/>
 		<File RelativePath=".\src\erosilt.f90"/>
 		<File RelativePath=".\src\factor3d2d.f90"/>

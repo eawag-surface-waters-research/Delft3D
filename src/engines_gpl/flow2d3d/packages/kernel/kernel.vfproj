@@ -205,8 +205,6 @@
 		<File RelativePath="src\compute_sediment\avalan.f90"/>
 		<File RelativePath="src\compute_sediment\bndmorlyr.f90"/>
 		<File RelativePath="src\compute_sediment\bott3d.f90"/>
-		<File RelativePath="src\compute_sediment\compbsskin.f90"/>
-		<File RelativePath="src\compute_sediment\compsandfrac.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
 		<File RelativePath="src\compute_sediment\dredge.f90"/>
 		<File RelativePath="src\compute_sediment\dredgedump.f90">
@@ -445,9 +443,9 @@
 		<File RelativePath="src\timedep\updbcq.f90"/>
 		<File RelativePath="src\timedep\updbct.f90"/>
 		<File RelativePath="src\timedep\upddis.f90"/>
-		<File RelativePath="src\timedep\updveg3d.f90"/>
 		<File RelativePath="src\timedep\updeva.f90"/>
 		<File RelativePath="src\timedep\updtem.f90"/>
+		<File RelativePath="src\timedep\updveg3d.f90"/>
 		<File RelativePath="src\timedep\wetdis.f90"/>
 		<File RelativePath="src\timedep\windtogridc.f90"/>
 		<File RelativePath="src\timedep\windtostress.f90"/></Filter></Filter></Files>

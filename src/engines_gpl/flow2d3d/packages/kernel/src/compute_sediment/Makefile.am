@@ -35,8 +35,6 @@ libKernelComputeSediment_la_SOURCES = \
          dredge.f90 \
          bndmorlyr.f90 \
          bott3d.f90 \
-         compbsskin.f90 \
-         compsandfrac.f90 \
          compthick.f90 \
          dredgedump.f90 \
          dwnvel.f90 \
