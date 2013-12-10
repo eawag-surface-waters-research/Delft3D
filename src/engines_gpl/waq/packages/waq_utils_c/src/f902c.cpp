@@ -149,6 +149,8 @@ long STDCALL PERFORM_FUNCTION(long  * sharedDLLHandle ,
   char * fun_name;
   SharedDLL * sharedDLL = (SharedDLL *) (*sharedDLLHandle);
 
+  if ( sharedDLL != NULL )
+  {
   fun_name = strFcpy(function, length_function);
   RemoveTrailingBlanksXX(fun_name);
 
@@ -166,7 +168,7 @@ long STDCALL PERFORM_FUNCTION(long  * sharedDLLHandle ,
                       iknmrk  , noq1   , noq2   , noq3   , noq4   );
   }
   free(fun_name); fun_name = NULL;
-
+  }
   return error;
 }
 

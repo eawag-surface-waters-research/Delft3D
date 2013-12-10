@@ -464,8 +464,9 @@
      &                             noq3   , noq4   )
             if ( ierror .ne. 0 ) then
                call getmlu(lunrep)
-               write(*,*) 'ERROR : requested module not in process library DLL'
-               write(*,*) 'module: ', pronam
+               write(*,*) 'ERROR     : requested module not in process library DLL'
+               write(*,*) 'module    : ', pronam
+               write(*,*) 'dll handle: ', dll_opb
                write(lunrep,*) 'ERROR     : requested module not in process library DLL'
                write(lunrep,*) 'module    : ', pronam
                write(lunrep,*) 'dll handle: ', dll_opb

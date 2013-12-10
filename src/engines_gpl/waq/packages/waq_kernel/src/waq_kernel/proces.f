@@ -249,8 +249,10 @@ C
          if ( ierror .ne. 0 .and. l_stop ) then
             write(*,*) 'ERROR : opening process library DLL'
             write(*,*) 'DLL   : ',trim(shared_dll)
+            write(*,*) 'dll handle: ', dll_opb
             write(lunrep,*) 'ERROR : opening process library DLL'
             write(lunrep,*) 'DLL   : ',trim(shared_dll)
+            write(lunrep,*) 'dll handle: ', dll_opb
             call srstop(1)
          endif
          ifirst = 0
