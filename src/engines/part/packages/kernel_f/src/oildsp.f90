@@ -38,7 +38,7 @@ module oildsp_mod
                             ypart   , zpart   , za      , locdep  , dps     ,    &
                             tcktot  , substi  , hmin    , npmax   , rhow    ,    &
                             amassd  , ioptrad , ndisapp , idisset , tydisp  ,    &
-                            efdisp  , fidisp  , nrowsmax )
+                            efdisp  , xpoldis , ypoldis , nrowsdis )
 
       use precision
       use typos
@@ -96,8 +96,9 @@ module oildsp_mod
       integer  ( ip), pointer       :: idisset(:)
       integer  ( ip), pointer       :: tydisp (:)
       real     ( rp), pointer       :: efdisp (:)
-      character( 256),pointer       :: fidisp (:)
-      integer  ( ip), intent(in   ) :: nrowsmax 
+      real     ( sp), pointer       :: xpoldis (:,:)
+      real     ( sp), pointer       :: ypoldis (:,:)
+      integer  ( ip), pointer       :: nrowsdis (:)
 
       fstick = 0.0
       radius = 0.0

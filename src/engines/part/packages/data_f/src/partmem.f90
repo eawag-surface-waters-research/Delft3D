@@ -98,6 +98,7 @@ module partmem
       real     ( rp)           :: rhow
       integer  ( ip)           :: stickdf
       integer  ( ip)           :: ndisapp
+      integer  ( ip)           :: nboomint
       integer  ( ip)           :: ini_opt
       character(256)           :: ini_file
       character(256)           :: idp_file
@@ -172,6 +173,16 @@ module partmem
       integer  ( ip), pointer  :: tydisp (:)
       real     ( rp), pointer  :: efdisp (:)
       character( 256),pointer  :: fidisp (:)
+      real     ( sp), pointer  :: xpoldis (:,:)
+      real     ( sp), pointer  :: ypoldis (:,:)
+      integer  ( ip), pointer  :: nrowsdis (:)
+      integer  ( ip), pointer  :: iboomset(:)
+      integer  ( ip), pointer  :: tyboom (:)
+      real     ( sp), pointer  :: efboom (:,:)
+      real     ( sp), pointer  :: xpolboom (:,:)
+      real     ( sp), pointer  :: ypolboom (:,:)
+      integer  ( ip), pointer  :: nrowsboom (:)
+      character( 256),pointer  :: fiboom (:)
       character( 20), pointer  :: nmdyer (:)
       integer  ( ip), pointer  :: iwtime (:)
       real     ( rp), pointer  :: xwaste (:)

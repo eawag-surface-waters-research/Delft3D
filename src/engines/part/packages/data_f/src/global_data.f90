@@ -42,6 +42,7 @@ module global_pointers
       character     (len=40   ) ,  pointer, dimension(:       ) :: title
       character     (len=256  ) ,  pointer, dimension(:       ) :: finud
       character     (len=256  ) ,  pointer, dimension(:       ) :: fidisp
+      character     (len=256  ) ,  pointer, dimension(:       ) :: fiboom
 
       integer       (sp       ) ,  pointer, dimension(:       ) :: floil
       integer       (sp       ) ,  pointer, dimension(:       ) :: ictmax
@@ -87,6 +88,10 @@ module global_pointers
       integer       (sp       ) ,  pointer, dimension(:       ) :: flowpnt
       integer       (sp       ) ,  pointer, dimension(:       ) :: tydisp
       integer       (sp       ) ,  pointer, dimension(:       ) :: idisset
+      integer       (sp       ) ,  pointer, dimension(:       ) :: nrowsdis
+      integer       (sp       ) ,  pointer, dimension(:       ) :: tyboom
+      integer       (sp       ) ,  pointer, dimension(:       ) :: iboomset
+      integer       (sp       ) ,  pointer, dimension(:       ) :: nrowsboom
 
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: elt_dims
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: ibuff
@@ -158,7 +163,6 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:       ) :: zlevel
       real          (sp       ) ,  pointer, dimension(:       ) :: zpart
       real          (sp       ) ,  pointer, dimension(:       ) :: zwaste
-      real          (sp       ) ,  pointer, dimension(:       ) :: efdisp
 
       real          (sp       ) ,  pointer, dimension(:,:     ) :: aconc
       real          (sp       ) ,  pointer, dimension(:,:     ) :: aconud
@@ -191,6 +195,13 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:     ) :: vsfact
       real          (sp       ) ,  pointer, dimension(:,:     ) :: wpart
       real          (sp       ) ,  pointer, dimension(:,:     ) :: xyztrk
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: efdisp
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: xpoldis
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: ypoldis
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: efboom
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: xpolboom
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: ypolboom
+
 
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: amassc
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: atrack

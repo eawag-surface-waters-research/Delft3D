@@ -44,8 +44,8 @@ contains
                           xa0    , ya0    , xa     , ya     , npart0 ,      &
                           mpart0 , za     , locdep , dps    , nolay  ,      &
                           vrtdsp , stickdf, subst  , nbmax  , nconn  ,      &
-                          conn   , tau    , caltau )
-
+                          conn   , tau    , caltau , nboomint , iboomset ,  &
+                          tyboom , efboom , xpolboom , ypolboom , nrowsboom , itime)
       use precision
       use typos
 
@@ -147,6 +147,16 @@ contains
       type( pnt ), intent(in   ) :: conn (nconn)
       real   (sp), pointer       :: tau   ( : )
       logical    , intent(in   ) :: caltau
+
+      integer  ( ip)           :: nboomint 
+      integer  ( ip), pointer  :: iboomset(:)
+      integer  ( ip), pointer  :: tyboom (:) 
+      real     ( sp), pointer  :: efboom (:,:)
+      real     ( sp), pointer  :: xpolboom (:,:)
+      real     ( sp), pointer  :: ypolboom (:,:)
+      integer  ( ip), pointer  :: nrowsboom (:)
+      
+      integer(ip), intent(in   ) :: itime
 
       return
 

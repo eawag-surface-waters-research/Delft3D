@@ -270,8 +270,7 @@
      &                    ypart    , zpart    , za       , locdep   , dpsp     ,    
      &                    tcktot   , substi   , hmin     , npmax    , rhow     ,    
      &                    amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    
-     &                    efdisp   , fidisp   , nrowsmax)
-
+     &                    efdisp   , xpoldis  , ypoldis  , nrowsdis)
       end select
 
 !     two-layer system with stratification
@@ -385,7 +384,10 @@
      &              xa0      , ya0      , xa       , ya       , npart0   ,
      &              mpart0   , za       , locdep   , dpsp     , nolayp   ,
      &              vrtdsp   , stickdf  , subst    , nbmax    , nconn    ,
-     &              conn     , tau      , caltau   )
+     &              conn     , tau      , caltau   , nboomint , iboomset ,
+     &              tyboom   , efboom   , xpolboom , ypolboom , nrowsboom ,
+     &              itime)
+     
 
  9999 if ( timon ) call timstop ( ithandl )
       return
