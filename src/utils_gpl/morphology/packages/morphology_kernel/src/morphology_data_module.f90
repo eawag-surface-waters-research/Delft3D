@@ -1,4 +1,4 @@
-module morphology_data_module
+﻿module morphology_data_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                     
@@ -539,8 +539,8 @@ type sedtra_type
     real(fp)         , dimension(:,:)    , pointer :: sbwy     !(nc1:nc2,lsedtot) sbwv in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: sswx     !(nc1:nc2,lsedtot) sswu in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: sswy     !(nc1:nc2,lsedtot) sswv in structured Delft3D-FLOW
-    real(fp)         , dimension(:,:)    , pointer :: sxtot    !(nc1:nc2,lsedtot)
-    real(fp)         , dimension(:,:)    , pointer :: sytot    !(nc1:nc2,lsedtot)
+    real(fp)         , dimension(:,:)    , pointer :: sxtot    !(nc1:nc2,lsedtot) sutot in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sytot    !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
     !
     real(fp)         , dimension(:,:)    , pointer :: srcmax   !(nc1:nc2,lsedtot)
     real(fp)         , dimension(:,:)    , pointer :: fixfac   !(nc1:nc2,lsedtot)
@@ -733,6 +733,24 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     sedtra%kfsed    = 0
     sedtra%kmxsed   = 0
     !
+    sedtra%bc_mor_array = 0.0_fp
+    !
+    sedtra%dcwwlc   = 0.0_fp
+    sedtra%epsclc   = 0.0_fp
+    sedtra%epswlc   = 0.0_fp
+    sedtra%rsdqlc   = 0.0_fp
+    sedtra%sddflc   = 0.0_fp
+    sedtra%wslc     = 0.0_fp
+    !
+    sedtra%e_dzdn   = 0.0_fp
+    sedtra%e_dzdt   = 0.0_fp
+    !
+    sedtra%e_sbcn   = 0.0_fp
+    sedtra%e_sbct   = 0.0_fp
+    sedtra%e_sbwn   = 0.0_fp
+    sedtra%e_sbwt   = 0.0_fp
+    sedtra%e_sswn   = 0.0_fp
+    sedtra%e_sswt   = 0.0_fp
     sedtra%e_scrn   = 0.0_fp
     sedtra%e_scrt   = 0.0_fp
     !
@@ -751,10 +769,30 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     sedtra%hidexp   = 1.0_fp
     !
     sedtra%ust2     = 0.0_fp
+    sedtra%uuu      = 0.0_fp
+    sedtra%vvv      = 0.0_fp
+    sedtra%umod     = 0.0_fp
+    sedtra%zumod    = 0.0_fp
+    sedtra%ust2     = 0.0_fp
+    !
+    sedtra%sinkse   = 0.0_fp
+    sedtra%sourse   = 0.0_fp
+    sedtra%sour_im  = 0.0_fp
     !
     sedtra%dbodsd   = 0.0_fp
     !
+    sedtra%sbcx     = 0.0_fp
+    sedtra%sbcy     = 0.0_fp
+    sedtra%sbwx     = 0.0_fp
+    sedtra%sbwy     = 0.0_fp
+    sedtra%sswx     = 0.0_fp
+    sedtra%sswy     = 0.0_fp
+    sedtra%sxtot    = 0.0_fp
+    sedtra%sytot    = 0.0_fp
+    !
+    sedtra%srcmax   = 0.0_fp
     sedtra%fixfac   = 1.0_fp
+    sedtra%taurat   = 0.0_fp
 end subroutine allocsedtra
 !
 !
