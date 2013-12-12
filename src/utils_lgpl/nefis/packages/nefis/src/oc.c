@@ -71,6 +71,7 @@
 #  define FILE_OPEN        _open
 #  define FILE_CLOSE       _close
 #  define FILE_READ_WRITE (_O_RDWR   | _O_BINARY)
+#  define FILE_READ_ONLY  (_O_RDONLY | _O_BINARY)
 #  define FILE_CREATE     (_O_CREAT  | _O_TRUNC | _O_RDWR     | _O_BINARY)
 #  define FILE_MODE       (_S_IREAD  | _S_IWRITE)
 #elif defined(GNU_PC) || defined(HAVE_CONFIG_H) || defined(salford32)
