@@ -4,6 +4,18 @@
 ! Licensed under the Academic Free License version 1.1 found in file LICENSE
 ! with additional provisions found in that same file.
 !
+
+!> Maintain global error status for use in library mode.
+!! We do not call any Fortran stop statements.
+module kdtree2_error
+  integer, parameter :: KDTREE_IERR_ALLOC     = 1
+  integer, parameter :: KDTREE_IERR_HEAPSMALL = 2
+  integer, parameter :: KDTREE_IERR_BOUNDS    = 3
+  integer, parameter :: KDTREE_IERR_DIMENS    = 4
+
+  integer, public    :: kdtree2_ierror !< error (>0) or not (0)
+end module kdtree2_error
+
 module kdtree2_precision_module
   
   integer, parameter :: sp = kind(0.0)
@@ -27,6 +39,7 @@ end module kdtree2_precision_module
 
 module kdtree2_priority_queue_module
   use kdtree2_precision_module
+  use kdtree2_error
   !
   ! maintain a priority queue (PQ) of data, pairs of 'priority/payload', 
   ! implemented with a binary heap.  This is the type, and the 'dis' field
@@ -112,6 +125,8 @@ contains
     !
     !
     integer :: nalloc
+
+    kdtree2_ierror = 0
 
     nalloc = size(results_in,1)
     if (nalloc .lt. 1) then
@@ -241,11 +256,14 @@ bigloop:  do
     type(pq),pointer :: a
     type(kdtree2_result),intent(out)  :: e
 
+    kdtree2_ierror = 0
     if (a%heap_size .gt. 0) then
        e = a%elems(1) 
     else
-       write (*,*) 'PQ_MAX: ERROR, heap_size < 1'
-       stop
+       !write (*,*) 'PQ_MAX: ERROR, heap_size < 1'
+       !stop
+       kdtree2_ierror = KDTREE_IERR_HEAPSMALL
+       return
     endif
     return
   end subroutine pq_max
@@ -253,11 +271,14 @@ bigloop:  do
   real(kdkind) function pq_maxpri(a)
     type(pq), pointer :: a
 
+    kdtree2_ierror = 0
     if (a%heap_size .gt. 0) then
        pq_maxpri = a%elems(1)%dis
     else
-       write (*,*) 'PQ_MAX_PRI: ERROR, heapsize < 1'
-       stop
+       !write (*,*) 'PQ_MAX_PRI: ERROR, heapsize < 1'
+       !stop
+       kdtree2_ierror = KDTREE_IERR_HEAPSMALL
+       return
     endif
     return
   end function pq_maxpri
@@ -271,6 +292,7 @@ bigloop:  do
     type(pq),pointer :: a
     type(kdtree2_result), intent(out) :: e
     
+    kdtree2_ierror = 0
     if (a%heap_size .ge. 1) then
        !
        ! return max as first element
@@ -285,8 +307,10 @@ bigloop:  do
        call heapify(a,1)
        return
     else
-       write (*,*) 'PQ_EXTRACT_MAX: error, attempted to pop non-positive PQ'
-       stop
+       !write (*,*) 'PQ_EXTRACT_MAX: error, attempted to pop non-positive PQ'
+       !stop
+       kdtree2_ierror = KDTREE_IERR_HEAPSMALL
+       return
     end if
     
   end subroutine pq_extract_max
@@ -305,6 +329,8 @@ bigloop:  do
     integer :: i, isparent
     real(kdkind)    :: parentdis
     !
+
+    kdtree2_ierror = 0
 
     !    if (a%heap_size .ge. a%max_elems) then
     !       write (*,*) 'PQ_INSERT: error, attempt made to insert element on full PQ'
@@ -395,6 +421,8 @@ bigloop:  do
 
     type(kdtree2_result) :: etmp
     
+    kdtree2_ierror = 0
+
     if (.true.) then
        N=a%heap_size
        if (N .ge. 1) then
@@ -440,11 +468,14 @@ bigloop:  do
        !
        ! slower version using elementary pop and push operations.
        !
-       call pq_extract_max(a,etmp) 
+       call pq_extract_max(a,etmp)
+       if ( kdtree2_ierror.ne.0 ) return
+
        etmp%dis = dis
        etmp%idx = idx
        pq_replace_max = pq_insert(a,dis,idx)
     endif
+
     return
   end function pq_replace_max
 
@@ -452,12 +483,15 @@ bigloop:  do
     ! 
     ! delete item with index 'i'
     !
-    type(pq),pointer :: a
-    integer           :: i
+    type(pq), pointer    :: a
+    integer              :: i
 
+    kdtree2_ierror = 0
     if ((i .lt. 1) .or. (i .gt. a%heap_size)) then
-       write (*,*) 'PQ_DELETE: error, attempt to remove out of bounds element.'
-       stop
+       !write (*,*) 'PQ_DELETE: error, attempt to remove out of bounds element.'
+       !stop
+       kdtree2_ierror = KDTREE_IERR_BOUNDS
+       return
     endif
 
     ! swap the item to be deleted with the last element
@@ -473,6 +507,7 @@ end module kdtree2_priority_queue_module
 
 
 module kdtree2_module
+  use kdtree2_error
   use kdtree2_precision_module
   use kdtree2_priority_queue_module
   ! K-D tree routines in Fortran 90 by Matt Kennel.
@@ -511,6 +546,7 @@ module kdtree2_module
   ! brute force of kdtree2_[n|r]_nearest
   !----------------------------------------------------------------
 
+  public :: kdtree2_ierror
 
   integer, parameter :: bucket_size = 12
   ! The maximum number of points to keep in a terminal node.
@@ -642,6 +678,8 @@ contains
     mr%the_data => input_data
     ! pointer assignment
 
+    kdtree2_ierror = 0
+
     if (present(dim)) then
        mr%dimen = dim
     else
@@ -650,14 +688,16 @@ contains
     mr%n = size(input_data,2)
 
     if (mr%dimen > mr%n) then
-       !  unlikely to be correct
-       write (*,*) 'KD_TREE_TRANS: likely user error.'
-       write (*,*) 'KD_TREE_TRANS: You passed in matrix with D=',mr%dimen
-       write (*,*) 'KD_TREE_TRANS: and N=',mr%n
-       write (*,*) 'KD_TREE_TRANS: note, that new format is data(1:D,1:N)'
-       write (*,*) 'KD_TREE_TRANS: with usually N >> D.   If N =approx= D, then a k-d tree'
-       write (*,*) 'KD_TREE_TRANS: is not an appropriate data structure.'
-       stop
+!       !  unlikely to be correct
+!       write (*,*) 'KD_TREE_TRANS: likely user error.'
+!       write (*,*) 'KD_TREE_TRANS: You passed in matrix with D=',mr%dimen
+!       write (*,*) 'KD_TREE_TRANS: and N=',mr%n
+!       write (*,*) 'KD_TREE_TRANS: note, that new format is data(1:D,1:N)'
+!       write (*,*) 'KD_TREE_TRANS: with usually N >> D.   If N =approx= D, then a k-d tree'
+!       write (*,*) 'KD_TREE_TRANS: is not an appropriate data structure.'
+!       stop
+       kdtree2_ierror = KDTREE_IERR_DIMENS
+       return
     end if
 
     call build_tree(mr)
@@ -986,6 +1026,9 @@ contains
     ! .. Structure Arguments ..
     type (kdtree2), pointer :: tp
     ! ..
+
+    kdtree2_ierror = 0
+
     call destroy_node(tp%root)
 
     deallocate (tp%ind)
@@ -1032,7 +1075,7 @@ contains
     integer, intent (In)         :: nn
     type(kdtree2_result), target :: results(:)
 
-
+    kdtree2_ierror = 0
     sr%ballsize = huge(1.0)
     sr%qv => qv
     sr%nn = nn
@@ -1054,15 +1097,19 @@ contains
     endif
     sr%dimen = tp%dimen
 
-    call validate_query_storage(nn) 
+    call validate_query_storage(nn)
+    if ( kdtree2_ierror.ne.0 ) return
+
     sr%pq = pq_create(results)
 
     call search(tp%root)
+    if ( kdtree2_ierror.ne.0 ) return
 
     if (tp%sort) then
        call kdtree2_sort_results(nn, results)
     endif
 !    deallocate(sr%pqp)
+
     return
   end subroutine kdtree2_n_nearest
 
@@ -1073,6 +1120,8 @@ contains
     type (kdtree2), pointer        :: tp
     integer, intent (In)           :: idxin, correltime, nn
     type(kdtree2_result), target   :: results(:)
+
+    kdtree2_ierror = 0
 
     allocate (sr%qv(tp%dimen))
     sr%qv = tp%the_data(:,idxin) ! copy the vector
@@ -1098,9 +1147,11 @@ contains
     endif
 
     call validate_query_storage(nn)
+    if ( kdtree2_ierror.ne.0 ) return
     sr%pq = pq_create(results)
 
     call search(tp%root)
+    if ( kdtree2_ierror.ne.0 ) return
 
     if (tp%sort) then
        call kdtree2_sort_results(nn, results)
@@ -1127,6 +1178,8 @@ contains
     integer, intent (In)         :: nalloc
     type(kdtree2_result), target :: results(:)
 
+    kdtree2_ierror = 0
+
     !
     sr%qv => qv
     sr%ballsize = r2
@@ -1138,6 +1191,8 @@ contains
     sr%results => results
 
     call validate_query_storage(nalloc)
+    if (kdtree2_ierror.ne.0) return
+
     sr%nalloc = nalloc
     sr%overflow = .false. 
     sr%ind => tp%ind
@@ -1156,6 +1211,8 @@ contains
     !
 
     call search(tp%root)
+    if ( kdtree2_ierror.ne.0 ) return
+
     nfound = sr%nfound
     if (tp%sort) then
        call kdtree2_sort_results(nfound, results)
@@ -1187,6 +1244,9 @@ contains
     ! .. Intrinsic Functions ..
     intrinsic HUGE
     ! ..
+
+    kdtree2_ierror = 0
+
     allocate (sr%qv(tp%dimen))
     sr%qv = tp%the_data(:,idxin) ! copy the vector
     sr%ballsize = r2
@@ -1201,6 +1261,7 @@ contains
     sr%overflow = .false.
 
     call validate_query_storage(nalloc)
+    if ( kdtree2_ierror.ne.0 ) return
 
     !    sr%dsl = HUGE(sr%dsl)    ! set to huge positive values
     !    sr%il = -1               ! set to invalid indexes
@@ -1222,6 +1283,8 @@ contains
     !
 
     call search(tp%root)
+    if ( kdtree2_ierror.ne.0 ) return
+
     nfound = sr%nfound
     if (tp%sort) then
        call kdtree2_sort_results(nfound,results)
@@ -1246,6 +1309,9 @@ contains
     ! ..
     ! .. Intrinsic Functions ..
     intrinsic HUGE
+
+    kdtree2_ierror = 0
+
     ! ..
     sr%qv => qv
     sr%ballsize = r2
@@ -1275,6 +1341,7 @@ contains
     sr%overflow = .false.
 
     call search(tp%root)
+    if ( kdtree2_ierror.ne.0 ) return
 
     nfound = sr%nfound
 
@@ -1294,6 +1361,9 @@ contains
     ! ..
     ! .. Intrinsic Functions ..
     intrinsic HUGE
+
+    kdtree2_ierror = 0
+
     ! ..
     allocate (sr%qv(tp%dimen))
     sr%qv = tp%the_data(:,idxin)
@@ -1325,6 +1395,7 @@ contains
     sr%overflow = .false.
 
     call search(tp%root)
+    if ( kdtree2_ierror.ne.0 ) return
 
     nfound = sr%nfound
 
@@ -1336,12 +1407,14 @@ contains
     !
     ! make sure we have enough storage for n
     !
-    integer, intent(in) :: n
+    integer, intent(in)  :: n
 
     if (size(sr%results,1) .lt. n) then
-       write (*,*) 'KD_TREE_TRANS:  you did not provide enough storage for results(1:n)'
-       stop
+       !write (*,*) 'KD_TREE_TRANS:  you did not provide enough storage for results(1:n)'
+       !stop
+       kdtree2_ierror = KDTREE_IERR_ALLOC
        return
+
     endif
 
     return
@@ -1389,6 +1462,7 @@ contains
           call process_terminal_node_fixedball(node)
        else
           call process_terminal_node(node)
+          if ( kdtree2_ierror.ne.0 ) return
        endif
     else
        ! we are not on a terminal node
@@ -1408,7 +1482,10 @@ contains
 !          extra = qval- node%cut_val_left
        endif
 
-       if (associated(ncloser)) call search(ncloser)
+       if (associated(ncloser)) then
+          call search(ncloser)
+          if ( kdtree2_ierror.ne.0 ) return
+       end if
 
        ! we may need to search the second node. 
        if (associated(nfarther)) then
@@ -1435,6 +1512,7 @@ contains
              ! if we are still here then we need to search mroe.
              !
              call search(nfarther)
+             if ( kdtree2_ierror.ne.0 ) return
           endif
        endif
     end if
@@ -1587,6 +1665,7 @@ contains
           ! Hence we replace that with the current one.
           !
           ballsize = pq_replace_max(pqp,sd,indexofi)
+          if ( kdtree2_ierror.ne.0 ) return
        endif
     end do mainloop
     !
@@ -1699,6 +1778,9 @@ contains
 
     integer :: i, j, k
     real(kdkind), allocatable :: all_distances(:)
+
+    kdtree2_ierror = 0
+
     ! ..
     allocate (all_distances(tp%n))
     do i = 1, tp%n
@@ -1740,6 +1822,9 @@ contains
 
     integer :: i, nalloc
     real(kdkind), allocatable :: all_distances(:)
+
+    kdtree2_ierror = 0
+
     ! ..
     allocate (all_distances(tp%n))
     do i = 1, tp%n
@@ -1773,6 +1858,8 @@ contains
     type(kdtree2_result), target :: results(:) 
     !
     !
+
+    kdtree2_ierror = 0
 
     !THIS IS BUGGY WITH INTEL FORTRAN
     !    If (nfound .Gt. 1) Call heapsort(results(1:nfound)%dis,results(1:nfound)%ind,nfound)
