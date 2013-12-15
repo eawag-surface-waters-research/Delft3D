@@ -87,7 +87,7 @@ if [ "x$AUTOMAKE_VERSION" = "x" ] ; then
 fi
 # set to minimum acceptable version of libtool
 if [ "x$LIBTOOL_VERSION" = "x" ] ; then
-    LIBTOOL_VERSION=2.0.0
+    LIBTOOL_VERSION=2.2.0
 fi
 
 
@@ -456,7 +456,7 @@ for sig in 1 2 13 15; do
 
 	    $VERBOSE_ECHO "rm -f acinclude.m4.$$.backup"
 	    rm -f acinclude.m4.$$.backup
-        fi
+	fi
 
 	{ (exit 1); exit 1; }
 ' $sig
@@ -492,10 +492,10 @@ fi
 # get project name #
 ####################
 if [ "x$PROJECT" = "x" ] ; then
-    PROJECT="`grep AC_INIT $CONFIGURE | grep -v '.*#.*AC_INIT' | tail -${TAIL_N}1 | sed 's/^[ 	]*AC_INIT(\([^,)]*\).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+    PROJECT="`grep AC_INIT $CONFIGURE | grep -v '.*#.*AC_INIT' | tail -${TAIL_N}1 | sed 's/^[	]*AC_INIT(\([^,)]*\).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     if [ "x$PROJECT" = "xAC_INIT" ] ; then
 	# projects might be using the older/deprecated arg-less AC_INIT .. look for AM_INIT_AUTOMAKE instead
-	PROJECT="`grep AM_INIT_AUTOMAKE $CONFIGURE | grep -v '.*#.*AM_INIT_AUTOMAKE' | tail -${TAIL_N}1 | sed 's/^[ 	]*AM_INIT_AUTOMAKE(\([^,)]*\).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+	PROJECT="`grep AM_INIT_AUTOMAKE $CONFIGURE | grep -v '.*#.*AM_INIT_AUTOMAKE' | tail -${TAIL_N}1 | sed 's/^[	]*AM_INIT_AUTOMAKE(\([^,)]*\).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     fi
     if [ "x$PROJECT" = "xAM_INIT_AUTOMAKE" ] ; then
 	PROJECT="project"
@@ -812,7 +812,7 @@ recursive_protect ( ) {
 
     # look for subdirs
     # $VERBOSE_ECHO "Looking for subdirs in `pwd`"
-    _det_config_subdirs="`grep AC_CONFIG_SUBDIRS $_configure | grep -v '.*#.*AC_CONFIG_SUBDIRS' | sed 's/^[ 	]*AC_CONFIG_SUBDIRS(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+    _det_config_subdirs="`grep AC_CONFIG_SUBDIRS $_configure | grep -v '.*#.*AC_CONFIG_SUBDIRS' | sed 's/^[	]*AC_CONFIG_SUBDIRS(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     CHECK_DIRS=""
     for dir in $_det_config_subdirs ; do
 	if test -d "`pwd`/$dir" ; then
@@ -867,7 +867,7 @@ restore_clobbered ( ) {
 		$VERBOSE_ECHO "mv ${file}.$$.protect_from_automake.backup ${file}"
 		mv ${file}.$$.protect_from_automake.backup ${file}
 	    fi # -f ${file}
-	
+
 	    # just in case
 	    $VERBOSE_ECHO "rm -f ${file}.$$.protect_from_automake.backup"
 	    rm -f ${file}.$$.protect_from_automake.backup
@@ -879,7 +879,7 @@ restore_clobbered ( ) {
 	return
     fi
 
-    _aux_dir="`grep AC_CONFIG_AUX_DIR $CONFIGURE | grep -v '.*#.*AC_CONFIG_AUX_DIR' | tail -${TAIL_N}1 | sed 's/^[ 	]*AC_CONFIG_AUX_DIR(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+    _aux_dir="`grep AC_CONFIG_AUX_DIR $CONFIGURE | grep -v '.*#.*AC_CONFIG_AUX_DIR' | tail -${TAIL_N}1 | sed 's/^[	]*AC_CONFIG_AUX_DIR(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     if test ! -d "$_aux_dir" ; then
 	_aux_dir=.
     fi
@@ -911,7 +911,7 @@ recursive_restore ( ) {
     fi
 
     # look for subdirs
-    _det_config_subdirs="`grep AC_CONFIG_SUBDIRS $_configure | grep -v '.*#.*AC_CONFIG_SUBDIRS' | sed 's/^[ 	]*AC_CONFIG_SUBDIRS(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+    _det_config_subdirs="`grep AC_CONFIG_SUBDIRS $_configure | grep -v '.*#.*AC_CONFIG_SUBDIRS' | sed 's/^[	]*AC_CONFIG_SUBDIRS(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     CHECK_DIRS=""
     for dir in $_det_config_subdirs ; do
 	if test -d "`pwd`/$dir" ; then
@@ -966,7 +966,7 @@ initialize ( ) {
     #####################
     # detect an aux dir #
     #####################
-    _aux_dir="`grep AC_CONFIG_AUX_DIR $CONFIGURE | grep -v '.*#.*AC_CONFIG_AUX_DIR' | tail -${TAIL_N}1 | sed 's/^[ 	]*AC_CONFIG_AUX_DIR(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+    _aux_dir="`grep AC_CONFIG_AUX_DIR $CONFIGURE | grep -v '.*#.*AC_CONFIG_AUX_DIR' | tail -${TAIL_N}1 | sed 's/^[	]*AC_CONFIG_AUX_DIR(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     if test ! -d "$_aux_dir" ; then
 	_aux_dir=.
     else
@@ -977,7 +977,7 @@ initialize ( ) {
     # detect a recursive configure #
     ################################
     CONFIG_SUBDIRS=""
-    _det_config_subdirs="`grep AC_CONFIG_SUBDIRS $CONFIGURE | grep -v '.*#.*AC_CONFIG_SUBDIRS' | sed 's/^[ 	]*AC_CONFIG_SUBDIRS(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
+    _det_config_subdirs="`grep AC_CONFIG_SUBDIRS $CONFIGURE | grep -v '.*#.*AC_CONFIG_SUBDIRS' | sed 's/^[	]*AC_CONFIG_SUBDIRS(\(.*\)).*/\1/' | sed 's/.*\[\(.*\)\].*/\1/'`"
     for dir in $_det_config_subdirs ; do
 	if test -d "`pwd`/$dir" ; then
 	    $VERBOSE_ECHO "Detected recursive configure directory: `pwd`/$dir"
@@ -1061,9 +1061,9 @@ initialize ( ) {
     fi
 # tcl/tk (and probably others) have a customized aclocal.m4, so can't delete it
 #     if test -f aclocal.m4 ; then
-# 	$VERBOSE_ECHO "Found an aclocal.m4 file, deleting it"
-# 	$VERBOSE_ECHO "rm -f aclocal.m4"
-# 	rm -f aclocal.m4
+#	$VERBOSE_ECHO "Found an aclocal.m4 file, deleting it"
+#	$VERBOSE_ECHO "rm -f aclocal.m4"
+#	rm -f aclocal.m4
 #     fi
 
 } # end of initialize()
@@ -1106,7 +1106,7 @@ download_gnulib_config_guess () {
 	ret=$?
 	if [ ! $ret = 0 ] ; then
 	    continue
-        fi
+	fi
 
 	__cmd_version=`${__cmd} --version | head -n 1 | sed -e 's/^[^0-9]\+//' -e 's/ .*//'`
 	$VERBOSE_ECHO "Found ${__cmd} ${__cmd_version}"
@@ -1114,7 +1114,7 @@ download_gnulib_config_guess () {
 	opts=""
 	case ${__cmd} in
 	    wget)
-		opts="-O" 
+		opts="-O"
 		;;
 	    curl)
 		opts="-o"
@@ -1483,7 +1483,7 @@ EOF
 	    $VERBOSE_ECHO "$automake_output"
 
 	    if [ ! $ret = 0 ] ; then
-	 	# test if libtool is busted
+		# test if libtool is busted
 		libtool_failure "$automake_output"
 
 		# let the user know what went wrong

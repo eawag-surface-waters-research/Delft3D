@@ -32,7 +32,7 @@ dnl We're going to make it work with older versions also, this might not work (l
 ## Libtool initialisation. ##
 ## ----------------------- ##
 
-LT_PREREQ(2.4)
+LT_PREREQ(2.2)
 LT_INIT
 dnl LTDL_INIT dnl I don't think this is required anymore
 dnl AC_PROG_LIBTOOL
