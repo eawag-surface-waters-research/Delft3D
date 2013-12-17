@@ -205,9 +205,10 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
                    ! nlg-nfg+1         for partition 1
                    ! nlg-nfg+1+halo    for the other partitions
                    !
-                   ibnd = partition_dims(inlg,i) - partition_dims(infg,i) + 1
-                   if (i /= 1) then
-                      ibnd = ibnd + ihalon
+                   if (i == 1) then
+                      ibnd = partition_dims(inlg,i)
+                   else
+                      ibnd = partition_dims(inlg,i) - partition_dims(infg,i) + 1 + ihalon
                    endif
                    write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', ibnd, &
                                               &                '   ', mmax-1, '   ', ibnd
@@ -215,9 +216,10 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
                    !
                    ! Idem, with nmaxus/nlg/nfg replaced by mmax/mlg/mfg
                    !
-                   ibnd = partition_dims(imlg,i) - partition_dims(imfg,i) + 1
-                   if (i /= 1) then
-                      ibnd = ibnd + ihalom
+                   if (i == 1) then
+                      ibnd = partition_dims(imlg,i)
+                   else
+                      ibnd = partition_dims(imlg,i) - partition_dims(imfg,i) + 1 + ihalom
                    endif
                    write(message,'(a,4(a,i0))') trim(message), '   ', ibnd, '   ', 1, &
                                               &                '   ', ibnd, '   ', nmax-1
@@ -250,7 +252,6 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
        !
        write (message,'(a,i3.3)') 'Empty subdomain is detected - node number is ',inode
        call prterr(lundia, 'U190', trim(message))
-
        nfg = 1
        nlg = 0
        mfg = 1
