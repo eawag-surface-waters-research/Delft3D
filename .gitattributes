@@ -4457,6 +4457,11 @@ src/tools_lgpl/matlab/quickplot/svnstripfile.m -text
 src/utils_gpl/Makefile.am -text
 src/utils_gpl/morphology/Makefile.am -text
 src/utils_gpl/morphology/packages/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_data/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_data/morphology_data.vfproj -text
+src/utils_gpl/morphology/packages/morphology_data/src/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_data/src/morphology_data_module.f90 -text
+src/utils_gpl/morphology/packages/morphology_data/src/sediment_basics_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_io/morphology_io.vfproj -text
 src/utils_gpl/morphology/packages/morphology_io/src/Makefile.am -text
@@ -4486,10 +4491,8 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/factor3d2d.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/fgyint.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/fluff_burial.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/getfixfac.f90 -text
-src/utils_gpl/morphology/packages/morphology_kernel/src/morphology_data_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/osmom.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/sand_mud.f90 -text
-src/utils_gpl/morphology/packages/morphology_kernel/src/sediment_basics_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/shld.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/soursin_2d.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/soursin_3d.f90 -text

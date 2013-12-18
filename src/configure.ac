@@ -503,6 +503,8 @@ tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/Makefi
 utils_gpl/Makefile
 utils_gpl/morphology/Makefile
 utils_gpl/morphology/packages/Makefile
+utils_gpl/morphology/packages/morphology_data/Makefile
+utils_gpl/morphology/packages/morphology_data/src/Makefile
 utils_gpl/morphology/packages/morphology_io/Makefile
 utils_gpl/morphology/packages/morphology_io/src/Makefile
 utils_gpl/morphology/packages/morphology_kernel/Makefile

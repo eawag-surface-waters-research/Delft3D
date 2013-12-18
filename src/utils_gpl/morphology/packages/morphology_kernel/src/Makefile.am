@@ -23,9 +23,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libMorphologyKernel_la_SOURCES = \
-         sediment_basics_module.f90 \
          bedcomposition_module.f90 \
-         morphology_data_module.f90 \
          bailtr.f90 \
          bedbc1993.f90 \
          bedbc2004.f90 \
