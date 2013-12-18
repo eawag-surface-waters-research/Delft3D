@@ -198,12 +198,11 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
                 write(message,'(2a,i3.3,a)') trim(runid), '-',i,'.grd'
                 if (idir == 1) then
                    !
-                   ! First, nmaxus of this partition will be set to
-                   ! nlg-nfg+1
-                   ! Then a halo will be added in front and at the end
                    ! The index of the boundary to be coupled is the last non-halo index:
-                   ! nlg-nfg+1         for partition 1
-                   ! nlg-nfg+1+halo    for the other partitions
+                   ! nlg               for partition 1
+                   ! nlg-(nfg-1)+halo  for the other partitions:
+                   !                   the lines 1 to “nfg-1” are not active in this partition, the model will be shifted
+                   !                   take into account that a halo will be added in front
                    !
                    if (i == 1) then
                       ibnd = partition_dims(inlg,i)
