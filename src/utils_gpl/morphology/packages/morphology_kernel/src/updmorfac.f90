@@ -39,18 +39,10 @@ subroutine updmorfac(morpar, timhr, refjulday)
     use table_handles
     !
     implicit none
-    !
-    ! The following list of pointer parameters is used to point inside the morpar structure
-    !
-    real(fp)                             , pointer       :: morfac
-    integer                              , pointer       :: morfacpar
-    integer                              , pointer       :: morfacrec
-    integer                              , pointer       :: morfactable
-    type (handletype)                    , pointer       :: morfacfile
 !
 ! Call variables
 !
-    type(morpar_type)           , target , intent(inout) :: morpar
+    type(morpar_type)                    , intent(inout) :: morpar
     real(fp)                             , intent(in)    :: timhr
     integer                              , intent(in)    :: refjulday
 !
@@ -61,16 +53,13 @@ subroutine updmorfac(morpar, timhr, refjulday)
 !
 !! executable statements -------------------------------------------------------
 !
-    morfac              => morpar%morfac
-    morfacpar           => morpar%morfacpar
-    morfacrec           => morpar%morfacrec
-    morfactable         => morpar%morfactable
-    morfacfile          => morpar%morfacfile
     !
     ! Obtain new value of time-varying morfac
     !
-    call gettabledata(morfacfile, morfactable, &
-           & morfacpar, 1, morfacrec, value, &
+    call gettabledata(morpar%morfacfile, &
+           & morpar%morfactable, &
+           & morpar%morfacpar, 1, &
+           & morpar%morfacrec, value, &
            & timhr, refjulday, errmsg)
-    morfac = value(1)
+    morpar%morfac = value(1)
 end subroutine updmorfac
