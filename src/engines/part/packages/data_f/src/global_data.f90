@@ -86,10 +86,8 @@ module global_pointers
       integer       (sp       ) ,  pointer, dimension(:       ) :: stoil
       integer       (sp       ) ,  pointer, dimension(:       ) :: cellpnt
       integer       (sp       ) ,  pointer, dimension(:       ) :: flowpnt
-      integer       (sp       ) ,  pointer, dimension(:       ) :: tydisp
       integer       (sp       ) ,  pointer, dimension(:       ) :: idisset
       integer       (sp       ) ,  pointer, dimension(:       ) :: nrowsdis
-      integer       (sp       ) ,  pointer, dimension(:       ) :: tyboom
       integer       (sp       ) ,  pointer, dimension(:       ) :: iboomset
       integer       (sp       ) ,  pointer, dimension(:       ) :: nrowsboom
 

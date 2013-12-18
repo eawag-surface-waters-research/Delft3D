@@ -97,11 +97,14 @@ module partmem
       logical  ( ip)           :: ldiffh
       real     ( rp)           :: rhow
       integer  ( ip)           :: stickdf
-      integer  ( ip)           :: ndisapp
-      integer  ( ip)           :: nboomint
+      integer  ( ip)           :: oil_opt
       integer  ( ip)           :: ini_opt
       character(256)           :: ini_file
       character(256)           :: idp_file
+      integer  ( ip)           :: tydisp
+      integer  ( ip)           :: ndisapp
+      integer  ( ip)           :: tyboom
+      integer  ( ip)           :: nboomint
       integer  ( ip)           :: nosta
       integer  ( ip)           :: iptset
       real     ( rp)           :: window(4)
@@ -170,14 +173,12 @@ module partmem
       integer  ( ip), pointer  :: ipset  (:)
       real     ( rp), pointer  :: recovr (:)
       integer  ( ip), pointer  :: idisset(:)
-      integer  ( ip), pointer  :: tydisp (:)
-      real     ( rp), pointer  :: efdisp (:)
+      real     ( sp), pointer  :: efdisp (:,:)
       character( 256),pointer  :: fidisp (:)
       real     ( sp), pointer  :: xpoldis (:,:)
       real     ( sp), pointer  :: ypoldis (:,:)
       integer  ( ip), pointer  :: nrowsdis (:)
       integer  ( ip), pointer  :: iboomset(:)
-      integer  ( ip), pointer  :: tyboom (:)
       real     ( sp), pointer  :: efboom (:,:)
       real     ( sp), pointer  :: xpolboom (:,:)
       real     ( sp), pointer  :: ypolboom (:,:)
