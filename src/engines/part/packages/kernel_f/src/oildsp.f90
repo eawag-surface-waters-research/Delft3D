@@ -94,8 +94,8 @@ module oildsp_mod
       real     ( rp), pointer       :: wpart   (:,:)
       integer  ( ip), intent(in   ) :: ndisapp
       integer  ( ip), pointer       :: idisset(:)
-      integer  ( ip), pointer       :: tydisp (:)
-      real     ( rp), pointer       :: efdisp (:)
+      integer  ( ip), intent(in   ) :: tydisp
+      real     ( sp), pointer       :: efdisp (:,:)
       real     ( sp), pointer       :: xpoldis (:,:)
       real     ( sp), pointer       :: ypoldis (:,:)
       integer  ( ip), pointer       :: nrowsdis (:)

@@ -150,7 +150,7 @@ contains
 
       integer  ( ip)           :: nboomint 
       integer  ( ip), pointer  :: iboomset(:)
-      integer  ( ip), pointer  :: tyboom (:) 
+      integer  ( ip), intent(in   ) :: tyboom
       real     ( sp), pointer  :: efboom (:,:)
       real     ( sp), pointer  :: xpolboom (:,:)
       real     ( sp), pointer  :: ypolboom (:,:)
