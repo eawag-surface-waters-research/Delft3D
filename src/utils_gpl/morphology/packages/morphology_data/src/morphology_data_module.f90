@@ -1,4 +1,4 @@
-﻿module morphology_data_module
+module morphology_data_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                     
@@ -1561,3 +1561,4 @@ subroutine clrtrapar(istat     ,trapar  )
 end subroutine clrtrapar
 
 end module morphology_data_module
+

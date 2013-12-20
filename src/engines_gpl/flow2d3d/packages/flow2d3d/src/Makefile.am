@@ -57,6 +57,7 @@ libflow2d3d_la_LIBADD = \
     $(top_builddir)/utils_gpl/morphology/packages/morphology_io/src/libMorphologyIO.la \
     $(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src/libMorphologyKernel.la \
     $(top_builddir)/utils_gpl/morphology/packages/morphology_plugins_c/src/libMorphologyPluginsC.la \
+    $(top_builddir)/utils_gpl/morphology/packages/morphology_data/src/libMorphologyData.la \
     $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIO.la \
     $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libDHydroLib.la \

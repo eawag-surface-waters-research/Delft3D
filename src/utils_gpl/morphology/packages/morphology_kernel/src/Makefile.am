@@ -18,7 +18,8 @@ FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_data/src
 
 #-------------------------------------------------------------------------------
 #Sources
