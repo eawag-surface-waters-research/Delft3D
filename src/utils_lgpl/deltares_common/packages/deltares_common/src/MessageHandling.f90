@@ -186,7 +186,7 @@ end subroutine set_mh_callback
 
 
 subroutine set_mh_c_callback(c_callback) bind(C, name="set_mh_c_callback")
-  !DEC$ ATTRIBUTES DLLEXPORT:: set_mh_c_callback
+  !DEC$ ATTRIBUTES DLLEXPORT::set_mh_c_callback
 
   use iso_c_binding
   implicit none
