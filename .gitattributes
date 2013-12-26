@@ -4137,6 +4137,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/CloseSplashScreen.mexw32 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/CloseSplashScreen.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/Contents.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/abbrevfn.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/absfullfile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/adcircmesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/adddimension.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/addlocation.m -text
@@ -4217,6 +4218,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/getvalstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/grib_disp.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/grib_find.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gribfil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/grid_fopen.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gridcelldata.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gridfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gridinterp.m -text
@@ -4287,6 +4289,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_icon.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface_update_options.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_netcdf_get.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_option.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_default.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_pnt.m -text
@@ -4296,6 +4299,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plotmanager.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_preferences_interface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_prefs.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_proj_rotatepole.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_proxy.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_refresh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_scalarfield.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_settings.m -text
@@ -4332,6 +4336,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexglx -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexw32 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexw64 -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/relativepath.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/removequant.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/resourceobject.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/rgb2hls.m -text
