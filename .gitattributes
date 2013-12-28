@@ -4256,7 +4256,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/netcdffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/nfs_tritonfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/nodelemesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/options.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/optionstransfer.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pcraster.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pcrasterfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pharosfil.m -text
