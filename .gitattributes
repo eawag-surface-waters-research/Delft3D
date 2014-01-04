@@ -3995,6 +3995,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/jet.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/jet_white_5.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/lolypop.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/navdepth.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/parula.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/pastel.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/pink.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/purpjet.clrmap -text
@@ -4237,6 +4238,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/isstandalone.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/jspost.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/jspostfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/lddplot.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/legendbox.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/limitresize.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/limits.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/listnames.m -text
@@ -4277,6 +4279,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_datafield_name2prop.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_defaultaxessettings.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_dimsqueeze.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_export.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_figaspect.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_figurebars.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_file2function.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_filefilters.m -text
@@ -4307,6 +4310,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_state_startup.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_state_version.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_strrep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_time2str.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_title.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_toolbarpush.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_toolbartoggle.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_tooltip.m -text
@@ -4385,7 +4389,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/usrdeffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/uv2cen.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/valuemap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/vardiff.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.cpp -text
@@ -4432,6 +4435,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/ui_message.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/uislider.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/units.ini -text
 src/tools_lgpl/matlab/quickplot/progsrc/ustrcmpi.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/vardiff.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vmean.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vrange.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vs_copy.m -text
