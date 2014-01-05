@@ -4404,6 +4404,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/qp_drawsymbol.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_getdata.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_gridview.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_icons.mat -text
+src/tools_lgpl/matlab/quickplot/progsrc/qp_session.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_unitconversion.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_validate.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpcross.m -text
