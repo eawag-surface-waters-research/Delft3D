@@ -4398,6 +4398,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writelog.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xx_constants.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xx_logo.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/xyz_or_mnk.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qck_anim.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_colorbar.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qp_drawsymbol.m -text
