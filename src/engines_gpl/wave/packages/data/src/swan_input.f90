@@ -1911,19 +1911,20 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        ! Read bathymetry
        !
        dom%depfil   = ''
-       dom%curvibot = 1
        call prop_get_string(tmp_ptr, '*', 'BedLevelGrid', dom%depfil)
        if (dom%depfil /= '') then
           call readgriddims(dom%depfil, dom%mxb, dom%myb)
           !
           ! poles? No, fences!
           !
-          dom%mxb    = dom%mxb - 1
-          dom%myb    = dom%myb - 1
+          dom%mxb      = dom%mxb - 1
+          dom%myb      = dom%myb - 1
+          dom%curvibot = 0
        else
-          dom%depfil = dom%curlif
-          dom%mxb    = dom%mxc
-          dom%myb    = dom%myc
+          dom%depfil   = dom%curlif
+          dom%mxb      = dom%mxc
+          dom%myb      = dom%myc
+          dom%curvibot = 1
        endif
        call prop_get_string(tmp_ptr, '*', 'BedLevel', dom%botfil)
        if (dom%botfil == '') then
