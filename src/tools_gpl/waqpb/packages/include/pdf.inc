@@ -41,7 +41,7 @@ c     Output items at the exchange level
 c     Fluxes
 
       integer      flumax , flu
-      parameter   (flumax=200)
+      parameter   (flumax=900)
       character*1  flu_do(flumax)
       character*10 flu_id(flumax)
       character*50 flu_nm(flumax)
@@ -50,7 +50,7 @@ c     Fluxes
 c     Stochi lines
 
       integer      stomax , sto
-      parameter   (stomax=300)
+      parameter   (stomax=900)
       character*10 sto_fl(stomax), sto_su(stomax)
       real         sto_sc(stomax)
       common /comsto/ sto   , sto_fl, sto_su, sto_sc

@@ -6,7 +6,7 @@
 !!
 !!  This program is distributed in the hope that it will be useful,
 !!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 !!  GNU General Public License for more details.
 !!
 !!  You should have received a copy of the GNU General Public License
@@ -17,8 +17,8 @@
 !!  P.O. Box 177
 !!  2600 MH Delft, The Netherlands
 !!
-!!  All indications and logos of, and references to registered trademarks 
-!!  of Stichting Deltares remain the property of Stichting Deltares. All 
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
 c
@@ -31,7 +31,7 @@ c     Reference: bespreekverslag van Gils 3-9-1998 R3252
      j             nstocm, nvelom, ndispm, nsgrpm, ncnsbm
       parameter   (nsubsm=3000, nitemm=30000, nfortm=800, nmodvm=4000,
      j             nprocm=3000, nfluxm=   1, nconfm=20, ninpum=30000,
-     j             noutpm=15000, noutfm=6000, nstocm=6000, nvelom=3000,
+     j             noutpm=15000, noutfm=6000, nstocm=9000, nvelom=3000,
      j             ndispm=3000, nsgrpm=20  , ncnsbm=4000)
       integer      nsubs , nitem , nfort , nproc , nflux ,
      j             nconf , ninpu , noutp , noutf , nstoc ,
