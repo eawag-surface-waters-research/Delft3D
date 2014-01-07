@@ -8,7 +8,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
                & nfl       ,nflmod    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2013.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

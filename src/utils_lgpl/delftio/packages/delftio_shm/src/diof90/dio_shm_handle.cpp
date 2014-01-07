@@ -1,6 +1,6 @@
 //---- LGPL --------------------------------------------------------------------
 //
-// Copyright (C)  Stichting Deltares, 2011-2013.
+// Copyright (C)  Stichting Deltares, 2011-2014.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -121,7 +121,7 @@ DioShmHandle::DioShmHandle(
                                 );
 
 		DWORD dwError_CFM = GetLastError();
-		if (dwError_CFM != 0 && dwError_CFM != ERROR_ALREADY_EXISTS ) 
+		if (dwError_CFM != 0 && dwError_CFM != ERROR_ALREADY_EXISTS )
 		{
 			fprintf(stderr,
                        "Error creating Memory Mapped File: %lu\n", dwError_CFM);

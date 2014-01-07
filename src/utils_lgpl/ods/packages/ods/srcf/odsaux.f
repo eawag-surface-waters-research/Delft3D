@@ -2,7 +2,7 @@
 *
 * odsaux.f   -  Auxiliary FORTRAN ODS routines
 *
-* Copyright (C)  Stichting Deltares, 2011-2013.
+* Copyright (C)  Stichting Deltares, 2011-2014.
 *
 *
 * General information:

@@ -3,7 +3,7 @@
 * getlga.f   -  ODS routine to get the index array for DELWAQ/DELPAR
 *               grid files
 *
-* Copyright (C)  Stichting Deltares, 2011-2013.
+* Copyright (C)  Stichting Deltares, 2011-2014.
 *
 *
 * General information:

@@ -2,7 +2,7 @@
  *  dlwbin.c  -  ODS functions for standard Delwaq/Delpar MAP and HIS files
  *               also useful for Delpar PLO files and DELWAQ balances files.
  *
- *  Copyright (C)  Stichting Deltares, 2011-2013.
+ *  Copyright (C)  Stichting Deltares, 2011-2014.
  *
  *  Arjen Markus
  */
@@ -21,7 +21,7 @@
 /*   Program:    DLWBIN.C                                             */
 /*   Version:    1.03                                                 */
 /*   Programmer: Andr  Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
 /*   Previous version(s):                                             */
 /*   1.02 -- 6 Dec 1993 -- 13:00 -- Operating System: DOS             */
 /*   0.00 -- 21 Jun 1993 -- 11:19 -- Operating System: DOS            */

@@ -1,6 +1,6 @@
 //---- LGPL --------------------------------------------------------------------
 //
-// Copyright (C)  Stichting Deltares, 2011-2013.
+// Copyright (C)  Stichting Deltares, 2011-2014.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,7 @@
 #include "btps.h"
 #include "nefis.h"
 
-#if defined(WIN32) 
+#if defined(WIN32)
 # define strdup _strdup
 #endif
 

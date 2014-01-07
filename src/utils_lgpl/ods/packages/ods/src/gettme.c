@@ -1,7 +1,7 @@
 /*
  *  gettme.c  -  ODS get list of time steps from file
  *
- *  Copyright (C)  Stichting Deltares, 2011-2013.
+ *  Copyright (C)  Stichting Deltares, 2011-2014.
  *
  *  Marc Kool
  */
@@ -21,7 +21,7 @@
 /*   Program:    GETTME.C                                             */
 /*   Version:    1.03                                                 */
 /*   Programmer: Andre Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
 /*   Previous version(s):                                             */
 /*   1.02 -- 6 Dec 1993 -- 13:00 -- Operating System: DOS             */
 /*   1.01 -- 5 Aug 1993 -- 16:31 -- Operating System: DOS             */

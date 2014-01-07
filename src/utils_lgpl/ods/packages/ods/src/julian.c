@@ -1,7 +1,7 @@
 /*
  *  julian.c  -  ODS convert Gregorian to Julian date
  *
- *  Copyright (C)  Stichting Deltares, 2011-2013.
+ *  Copyright (C)  Stichting Deltares, 2011-2014.
  *
  *  Marc Kool
  */
@@ -19,7 +19,7 @@
 /*   Program:    JULIAN.C                                             */
 /*   Version:    1.02                                                 */
 /*   Programmer: Andr‚ Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
 /*   Previous version(s):                                             */
 /*   1.01 -- 9 Dec 1993 -- 13:00 -- Operating System: DOS            */
 /*   1.00 -- 27 Aug 1993 -- 19:23 -- Operating System: DOS            */

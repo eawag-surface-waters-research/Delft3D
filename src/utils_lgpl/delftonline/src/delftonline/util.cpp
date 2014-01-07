@@ -6,7 +6,7 @@
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
-// Copyright (C)  Stichting Deltares, 2011-2013.
+// Copyright (C)  Stichting Deltares, 2011-2014.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -146,7 +146,7 @@ Receive (
 //    FILE * logfile = fopen ("DOL.log", "a");
 //    if (logfile == NULL)
 //        throw (char *) "Cannot open DOL.log";
-    
+
 //    fprintf (logfile, "Received message %5d  %7d bytes (mesg->size = %d)\n", mesg->seqn, received, mesg->size);
 //    fclose (logfile);
 
@@ -163,7 +163,7 @@ Send (
 //    FILE * logfile = fopen ("DOL.log", "a");
 //    if (logfile == NULL)
 //        throw (char *) "Cannot open DOL.log";
-    
+
 //    fprintf (logfile, "Sending  message %5d  %7d bytes\n", mesg->seqn, mesg->size);
 //    fclose (logfile);
 

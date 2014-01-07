@@ -1,7 +1,7 @@
 /*
  *  jspost.c  -  ODS functions for standard JSPOST files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2013.
+ *  Copyright (C)  Stichting Deltares, 2011-2014.
  *
  *   Peter van den Bosch
  */

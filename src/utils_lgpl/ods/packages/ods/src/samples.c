@@ -1,7 +1,7 @@
 /*
  *  samples.c  -  ODS: Samples files and simple tables
  *
- *  Copyright (C)  Stichting Deltares, 2011-2013.
+ *  Copyright (C)  Stichting Deltares, 2011-2014.
  *
  *  Arjen Markus
  *

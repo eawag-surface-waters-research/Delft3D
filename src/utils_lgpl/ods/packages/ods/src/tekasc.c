@@ -2,7 +2,7 @@
 /*
  *  tekasc.c  -  ODS functions for standard TEKAL ASCII 1d and 2d files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2013.
+ *  Copyright (C)  Stichting Deltares, 2011-2014.
  *
  *  Pleun Koole
  */
