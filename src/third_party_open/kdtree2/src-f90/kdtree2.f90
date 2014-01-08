@@ -687,18 +687,19 @@ contains
     end if
     mr%n = size(input_data,2)
 
-    if (mr%dimen > mr%n) then
-!       !  unlikely to be correct
-!       write (*,*) 'KD_TREE_TRANS: likely user error.'
-!       write (*,*) 'KD_TREE_TRANS: You passed in matrix with D=',mr%dimen
-!       write (*,*) 'KD_TREE_TRANS: and N=',mr%n
-!       write (*,*) 'KD_TREE_TRANS: note, that new format is data(1:D,1:N)'
-!       write (*,*) 'KD_TREE_TRANS: with usually N >> D.   If N =approx= D, then a k-d tree'
-!       write (*,*) 'KD_TREE_TRANS: is not an appropriate data structure.'
-!       stop
-       kdtree2_ierror = KDTREE_IERR_DIMENS
-       return
-    end if
+! SPvdP: disabled following check
+!    if (mr%dimen > mr%n) then
+!!       !  unlikely to be correct
+!!       write (*,*) 'KD_TREE_TRANS: likely user error.'
+!!       write (*,*) 'KD_TREE_TRANS: You passed in matrix with D=',mr%dimen
+!!       write (*,*) 'KD_TREE_TRANS: and N=',mr%n
+!!       write (*,*) 'KD_TREE_TRANS: note, that new format is data(1:D,1:N)'
+!!       write (*,*) 'KD_TREE_TRANS: with usually N >> D.   If N =approx= D, then a k-d tree'
+!!       write (*,*) 'KD_TREE_TRANS: is not an appropriate data structure.'
+!!       stop
+!       kdtree2_ierror = KDTREE_IERR_DIMENS
+!       return
+!    end if
 
     call build_tree(mr)
 
