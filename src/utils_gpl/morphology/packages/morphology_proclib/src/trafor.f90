@@ -556,7 +556,7 @@
                if (kmax == 1) then
                   ! 2D model
                   call soursin_2d(UEff2D    ,UStar    ,LocalDepth ,LocalDepth, &
-                                & Wsettle   ,T_relax  ,rsedeq(1)  ,   &
+                                & Wsettle   ,T_relax  ,rsedeq(1)  ,1.0_fp,   &
 !output
                                 & SourSe    ,sour_im  ,SinkSe   )
                else
