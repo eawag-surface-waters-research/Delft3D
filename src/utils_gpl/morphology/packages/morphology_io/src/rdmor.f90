@@ -92,6 +92,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                               , pointer :: sedthr
     real(fp)                               , pointer :: hmaxth
     real(fp)                               , pointer :: bedw
+    real(fp)                               , pointer :: factsd
     real(fp)                               , pointer :: rdc
     real(fp)                               , pointer :: rdw
     real(fp)                               , pointer :: espir
@@ -235,6 +236,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     sedthr              => morpar%sedthr
     hmaxth              => morpar%hmaxth
     bedw                => morpar%bedw
+    factsd              => morpar%factsd
     rdc                 => morpar%rdc
     rdw                 => morpar%rdw
     espir               => morpar%espir
@@ -518,6 +520,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Morphology', 'EpsPar', epspar)
        !
        call prop_get_integer(mor_ptr, 'Morphology', 'IopKCW', iopkcw)
+       !
+       ! === calibration factor for 2D suspended load relaxation time
+       !
+       call prop_get(mor_ptr, 'Morphology', 'FacTsd', factsd)
        !
        call prop_get(mor_ptr, 'Morphology', 'RDC', rdc)
        !

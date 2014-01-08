@@ -110,6 +110,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: xx
     real(fp)                             , pointer :: morfac
     logical                              , pointer :: varyingmorfac
+    real(fp)                             , pointer :: factsd
     logical                              , pointer :: multi
     logical                              , pointer :: wave
     real(fp)                             , pointer :: eps
@@ -416,6 +417,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ffthresh            => gdp%gdmorpar%thresh
     morfac              => gdp%gdmorpar%morfac
     varyingmorfac       => gdp%gdmorpar%varyingmorfac
+    factsd              => gdp%gdmorpar%factsd
     ag                  => gdp%gdphysco%ag
     vicmol              => gdp%gdphysco%vicmol
     gammax              => gdp%gdnumeco%gammax
@@ -1236,7 +1238,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! Galappatti time scale and source and sink terms
                 !
                 call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
-                              & ws(nm,kbed,l) ,tsd           ,rsedeq(nm,kbed,l),         &
+                              & ws(nm,kbed,l) ,tsd           ,rsedeq(nm,kbed,l),factsd , &
                               & sourse(nm,l)  ,sour_im(nm,l) ,sinkse(nm,l)  )
              endif ! suspfrac
           endif ! kmax = 1

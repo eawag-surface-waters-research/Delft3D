@@ -1,5 +1,5 @@
 subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
-                    & ws        ,tsd       ,rsedeq    , &
+                    & ws        ,tsd       ,rsedeq    ,factsd    , &
                     & sour_ex   ,sour_im   ,sink      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -52,12 +52,12 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
     real(fp), intent(in)  :: h0
     real(fp), intent(in)  :: h1
     real(fp), intent(in)  :: ws
+    real(fp), intent(in)  :: factsd
     real(fp)              :: tsd
     real(fp), intent(in)  :: rsedeq
     real(fp), intent(out) :: sour_ex
     real(fp), intent(out) :: sour_im
     real(fp), intent(out) :: sink
-
 !
 ! Local variables
 !
@@ -108,7 +108,7 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
           ! tsd given by user transport formula
           !
        endif
-       hots = wsl/tsd
+       hots = wsl/(tsd*factsd)
        sour_ex = rsedeq*hots/h0
        sour_im = (hots-wsl)/h1
        sink    = wsl/h1

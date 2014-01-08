@@ -270,6 +270,7 @@ type morpar_type
     real(fp):: sedthr     !  minimum depth for sediment calculations
     real(fp):: hmaxth     !  maximum depth for setting theta for erosion of dry bank
     real(fp):: bedw       !  factor for adjusting wave-related bed-load sand transport (included in bed-load)
+    real(fp):: factsd     !  calibration factor for 2D suspended load relaxation time
     real(fp):: rdw
     real(fp):: rdc
     real(fp):: espir      !  factor for weighing the effect of the spiral flow intensity in 2D simulations
@@ -1043,6 +1044,7 @@ subroutine initmorpar(morpar)
     real(fp)                             , pointer :: sedthr
     real(fp)                             , pointer :: hmaxth
     real(fp)                             , pointer :: bedw
+    real(fp)                             , pointer :: factsd
     real(fp)                             , pointer :: rdc
     real(fp)                             , pointer :: rdw
     real(fp)                             , pointer :: espir
@@ -1112,6 +1114,7 @@ subroutine initmorpar(morpar)
     sedthr              => morpar%sedthr
     hmaxth              => morpar%hmaxth
     bedw                => morpar%bedw
+    factsd              => morpar%factsd
     rdc                 => morpar%rdc
     rdw                 => morpar%rdw
     espir               => morpar%espir
@@ -1238,6 +1241,7 @@ subroutine initmorpar(morpar)
     hmaxth             = 1.0_fp
     bedw               = 1.0_fp
     factcr             = 1.0_fp    
+    factsd             = 1.0_fp
     rdw                = 0.02_fp
     rdc                = 0.01_fp
     espir              = 0.0_fp
