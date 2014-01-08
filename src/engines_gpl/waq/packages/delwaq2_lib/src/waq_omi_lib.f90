@@ -1549,6 +1549,8 @@ integer function WriteRestartFileDefaultName ()
     !DEC$ ATTRIBUTES ALIAS : '_WRITERESTARTFILEDEFAULTNAME' :: WriteRestartFileDefaultName
 
     use delwaq2_global_data
+    
+    implicit none
 
     character (len=255) lcharmap
     integer    i, k, ierr, found, WriteRestartFile
@@ -1564,9 +1566,9 @@ integer function WriteRestartFileDefaultName ()
     if ( found == 0) then
       write ( * , * ) ' Invalid name of restart MAP file !'
       write (lun(19),*) ' Invalid name of restart MAP file !'
-      WriteRestartFileDefault = 1
+      WriteRestartFileDefaultName = 1
     else
-      WriteRestartFileDefault = WriteRestartFile ( lcharmap )
+      WriteRestartFileDefaultName = WriteRestartFile ( lcharmap )
     end if
 end function
     
