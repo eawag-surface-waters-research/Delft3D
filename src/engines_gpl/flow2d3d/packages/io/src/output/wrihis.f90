@@ -76,6 +76,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     logical                         , pointer :: first
     character(20) , dimension(:)    , pointer :: namst
     character(20) , dimension(:)    , pointer :: namtra
+    logical                         , pointer :: ztbml
 !
 ! Local parameters
 !
@@ -196,6 +197,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     namst      => gdp%gdstations%namst
     namtra     => gdp%gdstations%namtra
     line_orig  => gdp%gdstations%line_orig
+    ztbml      => gdp%gdzmodel%ztbml
     !
     ! LSTSCI var. name in HIS FILE must remain LSTCI for GPP to work
     ! properly
@@ -781,7 +783,11 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! group 2, element 'LAYER_MODEL'
        !
        if (zmodel) then
-          cdum16(1) = 'Z-MODEL'
+          if (ztbml) then
+             cdum16(1) = 'Z-MODEL, ZTBML'
+          else
+             cdum16(1) = 'Z-MODEL'
+          endif
        else
           cdum16(1) = 'SIGMA-MODEL'
        endif

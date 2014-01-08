@@ -69,6 +69,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)                , pointer :: ztop
     integer  , dimension(:) , pointer :: modify_dzsuv
     logical                 , pointer :: ztbml
+    logical                 , pointer :: ztbml_upd_r1
 !
 ! Global variables
 !
@@ -160,6 +161,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ztop               => gdp%gdzmodel%ztop
     modify_dzsuv       => gdp%gdzmodel%modify_dzsuv
     ztbml              => gdp%gdzmodel%ztbml
+    ztbml_upd_r1       => gdp%gdzmodel%ztbml_upd_r1
     !
     ddb     = gdp%d%ddbound
     dzmin   = 0.1_fp*dryflc
@@ -318,13 +320,13 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! (and possibly R1 and qzk)
        !
        modify_dzsuv(:) = 1
-       call z_taubotmodifylayers(nmmax   ,kmax     ,lstsci   ,icx      ,icy          , & 
-                               & kfs     ,kfsmin   ,kfsmax   ,dps      ,dzs1         , &
-                               & kfu     ,kfumin   ,kfumax   ,dpu      ,dzu1         , &
-                               & kfv     ,kfvmin   ,kfvmax   ,dpv      ,dzv1         , &
-                               & r1      ,s1       ,s1       ,zk       ,modify_dzsuv , &
-                               & hdt     ,gsqs     ,kfsmax   ,qzk      ,umean        , &
-                               & vmean   ,gdp      )
+       call z_taubotmodifylayers(nmmax   ,kmax     ,lstsci       ,icx      ,icy          , & 
+                               & kfs     ,kfsmin   ,kfsmax       ,dps      ,dzs1         , &
+                               & kfu     ,kfumin   ,kfumax       ,dpu      ,dzu1         , &
+                               & kfv     ,kfvmin   ,kfvmax       ,dpv      ,dzv1         , &
+                               & r1      ,s1       ,s1           ,zk       ,modify_dzsuv , &
+                               & hdt     ,gsqs     ,kfsmax       ,qzk      ,umean        , &
+                               & vmean   ,dzs0     ,ztbml_upd_r1 ,gdp      )
     endif
     !
     do nm = 1, nmmax

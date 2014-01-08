@@ -494,6 +494,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: typbnd
     integer      , dimension(:)          , pointer :: modify_dzsuv
     logical                              , pointer :: ztbml
+    logical                              , pointer :: ztbml_upd_r1
 !    
     include 'tri-dyn.igd'
 !
@@ -546,7 +547,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer      :: vmor
     integer      :: ifirst_dens !  Flag to initialize the water density array
     logical      :: sscomp
-    logical      :: success      
+    logical      :: success
     character(8) :: stage       ! First or second half time step 
                                 ! Stage = 'both' means that in F0ISF1 the layering administration
                                 ! is copied for both the U- and the V-direction
@@ -951,12 +952,13 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     typbnd              => gdp%gdr_i_ch%typbnd
     modify_dzsuv        => gdp%gdzmodel%modify_dzsuv
     ztbml               => gdp%gdzmodel%ztbml
+    ztbml_upd_r1        => gdp%gdzmodel%ztbml_upd_r1
     flmd2l              => gdp%gdprocs%flmd2l
     depchg              => gdp%gdr_i_ch%depchg
     ssuu                => gdp%gdr_i_ch%ssuu
     ssvv                => gdp%gdr_i_ch%ssvv
-    lsedtot             => gdp%d%lsedtot    
-    rsedeq              => gdp%gdr_i_ch%rsedeq        
+    lsedtot             => gdp%d%lsedtot
+    rsedeq              => gdp%gdr_i_ch%rsedeq
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     seddif              => gdp%gdr_i_ch%seddif
@@ -1825,13 +1827,14 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 ! (and possibly R1 and qzk)
                 !
                 modify_dzsuv(1:3) = 1
-                call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci    ,icx      ,icy          , & 
-                                        & i(kfs)  ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
-                                        & i(kfu)  ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
-                                        & i(kfv)  ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
-                                        & r(r1)   ,r(s00)     ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                        & hdt     ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
-                                        & r(vmean),gdp          )
+                ztbml_upd_r1      = .false.
+                call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci       ,icx      ,icy          , & 
+                                        & i(kfs)  ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
+                                        & i(kfu)  ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
+                                        & i(kfv)  ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
+                                        & r(r1)   ,r(s00)     ,r(s1)        ,r(sig)   ,modify_dzsuv , &
+                                        & hdt     ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
+                                        & r(vmean),r(dzs0)    ,ztbml_upd_r1 ,gdp          )
              endif
           endif
        endif
@@ -2628,13 +2631,14 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
              !
              modify_dzsuv(1)   = 1
              modify_dzsuv(2:3) = 0
-             call z_taubotmodifylayers(nmmax    ,kmax       ,lstsci    ,icx      ,icy          , & 
-                                     & i(kfs)   ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
-                                     & i(kfu)   ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
-                                     & i(kfv)   ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
-                                     & r(r1)    ,r(s00)     ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                     & hdt      ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
-                                     & r(vmean) ,gdp        )
+             ztbml_upd_r1      = .false.
+             call z_taubotmodifylayers(nmmax    ,kmax       ,lstsci       ,icx      ,icy          , & 
+                                     & i(kfs)   ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
+                                     & i(kfu)   ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
+                                     & i(kfv)   ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
+                                     & r(r1)    ,r(s00)     ,r(s1)        ,r(sig)   ,modify_dzsuv , &
+                                     & hdt      ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
+                                     & r(vmean) ,r(dzs0)    ,ztbml_upd_r1 ,gdp        )
           endif
           !
           ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes 
@@ -2752,13 +2756,14 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 ! (and possibly R1 and qzk)
                 !
                 modify_dzsuv(1:3) = 1
-                call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci    ,icx      ,icy          , & 
-                                        & i(kfs)  ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
-                                        & i(kfu)  ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
-                                        & i(kfv)  ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
-                                        & r(r1)   ,r(s00)     ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                        & hdt     ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
-                                        & r(vmean),gdp          )
+                ztbml_upd_r1      = .true.
+                call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci       ,icx      ,icy          , & 
+                                        & i(kfs)  ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
+                                        & i(kfu)  ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
+                                        & i(kfv)  ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
+                                        & r(r1)   ,r(s00)     ,r(s1)        ,r(sig)   ,modify_dzsuv , &
+                                        & hdt     ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
+                                        & r(vmean),r(dzs0)    ,ztbml_upd_r1 ,gdp          )
              endif
              !
              ! Recalculate DPU/DPV (depth at velocity points)

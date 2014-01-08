@@ -65,8 +65,9 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer        , pointer :: i_restart
     logical        , pointer :: dp_from_map_file
     logical        , pointer :: kfuv_from_restart
+    character(16)  , pointer :: rst_layer_model
     logical        , pointer :: rst_dp
-    logical        , pointer :: roller    
+    logical        , pointer :: roller
     character(256) , pointer :: restid
     real(hp)       , pointer :: morft
     real(hp)       , pointer :: morft0
@@ -172,6 +173,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     i_restart           => gdp%gdrestart%i_restart
     dp_from_map_file    => gdp%gdrestart%dp_from_map_file
     kfuv_from_restart   => gdp%gdrestart%kfuv_from_restart
+    rst_layer_model     => gdp%gdrestart%rst_layer_model
     rst_dp              => gdp%gdrestart%rst_dp
     restid              => gdp%gdrestart%restid
     morft               => gdp%gdmorpar%morft
@@ -244,9 +246,9 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     ! the master opens and reads the grid file 
     ! 
     if ( inode /= master ) goto 50 
-    
+    !
     ierror = getelt(fds, 'map-const', 'DT', cuindex, 1, 4, dtms)
-
+    !
     dtm = dtms
     if (ierror/= 0) then
        ierror = neferr(0,error_string)
@@ -254,6 +256,15 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        error = .true.
        goto 9999
     endif
+    !
+    ierror = getelt(fds, 'map-const', 'LAYER_MODEL', cuindex, 1, 16, rst_layer_model)
+    if (ierror/= 0) then
+       ierror = neferr(0,error_string)
+       call prterr(lundia    ,'P004'    , error_string)
+       error = .true.
+       goto 9999
+    endif
+    !
     ierror = inqmxi(fds, 'map-series', max_index)
     if (ierror/= 0) then
        ierror = neferr(0,error_string)

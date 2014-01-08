@@ -479,6 +479,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer(pntrsize)                    , pointer :: typbnd
     integer      , dimension(:)          , pointer :: modify_dzsuv
     logical                              , pointer :: ztbml
+    logical                              , pointer :: ztbml_upd_r1
 !
     include 'tri-dyn.igd'
 !
@@ -929,6 +930,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     typbnd              => gdp%gdr_i_ch%typbnd
     modify_dzsuv        => gdp%gdzmodel%modify_dzsuv
     ztbml               => gdp%gdzmodel%ztbml
+    ztbml_upd_r1        => gdp%gdzmodel%ztbml_upd_r1
     flmd2l              => gdp%gdprocs%flmd2l
     depchg              => gdp%gdr_i_ch%depchg
     ssuu                => gdp%gdr_i_ch%ssuu
@@ -1521,13 +1523,14 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
              ! Call with modify_dzsuv set to 1 for all 3 components, to modify both dzs1, dzu1 and dzv1
              !
              modify_dzsuv(:) = 1
-             call z_taubotmodifylayers(nmmax    ,kmax       ,lstsci    ,icx      ,icy          , & 
-                                     & i(kfs)   ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
-                                     & i(kfu)   ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
-                                     & i(kfv)   ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
-                                     & r(r1)    ,r(s0)      ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                     & dtsec    ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
-                                     & r(vmean) ,gdp        )
+             ztbml_upd_r1    = .false.
+             call z_taubotmodifylayers(nmmax    ,kmax       ,lstsci       ,icx      ,icy          , & 
+                                     & i(kfs)   ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
+                                     & i(kfu)   ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
+                                     & i(kfv)   ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
+                                     & r(r1)    ,r(s0)      ,r(s1)        ,r(sig)   ,modify_dzsuv , &
+                                     & dtsec    ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
+                                     & r(vmean) ,r(dzs0)    ,ztbml_upd_r1 ,gdp     )
           endif
           !
           ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes
@@ -2005,6 +2008,26 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                           & r(vmean)  ,r(v0)     ,r(v1)     ,r(dzv0)   ,r(dzv1)   , &
                           & r(dzs1)   ,r(sig)    ,i(kfsmx0) ,r(gvv)    ,r(qyk)    , &
                           & gdp       )
+             !
+             ! If requested by keyword ZTBML 
+             ! (Z-model TauBottom Modified Layering)
+             ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+             !
+             if (ztbml) then
+                !
+                ! Call with modify_dzsuv set to 1 for all components, to modify dzs1, dzu1, dzv1
+                ! (and possibly R1 and qzk)
+                !
+                modify_dzsuv(1:3) = 1
+                ztbml_upd_r1      = .true.
+                call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci       ,icx      ,icy          , & 
+                                        & i(kfs)  ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
+                                        & i(kfu)  ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
+                                        & i(kfv)  ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
+                                        & r(r1)   ,r(s00)     ,r(s1)        ,r(sig)   ,modify_dzsuv , &
+                                        & dtsec   ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
+                                        & r(vmean),r(dzs0)    ,ztbml_upd_r1 ,gdp      )
+             endif
              !
              ! Recalculate DPU/DPV (depth at velocity points)
              !

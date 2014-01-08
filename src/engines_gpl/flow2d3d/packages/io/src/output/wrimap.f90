@@ -76,6 +76,7 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     logical                         , pointer :: first
     character(20) , dimension(:)    , pointer :: namst
     character(20) , dimension(:)    , pointer :: namtra
+    logical                         , pointer :: ztbml
 !
 ! Global variables
 !
@@ -197,6 +198,7 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     first      => nefiselem%first
     namst      => gdp%gdstations%namst
     namtra     => gdp%gdstations%namtra
+    ztbml      => gdp%gdzmodel%ztbml
     !
     ! LSTSCI var. name in MAP FILE must remain LSTCI for GPP to work
     ! properly
@@ -1035,7 +1037,11 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     !
     if (inode == master) then
        if (zmodel) then
-          cdum16(1) = 'Z-MODEL'
+          if (ztbml) then
+             cdum16(1) = 'Z-MODEL, ZTBML'
+          else
+             cdum16(1) = 'Z-MODEL'
+          endif
        else
           cdum16(1) = 'SIGMA-MODEL'
        endif

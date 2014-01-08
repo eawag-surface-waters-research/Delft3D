@@ -49,4 +49,5 @@ subroutine initzmodel(gdp       )
     gdp%gdzmodel%ztop         = 0.0_fp
     gdp%gdzmodel%theta        = 0.0_fp
     gdp%gdzmodel%ztbml        = .false.
+    gdp%gdzmodel%ztbml_upd_r1 = .false.
 end subroutine initzmodel

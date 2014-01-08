@@ -82,12 +82,15 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: bubble
     integer                       , pointer :: numdomains
     integer                       , pointer :: nummappers
+    character(16)                 , pointer :: rst_layer_model
     integer                       , pointer :: rtcmod
     integer                       , pointer :: nrcmp
     logical                       , pointer :: flcut
     logical                       , pointer :: fl45
     logical                       , pointer :: waqol
     integer                       , pointer :: itcomi
+    logical                       , pointer :: ztbml
+    logical                       , pointer :: ztbml_upd_r1
 !
 ! Global variables
 !
@@ -142,12 +145,15 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     bubble              => gdp%gdprocs%bubble
     numdomains          => gdp%gdprognm%numdomains
     nummappers          => gdp%gdprognm%nummappers
+    rst_layer_model     => gdp%gdrestart%rst_layer_model
     rtcmod              => gdp%gdrtc%rtcmod
     nrcmp               => gdp%gdtfzeta%nrcmp
     flcut               => gdp%gdtmpfil%flcut
     fl45                => gdp%gdtmpfil%fl45
     waqol               => gdp%gdwaqpar%waqol
     itcomi              => gdp%gdinttim%itcomi
+    ztbml               => gdp%gdzmodel%ztbml
+    ztbml_upd_r1        => gdp%gdzmodel%ztbml_upd_r1
     !
     ierror = 0
     iwarn  = 0
@@ -262,9 +268,19 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia    ,'Z011'    ,'Roller model'       )
           ierror = ierror+ 1
        endif
-       if(sedim .and. (kmax==1)) then
+       if (sedim .and. (kmax==1)) then
           call prterr(lundia    ,'Z011'    ,'2D morphology'       )
           ierror = ierror+ 1
+       endif
+       if (ztbml .and. rst_layer_model == 'UNKNOWN') then
+          call prterr(lundia    ,'P004'    ,'Restarting with modified layering (ZTBML=#Y#) only allowed')
+          write (lundia, '(a)') '          from MAP-files'
+          ierror = ierror + 1
+       endif    
+       if (.not. ztbml .and. rst_layer_model == 'Z-MODEL, ZTBML') then
+          call prterr(lundia    ,'P004'    ,'Restarting from Z-model run with modified bed-layering only allowed')
+          write (lundia, '(a)') '          with again modified layering: ZTBML=#Y#'
+          ierror = ierror + 1
        endif
        !
        ! warnings
@@ -311,6 +327,13 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        if (struct) then
           call prterr(lundia    ,'Z012'    ,'Structures'         )
           iwarn = iwarn + 1
+       endif
+       if (ztbml .and. rst_layer_model == 'Z-MODEL') then
+          errtxt = 'Z-model with modified bed-layering (ZTMBL) activated. Restarting from'
+          call prterr(lundia    ,'Z013'    , errtxt)
+          write (lundia, '(a)') '            unmodified layering, with conservative remapping near bottom'
+          iwarn        = iwarn + 1
+          ztbml_upd_r1 = .true.
        endif
     else
        !

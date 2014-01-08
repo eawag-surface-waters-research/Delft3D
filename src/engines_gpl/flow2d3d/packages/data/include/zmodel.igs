@@ -44,6 +44,7 @@
        real(fp)              :: theta    
        logical               :: ztbml        ! Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
                                              ! modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+       logical               :: ztbml_upd_r1 ! Flag to perform conservative remapping of constituents (r1), corresponding to the layer remapping (ZTBML)
 !
     end type gd_zmodel
 !

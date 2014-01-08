@@ -86,6 +86,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     real(fp), dimension(:,:) , pointer :: vstokes
     integer , dimension(:)   , pointer :: modify_dzsuv
     logical                  , pointer :: ztbml
+    logical                  , pointer :: ztbml_upd_r1
     include 'flow_steps_f.inc'
 !
 ! Global variables
@@ -264,7 +265,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     integer :: idry
     integer :: nhystp
     integer :: nmaxddb
-    logical :: flood   ! Flag for activating flooding part of checku subroutine 
+    logical :: flood   ! Flag for activating flooding part of checku subroutine
 !
 !! executable statements -------------------------------------------------------
 !
@@ -273,6 +274,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     vstokes            => gdp%gdtrisol%vstokes
     modify_dzsuv       => gdp%gdzmodel%modify_dzsuv
     ztbml              => gdp%gdzmodel%ztbml
+    ztbml_upd_r1       => gdp%gdzmodel%ztbml_upd_r1
     !
     nmaxddb = nmax + 2*gdp%d%ddbound
     !
@@ -421,13 +423,14 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           !
           modify_dzsuv(1:2) = 1
           modify_dzsuv(3)   = 0
-          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy          , & 
-                                  & kfs    ,kfsmin   ,kfsmax   ,dps     ,dzs1         , &
-                                  & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
-                                  & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
-                                  & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
-                                  & hdt    ,gsqs     ,kfsmx0   ,qzk     ,umean        , &
-                                  & vmean  ,gdp      )
+          ztbml_upd_r1      = .false.
+          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci       ,icx     ,icy          , & 
+                                  & kfs    ,kfsmin   ,kfsmax       ,dps     ,dzs1         , &
+                                  & kfu    ,kfumin   ,kfumax       ,dpu     ,dzu1         , &
+                                  & kfv    ,kfvmin   ,kfvmax       ,dpv     ,dzv1         , &
+                                  & r0     ,s0       ,s1           ,zk      ,modify_dzsuv , &
+                                  & hdt    ,gsqs     ,kfsmx0       ,qzk     ,umean        , &
+                                  & vmean  ,dzs0     ,ztbml_upd_r1 ,gdp      )
        endif
        !
        ! Compute Volume and Areas to be used in routines that computes 
@@ -607,13 +610,14 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           modify_dzsuv(1) = 1
           modify_dzsuv(2) = 0
           modify_dzsuv(3) = 1
-          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy          , & 
-                                  & kfs    ,kfsmin   ,kfsmax   ,dps     ,dzs1         , &
-                                  & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
-                                  & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
-                                  & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
-                                  & hdt    ,gsqs     ,kfsmx0   ,qzk     ,umean        , &
-                                  & vmean  ,gdp      )
+          ztbml_upd_r1    = .false.
+          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci       ,icx     ,icy          , & 
+                                  & kfs    ,kfsmin   ,kfsmax       ,dps     ,dzs1         , &
+                                  & kfu    ,kfumin   ,kfumax       ,dpu     ,dzu1         , &
+                                  & kfv    ,kfvmin   ,kfvmax       ,dpv     ,dzv1         , &
+                                  & r0     ,s0       ,s1           ,zk      ,modify_dzsuv , &
+                                  & hdt    ,gsqs     ,kfsmx0       ,qzk     ,umean        , &
+                                  & vmean  ,dzs0     ,ztbml_upd_r1 ,gdp      )
        endif
        !
        ! Compute Volume and Areas to be used in routines that computes 

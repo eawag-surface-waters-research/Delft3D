@@ -54,6 +54,8 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     !
     real(fp)              , pointer :: tstart
     integer               , pointer :: julday
+    character(16)         , pointer :: rst_layer_model
+    !
 !
 ! Global variables
 !
@@ -114,15 +116,16 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    julday      => gdp%gdinttim%julday
-    tstart      => gdp%gdexttim%tstart
+    julday          => gdp%gdinttim%julday
+    tstart          => gdp%gdexttim%tstart
+    rst_layer_model => gdp%gdrestart%rst_layer_model
     !
-    mfg         => gdp%gdparall%mfg
-    mlg         => gdp%gdparall%mlg
-    nfg         => gdp%gdparall%nfg
-    nlg         => gdp%gdparall%nlg
-    mmaxgl      => gdp%gdparall%mmaxgl
-    nmaxgl      => gdp%gdparall%nmaxgl
+    mfg             => gdp%gdparall%mfg
+    mlg             => gdp%gdparall%mlg
+    nfg             => gdp%gdparall%nfg
+    nlg             => gdp%gdparall%nlg
+    mmaxgl          => gdp%gdparall%mmaxgl
+    nmaxgl          => gdp%gdparall%nmaxgl
     !
     error = .false.
     nm_pos = 1
@@ -172,6 +175,10 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! restart file found
        !
        write(lundia, '(a)') 'Restarting from ' // trim(filtmp)
+       !
+       ! Layer type of restart file not known
+       !
+       rst_layer_model = 'UNKNOWN'
        !
        ! Allocate temporary single precision array for the ENTIRE domain
        !

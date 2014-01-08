@@ -53,7 +53,11 @@ type sv_restart
     !
     ! characters
     !
-    character(256) :: restid    !  Identification restart file
+    character(256) :: restid            !  Identification restart file
+    character(16)  :: rst_layer_model   !  Layer type of the restart file, options:
+                                        !  1) SIGMA-MODEL
+                                        !  2) Z-MODEL
+                                        !  3) Z-MODEL, ZTBML
 end type sv_restart
 
 
