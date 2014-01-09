@@ -303,15 +303,15 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                 qydo   = (qyk(ndm,k) + qyk(ndmu,k) )/ max(1, (kfvz0(ndm,k) + kfvz0(ndmu,k)) )
                 dpsu   = max(0.5_fp*(real(dps(nm),fp)+s0(nm) + real(dps(nmu),fp)+s0(nmu)),trsh)
                 if (u0(nm,k) > 0.0_fp) then
-                   thick  = max(dzs0(nm,k), trsh) / hl
+                   thick  = max(dzs0(nm,k), trsh) / max(hl,trsh)
                 elseif (u0(nm,k) < 0.0_fp) then
-                   thick  = max(dzs0(nmu,k), trsh) / hr
+                   thick  = max(dzs0(nmu,k), trsh) / max(hr, trsh)
                 else
-                   thick  = max(dzs0(nm,k)/hl, dzs0(nmu,k)/hr)
+                   thick  = max(dzs0(nm,k)/max(hl,trsh), dzs0(nmu,k)/max(hr, trsh))
                 endif
                 if (comparereal(ua(nm ,k),0.0_fp) /= 0 .and. &
                   & comparereal(ua(nmu,k),0.0_fp) /= 0        ) then
-                   advecx = (qxup*ua(nmu,k) - qxdo*ua(nm,k) - u0(nm,k)*(qxup - qxdo)) * gsqi / (dpsu*thick)
+                   advecx = (qxup*ua(nmu,k) - qxdo*ua(nm,k) - u0(nm,k)*(qxup - qxdo)) * gsqi / max(dpsu*thick,trsh)
                    !
                    ! CURVATURE TERM DUE TO CONVECTION IN U-DIRECTION
                    !
@@ -319,7 +319,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                 endif
                 if (comparereal(ub(ndm,k),0.0_fp) /= 0 .and. &
                   & comparereal(ub(nm ,k),0.0_fp) /= 0        ) then
-                   advecy =(qyup*ub(nm,k) - qydo*ub(ndm,k) - u0(nm,k)*(qyup - qydo)) * gsqi / (dpsu*thick)
+                   advecy =(qyup*ub(nm,k) - qydo*ub(ndm,k) - u0(nm,k)*(qyup - qydo)) * gsqi / max(dpsu*thick,trsh)
                    !
                    ! CURVATURE TERM DUE TO ADVECTION IN V-DIRECTION
                    !
@@ -335,7 +335,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                     & .or. (umean(nm) < 0.0_fp .and. (hr > hl) .and. kfu(nmd) == 1)  ) then
                     if (       (real(dps(nm),fp)          > real(dps(nmu),fp)+ dgcuni) & 
                         & .or. (real(dps(nm),fp) + dgcuni < real(dps(nmu),fp)        )  ) then
-                       factor = hr * hl / (dpsu*dpsu)
+                       factor = hr * hl / max(dpsu*dpsu,trsh)
                        !
                        ! avoid factor becoming small (synchronised with SOBEK FLS)
                        !

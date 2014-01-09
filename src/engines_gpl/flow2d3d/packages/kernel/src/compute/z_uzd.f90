@@ -551,7 +551,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! Temporary switch for vertical advection of horizontal momentum (PvdP 2009)
           ! THVERT = 0 means explicit 1st order upwind vertical advection
           !
-          thvert = 0.0_fp
+          !thvert = 0.0_fp
           !
           call z_hormom_fls(nmmax     ,kmax      ,icx       , &
                           & icy       ,kcs       ,kcs45     ,kcscut    , &
