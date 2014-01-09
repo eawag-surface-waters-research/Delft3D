@@ -47,6 +47,7 @@ subroutine initrestart(gdp)
     logical        , pointer :: kfuv_from_restart
     logical        , pointer :: rst_dp
     character(256) , pointer :: restid
+    character(16)  , pointer :: rst_layer_model
 !
 !! executable statements -------------------------------------------------------
 !
@@ -55,10 +56,12 @@ subroutine initrestart(gdp)
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     rst_dp             => gdp%gdrestart%rst_dp
     restid             => gdp%gdrestart%restid
+    rst_layer_model    => gdp%gdrestart%rst_layer_model
     !
     dp_from_map_file  = .true.
     kfuv_from_restart = .false.
     rst_dp            = .false.
     i_restart         = 1
     restid            = ' '
+    rst_layer_model   = ' '
 end subroutine initrestart

@@ -43,8 +43,14 @@
                                              ! Surface height for construction of Cartesian grid (Fixed layer Model)
        real(fp)              :: theta    
        logical               :: ztbml        ! Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
-                                             ! modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+                                             ! modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models.
        logical               :: ztbml_upd_r1 ! Flag to perform conservative remapping of constituents (r1), corresponding to the layer remapping (ZTBML)
+	                                         ! By default it is false. In three situations it is set to true (during initialization and/or simulation):
+											 ! 1) For restarts from a MAP-file where ZTBML was false. See routines flow_nefis_restart.f90 and chkset.f90.
+											 ! 2) When the water level enters layer 2 from the bottom (kfsmin(nm)+1). See subroutine 
+											 !    z_taubot_modify_layers.f90 and how it is called from z_adi.f90 / z_trisol.f90 / z_trisol_nhfull.f90
+											 ! 3) When the bottom level changes due to morphodynamics. See subroutine z_taubot_modify_layers.f90.
+											 !    and how it is called from z_adi.f90 / z_trisol.f90 / z_trisol_nhfull.f90.
 !
     end type gd_zmodel
 !

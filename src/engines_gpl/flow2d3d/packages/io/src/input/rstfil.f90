@@ -176,7 +176,8 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        write(lundia, '(a)') 'Restarting from ' // trim(filtmp)
        !
-       ! Layer type of restart file not known
+       ! Layer type of restart file not specified in the file. For z-layer models with ZTBML, this may cause problems.
+       ! Therefore set the layering_model of the restart file to UNKNOWN. Is checked in routine CHKSET.f90.
        !
        rst_layer_model = 'UNKNOWN'
        !
