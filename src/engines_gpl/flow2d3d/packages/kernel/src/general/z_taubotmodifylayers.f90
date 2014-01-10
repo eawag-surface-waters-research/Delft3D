@@ -142,23 +142,19 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci       ,icx     ,icy    
              !
              if (ztbml_upd_r1 .or. dzs1(nm,k)+dzs1(nm,k+1)/=dzs0(nm,k)+dzs0(nm,k+1)) then
                 if (kfsmax(nm) == k+1) then
-                   if (kfsmx0(nm) == k+2) then
+                   if (kfsmx0(nm) > k+1) then
                       qzk(nm,k) = qzk(nm,k) - 0.5_fp*gsqs(nm)*(s1(nm)-zk(k+1))/dtsec
                    else
                       qzk(nm,k) = qzk(nm,k) - 0.5_fp*gsqs(nm)*(s1(nm)-s0(nm))/dtsec
-                   endif 
+                   endif
                 elseif (kfsmx0(nm) == k+1) then
-                   if (kfsmax(nm) == k+2) then
+                   if (kfsmax(nm) > k+1) then
                       qzk(nm,k) = qzk(nm,k) + 0.5_fp*gsqs(nm)*(s0(nm)-zk(k+1))/dtsec
                    else
                       qzk(nm,k) = qzk(nm,k) - 0.5_fp*gsqs(nm)*(s1(nm)-s0(nm))/dtsec
                    endif 
                 endif
              endif
-             !
-             ! Todo: take the movement of the bottom into account: just as above for the free surface
-             !
-             !!!!! TODO !!!!!
              !
              ! Now the actual layer remapping to an equidistant distribution of the 
              ! two near-bed layers
