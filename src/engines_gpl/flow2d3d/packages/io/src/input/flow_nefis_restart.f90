@@ -257,13 +257,12 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        goto 9999
     endif
     !
+    ! Read the type of layer model from the map file. 
+    ! Parameter LAYER_MODEL may not be present. Was initialized with value 'UNKNOWN' in RDIC.f90
+    ! The value is needed to check for consistency when applying the z-model with ZTBML=#Y#, 
+    ! see subroutine CHKSET.
+    !
     ierror = getelt(fds, 'map-const', 'LAYER_MODEL', cuindex, 1, 16, rst_layer_model)
-    if (ierror/= 0) then
-       ierror = neferr(0,error_string)
-       call prterr(lundia    ,'P004'    , error_string)
-       error = .true.
-       goto 9999
-    endif
     !
     ierror = inqmxi(fds, 'map-series', max_index)
     if (ierror/= 0) then

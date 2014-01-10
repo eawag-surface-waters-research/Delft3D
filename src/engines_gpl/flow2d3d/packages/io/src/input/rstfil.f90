@@ -54,7 +54,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     !
     real(fp)              , pointer :: tstart
     integer               , pointer :: julday
-    character(16)         , pointer :: rst_layer_model
     !
 !
 ! Global variables
@@ -118,7 +117,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
 !
     julday          => gdp%gdinttim%julday
     tstart          => gdp%gdexttim%tstart
-    rst_layer_model => gdp%gdrestart%rst_layer_model
     !
     mfg             => gdp%gdparall%mfg
     mlg             => gdp%gdparall%mlg
@@ -175,11 +173,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! restart file found
        !
        write(lundia, '(a)') 'Restarting from ' // trim(filtmp)
-       !
-       ! Layer type of restart file not specified in the file. For z-layer models with ZTBML, this may cause problems.
-       ! Therefore set the layering_model of the restart file to UNKNOWN. Is checked in routine CHKSET.f90.
-       !
-       rst_layer_model = 'UNKNOWN'
        !
        ! Allocate temporary single precision array for the ENTIRE domain
        !

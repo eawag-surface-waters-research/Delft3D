@@ -65,7 +65,8 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer       , pointer :: itis
-    character*(10), pointer :: trans_unit !  Unit of the variables ATR and DTR
+    character(16) , pointer :: rst_layer_model
+    character*(10), pointer :: trans_unit      !  Unit of the variables ATR and DTR
     include 'pardef.igd'
 !
 ! Global variables
@@ -164,8 +165,9 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    itis       => gdp%gdrdpara%itis
-    trans_unit => gdp%gdpostpr%trans_unit
+    itis            => gdp%gdrdpara%itis
+    rst_layer_model => gdp%gdrestart%rst_layer_model
+    trans_unit      => gdp%gdpostpr%trans_unit
     !
     rdef   = 0.0
     nlook  = 1
@@ -272,6 +274,14 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call prterr(lundia    ,'V005'    ,' '       )
           error = .true.
        endif
+       !
+       ! Initialize the layer type of restart/map file. 
+       ! Will be read in case of restart from a map-file, but may not be specified in the file. 
+       ! For z-layer models with ZTBML, this may cause problems. 
+       ! Therefore set the layering_model of the restart file to UNKNOWN. Is checked in routine CHKSET.f90.
+       !
+       rst_layer_model = 'UNKNOWN'
+       !
        call rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                  & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                  & s1        ,u1        ,v1        ,r1        ,rtur1     , &
