@@ -64,6 +64,8 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
     integer                         , pointer :: celidt
+    integer                         , pointer :: lsal
+    integer                         , pointer :: ltem
     integer                         , pointer :: mfg
     integer                         , pointer :: mlg
     integer                         , pointer :: nfg
@@ -74,9 +76,12 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     integer       , dimension(:)    , pointer :: order_tra
     integer       , dimension(:)    , pointer :: smlay
     logical                         , pointer :: first
+    logical                         , pointer :: densin
     character(20) , dimension(:)    , pointer :: namst
     character(20) , dimension(:)    , pointer :: namtra
     logical                         , pointer :: ztbml
+    real(fp)                        , pointer :: rhow
+    real(fp)                        , pointer :: ag
 !
 ! Global variables
 !
@@ -199,6 +204,11 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     namst      => gdp%gdstations%namst
     namtra     => gdp%gdstations%namtra
     ztbml      => gdp%gdzmodel%ztbml
+    rhow       => gdp%gdphysco%rhow
+    ag         => gdp%gdphysco%ag
+    lsal       => gdp%d%lsal
+    ltem       => gdp%d%ltem
+    densin     => gdp%gdmorpar%densin
     !
     ! LSTSCI var. name in MAP FILE must remain LSTCI for GPP to work
     ! properly
@@ -464,6 +474,14 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
        call addelm(nefiswrimap,'OUTPUT_LAYERS',' ','[   -   ]','INTEGER',4, &
           & 'User selected output layers                                   ', &
           & 1         ,kmaxout   ,0         ,0         ,0         ,0       , &
+          & lundia    ,gdp)
+       call addelm(nefiswrimap,'RHOCONST',' ','[ KG/M3 ]','REAL',4, &
+          & 'User specified constant density                               ', &
+          & 1         ,1         ,0         ,0         ,0         ,0       , &
+          & lundia    ,gdp)
+       call addelm(nefiswrimap,'GRAVITY',' ','[  M/S2 ]','REAL',4, &
+          & 'User specified constant density                               ', &
+          & 1         ,1         ,0         ,0         ,0         ,0       , &
           & lundia    ,gdp)
        call defnewgrp(nefiswrimap ,filnam    ,grnam2   ,gdp)
        !
@@ -1031,11 +1049,9 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
        endif
        ierror = putelt(fds, grnam2, 'COORDINATES', uindex, 1, cdum16)
        if (ierror/=0) goto 999
-    endif
-    !
-    ! group 2, element 'LAYER_MODEL'
-    !
-    if (inode == master) then
+       !
+       ! group 2, element 'LAYER_MODEL'
+       !
        if (zmodel) then
           if (ztbml) then
              cdum16(1) = 'Z-MODEL, ZTBML'
@@ -1088,6 +1104,18 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     !
     if (inode == master) then
        ierror = putelt(fds, grnam2, 'OUTPUT_LAYERS', uindex, 1, smlay)
+       if (ierror/=0) goto 999
+       !
+       ! group 2, element 'RHOCONST'
+       !
+       rdummy(1) = real(rhow,sp)
+       ierror = putelt(fds, grnam2, 'RHOCONST', uindex, 1, rdummy)
+       if (ierror/=0) goto 999
+       !
+       ! group 2, element 'GRAVITY'
+       !
+       rdummy(1) = real(ag,sp)
+       ierror = putelt(fds, grnam2, 'GRAVITY', uindex, 1, rdummy)
        if (ierror/=0) goto 999
     endif
     !
