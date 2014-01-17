@@ -911,6 +911,7 @@ BInt4 GP_get_attribute ( BInt4   set        ,
   BInt4   shift_to_name ;
   BInt4   shift_to_value;
   BInt4   start      ;
+  BInt4   size_int   ;
   BData   vp         ;
 
   if ( nefis[set].one_file == TRUE )
@@ -955,6 +956,11 @@ BInt4 GP_get_attribute ( BInt4   set        ,
 
   min_comp = min( MAX_NAME, (BInt4) strlen(att_name) );
   start = 0;
+  if (nefis[set].file_version == Version_1) {
+      size_int = SIZE_BINT4;
+  } else {
+      size_int = SIZE_BINT8;
+  }
 
 /*
  * Integer attribute
@@ -962,8 +968,8 @@ BInt4 GP_get_attribute ( BInt4   set        ,
 
   if ( strncmp(att_type,"INTEGER",7 ) == 0)
   {
-    shift_to_name  = 3*SIZE_BINT8+2*MAX_NAME;
-    shift_to_value = 3*SIZE_BINT8+2*MAX_NAME + MAX_DIM*MAX_NAME;
+    shift_to_name  = 3*size_int+2*MAX_NAME;
+    shift_to_value = 3*size_int+2*MAX_NAME + MAX_DIM*MAX_NAME;
     j     = -1;
     if ( find == next )
     {
@@ -1043,8 +1049,8 @@ BInt4 GP_get_attribute ( BInt4   set        ,
 
   if ( strncmp(att_type,"REAL",4) == 0 )
   {
-    shift_to_name  = 3*SIZE_BINT8+2*MAX_NAME + MAX_DIM*(MAX_NAME+SIZE_BINT4);
-    shift_to_value = 3*SIZE_BINT8+2*MAX_NAME + MAX_DIM*(MAX_NAME+SIZE_BINT4) + MAX_DIM*MAX_NAME;
+    shift_to_name  = 3*size_int+2*MAX_NAME + MAX_DIM*(MAX_NAME+SIZE_BINT4);
+    shift_to_value = 3*size_int+2*MAX_NAME + MAX_DIM*(MAX_NAME+SIZE_BINT4) + MAX_DIM*MAX_NAME;
     j     = -1;
     if ( find == next )
     {
@@ -1125,8 +1131,8 @@ BInt4 GP_get_attribute ( BInt4   set        ,
 
   if ( strncmp(att_type,"CHARACTE",8) == 0 )
   {
-    shift_to_name  = 3*SIZE_BINT8+2*MAX_NAME + 2*MAX_DIM*(MAX_NAME+SIZE_BINT4);
-    shift_to_value = 3*SIZE_BINT8+2*MAX_NAME + 2*MAX_DIM*(MAX_NAME+SIZE_BINT4) + MAX_DIM*MAX_NAME;
+    shift_to_name  = 3*size_int+2*MAX_NAME + 2*MAX_DIM*(MAX_NAME+SIZE_BINT4);
+    shift_to_value = 3*size_int+2*MAX_NAME + 2*MAX_DIM*(MAX_NAME+SIZE_BINT4) + MAX_DIM*MAX_NAME;
     j     = -1;
     if ( find == next )
     {
