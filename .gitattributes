@@ -4355,6 +4355,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/shapewrite.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/shiftcontrol.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/shipma.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/shipmafil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/shyfemmesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/simsteps.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/skyllafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/sobek.m -text
