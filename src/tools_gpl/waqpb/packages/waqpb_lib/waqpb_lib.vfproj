@@ -78,6 +78,7 @@
 		<File RelativePath=".\src\wr_tabr9.f"/>
 		<File RelativePath=".\src\wridoc.f"/>
 		<File RelativePath=".\src\wripdf.f"/>
+		<File RelativePath=".\src\wrisub.f"/>
 		<File RelativePath=".\src\writex.f"/>
 		<File RelativePath=".\src\writrm.f"/>
 		<File RelativePath=".\src\zoek.f"/></Filter></Files>

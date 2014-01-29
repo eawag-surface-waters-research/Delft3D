@@ -2,13 +2,26 @@ c
 c     Program to decompose a PROCES.ASC file into tables
 c     28-2-2000: Start upgrade om PDF's in te checken
 c     04-8-2000: Finish
+c     13-01-2011: Jos van Gils, update to import asci files produced by the DUPROL parser
+c
+c                 USAGE: first argument is pdf file name (new feature)
+c                        next  argument is configuration ID
+c                        next  argument nonewtab (default) or newtab
+c                        next  argument optional nonewfrm (default) or newfrm
+c                        next  argument optional noduprol (default) or duprol
 
       include 'data.inc'
       character*1  c1
       character*10 c10, c10b, proces, c10a
+      character*20 c20
+      character*8  duprolstring
+      character*8  newtabstring
+      character*8  newfrmstring
       character*30 grp
       character*50 c50
-      character*80 pdffil
+      character*80 pdffil, procesnaam
+      character*10 initialConfgId
+      character*50 initialConfgName
       real         value
       integer      jndex , naanta, iaanta, iproc , i     , ihulp ,
      j             j     , noffse, ihulp2, ihulp3, ihulp4, nprocl,
@@ -16,14 +29,47 @@ c     04-8-2000: Finish
       integer      action, delete, replac, insert, abort , none
       parameter   (delete = 1, replac = 2, insert = 3, abort  = 0,
      j             none   = 4)
-      logical      newtab
+      logical      newtab, duprol, newfrm
       integer      io_mes, io_asc, io_inp
       data         io_mes /11/
       data         io_asc /14/
       data         io_inp /15/
-      data         grp /'DummyGroup                    '/
+
+      call getarg (1,pdffil)
+      if (pdffil.eq.' ') pdffil = 'proces.asc'
+
+      call getarg (2,initialConfgId)
+      if (initialConfgId.eq.' ') initialConfgId = 'DummyConfg'
+      initialConfgName = initialConfgId
+
+      call getarg (3,newtabstring)
+      newtab = .false.
+      if (newtabstring(1:6).eq.'newtab') newtab = .true.
+
+      call getarg (4,newfrmstring)
+      newfrm = .false.
+      if (newfrmstring(1:6).eq.'newfrm') newfrm = .true.
+
+      call getarg (5,duprolstring)
+      duprol = .false.
+      if (duprolstring(1:6).eq.'duprol') duprol = .true.
 
       open ( io_mes , file = 'import.log' )
+
+      if (newtab) then
+          write (io_mes,'(''Creating new tables'')')
+      else
+          write (io_mes,'(''Updating existing tables'')')
+      endif
+      if (newfrm) then
+          write (io_mes,'(''Using NEW format'')')
+      else
+          write (io_mes,'(''Using OLD format'')')
+      endif
+      if (duprol) then
+          write (io_mes,'(''DUPROL import'')')
+      endif
+
       nitem = 0
       nfort = 0
       nproc = 0
@@ -43,8 +89,8 @@ c      newtab = .true.
 c      write (*,*) 'Create new primary tables?? (0/1)'
 c      read (*,*) ihulp
 c      if ( ihulp .ne. 1 ) then
-          newtab = .false.
-          write (io_mes,'(''Updating existing tables'')')
+c          newtab = .false.
+c          write (io_mes,'(''Updating existing tables'')')
 c      else
 c          write (io_mes,'(''Creating new tables'')')
 c      endif
@@ -76,10 +122,10 @@ c         Remove secondary tables R4 till R8
           nvelo = 0
       endif
 
-      write (*,'('' Decomposing PROCES.ASC......'')')
+      write (*,'('' Decomposing '',a,''......'')') pdffil
       write (*,*)
-      write (io_mes,'(''Decomposing PROCES.ASC......'')')
-      open ( io_asc , file = 'proces.asc' , status='old', err=999)
+      write (io_mes,'('' Decomposing '',a,''......'')') pdffil
+      open ( io_asc , file = pdffil , status='old', err=999)
       read ( io_asc , * ) nprocl
       call iniind
 
@@ -95,6 +141,11 @@ c         proces name and description
           read ( io_asc , '(a10,20x,a50)' ) c10,c50
           write ( io_mes , '(''Process '',a10)' ) c10
           write (*,'(''Process: '',a10)') c10
+          if (duprol) then
+              grp = c10
+          else
+              grp = 'DummyGroup                    '
+          end if
 
 c         fortran code
           read ( io_asc , '(a10)' ) c10a
@@ -116,15 +167,14 @@ c         input items on segment level
           read ( io_asc , '(i10)' ) naanta
           ihulp = naanta
           do 15 iaanta = 1,naanta
-              if ( newtab ) then
-                  read ( io_asc , '(a10,f20.0,a50)' ) c10,value,c50
-                  c1 = 'x'
+              if ( newfrm ) then
+                  read ( io_asc , 3001) c10,value,c1,c50,c20
               else
-                  read ( io_asc , '(a10,f18.0,a1,1x,a50)' )
-     j                              c10,value,c1,c50
+                  read ( io_asc , 2001) c10,value,c1,c50
+                  c20 = ' '
               endif
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
 
               ninpu = ninpu + 1
               if ( ninpu .gt. ninpum ) then
@@ -160,15 +210,14 @@ c         input items on exchange level
 
           read ( io_asc , '(i10)' ) naanta
           do 20 iaanta = 1,naanta
-              if ( newtab ) then
-                  read ( io_asc , '(a10,f20.0,a50)' ) c10,value,c50
-                  c1 = 'x'
+              if ( newfrm ) then
+                  read ( io_asc , 3001) c10,value,c1,c50,c20
               else
-                  read ( io_asc , '(a10,f18.0,a1,1x,a50)' )
-     j                              c10,value,c1,c50
+                  read ( io_asc , 2001) c10,value,c1,c50
+                  c20 = ' '
               endif
               call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
 
               ninpu = ninpu + 1
               if ( ninpu .gt. ninpum ) then
@@ -203,15 +252,15 @@ c         output items on segment level
           read ( io_asc , '(i10)' ) naanta
           ihulp = naanta
           do 30 iaanta = 1,naanta
-              if ( newtab ) then
-                  read ( io_asc , '(a10,20x,a50)' ) c10,c50
-                  c1 = 'x'
+              if ( newfrm ) then
+                  read ( io_asc , 3002) c10,c1,c50,c20
               else
-                  read ( io_asc , '(a10,18x,a1,1x,a50)' ) c10,c1,c50
+                  read ( io_asc , 2002) c10,c1,c50
+                  c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
 
               noutp = noutp + 1
               if ( noutp .gt. noutpm ) stop 'DIMENSION NOUTPM'
@@ -227,15 +276,15 @@ c         output items on exchange level
 
           read ( io_asc , '(i10)' ) naanta
           do 40 iaanta = 1,naanta
-              if ( newtab ) then
-                  read ( io_asc , '(a10,20x,a50)' ) c10,c50
-                  c1 = 'x'
+              if ( newfrm ) then
+                  read ( io_asc , 3002) c10,c1,c50,c20
               else
-                  read ( io_asc , '(a10,18x,a1,1x,a50)' ) c10,c1,c50
+                  read ( io_asc , 2002) c10,c1,c50
+                  c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
 
               noutp = noutp + 1
               if ( noutp .gt. noutpm ) stop 'DIMENSION NOUTPM'
@@ -252,15 +301,15 @@ c         fluxes
           noffsf = noutf
           read ( io_asc , '(i10)' ) naanta
           do 50 iaanta = 1,naanta
-              if ( newtab ) then
-                  read ( io_asc , '(a10,20x,a50)' ) c10,c50
-                  c1 = 'x'
+              if ( newfrm ) then
+                  read ( io_asc , 3002) c10,c1,c50,c20
               else
-                  read ( io_asc , '(a10,18x,a1,1x,a50)' ) c10,c1,c50
+                  read ( io_asc , 2002) c10,c1,c50
+                  c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
 
               noutf = noutf + 1
               if ( noutf .gt. noutfm ) stop 'DIMENSION NOUTFM'
@@ -292,8 +341,9 @@ c             check presence of current flux in fluxes under current process
 
               value = -999.
               c50 = ' '
+              c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
    60     continue
 
 c         stochi lines D
@@ -311,8 +361,9 @@ c         stochi lines D
 
               value = -999.
               c50 = ' '
+              c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
    80     continue
 
 c         stochi lines V
@@ -330,14 +381,32 @@ c         stochi lines V
 
               value = -999.
               c50 = ' '
+              c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
-     j                      iitem)
+     j                      iitem, c20, newfrm, .false. )
    70     continue
-
           read ( io_asc , '(a10)' ) c10
           if ( c10(1:3) .ne. 'END' ) STOP 'error'
   100 continue
 
+c         DUPROL format has two additional blocks, specifying active and inactive substances
+
+      if ( duprol ) then
+          read ( io_asc , '(i10)' ) naanta
+          do iaanta = 1,naanta
+              read ( io_asc , 3002) c10,c1,c50,c20
+              value = -999.
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
+     j                      iitem, c20, newfrm, .false. )
+          enddo
+          read ( io_asc , '(i10)' ) naanta
+          do iaanta = 1,naanta
+              read ( io_asc , 3002) c10,c1,c50,c20
+              value = -999.
+              call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
+     j                      iitem, c20, newfrm, .true. )
+          enddo
+      endif
       close (io_asc)
 
 c     Sort and check R6-R7-R8
@@ -350,7 +419,7 @@ c     Sort and check R6-R7-R8
       call chksto ( veloit, velosu, velosc, nvelo , itemid, nitem )
 
 c     Create/update tables R1, R2
-      call cratab (grp,newtab)
+      call cratab (grp,newtab,initialConfgId,initialConfgName)
 
 c     Clear tables
       call cldept
@@ -388,12 +457,36 @@ c                 write (*,'(1x,a20,'' : '',f10.1)' )
 c    j            itemid(i),itemde(i)
               endif
           endif
-           call zoek (itemid(i)(1:5),1,'depth',5,ihulp)
-           if ( ihulp .eq. 1 ) itemde(i) = -999.
-           call zoek (itemid(i)(1:4),1,'delt',4,ihulp)
-           if ( ihulp .eq. 1 ) itemde(i) = -999.
-           call zoek (itemid(i)(1:10),1,'totaldepth',10,ihulp)
-           if ( ihulp .eq. 1 ) itemde(i) = -999.
+
+          call zoek (itemid(i)(1:5),1,'depth',5,ihulp)
+          if ( ihulp .eq. 1 ) itemde(i) = -999.
+          call zoek (itemid(i)(1:4),1,'delt',4,ihulp)
+          if ( ihulp .eq. 1 ) itemde(i) = -999.
+          call zoek (itemid(i)(1:10),1,'totaldepth',10,ihulp)
+          if ( ihulp .eq. 1 ) itemde(i) = -999.
+
+          if (duprol) then
+
+c         Remove defaults for DUFLOW hydro parameters, so that conversion process will be activated
+              call zoek (itemid(i)(1:5),1,'Z    ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'Q    ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'As   ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'dt   ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'dx   ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'V    ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'Wf   ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'Wd   ',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'Chezy',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
+          endif
   120 continue
 
       endif
@@ -404,10 +497,40 @@ c----------------------------------------------------------------------c
 
       call writdb ( 15 )
 
+c----------------------------------------------------------------------c
+c     Write prefined set for SOBEK (DUPROL mode ONLY)
+c----------------------------------------------------------------------c
+
+      if (duprol) then
+          i = index (pdffil,'.')
+          if (i.le.1) stop 'Bug 097'
+          procesnaam = pdffil(1:i-1)
+          pdffil = trim(procesnaam)//'.0'
+          open (15,file=pdffil)
+          write (15,1000) trim(initialConfgId)
+          write (15,'(''this file is not available for a DUFLOW model '')')
+          close (15)
+          pdffil = trim(procesnaam)//'.des'
+          open (15,file=pdffil)
+          write (15,'(''DUFLOW model '',a)') trim(procesnaam)
+          close (15)
+          pdffil = trim(procesnaam)//'.sub'
+          open (15,file=pdffil)
+          call wrisub(15)
+          close (15)
+      endif
+
+ 1000 format ('configuration ''',a,''' serial 2011010101') 
+ 1010 format ('2011010101') 
+
       close (io_mes)
 
       stop 'Normal end'
   999 stop 'PROCES.ASC does not exist!!!!!!!!!'
+ 2001 format (a10,f18.0,a1,1x,a50)
+ 2002 format (a10,18x,  a1,1x,a50)
+ 3001 format (a10,f18.0,a1,1x,a50,5x,a20)
+ 3002 format (a10,18x,  a1,1x,a50,5x,a20)
       end
 
       subroutine iniind()
@@ -439,9 +562,11 @@ c     Initialise indexes arrays
       return
       end
 
-      subroutine cratab (grp,newtab)
+      subroutine cratab (grp,newtab,initialConfgId,initialConfgName)
 
       character*30 grp
+      character*10 initialConfgId
+      character*50 initialConfgName
       include 'data.inc'
       integer iitem , iproc, icnpr, iconf
       logical newtab
@@ -455,8 +580,8 @@ c         Dummy versions of tables P1 and P5
           sgrpid(1) = grp
           sgrpnm(1) = grp
           nconf = 1
-          confid(1) = 'DummyConfg'
-          confnm(1) = 'DummyConfg'
+          confid(1) = initialConfgId
+          confnm(1) = initialConfgName
 
 c         Table R1
 c         include all processes in Dummy configuration

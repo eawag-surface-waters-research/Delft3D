@@ -3848,6 +3848,7 @@ src/tools_gpl/waqpb/packages/waqpb_lib/src/clrcar.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/coefed.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/finuni.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/makind.f -text
+src/tools_gpl/waqpb/packages/waqpb_lib/src/newfrm.txt -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/pdfnef.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/readdb.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/sortst.f -text
@@ -3871,6 +3872,7 @@ src/tools_gpl/waqpb/packages/waqpb_lib/src/wr_tabr8.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/wr_tabr9.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/wridoc.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/wripdf.f -text
+src/tools_gpl/waqpb/packages/waqpb_lib/src/wrisub.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/writex.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/writrm.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/zoek.f -text

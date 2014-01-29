@@ -1,13 +1,15 @@
       subroutine upd_p2 ( c10   , c50   , value , segmnt, newtab,
-     j                    grp   , io_mes, iitem )
+     j                    grp   , io_mes, iitem , c20   , newfrm,
+     j                    bodem )
       include 'data.inc'
       character*10 c10, naam
+      character*20 c20
       character*30 grp
       character*50 c50, c50l
       real         value
       integer      jndex , segmnt, ihulp1, ihulp2, io_mes, ihulp, j
       integer      ihulp3, ihulp4, iitem
-      logical      newtab
+      logical      newtab, newfrm, bodem
       integer      nitem0
       save         nitem0
       data         nitem0 /-999/
@@ -20,28 +22,51 @@ c     segmnt = 0: item defined as substance
 
       call zoek ( c10, nitem, itemid, 10, jndex)
       if ( jndex .le. 0 ) then
+
+c         NEW ITEM
+
           jndex = nitem + 1
           if (jndex.gt.nitemm) stop 'DIMENSION NITEMM'
           nitem = jndex
           itemid(jndex) = c10
-          if ( c50 .eq. ' ' ) then
-              itemnm(jndex) = 'undefined'
-              itemun(jndex) = '{no unit}'
-          else
-c             Separate descriptions from units
-              ihulp = 0
-              c50l = c50
-              call finuni ( c50l , ihulp )
-              if ( ihulp .gt. 0 ) then
+
+c         Alternative approach for newfrm and EXISTING formats
+
+          if (newfrm) then
+c             newfrm format
+              if ( c50 .eq. ' ' ) then
+                  itemnm(jndex) = 'undefined'
+               else
+                  itemnm(jndex) = c50
+              endif
+              if ( c20 .eq. ' ' ) then
+                  itemun(jndex) = '{no unit}'
+               else
+                  itemun(jndex) = c20
+              endif
+c             end newfrm format
+	    else
+c             existing format
+              if ( c50 .eq. ' ' ) then
+                  itemnm(jndex) = 'undefined'
+                  itemun(jndex) = '{no unit}'
+               else
+c                 Separate descriptions from units
+                  ihulp = 0
+                  c50l = c50
+                  call finuni ( c50l , ihulp )
+                  if ( ihulp .gt. 0 ) then
 c                 ihulp = max(ihulp,31)
                   itemun(jndex) = c50l(ihulp:50)
                   do 145 j = ihulp, 50
   145             c50l(j:j) = ' '
-              else
-                  itemun(jndex) = '{no unit}'
+                  else
+                      itemun(jndex) = '{no unit}'
+                  endif
+                  itemnm(jndex) = c50l
               endif
-              itemnm(jndex) = c50l
-          endif
+c             end existing format
+	    endif
           itemse(jndex) = ' '
           itemex(jndex) = ' '
           itemde(jndex) = -999.
@@ -52,28 +77,58 @@ c                 ihulp = max(ihulp,31)
           if ( .not. newtab ) write ( io_mes , 1000 ) c10
  1000     format ('Item       ',a10,' added to table P2')
       else
-          if ( itemnm(jndex) .eq. 'undefined' .and.
-     j         c50 .ne. ' ' ) then
-c             Separate descriptions from units
-              ihulp = 0
-              c50l = c50
-              call finuni ( c50l , ihulp )
-              if ( ihulp .gt. 0 ) then
+
+c         Existing item, only actions if certain fields are undefined
+
+c         Alternative approach for newfrm and EXISTING formats
+
+          if (newfrm) then
+c             newfrm format
+              if ( itemnm(jndex) .eq. 'undefined' .and.
+     j            c50 .ne. ' ' ) itemnm(jndex) = c50
+              if ( itemun(jndex) .eq. '{no unit}' .and.
+     j            c20 .ne. ' ' ) itemun(jndex) = c20
+c             end newfrm format
+	    else
+c             existing format
+              if ( itemnm(jndex) .eq. 'undefined' .and.
+     j            c50 .ne. ' ' ) then
+c                 Separate descriptions from units
+                  ihulp = 0
+                  c50l = c50
+                  call finuni ( c50l , ihulp )
+                  if ( ihulp .gt. 0 ) then
 c                 ihulp = max(ihulp,31)
                   itemun(jndex) = c50l(ihulp:50)
                   do 146 j = ihulp, 50
   146             c50l(j:j) = ' '
-              else
-                  itemun(jndex) = '{no unit}'
+                  else
+                      itemun(jndex) = '{no unit}'
+                  endif
+                  itemnm(jndex) = c50l
               endif
-              itemnm(jndex) = c50l
-          endif
+c             end existing format
+	    endif
       endif
 
 c     Actions below ONLY for new items
 
       if ( jndex .gt. nitem0 ) then
           if ( segmnt .eq. 0 ) then
+
+c         Alternative approach for newfrm and EXISTING formats
+
+          if (newfrm) then
+c             newfrm format
+              itemgr(jndex) = grp
+              if ( bodem ) then
+                  itemwk(jndex) = ' '
+              else
+                  itemwk(jndex) = 'x'
+              endif
+c             end newfrm format
+	    else
+c             existing format
               itemgr(jndex) = grp
               ihulp1 = index ( c10 , 'S1' )
               ihulp2 = index ( c10 , 'S2' )
@@ -87,6 +142,8 @@ c     Actions below ONLY for new items
               else
                   itemwk(jndex) = 'x'
               endif
+c             end existing format
+	    endif
           endif
           if ( segmnt .eq. 1 ) itemse(jndex) = 'x'
           if ( segmnt .eq. 2 ) itemex(jndex) = 'x'
