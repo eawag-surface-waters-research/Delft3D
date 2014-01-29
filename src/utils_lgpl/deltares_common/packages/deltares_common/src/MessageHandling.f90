@@ -337,11 +337,12 @@ subroutine resetMaxerrorLevel()
 end subroutine
 
 subroutine message1string(level, w1)
+  use iso_c_utils
     character(*)    :: w1
     integer         :: level
 
     integer                        :: l1
-    character(600)                 :: rec
+    character(MAXSTRINGLEN)                 :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
