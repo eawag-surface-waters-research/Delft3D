@@ -42,7 +42,7 @@
 #include <string.h>
 #include <new>
 
-#if defined (WIN32)
+#if defined (WIN32) || defined(WIN64)
 #   include <process.h>
 #   include <ws2tcpip.h>
 

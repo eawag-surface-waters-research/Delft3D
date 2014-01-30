@@ -1,4 +1,4 @@
-//-------------------------------------------------------------------------------
+ //-------------------------------------------------------------------------------
 //  DelftOnline -- Global (Client/Server) Include File
 //
 //  This include file is very long, and contains not only API-related
@@ -43,7 +43,7 @@
 #include <stdio.h>
 
 
-#if defined (WIN32)
+#if defined (WIN32) || defined (WIN64)
 #   include <io.h>
 #   include <winsock.h>
 #   if defined (VS2008)

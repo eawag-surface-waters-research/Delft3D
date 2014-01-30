@@ -37,7 +37,7 @@
 #include "dol.h"
 
 
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN64)
 #   define vsnprintf _vsnprintf
 #endif
 
@@ -53,7 +53,7 @@ Client::initialize (
 
     if (! Client::initialized) {
         Client::initialized = true;
-#if defined (WIN32)
+#if defined (WIN32) || defined(WIN64)
         WORD versionRequested = MAKEWORD (1, 1);
         WSADATA wsaData;
         if (WSAStartup (versionRequested, &wsaData) != 0)
