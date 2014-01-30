@@ -39,6 +39,8 @@ type gd_bcdat
    integer     , dimension(:)    , pointer :: pindex          ! converts component number in internal database to component number used in hydrbc, hydrbcf and compnames
    integer     , dimension(:)    , pointer :: bct_order       ! stores the original order of the timeseries-boundaries in the bct file
                                                               ! used for parallel
+   integer     , dimension(:)    , pointer :: bct_to_tindex   ! stores the original order of the timeseries-boundaries in the bct file
+                                                              ! used for parallel
    integer     , dimension(:,:)  , pointer :: mnbnd_global    ! Copy of mnbnd containing the boundary indices of all boundaries in global indices
                                                               ! used for parallel
    integer     , dimension(:)    , pointer :: ext_bnd         ! mask array to identify boundaries whose information is prescribed by external components (e.g. SobekSIM) instead of the (dummy) input file

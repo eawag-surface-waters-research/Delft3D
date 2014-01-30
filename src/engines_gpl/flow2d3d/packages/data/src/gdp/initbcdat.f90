@@ -52,6 +52,7 @@ gdp%gdbcdat%ncomp  = -999
 gdp%gdbcdat%nsplit = -999
 nullify(gdp%gdbcdat%pindex)
 nullify(gdp%gdbcdat%bct_order)
+nullify(gdp%gdbcdat%bct_to_tindex)
 nullify(gdp%gdbcdat%mnbnd_global)
 nullify(gdp%gdbcdat%ext_bnd)
 gdp%gdbcdat%ascon  = ' '

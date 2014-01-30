@@ -1,5 +1,5 @@
 subroutine inibct(lundia    ,error     ,runid     , &
-                & itbct     ,nto       ,ntof      , &
+                & itbct     ,nto       ,ntoftoq   , &
                 & kmax      ,kcd       ,nambnd    ,typbnd    ,tprofu    , &
                 & hydrbc    ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -57,19 +57,20 @@ subroutine inibct(lundia    ,error     ,runid     , &
 !
 ! Global variables
 !
-    integer                                            :: kcd    !  Description and declaration in dimens.igs
-    integer                                            :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                            :: lundia !  Description and declaration in inout.igs
-    integer                                            :: nto    !  Description and declaration in esm_alloc_int.f90
-    integer                              , intent(in)  :: ntof   !  Description and declaration in dimens.igs
-    integer      , dimension(5, nto)                   :: itbct  !  Description and declaration in esm_alloc_int.f90
-    logical                              , intent(in)  :: bubble !  Description and declaration in procs.igs
-    logical                                            :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)     , dimension(4, nto, kcd)              :: hydrbc !  Description and declaration in esm_alloc_real.f90
+    integer                                            :: kcd     !  Description and declaration in dimens.igs
+    integer                                            :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                            :: lundia  !  Description and declaration in inout.igs
+    integer                                            :: nto     !  Description and declaration in esm_alloc_int.f90
+    integer                              , intent(in)  :: ntoftoq ! Number of open boundary sections before the time series type:
+                                                                  ! ntoftoq = ntof + ntoq
+    integer      , dimension(5, nto)                   :: itbct   !  Description and declaration in esm_alloc_int.f90
+    logical                              , intent(in)  :: bubble  !  Description and declaration in procs.igs
+    logical                                            :: error   !!  Flag=TRUE if an error is encountered
+    real(fp)     , dimension(4, nto, kcd)              :: hydrbc  !  Description and declaration in esm_alloc_real.f90
     character(*)                                       :: runid
-    character(1) , dimension(nto)                      :: typbnd !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto)                      :: nambnd !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto)                      :: tprofu !  Description and declaration in esm_alloc_char.f90
+    character(1) , dimension(nto)                      :: typbnd  !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                      :: nambnd  !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                      :: tprofu  !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -166,7 +167,7 @@ subroutine inibct(lundia    ,error     ,runid     , &
              !
              call keyinp(record(istart:iend)  ,chlp20   )
              call small(chlp20    ,len(chlp20)          )
-             do ito = ntof+1, nto
+             do ito = ntoftoq+1, nto
                 namhlp = nambnd(ito)
                 call small(namhlp    ,len(namhlp)          )
                 if ( chlp20 == namhlp ) then
@@ -198,9 +199,9 @@ subroutine inibct(lundia    ,error     ,runid     , &
        enddo
     endif
     !
-    ! Loop over NTOF+1>NTO open boundary points
+    ! Loop over ntoftoq+1>NTO open boundary points
     !
-    do ito = ntof + 1, nto
+    do ito = ntoftoq + 1, nto
        !
        if (parll) irecrd = irecs(ito)
        !
@@ -284,8 +285,8 @@ subroutine inibct(lundia    ,error     ,runid     , &
     !
     ! Read first time dep. input
     !
-    if (nto > ntof) then
-       call updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, gdp)
+    if (nto > ntoftoq) then
+       call updbct(lundia, filnam, ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error, gdp)
     endif
  9999 continue
 end subroutine inibct

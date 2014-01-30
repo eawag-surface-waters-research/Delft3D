@@ -399,18 +399,18 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer                            :: ierror
     integer                            :: itype
     integer                            :: nmaxddb
-    integer                            :: nst     ! Current time step counter
-    integer                            :: ntot0   ! Number of open boundary sections before the time series type
+    integer                            :: nst          ! Current time step counter
+    integer                            :: ntoftoq      ! Number of open boundary sections before the time series type:
+                                                       ! ntoftoq = ntof + ntoq
     integer                            :: ifirst_dens  ! Flag to initialize the water density array
     integer, dimension(:), allocatable :: kcucopy
     integer, dimension(:), allocatable :: kcvcopy
-    real(fp)                           :: timnow  ! Current timestep (multiples of dt)
+    real(fp)                           :: timnow       ! Current timestep (multiples of dt)
     real(fp), dimension(1)             :: value
     logical                            :: success
-    character(8)                       :: stage   ! First or second half time step
-                                                  ! Stage = 'both' means that in F0ISF1 the layering administration
-                                                  ! is copied for both the U- and the V-direction
-
+    character(8)                       :: stage        ! First or second half time step
+                                                       ! Stage = 'both' means that in F0ISF1 the layering administration
+                                                       ! is copied for both the U- and the V-direction
 !
 !! executable statements -------------------------------------------------------
 !
@@ -771,9 +771,9 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! at open boundaries (hydrodynamic input)
     !
     if (flbct) then
-       ntot0 = ntof + ntoq
+       ntoftoq = ntof + ntoq
        call inibct(lundia    ,error     ,runid     , &
-                 & i(itbct)  ,nto       ,ntot0     , &
+                 & i(itbct)  ,nto       ,ntoftoq   , &
                  & kmax      ,kcd       ,ch(nambnd),ch(typbnd),ch(tprofu), &
                  & r(hydrbc) ,bubble    ,gdp       )
        if (error) goto 9999

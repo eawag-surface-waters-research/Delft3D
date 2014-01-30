@@ -1,4 +1,4 @@
-subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, gdp)
+subroutine updbct(lundia, filnam, ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -38,6 +38,7 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     use handles
     use flow_tables
     use globaldata
+    use dfparall
     use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
@@ -51,20 +52,22 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     integer                          , pointer :: htype
     integer                          , pointer :: timerec
     integer, dimension(:)            , pointer :: bct_order
+    integer, dimension(:)            , pointer :: bct_to_tindex
     integer, dimension(:)            , pointer :: ext_bnd
     type (handletype)                , pointer :: tseriesfile
     !
     ! Global variables
     !
-    integer                      , intent(in)  :: kcd    !  Description and declaration in dimens.igs
-    integer                      , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                      , intent(in)  :: lundia !  Description and declaration in inout.igs
-    character(len=*)             , intent(in)  :: filnam !  filename of TMP bct file
-    integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
-    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(4, nto, kcd)           :: hydrbc !  Description and declaration in esm_alloc_real.f90
-    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in esm_alloc_char.f90
-    logical                      , intent(out) :: error  !  Flag=TRUE if an error is encountered
+    integer                      , intent(in)  :: kcd     ! Description and declaration in dimens.igs
+    integer                      , intent(in)  :: kmax    ! Description and declaration in esm_alloc_int.f90
+    integer                      , intent(in)  :: lundia  ! Description and declaration in inout.igs
+    character(len=*)             , intent(in)  :: filnam  ! filename of TMP bct file
+    integer                      , intent(in)  :: ntoftoq ! Number of open boundary sections before the time series type:
+                                                          ! ntoftoq = ntof + ntoq
+    integer                      , intent(in)  :: nto     ! Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(4, nto, kcd)           :: hydrbc  ! Description and declaration in esm_alloc_real.f90
+    character(20), dimension(nto), intent(in)  :: tprofu  ! Description and declaration in esm_alloc_char.f90
+    logical                      , intent(out) :: error   ! Flag=TRUE if an error is encountered
 !
 ! Local variables
 !
@@ -85,6 +88,7 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     htype        => gdp%gdinibct%tseriesfile%htype
     timerec      => gdp%gdinibct%timerec
     bct_order    => gdp%gdbcdat%bct_order
+    bct_to_tindex=> gdp%gdbcdat%bct_to_tindex
     ext_bnd      => gdp%gdbcdat%ext_bnd
     !
     error = .false.
@@ -98,9 +102,14 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     endif
     !
     minrec = huge(minrec)
-    do ito = ntof + 1, nto
+    do ito = ntoftoq + 1, nto
        if (ext_bnd(ito) == 1) cycle
        irec = max(1, timerec)
+       if (parll) then
+          tablenumber = bct_to_tindex(bct_order(ito))
+       else
+          tablenumber = bct_order(ito-ntoftoq)
+       endif
        if (tprofu(ito) == '3d-profile') then
           if (.not. allocated(work)) then
              allocate(work(2*kmax), stat=istat)
@@ -110,7 +119,6 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
                 return
              endif
           endif
-          tablenumber = bct_order(ito-ntof)
           call flw_gettabledata(tseriesfile, tablenumber, 1, 2*kmax, irec, work, timhr, julday, gdp)
           do j = 1, 2
              do k = 1, kmax
@@ -118,7 +126,6 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
              enddo
           enddo
        else
-          tablenumber = bct_order(ito-ntof)
           call flw_gettabledata(tseriesfile, tablenumber , 1, 2, irec, hydrbc(1:2,ito,1), timhr, julday, gdp)
        endif
        minrec = min(minrec, irec)

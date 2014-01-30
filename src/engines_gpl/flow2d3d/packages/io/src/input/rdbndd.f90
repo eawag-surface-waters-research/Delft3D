@@ -68,6 +68,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer              , pointer :: mmaxgl
     integer              , pointer :: nmaxgl
     integer, dimension(:), pointer :: bct_order
+    integer, dimension(:), pointer :: bct_to_tindex
 !
 ! Global variables
 !
@@ -104,6 +105,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Local variables
 !
+    integer                                     :: i
     integer                                     :: idef     ! Help var. containing default va- lue(s) for integer variable 
     integer                                     :: inprof   ! Index number of first character in PROFIL string of TPROFC definition
     integer                                     :: istat
@@ -116,12 +118,10 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                     :: n        ! Help var. 
     integer                                     :: nlook    ! Help var.: nr. of data to look for in the MD-file 
     integer                                     :: nn
-    integer                                     :: nn_t    
     integer                                     :: ntest    ! Help var. 
     integer                                     :: ntrec    ! Help. var to keep track of NRREC 
     integer       , dimension(4)                :: ival     ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
     integer       , dimension(mxdnto)           :: nsd      ! integer array to store sequence numbers of arrays mnbnd, alpha, typbnd, datbnd, statns, nambnd and tprofu in own subdomain
-    integer       , dimension(mxdnto)           :: nsd_t    ! integer array to store sequence numbers of timeserie-boundaries arrays in own subdomain
     integer       , dimension(:,:), allocatable :: itemp    ! work array to store mnbnd temporarily
     logical                                     :: defaul   ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     logical                                     :: found
@@ -162,6 +162,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     nmaxgl    => gdp%gdparall%nmaxgl
     mmaxgl    => gdp%gdparall%mmaxgl
     bct_order => gdp%gdbcdat%bct_order
+    bct_order => gdp%gdbcdat%bct_to_tindex
     !
     ! initialize local parameters
     !
@@ -516,13 +517,37 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! bct_order must have the dimension of the global number of boundary conditions (mxdnto).
        ! nto is the number of open boundaries in this specific partition
        !
-       allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
-       gdp%gdbcdat%bct_order = 0
+                    allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
+       if (istat==0) allocate(gdp%gdbcdat%bct_to_tindex(mxdnto), stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order,bct_to_tindex)')
           call d3stop(1, gdp)
        endif    
-       bct_order => gdp%gdbcdat%bct_order
+       bct_order     => gdp%gdbcdat%bct_order
+       bct_to_tindex => gdp%gdbcdat%bct_to_tindex
+       bct_order     = 0
+       bct_to_tindex = 0
+       !
+       ! The (global) boundaries are ordered:
+       ! - first the astronomic/harmonic boundaries (ntof pieces)
+       ! - then the Q boundaries                    (ntoq pieces)
+       ! - finally the Time series boundaries       (nto-ntof-ntoq pieces)
+       ! When running parallel, all boundaries that are completely outside this partition are removed in this subroutine
+       ! nto, ntof, ntoq will be adapted for this partition
+       ! Each boundary (partly) inside this partition has a reference to the original global boundary index:
+       !     bct_order(i) =  order of boundary i in original global boundaries list
+       ! For Time series boundaries:
+       !     In the original global boundary list, index-ntof-ntoq refers to the related table in the bct file:
+       !         boundary(ntof+ntoq+i) refers to table i in the bct file
+       !     When running parallel and boundaries outside this partition are removed, bct_to_tindex is used to find
+       !     the correct table in the bct file:
+       !         bct_to_tindex(bct_order(ito)) refers to the correct table in the bct file. See updbct.f90
+       !
+       i = 1
+       do n = ntof+ntoq+1, mxdnto
+          bct_to_tindex(n) = i
+          i                = i + 1
+       enddo
        !
        ! Store the original global mnbnd
        ! Only mnbnd_global(1:4,:) is set yet, but that's all that's needed
@@ -534,9 +559,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
        gdp%gdbcdat%mnbnd_global = mnbnd
        nn    = 0
-       nn_t  = 0       
        nsd   = 0
-       nsd_t = 0
        do n = 1, nto
           !
           ! first, check whether mnbnd values are inside entire domain
@@ -576,13 +599,8 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              mnbnd(2, n) = ival(2)
              mnbnd(3, n) = ival(3)
              mnbnd(4, n) = ival(4)
-             nn = nn +1
-             nsd(nn) = n
-             if (n > ntof + ntoq) then
-                nn_t = nn_t + 1
-                nsd_t(nn_t) = n - ntof - ntoq 
-             endif   
-          
+             nn          = nn + 1
+             nsd(nn)     = n
           endif
        enddo
        !
@@ -641,14 +659,6 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              nhsub(ntof) = nsd(n)
           endif
           bct_order(n) = nsd(n)         
-       enddo
-       !
-       ! bct_order is used to map the boundary acrossing the parallel subdomains. sensitive in timeseries. 
-       !
-       do n = 1, nto-ntof-ntoq ! nto-ntof-ntoq is the same as nn_t
-          if(typbnd(n)=='T'.or.datbnd(n)=='Q'.or.typbnd(n)=='R') then
-             bct_order(n) = nsd_t(n)
-          endif
        enddo
        deallocate(ctmp1,ctmp2,ctmp3,itemp,rtemp, stat=istat)
     endif ! parll and not.yestdd

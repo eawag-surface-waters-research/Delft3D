@@ -219,7 +219,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                             :: npbi           ! N index of point at boundary inside domain
     integer                             :: npbt           ! N index of boundary point
     integer                             :: nsta           ! Starting coord. (in the y-dir.) of an open bound. section 
-    integer                             :: ntot0          ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
+    integer                             :: ntoftoq        ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
     integer                             :: posrel         ! code denoting the position of the open boundary, related to the complete grid
     integer                             :: lb             ! lowerboundary of loopcounter
     integer                             :: ub             ! upperboundary of loopcounter
@@ -310,13 +310,13 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     ! TIMSCL will not been used in UPDBCC
     !
    
-    first  = .false.
-    horiz  = .false.
-    udir   = .false.
-    vdir   = .false.
-    ntot0  = ntof + ntoq
-    timscl = 1.0_fp
-    tcur   = (timnow - time_nodal_update_bnd)*dt*tunit/3600.0_fp
+    first   = .false.
+    horiz   = .false.
+    udir    = .false.
+    vdir    = .false.
+    ntoftoq = ntof + ntoq
+    timscl  = 1.0_fp
+    tcur    = (timnow - time_nodal_update_bnd)*dt*tunit/3600.0_fp
     !
     k1st  = -999
     k2nd  = -999
@@ -642,8 +642,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! Update time series values if necessary
     !
-    if (nto > ntot0) then
-       call updbct(lundia, ' ', ntot0, nto, kcd, kmax, hydrbc, tprofu, error, gdp)
+    if (nto > ntoftoq) then
+       call updbct(lundia, ' ', ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error, gdp)
        if (error) call d3stop(1, gdp)
     endif
     !
