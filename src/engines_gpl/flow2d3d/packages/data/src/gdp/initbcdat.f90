@@ -42,17 +42,17 @@ subroutine initbcdat(gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-gdp%gdbcdat%timtap = -999.0_fp
-gdp%gdbcdat%depbnd = -999.0_fp
-gdp%gdbcdat%nmskf  = -999
-gdp%gdbcdat%nmskl  = -999
-gdp%gdbcdat%mmskf  = -999
-gdp%gdbcdat%mmskl  = -999
-gdp%gdbcdat%ncomp  = -999
-gdp%gdbcdat%nsplit = -999
+gdp%gdbcdat%timtap   = -999.0_fp
+gdp%gdbcdat%depbnd   = -999.0_fp
+gdp%gdbcdat%nmskf    = -999
+gdp%gdbcdat%nmskl    = -999
+gdp%gdbcdat%mmskf    = -999
+gdp%gdbcdat%mmskl    = -999
+gdp%gdbcdat%ncomp    = -999
+gdp%gdbcdat%nsplit   = -999
+gdp%gdbcdat%gntoftoq = -999
 nullify(gdp%gdbcdat%pindex)
 nullify(gdp%gdbcdat%bct_order)
-nullify(gdp%gdbcdat%bct_to_tindex)
 nullify(gdp%gdbcdat%mnbnd_global)
 nullify(gdp%gdbcdat%ext_bnd)
 gdp%gdbcdat%ascon  = ' '

@@ -38,7 +38,6 @@ subroutine updbct(lundia, filnam, ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error
     use handles
     use flow_tables
     use globaldata
-    use dfparall
     use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
@@ -52,7 +51,7 @@ subroutine updbct(lundia, filnam, ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error
     integer                          , pointer :: htype
     integer                          , pointer :: timerec
     integer, dimension(:)            , pointer :: bct_order
-    integer, dimension(:)            , pointer :: bct_to_tindex
+    integer                          , pointer :: gntoftoq
     integer, dimension(:)            , pointer :: ext_bnd
     type (handletype)                , pointer :: tseriesfile
     !
@@ -88,7 +87,7 @@ subroutine updbct(lundia, filnam, ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error
     htype        => gdp%gdinibct%tseriesfile%htype
     timerec      => gdp%gdinibct%timerec
     bct_order    => gdp%gdbcdat%bct_order
-    bct_to_tindex=> gdp%gdbcdat%bct_to_tindex
+    gntoftoq     => gdp%gdbcdat%gntoftoq
     ext_bnd      => gdp%gdbcdat%ext_bnd
     !
     error = .false.
@@ -105,11 +104,10 @@ subroutine updbct(lundia, filnam, ntoftoq, nto, kcd, kmax, hydrbc, tprofu, error
     do ito = ntoftoq + 1, nto
        if (ext_bnd(ito) == 1) cycle
        irec = max(1, timerec)
-       if (parll) then
-          tablenumber = bct_to_tindex(bct_order(ito))
-       else
-          tablenumber = bct_order(ito-ntoftoq)
-       endif
+       !
+       ! See big comment block about gntoftoq in rdbndd.f90
+       !
+       tablenumber = bct_order(ito) - gntoftoq
        if (tprofu(ito) == '3d-profile') then
           if (.not. allocated(work)) then
              allocate(work(2*kmax), stat=istat)

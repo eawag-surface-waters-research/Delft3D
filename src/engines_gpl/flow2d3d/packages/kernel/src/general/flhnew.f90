@@ -172,8 +172,22 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
        !
        if (ifound == -9999) then
           error = .true.
-       elseif (ifound==0 .and. nkeyfd==0) then
+       elseif (ifound==0 .and. nkeyfd==0 .and. error==.false.) then
           ready = .true.
+       elseif (ifound==0 .and. nkeyfd==0 .and. error==.true.) then
+          !
+          ! When running parallel, boundaries outside this partition are removed
+          ! The removed boundaries must be skipped in this routine too
+          ! When the boundary name is not correct, error is set to .true. (and ready remains .false.)
+          ! It is assumed that the boundary read should be skipped for this partition
+          ! Some read parameters (related to the boundary to be skipped) are reset here
+          ! and reading continues
+          !
+          ntimrd = 0
+          timser = ' '
+          nparrd = 0
+          parrd  = ' '
+          goto 10
        elseif (ifound==0 .and. nkeyfd>0) then
           !
           ! No second keyword in RECORD, read new RECORD
@@ -240,10 +254,22 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
                    error = .false.
                    ready = .false.
                 else
-                   call prterr(lundia    ,'V099'    ,chlp20    )
+                   !
+                   ! Name does not match
+                   ! Assumed: this is a parallel run and the boundary read is completely outside this partition
+                   ! Set error to .true. and continue reading (ready = .false.)
+                   ! The related error message is removed
+                   !
                    error = .true.
-                   ready = .true.
+                   ready = .false.
                 endif
+             else
+                !
+                ! Name matches
+                ! error might be set to .true. before  (see 6 lines above)
+                ! and must be set to .false. here
+                !
+                error = .false.
              endif
           elseif (ifound == 17) then
              !

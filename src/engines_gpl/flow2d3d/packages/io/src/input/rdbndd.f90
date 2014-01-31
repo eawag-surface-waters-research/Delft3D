@@ -68,7 +68,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer              , pointer :: mmaxgl
     integer              , pointer :: nmaxgl
     integer, dimension(:), pointer :: bct_order
-    integer, dimension(:), pointer :: bct_to_tindex
+    integer              , pointer :: gntoftoq
 !
 ! Global variables
 !
@@ -162,7 +162,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     nmaxgl    => gdp%gdparall%nmaxgl
     mmaxgl    => gdp%gdparall%mmaxgl
     bct_order => gdp%gdbcdat%bct_order
-    bct_order => gdp%gdbcdat%bct_to_tindex
+    gntoftoq  => gdp%gdbcdat%gntoftoq
     !
     ! initialize local parameters
     !
@@ -501,32 +501,33 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        nhsub(n) = n
     enddo
     if (.not.parll .and. .not.yestdd) then
-       allocate (gdp%gdbcdat%bct_order(nto - ntof - ntoq), stat=istat)
+       allocate (gdp%gdbcdat%bct_order(nto), stat=istat)
        gdp%gdbcdat%bct_order = 0
        if (istat /= 0) then
           call prterr(lundia, 'P004', 'memory alloc error in rdbndd')
           call d3stop(1, gdp)
        endif
        bct_order => gdp%gdbcdat%bct_order
-       do n = 1, nto - ntof - ntoq
+       do n = 1, nto
           bct_order(n) = n
        enddo
     endif
+    !
+    ! See big comment block below
+    !
+    gntoftoq = ntof + ntoq
     if (parll .and. .not.yestdd) then
        !      
        ! bct_order must have the dimension of the global number of boundary conditions (mxdnto).
        ! nto is the number of open boundaries in this specific partition
        !
-                    allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
-       if (istat==0) allocate(gdp%gdbcdat%bct_to_tindex(mxdnto), stat=istat)
+       allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order,bct_to_tindex)')
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
           call d3stop(1, gdp)
        endif    
        bct_order     => gdp%gdbcdat%bct_order
-       bct_to_tindex => gdp%gdbcdat%bct_to_tindex
        bct_order     = 0
-       bct_to_tindex = 0
        !
        ! The (global) boundaries are ordered:
        ! - first the astronomic/harmonic boundaries (ntof pieces)
@@ -538,16 +539,12 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !     bct_order(i) =  order of boundary i in original global boundaries list
        ! For Time series boundaries:
        !     In the original global boundary list, index-ntof-ntoq refers to the related table in the bct file:
-       !         boundary(ntof+ntoq+i) refers to table i in the bct file
-       !     When running parallel and boundaries outside this partition are removed, bct_to_tindex is used to find
-       !     the correct table in the bct file:
-       !         bct_to_tindex(bct_order(ito)) refers to the correct table in the bct file. See updbct.f90
+       !         boundary "ntof+ntoq+i" refers to table i in the bct file
+       !     When running parallel and boundaries outside this partition are removed, 
+       !     the correct table in the bct file is found by using bct_order and gntoftoq:
+       !         "bct_order(i) - gntoftoq" refers to the correct table in the bct file. See updbct.f90
+       !     This also holds for non-parallel calculations
        !
-       i = 1
-       do n = ntof+ntoq+1, mxdnto
-          bct_to_tindex(n) = i
-          i                = i + 1
-       enddo
        !
        ! Store the original global mnbnd
        ! Only mnbnd_global(1:4,:) is set yet, but that's all that's needed
