@@ -761,9 +761,9 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        h0  = max(h0 , 0.01_fp)
        !
        ! calculate CIRC2/3D array
-       ! where nob (4,n) := sort opening and
+       ! where nob (4,n) := type of opening and
        ! nob (5,n) := row (conform irocol table)
-       ! nob (6,n) := sort opening and
+       ! nob (6,n) := type of opening and
        ! nob (7,n) := column (conform irocol table)
        !
        kpr = nob(4, n)
@@ -1221,7 +1221,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 !
                 ! Amplitude and phase values at individual boundary
                 ! points for all KC components,
-                ! for all sort of profiles the boundary values are
+                ! for all profile types the boundary values are
                 ! defined as depth averaged
                 !
                 do k = 1, kc

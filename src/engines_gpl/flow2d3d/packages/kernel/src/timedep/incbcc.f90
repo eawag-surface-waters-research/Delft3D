@@ -514,9 +514,9 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           enddo
           !
           ! calculate rbnd array
-          ! where nob (4,n) := sort opening and
+          ! where nob (4,n) := type of opening and
           !       nob (5,n) := row (conform irocol table)
-          !       nob (6,n) := sort opening and
+          !       nob (6,n) := type of opening and
           !       nob (7,n) := column (conform irocol table)
           !
           kpr = nob(4, n)

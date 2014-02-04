@@ -205,7 +205,7 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     if (error) goto 9999
     !
     ! calculate NOPEST and NLCEST and all NMAX MMAX combinations
-    ! which depend from sort computation (for DROGUE and TEMP no special
+    ! which depends on the type of computation (for DROGUE and TEMP no special
     ! arrays declared yet; for WAVE not yet implemented)
     !
     nopest = 4 * (nmax+mmax)

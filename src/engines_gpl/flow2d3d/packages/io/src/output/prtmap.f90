@@ -125,7 +125,7 @@ subroutine prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
     real(fp)      :: timmin   ! Time since ITDATE in minutes 
     real(fp)      :: timsec   ! Time in seconds 
     character(20) :: adtsim   ! Absolute date and time related to ITDATE and TIMSEC 
-    character(8)  :: eenh     ! Unit for concentrations depending on sort constituent 
+    character(8)  :: eenh     ! Unit for concentrations depending on type of constituent 
     !
     data maxlin/67/
 !

@@ -60,7 +60,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                    :: nrrec   ! Record counter keeping the track of the last record read
     logical      , intent(out) :: error   ! Flag=TRUE if an error is encountered
     logical      , intent(in)  :: noui    ! Flag true if program calling routine is not User Interface
-    character(6)               :: keyw    ! Key word to define the sort of sites
+    character(6)               :: keyw    ! Key word to define the type of "site"
 !
 !
 ! Local variables

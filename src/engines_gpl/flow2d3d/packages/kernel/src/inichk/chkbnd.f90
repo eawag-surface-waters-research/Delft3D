@@ -322,7 +322,7 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
        goto 9999
     endif
     !
-    ! Fill in rows with boundary sort (index 4 and 5 of irocol table)
+    ! Fill in rows with boundary type (index 4 and 5 of irocol table)
     ! Check whether idupl has values different from zero
     !
     ! The commBotBoundary and commTopBoundary are introduced to check if
@@ -457,7 +457,7 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
        endif
     enddo
     !
-    ! fill in columns with boundary sort (4 and 5 of irocol table)
+    ! fill in columns with boundary type (4 and 5 of irocol table)
     !
     commBotBoundary=0
     commTopBoundary=0
