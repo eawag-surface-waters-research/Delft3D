@@ -88,6 +88,8 @@ function initmeteo(runid) result(success)
    allocate(meteopointer)
    meteopointer%nummeteoitems        = 0
    meteopointer%spiderweb%active     = .false.
+   nullify(meteopointer%spiderweb%spwf)
+   nullify(meteopointer%spiderweb%spwarr)
    meteopointer%flowgrid%initialized = .false.
    success                           = addnewsubdomainmeteopointer(runid, meteopointer)
    pi                                = acos(-1.0_fp)
@@ -125,7 +127,7 @@ function gridtometeo(runid, nmax, mmax, &
    if ( .not. associated(meteo) ) then
       return
    endif
-   if (meteo%nummeteoitems == 0) then
+   if (nmax==0 .or. mmax==0) then
       nullify(meteo%flowgrid%kcs)
       nullify(meteo%flowgrid%xz)
       nullify(meteo%flowgrid%yz)
