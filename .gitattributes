@@ -4618,6 +4618,7 @@ src/utils_lgpl/delftio/doc/userDoc/pages/streams_delphi.html -text
 src/utils_lgpl/delftio/doc/userDoc/pages/streams_f77.html -text
 src/utils_lgpl/delftio/doc/userDoc/pages/streams_f90.html -text
 src/utils_lgpl/delftio/doc/userDoc/pages/versions.html -text
+src/utils_lgpl/delftio/include/Makefile.am -text
 src/utils_lgpl/delftio/include/dio-plt.inc -text
 src/utils_lgpl/delftio/include/dio-streams.inc -text
 src/utils_lgpl/delftio/include/dio-sync-support.inc -text
@@ -4677,6 +4678,7 @@ src/utils_lgpl/delftio/packages/delftio_dll/resource.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcxproj -text
+src/utils_lgpl/delftio/packages/delftio_shm/include/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/checkDiff -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/dio-sync-ux.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/dio_shm.h -text
@@ -4998,6 +5000,7 @@ src/utils_lgpl/delftio/tests/tstShmPlt2DfF90/w32/runTst.bat -text
 src/utils_lgpl/delftonline/Makefile.am -text
 src/utils_lgpl/delftonline/include/DelftOnline.h -text
 src/utils_lgpl/delftonline/include/DelftOnline.i -text
+src/utils_lgpl/delftonline/include/Makefile.am -text
 src/utils_lgpl/delftonline/src/delftonline/Makefile.am -text
 src/utils_lgpl/delftonline/src/delftonline/TODO -text
 src/utils_lgpl/delftonline/src/delftonline/arrayshape.cpp -text
@@ -5089,7 +5092,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/include/getputarray.h 
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/meminfo.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/platformst.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/precision.h -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/include/shared_library_fortran_api.h -text
+src/utils_lgpl/deltares_common/packages/deltares_common_c/include/so_fortran_api.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/stream.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/throwexception.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/util_mf.h -text
@@ -5222,6 +5225,7 @@ src/utils_lgpl/esmfsm/Makefile.am -text
 src/utils_lgpl/esmfsm/doc/esm.html -text
 src/utils_lgpl/esmfsm/doc/fsm.html -text
 src/utils_lgpl/esmfsm/doc/index.html -text
+src/utils_lgpl/esmfsm/include/Makefile.am -text
 src/utils_lgpl/esmfsm/include/esm.h -text
 src/utils_lgpl/esmfsm/include/fsm.i -text
 src/utils_lgpl/esmfsm/include/win32/pthread.h -text
@@ -5237,6 +5241,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/fortapi.f90 -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcxproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/include/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-esm.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-fsm.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile.am -text

@@ -15,7 +15,7 @@ noinst_LTLIBRARIES = libDIOF90Nefis.la
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_builddir)/utils_lgpl/delftio/include
+	-I$(top_srcdir)/utils_lgpl/delftio/include
 
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90

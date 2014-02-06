@@ -290,6 +290,7 @@ AC_ARG_WITH(openda,
                               headers and 'PATH/lib' to find the OPENDA libraries.]),
       [
        OPENDA_DIR=${withval}
+       with_oda=yes
        ODA_SRC=flow2d3d_openda
        ODA_INCDIR="-I$OPENDA_DIR/include"
        LTL_CTA="$OPENDA_DIR/lib/libcta.la"
@@ -299,6 +300,7 @@ AC_SUBST(ODA_SRC)
 AC_SUBST(ODA_INCDIR)
 AC_SUBST(ODA_LIB)
 AC_SUBST(LTL_CTA)
+AM_CONDITIONAL([WITH_ODA],[test "$with_oda" = yes])
 
 
 dnl Already create the libtool script here, because we're using it to detect .dylib/.so extension (works for >=2.2)
@@ -444,7 +446,6 @@ plugins_lgpl/plugin_delftflow_traform/src/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
 third_party_open/Makefile
-third_party_open/triangle/Makefile
 third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
 third_party_open/version_number/packages/version_number/Makefile
@@ -494,12 +495,6 @@ tools_gpl/vs/packages/vs/Makefile
 tools_gpl/vs/packages/vs/src/Makefile
 tools_gpl/vs/packages/vs_version_number/Makefile
 tools_gpl/vs/packages/vs_version_number/src/Makefile
-tools_gpl/waq_run_processes/Makefile
-tools_gpl/waq_run_processes/packages/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes/src/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/Makefile
 utils_gpl/Makefile
 utils_gpl/morphology/Makefile
 utils_gpl/morphology/packages/Makefile
@@ -516,16 +511,19 @@ utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile
 utils_lgpl/d_hydro_lib/packages/Makefile
 utils_lgpl/delftio/Makefile
+utils_lgpl/delftio/include/Makefile
 utils_lgpl/delftio/packages/delftio/Makefile
 utils_lgpl/delftio/packages/delftio/src/diof90/Makefile
 utils_lgpl/delftio/packages/delftio/src/diof90Nefis/Makefile
 utils_lgpl/delftio/packages/delftio/src/Makefile
 utils_lgpl/delftio/packages/delftio/src/delftio_sync/Makefile
 utils_lgpl/delftio/packages/delftio_shm/Makefile
+utils_lgpl/delftio/packages/delftio_shm/include/Makefile
 utils_lgpl/delftio/packages/delftio_shm/src/diof90/Makefile
 utils_lgpl/delftio/packages/delftio_shm/src/Makefile
 utils_lgpl/delftio/packages/Makefile
 utils_lgpl/delftonline/Makefile
+utils_lgpl/delftonline/include/Makefile
 utils_lgpl/delftonline/src/delftonline/Makefile
 utils_lgpl/delftonline/src/dolcli/Makefile
 utils_lgpl/delftonline/src/dolprint/Makefile
@@ -539,8 +537,6 @@ utils_lgpl/deltares_common/packages/deltares_common_c/src/Makefile
 utils_lgpl/deltares_common/packages/deltares_common_mpi/Makefile
 utils_lgpl/deltares_common/packages/deltares_common_mpi/src/Makefile
 utils_lgpl/deltares_common/packages/Makefile
-utils_lgpl/deltares_common/tests/Makefile
-utils_lgpl/deltares_common/tests/09_system_info/Makefile
 utils_lgpl/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/Makefile
@@ -548,27 +544,22 @@ utils_lgpl/ec_module/packages/ec_module/src/ectest/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/meteo/Makefile
 utils_lgpl/ec_module/packages/Makefile
 utils_lgpl/esmfsm/Makefile
+utils_lgpl/esmfsm/include/Makefile
 utils_lgpl/esmfsm/packages/esmfsm/Makefile
 utils_lgpl/esmfsm/packages/esmfsm/src/fsm/Makefile
 utils_lgpl/esmfsm/packages/esmfsm/src/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_c/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_c/include/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_version_number/src/Makefile
 utils_lgpl/esmfsm/packages/Makefile
-utils_lgpl/esmfsm/tests/allocate_local/Makefile
+utils_lgpl/esmfsm/tests/Makefile
 utils_lgpl/esmfsm/tests/esm_create/Makefile
 utils_lgpl/esmfsm/tests/esm_delete/Makefile
 utils_lgpl/esmfsm/tests/esm_info/Makefile
-utils_lgpl/esmfsm/tests/Makefile
-utils_lgpl/esmfsm/tests/test_01/Makefile
-utils_lgpl/esmfsm/tests/test_02/Makefile
-utils_lgpl/esmfsm/tests/test_03/Makefile
-utils_lgpl/esmfsm/tests/testesm/Makefile
-utils_lgpl/esmfsm/tests/testfill/Makefile
-utils_lgpl/esmfsm/tests/testfsm/Makefile
 utils_lgpl/ftnunit/Makefile
 utils_lgpl/ftnunit/packages/ftnunit/Makefile
 utils_lgpl/ftnunit/packages/ftnunit/src/Makefile
@@ -579,11 +570,7 @@ utils_lgpl/nefis/packages/Makefile
 utils_lgpl/nefis/packages/nefis/Makefile
 utils_lgpl/nefis/packages/nefis/src/Makefile
 utils_lgpl/nefis/packages/nefis/src_so/Makefile
-utils_lgpl/nefis/tests/demo_00/Makefile
-utils_lgpl/nefis/tests/demo_01/Makefile
-utils_lgpl/nefis/tests/demo_02/Makefile
 utils_lgpl/nefis/tests/Makefile
-utils_lgpl/nefis/tests/observations/Makefile
 utils_lgpl/nefis/tests/test_00/Makefile
 utils_lgpl/nefis/tests/test_01/Makefile
 utils_lgpl/nefis/tests/test_02/Makefile
@@ -597,7 +584,6 @@ utils_lgpl/nefis/tests/test_09/Makefile
 utils_lgpl/nefis/tests/test_10/Makefile
 utils_lgpl/nefis/tests/test_11/Makefile
 utils_lgpl/nefis/tests/test_12/Makefile
-utils_lgpl/nefis/tests/test_13/Makefile
 utils_lgpl/nefis/tests/test_14/Makefile
 utils_lgpl/nefis/tests/test_15/Makefile
 utils_lgpl/nefis/tests/test_16/Makefile

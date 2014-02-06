@@ -91,6 +91,7 @@ AM_FFLAGS = \
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+nodistdir = .
 
 #-------------------------------------------------------------------------------
 #   Custom make targets

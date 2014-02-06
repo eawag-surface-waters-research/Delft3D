@@ -12,7 +12,7 @@ lib_LTLIBRARIES = libDelftOnline.la
 
 INCLUDES = \
     $(STANDARD_C_INCLUDES) \
-    -I../../include
+    -I$(srcdir)/../../include
 
 libDelftOnline_la_SOURCES = \
     arrayshape.cpp \
@@ -33,6 +33,15 @@ libDelftOnline_la_SOURCES = \
     sortedbag.cpp \
     util.cpp
 
+noinst_HEADERS = \
+    clock.h \
+    delftonline_version.h \
+    dictionary.h \
+    dol.h \
+    linkedlist.h \
+    log.h \
+    sortedbag.h
+    
 
 AM_CPPFLAGS = \
     -Wno-int-to-pointer-cast

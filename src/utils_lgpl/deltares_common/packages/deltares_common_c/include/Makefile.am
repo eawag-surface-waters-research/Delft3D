@@ -18,7 +18,7 @@ dist_noinst_HEADERS = \
 	meminfo.h \
 	platformst.h \
 	precision.h \
-	shared_library_fortran_api.h \
+	so_fortran_api.h \
 	stream.h \
 	throwexception.h \
 	util_mf.h 

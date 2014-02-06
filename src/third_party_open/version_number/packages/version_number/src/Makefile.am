@@ -7,7 +7,8 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-noinst_PROGRAMS = version_number.exe
+nodist_PROGRAMS = version_number.exe
+BUILT_SOURCES = version_number.exe
 
 #-------------------------------------------------------------------------------
 #Includes

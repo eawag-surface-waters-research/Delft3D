@@ -56,6 +56,7 @@ libDeltaresCommon_la_SOURCES = \
 	util.f90 \
 	wavenr.f90
 
+
 EXTRA_DIST = \
 	deltares_common_version.F90.svn
 
@@ -73,5 +74,5 @@ BUILT_SOURCES = ./always \
 ./always:
 	rm -rf ./deltares_common_version.F90
 
-./deltares_common_version.F90:
+deltares_common_version.F90: 
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)

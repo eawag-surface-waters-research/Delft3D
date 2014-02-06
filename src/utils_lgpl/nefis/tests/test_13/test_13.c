@@ -32,8 +32,8 @@
 #include <limits.h>
 
 #if !defined(WIN32)
-#  include <rpc\types.h>
-#  include <rpc\xdr.h>
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
 #else
 #  include <sys/types.h>
 #  include <rpc/rpc.h>

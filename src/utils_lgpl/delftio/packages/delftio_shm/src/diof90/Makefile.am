@@ -14,8 +14,8 @@ noinst_LTLIBRARIES = libDelftIOSHM.la
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/include \
-	-I$(top_builddir)/utils_lgpl/esmfsm/include
+INCLUDES = -I$(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/include \
+	-I$(top_srcdir)/utils_lgpl/esmfsm/include
 
 #-------------------------------------------------------------------------------
 #Sources
