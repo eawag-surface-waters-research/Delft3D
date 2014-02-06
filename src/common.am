@@ -123,6 +123,12 @@ delftflow-dist: ds-install
 	    rm -rf delftflow-linux \
 	)
 
+#
+# Make dist depends on make. So force to do a make when doing make dist.
+dist dist-all: all
+	$(MAKE) $(AM_MAKEFLAGS) $(DIST_TARGETS) am__post_remove_distdir=' <at> :'
+	$(am__post_remove_distdir)
+
 distclean-local:
 	rm -f $(top_builddir)/bin/*
 	rm -f $(top_builddir)/lib/*
