@@ -92,6 +92,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 nodistdir = .
+noinst_nodistdir = .
 
 #-------------------------------------------------------------------------------
 #   Custom make targets
