@@ -59,18 +59,18 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
 ! Global variables
 !
     integer                                         , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
-    integer                                        , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
+    integer                                         , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
     integer                                                       :: idry   !!  Flag set to 1 if a dry point is detected in routine DRYCHK after SUD is completed
     integer                                                       :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
-    integer                                        , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                        , intent(in)  :: nfltyp !  Description and declaration in esm_alloc_int.f90
-    integer                                        , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    integer                                                      :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(out) :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfv    !  Description and declaration in esm_alloc_int.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: dps    !  Description and declaration in esm_alloc_real.f90
+    integer                                         , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: nfltyp !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
+    integer                                                       :: nmmaxj !  Description and declaration in dimens.igs
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(out) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                     :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                     :: kfv    !  Description and declaration in esm_alloc_int.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: excbed !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: qxk    !  Description and declaration in esm_alloc_real.f90
@@ -86,7 +86,7 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
     integer       :: nm
     integer       :: nmd
     character(18) :: tmpname
-    integer       :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    integer       :: nm_pos  ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -127,11 +127,11 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
        call dfreduce( idry, 1, dfint, dfmax, gdp )
      endif
     !
-    ! CHECK FOR FOUR DRY VELOCITY POINTS
+    ! Check for four dry velocity points
     !
     do nm = 1, nmmax
        !
-       ! correction due to vectorisation
+       ! Correction due to vectorisation
        !
        if (kfu(nm)==99) kfu(nm) = 0
        !
@@ -141,6 +141,9 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
           kfs(nm) = max(kfu(nm), kfu(nmd), kfv(nm), kfv(ndm))
        endif
     enddo
+    !
+    ! Exchange mask array kfs with neighbours for parallel runs
+    !
     call dfexchg ( kfs, 1,    1, dfint, nm_pos, gdp )
     do nm = 1, nmmax
        nmd = nm - icx
@@ -153,7 +156,9 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
        endif
     enddo
     !
-    ! exchange kfu, kfv, qxk and qyk with neighbours for parallel runs
+    ! Delft3D-16494: NOT NECESSARY?
+    !
+    ! Exchange kfu, kfv, qxk and qyk with neighbours for parallel runs
     !
     call dfexchg ( kfu, 1,    1, dfint , nm_pos, gdp )
     call dfexchg ( kfv, 1,    1, dfint , nm_pos, gdp )
@@ -169,6 +174,9 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
              dps(nm) = dps(nm) - real(hdt*excbed(nm)/cbed,prec)
           endif
        enddo
+       !
+       ! Exchange dps with neighbours for parallel runs
+       !
        call dfexchg ( dps, 1, 1, dfprec, nm_pos, gdp )
     endif
 end subroutine drychk

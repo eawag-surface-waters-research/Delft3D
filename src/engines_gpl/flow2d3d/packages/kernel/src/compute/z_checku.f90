@@ -45,6 +45,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall
     !
     use globaldata
     !
@@ -104,6 +105,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     integer  :: nm
     integer  :: nmd
     integer  :: nmu
+    integer  :: nm_pos   ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp) :: dzutot
     real(fp) :: hnm
     real(fp) :: drytrsh
@@ -124,6 +126,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     !
     drytrsh   = drycrt
     floodtrsh = dryflc
+    nm_pos    = 1
     !
     kkmin = 0
     kkmax = 0
@@ -279,4 +282,10 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           endif
        endif
     enddo
+    !
+    ! Delft3D-16494: NOT NECESSARY?
+    !
+    ! Exchange mask array kfu with neighbours for parallel runs
+    !
+    call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
 end subroutine z_checku

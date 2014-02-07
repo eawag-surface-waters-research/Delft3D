@@ -133,6 +133,7 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     dryflc             => gdp%gdnumeco%dryflc
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     restid             => gdp%gdrestart%restid
+    !
     nm_pos             =  1
     !
     if (initia > 0) then
@@ -270,6 +271,9 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
           write (lundia, '(a)')        '            to avoid problems with the vertical layering.'
        endif
        !
+       ! Delft3D-16494: NOT NECESSARY? Could the loop above for determining kfs also be done with kcs/=0?
+       ! otherwise also need to communicate kfu/kfv and s1?
+       !
        ! exchange mask array kfs with neighbours for parallel runs
        !
        call dfexchg ( kfs, 1, 1, dfint, nm_pos, gdp )
@@ -336,7 +340,9 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
              endif
           enddo
           !
-          ! exchange mask arrays kfu and kfv with neighbours for parallel runs
+          ! Delft3D-16494: NOT NECESSARY?
+          !
+          ! Exchange mask arrays kfu and kfv with neighbours for parallel runs
           !
           call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
           call dfexchg ( kfv, 1, 1, dfint, nm_pos, gdp )
@@ -348,6 +354,9 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     !
     allocate(mask(gdp%d%nmlb:gdp%d%nmub))
     mask(:) = min(1, abs(kcs(:)))
+    !
+    ! Delft3D-16494: NOT NECESSARY?
+    !
     call dfexchg ( mask, 1, 1, dfint, nm_pos, gdp )
     !
     ! arrays s1, u1, v1, r1 and rtur1 can be computed redundantly to
@@ -404,7 +413,9 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
        endif
     enddo
     !
-    ! exchange mask array kfs with neighbours for parallel runs
+    ! Delft3D-16494: NOT NECESSARY?
+    !
+    ! Exchange mask array kfs with neighbours for parallel runs
     !
     call dfexchg ( kfs, 1, 1, dfint, nm_pos, gdp )
 end subroutine chkdry

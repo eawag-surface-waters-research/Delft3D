@@ -45,7 +45,8 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use dfparall
+    !
     use globaldata
     !
     implicit none
@@ -136,6 +137,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer        :: nmref
     integer        :: nmu
     integer        :: num
+    integer        :: nm_pos     ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp)       :: dpsmax
     real(fp)       :: dpsmin
     real(fp)       :: gridheight
@@ -168,6 +170,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     dpsmax  = -1.0e+32_fp
     dpsmin  =  1.0e+32_fp
     icxy    = max(icx, icy)
+    nm_pos  = 1
     !
     ! initialize global arrays
     ! ASSUMED: ALL ARRAYS HAVE BEEN SET TO ZERO
@@ -265,6 +268,10 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
            s1max = max(s1max, s1(nm))
         endif
     enddo
+    !
+    ! exchange s1 with neighbours
+    !
+    call dfexchg ( s1, 1, 1, dfloat, nm_pos, gdp )
     !
     ! ztop should be higher than maximum water level 's1max'
     ! otherwise a warning is given

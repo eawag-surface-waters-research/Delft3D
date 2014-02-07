@@ -300,7 +300,8 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     deallocate(z0scratch)
     !
-    ! exchange turbulence values with neighbours for parallel runs
+    ! Delft3D-16494: NOT NECESSARY? No implicit loop was performed
+    ! Exchange turbulence values with neighbours for parallel runs
     !
     call dfexchg ( rtur0(:,:,1), 0, kmax, dfloat, nm_pos, gdp )
     call dfexchg ( rtur0(:,:,2), 0, kmax, dfloat, nm_pos, gdp )

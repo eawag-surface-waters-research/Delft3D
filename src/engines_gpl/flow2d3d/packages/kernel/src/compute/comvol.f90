@@ -75,8 +75,8 @@ subroutine comvol(nmmax     ,kmax      ,zmodel    ,kcs       ,kcu       , &
 !
     integer                            :: k
     integer                            :: nm
-    integer, dimension(:), allocatable :: masks ! temporary array for masking volumes
-    integer, dimension(:), allocatable :: masku ! temporary array for masking areas
+    integer, dimension(:), allocatable :: masks  ! temporary array for masking volumes
+    integer, dimension(:), allocatable :: masku  ! temporary array for masking areas
     integer                            :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------

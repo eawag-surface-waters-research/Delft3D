@@ -76,6 +76,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall
     !
     use globaldata
     !
@@ -212,6 +213,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     integer      :: nmd
     integer      :: nmu
     integer      :: num
+    integer      :: nm_pos     ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp)     :: alfa
     real(fp)     :: bi
     real(fp)     :: buoflu
@@ -287,6 +289,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     icxy   = max(icx, icy)
     timest = 2.0 * hdt
     ee     = exp(1.0)
+    nm_pos = 1
     !
     ! first step : advection
     !
@@ -344,8 +347,15 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                     & icx       ,icy       ,nto       ,ltur      , &
                     & mnbnd     ,ubnd      ,aak       ,bbk       ,cck       , &
                     & ddk       ,rtur0     ,rtur1    , gdp       )
-       enddo            
+       enddo
     endif
+    !
+    ! Delft3D-16494: NOT NECESSARY?
+    !
+    ! exchange rtur1 with neighbours for parallel runs
+    !
+    call dfexchg ( rtur1(:, :, 1), 1, kmax-1, dfloat, nm_pos, gdp )
+    call dfexchg ( rtur1(:, :, 2), 1, kmax-1, dfloat, nm_pos, gdp )
     !
     ! advective transport
     !
@@ -376,6 +386,11 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        enddo
     enddo
     !
+    ! exchange rtur1 with neighbours for parallel runs
+    !
+    call dfexchg ( rtur1(:, :, 1), 1, kmax-1, dfloat, nm_pos, gdp )
+    call dfexchg ( rtur1(:, :, 2), 1, kmax-1, dfloat, nm_pos, gdp )
+    !
     do n = nmax, 1, -1
        do m = mmax, 1, -1
           nm = (n + ddb)*icy + (m + ddb)*icx - icxy
@@ -400,6 +415,11 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        enddo
     enddo
     !
+    ! exchange rtur1 with neighbours for parallel runs
+    !
+    call dfexchg ( rtur1(:, :, 1), 1, kmax-1, dfloat, nm_pos, gdp )
+    call dfexchg ( rtur1(:, :, 2), 1, kmax-1, dfloat, nm_pos, gdp )
+    !
     do n = 1, nmax, 1
        do m = mmax, 1, -1
           nm = (n + ddb)*icy + (m + ddb)*icx - icxy
@@ -423,6 +443,12 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           endif
        enddo
     enddo
+    !
+    ! exchange rtur1 with neighbours for parallel runs
+    !
+    call dfexchg ( rtur1(:, :, 1), 1, kmax-1, dfloat, nm_pos, gdp )
+    call dfexchg ( rtur1(:, :, 2), 1, kmax-1, dfloat, nm_pos, gdp )
+    !
     do n = nmax, 1, -1
        do m = 1, mmax, 1
           nm = (n + ddb)*icy + (m + ddb)*icx - icxy
@@ -446,6 +472,11 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           endif
        enddo
     enddo
+    !
+    ! exchange rtur1 with neighbours for parallel runs
+    !
+    call dfexchg ( rtur1(:, :, 1), 1, kmax-1, dfloat, nm_pos, gdp )
+    call dfexchg ( rtur1(:, :, 2), 1, kmax-1, dfloat, nm_pos, gdp )
     !
     ! production term (only vertical gradients)
     !
@@ -1018,5 +1049,11 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
              endif
           enddo
        enddo
+       !
+       ! Delft3D-16494: NOT NECESSARY? no implicit solve took place
+       !
+       ! exchange rtur1 with neighbours for parallel runs
+       !
+       call dfexchg ( rtur1(:, :, l), 0, kmax, dfloat, nm_pos, gdp )
     enddo
 end subroutine z_tratur

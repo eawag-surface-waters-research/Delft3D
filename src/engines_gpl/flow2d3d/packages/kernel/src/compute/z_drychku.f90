@@ -47,6 +47,7 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    !use dfparall
     !
     use globaldata
     !
@@ -105,6 +106,7 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     integer  :: nm
     integer  :: nmd
     integer  :: nmu
+    integer  :: nm_pos
     real(fp) :: dzutot
     real(fp) :: hnm
     real(fp) :: s1u
@@ -326,4 +328,8 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
        else
        endif
     enddo
+    !call dfexchg ( kfumax, 1, 1   , dfint, nm_pos, gdp )
+    !call dfexchg ( kfuz1 , 1, kmax, dfint, nm_pos, gdp )
+    !call dfexchg ( dzu1  , 1, kmax, dfloat, nm_pos, gdp )
+    !
 end subroutine z_drychku

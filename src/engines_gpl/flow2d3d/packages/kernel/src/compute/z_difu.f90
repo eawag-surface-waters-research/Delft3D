@@ -84,6 +84,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     use mathconsts
     use flow2d3d_timers
     use sediment_basics_module
+    !
+    use dfparall
+    !
     use globaldata
     !
     implicit none
@@ -247,6 +250,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     integer                 :: nmuu
     integer                 :: num
     integer                 :: nuum
+    integer                 :: nm_pos    ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     integer                 :: nnudge
     real(fp)                :: adza
     real(fp)                :: adzc
@@ -290,8 +294,10 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     !
     if (lstsci == 0) goto 9999
     !
-    ddb  = gdp%d%ddbound
-    icxy = max(icx, icy)
+    ddb    = gdp%d%ddbound
+    icxy   = max(icx, icy)
+    nm_pos = 1
+    !
     if (nonhyd .and. nh_level==nh_full) then
        timest = 2.0_fp * hdt
     else
@@ -1329,6 +1335,10 @@ subroutine z_difu_solv_expl( )
     enddo
     call timer_stop(timer_difu_solve2, gdp)  
     !
+    ! Parallel communication of R1
+    !
+    call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
+    !
     ! D3dFlow_Solve_ADI_Conc: Check for convergence
     !
     nhystp = nxtstp(d3dflow_solve_adi_conc, gdp)
@@ -1375,6 +1385,10 @@ subroutine z_difu_solv_impl( )
        endif
     enddo
     call timer_stop(timer_difu_solve2, gdp)
+    !
+    ! Parallel communication of R1
+    !
+    call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
     !
     ! DD code added:
     !
@@ -1484,6 +1498,15 @@ subroutine z_difu_solv_impl( )
     enddo
     call timer_stop(timer_difu_solve2, gdp)
     !
+    ! Parallel communication of R1
+    !
+    call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
+    !
+    ! Determine global maximum of 'itr' over all nodes
+    ! Note: this enables to synchronize the iteration process
+    !
+    call dfreduce( itr, 1, dfint, dfmax, gdp )
+    !
     if (itr>0 .and. iter<50) goto 333
     !
     if (iter >= 50) then
@@ -1498,7 +1521,7 @@ subroutine z_difu_solv_impl( )
     nhystp = nxtstp(d3dflow_solve_adi_conc, gdp)
     if (nhystp==d3dflow_solve_adi_conc) goto 222
     !
-    ! DD code added end          
+    ! DD code added end
     !
 end subroutine z_difu_solv_impl
 !

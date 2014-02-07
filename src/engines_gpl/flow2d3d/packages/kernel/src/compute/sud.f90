@@ -246,8 +246,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     integer       :: m
     integer       :: mmaxddb
     integer       :: n
-    integer       :: ndm
-    integer       :: ndmd
     integer       :: nhystp
     integer       :: nm
     integer       :: nmaxddb
@@ -292,7 +290,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     nfl         => gdp%gdprocs%nfl
     zmodel      => gdp%gdprocs%zmodel
     wavcmp      => gdp%gdprocs%wavcmp
-    nm_pos      =  1
     !
     call timer_start(timer_sud_rest, gdp)
     !
@@ -302,6 +299,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     hdti    = 1.0_fp / hdt
     icxy    = max(icx, icy)
     drytrsh = drycrt
+    !
+    nm_pos  = 1
     !
     if (idry == 1) then
        !
@@ -519,8 +518,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
        call timer_start(timer_sud_rest, gdp)
        if (momsol=='flood ') then
           nmd  = -icx
-          ndm  = -icy
-          ndmd = -icx - icy
           do nm = 1, nmmax
              nmd = nmd + 1
              if (kcs(nm)==1) then
@@ -534,12 +531,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
           enddo
        else
           nmd  = -icx
-          ndm  = -icy
-          ndmd = -icx - icy
           do nm = 1, nmmax
              nmd  = nmd  + 1
-             ndm  = ndm  + 1
-             ndmd = ndmd + 1
              if (kcs(nm)==1) then
                 a(nm) = guu(nmd)*(hu(nmd)*aa(nmd) - tetau(nmd)*dd(nmd))
                 b(nm) = hdti*gsqs(nm)                                             &
@@ -787,10 +780,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
        !
        call timer_start(timer_sud_rest, gdp)
        nmu = +icx
-       ndm = -icy
        do nm = 1, nmmax
           nmu = nmu + 1
-          ndm = ndm + 1
           if (kfu(nm)==1) then
              !
              ! Special approach for 2D weir points:

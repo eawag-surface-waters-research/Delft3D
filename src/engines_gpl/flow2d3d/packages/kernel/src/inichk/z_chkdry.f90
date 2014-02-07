@@ -52,7 +52,8 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use dfparall
+    !
     use globaldata
     !
     implicit none
@@ -65,6 +66,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     real(fp)       , pointer :: drycrt
     real(fp)       , pointer :: dryflc
     logical        , pointer :: zmodel
+    logical        , pointer :: kfuv_from_restart
     real(fp)       , pointer :: dzmin
     
 !
@@ -136,6 +138,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer  :: nmd
     integer  :: nmu
     integer  :: num
+    integer  :: nm_pos  ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp) :: dzfound ! Thinnest layer found in the initial grid distribution
     real(fp) :: hnm
     real(fp) :: drytrsh
@@ -150,9 +153,12 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     lundia             => gdp%gdinout%lundia
     zmodel             => gdp%gdprocs%zmodel
     drycrt             => gdp%gdnumeco%drycrt
+    dryflc             => gdp%gdnumeco%dryflc
+    kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     dzmin              => gdp%gdzmodel%dzmin
     !
     drytrsh = drycrt
+    nm_pos  = 1
     !
     !NOTE: that the contents of KFS are here identical to KCS
     !      (except for boundary points)
@@ -229,7 +235,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        do nm = 1, nmmax
           nmd = nm - icx
           ndm = nm - icy
-          if (kcs(nm) > 0) then
+          if (kcs(nm) /= 0) then
              if (s1(nm)<= - real(dps(nm),fp)) then
                 s1(nm)   = -real(dps(nm),fp)
                 kfu(nm)  = 0
@@ -247,6 +253,15 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
              endif
           endif
        enddo
+       !
+       ! Delft3D-16494: NOT NECESSARY? Could the loop above also be done with kcs/=0 instead of kcs>0
+       ! otherwise also need to communicate kfu/kfv and s1?
+       !
+       ! exchange mask array kfs with neighbours for parallel runs
+       !
+       !call dfexchg ( kfs, 1, 1, dfint, nm_pos, gdp )
+       !call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
+       !call dfexchg ( kfv, 1, 1, dfint, nm_pos, gdp )
        !
        ! Check whether the minimum layer thickness (0.1*Dryflc) is smaller 
        ! than one of the internal layers for the Z-model, 
@@ -304,6 +319,11 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        endif
     enddo
     !
+    ! exchange mask array kfs with neighbours for parallel runs
+    !
+    call dfexchg ( kfs  , 1, 1   , dfint, nm_pos, gdp )
+    call dfexchg ( kfsz1, 1, kmax, dfint, nm_pos, gdp )
+    !
     ! Check for dry velocity points
     ! Approach for 2D weirs (following WAQUA)
     ! HUCRES is initially set to extreme large value to guarantee
@@ -344,7 +364,15 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           hvcres = 1.0e+9_fp
           if (abs(kspv(nm, 0)) == 9) then
              hvcres = s1v + hkrv(nm)
-          endif         
+          endif
+          if (.not.kfuv_from_restart) then
+             if (kfu(nm)*min(hu(nm), hucres)<dryflc .and. kcu(nm)*kfu(nm)==1) then
+                kfu(nm) = 0
+             endif
+             if (kfv(nm)*min(hv(nm), hvcres)<dryflc .and. kcv(nm)*kfv(nm)==1) then
+                kfv(nm) = 0
+             endif
+          endif
           !
           ! Determine KFUMAX, using S1U, starting from the top layer KMAX
           !
@@ -353,7 +381,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
              !
              ! 15-3-2007 change to allow S1 > ZK(KMAX), needed for NH-models
              !
-             if ( kcu(nm) /= 0 .and. (zk(k - 1)+dzmin <= s1u .or. (s1u>zk(kmax) .and. k==kmax)) ) then
+             if ( kcu(nm) > 0 .and. (zk(k - 1)+dzmin <= s1u .or. (s1u>zk(kmax) .and. k==kmax)) ) then
                 kfumax(nm) = k
                 exit
              endif
@@ -389,7 +417,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
              !
              ! 15-3-2007 change to allow S1 > ZK(KMAX), needed for NH-models
              !
-             if ( kcv(nm) /= 0 .and. (zk(k - 1)+dzmin <= s1v .or. (s1v>zk(kmax) .and. k==kmax)) ) then
+             if ( kcv(nm) > 0 .and. (zk(k - 1)+dzmin <= s1v .or. (s1v>zk(kmax) .and. k==kmax)) ) then
                 kfvmax(nm) = k
                 exit
              endif
@@ -418,6 +446,17 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
              endif
           enddo
        enddo
+       !
+       ! Delft3D-16494: NOT NECESSARY?
+       !
+       ! exchange mask arrays with neighbours for parallel runs
+       !
+       call dfexchg ( kfu   , 1, 1   , dfint, nm_pos, gdp )
+       call dfexchg ( kfv   , 1, 1   , dfint, nm_pos, gdp )
+       call dfexchg ( kfumax, 1, 1   , dfint, nm_pos, gdp )
+       call dfexchg ( kfvmax, 1, 1   , dfint, nm_pos, gdp )
+       call dfexchg ( kfuz1 , 1, kmax, dfint, nm_pos, gdp )
+       call dfexchg ( kfvz1 , 1, kmax, dfint, nm_pos, gdp )
     endif
     !
     ! Mask initial arrays

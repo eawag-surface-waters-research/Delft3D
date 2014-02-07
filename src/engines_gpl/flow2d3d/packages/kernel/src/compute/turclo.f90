@@ -172,9 +172,9 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     !
     ! Initialization
     !
-    kbg   = kmax + 1
-    khtur = kmax + 2
-    nm_pos= 1
+    kbg    = kmax + 1
+    khtur  = kmax + 2
+    nm_pos = 1
     !
     ! This routine is only of interest in case KMAX > 1
     !
@@ -243,10 +243,13 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        enddo
        !
+       ! Delft3D-16494: NOT NECESSARY?
+       !
        ! Parallel case: exchange arrays in the overlapping cells
        !
        call dfexchg(dudz, 0, kmax, dfloat, nm_pos, gdp)
        call dfexchg(dvdz, 0, kmax, dfloat, nm_pos, gdp)
+       !
        do k = 1, kmax - 1
           kup = k + 1
           tsg = 0.5*(thick(k) + thick(kup))
@@ -516,6 +519,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        enddo
     endif
     !
+    ! Delft3D-16494: NOT NECESSARY?
     ! Parallel case: exchange arrays in the overlapping cells
     !
     call dfexchg(vicww, 0, kmax, dfloat, nm_pos, gdp)

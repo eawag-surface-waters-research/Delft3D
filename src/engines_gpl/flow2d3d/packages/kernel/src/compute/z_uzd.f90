@@ -80,6 +80,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use flow2d3d_timers
+    use dfparall
     !
     use globaldata
     !
@@ -275,6 +276,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer            :: num
     integer            :: numd
     integer            :: numu
+    integer            :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     integer            :: nhystp
     real(fp)           :: advecx
     real(fp)           :: advecy
@@ -367,6 +369,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     drytrsh      = drycrt
     drythreshold = 0.1_fp * dryflc
+    nm_pos       = 1
     !
     ! Flag for vertical advection set to 1.0 by default = Central implicit discretisation of 
     ! advection in vertical (0.0 means 1st order upwind explicit)
@@ -1089,11 +1092,11 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !             ( NMAX ) IS ASSUMED!!!!!
        !
        itr = 0
-       if(icx == 1) then
+       if (icx == 1) then
           call timer_start(timer_uzd_solve3u, gdp)
        else
           call timer_start(timer_uzd_solve5v, gdp)
-       end if
+       endif
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
              do k = kfumn0(nm), kfumx0(nm)
@@ -1112,14 +1115,14 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              enddo
           endif
        enddo
-       if(icx == 1) then
-         call timer_stop(timer_uzd_solve3u, gdp)
-         call timer_start(timer_uzd_solve4u, gdp)
+       if (icx == 1) then
+          call timer_stop(timer_uzd_solve3u, gdp)
+          call timer_start(timer_uzd_solve4u, gdp)
        else
-         call timer_stop(timer_uzd_solve5v, gdp)
-         call timer_start(timer_uzd_solve6v, gdp)
-       end if
-!
+          call timer_stop(timer_uzd_solve5v, gdp)
+          call timer_start(timer_uzd_solve6v, gdp)
+       endif
+       !
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
              kmin = kfumn0(nm)
@@ -1160,13 +1163,17 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           endif
        enddo
        !
-       if(icx == 1) then
-         call timer_stop(timer_uzd_solve4u, gdp)
-         call timer_start(timer_uzd_solve3u, gdp)
+       ! exchange u1 with neighbours for parallel runs
+       !
+       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
+       !
+       if (icx == 1) then
+          call timer_stop(timer_uzd_solve4u, gdp)
+          call timer_start(timer_uzd_solve3u, gdp)
        else
-         call timer_stop(timer_uzd_solve6v, gdp)
-         call timer_start(timer_uzd_solve5v, gdp)
-       end if
+          call timer_stop(timer_uzd_solve6v, gdp)
+          call timer_start(timer_uzd_solve5v, gdp)
+       endif
        !
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
@@ -1183,18 +1190,17 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                              & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
                              & - buxuy(nm,k)*u1(nm+icx+icy,k) &
                              & - buxdy(nm,k)*u1(nm+icx-icy,k)
-                         
              enddo
           endif
        enddo
        !
-       if(icx == 1) then
-         call timer_stop(timer_uzd_solve3u, gdp)
-         call timer_start(timer_uzd_solve4u, gdp)
+       if (icx == 1) then
+          call timer_stop(timer_uzd_solve3u, gdp)
+          call timer_start(timer_uzd_solve4u, gdp)
        else
-         call timer_stop(timer_uzd_solve5v, gdp)
-         call timer_start(timer_uzd_solve6v, gdp)
-       end if
+          call timer_stop(timer_uzd_solve5v, gdp)
+          call timer_start(timer_uzd_solve6v, gdp)
+       endif
        !
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
@@ -1233,12 +1239,22 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              enddo
           endif
        enddo
-       if(icx == 1) then
-         call timer_stop(timer_uzd_solve4u, gdp)
-       else
-         call timer_stop(timer_uzd_solve6v, gdp)
-       end if
        !
+       ! exchange u1 with neighbours for parallel runs
+       !
+       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
+       !
+       if (icx == 1) then
+          call timer_stop(timer_uzd_solve4u, gdp)
+       else
+          call timer_stop(timer_uzd_solve6v, gdp)
+       endif
+       !
+       !
+       ! determine global maximum of 'itr' over all nodes
+       ! Note: this enables to synchronize the iteration process
+       !
+       call dfreduce( itr, 1, dfint, dfmax, gdp )
        if (itr>0 .and. iter<50) goto 1100
        if (iter >= 50) then
           write (errtxt, '(i0)') nst
@@ -1299,13 +1315,13 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! D3dFlowMap_Build_V: poke the coupling equations into system
           !
           nhystp = nxtstp(d3dflow_build_v, gdp)
-       !
+          !
        else
           !
           ! D3dFlowMap_Build_U: poke the coupling equations into system
           !
           nhystp = nxtstp(d3dflow_build_u, gdp)
-       !
+          !
        endif
        call timer_stop(timer_uzd_rest, gdp) 
        !

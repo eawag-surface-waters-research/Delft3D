@@ -499,7 +499,11 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
              enddo
           enddo
           !
-          ! exchange rtur1 with neighbours for parallel runs
+          ! Delft3D-16494: NOT NECESSARY?
+          ! Only 2 iterations are performed and the halo is 3 wide,
+          ! so no communication should be necessary
+          !
+          ! Exchange rtur1 with neighbours for parallel runs
           !
           call dfexchg ( rtur1(:, :, l), 1, kmax-1, dfloat, nm_pos, gdp )
        enddo
@@ -1143,7 +1147,9 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           enddo
        enddo
        !
-       ! exchange rtur1 with neighbours for parallel runs
+       ! Delft3D-16494: NOT NECESSARY? no implicit solve took place
+       !
+       ! Exchange rtur1 with neighbours for parallel runs
        !
        call dfexchg ( rtur1(:, :, l), 0, kmax, dfloat, nm_pos, gdp )
     enddo

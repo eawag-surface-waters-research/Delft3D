@@ -44,6 +44,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall
     !
     use globaldata
     !
@@ -95,6 +96,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     integer                :: ndm
     integer                :: nm
     integer                :: nmd
+    integer                :: nm_pos    ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     integer, dimension(1)  :: nm_s1max1
     integer, dimension(1)  :: nm_s1max2
     logical                :: flood
@@ -109,36 +111,48 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     lundia  => gdp%gdinout%lundia
     dzmin   => gdp%gdzmodel%dzmin
     !
-    idry = 0
+    idry   = 0
+    nm_pos = 1
     !
     do nm = 1, nmmax
        nmd = nm - icx
        ndm = nm - icy
-       if (kfu(nm)==1 .or. kfu(nmd)==1 .or. kfv(nm)==1 .or. kfv(ndm)==1) then
-          if ( s1(nm) <= -real(dps(nm),fp) ) then
-             kfu(nm ) = 0
-             kfu(nmd) = 0
-             kfv(nm ) = 0
-             kfv(ndm) = 0
-             do k = 1, kmax  ! evt. kfsmin, kmax
-                kfuz0(nm , k) = 0
-                kfuz0(nmd, k) = 0
-                kfvz0(nm , k) = 0
-                kfvz0(ndm, k) = 0
-                qxk  (nm , k) = 0.0_fp
-                qxk  (nmd, k) = 0.0_fp
-                qyk  (nm , k) = 0.0_fp
-                qyk  (ndm, k) = 0.0_fp
-                dzs1 (nm , k) = 0.0_fp
-             enddo
-             !
-             ! At least one cell that was active has become dry:
-             ! Redo Z_SUD (from Z_ADI) with these cells isolated
-             !
-             idry = 1
+       if ( kcs(nm)/=0 ) then
+          !
+          ! Check on kfs(nm) == 1 is necessary, because when the last active cell edge of a cell
+          ! was set dry in Z_SUD, all KFU/KFV are zero and this check would not be performed
+          !
+          if (kfu(nm)==1 .or. kfu(nmd)==1 .or. kfv(nm)==1 .or. kfv(ndm)==1 .or. kfs(nm)==1) then
+             if ( s1(nm) <= -real(dps(nm),fp) ) then
+                kfu(nm ) = 0
+                kfu(nmd) = 0
+                kfv(nm ) = 0
+                kfv(ndm) = 0
+                do k = 1, kmax  ! evt. kfsmin, kmax
+                   kfuz0(nm , k) = 0
+                   kfuz0(nmd, k) = 0
+                   kfvz0(nm , k) = 0
+                   kfvz0(ndm, k) = 0
+                   qxk  (nm , k) = 0.0_fp
+                   qxk  (nmd, k) = 0.0_fp
+                   qyk  (nm , k) = 0.0_fp
+                   qyk  (ndm, k) = 0.0_fp
+                   dzs1 (nm , k) = 0.0_fp
+                enddo
+                !
+                ! At least one cell that was active has become dry:
+                ! Redo Z_SUD (from Z_ADI) with these cells isolated
+                !
+                idry = 1
+             endif
           endif
        endif
     enddo
+    !
+    ! Determine global maximum of 'idry' over all nodes
+    ! Note: this enables to synchronize the repeating computation of SUD
+    !
+    call dfreduce( idry, 1, dfint, dfmax, gdp )
     !
     ! CHECK FOR FOUR DRY VELOCITY POINTS
     !
@@ -187,6 +201,12 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        endif
     enddo
     !
+    ! Delft3D-16494: NOT NECESSARY?
+    !
+    ! Exchange mask array kfs with neighbours for parallel runs
+    !
+    call dfexchg ( kfs, 1,    1, dfint, nm_pos, gdp )
+    !
     ! issue warning if maximum water level is above zk(kmax) (ZTOP)
     !
     s1max1    = maxval(s1)
@@ -217,7 +237,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     ! Reset all DZS1 to for all inactive points above KFSMAX
     !
     do nm = 1, nmmax
-       if (kcs(nm) > 0 ) then
+       if (kcs(nm) /= 0) then
           do k = kfsmin(nm), kfsmax(nm)
              if (kfsmin(nm) == kfsmax(nm)) then
                 dzs1(nm, k) = real(dps(nm),fp) + s1(nm)
@@ -260,7 +280,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        !
        ! Copy concentration to new layer. NB. KFS might be equal to zero!
        !
-       if (kcs(nm).eq.1 .and. kfsmax(nm) > kfsmx0(nm)) then
+       if ((kcs(nm)==1 .or. kcs(nm)==-1) .and. kfsmax(nm) > kfsmx0(nm)) then
           do k = kfsmx0(nm)+1, kfsmax(nm)
              do l = 1, lstsci
                 r1(nm, k, l) = r1(nm, kfsmx0(nm), l)

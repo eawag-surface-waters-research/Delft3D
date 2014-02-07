@@ -428,7 +428,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ndmu       = nm + icx - icy
           gksi       = gvu(nm)
           do k = kfumn0(nm), kfumx0(nm)
-             if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
+             if (kfuz0(nm, k)==1) then
                 !
                 ! BAROCLINIC PRESSURE, CORIOLIS, ATMOSPHERIC PRES. and TIDE GEN. FORCE
                 ! Surface gradient is fully accounted for here and not in z_uzd:
@@ -481,7 +481,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     do nm = 1, nmmax
        nmu  = nm + icx
        kmin = kfumn0(nm)
-       if (kfu(nm)==1 .and. kcs(nm)*kcs(nmu)>0) then
+       if (kfu(nm)==1) then
           kkmax = max(kmin, kfumx0(nm))
           !
           ! WIND AND BOTTOM FRICTION

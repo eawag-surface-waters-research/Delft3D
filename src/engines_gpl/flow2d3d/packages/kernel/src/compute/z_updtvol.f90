@@ -39,6 +39,7 @@ subroutine z_updtvol(nmmax     ,kmax      ,kcs       ,kcu       ,kcv       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    !use dfparall
     !
     implicit none
     !
@@ -68,11 +69,27 @@ subroutine z_updtvol(nmmax     ,kmax      ,kcs       ,kcu       ,kcv       , &
 !
     integer :: k
     integer :: nm
+    !integer                            :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    !integer, dimension(:), allocatable :: masks  ! temporary array for masking volumes
+    !integer, dimension(:), allocatable :: masku  ! temporary array for masking areas
 !
 !! executable statements -------------------------------------------------------
 !
     nonhyd      => gdp%gdprocs%nonhyd
     nh_level    => gdp%gdnonhyd%nh_level
+    !
+    ! Delft3D-16494: NOT NECESSARY?
+    !
+    ! mask initial arrays
+    ! Note: for parallel runs, temporary arrays are allocated for masking volumes and areas
+    !
+    !allocate(masks(gdp%d%nmlb:gdp%d%nmub))
+    !allocate(masku(gdp%d%nmlb:gdp%d%nmub))
+    !masks(:) = min(1, kcs(:))
+    !masku(:) = min(1, kcu(:))
+    !nm_pos   = 1
+    !call dfexchg ( masks, 1, 1, dfint, nm_pos, gdp )
+    !call dfexchg ( masku, 1, 1, dfint, nm_pos, gdp )
     !
     do k = 1, kmax
        do nm = 1, nmmax
@@ -88,4 +105,5 @@ subroutine z_updtvol(nmmax     ,kmax      ,kcs       ,kcu       ,kcv       , &
           enddo
        enddo
     endif
+    !deallocate(masks,masku)
 end subroutine z_updtvol

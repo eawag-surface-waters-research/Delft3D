@@ -318,38 +318,39 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
     endif
     !
     ! Fast convergence to steady state
+    ! Commented out because it is not used (delta = 0)
     !
-    delta = 0.0
-    do nm = 1, nmmax
-       if (kcs(nm) /= 0) then
-          if (zmodel) then
-             k0 = kfumin(nm)
-             k1 = kfumax(nm)
-          endif
-          do k = k0, k1
-             !
-             ! test "and" to avoid halos
-             !
-             if ((kcu(nm)==1) .and. (kfu(nm)==1)) then 
-                zz = delta*(s1(nm + icx) - s0(nm + icx) - s1(nm) + s0(nm))
-                u1(nm, k) = u1(nm, k) + zz/hu(nm)
-             endif
-          enddo
-          if (zmodel) then
-             k0 = kfvmin(nm)
-             k1 = kfvmax(nm)
-          endif
-          do k = k0, k1
-             !
-             ! test "and" to avoid halos
-             !
-             if ((kcv(nm)==1) .and. (kfv(nm)==1)) then 
-                zz = delta*(s1(nm + icy) - s0(nm + icy) - s1(nm) + s0(nm))
-                v1(nm, k) = v1(nm, k) + zz/hv(nm)
-             endif
-          enddo
-       endif
-    enddo
+    !delta = 0.0
+    !do nm = 1, nmmax
+    !   if (kcs(nm) > 0) then
+    !      if (zmodel) then
+    !         k0 = kfumin(nm)
+    !         k1 = kfumax(nm)
+    !      endif
+    !      !
+    !      ! test "and" to avoid halos
+    !      !
+    !      if ((kcu(nm)==1) .and. (kfu(nm)==1)) then 
+    !         zz = delta * (s1(nm + icx) - s0(nm + icx) - s1(nm) + s0(nm)) / hu(nm)
+    !         do k = k0, k1
+    !            u1(nm, k) = u1(nm, k) + zz
+    !         enddo
+    !      endif
+    !      if (zmodel) then
+    !         k0 = kfvmin(nm)
+    !         k1 = kfvmax(nm)
+    !      endif
+    !      !
+    !      ! test "and" to avoid halos
+    !      !
+    !      if ((kcv(nm)==1) .and. (kfv(nm)==1)) then 
+    !         zz = delta * (s1(nm + icy) - s0(nm + icy) - s1(nm) + s0(nm)) / hv(nm)
+    !         do k = k0, k1
+    !            v1(nm, k) = v1(nm, k) + zz
+    !         enddo
+    !      endif
+    !   endif
+    !enddo
     !
     ! copy u1 to u0, v1 to v0 and volum1 to volum0
     !

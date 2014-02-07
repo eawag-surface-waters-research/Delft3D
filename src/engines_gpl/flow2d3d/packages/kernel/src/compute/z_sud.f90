@@ -68,6 +68,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use flow2d3d_timers
+    use dfparall
     !
     use globaldata
     !
@@ -77,8 +78,12 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)               , pointer :: eps
     integer                , pointer :: lundia
+    integer                , pointer :: ntstep
+    real(fp)               , pointer :: dryflc
     real(fp)               , pointer :: hdt
+    integer                , pointer :: iter1
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     integer                , pointer :: iro
@@ -231,7 +236,10 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     integer       :: ddb
     integer       :: i
     integer       :: icxy
+    integer       :: icol
+    integer       :: ierror
     integer       :: intdir
+    integer       :: iter
     integer       :: itr
     integer       :: k
     integer       :: kenm
@@ -248,31 +256,38 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     integer       :: nmf
     integer       :: nmlu
     integer       :: nmu
+    integer       :: nm_pos   ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    logical       :: error    ! Flag for detection of closure error in mass-balance
     real(hp)      :: bi
     real(hp)      :: fac
     real(fp)      :: dxid
     real(fp)      :: dxiu
-    real(fp)      :: eps
+    real(fp)      :: epsomb
     real(fp)      :: hdti
     real(fp)      :: hnm
     real(fp)      :: hnmd
+    real(fp)      :: htrsh
     real(fp)      :: pr
     real(fp)      :: s1u
-    character(26) :: errtxt
+    character(80) :: errtxt
 !
 !! executable statements -------------------------------------------------------
 !
+    eps        => gdp%gdconst%eps
+    lundia     => gdp%gdinout%lundia
+    ntstep     => gdp%gdinttim%ntstep
     wind       => gdp%gdprocs%wind
     culvert    => gdp%gdprocs%culvert
     zmodel     => gdp%gdprocs%zmodel
     wavcmp     => gdp%gdprocs%wavcmp
     bubble     => gdp%gdprocs%bubble
     maseva     => gdp%gdheat%maseva
+    dryflc     => gdp%gdnumeco%dryflc
+    hdt        => gdp%gdnumeco%hdt
+    iter1      => gdp%gdnumeco%iter1
     rhow       => gdp%gdphysco%rhow
     ag         => gdp%gdphysco%ag
     iro        => gdp%gdphysco%iro
-    hdt        => gdp%gdnumeco%hdt
-    lundia     => gdp%gdinout%lundia
     !
     call timer_start(timer_sud_rest, gdp)
     ddb     = gdp%d%ddbound
@@ -280,8 +295,10 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     mmaxddb = mmax + 2*gdp%d%ddbound
     hdti    = 1.0_fp / hdt
     icxy    = max(icx, icy)
+    htrsh   = 0.5_fp * dryflc
     itr     = 0
     flood   = .false.
+    nm_pos  = 1
     !
     ! Compute depth averaged velocities UMEAN and total depths in velocity points HU
     !
@@ -394,7 +411,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
              d0k(nm, k) = d0k(nm, k) + disch(i)/gsqs(nm)
           else
              do kk = kfsmn0(nm), max(kfsmx0(nm),kfsmn0(nm))
- 
+                !
                 ! In case of only one layer, add discharge in that layer
                 !
                 if (kfsmn0(nm) == kfsmx0(nm)) then
@@ -489,19 +506,6 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     enddo
     call timer_stop(timer_sud_rest, gdp)
     !
-    ! BOUNDARY CONDITIONS
-    !
-    call timer_start(timer_sud_cucbp, gdp)
-    call cucbp(kmax      ,norow     ,icx       , &
-             & icy       ,zmodel    ,irocol    ,kcs       ,kfu       , &
-             & kfumn0    ,kfumx0    ,s0        ,u0        ,dpu       , &
-             & hu        ,umean     ,tetau     ,guu       ,gvu       , &
-             & dzu0      ,thick     ,circ2d    ,circ3d    ,a         , &
-             & b         ,c         ,d         ,aa        ,bb        , &
-             & cc        ,dd        ,aak       ,bbk       ,cck       , &
-             & ddk       ,crbc      ,wavcmp    ,gdp       )
-    call timer_stop(timer_sud_cucbp, gdp)
-    !
     ! Sum d0k in d0
     !
     call timer_start(timer_sud_rest, gdp)
@@ -515,183 +519,340 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     enddo
     call timer_stop(timer_sud_rest, gdp)
     !
- 9999 continue
     !
-    call timer_start(timer_sud_rest, gdp)
+    ! ITERATIVE LOOP OVER CURRENT ROW. CALCULATION OF CONTINUITY EQ.
+    !
+ 9999 continue
     itr = 0
     !
-    ! SET UP SYSTEM OF EQUATIONS FOR INTERIOR POINTS
-    !
-    do nm = 1, nmmax
-       nmd = nm - icx
-       if (kcs(nm) == 1) then
-          hnm = 0.0_fp
-          do k = kfumn0(nm), kfumx0(nm)
-             hnm = hnm + dzu0(nm,k)
-          enddo
-          hnmd = 0.0_fp
-          do k = kfumn0(nmd), kfumx0(nmd)
-             hnmd = hnmd + dzu0(nmd,k)
-          enddo
-          dxid  = hnmd * guu(nmd) / gsqs(nm)
-          dxiu  = hnm  * guu(nm)  / gsqs(nm)
-          a(nm) = aa(nmd) * dxid
-          b(nm) = hdti + dxid*cc(nmd) - aa(nm)*dxiu
-          c(nm) = -cc(nm) * dxiu
-          d(nm) = d0(nm) - dd(nm)*dxiu + dd(nmd)*dxid
-       endif
-    enddo
-    call timer_stop(timer_sud_rest, gdp)
-    !
-    !        Give Mapper chance to build the coupling equations
-    !        Note that this is a two-stage process. First, coupling equations
-    !        are built for the coupling points start+1;end-1
-    !        Secondly, coupling equations are built for the `end' coupling points,
-    !        start and end.
-    !
-    nhystp = nxtstp(d3dflow_build_adi_zeta, gdp)
-    !
-    ! SOLUTION TRIDIAGONAL SYSTEM FOR THE WATERLEVELS
-    !
-    if (nhystp==noneighbors) then
+    do iter = 1, iter1
        !
-       ! Single domain case without domain decomposition
+       ! BOUNDARY CONDITIONS
        !
-       ! DOUBLE SWEEP RECURSION
+       call timer_start(timer_sud_cucbp, gdp)
+       call cucbp(kmax      ,norow     ,icx       , &
+                & icy       ,zmodel    ,irocol    ,kcs       ,kfu       , &
+                & kfumn0    ,kfumx0    ,s0        ,u0        ,dpu       , &
+                & hu        ,umean     ,tetau     ,guu       ,gvu       , &
+                & dzu0      ,thick     ,circ2d    ,circ3d    ,a         , &
+                & b         ,c         ,d         ,aa        ,bb        , &
+                & cc        ,dd        ,aak       ,bbk       ,cck       , &
+                & ddk       ,crbc      ,wavcmp    ,gdp       )
+       call timer_stop(timer_sud_cucbp, gdp)
+       !
+       ! SET UP SYSTEM OF EQUATIONS FOR INTERIOR POINTS
        !
        call timer_start(timer_sud_rest, gdp)
-       nmf = icx - icxy
-       do n = 1, nmaxddb
-          nmf = nmf + icy
-          if (kcs(nmf) /= 0) then
-             bi     = 1.0_hp / real(b(nmf),hp)
-             c(nmf) = real(c(nmf),hp) * bi
-             d(nmf) = real(d(nmf),hp) * bi
+       do nm = 1, nmmax
+          nmd = nm - icx
+          if (kcs(nm) == 1) then
+             hnm = 0.0_fp
+             do k = kfumn0(nm), kfumx0(nm)
+                hnm = hnm + dzu0(nm,k)
+             enddo
+             hnmd = 0.0_fp
+             do k = kfumn0(nmd), kfumx0(nmd)
+                hnmd = hnmd + dzu0(nmd,k)
+             enddo
+             dxid  = hnmd * guu(nmd) / gsqs(nm)
+             dxiu  = hnm  * guu(nm)  / gsqs(nm)
+             a(nm) = aa(nmd) * dxid
+             b(nm) = hdti + dxid*cc(nmd) - aa(nm)*dxiu
+             c(nm) = -cc(nm) * dxiu
+             d(nm) = d0(nm) - dd(nm)*dxiu + dd(nmd)*dxid
           endif
        enddo
-       do m = 2, mmaxddb
-          nm = m*icx - icxy
-          do n = 1, nmaxddb
-             nm = nm + icy
-             if (kcs(nm) /= 0) then
-                bi    = 1.0_hp / (real(b(nm),hp) - real(a(nm),hp)*real(c(nm-icx),hp))
-                c(nm) = real(c(nm),hp) * bi
-                d(nm) = (real(d(nm),hp) - real(a(nm),hp)*real(d(nm-icx),hp)) * bi
-             endif
-          enddo
-       enddo
-       !
-       ! BACK SWEEP
-       !
-       nmlu = mmaxddb*icx - icxy
-       do n = 1, nmaxddb
-          nmlu = nmlu + icy
-          if (kcs(nmlu) /= 0) then
-             s1(nmlu) = d(nmlu)
-          endif
-       enddo
-       do m = mmaxddb - 1, 1, -1
-          nm = m*icx - icxy
-          do n = 1, nmaxddb
-             nm = nm + icy
-             if (kcs(nm) /= 0) then
-                d (nm) = d(nm) - c(nm)*d(nm + icx)
-                s1(nm) = d(nm)
-             endif
-          enddo
-       enddo
-       !
        call timer_stop(timer_sud_rest, gdp)
-    else
        !
        ! Domain decomposition:
+       !        Give Mapper chance to build the coupling equations
+       !        Note that this is a two-stage process. First, coupling equations
+       !        are built for the coupling points start+1;end-1
+       !        Secondly, coupling equations are built for the `end' coupling points,
+       !        start and end.
        !
-       !       METHOD OF WANG
        !
-       !       First part of Wang's algoritm: pre-elimination:
+       nhystp = nxtstp(d3dflow_build_adi_zeta, gdp)
        !
-       call timer_start(timer_sud_wangpre, gdp)
-       call wangp1(s1        ,kcs       ,irocol    ,norow     ,icx       , &
-                 & icy       ,j         ,nmmaxj    ,a         ,b         , &
-                 & c         ,d         ,gdp       )
-       call timer_stop(timer_sud_wangpre, gdp)
+       ! End of Domain decomposition addition
        !
-       !       Now second part of Wang's algoritm: elimination of reduced
-       !       system. This is carried out by a global mapper process.
-       !       At end of global mapper process:
-       !       at coupling point at the left side and
-       !       at last computational point at the right side we have that
-       !       a=c=0, b=1 and d=zeta=new water elevation
        !
-       !       Now Mapper builds and solves the reduced system of equation
+       !***SCALE ROWS OF MATRIX/RIGHT HAND SIDE VECTOR
        !
-       if (icx == 1) then
-          intdir = 0
+       call timer_start(timer_sud_rowsc, gdp)
+       do nm = 1, nmmax
+          bi    = 1.0_hp / real(b(nm),hp)
+          a(nm) = real(a(nm),hp) * bi
+          b(nm) = 1.0_fp
+          c(nm) = real(c(nm),hp) * bi
+          d(nm) = real(d(nm),hp) * bi
+       enddo
+       call timer_stop(timer_sud_rowsc, gdp)
+       !
+       ! SOLUTION TRIDIAGONAL SYSTEM FOR THE WATERLEVELS
+       !
+       if (nhystp==noneighbors) then
+          !
+          ! Single domain case without domain decomposition
+          ! The next piece of code in this IF-statement works for both serial and parallel runs
+          ! In case of parallel runs twisted factorization technique is employed which is
+          ! perfectly parallizable for two processors only. In case of more than 2 processors,
+          ! this technique is combined with the block Jacobi approach at coupling points between
+          ! pairs of "twisted" processors. Improvement in convergence is achieved by means of
+          ! alternating the pairs of twisted processors at each iteration.
+          !
+          if ( nproc > 2 ) then
+             icol = mod(iter,2)
+          else
+             icol = 1
+          endif
+          !
+          call timer_start(timer_sud_solve, gdp)
+          if ( mod(inode,2) == icol ) then
+             !
+             ! FORWARD SWEEP (elimination)
+             !
+             ! Division by the pivot for nmf is not needed anymore
+             ! because of row scaling
+             !
+             do m = 2, mmaxddb
+                nm = m*icx - icxy
+                do n = 1, nmaxddb
+                   nm = nm + icy
+                   if (kcs(nm) > 0) then
+                      bi    = 1.0_hp / (real(b(nm),hp) - real(a(nm),hp)*real(c(nm-icx),hp))
+                      c(nm) = real(c(nm),hp) * bi
+                      d(nm) = (real(d(nm),hp) - real(a(nm),hp)*real(d(nm-icx),hp)) * bi
+                   endif
+                enddo
+             enddo
+          else
+             !
+             ! BACKWARD SWEEP (elimination)
+             !
+             ! Division by the pivot for nmlu is not needed anymore
+             ! because of row scaling
+             !
+             do m = mmaxddb-1, 1, -1
+                nm = m*icx - icxy
+                do n = 1, nmaxddb
+                   nm = nm + icy
+                   if (kcs(nm) > 0) then
+                      bi    = 1.0_hp / (real(b(nm),hp) - real(c(nm),hp)*real(a(nm+icx),hp))
+                      a(nm) = real(a(nm),hp) * bi
+                      d(nm) = (real(d(nm),hp) - real(c(nm),hp)*real(d(nm+icx),hp)) * bi
+                   endif
+                enddo
+             enddo
+          endif
+          !
+          ! exchange coefficients a, b, c and d with neighbours for parallel runs
+          !
+          call dfexchg ( a, 1, 1, dfloat, nm_pos, gdp )
+          call dfexchg ( b, 1, 1, dfloat, nm_pos, gdp )
+          call dfexchg ( c, 1, 1, dfloat, nm_pos, gdp )
+          call dfexchg ( d, 1, 1, dfloat, nm_pos, gdp )
+          call dfsync(gdp)
+          !
+          if ( mod(inode,2) == icol ) then
+             !
+             ! FORWARD SWEEP in coupling points (elimination)
+             !
+             do m = 1, mmaxddb
+                nm = m*icx - icxy
+                do n = 1, nmaxddb
+                   nm = nm + icy
+                   if (kcs(nm) == -1) then
+                      bi     = 1.0_fp / (real(b(nm),hp) - real(a(nm),hp)*real(c(nm-icx),hp))
+                      c (nm) = real(c(nm),hp) * bi
+                      d (nm) = (real(d(nm),hp) - real(a(nm),hp)*real(d(nm-icx),hp)) * bi
+                      s1(nm) = d(nm)
+                   endif
+                enddo
+             enddo
+             !
+             ! BACKWARD SWEEP (substitution)
+             !
+             nmlu = mmaxddb*icx - icxy
+             do n = 1, nmaxddb
+                nmlu = nmlu + icy
+                if (kcs(nmlu) > 0) s1(nmlu) = d(nmlu)
+             enddo
+             do m = mmaxddb - 1, 1, -1
+                nm = m*icx - icxy
+                do n = 1, nmaxddb
+                   nm = nm + icy
+                   if (kcs(nm) > 0) then
+                      d(nm)  = d(nm) - c(nm)*d(nm + icx)
+                      s1(nm) = d(nm)
+                  endif
+                enddo
+             enddo
+          else
+             !
+             ! BACKWARD SWEEP in coupling points (elimination)
+             !
+             do m = mmaxddb, 1, -1
+                nm = m*icx - icxy
+                do n = 1, nmaxddb
+                   nm = nm + icy
+                   if (kcs(nm) == -1) then
+                      bi     = 1.0_hp / (real(b(nm),hp) - real(c(nm),hp)*real(a(nm+icx),hp))
+                      a (nm) = real(a(nm),hp) * bi
+                      d (nm) = (real(d(nm),hp) - real(c(nm),hp)*real(d(nm+icx),hp)) * bi
+                      s1(nm) = d(nm)
+                   endif
+                enddo
+             enddo
+             !
+             ! FORWARD SWEEP (substitution)
+             !
+             nmf = icx - icxy
+             do n = 1, nmaxddb
+                nmf = nmf + icy
+                if (kcs(nmf) > 0) s1(nmf) = d(nmf)
+             enddo
+             do m = 2, mmaxddb
+                nm = m*icx - icxy
+                do n = 1, nmaxddb
+                   nm = nm + icy
+                   if (kcs(nm) > 0) then
+                      d (nm) = d(nm) - a(nm)*d(nm - icx)
+                      s1(nm) = d(nm)
+                   endif
+                enddo
+             enddo
+          endif
+          !
+          ! exchange s1 with neighbours for parallel runs
+          !
+          call dfexchg ( s1, 1, 1, dfloat, nm_pos, gdp )
+          !
+          ! insert block Jacobi equation in coupling points
+          !
+          do nm = 1, nmmax
+             if ( kcs(nm) == -1 ) then
+                a(nm) = 0.0
+                b(nm) = 1.0
+                c(nm) = 0.0
+                d(nm) = s1(nm)
+             endif
+          enddo
+          call timer_stop(timer_sud_solve, gdp)
        else
           !
-          !          intdir = 1 corresponds to left_to_Right direction
-          !          (see GAWS routines)
+          ! Domain decomposition:
           !
-          intdir = 1
-       endif
-       call timer_start(timer_sud_gwsslv, gdp)
-       call gwsslv(intdir    )
-       call timer_stop(timer_sud_gwsslv, gdp)
-       !
-       !       Now third part of Wang's algoritm: back substitution
-       !
-       call timer_start(timer_sud_wangback, gdp)
-       call wangp3(s1        ,kcs       ,irocol    ,norow     ,icx       , &
-                 & icy       ,j         ,nmmaxj    ,a         ,b         , &
-                 & c         ,d         ,gdp       )
-       call timer_stop(timer_sud_wangback, gdp)
-       !
-       !       in case of Hydra (DD method, Wang approach) array d does
-       !       not contain the solution, but the right-hand side evaluation.
-       !       Since array d (and also s1) is used in the remainder of SUD
-       !       for the new water elevation, we have to copy s1 to d.
-       !
-       do nm = 1, nmmax
-          d(nm) = s1(nm)
-       enddo
-    endif
-    !
-    call timer_start(timer_sud_rest, gdp)
-    !
-    ! TOTAL WATERDEPTH DRYING IN SUD
-    !
-    do nm = 1, nmmax
-       nmu = nm + icx
-       if (kfu(nm) == 1) then
-          hnm = tetau(nm)*d(nm) + (1.0_fp - tetau(nm))*d(nmu) + dpu(nm)
+          ! Wang solver for subdomains
           !
-          ! CHECK FOR DRYING
+          ! METHOD OF WANG
           !
-          if (hnm <= 0.0_fp) then
-             aa (nm) = 0.0_fp
-             bb (nm) = 1.0_fp
-             cc (nm) = 0.0_fp
-             dd (nm) = 0.0_fp
-             kfu(nm) = 0
-             do k = 1, kmax
-                kfuz0(nm, k) = 0
-             enddo
-             !kfumax(nm) = -1
-             itr = 1
+          ! First part of Wang's algoritm: pre-elimination:
+          !
+          call timer_start(timer_sud_wangpre, gdp)
+          call wangp1(s1        ,kcs       ,irocol    ,norow     ,icx       , &
+                    & icy       ,j         ,nmmaxj    ,a         ,b         , &
+                    & c         ,d         ,gdp       )
+          call timer_stop(timer_sud_wangpre, gdp)
+          !
+          ! Now second part of Wang's algoritm: elimination of reduced
+          ! system. This is carried out by a global mapper process.
+          ! At end of global mapper process:
+          ! at coupling point at the left side and
+          ! at last computational point at the right side we have that
+          ! a=c=0, b=1 and d=zeta=new water elevation
+          !
+          ! Now Mapper builds and solves the reduced system of equation
+          !
+          if (icx==1) then
+             intdir = 0
+          else
+             !
+             ! intdir = 1 corresponds to left_to_Right direction
+             ! (see GAWS routines)
+             !
+             intdir = 1
           endif
+          call timer_start(timer_sud_gwsslv, gdp)
+          call gwsslv(intdir    )
+          call timer_stop(timer_sud_gwsslv, gdp)
+          !
+          ! Now third part of Wang's algoritm: back substitution
+          !
+          call timer_start(timer_sud_wangback, gdp)
+          call wangp3(s1        ,kcs       ,irocol    ,norow     ,icx       , &
+                    & icy       ,j         ,nmmaxj    ,a         ,b         , &
+                    & c         ,d         ,gdp       )
+          call timer_stop(timer_sud_wangback, gdp)
+          !
+          ! in case of Hydra (DD method, Wang approach) array d does
+          ! not contain the solution, but the right-hand side evaluation.
+          ! Since array d (and also s1) is used in the remainder of SUD
+          ! for the new water elevation, we have to copy s1 to d.
+          !
+          do nm = 1, nmmax
+             d(nm) = s1(nm)
+          enddo
+       endif
+       !
+       ! TOTAL WATERDEPTH DRYING IN SUD
+       !
+       call timer_start(timer_sud_rest, gdp)
+       nmu = +icx
+       do nm = 1, nmmax
+          nmu = nmu + 1
+          if (kfu(nm)==1) then
+             hnm = tetau(nm)*d(nm) + (1. - tetau(nm))*d(nmu) + dpu(nm)
+             !
+             ! CHECK FOR DRYING
+             !
+             if (hnm <= 0.0_fp) then
+                aa(nm)  = 0.0
+                bb(nm)  = 1.0
+                cc(nm)  = 0.0
+                dd(nm)  = 0.0
+                kfu(nm) = 0
+                do k = 1, kmax
+                   kfuz0(nm, k) = 0
+                enddo
+                itr = 1
+             endif
+          endif
+       enddo
+       call timer_stop(timer_sud_rest, gdp)
+       !
+       ! determine global maximum of 'itr' over all nodes
+       ! Note: this enables to synchronize the repeating computation
+       !
+       call dfreduce( itr, 1, dfint, dfmax, gdp )
+       !
+       ! REPEAT COMPUTATION IF POINT IS SET DRY
+       !       FIRST RESET HU
+       !
+       ! Domain decomposition:
+       !    Synchronize on drying before finishing solve zeta
+       !
+       ! Note that if iter<iter1 flow goes always back to Build step
+       ! (either because of DD flag or because of iter loop until iter=iter1)
+       ! Since no mapping occurs for check_sud_dry, this communication
+       ! step could be skipped for iter<iter1.
+       !
+       nhystp = nxtdry(d3dflow_check_sud_dry, itr, gdp)
+       !
+       ! repeat computation if point is set dry
+       !
+       if (nhystp==d3dflow_build_adi_zeta .or. &
+         & (nhystp==noneighbors .and. itr==1)) then
+          !
+          ! End of Domain decomposition addition
+          !
+          goto 9999
        endif
     enddo
-    call timer_stop(timer_sud_rest, gdp)
-    !        print *,itr, '    ' , icx
     !
-    ! Synchronize on drying before finishing solve zeta
+    ! exchange kfu with neighbours for parallel runs
     !
-    nhystp = nxtdry(d3dflow_check_sud_dry, itr, gdp)
-    !
-    ! repeat computation if point is set dry
-    !
-    if (nhystp==d3dflow_build_adi_zeta .or.     &
-      & (nhystp==noneighbors .and. itr==1)) goto 9999
+    call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
     !
     ! adapt discharge boundary conditions
     !
@@ -721,6 +882,10 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        else
        endif
     enddo
+    !
+    ! exchange u1 with neighbours for parallel runs
+    !
+    call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
     !
     ! Compute umean again based on new velocities
     !
@@ -758,6 +923,32 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
              enddo
           endif
        enddo
+       !
+       ! exchange w1 with neighbours for parallel runs
+       !
+       call dfexchg ( w1, 0, kmax, dfloat, nm_pos, gdp )
+       !
+       ! compute vertical discharge
+       !
+       !
+       epsomb = max(eps, eps*hdt)
+       !
+       error = .false.
+       do nm = 1, nmmax
+          if (abs(w1(nm, kmax))>epsomb) then
+             error = .true.
+             w1(nm, kmax) = 0.0
+          endif
+       enddo
+       ierror = 0
+       if (error) ierror = 1
+       call dfreduce( ierror, 1, dfint, dfmax, gdp )
+       error = ierror==1
+       if (error) then
+          write (errtxt, '(a,e12.3,a,i0,a)') 'Mass closure error exceeds ', &
+               & epsomb, ' after ', ntstep, ' timesteps.'
+          call prterr(lundia, 'U190', trim(errtxt))
+       endif
        call timer_stop(timer_sud_veldisch, gdp)
     endif
 end subroutine z_sud

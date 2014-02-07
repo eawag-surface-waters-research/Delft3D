@@ -539,14 +539,6 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
        endif
     endif
     !
-    ! parallel Delft3D-FLOW and Z-model not allowed
-    !
-    if (parll .and. zmodel) then
-       error = .true.
-       call prterr(lundia    ,'Z011'    ,'parallel Delft3D-FLOW'       )
-       goto 9999
-    endif
-    !
     ! HLES horizontal viscosity calculation?
     !
     htur2d = .false.

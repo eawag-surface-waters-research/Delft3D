@@ -57,6 +57,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall
     !
     use globaldata
     !
@@ -139,8 +140,8 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
 !
 ! Local variables
 !
-    integer  :: kbg    ! denotes the k-index of vicuv/dicuv containing the background values
-    integer  :: khtur  ! denotes the k-index of vicuv/dicuv containing the HLES values
+    integer  :: kbg       ! Denotes the k-index of vicuv/dicuv containing the background values
+    integer  :: khtur     ! Denotes the k-index of vicuv/dicuv containing the HLES values
     integer  :: k
     integer  :: kmin
     integer  :: kup
@@ -148,13 +149,14 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     integer  :: ndm
     integer  :: nm
     integer  :: nmd
+    integer  :: nm_pos    ! Indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     real(fp) :: aa
     real(fp) :: bb
     real(fp) :: difiwe
     real(fp) :: drhodz
     real(fp) :: dz
     real(fp) :: ee
-    real(fp) :: epsd   ! Underbound denominator
+    real(fp) :: epsd      ! Underbound denominator
     real(fp) :: fl
     real(fp) :: fs
     real(fp) :: h0
@@ -162,7 +164,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     real(fp) :: rl
     real(fp) :: rz
     real(fp) :: shear
-    real(fp) :: sqrtbv ! Square root of Brunt Vaisly frequency BRUVAI(NM,K)
+    real(fp) :: sqrtbv    ! Square root of Brunt Vaisly frequency BRUVAI(NM,K)
     real(fp) :: tke
     real(fp) :: tkewin
     real(fp) :: ustbe
@@ -196,9 +198,10 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     !
     ! Initialization
     !
-    kbg   = kmax + 1
-    khtur = kmax + 2
-    ee    = exp(1.0)
+    kbg    = kmax + 1
+    khtur  = kmax + 2
+    ee     = exp(1.0)
+    nm_pos = 1
     !
     ! Copy the computed HLES eddy viscosity to the index that will be
     ! used by the program 
@@ -287,6 +290,14 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              enddo
           endif
        enddo
+       !
+       ! Delft3D-16494: NOT NECESSARY?
+       !
+       ! parallel case: exchange arrays in the overlapping cells
+       !
+       call dfexchg(dudz, 0, kmax, dfloat, nm_pos, gdp)
+       call dfexchg(dvdz, 0, kmax, dfloat, nm_pos, gdp)
+       !
        do nm = 1, nmmax
           do k = kfsmin(nm), kfsmax(nm) - 1
              kup = k + 1
@@ -582,6 +593,12 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        ! dicww(nm,k) = min(dicww(nm,k), 10)
        !
     endif
+    !
+    ! Delft3D-16494: NOT NECESSARY?
+    ! parallel case: exchange arrays in the overlapping cells
+    !
+    call dfexchg(vicww, 0, kmax, dfloat, nm_pos, gdp)
+    call dfexchg(dicww, 0, kmax, dfloat, nm_pos, gdp)
     !
     ! Horizontal eddy viscosities and diffusivities in density points
     !
