@@ -91,8 +91,8 @@ AM_FFLAGS = \
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-nodistdir = .
-noinst_nodistdir = .
+nodistdir = @abs_builddir@/bin
+noinst_nodistdir = @abs_builddir@/bin
 
 #-------------------------------------------------------------------------------
 #   Custom make targets
