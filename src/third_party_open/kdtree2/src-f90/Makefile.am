@@ -11,3 +11,5 @@ kdtree2_test_SOURCES = \
 	kdtree2_test.f90
 
 kdtree2_test_LDADD = libkdtree2f.la
+
+MOSTLYCLEANFILES = *.mod
