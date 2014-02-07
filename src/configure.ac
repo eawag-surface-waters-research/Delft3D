@@ -554,6 +554,7 @@ utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_version_number/include/Makefile
 utils_lgpl/esmfsm/packages/esmfsm_version_number/src/Makefile
 utils_lgpl/esmfsm/packages/Makefile
 utils_lgpl/esmfsm/tests/Makefile
