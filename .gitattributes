@@ -5255,6 +5255,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/fsm.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcxproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/resource.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/version_number.h.svn -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/version_number.ini -text
