@@ -172,9 +172,9 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
        !
        if (ifound == -9999) then
           error = .true.
-       elseif (ifound==0 .and. nkeyfd==0 .and. error==.false.) then
+       elseif (ifound==0 .and. nkeyfd==0 .and. .not. error) then
           ready = .true.
-       elseif (ifound==0 .and. nkeyfd==0 .and. error==.true.) then
+       elseif (ifound==0 .and. nkeyfd==0 .and. error) then
           !
           ! When running parallel, boundaries outside this partition are removed
           ! The removed boundaries must be skipped in this routine too

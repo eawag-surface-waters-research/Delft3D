@@ -1080,9 +1080,9 @@ integer                                    :: my_idebug
    do ifac = 1, nfac
       if (pfctrs(ifac).le.0) then
          if (found) then
-            ipossiz = ipossiz * -pfctrs(ifac)
+            ipossiz = ipossiz * (-pfctrs(ifac))
          else
-            ipresiz = ipresiz * -pfctrs(ifac)
+            ipresiz = ipresiz * (-pfctrs(ifac))
          endif
       else
          found = .true.
