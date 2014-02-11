@@ -44,7 +44,7 @@ libWaqKernel_la_SOURCES = \
        baldmp.f \
        chknmr.f \
        delmat.f \
-       delpar00.f \
+       delpar00.F \
        delpar01.f \
        par2waq.f \
        dlwqi0.f \

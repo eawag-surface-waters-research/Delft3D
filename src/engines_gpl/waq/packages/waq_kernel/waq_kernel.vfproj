@@ -162,7 +162,15 @@
 		<File RelativePath=".\src\waq_kernel\baldmp.f"/>
 		<File RelativePath=".\src\waq_kernel\chknmr.f"/>
 		<File RelativePath=".\src\waq_kernel\delmat.f"/>
-		<File RelativePath=".\src\waq_kernel\delpar00.f"/>
+		<File RelativePath=".\src\waq_kernel\delpar00.F">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_kernel\delpar01.f"/>
 		<File RelativePath=".\src\waq_kernel\delwaq2.f"/>
 		<File RelativePath=".\src\waq_kernel\delwaq2_data.f"/>
