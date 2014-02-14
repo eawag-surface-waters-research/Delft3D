@@ -328,64 +328,66 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
             & lundia    ,gdp       )
        endif
-       if (moroutput%sbcuuvv) then
-         call addelm(nefiswrsedm,'SBCUU',' ',transpunit ,'REAL',4          , &
-            & 'Bed-load transport u-direction due to currents (u point)'   , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SBCVV',' ',transpunit ,'REAL',4          , &
-            & 'Bed-load transport v-direction due to currents (v point)'   , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
+       if (lsedtot > 0) then
+          if (moroutput%sbcuuvv) then
+            call addelm(nefiswrsedm,'SBCUU',' ',transpunit ,'REAL',4          , &
+               & 'Bed-load transport u-direction due to currents (u point)'   , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SBCVV',' ',transpunit ,'REAL',4          , &
+               & 'Bed-load transport v-direction due to currents (v point)'   , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%sbwuv) then
+            call addelm(nefiswrsedm,'SBWU',' ',transpunit ,'REAL',4           , &
+               & 'Bed-load transport u-direction due to waves (zeta point)'   , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SBWV',' ',transpunit ,'REAL',4           , &
+               & 'Bed-load transport v-direction due to waves (zeta point)'   , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%sbwuuvv) then
+            call addelm(nefiswrsedm,'SBWUU',' ',transpunit ,'REAL',4          , &
+               & 'Bed-load transport u-direction due to waves (u point)'      , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SBWVV',' ',transpunit ,'REAL',4          , &
+               & 'Bed-load transport v-direction due to waves (v point)'      , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%sswuv) then
+            call addelm(nefiswrsedm,'SSWU',' ',transpunit ,'REAL',4           , &
+               & 'Suspended transport u-direction due to waves (zeta point)'  , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SSWV',' ',transpunit ,'REAL',4           , &
+               & 'Suspended transport v-direction due to waves (zeta point)'  , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          if (moroutput%sswuuvv) then
+            call addelm(nefiswrsedm,'SSWUU',' ',transpunit ,'REAL',4          , &
+               & 'Suspended transport u-direction due to waves (u point)'     , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+            call addelm(nefiswrsedm,'SSWVV',' ',transpunit ,'REAL',4          , &
+               & 'Suspended transport v-direction due to waves (v point)'     , &
+               & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+               & lundia    ,gdp       )
+          endif
+          call addelm(nefiswrsedm,'SBUU',' ',transpunit ,'REAL',4           , &
+             & 'Bed-load transport u-direction (u point)'                   , &
+             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrsedm,'SBVV',' ',transpunit ,'REAL',4           , &
+             & 'Bed-load transport v-direction (v point)'                   , &
+             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+             & lundia    ,gdp       )
        endif
-       if (moroutput%sbwuv) then
-         call addelm(nefiswrsedm,'SBWU',' ',transpunit ,'REAL',4           , &
-            & 'Bed-load transport u-direction due to waves (zeta point)'   , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SBWV',' ',transpunit ,'REAL',4           , &
-            & 'Bed-load transport v-direction due to waves (zeta point)'   , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%sbwuuvv) then
-         call addelm(nefiswrsedm,'SBWUU',' ',transpunit ,'REAL',4          , &
-            & 'Bed-load transport u-direction due to waves (u point)'      , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SBWVV',' ',transpunit ,'REAL',4          , &
-            & 'Bed-load transport v-direction due to waves (v point)'      , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%sswuv) then
-         call addelm(nefiswrsedm,'SSWU',' ',transpunit ,'REAL',4           , &
-            & 'Suspended transport u-direction due to waves (zeta point)'  , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SSWV',' ',transpunit ,'REAL',4           , &
-            & 'Suspended transport v-direction due to waves (zeta point)'  , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       if (moroutput%sswuuvv) then
-         call addelm(nefiswrsedm,'SSWUU',' ',transpunit ,'REAL',4          , &
-            & 'Suspended transport u-direction due to waves (u point)'     , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-         call addelm(nefiswrsedm,'SSWVV',' ',transpunit ,'REAL',4          , &
-            & 'Suspended transport v-direction due to waves (v point)'     , &
-            & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-            & lundia    ,gdp       )
-       endif
-       call addelm(nefiswrsedm,'SBUU',' ',transpunit ,'REAL',4           , &
-          & 'Bed-load transport u-direction (u point)'                   , &
-          & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrsedm,'SBVV',' ',transpunit ,'REAL',4           , &
-          & 'Bed-load transport v-direction (v point)'                   , &
-          & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-          & lundia    ,gdp       )
        if (lsed > 0) then
           call addelm(nefiswrsedm,'SSUU',' ',transpunit ,'REAL',4           , &
              & 'Suspended-load transport u-direction (u point)'             , &
@@ -440,17 +442,19 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
              & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
              & lundia    ,gdp       )
        endif
-       if (scour) then
-          call addelm(nefiswrsedm,'TAUADD',' ','[   -   ]','REAL',4         , &
-             & 'Extra shear stress due to scour feature                    ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-             & lundia    ,gdp       )
-       endif
-       if (moroutput%taurat) then
-          call addelm(nefiswrsedm,'TAURAT',' ','[   -   ]','REAL',4         , &
-             & 'Excess bed shear ratio'                                     , &
-             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-             & lundia    ,gdp       )
+       if (lsedtot > 0) then
+          if (scour) then
+             call addelm(nefiswrsedm,'TAUADD',' ','[   -   ]','REAL',4         , &
+                & 'Extra shear stress due to scour feature                    ', &
+                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
+          if (moroutput%taurat) then
+             call addelm(nefiswrsedm,'TAURAT',' ','[   -   ]','REAL',4         , &
+                & 'Excess bed shear ratio'                                     , &
+                & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (moroutput%dm) then
           call addelm(nefiswrsedm,'DM',' ','[   M   ]','REAL',4             , &
@@ -481,46 +485,52 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                 & lundia    ,gdp       )
           enddo
        endif
-       if (moroutput%frac) then
-          call addelm(nefiswrsedm,'FRAC',' ','[   -   ]','REAL',4           , &
-             & 'Availability fraction in top layer'                         , &
-             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-             & lundia    ,gdp       )
-       endif
-       if (moroutput%mudfrac) then
-          call addelm(nefiswrsedm,'MUDFRAC',' ','[   -   ]','REAL',4        , &
-             & 'Mud fraction in top layer'                                  , &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
-             & lundia    ,gdp       )
-       endif
-       if (moroutput%sandfrac) then
-          call addelm(nefiswrsedm,'SANDFRAC',' ','[   -   ]','REAL',4        , &
-             & 'Sand fraction in top layer'                                  , &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-       endif
-       if (moroutput%fixfac) then
-          call addelm(nefiswrsedm,'FIXFAC',' ','[   -   ]','REAL',4         , &
-             & 'Reduction factor due to limited sediment thickness'         , &
-             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-             & lundia    ,gdp       )
-       endif
-       if (moroutput%hidexp) then
-          call addelm(nefiswrsedm,'HIDEXP',' ','[   -   ]','REAL',4         , &
-             & 'Hiding and exposure factor'                                 , &
-             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
-             & lundia    ,gdp       )
+       if (lsedtot > 0) then
+          if (moroutput%frac) then
+             call addelm(nefiswrsedm,'FRAC',' ','[   -   ]','REAL',4           , &
+                & 'Availability fraction in top layer'                         , &
+                & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
+          if (moroutput%mudfrac) then
+             call addelm(nefiswrsedm,'MUDFRAC',' ','[   -   ]','REAL',4        , &
+                & 'Mud fraction in top layer'                                  , &
+                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
+          if (moroutput%sandfrac) then
+             call addelm(nefiswrsedm,'SANDFRAC',' ','[   -   ]','REAL',4        , &
+                & 'Sand fraction in top layer'                                  , &
+                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
+          if (moroutput%fixfac) then
+             call addelm(nefiswrsedm,'FIXFAC',' ','[   -   ]','REAL',4         , &
+                & 'Reduction factor due to limited sediment thickness'         , &
+                & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
+          if (moroutput%hidexp) then
+             call addelm(nefiswrsedm,'HIDEXP',' ','[   -   ]','REAL',4         , &
+                & 'Hiding and exposure factor'                                 , &
+                & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
+                & lundia    ,gdp       )
+          endif
        endif
        !
        ! Add mor fields
        !
-       call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                 & 1         ,0         ,grnam5    ,gdp       )
+       if (lsedtot > 0) then
+          call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                    & 1         ,0         ,grnam5    ,gdp       )
+       endif
        !
        ! Add fluff fields
        !
-       call dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                     & 1         ,0         ,grnam5    ,gdp       )
+       if (lsed > 0) then
+          call dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                        & 1         ,0         ,grnam5    ,gdp       )
+       endif
        !
        call defnewgrp(nefiswrsedm ,filnam    ,grnam5   ,gdp)
        !
@@ -738,433 +748,435 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        if (ierror/=0) goto 9999
     endif
     !
-    if (moroutput%sbcuv) then
-       !
-       ! group 5: element 'SBCU'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbcu)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbcu(nm,l)/rhol
+    if (lsedtot > 0) then
+       if (moroutput%sbcuv) then
+          !
+          ! group 5: element 'SBCU'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbcu)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbcu(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBCU', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-       !
-       ! group 5: element 'SBCV'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbcv)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbcv(nm,l)/rhol
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBCU', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SBCV'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbcv)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbcv(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBCV', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBCV', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%sbcuuvv) then
        !
-       ! group 5: element 'SBCUU'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbcuu)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbcuu(nm,l)/rhol
+       if (moroutput%sbcuuvv) then
+          !
+          ! group 5: element 'SBCUU'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbcuu)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbcuu(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBCUU', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-       !
-       ! group 5: element 'SBCVV'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbcvv)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbcvv(nm,l)/rhol
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBCUU', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SBCVV'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbcvv)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbcvv(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBCVV', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBCVV', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%sbwuv) then
        !
-       ! group 5: element 'SBWU'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbwu)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbwu(nm,l)/rhol
+       if (moroutput%sbwuv) then
+          !
+          ! group 5: element 'SBWU'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbwu)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbwu(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBWU', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-       !
-       ! group 5: element 'SBWV'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbwv)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbwv(nm,l)/rhol
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBWU', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SBWV'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbwv)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbwv(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBWV', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBWV', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%sbwuuvv) then
        !
-       ! group 5: element 'SBWUU'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbwuu)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbwuu(nm,l)/rhol
+       if (moroutput%sbwuuvv) then
+          !
+          ! group 5: element 'SBWUU'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbwuu)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbwuu(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBWUU', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-       !
-       ! group 5: element 'SBWVV'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sbwvv)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sbwvv(nm,l)/rhol
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBWUU', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SBWVV'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sbwvv)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sbwvv(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SBWVV', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SBWVV', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%sswuv) then
        !
-       ! group 5: element 'SSWU'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sswu)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sswu(nm,l)/rhol
+       if (moroutput%sswuv) then
+          !
+          ! group 5: element 'SSWU'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sswu)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sswu(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SSWU', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-       !
-       ! group 5: element 'SSWV'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sswv)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sswv(nm,l)/rhol
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SSWU', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SSWV'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sswv)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sswv(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SSWV', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SSWV', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%sswuuvv) then
        !
-       ! group 5: element 'SSWUU'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sswuu)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sswuu(nm,l)/rhol
+       if (moroutput%sswuuvv) then
+          !
+          ! group 5: element 'SSWUU'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sswuu)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sswuu(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
-       endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SSWUU', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-       !
-       ! group 5: element 'SSWVV'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(sswvv)) then
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = sswvv(nm,l)/rhol
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SSWUU', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! group 5: element 'SSWVV'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(sswvv)) then
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = sswvv(nm,l)/rhol
+                   enddo
                 enddo
              enddo
-          enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SSWVV', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SSWVV', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    ! group 5: element 'SBUU'
-    !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-    do l = 1, lsedtot
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             rbuff4(n, m, l, 1) = sbuu(n, m, l)/rhol
+       !
+       ! group 5: element 'SBUU'
+       !
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+       do l = 1, lsedtot
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                rbuff4(n, m, l, 1) = sbuu(n, m, l)/rhol
+             enddo
           enddo
        enddo
-    enddo
-    call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierror = putelt(fds, grnam5, 'SBUU', uindex, 1, glbarr4)
-    endif
-    if (ierror/=0) goto 9999
-    !
-    ! group 5: element 'SBVV'
-    !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-    do l = 1, lsedtot
-       select case(moroutput%transptype)
-       case (0)
-          rhol = 1.0_fp
-       case (1)
-          rhol = cdryb(l)
-       case (2)
-          rhol = rhosol(l)
-       end select
-       do m = 1, mmax
-          do n = 1, nmaxus
-             rbuff4(n, m, l, 1) = sbvv(n, m, l)/rhol
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grnam5, 'SBUU', uindex, 1, glbarr4)
+       endif
+       if (ierror/=0) goto 9999
+       !
+       ! group 5: element 'SBVV'
+       !
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+       do l = 1, lsedtot
+          select case(moroutput%transptype)
+          case (0)
+             rhol = 1.0_fp
+          case (1)
+             rhol = cdryb(l)
+          case (2)
+             rhol = rhosol(l)
+          end select
+          do m = 1, mmax
+             do n = 1, nmaxus
+                rbuff4(n, m, l, 1) = sbvv(n, m, l)/rhol
+             enddo
           enddo
        enddo
-    enddo
-    call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierror = putelt(fds, grnam5, 'SBVV', uindex, 1, glbarr4)
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grnam5, 'SBVV', uindex, 1, glbarr4)
+       endif
+       if (ierror/=0) goto 9999
     endif
-    if (ierror/=0) goto 9999
     if (lsed > 0) then
        !
        ! group 5: element 'SSUU'
@@ -1420,49 +1432,51 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        if (ierror/=0) goto 9999
     endif
     !
-    if (scour) then
-       !
-       ! group 5: element 'TAUADD'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
-       do m = 1, mmax
-          do n = 1, nmaxus
-             call n_and_m_to_nm(n, m, nm, gdp)
-             call shearx(tauadd, nm, gdp)
-             rbuff4(n, m, 1, 1) = tauadd
-          enddo
-       enddo
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'TAUADD', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%taurat) then
-       !
-       ! group 5: element 'TAURAT'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(taurat)) then
-          do l = 1, lsedtot
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = taurat(nm, l)
-                enddo
+    if (lsedtot > 0) then
+       if (scour) then
+          !
+          ! group 5: element 'TAUADD'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
+          do m = 1, mmax
+             do n = 1, nmaxus
+                call n_and_m_to_nm(n, m, nm, gdp)
+                call shearx(tauadd, nm, gdp)
+                rbuff4(n, m, 1, 1) = tauadd
              enddo
           enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'TAUADD', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'TAURAT', uindex, 1, glbarr4)
+       !
+       if (moroutput%taurat) then
+          !
+          ! group 5: element 'TAURAT'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(taurat)) then
+             do l = 1, lsedtot
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = taurat(nm, l)
+                   enddo
+                enddo
+             enddo
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'TAURAT', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       if (ierror/=0) goto 9999
     endif
     !
     ! group 5: element 'DM'
@@ -1538,122 +1552,128 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        deallocate(rbuff4)
     endif
     !
-    if (moroutput%frac) then
-       !
-       ! group 5: element 'FRAC'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       do l = 1, lsedtot
-          do m = 1, mmax
-             do n = 1, nmaxus
-                call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff4(n, m, l, 1) = frac(nm, l)
-             enddo
-          enddo
-       enddo
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'FRAC', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%mudfrac) then
-       !
-       ! group 5: element 'MUDFRAC'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
-       do m = 1, mmax
-          do n = 1, nmaxus
-             call n_and_m_to_nm(n, m, nm, gdp)
-             rbuff4(n, m, 1, 1) = mudfrac(nm)
-          enddo
-       enddo
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'MUDFRAC', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    
-    if (moroutput%sandfrac) then
-       !
-       ! group 5: element 'SANDFRAC'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
-       do m = 1, mmax
-          do n = 1, nmaxus
-             call n_and_m_to_nm(n, m, nm, gdp)
-             rbuff4(n, m, 1, 1) = sandfrac(nm)
-          enddo
-       enddo
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'SANDFRAC', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%fixfac) then
-       !
-       ! group 5: element 'FIXFAC'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       if (associated(fixfac)) then
+    if (lsedtot > 0) then
+       if (moroutput%frac) then
+          !
+          ! group 5: element 'FRAC'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
           do l = 1, lsedtot
              do m = 1, mmax
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, l, 1) = fixfac(nm, l)
+                   rbuff4(n, m, l, 1) = frac(nm, l)
                 enddo
              enddo
           enddo
-       else
-          rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'FRAC', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'FIXFRAC', uindex, 1, glbarr4)
-       endif
-       if (ierror/=0) goto 9999
-    endif
-    !
-    if (moroutput%hidexp) then
        !
-       ! group 5: element 'HIDEXP'
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
-       do l = 1, lsedtot
+       if (moroutput%mudfrac) then
+          !
+          ! group 5: element 'MUDFRAC'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
           do m = 1, mmax
              do n = 1, nmaxus
                 call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff4(n, m, l, 1) = gdp%gderosed%hidexp(nm, l)
+                rbuff4(n, m, 1, 1) = mudfrac(nm)
              enddo
           enddo
-       enddo
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam5, 'HIDEXP', uindex, 1, glbarr4)
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'MUDFRAC', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
        endif
-       if (ierror/=0) goto 9999
+       !
+       if (moroutput%sandfrac) then
+          !
+          ! group 5: element 'SANDFRAC'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
+          do m = 1, mmax
+             do n = 1, nmaxus
+                call n_and_m_to_nm(n, m, nm, gdp)
+                rbuff4(n, m, 1, 1) = sandfrac(nm)
+             enddo
+          enddo
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'SANDFRAC', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
+       !
+       if (moroutput%fixfac) then
+          !
+          ! group 5: element 'FIXFAC'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          if (associated(fixfac)) then
+             do l = 1, lsedtot
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff4(n, m, l, 1) = fixfac(nm, l)
+                   enddo
+                enddo
+             enddo
+          else
+             rbuff4(1:nmaxus, 1:mmax, 1:lsedtot, 1) = -999.0
+          endif
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'FIXFRAC', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
+       !
+       if (moroutput%hidexp) then
+          !
+          ! group 5: element 'HIDEXP'
+          !
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsedtot, 1) )
+          do l = 1, lsedtot
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff4(n, m, l, 1) = gdp%gderosed%hidexp(nm, l)
+                enddo
+             enddo
+          enddo
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff4)
+          if (inode == master) then
+             ierror = putelt(fds, grnam5, 'HIDEXP', uindex, 1, glbarr4)
+          endif
+          if (ierror/=0) goto 9999
+       endif
     endif
     !
     ! Add mor fields
     !
-    call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-              & 2         ,fds       ,grnam5    ,gdp       )
-    if (error) goto 9999
+    if (lsedtot > 0) then
+       call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                 & 2         ,fds       ,grnam5    ,gdp       )
+       if (error) goto 9999
+    endif
     !
     ! Add fluff fields
     !
-    call dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                  & 2         ,fds       ,grnam5    ,gdp       )
-    if (error) goto 9999
+    if (lsed > 0) then
+       call dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                     & 2         ,fds       ,grnam5    ,gdp       )
+       if (error) goto 9999
+    endif
     !
     if (inode == master) ierror = clsnef(fds)
     !
