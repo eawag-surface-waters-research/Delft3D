@@ -328,6 +328,37 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        endif
     endif
     !
+    ! Locate and read 'Gapres' Global atmosferic pressure
+    ! default value allowed => default
+    !
+    keyw = 'Gapres'
+    ntrec = nrrec
+    rdef = gapres
+    lkw = 6
+    call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
+              & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
+              & 'NO'      )
+    lerror = .false.
+    !
+    ! not found ?
+    !
+    if (found) then
+       call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
+                 & mdfrec    ,rval      ,rdef      ,defaul    ,nrrec     , &
+                 & ntrec     ,lundia    ,gdp       )
+       !
+       ! reading error?
+       !
+       if (lerror) then
+          lerror = .false.
+          gapres = rdef
+       else
+          gapres = rval(1)
+       endif
+    else
+       gapres = rdef
+    endif
+    !
     ! process temp, only if ktemp > 0, then per definition temp = .true.
     !
     if (ktemp>0) then
@@ -409,37 +440,6 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        ! For "Ocean" model
        !
        if (ktemp==5) then
-          !
-          ! Locate and read 'Gapres' Global atmosferic pressure
-          ! default value allowed => defaul
-          !
-          keyw = 'Gapres'
-          ntrec = nrrec
-          rdef = gapres
-          lkw = 6
-          call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                    & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                    & 'NO'      )
-          lerror = .false.
-          !
-          ! not found ?
-          !
-          if (found) then
-             call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                       & mdfrec    ,rval      ,rdef      ,defaul    ,nrrec     , &
-                       & ntrec     ,lundia    ,gdp       )
-             !
-             ! reading error?
-             !
-             if (lerror) then
-                lerror = .false.
-                gapres = rdef
-             else
-                gapres = rval(1)
-             endif
-          else
-             gapres = rdef
-          endif
           !
           ! reset RDEF
           !
