@@ -159,7 +159,7 @@ subroutine z_initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        if (kfs(nm)==1) then
           z0scratch(nm, kmax) = (  kfu(nm)*z0urou(nm) + kfu(nmd)*z0urou(nmd)   &
                               &  + kfv(nm)*z0vrou(nm) + kfv(ndm)*z0vrou(ndm) ) &
-                              & / (kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
+                              & / max(1,kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
        endif
     enddo
     !

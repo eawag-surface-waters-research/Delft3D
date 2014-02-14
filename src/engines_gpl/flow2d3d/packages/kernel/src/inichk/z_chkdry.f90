@@ -294,36 +294,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     call upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icy       , &
              & zmodel    ,kcs       ,kfv       ,kspv      ,dps       , &
              & s1        ,dpv       ,vmean     ,hv        ,gdp       )
-    !
-    ! set KFS to 0 if the surrounding velocity points are dry
-    !
-    do nm = 1, nmmax
-       if (kcs(nm) > 0) then
-          nmd = nm - icx
-          ndm = nm - icy
-          kfs(nm) = max(kfu(nm), kfu(nmd), kfv(nm), kfv(ndm))
-          if (kfs(nm) == 1) then
-             do k = kfsmin(nm), kmax
-                if (k <= kfsmax(nm)) then
-                   kfsz1(nm, k) = 1
-                else
-                   kfsz1(nm, k) = 0
-                endif
-             enddo
-          else
-             !kfsmax(nm) = -1
-             do k = kfsmin(nm), kmax
-                kfsz1(nm, k) = 0
-             enddo
-          endif
-       endif
-    enddo
-    !
-    ! exchange mask array kfs with neighbours for parallel runs
-    !
-    call dfexchg ( kfs  , 1, 1   , dfint, nm_pos, gdp )
-    call dfexchg ( kfsz1, 1, kmax, dfint, nm_pos, gdp )
-    !
+   !
     ! Check for dry velocity points
     ! Approach for 2D weirs (following WAQUA)
     ! HUCRES is initially set to extreme large value to guarantee
@@ -458,6 +429,35 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        call dfexchg ( kfuz1 , 1, kmax, dfint, nm_pos, gdp )
        call dfexchg ( kfvz1 , 1, kmax, dfint, nm_pos, gdp )
     endif
+    !
+    ! set KFS to 0 if the surrounding velocity points are dry
+    !
+    do nm = 1, nmmax
+       if (kcs(nm) > 0) then
+          nmd = nm - icx
+          ndm = nm - icy
+          kfs(nm) = max(kfu(nm), kfu(nmd), kfv(nm), kfv(ndm))
+          if (kfs(nm) == 1) then
+             do k = kfsmin(nm), kmax
+                if (k <= kfsmax(nm)) then
+                   kfsz1(nm, k) = 1
+                else
+                   kfsz1(nm, k) = 0
+                endif
+             enddo
+          else
+             !kfsmax(nm) = -1
+             do k = kfsmin(nm), kmax
+                kfsz1(nm, k) = 0
+             enddo
+          endif
+       endif
+    enddo
+    !
+    ! exchange mask array kfs with neighbours for parallel runs
+    !
+    call dfexchg ( kfs  , 1, 1   , dfint, nm_pos, gdp )
+    call dfexchg ( kfsz1, 1, kmax, dfint, nm_pos, gdp )
     !
     ! Mask initial arrays
     !
