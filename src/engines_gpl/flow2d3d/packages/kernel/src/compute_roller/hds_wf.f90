@@ -87,13 +87,15 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
 !
 ! executable statements -------------------------------------------------------
 !
+
                   allocate (dx(mmax), stat = istat)
     if (istat==0) allocate (dy(nmax), stat = istat)
     if (istat /= 0) then
        call prterr(lundia, 'P004', 'memory alloc error in hds_wf, roller module')
        call d3stop(1, gdp)
     endif    !
-    dx(1) = 0.0 
+    dx(1) = 0.0
+    dy(1) = 0.0
     if (f_lam < 0.0) f_lamt=-f_lam
     do m = 1, mmax
        do n = 1, nmax

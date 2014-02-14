@@ -92,16 +92,18 @@ real(fp)                                                       , intent(in)  :: 
 !
 ! executable statements -------------------------------------------------------
 !
+
                  allocate (dx(mmax), stat = istat)
    if (istat==0) allocate (dy(nmax), stat = istat)
    if (istat /= 0) then
       call prterr(lundia, 'P004', 'memory alloc error in hds, roller module')
       call d3stop(1, gdp)
    endif
-   dx(1) = 0.0 
+   dx(1) = 0.0
+   dy(1) = 0.0
    do m = 1, mmax
-       do n = 1, nmax
-          if (kfs(n, m)==1) then
+      do n = 1, nmax
+         if (kfs(n, m)==1) then
              mx = 1
              sdx = 0.0
              mrup = 0.0
@@ -234,8 +236,8 @@ real(fp)                                                       , intent(in)  :: 
              grfacv(n, m) = gruvt*hdps*sin(theta(n, m)*degrad)-grmasv(n,m)
          else
          endif
-       enddo
-    enddo
-    if (allocated(dx)) deallocate(dx, stat=istat)
-    if (allocated(dy)) deallocate(dy, stat=istat)
+      enddo
+   enddo
+   if (allocated(dx)) deallocate(dx, stat=istat)
+   if (allocated(dy)) deallocate(dy, stat=istat)
 end subroutine hds
