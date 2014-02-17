@@ -639,35 +639,42 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
         free_space = len(value)
         do
            call tree_get_data_string( anode, localvalue, success_ )
-           !
-           ! Remove possible delimiters #
-           !
-           if (localvalue(1:1)=='#') then
-              localvalue = localvalue(2:)
-              k = index(localvalue, '#')
-              if (k>0) then
-                 localvalue = localvalue(1:k-1)
-              endif
-              localvalue = adjustl(localvalue)
-           endif
-           !
-           ! Write to parameter "value"
-           !
-           if (free_space == len(value)) then
-              ! First write to "value": Write as much as possible
-              value = ' '
-              value = localvalue(:min(free_space,len_trim(localvalue)))
+
+           ! tree_get_data_string only checks whether key exists (success_ = .true.)
+           ! but this prop_get_string is more strict: if value was empty, success_ = .false.
+           if (len_trim(localvalue) == 0) then
+              success_ = .false.
            else
-              ! Follow up write to "value": Only add when there is enough free space
-              ! This is to avoid "half values" being added
-              if (len_trim(localvalue) > free_space - 1) then
-                 ! Not enough free space in parameter "value" anymore. Exit this do-loop.
-                 exit
+              !
+              ! Remove possible delimiters #
+              !
+              if (localvalue(1:1)=='#') then
+                 localvalue = localvalue(2:)
+                 k = index(localvalue, '#')
+                 if (k>0) then
+                    localvalue = localvalue(1:k-1)
+                 endif
+                 localvalue = adjustl(localvalue)
               endif
-              ! Add a space between the values
-              value = trim(value) // ' ' // localvalue(:len_trim(localvalue))
-           endif
-           free_space = len(value) - len_trim(value)
+              !
+              ! Write to parameter "value"
+              !
+              if (free_space == len(value)) then
+                 ! First write to "value": Write as much as possible
+                 value = ' '
+                 value = localvalue(:min(free_space,len_trim(localvalue)))
+              else
+                 ! Follow up write to "value": Only add when there is enough free space
+                 ! This is to avoid "half values" being added
+                 if (len_trim(localvalue) > free_space - 1) then
+                    ! Not enough free space in parameter "value" anymore. Exit this do-loop.
+                    exit
+                 endif
+                 ! Add a space between the values
+                 value = trim(value) // ' ' // localvalue(:len_trim(localvalue))
+              endif
+              free_space = len(value) - len_trim(value)
+           end if ! empty(localvalue)
            !
            ! Check if the next child node has name " "
            !
