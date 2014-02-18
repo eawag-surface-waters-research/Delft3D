@@ -131,7 +131,7 @@ old_name,new_name,old_default,configuration,serial,action_type
 "ExtPODUV  ","ExtPOGUV  ",    0.00000    ,"          ",2012032801,         1
 "ExtPODUV  ","ExtUVPOC1 ",   0.470000    ,"          ",2012032801,         6
 "ExtPODUV  ","ExtUVPOC2 ",   0.600000E-01,"          ",2012032801,         6
-"ExtPODUV  ","ExtUVPOC1 ",    0.00000    ,"          ",2012032801,         1
+"ExtUVDetc ","ExtUVPOC1 ",    0.00000    ,"          ",2012032801,         2
 "ExtUVOOC  ","ExtUVPOC2 ",    0.00000    ,"          ",2012032801,         2
 "Extinc_VL ","Extinc_VLG",    0.00000    ,"          ",2012032801,         1
 "DisHum    ","DOC       ",    0.00000    ,"          ",2012032801,         2
