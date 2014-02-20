@@ -29,7 +29,6 @@ Not supported functionality and limitations
 - Any usage of a com-file
 - Z layer model
 - Domain Decomposition
-- Wave online
 - Fluid mud online
 - RTC online
 - Coup online
@@ -297,11 +296,11 @@ group               testcase
                     13-dpmv_dep            ERROR: dif_s1 > 1E-4 
                     14-tt_veg_split        ERROR: To be investigated   
                     15-dpmv_bend           ERROR: To be investigated
-21_waveol           01-trench_dd           ERROR: WAVE online
-                    02-lido_dd             ERROR: WAVE online
-                    03-coafin_dd           ERROR: WAVE online
-                    04-botnow_curnow       ERROR: WAVE online
-                    05-flow_wave_roller    ERROR: WAVE online
+21_waveol           01-trench_dd           ERROR: dd
+                    02-lido_dd             ERROR: dd
+                    03-coafin_dd           ERROR: dd
+                    04-botnow_curnow       OK
+                    05-flow_wave_roller    ERROR: roller
 22_graded           01-graded              ERROR: dif_s1 > 0.15            
                     02-pankop              ERROR: diff u > 0.03 (at inflow) 
                     03-trench              ERROR: locally very large differences
