@@ -146,7 +146,7 @@
          endif
          if ( j .gt. 0 ) then
             if ( j .lt. i ) then        ! first  off-diagonal element -> previous layer
-               ip = 2
+               jp = 2
             else                        ! second off-diagonal element -> next layer
                jp = 1
             endif
