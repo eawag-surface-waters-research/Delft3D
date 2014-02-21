@@ -64,7 +64,6 @@
 
       ! local decalrations
 
-      integer , allocatable, save  :: iknmrk_save(:) ! copy of the original feature array
       integer                      :: ip1            ! index pointer in pmsa array
       integer                      :: ip2            ! index pointer in pmsa array
       integer                      :: ip3            ! index pointer in pmsa array
@@ -87,15 +86,6 @@
       integer                      :: ibodem         ! bottom segment number
       integer, save                :: opemersion = 2 ! option emersion 1 = all, 2 = one, 3 = average
       integer                      :: ik1,ik2,ik3    ! seperate features
-
-      ! allocate storage of original feature array or reset original
-
-      if ( .not. allocated(iknmrk_save) ) then
-         allocate(iknmrk_save(noseg))
-         iknmrk_save=iknmrk(1:noseg)
-      else
-         iknmrk(1:noseg)=iknmrk_save
-      endif
 
       ! initialise bottom if necessary
 
