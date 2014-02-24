@@ -26,14 +26,14 @@ set SCRIPT_DIRECTORY=%~dp0
 
 set SVNVERSION="%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe"
 REM Temporariry fix until TeamCity is compatible with svn 1.8
-set SVNVERSION17="%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion-17.exe"
+set SVNVERSION17="%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32-17\svnversion.exe"
 set VN="%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe"
 
 set version=000000
 
 rem Obtain the svn version number 
 for /f "tokens=*" %%a in ('%SVNVERSION% %2') do set version=%%a
-IF "%version" == "000000" (
+IF "%version%" == "000000" (
    REM use old svn version 1.7 for use on TeamCity Buildserver which does not support 1.8 yet
    for /f "tokens=*" %%a in ('%SVNVERSION17% %2') do set version=%%a
    )
