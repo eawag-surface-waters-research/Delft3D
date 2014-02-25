@@ -8,6 +8,9 @@
 include $(top_srcdir)/common.am
 bin_PROGRAMS = delwaq1
 
+AM_FCFLAGS += $(OPENMP_FCFLAGS)
+AM_FFLAGS += $(OPENMP_FFLAGS)
+
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
