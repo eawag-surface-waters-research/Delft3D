@@ -887,11 +887,11 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     !
     do k = 1, kmax
        do nm = 1, nmmax
-             if (momsol == 'flood') then
-                qxk(nm, k) = guu(nm)*hu0(nm)*thick(k)*u1(nm, k)*porosu(nm,k)
-             else
-                qxk(nm, k) = guu(nm)*hu (nm)*thick(k)*u1(nm, k)*porosu(nm,k)
-             endif
+          if (momsol == 'flood') then
+             qxk(nm, k) = guu(nm)*hu0(nm)*thick(k)*u1(nm, k)*porosu(nm,k)
+          else
+             qxk(nm, k) = guu(nm)*hu (nm)*thick(k)*u1(nm, k)*porosu(nm,k)
+          endif
        enddo
     enddo
     !
@@ -911,7 +911,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     enddo
     do k = 1, kmax
        do nm = 1, nmmax
-             umean(nm) = umean(nm) + thick(k)*u1(nm, k)
+          umean(nm) = umean(nm) + thick(k)*u1(nm, k)
        enddo
     enddo
     !

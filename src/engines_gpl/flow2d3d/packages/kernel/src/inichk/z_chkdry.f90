@@ -462,7 +462,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     ! Mask initial arrays
     !
     do nm = 1, nmmax
-       mask = min(1, kcs(nm))
+       mask = min(1, abs(kcs(nm)))
        s1(nm) = s1(nm)*mask
        if (kfs(nm) == 1) then
           !

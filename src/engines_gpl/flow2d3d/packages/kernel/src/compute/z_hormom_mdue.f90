@@ -139,7 +139,7 @@ subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
        endif
     enddo
     do nm = 1, nmmax
-       if (kfu(nm)==1) then
+       if (kfu(nm)==1  .and. (kcs(nm)>0 .or. kcs(nmu)>0)) then
           nmd   = nm - icx
           ndm   = nm - icy
           ndmd  = nm - icx - icy
@@ -155,7 +155,7 @@ subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
           gsqi  = gsqiu(nm)
           !
           do k = kfumn0(nm), kfumx0(nm)
-             if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
+             if (kfuz0(nm, k)==1) then
                 vvv   = 0.25_fp * (v1(ndm,k)+v1(ndmu,k)+v1(nm,k)+v1(nmu,k))
                 uuu   = u0(nm, k)
                 cvv   = vvv/geta

@@ -522,13 +522,13 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! Using the whole time step (fully non-hydrostatic mode)
           !
           call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
-                            & icy       ,kcs       ,kcs45     ,kcscut    , &
-                            & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
-                            & kfvz0     ,kfsmn0    ,kfsmx0    , &
-                            & u0        ,v0        ,hu        , &
-                            & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
-                            & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
-                            & ddk       ,gdp       )
+                           & icy       ,kcs       ,kcs45     ,kcscut    , &
+                           & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+                           & kfvz0     ,kfsmn0    ,kfsmx0    , &
+                           & u0        ,v0        ,hu        , &
+                           & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                           & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                           & ddk       ,gdp       )
           !
        elseif (momsol == 'finvol') then
           !

@@ -309,7 +309,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
     ! TIMSCL will not been used in UPDBCC
     !
-   
     first   = .false.
     horiz   = .false.
     udir    = .false.
@@ -321,7 +320,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     k1st  = -999
     k2nd  = -999
     dpvel = -999.0_fp
-  
+    !
     if (parll) then 
        !
        ! Recalculates the effective global number of open boundary conditions

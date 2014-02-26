@@ -193,7 +193,7 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
        !
        ! Set new layer administration in the computational points
        !
-       if (kcu(nm)/=0 .and. kcs(nm)*kcs(nmu)>0) then
+       if (kcu(nm)/=0) then
           !
           ! s1u is used for setting kfumax
           !

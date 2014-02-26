@@ -651,7 +651,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    !
                    ! Central implicit
                    !
-                   maskval = min(kcs(nm), 2)*min(kcs(nmu), 2)
+                   maskval = min(abs(kcs(nm)), 2)*min(abs(kcs(nmu)), 2)
                    www     = 0.25_fp*maskval*(w0(nm, k - 1) + w0(nm, k) + w0(nmu, k - 1) + w0(nmu, k))
                    if (www < 0.0_fp) then
                       adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
@@ -769,8 +769,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              numu = nm + icx + icy
              ndmu = nm + icx - icy
              numd = nm - icx + icy
-             do k = kfumn0(nm), kfumx0(nm)
-                if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
+             if (kfu(nm)==1 .and. (kcu(nm)==1)) then
+                do k = kfumn0(nm), kfumx0(nm)
                    if (kfuz0(nm, k)==1) then
                       gksid = gvz(nm)
                       gksiu = gvz(nmu)
@@ -780,7 +780,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       geta  = guu(nm)
                       idifd = kfvz0(ndm, k)*kfvz0(ndmu, k)*kfuz0(ndm, k)
                       idifu = kfvz0(nm, k)*kfvz0(nmu, k)*kfuz0(num, k)
-                      idifc = abs(2 - kcs(nm))*abs(2 - kcs(nmu))
+                      idifc = abs(2 - abs(kcs(nm)))*abs(2 - abs(kcs(nmu)))
                       !
                       ! EDDY VISCOSITY FOR KMAX = 1, USING LAPLACE OPERATOR
                       ! (2*VIH*(D2U/DX2 + D2U/DY2)
@@ -796,8 +796,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                                  & + dux*u0(nmu, k) + ddy*u0(ndm, k)               &
                                  & + duy*u0(num, k)
                    endif
-                endif
-             enddo
+                enddo
+             endif
           enddo
        else
           !

@@ -244,8 +244,6 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     integer       :: k
     integer       :: kenm
     integer       :: kk
-    integer       :: kkmin
-    integer       :: kkmax
     integer       :: m
     integer       :: mmaxddb
     integer       :: n
@@ -367,7 +365,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     !
     call timer_start(timer_sud_rest, gdp)
     do nm = 1, nmmax
-       if (kcs(nm) /= 0) then
+       if (kcs(nm) > 0) then
           do k = 1, kmax
              d0k(nm, k) = ( - qyk(nm, k) + qyk(nm - icy, k)) / gsqs(nm)
           enddo
@@ -510,7 +508,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     !
     call timer_start(timer_sud_rest, gdp)
     do nm = 1, nmmax
-       if (kcs(nm) /= 0) then
+       if (kcs(nm) > 0) then
           do k = 1, kmax
              d0(nm) = d0(nm) + d0k(nm, k)
           enddo
@@ -868,16 +866,13 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
              if (kfuz0(nm,k) == 1) then
                 pr         = aak(nm, k)*d(nm) + cck(nm, k)*d(nm + icx)
                 u1(nm, k)  = (ddk(nm, k) - pr) / bbk(nm, k)
-                qxk(nm, k) = dzu0(nm, k) * u1(nm, k) * guu(nm) * porosu(nm, k)
              else
                 u1(nm, k)  = 0.0_fp
-                qxk(nm, k) = 0.0_fp
              endif
           enddo
        elseif (kcu(nm)/=0) then
           do k = kfumn0(nm), kmax
              u1(nm, k)  = 0.0_fp
-             qxk(nm, k) = 0.0_fp
           enddo
        else
        endif
@@ -886,6 +881,25 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     ! exchange u1 with neighbours for parallel runs
     !
     call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
+    !
+    ! Compute the fluxes after the communication of u1
+    !
+    do nm = 1, nmmax
+       if (kfu(nm) == 1) then
+          do k = kfumn0(nm), kmax
+             if (kfuz0(nm,k) == 1) then
+                qxk(nm, k) = dzu0(nm, k) * u1(nm, k) * guu(nm) * porosu(nm, k)
+             else
+                qxk(nm, k) = 0.0_fp
+             endif
+          enddo
+       elseif (kcu(nm)/=0) then
+          do k = kfumn0(nm), kmax
+             qxk(nm, k) = 0.0_fp
+          enddo
+       else
+       endif
+    enddo
     !
     ! Compute umean again based on new velocities
     !
@@ -935,9 +949,11 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        !
        error = .false.
        do nm = 1, nmmax
-          if (abs(w1(nm, kmax))>epsomb) then
-             error = .true.
-             w1(nm, kmax) = 0.0
+          if (kcs(nm)*kfs(nm) == 1) then
+             if (abs(w1(nm, kfsmx0(nm)))>epsomb) then
+                error = .true.
+                w1(nm, kfsmx0(nm)) = 0.0
+             endif
           endif
        enddo
        ierror = 0
