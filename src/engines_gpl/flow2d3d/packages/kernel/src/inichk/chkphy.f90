@@ -50,6 +50,7 @@ subroutine chkphy(lundia     ,error     ,salin     ,temp      ,wind      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)                , pointer :: tzone
 !
 ! Global variables
 !
@@ -91,6 +92,8 @@ subroutine chkphy(lundia     ,error     ,salin     ,temp      ,wind      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    tzone       => gdp%gdexttim%tzone
+    !
     ! initialize local parameters
     !
     error  = .false.
@@ -144,7 +147,8 @@ subroutine chkphy(lundia     ,error     ,salin     ,temp      ,wind      , &
     ! Check ANGLON, only if KTEMP = 5, and solar radiation is NOT input
     !
     if (.not.sferic) then
-        if (ktemp==5 .and. .not.solrad_read .and. .not.swrf_file) then
+        if (ktemp==5 .and. .not.solrad_read .and. .not.swrf_file .and. &
+           & comparereal(tzone , 0.0_fp) == 0) then
            if (comparereal(anglon , 0.0_fp) == 0) then
               call prterr(lundia, 'U184', ' ')
            endif
