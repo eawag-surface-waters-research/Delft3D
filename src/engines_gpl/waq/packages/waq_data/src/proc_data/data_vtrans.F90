@@ -27,15 +27,9 @@
 
       INTEGER, SAVE ::  NOLAYLOCAL, NOSEGLOCAL
       REAL   , SAVE ::  TIMTOT
-      LOGICAL           ACTIVE_VTRANS                 ! switch indicating if VTRANS functionality is active
-      LOGICAL           RESET_VTRANS                  ! switch indicating if new distribution step is needed
-      LOGICAL           INIT_VTRANS                   ! switch indicating if VTRANS is initialised
-      SAVE              ACTIVE_VTRANS
-      SAVE              RESET_VTRANS
-      SAVE              INIT_VTRANS
-      DATA              ACTIVE_VTRANS  /.FALSE./
-      DATA              RESET_VTRANS   /.TRUE./
-      DATA              INIT_VTRANS    /.FALSE./
+      LOGICAL, SAVE ::  ACTIVE_VTRANS = .FALSE.       ! switch indicating if VTRANS functionality is active
+      LOGICAL, SAVE ::  RESET_VTRANS  = .TRUE.        ! switch indicating if new distribution step is needed
+      LOGICAL, SAVE ::  INIT_VTRANS   = .FALSE.       ! switch indicating if VTRANS is initialised
 
       REAL, ALLOCATABLE, SAVE :: CONCV(:,:)           ! calculated concentration distribution per layer
       REAL, ALLOCATABLE, SAVE :: TIMEV(:,:)           ! accumulated time per layer

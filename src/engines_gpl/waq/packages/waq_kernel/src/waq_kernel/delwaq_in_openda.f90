@@ -93,7 +93,7 @@ contains
   integer, intent(in)          :: operation     !   operation: oper_multiply, oper_add, oper_set
 
   if (doLogging) then
-     print *, 'set_openda_buffer, loc-id=', location_id, ', q_id=', quantity_id, ', val=', val, ', oper:', operation
+     write (*,*) 'set_openda_buffer, loc-id=', location_id, ', q_id=', quantity_id, ', val=', val, ', oper:', operation
      call flush(6)
   endif
   l_ei(location_id,quantity_id) = .true.
@@ -133,7 +133,7 @@ contains
 !! TODO: allow other variants of get_openda_buffer
 
   if (location_id == -1 .or. quantity_id == -1) then
-       print *, 'EI get_openda_buffer, INVALID ITEM: loc-id=', location_id, ', q_id=', quantity_id
+       write (*,*) 'EI get_openda_buffer, INVALID ITEM: loc-id=', location_id, ', q_id=', quantity_id
   else
     if (l_ei(location_id,quantity_id)) then
        org_value = qarray(1,1)
@@ -145,10 +145,10 @@ contains
        case(oper_multiply)
            qarray = qarray * ei_val(location_id, quantity_id)
        case default
-          print *, 'get_openda_buffer: UNKNOWN OPERATION type: ', ei_oper(location_id,quantity_id)
+          write (*,*) 'get_openda_buffer: UNKNOWN OPERATION type: ', ei_oper(location_id,quantity_id)
        endselect
        if (doLogging) then
-          print *, 'EI adjusted, loc-id=', location_id, ', q_id=', quantity_id, ', was: ', org_value, ', is:', qarray(1,1)
+          write (*,*) 'EI adjusted, loc-id=', location_id, ', q_id=', quantity_id, ', was: ', org_value, ', is:', qarray(1,1)
           call flush(6)
        endif
     endif

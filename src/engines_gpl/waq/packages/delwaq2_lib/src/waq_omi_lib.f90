@@ -285,6 +285,7 @@ logical function SetOutputTimers(type, startTime, endTime, timeStep)
             idstrt = startTime
             idstop = endTime
             idstep = timeStep
+        case default
     end select
 
     noutp = 9
@@ -1045,7 +1046,7 @@ logical function DefineWQProcessesCore(substance, substance_mult, &
     size_dlwq_state%output = 9 + 7*noutp
     size_dlwq_state%total  = size_dlwq_state%core + size_dlwq_state%pseudo + size_dlwq_state%output
 
-    print *,'state sizes have been set in DefineWQProcessesCore'
+    write (*,*) 'state sizes have been set in DefineWQProcessesCore'
 
 
     DefineWQProcessesCore = .true.
@@ -1230,7 +1231,7 @@ logical function SetInitialVolume( volume )
     SetInitialVolume = .true.
     return
 
- 911 print *,'setinitialvolume: error!!! '
+ 911 write (*,*) 'setinitialvolume: error!!! '
 
 end function SetInitialVolume
 
@@ -1558,7 +1559,7 @@ integer function WriteRestartFileDefaultName ()
     lcharmap = lchar(23)
     found = 0
     do i=248,1,-1
-      if ( lcharmap(i:i) .eq. '.' .and. found .eq. 0 ) then
+      if ( lcharmap(i:i) == '.' .and. found == 0 ) then
         lcharmap(i:i+7) = "_res.map"
         found = 1
       endif
@@ -2115,7 +2116,7 @@ end subroutine write_array_2d
 !     Write the file with constants, functions etc
 !
 subroutine write_functions( name )
-    character(len=*) :: name
+    character(len=*), intent(in) :: name
 
     integer, parameter :: FILE_NAME_SIZE = 256
     integer, parameter :: ITEM_NAME_SIZE = 20

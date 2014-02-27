@@ -477,9 +477,9 @@ contains
 
 !> Create a new item if necessary (internal routine)
 subroutine createOrFindItem( name, idx, isNew )
-    character(len=*)     :: name
-    integer, intent(out) :: idx
-    logical, intent(out) :: isNew
+    character(len=*), intent(in)  :: name
+    integer         , intent(out) :: idx
+    logical         , intent(out) :: isNew
 
     integer              :: i
     integer              :: maxused

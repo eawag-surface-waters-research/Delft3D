@@ -95,9 +95,9 @@
      &         oda_loctype == ODA_LOC_TYPE_ALL_SEGMENTS) then
               dlwq_type = DLWQ_ALL_CONCENTRATIONS
           else
-              print *,' Wrong combination of ODA-enumeration: '
-              print *,' parameter type: ', oda_partype
-              print *,' location type: ', oda_loctype
+              write (*,*) ' Wrong combination of ODA-enumeration: '
+              write (*,*) ' parameter type: ', oda_partype
+              write (*,*) ' location type: ', oda_loctype
               ! stop
           endif
 
@@ -133,8 +133,8 @@
               oda_partype = ODA_PAR_TYPE_ALL_SUBSTANCES
               oda_loctype = ODA_LOC_TYPE_ALL_SEGMENTS
           else
-            print *,' Wrong combination of dlwq-enumeration: '
-            print *,'  type: ', dlwq_type
+              write (*,*) ' Wrong combination of dlwq-enumeration: '
+              write (*,*) '  type: ', dlwq_type
             ! stop
           endif
 

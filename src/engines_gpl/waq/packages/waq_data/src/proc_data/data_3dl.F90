@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       MODULE DATA_3DL
+      
+      IMPLICIT NONE
 
       INTEGER, SAVE ::  NOSEG_3DL                 ! number of segments, copy of NOSEG
       INTEGER, SAVE ::  NOSEGL_3DL                ! number of segments per layer
@@ -67,8 +69,8 @@
       NGRO_3DL   = NGRO
       NTYP_3DL   = NTYP
 
-      ALLOCATE ( RADSURF_3DL(NOSEG)      ,&
-                 EFFIC_3DL(NTYP,NOSEG)   ,&
+      ALLOCATE ( RADSURF_3DL(NOSEG)      , &
+                 EFFIC_3DL(NTYP,NOSEG)   , &
                  STAT = IERR_ALLOC     )
       IF ( IERR_ALLOC .NE. 0 ) THEN
          CALL GETMLU(LUNREP)
