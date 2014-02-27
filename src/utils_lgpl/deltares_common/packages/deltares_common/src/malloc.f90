@@ -1614,6 +1614,7 @@ subroutine reallocPReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
