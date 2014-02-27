@@ -275,8 +275,10 @@ subroutine reallocPInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -294,6 +296,7 @@ subroutine reallocPInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -339,8 +342,10 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -357,6 +362,7 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -403,8 +409,10 @@ subroutine reallocPInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -426,6 +434,7 @@ subroutine reallocPInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -471,8 +480,10 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -497,6 +508,7 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -543,8 +555,10 @@ subroutine reallocPInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -568,6 +582,7 @@ subroutine reallocPInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -613,8 +628,10 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -643,6 +660,7 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -689,8 +707,10 @@ subroutine reallocPInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -716,6 +736,7 @@ subroutine reallocPInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -761,8 +782,10 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -795,6 +818,7 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -841,8 +865,10 @@ subroutine reallocPCharacter(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -860,6 +886,7 @@ subroutine reallocPCharacter(arr, uindex, lindex, stat, fill, shift, keepExistin
       arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -905,8 +932,10 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -923,6 +952,7 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill, shift, keepExisting
       arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -969,8 +999,10 @@ subroutine reallocPCharacter2(arr, uindex, lindex, stat, fill, shift, keepExisti
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -992,6 +1024,7 @@ subroutine reallocPCharacter2(arr, uindex, lindex, stat, fill, shift, keepExisti
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1037,8 +1070,10 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1063,6 +1098,7 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill, shift, keepExistin
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1109,8 +1145,10 @@ subroutine reallocPCharacter3(arr, uindex, lindex, stat, fill, shift, keepExisti
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1134,6 +1172,7 @@ subroutine reallocPCharacter3(arr, uindex, lindex, stat, fill, shift, keepExisti
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1179,8 +1218,10 @@ subroutine reallocCharacter3(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1209,6 +1250,7 @@ subroutine reallocCharacter3(arr, uindex, lindex, stat, fill, shift, keepExistin
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1255,8 +1297,10 @@ subroutine reallocPCharacter4(arr, uindex, lindex, stat, fill, shift, keepExisti
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1282,6 +1326,7 @@ subroutine reallocPCharacter4(arr, uindex, lindex, stat, fill, shift, keepExisti
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1327,8 +1372,10 @@ subroutine reallocCharacter4(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1361,6 +1408,7 @@ subroutine reallocCharacter4(arr, uindex, lindex, stat, fill, shift, keepExistin
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1407,8 +1455,10 @@ subroutine reallocPReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1426,6 +1476,7 @@ subroutine reallocPReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1471,8 +1522,10 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1489,6 +1542,7 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1535,8 +1589,10 @@ subroutine reallocPReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1603,8 +1659,10 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1629,6 +1687,7 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1675,8 +1734,10 @@ subroutine reallocPReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1700,6 +1761,7 @@ subroutine reallocPReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1745,8 +1807,10 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1775,6 +1839,7 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1821,8 +1886,10 @@ subroutine reallocPReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1848,6 +1915,7 @@ subroutine reallocPReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1893,8 +1961,10 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1927,6 +1997,7 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -1973,8 +2044,10 @@ subroutine reallocPDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -1992,6 +2065,7 @@ subroutine reallocPDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2037,8 +2111,10 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2055,6 +2131,7 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2101,8 +2178,10 @@ subroutine reallocPDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2124,6 +2203,7 @@ subroutine reallocPDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2169,8 +2249,10 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2195,6 +2277,7 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2241,8 +2324,10 @@ subroutine reallocPDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2266,6 +2351,7 @@ subroutine reallocPDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2311,8 +2397,10 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2341,6 +2429,7 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2387,8 +2476,10 @@ subroutine reallocPDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2414,6 +2505,7 @@ subroutine reallocPDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2459,8 +2551,10 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2493,6 +2587,7 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2539,8 +2634,10 @@ subroutine reallocPLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2558,6 +2655,7 @@ subroutine reallocPLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2603,8 +2701,10 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2621,6 +2721,7 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
       arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2667,8 +2768,10 @@ subroutine reallocPLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2690,6 +2793,7 @@ subroutine reallocPLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2735,8 +2839,10 @@ subroutine reallocLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2761,6 +2867,7 @@ subroutine reallocLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2807,8 +2914,10 @@ subroutine reallocPLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2832,6 +2941,7 @@ subroutine reallocPLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2877,8 +2987,10 @@ subroutine reallocLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2907,6 +3019,7 @@ subroutine reallocLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -2953,8 +3066,10 @@ subroutine reallocPLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -2980,6 +3095,7 @@ subroutine reallocPLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
@@ -3025,8 +3141,10 @@ subroutine reallocLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
-      !
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) then
+         goto 999 ! output=input
+      end if
+!
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
          muind = min(uind + shift_, uindex)
@@ -3059,6 +3177,7 @@ subroutine reallocLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       enddo
       deallocate(b, stat = localErr)
    endif
+999 continue
    if (present(stat)) stat = localErr
 end subroutine
 
