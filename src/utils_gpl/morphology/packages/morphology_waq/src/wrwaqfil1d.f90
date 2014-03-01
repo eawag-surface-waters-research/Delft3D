@@ -1,7 +1,7 @@
       module wrwaqfil1d
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2012.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -24,9 +24,10 @@
 !  are registered trademarks of Stichting Deltares, and remain the property of  
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
-!!--description-----------------------------------------------------------------
-! This module contains the data and routines for communicating with WAQ
-!!--declarations----------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
+!-------------------------------------------------------------------------------
 
       contains
       
