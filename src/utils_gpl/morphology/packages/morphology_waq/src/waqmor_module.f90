@@ -68,7 +68,7 @@ subroutine morini2waqdef(morpar, sedpar, trapar, waqmor)
     integer                     :: nIBS  ! number of bedload/total load fractions
     integer                     :: nISS  ! number of suspended fractions
     character(7)                :: num      ! number string for fraction
-    character(6)                :: trapar   ! name of transport parameter
+    character(6)                :: parnam   ! name of transport parameter
     character(1024)             :: errmsg
 !
 !! executable statements -------------------------------------------------------
@@ -138,14 +138,14 @@ subroutine morini2waqdef(morpar, sedpar, trapar, waqmor)
        call addpar(waqmor, 'IniThk'//num, RVAL=sedpar%sdbuni(j))
        call addpar(waqmor, 'TraFrm'//num, IVAL=trapar%iform(j))
        !
-       trapar = 'TrPa'
+       parnam = 'TrPa'
        do ipar = 1,10
-          write(trapar(5:6),'(I2.2)') ipar
+          write(parnam(5:6),'(I2.2)') ipar
           if (trapar%iparfld(ipar+10,j) /= 0) then
              ! spatially varying field
-             call addfld(waqmor, trapar//num, RVAL=trapar%parfld(:,trapar%iparfld(ipar+10,j)))
+             call addfld(waqmor, parnam//num, RVAL=trapar%parfld(:,trapar%iparfld(ipar+10,j)))
           elseif (trapar%par(ipar+10,j) /= 0.0) then
-             call addpar(waqmor, trapar//num, RVAL=trapar%par(ipar+10,j))
+             call addpar(waqmor, parnam//num, RVAL=trapar%par(ipar+10,j))
           endif
        enddo
        !

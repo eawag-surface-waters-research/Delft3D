@@ -28,11 +28,18 @@
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
+
+!include preprocessing flags from autotools
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+      implicit none
       
       contains
 
       function openwaqbinfile(filename) result (lun)
-         character*(*), intent(in) :: filename
+         character*(*), intent(in) :: filename !< Output filename.
          integer :: lun
          integer, external :: newunit
 !
@@ -41,7 +48,12 @@
 !                    Although it is not standard Fortran
 !
          lun    = newunit()
+#ifdef HAVE_FC_FORM_BINARY
          open  ( lun , file=filename , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+         open  ( lun , file=filename , form = 'unformatted' , access='stream' )
+#endif
       end function openwaqbinfile
 
 
@@ -54,24 +66,28 @@
 !                 to isolate newunit dependency.
 !
          lun    = newunit()
+#ifdef HAVE_FC_FORM_BINARY
          open  ( lun , file=filename , SHARED )
+#else
+         open  ( lun , file=filename , access='stream')
+#endif
       end function openasciifile
 
 
+!> Write ASCII or binary pointer file for WAQ.
       subroutine wrwaqpoi(ifrmto, noq, filename, ascii)
-!!--description-----------------------------------------------------------------
-! Write ASCII or binary pointer file
-!!--declarations----------------------------------------------------------------
-!     use xxx
-!
       implicit none
 !
 !           Global variables
 !
-      integer                , intent(in) :: noq
-      integer, dimension(:,:), intent(in) :: ifrmto
-      logical                , intent(in) :: ascii
-      character(*)           , intent(in) :: filename
+      integer                , intent(in) :: noq      !< Nr. of linkages (pointers) between computational cells.
+      integer, dimension(:,:), intent(in) :: ifrmto   !< Pointer table with all linkages.
+                                                      !! ifrmto(1,:) = 'from'   cell number
+                                                      !! ifrmto(2,:) = 'to'     cell number
+                                                      !! ifrmto(3,:) = 'from-1' cell number
+                                                      !! ifrmto(4,:) = 'to+1'   cell number
+      logical                , intent(in) :: ascii    !< Produce ascii file or not (then binary).
+      character(*)           , intent(in) :: filename !< Name for output pointer file.
 !
 !           Local variables
 !
@@ -87,7 +103,7 @@
          !
          lunout = openasciifile(filename)
          do q = 1,noq
-            write(lunout,'(4i)') ( ifrmto(i,q), i=1,4 )
+            write(lunout,'(4i10)') ( ifrmto(i,q), i=1,4 )
          enddo
          close(lunout)
       else
@@ -99,22 +115,23 @@
          close(lunout)
       endif
       end subroutine wrwaqpoi
+!
+!------------------------------------------------------------------------------
 
 
+      !> Write (binary) from/to length file for DelWAQ.
       subroutine wrwaqlen(lenex, noq, filename, ascii)
-!!--description-----------------------------------------------------------------
-! Write (binary) from/to length file
-!!--declarations----------------------------------------------------------------
       use precision
 !
       implicit none
 !
 !           Global variables
 !
-      integer                 , intent(in) :: noq
-      real(hp), dimension(:,:), intent(in) :: lenex
-      logical                 , intent(in) :: ascii
-      character(*)            , intent(in) :: filename
+      integer      , intent(in) :: noq           !< Nr. of linkages (pointers) between computational cells.
+      real(hp)     , intent(in) :: lenex(2, noq) !< Dispersion half-lengths of computational cells, segment
+                                                 !! centre to exchange point. (2 values: from/to direction)
+      logical      , intent(in) :: ascii         !< Produce ascii file or not (then binary).
+      character(*) , intent(in) :: filename      !< Output filename.
 !
 !           Local variables
 !
@@ -130,7 +147,7 @@
          !
          lunout = openasciifile(filename)
          do q = 1,noq
-            write(lunout,'(i,2f18.8)') q, ( lenex(i,q), i=1,2 )
+            write(lunout,'(i10,2f18.8)') q, ( lenex(i,q), i=1,2 )
          enddo
          close(lunout)
       else
@@ -143,24 +160,25 @@
          close(lunout)
       endif
       end subroutine wrwaqlen
-
-
-      subroutine wrwaqbin(itim, quant, nquant, filename, ascii, lunout)
-!!--description-----------------------------------------------------------------
-! Write (binary) exchange file(s): area and fluxes
-!!--declarations----------------------------------------------------------------
-      use precision
 !
+!------------------------------------------------------------------------------
+
+
+
+      !> Write (binary) exchange file(s) for DelWAQ: area and fluxes.
+      subroutine wrwaqbin(itim, quant, nquant, filename, ascii, lunout)
+      use precision
       implicit none
 !
 !           Global variables
 !
-      integer                 , intent(in)    :: itim
-      integer                 , intent(in)    :: nquant
-      real(hp), dimension(:)  , intent(in)    :: quant
-      logical                 , intent(in)    :: ascii
-      character(*)            , intent(in)    :: filename
-      integer                 , intent(inout) :: lunout
+      integer                 , intent(in)    :: itim     !< Time for new data block
+      integer                 , intent(in)    :: nquant   !< Size of quant(ity) array.
+      real(hp), dimension(:)  , intent(in)    :: quant    !< Quantity array to be written.
+      logical                 , intent(in)    :: ascii    !< Produce ascii file or not (then binary).
+      character(*)            , intent(in)    :: filename !< Output filename (only used if lunout not connected yet).
+      integer                 , intent(inout) :: lunout   !< File pointer for output file. Used if already connected,
+                                                          !! or set to new value for filename.
 !
 !           Local variables
 !
@@ -175,9 +193,9 @@
          if (lunout<0) then
             lunout = openasciifile(filename)
          endif
-         write(lunout,'(a,i)') 'Time = ', itim
+         write(lunout,'(a,i10)') 'Time = ', itim
          do q = 1,nquant
-            write(lunout,'(i,f18.8)') q, quant(q)
+            write(lunout,'(i10,f18.8)') q, quant(q)
          enddo
          !close(lunout)
       else
@@ -192,19 +210,18 @@
          !close(lunout)
       endif
       end subroutine wrwaqbin
-
-
-      subroutine wrmonseg(noseg, filename)
-!!--description-----------------------------------------------------------------
-! Write monitoring segments file (each segment is a monitoring area)
-!!--declarations----------------------------------------------------------------
 !
+!------------------------------------------------------------------------------
+
+
+      !> Write monitoring segments file for DelWAQ (each segment is a monitoring area).
+      subroutine wrmonseg(noseg, filename)
       implicit none
 !
 !           Global variables
 !
       integer                 , intent(in) :: noseg
-      character(*)            , intent(in) :: filename
+      character(*)            , intent(in) :: filename !< Output filename.
 !
 !           Local variables
 !
@@ -220,19 +237,18 @@
       enddo
       close(lunout)
       end subroutine wrmonseg
-
-
-      subroutine wr_nrofseg(noseg, filename)
-!!--description-----------------------------------------------------------------
-! Write NROFSEGM.DAT file
-!!--declarations----------------------------------------------------------------
 !
+!------------------------------------------------------------------------------
+
+
+      !> Write NROFSEGM.DAT file for DelWAQ.
+      subroutine wr_nrofseg(noseg, filename)
       implicit none
 !
 !           Global variables
 !
       integer                 , intent(in) :: noseg
-      character(*)            , intent(in) :: filename
+      character(*)            , intent(in) :: filename !< Output filename.
 !
 !           Local variables
 !
@@ -244,13 +260,12 @@
       write(lunout,'(i12,a)') noseg,'   ; number of segments'
       close(lunout)
       end subroutine wr_nrofseg
-
-
-      subroutine wr_nrofexch(noq1, noq2, noq3, filename)
-!!--description-----------------------------------------------------------------
-! Write NROFEXCH.DAT file
-!!--declarations----------------------------------------------------------------
 !
+!------------------------------------------------------------------------------
+
+
+      !> Write NROFEXCH.DAT file for DelWAQ.
+      subroutine wr_nrofexch(noq1, noq2, noq3, filename)
       implicit none
 !
 !           Global variables
@@ -258,7 +273,7 @@
       integer                 , intent(in) :: noq1
       integer                 , intent(in) :: noq2
       integer                 , intent(in) :: noq3
-      character(*)            , intent(in) :: filename
+      character(*)            , intent(in) :: filename !< Output filename.
 !
 !           Local variables
 !
@@ -270,5 +285,7 @@
       write(lunout,'(3i12,a)') noq1, noq2, noq3, '   ; number of exchanges in three directions'
       close(lunout)
       end subroutine wr_nrofexch
+!
+!------------------------------------------------------------------------------
 
       end module wrwaq
