@@ -4563,7 +4563,7 @@ src/utils_gpl/morphology/packages/morphology_waq/src/waqdata.f90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/waqlib.f90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/waqmor_module.f90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/waqsim_module.f90 -text
-src/utils_gpl/morphology/packages/morphology_waq/src/wrwaq.f90 -text
+src/utils_gpl/morphology/packages/morphology_waq/src/wrwaq.F90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/wrwaqfil1d.f90 -text
 src/utils_lgpl/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/Makefile.am -text
