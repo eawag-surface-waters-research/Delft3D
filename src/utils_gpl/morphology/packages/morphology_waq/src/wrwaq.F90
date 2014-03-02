@@ -67,9 +67,9 @@
 !
          lun    = newunit()
 #ifdef HAVE_FC_FORM_BINARY
-         open  ( lun , file=filename , SHARED )
+         open  ( lun , file=filename , form='formatted', SHARED )
 #else
-         open  ( lun , file=filename , access='stream')
+         open  ( lun , file=filename , form='formatted', access='stream')
 #endif
       end function openasciifile
 
@@ -102,6 +102,7 @@
          ! ascii output
          !
          lunout = openasciifile(filename)
+         write(lunout,'(a)') ';     From        To    From-1      To+1'
          do q = 1,noq
             write(lunout,'(4i10)') ( ifrmto(i,q), i=1,4 )
          enddo
