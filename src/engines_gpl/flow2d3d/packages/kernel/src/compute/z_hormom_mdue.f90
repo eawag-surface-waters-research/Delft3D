@@ -139,11 +139,11 @@ subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
        endif
     enddo
     do nm = 1, nmmax
+       nmu = nm + icx
        if (kfu(nm)==1  .and. (kcs(nm)>0 .or. kcs(nmu)>0)) then
           nmd   = nm - icx
           ndm   = nm - icy
           ndmd  = nm - icx - icy
-          nmu   = nm + icx
           num   = nm + icy
           numu  = nm + icx + icy
           ndmu  = nm + icx - icy
