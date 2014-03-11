@@ -293,6 +293,7 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: facmax
     real(fp)           :: ff
     real(fp)           :: flowresist
+    real(fp)           :: fxwl     ! local, modified fxw
     real(fp)           :: geta
     real(fp)           :: getad
     real(fp)           :: getau
@@ -325,6 +326,8 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: viz2
     real(fp)           :: vvv
     real(fp)           :: vvvc   ! Tangential velocity component used in Coriolis term
+    real(fp)           :: wsbodyul ! local, modified wsbodyu
+    real(fp)           :: wsul     ! local, modified wsu
     real(fp)           :: wsumax
     real(fp)           :: www
     real(fp)           :: zz
@@ -637,35 +640,35 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
           !
           if (wave) then
              wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
-             wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
+             wsul   = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
              !
              if (mom_output) then
                 mom_m_waveforce(nm, 1)  = mom_m_waveforce(nm, 1) &
-                                        & + wsu(nm)*h0i/(rhow*thick(1))
+                                        & + wsul*h0i/(rhow*thick(1))
              else
-                ddk(nm, 1) = ddk(nm, 1) + wsu(nm)*h0i/(rhow*thick(1))
+                ddk(nm, 1) = ddk(nm, 1) + wsul*h0i/(rhow*thick(1))
              endif
              !
              ! WAVE INDUCED BODY FORCE
              !
              if (roller .or. xbeach) then
-                fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
+                fxwl = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
                 do k = 1, kmax
                    if (mom_output) then
                       mom_m_waveforce(nm, k)  = mom_m_waveforce(nm, k) &
-                                              & + fxw(nm)*h0i/rhow
+                                              & + fxwl*h0i/rhow
                    else
-                      ddk(nm, k) = ddk(nm, k) + fxw(nm)*h0i/rhow
+                      ddk(nm, k) = ddk(nm, k) + fxwl*h0i/rhow
                    endif
                 enddo
              else
-                wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
+                wsbodyul = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
                 do k = 1, kmax
                    if (mom_output) then
                       mom_m_waveforce(nm, k)  = mom_m_waveforce(nm, k) &
-                                              & + wsbodyu(nm)*h0i/rhow
+                                              & + wsbodyul*h0i/rhow
                    else
-                      ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)*h0i/rhow
+                      ddk(nm, k) = ddk(nm, k) + wsbodyul*h0i/rhow
                    endif
                 enddo
              endif

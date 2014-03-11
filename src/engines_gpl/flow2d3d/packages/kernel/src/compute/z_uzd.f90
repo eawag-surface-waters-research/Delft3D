@@ -308,6 +308,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: eps1
     real(fp)           :: facmax
     real(fp)           :: ff
+    real(fp)           :: fxwl     ! local, modified fxw
     real(fp)           :: geta
     real(fp)           :: getad
     real(fp)           :: getau
@@ -334,6 +335,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: vvvc     ! Tangential velocity component used in Coriolis term
     real(fp)           :: www
     real(fp)           :: wavg0
+    real(fp)           :: wsbodyul ! local, modified wsbodyu
+    real(fp)           :: wsul     ! local, modified wsu
     real(fp)           :: wsumax
     real(fp)           :: zz
     character(20)      :: errtxt
@@ -654,21 +657,21 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              if (wave) then
                 wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
-                wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
+                wsul   = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
                 !
-                ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*max(dzu0(nm, kkmax),drytrsh))
+                ddk(nm, kkmax) = ddk(nm, kkmax) + wsul/(rhow*max(dzu0(nm, kkmax),drytrsh))
                 !
                 ! WAVE INDUCED BODY FORCE
                 !
                 if (roller .or. xbeach) then
-                   fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
+                   fxwl = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
                    do k = kfumn0(nm), kfumx0(nm)
-                      ddk(nm, k) = ddk(nm, k) + fxw(nm)/(rhow*hu(nm))
+                      ddk(nm, k) = ddk(nm, k) + fxwl/(rhow*hu(nm))
                    enddo
                 else
-                   wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
+                   wsbodyul = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
                    do k = kfumn0(nm), kfumx0(nm)
-                      ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)/(rhow*hu(nm))
+                      ddk(nm, k) = ddk(nm, k) + wsbodyul/(rhow*hu(nm))
                    enddo
                 endif
              endif
