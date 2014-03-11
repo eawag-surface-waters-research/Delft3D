@@ -398,6 +398,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     do i = 1, nsrc
        nm   = (mnksrc(5, i) + ddb) + ((mnksrc(4, i) - 1) + ddb) * icxy
        k    = mnksrc(6, i)
+       if (k .eq. -1) cycle
        kenm = min(1, kfu(nm) + kfu(nm - icx) + kfv(nm) + kfv(nm - icy))
        if (kenm/=0 .or. disch(i)>=0.0_fp) then
           if (k/=0) then
