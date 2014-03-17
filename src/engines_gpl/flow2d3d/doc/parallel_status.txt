@@ -27,7 +27,7 @@ map-file:
 Not supported functionality and limitations
 ===========================================
 - Any usage of a com-file
-- Z layer model
+- Z layer model (non-hydrostatic)
 - Domain Decomposition
 - Fluid mud online
 - RTC online
@@ -48,6 +48,7 @@ Not supported functionality and limitations
 - mormerge
 - mass balance polygons
 - writing dune output
+- bubble screen
 
 
 
@@ -112,6 +113,7 @@ group               testcase
                                              2-4doms: diff_temp <  1E-3 C    diff_sep <5E-5m       diff_u < 2E-4; (OK!)
                     13-foumod_scs          NOT OK: wl difference of 0.2 at skewed open boundary near Andaman Sea
                     14-katrina_windcd3     OK
+                    15-bubblescreen_sigma  ERROR: Bubble screen
 04_coarsewind       01-001                 ***** DISABLED ********** DISABLED *****
                     02-003                 OK
                     03-004                 OK
@@ -148,66 +150,66 @@ group               testcase
                     10-bijker              ERROR: Waves activated but no COM-file present
                     11-rijn1993            ERROR: Waves activated but no COM-file present
                     12-vanrijn_temp        OK
-07_zlayers          01-channel             ERROR: Z layer
-                    02-drying-flooding     ERROR: Z layer
-                    03-tidalflume          ERROR: Z layer
+07_zlayers          01-channel             OK
+                    02-drying-flooding     OK
+                    03-tidalflume          OK
                     04-temperature         ***** DISABLED ********** DISABLED *****
-                    05-pits                ERROR: Z layer
-                    06-125                 ERROR: Z layer
-                    07-f34                 ERROR: Z layer
-                    08-brassem             ERROR: Z layer
-                    09-zegerplas           ERROR: Z layer
-                    10-gate1               ERROR: Z layer
-                    11-gate2               ERROR: Z layer
-                    12-lockex_nhy          ERROR: Z layer
-                    13-jet_nhy             ERROR: Z layer
-                    14-01.06-rot_r         ERROR: Z layer
-                    15-01.07-chezy_r       ERROR: Z layer
-                    16-01.08-power_r       ERROR: Z layer
-                    17-01.12-breukelerme   ERROR: Z layer
-                    18-01.15-eva_plus      ERROR: Z layer
-                    19-03.06-india_droog   ERROR: Z layer
-                    20-04.07-034           ERROR: Z layer
-                    21-11.10-q10           ERROR: Z layer
-                    22-jvk-bak_met_dremp   ERROR: Z layer
-                    23-onl                 ERROR: Z layer
-                    24-forester            ERROR: Z layer
-                    25-bubblescreen        ERROR: Z layer
-                    26-powerstation        ERROR: Z layer
-07a_zlayers_implicit01-channel             ERROR: Z layer
-                    02-drying-flooding     ERROR: Z layer
-                    03-tidalflume          ERROR: Z layer
+                    05-pits                OK
+                    06-125                 OK
+                    07-f34                 ERROR: walking discharge
+                    08-brassem             OK
+                    09-zegerplas           OK
+                    10-gate1               OK
+                    11-gate2               OK
+                    12-lockex_nhy          ERROR: Z layer model (non-hydrostatic)
+                    13-jet_nhy             ERROR: Z layer model (non-hydrostatic)
+                    14-01.06-rot_r         OK
+                    15-01.07-chezy_r       OK
+                    16-01.08-power_r       ERROR: powerstation
+                    17-01.12-breukelerme   OK
+                    18-01.15-eva_plus      OK
+                    19-03.06-india_droog   OK
+                    20-04.07-034           OK
+                    21-11.10-q10           OK
+                    22-jvk-bak_met_dremp   OK
+                    23-onl                 OK
+                    24-forester            ERROR: max(mmax,nmax)/npart < 4
+                    25-bubblescreen        ERROR: bubble screen
+                    26-powerstation        ERROR: powerstation
+07a_zlayers_implicit01-channel             OK
+                    02-drying-flooding     OK
+                    03-tidalflume          OK?
                     04-temperature         ***** DISABLED ********** DISABLED *****
-                    05-pits                ERROR: Z layer
-                    06-125                 ERROR: Z layer
-                    07-f34                 ERROR: Z layer
-                    08-brassem             ERROR: Z layer
-                    09-zegerplas           ERROR: Z layer
-                    10-gate1               ERROR: Z layer
-                    11-gate2               ERROR: Z layer
-                    12-lockex_nhy          ERROR: Z layer
-                    13-jet_nhy             ERROR: Z layer
-                    14-01.06-rot_r         ERROR: Z layer
-                    15-01.07-chezy_r       ERROR: Z layer
-                    16-01.08-power_r       ERROR: Z layer
-                    17-01.12-breukelerme   ERROR: Z layer
-                    18-01.15-eva_plus      ERROR: Z layer
-                    19-03.06-india_droog   ERROR: Z layer
-                    20-04.07-034           ERROR: Z layer
-                    21-11.10-q10           ERROR: Z layer
-                    22-jvk-bak_met_dremp   ERROR: Z layer
-                    23-onl                 ERROR: Z layer
-                    24-forester            ERROR: Z layer
-                    25-bubblescreen        ERROR: Z layer
-08_fluidmud         1-helling              ERROR: Z layer
-                    2-aandrijving1         ERROR: Z layer
-                    3-aandrijving2         ERROR: Z layer
-                    4-slibhelling          ERROR: Z layer
-                    5-consolidatie         ERROR: Z layer
-                    6-inuitstroom          ERROR: Z layer
-                    7-erosie               ERROR: Z layer
-                    8-klots                ERROR: Z layer
-                    9-bezinken             ERROR: Z layer
+                    05-pits                OK
+                    06-125                 OK
+                    07-f34                 ERROR: walking discharge
+                    08-brassem             OK
+                    09-zegerplas           OK
+                    10-gate1               OK
+                    11-gate2               OK
+                    12-lockex_nhy          ERROR: Z layer model (non-hydrostatic)
+                    13-jet_nhy             ERROR: Z layer model (non-hydrostatic)
+                    14-01.06-rot_r         OK
+                    15-01.07-chezy_r       OK
+                    16-01.08-power_r       ERROR: powerstation
+                    17-01.12-breukelerme   OK
+                    18-01.15-eva_plus      OK
+                    19-03.06-india_droog   OK
+                    20-04.07-034           OK
+                    21-11.10-q10           OK
+                    22-jvk-bak_met_dremp   OK
+                    23-onl                 OK
+                    24-forester            ERROR: max(mmax,nmax)/npart < 4
+                    25-bubblescreen        ERROR: bubble screen
+08_fluidmud         1-helling              ERROR: Fluid mud online
+                    2-aandrijving1         ERROR: Fluid mud online
+                    3-aandrijving2         ERROR: Fluid mud online
+                    4-slibhelling          ERROR: Fluid mud online
+                    5-consolidatie         ERROR: Fluid mud online
+                    6-inuitstroom          ERROR: Fluid mud online
+                    7-erosie               ERROR: Fluid mud online
+                    8-klots                ERROR: Fluid mud online
+                    9-bezinken             ERROR: Fluid mud online
 09_rtc              01-basic               ERROR: RTC online
                     02-s01a_dd             ***** DISABLED ********** DISABLED *****
 10_dd               00-2bakjes             ERROR: DD
