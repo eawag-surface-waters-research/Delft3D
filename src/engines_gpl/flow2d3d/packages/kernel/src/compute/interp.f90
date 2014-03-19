@@ -29,7 +29,7 @@ function interp (x, y, kfmin, kfmax, kfstep, kmax, xval)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! ineterpolate y values for xval in the range of x array
+! interpolate y values for xval in the range of x array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -58,6 +58,7 @@ function interp (x, y, kfmin, kfmax, kfstep, kmax, xval)
 !
 !! executable statements -------------------------------------------------------
 !
+    interp = -999.0_fp
     if (xval < x(0)) then
        !
        ! outside extrapolation region lower side

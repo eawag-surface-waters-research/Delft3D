@@ -734,9 +734,9 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
           do k = 1, kmax
              do nm = 1, nmmax
                 if ( (kfs(nm)==1) .and. (kcs(nm)==1) ) then 
+                   h0new = s1(nm) + real(dps(nm),fp)
                    if (abs(sink(nm, k, l))*h0new>eps) then
                       h0old = s0(nm) + real(dps(nm),fp)
-                      h0new = s1(nm) + real(dps(nm),fp)
                       r1(nm, k, l) = sour(nm, k, l)*h0old/(sink(nm, k, l)*h0new)
                    else
                       r1(nm, k, l) = 0.0

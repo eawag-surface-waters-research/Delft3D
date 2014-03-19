@@ -278,7 +278,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                    if (ltur>1) then
                       tur_eps = rtur0(nm,k,2)
                    else
-                      tur_k = -999.0_fp
+                      tur_eps = -999.0_fp
                    endif
                    !
                    h0 = s0(nm) - real(dps(nm),fp)
