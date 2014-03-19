@@ -157,8 +157,6 @@ AC_CONFIG_FILES([Makefile
                  packages/Makefile
                  packages/nefis/Makefile
                  packages/nefis/src/Makefile
-                 packages/nefis_version_number/Makefile
-                 packages/nefis_version_number/src/Makefile
                  tests/Makefile
                  tests/test_00/Makefile
                  tests/test_01/Makefile
