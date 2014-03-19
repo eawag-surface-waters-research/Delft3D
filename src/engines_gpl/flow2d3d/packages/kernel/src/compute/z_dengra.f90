@@ -95,19 +95,19 @@ subroutine z_dengra(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        num = nm + icy
        if (kfu(nm) == 1) then
           if (kfumin(nm) <= kfumx0(nm)) then
-             drhodx(nm, kfumx0(nm)) = 0.
+             drhodx(nm, kfumx0(nm)) = 0.0_fp
              do k = kfumx0(nm), kfumin(nm), -1
                 kup = k + 1
                 if (k == kfumx0(nm)) then
                    iken          = kfsz0(nm, k)*kfsz0(nmu, k)
-                   drhodx(nm, k) = iken*dzu0(nm, k)*.5*(rho(nmu, k) - rho(nm, k))  &
+                   drhodx(nm, k) = iken*dzu0(nm, k)*0.5_fp*(rho(nmu, k) - rho(nm, k))  &
                                  & /gvu(nm)
                 else
                    ikenup        = kfsz0(nm, kup)*kfsz0(nmu, kup)
                    iken          = kfsz0(nm, k)*kfsz0(nmu, k)
-                   drhodx(nm, k) = drhodx(nm, kup) + ikenup*.5*dzu0(nm, kup)       &
+                   drhodx(nm, k) = drhodx(nm, kup) + ikenup*0.5_fp*dzu0(nm, kup)       &
                                  & *(rho(nmu, kup) - rho(nm, kup))/gvu(nm)         &
-                                 & + iken*.5*dzu0(nm, k)*(rho(nmu, k) - rho(nm, k))&
+                                 & + iken*0.5_fp*dzu0(nm, k)*(rho(nmu, k) - rho(nm, k))&
                                  & /gvu(nm)
                 endif
              enddo
@@ -116,19 +116,19 @@ subroutine z_dengra(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        if (kfv(nm) == 1) then
           if (kfvmin(nm) <= kfvmx0(nm)) then
-             drhody(nm, kfvmx0(nm)) = 0.
+             drhody(nm, kfvmx0(nm)) = 0.0_fp
              do k = kfvmx0(nm), kfvmin(nm), -1
                 kup = k + 1
                 if (k == kfvmx0(nm)) then
                    iken          = kfsz0(num, k)*kfsz0(nm, k)
-                   drhody(nm, k) = iken*dzv0(nm, k)*.5*(rho(num, k) - rho(nm, k))  &
+                   drhody(nm, k) = iken*dzv0(nm, k)*0.5_fp*(rho(num, k) - rho(nm, k))  &
                                  & /guv(nm)
                 else
                    ikenup        = kfsz0(nm, kup)*kfsz0(num, kup)
                    iken          = kfsz0(nm, k)*kfsz0(num, k)
-                   drhody(nm, k) = drhody(nm, kup) + ikenup*.5*dzv0(nm, kup)       &
+                   drhody(nm, k) = drhody(nm, kup) + ikenup*0.5_fp*dzv0(nm, kup)       &
                                  & *(rho(num, kup) - rho(nm, kup))/guv(nm)         &
-                                 & + iken*.5*dzv0(nm, k)*(rho(num, k) - rho(nm, k))&
+                                 & + iken*0.5_fp*dzv0(nm, k)*(rho(num, k) - rho(nm, k))&
                                  & /guv(nm)
                 endif
              enddo

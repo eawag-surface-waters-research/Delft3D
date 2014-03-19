@@ -316,7 +316,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     icxy   = max(icx, icy)
     !
     ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
-    facmax       = 0.25*sqrt(ag)*rhow*gammax**2
+    facmax       = 0.25_fp*sqrt(ag)*rhow*gammax**2
     drythreshold = 0.1_fp * dryflc
     !
     if (icx==1) then
@@ -509,7 +509,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 !
                 ! cfurou(nm,1) contains u/u*
                 !
-                uweir      = sqrt(2.0 / 3.0 * ag * max(hu(nm), drytrsh))
+                uweir      = sqrt(2.0_fp / 3.0_fp * ag * max(hu(nm), drytrsh))
                 taubpu(nm) = uweir / (cfurou(nm,1)**2)
              endif
           endif
@@ -545,7 +545,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! WAVE FORCE AT SURFACE
           !
           if (wave) then
-             wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
+             wsumax = facmax*hu(nm)**(1.5_fp)/max(0.1_fp, tp(nm))
              wsul   = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
              !
              ddk(nm, kkmax) = ddk(nm, kkmax) + wsul/(rhow*dzu0(nm, kkmax))          !

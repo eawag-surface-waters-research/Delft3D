@@ -186,7 +186,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           ! Find the (new) location of the bed layer
           !
           do k = 1, kmax
-             if ( zk(k)-dzmin >= -dps(nm) .or. k == kmax) then
+             if ( zk(k)-dzmin >= -real(dps(nm),fp) .or. k == kmax) then
                 kfsmin(nm) = k
                 exit
              endif
