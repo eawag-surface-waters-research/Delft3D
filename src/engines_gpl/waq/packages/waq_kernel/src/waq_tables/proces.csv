@@ -112,7 +112,7 @@ procid,procco,procfo,procnm
 "NutRel_Alg",123,"NUTREL    ","Release (nutrients/detritus) by of mortality algae"
 "NRAlg_S1  ",123,"NRALGS    ","Nutrient release of algae in S1                   "
 "OXYMin    ",123,"OXYMIN    ","Potential mimimum dissolved oxygen concentration  "
-"CONSELAC  ",123,"CSELAC    ","Consumption of electron acceptors                 "
+"CONSELAC  ",123,"CSELAC    ","Consumption oxygen/other electron acceptors       "
 "EBULCH4   ",123,"EBUCH4    ","Ebullition of methane                             "
 "SaturCH4  ",123,"SATCH4    ","Saturation concentration methane                  "
 "VolatCH4  ",123,"REAR      ","Volatilisation of methane                         "

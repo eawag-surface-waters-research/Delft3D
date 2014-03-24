@@ -526,6 +526,28 @@ stocfl,stocsu,stocsc
 "dcPPDiat  ","TIC       ",  -1.00000
 "dcPPDiat  ","H2O       ",  -1.50000
 "dcPPDiat  ","Diat      ",   1.00000
+"dOxCon    ","OXY       ",  -2.66700
+"dOxCon    ","TIC       ",   1.00000
+"dOxCon    ","H2O       ",   1.50000
+"dOxCon    ","POC1      ",   0.00000
+"dOxCon    ","POC2      ",   0.00000
+"dOxCon    ","POC3      ",   0.00000
+"dOxCon    ","POC4      ",   0.00000
+"dNiDen    ","NO3       ",  -0.93300
+"dNiDen    ","TIC       ",   1.00000
+"dNiDen    ","H2O       ",   2.10000
+"dNiDen    ","H+        ",  -0.06700
+"dNiDen    ","Alka      ",   4.06667
+"dFeRed    ","FeIIIpa   ", -18.60000
+"dFeRed    ","FeIId     ",  18.60000
+"dFeRed    ","TIC       ",   1.00000
+"dFeRed    ","Alka      ",  40.66670
+"dSuRed    ","SO4       ",  -1.33300
+"dSuRed    ","SUD       ",   1.33300
+"dSuRed    ","TIC       ",   1.00000
+"dSuRed    ","H2O       ",   1.50000
+"dMetGenCH4","CH4       ",   1.00000
+"dMetGenCO2","TIC       ",   1.00000
 "dMortDetC ","POC1      ",   1.00000
 "dMortOOC  ","POC2      ",   1.00000
 "dNH4Aut   ","NH4       ",   1.00000
@@ -558,24 +580,6 @@ stocfl,stocsu,stocsc
 "dDumOXYMin","OXY       ",   0.00000
 "dDumOXYMin","GREEN     ",   0.00000
 "dDumOXYMin","DIAT      ",   0.00000
-"dOxCon    ","OXY       ",  -2.66700
-"dOxCon    ","TIC       ",   1.00000
-"dOxCon    ","H2O       ",   1.50000
-"dNiDen    ","NO3       ",  -0.93300
-"dNiDen    ","TIC       ",   1.00000
-"dNiDen    ","H2O       ",   2.10000
-"dNiDen    ","H+        ",  -0.06700
-"dNiDen    ","Alka      ",   4.06667
-"dFeRed    ","FeIIIpa   ", -18.60000
-"dFeRed    ","FeIId     ",  18.60000
-"dFeRed    ","TIC       ",   1.00000
-"dFeRed    ","Alka      ",  40.66670
-"dSuRed    ","SO4       ",  -1.33300
-"dSuRed    ","SUD       ",   1.33300
-"dSuRed    ","TIC       ",   1.00000
-"dSuRed    ","H2O       ",   1.50000
-"dMetGenCH4","CH4       ",   1.00000
-"dMetGenCO2","TIC       ",   1.00000
 "dMetEbul  ","CH4       ",  -1.00000
 "dVolCH4   ","CH4       ",   1.00000
 "dSUDox    ","SUD       ",  -1.00000
