@@ -50,9 +50,10 @@ type stmtype
     type(morpar_type)                        , pointer     :: morpar
     type(bedcomp_data)                       , pointer     :: morlyr
     type(trapar_type)                        , pointer     :: trapar
-    integer                                                :: lsed
+    integer                                                :: lsedsus
     integer                                                :: lsedtot
     real(fp)      , dimension(:), allocatable              :: facdss
+    real(fp)      , dimension(:,:), allocatable            :: ws
     character(20) , dimension(:), allocatable              :: namcon
 end type stmtype
 
@@ -125,16 +126,17 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     nto    = size(nambnd,1)
     !
     ! Open filsed file and determine the number of sediment fractions
-    ! lsed and lsedtot. Fill names and sediment types in sedpar.
+    ! lsedsus (only fractions that included suspended transport advection diffusion solver)
+    ! and lsedtot (total number of fractions). Fill names and sediment types in sedpar.
     ! Keep sediment file information in sedfil_tree.
     !
-    call count_sed(lundia, error, stm%lsed, stm%lsedtot, filsed, &
+    call count_sed(lundia, error, stm%lsedsus, stm%lsedtot, filsed, &
                  & stm%sedpar, sedfil_tree)
     if (error) goto 999
     !
-    lstsci = max(0,lsal,ltem) + stm%lsed
+    lstsci = max(0,lsal,ltem) + stm%lsedsus
     !
-    allocate(stm%facdss(stm%lsed)   , stat = istat)
+    allocate(stm%facdss(stm%lsedsus)   , stat = istat)
     allocate(stm%namcon(lstsci+ltur), stat = istat)
     !
     if (lsal>0) then
@@ -143,7 +145,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     if (ltem>0) then
        stm%namcon(ltem) = 'TEMPERATURE'
     endif
-    do l=1,stm%lsed
+    do l=1,stm%lsedsus
        stm%namcon(max(0,lsal,ltem) + l) = stm%sedpar%namsed(l)
     enddo
     !
@@ -161,7 +163,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     call initrafrm(lundia, error, stm%lsedtot, stm%trapar)
     if (error) goto 999
     !
-    call rdsed  (lundia, error, lsal, ltem, stm%lsed, &
+    call rdsed  (lundia, error, lsal, ltem, stm%lsedsus, &
                & stm%lsedtot, lstsci, ltur, stm%facdss, stm%namcon, &
                & stm%iopsus, nmlb, nmub, filsed, &
                & sedfil_tree, stm%sedpar, stm%trapar)
@@ -174,7 +176,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     ! fwfac set by rdmor
     !
     call rdmor  (lundia, error, filmor, lsec, stm%lsedtot, &
-               & stm%lsed, nmaxus, nto, nambnd, julrefday, morfil_tree, &
+               & stm%lsedsus, nmaxus, nto, nambnd, julrefday, morfil_tree, &
                & stm%sedpar, stm%morpar, stm%fwfac, stm%morlyr, &
                & griddim)
     !
@@ -204,7 +206,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     !
     ! Echo sediment and transport parameters
     !
-    call echosed(lundia, error, stm%lsed, stm%lsedtot, stm%facdss, &
+    call echosed(lundia, error, stm%lsedsus, stm%lsedtot, stm%facdss, &
                & stm%iopsus, stm%sedpar, stm%trapar)
     if (error) goto 999
     !
