@@ -1,7 +1,7 @@
 Please check the following sites for additional information:
-General information: http://oss.deltares.nl/web/opendelft3d/source-code
-FAQ                : http://oss.deltares.nl/web/opendelft3d/faq-compiling-code
-Compile forum      : http://oss.deltares.nl/web/opendelft3d/general/-/message_boards?_19_mbCategoryId=22276
+General information: http://oss.deltares.nl/web/delft3d/source-code
+FAQ                : http://oss.deltares.nl/web/delft3d/faq
+Compile forum      : http://oss.deltares.nl/web/delft3d/general/-/message_boards?_19_mbCategoryId=22276
 
 
 Compiling on Windows
@@ -44,7 +44,7 @@ Compiling on Linux
      - Be careful with tools/compilers located in different directories due to different revision/build numbers (e.q. /opt/mpich2-1.4.1-gcc-4.6.2)
        You have to take care of that yourself
      - Check both "common.am" and "build.sh"
-     - Check http://oss.deltares.nl/web/opendelft3d/faq-compiling-code
+     - Check http://oss.deltares.nl/web/delft3d/faq
      - When using a --prefix unequal to `pwd`, the specified directory will contain:
        - "bin" and "lib" subdirectories (due to the default Linux "install")
        - "lnx", ready to copy to an existing Delft3D installation (due to "ds-install"),
