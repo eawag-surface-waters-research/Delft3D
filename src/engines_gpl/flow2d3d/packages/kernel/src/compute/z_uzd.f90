@@ -117,6 +117,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer                 , pointer :: nh_level
     logical                 , pointer :: nonhyd
     real(fp)                , pointer :: dzmin
+    integer                 , pointer :: mfg
+    integer                 , pointer :: nfg
 !
 ! Global variables
 !
@@ -266,6 +268,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer            :: n
     integer            :: nmf
     integer            :: nml
+    integer            :: nmsta
     integer            :: ndm
     integer            :: ndmd
     integer            :: ndmu
@@ -369,6 +372,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     nh_level   => gdp%gdnonhyd%nh_level
     nonhyd     => gdp%gdprocs%nonhyd
     dzmin      => gdp%gdzmodel%dzmin
+    mfg        => gdp%gdparall%mfg
+    nfg        => gdp%gdparall%nfg
     !
     drytrsh      = drycrt
     drythreshold = 0.1_fp * dryflc
@@ -765,7 +770,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       ! Central implicit
                       !
                       maskval = min(kcs(nm), 2)*min(kcs(nmu), 2)
-                      www     = 0.25_fp*maskval*(w0(nm, k - 1) + w0(nm, k) + w0(nmu, k - 1) + w0(nmu, k))
+                      www     = 0.25_fp*abs(maskval)*(w0(nm, k - 1) + w0(nm, k) + w0(nmu, k - 1) + w0(nmu, k))
                       if (www < 0.0_fp) then
                          adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
                          adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + kfad*(1 + kfad)*www/dzup
@@ -882,7 +887,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ndmu = nm + icx - icy
              numd = nm - icx + icy
              do k = kfumn0(nm), kfumx0(nm)
-                if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
+                if (kfu(nm) == 1 .and. kcs(nm) > 0 .and. kcs(nmu) > 0) then
                    if (kfuz0(nm, k) == 1) then
                       gksid = gvz(nm)
                       gksiu = gvz(nmu)
@@ -892,7 +897,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       geta  = guu(nm)
                       idifd = kfvz0(ndm, k)*kfvz0(ndmu, k)*kfuz0(ndm, k)
                       idifu = kfvz0(nm , k)*kfvz0(nmu , k)*kfuz0(num, k)
-                      idifc = abs(2 - kcs(nm))*abs(2 - kcs(nmu))
+                      idifc = abs(2 - abs(kcs(nm)))*abs(2 - abs(kcs(nmu)))
                       !
                       ! EDDY VISCOSITY FOR KMAX = 1, USING LAPLACE OPERATOR
                       ! (2*VIH*(D2U/DX2 + D2U/DY2)
@@ -943,7 +948,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! IMPLEMENTATION OF BOUNDARY CONDITIONS
              !
-             if (kcu(nmf)*kfu(nmf) == 1) then
+             if (kcu(nmf)==1 .and. kfu(nmf)==1) then
                 if (ibf==3 .or. ibf==5 .or. ibf==6 .or. ibf==7) then
                    do k = kfumn0(nmf), kfumx0(nmf)
                       aak  (nmf, k) = 0.0_fp
@@ -961,7 +966,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    enddo
                 endif
              endif
-             if (kcu(nml)*kfu(nml) == 1) then
+             if (kcu(nml)==1 .and. kfu(nml)==1) then
                 if (ibl==3 .or. ibl==5 .or. ibl==6 .or. ibl==7) then
                    do k = kfumn0(nml), kfumx0(nml)
                       aak  (nml, k) = 0.0_fp
@@ -987,8 +992,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call timer_start(timer_uzd_lhs, gdp)
        do nm = 1, nmmax
-          if (kcu(nm) == 3) then
-             do k = kfumn0(nm), kfumx0(nm)
+          if (kcu(nm)==3 .or. kcu(nm)==-1) then
+             do k = 1, kmax
                 aak(nm,k) = 0.0_fp
                 bbk(nm,k) = 1.0_fp
                 cck(nm,k) = 0.0_fp
@@ -1070,13 +1075,27 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        iter = 0
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
-             do k = kfumn0(nm), kfumx0(nm)
+             do k = 1, kmax
                 u1   (nm, k) = u0(nm, k)
                 uvdwk(nm, k) = u0(nm, k)
              enddo
           endif
        enddo
        call timer_stop(timer_uzd_solve2, gdp)
+       !
+       ! ensure that loop starts at point of correct color in own subdomain
+       !
+       if (mod(mfg+nfg,2) == 1) then
+          !
+          ! red points
+          !
+          nmsta = 1
+       else
+          !
+          ! black points
+          !
+          nmsta = 2
+       endif
        !
        ! Domain decomposition:
        !     resume point for next solve
@@ -1086,179 +1105,210 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        ! End Domain decomposition addition
        !
- 1100 continue
-       iter = iter + 1
+       itr = 1
+       loop_iteration: do while (itr == 1 .and. iter < 50)
+          iter = iter + 1
+          !
+          ! ITERATIVE SOLUTION METHOD USING CHECKERBOARD JACOBI
+          ! IN HORIZONTAL DIRECTION
+          ! ATTENTION : AN ODD NUMBER OF GRIDPOINTS IN V-DIRECTION
+          !             ( NMAX ) IS ASSUMED!!!!!
+          !
+          itr = 0
+          if (icx == 1) then
+             call timer_start(timer_uzd_solve3u, gdp)
+          else
+             call timer_start(timer_uzd_solve5v, gdp)
+          endif
+          !
+          ! loop starts at red or black point depending on own subdomain
+          !
+          nmsta = 3 - nmsta
+          !
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   !
+                   ! COMPUTE RIGHT HAND SIDE
+                   !
+                   uvdwk(nm, k) = ddk(nm,k)                      &
+                                & - bdx  (nm,k)*u1(nm-icx    ,k) &
+                                & - bdy  (nm,k)*u1(nm-icy    ,k) &
+                                & - buy  (nm,k)*u1(nm+icy    ,k) &
+                                & - bux  (nm,k)*u1(nm+icx    ,k) &
+                                & - bdxdy(nm,k)*u1(nm-icx-icy,k) &
+                                & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
+                                & - buxuy(nm,k)*u1(nm+icx+icy,k) &
+                                & - buxdy(nm,k)*u1(nm+icx-icy,k)
+                enddo
+             endif
+          enddo
+          if (icx == 1) then
+             call timer_stop(timer_uzd_solve3u, gdp)
+             call timer_start(timer_uzd_solve4u, gdp)
+          else
+             call timer_stop(timer_uzd_solve5v, gdp)
+             call timer_start(timer_uzd_solve6v, gdp)
+          endif
+          !
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                kmin = kfumn0(nm)
+                vvdwk(nm, kmin) = uvdwk(nm, kmin)*bbk(nm, kmin)
+             endif
+          enddo
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm)+1, kfumx0(nm)
+                   vvdwk(nm, k) = (uvdwk(nm, k) - aak(nm, k)*vvdwk(nm, k - 1))*bbk(nm, k)
+                enddo
+             endif
+          enddo
+          !       
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumx0(nm)-1, kfumn0(nm), -1
+                   vvdwk(nm, k) = vvdwk(nm, k) - cck(nm, k)*vvdwk(nm, k + 1)
+                enddo
+             endif
+          enddo
+          !
+          ! CHECK FOR CONVERGENCE
+          !
+          loop_nm_1: do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
+                      itr = 1
+                      exit loop_nm_1
+                   endif
+                enddo
+             endif
+          enddo loop_nm_1
+          if (icx == 1) then
+             call timer_stop(timer_uzd_solve4u, gdp)
+             call timer_start(timer_uzd_solve3u, gdp)
+          else
+             call timer_stop(timer_uzd_solve6v, gdp)
+             call timer_start(timer_uzd_solve5v, gdp)
+          endif
+          !
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   u1(nm, k) = vvdwk(nm, k)
+                enddo
+             endif
+          enddo
+          !
+          ! exchange u1 with neighbours for parallel runs
+          !
+          call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
+          !
+          !
+          ! loop starts at point of other color now (black respectively red)
+          !
+          nmsta = 3 - nmsta
+          !
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   !
+                   ! COMPUTE RIGHT HAND SIDE
+                   !
+                   uvdwk(nm, k) = ddk(nm,k)                      &
+                                & - bdx  (nm,k)*u1(nm-icx    ,k) &
+                                & - bdy  (nm,k)*u1(nm-icy    ,k) &
+                                & - buy  (nm,k)*u1(nm+icy    ,k) &
+                                & - bux  (nm,k)*u1(nm+icx    ,k) &
+                                & - bdxdy(nm,k)*u1(nm-icx-icy,k) &
+                                & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
+                                & - buxuy(nm,k)*u1(nm+icx+icy,k) &
+                                & - buxdy(nm,k)*u1(nm+icx-icy,k)
+                enddo
+             endif
+          enddo
+          !
+          if (icx == 1) then
+             call timer_stop(timer_uzd_solve3u, gdp)
+             call timer_start(timer_uzd_solve4u, gdp)
+          else
+             call timer_stop(timer_uzd_solve5v, gdp)
+             call timer_start(timer_uzd_solve6v, gdp)
+          endif
+          !
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                kmin           = kfumn0(nm)
+                vvdwk(nm,kmin) = uvdwk(nm,kmin) * bbk(nm, kmin)
+             endif
+          enddo
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm)+1, kfumx0(nm)
+                   vvdwk(nm,k) = (uvdwk(nm,k) - aak(nm,k)*vvdwk(nm,k-1)) * bbk(nm,k)
+                enddo
+             endif
+          enddo
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumx0(nm)-1, kfumn0(nm), -1
+                   vvdwk(nm,k) = vvdwk(nm,k) - cck(nm,k)*vvdwk(nm,k+1)
+                enddo
+             endif
+          enddo
+          !
+          ! CHECK FOR CONVERGENCE
+          !
+          loop_nm_2: do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
+                      itr = 1
+                      exit loop_nm_2
+                   endif
+                enddo
+             endif
+          enddo loop_nm_2
+          !
+          if (icx == 1) then
+             call timer_stop(timer_uzd_solve4u, gdp)
+          else
+             call timer_stop(timer_uzd_solve6v, gdp)
+          endif
+          !
+          do nm = nmsta, nmmax, 2
+             if (kfu(nm) == 1) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   u1(nm, k) = vvdwk(nm, k)
+                enddo
+             endif
+          enddo
+          !
+          ! exchange u1 with neighbours for parallel runs
+          !
+          call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
+          !
+          ! set right-hand side to u1 in the halo area so that convergence check can be done safely
+          !
+          do nm = 1, nmmax
+             if ( kcu(nm) == -1 ) then
+                do k = kfumn0(nm), kfumx0(nm)
+                   ddk(nm,k) = u1(nm,k)
+                enddo
+             endif
+          enddo
+          !
+          !
+          ! determine global maximum of 'itr' over all nodes
+          ! Note: this enables to synchronize the iteration process
+          !
+          call dfreduce( itr, 1, dfint, dfmax, gdp )
+       enddo loop_iteration
        !
-       ! ITERATIVE SOLUTION METHOD USING CHECKERBOARD JACOBI
-       ! IN HORIZONTAL DIRECTION
-       ! ATTENTION : AN ODD NUMBER OF GRIDPOINTS IN V-DIRECTION
-       !             ( NMAX ) IS ASSUMED!!!!!
-       !
-       itr = 0
-       if (icx == 1) then
-          call timer_start(timer_uzd_solve3u, gdp)
-       else
-          call timer_start(timer_uzd_solve5v, gdp)
+       if (gdp%gdflwpar%flwoutput%iteroutputsteps >= gdp%gdinttim%ntstep) then
+          write (lundia, '(2(a,i0))') 'z_uzd (ntstep  ,iter):',gdp%gdinttim%ntstep, '   ',iter
        endif
-       do nm = 1, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumn0(nm), kfumx0(nm)
-                !
-                ! COMPUTE RIGHT HAND SIDE
-                !
-                uvdwk(nm, k) = ddk(nm,k)                      &
-                             & - bdx  (nm,k)*u1(nm-icx    ,k) &
-                             & - bdy  (nm,k)*u1(nm-icy    ,k) &
-                             & - buy  (nm,k)*u1(nm+icy    ,k) &
-                             & - bux  (nm,k)*u1(nm+icx    ,k) &
-                             & - bdxdy(nm,k)*u1(nm-icx-icy,k) &
-                             & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
-                             & - buxuy(nm,k)*u1(nm+icx+icy,k) &
-                             & - buxdy(nm,k)*u1(nm+icx-icy,k)
-             enddo
-          endif
-       enddo
-       if (icx == 1) then
-          call timer_stop(timer_uzd_solve3u, gdp)
-          call timer_start(timer_uzd_solve4u, gdp)
-       else
-          call timer_stop(timer_uzd_solve5v, gdp)
-          call timer_start(timer_uzd_solve6v, gdp)
-       endif
-       !
-       do nm = 1, nmmax, 2
-          if (kfu(nm) == 1) then
-             kmin = kfumn0(nm)
-             vvdwk(nm, kmin) = uvdwk(nm, kmin)*bbk(nm, kmin)
-          endif
-       enddo
-       do nm = 1, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumn0(nm)+1, kfumx0(nm)
-                vvdwk(nm, k) = (uvdwk(nm, k) - aak(nm, k)*vvdwk(nm, k - 1))*bbk(nm, k)
-             enddo
-          endif
-       enddo
-       !       
-       do nm = 1, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumx0(nm)-1, kfumn0(nm), -1
-                vvdwk(nm, k) = vvdwk(nm, k) - cck(nm, k)*vvdwk(nm, k + 1)
-             enddo
-          endif
-       enddo
-       !
-       ! CHECK FOR CONVERGENCE
-       !
-       smax = 0.0
-       do nm = 1, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumn0(nm), kfumx0(nm)
-                if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
-                   itr = 1
-                endif
-                zz = abs(vvdwk(nm, k) - u1(nm, k))
-                if (zz > smax) then
-                   smax = zz
-                endif
-                u1(nm, k) = vvdwk(nm, k)
-             enddo
-          endif
-       enddo
-       !
-       ! exchange u1 with neighbours for parallel runs
-       !
-       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
-       !
-       if (icx == 1) then
-          call timer_stop(timer_uzd_solve4u, gdp)
-          call timer_start(timer_uzd_solve3u, gdp)
-       else
-          call timer_stop(timer_uzd_solve6v, gdp)
-          call timer_start(timer_uzd_solve5v, gdp)
-       endif
-       !
-       do nm = 2, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumn0(nm), kfumx0(nm)
-                !
-                ! COMPUTE RIGHT HAND SIDE
-                !
-                uvdwk(nm, k) = ddk(nm,k)                      &
-                             & - bdx  (nm,k)*u1(nm-icx    ,k) &
-                             & - bdy  (nm,k)*u1(nm-icy    ,k) &
-                             & - buy  (nm,k)*u1(nm+icy    ,k) &
-                             & - bux  (nm,k)*u1(nm+icx    ,k) &
-                             & - bdxdy(nm,k)*u1(nm-icx-icy,k) &
-                             & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
-                             & - buxuy(nm,k)*u1(nm+icx+icy,k) &
-                             & - buxdy(nm,k)*u1(nm+icx-icy,k)
-             enddo
-          endif
-       enddo
-       !
-       if (icx == 1) then
-          call timer_stop(timer_uzd_solve3u, gdp)
-          call timer_start(timer_uzd_solve4u, gdp)
-       else
-          call timer_stop(timer_uzd_solve5v, gdp)
-          call timer_start(timer_uzd_solve6v, gdp)
-       endif
-       !
-       do nm = 2, nmmax, 2
-          if (kfu(nm) == 1) then
-             kmin           = kfumn0(nm)
-             vvdwk(nm,kmin) = uvdwk(nm,kmin) * bbk(nm, kmin)
-          endif
-       enddo
-       do nm = 2, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumn0(nm)+1, kfumx0(nm)
-                vvdwk(nm,k) = (uvdwk(nm,k) - aak(nm,k)*vvdwk(nm,k-1)) * bbk(nm,k)
-             enddo
-          endif
-       enddo
-       do nm = 2, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumx0(nm)-1, kfumn0(nm), -1
-                vvdwk(nm,k) = vvdwk(nm,k) - cck(nm,k)*vvdwk(nm,k+1)
-             enddo
-          endif
-       enddo
-       !
-       ! CHECK FOR CONVERGENCE
-       !
-       do nm = 2, nmmax, 2
-          if (kfu(nm) == 1) then
-             do k = kfumn0(nm), kfumx0(nm)
-                if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
-                   itr = 1
-                endif
-                zz = abs(vvdwk(nm, k) - u1(nm, k))
-                if (zz > smax) then
-                   smax = zz
-                endif
-                u1(nm, k) = vvdwk(nm, k)
-             enddo
-          endif
-       enddo
-       !
-       ! exchange u1 with neighbours for parallel runs
-       !
-       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
-       !
-       if (icx == 1) then
-          call timer_stop(timer_uzd_solve4u, gdp)
-       else
-          call timer_stop(timer_uzd_solve6v, gdp)
-       endif
-       !
-       !
-       ! determine global maximum of 'itr' over all nodes
-       ! Note: this enables to synchronize the iteration process
-       !
-       call dfreduce( itr, 1, dfint, dfmax, gdp )
-       if (itr>0 .and. iter<50) goto 1100
        if (iter >= 50) then
           write (errtxt, '(i0)') nst
           call prterr(lundia    ,'S205'    ,trim(errtxt)    )
@@ -1282,6 +1332,27 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        endif
        !
        ! End Domain decomposition addition
+       !
+       !
+       ! DEFINE NEW DEPTH AVERAGED VELOCITY
+       !
+       call timer_start(timer_uzd_umean, gdp)
+       !
+       ! Initialise umean for all (nm) 
+       !
+       umean = 0.0
+       !
+       do nm = 1, nmmax
+          if (kfu(nm) == 1) then
+             hnm = 0.0_fp
+             do k = kfumn0(nm), kfumx0(nm)
+                umean(nm) = umean(nm) + dzu0(nm,k)*u1(nm, k)
+                hnm       = hnm + dzu0(nm,k)  
+             enddo
+             umean(nm) = umean(nm) / hnm
+           endif
+       enddo
+       call timer_stop(timer_uzd_umean, gdp)
        !
     else       ! if (momsol == 'mdue  ') then
        !
