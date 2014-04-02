@@ -984,21 +984,26 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 utot  = sqrt(uuu*uuu + vvv*vvv)
                 h0    = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 ken   = kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm)
-                kmaxx = kfsmin(nm)
                 if (ken /= 0) then
                    z0s    = ( kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) + kfv(ndm)*z0vrou(ndm)  &
                           & + kfv(nm )*z0vrou(nm ) ) / ken
                    rz     = 1.0 + dz/z0s
                    s      = log(rz) / vonkar
                    tkebot = utot*utot/(s*s*sqrt(cmukep))
-                   aak(nm, kmaxx - 1) = 0.0
-                   bbk(nm, kmaxx - 1) = 1.0
-                   cck(nm, kmaxx - 1) = 0.0
-                   ddk(nm, kmaxx - 1) = cewall*tkebot**1.5/z0s
-                   aak(nm, kmaxx)     = 0.0
-                   bbk(nm, kmaxx)     = 1.0
-                   cck(nm, kmaxx)     = 0.0
-                   ddk(nm, kmaxx)     = z0s * ddk(nm, kmin - 1) / (dzs1(nm, kmaxx)+z0s)
+                   aak(nm, kmin - 1) = 0.0
+                   bbk(nm, kmin - 1) = 1.0
+                   cck(nm, kmin - 1) = 0.0
+                   ddk(nm, kmin - 1) = cewall*tkebot**1.5/z0s
+                   !
+                   ! Only perform additional specification of boundary flux for epsilon
+                   ! when more than 1 layer is active
+                   !
+                   if (kfsmax(nm) > kmin) then
+                      aak(nm, kmin)     = 0.0
+                      bbk(nm, kmin)     = 1.0
+                      cck(nm, kmin)     = 0.0
+                      ddk(nm, kmin)     = z0s * ddk(nm, kmin - 1) / (dzs1(nm, kmin)+z0s)
+                   endif
                 else
                    ddk(nm, kmaxx - 1) = 0.
                 endif

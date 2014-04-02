@@ -472,26 +472,28 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        !=======================================================================
        else
           do nm = 1, nmmax
-             do k = kfsmin(nm), kfsmax(nm) - 1
-                h0 = real(dps(nm),fp) + s1(nm)
-                if (kfs(nm)==1 .and. h0>0.01_fp) then
+             h0 = real(dps(nm),fp) + s1(nm)
+             if (kfs(nm)==1 .and. h0>0.01_fp) then
+                do k = kfsmin(nm), kfsmax(nm) - 1
                    vicww(nm, k) = cmukep*rtur1(nm, k, 1)                        &
                                 & **2/max(rtur1(nm, k, 2), epsd)
                    dicww(nm, k) = vicww(nm, k)
-                else
-                   !
-                   ! Make vicww and dicww small for points
-                   ! that are dry or almost dry
-                   ! Actually, it would be more consistent to use
-                   ! dicww(nm, k) = vicmol/sigmol
-                   ! but sigmol depends on l and is not available here
-                   ! So, just use
-                   ! dicww(nm, k) = vicmol
-                   !
+                enddo
+             else
+                !
+                ! Make vicww and dicww small for points
+                ! that are dry or almost dry
+                ! Actually, it would be more consistent to use
+                ! dicww(nm, k) = vicmol/sigmol
+                ! but sigmol depends on l and is not available here
+                ! So, just use
+                ! dicww(nm, k) = vicmol
+                !
+                do k = kfsmin(nm), kfsmax(nm) - 1
                    vicww(nm, k) = vicmol
                    dicww(nm, k) = vicmol
-                endif
-             enddo
+                enddo
+             endif
           enddo
        endif
        !
@@ -534,7 +536,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 ! See Delft3D-FLOW manual section 9.5 "Turbulence".
                 ! See also [Journal of Marine Res., Vol 1] for related formulas.
                 !
-               if (rich(nm, kmin) >= 0.0_fp) then
+                if (rich(nm, kmin) >= 0.0_fp) then
                    fl = exp( - 2.3_fp * min(rich(nm, kmin), 30.0_fp))
                    aa = (1.0_fp + 3.33_fp*rich(nm, kmin))
                    aa = aa*sqrt(aa)
@@ -565,7 +567,6 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                                       & /max(rtur1(nm, kfsmax(nm), 2), epsd)
                 dicww(nm, kfsmax(nm)) = vicww(nm, kfsmax(nm))
              endif
-             
           else
              !
              ! Make vicww and dicww small for points
