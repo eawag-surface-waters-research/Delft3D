@@ -106,6 +106,7 @@ module MessageHandling
    module procedure message1char1int
    module procedure message1char2int
    module procedure message1char3int
+   module procedure message1char1double
    module procedure message2int1char
    module procedure message1char1int1double
    module procedure message1double1int1char
@@ -120,6 +121,7 @@ module MessageHandling
    module procedure error1char2real
    module procedure error2char1real
    module procedure error2char2real
+   module procedure error1char1double
    module procedure error1char1int
    module procedure error1char2int
    module procedure error1char1int1double
@@ -461,6 +463,22 @@ subroutine message1char1real(level, w1, r2)
     call SetMessage(level, rec)
 end subroutine message1char1real
 
+subroutine message1char1double(level, w1, d2)
+    double precision, intent(in) :: d2
+    character(*) :: w1
+    integer         :: level
+
+    integer :: l1
+    character(600) :: rec
+
+    rec = ' '
+    l1 = max(1, len_trim(w1))
+    write (rec(1:), '(a)') w1(:l1)
+    write (rec(2 + l1:), '(F14.6)') d2
+
+    call SetMessage(level, rec)
+end subroutine message1char1double
+
 subroutine message1char1int(level, w1, i2)
     integer :: i2
     character(*) :: w1
@@ -628,6 +646,13 @@ subroutine error1char1real(w1, r2)
 
     call mess(LEVEL_ERROR, w1, r2)
 end subroutine error1char1real
+
+subroutine error1char1double(w1, d2)
+    double precision, intent(in) :: d2
+    character(*) :: w1
+
+    call mess(LEVEL_ERROR, w1, d2)
+end subroutine error1char1double
 
 subroutine error1char1int(w1, i2)
     integer :: i2
