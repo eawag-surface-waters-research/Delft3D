@@ -46,6 +46,25 @@ module MHCallBack
         character(c_char), intent(in) :: msg(MAXSTRINGLEN) !< c message null terminated
       end subroutine c_callbackiface
    end interface
+   
+   abstract interface
+      subroutine progress_iface(msg, progress)
+        character(len=*), intent(in) :: msg !< c message null terminated
+        double precision,  intent(in) :: progress
+      end subroutine progress_iface
+   end interface
+
+
+   abstract interface
+      subroutine progress_c_iface(msg, progress)
+        use iso_c_binding
+        use iso_c_utils
+        character(c_char), intent(in) :: msg(MAXSTRINGLEN) !< c message null terminated
+        real(c_double), intent(in) :: progress !< progress in fraction
+      end subroutine progress_c_iface
+   end interface
+
+
 end module MHCallBack
 
 !> Diagnostics output module.
@@ -60,8 +79,18 @@ end module MHCallBack
 !! Messages have a severity level: LEVEL_(DEBUG|INFO|WARN|ERROR|FATAL).
 module MessageHandling
    use MHCallBack
+   use iso_c_utils
    implicit none
 
+   procedure(progress_iface), pointer :: progress_callback => null()
+   procedure(progress_c_iface), pointer :: progress_c_callback => null()
+
+   integer, parameter, public    :: BUFLEN = 1024
+   !> The message buffer allows you to write any number of variables in any
+   !! order to a character string. Call msg_flush or err_flush to output
+   !! the actual message or error.
+   character(len=BUFLEN), public :: msg_mh
+   character(len=MAXSTRINGLEN), public :: errmsg
 
    public SetMessage
    public GetMessageCount
@@ -75,7 +104,14 @@ module MessageHandling
    public resetMaxerrorLevel
    public set_mh_c_callback
    public set_mh_callback
-
+   public aerr
+   public msg_flush
+   public dbg_flush
+   public warn_flush
+   public err_flush
+   public set_progress_callback
+   public progress
+   
    integer,parameter, public     :: LEVEL_DEBUG = 1
    integer,parameter, public     :: LEVEL_INFO  = 2
    integer,parameter, public     :: LEVEL_WARN  = 3
@@ -682,6 +718,113 @@ subroutine error1char1int1double(w1, i2, d3)
 
     call mess(LEVEL_ERROR, w1, i2, d3)
 end subroutine error1char1int1double
+
+subroutine aerr(w1, iostat, isize, errmsg) ! Allocation error          ,continue if iostat = 0   )
+  character(*) :: w1
+  integer      :: iostat
+  integer      :: isize
+  integer      :: i3
+  character(len=*), optional :: errmsg
+  double precision :: rmemtot
+  data rmemtot/0/ ! AvD: causes access problems with multiple OpenMP threads
+
+  if (iostat==0) then
+!$OMP CRITICAL
+     rmemtot = rmemtot + isize
+     i3 = rmemtot*1e-6
+     if (abs(isize) > 1000) then
+        write (msg_mh,*) i3, isize*1e-6, ' ', w1
+        call dbg_flush()
+     endif
+!$OMP END CRITICAL
+  else
+
+     if (present(errmsg)) then
+        write (msg_mh,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize, '=>', trim(errmsg(1:500))
+     else
+        write (msg_mh,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize
+     end if
+     call err_flush()
+     !call err ('Allocation Error  :',w1)
+     !call err ('Allocate status   =',i1)
+     !call err ('Integer parameter =',i2)
+  endif
+
+end subroutine aerr
+
+!> Output the current message buffer as a 'debug' message.
+subroutine dbg_flush()
+! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
+    call mess(LEVEL_DEBUG,  msg_mh)
+end subroutine dbg_flush
+
+!!> Output the current message buffer as an 'info' message.
+subroutine msg_flush()
+! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
+    call mess(LEVEL_INFO,  msg_mh)
+end subroutine msg_flush
+
+!> Output the current message buffer as a 'warning' message.
+subroutine warn_flush()
+! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
+    call mess(LEVEL_WARN,  msg_mh)
+end subroutine warn_flush
+
+!> Output the current message buffer as an 'error' message.
+subroutine err_flush()
+    call mess(LEVEL_ERROR, msg_mh)
+
+end subroutine err_flush
+
+!subroutine fewsdiag_init()
+!end subroutine fewsdiag_init
+!
+!
+!!--------------------------------------------------------------------------------------------------
+!
+!
+subroutine progress(message, fraction)
+  use iso_c_binding
+  use iso_c_utils
+  implicit none
+
+  character(len=*), intent(in) :: message
+  double precision, intent(in) :: fraction
+
+  ! call the registered progress bar
+  if (associated(progress_callback)) then
+     call progress_callback(message, fraction)
+  end if
+
+  ! call the c callback if registered
+  if (associated(progress_c_callback)) then
+     call progress_c_callback(string_to_char_array(message), fraction)
+  end if
+
+end subroutine progress
+!
+subroutine set_progress_callback(callback)
+  ! set the progress handler
+  procedure(progress_iface) :: callback
+
+  ! TODO check if we need cptr2fptr
+  progress_callback => callback
+
+end subroutine set_progress_callback
+
+subroutine set_progress_c_callback(c_callback) bind(C, name="set_progress_c_callback")
+  !DEC$ ATTRIBUTES DLLEXPORT:: set_progress_c_callback
+
+  use iso_c_binding
+  use iso_c_utils
+  implicit none
+  type(c_funptr) :: c_callback
+
+  ! Set a callback that will be cauled with new messages
+
+  call c_f_procpointer(c_callback, progress_c_callback)
+end subroutine set_progress_c_callback
+
 
 
 
