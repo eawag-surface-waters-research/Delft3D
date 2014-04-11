@@ -122,9 +122,10 @@ type DioPltHeaderType
     ! Specific data for HIS files
     !
     character(len=HisRunIdSize), &
-             pointer, dimension(:):: hisRunId    ! runid for HIS files
-    integer, pointer, dimension(:):: hisIntIds    ! location number for HIS files
-    logical                       :: hasRunid    ! Plt contains HIS information
+             pointer, dimension(:):: hisRunId       ! runid for HIS files
+    integer, pointer, dimension(:):: hisIntIds      ! location number for HIS files
+    logical                       :: hasRunid       ! Plt contains HIS information
+    logical                       :: allowJumpBack  ! while writing, his file can jump back in time
 
 end type DioPltHeaderType
 
@@ -457,6 +458,8 @@ function DioPltHeaderCreateEmpty(varType) result(header)
     ! specific for His files
     nullify(header % hisRunId)
     nullify(header % hisIntIds)
+    header % hasRunid = .false.
+    header % allowJumpBack = .false.
 
 end function DioPltHeaderCreateEmpty
 
@@ -2804,6 +2807,10 @@ subroutine DioPltPutHisStepReals(plt, intTime, values)
 
     ! body
 
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, integerHisTime=intTime)
+    endif
+
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetHisTimestep(plt % ds, intTime)
     call DioPltSetValues(plt, values)
@@ -2826,6 +2833,10 @@ subroutine DioPltPutHisStepDoubles(plt, intTime, values)
     double precision, dimension(:,:), intent(in)  :: values   ! doubles
 
     ! body
+
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, integerHisTime=intTime)
+    endif
 
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetHisTimestep(plt % ds, intTime)
@@ -2850,6 +2861,10 @@ subroutine DioPltPutHisStepIntegers(plt, intTime, values)
 
     ! body
 
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, integerHisTime=intTime)
+    endif
+
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetHisTimestep(plt % ds, intTime)
     call DioPltSetValues(plt, values)
@@ -2873,6 +2888,10 @@ subroutine DioPltPutHisStepReals1D(plt, intTime, values, allowLarger)
     logical, optional , intent(in)             :: allowLarger ! size > nPar*nLoc allowed
 
     ! body
+
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, integerHisTime=intTime)
+    endif
 
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetHisTimestep(plt % ds, intTime)
@@ -2902,6 +2921,10 @@ subroutine DioPltPutHisStepDoubles1D(plt, intTime, values, allowLarger)
 
     ! body
 
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, integerHisTime=intTime)
+    endif
+
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetHisTimestep(plt % ds, intTime)
 
@@ -2929,6 +2952,10 @@ subroutine DioPltPutJulTimeReals(plt, julTime, values)
 
     ! body
 
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, julTime)
+    endif
+
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetJulTimestep(plt % ds, julTime)
     call DioPltSetValues(plt, values)
@@ -2951,6 +2978,10 @@ subroutine DioPltPutJulTimeDoubles(plt, julTime, values)
     double precision, dimension(:,:), intent(in)    :: values
 
     ! body
+
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, julTime)
+    endif
 
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetJulTimestep(plt % ds, julTime)
@@ -2975,6 +3006,10 @@ subroutine DioPltPutJulTimeIntegers(plt, julTime, values)
 
     ! body
 
+    if (plt % header % allowJumpBack) then
+        call DioPltCheckJumpBack(plt, julTime)
+    endif
+
     call DioDsIncreaseTimestep(plt % ds)
     call DioDsSetJulTimestep(plt % ds, julTime)
     call DioPltSetValues(plt, values)
@@ -2983,6 +3018,84 @@ subroutine DioPltPutJulTimeIntegers(plt, julTime, values)
     return
 
 end subroutine DioPltPutJulTimeIntegers
+
+
+subroutine DioPltCheckJumpBack(plt, julianTime, integerHisTime)
+
+#if (defined(HAVE_CONFIG_H)||defined(salford32))
+    type(DioPltType)                            :: plt
+    double precision, intent(in), optional      :: julianTime
+    integer         , intent(in), optional      :: integerHisTime
+    call DioStreamError(229, &
+        'DioPltCheckJumpBack not supported for LINUX (ds: ', &
+                            plt % ds % name, ')')
+#else
+
+#if (defined(WIN32))
+    use dfport          ! for fseek
+#else
+    integer, external   :: fseek
+    integer,  parameter :: SEEK_SET = 0, SEEK_CUR = 1
+#endif
+
+    ! arguments   
+    type(DioPltType)                            :: plt
+    double precision, intent(in), optional      :: julianTime
+    integer         , intent(in), optional      :: integerHisTime
+
+    ! locals
+   
+    integer         :: lun          ! lun to read from
+    integer         :: headerSize,& ! size of HIS header 
+                       blockSize ,& ! size of HIS time step block
+                       jumpSize     ! total jump size
+    integer         :: dummy        ! dummy for HIS step
+    real, dimension(:,:), &
+          allocatable :: reals      ! temp storage for values
+    integer         :: tIndex       ! time index to write to
+    integer         :: fseekResult  ! result of fseek call
+
+    ! body
+
+    tIndex = plt % ds % curTimeIndex
+    if (tIndex > 0) then
+        if (present(integerHisTime)) then
+            do while (integerHisTime <= plt % ds % hisStep(tIndex) .and. tIndex > 1)
+                tIndex = tIndex - 1
+            enddo
+        endif
+        if (present(julianTime)) then
+            do while (julianTime <= plt % ds % timeStep(tIndex) .and. tIndex > 1)
+                tIndex = tIndex - 1
+            enddo
+        endif
+    endif
+
+    if (tIndex < plt % ds % curTimeIndex) then
+    
+        headerSize = DioPltHisDetermineHeaderSize(plt)  ! todo: for performance: store sizes
+        blockSize  = DioPltHisDetermineBlockSize(plt)
+        
+        jumpSize = headerSize + blockSize * (tIndex - 1)
+
+        fseekResult = fseek(plt % ds % outStream % lun, jumpSize, SEEK_SET)
+        if ( fseekResult .ne. 0 ) then
+            call DioStreamError(230, 'Could not jump back in his file')
+        endif
+
+        plt % ds % curPutGetCount = tIndex
+        if ( plt % ds % dataGrows ) then
+            plt % ds % curDataIndex = tIndex
+        endif
+        if ( plt % ds % timeGrows ) then
+            plt % ds % curTimeIndex = tIndex
+        endif
+
+    endif
+
+#endif
+
+end subroutine DioPltCheckJumpBack
 
 
 !******************************************************************************
@@ -3571,6 +3684,10 @@ subroutine DioPltHisWriteHeader(plt)
 
     lun = plt % ds % outStream % lun
     header => plt % header
+    call DioConfGetStProp(dio_st_AllowJumpBack, plt % header % allowJumpBack)
+    if (plt % header % allowJumpBack) then
+        plt % ds % timeGrows = .true.
+    endif
 
     ! TODO CHECK REMOVAL header % varType = Dio_Plt_Real
 

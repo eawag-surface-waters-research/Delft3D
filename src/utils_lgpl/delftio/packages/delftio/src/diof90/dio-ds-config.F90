@@ -93,11 +93,11 @@ integer, private, parameter :: dio_St_NR_IntProps       = 2
 integer, parameter          :: dio_st_Delay       = 1
 integer, parameter          :: dio_st_SleepTime   = 2
 
-integer, private, parameter :: dio_St_NR_LogProps       = 0
+integer, private, parameter :: dio_St_NR_LogProps       = 1
+integer, parameter          :: dio_st_AllowJumpBack = 1
 
 integer, private, parameter :: dio_St_NR_StrProps       = 1
 integer, parameter          :: dio_st_Timeout     = 1
-
 
 
 !
@@ -249,6 +249,7 @@ subroutine DioConfigDump(lun)
     write(lun,*) 'Settings Dly: ', dioConfig % settings % intProp(dio_st_Delay)
     write(lun,*) 'Settings Slp: ', dioConfig % settings % intProp(dio_st_SleepTime)
     write(lun,*) 'Settings Tmo: ', dioConfig % settings % strProp(dio_st_Timeout)
+    write(lun,*) 'Settings AJB: ', dioConfig % settings % strProp(dio_st_AllowJumpBack)
 
 
     ds => dioConfig % dsDefaults
