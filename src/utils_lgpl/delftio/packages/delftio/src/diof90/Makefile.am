@@ -48,7 +48,7 @@ BUILT_SOURCES = ./always \
 	rm -rf ./delftio_version.F90
 
 ./delftio_version.F90:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/delftio_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/delftio_version.F90 $(srcdir) ../../include/version_number.ini $(top_builddir)
 
 
 #-------------------------------------------------------------------------------
