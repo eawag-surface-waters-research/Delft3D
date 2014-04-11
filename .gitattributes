@@ -4710,8 +4710,6 @@ src/utils_lgpl/delftio/packages/delftio_shm/src/diof90/dio_shm_datablock.cpp -te
 src/utils_lgpl/delftio/packages/delftio_shm/src/diof90/dio_shm_f2c_c.cpp -text
 src/utils_lgpl/delftio/packages/delftio_shm/src/diof90/dio_shm_handle.cpp -text
 src/utils_lgpl/delftio/packages/delftio_shm/src/diof90/dio_shm_sync.cpp -text
-src/utils_lgpl/delftio/packages/diostates/bin/win32/diostates.lib -text
-src/utils_lgpl/delftio/packages/diostates/restartmodule.F90 -text
 src/utils_lgpl/delftio/scripts/conv2ux -text
 src/utils_lgpl/delftio/scripts/diorun -text
 src/utils_lgpl/delftio/scripts/setup -text
