@@ -69,7 +69,6 @@ libflow2d3d_la_LIBADD = \
     $(MPILIBS) \
     $(FCLIBS) $(CCLIBS)
 
-
 BUILT_SOURCES = \
 	./always \
 	$(srcdir)/../include/flow2d3d_version.h
