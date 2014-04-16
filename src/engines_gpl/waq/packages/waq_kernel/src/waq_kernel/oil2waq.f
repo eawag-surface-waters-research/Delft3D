@@ -82,7 +82,7 @@
 
 !      if ( iddtim .eq. 0 ) return
 
-      if ( timon ) call timstrt ( "par2waq", ithandl )
+      if ( timon ) call timstrt ( "oil2waq", ithandl )
 
       massbal = iaflag .eq. 1
       fluxes  = btest(intopt,3)
