@@ -93,6 +93,7 @@
          do isub = 1, nosubs
             partsub = syname( ioff+isub ) ( 1 : len_trim(syname(ioff+isub))-1 ) ! cut the 'p' off
             call zoek20 ( partsub, ioff, syname, 20, iwaqsub(isub) )
+            if ( iwaqsub(isub) .lt. 0 ) iwaqsub(isub) = 0 ! not found!
             if ( iwaqsub(isub) .gt. nosys ) iwaqsub(isub) = -iwaqsub(isub)      ! not dissolved
          enddo
       endif
