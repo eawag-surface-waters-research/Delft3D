@@ -3057,8 +3057,9 @@ subroutine DioPltCheckJumpBack(plt, julianTime, integerHisTime)
 
     ! body
 
-    tIndex = plt % ds % curTimeIndex
-    if (tIndex > 0) then
+    if (plt % ds % curTimeIndex > 0) then
+
+        tIndex = plt % ds % curTimeIndex
         if (present(integerHisTime)) then
             do while (integerHisTime <= plt % ds % hisStep(tIndex) .and. tIndex > 1)
                 tIndex = tIndex - 1
@@ -3069,29 +3070,29 @@ subroutine DioPltCheckJumpBack(plt, julianTime, integerHisTime)
                 tIndex = tIndex - 1
             enddo
         endif
-    endif
 
-    if (tIndex < plt % ds % curTimeIndex) then
-    
-        headerSize = DioPltHisDetermineHeaderSize(plt)  ! todo: for performance: store sizes
-        blockSize  = DioPltHisDetermineBlockSize(plt)
+        if (tIndex < plt % ds % curTimeIndex) then
         
-        jumpSize = headerSize + blockSize * (tIndex - 1)
+            headerSize = DioPltHisDetermineHeaderSize(plt)  ! todo: for performance: store sizes
+            blockSize  = DioPltHisDetermineBlockSize(plt)
+            
+            jumpSize = headerSize + blockSize * (tIndex - 1)
 
-        fseekResult = fseek(plt % ds % outStream % lun, jumpSize, SEEK_SET)
-        if ( fseekResult .ne. 0 ) then
-            call DioStreamError(230, 'Could not jump back in his file')
-        endif
+            fseekResult = fseek(plt % ds % outStream % lun, jumpSize, SEEK_SET)
+            if ( fseekResult .ne. 0 ) then
+                call DioStreamError(230, 'Could not jump back in his file')
+            endif
 
-        plt % ds % curPutGetCount = tIndex
-        if ( plt % ds % dataGrows ) then
-            plt % ds % curDataIndex = tIndex
-        endif
-        if ( plt % ds % timeGrows ) then
-            plt % ds % curTimeIndex = tIndex
-        endif
+            plt % ds % curPutGetCount = tIndex
+            if ( plt % ds % dataGrows ) then
+                plt % ds % curDataIndex = tIndex
+            endif
+            if ( plt % ds % timeGrows ) then
+                plt % ds % curTimeIndex = tIndex
+            endif
 
-    endif
+        endif
+   endif
 
 #endif
 
