@@ -75,6 +75,8 @@
 
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       real     ( 4)    threshold       ! drying and flooding value
+      real     ( 4)    minvolume       ! minimum volume in a call
+      real     ( 4)    minarea         ! minimum area of a call
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable volumes
       integer  ( 4)    ivol            ! index for this computational volumes
@@ -92,6 +94,15 @@
       threshold = 0.001                                        ! default value of 1 mm
       call zoek20 ( 'DRY_THRESH', nocons, coname, 10, idryfld )
       if ( idryfld .gt. 0 ) threshold = cons(idryfld)          ! or the given value
+
+      minvolume = 1.00                                         ! default value of 1 m3
+      call zoek20 ( 'MIN_VOLUME', nocons, coname, 10, idryfld )
+      if ( idryfld .gt. 0 ) minvolume = cons(idryfld)          ! or the given value
+
+      minarea = 1.00                                         ! default value of 1 m2
+      call zoek20 ( 'MIN_AREA', nocons, coname, 10, idryfld )
+      if ( idryfld .gt. 0 ) minarea = cons(idryfld)            ! or the given value
+      
       do iseg = 1, nosegl
          call dhkmrk( 1, iknmrk(iseg), ikm )
          if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
@@ -106,17 +117,17 @@
                call dhkmst(1, iknmkv(ivol), 0 )               ! zero the last bit
                call dhkmst(2, iknmkv(ivol), 0 )               ! and the second feature
                call dhkmst(3, iknmkv(ivol), 0 )               ! and the third feature
-               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
+               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
             enddo
          else
             do ilay = 1, nolay                                ! this copies the constant
                ivol = iseg + (ilay-1)*nosegl                  ! property in case cell had
                iknmkv(ivol) = iknmrk(ivol)                    ! become wet again
-               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
+               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
             enddo
          endif
       enddo
-      area = max( area, 1.0 )
+      area = max( area, minarea )
 
       if ( timon ) call timstop ( ithandl )
 
@@ -164,6 +175,8 @@
 
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       real     ( 4)    threshold       ! drying and flooding value
+      real     ( 4)    minvolume       ! minimum volume in a call
+      real     ( 4)    minarea         ! minimum area of a call
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable
       integer  ( 4)    ivol            ! this computational volume
@@ -176,9 +189,14 @@
 
       nosegl = nosegw / nolay
 
+      threshold = 0.001                                         ! default value of 1 mm
       call zoek20 ( 'DRY_THRESH', nocons, coname, 10, idryfld )
-      threshold = 0.001                                  ! default value of 1 mm
-      if ( idryfld .gt. 0 ) threshold = cons(idryfld)    ! or the given value
+      if ( idryfld .gt. 0 ) threshold = cons(idryfld)           ! or the given value
+
+      minvolume = 1.00                                         ! default value of 1 m3
+      call zoek20 ( 'MIN_VOLUME', nocons, coname, 10, idryfld )
+      if ( idryfld .gt. 0 ) minvolume = cons(idryfld)          ! or the given value
+
       do iseg = 1, nosegl
          call dhkmrk( 1, iknmrk(iseg), ikm )
          if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
@@ -191,7 +209,7 @@
             do ilay = 1, nolay
                ivol = iseg + (ilay-1)*nosegl
                iknmkv(ivol) = iknmrk(ivol)
-               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
+               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
             enddo
          endif
       enddo
