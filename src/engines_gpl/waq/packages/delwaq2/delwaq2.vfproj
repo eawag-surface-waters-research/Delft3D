@@ -6,7 +6,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)\" Traceback="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName)" IgnoreDefaultLibraryNames="libifcoremd.lib; libifcoremdd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="67108864"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/FORCE:MULTIPLE" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName)" IgnoreDefaultLibraryNames="libifcoremd.lib; libifcoremdd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="67108864" LargeAddressAware="addrAwareLarge"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
