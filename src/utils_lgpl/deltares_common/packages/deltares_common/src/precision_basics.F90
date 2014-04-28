@@ -90,10 +90,10 @@ real(hp) :: value
 !
 eps = 2.0_hp * epsilon(val1)
 !
-if (abs(val1)<1.0d0 .or. abs(val2)<1.0d0) then
+if (abs(val1)<1.0_hp .or. abs(val2)<1.0_hp) then
    value = val1 - val2
 else
-   value = val1/val2 - 1.0d0
+   value = val1/val2 - 1.0_hp
 endif
 !
 if (abs(value)<eps) then
