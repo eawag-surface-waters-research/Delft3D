@@ -615,7 +615,7 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
     !
     ! Handle chapters
     !
-    ignore = chapter(1:1)=='*'
+    ignore = chapter(1:1)=='*' .or. len_trim(chapter) == 0
     !
     ! Find the chapter first
     !
