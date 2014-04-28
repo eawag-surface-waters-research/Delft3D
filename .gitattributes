@@ -5100,7 +5100,6 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/wavenr.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcxproj -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_2012.vcxproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/cpuinfo.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/getputarray.h -text

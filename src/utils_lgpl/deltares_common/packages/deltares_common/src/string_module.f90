@@ -5,7 +5,7 @@ module string_module
 !                                                                               
 !  This library is free software; you can redistribute it and/or                
 !  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.            
+!  License as published by the Free Software Foundation version 2.1.                 
 !                                                                               
 !  This library is distributed in the hope that it will be useful,              
 !  but WITHOUT ANY WARRANTY; without even the implied warranty of               
@@ -35,473 +35,388 @@ module string_module
 ! NONE
 !!--declarations----------------------------------------------------------------
 
-   implicit none
+private
 
-   private
+!
+! functions and subroutines
+!
+public string_module_info
+public str_token
+public str_lower
+public str_upper
+public strcmpi
+public remove_leading_spaces
+public remove_all_spaces
 
-   !
-   ! functions and subroutines
-   !
-   public :: string_module_info
-   public :: str_token
-   public :: str_lower
-   public :: str_upper
-   public :: strcmpi
-   public :: remove_leading_spaces
-   public :: remove_all_spaces
-   public :: find_first_word
-   public :: find_first_letter
-   public :: count_words
-
-   contains
-
-      ! ------------------------------------------------------------------------------
-      !   Subroutine: string_module_info
-      !   Purpose:    Add info about this string module to the messages stack
-      !   Summary:    Add id string and URL
-      !   Arguments:
-      !   messages    Stack of messages to add the info to
-      ! ------------------------------------------------------------------------------
-      subroutine string_module_info(messages)
-          use message_module
-          !
-          ! Call variables
-          !
-          type(message_stack), pointer :: messages
-          !
-          !! executable statements ---------------------------------------------------
-          !
-          call addmessage(messages,'$Id$')
-          call addmessage(messages,'$URL$')
-      end subroutine string_module_info
+contains
 
 
 
-      ! ------------------------------------------------------------------------------
-      !   Subroutine: str_token
-      !   Purpose:    Obtain first token from string
-      !   Summary:    Scan string for non-space characters and return first set found.
-      !   Arguments:
-      !   string      on input : String to be scanned
-      !               on output: Remainder of string
-      !   token       on output: String containing token
-      !   quote       on input : Optional quote character
-      ! ------------------------------------------------------------------------------
-      subroutine str_token(string, token, quote)
-          !
-          ! Call variables
-          !
-          character(*)          , intent(inout) :: string
-          character(*)          , intent(out)   :: token
-          character(1), optional, intent(in)    :: quote
-          !
-          ! Local variables
-          !
-          integer :: i
-          integer :: i1
-          integer :: i2
-          integer :: j
-          integer :: strlen
-          logical :: quoted
-          !
-          !! executable statements ---------------------------------------------------
-          !
-          i1     = -1
-          i2     = -1
-          quoted = .false.
-          strlen = len_trim(string)
-          ! find start of token
-          do i = 1, strlen
-             j = ichar(string(i:i))
-             if (j == 32 .or. j == 9 .or. j == 10 .or. j == 13) then
-                ! a space
-                if (i1>0 .and. .not.quoted) then
-                   ! token ends here
-                   i2 = i-1
-                   exit
-                endif
-             else
-                ! not a space
-                if (i1<0) then
-                   ! token starts here and may continue till the end of the string
-                   if (present(quote)) then
-                      if (string(i:i) == quote) then
-                         quoted = .true.
-                      endif
-                   endif
-                   i1 = i
-                   i2 = strlen
-                elseif (quoted) then
-                   if (string(i:i) == quote) then
-                      quoted = .false.
-                   endif
-                endif
-             endif
-          enddo
-          !
+! ------------------------------------------------------------------------------
+!   Subroutine: string_module_info
+!   Purpose:    Add info about this string module to the messages stack
+!   Summary:    Add id string and URL
+!   Arguments:
+!   messages    Stack of messages to add the info to
+! ------------------------------------------------------------------------------
+subroutine string_module_info(messages)
+    use message_module
+    !
+    ! Call variables
+    !
+    type(message_stack), pointer :: messages
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    call addmessage(messages,'$Id$')
+    call addmessage(messages,'$URL$')
+end subroutine string_module_info
+
+
+
+! ------------------------------------------------------------------------------
+!   Subroutine: str_token
+!   Purpose:    Obtain first token from string
+!   Summary:    Scan string for non-space characters and return first set found.
+!   Arguments:
+!   string      on input : String to be scanned
+!               on output: Remainder of string
+!   token       on output: String containing token
+!   quote       on input : Optional quote character
+! ------------------------------------------------------------------------------
+subroutine str_token(string, token, quote)
+    implicit none
+    !
+    ! Call variables
+    !
+    character(*)          , intent(inout) :: string
+    character(*)          , intent(out)   :: token
+    character(1), optional, intent(in)    :: quote
+    !
+    ! Local variables
+    !
+    integer :: i
+    integer :: i1
+    integer :: i2
+    integer :: j
+    integer :: strlen
+    logical :: quoted
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    i1     = -1
+    i2     = -1
+    quoted = .false.
+    strlen = len_trim(string)
+    ! find start of token
+    do i = 1, strlen
+       j = ichar(string(i:i))
+       if (j == 32 .or. j == 9 .or. j == 10 .or. j == 13) then
+          ! a space
+          if (i1>0 .and. .not.quoted) then
+             ! token ends here
+             i2 = i-1
+             exit
+          endif
+       else
+          ! not a space
           if (i1<0) then
-             ! empty string: no token found
-             token = ' '
-          else
-             ! token found
-             token  = string(i1:i2)
+             ! token starts here and may continue till the end of the string
              if (present(quote)) then
-                ! remove quotes
-                if (string(i1:i1)==quote .and. string(i2:i2)==quote) then
-                   token = string(i1+1:i2-1)
+                if (string(i:i) == quote) then
+                   quoted = .true.
                 endif
              endif
-             string = string(i2+1:strlen)
-          endif
-      end subroutine str_token
-
-
-
-      ! ------------------------------------------------------------------------------
-      !   Subroutine: str_lower
-      !   Purpose:    Convert upper case characters to lower case
-      !   Summary:    Scan string for upper case characters and
-      !               convert them.
-      !   Arguments:
-      !   string      String to be converted
-      !   lenstr      Optional length of string to be converted
-      ! ------------------------------------------------------------------------------
-      subroutine str_lower(string, lenstr)
-          !
-          ! Call variables
-          !
-          integer     , optional, intent(in) :: lenstr
-          character(*)                       :: string
-          !
-          ! Local variables
-          !
-          integer :: i
-          integer :: j
-          integer :: newlen
-          !
-          !! executable statements ---------------------------------------------------
-          !
-          if (present(lenstr)) then
-             newlen = min(lenstr, len_trim(string))
-          else
-             newlen = len_trim(string)
-          endif
-          do i = 1, newlen
-             j = ichar(string(i:i))
-             if ((j>64) .and. (j<91)) then
-                j = j + 32
-                string(i:i) = char(j)
+             i1 = i
+             i2 = strlen
+          elseif (quoted) then
+             if (string(i:i) == quote) then
+                quoted = .false.
              endif
-          enddo
-      end subroutine str_lower
-
-
-
-      ! ------------------------------------------------------------------------------
-      !   Subroutine: str_upper
-      !   Purpose:    Convert lower case characters to upper case
-      !   Summary:    Scan string for lower case characters and
-      !               convert them.
-      !   Arguments:
-      !   string      String to be converted
-      !   lenstr      Optional length of string to be converted
-      ! ------------------------------------------------------------------------------
-      subroutine str_upper(string, lenstr)
-          !
-          ! Call variables
-          !
-          integer     , optional, intent(in) :: lenstr
-          character(*)                       :: string
-          !
-          ! Local variables
-          !
-          integer :: i
-          integer :: j
-          integer :: newlen
-          !
-          !! executable statements ---------------------------------------------------
-          !
-          if (present(lenstr)) then
-             newlen = min(lenstr, len_trim(string))
-          else
-             newlen = len_trim(string)
           endif
-          do i = 1, newlen
-             j = ichar(string(i:i))
-             if ((j>96) .and. (j<123)) then
-                j = j - 32
-                string(i:i) = char(j)
-             endif
-          enddo
-      end subroutine str_upper
-
-
-
-      ! ------------------------------------------------------------------------------
-      !   Subroutine: remove_all_spaces
-      !   Purpose:    Remove all spaces from a string
-      !   Summary:    Scan string for space characters and if one exists, move the
-      !               following characters forward.
-      !   Arguments:
-      !   string      String to be converted
-      !   lenstr      Optional trimmed length of string after removal of spaces
-      ! ------------------------------------------------------------------------------
-      subroutine remove_all_spaces(string, lenstr)
-          !
-          ! Call variables
-          !
-          character(*)                       :: string
-          integer     , optional, intent(out):: lenstr
-          !
-          ! Local variables
-          !
-          integer :: i
-          integer :: newlen
-          !
-          !! executable statements ---------------------------------------------------
-          !
-          newlen = len_trim(string)
-          !
-          ! loop over all characters in string
-          !    if it is a space character, move remainder of string forward
-          !
-          i = 1
-          do while (i<newlen)
-             if (string(i:i)==' ') then
-                string(i:newlen) = string(i+1:newlen) // ' '
-                newlen = newlen-1
-             else
-                i = i+1
-             endif
-          enddo
-          !
-          if (present(lenstr)) then
-             lenstr = newlen
+       endif
+    enddo
+    !
+    if (i1<0) then
+       ! empty string: no token found
+       token = ' '
+    else
+       ! token found
+       token  = string(i1:i2)
+       if (present(quote)) then
+          ! remove quotes
+          if (string(i1:i1)==quote .and. string(i2:i2)==quote) then
+             token = string(i1+1:i2-1)
           endif
-      end subroutine remove_all_spaces
+       endif
+       string = string(i2+1:strlen)
+    endif
+end subroutine str_token
 
 
 
-      ! ------------------------------------------------------------------------------
-      !   Subroutine: remove_leading_spaces
-      !   Purpose:    Remove leading spaces from a string
-      !   Summary:    Scan string for space characters at beginning of string and
-      !               if they exist, move the actual string forward.
-      !   Arguments:
-      !   string      String to be converted
-      !   lenstr      Optional trimmed length of string after removal of spaces
-      ! ------------------------------------------------------------------------------
-      subroutine remove_leading_spaces(string, lenstr)
-          !
-          ! Call variables
-          !
-          character(*)                       :: string
-          integer     , optional, intent(out):: lenstr
-          !
-          ! Local variables
-          !
-          integer :: i
-          integer :: newlen
-          !
-          !! executable statements ---------------------------------------------------
-          !
-          newlen = len_trim(string)
-          !
-          ! find first non-space character
-          !
-          i = 1
-          do while (i<newlen)
-             if (string(i:i)==' ') then
-                i = i+1
-             else
-                exit
-             endif
-          enddo
-          !
-          ! remove leading spaces
-          !
-          string = string(i:newlen)
-          !
-          if (present(lenstr)) then
-             lenstr = len_trim(string)
-          endif
-      end subroutine remove_leading_spaces
+! ------------------------------------------------------------------------------
+!   Subroutine: str_lower
+!   Purpose:    Convert upper case characters to lower case
+!   Summary:    Scan string for upper case characters and
+!               convert them.
+!   Arguments:
+!   string      String to be converted
+!   lenstr      Optional length of string to be converted
+! ------------------------------------------------------------------------------
+subroutine str_lower(string, lenstr)
+    implicit none
+    !
+    ! Call variables
+    !
+    integer     , optional, intent(in) :: lenstr
+    character(*)                       :: string
+    !
+    ! Local variables
+    !
+    integer :: i
+    integer :: j
+    integer :: newlen
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    if (present(lenstr)) then
+       newlen = min(lenstr, len_trim(string))
+    else
+       newlen = len_trim(string)
+    endif
+    do i = 1, newlen
+       j = ichar(string(i:i))
+       if ((j>64) .and. (j<91)) then
+          j = j + 32
+          string(i:i) = char(j)
+       endif
+    enddo
+end subroutine str_lower
 
 
 
-      ! ------------------------------------------------------------------------------
-      !   Function:   strcmpi
-      !   Purpose:    Case-insensitive comparison of strings (upto certain length)
-      !   Summary:    Change strings to lower case and compare (sub)strings.
-      !   Arguments:
-      !   string1     First string to be compared
-      !   string2     Second string to be compared
-      !   lencmp      Optional length over which to compare strings
-      ! ------------------------------------------------------------------------------
-      function strcmpi(string1, string2, lenreq) result(retval)
-          !
-          ! Call variables
-          !
-          character(*)                   , intent(in) :: string1
-          character(*)                   , intent(in) :: string2
-          integer              , optional, intent(in) :: lenreq
-          logical                                     :: retVal  ! .true.  if strings are equal
-                                                                 ! .false. if strings are not equal or len1 /= len2
-          !
-          ! Local variables
-          !
-          integer                                     :: len1    ! length of string1, without trailing blanks
-          integer                                     :: len2    ! length of string2, without trailing blanks
-          integer                                     :: lencmp  ! length of strings to be compared
-          character(999) , dimension(:) , allocatable :: locstr  ! copy of strings, to convert to lowercase
-          !
-          !! executable statements ---------------------------------------------------
-          !
+! ------------------------------------------------------------------------------
+!   Subroutine: str_upper
+!   Purpose:    Convert lower case characters to upper case
+!   Summary:    Scan string for lower case characters and
+!               convert them.
+!   Arguments:
+!   string      String to be converted
+!   lenstr      Optional length of string to be converted
+! ------------------------------------------------------------------------------
+subroutine str_upper(string, lenstr)
+    implicit none
+    !
+    ! Call variables
+    !
+    integer     , optional, intent(in) :: lenstr
+    character(*)                       :: string
+    !
+    ! Local variables
+    !
+    integer :: i
+    integer :: j
+    integer :: newlen
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    if (present(lenstr)) then
+       newlen = min(lenstr, len_trim(string))
+    else
+       newlen = len_trim(string)
+    endif
+    do i = 1, newlen
+       j = ichar(string(i:i))
+       if ((j>96) .and. (j<123)) then
+          j = j - 32
+          string(i:i) = char(j)
+       endif
+    enddo
+end subroutine str_upper
+
+
+
+! ------------------------------------------------------------------------------
+!   Subroutine: remove_all_spaces
+!   Purpose:    Remove all spaces from a string
+!   Summary:    Scan string for space characters and if one exists, move the
+!               following characters forward.
+!   Arguments:
+!   string      String to be converted
+!   lenstr      Optional trimmed length of string after removal of spaces
+! ------------------------------------------------------------------------------
+subroutine remove_all_spaces(string, lenstr)
+    implicit none
+    !
+    ! Call variables
+    !
+    character(*)                       :: string
+    integer     , optional, intent(out):: lenstr
+    !
+    ! Local variables
+    !
+    integer :: i
+    integer :: newlen
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    newlen = len_trim(string)
+    !
+    ! loop over all characters in string
+    !    if it is a space character, move remainder of string forward
+    !
+    i = 1
+    do while (i<newlen)
+       if (string(i:i)==' ') then
+          string(i:newlen) = string(i+1:newlen) // ' '
+          newlen = newlen-1
+       else
+          i = i+1
+       endif
+    enddo
+    !
+    if (present(lenstr)) then
+       lenstr = newlen
+    endif
+end subroutine remove_all_spaces
+
+
+
+! ------------------------------------------------------------------------------
+!   Subroutine: remove_leading_spaces
+!   Purpose:    Remove leading spaces from a string
+!   Summary:    Scan string for space characters at beginning of string and
+!               if they exist, move the actual string forward.
+!   Arguments:
+!   string      String to be converted
+!   lenstr      Optional trimmed length of string after removal of spaces
+! ------------------------------------------------------------------------------
+subroutine remove_leading_spaces(string, lenstr)
+    implicit none
+    !
+    ! Call variables
+    !
+    character(*)                       :: string
+    integer     , optional, intent(out):: lenstr
+    !
+    ! Local variables
+    !
+    integer :: i
+    integer :: newlen
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    newlen = len_trim(string)
+    !
+    ! find first non-space character
+    !
+    i = 1
+    do while (i<newlen)
+       if (string(i:i)==' ') then
+          i = i+1
+       else
+          exit
+       endif
+    enddo
+    !
+    ! remove leading spaces
+    !
+    string = string(i:newlen)
+    !
+    if (present(lenstr)) then
+       lenstr = len_trim(string)
+    endif
+end subroutine remove_leading_spaces
+
+
+
+! ------------------------------------------------------------------------------
+!   Function:   strcmpi
+!   Purpose:    Case-insensitive comparison of strings (upto certain length)
+!   Summary:    Change strings to lower case and compare (sub)strings.
+!   Arguments:
+!   string1     First string to be compared
+!   string2     Second string to be compared
+!   lencmp      Optional length over which to compare strings
+! ------------------------------------------------------------------------------
+function strcmpi(string1, string2, lenreq) result(retval)
+    implicit none
+    !
+    ! Call variables
+    !
+    character(*)                   , intent(in) :: string1
+    character(*)                   , intent(in) :: string2
+    integer              , optional, intent(in) :: lenreq
+    logical                                     :: retVal  ! .true.  if strings are equal
+                                                           ! .false. if strings are not equal or len1 /= len2
+    !
+    ! Local variables
+    !
+    integer                                     :: len1    ! length of string1, without trailing blanks
+    integer                                     :: len2    ! length of string2, without trailing blanks
+    integer                                     :: lencmp  ! length of strings to be compared
+    character(999) , dimension(:) , allocatable :: locstr  ! copy of strings, to convert to lowercase
+    !
+    !! executable statements ---------------------------------------------------
+    !
+    retval = .false.
+    len1   = len_trim(string1)
+    len2   = len_trim(string2)
+    !
+    ! determine comparison length
+    !
+    if (present(lenreq)) then
+       lencmp = lenreq
+    else
+       lencmp = max(len1,len2)
+    endif
+    !
+    ! do a quick check on string length
+    !
+    if (len1<lencmp .or. len2<lencmp) then
+       !
+       ! at least one string is shorter than the comparison length
+       ! they can only be equal if their length is equal
+       !
+       if (len1 /= len2) then
           retval = .false.
-          len1   = len_trim(string1)
-          len2   = len_trim(string2)
+          return
+       else
           !
-          ! determine comparison length
+          ! strings have equal length, but are shorter than comparison length
+          ! we only have to check the strings for their actual length
           !
-          if (present(lenreq)) then
-             lencmp = lenreq
-          else
-             lencmp = max(len1,len2)
-          endif
-          !
-          ! do a quick check on string length
-          !
-          if (len1<lencmp .or. len2<lencmp) then
-             !
-             ! at least one string is shorter than the comparison length
-             ! they can only be equal if their length is equal
-             !
-             if (len1 /= len2) then
-                retval = .false.
-                return
-             else
-                !
-                ! strings have equal length, but are shorter than comparison length
-                ! we only have to check the strings for their actual length
-                !
-                lencmp = len1
-             endif
-          endif
-          !
-          ! local copy of the strings needed to switch case without changing the
-          ! original version.
-          !
-          allocate (locstr(2))
-          !
-          ! strings will be compared upto lencmp
-          !
-          locstr(1) = string1(1:lencmp)
-          call str_lower(locstr(1), lencmp)
-          !
-          locstr(2) = string2(1:lencmp)
-          call str_lower(locstr(2), lencmp)
-          !
-          if (locstr(1)(1:lencmp) == locstr(2)(1:lencmp)) then
-             !
-             ! strings are equal upto lencmp
-             !
-             retval = .true.
-          else
-             !
-             ! strings are not equal
-             !
-             retval = .false.
-          endif
-          deallocate (locstr)
-      end function strcmpi
-      
-      !> Determine the indices of the first letter (not number) and last character of the first word in a string.
-      !! Failure is indicated by: i1 = 0; i2 = 0
-      subroutine find_first_word(string, i1, i2)
-         character(len=*), intent(in)  :: string !< string to inspect
-         integer,          intent(out) :: i1     !< string index of the first letter of the first word
-         integer,          intent(out) :: i2     !< string index of the last character of the first word
-         !
-         integer :: i !< loop counter
-         integer :: L !< length of string, excluding trailing whitespace
-         !
-         L = len_trim(string)
-         i1 = find_first_letter(string(1:L))
-         i2 = 0
-         i = 0
-         !
-         if (i1 > 0) then
-            i2 = L
-            do i=i1+1, L
-               if (is_whitespace(string(i:i))) then
-                  i2 = i-1
-                  exit
-               end if
-            end do
-         end if
-      end subroutine find_first_word
-      
-      !> Determine the index of the first letter in a string.
-      !! Failure is indicated by: index = 0
-      function find_first_letter(string) result(idx)
-         integer                      :: idx  !< index of first letter
-         character(len=*), intent(in) :: string !< string to inspect
-         !
-         integer :: i  !< loop index
-         integer :: i1 !< helper variable
-         integer :: i2 !< helper variable
-         integer :: i3 !< helper variable
-         !
-         idx = 0
-         do i=1, len_trim(string)
-            i1 = index('qwertyuiopasdfghjklzxcvbnm', string(i:i))
-            i2 = index('QWERTYUIOPASDFGHJKLZXCVBNM', string(i:i))
-            i3 = max(i1, i2)
-            if (i3 /= 0) then
-               idx = i
-               exit
-            endif
-         enddo
-      end function find_first_letter
-      
-      !> Count the number of whitespace separated character groups.
-      function count_words(string) result(number)
-         integer                      :: number !< number of words
-         character(len=*), intent(in) :: string !< string to inspect
-         !
-         integer :: i !< loop counter
-         logical :: was_whitespace !< helper variable
-         !
-         number = 0
-         was_whitespace = .true.
-         !
-         do i=1, len(string)
-            if (is_whitespace(string(i:i))) then
-               if (.not. was_whitespace) then
-                  ! word has ended
-                  was_whitespace = .true.
-               end if
-            else
-               if (was_whitespace) then
-                  ! word has started
-                  number = number + 1
-                  was_whitespace = .false.
-               end if
-            end if
-         end do
-      end function count_words
-      
-      !> Checks whether the character is whitespace.
-      function is_whitespace(letter)
-         logical                      :: is_whitespace !< 
-         character(len=1), intent(in) :: letter        !< 
-         !
-         is_whitespace = .false.
-         !
-         if (letter == ' ') then ! space
-            is_whitespace = .true.
-         else if (letter == char(9)) then ! tab
-            is_whitespace = .true.
-         end if
-      end function is_whitespace
+          lencmp = len1
+       endif
+    endif
+    !
+    ! local copy of the strings needed to switch case without changing the
+    ! original version.
+    !
+    allocate (locstr(2))
+    !
+    ! strings will be compared upto lencmp
+    !
+    locstr(1) = string1(1:lencmp)
+    call str_lower(locstr(1), lencmp)
+    !
+    locstr(2) = string2(1:lencmp)
+    call str_lower(locstr(2), lencmp)
+    !
+    if (locstr(1)(1:lencmp) == locstr(2)(1:lencmp)) then
+       !
+       ! strings are equal upto lencmp
+       !
+       retval = .true.
+    else
+       !
+       ! strings are not equal
+       !
+       retval = .false.
+    endif
+    deallocate (locstr)
+end function strcmpi
+
+
 end module string_module

@@ -35,27 +35,20 @@ module time_module
 ! NONE
 !!--declarations----------------------------------------------------------------
 
-   implicit none
-
 private
 
-   public :: time_module_info
-   public :: datetime2sec
-   public :: sec2ddhhmmss
-   public :: ymd2jul
-   public :: jul2ymd
+!
+! functions and subroutines
+!
+public time_module_info
+public datetime2sec
+public sec2ddhhmmss
+public ymd2jul
+public jul2ymd
 
-   interface ymd2jul
-      module procedure GregorianDateToJulianDateNumber
-      module procedure GregorianYearMonthDayToJulianDateNumber
-   end interface ymd2jul
+contains
 
-   interface jul2ymd
-      module procedure JulianDateNumberToGregorianDate
-      module procedure JulianDateNumberToGregorianYearMonthDay
-   end interface jul2ymd
 
-   contains
 
 ! ------------------------------------------------------------------------------
 !   Subroutine: time_module_info
@@ -89,6 +82,7 @@ end subroutine time_module_info
 !               Otherwise: time in seconds since julday = 0 (only to be used for time steps)
 ! ------------------------------------------------------------------------------
 function datetime2sec(datetime, refdatetime) result (sec)
+    implicit none
     !
     ! Call variables
     !
@@ -135,6 +129,7 @@ end function datetime2sec
 !   ddhhmmss    Integer with days, hours, minutes and seconds formatted as ddhhmmss 
 ! ------------------------------------------------------------------------------
 function sec2ddhhmmss(sec) result (ddhhmmss)
+    implicit none
     !
     ! Call variables
     !
@@ -165,87 +160,104 @@ function sec2ddhhmmss(sec) result (ddhhmmss)
     ddhhmmss = ss + 100*mm + 10000*hh + 1000000*dd
 end function sec2ddhhmmss
 
-      ! =======================================================================
 
-      !> Calculates the Julian Date Number from a Gregorian calender date.
-      !! Returns 0 in case of failure.
-      function GregorianDateToJulianDateNumber(yyyymmdd) result(jdn)
-         integer             :: jdn      !< calculated Julian Date Number
-         integer, intent(in) :: yyyymmdd !< Gregorian calender date
+
+! ------------------------------------------------------------------------------
+!   Subroutine: ymd2jul
+!   Purpose:    Convert a year, month, day triplet into a Julian date number
+!   Arguments:
+!   year        Year
+!   month       Month number
+!   day         Day
+!   julday      Julian date
+! ------------------------------------------------------------------------------
+function ymd2jul(year, month, day) result (julday)
+    implicit none
 !
-         integer :: year  !< helper variable
-         integer :: month !< helper variable
-         integer :: day   !< helper variable
+! Global variables
 !
-         year = yyyymmdd/10000
-         month = yyyymmdd/100 - year*100
-         day = yyyymmdd - month*100 - year*10000
-         jdn = GregorianYearMonthDayToJulianDateNumber(year, month, day)
-      end function GregorianDateToJulianDateNumber
-      
-      ! =======================================================================
-      
-      !> Calculates the Julian Date Number from a Gregorian year, month and day.
-      !! Returns 0 in case of failure.
-      function GregorianYearMonthDayToJulianDateNumber(year, month, day) result(jdn)
-         integer :: jdn               !< calculated Julian Date Number
-         integer, intent(in) :: year  !< Gregorian year
-         integer, intent(in) :: month !< Gregorian month
-         integer, intent(in) :: day   !< Gregorian day
+    integer , intent(in)             :: year   !  Year or YYYYMMDD integer
+    integer , intent(in) , optional  :: month  !  Month
+    integer , intent(in) , optional  :: day    !  Day
+    integer                          :: julday !  Julian day number
+!
+!
+! Local variables
+!
+    integer               :: d      ! Help var. to check calculation 
+    integer               :: m      ! Help var. to check calculation 
+    integer               :: y      ! Help var. to check calculation 
+    integer               :: lday   ! Local day
+    integer               :: lmonth ! Local month number
+    integer               :: lyear  ! Local year
+    integer               :: month1 ! Help variable
+!
+!! executable statements -------------------------------------------------------
+!
     !
-         integer :: month1 !< helper variable
-         integer :: y      !< helper variable
-         integer :: m      !< helper variable
-         integer :: d      !< helper variable
+    if (present(month) .and. present(day)) then
+       lyear  = year
+       lmonth = month
+       lday   = day
+    elseif (.not.present(month) .and. .not.present(day)) then
+       lyear  = year/10000
+       lmonth = year/100 - lyear*100
+       lday   = year - lmonth*100 - lyear*10000
+    else
+       stop 'Improper use of YMD2JUL'
+    endif
     !
     ! Calculate Julian day assuming the given month is correct
     !
-         month1 = (month - 14)/12
-         jdn = day - 32075 + 1461*(year + 4800 + month1)/4 &
-                           + 367*(month - 2 - month1*12)/12 &
-                           - 3*((year + 4900 + month1)/100)/4
+    month1 = (lmonth - 14)/12
+    julday = lday - 32075 + 1461*(lyear + 4800 + month1)/4 + 367*(lmonth - 2 - month1*12) &
+           & /12 - 3*((lyear + 4900 + month1)/100)/4
     !
     ! Calculate backwards to test if the assumption is correct
     !
-         call jul2ymd(jdn, y, m, d)
+    call jul2ymd(julday, y, m, d)
     !
-         ! Test if calculation is correct
+    ! Test if calculating is correct
     !
-         if ((y /= year) .or. (m /= month) .or. (d /= day)) then
-            jdn = 0
+    if ((y /= lyear) .or. (m /= lmonth) .or. (d /= lday)) then
+       julday = 0
     endif
-      end function GregorianYearMonthDayToJulianDateNumber
+end function ymd2jul
 
-      ! =======================================================================
 
-      !> Calculates the Gregorian calender date from a Julian Date Number.
-      subroutine JulianDateNumberToGregorianDate(jdn, yyyymmdd)
-         integer, intent(in) :: jdn       !< Julian Date Number
-         integer, intent(out) :: yyyymmdd !< calculated Gregorian calender date
+
+! ------------------------------------------------------------------------------
+!   Subroutine: jul2ymd
+!   Purpose:    Convert a Julian date number in a year, month, day triplet
+!   Arguments:
+!   julday      Julian date
+!   year        Year or YYYYMMDD integer
+!   month       Month number
+!   day         Day
+! ------------------------------------------------------------------------------
+subroutine jul2ymd(julday, year, month, day)
+    implicit none
 !
-         integer :: year  !< helper variable
-         integer :: month !< helper variable
-         integer :: day   !< helper variable
+! Global variables
 !
-         call JulianDateNumberToGregorianYearMonthDay(jdn, year, month, day)
-         yyyymmdd = year*10000 + month*100 + day
-      end subroutine JulianDateNumberToGregorianDate
-      
-      ! =======================================================================
-      
-      !> Calculates the Gregorian year, month, day triplet from a Julian Date Number.
-      subroutine JulianDateNumberToGregorianYearMonthDay(jdn, year, month, day)
-         integer, intent(in)  :: jdn   !< Julian Date Number
-         integer, intent(out) :: year  !< calculated Gregorian year
-         integer, intent(out) :: month !< calculated Gregorian month
-         integer, intent(out) :: day   !< calculated Gregorian day
+    integer , intent(in)             :: julday !  Julian day number
+    integer , intent(out)            :: year   !  Year
+    integer , intent(out) , optional :: month  !  Month
+    integer , intent(out) , optional :: day    !  Day
 !
-         integer :: j !< helper variable
-         integer :: l !< helper variable
-         integer :: m !< helper variable
-         integer :: n !< helper variable
+! Local variables
 !
-         l      = jdn + 68569
+    integer               :: j      ! Help variable
+    integer               :: l      ! Help variable
+    integer               :: m      ! Help variable
+    integer               :: n      ! Help variable
+    integer               :: lday   ! Local day
+    integer               :: lmonth ! Local month number
+    integer               :: lyear  ! Local year
+!
+!! executable statements -------------------------------------------------------
+!
+    l      = julday + 68569
     n      = 4 * l / 146097
     l      = l - (146097*n + 3)/4
     j      = 4000 * (l + 1) / 1461001

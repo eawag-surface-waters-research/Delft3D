@@ -56,10 +56,9 @@ libDeltaresCommon_la_SOURCES = \
 	util.f90 \
 	wavenr.f90
 
-# For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
-# So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
-dist-hook:
-	sed -i -e 's/^REGENERATE_VN=yes/REGENERATE_VN=no/' $(distdir)/Makefile.am
+
+EXTRA_DIST = \
+	deltares_common_version.F90.svn
 
 #-------------------------------------------------------------------------------
 #Libraries
@@ -68,25 +67,12 @@ libDeltaresCommon_la_LIBADD=\
 	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libDeltaresCommonC.la \
 	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/libRDToken.la
 
+
 BUILT_SOURCES = ./always \
 	./deltares_common_version.F90
 
-REGENERATE_VN=yes
-
-# (the space before ifeq is intentional to fool Automake, and leave this conditional to Make)
- ifeq ($(REGENERATE_VN),yes)
-# We're in a working copy build dir, so always update the *version.F90
 ./always:
 	rm -rf ./deltares_common_version.F90
 
-
-# read up on secondary expansion before using $@ in dependency
-./deltares_common_version.F90: deltares_common_version.F90.svn
-	$(top_builddir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(builddir) ../include/version_number.ini $(top_builddir)
- else
-# Do not force regeneration of *version.F90, because it is already shipped in a source distribution archive.
-./always:
-
-./deltares_common_version.F90:
-
- endif
+deltares_common_version.F90: 
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
