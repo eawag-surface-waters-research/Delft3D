@@ -469,6 +469,7 @@ rem ================
 
     call :copyFile engines_gpl\wave\bin\release\wave.exe            !dest_bin!
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini       !dest_default!
+    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"      !dest_bin!
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll" !dest_bin!
     call :copyFile "third_party_open\swan\bin\win32\*.*"            !dest_swan_bin!
     call :copyFile third_party_open\swan\scripts\swan_install.bat " !dest_swan_scripts!\swan.bat"

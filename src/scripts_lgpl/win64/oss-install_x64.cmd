@@ -434,9 +434,10 @@ rem ================
     call :makeDir !dest_swan_scripts!
 
     call :copyFile engines_gpl\wave\bin\x64\release\wave.exe            !dest_bin!
-    call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini       !dest_default!
-    rem call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll" !dest_bin!
-    call :copyFile "third_party_open\swan\bin\w64_i11\*.*"            !dest_swan_bin!
+    call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini           !dest_default!
+    rem call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"       !dest_bin!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"            !dest_bin!
+    call :copyFile "third_party_open\swan\bin\w64_i11\*.*"              !dest_swan_bin!
     call :copyFile third_party_open\swan\scripts\swan_install_x64.bat " !dest_swan_scripts!\swan.bat"
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.

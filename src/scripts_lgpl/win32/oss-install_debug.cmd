@@ -200,7 +200,13 @@ rem === INSTALL_WAVE
 rem ================
 :wave
     echo "installing wave . . ."
-    echo "... nothing to be done"
+
+    set dest_bin="engines_gpl\wave\bin\Debug"
+
+    if not exist !dest_bin!     mkdir !dest_bin!
+
+    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
 goto :endproc
 
 
