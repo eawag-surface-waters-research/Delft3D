@@ -89,7 +89,7 @@ module MessageHandling
    !> The message buffer allows you to write any number of variables in any
    !! order to a character string. Call msg_flush or err_flush to output
    !! the actual message or error.
-   character(len=BUFLEN), public :: msg_mh
+   character(len=BUFLEN), public :: msgbuf
    character(len=MAXSTRINGLEN), public :: errmsg
 
    public SetMessage
@@ -733,16 +733,16 @@ subroutine aerr(w1, iostat, isize, errmsg) ! Allocation error          ,continue
      rmemtot = rmemtot + isize
      i3 = rmemtot*1e-6
      if (abs(isize) > 1000) then
-        write (msg_mh,*) i3, isize*1e-6, ' ', w1
+        write (msgbuf,*) i3, isize*1e-6, ' ', w1
         call dbg_flush()
      endif
 !$OMP END CRITICAL
   else
 
      if (present(errmsg)) then
-        write (msg_mh,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize, '=>', trim(errmsg(1:500))
+        write (msgbuf,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize, '=>', trim(errmsg(1:500))
      else
-        write (msg_mh,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize
+        write (msgbuf,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize
      end if
      call err_flush()
      !call err ('Allocation Error  :',w1)
@@ -755,24 +755,24 @@ end subroutine aerr
 !> Output the current message buffer as a 'debug' message.
 subroutine dbg_flush()
 ! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
-    call mess(LEVEL_DEBUG,  msg_mh)
+    call mess(LEVEL_DEBUG,  msgbuf)
 end subroutine dbg_flush
 
 !!> Output the current message buffer as an 'info' message.
 subroutine msg_flush()
 ! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
-    call mess(LEVEL_INFO,  msg_mh)
+    call mess(LEVEL_INFO,  msgbuf)
 end subroutine msg_flush
 
 !> Output the current message buffer as a 'warning' message.
 subroutine warn_flush()
 ! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
-    call mess(LEVEL_WARN,  msg_mh)
+    call mess(LEVEL_WARN,  msgbuf)
 end subroutine warn_flush
 
 !> Output the current message buffer as an 'error' message.
 subroutine err_flush()
-    call mess(LEVEL_ERROR, msg_mh)
+    call mess(LEVEL_ERROR, msgbuf)
 
 end subroutine err_flush
 
