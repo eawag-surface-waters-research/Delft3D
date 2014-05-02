@@ -511,8 +511,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Extinc_VLG","POC1      ",  11,"Y","x",1
 "Extinc_VLG","POC2      ",  12,"Y","x",1
 "Extinc_VLG","SW_Uitz   ",  13,"Y"," ",1
-"Extinc_VLG","DOC       ",  14,"Y"," ",1
-"Extinc_VLG","ExtVlDOC  ",  15,"Y"," ",1
+"Extinc_VLG","DOC       ",  14,"Y","x",1
+"Extinc_VLG","ExtVlDOC  ",  15,"Y","x",1
 "Extinc_VLG","UitZDEPT1 ",  16,"Y"," ",1
 "Extinc_VLG","UitZDEPT2 ",  17,"Y"," ",1
 "Extinc_VLG","UitZCORCH ",  18,"Y"," ",1
@@ -544,8 +544,8 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Extinc_UVG","POC1      ",  11,"Y","x",1
 "Extinc_UVG","POC2      ",  12,"Y","x",1
 "Extinc_UVG","SW_Uitz   ",  13,"Y"," ",1
-"Extinc_UVG","DOC       ",  14,"Y"," ",1
-"Extinc_UVG","ExtUVDOC  ",  15,"Y"," ",1
+"Extinc_UVG","DOC       ",  14,"Y","x",1
+"Extinc_UVG","ExtUVDOC  ",  15,"Y","x",1
 "Extinc_UVG","UitZDEPT1 ",  16,"Y"," ",1
 "Extinc_UVG","UitZDEPT2 ",  17,"Y"," ",1
 "Extinc_UVG","UitZCORCH ",  18,"Y"," ",1
