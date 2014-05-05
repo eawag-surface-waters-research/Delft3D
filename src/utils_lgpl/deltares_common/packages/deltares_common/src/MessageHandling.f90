@@ -42,7 +42,7 @@ module MHCallBack
       subroutine c_callbackiface(level, msg)
         use iso_c_binding
         use iso_c_utils
-        integer(c_int), intent(in) :: level !< severity
+        integer(c_int), value, intent(in) :: level !< severity
         character(c_char), intent(in) :: msg(MAXSTRINGLEN) !< c message null terminated
       end subroutine c_callbackiface
    end interface
@@ -89,7 +89,7 @@ module MessageHandling
    !> The message buffer allows you to write any number of variables in any
    !! order to a character string. Call msg_flush or err_flush to output
    !! the actual message or error.
-   character(len=BUFLEN), public :: msgbuf
+   character(len=MAXSTRINGLEN), public :: msgbuf
    character(len=MAXSTRINGLEN), public :: errmsg
 
    public SetMessage
@@ -102,7 +102,7 @@ module MessageHandling
    public resetMessageCount_MH
    public getMaxErrorLevel
    public resetMaxerrorLevel
-   public set_mh_c_callback
+   public set_logger
    public set_mh_callback
    public aerr
    public msg_flush
@@ -180,7 +180,7 @@ private
    logical, save                  :: alreadyInCallback=.false.                   !< flag for preventing recursive calls to callback subroutine
    !> Callback routine invoked upon any mess/err (i.e. SetMessage)
    procedure(mh_callbackiface), pointer :: mh_callback => null()
-   procedure(c_callbackiface), pointer :: f_callback => null()
+   procedure(c_callbackiface), pointer :: c_logger => null()
 
 contains
 
@@ -223,17 +223,19 @@ subroutine set_mh_callback(callback)
 end subroutine set_mh_callback
 
 
-subroutine set_mh_c_callback(c_callback) bind(C, name="set_mh_c_callback")
-  !DEC$ ATTRIBUTES DLLEXPORT::set_mh_c_callback
+
+subroutine set_logger(c_callback) bind(C, name="set_logger")
+  !DEC$ ATTRIBUTES DLLEXPORT::set_logger
 
   use iso_c_binding
   implicit none
-  type(c_funptr) :: c_callback
+  type(c_funptr), value :: c_callback
 
   ! Set a callback that will be cauled with new messages
 
-  call c_f_procpointer(c_callback, f_callback)
-end subroutine set_mh_c_callback
+  call c_f_procpointer(c_callback, c_logger)
+end subroutine set_logger
+
 
 
 !> The main message routine. Puts the message string to all output
@@ -295,10 +297,10 @@ recursive subroutine SetMessage(level, string)
       alreadyInCallback = .false.
    end if
 
-   if (associated(f_callback).and. .not. alreadyInCallback) then
+   if (associated(c_logger).and. .not. alreadyInCallback) then
       alreadyInCallback = .true.
       c_string = string_to_char_array(trim(string))
-      call f_callback(level, c_string)
+      call c_logger(level, c_string)
       alreadyInCallback = .false.
    end if
 
