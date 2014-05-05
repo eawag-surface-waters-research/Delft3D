@@ -172,28 +172,47 @@ private
    integer               ,                         private :: ibuffertail  = 0 !< Index of newest message in message buffer.
 
    integer,                                    private :: maxErrorLevel = 0
-   integer,                                    public  :: thresholdLvl = 0
+   !> The threshold levels: do not emit messages that have a level lower than treshold.
+   !! Note: each of the three output channels can be configured with its own treshold level.
+   integer,                                    public  :: thresholdLvl_stdout = 0 !< Threshold level specific for stdout channel.
+   integer,                                    public  :: thresholdLvl_log    = 0 !< Threshold level specific for the logging queue channel.
+   integer,                                    public  :: thresholdLvl_file   = 0 !< Threshold level specific for the file output channel.
 
-   integer, save                  :: lunMess          = 0
-   logical, save                  :: writeMessage2Screen = .false.
-   logical, save                  :: useLogging = .true.
+   !> For the above threshold levels to become active, each channel must be separately enabled:
+   integer, save                  :: lunMess             = 0       !< The file pointer to be used for the file output channel.
+   logical, save                  :: writeMessage2Screen = .false. !< Whether or not to use the stdout channel.
+   logical, save                  :: useLogging          = .true.  !< Whether or not to use the logging queue channel.
    logical, save                  :: alreadyInCallback=.false.                   !< flag for preventing recursive calls to callback subroutine
+
    !> Callback routine invoked upon any mess/err (i.e. SetMessage)
    procedure(mh_callbackiface), pointer :: mh_callback => null()
    procedure(c_callbackiface), pointer :: c_logger => null()
 
 contains
 
-!> Sets up the output of messages. All three formats are optional
-!! and can be used in any combination.
-subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel, reset_counters)
-   logical, optional, intent(in)       :: write2screen !< Print messages to stdout.
-   logical, optional, intent(in)       :: useLog       !< Store messages in buffer.
-   integer, optional, intent(in)       :: lunMessages  !< File pointer whereto messages can be written.
-   integer, optional, intent(in)       :: thresholdLevel  !< Messages with level lower than the thresholdlevel
-                                                          !< will be discarded.
-   logical, optional, intent(in)       :: reset_counters  !< If present and True then reset message counters.
-                                                          !< SetMessageHandling is called more than once.
+!> Sets up the output channels and filtering of messages.
+!!
+!! Three output channels are available:
+!! * standard out ("screen output")
+!! * a logging queue which can be inquired from your application.
+!! * a plain text file
+!! All three output channels are optional and can be used in any combination.
+!!
+!! Messages have a severity level, and each output channel can be filtered with
+!! its own threshold level. Note that the threshold level is only active if the
+!! output channel has been enabled. See the respective input arguments for enabling.
+!!
+subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel, thresholdLevel_stdout, thresholdLevel_log, thresholdLevel_file, reset_counters)
+   logical, optional, intent(in)       :: write2screen           !< Enable stdout: print messages to stdout.
+   logical, optional, intent(in)       :: useLog                 !< Enable logging queue: store messages in buffer.
+   integer, optional, intent(in)       :: lunMessages            !< Enable file output: nonzero file pointer whereto messages can be written.
+   integer, optional, intent(in)       :: thresholdLevel         !< Messages with level lower than the thresholdlevel
+                                                                 !< will be discarded. Used as default for all three output channels.
+   integer, optional, intent(in)       :: thresholdLevel_stdout  !< Threshold level specific for stdout channel.
+   integer, optional, intent(in)       :: thresholdLevel_log     !< Threshold level specific for the logging queue channel.
+   integer, optional, intent(in)       :: thresholdLevel_file    !< Threshold level specific for the file output channel.
+   logical, optional, intent(in)       :: reset_counters         !< If present and True then reset message counters.
+                                                                 !< SetMessageHandling is called more than once.
 
    procedure(mh_callbackiface), optional :: callback
 
@@ -203,7 +222,24 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    if (present(callback) ) then
       call set_mh_callback(callback)
    endif
-   if (present(thresholdLevel) )  thresholdLvl     = thresholdLevel
+
+   ! For backwards compatibility: if non-specific thresholdLevel is passed, use it for all three channels.
+   if (present(thresholdLevel) )  then
+      thresholdLvl_stdout = thresholdLevel
+      thresholdLvl_log    = thresholdLevel
+      thresholdLvl_file   = thresholdLevel
+   end if
+
+   ! .. but override the threshold level per channel, when given.
+   if (present(thresholdLevel_stdout) )  then
+      thresholdLvl_stdout = thresholdLevel_stdout
+   end if
+   if (present(thresholdLevel_log) )  then
+      thresholdLvl_log = thresholdLevel_log
+   end if
+   if (present(thresholdLevel_file) )  then
+      thresholdLvl_file = thresholdLevel_file
+   end if
 
    if (present(reset_counters)) then
      if (reset_counters) then
@@ -254,19 +290,19 @@ recursive subroutine SetMessage(level, string)
 
    levelact = max(1,min(max_level, level))
 
-   if (level >= thresholdLvl) then
-
+   if (level >= 0) then
       if (writeMessage2Screen) then
-         write (*, '(a)') level_prefix(levelact)//trim(string)
+         if (level >= thresholdLvl_stdout) then
+            write (*, '(a)') level_prefix(levelact)//trim(string)
+         end if
       endif
 
       if (lunMess > 0) then
-
-         write (lunMess, '(a)') level_prefix(levelact)//trim(string)
-
-         ! Only count for Log-File, otherwise confusing.....
-         mess_level_count(levelact) = mess_level_count(levelact) + 1
-
+         if (level >= thresholdLvl_file) then
+            write (lunMess, '(a)') level_prefix(levelact)//trim(string)
+            ! Only count for Log-File, otherwise confusing.....
+            mess_level_count(levelact) = mess_level_count(levelact) + 1
+         end if
       end if
 
       if (level > maxErrorLevel) then
@@ -274,9 +310,10 @@ recursive subroutine SetMessage(level, string)
       endif
 
       if (useLogging) then
-         call pushMessage(levelact, string)
+         if (level >= thresholdLvl_log) then
+            call pushMessage(levelact, string)
+         endif
       endif
-
    elseif (level < 0) then
 
       ! If negative level just put string to all output channels without prefix and counting
