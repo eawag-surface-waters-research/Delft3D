@@ -47,7 +47,7 @@ C
 
       PARAMETER (MT = 30)
       PARAMETER (MS = 15)
-      PARAMETER (MN =  6)
+      PARAMETER (MN =  8)
       PARAMETER (MG =  5)
       PARAMETER (IA =  MN + 2 + 1 + 2 * MS)
       PARAMETER (MX =  IA + MT + 1)

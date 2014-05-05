@@ -33,7 +33,10 @@ C    Called by: BLOOMC
 C    Calls    : NATMOR
 
       SUBROUTINE BLMORT (BIOMAS, TEMP  , FAUT  , FDET  , FLAUTN, FLDETN,
-     J                   FLOOXN, FLMORA, DEAT4 , TSTEPI)
+     J                   FLOOXN, FLMORA, DEAT4 , TSTEPI, LMIXO , LFIXN ,
+     J                   LCARB , NUTCON, FLXCON)
+
+      IMPLICIT NONE
 
 C     Arguments
 C
@@ -49,6 +52,14 @@ C     FLOOXN  R*4   4        O    OOX production fluxes (g/m3/d)
 C     FLMORA  R*4   NUSPEC   O    Algae mortality fluxes (gC/m3/d)
 C     DEAT4   R*4   1        O    ??$Check necessity to transfer$
 C     TSTEPI  R*4   1        I    Time step (d)
+C     LMIXO   L     1        O    Flag mixotrophy
+C     LFIXN   L     1        O    Flag N-fixation
+C     LCARB   L     1        I    Flag carbon limitation
+c     NUTCON  I*4   8        O    Nutrients involved in active nutrient constraints
+c     FLXCON  I*4   8        O    Uptake fluxes involved in active nutrient constraints
+
+      LOGICAL      LMIXO,LFIXN,LCARB
+      INTEGER      NUTCON(*), FLXCON(*)
 
       REAL            BIOMAS(*), TEMP, FAUT(*), FDET(*), FLAUTN(*),
      J                FLDETN(*), FLOOXN(*), FLMORA(*), DEAT4, TSTEPI
@@ -82,8 +93,8 @@ C     CMORTO  R*4   1             OOx production (gC/m3/d)
 C     J       I     1
 
       REAL            CMORT , CMORTA, CMORTD, CMORTO, CPHYT
-      REAL*8          TEMP8 , ZOODD , DEAT
-      INTEGER         J
+      REAL*8          FOOX  , TEMP8 , ZOODD , DEAT
+      INTEGER         I, J, K
 C
 C  Zero fluxes
 C
@@ -113,11 +124,8 @@ C  of carbon.
 C
 C  Loop over algae species
 
-      DO 220 J=1,NUSPEC
-C$ For the sake of testing we allow mortality with small negative
-C$ biomasses. This should be corrected eventually
+      DO J=1,NUSPEC
          CPHYT = MAX ( BIOMAS(J) , 0.0 )
-c        CPHYT =       BIOMAS(J)
 
 C  Compute total mortality for this species and store the flux
 c  JvG 16-8-2010 avoid undershoots leading to negative biomass
@@ -133,48 +141,21 @@ C
          CMORTO = CMORT * FOOX
 C
 C Detritus production for C, N, P, Si (for C including part autolysis)
-C
-         FLDETN(1) = FLDETN(1) + CMORTD + CMORTA *FDET(J)/(FDET(J)+FOOX)
-         FLDETN(2) = FLDETN(2) + CMORTD * SNGL(CTODRY(J)*AA(1,J))
-         FLDETN(3) = FLDETN(3) + CMORTD * SNGL(CTODRY(J)*AA(2,J))
-         FLDETN(4) = FLDETN(4) + CMORTD * SNGL(CTODRY(J)*AA(3,J))
-C        DETN,DETP or FIXN
-         IF (NUNUCO.GE.4) FLDETN(2) = FLDETN(2) +
-     1                                CMORTD * SNGL(CTODRY(J)*AA(4,J))
-         IF (NUNUCO.GE.5) FLDETN(3) = FLDETN(3) +
-     1                                CMORTD * SNGL(CTODRY(J)*AA(5,J))
-         IF (NUNUCO.EQ.6) FLDETN(2) = FLDETN(2) +
-     1                                CMORTD * SNGL(CTODRY(J)*AA(6,J))
-C
-C Autolysis for C, N, P, Si (0 for carbon)
-C
-         FLAUTN(1) = FLAUTN(1) + 0.0
-         FLAUTN(2) = FLAUTN(2) + CMORTA * SNGL(CTODRY(J)*AA(1,J))
-         FLAUTN(3) = FLAUTN(3) + CMORTA * SNGL(CTODRY(J)*AA(2,J))
-         FLAUTN(4) = FLAUTN(4) + CMORTA * SNGL(CTODRY(J)*AA(3,J))
-C        DETN,DETP or FIXN
-         IF (NUNUCO.GE.4) FLAUTN(2) = FLAUTN(2) + CMORTA *
-     1                                SNGL(CTODRY(J)*AA(4,J))
-         IF (NUNUCO.GE.5) FLAUTN(3) = FLAUTN(3) + CMORTA *
-     1                                SNGL(CTODRY(J)*AA(5,J))
-         IF (NUNUCO.EQ.6) FLAUTN(2) = FLAUTN(2) + CMORTA *
-     1                                SNGL(CTODRY(J)*AA(6,J))
-C
+C Autolysis for C, N, P, Si (NOT for carbon)
 C OOx production for C, N, P, Si (for C including part autolysis)
 C
+         FLDETN(1) = FLDETN(1) + CMORTD + CMORTA *FDET(J)/(FDET(J)+FOOX)
          FLOOXN(1) = FLOOXN(1) + CMORTO + CMORTA * FOOX / (FDET(J)+FOOX)
-         FLOOXN(2) = FLOOXN(2) + CMORTO * SNGL(CTODRY(J)*AA(1,J))
-         FLOOXN(3) = FLOOXN(3) + CMORTO * SNGL(CTODRY(J)*AA(2,J))
-         FLOOXN(4) = FLOOXN(4) + CMORTO * SNGL(CTODRY(J)*AA(3,J))
-C        DETN,DETP or FIXN
-         IF (NUNUCO.GE.4) FLOOXN(2) = FLOOXN(2) + CMORTO *
-     1                                SNGL(CTODRY(J)*AA(4,J))
-         IF (NUNUCO.GE.5) FLOOXN(3) = FLOOXN(3) + CMORTO *
-     1                                SNGL(CTODRY(J)*AA(5,J))
-         IF (NUNUCO.EQ.6) FLOOXN(2) = FLOOXN(2) + CMORTO *
-     1                                SNGL(CTODRY(J)*AA(6,J))
+         DO K=1,NUNUCO
+            I = NUTCON(K)
+            IF (I.LE.3) THEN
+            FLDETN(I+1) = FLDETN(I+1) + CMORTD * SNGL(CTODRY(J)*AA(K,J))
+            FLAUTN(I+1) = FLAUTN(I+1) + CMORTA * SNGL(CTODRY(J)*AA(K,J))
+            FLOOXN(I+1) = FLOOXN(I+1) + CMORTO * SNGL(CTODRY(J)*AA(K,J))
+            ENDIF
+         ENDDO
 
-  220 CONTINUE
+      ENDDO
 
       RETURN
       END
