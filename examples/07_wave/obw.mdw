@@ -63,6 +63,8 @@
    WriteCOM             = false                        
    COMWriteInterval     =  0.000000000000000000e+000         
    FlowGridForCOM       =                              
+   locationfile         = points.xy
+   WriteTable           = true
 [Domain]
    Grid                 = coastw.grd                   
    FlowBedLevel         = 0                            
