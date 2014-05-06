@@ -310,17 +310,17 @@ C
       EXTLIM = 0D0
       DEAT   = DBLE(DEAT4)
 
-      write (1961,*   ) 'BLOOM   ',NREP
-      write (1961,1001) 'XINIT   ',(XINIT(J), J=1,NUECOG)
-      write (1961,1001) 'CONCEN  ',(CONCEN(J), J=1,NUNUCO)
-      write (1961,1001) 'X       ',(X(J), J=1,NUSPEC)
+C      write (1961,*   ) 'BLOOM   ',NREP
+C      write (1961,1001) 'XINIT   ',(XINIT(J), J=1,NUECOG)
+C      write (1961,1001) 'CONCEN  ',(CONCEN(J), J=1,NUNUCO)
+C      write (1961,1001) 'X       ',(X(J), J=1,NUSPEC)
 
       CALL DYNRUN (EXTOT8, EXBAC8, TEMP8 , RAD8  , DEPTH8, DAYL8 ,
      J             CHLOR8, ID    , ISEG  , LCOUPL, NSET  , EXTLIM,
      J             DEAT  , TOTCHL, TOTDRY, TOTCAR)
 
-      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)
-      write (1961,1001) 'XDEFB   ',(XDEF(NUROWS+J), J=1,NUSPEC)
+C      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)
+C      write (1961,1001) 'XDEFB   ',(XDEF(NUROWS+J), J=1,NUSPEC)
 
 C
 C Store total carbon and chlorophyll concentration
@@ -431,9 +431,9 @@ C
           RATMOR(J) = RATMOR(J) / SNGL(XINIT(J)) / TSTEPI
       ENDDO
 
-      write (1961,1001) 'FLMORA  ',(FLMORA(J), J=1,NUSPEC)
-      write (1961,1001) 'FLDETN  ',(FLDETN(J), J=1,4)
-      write (1961,1001) 'FLUPTN  ',(FLUPTN(J), J=1,9)
+C      write (1961,1001) 'FLMORA  ',(FLMORA(J), J=1,NUSPEC)
+C      write (1961,1001) 'FLDETN  ',(FLDETN(J), J=1,4)
+C      write (1961,1001) 'FLUPTN  ',(FLUPTN(J), J=1,9)
 C
 C Exit
 C
