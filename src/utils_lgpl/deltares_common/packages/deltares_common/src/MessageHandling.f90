@@ -104,7 +104,6 @@ module MessageHandling
    public resetMaxerrorLevel
    public set_logger
    public set_mh_callback
-   public aerr
    public msg_flush
    public dbg_flush
    public warn_flush
@@ -759,39 +758,6 @@ subroutine error1char1int1double(w1, i2, d3)
     call mess(LEVEL_ERROR, w1, i2, d3)
 end subroutine error1char1int1double
 
-subroutine aerr(w1, iostat, isize, errmsg) ! Allocation error          ,continue if iostat = 0   )
-  character(*) :: w1
-  integer      :: iostat
-  integer      :: isize
-  integer      :: i3
-  character(len=*), optional :: errmsg
-  double precision :: rmemtot
-  data rmemtot/0/ ! AvD: causes access problems with multiple OpenMP threads
-
-  if (iostat==0) then
-!$OMP CRITICAL
-     rmemtot = rmemtot + isize
-     i3 = rmemtot*1e-6
-     if (abs(isize) > 1000) then
-        write (msgbuf,*) i3, isize*1e-6, ' ', w1
-        call dbg_flush()
-     endif
-!$OMP END CRITICAL
-  else
-
-     if (present(errmsg)) then
-        write (msgbuf,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize, '=>', trim(errmsg(1:500))
-     else
-        write (msgbuf,*) ' Allocation Error: ', w1, ', Allocate status = ', iostat, ', Integer parameter = ', isize
-     end if
-     call err_flush()
-     !call err ('Allocation Error  :',w1)
-     !call err ('Allocate status   =',i1)
-     !call err ('Integer parameter =',i2)
-  endif
-
-end subroutine aerr
-
 !> Output the current message buffer as a 'debug' message.
 subroutine dbg_flush()
 ! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
@@ -813,11 +779,8 @@ end subroutine warn_flush
 !> Output the current message buffer as an 'error' message.
 subroutine err_flush()
     call mess(LEVEL_ERROR, msgbuf)
-
 end subroutine err_flush
 
-!subroutine fewsdiag_init()
-!end subroutine fewsdiag_init
 !
 !
 !!--------------------------------------------------------------------------------------------------

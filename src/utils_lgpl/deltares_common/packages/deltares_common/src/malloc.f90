@@ -31,7 +31,7 @@ module m_alloc
 implicit none
 private 
 
-public realloc, reallocP, reallocCharacter
+public realloc, reallocP, reallocCharacter, aerr
 
 ! TODO: Handle nondefault kinds properly? [AvD]
 
@@ -145,6 +145,41 @@ interface reallocP
    module procedure reallocPLogical4
 end interface
 contains
+
+
+!> Emit an allocation error message *if* an allocation error has occurred.
+!! The error message goes through the MessageHandling output channels, as configured by the calling application.
+subroutine aerr(name, iostat, isize, errmsg)
+   use MessageHandling, only: msgbuf, dbg_flush, err_flush
+
+   character(len=*), intent(in)  :: name   !< Name of the allocated array(s) or other description.
+   integer,          intent(in)  :: iostat !< IO status as returned by ALLOCATE(..stat=iostat) statement. When zero, do nothing.
+   integer,          intent(in)  :: isize  !< Size in bytes of original ALLOCATE statement.
+   character(len=*), intent(in), optional :: errmsg !< Optional error message as returned by ALLOCATE(..errmsg=errormsg) statement
+
+   double precision, save :: rmemtot = 0d0
+
+   integer      :: i3
+
+   if (iostat==0) then
+!$OMP CRITICAL
+      rmemtot = rmemtot + isize
+      i3 = rmemtot*1e-6
+      if (abs(isize) > 1000) then
+         write (msgbuf,*) i3, isize*1e-6, ' ', trim(name)
+         call dbg_flush()
+      endif
+!$OMP END CRITICAL
+   else
+      if (present(errmsg)) then
+         write (msgbuf,*) ' Allocation Error: ', trim(name), ', Allocate status = ', iostat, ', Integer parameter = ', isize, '=>', trim(errmsg)
+      else
+         write (msgbuf,*) ' Allocation Error: ', trim(name), ', Allocate status = ', iostat, ', Integer parameter = ', isize
+      end if
+      call err_flush()
+endif
+
+end subroutine aerr
 
 subroutine reallocReal2x(arr, u1, u2, l1, l2, stat, keepExisting)
    real, allocatable, intent(inout)             :: arr(:, :)
