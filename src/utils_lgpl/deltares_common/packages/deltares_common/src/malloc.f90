@@ -151,6 +151,7 @@ contains
 !! The error message goes through the MessageHandling output channels, as configured by the calling application.
 subroutine aerr(name, iostat, isize, errmsg)
    use MessageHandling, only: msgbuf, dbg_flush, err_flush
+   use precision
 
    character(len=*), intent(in)  :: name   !< Name of the allocated array(s) or other description.
    integer,          intent(in)  :: iostat !< IO status as returned by ALLOCATE(..stat=iostat) statement. When zero, do nothing.
