@@ -291,8 +291,10 @@ recursive subroutine SetMessage(level, string)
    levelact = max(1,min(max_level, level))
 
    if (level >= 0) then
-      if (writeMessage2Screen) then
-         if (level >= thresholdLvl_stdout) then
+      ! Always *count* messages, independent from any treshold level.
+      mess_level_count(levelact) = mess_level_count(levelact) + 1      if (writeMessage2Screen) then
+
+      if (level >= thresholdLvl_stdout) then
             write (*, '(a)') level_prefix(levelact)//trim(string)
          end if
       endif
@@ -300,8 +302,6 @@ recursive subroutine SetMessage(level, string)
       if (lunMess > 0) then
          if (level >= thresholdLvl_file) then
             write (lunMess, '(a)') level_prefix(levelact)//trim(string)
-            ! Only count for Log-File, otherwise confusing.....
-            mess_level_count(levelact) = mess_level_count(levelact) + 1
          end if
       end if
 
