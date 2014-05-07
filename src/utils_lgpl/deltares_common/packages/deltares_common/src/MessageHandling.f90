@@ -292,9 +292,10 @@ recursive subroutine SetMessage(level, string)
 
    if (level >= 0) then
       ! Always *count* messages, independent from any treshold level.
-      mess_level_count(levelact) = mess_level_count(levelact) + 1      if (writeMessage2Screen) then
+      mess_level_count(levelact) = mess_level_count(levelact) + 1
 
       if (level >= thresholdLvl_stdout) then
+         if (writeMessage2Screen) then
             write (*, '(a)') level_prefix(levelact)//trim(string)
          end if
       endif
