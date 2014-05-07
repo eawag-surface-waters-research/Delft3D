@@ -154,7 +154,7 @@ subroutine aerr(name, iostat, isize, errmsg)
 
    character(len=*), intent(in)  :: name   !< Name of the allocated array(s) or other description.
    integer,          intent(in)  :: iostat !< IO status as returned by ALLOCATE(..stat=iostat) statement. When zero, do nothing.
-   integer,          intent(in)  :: isize  !< Size in bytes of original ALLOCATE statement.
+   integer,          intent(in)  :: isize  !< Size (nr of bytes divided by 8) of original ALLOCATE statement (i.e., for double precision arrays simply the array length).
    character(len=*), intent(in), optional :: errmsg !< Optional error message as returned by ALLOCATE(..errmsg=errormsg) statement
 
    double precision, save :: rmemtot = 0d0
@@ -164,7 +164,7 @@ subroutine aerr(name, iostat, isize, errmsg)
    if (iostat==0) then
 !$OMP CRITICAL
       rmemtot = rmemtot + isize
-      i3 = rmemtot*1e-6
+      i3 = 8*rmemtot*1e-6   ! convert size (in double/8 byte units) to megabytes
       if (abs(isize) > 1000) then
          write (msgbuf,*) i3, isize*1e-6, ' ', trim(name)
          call dbg_flush()
