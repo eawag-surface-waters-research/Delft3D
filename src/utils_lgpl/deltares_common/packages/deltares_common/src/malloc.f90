@@ -157,7 +157,7 @@ subroutine aerr(name, iostat, isize, errmsg)
    integer,          intent(in)  :: isize  !< Size (nr of bytes divided by 8) of original ALLOCATE statement (i.e., for double precision arrays simply the array length).
    character(len=*), intent(in), optional :: errmsg !< Optional error message as returned by ALLOCATE(..errmsg=errormsg) statement
 
-   double precision, save :: rmemtot = 0d0
+   real(kind=hp), save :: rmemtot = 0d0
 
    integer      :: i3
 
