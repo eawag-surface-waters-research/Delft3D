@@ -179,7 +179,6 @@ subroutine gdp_dealloc(gdp)
     endif
     deallocate (gdp%gdheat    , STAT = istat)
     deallocate (gdp%gdhtur2d  , STAT = istat)
-    deallocate (gdp%gdhwid    , STAT = istat)
     deallocate (gdp%gdinout   , STAT = istat)
     deallocate (gdp%gdinttim  , STAT = istat)
     deallocate (gdp%gdiwearr  , STAT = istat)

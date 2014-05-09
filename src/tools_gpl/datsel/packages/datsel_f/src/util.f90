@@ -69,50 +69,11 @@ subroutine util_getenv (name, value)
 end
 
 
-subroutine gethw (error, pathp, pathd, alone, fpathp, fpathd)
-    logical,        intent(out)     :: error
-    character(*),   intent(out)     :: pathp
-    character(*),   intent(out)     :: pathd
-    logical,        intent(in)      :: alone
-    character(*),   intent(out)     :: fpathp
-    character(*),   intent(out)     :: fpathd
-
-    !   Routine to determine the location of D3D program and data files based
-    !   on the values of the D3D_HOME, MOR_PATH and ARCH environment variables.
-    !   The actual work is done by a C routine because it's very string oriented.
-
-    integer  :: aloneint
-
-    if (alone) then
-        aloneint = 1
-    else
-        aloneint = 0
-    endif
-
-    call cutil_gethw ( &
-            pathp, len (pathp), &
-            pathd, len (pathd), &
-            aloneint, &
-            fpathp, len (fpathp), &
-            fpathd, len (fpathd), &
-            iresult &
-            )
-
-    if (iresult == 0) then
-        error = .false.
-    else
-        error = .true.
-    endif
-end
-
-
 subroutine getmp (error, pathd)
     logical,        intent(out)    :: error
     character(*),   intent(out)    :: pathd
 
-    ! Routine to determine the location of D3D program and data files based
-    ! on the values of the D3D_HOME, MOR_PATH and ARCH environment variables.
-    ! The actual work is done by a C routine because it's very string oriented.
+    ! Routine to determine the location of the "default" directory.
 
     call cutil_getmp (pathd, len (pathd), result)
 

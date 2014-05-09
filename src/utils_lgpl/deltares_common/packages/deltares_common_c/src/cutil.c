@@ -237,15 +237,13 @@ CUTIL_SYSTEM (
 
 
 /*------------------------------------------------------------------------------
-/*  Routines to determine the location of D3D program and data files based */
-/*  on the values of the D3D_HOME and ARCH environment variables. */
+/*  Routines to locate the "default" directory */
 
 
 #define SUCCESS     0
 #define FAILURE     1
 
 
-static    int     getpath         (char **, char **, char **, char *);
 static    void    report_error    (char *);
 
 void STDCALL
@@ -307,121 +305,6 @@ CUTIL_GETMP (
     *result = SUCCESS;
     }
 
-
-void STDCALL
-CUTIL_GETHW (
-#if !defined (WIN32)
-    char *  pathp,
-    int *   lenpathp,
-    char *  pathd,
-    int *   lenpathd,
-    int *   aloneint,
-    char *  fpathp,
-    int *   lenfpathp,
-    char *  fpathd,
-    int *   lenfpathd,
-    int *   result
-#else
-    char *  pathp,
-    int *   lenpathp,
-    char *  pathd,
-    int *   lenpathd,
-    int *   aloneint,
-    char *  fpathp,
-    int *   lenfpathp,
-    char *  fpathd,
-    int *   lenfpathd,
-    int *   result
-#endif
-    ) {
-
-    char *  modname;
-    char *  arch        = NULL;
-    char *  d3d_home    = NULL;
-
-    char *  envpath        = NULL;
-    char    slash;                    /* UNIX or Windows directory separator */
-    char    pathp_buf  [10000];
-    char    pathd_buf  [10000];
-    char    fpathp_buf [10000];
-    char    fpathd_buf [10000];
-
-
-    modname = "flow";
-
-    /*----  Get and validate paths from environment variables */
-
-    if (getpath (&arch, &d3d_home, &envpath, &slash) == FAILURE) {
-    *result = FAILURE;
-    return;
-        }
-
-    /*----  Assemble final path strings */
-
-    if (envpath = d3d_home) {
-        if (arch == NULL) {
-            sprintf (pathp_buf,  "%s%c%s%cbin%c",       envpath, slash, modname, slash, slash);
-            sprintf (pathd_buf,  "%s%c%s%cdefault%c",   envpath, slash, modname, slash, slash);
-            sprintf (fpathp_buf, "%s%cflow%cbin%c",     envpath, slash, slash, slash);
-            sprintf (fpathd_buf, "%s%cflow%cdefault%c", envpath, slash, slash, slash);
-        }
-    else {
-            sprintf (pathp_buf,  "%s%c%s%c%s%cbin%c",       envpath, slash, arch, slash, modname, slash, slash);
-            sprintf (pathd_buf,  "%s%c%s%c%s%cdefault%c",   envpath, slash, arch, slash, modname, slash, slash);
-            sprintf (fpathp_buf, "%s%c%s%cflow%cbin%c",     envpath, slash, arch, slash, slash, slash);
-            sprintf (fpathd_buf, "%s%c%s%cflow%cdefault%c", envpath, slash, arch, slash, slash, slash);
-            }
-    }
-    else {
-        sprintf (pathp_buf,  "%s%cbin%c",     envpath, slash, slash);
-        sprintf (pathd_buf,  "%s%cdefault%c", envpath, slash, slash);
-        sprintf (fpathp_buf, "%s%cbin%c",     envpath, slash, slash);
-        sprintf (fpathd_buf, "%s%cdefault%c", envpath, slash, slash);
-    }
-
-    if ((int) strlen (pathp_buf)  >= *lenpathp  ||
-        (int) strlen (pathd_buf)  >= *lenpathd  ||
-        (int) strlen (fpathp_buf) >= *lenfpathp ||
-        (int) strlen (fpathd_buf) >= *lenfpathd
-    ) {
-        report_error ("The D3D_HOME environment variable is too long");
-        *result = FAILURE;
-        return;
-      }
-
-    cstr2fstr (pathp_buf,  *lenpathp,  pathp);
-    cstr2fstr (pathd_buf,  *lenpathd,  pathd);
-    cstr2fstr (fpathp_buf, *lenfpathp, fpathp);
-    cstr2fstr (fpathd_buf, *lenfpathd, fpathd);
-
-    *result = SUCCESS;
-    }
-
-
-static int
-getpath (
-    char *  *arch,
-    char *  *d3d_home,
-    char *  *envpath,
-    char    *slash
-    ) {
-
-    //  The ARCH and D3D_HOME envars are no longer necessary.
-    //  This routine now just returns dummy values.
-    //  Irv.Elshoff@Deltares.NL, 27 apr 11
-
-    *arch     = "ARCH";     // getenv ("ARCH");
-    *d3d_home = "D3D_HOME"; // getenv ("D3D_HOME");
-    *envpath  = *d3d_home;
-
-#ifdef WIN32
-    *slash = '\\';
-#else
-    *slash = '/';
-#endif
-
-    return SUCCESS;
-}
 
 static void
 report_error (

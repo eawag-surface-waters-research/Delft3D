@@ -50,8 +50,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    character*256 , pointer :: pathd
-    character*256 , pointer :: pathp
     integer       , pointer :: lunmd
     integer       , pointer :: lundia
     integer       , pointer :: lunprt
@@ -79,10 +77,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
 !
     integer                    :: ierr
     integer                    :: lfil
-    integer                    :: lfpathd      ! Length of FPATHD without trailing blanks
-    integer                    :: lfpathp      ! Length of FPATHP without trailing blanks
-    integer                    :: lpathd       ! Length of PATHD without trailing blanks
-    integer                    :: lpathp       ! Length of PATHP without trailing blanks
     integer                    :: lrid         ! Help var. to determine the actual length of RUNID
     integer                    :: lridmx       ! Help var. for lunprt: LRID < 47
     integer                    :: lunhlp       ! Help var.
@@ -94,8 +88,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     character(20)              :: rundat       ! Current date and time containing a combination of DATE and TIME
     character(256)             :: version_full
     character(256)             :: filtmp       ! Help var. to specify file name
-    character(256)             :: fpathd       ! ..../flow/default directory FPATHD = PATHD when alone = TRUE PATHD =  ..../mor/default when alone = FALSE
-    character(256)             :: fpathp       ! See FPATHD and PATHP
     character(55)              :: txtput       ! Texts to be filled in the header
     character(256)             :: usernm       ! Licensee name set in 'userfil'
     type(message_stack)        :: stack
@@ -113,8 +105,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     lundia     => gdp%gdinout%lundia
     lunprt     => gdp%gdinout%lunprt
     lunscr     => gdp%gdinout%lunscr
-    pathd      => gdp%gdhwid%pathd
-    pathp      => gdp%gdhwid%pathp
     !
     ! initialisation of constants in const.inc
     ! NOTE: data-statement is not used to avoid problems with the
@@ -154,12 +144,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     lundia = 0
     lunmd  = 8
     !
-    ! computer system
-    !
-    call gethw(error     ,pathp     ,pathd     ,alone     ,fpathp    , &
-             & fpathd    )
-    if (error) goto 9999
-    !
     ! platform definition
     !
     call util_getenv('ARCH',txthlp)
@@ -170,16 +154,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
        gdp%arch = 'linux'
     endif
     gdp%errorcode = 0
-    !
-    ! check if errfil exist
-    !
-    call noextspaces(pathd     ,lpathd    )
-    call noextspaces(fpathd    ,lfpathd   )
-    call noextspaces(pathp     ,lpathp    )
-    call noextspaces(fpathp    ,lfpathp   )
-    !
-    ! file errfil is not used anymore
-    !
     !
     ! check userfile consistency
     !

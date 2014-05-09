@@ -61,7 +61,6 @@
 #if HAVE_CONFIG_H
 #   include "config.h"
 #   define STDCALL  /* nothing */
-#   define CUTIL_GETHW  FC_FUNC(cutil_gethw,CUTIL_GETHW)
 #   define CUTIL_GETMP  FC_FUNC(cutil_getmp,CUTIL_GETMP)
 #   define CUTIL_GETENV FC_FUNC(cutil_getenv,CUTIL_GETENV)
 #   define CUTIL_SYSTEM FC_FUNC(cutil_system,CUTIL_SYSTEM)
@@ -71,7 +70,6 @@
 #else
 // WIN32
 #   define STDCALL  /* nothing */
-#   define CUTIL_GETHW  CUTIL_GETHW
 #   define CUTIL_GETMP  CUTIL_GETMP
 #   define CUTIL_GETENV CUTIL_GETENV
 #   define CUTIL_SYSTEM CUTIL_SYSTEM
@@ -87,12 +85,10 @@
 
 #if !defined (WIN32)
 void    STDCALL         CUTIL_GETMP (char *, int *, int *);
-void    STDCALL         CUTIL_GETHW (char *, int *, char *, int *, int *, char *, int *, char *, int *, int *);
 void    STDCALL         CUTIL_GETENV(char *, int *, char *, int *);
 void    STDCALL         CUTIL_SYSTEM(char *, int *);
 #else
 void    STDCALL         CUTIL_GETMP (char *, int *, int *, int);
-void    STDCALL         CUTIL_GETHW (char *, int *, char *, int *, int *, char *, int *, char *, int *, int *, int, int, int, int);
 void    STDCALL         CUTIL_GETENV(char *, int *, char *, int *, int, int);
 void    STDCALL         CUTIL_SYSTEM(char *, int *, int);
 #endif

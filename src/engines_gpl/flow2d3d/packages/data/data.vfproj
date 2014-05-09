@@ -214,7 +214,6 @@
 		<File RelativePath="src\gdp\initfmtdis.f90"/>
 		<File RelativePath="src\gdp\initfourier.f90"/>
 		<File RelativePath="src\gdp\initheat.f90"/>
-		<File RelativePath="src\gdp\inithwid.f90"/>
 		<File RelativePath="src\gdp\initincbc.f90"/>
 		<File RelativePath="src\gdp\initincbcc.f90"/>
 		<File RelativePath="src\gdp\initincwav.f90"/>
