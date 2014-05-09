@@ -59,7 +59,6 @@ libDataGDP_la_SOURCES = \
          initfmtdis.f90 \
          initfourier.f90 \
          initheat.f90 \
-         inithwid.f90 \
          initincbc.f90 \
          initincbcc.f90 \
          initincwav.f90 \
