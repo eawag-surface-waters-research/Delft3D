@@ -179,7 +179,7 @@ private
 
    !> For the above threshold levels to become active, each channel must be separately enabled:
    integer, save                  :: lunMess             = 0       !< The file pointer to be used for the file output channel.
-   logical, save                  :: writeMessage2Screen = .false. !< Whether or not to use the stdout channel.
+   logical, save                  :: writeMessage2Screen = .true.  !< Whether or not to use the stdout channel.
    logical, save                  :: useLogging          = .true.  !< Whether or not to use the logging queue channel.
    logical, save                  :: alreadyInCallback=.false.                   !< flag for preventing recursive calls to callback subroutine
 
