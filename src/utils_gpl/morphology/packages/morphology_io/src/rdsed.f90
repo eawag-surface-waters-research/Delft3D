@@ -362,7 +362,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        if (.not. ex) then
           flsmdc = ' '
           mdcuni = 0.0_fp
-          call prop_get(sed_ptr, '*', 'MudCnt', mdcuni)
+          call prop_get(sed_ptr, 'SedimentOverall', 'MudCnt', mdcuni)
        endif
        !
        if ( .not. associated(sed_ptr%child_nodes) ) then
