@@ -246,6 +246,7 @@ CUTIL_SYSTEM (
 
 static    void    report_error    (char *);
 
+
 void STDCALL
 CUTIL_GETMP (
 #if !defined (WIN32)
@@ -302,6 +303,52 @@ CUTIL_GETMP (
     /*---- The path should end with a slash. Must be added after being checked with isdir. */
     sprintf (buf, "%s%c", buf, slash);
     cstr2fstr (buf, *lenpath, path);
+    *result = SUCCESS;
+    }
+
+
+void STDCALL
+CUTIL_GETEXEDIR (
+#if !defined (WIN32)
+    char *  path,
+    int *   lenpath,
+    int *   result
+#else
+    char *  path,
+    int *   lenpath,
+    int *   result,
+    int     path_LENGTH
+#endif
+    ) {
+
+    char    slash;                    /* UNIX or Windows directory separator */
+    char    buf [1000];
+    char    path_buffer[1000];
+    char    drive[1000];
+    char    dir[1000];
+    char    fname[1000];
+    char    ext[1000];
+    int     err;
+    int     len;
+    len = 1000;
+    /*----  Get and validate default directory using the location of this binary */
+
+#ifdef WIN32
+    slash = '\\';
+    GetModuleFileName(NULL,path_buffer,len);
+    err = _splitpath_s(path_buffer, drive, len, dir, len, fname, len, ext, len);
+    if (err != 0) {
+        report_error ("Unable to read/split the executable directory");
+        *result = FAILURE;
+        return;
+        }
+    sprintf (path_buffer, "%s%s", drive, dir);
+#else
+    slash = '/';
+    readlink("/proc/self/exe", path_buffer,len);
+    sprintf (path_buffer, "%s%c", dirname(path_buffer), slash);
+#endif
+    cstr2fstr (path_buffer, *lenpath, path);
     *result = SUCCESS;
     }
 

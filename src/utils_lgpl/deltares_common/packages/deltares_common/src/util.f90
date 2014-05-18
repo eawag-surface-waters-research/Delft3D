@@ -81,6 +81,28 @@ subroutine util_getenv (name, value)
 end
 
 
+subroutine getexedir (error, pathd)
+    implicit none
+    logical,        intent(out)    :: error
+    character(*),   intent(out)    :: pathd
+    !
+    ! Routine to determine the directory of the executable.
+    !
+    integer :: result
+    !
+    ! body
+    !
+    result = 1
+    call cutil_getexedir (pathd, len (pathd), result)
+
+    if (result == 0) then
+        error = .false.
+    else
+        error = .true.
+    endif
+end
+
+
 subroutine getmp (error, pathd)
     implicit none
     logical,        intent(out)    :: error
