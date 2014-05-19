@@ -246,6 +246,18 @@ CUTIL_SYSTEM (
 
 static    void    report_error    (char *);
 
+/* FTN_CAPITAL is assumed to be the default value */
+
+#if HAVE_CONFIG_H
+#   include "config.h"
+#   define STDCALL  /* nothing */
+#   define CUTIL_GETEXEDIR FC_FUNC(cutil_getexedir,CUTIL_GETEXEDIR)
+#else
+// WIN32
+#   define STDCALL  /* nothing */
+#   define CUTIL_GETEXEDIR  CUTIL_GETEXEDIR
+#endif
+
 
 void STDCALL
 CUTIL_GETMP (
