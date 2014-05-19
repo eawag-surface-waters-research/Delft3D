@@ -29,7 +29,7 @@
      J                    CONS  , NOQ   , IPOINT, FLXNAM, INTOPT,
      J                    VOLUME, SURF  , NOSEG , LUNOUT, LCHOUT,
      J                    INIOUT, DMPBAL, NOWST , NOWTYP, WSTTYP,
-     J                    IWASTE, INWTYP, WSTDMP)
+     J                    IWASTE, INWTYP, WSTDMP, ISEGCOL)
 C
 C     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
 C
@@ -114,6 +114,7 @@ C
       integer                    :: iwaste(nowst)         ! segment numbers of the wasteloads
       integer                    :: inwtyp(nowst)         ! wasteload type number (index in wsttyp)
       real                       :: wstdmp(notot,nowst,2) ! accumulated wasteloads 1/2 in and out
+      integer, intent(in   )     :: isegcol(*)            ! pointer from segment to top of column
 
 C     Local declarations
 C
@@ -731,7 +732,7 @@ c     Optionally scale the balance per volume or area
 
           ALLOCATE(DMP_SURF(NDMPAR), STAT = IERR )
           IF ( IERR .GT. 0 ) GOTO 9000
-          CALL DMPVAL(NDMPAR,IPDMP(NDMPAR+NTDMPQ+1),SURF,DMP_SURF)
+          CALL DMPSURF(NOSEG, NDMPAR, IPDMP(NDMPAR+NTDMPQ+1), ISEGCOL, SURF, DMP_SURF)
           IDUMP_OUT = 0
           DO IDUMP = 1 , NDMPAR
              IF ( DMPBAL(IDUMP) .EQ. 1 ) THEN
@@ -862,7 +863,7 @@ c         In mass
 c         In mass/m2
           ALLOCATE(DMP_SURF(NDMPAR), STAT = IERR )
           IF ( IERR .GT. 0 ) GOTO 9000
-          CALL DMPVAL(NDMPAR,IPDMP(NDMPAR+NTDMPQ+1),SURF,DMP_SURF)
+          CALL DMPSURF(NOSEG, NDMPAR, IPDMP(NDMPAR+NTDMPQ+1), ISEGCOL, SURF, DMP_SURF)
           IDUMP_OUT = 0
           DO IDUMP = 1 , NDMPAR
              IF ( DMPBAL(IDUMP) .EQ. 1 ) THEN

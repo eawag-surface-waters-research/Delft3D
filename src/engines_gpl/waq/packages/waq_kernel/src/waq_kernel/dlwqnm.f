@@ -407,7 +407,7 @@ c        layers in preconditioner [1,kmax]
      &                 c(ibtyp), j(intyp), c(icnam), noq     , j(ixpnt),
      &                 intopt  , c(ipnam), c(ifnam), c(isfna), j(idmpb),
      &                 nowst   , nowtyp  , c(iwtyp), j(iwast), j(inwtyp),
-     &                 a(iwdmp), iknmkv  , j(iowns), mypart  )
+     &                 a(iwdmp), iknmkv  , j(iowns), mypart  , isegcol )
 
 ! zero cumulative arrays
          if ( imflag .or. ( ihflag .and. noraai .gt. 0 ) ) then

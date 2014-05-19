@@ -43,7 +43,7 @@
      +                    BNDTYP, INWTYP, CONAME, NOQ   , IPOINT,
      +                    INTOPT, PANAME, FUNAME, SFNAME, DMPBAL,
      +                    NOWST , NOWTYP, WSTTYP, IWASTE, INXTYP,
-     +                    WSTDMP, iknmrk, OWNERS, MYPART)
+     +                    WSTDMP, iknmrk, OWNERS, MYPART, ISEGCOL)
 C
 C
 C     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -219,6 +219,7 @@ C
       integer                    :: iwaste(nowst)         ! segment numbers of the wasteloads
       integer                    :: inxtyp(nowst)         ! wasteload type number (index in wsttyp)
       real                       :: wstdmp(notot,nowst,2) ! accumulated wasteloads 1/2 in and out
+      integer, intent(in   )     :: isegcol(*)            ! pointer from segment to top of column
 C
 C     Local declarations
 C
@@ -591,7 +592,7 @@ C
      J                       CONS  , NOQ   , IPOINT, OUNAM(K1), INTOPT,
      J                       VOLUME, SURF  , NOSEG , LUNOUT   , LCHOUT,
      J                       INIOUT, DMPBAL, NOWST , NOWTYP   , WSTTYP,
-     J                       IWASTE, INXTYP, WSTDMP)
+     J                       IWASTE, INXTYP, WSTDMP, ISEGCOL  )
                DEALLOCATE (SURF)
 C
             ENDIF

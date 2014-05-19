@@ -279,7 +279,7 @@ C
      +              C(IBTYP), J(INTYP), C(ICNAM), NOQ     , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  )
+     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
 C
 C          close files, except monitor file
 C

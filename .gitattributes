@@ -1858,6 +1858,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqwq.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqwx.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqwy.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwsol.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dmpsurf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dmpval.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dryfld.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dumpconc.f -text
@@ -1896,6 +1897,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/raatra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/saxpy.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/scopy.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/sdot.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/segcol.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/setset.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/sgemv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/sgmres.f90 -text

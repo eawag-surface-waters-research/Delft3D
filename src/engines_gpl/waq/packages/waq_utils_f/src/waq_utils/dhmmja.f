@@ -740,6 +740,11 @@ C
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "iexseg              " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "iexseg              ", (noseg+nobnd)          *noth
       endif
+      itoti = itoti +  (noseg+nseg2) ;  nr_jar_new = nr_jar_new+1                             ! isegcol
+      if ( l_decl ) allocate ( isegcol( noseg+nseg2 ) , stat=ierr )
+      if ( ierr .ne. 0 ) then ; write(lunrep,2010) "isegcol             " ; call srstop(1) ; endif
+      if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "isegcol             ", noseg+nseg2
+
       if ( .not. l_decl ) write ( 328, '(/5x,a20,i12)' ) "Total (4 byte words)",itoti
 
       return

@@ -53,6 +53,7 @@ MODULE waqmem
    integer, allocatable :: tmat    (:)      ! pointer to  (iq) in matrix
    integer, pointer     :: iexseg  (:,:)    ! zero if volume is explicit
    integer, pointer     :: iknmkv  (:,:)    ! time variable feature array (for drying/flooding)
+   integer, allocatable :: isegcol (:)      ! pointer from segment to top of column
 
 !      solver  6, 7 and 10 only
 
@@ -149,6 +150,7 @@ MODULE waqmem
        if (allocated(tmat))    deallocate(tmat)
        if (associated(iexseg))  deallocate(iexseg)
        if (associated(iknmkv))  deallocate(iknmkv)
+       if (allocated(isegcol)) deallocate(isegcol)
 
 !      solver  6, 7 and 10 only
 

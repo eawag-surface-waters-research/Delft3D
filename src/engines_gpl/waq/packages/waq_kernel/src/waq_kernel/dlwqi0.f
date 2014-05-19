@@ -319,6 +319,11 @@ C
 
       CALL CHKNMR ( LUN(19) , MYPART , nosss  , J(IOWNS) , J(IKNMR) )
 
+      ! determine top of the vertcical columns
+
+      call segcol(nosss   , noq1    , noq2   , noq3  , noq4  ,
+     &            j(ixpnt), j(iknmr), isegcol)
+
       IF ( RTCACT )
 c     Interface to RTC (0)
      Jcall RTCSHL (ITSTRT, A, J, C)

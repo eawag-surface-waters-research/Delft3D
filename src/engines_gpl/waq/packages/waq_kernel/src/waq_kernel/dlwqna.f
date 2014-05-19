@@ -353,7 +353,7 @@ C
      +              C(IBTYP), J(INTYP), C(ICNAM), noqtt   , J(IXPNT),
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
-     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  )
+     +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
 
 !        zero cumulative arrays
 
