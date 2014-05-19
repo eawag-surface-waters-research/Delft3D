@@ -170,6 +170,8 @@ C     NIPVAR      Nr of input items for BLOOM types
      J         IP28
       INTEGER  IO(NOPFIX)
       INTEGER  NOSEGW, NOLAY, NOSEGL, IKMRK1, IKMRK2
+      integer  ipo17, ipo18, ipo19
+      integer  ino17, ino18, ino19
       INTEGER  INIT , IFLUX, ISEG, IALG, IOFF, IP, IGRO
       INTEGER  IFAUTO, IFDETR, IFOOXP, IFUPTA, IFPROD, IFMORT
       INTEGER  ISWVTR
@@ -869,7 +871,38 @@ C
       ENDDO
 C
  9000 CONTINUE
-C
+
+      ! cummulate output per square metre over the depth towards lowest layer
+
+      ipo17 = ipoint(nipfix+nipvar*ntyp_m+17)
+      ino17 = increm(nipfix+nipvar*ntyp_m+17)
+      ipo18 = ipoint(nipfix+nipvar*ntyp_m+18)
+      ino18 = increm(nipfix+nipvar*ntyp_m+18)
+      ipo19 = ipoint(nipfix+nipvar*ntyp_m+19)
+      ino19 = increm(nipfix+nipvar*ntyp_m+19)
+
+      do iq = noq1+noq2+1 , noq1+noq2+noq3
+         ifrom = iexpnt(1,iq)
+         ito   = iexpnt(2,iq)
+         if ( ifrom.gt.0 .and. ito.gt.0 ) then
+            pmsa(ipo17+(ito-1)*ino17) = pmsa(ipo17+(ifrom-1)*ino17) + pmsa(ipo17+(ito-1)*ino17)
+            pmsa(ipo18+(ito-1)*ino18) = pmsa(ipo18+(ifrom-1)*ino18) + pmsa(ipo18+(ito-1)*ino18)
+            pmsa(ipo19+(ito-1)*ino19) = pmsa(ipo19+(ifrom-1)*ino19) + pmsa(ipo19+(ito-1)*ino19)
+         endif
+      enddo
+
+      ! set the accumulated value for every layer
+
+      do iq = noq1+noq2+noq3, noq1+noq2+1,-1
+         ifrom = iexpnt(1,iq)
+         ito   = iexpnt(2,iq)
+         if ( ifrom.gt.0 .and. ito.gt.0 ) then
+            pmsa(ipo17+(ifrom-1)*ino17) = pmsa(ipo17+(ito-1)*ino17)
+            pmsa(ipo18+(ifrom-1)*ino18) = pmsa(ipo18+(ito-1)*ino18)
+            pmsa(ipo19+(ifrom-1)*ino19) = pmsa(ipo19+(ito-1)*ino19)
+         endif
+      enddo
+
       RETURN
 C
   901 STOP 'ERROR D40BLO: DIMENSION NTYP_M TOO SMALL'
