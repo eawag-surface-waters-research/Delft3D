@@ -66,6 +66,7 @@ C       Store the original value
         MRTM1(IALG) = RMORT1(IALG)
 C       Salinity dep. mortality ??
         IF (MRTM2(IALG).GT.0.) THEN
+          CL = MIN(CL,35000.)
           RMORT1(IALG) =  (MRTM2(IALG)-MRTM1(IALG))/
      1      (1.+EXP(MRTB1(IALG)*(CL-MRTB2(IALG))))+MRTM1(IALG)
         ENDIF
