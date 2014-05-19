@@ -233,7 +233,8 @@ c      times are converted to delwaq times
          data_block%times(ibrk-i1+1) = a2/afact + 0.5
       enddo
 
-      iorder = data_block%iorder
+      iorder = ORDER_PARAM_LOC
+      data_block%iorder = iorder
       if ( iorder .eq. ORDER_PARAM_LOC ) then
          ndim1 = data_param%no_item
          ndim2 = data_loc%no_item
@@ -260,7 +261,7 @@ c      times are converted to delwaq times
       allocate(buffer2(nsubs,nlocs,nobrk),stat=ierr_alloc)
       if ( ierr_alloc .eq. 0 ) then
          maxdim = nsubs*nlocs*nobrk
-         call getmat2( cfile , 0 , ipar_ods(ipar), loc     , timdef   ,
+         call getmat2( cfile , 0 , ipar_ods      , loc     , timdef   ,
      *                 amiss , 0 , maxdim        , buffer2 , ierror   ,
      *                                                       cfile(3) )
          do ipar = 1 , data_param%no_item
