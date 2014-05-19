@@ -91,7 +91,7 @@ C
      +         IEXPNT(4,*)     , IKNMRK(*)
       REAL     PMSA(*)         , FL(*)
 
-      REAL     KSOL , KPRC   , FSOL   , FPRC  , FRP   , FRS   ,
+      REAL     KSOL , KPRC   , FSOL   , FPRC  ,
      +         TEMP , TMPSOL , TMPPRC , TCSOL , TCPRC ,
      +         CPHD , CPHPR  , CPHDE  , POROS , OXY   , CROXY ,
      +         DELT
@@ -117,8 +117,8 @@ C
 
 !!    IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.3) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-         CPHD    = PMSA(IP1)
-         CPHPR   = PMSA(IP2)
+         CPHD    = MAX(PMSA(IP1),0.0)
+         CPHPR   = MAX(PMSA(IP2),0.0)
          CPHDE   = PMSA(IP3)
          KPRC    = PMSA(IP4)
          TCPRC   = PMSA(IP5)
@@ -134,24 +134,17 @@ C     Calculation of the precipitation or dissolution flux
 C     dependent on dissolved oxygen
 C
          IF ( OXY .GE. CROXY ) THEN
-            FRP = 0.0
-            FRS = 1.0
+            FPRC   = 0.0
+            TMPSOL = TCSOL**(TEMP - 20.0)
+            FSOL   = KSOL * TMPSOL * CPHPR * OXY / POROS
+            IF ( FSOL .LT. 0.0) FSOL = 0.0
+            IF ( FSOL*DELT .GE. CPHPR) FSOL = 0.5 * CPHPR / DELT
          ELSE
-            FRP = 1.0
-            FRS = 0.0
+            FSOL   = 0.0
+            TMPPRC = TCPRC**(TEMP - 20.0)
+            FPRC   = KPRC * TMPPRC * ( CPHD / POROS - CPHDE ) * POROS
+            IF ( FPRC .LT. 0.0) FPRC = 0.0
          ENDIF
-
-         FPRC = 0.0
-         FSOL = 0.0
-         TMPPRC = TCPRC**(TEMP - 20.0)
-         TMPSOL = TCSOL**(TEMP - 20.0)
-C
-         FPRC = FRP * KPRC * TMPPRC * ( CPHD / POROS - CPHDE ) * POROS
-         FSOL = FRS * KSOL * TMPSOL * CPHPR * OXY / POROS
-C
-         IF ( FPRC .LT. 0.0) FPRC = 0.0
-         IF ( FSOL .LT. 0.0) FSOL = 0.0
-         IF ( FSOL*DELT .GE. CPHPR) FSOL = 0.5 * CPHPR / DELT
 C
 C     Output of module
 C
