@@ -287,7 +287,8 @@ C
 C
 C          If  detritus = 0 : set fluxes to zero and skip algorithm
 C
-           IF (POC .LT. 1E-10 .OR. PON .LT. 1E-10 .OR. POP .LT. 1E-10)
+!jvb       IF (POC .LT. 1E-10 .OR. PON .LT. 1E-10 .OR. POP .LT. 1E-10)
+           IF (POC .LT. 1E-10)
      &        THEN
 C
               DECOC = 0.0
@@ -370,7 +371,7 @@ C
 C
 C             for nutrient stripping
 C
-              IF (NINT(SWOMDEC) .EQ. 0.0) THEN
+              IF (NINT(SWOMDEC) .EQ. 0 ) THEN
                  N_FACT = 1.0 + ((PON/POC) - ANR) / ANR
                  P_FACT = 1.0 + ((POP/POC) - APR) / APR
                  S_FACT = 1.0 + ((POS/POC) - ASR) / ASR
