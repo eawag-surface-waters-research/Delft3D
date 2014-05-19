@@ -471,7 +471,7 @@ C
 
 !          explicit part of transport done, volumes on diagonal
 
-         call dlwq42 ( nosys    , notot    , nototp   , noseg    , a(ivol2) ,
+         call dlwq42 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idt      ,
      &                 ivflag   , lun(19)  , j(iowns) , mypart   )
          call timer_stop(timer_transport)
@@ -600,7 +600,7 @@ C
 !            write restart file
 
              CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
-     *                     C(ISNAM) , NOTOT , NOSEG    )
+     *                     C(ISNAM) , NOTOT , NOSSS    )
              call timer_stop(timer_close)
          endif
       endif
