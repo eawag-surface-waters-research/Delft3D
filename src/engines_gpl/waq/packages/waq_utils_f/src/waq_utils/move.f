@@ -44,3 +44,25 @@ C
 C
       RETURN
       END
+      subroutine dmove ( array1 , array2 , notot )
+
+      real(8) ::  array1(*)
+      real(4) ::  array2(*)
+
+      do i = 1,notot
+         array2(i) = array1(i)
+      enddo
+
+      return
+      end
+      subroutine smove ( array1 , array2 , notot )
+
+      real(4) ::  array1(*)
+      real(8) ::  array2(*)
+
+      do i = 1,notot
+         array2(i) = array1(i)
+      enddo
+
+      return
+      end
