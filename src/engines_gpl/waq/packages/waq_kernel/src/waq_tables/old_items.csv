@@ -57,7 +57,6 @@ old_name,new_name,old_default,configuration,serial,action_type
 "RcDetSi   ","RcDisSi20 ",    0.00000    ,"          ",2012032801,         2
 "RcDetSHigh","n.a.      ",    8.00000    ,"          ",2012032801,         7
 "TcDetSi   ","TcDisSi   ",    0.00000    ,"          ",2012032801,         2
-"CTMin     ","n.a.      ",    0.00000    ,"          ",2012032801,         7
 "SiCMinLimH","n.a.      ",    8.00000    ,"          ",2012032801,         7
 "SiCMinLimL","n.a.      ",    8.00000    ,"          ",2012032801,         7
 "WM_OOC    ","DecMedium ",    0.00000    ,"          ",2012032801,         1
