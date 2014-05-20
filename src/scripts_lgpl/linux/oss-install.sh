@@ -207,6 +207,7 @@ function waq () {
 
     echo "Gathering libraries for delwaq..."
     cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep -v $gatherExcludeFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep $gatherIncludeFilter` $dest_bin
 
     # chrpath -r \$ORIGIN $dest_bin/delwaq1
     # chrpath -r \$ORIGIN $dest_bin/delwaq2
