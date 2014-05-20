@@ -72,7 +72,7 @@ C     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+     +         IEXPNT(4,*) , IKNMRK(*) , IQ, IFROM, ITO, NOQ1, NOQ2, NOQ3, NOQ4
 C
 C     Local (species groups arrays are now dimensioned as species/types arrays)
 C
