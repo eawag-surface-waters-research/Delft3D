@@ -42,6 +42,8 @@ libWaqKernel_la_SOURCES = \
        wqhbcom.f90 \
        actloc.f \
        baldmp.f \
+       dmpsurf.f \
+       segcol.f \
        chknmr.f \
        delmat.f \
        delpar00.F \
