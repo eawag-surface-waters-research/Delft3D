@@ -110,6 +110,7 @@ module MessageHandling
    public err_flush
    public set_progress_callback
    public progress
+   public stringtolevel
    
    integer,parameter, public     :: LEVEL_DEBUG = 1
    integer,parameter, public     :: LEVEL_INFO  = 2
@@ -187,7 +188,30 @@ private
    procedure(mh_callbackiface), pointer :: mh_callback => null()
    procedure(c_callbackiface), pointer :: c_logger => null()
 
-contains
+   contains
+
+!> Returns the numeric logging level value for a given level name.
+!! The returned level can be used for calling SetMessageHandling(.., thresholdLevel=ilevel,...)
+function stringtolevel(levelname) result(ilevel)
+   character(len=*), intent(in) :: levelname !< Name of the level, 'DEBUG'/'INFO', etc.
+   integer                      :: ilevel    !< The numeric value of the given level
+
+   ilevel = LEVEL_NONE  
+
+   select case (trim(levelname))
+   case ('DEBUG')
+      ilevel = LEVEL_DEBUG 
+   case ('INFO')
+      ilevel = LEVEL_INFO  
+   case ('WARN')
+      ilevel = LEVEL_WARN  
+   case ('ERROR')
+      ilevel = LEVEL_ERROR 
+   case ('FATAL')
+      ilevel = LEVEL_FATAL 
+   end select
+
+end function stringtolevel
 
 !> Sets up the output channels and filtering of messages.
 !!
