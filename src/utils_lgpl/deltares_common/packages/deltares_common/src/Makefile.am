@@ -79,9 +79,7 @@ REGENERATE_VN=yes
 ./always:
 	rm -rf ./deltares_common_version.F90
 
-
-# read up on secondary expansion before using $@ in dependency
-./deltares_common_version.F90: deltares_common_version.F90.svn
+./deltares_common_version.F90: deltares_common_version.F90.svn ./always
 	$(top_builddir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(builddir) ../include/version_number.ini $(top_builddir)
  else
 # Do not force regeneration of *version.F90, because it is already shipped in a source distribution archive.
@@ -90,3 +88,5 @@ REGENERATE_VN=yes
 ./deltares_common_version.F90:
 
  endif
+
+.PHONY: ./always
