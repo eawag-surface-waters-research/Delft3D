@@ -15,11 +15,12 @@
 #   there is at least one row. Otherwise they are not shown.
 # -------------------------------------------------------------------------
 
-version 3 minor 31
+version 3 minor 32
 
 table 'General algal typology'
    columns 'Alga'       'Extinction' 'Fraction autolysis' 'Fraction detritus' 'Mixing depth fraction' 'Fixed or not'
    row     'FDIATOMS_E' 'ExtVlFDI_E' 'FrAutFDI_E'         'FrDetFDI_E'        'SDMixFDI_E'            'FixFDI_E'
+   row     'FDIATOMS_N' 'ExtVlFDI_N' 'FrAutFDI_N'         'FrDetFDI_N'        'SDMixFDI_N'            'FixFDI_N'
    row     'FDIATOMS_P' 'ExtVlFDI_P' 'FrAutFDI_P'         'FrDetFDI_P'        'SDMixFDI_P'            'FixFDI_P'
    row     'FFLAGELA'   'ExtVlFFL_E' 'FrAutFFL_E'         'FrDetFFL_E'        'SDMixFFL_E'            'FixFFL_E'
    row     'GREENS_E'   'ExtVlGRE_E' 'FrAutGRE_E'         'FrDetGRE_E'        'SDMixGRE_E'            'FixGRE_E'
@@ -68,6 +69,7 @@ end-table
 table 'Algal stoichiometry'
    columns 'Alga'       'Dry matter' 'Nitrogen/Carbon'    'Phosphorus/Carbon' 'Silicon/Carbon' 'Chlfa/Carbon'
    row     'FDIATOMS_E' 'DMCFFDI_E'  'NCRFDI_E'           'PCRFDI_E'          'SCRFDI_E'       'ChlaCFDI_E'
+   row     'FDIATOMS_N' 'DMCFFDI_N'  'NCRFDI_N'           'PCRFDI_N'          'SCRFDI_N'       'ChlaCFDI_N'
    row     'FDIATOMS_P' 'DMCFFDI_P'  'NCRFDI_P'           'PCRFDI_P'          'SCRFDI_P'       'ChlaCFDI_P'
    row     'FFLAGELA'   'DMCFFFL_E'  'NCRFFL_E'           'PCRFFL_E'          'SCRFFL_E'       'ChlaCFFL_E'
    row     'GREENS_E'   'DMCFGRE_E'  'NCRGRE_E'           'PCRGRE_E'          'SCRGRE_E'       'ChlaCGRE_E'
@@ -116,6 +118,7 @@ end-table
 table 'Algal physiology'
    columns 'Alga'       'Maximum production' 'Temp.coeff prod.' 'Type of dependence' 'Mortality'  'Temp.coeff mort.' 'Maintenance respiration' 'Temp.coeff resp.'
    row     'FDIATOMS_E' 'PPMaxFDI_E'         'TcPMxFDI_E'       'TFPMxFDI_E'         'Mort0FDI_E' 'TcMrtFDI_E'       'MRespFDI_E'              'TcRspFDI_E'
+   row     'FDIATOMS_N' 'PPMaxFDI_N'         'TcPMxFDI_N'       'TFPMxFDI_N'         'Mort0FDI_N' 'TcMrtFDI_N'       'MRespFDI_N'              'TcRspFDI_N'
    row     'FDIATOMS_P' 'PPMaxFDI_P'         'TcPMxFDI_P'       'TFPMxFDI_P'         'Mort0FDI_P' 'TcMrtFDI_P'       'MRespFDI_P'              'TcRspFDI_P'
    row     'FFLAGELA'   'PPMaxFFL_E'         'TcPMxFFL_E'       'TFPMxFFL_E'         'Mort0FFL_E' 'TcMrtFFL_E'       'MRespFFL_E'              'TcRspFFL_E'
    row     'GREENS_E'   'PPMaxGRE_E'         'TcPMxGRE_E'       'TFPMxGRE_E'         'Mort0GRE_E' 'TcMrtGRE_E'       'MRespGRE_E'              'TcRspGRE_E'
@@ -164,6 +167,7 @@ end-table
 table 'Mixotrophic algae'
    columns 'Alga'       'N/C ratio'  'P/C ratio'  'N/C (nitrogen fixating)'
    row     'FDIATOMS_E' 'XNCRFDI_E'  'XPCRFDI_E'  'FNCRFDI_E'
+   row     'FDIATOMS_N' 'XNCRFDI_N'  'XPCRFDI_N'  'FNCRFDI_N'
    row     'FDIATOMS_P' 'XNCRFDI_P'  'XPCRFDI_P'  'FNCRFDI_P'
    row     'FFLAGELA'   'XNCRFFL_E'  'XPCRFFL_E'  'FNCRFFL_E'
    row     'GREENS_E'   'XNCRGRE_E'  'XPCRGRE_E'  'FNCRGRE_E'
@@ -212,6 +216,7 @@ end-table
 table 'Salinity dependent mortaility'
    columns 'Alga'       'Mortality'  'Coefficient B1' 'Coefficient B2' 'Extra rapid mortality'
    row     'FDIATOMS_E' 'MORT2FDI_E' 'MrtB1FDI_E'     'MrtB2FDI_E'     'MrtExFDI_E'
+   row     'FDIATOMS_N' 'MORT2FDI_N' 'MrtB1FDI_N'     'MrtB2FDI_N'     'MrtExFDI_N'
    row     'FDIATOMS_P' 'MORT2FDI_P' 'MrtB1FDI_P'     'MrtB2FDI_P'     'MrtExFDI_P'
    row     'FFLAGELA'   'MORT2FFL_E' 'MrtB1FFL_E'     'MrtB2FFL_E'     'MrtExFFL_E'
    row     'GREENS_E'   'MORT2GRE_E' 'MrtB1GRE_E'     'MrtB2GRE_E'     'MrtExGRE_E'
@@ -260,6 +265,7 @@ end-table
 table 'Algal sedimentation'
    columns 'Alga'       'Sedimentation velocity base' 'Sedimentation velocity fixed' 'flocculation coeff.' 'Salininity enhancement factor'
    row     'FDIATOMS_E' 'V0SedFDI_E'                  'VSedFDI_E'                    'nFDI_E'              'EnhSdFDI_E'
+   row     'FDIATOMS_N' 'V0SedFDI_N'                  'VSedFDI_N'                    'nFDI_N'              'EnhSdFDI_N'
    row     'FDIATOMS_P' 'V0SedFDI_P'                  'VSedFDI_P'                    'nFDI_P'              'EnhSdFDI_P'
    row     'FFLAGELA'   'V0SedFFL_E'                  'VSedFFL_E'                    'nFFL_E'              'EnhSdFFL_E'
    row     'GREENS_E'   'V0SedGRE_E'                  'VSedGRE_E'                    'nGRE_E'              'EnhSdGRE_E'
