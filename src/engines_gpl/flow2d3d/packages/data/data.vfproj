@@ -106,6 +106,7 @@
 		<File RelativePath="include\rdpara.igs"/>
 		<File RelativePath="include\restart.igs"/>
 		<File RelativePath="include\rivpro.igs"/>
+		<File RelativePath=".\include\rtc.igs"/>
 		<File RelativePath="include\scour.igs"/>
 		<File RelativePath="include\snel.igs"/>
 		<File RelativePath="include\stations.igs"/>

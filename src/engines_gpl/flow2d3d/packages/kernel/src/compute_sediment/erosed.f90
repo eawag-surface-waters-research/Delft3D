@@ -282,95 +282,96 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 !
 ! Local variables
 !
-    integer                       :: i
-    integer                       :: istat
-    integer                       :: j
-    integer                       :: k
-    integer                       :: k2d
-    integer                       :: kbed
-    integer                       :: kmaxsd
-    integer                       :: kn
-    integer                       :: ku
-    integer                       :: kv
-    integer                       :: l
-    integer                       :: ll
-    integer                       :: lstart
-    integer                       :: m
-    integer                       :: n
-    integer                       :: ndm
-    integer                       :: nhystp
-    integer                       :: nm
-    integer                       :: nmd
-    integer                       :: nm_pos    ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
-    integer                       :: nmu
-    integer                       :: num
-    logical                       :: error
-    logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
-    real(fp)                      :: aks_ss3d
-    real(fp)                      :: caks
-    real(fp)                      :: caks_ss3d
-    real(fp)                      :: chezy
-    real(fp)                      :: conc2d
-    real(fp)                      :: delr
-    real(fp)                      :: di50
-    real(fp)                      :: difbot
-    real(fp)                      :: drho
-    real(fp)                      :: dstari
-    real(fp)                      :: dtmor
-    real(fp)                      :: ee
-    real(fp)                      :: fi
-    real(fp)                      :: fracf
-    real(fp)                      :: grkg
-    real(fp)                      :: grm2
-    real(fp)                      :: grlyrs
-    real(fp)                      :: h0
-    real(fp)                      :: h1
-    real(fp)                      :: rc
-    real(fp)                      :: mfltot
-    real(fp)                      :: sag
-    real(fp)                      :: salinity
-    real(fp)                      :: sinkfluff
-    real(fp)                      :: sinktot
-    real(fp)                      :: sourfluff
-    real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
-    real(fp)                      :: taks
-    real(fp)                      :: taks0
-    real(fp)                      :: tauadd
-    real(fp)                      :: taub
-    real(fp)                      :: tauc
-    real(fp)                      :: tdss      ! temporary variable for dss
-    real(fp)                      :: temperature
-    real(fp)                      :: thick0
-    real(fp)                      :: thick1
-    real(fp)                      :: trsedeq   ! temporary variable for rsedeq
-    real(fp)                      :: tsalmax
-    real(fp)                      :: tsd
-    real(fp)                      :: tsigmol   ! temporary variable for sigmol
-    real(fp)                      :: tws0
-    real(fp)                      :: twsk
-    real(fp)                      :: u
-    real(fp)                      :: ubed
-    real(fp)                      :: umean
-    real(fp)                      :: ustarc
-    real(fp)                      :: utot
-    real(fp)                      :: v
-    real(fp)                      :: vbed
-    real(fp)                      :: velb
-    real(fp)                      :: velm
-    real(fp)                      :: vmean
-    real(fp)                      :: z0cur
-    real(fp)                      :: z0rou
-    real(fp)                      :: zvelb
-    real(fp), dimension(lsedtot)  :: E            ! erosion velocity [m/s]
-    real(fp), dimension(0:kmax2d) :: dcww2d
-    real(fp), dimension(0:kmax2d) :: sddf2d
-    real(fp), dimension(0:kmax2d) :: ws2d
-    real(fp), dimension(kmax2d)   :: rsdq2d
-    real(fp), dimension(kmax2d)   :: sig2d
-    real(fp), dimension(kmax2d)   :: thck2d
-    real(fp), dimension(kmax)     :: concin3d
-    real(fp), dimension(kmax2d)   :: concin2d
-    character(256)                :: errmsg
+    integer                         :: i
+    integer                         :: istat
+    integer                         :: j
+    integer                         :: k
+    integer                         :: k2d
+    integer                         :: kbed
+    integer                         :: kmaxsd
+    integer                         :: kn
+    integer                         :: ku
+    integer                         :: kv
+    integer                         :: l
+    integer                         :: ll
+    integer                         :: lstart
+    integer                         :: m
+    integer                         :: n
+    integer                         :: ndm
+    integer                         :: nhystp
+    integer                         :: nm
+    integer                         :: nmd
+    integer                         :: nm_pos    ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    integer                         :: nmu
+    integer                         :: num
+    logical                         :: error
+    logical                         :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
+    real(fp)                        :: aks_ss3d
+    real(fp)                        :: caks
+    real(fp)                        :: caks_ss3d
+    real(fp)                        :: chezy
+    real(fp)                        :: conc2d
+    real(fp)                        :: delr
+    real(fp)                        :: di50
+    real(fp)                        :: difbot
+    real(fp)                        :: drho
+    real(fp)                        :: dstari
+    real(fp)                        :: dtmor
+    real(fp)                        :: ee
+    real(fp)                        :: fi
+    real(fp)                        :: fracf
+    real(fp)                        :: grkg
+    real(fp)                        :: grm2
+    real(fp)                        :: grlyrs
+    real(fp)                        :: h0
+    real(fp)                        :: h1
+    real(fp)                        :: rc
+    real(fp)                        :: mfltot
+    real(fp)                        :: sag
+    real(fp)                        :: salinity
+    real(fp)                        :: sinkfluff
+    real(fp)                        :: sinktot
+    real(fp)                        :: sourfluff
+    real(fp)                        :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
+    real(fp)                        :: taks
+    real(fp)                        :: taks0
+    real(fp)                        :: tauadd
+    real(fp)                        :: taub
+    real(fp)                        :: tauc
+    real(fp)                        :: tdss      ! temporary variable for dss
+    real(fp)                        :: temperature
+    real(fp)                        :: thick0
+    real(fp)                        :: thick1
+    real(fp)                        :: trsedeq   ! temporary variable for rsedeq
+    real(fp)                        :: tsalmax
+    real(fp)                        :: tsd
+    real(fp)                        :: tsigmol   ! temporary variable for sigmol
+    real(fp)                        :: tws0
+    real(fp)                        :: twsk
+    real(fp)                        :: u
+    real(fp)                        :: ubed
+    real(fp)                        :: umean
+    real(fp)                        :: ustarc
+    real(fp)                        :: utot
+    real(fp)                        :: v
+    real(fp)                        :: vbed
+    real(fp)                        :: velb
+    real(fp)                        :: velm
+    real(fp)                        :: vmean
+    real(fp)                        :: z0cur
+    real(fp)                        :: z0rou
+    real(fp)                        :: zvelb
+    real(fp), dimension(:), pointer :: localpar
+    real(fp), dimension(lsedtot)    :: E            ! erosion velocity [m/s]
+    real(fp), dimension(0:kmax2d)   :: dcww2d
+    real(fp), dimension(0:kmax2d)   :: sddf2d
+    real(fp), dimension(0:kmax2d)   :: ws2d
+    real(fp), dimension(kmax2d)     :: rsdq2d
+    real(fp), dimension(kmax2d)     :: sig2d
+    real(fp), dimension(kmax2d)     :: thck2d
+    real(fp), dimension(kmax)       :: concin3d
+    real(fp), dimension(kmax2d)     :: concin2d
+    character(256)                  :: errmsg
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -508,6 +509,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     flmd2l              => gdp%gdprocs%flmd2l
     depfac              => gdp%gdmorpar%flufflyr%depfac
     mfluff              => gdp%gdmorpar%flufflyr%mfluff
+    !
+    allocate (localpar (gdp%gdtrapar%npar), stat = istat)
     !
     if (varyingmorfac .and. icall==1) then
        call updmorfac(gdp%gdmorpar, timhr, julday)
@@ -952,6 +955,17 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        !
        do l = 1, lsedtot
           !
+          ! Copy the globally defined l-dependent parameters of array par to localpar.
+          ! All nm-/l-based redefinitions of these parameters are performed
+          ! on localpar, thus ensuring that the global array par is not
+          ! messed up with specific, nm-/l-dependent data.
+          ! The usage of localpar is introduced to speed up the calculations
+          ! significantly for certain combinations of testcase/compilers/hardware/operating systems.
+          !
+          do i = 1,gdp%gdtrapar%npar
+             localpar(i) = par(i,l)
+          enddo
+          !
           ! fraction specific quantities
           !
           dll_reals(RP_HIDEX)    = real(hidexp(nm,l) ,hp)
@@ -962,7 +976,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           do i = 1,gdp%gdtrapar%npar
              j = gdp%gdtrapar%iparfld(i,l)
              if (j>0) then
-                 par(i,l) = gdp%gdtrapar%parfld(nm,j)
+                 localpar(i) = gdp%gdtrapar%parfld(nm,j)
              endif
           enddo
           !
@@ -975,7 +989,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_DSTAR) = 0.0_hp
              dll_reals(RP_SETVL) = real(ws(nm, kbed, l)  ,hp) ! Vertical velocity near bedlevel
              if (flmd2l) then
-                 par(11,l) = entr(nm)
+                 localpar(11) = entr(nm)
              endif
              !
              do k = 0, kmax
@@ -995,7 +1009,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              call erosilt(thick       ,kmax        ,wslc        ,lundia      , &
                         & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l),&
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
-                        & par(1,l)    ,max_integers,max_reals   ,max_strings , &
+                        & localpar    ,max_integers,max_reals   ,max_strings , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
                         & dll_strings  ,iflufflyr ,mfltot ,fracf    , &
                         & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
@@ -1106,12 +1120,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_DSS  ) = real(tdss    ,hp)
           dll_reals(RP_DSTAR) = real(dstar(l),hp)
           dll_reals(RP_SETVL) = real(twsk    ,hp) ! Vertical velocity near bedlevel
-          par(1,l) = ag
-          par(2,l) = rhowat(nm,kbed) ! rhow
-          par(3,l) = rhosol(l)
-          par(4,l) = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
-          par(5,l) = 1.0E-6     ! rnu    from md-tran.*
-          par(6,l) = di50
+          localpar(1) = ag
+          localpar(2) = rhowat(nm,kbed) ! rhow
+          localpar(3) = rhosol(l)
+          localpar(4) = (rhosol(l)-rhowat(nm,kbed)) / rhowat(nm,kbed)
+          localpar(5) = 1.0E-6     ! rnu    from md-tran.*
+          localpar(6) = di50
           !
           ! SWITCH 2DH/3D SIMULATIONS
           !
@@ -1144,7 +1158,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
-                       & iform(l)  ,par(1,l)  ,max_integers,max_reals,max_strings, &
+                       & iform(l)  ,localpar  ,max_integers,max_reals,max_strings, &
                        & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
                        & taks      ,caks      ,taurat(nm,l),sddflc  ,rsdqlc    , &
                        & kmaxsd    ,conc2d    ,sbcu(nm,l ),sbcv(nm,l),sbwu(nm,l), &
@@ -1222,7 +1236,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
-                       & iform(l)  ,par(1,l)  ,max_integers,max_reals,max_strings, &
+                       & iform(l)  ,localpar  ,max_integers,max_reals,max_strings, &
                        & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
                        & taks      ,caks      ,taurat(nm,l),sddf2d  ,rsdq2d    , &
                        & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
@@ -1426,4 +1440,5 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! DD-Mapper: copy sbuu and sbvv
     !
     nhystp = nxtstp(d3dflow_sediment, gdp)
+    deallocate (localpar, stat = istat)
 end subroutine erosed
