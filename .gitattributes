@@ -4512,6 +4512,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/xyveloc.m -text
 src/tools_lgpl/matlab/quickplot/qp_iconedit.m -text
 src/tools_lgpl/matlab/quickplot/read_identification.m -text
 src/tools_lgpl/matlab/quickplot/svnstripfile.m -text
+src/tools_lgpl/matlab/rtc/progsrc/rtc_communicator.m -text
 src/utils_gpl/Makefile.am -text
 src/utils_gpl/morphology/Makefile.am -text
 src/utils_gpl/morphology/packages/Makefile.am -text
