@@ -60,6 +60,7 @@ libDeltaresCommon_la_SOURCES = \
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
 dist-hook:
 	sed -i -e 's/^REGENERATE_VN=yes/REGENERATE_VN=no/' $(distdir)/Makefile.am
+	sed -i -e 's/^REGENERATE_VN=yes/REGENERATE_VN=no/' $(distdir)/Makefile.in
 
 #-------------------------------------------------------------------------------
 #Libraries
