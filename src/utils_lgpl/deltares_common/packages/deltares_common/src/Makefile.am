@@ -59,8 +59,8 @@ libDeltaresCommon_la_SOURCES = \
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
 dist-hook:
-	sed -i -e 's/^REGENERATE_VN=yes/REGENERATE_VN=no/' $(distdir)/Makefile.am
-	sed -i -e 's/^REGENERATE_VN=yes/REGENERATE_VN=no/' $(distdir)/Makefile.in
+	sed -i -e 's/^REGENERATE_VN[ \t]*=[ \t]*yes/REGENERATE_VN=no/' $(distdir)/Makefile.am
+	sed -i -e 's/^REGENERATE_VN[ \t]*=[ \t]*yes/REGENERATE_VN=no/' $(distdir)/Makefile.in
 
 #-------------------------------------------------------------------------------
 #Libraries
