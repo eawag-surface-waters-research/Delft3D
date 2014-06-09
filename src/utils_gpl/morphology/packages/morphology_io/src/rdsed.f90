@@ -144,6 +144,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                     :: lfile
     integer                     :: luninp
     integer                     :: n                   ! Temporary storage for nseddia(l)
+    integer                     :: nm
     integer                     :: version
     integer          , external :: newunit
     integer(pntrsize), external :: open_shared_library
@@ -363,10 +364,25 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           call combinepaths(filsed, flsmdc)
           inquire (file = flsmdc, exist = ex)
        endif
-       if (.not. ex) then
+       if (ex) then
+          !
+          ! Space varying data has been specified
+          ! Use routine that also read the depth file to read the data
+          !
+          call depfil(lundia    ,error     ,flsmdc    ,fmttmp    , &
+                    & mudcnt    ,1         ,1         ,griddim   )
+          if (error) return
+          do nm = 1, griddim%nmmax
+             mudcnt(nm) = max(0.0_fp, min(mudcnt(nm), 1.0_fp))
+          enddo
+       else
           flsmdc = ' '
           mdcuni = 0.0_fp
           call prop_get(sed_ptr, 'SedimentOverall', 'MudCnt', mdcuni)
+          !
+          ! Uniform data has been specified
+          !
+          mudcnt = max(0.0_fp,min(mdcuni,1.0_fp))
        endif
        !
        if ( .not. associated(sed_ptr%child_nodes) ) then
@@ -388,7 +404,18 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           call combinepaths(filsed, flspmc)
           inquire (file = flspmc, exist = ex)
        endif
-       if (.not. ex) then
+       if (ex) then
+          !
+          ! Space varying data has been specified
+          ! Use routine that also read the depth file to read the data
+          !
+          call depfil(lundia    ,error     ,flspmc    ,fmttmp    , &
+                    & pmcrit    ,1         ,1         ,griddim   )
+          if (error) return
+          do nm = 1, griddim%nmmax
+             pmcrit(nm) = min(pmcrit(nm), 1.0_fp)
+          enddo
+       else
           flspmc = ' '
           call prop_get(sed_ptr, '*', 'PmCrit', pmcrit(1))
           pmcrit = min(pmcrit(1), 1.0_fp)
