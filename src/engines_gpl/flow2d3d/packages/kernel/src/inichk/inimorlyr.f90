@@ -352,10 +352,10 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           ! Read the data from the initial composition file.
           !
           call rdinimorlyr(flcomp    ,msed      ,thlyr     ,cdryb     , &
-                         & lsedtot   ,mmax      ,nlyr      ,nmax      , &
-                         & nmaxus    ,nmmax     ,lundia    ,kcs       , &
+                         & lsedtot   ,nlyr      ,lundia    ,kcs       , &
                          & icx       ,icy       ,svfrac    ,iporosity , &
-                         & gdp       )
+                         & gdp%gdsedpar%rhosol  ,gdp%gdmorlyr  ,gdp%griddim   ,error     )
+          if (error) call d3stop(1, gdp)
        endif
     endselect
  9999 continue

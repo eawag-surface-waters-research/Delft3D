@@ -43,7 +43,7 @@ contains
 subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                & lsedtot   ,lstsci    ,ltur      ,facdss    ,namcon    , &
                & iopsus    ,nmlb      ,nmub      ,filsed    , &
-               & sed_ptr   ,sedpar    ,trapar    )
+               & sed_ptr   ,sedpar    ,trapar    ,griddim   )
 !!--description-----------------------------------------------------------------
 !
 ! Read sediment parameters from an input file
@@ -59,6 +59,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     use morphology_data_module
     use sediment_basics_module
     use system_utils, only:SHARED_LIB_EXTENSION
+    use grid_dimens_module, only: griddimtype
     !
     implicit none
     !
@@ -128,6 +129,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     type(tree_data)                          , pointer     :: sed_ptr
     type(sedpar_type)                        , pointer     :: sedpar
     type(trapar_type)                        , pointer     :: trapar
+    type(griddimtype)             , target   , intent(in)  :: griddim
 !
 ! Local variables
 !
@@ -150,6 +152,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)                    :: sedsg               ! Temporary storage for geometric standard deviation
     logical                     :: ex
     logical                     :: success
+    character(11)               :: fmttmp ! Format file ('formatted  ') 
     character(20)               :: sedname
     character(256)              :: filtrn
     character(256)              :: rec
@@ -206,6 +209,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     flstrn               => trapar%flstrn
     !
     rmissval = -999.0_fp
+    fmttmp   = 'formatted'
     !
     istat = 0
     if (.not. associated(sedpar%sedd50)) then
@@ -461,7 +465,16 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 call combinepaths(filsed, flsdia)
                 inquire (file = flsdia, exist = ex)
              endif
-             if (.not. ex) flsdia = ' '
+             if (ex) then
+                !
+                !  File with space varying data has been specified, read it now.
+                !
+                call depfil(lundia    ,error     ,flsdia    ,fmttmp    , &
+                          & sedd50fld ,1         ,1         ,griddim   )
+                if (error) return
+             else
+                flsdia = ' '
+             endif
           else
              ex = .false.
           endif

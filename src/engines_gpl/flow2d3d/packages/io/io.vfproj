@@ -99,7 +99,6 @@
 		<File RelativePath="src\input\rdhyvd.f90"/>
 		<File RelativePath="src\input\rdibch.f90"/>
 		<File RelativePath="src\input\rdic.f90"/>
-		<File RelativePath="src\input\rdinimorlyr.f90"/>
 		<File RelativePath="src\input\rdirt.f90"/>
 		<File RelativePath="src\input\rdiwe.f90"/>
 		<File RelativePath="src\input\rdlaydis.f90"/>

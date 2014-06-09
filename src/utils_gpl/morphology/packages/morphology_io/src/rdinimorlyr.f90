@@ -1,8 +1,7 @@
 subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
-                     & lsedtot   ,mmax      ,nlyr      ,nmax      , &
-                     & nmaxus    ,nmmax     ,lundia    ,kcs       , &
+                     & lsedtot   ,nlyr      ,lundia    ,kcs       , &
                      & icx       ,icy       ,svfrac    ,iporosity , &
-                     & gdp       )
+                     & rhosol    ,bedcomp   ,dims      ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -41,34 +40,28 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     use precision
     use bedcomposition_module
     use properties
-    !
-    use globaldata
+    use grid_dimens_module, only: griddimtype
+    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)        , dimension(:)    , pointer :: rhosol
 !
 ! Global variables
 !
+    type(griddimtype), target                              , intent(in)  :: dims    !  grid dimensions
+    type(bedcomp_data), target                             , intent(in)  :: bedcomp
     integer                                                , intent(in)  :: icx
     integer                                                , intent(in)  :: icy
     integer                                                , intent(in)  :: iporosity
     integer                                                , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                                                              :: lundia  !  Description and declaration in inout.igs
-    integer                                                , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
     integer                                                , intent(in)  :: nlyr    !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
-    integer                                                              :: nmmax   !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(lsedtot,nlyr,gdp%d%nmlb:gdp%d%nmub), intent(out) :: msed
-    real(fp), dimension(nlyr,gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: svfrac
-    real(fp), dimension(nlyr,gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: thlyr
+    integer , dimension(dims%nmlb:dims%nmub)               , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(lsedtot,nlyr,dims%nmlb:dims%nmub)  , intent(out) :: msed
+    real(fp), dimension(nlyr,dims%nmlb:dims%nmub)          , intent(out) :: svfrac
+    real(fp), dimension(nlyr,dims%nmlb:dims%nmub)          , intent(out) :: thlyr
     real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lsedtot)                           , intent(in)  :: rhosol
+    logical                                                , intent(out) :: error
     character(*)                                                         :: filcomp
 !
 ! Local variables
@@ -81,6 +74,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     integer                               :: nm
     integer                               :: nm2
     integer                               :: nmlb
+    integer                               :: nmmax
     integer                               :: nmub
     real(fp)                              :: cdrybavg
     real(fp)                              :: fraction
@@ -100,7 +94,6 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     logical                               :: anysedbed
     logical                               :: err
     logical                               :: ex
-    logical                               :: error
     character(10)                         :: lstr
     character(10)                         :: versionstring
     character(11)                         :: fmttmp   ! Format file ('formatted  ') 
@@ -113,18 +106,16 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    rhosol               => gdp%gdsedpar%rhosol
-    !
     rmissval      = -999.0_fp
     fmttmp        = 'formatted'
-    nmlb          = gdp%d%nmlb
-    nmub          = gdp%d%nmub
+    nmmax         = dims%nmmax
+    nmlb          = dims%nmlb
+    nmub          = dims%nmub
     error         = .false.
     !
     ! Create Initial Morphology branch in input tree
     !
-    call tree_create_node( gdp%input_tree, 'Initial Morphology', mor_ptr )
-    call tree_put_data( mor_ptr, transfer(trim(filcomp),node_value), 'STRING' )
+    call tree_create  ( "Initial Morphology", mor_ptr )
     !
     ! Put mor-file in input tree
     !
@@ -132,14 +123,15 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', trim(filcomp))
+          call write_error(FILE_NOT_FOUND//trim(filcomp), unit=lundia)
        case(3)
-          call prterr(lundia, 'G006', trim(filcomp))
+          call write_error(PREMATURE_EOF//trim(filcomp), unit=lundia)
        case default
-          call prterr(lundia, 'G007', trim(filcomp))
+          call write_error(FILE_READ_ERROR//trim(filcomp), unit=lundia)
        endselect
-       call d3stop(1, gdp)
-    endif
+       error = .true.
+       return
+    endif    
     !
     ! Check version number of mor input file
     !
@@ -159,7 +151,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
        if (istat == 0) allocate(thtemp(nmlb:nmub), stat = istat)
        if (istat /= 0) then
           call prterr(lundia, 'U021', 'RdIniMorLyr: memory alloc error')
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        !
        do i = 1, size(mor_ptr%child_nodes)
@@ -192,7 +185,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
              write (message,'(a,i2,2a)') 'No type specified for layer ', ilyr, &
                                        & ' in file ', trim(filcomp)
              call prterr(lundia, 'U021', trim(message))
-             call d3stop(1, gdp)          
+             error = .true.
+             return
           elseif (layertype == 'mass fraction' .or. &
                 & layertype == 'volume fraction') then
              !
@@ -217,7 +211,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                        & 'Missing Thick keyword for layer ', ilyr, &
                        & ' in file ', trim(filcomp)
                    call prterr(lundia, 'U021', trim(message))
-                   call d3stop(1, gdp)          
+                   error = .true.
+                   return
                 endif
                 do nm = 1, nmmax
                    thtemp(nm) = sedbed
@@ -227,13 +222,13 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 ! Spatially varying thickness
                 !
                 call depfil(lundia    ,error     ,filename  ,fmttmp    , &
-                          & thtemp    ,1         ,1         ,gdp%griddim)
+                          & thtemp    ,1         ,1         ,dims)
                 if (error) then
                    write (message,'(3a,i2,2a)')  &
                        & 'Error reading thickness from ', trim(filename), &
                        & ' for layer ', ilyr, ' in file ', trim(filcomp)
                    call prterr(lundia, 'U021', trim(message))
-                   call d3stop(1, gdp)          
+                   return          
                 endif
              endif
              !
@@ -258,7 +253,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
                    call prterr(lundia, 'U021', trim(message))
-                   call d3stop(1, gdp)          
+                   error = .true.
+                   return
                 endif
                 !
                 parname  = 'Fraction' // trim(lstr)
@@ -285,14 +281,14 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    !
                    anyfrac = .true.
                    call depfil(lundia    ,error     ,filename  , fmttmp    , &
-                             & rtemp(nmlb,l)        ,1   ,1    ,gdp%griddim)
+                             & rtemp(nmlb,l)        ,1   ,1    ,dims)
                    if (error) then
                       write (message,'(a,i2,3a,i2,2a)')  &
                           & 'Error reading fraction ', l, 'from ', &
                           & trim(filename), ' for layer ', ilyr, ' in file ', &
                           & trim(filcomp)
                       call prterr(lundia, 'U021', trim(message))
-                      call d3stop(1, gdp)          
+                      return
                    endif
                 endif
              enddo
@@ -304,7 +300,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                     & 'No Fraction keywords found for layer ', ilyr, &
                     & ' in file ', trim(filcomp)
                 call prterr(lundia, 'U021', trim(message))
-                call d3stop(1, gdp)          
+                error = .true.
+                return
              endif
              !
              ! Check validity of input data.
@@ -322,13 +319,15 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                              & 'Negative ', trim(layertype), l, ' in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
                          call prterr(lundia, 'U021', trim(message))
-                         call d3stop(1, gdp)          
+                         error = .true.
+                         return
                       elseif (rtemp(nm, l) > 1.0_fp) then
                          write (message,'(a,i2,a,i2,3a,i0)')  &
                              & trim(layertype), l, ' bigger than 1 in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
                          call prterr(lundia, 'U021', trim(message))
-                         call d3stop(1, gdp)
+                         error = .true.
+                         return
                       endif
                       totfrac = totfrac + rtemp(nm,l)
                    enddo
@@ -337,7 +336,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                           & 'Sum of ', trim(layertype), ' not equal to 1 in layer ', &
                           & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
                       call prterr(lundia, 'U021', trim(message))
-                      call d3stop(1, gdp)          
+                      error = .true.
+                      return
                    else
                       totfrac = 0.0_fp
                       do l = 1, lsedtot-1
@@ -442,7 +442,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                          mfrac(l) = mfrac(l) / mfracsum
                       enddo
                       !
-                      call getporosity(gdp%gdmorlyr, mfrac, poros)
+                      call getporosity(bedcomp, mfrac, poros)
                       svf = 1.0_fp - poros
                       !
                       do l = 1, lsedtot
@@ -464,7 +464,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                          rtemp(nm, l) = rtemp(nm, l) / vfracsum
                       enddo
                       !
-                      call getporosity(gdp%gdmorlyr, mfrac, poros)
+                      call getporosity(bedcomp, mfrac, poros)
                       svf = 1.0_fp - poros
                       !
                       do l = 1, lsedtot
@@ -502,7 +502,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
                    call prterr(lundia, 'U021', trim(message))
-                   call d3stop(1, gdp)
+                   error = .true.
+                   return
                 endif
                 !
                 parname  = 'SedBed' // trim(lstr)
@@ -529,13 +530,13 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    !
                    anysedbed = .true.
                    call depfil(lundia    ,error     ,filename  , fmttmp    , &
-                             & rtemp(nmlb,l)        ,1   ,1    ,gdp%griddim)
+                             & rtemp(nmlb,l)        ,1   ,1    ,dims)
                    if (error) then
                       write (message,'(5a,i2,2a)')  &
                           & 'Error reading ', layertype, '  from ', trim(filename), &
                           & ' for layer ', ilyr, ' in file ', trim(filcomp)
                       call prterr(lundia, 'U021', trim(message))
-                      call d3stop(1, gdp)          
+                      return
                    endif
                 endif
              enddo
@@ -547,7 +548,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                     & 'No SedBed keywords found for layer ' ,ilyr, &
                     & ' in file ' ,trim(filcomp)
                 call prterr(lundia, 'U021', trim(message))
-                call d3stop(1, gdp)          
+                error = .true.
+                return
              endif
              !
              ! Check validity of input data.
@@ -564,7 +566,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                              & 'Negative ', trim(layertype), l, ' in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
                          call prterr(lundia, 'U021', trim(message))
-                         call d3stop(1, gdp)          
+                         error = .true.
+                         return
                       endif
                    enddo
                 elseif (kcs(nm) == 2 .and. ilyr == 1) then
@@ -651,7 +654,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                             mfrac(l) = mfrac(l) / mfracsum
                          enddo
                          !
-                         call getporosity(gdp%gdmorlyr, mfrac, poros)
+                         call getporosity(bedcomp, mfrac, poros)
                          svf = 1.0_fp - poros
                       else
                          svf = 1.0_fp
@@ -697,7 +700,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
               & trim(layertype), ''' specified for layer ', ilyr, &
               & ' in file ', trim(filcomp)
              call prterr(lundia, 'U021', trim(message))
-             call d3stop(1, gdp)          
+             error = .true.
+             return
           endif
           !
        enddo
@@ -708,7 +712,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     else
        write (message,'(2a)') 'Invalid file version of ', trim(filcomp)
        call prterr(lundia, 'U021', trim(message))
-       call d3stop(1, gdp)          
+       error = .true.
+       return          
     endif
     !
 end subroutine rdinimorlyr

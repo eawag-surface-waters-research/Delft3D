@@ -80,7 +80,6 @@ libIOInput_la_SOURCES = \
          rdhyvd.f90 \
          rdibch.f90 \
          rdic.f90 \
-         rdinimorlyr.f90 \
          rdirt.f90 \
          rdiwe.f90 \
          rdlaydis.f90 \

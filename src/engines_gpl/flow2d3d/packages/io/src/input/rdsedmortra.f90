@@ -111,7 +111,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     call rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              & lsedtot   ,lstsci    ,ltur      ,facdss    ,namcon    , &
              & iopsus    ,gdp%d%nmlb,gdp%d%nmub,filsed    , &
-             & sed_ptr   ,gdp%gdsedpar,gdp%gdtrapar)
+             & sed_ptr   ,gdp%gdsedpar,gdp%gdtrapar, gdp%griddim)
     if (error) goto 999
     !
     ! Read name of morphology input file

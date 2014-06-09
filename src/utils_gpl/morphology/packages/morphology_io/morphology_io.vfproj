@@ -44,6 +44,7 @@
 				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\src\rdinimorlyr.f90"/>
 		<File RelativePath=".\src\rdmor.f90"/>
 		<File RelativePath=".\src\rdmorlyr.f90"/>
 		<File RelativePath=".\src\rdsed.f90"/>

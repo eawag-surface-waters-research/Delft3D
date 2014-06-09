@@ -166,7 +166,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     call rdsed  (lundia, error, lsal, ltem, stm%lsedsus, &
                & stm%lsedtot, lstsci, ltur, stm%facdss, stm%namcon, &
                & stm%iopsus, nmlb, nmub, filsed, &
-               & sedfil_tree, stm%sedpar, stm%trapar)
+               & sedfil_tree, stm%sedpar, stm%trapar, griddim)
     !
     ! Read morphology parameters
     !

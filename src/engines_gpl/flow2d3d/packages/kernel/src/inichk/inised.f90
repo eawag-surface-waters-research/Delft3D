@@ -194,6 +194,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     sucor               => gdp%gderosed%e_scrn
     svcor               => gdp%gderosed%e_scrt
     !
+    !-------- read some more input data
+    !
     ! Start filling array SEDD50FLD
     !
     if (lsedtot==1 .and. flsdia/=' ') then
@@ -252,6 +254,14 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        pmcrit(nm) = min(pmcrit(nm), 1.0_fp)
     enddo
     !
+    ! Initialise morphology layers
+    !
+    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
+                 & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
+                 & lundia    ,error     ,kcs       ,gdp       )
+    !
+    !-------- compute derived quantities
+    !
     ! Initialise suspended sediment diameter
     !
     if (lsedtot==1 .and. lsed==1 .and. flsdia/=' ') then
@@ -304,12 +314,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
            endif
        enddo
     endif
-    !
-    ! Initialise morphology layers
-    !
-    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
-                 & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
-                 & lundia    ,error     ,kcs       ,gdp       )
     !
     ! Inilialise fractions
     !
