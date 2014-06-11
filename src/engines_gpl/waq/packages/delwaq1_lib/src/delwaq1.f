@@ -483,9 +483,9 @@
      +              noinfo       , iwar         ,
      +              ierr         )
       write ( lunrep,'(//'' Messages presented in this .lst file:'')')
-!jvb  write ( lunrep,'( /'' Number of INFOrmative messages:'',I3)') noinfo
-      write ( lunrep,'( /'' Number of WARNINGS            :'',I3)') iwar
-      write ( lunrep,'(  '' Number of ERRORS during input :'',I3)') ierr
+!jvb  write ( lunrep,'( /'' Number of INFOrmative messages:'',I6)') noinfo
+      write ( lunrep,'( /'' Number of WARNINGS            :'',I6)') iwar
+      write ( lunrep,'(  '' Number of ERRORS during input :'',I6)') ierr
       write ( lunrep,'(  '' '')')
 !
       call dlwqp1 ( lun          , lchar        ,
@@ -500,11 +500,11 @@
 !
   900 continue
       write ( lunrep,'(//'' Messages presented including .lsp file:'')')
-!jvb  write ( lunrep,'( /'' Number of INFOrmative messages:'',I3)') noinfo
+!jvb  write ( lunrep,'( /'' Number of INFOrmative messages:'',I6)') noinfo
       write ( lunrep,'(  '' Number of WARNINGS            :'',I6)') iwar
       write ( lunrep,'( /'' Number of ERRORS during input :'',I6)') ierr
-      write (   *   ,'(  '' Number of WARNINGS            :'',I3)') iwar
-      write (   *   ,'(  '' Number of ERRORS during input :'',I3)') ierr
+      write (   *   ,'(  '' Number of WARNINGS            :'',I6)') iwar
+      write (   *   ,'(  '' Number of ERRORS during input :'',I6)') ierr
       write (   *   ,'(  '' '')')
 !
       if ( ierr .eq. 0 ) then
