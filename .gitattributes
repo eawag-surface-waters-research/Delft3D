@@ -160,6 +160,7 @@ examples/07_wave/obw.mdm -text
 examples/07_wave/obw.mdw -text
 examples/07_wave/obw.obs -text
 examples/07_wave/obw.pol -text
+examples/07_wave/points.xy -text
 examples/07_wave/run_wave.bat -text
 examples/07_wave/run_wave.sh -text
 examples/run_all_examples.bat -text
