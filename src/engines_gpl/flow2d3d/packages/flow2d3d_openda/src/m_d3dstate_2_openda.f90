@@ -64,6 +64,8 @@ character(len=10),save  :: state_file_extension = '.txt'           ! default: as
 
 integer, dimension(9), save, public :: sub_core_offsets = 0
 
+logical, save :: cta_core_initialised = .false.
+
 contains
 
 !----------------------------
@@ -106,11 +108,14 @@ function d3da_create_instance() result(instance_id)
 
     if (current_instance == no_instance_yet) then
        ! First instance creation. Initialize Costa
-        call CTA_CORE_INITIALISE(ierr)
-        if (ierr .ne. 0) then
-            print *,'ERROR initializing COSTA! '
-            stop
-        endif
+       if (.not. cta_core_initialised) then
+           call CTA_CORE_INITIALISE(ierr)
+           if (ierr .ne. 0) then
+               print *,'ERROR initializing COSTA! '
+               stop
+           endif
+           cta_core_initialised = .true.
+       endif
     endif
 
     ! store current instance if needed
