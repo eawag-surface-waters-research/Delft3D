@@ -479,6 +479,7 @@
 		<File RelativePath=".\src\waq_kernel\dlwqwx.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqwy.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwsol.f"/>
+		<File RelativePath=".\src\waq_kernel\dmpsurf.f"/>
 		<File RelativePath=".\src\waq_kernel\dmpval.f"/>
 		<File RelativePath=".\src\waq_kernel\dryfld.f90"/>
 		<File RelativePath=".\src\waq_kernel\dumpconc.f"/>
@@ -561,6 +562,7 @@
 		<File RelativePath=".\src\waq_kernel\saxpy.f"/>
 		<File RelativePath=".\src\waq_kernel\scopy.f"/>
 		<File RelativePath=".\src\waq_kernel\sdot.f"/>
+		<File RelativePath=".\src\waq_kernel\segcol.f"/>
 		<File RelativePath=".\src\waq_kernel\setset.f"/>
 		<File RelativePath=".\src\waq_kernel\sgemv.f">
 			<FileConfiguration Name="Debug|Win32">
