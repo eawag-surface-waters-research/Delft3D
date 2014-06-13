@@ -1125,7 +1125,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                           & r(taubmx)   ,r(windu)  ,r(windv)  ,velt      ,r(cvalu0)   , &
                           & r(cvalv0)   ,r(cfurou) ,r(cfvrou) ,rouflo    ,r(patm)     , &
                           & r(z0ucur)   ,r(z0vcur) ,r(z0urou) ,r(z0vrou) ,ktemp       , &
-                          & r(precip)   ,gdp       )
+                          & r(precip)   ,r(evap)   ,gdp       )
              if (error) goto 9999
              if (roller) then
                 call wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &

@@ -12,7 +12,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                   & taubmx    ,windu     ,windv     ,velt      ,cvalu0    , &
                   & cvalv0    ,cfurou    ,cfvrou    ,rouflo    ,patm      , &
                   & z0ucur    ,z0vcur    ,z0urou    ,z0vrou    ,ktemp     , &
-                  & precip    ,gdp       )
+                  & precip    ,evap      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -147,6 +147,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: windu       !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: windv       !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: precip      !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: evap        !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)            , intent(in)  :: cfurou      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)            , intent(in)  :: cfvrou      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: cvalu0      !  Description and declaration in esm_alloc_real.f90
@@ -570,7 +571,13 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           endif
           if (prcp_file) then
              call addelm(nefiswrtmap,'PRECIP',' ','[  MM/H ]','REAL',4          , &
-                & 'Precipitation (zeta point)                          ', &
+                & 'Precipitation rate (zeta point)                     ', &
+                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
+          if (keva < 2) then ! if keva < 2 then evaporation is calculated by the model
+             call addelm(nefiswrtmap,'EVAP',' ','[  MM/H ]','REAL',4          , &
+                & 'Evaporation rate (zeta point)                          ', &
                 & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
@@ -1398,7 +1405,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (ierror /= 0) goto 999
     endif
     !
-    ! Output of air parameters: wind, pressure, cloudiness, relative humidity, temperature, and precipitation
+    ! Output of air parameters: wind, pressure, cloudiness, relative humidity, temperature, precipitation, and evaporation
     !
     if (flwoutput%air) then
        !
@@ -1430,6 +1437,20 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           rbuff2 = precip * 3600000.0_fp
           call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, rbuff2, 'PRECIP')
+          deallocate(rbuff2)
+          if (ierror /= 0) goto 999
+       endif
+       !
+       if (keva < 2) then
+          !
+          ! element 'EVAP'
+          !
+          ! Convert to mm/h
+          !
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2 = evap * 3600000.0_fp
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, rbuff2, 'EVAP')
           deallocate(rbuff2)
           if (ierror /= 0) goto 999
        endif
