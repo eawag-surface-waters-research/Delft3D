@@ -329,7 +329,7 @@ C*********************************************************************
                   ierr = 3
             end select
 
-         case ( 19 )                          !     monitoring file
+         case ( 19 )                          !     DELWAQ2 monitoring file (.mon)
             select case ( opmode )
                case ( 1 )
                   call dhdelf ( finam, ierr2 )
@@ -419,7 +419,7 @@ C*********************************************************************
                   ierr = 3
             end select
 
-         case ( 29 )                          !     DELWAQ1 input report file
+         case ( 29 )                          !     DELWAQ1 input report file (.lst)
             select case ( opmode )
                case ( 1 )
                   open ( lun, file = finam, err = 910 )
@@ -477,7 +477,7 @@ C*********************************************************************
                   ierr = 3
             end select
 
-         case ( 35 )                          !     DELWAQ1P report file
+         case ( 35 )                          !     DELWAQ1 proceses report file (.lsp)
             select case ( opmode )
                case ( 1 )
                   open ( lun, file = finam, err = 910 )
