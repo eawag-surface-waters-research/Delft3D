@@ -88,6 +88,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:)         , pointer :: sdbuni
     real(fp)      , dimension(:)         , pointer :: sedtrcfac
     real(fp)      , dimension(:)         , pointer :: mudcnt
+    real(fp)      , dimension(:)         , pointer :: pmcrit
     real(fp)      , dimension(:)         , pointer :: tcguni
     integer       , dimension(:)         , pointer :: nseddia
     integer       , dimension(:)         , pointer :: sedtyp
@@ -154,6 +155,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     sedtrcfac           => gdp%gdsedpar%sedtrcfac
     tcguni              => gdp%gdsedpar%tcguni
     mudcnt              => gdp%gdsedpar%mudcnt
+    pmcrit              => gdp%gdsedpar%pmcrit
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
     inisedunit          => gdp%gdsedpar%inisedunit
@@ -192,15 +194,63 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     sucor               => gdp%gderosed%e_scrn
     svcor               => gdp%gderosed%e_scrt
     !
-    !-------- read some more input data
+    ! Start filling array SEDD50FLD
     !
-    ! Initialise morphology layers
+    if (lsedtot==1 .and. flsdia/=' ') then
+       !
+       !  Space varying data has been specified
+       !  Use routine that also read the depth file to read the data
+       !
+       allocate (gdp%gdsedpar%sedd50fld(gdp%d%nmlb:gdp%d%nmub), stat = istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Inised: memory alloc error')
+          call d3stop(1, gdp)
+       endif
+       sedd50fld           => gdp%gdsedpar%sedd50fld
+       !
+       call depfil(lundia    ,error     ,flsdia    ,fmttmp    , &
+                 & sedd50fld ,1         ,1         ,gdp%griddim)
+       if (error) goto 9999
+       !
+       call mirror_bnd(icx       ,icy       ,nmmax     , &
+                     & kcs       ,sedd50fld ,nmlb      ,nmub      )
+       !
+    endif
     !
-    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
-                 & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
-                 & lundia    ,error     ,kcs       ,gdp       )
+    ! Start filling array MUDCNT
     !
-    !-------- compute derived quantities
+    if (flsmdc == ' ') then
+       !
+       ! Uniform data has been specified
+       !
+       mudcnt = mdcuni
+    else
+       !
+       ! Space varying data has been specified
+       ! Use routine that also read the depth file to read the data
+       !
+       call depfil(lundia    ,error     ,flsmdc    ,fmttmp    , &
+                 & mudcnt    ,1         ,1         ,gdp%griddim)
+       if (error) goto 9999
+    endif
+    do nm = 1, nmmax
+       mudcnt(nm) = max(0.0_fp, min(mudcnt(nm), 1.0_fp))
+    enddo
+    !
+    ! Read array PMCRIT
+    !
+    if (flspmc /= ' ') then
+       !
+       ! Space varying data has been specified
+       ! Use routine that also read the depth file to read the data
+       !
+       call depfil(lundia    ,error     ,flspmc    ,fmttmp    , &
+                 & pmcrit    ,1         ,1         ,gdp%griddim)
+       if (error) goto 9999
+    endif
+    do nm = 1, nmmax
+       pmcrit(nm) = min(pmcrit(nm), 1.0_fp)
+    enddo
     !
     ! Initialise suspended sediment diameter
     !
@@ -255,7 +305,13 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        enddo
     endif
     !
-    ! Initialise fractions
+    ! Initialise morphology layers
+    !
+    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
+                 & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
+                 & lundia    ,error     ,kcs       ,gdp       )
+    !
+    ! Inilialise fractions
     !
     call getfrac(gdp%gdmorlyr, frac     ,anymud    ,mudcnt    , &
                & mudfrac     ,gdp%d%nmlb,gdp%d%nmub)
