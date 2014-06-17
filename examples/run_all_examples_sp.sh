@@ -49,7 +49,7 @@ cd ../input
 ../../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
 cd ../..
 
-echo "Skipping testcase 06_delwaq (no sp variant)"
+echo "Skipping testcases 06_delwaq and 07_wave (no sp variant)"
 
 
 echo ...finished
