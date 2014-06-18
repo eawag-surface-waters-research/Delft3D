@@ -486,6 +486,8 @@ c         Remove defaults for DUFLOW hydro parameters, so that conversion proces
               if ( ihulp .eq. 1 ) itemde(i) = -999.
               call zoek (itemid(i)(1:5),1,'Chezy',5,ihulp)
               if ( ihulp .eq. 1 ) itemde(i) = -999.
+              call zoek (itemid(i)(1:5),1,'ITIME',5,ihulp)
+              if ( ihulp .eq. 1 ) itemde(i) = -999.
           endif
   120 continue
 
