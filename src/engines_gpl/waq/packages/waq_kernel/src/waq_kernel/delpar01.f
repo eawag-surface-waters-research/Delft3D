@@ -306,7 +306,7 @@
      &                 ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,
      &                 acf      , lunut    , kpart    , layt     , tcktot   ,
      &                 nplay    , kwaste   , nolayp   , linear   , track    ,
-     &                 nmconr   )
+     &                 nmconr   , sizep    , rhopart  , noconsp  , const   )
 
 !     write particle tracks
 
@@ -358,7 +358,10 @@
          wsettl = 1.0  ! whole array assignment
       endif
       call partvs ( lunut    , itime    , nosubs   , nopart   , ivtset   ,
-     &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   )
+     &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,
+     &              modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,
+     &              npart    , mpart    , kpart    , nosegp   , noseglp  ,
+     &              rhopart  , rhowatc  , sizep    , const    , rhow     )
 
 !      calculate actual decaycoefficient
 

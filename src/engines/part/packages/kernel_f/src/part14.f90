@@ -28,7 +28,7 @@
 module part14_mod
 
    contains
-      subroutine part14 ( itime  , idelt  , nodye  , nocont , ictime ,    &
+    subroutine part14 ( itime  , idelt  , nodye  , nocont , ictime ,    &
                           ictmax , nwaste , mwaste , xwaste , ywaste ,    &
                           zwaste , aconc  , rem    , npart  , ndprt  ,    &
                           mpart  , xpart  , ypart  , zpart  , wpart  ,    &
@@ -37,7 +37,7 @@ module part14_mod
                           ncheck , t0buoy , modtyp , abuoy  , t0cf   ,    &
                           acf    , lun2   , kpart  , layt   , tcktot ,    &
                           nplay  , kwaste , nolay  , linear , track  ,    &
-                          nmconr  )
+                          nmconr , sizep  , rhopart, noconsp, const)
 
       use precision
 
@@ -89,6 +89,10 @@ module part14_mod
       integer  ( ip), intent(in   ) :: linear (nocont)
       real     ( rp), intent(inout) :: track  (8,*)
       character( 20), intent(in   ) :: nmconr (nocont)
+      real     ( rp), intent(  in)  :: sizep  (nosubs,*)   
+      real     ( rp), intent(  out) :: rhopart  (nosubs,*) 
+      integer  ( ip), intent(in   ) :: noconsp   
+      real     ( rp), intent(in   ) :: const(*)  
 
       npart  (1) = 0
       mpart  (1) = 0

@@ -145,6 +145,7 @@ module partmem
       real     ( rp), pointer  :: tau1   (:)
       real     ( rp), pointer  :: salin  (:)
       real     ( rp), pointer  :: salin1 (:)
+      real     ( rp), pointer  :: rhowatc (:)
       real     ( rp), pointer  :: temper (:)
       real     ( rp), pointer  :: temper1(:)
       real     ( rp), pointer  :: velo   (:)
@@ -215,6 +216,8 @@ module partmem
       real     ( rp), pointer  :: decays (:)
       integer  ( ip), pointer  :: ivtime (:)
       real     ( rp), pointer  :: wpart (:,:)
+      real     ( sp), pointer  :: sizep (:,:)   
+      real     ( rp), pointer  :: rhopart (:,:) 
       real     ( rp), pointer  :: vsfour(:,:,:)
       real     ( rp), pointer  :: wsettl (:)
       integer  ( ip)              nbmax
