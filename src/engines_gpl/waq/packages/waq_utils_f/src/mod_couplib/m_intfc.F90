@@ -964,7 +964,7 @@ integer, dimension(:), allocatable :: iwork
 ! help variables for MPI-operations
 integer, parameter             :: TAG_COLCIF = 1002
 integer                        :: idest, isrc, msgtag, ierror
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 integer                        :: mpstat(MPI_STATUS_SIZE)
 #endif
 ! level of debug-output, 0=none
@@ -1011,7 +1011,7 @@ integer                        :: idebug
 !   - send array 'ihave' to master
 !   - fill in neighbour-table with 1 neighbour (master), for sending all
 !     indices marked "1" in ihave
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (mypart.eq.1) then
 
 !     Note: assuming that global adressing is used, such that nelem is
@@ -1300,7 +1300,7 @@ integer, dimension(:), allocatable :: iwork
 ! help variables for MPI-operations
 integer, parameter             :: TAG_DSTRIF = 1001
 integer                        :: idest, isrc, msgtag, ierror
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 integer                        :: mpstat(MPI_STATUS_SIZE)
 #endif
 ! level of debug-output, 0=none
@@ -1346,7 +1346,7 @@ integer                        :: idebug=0
 !   - send array 'ineed' to master
 !   - fill in neighbour-table with 1 neighbour (master), delivering all
 !     indices marked "1" in ineed
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (mypart.eq.1) then
 
 !     Note: assuming that global adressing is used, such that nelem is
@@ -1482,7 +1482,7 @@ integer, dimension(:), pointer :: iwork
 ! help variables for MPI-operations
 integer, parameter             :: TAG_UPDTIF = 1002
 integer                        :: idest, isrc, msgtag, ierror
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 integer                        :: mpstat(MPI_STATUS_SIZE)
 #endif
 ! internal value of idebug
@@ -1529,7 +1529,7 @@ integer                        :: my_idebug=0
    enddo
 
 !  allocate neighbour-table with maximum size; all processes might be neighbours
-#ifndef HAVE_MPI
+#ifndef HAVE_MPI_WAQ
    nngb = 0
    allocate(nghtbl2(nngb))
 #else

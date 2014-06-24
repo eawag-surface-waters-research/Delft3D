@@ -41,7 +41,7 @@
 !   Version 1.0  30-11-2007  initial version
 !-----------------------------------------------------------------------------
 module m_sndrcv
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 use m_timings
@@ -376,7 +376,7 @@ end subroutine sndrcv_stopmod
 !!<
 !-----------------------------------------------------------------------------
 subroutine distribute_1d_idata_on_cardset(mypart, iarray, nelem, info, idebug)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 !-- HEADER VARIABLES/ARGUMENTS
@@ -407,7 +407,7 @@ integer :: ierror
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: non-coupled run, nothing to be done'
       return
    endif
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -891,7 +891,7 @@ end subroutine accumulate_1d_idata_on_repl_namedset
 subroutine sendrecv_data(iarray, rarray, darray, presiz, namixs, possiz, &
                          namitf, ladd, comm_op, info, idebug)
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 !-- HEADER VARIABLES/ARGUMENTS
@@ -937,7 +937,7 @@ integer                                    :: elem_size
 integer                                    :: iof, nitm
 ! help variables for MPI-operations
 integer                                    :: idest, isrc, msgtag, ierror
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 integer                                    :: mpstat(MPI_STATUS_SIZE)
 #endif
 integer, dimension(:), pointer             :: ireq
@@ -965,7 +965,7 @@ integer                                    :: my_idebug
       return
    endif
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  Get optional pre- and post replication factors
 
    ipresiz = 1

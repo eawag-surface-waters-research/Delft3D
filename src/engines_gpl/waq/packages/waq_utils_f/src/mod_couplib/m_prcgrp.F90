@@ -66,7 +66,7 @@ public
 ! now we assume that processes are ordered by rank, such that the task-id of a
 ! process is itid = irank = iprc-1.
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 include 'mpif.h'
 #endif
 !integer, parameter, public :: MPI_REAL8 = MPI_DOUBLE_PRECISION
@@ -76,7 +76,7 @@ public  prcgrp_initmod
 
 ! overall MPI process group as far as CouPLib is concerned:
 ! (maybe this value should be settable by the calling program)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 integer, parameter, public   :: MPI_COMM_ALL = MPI_COMM_WORLD
 #endif
 
@@ -141,7 +141,7 @@ integer           :: supported_level
       write(*,*) 'prcgrp_initmod: Error: called for the second time.'
       return
    end if
-#ifndef HAVE_MPI
+#ifndef HAVE_MPI_WAQ
      numprc = 1
      iscple = 0
      myrank = 0

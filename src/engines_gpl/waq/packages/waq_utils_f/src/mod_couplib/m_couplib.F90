@@ -282,7 +282,7 @@ integer     :: ierr
 !-----------------------------------------------------------------------------
 
    call sndrcv_stopmod()
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    call mpi_finalize(ierr)
 #endif   
 end subroutine couplib_stop

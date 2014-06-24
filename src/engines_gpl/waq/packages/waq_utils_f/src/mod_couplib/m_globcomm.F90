@@ -41,7 +41,7 @@
 !   Version 1.0  30-11-2007  initial version
 !-----------------------------------------------------------------------------
 module m_globcomm
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 use m_timings
@@ -111,7 +111,7 @@ contains
 !!<
 !-----------------------------------------------------------------------------
 subroutine globcomm_initmod(idebug)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -143,7 +143,7 @@ integer         :: i, ierr
 
    end if
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !     Register subroutine for global operation CP_MAX1
 
       if (my_idebug.ge.2) write(LOUT,*) 'globcomm_initmod: register operation',&
@@ -192,7 +192,7 @@ end subroutine globcomm_initmod
 !!<
 !-----------------------------------------------------------------------------
 subroutine sync_processes()
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -205,7 +205,7 @@ integer     :: ierr
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (use_timers) call timer_start(itimer_commop(ISYNCTM,ISYNCHR))
    call mpi_barrier(MPI_COMM_ALL, ierr)
    if (use_timers) call timer_stop(itimer_commop(ISYNCTM,ISYNCHR))
@@ -234,7 +234,7 @@ end subroutine sync_processes
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_1d_idata(iarray, numval, oper, info)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -254,7 +254,7 @@ integer         :: mpi_op
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -311,7 +311,7 @@ end subroutine combine_1d_idata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_1d_rdata(rarray, numval, oper, info)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -330,7 +330,7 @@ integer         :: mpi_op
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -387,7 +387,7 @@ end subroutine combine_1d_rdata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_1d_ddata(darray, numval, oper, info)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -407,7 +407,7 @@ integer         :: mpi_op
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -466,7 +466,7 @@ end subroutine combine_1d_ddata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_2d_idata(iarray, lenvec, numvec, oper, info)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -486,7 +486,7 @@ integer         :: mpi_op, mpi_type
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  for element-wise operations: call 1D version of this routine
 
    if (oper.eq.CP_SUM .or. oper.eq.CP_MAX .or. oper.eq.CP_MIN) then
@@ -566,7 +566,7 @@ end subroutine combine_2d_idata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_2d_rdata(rarray, lenvec, numvec, oper, info)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -586,7 +586,7 @@ integer         :: mpi_op, mpi_type
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  for element-wise operations: call 1D version of this routine
 
    if (oper.eq.CP_SUM .or. oper.eq.CP_MAX .or. oper.eq.CP_MIN) then
@@ -666,7 +666,7 @@ end subroutine combine_2d_rdata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_2d_ddata(darray, lenvec, numvec, oper, info)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -686,7 +686,7 @@ integer         :: mpi_op, mpi_type
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 !  for element-wise operations: call 1D version of this routine
 
    if (oper.eq.CP_SUM .or. oper.eq.CP_MAX .or. oper.eq.CP_MIN) then
@@ -762,7 +762,7 @@ end subroutine combine_2d_ddata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_oper_imax1(iarr1, iarr2, numvec, itype)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -778,7 +778,7 @@ integer         :: ndim, ivec, iel, iof, ierr
 !-----------------------------------------------------------------------------
    if (iscple.eq.0) return
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 
 !  determine the number of data-items per vector
 
@@ -806,7 +806,7 @@ end subroutine combine_oper_imax1
 
 
 subroutine combine_oper_rmax1(rarr1, rarr2, numvec, itype)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -819,7 +819,7 @@ integer,                    intent(in)    :: numvec, itype
 integer         :: ndim, ivec, iel, iof, ierr
 
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 
    call mpi_type_size(itype, ndim, ierr)
    ndim = ndim / 4
@@ -836,7 +836,7 @@ end subroutine combine_oper_rmax1
 
 
 subroutine combine_oper_dmax1(darr1, darr2, numvec, itype)
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -849,7 +849,7 @@ integer,                    intent(in)    :: numvec, itype
 integer         :: ndim, ivec, iel, iof, ierr
 
    if (iscple.eq.0) return
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 
    call mpi_type_size(itype, ndim, ierr)
    ndim = ndim / 8

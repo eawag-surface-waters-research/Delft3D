@@ -55,7 +55,7 @@ end subroutine distribute_0d_ldata_on_cardset
 
 subroutine distribute_1d_ldata_on_cardset(mypart, larray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 implicit none
@@ -82,7 +82,7 @@ integer :: ierror
       return
    endif
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -191,7 +191,7 @@ end subroutine distribute_0d_rdata_on_cardset
 
 subroutine distribute_1d_rdata_on_cardset(mypart, rarray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 implicit none
@@ -218,7 +218,7 @@ integer :: ierror
       return
    endif
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -308,7 +308,7 @@ end subroutine distribute_0d_ddata_on_cardset
 
 subroutine distribute_1d_ddata_on_cardset(mypart, darray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 implicit none
@@ -335,7 +335,7 @@ integer :: ierror
       return
    endif
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -406,7 +406,7 @@ end subroutine distribute_4d_ddata_on_cardset
 
 subroutine distribute_1d_cdata_on_cardset(mypart, carray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
 use mpi
 #endif
 
@@ -434,7 +434,7 @@ integer :: my_idebug
       return
    endif
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_WAQ
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
