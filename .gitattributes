@@ -4020,7 +4020,9 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/Bu_10.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/Cat_12.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/GrMg_16.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/RdYlBu_11b.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/Shepard_class.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/StepSeq_25.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/USDA_class.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/autumn.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/avs.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/bluemap.clrmap -text
