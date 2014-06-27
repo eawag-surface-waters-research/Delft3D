@@ -39,6 +39,7 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -107,9 +108,9 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
              exit
           endif
           write (cnum(1), '(i12)') ittaru(itt, 1)
-          call noextspaces(cnum(1)   ,numlen(1) )
+          call remove_leading_spaces(cnum(1)   ,numlen(1) )
           write (cnum(2), '(i12)') ittaru(itt, 2)
-          call noextspaces(cnum(2)   ,numlen(2) )
+          call remove_leading_spaces(cnum(2)   ,numlen(2) )
           cmsg = 'Trachytopes in ' // cdir // '-Direction, ' //                 &
                & 'N, M out of Range: N = ' // cnum(1)(1:numlen(1))              &
                & // ', M = ' // cnum(2)(1:numlen(2))
@@ -157,7 +158,7 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
              exit
           endif
           write (cnum(1), '(i12)') ittaru(itt, 3)
-          call noextspaces(cnum(1)   ,numlen(1) )
+          call remove_leading_spaces(cnum(1)   ,numlen(1) )
           cmsg = 'Trachytope in ' // cdir // '-Direction ' //                   &
                & 'not defined, Number: ' // cnum(1)(1:numlen(1))
           call prterr(lundia    ,'J001'    ,cmsg      )

@@ -42,6 +42,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     use system_utils, only: exifil
     !
@@ -81,7 +82,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
 !
     ! define length of runid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! test file existence and if so read
     !

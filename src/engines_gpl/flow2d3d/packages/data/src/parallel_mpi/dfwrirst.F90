@@ -41,6 +41,7 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -192,7 +193,7 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
        !
        ! get file name and test file existence
        !
-       call noextspaces(runid     ,lrid      )
+       call remove_leading_spaces(runid     ,lrid      )
        !
        filrst(:8 + lrid) = 'tri-rst.' // runid(:lrid)
        lend = 8 + lrid + 16

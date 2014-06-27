@@ -39,6 +39,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     use precision
     use properties
     use globaldata
+    use string_module
     use dfparall
     use system_utils, only: exifil
     !
@@ -270,7 +271,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     lfile = index(filtmp, ' ')
     if (lfile==0) lfile = 13
     lfile = lfile - 1
-    call noextspaces(filtmp    ,lfile     )
+    call remove_leading_spaces(filtmp    ,lfile     )
     if (.not.exifil(filtmp, lundia)) then
        !
        ! file does not exist !!
@@ -417,7 +418,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        error  = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       call noextspaces(rec132    ,lcurec    )
+       call remove_leading_spaces(rec132    ,lcurec    )
        errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
        call prterr(lundia    ,'G007'    ,errmsg    )
        goto 199
@@ -444,7 +445,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
              error  = .true.
              rec132 = ' '
              write (rec132, '(i12)') mcurec
-             call noextspaces(rec132    ,lcurec    )
+             call remove_leading_spaces(rec132    ,lcurec    )
              errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
              call prterr(lundia    ,'J014'    ,errmsg    )
              goto 199
@@ -465,7 +466,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
              error  = .true.
              rec132 = ' '
              write (rec132, '(i12)') mcurec
-             call noextspaces(rec132    ,lcurec    )
+             call remove_leading_spaces(rec132    ,lcurec    )
              errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
              call prterr(lundia    ,'G007'    ,errmsg    )
              goto 199
@@ -503,7 +504,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           error  = .true.
           rec132 = ' '
           write (rec132, '(i12)') mcurec
-          call noextspaces(rec132    ,lcurec    )
+          call remove_leading_spaces(rec132    ,lcurec    )
           errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
           call prterr(lundia    ,'J005'    ,errmsg    )
           goto 199
@@ -515,7 +516,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        error  = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       call noextspaces(rec132    ,lcurec    )
+       call remove_leading_spaces(rec132    ,lcurec    )
        errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
        call prterr(lundia    ,'G007'    ,errmsg    )
        goto 199
@@ -625,7 +626,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        lfile = index(filtmp, ' ')
        if (lfile==0) lfile = 13
        lfile = lfile - 1
-       call noextspaces(filtmp    ,lfile     )
+       call remove_leading_spaces(filtmp    ,lfile     )
        if (.not.exifil(filtmp, lundia)) then
           !
           ! file does not exist !!
@@ -672,7 +673,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        lfile = index(filtmp, ' ')
        if (lfile==0) lfile = 13
        lfile = lfile - 1
-       call noextspaces(filtmp    ,lfile     )
+       call remove_leading_spaces(filtmp    ,lfile     )
        if (.not.exifil(filtmp, lundia)) then
           !
           ! file does not exist !!

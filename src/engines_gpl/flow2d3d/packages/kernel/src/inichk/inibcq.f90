@@ -40,6 +40,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -103,7 +104,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
     !
     ! Define length of RUNID
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     filnam = 'TMP_' // runid(:lrid) // '.bcq'
     !

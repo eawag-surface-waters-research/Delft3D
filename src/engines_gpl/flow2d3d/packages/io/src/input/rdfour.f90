@@ -38,6 +38,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -126,7 +127,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        !-------define length of file name
        !
-       call noextspaces(filfou    ,lfile     )
+       call remove_leading_spaces(filfou    ,lfile     )
        !
        !-------test file existence <YES>
        !

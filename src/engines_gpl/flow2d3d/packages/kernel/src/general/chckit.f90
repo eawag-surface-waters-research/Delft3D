@@ -39,6 +39,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -68,7 +69,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
     real(fp)                       :: t
     character(256)                 :: errmsg
     character(256)                 :: localfilnam !!  copy of filnam; needed because chckit can be called with a constant string. 
-                                                  !!  That causes problems for NOEXTSPACES. 
+                                                  !!  That causes problems for remove_leading_spaces. 
 !
 !
 !! executable statements -------------------------------------------------------
@@ -77,7 +78,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
     ! Strip blanks from file name
     !
     localfilnam = filnam
-    call noextspaces(localfilnam, namlen)
+    call remove_leading_spaces(localfilnam, namlen)
     !
     ! NOTE: in future interpolation over DT should be possible
     ! CHECK TIMES

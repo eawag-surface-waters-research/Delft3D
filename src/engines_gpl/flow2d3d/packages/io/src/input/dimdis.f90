@@ -40,6 +40,7 @@ subroutine dimdis(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -163,7 +164,7 @@ subroutine dimdis(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        ! test file existence
        !
-       call noextspaces(filtmp    ,lfile     )
+       call remove_leading_spaces(filtmp    ,lfile     )
        !
        if (exifil(filtmp, lundia)) then
           !

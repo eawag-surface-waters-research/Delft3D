@@ -39,7 +39,7 @@ subroutine putgtc(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
+    use string_module
     !
     implicit none
 !
@@ -141,11 +141,11 @@ subroutine putgtc(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
     ind                 = len_trim(filnam)+1
     datnam              = filnam
     datnam(ind:ind + 3) = '.dat'
-    call noextspaces(datnam    ,datlen    )
+    call remove_leading_spaces(datnam    ,datlen    )
     !
     defnam              = filnam
     defnam(ind:ind + 3) = '.def'
-    call noextspaces(defnam    ,deflen    )
+    call remove_leading_spaces(defnam    ,deflen    )
     !
     ! write or read data from nefis files
     !

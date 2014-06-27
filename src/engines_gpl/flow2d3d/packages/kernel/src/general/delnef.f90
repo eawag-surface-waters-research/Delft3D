@@ -37,6 +37,7 @@ subroutine delnef(filnam, gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -61,7 +62,7 @@ subroutine delnef(filnam, gdp)
     !
     locfnm = ' '
     locfnm = filnam
-    call noextspaces(locfnm    ,ind       )
+    call remove_leading_spaces(locfnm    ,ind       )
     !
     ! test files existence
     !

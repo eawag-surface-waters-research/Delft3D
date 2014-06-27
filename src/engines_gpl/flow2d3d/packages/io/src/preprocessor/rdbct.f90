@@ -45,6 +45,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     use precision
     use flow_tables
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -214,7 +215,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! Set name for the parameters, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.bct'
           !
           ! Check filename and access
@@ -251,7 +252,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! define length of file name
           !
-          call noextspaces(filbct    ,lf        )
+          call remove_leading_spaces(filbct    ,lf        )
           !
           ! test file existence <YES> -> open file <NO> -> error
           !
@@ -330,7 +331,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! Set name for the parameters, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.bct'
           !
           ! Open file only in case NRVER =< 249, which always the

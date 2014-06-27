@@ -38,6 +38,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -173,7 +174,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
         !
         ! write start date and time to LUNPRT
         !
-       call noextspaces(gdp%runid, lrid)
+       call remove_leading_spaces(gdp%runid, lrid)
        lridmx = min(lrid, 47)
        !
        ! Date and time
@@ -259,11 +260,11 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
 !          ind                 = len_trim(filnam)+1
 !          datnam              = filnam
 !          datnam(ind:ind + 3) = '.dat'
-!          call noextspaces(datnam, datlen)
+!          call remove_leading_spaces(datnam, datlen)
 !          !
 !          defnam              = filnam
 !          defnam(ind:ind + 3) = '.def'
-!          call noextspaces(defnam, deflen)
+!          call remove_leading_spaces(defnam, deflen)
 !          !
 !          fd_nef      = 0
 !          ierror      = 0

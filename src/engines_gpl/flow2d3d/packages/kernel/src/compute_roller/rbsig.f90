@@ -77,6 +77,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
     use precision
     use mathconsts
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -128,7 +129,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
     timtap    => gdp%gdbcdat%timtap
     depbnd    => gdp%gdbcdat%depbnd
     !
-    call noextspaces(filrol    ,lfile     )
+    call remove_leading_spaces(filrol    ,lfile     )
     !
     inquire (file = filrol(1:lfile), exist = ex)
     if (ex) then

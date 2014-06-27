@@ -107,7 +107,7 @@ subroutine endscr(lunscr    ,merr      ,mwarn     ,date     ,time      , &
     write (lunscr, '(a)') txtfil(1)
     write (lunscr, '(a)') txtfil(4)
     write (lunscr, '(a)') txtfil(1)
-    call noextspaces(runid     ,lenrun    )
+    call remove_leading_spaces(runid     ,lenrun    )
     !
     !-----Use original layout only when len(runid)<=3
     !

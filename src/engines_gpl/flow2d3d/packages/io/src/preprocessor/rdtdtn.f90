@@ -43,6 +43,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -146,8 +147,8 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     interp = 'Y'
     irec   = 0
     !
-    call noextspaces(filout    ,lflout    )
-    call noextspaces(filbct    ,lfbct     )
+    call remove_leading_spaces(filout    ,lflout    )
+    call remove_leading_spaces(filbct    ,lfbct     )
     !
     ! Define parameter name for time column
     !

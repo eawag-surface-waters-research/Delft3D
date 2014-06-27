@@ -46,6 +46,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -208,7 +209,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! Set name for the constituents, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.bcc'
           !
           ! Check filename and access
@@ -245,7 +246,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! define length of file name
           !
-          call noextspaces(filbcc    ,lf        )
+          call remove_leading_spaces(filbcc    ,lf        )
           !
           ! Test file existence <YES> -> open file <NO> -> error
           !
@@ -323,7 +324,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! Set name for the constituents, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.bcc'
           !
           ! Open file only in case NRVER =< 249, which always the

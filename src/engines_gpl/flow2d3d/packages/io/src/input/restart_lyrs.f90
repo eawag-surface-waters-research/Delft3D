@@ -39,6 +39,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !!--declarations----------------------------------------------------------------
     use precision 
     use globaldata
+    use string_module
     use bedcomposition_module
     use dfparall
     !
@@ -130,7 +131,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     error        = .false.
     success      = .false.
     layerfrac    = 0
-    call noextspaces(restid    ,lrid      )
+    call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file
     !

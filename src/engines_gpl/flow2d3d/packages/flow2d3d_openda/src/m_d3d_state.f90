@@ -149,7 +149,7 @@ contains
    if (.false.) then
      ! doe dit nog even niet. Voorlopig willen we alleen bij mode 0 uitvoer schrijven!
      tmpchar = d3d_state%pseudo%trifil
-     call noextspaces(tmpchar, ic)
+     call remove_leading_spaces(tmpchar, ic)
      d3d_state%pseudo%trifil(1:ic) = tmpchar(1:ic)
      d3d_state%pseudo%trifil(ic+1:ic+3) = ch_imode(1:3)
 

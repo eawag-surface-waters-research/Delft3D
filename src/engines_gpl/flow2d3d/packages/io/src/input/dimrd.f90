@@ -61,6 +61,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     use dfparall
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -242,7 +243,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     ! define length of runid and put in fixed size array
     ! size is tested in iniid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     fixid(1:lrid) = runid(1:lrid)
     !
     ! calculate = sign

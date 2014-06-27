@@ -60,7 +60,6 @@
 		<File RelativePath=".\src\get_vegi_map.f90"/>
 		<File RelativePath=".\src\get_visc.f90"/>
 		<File RelativePath=".\src\get_wind.f90"/>
-		<File RelativePath=".\src\noextspaces.f90"/>
 		<File RelativePath=".\src\out2d.f90"/>
 		<File RelativePath=".\src\put_wave_fields.f90"/>
 		<File RelativePath=".\src\putgtc.f90"/>

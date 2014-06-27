@@ -40,18 +40,19 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
 !!--pseudo code and references-------------------------------------------------- 
 ! NONE 
 !!--declarations---------------------------------------------------------------- 
-    use precision 
-    use flow2d3d_timers 
+    use precision
+    use flow2d3d_timers
     ! 
-    use globaldata 
+    use globaldata
+    use string_module
     ! 
-    implicit none 
+    implicit none
     ! 
     ! parameters (hard coded, fixed dimensions)
     !
-    include 'pardef.igd'         
+    include 'pardef.igd'
     !
-    type(globdat),target :: gdp 
+    type(globdat),target :: gdp
     ! 
     ! The following list of pointer parameters is used to point inside the gdp structure 
     ! 
@@ -457,7 +458,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         ! 
         ! Define length of runid 
         ! 
-        call noextspaces(runid     ,lrid      ) 
+        call remove_leading_spaces(runid     ,lrid      ) 
         ! 
         ! Read processes and dimensions 
         ! 

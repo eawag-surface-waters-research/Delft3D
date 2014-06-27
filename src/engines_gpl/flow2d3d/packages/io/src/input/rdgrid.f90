@@ -55,6 +55,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     use properties
     !
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -206,7 +207,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     ! define length of runid and put in fixed size array
     ! size is tested in iniid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     fixid(1:lrid) = runid(1:lrid)
     !=======================================================================
     !
@@ -297,7 +298,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        ! append node number to file name in case of parallel computing within single-domain case
        !
        if ( parll ) then
-          call noextspaces(filnam,lfnm)
+          call remove_leading_spaces(filnam,lfnm)
           write(filnam(lfnm+1:lfnm+4),666) inode
        endif
        open (lundry, file = trim(filnam), form = 'unformatted', status = 'unknown')
@@ -496,7 +497,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        ! append node number to file name in case of parallel computing within single-domain case
        !
        if ( parll ) then
-          call noextspaces(filnam,lfnm)
+          call remove_leading_spaces(filnam,lfnm)
           write(filnam(lfnm+1:lfnm+4),666) inode
        endif
        open (luntd, file = trim(filnam), form = 'unformatted', status = 'unknown')
@@ -697,7 +698,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     ! append node number to file name in case of parallel computing within single-domain case
     !
     if ( parll ) then
-       call noextspaces(filnam,lfnm)
+       call remove_leading_spaces(filnam,lfnm)
        write(filnam(lfnm+1:lfnm+4),666) inode
     endif
     open (luncut, file = trim(filnam), form = 'unformatted', status = 'unknown')
@@ -750,7 +751,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     ! append node number to file name in case of parallel computing within single-domain case
     !
     if ( parll ) then
-       call noextspaces(filnam,lfnm)
+       call remove_leading_spaces(filnam,lfnm)
        write(filnam(lfnm+1:lfnm+4),666) inode
     endif
     open (lun45, file = trim(filnam), form = 'unformatted', status = 'unknown')

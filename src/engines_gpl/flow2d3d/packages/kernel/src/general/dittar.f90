@@ -39,6 +39,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -96,7 +97,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
     !
     ! test file existence
     !
-    call noextspaces(filnam    ,lfile     )
+    call remove_leading_spaces(filnam    ,lfile     )
     if (.not.exifil(filnam, lundia)) then
        !
        ! file does not exist !!
@@ -150,7 +151,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
        error = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec + 1
-       call noextspaces(rec132    ,lcurec    )
+       call remove_leading_spaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
        call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)
@@ -201,7 +202,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
        error = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       call noextspaces(rec132    ,lcurec    )
+       call remove_leading_spaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
        call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)

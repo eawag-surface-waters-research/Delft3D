@@ -46,6 +46,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use properties
     use system_utils, only: exifil
     !
@@ -91,7 +92,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
     !
     ! Define length of runid
     !
-    call noextspaces(runid, lrid)
+    call remove_leading_spaces(runid, lrid)
     !  
     ! Check keyword 'ReTMP' which defines if temporary files 
     ! have to be reused if possible        

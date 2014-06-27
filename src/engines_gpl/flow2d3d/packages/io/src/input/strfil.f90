@@ -40,6 +40,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     use system_utils, only: exifil
     !
@@ -157,7 +158,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
     !
     ! test file existence, if so read
     !
-    call noextspaces(filstr    ,lfile     )
+    call remove_leading_spaces(filstr    ,lfile     )
     if (exifil(filstr, lundia)) then
        !
        ! file = exist

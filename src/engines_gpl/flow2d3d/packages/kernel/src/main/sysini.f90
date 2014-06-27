@@ -41,6 +41,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     use precision
     use mathconsts
     use globaldata
+    use string_module
     use deltares_common_version_module
     use dfparall
     !
@@ -180,7 +181,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     call iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              & gdp       )
     if (error) goto 9999
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     if (.not.parll .or. (parll .and. inode==master)) then
        if (soort == 'tdatom') then
           write (lunscr, '(a,a)') '            runid : ', runid(:lrid)
@@ -197,7 +198,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     date(8:8)  = '-'
     date(9:10) = rundat(9:10)
     !
-    call noextspaces(filmd     ,lfil      )
+    call remove_leading_spaces(filmd     ,lfil      )
     !
     ! get source code location
     !

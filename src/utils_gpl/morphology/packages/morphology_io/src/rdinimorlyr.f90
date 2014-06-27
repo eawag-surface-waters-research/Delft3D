@@ -40,6 +40,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     use precision
     use bedcomposition_module
     use properties
+    use string_module, only: remove_leading_spaces
     use grid_dimens_module, only: griddimtype
     use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
     !
@@ -240,7 +241,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 write(lstr,'(i10)') l
                 length = 10
-                call noextspaces(lstr, length)
+                call remove_leading_spaces(lstr, length)
                 !
                 ! Keyword SedBed<i> may not be used when layertype is fraction
                 !
@@ -489,7 +490,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 write(lstr,'(i10)') l
                 length = 10
-                call noextspaces(lstr, length)
+                call remove_leading_spaces(lstr, length)
                 !
                 ! Keyword Fraction<i> may not be used when layertype is sediment
                 !

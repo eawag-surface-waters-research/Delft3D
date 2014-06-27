@@ -41,6 +41,7 @@ subroutine inibcc(lundia    ,error     ,runid     ,timnow    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -112,7 +113,7 @@ subroutine inibcc(lundia    ,error     ,runid     ,timnow    , &
     itdate  => gdp%gdexttim%itdate
     tstop   => gdp%gdexttim%tstop
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     filnam = 'TMP_' // runid(:lrid) // '.bcc'
     !

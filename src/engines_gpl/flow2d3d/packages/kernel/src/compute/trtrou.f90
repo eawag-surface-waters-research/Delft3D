@@ -42,6 +42,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     use precision
     use mathconsts
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -670,9 +671,9 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              thetag = u2dh**2/(rcgrn**2*relden*d50)
              if (thetag<=0.0) then
                 write (cnum(1), '(i12)') nc
-                call noextspaces(cnum(1)   ,numlen(1) )
+                call remove_leading_spaces(cnum(1)   ,numlen(1) )
                 write (cnum(2), '(i12)') mc
-                call noextspaces(cnum(2)   ,numlen(2) )
+                call remove_leading_spaces(cnum(2)   ,numlen(2) )
                 cmsg = cnum(1)(1:numlen(1)) // ', ' // cnum(2)(1:numlen(2))
                 call prterr(lundia    ,'J015'    ,cmsg      )
                 call d3stop(1, gdp)
@@ -682,9 +683,9 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              if (thetag>=1.0_fp) then
                 write (cnum(1), '(i12)') nc
-                call noextspaces(cnum(1)   ,numlen(1) )
+                call remove_leading_spaces(cnum(1)   ,numlen(1) )
                 write (cnum(2), '(i12)') mc
-                call noextspaces(cnum(2)   ,numlen(2) )
+                call remove_leading_spaces(cnum(2)   ,numlen(2) )
                 cmsg = cnum(1)(1:numlen(1)) // ', ' // cnum(2)(1:numlen(2))
                 call prterr(lundia    ,'J016'    ,cmsg      )
                 call d3stop(1, gdp)

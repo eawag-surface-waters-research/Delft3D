@@ -42,6 +42,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -157,7 +158,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! test file existence, if so read
     !
-    call noextspaces(filq2e    ,lfile     )
+    call remove_leading_spaces(filq2e    ,lfile     )
     inquire (file = filq2e(1:lfile), exist = ex)
     if (ex) then
        !

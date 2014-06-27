@@ -56,6 +56,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     ! global data declaration; compare with include 'globdat.igd'
     !
     use globaldata
+    use string_module
     implicit none
     type(globDat)  , target   :: gdp
     !
@@ -277,7 +278,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     !
     ! Start FLOW simulation program
     !
-    call noextspaces(runid     ,lenid     )
+    call remove_leading_spaces(runid     ,lenid     )
     if (init) then
        !
        ! Read  dimensions of arrays and declare array pointers
@@ -323,7 +324,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     ! NOTE: case may never be only blanks
     !
     case = runid
-    call noextspaces(case      ,ic        )
+    call remove_leading_spaces(case      ,ic        )
     !
     comfil(1:4) = 'com-'
     comfil(5:)  = case(1:ic)
@@ -366,6 +367,7 @@ end function trisim_init
 !----------------------------------------------------------------------
 integer function trisim_step(olv_handle, gdp) result(retval)
     use globaldata
+    use string_module
     use d3d_olv_class
     !
     implicit none
@@ -393,6 +395,7 @@ end function trisim_step
 !-----------------------------------------------------------------------
 integer function trisim_finish(olv_handle, gdp) result(retVal)
     use globaldata
+    use string_module
     use dfparall
     use d3d_olv_class
     !    
@@ -439,6 +442,7 @@ integer function trisim_close(gdp) result (retval)
     use flow2d3d_timers
     use meteo
     use globaldata
+    use string_module
     !    
     implicit none
     !    
@@ -531,6 +535,7 @@ end function trisim_close
 !==============================================================================
 integer function trisim_initialise_single_step(gdp) result(retval)
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -559,6 +564,7 @@ end function trisim_initialise_single_step
 !==============================================================================
 integer function trisim_prepare_next_step(gdp) result(retval)
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -584,6 +590,7 @@ end function trisim_prepare_next_step
 !==============================================================================
 integer function trisim_check_step(gdp) result(retval)
     use globaldata
+    use string_module
     !
     implicit none
     !

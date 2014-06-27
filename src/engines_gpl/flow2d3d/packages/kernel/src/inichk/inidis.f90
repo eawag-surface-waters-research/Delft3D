@@ -45,6 +45,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -171,7 +172,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     !
     ! define length of RUNID
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! Time dependent discharges
     !

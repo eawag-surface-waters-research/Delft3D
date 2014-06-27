@@ -54,6 +54,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -241,7 +242,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! Set name for the constituents, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.dis'
           !
           ! Check filename and access
@@ -278,7 +279,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! define length of file name
           !
-          call noextspaces(fildis    ,lf        )
+          call remove_leading_spaces(fildis    ,lf        )
           !
           ! test file existence <YES> -> open file <NO> -> error
           !
@@ -357,7 +358,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! Set name for the parameters, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.dis'
           !
           ! Open file only in case NRVER =< 249, which always the

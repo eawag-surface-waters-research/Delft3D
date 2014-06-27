@@ -40,6 +40,7 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -149,7 +150,7 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
           commrd = .false.
        elseif (ierr== - 20011) then
           luntmp = newlun(gdp)
-          call noextspaces(comfil    ,lfil      )
+          call remove_leading_spaces(comfil    ,lfil      )
           fixcom(1:lfil) = comfil(1:lfil)
           open (luntmp, file = fixcom(1:lfil) // '.def')
           read (luntmp, '(a)') cdummy

@@ -48,6 +48,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     use mathconsts
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -288,11 +289,11 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
        ind = len_trim(comfil)+1
        datnam              = comfil
        datnam(ind:ind + 3) = '.dat'
-       call noextspaces(datnam, datlen)
+       call remove_leading_spaces(datnam, datlen)
        !
        defnam              = comfil
        defnam(ind:ind + 3) = '.def'
-       call noextspaces(defnam, deflen)
+       call remove_leading_spaces(defnam, deflen)
        !
        ! Read the actual COM-file version from the COM-file
        !

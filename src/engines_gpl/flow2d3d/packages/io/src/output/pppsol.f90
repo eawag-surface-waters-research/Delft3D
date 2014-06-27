@@ -41,6 +41,7 @@ subroutine pppsol(mmax      ,nmax      ,kmax      ,lstsci    ,ltur      , &
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -88,7 +89,7 @@ subroutine pppsol(mmax      ,nmax      ,kmax      ,lstsci    ,ltur      , &
 !! executable statements -------------------------------------------------------
 !
     ddb = gdp%d%ddbound
-    call noextspaces(runid     ,lenid     )
+    call remove_leading_spaces(runid     ,lenid     )
     filnam = 'tstprt.' // runid(:lenid)
     lunsol = newlun(gdp)
     open (lunsol, file = filnam)

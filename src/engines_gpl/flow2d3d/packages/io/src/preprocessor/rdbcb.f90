@@ -47,6 +47,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -120,11 +121,11 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !-----read data from external file
     !
     if (filbcb/=fildef) then
-       call noextspaces(runid     ,lrid      )
+       call remove_leading_spaces(runid     ,lrid      )
        !
        !-------define length of file name
        !
-       call noextspaces(filbcb    ,lf        )
+       call remove_leading_spaces(filbcb    ,lf        )
        !
        !-------test file existence <YES> -> open file <NO> -> error
        !

@@ -36,6 +36,8 @@ function open_datdef(filnam    ,fds       )
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+    use string_module
+!
     implicit none
 !
 ! Global variables
@@ -54,7 +56,7 @@ function open_datdef(filnam    ,fds       )
 !
 !! executable statements -------------------------------------------------------
 !
-    call noextspaces(filnam    ,len_fn    )
+    call remove_leading_spaces(filnam    ,len_fn    )
     dat_file = filnam(1:len_fn)//'.dat'
     def_file = filnam(1:len_fn)//'.def'
     !

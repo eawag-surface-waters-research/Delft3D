@@ -41,6 +41,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
     use precision
     use mathconsts
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -133,7 +134,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
     !
     !-------define length of file name
     !
-    call noextspaces(filfou, lfile)
+    call remove_leading_spaces(filfou, lfile)
     !
     errmsg = 'Times in file ' // filfou(1:lfile)
     cdummy = ' '

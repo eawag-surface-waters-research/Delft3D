@@ -42,6 +42,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -135,7 +136,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     npara = 2 + lstsc + 2
     allocate(parrd(npara))
     !
-    call noextspaces(filout    ,lflout    )
+    call remove_leading_spaces(filout    ,lflout    )
     !
     ! Determine the record length for direct access file and the
     ! corresponding format

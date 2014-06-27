@@ -35,7 +35,6 @@ libio_la_SOURCES = \
          get_vegi_map.f90 \
          get_visc.f90 \
          get_wind.f90 \
-         noextspaces.f90 \
          out2d.f90 \
          put_wave_fields.f90 \
          putgtc.f90 \

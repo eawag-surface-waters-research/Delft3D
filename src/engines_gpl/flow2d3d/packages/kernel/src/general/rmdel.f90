@@ -38,6 +38,7 @@ subroutine rmdel(filnam    ,gdp       )
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -60,7 +61,7 @@ subroutine rmdel(filnam    ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
-    call noextspaces(filnam    ,lfil      )
+    call remove_leading_spaces(filnam    ,lfil      )
     inquire (file = filnam(:lfil), exist = ex)
     if (ex) then
        inquire (file = filnam(:lfil), opened = ex)

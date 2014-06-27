@@ -43,6 +43,7 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     use precision
     use dfparall
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -125,7 +126,7 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     ! define length of runid and put in fixed size array
     ! size is tested in iniid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     fixid(1:lrid) = runid(1:lrid)
     !
     ! open unformatted scratch file for grid (see rdgrid)

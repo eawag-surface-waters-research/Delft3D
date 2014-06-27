@@ -38,6 +38,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
 !!--declarations----------------------------------------------------------------
     use precision 
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -85,7 +86,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     nullify(sbuff)
     error        = .false.
     success      = .false.
-    call noextspaces(restid    ,lrid      )
+    call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file
     !

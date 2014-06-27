@@ -43,6 +43,7 @@ subroutine prterr(lundia, msgno, filtxt)
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -59,7 +60,7 @@ subroutine prterr(lundia, msgno, filtxt)
     integer        :: ip         ! Help var. 
     integer        :: msglen     ! Help var.; length of MSG 
     integer        :: oldlen     ! Help var.; length of MSGOLD 
-    character(300) :: filtxtcopy ! copy of FILTXT (needed in NOEXTSPACES call) 
+    character(300) :: filtxtcopy ! copy of FILTXT (needed in remove_leading_spaces call) 
     character(300) :: msg        ! Message output to LUNOUT 300 = 256 + a bit (field, =, ##, etc.) 
     character(300) :: msgold     ! Help var. to store MSG 300 = 256 + a bit (field, =, ##, etc.) 
 !
@@ -804,14 +805,14 @@ subroutine prterr(lundia, msgno, filtxt)
     msgold = msg
     msg = ' '
     ip = index(msgold, '#')
-    call noextspaces(msgold    ,oldlen    )
+    call remove_leading_spaces(msgold    ,oldlen    )
     !
     ! filtxt can be a constant string.
-    ! call NOEXTSPACES with a writable copy
+    ! call remove_leading_spaces with a writable copy
     !
     ilen = min(len(filtxt), len(filtxtcopy))
     filtxtcopy(:ilen) = filtxt(:ilen)
-    call noextspaces(filtxtcopy,ilen      )
+    call remove_leading_spaces(filtxtcopy,ilen      )
     ilen = min(ilen, len(msg) - oldlen)
     if (ip/=0 .and. ilen/=0) then
        msglen = oldlen + ilen

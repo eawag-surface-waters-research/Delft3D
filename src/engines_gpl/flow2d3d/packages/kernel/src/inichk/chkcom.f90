@@ -39,6 +39,7 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -118,11 +119,11 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
     !
     datnam = filnam
     datnam(ind:ind + 3) = '.dat'
-    call noextspaces(datnam    ,datlen    )
+    call remove_leading_spaces(datnam    ,datlen    )
     !
     defnam = filnam
     defnam(ind:ind + 3) = '.def'
-    call noextspaces(defnam    ,deflen    )
+    call remove_leading_spaces(defnam    ,deflen    )
     !
     !-----Open NEFIS files with read access
     !

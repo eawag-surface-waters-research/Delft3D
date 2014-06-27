@@ -39,6 +39,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -99,7 +100,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
     !
     ! test file existence
     !
-    call noextspaces(filsrc    ,lfile     )
+    call remove_leading_spaces(filsrc    ,lfile     )
     !
     error = .not.exifil(filsrc, lundia)
     if (error) goto 9999

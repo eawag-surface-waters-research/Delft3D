@@ -44,6 +44,7 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
 !
 !!--declarations----------------------------------------------------------------
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -95,7 +96,7 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
     ! define length of runid and put in fixed size array
     ! size is tested in iniid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     fixid(1:lrid) = runid(1:lrid)
     !
     ! open scratch file
@@ -105,7 +106,7 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
     !
     ! append node number to file name
     !
-    call noextspaces(filnam,lfnm)
+    call remove_leading_spaces(filnam,lfnm)
     write(filnam(lfnm+1:lfnm+4),666) inode
     open (lungrd, file = trim(filnam), form = 'unformatted', status = 'unknown')
     !

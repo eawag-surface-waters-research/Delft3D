@@ -40,6 +40,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -101,7 +102,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     !
     ! test file existence
     !
-    call noextspaces(filnam    ,lfile     )
+    call remove_leading_spaces(filnam    ,lfile     )
     if (.not.exifil(filnam, lundia)) then
        !
        ! file does not exist !!
@@ -167,7 +168,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        error = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec + 1
-       call noextspaces(rec132    ,lcurec    )
+       call remove_leading_spaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
        call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)
@@ -218,7 +219,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        error = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       call noextspaces(rec132    ,lcurec    )
+       call remove_leading_spaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
        call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)

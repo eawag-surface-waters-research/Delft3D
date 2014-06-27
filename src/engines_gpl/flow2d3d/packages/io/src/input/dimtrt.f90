@@ -38,6 +38,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     use precision
     use properties
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -133,7 +134,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     !
     ! test file existence
     !
-    call noextspaces(filtmp    ,lfile     )
+    call remove_leading_spaces(filtmp    ,lfile     )
     if (.not.exifil(filtmp, lundia)) then
        !
        ! file does not exist !!

@@ -40,6 +40,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -93,7 +94,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     !
     ! Test file existence and if so read
     !
-    call noextspaces(filbch, lfile)
+    call remove_leading_spaces(filbch, lfile)
     !
     if (exifil(filbch, lundia)) then
        luntmp = newlun(gdp)

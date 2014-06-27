@@ -40,6 +40,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -87,7 +88,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
     !
     !-----define length of file name
     !
-    call noextspaces(filnam    ,lfile     )
+    call remove_leading_spaces(filnam    ,lfile     )
     !
     !-----test file existence <YES>
     !

@@ -42,6 +42,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     use properties
 !
     use globaldata
+    use string_module
     !
     use dfparall
     !
@@ -208,7 +209,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     nullify(sbuff)
     error        = .false.
     error_string = ' '
-    call noextspaces(restid    ,lrid      )
+    call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file
     !

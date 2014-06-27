@@ -40,6 +40,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -138,7 +139,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     interp = 'Y'
     irec   = 0
     !
-    call noextspaces(filout    ,lflout    )
+    call remove_leading_spaces(filout    ,lflout    )
     !
     ! Start reading the QH relations.
     !

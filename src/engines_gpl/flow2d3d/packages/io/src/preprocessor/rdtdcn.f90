@@ -42,6 +42,7 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -156,8 +157,8 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     cntain = ' # at ends A&B of open boundary segment '
     interp = 'Y'
     !
-    call noextspaces(filout    ,lflout    )
-    call noextspaces(filout    ,lflbcc    )
+    call remove_leading_spaces(filout    ,lflout    )
+    call remove_leading_spaces(filout    ,lflbcc    )
     !
     ! Define parameter name for time column
     !

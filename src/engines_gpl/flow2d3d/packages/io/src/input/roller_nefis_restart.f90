@@ -41,6 +41,7 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
     use precision
     use properties
     use globaldata
+    use string_module
     use dfparall
     use nan_check_module
     !
@@ -123,7 +124,7 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
     nullify(sbuff)
     error        = .false.
     error_string = ' '
-    call noextspaces(restid    ,lrid      )
+    call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file
     !

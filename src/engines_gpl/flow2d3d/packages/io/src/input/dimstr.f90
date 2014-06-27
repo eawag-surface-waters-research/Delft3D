@@ -39,6 +39,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -77,7 +78,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
     !
     ! Barrier / Gate file name specified; Test file existence
     !
-    call noextspaces(filnam    ,lfile     )
+    call remove_leading_spaces(filnam    ,lfile     )
     error = .not.exifil(filnam, lundia)
     if (error) goto 9999
     !

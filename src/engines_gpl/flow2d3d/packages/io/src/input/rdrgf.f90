@@ -37,9 +37,10 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
 !!--pseudo code and references-------------------------------------------------- 
 ! NONE 
 !!--declarations---------------------------------------------------------------- 
-    use precision 
-    use globaldata 
-    use dfparall 
+    use precision
+    use globaldata
+    use string_module, only: remove_leading_spaces
+    use dfparall
     use system_utils, only: exifil
     ! 
     implicit none 
@@ -107,7 +108,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     ! 
     ! check file existence 
     ! 
-    call noextspaces(filrgf    ,ilen      ) 
+    call remove_leading_spaces(filrgf    ,ilen      ) 
     error = .not.exifil(filrgf, lundia) 
     if (error) goto 9999 
     ! 

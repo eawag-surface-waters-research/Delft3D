@@ -41,6 +41,7 @@ subroutine triend(runid, gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -98,7 +99,7 @@ subroutine triend(runid, gdp)
     !
     ! define lenght of RUNID
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! if NUERR = 1 then error occurred in TRIPOI part
     !
@@ -193,7 +194,7 @@ subroutine triend(runid, gdp)
        merr = merr + 1
        ntel = ntel + 1
        if (ntel<=10) then
-          call noextspaces(recdia    ,reclen    )
+          call remove_leading_spaces(recdia    ,reclen    )
           if (reclen<=79) then
              write (lunscr, '(a)') recdia(:reclen)
           else
@@ -233,7 +234,7 @@ subroutine triend(runid, gdp)
        mwarn = mwarn + 1
        ntel = ntel + 1
        if (ntel<=10) then
-          call noextspaces(recdia    ,reclen    )
+          call remove_leading_spaces(recdia    ,reclen    )
           if (reclen<=79) then
              write (lunscr, '(a)') recdia(:reclen)
           else

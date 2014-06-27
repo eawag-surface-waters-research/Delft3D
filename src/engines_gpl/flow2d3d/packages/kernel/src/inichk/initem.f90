@@ -39,6 +39,7 @@ subroutine initem(runid, cyclic, timnow, ktemp, temint, patm, gdp)
     use precision
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -188,7 +189,7 @@ subroutine initem(runid, cyclic, timnow, ktemp, temint, patm, gdp)
     !
     ! define length of RUNID
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! Time dependent temperature
     ! Only if KTEMP > 0 FLTEM = .true. (See READMD)

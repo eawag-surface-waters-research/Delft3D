@@ -40,6 +40,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     !
     implicit none
@@ -124,7 +125,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
     !
     ! define length of runid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! fill array for closed boundaries (rows)
     !

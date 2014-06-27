@@ -40,6 +40,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall
     use system_utils, only: exifil
     !
@@ -131,7 +132,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     !
     ! test file existence
     !
-    call noextspaces(filbar    ,lfile     )
+    call remove_leading_spaces(filbar    ,lfile     )
     error = .not.exifil(filbar, lundia)
     if (error) goto 9999
     !

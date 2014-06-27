@@ -42,6 +42,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use system_utils, only: exifil
     !
     implicit none
@@ -134,7 +135,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
     !
     ! test if file exists; and if so, read.
     !
-    call noextspaces(filbnd    ,lfile     )
+    call remove_leading_spaces(filbnd    ,lfile     )
     !
     if (exifil(filbnd, lundia)) then
        !

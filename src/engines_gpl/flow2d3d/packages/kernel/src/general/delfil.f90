@@ -52,6 +52,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     use dfparall 
     !
     implicit none
@@ -119,13 +120,13 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     !
     ! Define length of runid
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! Open mdf/md-file/md-flow file to see if temporary files are really
     ! temporary. If no mdf/md-file/md-flow file defined defined then no
     ! temporary files either
     !
-    call noextspaces(filmd     ,lmd       )
+    call remove_leading_spaces(filmd     ,lmd       )
     inquire (file = filmd(1:lmd), exist = ex)
     if (ex) then
        inquire (file = filmd(1:lmd), opened = opend)

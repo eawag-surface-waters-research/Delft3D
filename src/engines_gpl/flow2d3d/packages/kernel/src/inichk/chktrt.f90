@@ -38,6 +38,7 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -104,14 +105,14 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        if (ittdef(i, 1) <= 0) then
           cnum = ' '
           write (cnum, '(i12)') ittdef(i, 1)
-          call noextspaces(cnum      ,numlen    )
+          call remove_leading_spaces(cnum      ,numlen    )
           call prterr(lundia    ,'J008'    ,cnum(1:numlen)       )
           error = .true.
        endif
        if (ittdef(i, 2) <= 0) then
           cnum = ' '
           write (cnum, '(i12)') ittdef(i, 2)
-          call noextspaces(cnum      ,numlen    )
+          call remove_leading_spaces(cnum      ,numlen    )
           call prterr(lundia    ,'J009'    ,cnum(1:numlen)       )
           error = .true.
        endif
@@ -122,7 +123,7 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           if (ittdef(i, 1) == ittdef(id, 1)) then
              cnum = ' '
              write (cnum, '(i12)') ittdef(i, 1)
-             call noextspaces(cnum      ,numlen    )
+             call remove_leading_spaces(cnum      ,numlen    )
              call prterr(lundia    ,'J012'    ,cnum(1:numlen)       )
              error = .true.
           endif

@@ -49,6 +49,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -220,7 +221,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !              Set name for the constituents, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.eva'
           !
           !---------Check filename and format
@@ -271,7 +272,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           !---------define length of file name
           !
-          call noextspaces(fileva    ,lf        )
+          call remove_leading_spaces(fileva    ,lf        )
           !
           !---------Read data from file only in case .not.NOREAD
           !
@@ -315,7 +316,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !              open output file
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.eva'
           !
           !---------Open file

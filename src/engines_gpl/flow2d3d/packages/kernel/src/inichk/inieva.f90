@@ -39,6 +39,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -110,7 +111,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
     !
     ! define length of RUNID
     !
-    call noextspaces(runid     ,lrid      )
+    call remove_leading_spaces(runid     ,lrid      )
     !
     ! Time dependent rainfall / evaporation
     ! Only if KEVA > 0 FLEVA = .true. (See READMD)

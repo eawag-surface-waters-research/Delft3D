@@ -54,6 +54,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
     use properties
     !
     use globaldata
+    use string_module
     !
     implicit none
     !
@@ -163,12 +164,12 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        ! Set name for the constituents, Regenerated locally
        !
        if (noui) then
-          call noextspaces(runid     ,lrid      )
+          call remove_leading_spaces(runid     ,lrid      )
           filout = 'TMP_' // runid(:lrid) // '.tem'
           !
           ! define length of file name
           !
-          call noextspaces(filtem, lf)
+          call remove_leading_spaces(filtem, lf)
           !
           ! open unformatted tem-file
           !
@@ -201,7 +202,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        !
        ! Remove file TMP_<runid>.tem if it exists
        !
-       call noextspaces(runid, lrid)
+       call remove_leading_spaces(runid, lrid)
        filout = 'TMP_' // runid(:lrid) // '.tem'
        !
        ! Open file
