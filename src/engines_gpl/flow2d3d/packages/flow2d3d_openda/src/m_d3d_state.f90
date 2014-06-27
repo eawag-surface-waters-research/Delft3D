@@ -29,7 +29,8 @@ module m_d3d_state
 !  $HeadURL$
 !-------------------------------------------------------------------------------
 !
-use precision   ! for fp
+use precision     ! for fp
+use string_module ! for remove_leading_spaces
 
 type t_d3d_corestate
     real(fp), dimension(:,:,:), allocatable  :: u
