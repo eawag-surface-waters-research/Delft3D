@@ -151,7 +151,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
        allocate(rtemp(nmlb:nmub,lsedtot), stat = istat)
        if (istat == 0) allocate(thtemp(nmlb:nmub), stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdIniMorLyr: memory alloc error')
+          call write_error( 'RdIniMorLyr: memory alloc error', unit=lundia)
           error = .true.
           return
        endif
@@ -185,7 +185,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
              !
              write (message,'(a,i2,2a)') 'No type specified for layer ', ilyr, &
                                        & ' in file ', trim(filcomp)
-             call prterr(lundia, 'U021', trim(message))
+             call write_error(message, unit=lundia)
              error = .true.
              return
           elseif (layertype == 'mass fraction' .or. &
@@ -211,7 +211,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    write (message,'(a,i2,2a)')  &
                        & 'Missing Thick keyword for layer ', ilyr, &
                        & ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message))
+                   call write_error(message, unit=lundia)
                    error = .true.
                    return
                 endif
@@ -228,7 +228,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    write (message,'(3a,i2,2a)')  &
                        & 'Error reading thickness from ', trim(filename), &
                        & ' for layer ', ilyr, ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message))
+                   call write_error(message, unit=lundia)
                    return          
                 endif
              endif
@@ -253,7 +253,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                        & 'Use Fraction' ,trim(lstr), ' instead of SedBed', &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message))
+                   call write_error(message, unit=lundia)
                    error = .true.
                    return
                 endif
@@ -288,7 +288,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                           & 'Error reading fraction ', l, 'from ', &
                           & trim(filename), ' for layer ', ilyr, ' in file ', &
                           & trim(filcomp)
-                      call prterr(lundia, 'U021', trim(message))
+                      call write_error(message, unit=lundia)
                       return
                    endif
                 endif
@@ -300,7 +300,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 write (message,'(a,i2,2a)')  &
                     & 'No Fraction keywords found for layer ', ilyr, &
                     & ' in file ', trim(filcomp)
-                call prterr(lundia, 'U021', trim(message))
+                call write_error(message, unit=lundia)
                 error = .true.
                 return
              endif
@@ -319,14 +319,14 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                          write (message,'(2a,i2,a,i2,3a,i0)')  &
                              & 'Negative ', trim(layertype), l, ' in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                         call prterr(lundia, 'U021', trim(message))
+                         call write_error(message, unit=lundia)
                          error = .true.
                          return
                       elseif (rtemp(nm, l) > 1.0_fp) then
                          write (message,'(a,i2,a,i2,3a,i0)')  &
                              & trim(layertype), l, ' bigger than 1 in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                         call prterr(lundia, 'U021', trim(message))
+                         call write_error(message, unit=lundia)
                          error = .true.
                          return
                       endif
@@ -336,7 +336,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       write (message,'(3a,i2,3a,i0)')  &
                           & 'Sum of ', trim(layertype), ' not equal to 1 in layer ', &
                           & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                      call prterr(lundia, 'U021', trim(message))
+                      call write_error(message, unit=lundia)
                       error = .true.
                       return
                    else
@@ -502,7 +502,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                        & 'Use SedBed', trim(lstr), ' instead of Fraction', &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message))
+                   call write_error(message, unit=lundia)
                    error = .true.
                    return
                 endif
@@ -536,7 +536,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       write (message,'(5a,i2,2a)')  &
                           & 'Error reading ', layertype, '  from ', trim(filename), &
                           & ' for layer ', ilyr, ' in file ', trim(filcomp)
-                      call prterr(lundia, 'U021', trim(message))
+                      call write_error(message, unit=lundia)
                       return
                    endif
                 endif
@@ -548,7 +548,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 write (message,'(a,i2,2a)')  &
                     & 'No SedBed keywords found for layer ' ,ilyr, &
                     & ' in file ' ,trim(filcomp)
-                call prterr(lundia, 'U021', trim(message))
+                call write_error(message, unit=lundia)
                 error = .true.
                 return
              endif
@@ -566,7 +566,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                          write (message,'(2a,i2,a,i2,3a,i0)')  &
                              & 'Negative ', trim(layertype), l, ' in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                         call prterr(lundia, 'U021', trim(message))
+                         call write_error(message, unit=lundia)
                          error = .true.
                          return
                       endif
@@ -700,7 +700,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
              write (message,'(3a,i2,2a)') 'Unknown layer type ''', &
               & trim(layertype), ''' specified for layer ', ilyr, &
               & ' in file ', trim(filcomp)
-             call prterr(lundia, 'U021', trim(message))
+             call write_error(message, unit=lundia)
              error = .true.
              return
           endif
@@ -712,7 +712,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
        !
     else
        write (message,'(2a)') 'Invalid file version of ', trim(filcomp)
-       call prterr(lundia, 'U021', trim(message))
+       call write_error(message, unit=lundia)
        error = .true.
        return          
     endif
