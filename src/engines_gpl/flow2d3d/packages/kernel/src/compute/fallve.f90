@@ -542,7 +542,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                    if (ltur>1) then
                       tur_eps = rtur0(nm,k,2)
                    else
-                      tur_k = -999.0_fp
+                      tur_eps = -999.0_fp
                    endif
                    !
                    h0 = s0(nm) - real(dps(nm),fp)
@@ -586,29 +586,26 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                    dll_reals(19) = real(um        ,hp)
                    dll_reals(20) = real(vm        ,hp)
                    dll_reals(21) = real(chezy     ,hp)
-                   max_reals       = 21
+                   !
                    if (max_integers < 5) then
                       write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to settling routine.'
                       call prterr (lundia,'U021', trim(errmsg))
                       call d3stop(1, gdp)
                    endif
-                   !
                    call nm_to_n_and_m(nm, n, m, gdp)
                    dll_integers( 1) = nm
                    dll_integers( 2) = n
                    dll_integers( 3) = m
                    dll_integers( 4) = k
                    dll_integers( 5) = l
-                   max_integers     = 5
+                   !
                    if (max_strings < 2) then
                       write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to settling routine.'
                       call prterr (lundia,'U021', trim(errmsg))
                       call d3stop(1, gdp)
                    endif
-                   !
                    dll_strings( 1) = gdp%runid
                    dll_strings( 2) = dll_usrfil(l)
-                   !max_strings     = 1
                    !
                    ! Initialisation of output variables of user defined settling velocity routine
                    !
@@ -627,7 +624,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                    call vsemlun
                    if (error_ptr /= 0) then
                       write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
-                      call prterr (lundia,'U021', trim(errmsg),gdp)
+                      call prterr (lundia,'U021', trim(errmsg))
                       call d3stop(1, gdp)
                    endif
                    if (message /= ' ') then
