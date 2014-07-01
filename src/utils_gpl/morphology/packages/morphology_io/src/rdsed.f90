@@ -323,7 +323,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     thcmud       = rmissval
     !
-    mudcnt       = rmissval
+    mudcnt       =  0.0
     pmcrit       = -1.0
     sedd50fld    = rmissval
     !
@@ -685,8 +685,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              logseddia(2,1,l) = log(sedd50(l))
           endif
        enddo
-       !
-       mudcnt = 0.0_fp
     endif
     if (error) goto 9999
     do l = 1, lsedtot
