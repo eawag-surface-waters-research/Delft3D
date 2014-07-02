@@ -1445,10 +1445,10 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'EVAP'
           !
-          ! Convert to mm/h
+          ! Convert from [kg m-2 s-1] to [mm h-1]
           !
           allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-          rbuff2 = evap * 3600000.0_fp
+          rbuff2 = evap * 3600000.0_fp / rhow
           call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, rbuff2, 'EVAP')
           deallocate(rbuff2)
