@@ -127,7 +127,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: rint1
     integer(pntrsize), pointer :: dsdeta
     integer(pntrsize), pointer :: dsdksi
-    integer(pntrsize), pointer :: dss
     integer(pntrsize), pointer :: dtdeta
     integer(pntrsize), pointer :: dtdksi
     integer(pntrsize), pointer :: dteu
@@ -154,7 +153,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: ewave0
     integer(pntrsize), pointer :: ewave1
     integer(pntrsize), pointer :: excbed
-    integer(pntrsize), pointer :: facdss
     integer(pntrsize), pointer :: fcorio
     integer(pntrsize), pointer :: fltr
     integer(pntrsize), pointer :: fuiwe
@@ -607,7 +605,6 @@ subroutine gtptrs(gdp)
     rint1      => gdp%gdr_i_ch%rint1
     dsdeta     => gdp%gdr_i_ch%dsdeta
     dsdksi     => gdp%gdr_i_ch%dsdksi
-    dss        => gdp%gdr_i_ch%dss
     dtdeta     => gdp%gdr_i_ch%dtdeta
     dtdksi     => gdp%gdr_i_ch%dtdksi
     dteu       => gdp%gdr_i_ch%dteu
@@ -634,7 +631,6 @@ subroutine gtptrs(gdp)
     ewave0     => gdp%gdr_i_ch%ewave0
     ewave1     => gdp%gdr_i_ch%ewave1
     excbed     => gdp%gdr_i_ch%excbed
-    facdss     => gdp%gdr_i_ch%facdss
     fcorio     => gdp%gdr_i_ch%fcorio
     fltr       => gdp%gdr_i_ch%fltr
     fuiwe      => gdp%gdr_i_ch%fuiwe
@@ -1151,7 +1147,6 @@ subroutine gtptrs(gdp)
     drodep     = gtrpnt('drodep', gdp)
     dsdeta     = gtrpnt('dsdeta', gdp)
     dsdksi     = gtrpnt('dsdksi', gdp)
-    dss        = gtrpnt('dss'   , gdp)
     dtdeta     = gtrpnt('dtdeta', gdp)
     dtdksi     = gtrpnt('dtdksi', gdp)
     dteu       = gtrpnt('dteu'  , gdp)
@@ -1185,7 +1180,6 @@ subroutine gtptrs(gdp)
     ewave1     = gtrpnt('ewave1', gdp)
     excbed     = gtrpnt('excbed', gdp)
     fcorio     = gtrpnt('fcorio', gdp)
-    facdss     = gtrpnt('facdss', gdp)
     fltr       = gtrpnt('fltr'  , gdp)
     fuiwe      = gtrpnt('fuiwe' , gdp)
     fviwe      = gtrpnt('fviwe' , gdp)

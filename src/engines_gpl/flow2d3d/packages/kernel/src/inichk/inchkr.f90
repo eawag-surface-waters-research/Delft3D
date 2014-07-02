@@ -182,7 +182,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: dpv
     integer(pntrsize)                    , pointer :: rint0
     integer(pntrsize)                    , pointer :: rint1
-    integer(pntrsize)                    , pointer :: dss
     integer(pntrsize)                    , pointer :: umdis0
     integer(pntrsize)                    , pointer :: umdis1
     integer(pntrsize)                    , pointer :: vmdis0
@@ -542,7 +541,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     dpv                 => gdp%gdr_i_ch%dpv
     rint0               => gdp%gdr_i_ch%rint0
     rint1               => gdp%gdr_i_ch%rint1
-    dss                 => gdp%gdr_i_ch%dss
     umdis0              => gdp%gdr_i_ch%umdis0
     umdis1              => gdp%gdr_i_ch%umdis1
     vmdis0              => gdp%gdr_i_ch%vmdis0
@@ -559,7 +557,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ewabr1              => gdp%gdr_i_ch%ewabr1
     ewave0              => gdp%gdr_i_ch%ewave0
     ewave1              => gdp%gdr_i_ch%ewave1
-    facdss              => gdp%gdr_i_ch%facdss
     grmasu              => gdp%gdr_i_ch%grmasu
     grmasv              => gdp%gdr_i_ch%grmasv
     grmsur              => gdp%gdr_i_ch%grmsur
@@ -898,8 +895,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     !
     if (sedim .and. initia/=3) then
        call inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
-                 & nmmax     ,lsed      ,lsedtot   , &
-                 & r(facdss) ,r(dss)    ,i(kcs)    ,gdp       )
+                 & nmmax     ,lsed      ,lsedtot   ,i(kcs)    ,gdp       )
        if (error) goto 9999
     endif
     !

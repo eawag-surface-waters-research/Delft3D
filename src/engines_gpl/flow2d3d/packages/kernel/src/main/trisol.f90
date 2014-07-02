@@ -266,7 +266,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: rint1
     integer(pntrsize)                    , pointer :: dsdeta
     integer(pntrsize)                    , pointer :: dsdksi
-    integer(pntrsize)                    , pointer :: dss
     integer(pntrsize)                    , pointer :: dtdeta
     integer(pntrsize)                    , pointer :: dtdksi
     integer(pntrsize)                    , pointer :: dteu
@@ -818,7 +817,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     rint1               => gdp%gdr_i_ch%rint1
     dsdeta              => gdp%gdr_i_ch%dsdeta
     dsdksi              => gdp%gdr_i_ch%dsdksi
-    dss                 => gdp%gdr_i_ch%dss
     dtdeta              => gdp%gdr_i_ch%dtdeta
     dtdksi              => gdp%gdr_i_ch%dtdksi
     dteu                => gdp%gdr_i_ch%dteu
@@ -1900,75 +1898,76 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
        call timer_stop(timer_trakad, gdp)
        !
-       ! Transport
-       ! constituent (excl. turbulence)
+       ! Call sediment transport routines
        !
-       if (lsed > 0) then
-          icx = nmaxddb
-          icy = 1
-          call timer_start(timer_fallve, gdp)
-          call fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
-                    & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
-                    & r(wphy)   ,r(r0)     ,r(rtur0)  ,ltur      ,r(thick)  , &
-                    & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     ,r(dss)    , &
-                    & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
-                    & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
-                    & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
-                    & gdp       )        
-          call timer_stop(timer_fallve, gdp)
-       endif
-       !
-       ! Erosed should not be called when run parallel to fluid mud
-       !
-       if (lsedtot>0 .and. .not.mudlay) then
+       if (lsedtot>0) then
           call timer_start(timer_3dmor, gdp)
-          !
-          ! The velocities from previous half timestep are corrected for
-          ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6
-          ! (V0EUL) these are used in EROSED
-          !
           icx = nmaxddb
           icy = 1
-          call timer_start(timer_euler, gdp)
-          call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
-                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
-                   & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
-                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
-                   & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
-          call timer_stop(timer_euler, gdp)
           !
-          ! Suspended sediment source and sink terms
-          ! Bed load sediment transport vector components
-          ! Vertical sediment diffusion coefficient
-          ! Note uses work arrays wrkc1, wrka12..wrka15 locally
+          if (lsed > 0) then
+             call timer_start(timer_fallve, gdp)
+             call fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
+                       & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
+                       & r(wphy)   ,r(r0)     ,r(rtur0)  ,ltur      ,r(thick)  , &
+                       & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     , &
+                       & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
+                       & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
+                       & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
+                       & gdp       )        
+             call timer_stop(timer_fallve, gdp)
+          endif
           !
-          icx = nmaxddb
-          icy = 1
-          call timer_start(timer_erosed, gdp)
-          call erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
-                 & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
-                 & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
-                 & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
-                 & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                 & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
-                 & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                 & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
-                 & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
-                 & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                 & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
-                 & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                 & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
-                 & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
-                 & 1         ,gdp       )
-          call timer_stop(timer_erosed, gdp)
+          ! Erosed should not be called when run as fluid mud
+          !
+          if (.not.mudlay) then
+             !
+             ! The velocities from previous half timestep are corrected for
+             ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6
+             ! (V0EUL) these are used in EROSED
+             !
+             call timer_start(timer_euler, gdp)
+             call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                      & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                      & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                      & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
+                      & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                      & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
+                      & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+             call timer_stop(timer_euler, gdp)
+             !
+             ! Suspended sediment source and sink terms
+             ! Bed load sediment transport vector components
+             ! Vertical sediment diffusion coefficient
+             ! Note uses work arrays wrkc1, wrka12..wrka15 locally
+             !
+             call timer_start(timer_erosed, gdp)
+             call erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
+                    & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
+                    & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
+                    & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
+                    & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
+                    & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                    & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
+                    & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
+                    & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
+                    & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
+                    & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
+                    & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
+                    & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
+                    & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
+                    & 1         ,gdp       )
+             call timer_stop(timer_erosed, gdp)
+          endif
           call timer_stop(timer_3dmor, gdp)
        endif
+       !
+       ! Transport of constituents (excl. turbulence)
+       !
        if ((lstsci>0 .or. roller) .and. nst<itdiag) then
-       call timer_start(timer_difu, gdp)
-       call timer_start(timer_tritra, gdp)
-       call tritra(stage     ,lundia    ,nst       ,icreep    , &
+          call timer_start(timer_difu, gdp)
+          call timer_start(timer_tritra, gdp)
+          call tritra(stage     ,lundia    ,nst       ,icreep    , &
                  & trasol    ,jstart    ,nmmaxj    ,eulerisoglm, &
                  & nmmax     ,nmax      ,mmax      ,kmax      ,lstsci    , &
                  & lstsc     ,lsal      ,ltem      ,lsecfl    ,lsec      , &
@@ -2966,71 +2965,75 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
        call timer_stop(timer_trakad, gdp)
        !
-       ! Transport
-       ! constituent (excl. turbulence)
+       ! Transport of constituents (excl. turbulence)
        !
-       if (lsed > 0) then
-          icx = nmaxddb
-          icy = 1
-          call timer_start(timer_fallve, gdp)
-          call fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
-                    & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
-                    & r(wphy)   ,r(r0)     ,r(rtur0)  ,ltur      ,r(thick)  , &
-                    & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     ,r(dss)    , &
-                    & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
-                    & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
-                    & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
-                    & gdp       )
-          call timer_stop(timer_fallve, gdp)
-       endif
        !
-       ! Erosed should not be called when run as fluid mud
+       ! Call sediment transport routines
        !
-       if (lsedtot>0 .and. .not.mudlay) then
+       if (lsedtot>0) then
           call timer_start(timer_3dmor, gdp)
-          !
-          ! The velocities from previous half timestep are corrected for
-          ! mass flux and temporary set in WRKB5 (U0EUL) and
-          ! WRKB6 (V0EUL) these are used in EROSED
-          !
           icx = nmaxddb
           icy = 1
-          call timer_start(timer_euler, gdp)
-          call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
-                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
-                   & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
-                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
-                   & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
-          call timer_stop(timer_euler, gdp)
           !
-          ! Suspended sediment source and sink terms
-          ! Bed load sediment transport vector components
-          ! Vertical sediment diffusion coefficient
-          ! Note uses work arrays wrkc1, wrka12..wrka15 locally
+          if (lsed > 0) then
+             call timer_start(timer_fallve, gdp)
+             call fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
+                       & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
+                       & r(wphy)   ,r(r0)     ,r(rtur0)  ,ltur      ,r(thick)  , &
+                       & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     , &
+                       & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
+                       & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
+                       & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
+                       & gdp       )
+             call timer_stop(timer_fallve, gdp)
+          endif
           !
-          icx = nmaxddb
-          icy = 1
-          call timer_start(timer_erosed, gdp)
-          call erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
-                    & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
-                    & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
-                    & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
-                    & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                    & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
-                    & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                    & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
-                    & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
-                    & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                    & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
-                    & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                    & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
-                    & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
-                    & 2         ,gdp       )
-          call timer_stop(timer_erosed, gdp)
+          ! Erosed should not be called when run as fluid mud
+          !
+          if (.not.mudlay) then
+             !
+             ! The velocities from previous half timestep are corrected for
+             ! mass flux and temporary set in WRKB5 (U0EUL) and
+             ! WRKB6 (V0EUL) these are used in EROSED
+             !
+             call timer_start(timer_euler, gdp)
+             call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                      & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                      & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                      & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
+                      & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                      & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
+                      & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+             call timer_stop(timer_euler, gdp)
+             !
+             ! Suspended sediment source and sink terms
+             ! Bed load sediment transport vector components
+             ! Vertical sediment diffusion coefficient
+             ! Note uses work arrays wrkc1, wrka12..wrka15 locally
+             !
+             call timer_start(timer_erosed, gdp)
+             call erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
+                       & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
+                       & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
+                       & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
+                       & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
+                       & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                       & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
+                       & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
+                       & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
+                       & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
+                       & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
+                       & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
+                       & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
+                       & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
+                       & 2         ,gdp       )
+             call timer_stop(timer_erosed, gdp)
+          endif
           call timer_stop(timer_3dmor, gdp)
        endif
+       !
+       ! Transport of constituents (excl. turbulence)
+       !
        if ((lstsci>0 .or. roller) .and. nst<itdiag) then
           call timer_start(timer_difu, gdp)
           call timer_start(timer_tritra, gdp)

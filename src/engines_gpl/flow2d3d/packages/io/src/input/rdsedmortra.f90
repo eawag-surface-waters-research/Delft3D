@@ -1,5 +1,5 @@
 subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-                     & lsedtot   ,lstsci    ,ltur      ,facdss    ,namcon    , &
+                     & lsedtot   ,lstsci    ,ltur      ,namcon    , &
                      & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
                      & nmmax     ,nto       ,nambnd    ,lsec      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -60,7 +60,6 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                                  , intent(in)  :: ltur    !  Description and declaration in iidim.f90
     integer                                                :: lundia  !  Description and declaration in inout.igs
     logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
-    real(fp)      , dimension(lsed)                        :: facdss  !  Description and declaration in rjdim.f90
     character(20) , dimension(lstsci + ltur)               :: namcon  !  Description and declaration in ckdim.f90
     integer                                                :: iopsus
     character(*)                                           :: filnam
@@ -109,9 +108,9 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     ! Read data from that file
     !
     call rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-             & lsedtot   ,lstsci    ,ltur      ,facdss    ,namcon    , &
-             & iopsus    ,gdp%d%nmlb,gdp%d%nmub,filsed    , &
-             & sed_ptr   ,gdp%gdsedpar,gdp%gdtrapar, gdp%griddim)
+             & lsedtot   ,lstsci    ,ltur      ,namcon    ,iopsus    , &
+             & gdp%d%nmlb,gdp%d%nmub,filsed    ,sed_ptr   , &
+             & gdp%gdsedpar,gdp%gdtrapar, gdp%griddim)
     if (error) goto 999
     !
     ! Read name of morphology input file
@@ -169,7 +168,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     ! Echo sediment and transport parameters
     !
-    call echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
+    call echosed(lundia    ,error     ,lsed      ,lsedtot   , &
                & iopsus    ,gdp%gdsedpar, gdp%gdtrapar)
     if (error) goto 999
     !

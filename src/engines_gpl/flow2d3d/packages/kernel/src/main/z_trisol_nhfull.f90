@@ -184,7 +184,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: rksd
     integer(pntrsize)                    , pointer :: depchg
-    integer(pntrsize)                    , pointer :: dss
     logical                              , pointer :: bedupd
     logical                              , pointer :: eqmbcsand
     logical                              , pointer :: eqmbcmud
@@ -946,7 +945,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     bedupd              => gdp%gdmorpar%bedupd
     eqmbcsand           => gdp%gdmorpar%eqmbcsand
     eqmbcmud            => gdp%gdmorpar%eqmbcmud
-    dss                 => gdp%gdr_i_ch%dss
     rca                 => gdp%gdr_i_ch%rca
     sedtyp              => gdp%gdsedpar%sedtyp
     !
@@ -1714,7 +1712,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
              call fallve(kmax    ,nmmax     ,lsal      ,ltem      ,lsed      , &
                      & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
                      & r(wphy)   ,r(r0)     ,r(rtur0)  ,ltur      ,r(thick)  , &
-                     & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     ,r(dss)    , &
+                     & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     , &
                      & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
                      & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
                      & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
@@ -1735,7 +1733,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                      & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
                      & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
                      & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
-                     & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
+                     & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
                      & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
                      & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,dtsec     ,1         , &

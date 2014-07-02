@@ -1,7 +1,7 @@
 subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 & kcs       ,kfs       ,aak       ,u0        ,v0        , &
                 & wphy      ,r0        ,rtur0     ,ltur      ,thick     , &
-                & saleqs    ,temeqs    ,rhowat    ,ws        ,dss       , &
+                & saleqs    ,temeqs    ,rhowat    ,ws        , &
                 & icx       ,icy       ,lundia    ,dps       ,s0        , &
                 & umean     ,vmean     ,z0urou    ,z0vrou    ,kfu       , &
                 & kfv       ,zmodel    ,kfsmx0    ,kfsmn0    ,dzs0      , &
@@ -61,6 +61,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)                         , pointer :: vicmol
     real(fp)                         , pointer :: csoil
     real(fp)           , dimension(:), pointer :: rhosol
+    real(fp)         , dimension(:,:), pointer :: dss
     real(fp)           , dimension(:), pointer :: ws0
     real(fp)           , dimension(:), pointer :: wsm
     real(fp)           , dimension(:), pointer :: salmax
@@ -109,7 +110,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)      , intent(in)  :: wphy   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *  ) , intent(in)  :: r0     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,0:kmax,ltur), intent(in)  :: rtur0  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)      , intent(in)  :: dss    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: umean  !  Description and declaration in esm_alloc_real.f90
@@ -173,6 +173,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     vicmol              => gdp%gdphysco%vicmol
     csoil               => gdp%gdsedpar%csoil
     rhosol              => gdp%gdsedpar%rhosol
+    dss                 => gdp%gdsedpar%dss
     ws0                 => gdp%gdsedpar%ws0
     wsm                 => gdp%gdsedpar%wsm
     salmax              => gdp%gdsedpar%salmax

@@ -105,7 +105,6 @@ type gd_r_i_ch
        integer(pntrsize) :: rint1      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: dsdeta     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: dsdksi     !  Description and declaration in esm_alloc_real.f90
-       integer(pntrsize) :: dss        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: dtdeta     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: dtdksi     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: dteu       !  Description and declaration in esm_alloc_real.f90
@@ -132,7 +131,6 @@ type gd_r_i_ch
        integer(pntrsize) :: ewave0     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: ewave1     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: excbed     !  Description and declaration in esm_alloc_real.f90
-       integer(pntrsize) :: facdss     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: fcorio     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: fltr       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: fuiwe      !  Description and declaration in esm_alloc_real.f90

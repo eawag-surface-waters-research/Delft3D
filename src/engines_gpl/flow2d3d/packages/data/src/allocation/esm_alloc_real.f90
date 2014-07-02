@@ -1515,17 +1515,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  no description (yet)
     if (ierr<= - 9) goto 9999
     !
-    pntnam = 'dss'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'facdss'        !  Global data
-    ierr = mkfpnt(pntnam, lsed, gdp)
-                             !  ratio of suspended sediment diameter and
-                             !  diameter specified in sed-file
-    if (ierr<= - 9) goto 9999
-    !
     !
     !     Arrays for: fluid mud; driving forces for fluid mud layer
     !                   usus, vsus, czusus, czvsus, wssus, entr, rsed

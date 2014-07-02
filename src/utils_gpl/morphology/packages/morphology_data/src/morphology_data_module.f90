@@ -54,13 +54,13 @@ public fluffy_type
 !
 ! public routines
 !
-public initmorpar
+public nullmorpar
 public clrmorpar
-public initsedpar
+public nullsedpar
 public clrsedpar
-public inittrapar
+public nulltrapar
 public clrtrapar
-public initsedtra
+public nullsedtra
 public allocsedtra
 public clrsedtra
 public allocfluffy
@@ -401,6 +401,9 @@ type sedpar_type
     real(fp)      , dimension(:)    , pointer :: gamflc     !  Calibration factor on flocculation parameter in Van Rijn (2004) 
     real(fp)      , dimension(:)    , pointer :: taucr      !  Critical shear stress 
     real(fp)      , dimension(:)    , pointer :: tetacr     !  Dimensionless critical shear stress (Shields parameter)
+    !
+    real(fp)      , dimension(:,:)  , pointer :: dss        !  Characteristic suspended sediment diameter
+    real(fp)      , dimension(:)    , pointer :: facdss     !  Ratio between suspended sediment diameter and D50
     real(fp)      , dimension(:)    , pointer :: ws0        !  Settling velocity fresh water
     real(fp)      , dimension(:)    , pointer :: wsm        !  Settling velocity saline water
     real(fp)      , dimension(:)    , pointer :: salmax     !  Maximum salinity [ppt]
@@ -553,10 +556,10 @@ contains
 !
 !
 !============================================================================== 
-subroutine initsedtra(sedtra)
+subroutine nullsedtra(sedtra)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a sedtra_type data structure.
+!    Function: - Nullify/initialize a sedtra_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -635,7 +638,7 @@ subroutine initsedtra(sedtra)
     nullify(sedtra%srcmax)
     nullify(sedtra%fixfac)
     nullify(sedtra%taurat)
-end subroutine initsedtra
+end subroutine nullsedtra
 !
 !
 !
@@ -887,10 +890,10 @@ end subroutine clrsedtra
 !
 !
 !============================================================================== 
-subroutine initsedpar(sedpar)
+subroutine nullsedpar(sedpar)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a sedpar_type data structure.
+!    Function: - Nullify/initialize a sedpar_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -927,6 +930,9 @@ subroutine initsedpar(sedpar)
     nullify(sedpar%taucr)
     nullify(sedpar%tetacr)
     nullify(sedpar%gamflc)
+    !
+    nullify(sedpar%dss)
+    nullify(sedpar%facdss)
     nullify(sedpar%ws0)
     nullify(sedpar%wsm)
     nullify(sedpar%salmax)
@@ -943,7 +949,7 @@ subroutine initsedpar(sedpar)
     nullify(sedpar%namsed)
     nullify(sedpar%flsdbd)
     nullify(sedpar%flstcg)
-end subroutine initsedpar
+end subroutine nullsedpar
 !
 !
 !
@@ -978,6 +984,9 @@ subroutine clrsedpar(istat     ,sedpar  )
     if (associated(sedpar%taucr))      deallocate(sedpar%taucr,      STAT = istat)
     if (associated(sedpar%tetacr))     deallocate(sedpar%tetacr,     STAT = istat)
     if (associated(sedpar%gamflc))     deallocate(sedpar%gamflc,     STAT = istat)
+    !
+    if (associated(sedpar%dss))        deallocate(sedpar%dss,        STAT = istat)
+    if (associated(sedpar%facdss))     deallocate(sedpar%facdss,     STAT = istat)
     if (associated(sedpar%ws0))        deallocate(sedpar%ws0,        STAT = istat)
     if (associated(sedpar%wsm))        deallocate(sedpar%wsm,        STAT = istat)
     if (associated(sedpar%salmax))     deallocate(sedpar%salmax,     STAT = istat)
@@ -998,10 +1007,10 @@ end subroutine clrsedpar
 !
 !
 !============================================================================== 
-subroutine initmorpar(morpar)
+subroutine nullmorpar(morpar)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a morpar_type data structure.
+!    Function: - Nullify/initialize a morpar_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1296,7 +1305,7 @@ subroutine initmorpar(morpar)
     nullify(morpar%mergebuf)
     !
     call initfluffy(morpar%flufflyr)
-end subroutine initmorpar
+end subroutine nullmorpar
 !
 !
 !
@@ -1454,10 +1463,10 @@ end subroutine clrmorpar
 !
 !
 !============================================================================== 
-subroutine inittrapar(trapar  )
+subroutine nulltrapar(trapar  )
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Initialize a trapar_type data structure.
+!    Function: - Nullify/initialize a trapar_type data structure.
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1501,7 +1510,7 @@ subroutine inittrapar(trapar  )
     nullify(trapar%parfil)
     nullify(trapar%iparfld)
     nullify(trapar%parfld)
-end subroutine inittrapar
+end subroutine nulltrapar
 !
 !
 !

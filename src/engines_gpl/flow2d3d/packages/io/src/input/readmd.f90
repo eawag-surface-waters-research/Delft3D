@@ -75,7 +75,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer(pntrsize)             , pointer :: dpv
     integer(pntrsize)             , pointer :: drodep
     integer(pntrsize)             , pointer :: dxydro
-    integer(pntrsize)             , pointer :: facdss
     integer(pntrsize)             , pointer :: fcorio
     integer(pntrsize)             , pointer :: hkru
     integer(pntrsize)             , pointer :: hkrv
@@ -484,7 +483,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     dpv                 => gdp%gdr_i_ch%dpv
     drodep              => gdp%gdr_i_ch%drodep
     dxydro              => gdp%gdr_i_ch%dxydro
-    facdss              => gdp%gdr_i_ch%facdss
     fcorio              => gdp%gdr_i_ch%fcorio
     hkru                => gdp%gdr_i_ch%hkru
     hkrv                => gdp%gdr_i_ch%hkrv
@@ -850,7 +848,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     if (sedim) then
        call rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-                      & lsedtot   ,lstsci    ,ltur      ,r(facdss) ,ch(namcon), &
+                      & lsedtot   ,lstsci    ,ltur      ,ch(namcon), &
                       & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
                       & nmmax     ,nto       ,ch(nambnd),lsec      ,gdp       )
        if (error) goto 9999

@@ -112,9 +112,9 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     allocate(stm%trapar , stat = istat)
     allocate(stm%morlyr , stat = istat)
     !
-    call initsedpar(stm%sedpar)
-    call initmorpar(stm%morpar)
-    call inittrapar(stm%trapar)
+    call nullsedpar(stm%sedpar)
+    call nullmorpar(stm%morpar)
+    call nulltrapar(stm%trapar)
     istat = initmorlyr (stm%morlyr)
     !
     call tree_create  ( "Sediment input", sedfil_tree )
@@ -164,7 +164,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     if (error) goto 999
     !
     call rdsed  (lundia, error, lsal, ltem, stm%lsedsus, &
-               & stm%lsedtot, lstsci, ltur, stm%facdss, stm%namcon, &
+               & stm%lsedtot, lstsci, ltur, stm%namcon, &
                & stm%iopsus, nmlb, nmub, filsed, &
                & sedfil_tree, stm%sedpar, stm%trapar, griddim)
     !
@@ -206,7 +206,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     !
     ! Echo sediment and transport parameters
     !
-    call echosed(lundia, error, stm%lsedsus, stm%lsedtot, stm%facdss, &
+    call echosed(lundia, error, stm%lsedsus, stm%lsedtot, &
                & stm%iopsus, stm%sedpar, stm%trapar)
     if (error) goto 999
     !

@@ -107,11 +107,8 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     lunprt     => gdp%gdinout%lunprt
     lunscr     => gdp%gdinout%lunscr
     !
-    ! initialisation of constants in const.inc
-    ! NOTE: data-statement is not used to avoid problems with the
-    !           order of declarations-data-code
+    ! initialisation of constants in gdconst and gdconstd
     !
-    call init_mathconsts()
     earthrad = 6378137.0   ! Mathworld, IUGG
     eps      = 1.0e-6
     amiss    = -999.0_fp

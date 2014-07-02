@@ -10,7 +10,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                   & sbvv      ,seddif    ,hrms      ,ltur      , &
                   & teta      ,rlabda    ,aks       ,saleqs    , &
                   & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
-                  & hv        ,rca       ,dss       ,ubot      ,rtur0     , &
+                  & hv        ,rca       ,ubot      ,rtur0     , &
                   & temeqs    ,gsqs      ,guu       ,gvv       ,kfsmin    , &
                   & kfsmax    ,dzs0      ,kfumin    ,kfumax    ,kfvmin    , &
                   & kfvmax    ,dzu1      ,dzv1      ,dt        ,icall     , &
@@ -93,6 +93,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: dstar
     real(fp)         , dimension(:)      , pointer :: taucr
     real(fp)         , dimension(:)      , pointer :: tetacr
+    real(fp)         , dimension(:,:)    , pointer :: dss
     real(fp)         , dimension(:)      , pointer :: ws0
     real(fp)         , dimension(:)      , pointer :: salmax
     real(fp)         , dimension(:)      , pointer :: mudcnt
@@ -277,7 +278,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)                   :: sink    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)                   :: sour    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lsed)                :: rsedeq  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: dss     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)        , intent(out) :: rca     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbuu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbvv    !  Description and declaration in esm_alloc_real.f90
@@ -409,6 +409,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     dstar               => gdp%gdsedpar%dstar
     taucr               => gdp%gdsedpar%taucr
     tetacr              => gdp%gdsedpar%tetacr
+    dss                 => gdp%gdsedpar%dss
     ws0                 => gdp%gdsedpar%ws0
     salmax              => gdp%gdsedpar%salmax
     mudcnt              => gdp%gdsedpar%mudcnt

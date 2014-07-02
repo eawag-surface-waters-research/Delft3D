@@ -41,9 +41,9 @@ public echosed
 contains
 
 subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-               & lsedtot   ,lstsci    ,ltur      ,facdss    ,namcon    , &
-               & iopsus    ,nmlb      ,nmub      ,filsed    , &
-               & sed_ptr   ,sedpar    ,trapar    ,griddim   )
+               & lsedtot   ,lstsci    ,ltur      ,namcon    ,iopsus    , &
+               & nmlb      ,nmub      ,filsed    ,sed_ptr   , &
+               & sedpar    ,trapar    ,griddim   )
 !!--description-----------------------------------------------------------------
 !
 ! Read sediment parameters from an input file
@@ -82,6 +82,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)         , dimension(:)    , pointer :: dstar
     real(fp)         , dimension(:)    , pointer :: taucr
     real(fp)         , dimension(:)    , pointer :: tetacr
+    real(fp)         , dimension(:)    , pointer :: facdss
     real(fp)         , dimension(:)    , pointer :: ws0
     real(fp)         , dimension(:)    , pointer :: wsm
     real(fp)         , dimension(:)    , pointer :: salmax
@@ -120,7 +121,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                                  , intent(in)  :: ltur    !  Description and declaration in esm_alloc_int.f90
     integer                                  , intent(in)  :: lundia  !  Description and declaration in inout.igs
     logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
-    real(fp)      , dimension(lsed)          , intent(out) :: facdss  !  Description and declaration in esm_alloc_real.f90
     character(20) , dimension(lstsci + ltur) , intent(in)  :: namcon  !  Description and declaration in esm_alloc_char.f90
     integer                                  , intent(out) :: iopsus
     integer                                  , intent(in)  :: nmlb
@@ -235,6 +235,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        if (istat==0) allocate (sedpar%flsdbd    (                          lsedtot), stat = istat)
        if (istat==0) allocate (sedpar%inisedunit(                          lsedtot), stat = istat)
        !
+       if (istat==0) allocate (sedpar%dss       (nmlb:nmub            ,max(1,lsed)), stat = istat)
+       if (istat==0) allocate (sedpar%facdss    (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (sedpar%ws0       (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (sedpar%wsm       (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (sedpar%salmax    (                      max(1,lsed)), stat = istat)
@@ -274,6 +276,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        flsdbd        => sedpar%flsdbd
        inisedunit    => sedpar%inisedunit
        !
+       facdss        => sedpar%facdss
        ws0           => sedpar%ws0
        wsm           => sedpar%wsm
        salmax        => sedpar%salmax
@@ -881,7 +884,7 @@ subroutine opensedfil(lundia    ,error     ,filsed    ,luninp    ,version  )
 end subroutine opensedfil
 
 
-subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
+subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
                  & iopsus    ,sedpar    ,trapar    )
 !!--description-----------------------------------------------------------------
 !
@@ -903,7 +906,6 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     integer                                  , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
     integer                                                :: lundia  !  Description and declaration in inout.igs
     logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
-    real(fp)      , dimension(lsed)                        :: facdss  !  Description and declaration in rjdim.f90
     type(sedpar_type)                        , pointer     :: sedpar
     type(trapar_type)                        , pointer     :: trapar
 !
@@ -918,9 +920,12 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     real(fp)        , dimension(:)    , pointer :: logsedsig
     real(fp)        , dimension(:)    , pointer :: sedd10
     real(fp)        , dimension(:)    , pointer :: sedd50
+    real(fp)        , dimension(:)    , pointer :: sedd50fld
     real(fp)        , dimension(:)    , pointer :: seddm
     real(fp)        , dimension(:)    , pointer :: sedd90
     real(fp)        , dimension(:)    , pointer :: cdryb
+    real(fp)        , dimension(:,:)  , pointer :: dss
+    real(fp)        , dimension(:)    , pointer :: facdss
     real(fp)        , dimension(:)    , pointer :: ws0
     real(fp)        , dimension(:)    , pointer :: wsm
     real(fp)        , dimension(:)    , pointer :: salmax
@@ -948,6 +953,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     integer                   :: i
     integer                   :: l
     integer                   :: n                   ! Temporary storage for nseddia(l)
+    integer                   :: nm
     real(fp)                  :: logsedd50
     real(fp)                  :: rmissval
     real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
@@ -969,9 +975,12 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     logsedsig            => sedpar%logsedsig
     sedd10               => sedpar%sedd10
     sedd50               => sedpar%sedd50
+    sedd50fld            => sedpar%sedd50fld
     seddm                => sedpar%seddm
     sedd90               => sedpar%sedd90
     cdryb                => sedpar%cdryb
+    dss                  => sedpar%dss
+    facdss               => sedpar%facdss
     ws0                  => sedpar%ws0
     wsm                  => sedpar%wsm
     salmax               => sedpar%salmax
@@ -1428,6 +1437,14 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
              call write_error(errmsg, unit=lundia)
              error = .true.
              return
+          endif
+          !
+          if (lsedtot==1 .and. flsdia/=' ') then ! l=1
+             do nm = 1, size(sedd50fld)
+                dss(nm, 1) = sedd50fld(nm)*facdss(1)
+             enddo
+          else
+             dss(:, l) = sedd50(l)*facdss(l)
           endif
        endif
        !
