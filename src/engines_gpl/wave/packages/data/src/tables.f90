@@ -1227,17 +1227,15 @@ subroutine org_gettabledata_scalar(this       ,itable     ,ipar       , &
 ! Local variables
 !
     real(hp)                 :: timreq
-    real(hp)                 :: t1
-    real(hp)                 :: t2
     !
     real(fp)                 :: alpha
     real(fp)                 :: extrapol
     !
     integer                  :: i
-    integer                  :: irec2
     integer                  :: j
     integer                  :: datediff
     !
+    logical                  :: blockfunction
     logical                  :: inrange
     !
     integer, pointer         :: nrec
@@ -1295,19 +1293,37 @@ subroutine org_gettabledata_scalar(this       ,itable     ,ipar       , &
           !
           ! requested time beyond the last time in the table
           !
-          select case(table%extrapolation)
-          case ('periodic')
-             errorstring = 'Periodic boundary conditions not '// &
-                & 'yet implemented, please contact code supplier'
-             return
-          case ('constant')
+          blockfunction = .true.
+          do i = 1, npar
+             j = ipar + i - 1
+             if (table%parameters(j)%interpolation /= 'block') then
+                blockfunction = .false.
+                exit
+             endif
+          enddo
+          !
+          if (blockfunction) then
              irec  = nrec
              do i = 1, npar
                 j = ipar + i - 1
                 values(i) = table%values(irec,j)
              enddo
              inrange = .false.
-          case default
+             !
+          else
+             select case(table%extrapolation)
+             case ('periodic')
+                errorstring = 'Periodic boundary conditions not '// &
+                   & 'yet implemented, please contact code supplier'
+                return
+             case ('constant')
+                irec  = nrec
+                do i = 1, npar
+                   j = ipar + i - 1
+                   values(i) = table%values(irec,j)
+                enddo
+                inrange = .false.
+             case default
                 if (present(extrapol_in)) then
                    !
                    ! extrapol_in: interval behind table%times(nrec) where extrapolation is used [hr]
@@ -1329,29 +1345,40 @@ subroutine org_gettabledata_scalar(this       ,itable     ,ipar       , &
                       & ' at '//trim(table%location)
                    return
                 endif
-          endselect
+             endselect
+             !
+          endif
        endif
        !
        if (inrange) then
           !
-          ! reset search index
+          ! Reset search index
+          ! Use comparereal to make sure that in single precision, small differences are allowed
           !
-          if (table%times(irec) > timreq) irec = 1
+          if (comparereal(real(timreq,fp), real(table%times(irec),fp)) == -1) irec = 1
           !
           ! search time-interval ...
           !
           do while (irec < nrec)
-             if (table%times(irec+1) > timreq) exit
+             !
+             ! Use comparereal to make sure that in single precision, small differences are allowed
+             !
+             if (comparereal(real(timreq,fp), real(table%times(irec+1),fp)) == 0) then
+                 alpha = 0.0_fp
+                 exit
+             elseif (comparereal(real(timreq,fp), real(table%times(irec+1),fp)) == -1) then
+                 if (table%times(irec+1) > table%times(irec)) then
+                    alpha = ( table%times(irec+1) - timreq ) / ( table%times(irec+1)-table%times(irec) )
+                    exit
+                 else
+                    errorstring = 'Times are not increasing at '//trim(table%location)
+                    return
+                 endif
+             endif
              irec = irec + 1
           enddo
           !
           ! time found
-          !
-          irec2 = irec + 1
-          if (irec == nrec) irec2 = irec
-          t1    = table%times(irec)
-          t2    = table%times(irec2)
-          alpha = real((t2 - timreq) / (t2 - t1),fp)
           !
           do i = 1, npar
              j = ipar + i - 1
@@ -1365,7 +1392,7 @@ subroutine org_gettabledata_scalar(this       ,itable     ,ipar       , &
                 ! linear interpolation
                 !
                 values(i) = table%values(irec,j) * alpha + &
-                          & table%values(irec2,j) * (1.0_fp - alpha)
+                          & table%values(irec+1,j) * (1.0_fp - alpha)
              endif
           enddo
        endif
