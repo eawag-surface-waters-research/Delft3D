@@ -19,7 +19,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
                & wave      ,rca       ,zrca      ,windu     ,windv     , &
                & zwndsp    ,zwnddr    ,patm      ,zairp     ,wind      , &
-               & precip    ,evap      ,zprecp   ,zevap     ,gdp       )
+               & precip    ,evap      ,zprecp    ,zevap     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                

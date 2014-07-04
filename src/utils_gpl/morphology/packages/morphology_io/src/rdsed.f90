@@ -959,7 +959,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
     real(fp)                  :: xm
     logical        , external :: stringsequalinsens
-    character(30)             :: txtput1
+    character(40)             :: txtput1
     character(10)             :: txtput2
     character(10)             :: versionstring
     character(256)            :: errmsg
@@ -1031,7 +1031,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
        !
        ! Sand-mud interaction
        !
-       txtput1 = 'Sand mud interaction with critical mud fraction'
+       txtput1 = 'Crit mud frac for sand mud interaction'
        if (flspmc /= ' ') then
           write (lundia, '(3a)') txtput1, ':  ', trim(flspmc)
        else

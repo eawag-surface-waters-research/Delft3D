@@ -1,7 +1,7 @@
 subroutine updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,kcs       , &
                    & kcu       ,kcv       ,qxk       ,qyk       ,qzk       , &
                    & nsrc      ,disch     ,kfumin    ,kfvmin    ,qu        , &
-                   & qv        ,gdp       )
+                   & qv        ,discum    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                

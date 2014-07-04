@@ -36,7 +36,7 @@ implicit none
    type(tree_data), pointer   :: tree
    type(tree_data), pointer   :: node1, node2, dadptr, polptr
 
-   character(len=1), dimension(1)          :: dummy
+   character(len=1), dimension(1)          :: dummy = ' '
    character(len=1), dimension(:), pointer :: data_ptr
    character(len=40) :: node_name, node_type, stored_data, type
 

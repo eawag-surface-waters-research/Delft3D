@@ -127,7 +127,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              read (lunid, '(a)') runid
              close (lunid)
           else
-             call prterr(lunscr, 'G003')
+             call prterr(lunscr, 'G003', 'dummy')
              error = .true.
              goto 9999
           endif

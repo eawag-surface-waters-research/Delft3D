@@ -152,7 +152,6 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     integer                                      :: k
     integer                                      :: kmaxout
     integer                                      :: l
-    integer                                      :: len       ! length of field of current subdomain
     integer                                      :: lengl     ! length of field containing collected data
     integer                                      :: lenlo     ! length of field containing collected data
     integer                                      :: lhlp      ! Help variable for teller constituents and turbulent quantities 

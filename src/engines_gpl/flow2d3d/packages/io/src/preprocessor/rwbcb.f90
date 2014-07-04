@@ -318,7 +318,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
           !---------Calculate Date and time for RTC
           !
           call juldat(timref    ,julday    )
-          call timdat(julday    ,timrd*60.0,iacdat    ,iactim    )
+          call timdat(julday    ,timrd*60.0_fp,iacdat    ,iactim    )
           !
           !---------Re-define ITOLD
           !

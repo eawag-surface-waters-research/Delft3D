@@ -79,6 +79,7 @@
 !
          SlopeNorm = 0.0
          SlopeTang = 0.0
+         dum_dZB   = 0.0
 !
 !   *****     End of your code       *****
 !

@@ -29,7 +29,10 @@ subroutine errsys(string,ierr)
 !        number in a DLL. As the original writes to the monitoring
 !        file, the message would be hidden in a file like "fort.88"
 !
-    character*(*) string
+    implicit none
+
+    character*(*) :: string
+    integer       :: ierr
 
     write(*,*) string
     write(*,*) 'The program stopped because of this'

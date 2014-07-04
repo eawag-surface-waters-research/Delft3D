@@ -211,6 +211,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     !
     ! Call variables
     !
+    integer                      , intent(in)   :: npardef
     integer                      , intent(in)   :: lundia
     logical                      , intent(out)  :: error
     integer                      , intent(in)   :: lsedtot !  Description and declaration in iidim.f90
@@ -218,7 +219,6 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     character(*)                 , intent(in)   :: filtrn
     integer, dimension(2,npardef), intent(in)   :: ipardef
     real(fp), dimension(npardef) , intent(in)   :: rpardef
-    integer                      , intent(in)   :: npardef
     integer, dimension(:)        , intent(in)   :: sedtyp
     type(tree_data), dimension(:), intent(in)   :: sedblock
     type (griddimtype), target   , intent(in)   :: dims    !  grid dimensions
@@ -371,6 +371,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
 !
 ! Call variables
 !
+    integer                       , intent(in)   :: npardef
     integer                                      :: lundia  !  Description and declaration in inout.igs
     logical                       , intent(out)  :: error
     integer, dimension(:)                        :: iform
@@ -388,7 +389,6 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
     character(*), dimension(:)                   :: dll_usrfil
     integer, dimension(2,npardef) , intent(in)   :: ipardef
     real(fp), dimension(npardef)  , intent(in)   :: rpardef
-    integer                       , intent(in)   :: npardef
     type(tree_data), dimension(:) , intent(in)   :: sedblock
 !
 ! Local variables

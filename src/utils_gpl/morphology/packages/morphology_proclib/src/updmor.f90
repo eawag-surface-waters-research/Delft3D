@@ -99,7 +99,9 @@
       call failconst(increm(iMorFac+1),'Morphological factor')
       MorFac         = pmsa( ipoint(iMorFac     +  1) )
       allocate( dbodsd(numIS,noseg) )
+      dbodsd = 0.0_fp
       allocate( depchg(noseg) )
+      depchg = 0.0_fp
 !
 !     Initialise pointers
 !

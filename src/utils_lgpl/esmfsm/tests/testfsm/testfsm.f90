@@ -126,7 +126,7 @@ subroutine makepointer_l (unit, keyname, type, length)
         result = FSMERR (message)
         write (unit,*) 'MAKPTR ', keyname, 'Error: ', message(1:len_trim(message))
     else
-        write (unit,*) 'MAKPTR ', keyname, 'OK => ', result
+        write (unit,*) 'MAKPTR ', keyname, 'OK => ', presult
     endif
 end subroutine makepointer_l
 
@@ -147,7 +147,7 @@ subroutine getpointer_l (unit, keyname)
         result = FSMERR (message)
         write (unit,*) 'GETPTR ', keyname, 'Error: ', message(1:len_trim(message))
     else
-        write (unit,*) 'GETPTR ', keyname, 'OK => ', result
+        write (unit,*) 'GETPTR ', keyname, 'OK => ', presult
     endif
 end subroutine getpointer_l
 
@@ -168,6 +168,6 @@ subroutine releasepointer_l (unit, keyname)
         result = FSMERR (message)
         write (unit,*) 'RELPTR ', keyname, 'Error: ', message(1:len_trim(message))
     else
-        write (unit,*) 'RELPTR ', keyname, 'OK => ', result
+        write (unit,*) 'RELPTR ', keyname, 'OK => ', presult
     endif
 end subroutine releasepointer_l

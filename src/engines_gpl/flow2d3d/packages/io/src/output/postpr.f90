@@ -964,7 +964,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
                    & wave      ,r(rca)    ,r(zrca)   ,r(windu)  ,r(windv)  , &
                    & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
-                   & r(precip) ,r(evap)   ,r(zprecp),r(zevap)  ,gdp       )
+                   & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
           ftstat = .true.
        endif
        !

@@ -84,6 +84,7 @@
          else
             KfSedVal = 0
          endif
+         dum_dZB4    = 0.0
 !
 !   *****     End of your code       *****
 !

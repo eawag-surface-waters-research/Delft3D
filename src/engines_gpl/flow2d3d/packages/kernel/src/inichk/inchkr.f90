@@ -846,27 +846,27 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                    & r (windsu),r (windsv),r (w10mag), gdp)
     endif
     if (rhum_file) then
-       success = getmeteoval(gdp%runid, 'relhum', timhr * 60.0, &
+       success = getmeteoval(gdp%runid, 'relhum', timhr * 60.0_fp, &
                            & gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, rhumarr , 0)
        call checkmeteoresult(success, gdp)
     endif
     if (tair_file) then
-       success = getmeteoval(gdp%runid, 'airtemp', timhr * 60.0, &
+       success = getmeteoval(gdp%runid, 'airtemp', timhr * 60.0_fp, &
                            &gdp%gdparall%mfg, gdp%gdparall%nfg,  nlb, nub, mlb, mub, tairarr , 0)
        call checkmeteoresult(success, gdp)
     endif
     if (clou_file) then
-       success = getmeteoval(gdp%runid, 'cloud', timhr * 60.0, &
+       success = getmeteoval(gdp%runid, 'cloud', timhr * 60.0_fp, &
                            &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, clouarr , 0)
        call checkmeteoresult(success, gdp)
     endif
     if (prcp_file) then
-       success = getmeteoval(gdp%runid, 'precipitation', timhr * 60.0, &
+       success = getmeteoval(gdp%runid, 'precipitation', timhr * 60.0_fp, &
                            &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, r(precip) , 0)
        call checkmeteoresult(success, gdp)
     endif
     if (swrf_file) then
-       success = getmeteoval(gdp%runid, 'swrf', timhr * 60.0, &
+       success = getmeteoval(gdp%runid, 'swrf', timhr * 60.0_fp, &
                            &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, swrfarr , 0)
        call checkmeteoresult(success, gdp)
     endif

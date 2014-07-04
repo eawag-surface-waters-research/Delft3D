@@ -699,6 +699,8 @@ function getpointer(pntnam, gdp)
     zwndsp     => gdp%gdr_i_ch%zwndsp
     zwnddr     => gdp%gdr_i_ch%zwnddr
     zairp      => gdp%gdr_i_ch%zairp
+    zevap      => gdp%gdr_i_ch%zevap
+    zprecp     => gdp%gdr_i_ch%zprecp
     drhodx     => gdp%gdr_i_ch%drhodx
     drhody     => gdp%gdr_i_ch%drhody
     dzs0       => gdp%gdr_i_ch%dzs0

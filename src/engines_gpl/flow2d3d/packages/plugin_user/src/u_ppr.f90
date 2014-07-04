@@ -64,6 +64,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: dtr
     integer(pntrsize)      , pointer :: enstro
     integer(pntrsize)      , pointer :: entr
+    integer(pntrsize)      , pointer :: evap
     integer(pntrsize)      , pointer :: fltr
     integer(pntrsize)      , pointer :: gro
     integer(pntrsize)      , pointer :: guu
@@ -73,6 +74,8 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: hrms
     integer(pntrsize)      , pointer :: hu
     integer(pntrsize)      , pointer :: hv
+    integer(pntrsize)      , pointer :: patm
+    integer(pntrsize)      , pointer :: precip
     integer(pntrsize)      , pointer :: qu
     integer(pntrsize)      , pointer :: qxk
     integer(pntrsize)      , pointer :: qyk
@@ -109,6 +112,8 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: vmnldf
     integer(pntrsize)      , pointer :: vortic
     integer(pntrsize)      , pointer :: w1
+    integer(pntrsize)      , pointer :: windu
+    integer(pntrsize)      , pointer :: windv
     integer(pntrsize)      , pointer :: wphy
     integer(pntrsize)      , pointer :: ws
     integer(pntrsize)      , pointer :: xydro
@@ -141,6 +146,11 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer(pntrsize)      , pointer :: zvort
     integer(pntrsize)      , pointer :: zwl
     integer(pntrsize)      , pointer :: zws
+    integer(pntrsize)      , pointer :: zwndsp
+    integer(pntrsize)      , pointer :: zwnddr
+    integer(pntrsize)      , pointer :: zairp
+    integer(pntrsize)      , pointer :: zprecp
+    integer(pntrsize)      , pointer :: zevap
     integer(pntrsize)      , pointer :: rl
     integer(pntrsize)      , pointer :: p1
     integer(pntrsize)      , pointer :: hydprs
@@ -199,6 +209,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     integer               , pointer :: lunus3
     logical               , pointer :: drogue
     logical               , pointer :: wave
+    logical               , pointer :: wind
     logical               , pointer :: zmodel
 !
 ! Global variables
@@ -286,6 +297,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     julday      => gdp%gdinttim%julday
     drogue      => gdp%gdprocs%drogue
     wave        => gdp%gdprocs%wave
+    wind        => gdp%gdprocs%wind
     zmodel      => gdp%gdprocs%zmodel
     alfas       => gdp%gdr_i_ch%alfas
     atr         => gdp%gdr_i_ch%atr
@@ -299,6 +311,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     dtr         => gdp%gdr_i_ch%dtr
     enstro      => gdp%gdr_i_ch%enstro
     entr        => gdp%gdr_i_ch%entr
+    evap        => gdp%gdr_i_ch%evap
     fltr        => gdp%gdr_i_ch%fltr
     gro         => gdp%gdr_i_ch%gro
     guu         => gdp%gdr_i_ch%guu
@@ -308,6 +321,8 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     hrms        => gdp%gdr_i_ch%hrms
     hu          => gdp%gdr_i_ch%hu
     hv          => gdp%gdr_i_ch%hv
+    patm        => gdp%gdr_i_ch%patm
+    precip      => gdp%gdr_i_ch%precip
     qu          => gdp%gdr_i_ch%qu
     qxk         => gdp%gdr_i_ch%qxk
     qyk         => gdp%gdr_i_ch%qyk
@@ -344,6 +359,8 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     vmnldf      => gdp%gdr_i_ch%vmnldf
     vortic      => gdp%gdr_i_ch%vortic
     w1          => gdp%gdr_i_ch%w1
+    windu       => gdp%gdr_i_ch%windu
+    windv       => gdp%gdr_i_ch%windv
     wphy        => gdp%gdr_i_ch%wphy
     ws          => gdp%gdr_i_ch%ws
     xydro       => gdp%gdr_i_ch%xydro
@@ -376,6 +393,11 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     zvort       => gdp%gdr_i_ch%zvort
     zwl         => gdp%gdr_i_ch%zwl
     zws         => gdp%gdr_i_ch%zws
+    zwndsp      => gdp%gdr_i_ch%zwndsp
+    zwnddr      => gdp%gdr_i_ch%zwnddr
+    zairp       => gdp%gdr_i_ch%zairp
+    zprecp      => gdp%gdr_i_ch%zprecp
+    zevap       => gdp%gdr_i_ch%zevap
     rl          => gdp%gdr_i_ch%rl
     p1          => gdp%gdr_i_ch%p1
     hydprs      => gdp%gdr_i_ch%hydprs
@@ -472,7 +494,9 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
                 & r(zssv)   ,r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                 & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
                 & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
-                & wave      ,r(rca)    ,r(zrca)   ,gdp       )
+                & wave      ,r(rca)    ,r(zrca)   ,r(windu)  ,r(windv)  , &
+                & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
+                & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
     endif
     !
     ! HIS data (USE LUNUS1)

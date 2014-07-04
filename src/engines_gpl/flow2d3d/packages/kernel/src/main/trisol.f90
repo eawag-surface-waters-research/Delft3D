@@ -2212,7 +2212,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
-                    & r(qv)     ,gdp       )
+                    & r(qv)     ,r(discum) ,gdp       )
        !
        ! Check Courant numbers for U and V velocities in U-points
        ! Check is done based upon old/original geometry (corresponding to S0)
@@ -3282,7 +3282,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
-                    & r(qv)     ,gdp       )
+                    & r(qv)     ,r(discum) ,gdp       )
        !
        ! Check Courant numbers for U and V velocities in U-points
        ! Check is done based upon old/original geometry (corresponding to S0)

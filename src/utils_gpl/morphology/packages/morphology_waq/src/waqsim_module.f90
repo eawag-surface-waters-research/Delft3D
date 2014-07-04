@@ -1148,6 +1148,7 @@ subroutine write2par(parfile, par)
     integer :: itime
     integer, external :: newunit
     !
+    lun = newunit()
     itime = 0
     open(lun, file = parfile, form = 'binary', status = 'replace')
     write(lun) itime

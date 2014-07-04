@@ -1842,7 +1842,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
-                    & r(qv)     ,gdp       )       
+                    & r(qv)     ,r(discum) ,gdp       )       
        !
        ! Check Courant numbers for U and V velocities in U-points
        ! Check in V-points is done only after second half ADI-step
@@ -2781,7 +2781,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
-                    & r(qv)     ,gdp       )
+                    & r(qv)     ,r(discum) ,gdp       )
        !
        ! Check Courant numbers for U and V velocities in V-points
        ! Check in U-points is done only after first half ADI-step
