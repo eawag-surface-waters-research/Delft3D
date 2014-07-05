@@ -42,6 +42,7 @@ libMorphologyKernel_la_SOURCES = \
          fgyint.f90 \
          fluff_burial.f90 \
          getfixfac.f90 \
+         initsedtra.f90 \
          osmom.f90 \
          sand_mud.f90 \
          shld.f90 \
