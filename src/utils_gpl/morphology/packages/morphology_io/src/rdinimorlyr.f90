@@ -1,7 +1,8 @@
 subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                      & lsedtot   ,nlyr      ,lundia    ,kcs       , &
                      & icx       ,icy       ,svfrac    ,iporosity , &
-                     & rhosol    ,bedcomp   ,dims      ,error     )
+                     & rhosol    ,bedcomp   ,dims      ,namsed    , &
+                     & error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -63,7 +64,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(lsedtot)                           , intent(in)  :: rhosol
     logical                                                , intent(out) :: error
-    character(*)                                                         :: filcomp
+    character(*)                                           , intent(in)  :: filcomp
+    character(*), dimension(lsedtot)                       , intent(in)  :: namsed
 !
 ! Local variables
 !
@@ -138,7 +140,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     !
     versionstring = 'n.a.'
     call prop_get_string(mor_ptr, 'BedCompositionFileInformation', 'FileVersion', versionstring)
-    if (trim(versionstring) == '01.00') then
+    if (trim(versionstring) == '01.00' .or. trim(versionstring) == '02.00') then
+       
        !
        ! reset mass of sediment per fraction to zero
        !
@@ -239,26 +242,30 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 ! Scan file for fractions
                 !
-                write(lstr,'(i10)') l
-                length = 10
-                call remove_leading_spaces(lstr, length)
-                !
-                ! Keyword SedBed<i> may not be used when layertype is fraction
-                !
-                parname  = 'SedBed' // trim(lstr)
-                filename = ' '
-                call prop_get_string(layer_ptr, '*', parname, filename)
-                if (filename /= ' ') then
-                   write (message,'(7a,i2,2a)')  &
-                       & 'Use Fraction' ,trim(lstr), ' instead of SedBed', &
-                       & trim(lstr), ' for ', trim(layertype), ' layer ', &
-                       & ilyr, ' in file ', trim(filcomp)
-                   call write_error(message, unit=lundia)
-                   error = .true.
-                   return
+                if (trim(versionstring) == '01.00') then
+                   write(lstr,'(i10)') l
+                   length = 10
+                   call remove_leading_spaces(lstr, length)
+                   !
+                   ! Keyword SedBed<i> may not be used when layertype is fraction
+                   !
+                   parname  = 'SedBed' // trim(lstr)
+                   filename = ' '
+                   call prop_get_string(layer_ptr, '*', parname, filename)
+                   if (filename /= ' ') then
+                      write (message,'(7a,i2,2a)')  &
+                          & 'Use Fraction' ,trim(lstr), ' instead of SedBed', &
+                          & trim(lstr), ' for ', trim(layertype), ' layer ', &
+                          & ilyr, ' in file ', trim(filcomp)
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   endif
+                   !
+                   parname  = 'Fraction' // trim(lstr)
+                else
+                   parname = namsed(l)
                 endif
-                !
-                parname  = 'Fraction' // trim(lstr)
                 filename = ' '
                 call prop_get_string(layer_ptr, '*', parname, filename)
                 !
@@ -270,9 +277,22 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    !
                    ! Constant fraction
                    !
-                   fraction = 0.0_fp
+                   fraction = rmissval
                    call prop_get(layer_ptr, '*', parname, fraction)
-                   if (fraction > 0.0_fp) anyfrac = .true.
+                   if (comparereal(fraction,rmissval) == 0) then
+                      fraction = 0.0_fp
+                   elseif (fraction<0.0_fp .or. fraction>1.0_fp) then
+                      write (message,'(a,e12.4,5a,i2,3a)')  &
+                          & 'Invalid value ',fraction,' for ', trim(parname), &
+                          & ' of ', trim(layertype), ' layer ', &
+                          & ilyr, ' in file ', trim(filcomp), &
+                          & ' Value between 0 and 1 required.'
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   else
+                      anyfrac = .true.
+                   endif
                    do nm = 1, nmmax
                       rtemp(nm, l) = fraction
                    enddo
@@ -298,7 +318,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
              !
              if (.not. anyfrac) then
                 write (message,'(a,i2,2a)')  &
-                    & 'No Fraction keywords found for layer ', ilyr, &
+                    & 'No data found for any sediment fraction in the data block of layer ' ,ilyr, &
                     & ' in file ', trim(filcomp)
                 call write_error(message, unit=lundia)
                 error = .true.
@@ -488,26 +508,30 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 ! Scan file for sediment masses
                 !
-                write(lstr,'(i10)') l
-                length = 10
-                call remove_leading_spaces(lstr, length)
-                !
-                ! Keyword Fraction<i> may not be used when layertype is sediment
-                !
-                parname  = 'Fraction' // trim(lstr)
-                filename = ' '
-                call prop_get_string(layer_ptr, '*', parname, filename)
-                if (filename /= ' ') then
-                   write (message,'(7a,i2,2a)')  &
-                       & 'Use SedBed', trim(lstr), ' instead of Fraction', &
-                       & trim(lstr), ' for ', trim(layertype), ' layer ', &
-                       & ilyr, ' in file ', trim(filcomp)
-                   call write_error(message, unit=lundia)
-                   error = .true.
-                   return
+                if (trim(versionstring) == '01.00') then
+                   write(lstr,'(i10)') l
+                   length = 10
+                   call remove_leading_spaces(lstr, length)
+                   !
+                   ! Keyword Fraction<i> may not be used when layertype is sediment
+                   !
+                   parname  = 'Fraction' // trim(lstr)
+                   filename = ' '
+                   call prop_get_string(layer_ptr, '*', parname, filename)
+                   if (filename /= ' ') then
+                      write (message,'(7a,i2,2a)')  &
+                          & 'Use SedBed', trim(lstr), ' instead of Fraction', &
+                          & trim(lstr), ' for ', trim(layertype), ' layer ', &
+                          & ilyr, ' in file ', trim(filcomp)
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   endif
+                   !
+                   parname  = 'SedBed' // trim(lstr)
+                else
+                   parname = namsed(l)
                 endif
-                !
-                parname  = 'SedBed' // trim(lstr)
                 filename = ' '
                 call prop_get_string(layer_ptr, '*', parname, filename)
                 !
@@ -519,9 +543,22 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    !
                    ! Constant thickness or mass
                    !
-                   sedbed = 0.0_fp
+                   sedbed = rmissval
                    call prop_get(layer_ptr, '*', parname, sedbed)
-                   if (sedbed > 0.0_fp) anysedbed = .true.
+                   if (comparereal(sedbed,rmissval) == 0) then
+                      sedbed = 0.0_fp
+                   elseif (sedbed<0.0_fp) then
+                      write (message,'(a,e12.4,5a,i2,3a)')  &
+                          & 'Invalid value ',sedbed,' for ', trim(parname), &
+                          & ' of ', trim(layertype), ' layer ', &
+                          & ilyr, ' in file ', trim(filcomp), &
+                          & ' Positive value required.'
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   else
+                      anysedbed = .true.
+                   endif
                    do nm = 1, nmmax
                       rtemp(nm, l) = sedbed
                    enddo
@@ -546,7 +583,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
              !
              if (.not. anysedbed) then
                 write (message,'(a,i2,2a)')  &
-                    & 'No SedBed keywords found for layer ' ,ilyr, &
+                    & 'No data found for any sediment fraction in the data block of layer ' ,ilyr, &
                     & ' in file ' ,trim(filcomp)
                 call write_error(message, unit=lundia)
                 error = .true.

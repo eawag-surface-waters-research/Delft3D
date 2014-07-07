@@ -354,7 +354,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           call rdinimorlyr(flcomp    ,msed      ,thlyr     ,cdryb     , &
                          & lsedtot   ,nlyr      ,lundia    ,kcs       , &
                          & icx       ,icy       ,svfrac    ,iporosity , &
-                         & gdp%gdsedpar%rhosol  ,gdp%gdmorlyr  ,gdp%griddim   ,error     )
+                         & gdp%gdsedpar%rhosol  ,gdp%gdmorlyr  ,gdp%griddim   ,gdp%gdsedpar%namsed, &
+                         & error     )
           if (error) call d3stop(1, gdp)
        endif
     endselect
