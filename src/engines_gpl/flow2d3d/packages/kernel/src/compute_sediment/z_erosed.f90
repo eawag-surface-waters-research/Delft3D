@@ -65,7 +65,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use mathconsts
+    use mathconsts, only: pi, ee
     use bedcomposition_module
     use morphology_data_module
     use sediment_basics_module
@@ -330,7 +330,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: drho
     real(fp)                      :: dstari
     real(fp)                      :: dtmor
-    real(fp)                      :: ee
     real(fp)                      :: fi
     real(fp)                      :: fracf
     real(fp)                      :: grkg
@@ -551,7 +550,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     !
     lstart = max(lsal, ltem)
     sag    = sqrt(ag)
-    ee     = exp(1.0_fp)
     !
     ! Reset Sourse and Sinkse arrays for all (nm,l)
     !

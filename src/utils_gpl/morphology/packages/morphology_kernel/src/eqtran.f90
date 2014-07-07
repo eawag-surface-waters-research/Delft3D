@@ -49,7 +49,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use message_module, only: write_error
-    use mathconsts
+    use mathconsts, only: pi, ee
     use morphology_data_module
     !
     implicit none
@@ -138,7 +138,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                    :: dgsd
     real(fp)                    :: di50
     real(fp)                    :: dstar
-    real(fp)                    :: ee
     real(fp)                    :: fac3d2d
     real(fp)                    :: h1
     real(fp)                    :: hidexp
@@ -249,7 +248,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     sbwv   = 0.0_fp
     sswu   = 0.0_fp
     sswv   = 0.0_fp
-    ee     = exp(1.0_fp)
     sag    = sqrt(ag)
     bakdif = vicmol / sigmol
     !

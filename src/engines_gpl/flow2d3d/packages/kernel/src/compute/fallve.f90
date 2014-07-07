@@ -46,7 +46,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use mathconsts
+    use mathconsts, only: ee, pi
     use sediment_basics_module
     use globaldata
     !
@@ -139,7 +139,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)                    :: b
     real(fp)                    :: chezy
     real(fp)                    :: coefw  
-    real(fp)                    :: ee
     real(fp)                    :: h0  
     real(fp)                    :: hinset
     real(fp)                    :: rhoint
@@ -198,7 +197,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     !
     aak = 0.0_fp
     sag = sqrt(ag)
-    ee  = exp(1.0_fp)
     !
     lst = max(lsal, ltem)
     do l = 1, lsed

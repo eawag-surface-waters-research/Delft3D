@@ -54,7 +54,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use mathconsts
+    use mathconsts, only: pi, ee, degrad
     !
     use globaldata
     !
@@ -169,7 +169,6 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)                           :: cvalue
     real(fp)                           :: cwall
     real(fp)                           :: dz         ! Distance of the bottom layer from the wall, used to calculate bottom stress vel. 
-    real(fp)                           :: ee
     real(fp)                           :: fmrat
     real(fp)                           :: fw         ! Wave friction factor 
     real(fp)                           :: gamma
@@ -291,7 +290,6 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     alfaw  = 20.
     sixth  = 1./6.
     sag    = sqrt(ag)
-    ee     = exp(1.0)
     astarc = 30.*pi**2
     waveps = 1.E-4
     !
