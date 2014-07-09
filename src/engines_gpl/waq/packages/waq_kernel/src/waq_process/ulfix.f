@@ -37,6 +37,7 @@
 !
 !     date    author          description
 !     ------  --------------  -----------------------------------------
+!     140526  jos van gils    modify for inactive variables in g/m2
 !     090219  jan van beek    3D implementation,
 !                             restyle,
 !                             do not use bloomdepth this makes no sense
@@ -176,15 +177,16 @@
                do ilay = 1 , nolay
                   iseg = isegl + (ilay-1)*nosegl
                   volume = pmsa(ip7+(iseg-1)*in7)
+                  depth  = pmsa(ip5+(iseg-1)*in5)
                   ip = ipoint(nipfix+ialg)+ (iseg-1)*increm(nipfix+ialg)
                   bloomalg = max(pmsa(ip),0.0)
-                  msusp = msusp + bloomalg*volume
+                  msusp = msusp + bloomalg*volume  ! total mass suspended type in g
                   call dhkmrk(2,iknmrk(iseg),ikmrk2)
                   if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
                      ip = ipoint(nipfix+jalg)+ (iseg-1)*increm(nipfix+jalg)
                      bloomalg = max(pmsa(ip),0.0)
-                     mfix     = bloomalg
+                     mfix     = bloomalg*volume/depth     ! biomass of attached (fixed) type (convert from g/m2 to g)
                      isegb    = iseg
                      ilayb    = ilay
                      exit
@@ -239,36 +241,6 @@
 
       enddo ! columns
 
-      ! loop to calculate concentration per m2
-
-      ip5  = ipoint( 5)
-      ip7  = ipoint( 7)
-      do iseg = 1 , noseg
-
-         if (btest(iknmrk(iseg),0)) then
-
-            depth  = pmsa( ip5 )
-            volume = pmsa( ip7 )
-
-            do ialg = 1 , ntyp_m
-               ip = nipfix+ialg
-               ipp = ipoint(ip)+ (iseg-1)*increm(ip)
-               if ( ifix(ialg) .lt. 0 ) then
-                  bloomalg = pmsa(ipp)/volume
-               else
-                  bloomalg = pmsa(ipp)
-               endif
-               ip = nipfix+ialg+2*ntyp_m+1
-               ipp = ipoint(ip)+ (iseg-1)*increm(ip)
-               pmsa(ipp) = bloomalg*depth
-            enddo
-
-         endif
-
-         ip5   = ip5   + increm (  5 )
-         ip7   = ip7   + increm (  7 )
-
-      enddo
 
       return
       end

@@ -2357,7 +2357,6 @@ outppr,outpit,outpnm,outpdo,outpsx
 "TrSe2Alg30","VxUpwAlg30",   1,"x",0
 "TrSe2Alg30","VxDwnAlg30",   2,"x",0
 "UlvaFix_P ","frFixedAlg",   1,"x",1
-"UlvaFix_P ","M2_ALG    ",   2,"x",1
 "UlvaFix   ","frFixedAlg",   1,"x",1
 "UlvaFix   ","M2_ALG01  ",   2,"x",1
 "UlvaFix   ","M2_ALG02  ",   3,"x",1

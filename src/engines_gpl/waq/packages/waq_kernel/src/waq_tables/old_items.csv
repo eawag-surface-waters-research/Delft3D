@@ -2,7 +2,7 @@ old_name,new_name,old_default,configuration,serial,action_type
 "Chloride  ","Salinchlor",    0.00000    ,"          ",2012032801,         1
 "Chloride  ","SWSalCl   ",    0.00000    ,"          ",2012032801,         6
 "Salin     ","Salinchlor",    0.00000    ,"          ",2012032801,         1
-"Salin     ","SWSalCl   ",    1.00000    ,"          ",2012032801,         6
+"Salin     ","SWSalCl   ",   1.000000    ,"          ",2012032801,         6
 "DetC      ","POC1      ",    0.00000    ,"          ",2012032801,         2
 "DetN      ","PON1      ",    0.00000    ,"          ",2012032801,         2
 "DetP      ","POP1      ",    0.00000    ,"          ",2012032801,         2
@@ -15,11 +15,11 @@ old_name,new_name,old_default,configuration,serial,action_type
 "POC_gem   ","Compos    ",    0.00000    ,"          ",2012032801,         1
 "WM_DetC   ","DecFast   ",    0.00000    ,"          ",2012032801,         1
 "WM_DetC   ","Conselac  ",    0.00000    ,"          ",2012032801,         4
-"WM_DetC   ","SWOxCon   ",    1.00000    ,"          ",2012032801,         6
+"WM_DetC   ","SWOxCon   ",   1.000000    ,"          ",2012032801,         6
 "WM_DetC   ","SO4       ",    0.00000    ,"          ",2012032801,         6
 "WM_DetC   ","b_poc1poc2",    0.00000    ,"          ",2012032801,         6
 "WM_DetC   ","b_poc1doc ",    0.00000    ,"          ",2012032801,         6
-"WM_DetC   ","SWOMDec   ",    1.00000    ,"          ",2012032801,         6
+"WM_DetC   ","SWOMDec   ",   1.000000    ,"          ",2012032801,         6
 "WM_DetC   ","kl_dFdcC20",   0.120000    ,"          ",2012032801,         6
 "WM_DetC   ","ku_dFdcC20",   0.120000    ,"          ",2012032801,         6
 "WM_DetN   ","n.a.      ",    6.00000    ,"          ",2012032801,         5
@@ -50,7 +50,7 @@ old_name,new_name,old_default,configuration,serial,action_type
 "TcDetP    ","kT_dec    ",    0.00000    ,"          ",2012032801,         2
 "TcDetP    ","n.a.      ",    7.00000    ,"          ",2012032801,         7
 "WM_DetSi  ","DisSi     ",    0.00000    ,"          ",2012032801,         1
-"WM_DetSi  ","SWDisSi   ",    1.00000    ,"          ",2012032801,         6
+"WM_DetSi  ","SWDisSi   ",   1.000000    ,"          ",2012032801,         6
 "WM_DetSi  ","RcDisSi20 ",   0.100000E-01,"          ",2012032801,         6
 "WM_DetSi  ","TcDisSi   ",    1.04700    ,"          ",2012032801,         6
 "ZMinDetSi ","n.a.      ",    6.00000    ,"          ",2012032801,         7
@@ -61,11 +61,11 @@ old_name,new_name,old_default,configuration,serial,action_type
 "SiCMinLimL","n.a.      ",    8.00000    ,"          ",2012032801,         7
 "WM_OOC    ","DecMedium ",    0.00000    ,"          ",2012032801,         1
 "WM_OOC    ","Conselac  ",    0.00000    ,"          ",2012032801,         4
-"WM_OOC    ","SWOxCon   ",    1.00000    ,"          ",2012032801,         6
+"WM_OOC    ","SWOxCon   ",   1.000000    ,"          ",2012032801,         6
 "WM_OOC    ","SO4       ",    0.00000    ,"          ",2012032801,         6
 "WM_OOC    ","b_poc2poc3",    0.00000    ,"          ",2012032801,         6
 "WM_OOC    ","b_poc2doc ",    0.00000    ,"          ",2012032801,         6
-"WM_OOC    ","SWOMDec   ",    1.00000    ,"          ",2012032801,         6
+"WM_OOC    ","SWOMDec   ",   1.000000    ,"          ",2012032801,         6
 "WM_OOC    ","kl_dMdcC20",   0.100000E-01,"          ",2012032801,         6
 "WM_OOC    ","ku_dMdcC20",   0.100000E-01,"          ",2012032801,         6
 "WM_OON    ","n.a.      ",    6.00000    ,"          ",2012032801,         5
@@ -103,11 +103,11 @@ old_name,new_name,old_default,configuration,serial,action_type
 "nOOC      ","nPOC2     ",    0.00000    ,"          ",2012032801,         2
 "EnhSedOOC ","EnhSedPOC2",    0.00000    ,"          ",2012032801,         2
 "SedDetC   ","Sed_POC1  ",    0.00000    ,"          ",2012032801,         1
-"SedDetC   ","VSedPOC1  ",   0.100000    ,"          ",2012032801,         6
-"SedDetC   ","VSedOpal  ",   0.100000    ,"          ",2012032801,         6
+"SedDetC   ","VSedPOC1  ",   0.100000E+00,"          ",2012032801,         6
+"SedDetC   ","VSedOpal  ",   0.100000E+00,"          ",2012032801,         6
 "Sed_OOC   ","Sed_POC2  ",    0.00000    ,"          ",2012032801,         1
-"Sed_OOC   ","VSedPOC2  ",   0.100000    ,"          ",2012032801,         6
-"Sed_OOC   ","VSedOpal  ",   0.100000    ,"          ",2012032801,         6
+"Sed_OOC   ","VSedPOC2  ",   0.100000E+00,"          ",2012032801,         6
+"Sed_OOC   ","VSedOpal  ",   0.100000E+00,"          ",2012032801,         6
 "SedN_Det  ","Sed_Opal  ",    0.00000    ,"          ",2012032801,         4
 "SedN_Det  ","SedNPOC1  ",    0.00000    ,"          ",2012032801,         1
 "SedN_OOC  ","Sed_Opal  ",    0.00000    ,"          ",2012032801,         4
@@ -167,8 +167,8 @@ old_name,new_name,old_default,configuration,serial,action_type
 "kl_dFdec20","kl_dFdcN20",    0.00000    ,"          ",2012032801,         8
 "kl_dFdec20","kl_dFdcP20",    0.00000    ,"          ",2012032801,         8
 "kl_dFdec20","kl_dFdcC20",    0.00000    ,"          ",2012032801,         8
-"DecFastG  ","b_ni      ",    1.00000    ,"          ",2012032801,         6
-"DecFastG  ","b_su      ",    1.00000    ,"          ",2012032801,         6
+"DecFastG  ","b_ni      ",   1.000000    ,"          ",2012032801,         6
+"DecFastG  ","b_su      ",   1.000000    ,"          ",2012032801,         6
 "DecMediumG","DecMedium ",    0.00000    ,"          ",2012032801,         1
 "DecMediumG","SWOMDec   ",    0.00000    ,"          ",2012032801,         6
 "ku_dMdec20","ku_dMdcN20",    0.00000    ,"          ",2012032801,         8
@@ -177,8 +177,8 @@ old_name,new_name,old_default,configuration,serial,action_type
 "kl_dMdec20","kl_dMdcN20",    0.00000    ,"          ",2012032801,         8
 "kl_dMdec20","kl_dMdcP20",    0.00000    ,"          ",2012032801,         8
 "kl_dMdec20","kl_dMdcC20",    0.00000    ,"          ",2012032801,         8
-"DecMediumG","b_ni      ",    1.00000    ,"          ",2012032801,         6
-"DecMediumG","b_su      ",    1.00000    ,"          ",2012032801,         6
+"DecMediumG","b_ni      ",   1.000000    ,"          ",2012032801,         6
+"DecMediumG","b_su      ",   1.000000    ,"          ",2012032801,         6
 "DecSlowG  ","DecSlow   ",    0.00000    ,"          ",2012032801,         1
 "DecSlowG  ","SWOMDec   ",    0.00000    ,"          ",2012032801,         6
 "ku_dSdec20","ku_dSdcN20",    0.00000    ,"          ",2012032801,         8
@@ -189,14 +189,14 @@ old_name,new_name,old_default,configuration,serial,action_type
 "kl_dSdec20","kl_dSdcC20",    0.00000    ,"          ",2012032801,         8
 "k_dprdec20","k_dprdcC20",    0.00000    ,"          ",2012032801,         2
 "k_DOCdec20","k_DOCdcC20",    0.00000    ,"          ",2012032801,         2
-"DecSlowG  ","b_ni      ",    1.00000    ,"          ",2012032801,         6
-"DecSlowG  ","b_su      ",    1.00000    ,"          ",2012032801,         6
+"DecSlowG  ","b_ni      ",   1.000000    ,"          ",2012032801,         6
+"DecSlowG  ","b_su      ",   1.000000    ,"          ",2012032801,         6
 "DecRefrG  ","DecRefr   ",    0.00000    ,"          ",2012032801,         1
-"DecRefrG  ","b_ni      ",    1.00000    ,"          ",2012032801,         6
-"DecRefrG  ","b_su      ",    1.00000    ,"          ",2012032801,         6
+"DecRefrG  ","b_ni      ",   1.000000    ,"          ",2012032801,         6
+"DecRefrG  ","b_su      ",   1.000000    ,"          ",2012032801,         6
 "DecDOCG   ","DecDOC    ",    0.00000    ,"          ",2012032801,         1
-"DecDOCG   ","b_ni      ",    1.00000    ,"          ",2012032801,         6
-"DecDOCG   ","b_su      ",    1.00000    ,"          ",2012032801,         6
+"DecDOCG   ","b_ni      ",   1.000000    ,"          ",2012032801,         6
+"DecDOCG   ","b_su      ",   1.000000    ,"          ",2012032801,         6
 "Res_IM1   ","S12traIM1 ",    0.00000    ,"          ",2012032801,         1
 "Res_IM2   ","S12traIM2 ",    0.00000    ,"          ",2012032801,         1
 "Res_IM3   ","S12traIM3 ",    0.00000    ,"          ",2012032801,         1
@@ -243,7 +243,7 @@ old_name,new_name,old_default,configuration,serial,action_type
 "ResN_Det  ","S12traDetP",    0.00000    ,"          ",2012032801,         4
 "ResN_Det  ","S12traDetS",    0.00000    ,"          ",2012032801,         4
 "ResN_Dia  ","n.a.      ",    0.00000    ,"          ",2012032801,         5
-"ResN_Dia  ","n.a.      ",    1.00000    ,"          ",2012032801,         5
+"ResN_Dia  ","n.a.      ",   1.000000    ,"          ",2012032801,         5
 "ResN_OO   ","S12traOON ",    0.00000    ,"          ",2012032801,         1
 "ResN_OO   ","S12traOOP ",    0.00000    ,"          ",2012032801,         4
 "BurS1N_Dia","n.a.      ",    0.00000    ,"          ",2012032801,         5
