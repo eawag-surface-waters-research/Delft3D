@@ -738,13 +738,21 @@ c     Optionally scale the balance per volume or area
              IF ( DMPBAL(IDUMP) .EQ. 1 ) THEN
                 IDUMP_OUT = IDUMP_OUT + 1
                 DO IOUT  = 1,NOOUT
-                  BALANS(IOUT,IDUMP_OUT) = BALANS(IOUT,IDUMP_OUT)/DMP_SURF(IDUMP)
-                ENDDO
+                   IF (DMP_SURF(IDUMP).GT.1.0E-20) THEN
+                      BALANS(IOUT,IDUMP_OUT) = BALANS(IOUT,IDUMP_OUT)/DMP_SURF(IDUMP)
+                   ELSE
+                      BALANS(IOUT,IDUMP_OUT) = -999.0
+                   END IF
+               ENDDO
                 TOT_SURF = TOT_SURF + DMP_SURF(IDUMP)
              ENDIF
           ENDDO
           DO IOUT  = 1,NOOUT
-             BALANS(IOUT,NDMPAR_OUT+1) = BALANS(IOUT,NDMPAR_OUT+1)/TOT_SURF
+             IF (TOT_SURF.GT.1.0E-20) THEN
+                BALANS(IOUT,NDMPAR_OUT+1) = BALANS(IOUT,NDMPAR_OUT+1)/TOT_SURF
+             ELSE
+                BALANS(IOUT,NDMPAR_OUT+1) = -999.0
+             END IF
           ENDDO
           DEALLOCATE(DMP_SURF)
 
@@ -869,13 +877,21 @@ c         In mass/m2
              IF ( DMPBAL(IDUMP) .EQ. 1 ) THEN
                 IDUMP_OUT = IDUMP_OUT + 1
                 DO IOUT  = 1,NOOUT
-                  BALTOT(IOUT,IDUMP_OUT) = BALTOT(IOUT,IDUMP_OUT)/DMP_SURF(IDUMP)
+                   IF (DMP_SURF(IDUMP).GT.1.0E-20) THEN
+                      BALTOT(IOUT,IDUMP_OUT) = BALTOT(IOUT,IDUMP_OUT)/DMP_SURF(IDUMP)
+                   ELSE
+                      BALTOT(IOUT,IDUMP_OUT) = -999.0
+                   END IF
                 ENDDO
                 TOT_SURF = TOT_SURF + DMP_SURF(IDUMP)
              ENDIF
           ENDDO
           DO IOUT  = 1,NOOUT
-             BALTOT(IOUT,NDMPAR_OUT+1) = BALTOT(IOUT,NDMPAR_OUT+1)/TOT_SURF
+             IF (TOT_SURF.GT.1.0E-20) THEN
+                BALTOT(IOUT,NDMPAR_OUT+1) = BALTOT(IOUT,NDMPAR_OUT+1)/TOT_SURF
+             ELSE
+                BALTOT(IOUT,NDMPAR_OUT+1) = -999.0
+             END IF
           ENDDO
           CALL OUTBAI (IOBALI, MONAME      , IMSTRT, IMSTOP, NOOUT ,
      J                 NOTOT , NDMPAR_OUT+1, DANAMP, OUNAME, SYNAMP,
