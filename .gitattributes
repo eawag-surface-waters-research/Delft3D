@@ -4442,6 +4442,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/valuemap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/waterml2.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.cpp -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.dll -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.m -text
