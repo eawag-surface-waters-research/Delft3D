@@ -123,8 +123,8 @@
 #   define PUT_STRING_ATTRIBUTE    FC_FUNC(putsat,PUTSAT)
 #else
 /* WIN32 or WIN64 */
-#if STDCALL
-#   define FTN_CALL
+#if defined(STDCALL)
+#   define FTN_CALL __stdcall
 #else
 #   define FTN_CALL
 #endif
