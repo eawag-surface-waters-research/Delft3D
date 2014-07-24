@@ -677,8 +677,11 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           n = mnstat(2, ii)
           if (n<0) cycle
           !
-          zprecp(ii) = precip(n, m)
-          zevap(ii)  = evap(n, m)
+          ! Precipitation: convert from m/s to mm/h
+          zprecp(ii) = precip(n, m) * 3600000.0_fp
+          !
+          ! Evaporation: convert from kg/s to mm/h
+          zevap(ii)  = evap(n, m) * 3600000.0_fp / rhow
        enddo
     endif
     !

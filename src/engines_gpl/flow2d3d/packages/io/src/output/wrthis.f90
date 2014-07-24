@@ -360,11 +360,11 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                 & lundia    ,gdp       )
           endif
           if (flwoutput%air) then
-             call addelm(nefiswrthis,'ZPRECP',' ','[M3 S-1M-2]','REAL',4           , &
+             call addelm(nefiswrthis,'ZPRECP',' ','[  MM/H ]','REAL',4           , &
                 & 'Instantaneous precipitation rate in station                      ', &
                 & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
-             call addelm(nefiswrthis,'ZEVAP',' ','[M3 S-1M-2]','REAL',4             , &
+             call addelm(nefiswrthis,'ZEVAP',' ','[  MM/H ]','REAL',4             , &
                 & 'Instantaneous evaporation rate in station                        ', &
                 & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
