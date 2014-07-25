@@ -1440,7 +1440,11 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
           endif
           !
           if (lsedtot==1 .and. flsdia/=' ') then ! l=1
-             do nm = 1, size(sedd50fld)
+             !
+             ! Wrong: do nm=1,size(sedd50fld)
+             ! nm goes from nmlb (negative!) to nmub
+             !
+             do nm = lbound(sedd50fld,1), ubound(sedd50fld,1)
                 dss(nm, 1) = sedd50fld(nm)*facdss(1)
              enddo
           else
