@@ -143,8 +143,8 @@ module Dio_Prop
        !
        ! lun-id range for dio ASC/BIN/HIS streams
        !
-       integer, parameter :: dioStartLun = 800
-       integer, private   :: dioEndLun   = 900
+       integer, parameter :: dioStartLun =  800
+       integer, private   :: dioEndLun   = 4000
 
 
 contains
