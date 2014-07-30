@@ -719,7 +719,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     call dfexchg( z0vcur,1, 1, dfloat, nm_pos, gdp)
     call dfexchg( z0urou,1, 1, dfloat, nm_pos, gdp)
     call dfexchg( z0vrou,1, 1, dfloat, nm_pos, gdp)
-    do l = 1, lsedtot
+    do l = 1, lsed
        call dfexchg( ws(:,:,l),0, kmax, dfloat, nm_pos, gdp)
     enddo
     !
@@ -986,6 +986,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_D50  ) = 0.0_hp
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
+             !
+             ! Assumption: l <= lsed (which should hold for SEDTYP_COHESIVE)
+             !
              dll_reals(RP_SETVL) = real(ws(nm, kbed, l)  ,hp) ! Vertical velocity near bedlevel
              if (flmd2l) then
                  localpar(11) = entr(nm)
@@ -1101,6 +1104,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = dss(nm, l)
              tsalmax = salmax(l)
              tws0    = ws0(l)
+             !
+             ! Assumption: l <= lsed (which should hold for suspfrac)
+             !
              twsk    = ws(nm, kbed, l)
           else
              !
@@ -1135,6 +1141,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              if (suspfrac) then
                 !
                 ! Fill local 1dv arrays with fall velocity and diffusivity
+                !
+                !
+                ! Assumption: l <= lsed (which should hold for suspfrac)
                 !
                 do k = 0, kmax
                    wslc(k)   = ws(nm, k, l)
