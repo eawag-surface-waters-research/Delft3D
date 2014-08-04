@@ -141,6 +141,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp) :: dzdv
     real(fp) :: fixf
     real(fp) :: fnorm
+    real(fp) :: frc
     real(fp) :: ftheta    ! used in computation of Koch-Flokstra bed slope effect
     real(fp) :: hidexploc
     real(fp) :: phi
@@ -441,19 +442,24 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                    !
                 endif
                 !
-                ! apply upwind frac and fixfac. At an open (upstream) boundary the
-                ! fixfac should not be taken upwind.
+                ! Apply upwind frac and fixfac.
+                !
+                ! At inflow (open, dd, and partition) boundaries the fixfac should not be taken upwind.
                 !
                 if ((sbedcorr>0.0 .and. kcs(nm)==1) .or. kcs(nm2)/=1) then
                    fixf = fixfac(nm,l)
                 else
                    fixf = fixfac(nm2,l)
                 endif
-                if (sbedcorr > 0.0) then
-                   sbedcorr = sbedcorr * frac(nm,l) * fixf
+                !
+                ! At dd and partition boundaries the fraction should not be taken upwind (because these quantities have not been communicated).
+                !
+                if ((sbedcorr>0.0 .and. (kcs(nm)==1 .or. kcs(nm)==2)) .or. (kcs(nm2)/=1 .and. kcs(nm2)/=2)) then
+                   frc = frac(nm,l)
                 else
-                   sbedcorr = sbedcorr * frac(nm2,l) * fixf
+                   frc = frac(nm2,l)
                 endif
+                sbedcorr = sbedcorr * frc * fixf
                 !
                 if (idir == 1) then
                    sbuut(nm) = sbedcorr
