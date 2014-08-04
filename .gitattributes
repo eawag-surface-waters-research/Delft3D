@@ -4034,6 +4034,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/earth1.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/earth2.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/earthsurface.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/flag.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/gist_earth.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/gpprainbow.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/gray.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/hot.clrmap -text
