@@ -135,11 +135,11 @@ type bedcomp_settings
     integer :: nmlb       !  start index of segments
     integer :: nmub       !  nm end index
     integer :: updbaselyr !  switch for computing composition of base layer
-                          !  1: base layer is an independent layer
-                          !  2: base layer composition is kept fixed
-                          !  3: base layer composition is set equal to the
-                          !     composition of layer above it
-                          !  4: base layer composition and thickness constant
+                          !  1: base layer is an independent layer (both composition and thickness computed like any other layer)
+                          !  2: base layer composition is kept fixed (thickness is computed - total mass conserved)
+                          !  3: base layer composition is set equal to the composition of layer above it (thickness computed - total mass conserved)
+                          !  4: base layer composition and thickness constant (no change whatsoever)
+                          !  5: base lyaer composition is updated, but thickness is kept constant
     !
     ! pointers
     !
@@ -785,7 +785,10 @@ subroutine lyrerosion(this, nm, dzini, dmi)
        !
     case(2) ! composition of base layer constant
        !
-       ! compute new masses
+       ! compute new masses based on old composition and new thickness
+       ! Problem of current implementation:
+       ! if the base layer runs out of sediment once (thlyr(nlyr,nm) -> 0),
+       ! it looses the information on the composition and cannot recover.
        !
        if (thbaselyr>0.0_fp) then
           fac = thlyr(nlyr, nm)/thbaselyr
@@ -812,6 +815,19 @@ subroutine lyrerosion(this, nm, dzini, dmi)
        !
        thlyr(nlyr, nm)  = thbaselyr
        msed(:, nlyr, nm) = mbaselyr
+    case(5) ! composition updated, but thickness unchanged
+       !
+       ! reset thickness and correct mass
+       !
+       if (thlyr(nlyr, nm)>0.0_fp) then
+          fac = thbaselyr/thlyr(nlyr, nm)
+          do l = 1, this%settings%nfrac
+             msed(l, nlyr, nm) = msed(l, nlyr, nm)*fac
+          enddo
+       else
+          msed(:, nlyr, nm) = mbaselyr
+       endif
+       thlyr(nlyr, nm)  = thbaselyr
     case default
        !
        ! ERROR
