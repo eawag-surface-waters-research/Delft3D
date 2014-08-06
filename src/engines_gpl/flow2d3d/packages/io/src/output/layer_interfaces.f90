@@ -63,7 +63,7 @@ subroutine layer_interfaces(zmodel  ,kmax    ,mmax    ,nmaxus  ,s1     , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)   , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)         , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(kmax)                                             , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(nmaxus, mmax, 0:kmax)                             , intent(out) :: zkt    !  Vertical coordinates of layering interfaces
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) , intent(out) :: zkt    !  Vertical coordinates of layering interfaces
 !
 ! Local variables
 !

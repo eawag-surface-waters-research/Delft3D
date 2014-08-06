@@ -1,4 +1,4 @@
-subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
+subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
                   & rhow      ,mmax      , &
                   & kmax      ,nmaxus    ,lstsci    ,ltur      , &
                   & nsrc      ,zmodel    ,kcs       ,kfs       ,kfu       , &
@@ -535,7 +535,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (index(selmap(2:2), 'Y')>0 .and. zmodel) then
           call addelm(nefiswrtmap,'HYDPRES',' ','[  N/M2 ]','REAL',4         , &
              & 'Non-hydrostatic pressure at each layer in zeta point        ', &
-             & 3         ,nmaxus    ,mmax      ,kmaxout_restr,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%air) then
@@ -662,11 +662,11 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           end select
           call addelm(nefiswrtmap,'ROUMETU',' ',runit      ,'REAL',4         , &
              & trim(rdesc) // ' in U-point'                                  , &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'ROUMETV',' ',runit      ,'REAL',4         , &
              & trim(rdesc) // ' in V-point'                                  , &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%z0cur) then
@@ -1369,12 +1369,11 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! Output of vertical coordinates of the layer interfaces (both for Sigma- and Z-model)
     ! Note: this will NOT work in parallel (yet) !
     !
-    if (.not. parll .and. flwoutput%layering) then
+    if (flwoutput%layering) then
        !
        ! element 'LAYER_INTERFACE'
        !
-       allocate (zkt(nmaxus,mmax,0:kmax), stat=istat)
-       zkt(:, :, :) = -999.0_fp
+       allocate (zkt(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), stat=istat)
        if (istat /= 0) then
           write(lundia, '(''ERROR: Memory allocation error in routine WRTMAP'')')
        endif
@@ -1386,23 +1385,13 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        call layer_interfaces(zmodel     ,kmax      ,mmax     ,nmaxus   ,s1      , &
                            & dps        ,thick     ,dzs1     ,kcs      ,kfs     , &
                            & kfsmin     ,kfsmax    ,zkt      ,gdp      )
-       call sbuff_checksize(mmax*nmaxus*(kmax+1))
-       i = 0
-       do k = 0, kmax
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                sbuff(i) = real(zkt(n, m, k),sp)
-             enddo
-          enddo
-       enddo
+       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
+                     & kmaxout, 0, kmax, ierror, zkt, 'LAYER_INTERFACE', kfsmin, kfsmax)
+       if (ierror /= 0) goto 999
        !
        ! Deallocate the array with vertical layer coordinates
        !
        deallocate (zkt)
-       !
-       ierror = putelt(fds, grnam3, 'LAYER_INTERFACE', uindex, 1, sbuff)
-       if (ierror /= 0) goto 999
     endif
     !
     ! Output of air parameters: wind, pressure, cloudiness, relative humidity, temperature, precipitation, and evaporation
