@@ -131,11 +131,11 @@ subroutine dfwrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
        ! so every partition knows the dimensions and positions
        ! of the other partitions in the global domain
        !
-       call dfbroadc ( iarrc, 4*nproc, dfint, gdp )
-       call dfbroadc ( nf, nproc, dfint, gdp )
-       call dfbroadc ( nl, nproc, dfint, gdp )
-       call dfbroadc ( mf, nproc, dfint, gdp )
-       call dfbroadc ( ml, nproc, dfint, gdp )
+       call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
+       call dfbroadc_gdp ( nf, nproc, dfint, gdp )
+       call dfbroadc_gdp ( nl, nproc, dfint, gdp )
+       call dfbroadc_gdp ( mf, nproc, dfint, gdp )
+       call dfbroadc_gdp ( ml, nproc, dfint, gdp )
        !
        ! Write data to file
        !
