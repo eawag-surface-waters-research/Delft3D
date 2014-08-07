@@ -47,6 +47,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     use mathconsts
     use dfparall
     use globaldata
+    use geometry_module, only: clockwise
     !
     implicit none
     !
@@ -116,14 +117,11 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     real(fp)               :: dydknu
     real(fp)               :: dydksi          ! Help var. 
     real(fp)               :: small
+    real(fp), dimension(4) :: xcell
     real(fp)               :: xcndm
     real(fp)               :: xcndmd
     real(fp)               :: xcnm
     real(fp)               :: xcnmd
-    real(fp)               :: xnm
-    real(fp)               :: xndm
-    real(fp)               :: xnmd
-    real(fp)               :: xndmd
     real(fp)               :: xcor_mean
     real(fp)               :: xdis
     real(fp)               :: xdis1
@@ -131,6 +129,11 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     real(fp)               :: xm
     real(fp)               :: xmd
     real(fp)               :: xmu
+    real(fp)               :: xnm
+    real(fp)               :: xndm
+    real(fp)               :: xnmd
+    real(fp)               :: xndmd
+    real(fp), dimension(4) :: ycell
     real(fp)               :: ycndm
     real(fp)               :: ycndmd
     real(fp)               :: ycnm
@@ -857,8 +860,31 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     !      write (lundia,'(a,$)') 'alfa'
     !      call prisep(nst ,lundia,ALFAS,nmax  ,mmax         )
     !
+    !
+    ! check grid orientation based on first internal point
+    !
+    CHK_ORIENT : do m = 2, mmax
+       md = m - 1
+       do n = 2, nmaxus
+          nd = n - 1
+          if (kcs(n, m) == 1) then
+             xcell(1) = xcor(n , m)
+             ycell(1) = ycor(n , m)
+             xcell(2) = xcor(n , md)
+             ycell(2) = ycor(n , md)
+             xcell(3) = xcor(nd, md)
+             ycell(3) = ycor(nd, md)
+             xcell(4) = xcor(nd, m)
+             ycell(4) = ycor(nd, m)
+             if (clockwise(xcell,ycell)) then
+                call prterr(lundia ,'P004' ,'Grid orientation incorrect: Delft3D requires (M,N) to form a counter-clockwise coordinate system.')
+                success = .false.
+             endif
+             exit CHK_ORIENT
+          endif
+       enddo
+    enddo CHK_ORIENT
     if (.not. success) then
        call d3stop (3,gdp)
     endif
 end subroutine inigeo
-

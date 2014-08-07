@@ -1,0 +1,116 @@
+module geometry_module
+!----- LGPL --------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
+!                                                                               
+!  This library is free software; you can redistribute it and/or                
+!  modify it under the terms of the GNU Lesser General Public                   
+!  License as published by the Free Software Foundation version 2.1.            
+!                                                                               
+!  This library is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+!  Lesser General Public License for more details.                              
+!                                                                               
+!  You should have received a copy of the GNU Lesser General Public             
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Various geometrical routines
+!
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+
+   implicit none
+
+   private
+
+   !
+   ! functions and subroutines
+   !
+   public :: clockwise
+
+   contains
+
+      !> Checks orientation of a polygon.
+      function clockwise(x,y) result(cw)
+          use precision
+      
+          implicit none
+          
+          real(fp), dimension(:), intent(in) :: x   !< x-coordinates
+          real(fp), dimension(:), intent(in) :: y   !< y-coordinates
+          logical                            :: cw  !< true if clockwise, false if not
+          
+          integer :: i        !< loop variable
+          integer :: i0       !< index of lowest left most point
+          integer :: in       !< index of next point (not equal to x0,y0)
+          integer :: ip       !< index of previous point (not equal to x0,y0)
+          integer :: n        !< number of points in polygon
+          real(fp) :: an      !< angle of next point compared to horizontal x-axis
+          real(fp) :: ap      !< angle of previous point compared to horizontal x-axis
+          real(fp) :: x0      !< x-coordinate of point i0
+          real(fp) :: y0      !< y-coordinate of point i0
+          
+          !
+          ! select lowest left most point
+          !
+          n = size(x)
+          x0 = x(1)
+          y0 = y(1)
+          i0 = 1
+          do i = 2, n
+              if ( x(i)<x0 ) then
+                  x0 = x(i)
+                  y0 = y(i)
+                  i0 = i
+              elseif (x(i)==x0 .and. y(i)<y0) then
+                  y0 = y(i)
+                  i0 = i
+              endif
+          enddo
+          !
+          ! find point before
+          ! note that this will give an infinite loop if n==1 or more generally if all(x==x0 and y==y0)
+          !
+          ip = i0
+          do while (x(ip)==x0 .and. y(ip)==y0)
+              if (ip==1) then
+                  ip = n
+              else
+                  ip = ip-1
+              endif
+          enddo
+          !
+          ! find point after
+          !
+          in = i0
+          do while (x(in)==x0 .and. y(in)==y0)
+              if (in==n) then
+                  in = 1
+              else
+                  in = in+1
+              endif
+          enddo
+          !
+          ! if "point after" lies above "point before" the orientation is clockwise ...
+          !
+          an = atan2(y(in)-y0,x(in)-x0)
+          ap = atan2(y(ip)-y0,x(ip)-x0)
+          cw = an>ap
+      end function clockwise
+end module geometry_module

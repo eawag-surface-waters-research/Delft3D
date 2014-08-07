@@ -27,6 +27,7 @@ libDeltaresCommon_la_SOURCES = \
 	precision_basics.F90 \
 	precision.F90 \
 	precision_sp.F90 \
+	geometry_module.f90 \
 	grid_dimens_module.f90 \
 	message_module.f90 \
 	MessageHandling.f90 \

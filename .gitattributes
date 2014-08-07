@@ -5099,6 +5099,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/buffer.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/combinepaths.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/deltares_common_version.F90.svn -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/distance.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/geometry_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/grid_dimens_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/handles.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/iso_c_utils.F90 -text
