@@ -328,6 +328,7 @@ end subroutine readgriddims
 !
 !==============================================================================
 subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic ,xymiss)
+    use geometry_module, only: clockwise
     implicit none
 !
 ! Global variables
@@ -346,6 +347,8 @@ subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic 
 ! Local variables
 !
     real(hp), dimension(:,:,:),allocatable :: xy
+    real(hp), dimension(4)                 :: xcell
+    real(hp), dimension(4)                 :: ycell
     integer                                :: etamax
     integer                                :: i
     integer                                :: ierr
@@ -497,9 +500,32 @@ subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic 
           yb(i, j) = xy(2, i, j)
        enddo
     enddo
-    goto 1000
+    !
+    ! test grid orientation based on first "grid cell"
+    !
+    do i = 2, ksimax
+       do j = 2, etamax
+          if (codb(i-1,j-1)/=0 .and. codb(i-1,j)/=0 .and. codb(i,j-1)/=0 .and. codb(i,j)/=0) then
+             xcell(1) = xb(i-1,j-1)
+             xcell(2) = xb(i  ,j-1)
+             xcell(3) = xb(i  ,j)
+             xcell(4) = xb(i-1,j)
+             ycell(1) = yb(i-1,j-1)
+             ycell(2) = yb(i  ,j-1)
+             ycell(3) = yb(i  ,j)
+             ycell(4) = yb(i-1,j)
+             if (clockwise(xcell,ycell)) then
+                write (*, '(a)') '*** ERROR: Grid orientation incorrect: Delft3D requires (M,N) to form a counter-clockwise coordinate system.'
+                goto 999
+             endif
+             goto 1000
+          endif
+       enddo
+    enddo
+    goto 1000 ! shouldn't come here
+    !
   999 continue
-   write(*,'(2a)') '*** ERROR: reading GRD file', trim(filnam)
+   write(*,'(2a)') '*** ERROR: reading GRD file ', trim(filnam)
    stop
  1000 continue
     deallocate (xy, stat=ierr)
@@ -509,6 +535,7 @@ end subroutine read_grd
 !==============================================================================
 subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
                           & mmax, nmax, dx, dy)
+    use geometry_module, only: clockwise
     implicit none
 !
 ! Global variables
@@ -539,8 +566,10 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
     real                           :: pi
     real                           :: x1
     real                           :: x2
+    real, dimension(4)             :: xcell
     real                           :: y1
     real                           :: y2
+    real, dimension(4)             :: ycell
     real, dimension(:,:,:),allocatable :: xy
     logical                        :: kw_found
     logical                        :: sferic_read
@@ -638,7 +667,20 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
  8888 continue
     goto 999
     !
- 9999 continue
+9999 continue
+    !
+    xcell(1) = xy(1,1,1)
+    xcell(2) = xy(1,2,1)
+    xcell(3) = xy(1,2,2)
+    xcell(4) = xy(1,1,2)
+    ycell(1) = xy(2,1,1)
+    ycell(2) = xy(2,2,1)
+    ycell(3) = xy(2,2,2)
+    ycell(4) = xy(2,1,2)
+    if (clockwise(xcell,ycell)) then
+       write (*, '(a)') '*** ERROR: Grid orientation incorrect: Delft3D requires (M,N) to form a counter-clockwise coordinate system.'
+       goto 999
+    endif
     !
     pi   = 4.*atan(1.)
     alpha = atan2(xy(2,mmax,1)-xy(2,1,1),xy(1,mmax,1)-xy(1,1,1))*180./pi
@@ -646,18 +688,20 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
     yorigin   = xy(2,1,1)
     x1   = xy(1,mmax,1)
     y1   = xy(2,mmax,1)
-    x2   = xy(1,mmax,nmax)
-    y2   = xy(2,mmax,nmax)
+    !
     dxx  = (x1 - xorigin)/(mmax - 1)
-    dxy  = (x2 - x1)/(nmax - 1)
-    dyy  = (y2 - y1)/(nmax - 1)
     dyx  = (y1 - yorigin)/(mmax - 1)
     dx   = sqrt(dxx * dxx + dyx * dyx)
+    !
+    x2   = xy(1,mmax,nmax)
+    y2   = xy(2,mmax,nmax)
+    dxy  = (x2 - x1)/(nmax - 1)
+    dyy  = (y2 - y1)/(nmax - 1)
     dy   = sqrt(dyy * dyy + dxy * dxy)
     !
     goto 1000
   999 continue
-    write(*,'(2a)') '*** ERROR: reading GRD file', trim(filnam)
+    write(*,'(2a)') '*** ERROR: reading GRD file ', trim(filnam)
     deallocate (xy, stat=ierr)
     stop
  1000 continue

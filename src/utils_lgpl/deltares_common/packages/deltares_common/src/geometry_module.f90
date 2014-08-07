@@ -44,16 +44,43 @@ module geometry_module
    !
    public :: clockwise
 
+   interface clockwise
+      module procedure clockwise_sp
+      module procedure clockwise_hp
+   end interface clockwise
+
    contains
 
-      !> Checks orientation of a polygon.
-      function clockwise(x,y) result(cw)
+      !> Checks orientation of a polygon in high precision.
+      function clockwise_sp(x,y) result(cw)
           use precision
       
           implicit none
           
-          real(fp), dimension(:), intent(in) :: x   !< x-coordinates
-          real(fp), dimension(:), intent(in) :: y   !< y-coordinates
+          real(sp), dimension(:), intent(in) :: x   !< x-coordinates
+          real(sp), dimension(:), intent(in) :: y   !< y-coordinates
+          logical                            :: cw  !< true if clockwise, false if not
+          
+          integer                             :: n        !< number of points in polygon
+          real(hp), dimension(:), allocatable :: xhp      !< temporary double precision x-coordinates
+          real(hp), dimension(:), allocatable :: yhp      !< temporary double precision y-coordinates
+          
+          n = size(x)
+          allocate(xhp(n),yhp(n))
+          xhp = real(x,hp)
+          yhp = real(y,hp)
+          cw = clockwise_hp(xhp,yhp)
+          deallocate(xhp,yhp)
+      end function clockwise_sp
+
+      !> Checks orientation of a polygon in high precision.
+      function clockwise_hp(x,y) result(cw)
+          use precision
+      
+          implicit none
+          
+          real(hp), dimension(:), intent(in) :: x   !< x-coordinates
+          real(hp), dimension(:), intent(in) :: y   !< y-coordinates
           logical                            :: cw  !< true if clockwise, false if not
           
           integer :: i        !< loop variable
@@ -61,10 +88,10 @@ module geometry_module
           integer :: in       !< index of next point (not equal to x0,y0)
           integer :: ip       !< index of previous point (not equal to x0,y0)
           integer :: n        !< number of points in polygon
-          real(fp) :: an      !< angle of next point compared to horizontal x-axis
-          real(fp) :: ap      !< angle of previous point compared to horizontal x-axis
-          real(fp) :: x0      !< x-coordinate of point i0
-          real(fp) :: y0      !< y-coordinate of point i0
+          real(hp) :: an      !< angle of next point compared to horizontal x-axis
+          real(hp) :: ap      !< angle of previous point compared to horizontal x-axis
+          real(hp) :: x0      !< x-coordinate of point i0
+          real(hp) :: y0      !< y-coordinate of point i0
           
           !
           ! select lowest left most point
@@ -112,5 +139,5 @@ module geometry_module
           an = atan2(y(in)-y0,x(in)-x0)
           ap = atan2(y(ip)-y0,x(ip)-x0)
           cw = an>ap
-      end function clockwise
+      end function clockwise_hp
 end module geometry_module
