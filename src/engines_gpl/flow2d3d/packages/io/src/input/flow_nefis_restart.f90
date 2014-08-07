@@ -479,17 +479,19 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
           goto 9999
        endif
        if (lstsci /= 0) then
-          allocate(rst_namcon(rst_lstci+rst_ltur), stat = ier1)
-          if (ier1 /= 0) then
-             call prterr(lundia, 'G020', 'rst_lstci')
-             call d3stop(1, gdp)
-          endif
-          ierror = getelt(fds, 'map-const', 'NAMCON', cuindex, 1, 20*(rst_lstci+rst_ltur), rst_namcon)
-          if (ierror/= 0) then
-             ierror = neferr(0,error_string)
-             call prterr(lundia    ,'P004'    , error_string)
-             error = .true.
-             goto 9999
+          if (rst_lstci > 0) then
+             allocate(rst_namcon(rst_lstci+rst_ltur), stat = ier1)
+             if (ier1 /= 0) then
+                call prterr(lundia, 'G020', 'rst_lstci')
+                call d3stop(1, gdp)
+             endif
+             ierror = getelt(fds, 'map-const', 'NAMCON', cuindex, 1, 20*(rst_lstci+rst_ltur), rst_namcon)
+             if (ierror/= 0) then
+                ierror = neferr(0,error_string)
+                call prterr(lundia    ,'P004'    , error_string)
+                error = .true.
+                goto 9999
+             endif
           endif
           !
           deallocate(sbuff)
@@ -499,13 +501,18 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
              call prterr(lundia, 'G020', 'r1_g')
              call d3stop(1, gdp)
           endif
-          ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmaxgl*nmaxgl*kmax*rst_lstci*4, sbuff )
-          if (ierror/= 0) then
-             ierror = neferr(0,error_string)
-             call prterr(lundia    ,'P004'    , error_string)
-             error = .true.
-             goto 9999
+          r1_g = 0.0_sp ! need initialization for nan_check if parameter is not available on restart file
+          !
+          if (rst_lstci > 0) then
+             ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmaxgl*nmaxgl*kmax*rst_lstci*4, sbuff )
+             if (ierror/= 0) then
+                ierror = neferr(0,error_string)
+                call prterr(lundia    ,'P004'    , error_string)
+                error = .true.
+                goto 9999
+             endif
           endif
+          !
           do l = 1,lstsci
              found = .false.
              do ll = 1,rst_lstci
@@ -517,13 +524,21 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
                  endif
              enddo
              if (.not.found) then
-                write(lundia, '(3A)') 'No restart data found for "',trim(namcon(l)),'"; using constant default value.'
-                ! coninit(l) = 0
+                if (namcon(l)=='Secondary flow') then
+                   write(lundia, '(3A)') 'No restart data found for "',trim(namcon(l)),'"; using 0.'
+                   ! r1_g(1:nmaxgl,1:mmaxgl,1:kmax,l) = 0.0_sp already initialized after allocation
+                   coninit(l) = 1
+                else
+                   write(lundia, '(3A)') 'No restart data found for "',trim(namcon(l)),'"; using constant default value.'
+                   ! coninit(l) = 0
+                endif
              endif
           enddo
           if (.not. nan_check(r1_g, 'r1_g (restart-file)', lundia)) call d3stop(1, gdp)
           !
-          deallocate(rst_namcon)
+          if (rst_lstci > 0) then
+             deallocate(rst_namcon)
+          endif
        endif
        !
        ! Turbulence
