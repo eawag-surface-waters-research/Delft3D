@@ -69,7 +69,7 @@ module properties
        module procedure prop_set_double
        module procedure prop_set_doubles
     end interface
-    !
+
 contains
 
 subroutine prop_file(filetype, filename , tree, error)
@@ -131,23 +131,58 @@ end subroutine prop_file
 !               All other lines are assumed to be comments.
 ! --------------------------------------------------------------------
 !
-subroutine prop_inifile(filename , tree, error)
+subroutine prop_inifile(filename , tree, error, japreproc)
     use tree_structures
     !
     implicit none
     !
     ! Parameters
     !
-    character(*), intent(in)  :: filename
-    type(tree_data), pointer  :: tree
-    integer     , intent(out) :: error
+    character(*),               intent(in)                    :: filename     !< File name 
+    type(tree_data),    pointer,intent(inout)                 :: tree         !< Tree object generated 
+    integer,                    intent(out)                   :: error        !< Placeholder for file errors 
+    logical,                    intent(in),     optional      :: japreproc    !< Run the file through a preprocessor 
+    !
+    ! Local variables
+    !
+    integer               :: lu, iostat
+    integer, external     :: newunit 
+
+    lu = -1 
+    if (present(japreproc)) then            ! If preprocessor was requested
+       if (japreproc) then 
+          lu = preprocINI(filename, error)  ! do preprocessing 
+       endif 
+    endif 
+    if (lu<0) then                          ! if lu has not been assigned a valid unit number 
+       lu = newunit()                       ! request a free unit number 
+       open(lu,file=filename,iostat=iostat) ! attempt to open 
+       if (iostat/=0) then 
+          error = iostat                    ! upon file opening error, return iostat as error
+          return
+       endif 
+    endif 
+
+    call prop_inifile_pointer(lu, tree)
+    close (lu)
+    return
+end subroutine prop_inifile
+
+subroutine prop_inifile_pointer(lu, tree)
+    use tree_structures
+    !
+    implicit none
+    !
+    ! Parameters
+    !
+    integer,                    intent(in)      :: lu           !< File unit 
+    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated 
     !
     ! Local variables
     !
     integer               :: eof
     integer               :: eqpos, valend
     integer               :: k, k2
-    integer               :: lu
     integer               :: lend, lcend, num_bs
     integer               :: iostatus
     logical               :: filestatus
@@ -163,26 +198,6 @@ subroutine prop_inifile(filename , tree, error)
     !! executable statements -------------------------------------------------------
     !
     achapter => tree
-    error    = 0
-    inquire (file = filename, exist = filestatus)
-    if (.not.filestatus) then
-       error = 1
-       return
-    endif
-    do lu = 10, 99
-       inquire (lu, opened = filestatus)
-       if (.not.filestatus) exit
-    enddo
-    if (lu == 99) then
-       error = 2
-       return
-    endif
-    !
-    open (lu, file = filename, status = 'old', iostat = iostatus)
-    if (iostatus /= 0) then
-       error = 2
-       return
-    endif
     !
     ! To do:
     !   Get rid of leading blanks
@@ -308,8 +323,7 @@ subroutine prop_inifile(filename , tree, error)
     !
     ! End of file or procedure
     !
-    close (lu)
-end subroutine prop_inifile
+end subroutine prop_inifile_pointer
 !
 !
 ! --------------------------------------------------------------------
@@ -344,15 +358,40 @@ subroutine prop_tekalfile(filename , tree, error)
     !
     ! Parameters
     !
-    character(*), intent(in)  :: filename
-    type(tree_data), pointer  :: tree
-    integer     , intent(out) :: error
+    character(*),               intent(in)      :: filename     !< File name 
+    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated 
+    integer,                    intent(out)     :: error        !< Placeholder for file errors 
+    !
+    ! Local variables
+    !
+    integer               :: lu, iostat
+    integer, external     :: newunit 
+
+    lu = newunit()
+    open(lu,file=filename,iostat=error)
+    if (error/=0) then
+       return
+    endif
+
+    call prop_tekalfile_pointer(lu, tree)
+    close (lu)
+    return
+end subroutine prop_tekalfile
+
+subroutine prop_tekalfile_pointer(lu, tree)
+    use tree_structures
+    !
+    implicit none
+    !
+    ! Parameters
+    !
+    integer,                    intent(in)      :: lu           !< File unit 
+    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated 
     !
     ! Local variables
     !
     integer               :: eof
     integer               :: k
-    integer               :: lu
     integer               :: iostatus
     integer, dimension(2) :: blockdims
     real   , dimension(:),allocatable :: arow
@@ -364,26 +403,6 @@ subroutine prop_tekalfile(filename , tree, error)
     !! executable statements -------------------------------------------------------
     !
     blockdims = 0
-    error    = 0
-    inquire (file = filename, exist = filestatus)
-    if (.not.filestatus) then
-       error = 1
-       return
-    endif
-    do lu = 10, 99
-       inquire (lu, opened = filestatus)
-       if (.not.filestatus) exit
-    enddo
-    if (lu == 99) then
-       error = 2
-       return
-    endif
-    !
-    open (lu, file = filename, status = 'old', iostat = iostatus)
-    if (iostatus /= 0) then
-       error = 2
-       return
-    endif
     do
        !
        ! Skip the commentary in the header, lines starting with a '*'
@@ -431,8 +450,213 @@ subroutine prop_tekalfile(filename , tree, error)
     !
     ! End of file or procedure
     !
-    close (lu)
-end subroutine prop_tekalfile
+end subroutine prop_tekalfile_pointer
+
+
+    subroutine expand(subject,defnames,defstrings,ndef)
+    implicit none
+    ! Non-recursive (first level) expansion
+    ! Defnames and defstrings form a list of ndef (key,value)-pairs
+    ! used in the substitution upon encountering $key or ${key} in the string
+    ! keys starting with an underscore refer to environment variables 
+    ! e.g. ${_PATH} or $_PATH refers to the path variable 
+    character(*), intent(inout)   :: subject         !< subject to replacments
+    character(len=50), intent(in) :: defnames(:)     !< defined constants: names
+    character(len=50), intent(in) :: defstrings(:)   !< defined constants: content
+    integer, intent(in)           :: ndef            !< length of the definition list
+    character*(300) envstring       ! environment strings can be lengthy sometimes  ... 
+    character*(600) outstring       ! so the output must support that. Adapt if still insufficient.
+    character*(50) defstring
+    integer s1, s2, l1, idef
+
+    s1 = 1
+    s2 = 1
+    l1 = len(trim(subject))
+    outstring=''
+    do while(s1<=l1)
+       if (subject(s1:s1)=='$') then
+           if(subject(s1+1:s1+1)=='{') then 
+              read(subject(s1+2:index(subject(s1+1:l1),'}')+s1-1),*) defstring
+              s1 = s1 + len(trim(defstring)) + 2 + 1
+           else 
+              read(subject(s1+1:l1),*) defstring
+              s1 = s1 + len(trim(defstring)) + 1
+           endif 
+           if (defstring(1:1)=='_') then                                    ! environment variable
+              defstring=defstring(2:len(trim(defstring)))
+              call getenv(trim(defstring),envstring)                         ! is left empty if not existent
+              outstring=outstring(1:s2-1)//trim(envstring)
+              s2 = s2 + len(trim(envstring))
+           else 
+              do idef=1,ndef
+                  if (trim(defstring)==trim(defnames(idef))) then
+                      outstring=outstring(1:s2-1)//trim(defstrings(idef))
+                      s2 = s2 + len(trim(defstrings(idef)))
+                      exit
+                  endif
+              enddo
+          endif 
+       else
+           outstring(s2:s2)=subject(s1:s1)
+           s2 = s2 + 1
+           s1 = s1 + 1
+       endif
+    enddo
+    subject=trim(outstring)
+    return 
+    end subroutine expand
+
+
+!>     INI-file preproc, inspired by the C-preprocessor, supporting
+!>     * (nested) file inclusion through include-directive       
+!>           #include filename
+!>           #include <filename>
+!>     * aliases, defined 
+!>           #define aliasname content
+!>       and invoked by placing $aliasname or ${aliasname} in the text
+!>     * $_aliasname and ${_aliasname} refer to environment variables 
+!>     * conditionals #ifdef, #ifndef #endif 
+!>     * #include and #define work recursive, but preprocessing is 'single-pass' (begin to end of files)
+!>     Resulting file (expanded) is written to filename_out
+!>     Return error code: -5 -> file not found  
+!>                        -6 -> trying to open an already opened file 
+!>                        positive error codes refer to iostats
+!>     filename_out is optional. If provided, the file is created (or overwritten if existing),
+!>         otherwise a scratchfile is used, which is automatically unlinked upon closure  
+      integer function preprocINI(filename_in, error, filename_out) result (outfilenumber)
+      use MessageHandling
+      implicit none 
+      character(len=*), intent(in)                :: filename_in          !< basic config file 
+      integer,          intent(out)               :: error                !< error code 
+      character(len=*), intent(in), optional      :: filename_out         !< resulting input to build tree 
+      character(len=50) :: defnames(100), defstrings(100)       ! definition database 
+      integer           :: ndef
+      integer           :: iostat
+      logical           :: opened
+      integer, external :: newunit
+
+      ndef = 0
+      outfilenumber = newunit()
+      if (present(filename_out)) then 
+         open(outfilenumber,file=trim(filename_out),iostat=iostat)
+         if (iostat/=0) then
+            call mess(LEVEL_ERROR, 'Intermediate ini-file '''//trim(filename_out)//''' could not be written.')
+            outfilenumber = -1
+            error = iostat
+            return
+         endif
+      else 
+         open (outfilenumber, status='SCRATCH', IOSTAT=iostat)
+         if (iostat/=0) then 
+            outfilenumber = -1
+            error = iostat
+            return
+         endif 
+      endif 
+
+      error = parse_directives(trim(filename_in), outfilenumber, defnames, defstrings, ndef, 1)
+      if (error/=0) then                ! either something went wrong ...
+         close(outfilenumber)           ! close the file 
+         outfilenumber = error          ! return the err, rather than the file number     
+      else                              ! ... or we're all clear  ....
+         rewind(outfilenumber)          ! rewind the file just written and return the number to caller 
+      endif 
+      return 
+      end function preprocINI 
+      
+
+      recursive integer function parse_directives (infilename, outfilenumber, defnames, defstrings, ndef, level) result (err)
+      use MessageHandling
+      implicit none
+!     Parse a document with preprocessor directives
+!     Return error code: -5 -> file not found  
+!                        -6 -> trying to open an already opened file 
+
+      character(len=*), intent(in)     :: infilename      !< subject file parsed
+      integer, intent(in)              :: outfilenumber   !< unit nr. of output
+
+      character(len=50), intent(inout) :: defnames(:)     !< defined constants: names
+      character(len=50), intent(inout) :: defstrings(:)   !< defined constants: content
+      integer, intent(inout)           :: ndef            !< keeps track of the number of definitions
+      integer, intent(in)              :: level           !< nesting level 
+
+      character(len=200) :: s
+      character(len=50)  :: includefile, dumstr, defname, defstring 
+      integer            :: writing, idef, ilvl
+      integer            :: infilenumber, iostat
+      integer, external  :: newunit 
+
+      logical            :: opened, exist
+      character(len=100) :: infostr 
+
+      err = 0
+      inquire(file=trim(infilename), opened=opened, exist=exist)
+      if (opened) then 
+        err = -6                 ! loop: file is already open !
+        call mess(LEVEL_ERROR, 'Circular dependency, file '''//trim(infilename)//''' already open.')
+        return
+      endif  
+      if (.not.exist) then 
+        err = -5                 ! file not found 
+        call mess(LEVEL_ERROR, 'Model definition file '''//trim(infilename)//''' not found')
+        return
+      endif  
+
+      infilenumber = newunit()
+      open(infilenumber,file=trim(infilename),iostat=iostat)
+      if (iostat/=0) then
+        call mess(LEVEL_ERROR, 'Model definition file '''//trim(infilename)//''' could not be read.')
+        err = iostat
+        return
+      endif
+
+      writing = 1
+      do
+          read(infilenumber,'(a200)',end=666) s
+          if (index(s,'#include')==1) then
+             read(s,*) dumstr, includefile
+             if (includefile(1:1)=='<') then 
+                includefile=includefile(2:index(includefile,'>')-1)
+             endif 
+             if (writing>0) then
+                err = parse_directives(includefile, outfilenumber, defnames, defstrings, ndef, level+1)
+                if (err/=0) return                                     ! first error stops the process 
+             endif                                                     ! is returned to higher levels 
+          elseif (index(s,'#define')==1) then
+             read(s,*) dumstr, defname, defstring
+             call expand(defstring,defnames,defstrings,ndef)           ! first expand names
+             ndef = ndef + 1
+             defnames(ndef) = trim(defname)
+             call expand(defstring,defnames,defstrings,ndef)
+             defstrings(ndef) = trim(defstring)
+          elseif (index(s,'#ifdef')==1) then
+             read(s,*) dumstr, defname
+             writing=writing-1
+             do idef=1,ndef
+                if (trim(defname)==trim(defnames(idef))) then
+                    writing=writing+1
+                    exit
+                endif
+             enddo
+          elseif (index(s,'#endif')==1) then
+             writing = writing + 1
+          elseif (index(s,'#ifndef')==1) then
+             read(s,*) dumstr, defname
+             do idef=1,ndef
+                if (trim(defname)==trim(defnames(idef))) then
+                    writing=writing-1
+                endif
+             enddo
+          else                                                                ! Just process this line
+            if (writing>0) then
+               if (index(s,'$')>0) call expand(s,defnames,defstrings,ndef)   ! first expand names
+               write (outfilenumber,'(a)') trim(s)
+            endif
+          endif
+      enddo
+ 666  continue
+      close(infilenumber)
+      end function parse_directives
 
 
 !> Writes a property tree to file in ini format.
@@ -550,6 +774,19 @@ subroutine print_initree( tree, data, stop )
 end subroutine print_initree
 
 
+
+! subroutine prop_get_keyvalue(tree, chapterin ,keyin     ,value, success)
+!     implicit none 
+!     interface 
+!        subroutine tree_all_children( tree, keys, values, numkeys )
+!           type(TREE_DATA), pointer, intent(in) :: tree
+!           character(len=*), intent(out)        :: keys(:)
+!           character(len=*), intent(out)        :: values(:)
+!           integer, intent(out)                 :: numkeys
+!        end subroutine tree_all_children
+!     end interface 
+!        call tree_all_children( tree, keys, values, numkeys )
+! end subroutine 
 
 !
 !
