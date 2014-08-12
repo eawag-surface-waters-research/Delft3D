@@ -565,7 +565,7 @@ end subroutine prop_tekalfile_pointer
       end function preprocINI 
       
 
-      recursive integer function parse_directives (infilename, outfilenumber, defnames, defstrings, ndef, level) result (err)
+      recursive integer function parse_directives (infilename, outfilenumber, defnames, defstrings, ndef, level) result (error)
       use MessageHandling
       implicit none
 !     Parse a document with preprocessor directives
@@ -589,15 +589,15 @@ end subroutine prop_tekalfile_pointer
       logical            :: opened, exist
       character(len=100) :: infostr 
 
-      err = 0
+      error = 0
       inquire(file=trim(infilename), opened=opened, exist=exist)
       if (opened) then 
-        err = -6                 ! loop: file is already open !
+        error = -6                 ! loop: file is already open !
         call mess(LEVEL_ERROR, 'Circular dependency, file '''//trim(infilename)//''' already open.')
         return
       endif  
       if (.not.exist) then 
-        err = -5                 ! file not found 
+        error = -5                 ! file not found 
         call mess(LEVEL_ERROR, 'Model definition file '''//trim(infilename)//''' not found')
         return
       endif  
@@ -606,7 +606,7 @@ end subroutine prop_tekalfile_pointer
       open(infilenumber,file=trim(infilename),iostat=iostat)
       if (iostat/=0) then
         call mess(LEVEL_ERROR, 'Model definition file '''//trim(infilename)//''' could not be read.')
-        err = iostat
+        error = iostat
         return
       endif
 
@@ -619,8 +619,8 @@ end subroutine prop_tekalfile_pointer
                 includefile=includefile(2:index(includefile,'>')-1)
              endif 
              if (writing>0) then
-                err = parse_directives(includefile, outfilenumber, defnames, defstrings, ndef, level+1)
-                if (err/=0) return                                     ! first error stops the process 
+                error = parse_directives(includefile, outfilenumber, defnames, defstrings, ndef, level+1)
+                if (error/=0) return                                     ! first error stops the process 
              endif                                                     ! is returned to higher levels 
           elseif (index(s,'#define')==1) then
              read(s,*) dumstr, defname, defstring
