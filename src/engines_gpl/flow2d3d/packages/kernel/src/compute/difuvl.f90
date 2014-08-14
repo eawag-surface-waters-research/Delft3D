@@ -251,7 +251,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)                                                        :: tsg
     real(fp)                                                        :: uuu
     real(fp)                                                        :: vvv
-    real(fp), dimension(:,:,:), allocatable                         :: dummy 
     integer                                                         :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
@@ -533,15 +532,8 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! Swap fluxes when in stage 2, because then the U- and V- direction are interchanged
     !
     if (stage == 'stage2  ') then
-       allocate(dummy(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'P004', 'Difuvl: memory alloc error')
-          call d3stop(1, gdp)
-       else
-          dummy = fluxu
-          fluxu = fluxv
-          fluxv = dummy
-       endif
+       fluxu       => gdp%gdflwpar%fluxv
+       fluxv       => gdp%gdflwpar%fluxu
     endif
     !
     ! Cumulative flux
@@ -876,11 +868,4 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     !
     ! Deallocate possible local array
     !
-    if (stage == 'stage2  ') then
-       deallocate(dummy, stat=istat)
-       if (istat /= 0) then
-           call prterr(lundia, 'U021', 'DIFUFVL: memory dealloc error')
-           call d3stop(1, gdp)
-       endif
-    endif
 end subroutine difuvl
