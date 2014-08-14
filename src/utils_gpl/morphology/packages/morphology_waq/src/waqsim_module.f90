@@ -177,10 +177,10 @@ type waqsimtype
     character(len=40) , dimension(3) :: description = ' '
 end type waqsimtype
 
-interface waqsim_set
-   module procedure waqsim_setconst
-   module procedure waqsim_setfld
-end interface waqsim_set
+!interface waqsim_set
+!   module procedure waqsim_setconst
+!   module procedure waqsim_setfld
+!end interface waqsim_set
 
 contains
 
@@ -487,253 +487,253 @@ subroutine token2time(token,time)
 end subroutine token2time
 
 
-function waqsim_initialize(waqsim, procdef_file, sfrac_file, runid) result (success)
-!!--description-----------------------------------------------------------------
+!function waqsim_initialize(waqsim, procdef_file, sfrac_file, runid) result (success)
+!!!--description-----------------------------------------------------------------
+!!
+!! XXXX
+!!
+!!!--pseudo code and references--------------------------------------------------
+!! NONE
+!!!--declarations----------------------------------------------------------------
+!    implicit none
+!!
+!! Call variables
+!!
+!    type (waqsimtype)                        , target      :: waqsim
+!    character(*)                                           :: procdef_file
+!    character(*)                                           :: sfrac_file
+!    logical                                                :: success
+!    character(*)                             , optional    :: runid
+!!
+!! Local variables
+!!
+!    logical, external :: SetModel_Id
+!    logical, external :: SetProcessDefinitionX
+!    logical, external :: DefineWQSchematisation
+!    logical, external :: DefineWQDispersion
+!    logical, external :: SetInitialVolume
+!    logical, external :: SetIntegrationOptions
+!    logical, external :: SetReferenceDate
+!    logical, external :: SetSimulationTimes
+!    logical, external :: SetOutputTimers
+!    logical, external :: DefineWQExtraOutputParameters
+!    logical, external :: DefineWQProcessesX
+!    logical, external :: SetAttributeInit
+!    logical, external :: SetCurrentValueScalarInit
+!    integer, external :: ModelInitialize
+!!
+!    integer           :: i
+!    integer           :: j
+!    integer           :: istat
+!    character(len=20) :: name
+!    character(len=4)  :: mode
+!    character(3)      :: num      ! number string for fraction
 !
-! XXXX
+!!
+!!! executable statements -------------------------------------------------------
+!!
+!    mode = '-waq'
+!    if (present(runid)) then
+!       success = SetModel_Id(runid)
+!    endif
+!    success = SetProcessDefinitionX(mode, procdef_file, sfrac_file)
+!    success = DefineWQSchematisation(waqsim%nsegments, waqsim%poi, waqsim%nexchange)
+!    success = DefineWQDispersion(waqsim%disp,waqsim%lng)
+!    success = SetInitialVolume(waqsim%vol)
+!    success = SetIntegrationOptions(waqsim%int_method, waqsim%disp_flow_zero, waqsim%disp_bound, &
+!                                  & waqsim%first_order, waqsim%forester, waqsim%anticreep)
+!    success = SetReferenceDate(waqsim%refdate(1), waqsim%refdate(2), waqsim%refdate(3), &
+!                             & waqsim%refdate(4), waqsim%refdate(5), waqsim%refdate(6))
+!    success = SetSimulationTimes(waqsim%start_time, waqsim%stop_time, waqsim%time_step)
+!    !success = SetOutputTimers(1,start_time,stop_time,time_step) ! Mon
+!    success = SetOutputTimers(2,waqsim%start_his,waqsim%stop_his,waqsim%step_his) ! His
+!    success = SetOutputTimers(3,waqsim%start_map,waqsim%stop_map,waqsim%step_map) ! Map
+!    if (waqsim%noutput>0) then
+!       success = DefineWQExtraOutputParameters(waqsim%output, waqsim%noutput)
+!    endif
+!    success = DefineWQProcessesX(waqsim%subsname, waqsim%subsmult, waqsim%nsubs, &
+!                               & waqsim%nsubs_transp, waqsim%parname, waqsim%npar, &
+!                               & waqsim%fldname, waqsim%nfld, waqsim%process, waqsim%nprocess)
+!    do i = 1, waqsim%nsegatr
+!       success = SetAttributeInit(i,waqsim%segatr(1,i))
+!    enddo
+!    do i = 1,waqsim%nsubs
+!       if (waqsim%subsmult(i)==1) then
+!          name = waqsim%subsname(i);
+!          success = SetCurrentValueScalarInit(waqsim%subsname(i),waqsim%subsval(i))
+!       else
+!          do j = 1,waqsim%subsmult(i)
+!             if (j<100) then
+!                write(num(1:2),'(I2.2)') j
+!             else
+!                write(num(1:3),'(I3.3)') j
+!             endif
+!             name = trim(waqsim%subsname(i))//num
+!             success = SetCurrentValueScalarInit(name,waqsim%subsval(i))
+!          enddo
+!       endif
+!    enddo
+!    do i = 1,waqsim%npar
+!        success = SetCurrentValueScalarInit(waqsim%parname(i),waqsim%parval(i))
+!    enddo
+!    success = SetCurrentValueScalarInit('ZB',0.0_wqprec)
+!    success = ModelInitialize()==0
+!    waqsim%initialized = .true.
+!end function waqsim_initialize
 !
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    implicit none
 !
-! Call variables
+!function waqsim_step(waqsim) result (success)
+!!!--description-----------------------------------------------------------------
+!!
+!! XXXX
+!!
+!!!--pseudo code and references--------------------------------------------------
+!! NONE
+!!!--declarations----------------------------------------------------------------
+!    implicit none
+!!
+!! Call variables
+!!
+!    type (waqsimtype)                        , target      :: waqsim
+!    logical                                                :: success
+!!
+!! Local variables
+!!
+!    logical, external :: SetFlowData
+!    integer, external :: ModelPerformTimeStep
+!!
+!!! executable statements -------------------------------------------------------
+!!
+!    ! send new volumes, fluxes and areas
+!    success = SetFlowData(waqsim%vol,waqsim%area,waqsim%qag)
+!    ! perform waq step
+!    success = ModelPerformTimeStep()==0
+!    !call GetCurrentTime(x)
+!end function waqsim_step
 !
-    type (waqsimtype)                        , target      :: waqsim
-    character(*)                                           :: procdef_file
-    character(*)                                           :: sfrac_file
-    logical                                                :: success
-    character(*)                             , optional    :: runid
 !
-! Local variables
+!function waqsim_setconst(waqsim, quant, val) result (success)
+!!!--description-----------------------------------------------------------------
+!!
+!! XXXX
+!!
+!!!--pseudo code and references--------------------------------------------------
+!! NONE
+!!!--declarations----------------------------------------------------------------
+!    implicit none
+!!
+!! Call variables
+!!
+!    type (waqsimtype)                                      :: waqsim
+!    character(*)                             , intent(in)  :: quant
+!    real(wqprec)                             , intent(in)  :: val
+!    logical                                                :: success
+!!
+!! Local variables
+!!
+!    logical, external :: SetCurrentValueScalarRun
+!!
+!!! executable statements -------------------------------------------------------
+!!
+!    if (.not.waqsim%initialized) then
+!       success = .false.
+!    else
+!       success = SetCurrentValueScalarRun(quant,val)
+!    endif
+!end function waqsim_setconst
 !
-    logical, external :: SetModel_Id
-    logical, external :: SetProcessDefinitionX
-    logical, external :: DefineWQSchematisation
-    logical, external :: DefineWQDispersion
-    logical, external :: SetInitialVolume
-    logical, external :: SetIntegrationOptions
-    logical, external :: SetReferenceDate
-    logical, external :: SetSimulationTimes
-    logical, external :: SetOutputTimers
-    logical, external :: DefineWQExtraOutputParameters
-    logical, external :: DefineWQProcessesX
-    logical, external :: SetAttributeInit
-    logical, external :: SetCurrentValueScalarInit
-    integer, external :: ModelInitialize
 !
-    integer           :: i
-    integer           :: j
-    integer           :: istat
-    character(len=20) :: name
-    character(len=4)  :: mode
-    character(3)      :: num      ! number string for fraction
-
+!function waqsim_setfld(waqsim, quant, val) result (success)
+!!!--description-----------------------------------------------------------------
+!!
+!! XXXX
+!!
+!!!--pseudo code and references--------------------------------------------------
+!! NONE
+!!!--declarations----------------------------------------------------------------
+!    implicit none
+!!
+!! Call variables
+!!
+!    type (waqsimtype)                                      :: waqsim
+!    character(*)                             , intent(in)  :: quant
+!    real(wqprec), dimension(:)               , intent(in)  :: val
+!    logical                                                :: success
+!!
+!! Local variables
+!!
+!    logical, external :: SetCurrentValueFieldRun
+!    integer           :: len
+!    integer           :: i
+!!
+!!! executable statements -------------------------------------------------------
+!!
+!    len = size(val,1)
+!    if (.not.waqsim%initialized .or. len/=waqsim%nsegments) then
+!       success = .false.
+!    else
+!       success = SetCurrentValueFieldRun(quant,val)
+!    endif
+!end function waqsim_setfld
 !
-!! executable statements -------------------------------------------------------
 !
-    mode = '-waq'
-    if (present(runid)) then
-       success = SetModel_Id(runid)
-    endif
-    success = SetProcessDefinitionX(mode, procdef_file, sfrac_file)
-    success = DefineWQSchematisation(waqsim%nsegments, waqsim%poi, waqsim%nexchange)
-    success = DefineWQDispersion(waqsim%disp,waqsim%lng)
-    success = SetInitialVolume(waqsim%vol)
-    success = SetIntegrationOptions(waqsim%int_method, waqsim%disp_flow_zero, waqsim%disp_bound, &
-                                  & waqsim%first_order, waqsim%forester, waqsim%anticreep)
-    success = SetReferenceDate(waqsim%refdate(1), waqsim%refdate(2), waqsim%refdate(3), &
-                             & waqsim%refdate(4), waqsim%refdate(5), waqsim%refdate(6))
-    success = SetSimulationTimes(waqsim%start_time, waqsim%stop_time, waqsim%time_step)
-    !success = SetOutputTimers(1,start_time,stop_time,time_step) ! Mon
-    success = SetOutputTimers(2,waqsim%start_his,waqsim%stop_his,waqsim%step_his) ! His
-    success = SetOutputTimers(3,waqsim%start_map,waqsim%stop_map,waqsim%step_map) ! Map
-    if (waqsim%noutput>0) then
-       success = DefineWQExtraOutputParameters(waqsim%output, waqsim%noutput)
-    endif
-    success = DefineWQProcessesX(waqsim%subsname, waqsim%subsmult, waqsim%nsubs, &
-                               & waqsim%nsubs_transp, waqsim%parname, waqsim%npar, &
-                               & waqsim%fldname, waqsim%nfld, waqsim%process, waqsim%nprocess)
-    do i = 1, waqsim%nsegatr
-       success = SetAttributeInit(i,waqsim%segatr(1,i))
-    enddo
-    do i = 1,waqsim%nsubs
-       if (waqsim%subsmult(i)==1) then
-          name = waqsim%subsname(i);
-          success = SetCurrentValueScalarInit(waqsim%subsname(i),waqsim%subsval(i))
-       else
-          do j = 1,waqsim%subsmult(i)
-             if (j<100) then
-                write(num(1:2),'(I2.2)') j
-             else
-                write(num(1:3),'(I3.3)') j
-             endif
-             name = trim(waqsim%subsname(i))//num
-             success = SetCurrentValueScalarInit(name,waqsim%subsval(i))
-          enddo
-       endif
-    enddo
-    do i = 1,waqsim%npar
-        success = SetCurrentValueScalarInit(waqsim%parname(i),waqsim%parval(i))
-    enddo
-    success = SetCurrentValueScalarInit('ZB',0.0_wqprec)
-    success = ModelInitialize()==0
-    waqsim%initialized = .true.
-end function waqsim_initialize
-
-
-function waqsim_step(waqsim) result (success)
-!!--description-----------------------------------------------------------------
+!function waqsim_get(waqsim, quant, val) result (success)
+!!!--description-----------------------------------------------------------------
+!!
+!! XXXX
+!!
+!!!--pseudo code and references--------------------------------------------------
+!! NONE
+!!!--declarations----------------------------------------------------------------
+!    implicit none
+!!
+!! Call variables
+!!
+!    type (waqsimtype)                                      :: waqsim
+!    character(*)                             , intent(in)  :: quant
+!    real(wqprec), dimension(:)               , intent(in)  :: val
+!    logical                                                :: success
+!!
+!! Local variables
+!!
+!    logical, external :: GetCurrentValue
+!    integer           :: len
+!    integer           :: i
+!!
+!!! executable statements -------------------------------------------------------
+!!
+!    len = size(val,1)
+!    if (.not.waqsim%initialized .or. len/=waqsim%nsegments) then
+!       success = .false.
+!    else
+!       success = GetCurrentValue(quant,val)
+!    endif
+!end function waqsim_get
 !
-! XXXX
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    implicit none
-!
-! Call variables
-!
-    type (waqsimtype)                        , target      :: waqsim
-    logical                                                :: success
-!
-! Local variables
-!
-    logical, external :: SetFlowData
-    integer, external :: ModelPerformTimeStep
-!
-!! executable statements -------------------------------------------------------
-!
-    ! send new volumes, fluxes and areas
-    success = SetFlowData(waqsim%vol,waqsim%area,waqsim%qag)
-    ! perform waq step
-    success = ModelPerformTimeStep()==0
-    !call GetCurrentTime(x)
-end function waqsim_step
-
-
-function waqsim_setconst(waqsim, quant, val) result (success)
-!!--description-----------------------------------------------------------------
-!
-! XXXX
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    implicit none
-!
-! Call variables
-!
-    type (waqsimtype)                                      :: waqsim
-    character(*)                             , intent(in)  :: quant
-    real(wqprec)                             , intent(in)  :: val
-    logical                                                :: success
-!
-! Local variables
-!
-    logical, external :: SetCurrentValueScalarRun
-!
-!! executable statements -------------------------------------------------------
-!
-    if (.not.waqsim%initialized) then
-       success = .false.
-    else
-       success = SetCurrentValueScalarRun(quant,val)
-    endif
-end function waqsim_setconst
-
-
-function waqsim_setfld(waqsim, quant, val) result (success)
-!!--description-----------------------------------------------------------------
-!
-! XXXX
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    implicit none
-!
-! Call variables
-!
-    type (waqsimtype)                                      :: waqsim
-    character(*)                             , intent(in)  :: quant
-    real(wqprec), dimension(:)               , intent(in)  :: val
-    logical                                                :: success
-!
-! Local variables
-!
-    logical, external :: SetCurrentValueFieldRun
-    integer           :: len
-    integer           :: i
-!
-!! executable statements -------------------------------------------------------
-!
-    len = size(val,1)
-    if (.not.waqsim%initialized .or. len/=waqsim%nsegments) then
-       success = .false.
-    else
-       success = SetCurrentValueFieldRun(quant,val)
-    endif
-end function waqsim_setfld
-
-
-function waqsim_get(waqsim, quant, val) result (success)
-!!--description-----------------------------------------------------------------
-!
-! XXXX
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    implicit none
-!
-! Call variables
-!
-    type (waqsimtype)                                      :: waqsim
-    character(*)                             , intent(in)  :: quant
-    real(wqprec), dimension(:)               , intent(in)  :: val
-    logical                                                :: success
-!
-! Local variables
-!
-    logical, external :: GetCurrentValue
-    integer           :: len
-    integer           :: i
-!
-!! executable statements -------------------------------------------------------
-!
-    len = size(val,1)
-    if (.not.waqsim%initialized .or. len/=waqsim%nsegments) then
-       success = .false.
-    else
-       success = GetCurrentValue(quant,val)
-    endif
-end function waqsim_get
-
-function waqsim_finalize(waqsim) result (success)
-!!--description-----------------------------------------------------------------
-!
-! XXXX
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    implicit none
-!
-! Call variables
-!
-    type (waqsimtype)                        , target      :: waqsim
-    logical                                                :: success
-!
-! Local variables
-!
-    integer, external :: ModelFinalize
-!
-!! executable statements -------------------------------------------------------
-!
-    ! perform waq finalize
-    success = ModelFinalize()==0
-end function waqsim_finalize
+!function waqsim_finalize(waqsim) result (success)
+!!!--description-----------------------------------------------------------------
+!!
+!! XXXX
+!!
+!!!--pseudo code and references--------------------------------------------------
+!! NONE
+!!!--declarations----------------------------------------------------------------
+!    implicit none
+!!
+!! Call variables
+!!
+!    type (waqsimtype)                        , target      :: waqsim
+!    logical                                                :: success
+!!
+!! Local variables
+!!
+!    integer, external :: ModelFinalize
+!!
+!!! executable statements -------------------------------------------------------
+!!
+!    ! perform waq finalize
+!    success = ModelFinalize()==0
+!end function waqsim_finalize
 
 
 subroutine waqsim_writeinp(waqsim, filename, hyd)
