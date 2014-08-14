@@ -146,7 +146,8 @@ subroutine prop_inifile(filename , tree, error, japreproc)
     ! Local variables
     !
     integer               :: lu, iostat
-    integer, external     :: newunit 
+    logical               :: opened
+    integer               :: maxunit = 500 
 
     lu = -1 
     if (present(japreproc)) then            ! If preprocessor was requested
@@ -155,7 +156,18 @@ subroutine prop_inifile(filename , tree, error, japreproc)
        endif 
     endif 
     if (lu<0) then                          ! if lu has not been assigned a valid unit number 
-       lu = newunit()                       ! request a free unit number 
+       do lu=10,maxunit
+          inquire(lu, opened=opened)
+          if (.not.opened) then 
+             exit
+          endif 
+       enddo 
+       if (lu>maxunit) then 
+          lu = -1
+          error = -35                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
+          return
+       endif 
+       
        open(lu,file=filename,iostat=iostat) ! attempt to open 
        if (iostat/=0) then 
           error = iostat                    ! upon file opening error, return iostat as error
@@ -365,9 +377,22 @@ subroutine prop_tekalfile(filename , tree, error)
     ! Local variables
     !
     integer               :: lu, iostat
-    integer, external     :: newunit 
+    logical               :: opened 
+    integer               :: maxunit = 500
 
-    lu = newunit()
+    do lu=10,maxunit
+       inquire(lu, opened=opened)
+       if (.not.opened) then 
+          exit
+       endif 
+    enddo 
+    if (lu>maxunit) then 
+       lu = -1
+       error = -35                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
+       return
+    endif 
+
+
     open(lu,file=filename,iostat=error)
     if (error/=0) then
        return
@@ -533,16 +558,27 @@ end subroutine prop_tekalfile_pointer
       integer           :: ndef
       integer           :: iostat
       logical           :: opened
-      integer, external :: newunit
+      integer           :: maxunit = 500 
 
       ndef = 0
-      outfilenumber = newunit()
+
+      do outfilenumber=10,maxunit
+         inquire(outfilenumber, opened=opened)
+         if (.not.opened) then 
+            exit
+         endif 
+      enddo 
+      if (outfilenumber>maxunit) then 
+         outfilenumber = -1
+         error = -33                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
+         return
+      endif 
+
       if (present(filename_out)) then 
          open(outfilenumber,file=trim(filename_out),iostat=iostat)
          if (iostat/=0) then
-            call mess(LEVEL_ERROR, 'Intermediate ini-file '''//trim(filename_out)//''' could not be written.')
             outfilenumber = -1
-            error = iostat
+            error = iostat                          !       ERROR : Intermediate ini-file could not be written.
             return
          endif
       else 
@@ -584,29 +620,37 @@ end subroutine prop_tekalfile_pointer
       character(len=50)  :: includefile, dumstr, defname, defstring 
       integer            :: writing, idef, ilvl
       integer            :: infilenumber, iostat
-      integer, external  :: newunit 
 
       logical            :: opened, exist
+      integer            :: maxunit = 500
       character(len=100) :: infostr 
 
       error = 0
       inquire(file=trim(infilename), opened=opened, exist=exist)
       if (opened) then 
-        error = -6                 ! loop: file is already open !
-        call mess(LEVEL_ERROR, 'Circular dependency, file '''//trim(infilename)//''' already open.')
+        error = -6                 ! ERROR : included file is already open (circular dependency), ignore file  
         return
       endif  
       if (.not.exist) then 
-        error = -5                 ! file not found 
-        call mess(LEVEL_ERROR, 'Model definition file '''//trim(infilename)//''' not found')
+        error = -5                 ! ERROR : included file not found 
         return
       endif  
 
-      infilenumber = newunit()
+      do infilenumber=10,maxunit
+         inquire(infilenumber, opened=opened)
+         if (.not.opened) then 
+            exit
+         endif 
+      enddo 
+      if (infilenumber>maxunit) then 
+         infilenumber = -1
+         error = -34                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
+         return
+      endif 
+
       open(infilenumber,file=trim(infilename),iostat=iostat)
       if (iostat/=0) then
-        call mess(LEVEL_ERROR, 'Model definition file '''//trim(infilename)//''' could not be read.')
-        error = iostat
+        error = iostat             ! ERROR : file was encountered, but for some reason cannot be opened .... 
         return
       endif
 
