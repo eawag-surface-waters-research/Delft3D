@@ -114,7 +114,7 @@ real(fp)                                                       , intent(in)  :: 
              ! delay in negative x-direction
              !
              do pos = m-1,1,-1
-                dx(mx + 1) = xcor(n, m) - xcor(n, pos)
+                dx(mx + 1) = sqrt((xcor(n, m) - xcor(n, pos))**2 + (ycor(n, m) - ycor(n, pos))**2)
                 if (kfs(n, pos)==1 .and. dx(mx + 1)<f_lam*rlabda(n,m)) then
                    mx  = mx + 1
                    sdx = sdx + dx(mx)
@@ -140,7 +140,7 @@ real(fp)                                                       , intent(in)  :: 
              mx = 1
              sdx = 0.0
              do pos = m+1,mmax,1
-                dx(mx + 1) = xcor(n, pos) - xcor(n, m)
+                dx(mx + 1) = sqrt((xcor(n, m) - xcor(n, pos))**2 + (ycor(n, m) - ycor(n, pos))**2)
                 if (kfs(n, pos)==1 .and. dx(mx + 1)<f_lam*rlabda(n,m)) then
                    mx  = mx + 1
                    sdx = sdx + dx(mx)
@@ -166,7 +166,7 @@ real(fp)                                                       , intent(in)  :: 
              mx  = 1
              sdx = 0.0
              do pos = n+1,nmax,1
-                dy(mx + 1) = ycor(pos, m) - ycor(n, m)
+                dy(mx + 1) = sqrt((xcor(n, m) - xcor(pos, m))**2 + (ycor(n, m) - ycor(pos, m))**2)
                 if (kfs(pos, m)==1 .and. dy(mx + 1)<f_lam*rlabda(n,m)) then
                    mx  = mx + 1
                    sdx = sdx + dy(mx)
@@ -193,7 +193,7 @@ real(fp)                                                       , intent(in)  :: 
              sdx = 0.0
              !
              do pos = n-1,1,-1
-                dy(mx + 1) = ycor(n, m) - ycor(pos, m)
+                dy(mx + 1) = sqrt((xcor(n, m) - xcor(pos, m))**2 + (ycor(n, m) - ycor(pos, m))**2)
                 if (kfs(pos, m)==1 .and. dy(mx + 1)<f_lam*rlabda(n,m)) then
                    mx  = mx + 1
                    sdx = sdx + dy(mx)
