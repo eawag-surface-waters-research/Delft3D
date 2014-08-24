@@ -1238,14 +1238,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                                &  rhosol(l)         ,caks_ss3d      ,ws(nm,kmaxsd,l)    , &
                                &  aks_ss3d          ,sourse(nm,l)   ,sour_im(nm,l)      , &
                                &  sinkse(nm,l) )
-!                call nm_to_n_and_m(nm, n, m, gdp)
-!                if (m>=72 .and. m<=74 .and. n>=90 .and. n<=93) then
-!                    write(*,'(i5,i5,20e14.4)') m,n,h1,r0(nm,kmaxsd,ll),seddif(nm,kmaxsd,l),caks_ss3d, &
-!                               & ws(nm,kmaxsd,l),sourse(nm,l)   ,sour_im(nm,l)      , &
-!                               & sinkse(nm,l) 
-!                endif
-
-                
                 ! Impose relatively large vertical diffusion
                 ! coefficients for sediment in layer interfaces from
                 ! bottom of reference cell downwards, to ensure little
