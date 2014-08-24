@@ -4,6 +4,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
                  & par      ,numintpar ,numrealpar,numstrpar, &
                  & dllfunc  ,dllhandle ,intpar    ,realpar  , &
                  & strpar   ,iflufflyr ,mflufftot ,fracf    , &
+                 & maxslope ,wetslope  , &
 ! output:
                  & error    ,wstau     ,sinktot   ,sourse   , &
                  & sourf    )
@@ -65,6 +66,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     real(fp)                            , intent(in)    :: fixfac
     real(fp)                            , intent(in)    :: frac
     real(fp)                            , intent(in)    :: fracf
+    real(fp)                            , intent(in)    :: maxslope
     real(fp)                            , intent(in)    :: mflufftot
     real(fp)     , dimension(30)        , intent(inout) :: par
     real(fp)                            , intent(out)   :: sinktot
@@ -74,6 +76,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     real(fp)       , dimension(kmax)    , intent(in)    :: thick
     real(fp)                            , intent(in)    :: thick0
     real(fp)                            , intent(in)    :: thick1
+    real(fp)                            , intent(in)    :: wetslope
     real(fp)       , dimension(0:kmax)  , intent(in)    :: ws
     real(fp)                            , intent(out)   :: wstau
     !
@@ -88,12 +91,14 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
 ! Local variables
 !
     integer  :: k
+    real(fp) :: betaslope
     real(fp) :: sour
     real(fp) :: sour_fluff
     real(fp) :: sink
     real(fp) :: taub
     real(fp) :: taum
     real(fp) :: entr
+    real(fp) :: taucrmin
     real(fp) :: tcrdep
     real(fp) :: tcrero
     real(fp) :: eropar
@@ -156,6 +161,17 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           depeff = par(17)
           !
           ! Default Partheniades-Krone formula
+          !
+          if (maxslope>wetslope) then
+             !
+             ! Maximum bed slope in surrounding velocity points exceeds WetSlope
+             ! Decrease critical shear stress for erosion
+             !
+             taucrmin  = 0.1_fp
+             betaslope = 2.0_fp
+             tcrero = ((taucrmin - tcrero)/(betaslope*wetslope - wetslope))*taub + tcrero - ((taucrmin - tcrero)/(betaslope*wetslope - wetslope))*wetslope
+             tcrero = max(tcrero, taucrmin)
+          endif
           !
           taum = max(0.0_fp, taub/tcrero - 1.0_fp)
           sour = eropar * taum
