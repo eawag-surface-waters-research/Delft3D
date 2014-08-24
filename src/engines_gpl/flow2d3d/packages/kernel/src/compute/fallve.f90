@@ -280,7 +280,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                       tur_eps = -999.0_fp
                    endif
                    !
-                   h0 = s0(nm) - real(dps(nm),fp)
+                   h0 = s0(nm) + real(dps(nm),fp)
                    um = (umean(nm) + umean(nmd))/2.0_fp
                    vm = (vmean(nm) + vmean(nmd))/2.0_fp
                    !

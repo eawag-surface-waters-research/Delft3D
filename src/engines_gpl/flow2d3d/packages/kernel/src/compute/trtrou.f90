@@ -1,7 +1,7 @@
 subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                 & cfrou     ,rouflo    ,linit     ,gdis_dp   ,gdis_zet  , &
                 & huv       ,kcuv      ,uvdir     ,uvperp    ,sig       , &
-                & z0rou     ,idir      ,gdp       )
+                & z0rou     ,deltadir  ,idir      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -79,6 +79,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     real(fp), dimension(:,:)   , pointer :: vden2d 
     logical                    , pointer :: flsedprop_rqrd
     logical                    , pointer :: spatial_bedform
+    logical                    , pointer :: v2dwbl
     logical                    , pointer :: waqol
     !
     real(fp), dimension(:,:)   , pointer :: dxx
@@ -87,8 +88,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     real(fp), dimension(:)     , pointer :: bedformD90
     real(fp), dimension(:)     , pointer :: rksr
     real(fp), dimension(:)     , pointer :: rksmr
-    real(fp), dimension(:)     , pointer :: rksd
-    
+    real(fp), dimension(:)     , pointer :: rksd    
 !
 ! Local parameters
 !
@@ -112,6 +112,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kcuv
     logical                                                            , intent(in)  :: linit
     real(fp), dimension(kmax)                                          , intent(in)  :: sig
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: deltadir
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: gdis_dp
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: gdis_zet
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: huv
@@ -132,6 +133,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     integer, dimension(max_cl)  :: itrt_list
     integer                     :: itrt_user
     integer                     :: k
+    integer                     :: kmaxx
     integer                     :: m
     integer                     :: mc
     integer                     :: md
@@ -219,6 +221,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     real(fp)                    :: vh2d
     real(fp)                    :: vvv
     real(fp)                    :: vz0
+    real(fp)                    :: zcc
     character(12), dimension(2) :: cnum
     character(132)              :: cmsg
 !
@@ -237,6 +240,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     vicmol          => gdp%gdphysco%vicmol
     eps             => gdp%gdconst%eps
     dryflc          => gdp%gdnumeco%dryflc
+    v2dwbl          => gdp%gdnumeco%v2dwbl
     !
     alf_area_ser    => gdp%gdtrachy%alf_area_ser
     trtminh         => gdp%gdtrachy%trtminh
@@ -400,6 +404,18 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
           ch_pnt_ser = 0.0_fp
           depth      = max(trtminh , huv(nc, mc))
           !
+          kmaxx = kmax
+          !
+          if (v2dwbl) then
+             do k = kmax, 1, -1
+                zcc = (1.0 + sig(k))*depth
+                if (zcc>deltadir(nc, mc) .or. zcc>0.5*depth) then
+                   kmaxx = k
+                   exit
+                endif
+             enddo
+          endif
+          !
           if (idir==1) then
              call n_and_m_to_nm(nc, mc, nm, gdp) 
              call n_and_m_to_nm(nc, mu, nmu, gdp) 
@@ -428,8 +444,8 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              ! Average perpendicular velocity
              !
-             vvv = 0.25_fp*(  uvperp(nc, mc, kmax) + uvperp(nc, mu, kmax)  &
-                 &          + uvperp(nd, mc, kmax) + uvperp(nd, mu, kmax))
+             vvv = 0.25_fp*(  uvperp(nc, mc, kmaxx) + uvperp(nc, mu, kmaxx)  &
+                 &          + uvperp(nd, mc, kmaxx) + uvperp(nd, mu, kmaxx))
              !
              ! Riples, Megaripples, Dunes
              !
@@ -472,8 +488,8 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              ! Average perpendicular velocity
              !
-             vvv = 0.25_fp*(  uvperp(nc, mc, kmax) + uvperp(nc, md, kmax)  &
-                 &          + uvperp(nu, mc, kmax) + uvperp(nu, md, kmax))
+             vvv = 0.25_fp*(  uvperp(nc, mc, kmaxx) + uvperp(nc, md, kmaxx)  &
+                 &          + uvperp(nu, mc, kmaxx) + uvperp(nu, md, kmaxx))
              !
              ! Riples, Megaripples, Dunes
              !
@@ -492,7 +508,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
           !
           ! Depth-average velocity (similar as in TAUBOT)
           !
-          uuu  = uvdir(nc, mc, kmax)
+          uuu  = uvdir(nc, mc, kmaxx)
           umod = sqrt(uuu**2 + vvv**2)
           if (kmax==1) then
              u2dh = umod
@@ -500,7 +516,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              u2dh = (umod/depth*((depth + z0rou(nc, mc))         &
                   &              *log(1.0_fp + depth/max(z0rou(nc, mc),1.0e-20_fp)) &
                   &              - depth)                         ) &
-                  & /log(1.0_fp + (1.0_fp + sig(kmax))*depth/max(z0rou(nc, mc),1.0e-20_fp))
+                  & /log(1.0_fp + (1.0_fp + sig(kmaxx))*depth/max(z0rou(nc, mc),1.0e-20_fp))
           endif
        endif
        !

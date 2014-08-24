@@ -1062,12 +1062,12 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
        call trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                  & r(cfurou) ,rouflo    ,.true.    ,r(guu)    ,r(gvu)    , &
                  & r(hu)     ,i(kcu)    ,r(u1)     ,r(v1)     ,r(sig)    , &
-                 & r(z0urou) ,1         ,gdp       )
+                 & r(z0urou) ,r(deltau) ,1         ,gdp       )
        if (error) goto 9999
        call trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                  & r(cfvrou) ,rouflo    ,.true.    ,r(gvv)    ,r(guv)    , &
                  & r(hv)     ,i(kcv)    ,r(v1)     ,r(u1)     ,r(sig)    , &
-                 & r(z0vrou) ,2         ,gdp       )
+                 & r(z0vrou) ,r(deltav) ,2         ,gdp       )
        if (error) goto 9999
     endif
     !

@@ -2,7 +2,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
                 & u         ,v         ,kfs       ,z0urou    , &
                 & z0vrou    ,kfu       ,kfv       ,sig       , &
                 & kmax      ,hrms      ,rlabda    ,tp        , &
-                & icx       ,icy       ,gdp       )
+                & deltau    ,deltav    ,icx       ,icy       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -59,6 +59,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     logical                              , pointer :: wave
     logical                              , pointer :: lftrto
     logical                              , pointer :: spatial_bedform
+    logical                              , pointer :: v2dwbl
     real(fp)      , dimension(:)         , pointer :: sedd50
     real(fp)      , dimension(:)         , pointer :: sedd50fld
     real(fp)      , dimension(:)         , pointer :: sedd90
@@ -96,6 +97,8 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: deltau  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: deltav  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: hrms    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: rlabda  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: s1      !  Description and declaration in esm_alloc_real.f90
@@ -109,7 +112,9 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
 ! Local variables
 !
     integer  :: itrt
+    integer  :: k
     integer  :: kn
+    integer  :: kmaxx
     integer  :: nm
     integer  :: nmd
     integer  :: ndm
@@ -117,7 +122,9 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     real(fp) :: arg
     real(fp) :: d50
     real(fp) :: d90
+    real(fp) :: deltas
     real(fp) :: depth
+    real(fp) :: fact
     real(fp) :: fch2
     real(fp) :: fcoarse
     real(fp) :: hs
@@ -150,6 +157,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     real(fp) :: uwbih
     real(fp) :: uwc
     real(fp) :: z0rou
+    real(fp) :: zcc
 !
 !! executable statements -------------------------------------------------------
 !
@@ -166,6 +174,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     dt                      => gdp%gdexttim%dt
     tunit                   => gdp%gdexttim%tunit
     dxx                     => gdp%gderosed%dxx
+    v2dwbl                  => gdp%gdnumeco%v2dwbl
     ag                      => gdp%gdphysco%ag
     z0                      => gdp%gdphysco%z0
     z0v                     => gdp%gdphysco%z0v
@@ -227,8 +236,28 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
              !
              ! Velocity in zeta point
              !
-             uuu = 0.5_fp * (u(nm,kmax)*kfu(nm) + u(nmd,kmax)*kfu(nmd))
-             vvv = 0.5_fp * (v(nm,kmax)*kfv(nm) + v(ndm,kmax)*kfv(ndm))
+             kmaxx = kmax
+             !
+             if (v2dwbl .and. wave .and. kmax>1) then
+                !
+                ! Determine representative 2Dh velocity based on velocities in first layer above wave boundary layer 
+                ! kmaxx is the first layer with its centre above the wave boundary layer
+                ! Only implemented for sigma layers
+                !
+                fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
+                deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
+                !
+                do k = kmax, 1, -1
+                   zcc = (1.0 + sig(k))*depth
+                   if (zcc>deltas .or. zcc>0.5*depth) then
+                      kmaxx = k
+                      exit
+                   endif
+                enddo
+             endif
+             !
+             uuu = 0.5_fp * (u(nm,kmaxx)*kfu(nm) + u(nmd,kmaxx)*kfu(nmd))
+             vvv = 0.5_fp * (v(nm,kmaxx)*kfv(nm) + v(ndm,kmaxx)*kfv(ndm))
              !
              ! Depth-average velocity (similar as in TAUBOT)
              !
@@ -243,7 +272,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
                 u2dh = umod
              else
                 u2dh = (umod/depth*((depth + z0rou)*log(1.0_fp + depth/z0rou) - depth)) &
-                     & / log(1.0_fp + (1.0_fp + sig(kmax))*depth/z0rou)
+                     & / log(1.0_fp + (1.0_fp + sig(kmaxx))*depth/z0rou)
              endif
              if (wave) then
                 hs     = hrms(nm) * sqrt(2.0_fp)
@@ -334,9 +363,9 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
              ! to solve some issues in shallow areas, so for the time being we leave it in
              ! such that it can be reactivated easily when needed.
              !
-             !if (depth <= 1.0_fp) then
-             !   rksmr0 = rksmr0 * depth
-             !endif
+             if (depth <= 1.0_fp) then
+                rksmr0 = rksmr0 * depth
+             endif
              if (d50 < dsilt) then
                 rksmr0 = 0.0_fp
              endif

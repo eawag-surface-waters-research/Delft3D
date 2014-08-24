@@ -4,7 +4,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
                & dgcuni    ,forfuv    ,forfww    ,ktemp     ,temint    , &
                & keva      ,evaint    ,old_corio ,dpsopt    ,dpuopt    , &
                & zmodel    ,gammax    ,fwfac     , &
-               & nudge     ,nudvic    ,gdp       )
+               & nudge     ,nudvic    ,v2dwbl    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -75,6 +75,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     integer                    :: nudge     !  Description and declaration in procs.igs
     logical      , intent(in)  :: zmodel    !  Description and declaration in procs.igs
     logical                    :: old_corio !  Description and declaration in numeco.igs
+    logical                    :: v2dwbl    !  Description and declaration in numeco.igs
     real(fp)                   :: dco       !  Description and declaration in numeco.igs
     real(fp)                   :: dgcuni
     real(fp)                   :: drycrt    !  Description and declaration in numeco.igs
@@ -157,6 +158,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     old_corio = .true.
     slplim    = .false.
+    v2dwbl    = .false.
     !
     ! locate and read 'Dpuopt' record for determining DPU procedure
     ! dpuopt initialised as ' ', to allow special checks on combinations  
@@ -753,5 +755,13 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     call prop_get(gdp%mdfile_ptr, '*', 'OCorio' , old_corio)
     if (.not.old_corio) then
        write (lundia,'(a)') '*** MESSAGE Using Coriolis formulation of Kleptsova-Stelling-Pietrzak.'
+    endif
+    !
+    ! Flag to switch on using velocities above wave boundary layer to determine representative 2d velocity
+    !
+    call prop_get(gdp%mdfile_ptr, '*', 'V2DWBL', v2dwbl)
+    if (v2dwbl) then
+       write (msg,'(a)') 'Found Keyword V2DWBL = #Y#: using velocities above wave boundary layer to determine representative 2d velocity'
+       call prterr(lundia, 'G051', trim(msg))
     endif
 end subroutine rdnum

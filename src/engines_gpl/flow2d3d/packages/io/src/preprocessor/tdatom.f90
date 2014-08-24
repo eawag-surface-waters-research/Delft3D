@@ -123,6 +123,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     logical                         , pointer :: sbkol 
     logical                         , pointer :: bubble 
     logical                         , pointer :: nfl 
+    logical                         , pointer :: v2dwbl
     integer                         , pointer :: rtcmod 
     logical                         , pointer :: reusetmp !!  TRUE when temporary files will be reused 
                                                           !!  if possible 
@@ -337,6 +338,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     julday      => gdp%gdinttim%julday 
     nflmod      => gdp%gdnfl%nflmod 
     old_corio   => gdp%gdnumeco%old_corio
+    v2dwbl      => gdp%gdnumeco%v2dwbl
     wind        => gdp%gdprocs%wind 
     salin       => gdp%gdprocs%salin 
     temp        => gdp%gdprocs%temp 
@@ -571,7 +573,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & dgcuni    ,forfuv    ,forfww    ,ktemp     ,temint    , & 
                  & keva      ,evaint    ,old_corio , & 
                  & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , & 
-                 & nudge     ,nudvic    ,gdp       ) 
+                 & nudge     ,nudvic    ,v2dwbl    ,gdp       ) 
         ! 
         ! Read boundary definition. If specified in a separate file, 
         ! then check if TRIANA file is specified. If so, start tidals, the 

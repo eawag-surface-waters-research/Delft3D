@@ -433,10 +433,10 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                    if (slp>wetslope) then
                       if (idir == 1) then
                          avflux = gsqs(nm)*((dps(nmu) - dps(nm) + wetslope*dzduu(nm)/slp/gvu(nm)) / (1.0 + gsqs(nm)/gsqs(nmu))) / avaltime
-                         sbedcorr = sbedcorr + frac(nm, l)*avflux*rhosol(l)/guu(nm)
+                         sbedcorr = sbedcorr + avflux*rhosol(l)/guu(nm)
                       else
                          avflux = gsqs(nm)*((dps(num) - dps(nm) + wetslope*dzdvv(nm)/slp/guv(nm)) / (1.0 + gsqs(nm)/gsqs(num))) / avaltime
-                         sbedcorr = sbedcorr + frac(nm, l)*avflux*rhosol(l)/gvv(nm)
+                         sbedcorr = sbedcorr + avflux*rhosol(l)/gvv(nm)
                       endif
                    endif
                    !

@@ -12,7 +12,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
                 & hv        ,rca       ,ubot      ,rtur0     , &
                 & temeqs    ,gsqs      ,guu       ,gvv       ,dt        , &
-                & icall     ,gdp       )
+                & icall     ,deltau    ,deltav    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -182,6 +182,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: camax
     real(fp)                             , pointer :: aksfac
     real(fp)                             , pointer :: rdc
+    real(fp)                             , pointer :: wetslope
     integer                              , pointer :: iopkcw
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
@@ -235,6 +236,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                                                  , intent(in)  :: dt
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: aks     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: deltau  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: deltav  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu     !  Description and declaration in esm_alloc_real.f90
@@ -317,6 +320,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                        :: drho
     real(fp)                        :: dstari
     real(fp)                        :: dtmor
+    real(fp)                        :: dzduz
+    real(fp)                        :: dzdvz
     real(fp)                        :: fi
     real(fp)                        :: fracf
     real(fp)                        :: grkg
@@ -325,6 +330,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                        :: h0
     real(fp)                        :: h1
     real(fp)                        :: rc
+    real(fp)                        :: maxslope
     real(fp)                        :: mfltot
     real(fp)                        :: sag
     real(fp)                        :: salinity
@@ -371,6 +377,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax)       :: concin3d
     real(fp), dimension(kmax2d)     :: concin2d
     character(256)                  :: errmsg
+
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -378,6 +385,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     data sig2d/ - 0.0874, -0.2472, -0.3797, -0.4897, -0.5809, -0.6565, -0.7193, &
        & -0.7713, -0.8145, -0.8503, -0.8800, -0.9046, -0.9250, -0.9419, -0.9560,&
        & -0.9676, -0.9773, -0.9854, -0.9920, -0.9975/
+
+
+!    data thck2d/0.2243, 0.1794, 0.1434, 0.1147, 0.0917, 0.0734, 0.0587, 0.0469, &
+!       & 0.0375, 0.0300/
+!    data sig2d/-0.1122,-0.3140,-0.4754,-0.6045,-0.7077,-0.7902,-0.8563,-0.9090, &
+!       & -0.9512,-0.9850/
+    
 !
 !! executable statements -------------------------------------------------------
 !
@@ -509,6 +523,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     flmd2l              => gdp%gdprocs%flmd2l
     depfac              => gdp%gdmorpar%flufflyr%depfac
     mfluff              => gdp%gdmorpar%flufflyr%mfluff
+    wetslope            => gdp%gdmorpar%wetslope
     !
     allocate (localpar (gdp%gdtrapar%npar), stat = istat)
     !
@@ -606,7 +621,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & kfv       ,kcu       ,kcv       ,s1        ,dps       , &
               & u0eul     ,v0eul     ,uuu       ,vvv       ,umod      , &
               & zumod     ,sig       ,hu        ,hv        ,kfsed     , &
-              & gdp       )
+              & deltau    ,deltav    ,gdp       )
     call dfexchg( uuu,  1, 1, dfloat, nm_pos, gdp)
     call dfexchg( vvv,  1, 1, dfloat, nm_pos, gdp)
     call dfexchg( umod, 1, 1, dfloat, nm_pos, gdp)
@@ -638,7 +653,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! If user-specified THRESH is <= 0.0, the erosion flux is effectively not limited by FIXFAC since ffthresh is 1e-10
                 ! but by the amount of sediment that is available
                 !
-                srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dtmor
+                srcmax(nm, l) = bodsed(l, nm)/dtmor
+!                srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dtmor
              enddo
           endif
           !
@@ -761,6 +777,30 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           kbed    = kmax
        else
           kbed    = 1
+       endif
+       !
+       ! Compute bed slopes at cell centre (used in Van Rijn 2004)
+       ! Take the average slope from velocity points, but avoid slopes onto dry points
+       ! Also compute maximum absolute slope, use for cohesive material (clay) being undercut 
+       !
+       dzduz = 0.0_fp
+       maxslope = 0.0_fp
+       if (kfs(nmu)>0) then
+           dzduz = dzduz + 0.5_fp*dzduu(nm)
+           maxslope = max(maxslope, abs(dzduu(nm)))
+       endif
+       if (kfs(nmd)>0) then
+           dzduz = dzduz + 0.5_fp*dzduu(nmd)
+           maxslope = max(maxslope, abs(dzduu(nmd)))
+       endif
+       dzdvz = 0.0_fp
+       if (kfs(num)>0) then
+           dzdvz = dzdvz + 0.5_fp*dzdvv(nm)
+           maxslope = max(maxslope, abs(dzdvv(nm)))
+       endif
+       if (kfs(ndm)>0) then
+           dzdvz = dzdvz + 0.5_fp*dzdvv(ndm)
+           maxslope = max(maxslope, abs(dzdvv(ndm)))
        endif
        !
        ! Compute depth-averaged velocity components at cell centre
@@ -1009,11 +1049,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              thick0        = thick(kmaxsd) * h0
              thick1        = thick(kmaxsd) * h1
              call erosilt(thick       ,kmax        ,wslc        ,lundia      , &
-                        & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l),&
+                        & thick0      ,thick1      ,fixfac(nm,l),srcmax(nm, l),&
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
                         & localpar    ,max_integers,max_reals   ,max_strings , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
                         & dll_strings  ,iflufflyr ,mfltot ,fracf    , &
+                        & maxslope    ,wetslope  , &
                         & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
              if (error) call d3stop(1, gdp)
              !
@@ -1163,7 +1204,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & frac(nm,l),tsigmol   ,dcwwlc    ,lundia    ,taucr(l)  , &
                        & rksr(nm)  ,3         ,lsecfl    ,spirint   ,suspfrac  , &
                        & tetacr(l) ,tsalmax   ,tws0      ,concin3d  , &
-                       & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
+                       & dzduz     ,dzdvz     ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
                        & iform(l)  ,localpar  ,max_integers,max_reals,max_strings, &
@@ -1197,6 +1238,14 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                                &  rhosol(l)         ,caks_ss3d      ,ws(nm,kmaxsd,l)    , &
                                &  aks_ss3d          ,sourse(nm,l)   ,sour_im(nm,l)      , &
                                &  sinkse(nm,l) )
+!                call nm_to_n_and_m(nm, n, m, gdp)
+!                if (m>=72 .and. m<=74 .and. n>=90 .and. n<=93) then
+!                    write(*,'(i5,i5,20e14.4)') m,n,h1,r0(nm,kmaxsd,ll),seddif(nm,kmaxsd,l),caks_ss3d, &
+!                               & ws(nm,kmaxsd,l),sourse(nm,l)   ,sour_im(nm,l)      , &
+!                               & sinkse(nm,l) 
+!                endif
+
+                
                 ! Impose relatively large vertical diffusion
                 ! coefficients for sediment in layer interfaces from
                 ! bottom of reference cell downwards, to ensure little
@@ -1241,7 +1290,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & frac(nm,l),tsigmol   ,dcww2d    ,lundia    ,taucr(l)  , &
                        & rksr(nm)  ,2         ,lsecfl    ,spirint   ,suspfrac  , &
                        & tetacr(l) ,tsalmax   ,tws0      ,concin2d  , &
-                       & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
+                       & dzduz     ,dzdvz     ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
                        & iform(l)  ,localpar  ,max_integers,max_reals,max_strings, &

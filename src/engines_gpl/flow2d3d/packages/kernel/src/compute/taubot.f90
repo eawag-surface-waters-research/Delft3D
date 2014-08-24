@@ -70,6 +70,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)               , pointer :: fwfac
     logical                , pointer :: cstbnd
     logical                , pointer :: chz_k2d
+    logical                , pointer :: v2dwbl
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: z0
@@ -79,6 +80,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     logical                , pointer :: mudlay
     logical                , pointer :: zmodel
     logical                , pointer :: roller
+    integer                , pointer :: rolcorr
     real(fp), dimension(:) , pointer :: rksr
     real(fp), dimension(:) , pointer :: rksmr
 !
@@ -140,7 +142,9 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 ! Local variables
 !
+    integer                            :: k
     integer                            :: kmaxx
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kmaxxx
     integer                            :: modind     ! Index of friction model (1=FR84, 2=MS90, 3=HT91, 4=GM79, 5=DS88, 6=BK67) 
     integer                            :: ndm
     integer                            :: ndmu
@@ -226,6 +230,17 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(8, 4)          :: pp         ! Coefficient p(i) in expression for parameter p 
     real(fp), dimension(8, 4)          :: qq         ! Coefficient q(i) in expression for parameter q 
     real(fp), dimension(:),allocatable :: ka         ! Apparent bed roughness (Van Rijn, 2004)
+
+    real(fp)                           :: arg
+    real(fp)                           :: hsu
+    real(fp)                           :: awb
+    real(fp)                           :: delw
+    real(fp)                           :: zcc
+    real(fp)                           :: uuu0
+    real(fp)                           :: vvv0
+    real(fp)                           :: umod0
+    
+    
 !
 ! Data statements
 !
@@ -271,6 +286,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     taubng     => gdp%gdmudcoe%taubng
     fwfac      => gdp%gdnumeco%fwfac
     cstbnd     => gdp%gdnumeco%cstbnd
+    v2dwbl     => gdp%gdnumeco%v2dwbl
     chz_k2d    => gdp%gdrivpro%chz_k2d
     rhow       => gdp%gdphysco%rhow
     ag         => gdp%gdphysco%ag
@@ -281,6 +297,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     mudlay     => gdp%gdprocs%mudlay
     zmodel     => gdp%gdprocs%zmodel
     roller     => gdp%gdprocs%roller
+    rolcorr    => gdp%gdbetaro%rolcorr
     rksr       => gdp%gdbedformpar%rksr
     rksmr      => gdp%gdbedformpar%rksmr
     !
@@ -455,7 +472,29 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        nmu        = nmu  + 1
        ndm        = ndm  + 1
        ndmu       = ndmu + 1
+       !
        kmaxx      = kmax
+       !       
+       if (v2dwbl .and. kmax>1 .and. .not.zmodel) then
+          !
+          ! Determine representative 2Dh velocity based on velocities in first layer above wave boundary layer 
+          ! kmaxx is the first layer with its centre above the wave boundary layer
+          ! Use deltau from previous time step !
+          ! Only implemented for sigma layers
+          !
+          if (tpu>1.0) then
+             do k = kmax, 1, -1
+                zcc = (1.0 + sig(k))*hu(nm)
+                if (zcc>deltau(nm) .or. zcc>0.5*hu(nm)) then
+                   kmaxx = k
+                   exit
+                endif
+             enddo
+          endif
+       endif
+       !
+       kmaxxx(nm) = kmaxx ! kmaxxx to be used in following loop where apparent roughness is determined
+       !
        kcscuttest = .false.
        if (zmodel) then
           kmaxx      = kfumin(nm)
@@ -475,6 +514,30 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        endif
        umodsq     = uuu*uuu + vvv*vvv
        umod       = max(1.0e-4_fp , sqrt(umodsq))
+       !
+       if (kmaxx/=kmax) then
+          !
+          ! Also compute current magnitude (umod0) in bottom layer, because it's needed to
+          ! compute taubpu
+          !
+          uuu0       = u1(nm, kmax)
+          if (actual_avg) then
+             svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
+             vvv0 = (v1(ndm, kmax)*kfv(ndm) + v1(ndmu, kmax)*kfv(ndmu)            &
+                  & + v1(nm, kmax)*kfv(nm) + v1(nmu, kmax)*kfv(nmu))/svvv
+          else
+             vvv0 = 0.25*(v1(nm, kmax) + v1(ndm, kmax) + v1(ndmu, kmax)          &
+                 & + v1(nmu, kmax))
+          endif
+          umodsq     = uuu0*uuu0 + vvv0*vvv0
+          umod0      = max(1.0e-4_fp , sqrt(umodsq))
+       else
+          !
+          ! kmaxx equals kmax
+          !
+          umod0 = umod
+       endif
+       !       
        taubpu(nm) = 0.0
        if (kfu(nm)==1) then
           !
@@ -527,7 +590,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              else
                 u2dh = (umod/hu(nm)                                             &
                      & *((hu(nm) + z0urou(nm))*log(1.0 + hu(nm)/z0urou(nm))     &
-                     & - hu(nm)))/log(1.0 + (1.0 + sig(kmax))*hu(nm)/z0urou(nm))
+                     & - hu(nm)))/log(1.0 + (1.0 + sig(kmaxx))*hu(nm)/z0urou(nm))
              endif
           else
              u2dh = umod
@@ -578,7 +641,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! primary and secondary bottom friction terms
              !
-             taubpu(nm) = tauwci/(umod*rhow + waveps)
+             taubpu(nm) = tauwci/(umod0*rhow + waveps)
           else
              hrmsu    = 0.5_fp * (hrms  (nm) + hrms  (nmu))
              tpu      = 0.5_fp * (tp    (nm) + tp    (nmu))
@@ -607,7 +670,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ka(nm)     = ksc * exp(gamma*uratio)
              ka(nm)     = min(ka(nm) , 10.0_fp*ksc , 0.2_fp*hu(nm))
              ca         = 18.0_fp * log10(12.0_fp*hu(nm)/ka(nm))
-             taubpu(nm) = ag * (u2dh * u2dh / umod) / ca**2
+             taubpu(nm) = ag * (u2dh * u2dh / umod0) / ca**2
           endif
           !
           ! Wave dissipation due to bottom friction
@@ -777,6 +840,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmu  = nmu  + 1
           ndm  = ndm  + 1
           ndmu = ndmu + 1
+          kmaxx = kmaxxx(nm)
           if (kfu(nm) == 1) then
              !
              ! Z-model
@@ -791,7 +855,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 endif
                 kcscuttest = kcscut(nm, kmaxx)==1
              else
-                kmaxx      = kmax
+                kmaxx = kmaxxx(nm)
                 kcscuttest = .false.
              endif
              uuu        = u1(nm, kmaxx)
@@ -817,7 +881,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    if (zmodel) then
                       z0urou(nm) = dz/(exp(vonkar*cfurou(nm, 1)) - 1.0)
                    else
-                      z0urou(nm) = (1.0 + sig(kmax))*hu(nm)                     &
+                      z0urou(nm) = (1.0 + sig(kmaxx))*hu(nm)                     &
                                  & /(exp(vonkar*cfurou(nm, 1)) - 1.0)
                    endif
                 else
@@ -865,14 +929,22 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! Added breaker delay adjustment
              !
-             taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm)/hu(nm)) 
+             if (rolcorr==1) then
+                taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm) + grmsur(nm))/hu(nm)
+             else
+                taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm))/hu(nm) 
+             endif
              !
           endif
        enddo
     else
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
-             taubsu(nm) = taubpu(nm) * (grmasu(nm)+grfacu(nm)) / hu(nm)
+             if (rolcorr==1) then
+                taubsu(nm) = taubpu(nm) * (grmasu(nm) + grmsur(nm) + grfacu(nm)) / hu(nm)
+             else
+                taubsu(nm) = taubpu(nm) * (grmasu(nm) + grfacu(nm)) / hu(nm)
+             endif
           endif
        enddo
     endif

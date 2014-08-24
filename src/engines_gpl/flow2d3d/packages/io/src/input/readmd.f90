@@ -168,6 +168,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer                       , pointer :: iter1
     logical                       , pointer :: bndneu
     logical                       , pointer :: cstbnd
+    logical                       , pointer :: v2dwbl
     character(1)                  , pointer :: ascon
     character(8)                  , pointer :: dpsopt
     character(8)                  , pointer :: dpuopt
@@ -434,6 +435,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     old_corio           => gdp%gdnumeco%old_corio
     nudge               => gdp%gdnumeco%nudge
     nudvic              => gdp%gdnumeco%nudvic
+    v2dwbl              => gdp%gdnumeco%v2dwbl
     rhow                => gdp%gdphysco%rhow
     rhoa                => gdp%gdphysco%rhoa
     rhofrac             => gdp%gdphysco%rhofrac
@@ -752,7 +754,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
              & forfuv    ,forfww    ,ktemp     ,temint    , &
              & keva      ,evaint    ,old_corio , &
              & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , &
-             & nudge     ,nudvic    ,gdp       )
+             & nudge     ,nudvic    ,v2dwbl    ,gdp       )
     !
     ! Space varying coriolis field or
     ! calculate for SFERIC = .true. depending on ANGLAT and DY or

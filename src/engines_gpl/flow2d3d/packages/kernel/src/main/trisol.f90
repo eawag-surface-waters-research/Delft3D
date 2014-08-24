@@ -1956,7 +1956,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                     & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
                     & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
-                    & 1         ,gdp       )
+                    & 1         ,r(deltau) ,r(deltav) ,gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
           call timer_stop(timer_3dmor, gdp)
@@ -2765,7 +2765,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call calksc(nmmax     ,itimtt    ,d(dps)    ,r(s1)     ,lsedtot   , &
                     & r(wrkb3)  ,r(wrkb4)  ,i(kfs)    ,r(z0urou) ,r(z0vrou) , &
                     & i(kfu)    ,i(kfv)    ,r(sig)    ,kmax      ,r(hrms)   , &
-                    & r(rlabda) ,r(tp)     ,icx       ,icy       ,gdp       )
+                    & r(rlabda) ,r(tp)     ,r(deltau) ,r(deltav) ,icx       , &
+                    & icy       ,gdp       )
           call timer_stop(timer_calksc, gdp)
        endif
        !
@@ -2777,7 +2778,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                     & r(cfurou) ,rouflo    ,.false.   ,r(guu)    ,r(gvu)    , &
                     & r(hu)     ,i(kcu)    ,r(u1)     ,r(v1)     ,r(sig)    , &
-                    & r(z0urou) ,1         ,gdp       )
+                    & r(z0urou) ,r(deltau) ,1         ,gdp       )
           call timer_stop(timer_trtrou, gdp)
        endif
        !
@@ -2809,7 +2810,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                     & r(cfvrou) ,rouflo    ,.false.   ,r(gvv)    ,r(guv)    , &
                     & r(hv)     ,i(kcv)    ,r(v1)     ,r(u1)     ,r(sig)    , &
-                    & r(z0vrou) ,2         ,gdp       )
+                    & r(z0vrou) ,r(deltav) ,2         ,gdp       )
           if (itcomi > 0) then
              !
              ! Write roughness data to Communication file.
@@ -3026,7 +3027,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                        & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                        & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
                        & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
-                       & 2         ,gdp       )
+                       & 2         ,r(deltau) ,r(deltav) ,gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
           call timer_stop(timer_3dmor, gdp)
