@@ -52,6 +52,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                , pointer :: rolcorr
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: rhow
     logical                , pointer :: zmodel
@@ -117,6 +118,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
 !
 !! executable statements -------------------------------------------------------
 !
+    rolcorr   => gdp%gdbetaro%rolcorr
     ag        => gdp%gdphysco%ag
     rhow      => gdp%gdphysco%rhow
     zmodel    => gdp%gdprocs%zmodel 
@@ -209,11 +211,26 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
              endif ! end v-direction
           else 
              !
-             ! Use GLM velocities for fluxes
-             ! Apply correction for breaker delay
-             ! Correction for massflux due to roller is taken care of in euler.f90
+             ! Use GLM velocities for fluxes (default)
              !
-             do k=1,kmax
+             if (rolcorr==1) then
+                 !
+                 ! Correction to fluxes uniform over water depth
+                 !
+                 do k = 1, kmax
+                    qxk(n,m,k) = qxk(n,m,k) - sw*(grmasu(n,m))*guu(n,m)*thick(k)
+                    qyk(n,m,k) = qyk(n,m,k) - sw*(grmasv(n,m))*gvv(n,m)*thick(k)
+                 enddo
+                 !
+             elseif (rolcorr==2) then
+                !
+                ! Correction for massflux due to roller is taken care of in euler.f90 (default)
+                !
+             endif
+             !
+             ! Apply correction for breaker delay             
+             !
+             do k = 1, kmax
                qxk(n,m,k) = qxk(n,m,k) - sw*(grfacu(n,m))*guu(n,m)*thick(k)
                qyk(n,m,k) = qyk(n,m,k) - sw*(grfacv(n,m))*gvv(n,m)*thick(k)
              enddo

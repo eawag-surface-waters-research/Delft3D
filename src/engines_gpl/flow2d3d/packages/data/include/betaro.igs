@@ -36,6 +36,7 @@
        real(fp)     :: f_lam
        real(fp)     :: fwee
        integer      :: ndis
+       integer      :: rolcorr
        character(5) :: disform
        logical      :: wavfrc
 !

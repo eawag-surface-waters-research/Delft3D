@@ -57,6 +57,7 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     !
     integer       , pointer :: itis
     integer       , pointer :: ndis
+    integer       , pointer :: rolcorr
     real(fp)      , pointer :: alfarol
     real(fp)      , pointer :: betarol
     real(fp)      , pointer :: gamdis
@@ -87,6 +88,7 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
 !
     itis     => gdp%gdrdpara%itis
     ndis     => gdp%gdbetaro%ndis
+    rolcorr  => gdp%gdbetaro%rolcorr
     alfarol  => gdp%gdbetaro%alfarol
     betarol  => gdp%gdbetaro%betarol
     gamdis   => gdp%gdbetaro%gamdis
@@ -156,6 +158,11 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     wavfrc = .true.
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Wavfrc', wavfrc)
     !
+    ! locate 'RolCor' record
+    !
+    rolcorr = 2
+    call prop_get(gdp%mdfile_ptr, '*', 'RolCor', rolcorr)
+    !
     ! output values to file
     !
     write (lundia, '(//,2a)') '*** Input (or default) parameters for ',        &
@@ -182,6 +189,14 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     else
        txtput = 'Wavfrc'
        write (lundia, '(3a)')       txtput, ':    ', 'NO'
+    endif
+    txtput = 'RolCor'
+    if (rolcorr==0) then
+       write (lundia, '(3a)')       txtput, ':    ', 'NO'
+    elseif (rolcorr==1) then
+       write (lundia, '(3a)')       txtput, ':    ', 'Uniform over water column'
+    elseif (rolcorr==2) then
+       write (lundia, '(3a)')       txtput, ':    ', 'Using Eulerian velocities'
     endif
     if (wavcmp) then
        txtput = 'File containing wave components '
