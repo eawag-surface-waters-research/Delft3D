@@ -218,8 +218,8 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
                  ! Correction to fluxes uniform over water depth
                  !
                  do k = 1, kmax
-                    qxk(n,m,k) = qxk(n,m,k) - sw*(grmasu(n,m))*guu(n,m)*thick(k)
-                    qyk(n,m,k) = qyk(n,m,k) - sw*(grmasv(n,m))*gvv(n,m)*thick(k)
+                    qxk(n,m,k) = qxk(n,m,k) - sw*(grmsur(n,m))*guu(n,m)*thick(k)
+                    qyk(n,m,k) = qyk(n,m,k) - sw*(grmsvr(n,m))*gvv(n,m)*thick(k)
                  enddo
                  !
              elseif (rolcorr==2) then
