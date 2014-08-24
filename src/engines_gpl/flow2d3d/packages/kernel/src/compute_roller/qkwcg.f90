@@ -58,27 +58,27 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
 !
 ! Global variables
 !
-    integer                                                     , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                   :: nmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                   :: nocol  !  Description and declaration in esm_alloc_int.f90
-    integer                                                                   :: norow  !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(5, *)                                                  :: irocol !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kfv    !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: c      !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: cgc    !  Description and declaration in esm_alloc_real.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: qxkr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: qxkw   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: qykr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: qykw   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: rlabda !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: teta   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
+    integer                                                     , intent(in)    :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nocol  !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, *)                                                    :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)    :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: kfv    !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out)  :: c      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: cgc    !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)   :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)   :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: qxkr   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: qxkw   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: qykr   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: qykw   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)   :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)   :: s
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)   :: teta   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)   :: tp     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -88,6 +88,7 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
     integer :: n
     integer :: nhystp
     integer :: nmaxddb
+    integer :: iopt
     real(fp):: cf
     real(fp):: cg     ! Group velocity of the waves
     real(fp):: h      ! Total water depth in zeta point
@@ -102,41 +103,64 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
     !
     do n = 1, nmax
        do m = 1, mmax
+          !
+          qxkw(n, m) = 0.0
+          qykw(n, m) = 0.0
+          qxkr(n, m) = 0.0
+          qykr(n, m) = 0.0
+          cgc(n, m)  = 0.0
+          c(n, m)    = 0.0
+          !
           if (kfs(n, m)>0) then
+             !
              h = max(real(dps(n, m),fp) + s(n, m), dryflc)
              !
-             ! h = MAX (dps(n,m),dryflc)
+             ! Compute cf anf cg
              !
-             if (h>0.0) then
-                q          = 2.0*pi*h/max(0.1_fp,rlabda(n, m))
-                sigma      = tanh(q)
-                cg         = ag*tp(n, m)*(sigma + (1.0 - sigma*sigma)*q)/4.0/pi
-                qxkw(n, m) = cg*cos(teta(n, m)*degrad)
-                qykw(n, m) = cg*sin(teta(n, m)*degrad)
-                if (tp(n, m)>0.0) then
-                   cf = rlabda(n, m)/tp(n, m)
+             iopt=1
+             !
+             if (tp(n, m)>0.01_fp) then
+                 !
+                 if (iopt==1) then
+                   !
+                   q = 2.0_fp*pi*h/max(5.0_fp,rlabda(n, m)) ! k*h
+                   !
+                   if (q<pi/10.0_fp) then ! Shallow water
+                      cf = sqrt(ag*h)
+                      cg = cf
+                   elseif (q>pi/10.0_fp .and. q<pi) then ! Transitional water
+                      cf = ((ag*tp(n, m))/(2.0_fp*pi))*tanh(q)
+                      cg = ((cf/2.0_fp)*(1.0 + ((2.0_fp*q)/sinh(2.0_fp*q))))
+                   else ! Deep water
+                      cf = (( ag * tp(n, m) ) / ( 2.0_fp * pi ) )
+                      cg = cf/2.0_fp
+                   endif             
                 else
-                   cf = rlabda(n, m)
+                   !
+                   if (tp(n, m)>0.1_fp) then
+                      cf = rlabda(n, m)/tp(n, m)
+                   else
+                      cf = rlabda(n, m)
+                   endif
+                   !             
+                   q          = 2.0_fp*pi*h/max(0.1_fp,rlabda(n, m))
+                   sigma      = tanh(q)
+                   cg         = ag*tp(n, m)*(sigma + (1.0_fp - sigma*sigma)*q)/4.0_fp/pi
+                   cg         = min(cg, cf)
+                   !
                 endif
-                c(n, m)    = cf
-                qxkr(n, m) = cf*cos(teta(n, m)*degrad)
-                qykr(n, m) = cf*sin(teta(n, m)*degrad)
-                cgc(n, m)  = cg/max(0.01_fp,cf)
              else
-                qxkw(n, m) = 0.0
-                qykw(n, m) = 0.0
-                qxkr(n, m) = 0.0
-                qykr(n, m) = 0.0
-                cgc(n, m)  = 0.0
-                c(n, m)    = 0.0
+                cf = sqrt(ag*h)
+                cg = cf
              endif
-          else
-             qxkw(n, m) = 0.0
-             qykw(n, m) = 0.0
-             qxkr(n, m) = 0.0
-             qykr(n, m) = 0.0
-             cgc(n, m)  = 0.0
-             c(n, m)    = 0.0
+             !
+             c(n, m)    = cf
+             qxkr(n, m) = cf*cos(teta(n, m)*degrad)
+             qykr(n, m) = cf*sin(teta(n, m)*degrad)
+             qxkw(n, m) = cg*cos(teta(n, m)*degrad)
+             qykw(n, m) = cg*sin(teta(n, m)*degrad)
+             cgc(n, m)  = cg/max(0.01_fp,cf)
+             !
           endif
        enddo
     enddo
