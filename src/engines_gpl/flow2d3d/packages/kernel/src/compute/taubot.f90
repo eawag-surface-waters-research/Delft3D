@@ -940,11 +940,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     else
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
-             if (rolcorr==1) then
-                taubsu(nm) = taubpu(nm) * (grmasu(nm) + grmsur(nm) + grfacu(nm)) / hu(nm)
-             else
-                taubsu(nm) = taubpu(nm) * (grmasu(nm) + grfacu(nm)) / hu(nm)
-             endif
+             taubsu(nm) = taubpu(nm) * (grmasu(nm) + grfacu(nm)) / hu(nm)
           endif
        enddo
     endif
