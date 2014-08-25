@@ -40,8 +40,8 @@ character(20)  :: key
 character(20)  :: major
 character(20)  :: minor
 character(20)  :: revision
-character(20)  :: mdu_minor
-character(20)  :: mdu_major
+character(20)  :: config_minor
+character(20)  :: config_major
 character(20)  :: value
 character(500) :: inputFile
 character(500) :: line
@@ -66,8 +66,8 @@ call GET_COMMAND_ARGUMENT(4,outputFile)
 major    = '**'
 minor    = '**'
 revision = '**'
-mdu_major    = '**'
-mdu_minor    = '**'
+config_major    = '**'
+config_minor    = '**'
 
 handlein  = 33
 handleout = 34
@@ -89,11 +89,11 @@ do
   if (index(key,'minor') /= 0) then
     minor = trim(adjustl(value))
   endif
-  if (index(key,'mdu_major') /= 0) then
-    mdu_major = trim(adjustl(value))
+  if (index(key,'config_major') /= 0) then
+    config_major = trim(adjustl(value))
   endif
-  if (index(key,'mdu_minor') /= 0) then
-    mdu_minor = trim(adjustl(value))
+  if (index(key,'config_minor') /= 0) then
+    config_minor = trim(adjustl(value))
   endif
   if (index(key,'revision') /= 0) then
     revision = trim(adjustl(value))
@@ -122,12 +122,12 @@ do
   value  = revision
   call sed(line, key, value)
 
-  key    = 'VN_MDU_MINOR'
-  value  = mdu_minor
+  key    = 'VN_CONFIG_MINOR'
+  value  = config_minor
   call sed(line, key, value)
 
-  key    = 'VN_MDU_MAJOR'
-  value  = mdu_major
+  key    = 'VN_CONFIG_MAJOR'
+  value  = config_major
   call sed(line, key, value)
 
   key    = 'VN_BUILD_NUMBER'
