@@ -61,6 +61,7 @@ type gd_numeco
                                      !  (used in cucnp/z_cucnp and uzd/z_uzd)
    logical      :: use_zavg_for_qtot !  Flag indicating whether discharge distribution at total discharge is based
                                      !  on local water level (false) or average water level (true)
+   logical      :: v2dwbl            !  Flag for the use of velocity above wave boundary layer for computing 2d representative velocity
    character(8) :: dpsopt            !  Drying & Flooding procedure at cell centres
                                      !  [MEAN/MAX/MIN/NO]
    character(8) :: dpuopt
