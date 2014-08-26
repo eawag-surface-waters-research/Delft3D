@@ -168,11 +168,10 @@ subroutine prop_inifile(filename , tree, error, japreproc)
           return
        endif 
        
-       open(lu,file=filename,iostat=iostat) ! attempt to open 
-       if (iostat/=0) then 
-          error = iostat                    ! upon file opening error, return iostat as error
+       open(lu,file=filename,iostat=error)
+       if (error/=0) then
           return
-       endif 
+       endif
     endif 
 
     call prop_inifile_pointer(lu, tree)
