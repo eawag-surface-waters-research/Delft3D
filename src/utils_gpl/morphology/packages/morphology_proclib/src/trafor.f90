@@ -606,6 +606,7 @@
                        & par      ,MAX_IP    ,MAX_RP   ,MAX_SP   , &
                        & dllfunc  ,dllhandle ,intpar   ,realpar  , &
                        & strpar   ,iflufflyr ,mflufftot,fracf    , &
+                       & 0.0_fp   ,0.0_fp    , &
 ! output:
                        & error    ,wstau     ,SinkTot  ,SourSe   , &
                        & SourFl   )
