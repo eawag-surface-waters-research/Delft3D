@@ -1035,6 +1035,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                         & par         ,max_integers,max_reals   ,max_strings , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
                         & dll_strings  ,iflufflyr ,mfltot ,fracf    , &
+                        & 0.0_fp   ,0.0_fp    , &
                         & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
              if (error) call d3stop(1, gdp)
              !
