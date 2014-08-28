@@ -1268,6 +1268,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              call writemessages(gdp%messages, lundia)
              call d3stop(1, gdp)
           endif
+       else
+          dbodsd = 0.0_fp
        endif
        !
        ! Use dbodsd to calculate voldred, and update dps

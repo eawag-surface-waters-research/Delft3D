@@ -86,6 +86,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     real(fp)                         , pointer :: dt
     integer                          , pointer :: julday
     logical                          , pointer :: lfbedfrm
+    logical                          , pointer :: cmpupd
 !
 ! Global variables
 !
@@ -205,6 +206,12 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     dt                => gdp%gdexttim%dt
     julday            => gdp%gdinttim%julday
     lfbedfrm          => gdp%gdbedformpar%lfbedfrm
+    cmpupd            => gdp%gdmorpar%cmpupd
+    !
+    if (.not.cmpupd) then
+       prterr(lundia, 'P004', 'Dredging and dumping not supported when bed composition updating is disabled')
+       call d3stop(1, gdp)
+    endif
     !
     rmissval       = -9.99E9_fp
     nmaxddb        = nmax + 2*gdp%d%ddbound
