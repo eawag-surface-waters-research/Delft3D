@@ -83,19 +83,34 @@ do
   if ( pos < 1 ) cycle
   key   = line(:pos-1)
   value = line(pos+1:)
-  if (index(key,'major') /= 0) then
+  !if (index(key,'major') /= 0) then
+  !  major = trim(adjustl(value))
+  !endif
+  !if (index(key,'minor') /= 0) then
+  !  minor = trim(adjustl(value))
+  !endif
+  !if (index(key,'config_major') /= 0) then
+  !  config_major = trim(adjustl(value))
+  !endif
+  !if (index(key,'config_minor') /= 0) then
+  !  config_minor = trim(adjustl(value))
+  !endif
+  !if (index(key,'revision') /= 0) then
+  !  revision = trim(adjustl(value))
+  !endif
+  if (trim(adjustl(key))=='major') then 
     major = trim(adjustl(value))
   endif
-  if (index(key,'minor') /= 0) then
+  if (trim(adjustl(key))=='minor') then 
     minor = trim(adjustl(value))
   endif
-  if (index(key,'config_major') /= 0) then
+  if (trim(adjustl(key))=='config_major') then 
     config_major = trim(adjustl(value))
   endif
-  if (index(key,'config_minor') /= 0) then
+  if (trim(adjustl(key))=='config_minor') then 
     config_minor = trim(adjustl(value))
   endif
-  if (index(key,'revision') /= 0) then
+  if (trim(adjustl(key))=='revision') then 
     revision = trim(adjustl(value))
   endif
 enddo
@@ -136,6 +151,7 @@ do
 
   write(handleout,'(a)') trim(line)
 enddo
+
 
 end program version_number
 
