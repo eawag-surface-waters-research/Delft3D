@@ -801,7 +801,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
              !
              dhmax = 0.05_fp
              h1 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-             if (abs(dsdnm) > dhmax*h1*cdryb(1) .and. bedupd) then
+             if (abs(dsdnm) > dhmax*h1*cdryb(l) .and. bedupd) then
                 !
                 ! Only write bed change warning when bed updating is true
                 ! (otherwise no problem)
