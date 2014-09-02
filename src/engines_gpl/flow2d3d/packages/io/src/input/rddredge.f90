@@ -209,7 +209,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     cmpupd            => gdp%gdmorpar%cmpupd
     !
     if (.not.cmpupd) then
-       prterr(lundia, 'P004', 'Dredging and dumping not supported when bed composition updating is disabled')
+       call prterr(lundia, 'P004', 'Dredging and dumping not supported when bed composition updating is disabled')
        call d3stop(1, gdp)
     endif
     !
