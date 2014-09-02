@@ -1029,14 +1029,14 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              kmaxsd        = kmaxlc ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
              thick0        = thicklc(kmaxsd) * h0
              thick1        = thicklc(kmaxsd) * h1
-             call erosilt(thicklc     ,kmaxlc      ,wslc        ,lundia      , &
-                        & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l),&
-                        & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
-                        & par         ,max_integers,max_reals   ,max_strings , &
-                        & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
-                        & dll_strings  ,iflufflyr ,mfltot ,fracf    , &
-                        & 0.0_fp   ,0.0_fp    , &
-                        & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
+             call erosilt(thicklc     ,kmaxlc      ,wslc        ,lundia        , &
+                        & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l), &
+                        & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)      , &
+                        & par         ,max_integers,max_reals   ,max_strings   , &
+                        & dll_function(l),dll_handle(l),dll_integers,dll_reals , &
+                        & dll_strings    ,iflufflyr ,mfltot ,fracf             , &
+                        & 0.0_fp         ,0.0_fp                               , & 
+                        & error          ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
              if (error) call d3stop(1, gdp)
              !
              if (iflufflyr>0) then
