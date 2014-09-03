@@ -142,105 +142,103 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 ! Local variables
 !
-    integer                            :: k
-    integer                            :: kmaxx
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kmaxxx
-    integer                            :: modind     ! Index of friction model (1=FR84, 2=MS90, 3=HT91, 4=GM79, 5=DS88, 6=BK67) 
-    integer                            :: ndm
-    integer                            :: ndmu
-    integer                            :: nm
-    integer                            :: nmu
-    integer                            :: svvv
-    logical                            :: actual_avg
-    logical                            :: kcscuttest
-    real(fp)                           :: a
-    real(fp)                           :: abscos
-    real(fp)                           :: alfaw
-    real(fp)                           :: astar      ! Coefficient in expression for wave friction factor 
-    real(fp)                           :: astarc     ! 30 pi (critical value for astar) 
-    real(fp)                           :: ca         ! Appararent Chezy value (Van Rijn, 2004) 
-    real(fp)                           :: cdrag      ! Drag coefficient 
-    real(fp)                           :: ci         ! Cos(phi)^I 
-    real(fp)                           :: cj         ! Cos(phi)^J 
-    real(fp)                           :: coeffa     ! Coefficient a in expression for parametrized models 
-    real(fp)                           :: coeffb     ! Coefficient b in expression for parametrized models 
-    real(fp)                           :: coeffm     ! Coefficient m in expression for parametrized models 
-    real(fp)                           :: coeffn     ! Coefficient n in expression for parametrized models 
-    real(fp)                           :: coeffp     ! Coefficient p in expression for parametrized models 
-    real(fp)                           :: coeffq     ! Coefficient q in expression for parametrized models 
-    real(fp)                           :: costu
-    real(fp)                           :: cu
-    real(fp)                           :: cvalue
-    real(fp)                           :: cwall
-    real(fp)                           :: dz         ! Distance of the bottom layer from the wall, used to calculate bottom stress vel. 
-    real(fp)                           :: fmrat
-    real(fp)                           :: fw         ! Wave friction factor 
-    real(fp)                           :: gamma
-    real(fp)                           :: hrmsu
-    real(fp)                           :: hurou
-    real(fp)                           :: ks
-    real(fp)                           :: ksc
-    real(fp)                           :: lfc        ! Log(fw/cd)
-    real(fp)                           :: omega
-    real(fp)                           :: phi        ! Angle between wave and current direction (Van Rijn, 2004)
-    real(fp)                           :: rksru
-    real(fp)                           :: rksmru
-    real(fp)                           :: rz
-    real(fp)                           :: sag
-    real(fp)                           :: sintu
-    real(fp)                           :: sixth
-    real(fp)                           :: su
-    real(fp)                           :: taucur     ! Bottom friction due to current alone 
-    real(fp)                           :: tauwav     ! Bottom friction due to waves alone 
-    real(fp)                           :: tauwci     ! Bottom friction for combined waves and current 
-    real(fp)                           :: tpu
-    real(fp)                           :: u2dh
-    real(fp)                           :: uratio    
-    real(fp)                           :: ubot
-    real(fp)                           :: uc
-    real(fp)                           :: umod
-    real(fp)                           :: umodsq     ! Magnitude of velocity squared 
-    real(fp)                           :: uorbhs
-    real(fp)                           :: uorbu
-    real(fp)                           :: ust
-    real(fp)                           :: rr
-    real(fp)                           :: umax
-    real(fp)                           :: t1
-    real(fp)                           :: rlabdau
-    real(fp)                           :: u11
-    real(fp)                           :: a11
-    real(fp)                           :: raih
-    real(fp)                           :: rmax
-    real(fp)                           :: uon
-    real(fp)                           :: uoff
-    real(fp)                           :: uwbih 
-    real(fp)                           :: ustokes
-    real(fp)                           :: uuu
-    real(fp)                           :: vvv
-    real(fp)                           :: waveps     ! Small positive number 
-    real(fp)                           :: xpar       ! Variable x in in expression for parametrized models 
-    real(fp)                           :: ymxpar     ! Variable Y(max) in in expression for parametrized models 
-    real(fp)                           :: ypar       ! Variable y in in expression for parametrized models 
-    real(fp), dimension(8)             :: coeffi     ! Coefficient i in expression for parametrized models 
-    real(fp), dimension(8)             :: coeffj     ! Coefficient j in expression for parametrized models 
-    real(fp), dimension(8, 4)          :: aa         ! Coefficient a(i) in expression for parameter a 
-    real(fp), dimension(8, 4)          :: bb         ! Coefficient b(i) in expression for parameter b 
-    real(fp), dimension(8, 4)          :: mm         ! Coefficient m(i) in expression for parameter n 
-    real(fp), dimension(8, 4)          :: nn         ! Coefficient n(i) in expression for parameter n 
-    real(fp), dimension(8, 4)          :: pp         ! Coefficient p(i) in expression for parameter p 
-    real(fp), dimension(8, 4)          :: qq         ! Coefficient q(i) in expression for parameter q 
-    real(fp), dimension(:),allocatable :: ka         ! Apparent bed roughness (Van Rijn, 2004)
-
-    real(fp)                           :: arg
-    real(fp)                           :: hsu
-    real(fp)                           :: awb
-    real(fp)                           :: delw
-    real(fp)                           :: zcc
-    real(fp)                           :: uuu0
-    real(fp)                           :: vvv0
-    real(fp)                           :: umod0
-    
-    
+    integer                              :: ierror
+    integer                              :: k
+    integer                              :: kmaxx
+    integer  , dimension(:), allocatable :: kmaxxx
+    integer                              :: modind     ! Index of friction model (1=FR84, 2=MS90, 3=HT91, 4=GM79, 5=DS88, 6=BK67) 
+    integer                              :: ndm
+    integer                              :: ndmu
+    integer                              :: nm
+    integer                              :: nmu
+    integer                              :: svvv
+    logical                              :: actual_avg
+    logical                              :: kcscuttest
+    real(fp)                             :: a
+    real(fp)                             :: abscos
+    real(fp)                             :: alfaw
+    real(fp)                             :: astar      ! Coefficient in expression for wave friction factor 
+    real(fp)                             :: astarc     ! 30 pi (critical value for astar) 
+    real(fp)                             :: ca         ! Appararent Chezy value (Van Rijn, 2004) 
+    real(fp)                             :: cdrag      ! Drag coefficient 
+    real(fp)                             :: ci         ! Cos(phi)^I 
+    real(fp)                             :: cj         ! Cos(phi)^J 
+    real(fp)                             :: coeffa     ! Coefficient a in expression for parametrized models 
+    real(fp)                             :: coeffb     ! Coefficient b in expression for parametrized models 
+    real(fp)                             :: coeffm     ! Coefficient m in expression for parametrized models 
+    real(fp)                             :: coeffn     ! Coefficient n in expression for parametrized models 
+    real(fp)                             :: coeffp     ! Coefficient p in expression for parametrized models 
+    real(fp)                             :: coeffq     ! Coefficient q in expression for parametrized models 
+    real(fp)                             :: costu
+    real(fp)                             :: cu
+    real(fp)                             :: cvalue
+    real(fp)                             :: cwall
+    real(fp)                             :: dz         ! Distance of the bottom layer from the wall, used to calculate bottom stress vel. 
+    real(fp)                             :: fmrat
+    real(fp)                             :: fw         ! Wave friction factor 
+    real(fp)                             :: gamma
+    real(fp)                             :: hrmsu
+    real(fp)                             :: hurou
+    real(fp)                             :: ks
+    real(fp)                             :: ksc
+    real(fp)                             :: lfc        ! Log(fw/cd)
+    real(fp)                             :: omega
+    real(fp)                             :: phi        ! Angle between wave and current direction (Van Rijn, 2004)
+    real(fp)                             :: rksru
+    real(fp)                             :: rksmru
+    real(fp)                             :: rz
+    real(fp)                             :: sag
+    real(fp)                             :: sintu
+    real(fp)                             :: sixth
+    real(fp)                             :: su
+    real(fp)                             :: taucur     ! Bottom friction due to current alone 
+    real(fp)                             :: tauwav     ! Bottom friction due to waves alone 
+    real(fp)                             :: tauwci     ! Bottom friction for combined waves and current 
+    real(fp)                             :: tpu
+    real(fp)                             :: u2dh
+    real(fp)                             :: uratio    
+    real(fp)                             :: ubot
+    real(fp)                             :: uc
+    real(fp)                             :: umod
+    real(fp)                             :: umodsq     ! Magnitude of velocity squared 
+    real(fp)                             :: uorbhs
+    real(fp)                             :: uorbu
+    real(fp)                             :: ust
+    real(fp)                             :: rr
+    real(fp)                             :: umax
+    real(fp)                             :: t1
+    real(fp)                             :: rlabdau
+    real(fp)                             :: u11
+    real(fp)                             :: a11
+    real(fp)                             :: raih
+    real(fp)                             :: rmax
+    real(fp)                             :: uon
+    real(fp)                             :: uoff
+    real(fp)                             :: uwbih 
+    real(fp)                             :: ustokes
+    real(fp)                             :: uuu
+    real(fp)                             :: vvv
+    real(fp)                             :: waveps     ! Small positive number 
+    real(fp)                             :: xpar       ! Variable x in in expression for parametrized models 
+    real(fp)                             :: ymxpar     ! Variable Y(max) in in expression for parametrized models 
+    real(fp)                             :: ypar       ! Variable y in in expression for parametrized models 
+    real(fp), dimension(8)               :: coeffi     ! Coefficient i in expression for parametrized models 
+    real(fp), dimension(8)               :: coeffj     ! Coefficient j in expression for parametrized models 
+    real(fp), dimension(8, 4)            :: aa         ! Coefficient a(i) in expression for parameter a 
+    real(fp), dimension(8, 4)            :: bb         ! Coefficient b(i) in expression for parameter b 
+    real(fp), dimension(8, 4)            :: mm         ! Coefficient m(i) in expression for parameter n 
+    real(fp), dimension(8, 4)            :: nn         ! Coefficient n(i) in expression for parameter n 
+    real(fp), dimension(8, 4)            :: pp         ! Coefficient p(i) in expression for parameter p 
+    real(fp), dimension(8, 4)            :: qq         ! Coefficient q(i) in expression for parameter q 
+    real(fp), dimension(:),allocatable   :: ka         ! Apparent bed roughness (Van Rijn, 2004)
+    real(fp)                             :: arg
+    real(fp)                             :: hsu
+    real(fp)                             :: awb
+    real(fp)                             :: delw
+    real(fp)                             :: zcc
+    real(fp)                             :: uuu0
+    real(fp)                             :: vvv0
+    real(fp)                             :: umod0
 !
 ! Data statements
 !
@@ -303,7 +301,9 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! INITIALISATION
     !
-    allocate(ka(nmmax))
+    allocate(ka(nmmax), stat = ierror)
+    allocate(kmaxxx(gdp%d%nmlb:gdp%d%nmub), stat = ierror)
+    !
     alfaw  = 20.
     sixth  = 1./6.
     sag    = sqrt(ag)
@@ -944,5 +944,6 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           endif
        enddo
     endif
-    deallocate(ka)
+    deallocate(ka, stat=ierror)
+    deallocate(kmaxxx, stat=ierror)
 end subroutine taubot

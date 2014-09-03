@@ -51,7 +51,7 @@ module geometry_module
 
    contains
 
-      !> Checks orientation of a polygon in high precision.
+      !> Checks orientation of a polygon in single precision.
       function clockwise_sp(x,y) result(cw)
           use precision
       
