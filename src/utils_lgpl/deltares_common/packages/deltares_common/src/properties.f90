@@ -477,22 +477,51 @@ subroutine prop_tekalfile_pointer(lu, tree)
 end subroutine prop_tekalfile_pointer
 
 
-    subroutine expand(subject,defnames,defstrings,ndef)
+! --------------------------------------------------------------------
+!   Subroutine: expand
+!   Purpose:    Expand keys ${key} in subject, given a set of key-value pairs 
+!   Context:    Called by parse_directives
+!   Summary:
+!               Non-recursive (first level) expansion
+!               Defnames and defstrings form a list of ndef (key,value)-pairs
+!               used in the substitution upon encountering $key or ${key} in the string
+!               keys starting with an underscore refer to environment variables 
+!               e.g. ${_PATH} or $_PATH refers to the path variable 
+!   Arguments:
+!   subject     Character string subjected to replacements 
+!   defnames    keys 
+!   defstrings  replacement strings 
+!   ndef        number of keys = number of replacement strings 
+!
+!   Restrictions:
+!               - Single pass, replacement strings are not subject to expansion themselves (i.e. no recursion)
+!               - keys and replacement strings can at max hold 50 characters 
+! --------------------------------------------------------------------
+!
+subroutine expand(subject,defnames,defstrings,ndef)
+    !
     implicit none
-    ! Non-recursive (first level) expansion
-    ! Defnames and defstrings form a list of ndef (key,value)-pairs
-    ! used in the substitution upon encountering $key or ${key} in the string
-    ! keys starting with an underscore refer to environment variables 
-    ! e.g. ${_PATH} or $_PATH refers to the path variable 
-    character(*), intent(inout)   :: subject         !< subject to replacments
-    character(len=50), intent(in) :: defnames(:)     !< defined constants: names
-    character(len=50), intent(in) :: defstrings(:)   !< defined constants: content
-    integer, intent(in)           :: ndef            !< length of the definition list
-    character*(300) envstring       ! environment strings can be lengthy sometimes  ... 
-    character*(600) outstring       ! so the output must support that. Adapt if still insufficient.
-    character*(50) defstring
-    integer s1, s2, l1, idef
+    !
+    ! Parameters
+    !
+    character(*),   intent(inout)   :: subject         !< subject to replacments
+    character*(50), intent(in)      :: defnames(:)     !< defined constants: names
+    character*(50), intent(in)      :: defstrings(:)   !< defined constants: content
+    integer,        intent(in)      :: ndef            !< length of the definition list
+    !
+    ! Local variables
+    !
+    character*(300)     ::  envstring       ! environment strings can be lengthy sometimes  ... 
+    character*(600)     ::  outstring       ! so the output must support that. Adapt if still insufficient.
+    character*(50)      ::  defstring
+    integer             ::  s1
+    integer             ::  s2 
+    integer             ::  l1 
+    integer             ::  idef
 
+    !
+    !! executable statements -------------------------------------------------------
+    !
     s1 = 1
     s2 = 1
     l1 = len(trim(subject))
@@ -527,179 +556,249 @@ end subroutine prop_tekalfile_pointer
        endif
     enddo
     subject=trim(outstring)
-    return 
-    end subroutine expand
+end subroutine expand
 
 
-!>     INI-file preproc, inspired by the C-preprocessor, supporting
-!>     * (nested) file inclusion through include-directive       
-!>           #include filename
-!>           #include <filename>
-!>     * aliases, defined 
-!>           #define aliasname content
-!>       and invoked by placing $aliasname or ${aliasname} in the text
-!>     * $_aliasname and ${_aliasname} refer to environment variables 
-!>     * conditionals #ifdef, #ifndef #endif 
-!>     * #include and #define work recursive, but preprocessing is 'single-pass' (begin to end of files)
-!>     Resulting file (expanded) is written to filename_out
-!>     Return error code: -5 -> file not found  
-!>                        -6 -> trying to open an already opened file 
-!>                        positive error codes refer to iostats
-!>     filename_out is optional. If provided, the file is created (or overwritten if existing),
-!>         otherwise a scratchfile is used, which is automatically unlinked upon closure  
-      integer function preprocINI(filename_in, error, filename_out) result (outfilenumber)
-      use MessageHandling
-      implicit none 
-      character(len=*), intent(in)                :: filename_in          !< basic config file 
-      integer,          intent(out)               :: error                !< error code 
-      character(len=*), intent(in), optional      :: filename_out         !< resulting input to build tree 
-      character(len=50) :: defnames(100), defstrings(100)       ! definition database 
-      integer           :: ndef
-      integer           :: iostat
-      logical           :: opened
-      integer           :: maxunit = 500 
+! --------------------------------------------------------------------
+!   Subroutine: preprocINI
+!   Purpose:    INI-file preprocessor, cpp-style 
+!   Context:    preceeds processing an ini-files into a tree  
+!   Summary:
+!            * (nested) file inclusion through include-directive       
+!                  #include filename
+!                  #include <filename>
+!            * aliases, defined 
+!                  #define aliasname content
+!              and invoked by placing $aliasname or ${aliasname} in the text
+!            * $_aliasname and ${_aliasname} refer to environment variables 
+!            * conditionals #ifdef, #ifndef #endif 
+!            * #include and #define work recursive, but preprocessing is 'single-pass' (begin to end of files)
+!            Resulting file (expanded) is written to filename_out
+!            Return error code: -5 -> file not found  
+!                               -6 -> trying to open an already opened file 
+!                               positive error codes refer to iostats
+!            filename_out is optional. If provided, the file is created (or overwritten if existing),
+!                otherwise a scratchfile is used, which is automatically unlinked upon closure  
+!            Non-recursive (first level) expansion
+!            Defnames and defstrings form a list of ndef (key,value)-pairs
+!            used in the substitution upon encountering $key or ${key} in the string
+!            keys starting with an underscore refer to environment variables 
+!            e.g. ${_PATH} or $_PATH refers to the path variable 
+!   Arguments:
+!   infilename      Original file subjected to preprocessing  
+!   error           Reports final status: 
+!                           0  : no error
+!                         -55  : file not found (passed from parse_directives)
+!                         -66  : tryng to open a file that has already been opened (passed from parse_directives) 
+!                         -33  : available unit numbers ran out 
+!                   otherwise  : iostat from the last failed file operation 
+!   filename_out    Resulting file, optional (if not given, a scratch file is used) 
+!
+!   Result:
+!   outfilenumber   Handle to a file open for reading, containing the preprocessors result
+!   Restrictions:
+!               - the maximum file unit number to be returned is 500 
+!               - keys and replacement strings can at hold up to 50 characters only
+!               - no more than 100 replacements can be defined 
+! --------------------------------------------------------------------
+!
+integer function preprocINI(infilename, error, outfilename) result (outfilenumber)
+    use MessageHandling
+    !
+    implicit none
+    !
+    ! Parameters
+    !
+    character(*),     intent(in)                :: infilename           !< basic config file 
+    integer,          intent(out)               :: error                !< error code 
+    character(*),     intent(in), optional      :: outfilename          !< resulting input to build tree 
+    !
+    ! Local variables
+    !
+    character(50)     :: defnames(100)         ! definition database 
+    character(50)     :: defstrings(100)       
+    integer           :: ndef
+    integer           :: iostat
+    logical           :: opened
+    integer           :: maxunit = 500 
 
-      ndef = 0
+    !
+    !! executable statements -------------------------------------------------------
+    !
+    error = 0
+    ndef = 0
+    do outfilenumber=10,maxunit
+       inquire(outfilenumber, opened=opened)
+       if (.not.opened) then 
+          exit
+       endif 
+    enddo 
+    if (outfilenumber>maxunit) then 
+       outfilenumber = -1
+       error = -33                                !        ERROR CODE -33 : Running out of free filenumbers (1-99) for ini-file to be opened 
+       return
+    endif 
 
-      do outfilenumber=10,maxunit
-         inquire(outfilenumber, opened=opened)
-         if (.not.opened) then 
-            exit
-         endif 
-      enddo 
-      if (outfilenumber>maxunit) then 
-         outfilenumber = -1
-         error = -33                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
-         return
-      endif 
+    if (present(outfilename)) then 
+       open(outfilenumber,file=trim(outfilename),iostat=iostat)
+       if (iostat/=0) then
+          outfilenumber = -1
+          error = iostat                          !       ERROR : Intermediate ini-file could not be written.
+          return
+       endif
+    else 
+       open (outfilenumber, status='SCRATCH', IOSTAT=iostat)
+       if (iostat/=0) then 
+          outfilenumber = -1
+          error = iostat
+          return
+       endif 
+    endif 
 
-      if (present(filename_out)) then 
-         open(outfilenumber,file=trim(filename_out),iostat=iostat)
-         if (iostat/=0) then
-            outfilenumber = -1
-            error = iostat                          !       ERROR : Intermediate ini-file could not be written.
-            return
-         endif
-      else 
-         open (outfilenumber, status='SCRATCH', IOSTAT=iostat)
-         if (iostat/=0) then 
-            outfilenumber = -1
-            error = iostat
-            return
-         endif 
-      endif 
+    error = parse_directives(trim(infilename), outfilenumber, defnames, defstrings, ndef, 1)
+    if (error/=0) then                ! either something went wrong ...
+       close(outfilenumber)           ! close the file 
+       outfilenumber = -1             ! return -1 as a filenumber 
+    else                              ! ... or we're all clear  ....
+       rewind(outfilenumber)          ! rewind the file just written and return the number to caller 
+    endif 
+end function preprocINI 
 
-      error = parse_directives(trim(filename_in), outfilenumber, defnames, defstrings, ndef, 1)
-      if (error/=0) then                ! either something went wrong ...
-         close(outfilenumber)           ! close the file 
-         outfilenumber = error          ! return the err, rather than the file number     
-      else                              ! ... or we're all clear  ....
-         rewind(outfilenumber)          ! rewind the file just written and return the number to caller 
-      endif 
-      return 
-      end function preprocINI 
-      
+! --------------------------------------------------------------------
+!   Subroutine: parse_directives 
+!   Purpose:    part of the INI-file preprocessor, handles preprocessor directives 
+!   Context:    called by preprocINI 
+!   Summary:    see preprocINI
 
-      recursive integer function parse_directives (infilename, outfilenumber, defnames, defstrings, ndef, level) result (error)
-      use MessageHandling
-      implicit none
-!     Parse a document with preprocessor directives
-!     Return error code: -5 -> file not found  
-!                        -6 -> trying to open an already opened file 
+!   Arguments:
+!   filename_in     Character string subjected to replacements 
+!   infilename      Original file subjected to preprocessing (can also be an included file at deeper level)  
+!   outfilenumber   Handle to a file open for reading, containing the preprocessors result
+!   defnames        keys 
+!   defstrings      replacement strings 
+!   ndef            number of keys = number of replacement strings 
+!   level           keeps track of the recursive depth (we could enforce a max on this depth if desired)
+!
+!   Result:
+!   error           Reports final status: 
+!                           0  : no error
+!                         -55  : file not found 
+!                         -66  : tryng to open a file that has already been opened 
+!                         -33  : ran out of available unit numbers 
+!                   otherwise  : iostat from the last failed file operation 
+!   Restrictions:   see preprocINI
+! --------------------------------------------------------------------
+!
+recursive integer function parse_directives (infilename, outfilenumber, defnames, defstrings, ndef, level) result (error)
+    use MessageHandling
+    !
+    implicit none
+    !
+    ! Parameters
+    !
+    character(len=*),     intent(in)    :: infilename      !< subject file parsed
+    integer,              intent(in)    :: outfilenumber   !< unit nr. of output
+    character(len=50),    intent(inout) :: defnames(:)     !< defined constants: names
+    character(len=50),    intent(inout) :: defstrings(:)   !< defined constants: content
+    integer,              intent(inout) :: ndef            !< keeps track of the number of definitions
+    integer,              intent(in)    :: level           !< nesting level 
+    !
+    ! Local variables
+    !
+    character(len=200) :: s
+    character(len=50)  :: includefile
+    character(len=50)  :: dumstr
+    character(len=50)  :: defname
+    character(len=50)  :: defstring 
+    integer            :: writing 
+    integer            :: idef 
+    integer            :: ilvl
+    integer            :: infilenumber 
+    integer            :: iostat
+    logical            :: opened 
+    logical            :: exist
+    integer            :: maxunit = 500
+    character(len=100) :: infostr 
 
-      character(len=*), intent(in)     :: infilename      !< subject file parsed
-      integer, intent(in)              :: outfilenumber   !< unit nr. of output
+    !
+    !! executable statements
+    !
+    error = 0
+    inquire(file=trim(infilename), opened=opened, exist=exist)
+    if (opened) then 
+       error = -66                 ! ERROR : included file is already open (circular dependency), ignore file  
+       return
+    endif  
+    if (.not.exist) then 
+       error = -55                 ! ERROR : included file not found 
+       return
+    endif  
 
-      character(len=50), intent(inout) :: defnames(:)     !< defined constants: names
-      character(len=50), intent(inout) :: defstrings(:)   !< defined constants: content
-      integer, intent(inout)           :: ndef            !< keeps track of the number of definitions
-      integer, intent(in)              :: level           !< nesting level 
+    do infilenumber=10,maxunit
+       inquire(infilenumber, opened=opened)
+       if (.not.opened) then 
+          exit
+       endif 
+    enddo 
+    if (infilenumber>maxunit) then 
+       infilenumber = -1
+       error = -33                 ! ERROR CODE -33 : Running out of free filenumbers (1-99) for ini-file to be opened 
+       return
+    endif 
 
-      character(len=200) :: s
-      character(len=50)  :: includefile, dumstr, defname, defstring 
-      integer            :: writing, idef, ilvl
-      integer            :: infilenumber, iostat
+    open(infilenumber,file=trim(infilename),iostat=iostat)
+    if (iostat/=0) then
+       error = iostat              ! ERROR : file was encountered, but for some reason cannot be opened .... 
+       return
+    endif
 
-      logical            :: opened, exist
-      integer            :: maxunit = 500
-      character(len=100) :: infostr 
-
-      error = 0
-      inquire(file=trim(infilename), opened=opened, exist=exist)
-      if (opened) then 
-        error = -6                 ! ERROR : included file is already open (circular dependency), ignore file  
-        return
-      endif  
-      if (.not.exist) then 
-        error = -5                 ! ERROR : included file not found 
-        return
-      endif  
-
-      do infilenumber=10,maxunit
-         inquire(infilenumber, opened=opened)
-         if (.not.opened) then 
-            exit
-         endif 
-      enddo 
-      if (infilenumber>maxunit) then 
-         infilenumber = -1
-         error = -34                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
-         return
-      endif 
-
-      open(infilenumber,file=trim(infilename),iostat=iostat)
-      if (iostat/=0) then
-        error = iostat             ! ERROR : file was encountered, but for some reason cannot be opened .... 
-        return
-      endif
-
-      writing = 1
-      do
-          read(infilenumber,'(a200)',end=666) s
-          if (index(s,'#include')==1) then
-             read(s,*) dumstr, includefile
-             if (includefile(1:1)=='<') then 
-                includefile=includefile(2:index(includefile,'>')-1)
-             endif 
-             if (writing>0) then
-                error = parse_directives(includefile, outfilenumber, defnames, defstrings, ndef, level+1)
-                if (error/=0) return                                     ! first error stops the process 
-             endif                                                     ! is returned to higher levels 
-          elseif (index(s,'#define')==1) then
-             read(s,*) dumstr, defname, defstring
-             call expand(defstring,defnames,defstrings,ndef)           ! first expand names
-             ndef = ndef + 1
-             defnames(ndef) = trim(defname)
-             call expand(defstring,defnames,defstrings,ndef)
-             defstrings(ndef) = trim(defstring)
-          elseif (index(s,'#ifdef')==1) then
-             read(s,*) dumstr, defname
-             writing=writing-1
-             do idef=1,ndef
-                if (trim(defname)==trim(defnames(idef))) then
-                    writing=writing+1
-                    exit
-                endif
-             enddo
-          elseif (index(s,'#endif')==1) then
-             writing = writing + 1
-          elseif (index(s,'#ifndef')==1) then
-             read(s,*) dumstr, defname
-             do idef=1,ndef
-                if (trim(defname)==trim(defnames(idef))) then
-                    writing=writing-1
-                endif
-             enddo
-          else                                                                ! Just process this line
-            if (writing>0) then
-               if (index(s,'$')>0) call expand(s,defnames,defstrings,ndef)   ! first expand names
-               write (outfilenumber,'(a)') trim(s)
-            endif
+    writing = 1
+    do
+       read(infilenumber,'(a200)',end=666) s
+       if (index(s,'#include')==1) then
+          read(s,*) dumstr, includefile
+          if (includefile(1:1)=='<') then 
+             includefile=includefile(2:index(includefile,'>')-1)
+          endif 
+          if (writing>0) then
+             error = parse_directives(includefile, outfilenumber, defnames, defstrings, ndef, level+1)
+             if (error/=0) return                                   ! first error stops the process 
+          endif                                                     ! is returned to higher levels 
+       elseif (index(s,'#define')==1) then
+          read(s,*) dumstr, defname, defstring
+          call expand(defstring,defnames,defstrings,ndef)           ! first expand names
+          ndef = ndef + 1
+          defnames(ndef) = trim(defname)
+          call expand(defstring,defnames,defstrings,ndef)
+          defstrings(ndef) = trim(defstring)
+       elseif (index(s,'#ifdef')==1) then
+          read(s,*) dumstr, defname
+          writing=writing-1
+          do idef=1,ndef
+             if (trim(defname)==trim(defnames(idef))) then
+                writing=writing+1
+                exit
+             endif
+          enddo
+       elseif (index(s,'#endif')==1) then
+          writing = writing + 1
+       elseif (index(s,'#ifndef')==1) then
+          read(s,*) dumstr, defname
+          do idef=1,ndef
+             if (trim(defname)==trim(defnames(idef))) then
+                writing=writing-1
+             endif
+          enddo
+       else                                                               ! Just process this line
+          if (writing>0) then
+             if (index(s,'$')>0) call expand(s,defnames,defstrings,ndef)  ! first expand names
+             write (outfilenumber,'(a)') trim(s)
           endif
-      enddo
+       endif
+    enddo
  666  continue
-      close(infilenumber)
-      end function parse_directives
+    close(infilenumber)
+end function parse_directives
 
 
 !> Writes a property tree to file in ini format.
