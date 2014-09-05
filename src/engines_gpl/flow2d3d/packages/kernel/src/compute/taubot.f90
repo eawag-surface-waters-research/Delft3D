@@ -515,7 +515,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        umodsq     = uuu*uuu + vvv*vvv
        umod       = max(1.0e-4_fp , sqrt(umodsq))
        !
-       if (kmaxx/=kmax) then
+       if (kmaxx/=kmax .and. .not.zmodel) then
           !
           ! Also compute current magnitude (umod0) in bottom layer, because it's needed to
           ! compute taubpu
