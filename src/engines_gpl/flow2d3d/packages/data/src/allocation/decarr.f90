@@ -208,8 +208,8 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     ! which depends on the type of computation (for DROGUE and TEMP no special
     ! arrays declared yet; for WAVE not yet implemented)
     !
-    nopest = 4 * (nmax+mmax)
-    nlcest = 7 * (nmax+mmax)
+    nopest =  4 * (nmax+mmax)
+    nlcest = 10 * (nmax+mmax)
     if (kmax > 1) then
        threed = .true.
        nmaxd  = nmax
