@@ -118,6 +118,7 @@ libIOOutput_la_SOURCES = \
          wrthisdis.f90 \
          wrtmap_pointer.f90 \
          wrtmap.f90 \
+         wrtmap_int_nm.f90 \
          wrtmap_nm.f90 \
          wrtmap_nmk.f90 \
          wrtmap_nmkl.f90 \

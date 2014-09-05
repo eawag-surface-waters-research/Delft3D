@@ -247,6 +247,7 @@
 		<File RelativePath="src\output\wrthisdad.f90"/>
 		<File RelativePath="src\output\wrthisdis.f90"/>
 		<File RelativePath="src\output\wrtmap.f90"/>
+		<File RelativePath=".\src\output\wrtmap_int_nm.f90"/>
 		<File RelativePath=".\src\output\wrtmap_nm.f90"/>
 		<File RelativePath=".\src\output\wrtmap_nmk.f90"/>
 		<File RelativePath=".\src\output\wrtmap_nmkl.f90"/>

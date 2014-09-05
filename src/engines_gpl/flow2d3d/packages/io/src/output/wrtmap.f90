@@ -311,6 +311,32 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
           & 'Non-active/active in V-point                                ', &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
           & lundia    ,gdp       )
+       if (zmodel .and. flwoutput%kf_minmax) then
+          call addelm(nefiswrtmap,'KFSMIN',' ','[   -   ]','INTEGER',4          , &
+             & 'Bottom-most active layer at water level point               ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'KFSMAX',' ','[   -   ]','INTEGER',4          , &
+             & 'Top-most active layer at water level point                  ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'KFUMIN',' ','[   -   ]','INTEGER',4          , &
+             & 'Bottom-most active layer at U-point                         ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'KFUMAX',' ','[   -   ]','INTEGER',4          , &
+             & 'Top-most active layer at U-point                            ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'KFVMIN',' ','[   -   ]','INTEGER',4          , &
+             & 'Bottom-most active layer at V-point                         ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'KFVMAX',' ','[   -   ]','INTEGER',4          , &
+             & 'Top-most active layer at V-point                            ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+       endif
        if (index(selmap(2:3), 'Y') > 0) then
           call addelm(nefiswrtmap,'U1',' ','[  M/S  ]','REAL',4              , &
              & 'U-velocity per layer in U-point ('//trim(velt)//')', &
@@ -782,28 +808,54 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     ! group 3: element 'KFU'
     !
-    if (parll) then
-       call dfgather(kfu,nf,nl,mf,ml,iarrc,gdp)
-    else
-       call dfgather_seq(kfu,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)    
-    endif
-    if (inode == master) then
-       ierror = putelt(fds, grnam3, 'KFU', uindex, 1, glbari2)
-    endif
-         
+    call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                 & ierror, kfu, 'KFU')
     if (ierror /= 0) goto 999
     !
     ! group 3: element 'KFV'
     !
-    if (parll) then
-       call dfgather(kfv,nf,nl,mf,ml,iarrc,gdp)
-    else
-       call dfgather_seq(kfv,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)    
-    endif          
-    if (inode == master) then
-       ierror = putelt(fds, grnam3, 'KFV', uindex, 1, glbari2)
-    endif
+    call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                 & ierror, kfv, 'KFV')
     if (ierror /= 0) goto 999
+    !
+    if (zmodel .and. flwoutput%kf_minmax) then
+       !
+       ! group 3: element 'KFSMIN'
+       !
+       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, kfsmin, 'KFSMIN')
+       if (ierror /= 0) goto 999
+       !
+       ! group 3: element 'KFSMAX'
+       !
+       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, kfsmin, 'KFSMAX')
+       if (ierror /= 0) goto 999
+       !
+       ! group 3: element 'KFUMIN'
+       !
+       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, kfumin, 'KFUMIN')
+       if (ierror /= 0) goto 999
+       !
+       ! group 3: element 'KFUMAX'
+       !
+       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, kfumax, 'KFUMAX')
+       if (ierror /= 0) goto 999
+       !
+       ! group 3: element 'KFVMIN'
+       !
+       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, kfvmin, 'KFVMIN')
+       if (ierror /= 0) goto 999
+       !
+       ! group 3: element 'KFVMAX'
+       !
+       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, kfvmax, 'KFVMAX')
+       if (ierror /= 0) goto 999
+    endif
     !
     ! group 3: element 'U1' & 'V1' only if SELMAP( 2: 3) <> 'NN'
     !
