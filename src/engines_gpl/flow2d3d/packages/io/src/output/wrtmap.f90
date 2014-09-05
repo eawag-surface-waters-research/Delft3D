@@ -829,7 +829,7 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
        ! group 3: element 'KFSMAX'
        !
        call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfsmin, 'KFSMAX')
+                    & ierror, kfsmax, 'KFSMAX')
        if (ierror /= 0) goto 999
        !
        ! group 3: element 'KFUMIN'
