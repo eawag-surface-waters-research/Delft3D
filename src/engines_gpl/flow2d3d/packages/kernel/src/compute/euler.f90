@@ -151,6 +151,10 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     p1   = 0.0_fp
     p2   = 0.0_fp
     if (wave) then
+       if (zmodel) then
+           uwork = 0.0_fp
+           vwork = 0.0_fp
+       endif
        if (kmax > 1) then
           !
           ! 3D case
