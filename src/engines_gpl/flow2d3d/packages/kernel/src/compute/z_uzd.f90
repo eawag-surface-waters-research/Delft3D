@@ -661,7 +661,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ! physical limit to wsu
              !
              if (wave) then
-                wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
+                wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, 0.5_fp*(tp(nm)+tp(nmu)))
                 wsul   = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
                 !
                 ddk(nm, kkmax) = ddk(nm, kkmax) + wsul/(rhow*max(dzu0(nm, kkmax),drytrsh))

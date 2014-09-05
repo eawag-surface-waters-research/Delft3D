@@ -545,7 +545,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! WAVE FORCE AT SURFACE
           !
           if (wave) then
-             wsumax = facmax*hu(nm)**(1.5_fp)/max(0.1_fp, tp(nm))
+             wsumax = facmax*hu(nm)**(1.5_fp)/max(0.1_fp, 0.5_fp*(tp(nm)+tp(nmu)))
              wsul   = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
              !
              ddk(nm, kkmax) = ddk(nm, kkmax) + wsul/(rhow*dzu0(nm, kkmax))          !
