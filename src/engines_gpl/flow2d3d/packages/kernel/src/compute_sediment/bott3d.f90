@@ -951,7 +951,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    endif
                    !
                    if (from_num) then
-                      dv = thet*fixfac(num, l)*frac(num, l)
+                      dv             = thet*fixfac(num, l)*frac(num, l)
                       dbodsd(l, num) = dbodsd(l, num) - dv/gsqs(num)
                       dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
                       sbvv(nm, l)    = sbvv(nm, l) - dv/(dtmor*gvv(nm))
