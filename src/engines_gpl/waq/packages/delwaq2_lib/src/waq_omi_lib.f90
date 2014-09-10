@@ -563,15 +563,16 @@ logical function GetCurrentValue(name, value)
             value(i) = dlwqd%rbuf(iconc+idx-1+(i-1)*notot)
         enddo
     else
-        ! TODO
-        !call find_index( name, procparam_const, idx )
-        !if ( idx > 0 ) then
-        !    value(1:noseg) = value
-        !else
+        call find_index( name, procparam_const, idx )
+        if ( idx > 0 ) then
+            do i = 1,noseg
+                value(i) = dlwqd%rbuf(iconc+idx-1+(i-1)*notot)
+            enddo
+        else
             call SetMessage(LEVEL_ERROR, &
                 'Name not found (not a substance of process parameter): ' // name)
             return
-        !endif
+        endif
     endif
 
     GetCurrentValue = .true.
@@ -1963,7 +1964,7 @@ subroutine handle_output_requests( name )
         write( 10, '(a)' ) '2 ; all substances and extra output'
         write( 10, '(i5,a)' ) size(output_param), ' ; number of extra variables'
         do i = 1,size(output_param)
-            if ( k  < 4 ) then
+            if ( k.eq.1 .or. k.eq.3 ) then
                 write( 10, '(a,1x,a)' ) output_param(i), ''' '''
             else
                 write( 10, '(a,1x,a)' ) output_param(i)
@@ -1989,6 +1990,7 @@ end subroutine handle_output_requests
 subroutine handle_processes( name )
     use processet
     use output
+    use rd_token
 
     implicit none
 
@@ -2016,10 +2018,10 @@ subroutine handle_processes( name )
 
     integer, parameter                    :: icmax = 2000
     integer, parameter                    :: iimax = 2000
-    character(len=1)                      :: cchar
+!    character(len=1)                      :: cchar
     character(len=20), dimension(icmax)   :: car
     integer, dimension(iimax)             :: iar
-    integer                               :: npos
+!    integer                               :: npos
     integer                               :: iwidth
     integer                               :: ibflag
     integer                               :: iwar
@@ -2080,6 +2082,8 @@ subroutine handle_processes( name )
     ierr    = 0
     iwar    = 0
     ibflag  = 0 ! TODO: correct value
+    ilun(1) = 9
+    lch (1) = trim(name) // '.inp'
 
     call dlwq09( lun, lchar, filtype, car, iar, icmax, &
              iimax, iwidth, ibflag, version,           &
