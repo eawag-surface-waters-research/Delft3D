@@ -104,6 +104,7 @@
       if (timon) call timstrt( "grid", ithndl )
 
       nolay      = 1
+      nosegl     = noseg/nolay
       nogrid     = 1
       newinput   = .false.
       zmodel     = .false.
