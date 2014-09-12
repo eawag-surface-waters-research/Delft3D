@@ -155,7 +155,6 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     nopest     => gdp%d%nopest
     !
     nopest    = 0
-    nlcest    = 0
     nmaxd     = 1
     mmaxd     = 1
     nflmod    = ' '
@@ -208,8 +207,14 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     ! which depends on the type of computation (for DROGUE and TEMP no special
     ! arrays declared yet; for WAVE not yet implemented)
     !
-    nopest =  4 * (nmax+mmax)
-    nlcest = 10 * (nmax+mmax)
+    nopest = 4 * (nmax+mmax)
+    if (nlcest == 0) then
+       !
+       ! nlcest not specified (overwritten) by the user
+       ! define an estimation:
+       !
+       nlcest = 7 * (nmax+mmax)
+    endif
     if (kmax > 1) then
        threed = .true.
        nmaxd  = nmax

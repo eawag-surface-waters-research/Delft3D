@@ -49,6 +49,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer , pointer :: nlcest
 !
 ! Global variables
 !
@@ -97,8 +98,9 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    nlcest => gdp%d%nlcest
     !
-    !-----initialize local parameters
+    ! initialize local parameters
     !
     mdfrec = ' '
     rec132 = ' '
@@ -412,5 +414,12 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
   710 continue
     ntot = nto - ntof - ntoq
     !
- 9999 continue
+9999 continue
+    !
+    ! nlcest is estimated internally (7*(nmax+mmax)) but might be too small
+    ! The user can specify this value himself
+    ! nlcest=0: not specified by the user
+    !
+    nlcest = 0
+    call prop_get(gdp%mdfile_ptr,'*','nlcest',nlcest)
 end subroutine dimbnd

@@ -314,11 +314,12 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
     enddo
     !
     ! check array boundary of irocol table (noroco .gt. nlcest)
-    ! if noroco .gt. nlcest then fill of irocol is nonsens
+    ! if noroco .gt. nlcest then contents of irocol is rubbish
     !
     if (noroco > nlcest) then
        error = .true.
-       call prterr(lundia    ,'V027'    ,' '       )
+       call prterr(lundia, 'P004', 'Insufficient memory allocated for boundary data. Increase space by adding the following line to the mdf-file:')
+       write(lundia,'(a,i0)') "nlcest = ", noroco
        goto 9999
     endif
     !
