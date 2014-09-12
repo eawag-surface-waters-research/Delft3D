@@ -1066,22 +1066,8 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     !
     ! group 2, element 'GSQS'
     !
-    allocate(sbuff2d(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub))
-    do n = gdp%d%nlb, gdp%d%nub
-       do m = gdp%d%mlb, gdp%d%mub
-          sbuff2d(n, m) = real(gsqs(n, m),sp)
-       enddo
-    enddo
-    if (parll) then
-       call dfgather(sbuff2d,nf,nl,mf,ml,iarrc,gdp)
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'GSQS', uindex, 1, glbarr2)
-       endif
-    else
-          ierror = putelt(fds, grnam2, 'GSQS', uindex, 1, sbuff2d)    
-    endif
-    deallocate( sbuff2d )   
-    if (ierror/=0) goto 999
+    call wrtmap_nm(fds, grnam2, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                 & ierror, gsqs, 'GSQS')
     !
     ! Parallel partition
     !
