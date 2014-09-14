@@ -4445,11 +4445,13 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waterml2.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/wms.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.cpp -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.dll -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writelog.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/xparse.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xx_constants.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xx_logo.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xyz_or_mnk.m -text
