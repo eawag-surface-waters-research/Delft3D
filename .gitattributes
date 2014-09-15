@@ -4244,6 +4244,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/dxf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ecomsedfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.c -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.mexa64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.mexglx -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/filesequal.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/findseries.m -text
@@ -4385,6 +4386,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/realset.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/recolor.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints.c -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints.mexa64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r13_6p5.dll -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r13_6p5.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r13_6p5.mexglx -text
