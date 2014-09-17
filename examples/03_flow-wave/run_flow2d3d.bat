@@ -4,7 +4,7 @@
     rem Adapt and use it for your own purpose
     rem
     rem adri.mourits@deltares.nl
-    rem 16 Oct 2013
+    rem 17 sep 2014
     rem 
     rem
     rem This script starts a single-domain Delft3D-FLOW computation online with Delft3D-WAVE on Windows
@@ -25,6 +25,7 @@ set mdwfile=r17.mdw
     rem
 set ARCH=win32
 set D3D_HOME=..\..\bin
+  rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set flowexedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin

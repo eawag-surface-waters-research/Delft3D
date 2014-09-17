@@ -26,6 +26,10 @@ echo "Running testcase 03_flow-wave (sp) ..."
 cd 03_flow-wave
 ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 ./run_flow2d3d.sh >screen.log 2>&1
+
+
+echo "Running testcase 03_flow-wave parallel (sp) ..."
+./run_flow2d3d_parallel_wave.bat >screen_parallel.log 2>&1
 ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
 cd ..
 

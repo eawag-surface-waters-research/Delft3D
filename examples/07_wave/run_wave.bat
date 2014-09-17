@@ -4,7 +4,7 @@
     rem Adapt and use it for your own purpose
     rem
     rem adri.mourits@deltares.nl
-    rem 28 Jun 2013
+    rem 17 sep 2014
     rem 
     rem
     rem This script starts a Delft3D-WAVE calculation on Windows
@@ -24,6 +24,7 @@ set mdwfile=obw.mdw
     rem
 set ARCH=win32
 set D3D_HOME=..\..\bin
+  rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts

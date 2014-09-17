@@ -5,7 +5,7 @@
     rem
     rem edwin.spee@deltares.nl
     rem adri.mourits@deltares.nl
-    rem 11 Apr 2011
+    rem 17 sep 2014
     rem 
     rem
     rem This script starts on Windows a parallel single-domain Delft3D-FLOW 
@@ -29,6 +29,7 @@ set mdwfile=r17.mdw
     rem
 set ARCH=win32
 set D3D_HOME=..\..\bin
+  rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set flowexedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 rem set flowexedir=d:\src\trunk_os\src\engines_gpl\d_hydro\bin\Debug
 set waveexedir=%D3D_HOME%\%ARCH%\wave\bin

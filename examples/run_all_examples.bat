@@ -26,6 +26,10 @@ cd ..
 echo "Running testcase 03_flow-wave ..."
 cd 03_flow-wave
 call run_flow2d3d.bat >screen.log 2>&1
+
+
+echo "Running testcase 03_flow-wave parallel ..."
+call run_flow2d3d_parallel_wave.bat >screen_parallel.log 2>&1
 cd ..
 
 

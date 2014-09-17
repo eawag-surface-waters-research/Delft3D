@@ -4,7 +4,7 @@
     rem Adapt and use it for your own purpose
     rem
     rem adri.mourits@deltares.nl
-    rem 27 Dec 2010
+    rem 17 sep 2014
     rem 
     rem
     rem This script starts a single-domain Delft3D-FLOW computation on Windows
@@ -25,6 +25,7 @@ set argfile=config_d_hydro.xml
     rem
 set ARCH=win32
 set D3D_HOME=..\..\bin
+  rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 
     rem
@@ -35,7 +36,7 @@ set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 set PATH=%exedir%;%PATH%
 
     rem Run
-%exedir%\d_hydro.exe %argfile%
+"%exedir%\d_hydro.exe" %argfile%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line

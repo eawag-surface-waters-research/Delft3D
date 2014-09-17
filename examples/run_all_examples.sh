@@ -20,6 +20,10 @@ cd ..
 echo "Running testcase 03_flow-wave ..."
 cd 03_flow-wave
 ./run_flow2d3d.sh >screen.log 2>&1
+
+
+echo "Running testcase 03_flow-wave parallel ..."
+./run_flow2d3d_parallel_wave.sh >screen_parallel.log 2>&1
 cd ..
 
 

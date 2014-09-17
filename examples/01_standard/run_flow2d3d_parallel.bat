@@ -5,7 +5,7 @@
     rem
     rem edwin.spee@deltares.nl
     rem adri.mourits@deltares.nl
-    rem 23 Oct 2013
+    rem 17 sep 2014
     rem 
     rem
     rem This script starts a single-domain Delft3D-FLOW computation on Windows
@@ -38,6 +38,7 @@ set argfile=config_d_hydro.xml
     rem
 set ARCH=win32
 set D3D_HOME=..\..\bin
+  rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 
     rem
@@ -55,7 +56,7 @@ set MPIPATH=%exedir%
     rem Run
     rem start computation on all your local cores (2 for dual core; 4 for quad core etc.)
     rem note the flag "-localonly" which may be needed to avoid "Aborting: unable to connect to machinename.local"
-%MPIPATH%\mpiexec -n %NUMBER_OF_PROCESSORS% -localonly %exedir%\d_hydro.exe %argfile%
+"%MPIPATH%\mpiexec" -n %NUMBER_OF_PROCESSORS% -localonly "%exedir%\d_hydro.exe" %argfile%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
