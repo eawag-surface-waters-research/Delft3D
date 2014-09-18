@@ -18,7 +18,6 @@
       contains 
 
         function mf_open(fname) result (fptr)
-        use iso_c_binding
         implicit none 
         integer(kind=8)             ::      fptr 
         character(len=*),intent(in) ::      fname 

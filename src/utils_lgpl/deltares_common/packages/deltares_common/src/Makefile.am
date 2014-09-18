@@ -55,6 +55,7 @@ libDeltaresCommon_la_SOURCES = \
 	small.f90 \
 	timers.f \
 	util.f90 \
+	multi_file_io.f90 \
 	wavenr.f90
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
