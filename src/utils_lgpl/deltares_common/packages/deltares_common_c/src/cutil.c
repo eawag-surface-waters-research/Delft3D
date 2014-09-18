@@ -236,7 +236,144 @@ CUTIL_SYSTEM (
     }
 
 
-/*------------------------------------------------------------------------------
+
+
+///*------------------------------------------------------------------------------*/
+//// Some routines for reading from gfortran from a single file with multiple file handles simultaneously 
+//
+//#define _MAX_LENGTH_ 6666
+//
+//typedef struct FileHandle {
+//	FILE * fp;
+//	long prevFilePos;
+//} FileHandle;
+//
+//long long int STDCALL
+//CUTIL_OPEN (
+//    char* fname
+//    ) {
+//	FileHandle *fh = (FileHandle*) malloc(sizeof(FileHandle));
+//	fh->fp = fopen(fname,"r");
+//	fh->prevFilePos = 0;
+//    /*---- Open file, return filepointer */
+//    return ((long long int) fh);
+//    }
+//
+//int STDCALL
+//CUTIL_BACKSPACE (
+//    long long int* ifh
+//    ) {
+//	FileHandle* fh = (FileHandle*)ifh;
+//	fseek(fh->fp, fh->prevFilePos, SEEK_SET);
+//    return (0);
+//    }
+//
+//int STDCALL
+//CUTIL_EOF (
+//    long long int* ifh
+//    ) {
+//	FileHandle* fh = (FileHandle*)ifh;
+//    /*---- EOF reached ? */
+//	return (feof(fh->fp));
+//    }
+//
+//int STDCALL
+//CUTIL_REWIND (
+//    long long int* ifh
+//    ) {
+//	FileHandle* fh = (FileHandle*)ifh;
+//    /*---- rewind file */
+//	rewind(fh->fp);
+//    }
+//
+//int STDCALL
+//CUTIL_READ (
+//    long long int*  ifh,
+//    char* resultstr
+//    ) {
+//	FileHandle* fh = (FileHandle*)ifh;
+//	fh->prevFilePos = ftell(fh->fp);
+//    /*---- read a line from file */
+//    resultstr = fgets(resultstr,_MAX_LENGTH_,fh->fp);
+//    return(0);
+//    }
+//
+//int STDCALL
+//CUTIL_CLOSE (
+//    long long int* ifh
+//    ) {
+//	FileHandle* fh = (FileHandle*)ifh;
+//    /*---- close file */
+//	fclose (fh->fp);
+//	free(fh);					
+//    return(0);
+//    }
+//
+///*------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------*/
+// Some routines for reading from a single file with multiple file handles simultaneously 
+
+#define _MAX_LENGTH_ 6666
+
+long long int STDCALL
+CUTIL_MF_OPEN (
+    char* fname
+    ) {
+	FILE *fh; 
+	fh = fopen(fname,"r");
+    /*---- Open file, return filepointer */
+    return ((long long int) fh);
+    }
+
+int STDCALL
+CUTIL_MF_BACKSPACE (
+    long long int* ifh,
+	long int* prevpos
+    ) {
+	fseek((FILE*)*ifh, *prevpos, SEEK_SET);
+    return (0);
+    }
+
+int STDCALL
+CUTIL_MF_EOF (
+    long long int* ifh
+    ) {
+    /*---- EOF reached ? */
+	return (feof((FILE*)*ifh));
+    }
+
+int STDCALL
+CUTIL_MF_REWIND (
+    long long int* ifh
+    ) {
+    /*---- rewind file */
+	rewind((FILE*)*ifh);
+    }
+
+int STDCALL
+CUTIL_MF_READ (
+    long long int*  ifh,
+    char* resultstr,
+	int* currentpos
+    ) {
+	*currentpos = ftell((FILE*)*ifh);							/*---- save current pos in the file b4 reading */ 
+    resultstr = fgets(resultstr,_MAX_LENGTH_,(FILE*)*ifh);		/*---- read a line from file */
+    return(0);
+    }
+
+int STDCALL
+CUTIL_MF_CLOSE (
+    long long int* ifh
+    ) {
+    /*---- close file */
+	fclose ((FILE*)*ifh);
+    return(0);
+    }
+
+/*------------------------------------------------------------------------------*/
+
+
 /*  Routines to locate the "default" directory */
 
 
