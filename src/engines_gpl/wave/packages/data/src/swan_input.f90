@@ -3564,6 +3564,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
        endif
     endif
 !---output to locations--------------------------------------------
+    npoints = 0
     rccnt = rccnt + skcomc(iuni)
     rccnt = rccnt + 1
     read (iuni, *, err = 1002, end = 1009) pnts
@@ -5257,11 +5258,14 @@ subroutine adjustinput(sr)
     integer                     :: i
     integer                     :: in
     integer                     :: istat
+    logical                     :: exists
     type(tree_data)   , pointer :: domain_ptr
     type(tree_data)   , pointer :: input_tree
     type(swan_dom)    , pointer :: dom
     !
     filnam = TRIM(sr%filnam) // '.opt'
+    inquire (file = trim(filnam), exist = exists)
+    if (.not.exists) return
     !
     ! Create input tree
     !
