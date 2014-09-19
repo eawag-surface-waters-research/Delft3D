@@ -171,6 +171,7 @@ contains
       call dealloc(window     )
       call dealloc(wparm      )
       call dealloc(wpart      )
+      call dealloc(wpartini   )
       call dealloc(wsettl     )
       call dealloc(wveloa     )
       call dealloc(xa0        )

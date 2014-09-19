@@ -270,7 +270,8 @@
      &                    ypart    , zpart    , za       , locdep   , dpsp     ,    
      &                    tcktot   , substi   , hmin     , npmax    , rhow     ,    
      &                    amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    
-     &                    efdisp   , xpoldis  , ypoldis  , nrowsdis)
+     &                    efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,
+     &                    iptime)
       end select
 
 !     two-layer system with stratification

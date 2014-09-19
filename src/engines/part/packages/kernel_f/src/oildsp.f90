@@ -38,8 +38,8 @@ module oildsp_mod
                             ypart   , zpart   , za      , locdep  , dps     ,    &
                             tcktot  , substi  , hmin    , npmax   , rhow    ,    &
                             amassd  , ioptrad , ndisapp , idisset , tydisp  ,    &
-                            efdisp  , xpoldis , ypoldis , nrowsdis )
-
+                            efdisp  , xpoldis , ypoldis , nrowsdis, wpartini,    &
+                            iptime)
       use precision
       use typos
 
@@ -99,10 +99,12 @@ module oildsp_mod
       real     ( sp), pointer       :: xpoldis (:,:)
       real     ( sp), pointer       :: ypoldis (:,:)
       integer  ( ip), pointer       :: nrowsdis (:)
+      real     ( rp), pointer       :: wpartini   (:,:) 
+      integer(ip), dimension(:)     :: iptime
 
       fstick = 0.0
       radius = 0.0
-
+      wpartini = 0.0
       return
 
       end subroutine

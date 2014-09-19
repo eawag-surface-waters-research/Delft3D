@@ -216,6 +216,7 @@ module partmem
       real     ( rp), pointer  :: decays (:)
       integer  ( ip), pointer  :: ivtime (:)
       real     ( rp), pointer  :: wpart (:,:)
+      real     ( rp), pointer  :: wpartini (:,:)
       real     ( sp), pointer  :: sizep (:,:)   
       real     ( rp), pointer  :: rhopart (:,:) 
       real     ( rp), pointer  :: vsfour(:,:,:)

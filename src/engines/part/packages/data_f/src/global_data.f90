@@ -192,6 +192,8 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:     ) :: vrtdsp
       real          (sp       ) ,  pointer, dimension(:,:     ) :: vsfact
       real          (sp       ) ,  pointer, dimension(:,:     ) :: wpart
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: wpartini
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: sizep
       real          (sp       ) ,  pointer, dimension(:,:     ) :: xyztrk
       real          (sp       ) ,  pointer, dimension(:,:     ) :: efdisp
       real          (sp       ) ,  pointer, dimension(:,:     ) :: xpoldis
@@ -199,7 +201,7 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:     ) :: efboom
       real          (sp       ) ,  pointer, dimension(:,:     ) :: xpolboom
       real          (sp       ) ,  pointer, dimension(:,:     ) :: ypolboom
-
+      real          (rp       ) ,  pointer, dimension(:,:     ) :: rhopart
 
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: amassc
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: atrack
