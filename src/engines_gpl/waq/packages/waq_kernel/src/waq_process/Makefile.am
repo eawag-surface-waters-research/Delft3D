@@ -106,6 +106,10 @@ libwaq_process_la_SOURCES = \
        sedsod.f \
        set_effi.f \
        simph.f \
+       solvesaphe\mod_acbw_phsolvers.F90 \
+       solvesaphe\mod_chemconst.f90 \
+       solvesaphe\mod_precision.f90 \
+       phcarb.f \
        somsed.f \
        ssedph.f \
        staday.f \

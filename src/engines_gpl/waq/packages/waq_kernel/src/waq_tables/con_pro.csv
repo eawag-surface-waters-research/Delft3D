@@ -1,4 +1,5 @@
 "Config:   ","WAQ       ","ECO       ","Sobek     ","Delft3D   ","
+"pH_carb   ",A,A,A,A,
 "DynDepth  ",A,A,A,A,
 "DynSurf   ",A,A,A,A,
 "TotDepth  ",A,A,A,A,

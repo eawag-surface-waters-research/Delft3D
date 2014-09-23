@@ -1,4 +1,5 @@
 outfpr,outffl,outfnm,outfdo
+"pH_carb   ","dDumphcarb",   1,"x"
 "Emersion  ","dDumEmersi",   1,"x"
 "HeatBal   ","dTempHtfl ",   1,"x"
 "Temperatur","dModtemp  ",   1,"x"

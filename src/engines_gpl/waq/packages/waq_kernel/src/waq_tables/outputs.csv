@@ -1,4 +1,12 @@
 outppr,outpit,outpnm,outpdo,outpsx
+"pH_carb   ","pH        ",   1,"x",1
+"pH_carb   ","DisCO2    ",   2,"x",1
+"pH_carb   ","pCO2water ",   3,"x",1
+"pH_carb   ","DisHCO3   ",   4,"x",1
+"pH_carb   ","DisCO3    ",   5,"x",1
+"pH_carb   ","Satcal    ",   6,"x",1
+"pH_carb   ","Satarg    ",   7,"x",1
+"pH_carb   ","BOH4      ",   8,"x",1
 "DynDepth  ","Depth     ",   1,"x",1
 "DynSurf   ","Surf      ",   1,"x",1
 "TotDepth  ","TotalDepth",   1,"x",1

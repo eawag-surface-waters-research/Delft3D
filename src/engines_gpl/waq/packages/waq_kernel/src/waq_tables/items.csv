@@ -8890,3 +8890,8 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "Lim_MALG29","x"," ",   -999.000    ,"(-)                 ","Mortality limitation of group 29                  ","volume    ","volume    "," ","                              "
 "Lim_MALG30","x"," ",   -999.000    ,"(-)                 ","Mortality limitation of group 30                  ","volume    ","volume    "," ","                              "
 "M2_ALG    ","x"," ",   -999.000    ,"(gC/m2)             ","concentration of algae square metre               ","volume    ","volume    "," ","                              "
+"Satcal    ","x"," ",   -999.000    ,"(-)                 ","saturation state of calcite                       ","volume    ","volume    "," ","                              "
+"Satarg    ","x"," ",   -999.000    ,"(-)                 ","saturation state of aragonite                     ","volume    ","volume    "," ","                              "
+"BOH4      ","x"," ",   -999.000    ,"(gB/m3)             ","concentration of boric acid                       ","volume    ","volume    "," ","                              "
+"dDumphcarb","x"," ",   -999.000    ,"(-)                 ","dummy flux to access pH_simp                      ","volume    ","volume    "," ","                              "
+"pCO2water ","x"," ",   -999.000    ,"(µatm)              ","pressure equivalent of CO2 in the water           ","volume    ","volume    "," ","                              "

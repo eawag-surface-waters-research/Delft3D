@@ -1,4 +1,10 @@
 inpupr,inpuit,inpunm,inpude,inpudo,inpusx
+"pH_carb   ","Salinity  ",   1,"Y","x",1
+"pH_carb   ","TIC       ",   2,"N","x",1
+"pH_carb   ","Alka      ",   3,"N","x",1
+"pH_carb   ","Temp      ",   4,"Y","x",1
+"pH_carb   ","pH_min    ",   5,"Y","x",1
+"pH_carb   ","pH_max    ",   6,"Y","x",1
 "DynDepth  ","Volume    ",   1,"N","x",1
 "DynDepth  ","Surf      ",   2,"N","x",1
 "DynSurf   ","Volume    ",   1,"N","x",1

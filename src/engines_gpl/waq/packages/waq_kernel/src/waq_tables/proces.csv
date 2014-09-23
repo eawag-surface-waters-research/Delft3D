@@ -1,4 +1,5 @@
 procid,procco,procfo,procnm
+"pH_carb   ",123,"PHCARB    ","tion of pH and CO2 system                         "
 "DynDepth  ",123,"DDEPTH    ","dynamic calculation of the depth                  "
 "DynSurf   ",123,"DSURF     ","Dynamic calculation of the horizontal surface area"
 "TotDepth  ",123,"TOTDEP    ","depth water column                                "
