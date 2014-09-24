@@ -146,7 +146,7 @@ C     Temperatuur functie
 C     Salinity functie
 
       IF ( SAL .LT. MAXSAL ) THEN
-         SALFUN = (ENHFAC + 1.)/2.+ ((ENHFAC-1.)/2.)*COS(PI*SAL/MAXSAL)
+         SALFUN = (ENHFAC + 1.)/2.- ((ENHFAC-1.)/2.)*COS(PI*SAL/MAXSAL)
       ELSEIF (MAXSAL .GE. 0.0) THEN
          SALFUN = ENHFAC
       ELSE
