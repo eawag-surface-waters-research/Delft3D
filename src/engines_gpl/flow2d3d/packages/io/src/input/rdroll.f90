@@ -159,8 +159,8 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Wavfrc', wavfrc)
     !
     ! locate 'RolCor' record
+    ! rolcorr is already initialized in dimpro
     !
-    rolcorr = 2
     call prop_get(gdp%mdfile_ptr, '*', 'RolCor', rolcorr)
     !
     ! output values to file

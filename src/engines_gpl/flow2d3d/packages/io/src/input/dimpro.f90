@@ -64,6 +64,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     logical                             , pointer :: wlen_from_com !  Description and declaration in procs.igs
     integer                             , pointer :: numdomains
     integer                             , pointer :: itis
+    integer                             , pointer :: rolcorr
     character(256)                      , pointer :: sbkConfigFile
 !
 ! Global variables
@@ -139,6 +140,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     wlen_from_com     => gdp%gdprocs%wlen_from_com
     numdomains        => gdp%gdprognm%numdomains
     itis              => gdp%gdrdpara%itis
+    rolcorr           => gdp%gdbetaro%rolcorr
     sbkConfigFile     => gdp%gdsobek%sbkConfigFile
     !
     ! initialize local parameters
@@ -243,8 +245,10 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     !
     ! locate and read 'Roller' run Flow together with Roller Energy
     ! default = no ('N') which means Roller = .false.
+    ! rolcorr must be initialized to 2, especially when roller is not switched on
     !
-    roller = .false.
+    roller  = .false.
+    rolcorr = 2
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Roller', roller)
     !
     if (roller) then
