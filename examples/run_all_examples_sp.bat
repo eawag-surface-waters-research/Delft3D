@@ -12,10 +12,10 @@ call run_flow2d3d.bat >screen.log 2>&1
 
 echo "Running testcase 01_standard parallel (sp) ..."
    rem first fix the number of partitions to 2 (it's a very small model)
-%TCL_EXE% ../sed_in_file.tcl run_flow2d3d_parallel.bat "mpiexec -n %%NUMBER_OF_PROCESSORS%%" "mpiexec -n 2"
+%TCL_EXE% ../sed_in_file.tcl run_flow2d3d_parallel.bat "-n %%NUMBER_OF_PROCESSORS%%" "-n 2"
 call run_flow2d3d_parallel.bat >screen_parallel.log 2>&1
    rem Undo changes
-%TCL_EXE% ../sed_in_file.tcl run_flow2d3d_parallel.bat "mpiexec -n 2" "mpiexec -n %%NUMBER_OF_PROCESSORS%%"
+%TCL_EXE% ../sed_in_file.tcl run_flow2d3d_parallel.bat "-n 2" "-n %%NUMBER_OF_PROCESSORS%%"
 %TCL_EXE% ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
 cd ..
 

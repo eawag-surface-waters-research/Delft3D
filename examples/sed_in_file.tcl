@@ -11,7 +11,7 @@ set wholefile [read $infile]
 close $infile
 set newfile {}
 foreach line [split $wholefile "\n"] {
-   regsub -all "$searchstring" $line "$replacestring" line
+   regsub -all -- "$searchstring" $line "$replacestring" line
    lappend newfile $line
 }
 set outfile [open $filename "w"]

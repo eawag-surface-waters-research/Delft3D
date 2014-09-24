@@ -37,7 +37,7 @@ set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 set PATH=%exedir%;%PATH%
 
     rem Run
-start "%exedir%\d_hydro.exe" %argfilesed%
+start %exedir%\d_hydro.exe %argfilesed%
 "%exedir%\d_hydro.exe" %argfilemud%
 
 
