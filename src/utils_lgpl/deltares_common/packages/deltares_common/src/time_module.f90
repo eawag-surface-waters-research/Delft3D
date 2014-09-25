@@ -256,4 +256,58 @@ module time_module
          month  = m + 2 - 12*l
          year   = 100*(n-49) + j + l
       end subroutine JulianDateNumberToGregorianYearMonthDay
+
+      !> Parses an UDUnit-conventions datetime unit string.
+      !! TODO: replace this by calling C-API from UDUnits(-2).
+      function parse_ud_timeunit(timeunitstr, iunit, iyear, imonth, iday, ihour, imin, isec) result(ierr)
+         character(len=*), intent(in)  :: timeunitstr !< Time unit by UDUnits conventions, e.g. 'seconds since 2012-01-01 00:00:00.0 +0000'.
+         integer,          intent(out) :: iunit       !< Unit in seconds, i.e. 'hours since..' has iunit=3600.
+         integer,          intent(out) :: iyear       !< Year in reference datetime.
+         integer,          intent(out) :: imonth      !< Month in reference datetime.
+         integer,          intent(out) :: iday        !< Day in reference datetime.
+         integer,          intent(out) :: ihour       !< Hour in reference datetime.
+         integer,          intent(out) :: imin        !< Minute in reference datetime.
+         integer,          intent(out) :: isec        !< Seconds in reference datetime.
+         integer                       :: ierr        !< Error status, only 0 when successful.
+
+         integer :: i, n, ifound, iostat
+         character(len=7) :: unitstr
+
+         ierr = 0
+         unitstr = ' '
+
+         n = len_trim(timeunitstr)
+         ifound = 0
+         do i = 1,n
+            if (timeunitstr(i:i) == ' ') then ! First space found
+               if (timeunitstr(i+1:min(n, i+5)) == 'since') then
+                  unitstr = timeunitstr(1:i-1)
+                  ifound = 1
+               else
+                  ierr = 1
+               end if
+               exit ! Found or error, look no further.
+            end if
+         end do
+
+         if (ifound == 1) then
+            select case(trim(unitstr))
+            case('seconds')
+               iunit = 1
+            case('minutes')
+               iunit = 60
+            case('hours')
+               iunit = 3600
+            case('days')
+               iunit = 86400
+            case('weeks')
+               iunit = 604800
+            case default
+               iunit = -1
+            end select
+
+            read (timeunitstr(i+7:n), '(I4,1H,I2,1H,I2,1H,I2,1H,I2,1H,I2)', iostat = iostat) iyear, imonth, iday, ihour, imin, isec
+         end if
+      end function
+      
 end module time_module
