@@ -257,6 +257,8 @@ module time_module
          year   = 100*(n-49) + j + l
       end subroutine JulianDateNumberToGregorianYearMonthDay
 
+      ! =======================================================================
+      
       !> Parses an UDUnit-conventions datetime unit string.
       !! TODO: replace this by calling C-API from UDUnits(-2).
       function parse_ud_timeunit(timeunitstr, iunit, iyear, imonth, iday, ihour, imin, isec) result(ierr)
@@ -269,13 +271,16 @@ module time_module
          integer,          intent(out) :: imin        !< Minute in reference datetime.
          integer,          intent(out) :: isec        !< Seconds in reference datetime.
          integer                       :: ierr        !< Error status, only 0 when successful.
-
-         integer :: i, n, ifound, iostat
+         !
+         integer          :: i
+         integer          :: n
+         integer          :: ifound
+         integer          :: iostat
          character(len=7) :: unitstr
-
-         ierr = 0
+         !
+         ierr    = 0
          unitstr = ' '
-
+         !
          n = len_trim(timeunitstr)
          ifound = 0
          do i = 1,n
@@ -289,7 +294,7 @@ module time_module
                exit ! Found or error, look no further.
             end if
          end do
-
+         !
          if (ifound == 1) then
             select case(trim(unitstr))
             case('seconds')
@@ -305,9 +310,9 @@ module time_module
             case default
                iunit = -1
             end select
-
+            !
             read (timeunitstr(i+7:n), '(I4,1H,I2,1H,I2,1H,I2,1H,I2,1H,I2)', iostat = iostat) iyear, imonth, iday, ihour, imin, isec
          end if
-      end function
+      end function parse_ud_timeunit
       
 end module time_module
