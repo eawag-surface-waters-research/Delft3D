@@ -52,6 +52,8 @@ module string_module
    public :: find_first_word
    public :: find_first_letter
    public :: count_words
+   public :: remove_substr
+   public :: replace_char
 
    contains
 
@@ -504,4 +506,33 @@ module string_module
             is_whitespace = .true.
          end if
       end function is_whitespace
+
+    ! Replace character with code ichar1 by code ichar2
+    subroutine replace_char(r,ichar1,ichar2) 
+    implicit none
+    character(len=*), intent(inout)        ::      r
+    integer, intent(in)                    ::      ichar1, ichar2
+    integer :: i, ch
+    do i=1,len_trim(r)
+       ch = ichar(r(i:i))
+       if (ch==ichar1) then
+          r(i:i) = achar(ichar2)
+       endif
+    enddo
+    end subroutine replace_char      
+      
+    ! Remove substring substr from r
+    subroutine remove_substr(r,substr)
+    implicit none 
+    character(len=*),   intent(inout)   ::   r
+    character(len=*),   intent(in)      ::   substr
+
+    integer     ::  first
+    first = index(r,substr)
+    do while ((first>0) .and. (first<=len(trim(r))))
+       r = r(1:first-1)//r(first+1:len_trim(r))
+       first = index(r,substr)
+    enddo 
+    end subroutine remove_substr
+    
 end module string_module
