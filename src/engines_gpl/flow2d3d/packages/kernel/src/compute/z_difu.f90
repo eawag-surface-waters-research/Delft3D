@@ -651,6 +651,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              ! WATCH OUT: icx and icy are swapped
              !
              nfm  = (m+ddb)*icx + (nf+ddb)*icy - icxy
+             nfum = nfm + icy
              nlm  = (m+ddb)*icx + (nl+ddb)*icy - icxy
              nlum = nlm + icy
              if (kcv(nfm) == 1) then

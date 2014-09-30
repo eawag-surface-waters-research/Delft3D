@@ -951,6 +951,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     icx     = 0
     icy     = 0
     nmaxddb = nmax + 2*gdp%d%ddbound
+    stage   = 'both'
     !
     ! DD code added:
     !
@@ -2063,7 +2064,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
        !
-       stage = 'both'
        call timer_start(timer_f0isf1, gdp)
        call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
                  & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
