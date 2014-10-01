@@ -30,9 +30,9 @@ subroutine sline(dtn       ,md        ,ndim      ,te        ,xd        , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: - calculates streamline in this block
-!              - if drogue lives block then calculate time left
-!                and increment values for next block
+!    Function: - calculates streamline in this grid cell
+!              - if drogue leaves grid cell then calculate time left
+!                and increment values for next grid cell
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -156,7 +156,7 @@ subroutine sline(dtn       ,md        ,ndim      ,te        ,xd        , &
        enddo
     enddo
     !
-    !---calculate increment to next block
+    !---calculate increment to next grid cell
     !
     do i = 1, ndim
        inc(i) = 0
