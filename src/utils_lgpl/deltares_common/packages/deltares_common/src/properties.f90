@@ -168,7 +168,7 @@ subroutine prop_inifile(filename , tree, error, japreproc)
           return
        endif 
        
-       open(lu,file=filename,iostat=error)
+       open(lu,file=filename,iostat=error,status='old')
        if (error/=0) then
           return
        endif
