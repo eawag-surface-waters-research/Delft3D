@@ -4464,7 +4464,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/updateuicontrols.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/usrdeffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/uv2cen.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/valuemap.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waterml2.m -text
@@ -4516,6 +4515,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/ui_message.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/uislider.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/units.ini -text
 src/tools_lgpl/matlab/quickplot/progsrc/ustrcmpi.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vardiff.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vmean.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vrange.m -text
