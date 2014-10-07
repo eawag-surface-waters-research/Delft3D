@@ -339,7 +339,7 @@ C Solubility constant of aragonite
 C Solubility of CO2 in seawater. Weiss (1974). [mol/(kg*atm)].
       LNK0 = -60.2409 + 93.4517 / (TEMPK/100.0) + 23.3585 *
      +        log(TEMPK/100.0) + SAL * (0.023517 - 0.023656 * (TEMPK/100.0) +
-     +        0.000447036 * (TEMPK/100.0)**2)
+     +        0.00447036 * (TEMPK/100.0)**2)
       
       K0 = exp (LNK0)
 
