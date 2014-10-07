@@ -1036,7 +1036,6 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
 ! Local variables
 !
     integer                                     :: k
-    integer                                     :: kmin
     integer                                     :: kne
     integer                                     :: l
 
@@ -1123,7 +1122,6 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
        ! still more sediment to be deposited
        !
        if (keuler == nlyr) then
-          k = nlyr
           !
           ! no Eulerian underlayers, so put everything in
           ! the last (i.e. base) layer
@@ -1131,30 +1129,33 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
           select case (updbaselyr)
           case(1) ! compute separate composition for the base layer
              do l = 1, this%settings%nfrac           
-                msed(l, k, nm) = msed(l, k, nm) + dmi(l)
+                msed(l, nlyr, nm) = msed(l, nlyr, nm) + dmi(l)
              enddo
-             svfrac(k, nm) = svfrac(k, nm)*thlyr(k, nm) + svfracdep*dz
-             thlyr(k, nm)  = thlyr(k, nm) + dz
-             svfrac(k, nm) = svfrac(k, nm)/thlyr(k, nm)
-             dz            = 0.0_fp
+             svfrac(nlyr, nm) = svfrac(nlyr, nm)*thlyr(nlyr, nm) + svfracdep*dz
+             thlyr(nlyr, nm)  = thlyr(nlyr, nm) + dz
+             svfrac(nlyr, nm) = svfrac(nlyr, nm)/thlyr(nlyr, nm)
+             dz               = 0.0_fp
           case(2) ! composition of base layer constant
              !
              ! composition of dz is lost, update thickness
              !
-             fac = (thlyr(k, nm)+dz)/thlyr(k, nm)
+             fac = (thlyr(nlyr, nm)+dz)/thlyr(nlyr, nm)
              do l = 1, this%settings%nfrac
-                msed(l, k, nm) = msed(l, k, nm)*fac
+                msed(l, nlyr, nm) = msed(l, nlyr, nm)*fac
              enddo
-             thlyr(k, nm) = thlyr(k, nm) + dz
+             thlyr(nlyr, nm) = thlyr(nlyr, nm) + dz
           case(3) ! same as the (first non-empty) layer above it
              !
              ! composition of dz is lost, update thickness
              ! and set composition to that of layer nlyr-1
              !
-             thlyr(k, nm) = thlyr(k, nm) + dz
-             fac = thlyr(k, nm)/thlyr(k-1, nm)
+             do kne = nlyr-1,1,-1
+                if ( thlyr(kne, nm) > 0.0_fp ) exit
+             enddo
+             thlyr(nlyr, nm) = thlyr(nlyr, nm) + dz
+             fac = thlyr(nlyr, nm)/thlyr(kne, nm)
              do l = 1, this%settings%nfrac
-                msed(l, k, nm) = msed(l, kmin-1, nm)*fac
+                msed(l, nlyr, nm) = msed(l, kne, nm)*fac
              enddo
           case default
              !
@@ -1298,6 +1299,10 @@ subroutine lyrdiffusion(this, dt)
     do nm = this%settings%nmlb,this%settings%nmub
         nlyrloc = 0
         a       = 0.0_fp
+        !
+        zd = 0.0_fp         ! location of interface between the layers
+        nd = 1              ! index of used diffusion coefficient
+        ! 
         do k = 1, nlyr
             if (comparereal(thlyr(k,nm),0.0_fp) == 0) cycle
             nlyrloc = nlyrloc+1
@@ -1337,6 +1342,7 @@ subroutine lyrdiffusion(this, dt)
                 a( 0,1) = 0.0_fp
             endif
             !
+            zd                = zd+thlyr(k,nm)
             pth               = thlyr(k,nm) 
             thlyr(nlyrloc,nm) = thlyr(k,nm)
         enddo

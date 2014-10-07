@@ -373,7 +373,8 @@ type sedpar_type
     real(fp) :: mdcuni    !  mud content / mud fraction uniform value (non-zero only
                           !  if mud is not included simulation)
     real(fp) :: kssilt    !  ks value for silt for Soulsby 2004 formulation
-    real(fp) :: kssand    !  ks value for sand 
+    real(fp) :: kssand    !  ks value for sand
+    real(fp) :: version   !  interpreter version
     !
     ! reals
     !
@@ -910,10 +911,11 @@ subroutine nullsedpar(sedpar)
 !
 !! executable statements -------------------------------------------------------
 !
-    sedpar%mdcuni   = 0.0
+    sedpar%mdcuni   = 0.0_fp
     sedpar%nmudfrac = 0
     sedpar%flsdia   = ' '
     sedpar%flsmdc   = ' '
+    sedpar%version  = 2.0_fp
     !
     nullify(sedpar%sedblock)
     nullify(sedpar%rhosol)

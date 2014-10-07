@@ -819,8 +819,6 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
     integer                               :: ilyr
     integer                               :: istat
     integer                               :: nm
-    integer                               :: nmlb
-    integer                               :: nmub
     logical                               :: ex
     real(fp)                              :: rmissval
     real(fp)                              :: temp
@@ -911,7 +909,7 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
                 ! Spatially varying diffusion coefficient
                 !
                 call depfil(lundia    ,error     ,filename  ,fmttmp    , &
-                          & kdiff(ilyr,nmlb)     ,1         ,1         ,griddim   )
+                          & kdiff(ilyr,griddim%nmlb),1         ,1         ,griddim   )
                 if (error) then
                    message = 'Unable to read diffusion coefficients from ' // trim(filename)
                    call write_error(message, unit=lundia)

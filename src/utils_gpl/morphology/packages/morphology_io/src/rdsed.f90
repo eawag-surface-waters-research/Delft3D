@@ -348,7 +348,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     versionstring = ' '
     call prop_get_string(sed_ptr, 'SedimentFileInformation', 'FileVersion', versionstring)
-    if (trim(versionstring) == '02.00' .or. trim(versionstring) == '03.00') then
+    if (versionstring == '02.00' .or. versionstring == '03.00') then
+       if (versionstring == '03.00') sedpar%version = 3.0_fp
        error  = .false.
        !
        csoil  = 1.0e4_fp
@@ -961,7 +962,6 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     logical        , external :: stringsequalinsens
     character(40)             :: txtput1
     character(10)             :: txtput2
-    character(10)             :: versionstring
     character(256)            :: errmsg
 !
 !! executable statements -------------------------------------------------------
@@ -1010,7 +1010,6 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     ! echo input in diagnose-file
     !
     write (lundia, '(a)')   '*** Start  of sediment input'
-    !write (lundia, '(2a)') '    Sediment File Version: ', trim(versionstring)
     txtput1 = 'Ref concentration'
     write (lundia, '(2a,e12.4)') txtput1, ':', csoil
     if (csoil <= 0.0_fp) then
@@ -1143,7 +1142,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
              !
              ! One sediment diameter between 0 and 100%
              !
-             if (versionstring == '03.00') then
+             if (comparereal(sedpar%version,3.0_fp) >= 0) then
                 !
                 ! New behaviour: lognormal distribution
                 !

@@ -1005,7 +1005,10 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                       ddk(nm, kmin)     = z0s * ddk(nm, kmin - 1) / (dzs1(nm, kmin)+z0s)
                    endif
                 else
-                   ddk(nm, kmaxx - 1) = 0.
+                   aak(nm, kmin - 1) = 0.0
+                   bbk(nm, kmin - 1) = 1.0
+                   cck(nm, kmin - 1) = 0.0
+                   ddk(nm, kmin - 1) = 0.0
                 endif
              endif
           enddo
