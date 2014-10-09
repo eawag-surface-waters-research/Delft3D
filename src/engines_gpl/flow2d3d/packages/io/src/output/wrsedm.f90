@@ -361,7 +361,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
              & lundia    ,gdp       )
        endif
        if (scour) then
-          call addelm(nefiswrtmap,'TAUADD',' ','[  N/M2 ]','REAL',4          , &
+          call addelm(nefiswrsedm,'TAUADD',' ','[  N/M2 ]','REAL',4          , &
              & 'Extra shear stress due to scour feature                     ', &
              & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
              & lundia    ,gdp       )
