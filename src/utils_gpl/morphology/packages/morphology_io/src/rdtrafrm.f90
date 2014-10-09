@@ -958,7 +958,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        parkeyw(6) = 'ParFluff1'
        pardef(6)  = 0.0_fp
        parkeyw(7) = 'DepEff'
-       pardef(7)  = 0.0_fp
+       pardef(7)  = -1.0_fp
     elseif (iform == -2) then
        name       = 'Van Rijn (2007): TRANSPOR2004'
        nparopt    = 7

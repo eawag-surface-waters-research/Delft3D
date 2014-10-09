@@ -183,12 +183,14 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
             sour_fluff = min(mflufftot*parfl1,parfl0)*taum
           endif
           !
-          if (depeff > 0.0_fp) then
-             sink = depeff
-          elseif (tcrdep > 0.0_fp) then
-             sink = max(0.0_fp , 1.0_fp-taub/tcrdep)
+          if (comparereal(depeff,-1.0_fp)==0) then
+             if (tcrdep > 0.0_fp) then
+                sink = max(0.0_fp , 1.0_fp-taub/tcrdep)
+             else
+                sink = 0.0_fp
+             endif
           else
-             sink = 0.0_fp
+             sink = max(0.0_fp,min(depeff,1.0_fp))
           endif
        elseif (iform == 15) then
           !
