@@ -333,6 +333,14 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    ! At an internal point the composition of all layers is important.
                    ! Check the values carefully before continuing.
                    !
+                   if (thtemp(nm) < 0.0_fp) then
+                      write (message,'(a,i2,3a,i0)')  &
+                          & 'Negative sediment thickness specified for layer ', &
+                          & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   endif
                    totfrac = 0.0_fp
                    do l = 1, lsedtot
                       if (rtemp(nm, l) < 0.0_fp) then
