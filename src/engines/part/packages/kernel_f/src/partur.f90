@@ -34,12 +34,12 @@ implicit none
 contains
       subroutine partur ( itime  , noudef , iutime  , mpart   , npart  , &
                           kpart  , xpart  , ypart   , zpart   , wpart  , &
-                          iptime , nopart , lgrid   , modtyp  , nmax   , &
-                          mmax   , amasud , ipnt    , sname   , nosubs , &
-                          nolay  , nocont , ndprt   , npmax   , const  , &
-                          nodye  , lun    , mapsub  , buffer  , volume , &
-                          aconud , uscal  , isub    , finam   , iftime , &
-                          ifopt  , nosyss  , isfil   , nosubud , snamud   )
+                          iptime , nopart , lgrid   , nmax    , mmax   , &
+                          amasud , ipnt   , sname   , nosubs  , nolay  , &
+                          nocont , ndprt  , nodye   , lun     , buffer , &
+                          volume , aconud , uscal   , isub    , finam  , &
+                          iftime , ifopt  , nosyss  , isfil   , nosubud, &
+                          snamud   )
 
       integer(ip),dimension(:)    :: iftime, ifopt , nosyss, ipnt
       integer(ip),dimension(:)    :: iptime , kpart

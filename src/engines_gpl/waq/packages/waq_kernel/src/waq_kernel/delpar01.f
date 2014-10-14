@@ -32,7 +32,6 @@
       use parths_mod                 ! explicit interface
 !      use rdhydr_mod                 ! explicit interface
       use partwq_mod                 ! explicit interface
-      use partwr_mod                 ! explicit interface
       use oildsp_mod                 ! explicit interface
       use part09_mod                 ! explicit interface
       use part10_mod                 ! explicit interface
@@ -251,13 +250,7 @@
      &                    t0cf     , acf      , nwaste   , mwaste   , kpart    ,
      &                    mapsub   , layt     , mnmaxk   )
 
-         case ( 3 )     ! = red tide model
-            call partwr ( lgrid    , nmaxp    , concp    , volumep  , area     ,
-     &                    npart    , mpart    , wpart    , zpart    , npwndw   ,
-     &                    nopart   , idelt    , const    , noconsp  , rbuffr   ,
-     &                    lunut    , noslay   , mmaxp    , itime    , kpart    ,
-     &                    mapsub   , isfile   , mnmaxk   , mnmax2   , finnh4   ,
-     &                    finno3   )
+         case ( 3 )     ! = obsolete
 
          case ( 4 )     ! = oil model
             call oildsp ( lgrid    , nmaxp    , concp    , volumep  , area     ,    
@@ -325,22 +318,17 @@
 
       if ( noudef .gt. 0 )  then
 
-!       particle generation red tide model
-!       v3.30: general possibility for several substances
-!              input from a delwaq xxx.map or xxx.res file
-
 !       add release in a way defined by the user
-!       also check splitting of particles for red tide model
 !       array isub contains references to substances
 
-         call partur ( itime    , noudef   , iutime   , mpart    , npart    ,
-     &                 kpart    , xpart    , ypart    , zpart    , wpart    ,
-     &                 iptime   , nopart   , lgrid    , modtyp   , nmaxp    ,
-     &                 mmaxp    , tmasud   , ipntp    , substi   , nosubs   ,
-     &                 nolayp   , nocont   , ndprt    , npmax    , const    ,
-     &                 nodye    , lunut    , mapsub   , rbuffr   , volumep  ,
-     &                 aconud   , uscal    , isub     , finud    , iftime   ,
-     &                 ifopt    , nosyss   , isfud    , nosubud  , subsud   )
+         call partur (  itime    , noudef   , iutime   , mpart    , npart    , 
+     &                  kpart    , xpart    , ypart    , zpart    , wpart    ,
+     &                  iptime   , nopart   , lgrid    , nmaxp    , mmaxp    ,
+     &                  tmasud   , ipntp    , substi   , nosubs   , nolayp   ,
+     &                  nocont   , ndprt    , nodye    , lunut    , rbuffr   ,
+     &                  volumep  , aconud   , uscal    , isub     , finud    ,
+     &                  iftime   , ifopt    , nosyss   , isfud    , nosubud  ,
+     &                  subsud   )
 
       endif
 
