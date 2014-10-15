@@ -349,6 +349,7 @@ CUTIL_MF_REWIND (
     ) {
     /*---- rewind file */
 	rewind((FILE*)*ifh);
+	return(0);
     }
 
 int STDCALL
