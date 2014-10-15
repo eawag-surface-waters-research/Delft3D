@@ -181,6 +181,8 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           if (iflufflyr>0) then
             taum       = max(0.0_fp, taub - tcrflf)
             sour_fluff = min(mflufftot*parfl1,parfl0)*taum
+          else
+            sour_fluff = 0.0_fp
           endif
           !
           if (comparereal(depeff,-1.0_fp)==0) then
