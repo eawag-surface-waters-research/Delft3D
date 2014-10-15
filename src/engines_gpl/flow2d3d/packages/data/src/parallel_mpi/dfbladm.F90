@@ -120,6 +120,8 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
     integer                              :: nsiz           ! size of present subdomain in y-direction
     integer, dimension(:,:), allocatable :: partition_dims
     logical                              :: ex
+    character(12)                        :: date
+    character(12)                        :: time
     character(300)                       :: message        ! string to pass message
     character(256)                       :: ddbfile
 !
@@ -176,70 +178,63 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
        !
        ! Write the related ddb file. Needed as input by DDCOUPLE to prepare a WAQ calculation
        !
-       ddbfile = trim(runid) // ".ddb"
-       inquire (file = trim(ddbfile), exist = ex)
-       if (ex) then
-          write(message,'(3a)') "File """,trim(ddbfile),""" already exists and will not be generated."
+       call DATE_AND_TIME(date, time)
+       ddbfile = trim(runid) // "_" // trim(date) // "_" // trim(time) // ".ddb"
+       fillun = newlun(gdp)
+       open(fillun, file=trim(ddbfile), action="WRITE", iostat = istat)
+       if (istat /= 0) then
+          write(message,'(3a)') "Unable to open file """,trim(ddbfile),""". Skipping generation."
+          call prterr(lundia, 'U190', trim(message))
        else
-          write(message,'(3a)') "File """,trim(ddbfile),""" will be generated."
-       endif
-       call prterr(lundia, 'G051', trim(message))
-       if (.not.ex) then
-          fillun = newlun(gdp)
-          open(fillun, file=trim(ddbfile), iostat = istat)
-          if (istat /= 0) then
-             write(message,'(3a)') "Unable to open file """,trim(ddbfile),""". Skipping generation."
-             call prterr(lundia, 'U190', trim(message))
-          else
-             do i=1,nproc-1
+          do i=1,nproc-1
+             !
+             ! Generate the line related to the couple boundary between partition i and i+1
+             !
+             write(message,'(2a,i3.3,a)') trim(runid), '-',i,'.grd'
+             if (idir == 1) then
                 !
-                ! Generate the line related to the couple boundary between partition i and i+1
+                ! The index of the boundary to be coupled is the last non-halo index:
+                ! nlg               for partition 1
+                ! nlg-(nfg-1)+halo  for the other partitions:
+                !                   the lines 1 to “nfg-1” are not active in this partition, the model will be shifted
+                !                   take into account that a halo will be added in front
                 !
-                write(message,'(2a,i3.3,a)') trim(runid), '-',i,'.grd'
-                if (idir == 1) then
-                   !
-                   ! The index of the boundary to be coupled is the last non-halo index:
-                   ! nlg               for partition 1
-                   ! nlg-(nfg-1)+halo  for the other partitions:
-                   !                   the lines 1 to “nfg-1” are not active in this partition, the model will be shifted
-                   !                   take into account that a halo will be added in front
-                   !
-                   if (i == 1) then
-                      ibnd = partition_dims(inlg,i)
-                   else
-                      ibnd = partition_dims(inlg,i) - partition_dims(infg,i) + 1 + ihalon
-                   endif
-                   write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', ibnd, &
-                                              &                '   ', mmax-1, '   ', ibnd
+                if (i == 1) then
+                   ibnd = partition_dims(inlg,i)
                 else
-                   !
-                   ! Idem, with nmaxus/nlg/nfg replaced by mmax/mlg/mfg
-                   !
-                   if (i == 1) then
-                      ibnd = partition_dims(imlg,i)
-                   else
-                      ibnd = partition_dims(imlg,i) - partition_dims(imfg,i) + 1 + ihalom
-                   endif
-                   write(message,'(a,4(a,i0))') trim(message), '   ', ibnd, '   ', 1, &
-                                              &                '   ', ibnd, '   ', nmax-1
+                   ibnd = partition_dims(inlg,i) - partition_dims(infg,i) + 1 + ihalon
                 endif
-                write(message,'(4a,i3.3,a)') trim(message), '   ', trim(runid), '-',i+1,'.grd'
+                write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', ibnd, &
+                                           &                '   ', mmax-1, '   ', ibnd
+             else
                 !
-                ! Couple boundary index in the other partition:
-                ! The first non-halo index is 3
+                ! Idem, with nmaxus/nlg/nfg replaced by mmax/mlg/mfg
                 !
-                if (idir == 1) then
-                   write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', 3, &
-                                              &                '   ', mmax-1, '   ', 3
+                if (i == 1) then
+                   ibnd = partition_dims(imlg,i)
                 else
-                   write(message,'(a,4(a,i0))') trim(message), '   ', 3, '   ', 1, &
-                                              &                '   ', 3, '   ', nmax-1
+                   ibnd = partition_dims(imlg,i) - partition_dims(imfg,i) + 1 + ihalom
                 endif
-                write(fillun,'(a)') message
-             enddo
-          endif
-          close(fillun)
+                write(message,'(a,4(a,i0))') trim(message), '   ', ibnd, '   ', 1, &
+                                           &                '   ', ibnd, '   ', nmax-1
+             endif
+             write(message,'(4a,i3.3,a)') trim(message), '   ', trim(runid), '-',i+1,'.grd'
+             !
+             ! Couple boundary index in the other partition:
+             ! The first non-halo index is 3
+             !
+             if (idir == 1) then
+                write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', 3, &
+                                           &                '   ', mmax-1, '   ', 3
+             else
+                write(message,'(a,4(a,i0))') trim(message), '   ', 3, '   ', 1, &
+                                           &                '   ', 3, '   ', nmax-1
+             endif
+             write(fillun,'(a)') message
+          enddo
        endif
+       close(fillun)
+       call removeDuplicateDDBFiles(runid, ddbfile, gdp)
     endif
     deallocate(partition_dims, stat=istat)
     !

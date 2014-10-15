@@ -79,6 +79,7 @@ libDataParallelMPI_la_SOURCES = \
 	 dfwrsedh.F90 \
 	 adjlin.F90 \
 	 rdencl.F90 \
+	 removeDuplicateDDBFiles.f90 \
 	 strgrd.F90
 
 #-------------------------------------------------------------------------------
