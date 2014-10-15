@@ -329,7 +329,7 @@ CUTIL_MF_OPEN (
 int STDCALL
 CUTIL_MF_BACKSPACE (
     long long int* ifh,
-	long int* prevpos
+	long long int* prevpos
     ) {
 	fseek((FILE*)*ifh, *prevpos, SEEK_SET);
     return (0);
@@ -355,7 +355,7 @@ int STDCALL
 CUTIL_MF_READ (
     long long int*  ifh,
     char* resultstr,
-	int* currentpos
+	long long int* currentpos
     ) {
 	*currentpos = ftell((FILE*)*ifh);							/*---- save current pos in the file b4 reading */ 
     resultstr = fgets(resultstr,_MAX_LENGTH_,(FILE*)*ifh);		/*---- read a line from file */

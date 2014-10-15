@@ -43,7 +43,7 @@
         subroutine mf_backspace(fptr, currentpos)
         implicit none 
         integer(kind=8),intent(in)  ::      fptr    
-        integer(kind=4),intent(in)  ::      currentpos    
+        integer(kind=8),intent(in)  ::      currentpos    
         integer  ::  res
         integer :: CUTIL_MF_BACKSPACE
         res = CUTIL_MF_BACKSPACE(fptr,currentpos)
@@ -53,7 +53,7 @@
         implicit none 
         integer(kind=8),            intent(in)       ::  fptr    
         character(len=*),           intent(out)      ::  strout
-        integer(kind=4), optional,  intent(out)      ::  savepos
+        integer(kind=8), optional,  intent(out)      ::  savepos
         integer :: res 
         integer :: CUTIL_MF_READ
         integer :: strlen, lfindex, crindex 
