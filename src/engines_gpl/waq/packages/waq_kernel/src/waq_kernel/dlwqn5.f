@@ -164,6 +164,18 @@ C
           IFFLAG  = 0
           IAFLAG  = 0
           ibflag  = 0
+
+!     Dummy variables - used in DLWQD
+          ITIMEL  = ITIME
+          lleng   = 0
+          ioptzb  = 0 
+          nopred  = 6
+          NOWARN  = 0
+          tol     = 0.0D0
+          forester = .FALSE.
+          updatr = .FALSE.
+          NOQT  = NOQ + NOQ4
+
           if ( btest(intopt,3) ) ibflag = 1
           LDUMMY = .FALSE.
           IF ( NDSPN .EQ. 0 ) THEN

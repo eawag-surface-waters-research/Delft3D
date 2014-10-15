@@ -157,6 +157,22 @@
           IFFLAG  = 0
           IAFLAG  = 0
           IBFLAG  = 0
+
+!     Dummy variables - used in DLWQD
+          ITIMEL  = ITIME
+          lleng   = 0
+          ioptzb  = 0 
+          nopred  = 6
+          NOWARN  = 0
+          tol     = 0.0D0
+          forester = .FALSE.
+          updatr = .FALSE.
+
+          nosss  = noseg + nseg2
+          noqtt  = noq   + noq4
+          NOQT   = NOQ + NOQ4
+          inwtyp = intyp + nobnd
+
           IF ( MOD(INTOPT,16) .GE. 8 ) IBFLAG = 1
           LDUMMY = .FALSE.
           IF ( NDSPN .EQ. 0 ) THEN
@@ -199,10 +215,6 @@ C
           INCLUDE 'dlwqdata_restore.inc'
           call apply_operations( dlwqd )
       ENDIF
-
-      nosss  = noseg + nseg2
-      noqtt  = noq   + noq4
-      inwtyp = intyp + nobnd
 
       if ( timon ) call timstrt ( "dlwqn1", ithandl )
 
