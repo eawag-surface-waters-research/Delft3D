@@ -44,13 +44,11 @@ contains
       integer(ip),dimension(:)    :: iftime, ifopt , nosyss, ipnt
       integer(ip),dimension(:)    :: iptime , kpart
       integer(ip),dimension(:)    :: iutime
-      integer(ip),dimension(:)    :: mapsub
       integer(ip),dimension(:)    :: ndprt
       integer(ip),dimension(:)    :: npart , mpart
       integer(ip),dimension(:,:)  :: lgrid
 
       real   (sp),dimension(:)    :: buffer, volume, uscal
-      real   (sp),dimension(:)    :: const
       real   (sp),dimension(:)    :: xpart , ypart , zpart
       real   (sp),dimension(:,:)  :: aconud
       real   (sp),dimension(:,:)  :: amasud
