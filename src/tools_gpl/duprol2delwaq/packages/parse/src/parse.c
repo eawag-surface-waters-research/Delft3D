@@ -1,3 +1,26 @@
+//  Copyright (C)  Stichting Deltares, 2012-2014.
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License version 3,
+//  as published by the Free Software Foundation.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program. If not, see <http://www.gnu.org/licenses/>.
+//
+//  contact: delft3d.support@deltares.nl
+//  Stichting Deltares
+//  P.O. Box 177
+//  2600 MH Delft, The Netherlands
+//
+//  All indications and logos of, and references to registered trademarks
+//  of Stichting Deltares remain the property of Stichting Deltares. All
+//  rights reserved.
+
 #include <tchar.h>                   // commentaar voor de FORTRAN programmeerder
 #include <string.h>
 #include <malloc.h>
@@ -90,7 +113,7 @@ void main (int argc, char *argv[], char *envp[] )   // hoofdprogramma met run ti
     
 	if ( strrchr(modfile,'\\') != NULL )
     {   i = strrchr(modfile,'.') - strrchr(modfile,'\\') - 1 ;
-		if ( i > 6){ i = 6;}
+		if ( i > 10){ i = 10;}
         modname = (char *) malloc ( i + 1 ) ;
         strncpy( modname, strrchr(modfile,'\\') + 1, i ) ;
         modname[i] = '\0' ;
@@ -105,7 +128,7 @@ void main (int argc, char *argv[], char *envp[] )   // hoofdprogramma met run ti
     }
     else
     {   i = strrchr(modfile,'.') - modfile ;
-		if ( i > 6){i = 6;}
+		if ( i > 10){i = 10;}
         modname = (char *) malloc ( i + 1 ) ;
         strncpy( modname, modfile, i ) ;
         modname[i] = '\0' ;
@@ -128,7 +151,8 @@ void main (int argc, char *argv[], char *envp[] )   // hoofdprogramma met run ti
         for ( i = strlen(line) ; i > 0 ; i-- )
         {   if ( line[i] != ' ' ) { line[i+1] = '\0' ; break ;  }  }         // Haal trailing spaces weg
         for ( i = 0 ; i < (int) strlen(line) ; i++ )
-        {   if ( line[i] != ' ' ) break ;  }                                 // Haal leading spaties weg
+		{   if ( line[i] != ' ' ) break ;  }                                 // Haal leading spaties weg
+		if ( strlen(&line[i]) > 2 && line[i] == '}') i=i+2 ;                 // Skip twee tekens } als op een langere regel staat (else-regel)
         if ( strlen(&line[i]) != 0 ) parse ( &line[i] ) ;       // Haal hele spatie regels weg en parse een regel
         n = fgets( line, 512, infile ) ;                                     // Leest een regel Duprol
     }
@@ -935,11 +959,11 @@ int findID ( char *line, int bracket, int len, int mode  )
 }
 
 char* detect ( char *line )
-{   char *test[15] = { " != "  , " && "    , "!"       , " || "    , "^"     ,
-                       " ln("  , " ln "    , " log("   , " log "   , " rnd(" ,
+{   char *test[16] = { " != "  , " && "    , "!"       , " || "    , "^"     ,
+                       " ln("  , "-ln("    , " ln "    , " log("   , " log "   , " rnd(" ,
                        " rnd " , "(ln("    , "*ln("    , " &&("    , " ||("  } ;
-    char *solu[15] = { " /= "  , " .and. " , ".not."   , " .or. "  , "**"    ,
-                       " log(" , " log "   , " log10(" , " log10 " , " ran(" ,
+    char *solu[16] = { " /= "  , " .and. " , ".not."   , " .or. "  , "**"    ,
+                       " log(" , "-log("   , " log "   , " log10(" , " log10 " , " ran(" ,
                        " ran " , "(log("   , "*log("   , " .and.(" , " .or.("} ;
     int   number = 15 ;
     int   i, j, k     ;                                             // replace Duprol arithmetic with
@@ -963,6 +987,7 @@ char* detect ( char *line )
 	}
     for ( i = strlen(detected) ; i > 0 ; i-- ) if ( detected[i] != ' ' ) break ;
     detected[i] = '\0' ; work[i] = '\0' ;
+    if ( strchr( detected, '{' ) != NULL ) { *strchr( detected, '{' ) = ' ' ; *strchr( work, '{' ) = ' ' ; }
     if ( strchr( detected, '}' ) != NULL ) { *strchr( detected, '}' ) = ' ' ; *strchr( work, '}' ) = ' ' ; }
     strlwr( detected ) ;
     found = strstr( detected, "fl" ) ;            // if an "fl" is found that is between non-characters/numbers,
