@@ -105,7 +105,7 @@ subroutine write_wave_map_wind (sg, sof, n_swan_grids, wavedata, casl)
     !        elements is handled by PUTGET
     !
     celidt=wavedata%output%count
-    idummy(1) = wavedata%time%timtscale
+    idummy(1) = wavedata%time%calctimtscale
     call putgti(filnam   , grpnam, nelmx , elmnms, elmdms    , &
               & elmqty   , elmunt, elmdes, elmtps, nbytsg    , &
               & elmnms(1), celidt, wrswch, error , idummy(1) )

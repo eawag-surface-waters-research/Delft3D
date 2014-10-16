@@ -272,7 +272,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     !
     nelems = 29
     celidt=wavedata%output%count
-    idummy(1) = wavedata%time%timtscale
+    idummy(1) = wavedata%time%calctimtscale
     call putgti(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1) , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1)    , &
               & elmnms(1) ,celidt    ,wrswch    ,error     ,idummy(1)    )

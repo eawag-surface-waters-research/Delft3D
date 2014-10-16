@@ -95,13 +95,14 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       !
    endif
    do itide = 1, swan_run%nttide
+      call setcalculationcount(wavedata%time, wavedata%time%calccount + 1)
       if (wavedata%output%write_wavm) then
          call setoutputcount(wavedata%output, wavedata%output%count + 1)
       endif
       !
       ! Set time in case of standalone run
       !
-      if (wavedata%mode == stand_alone) call settimmin(wavedata%time, swan_run%timwav(itide))
+      if (wavedata%mode == stand_alone) call settimmin(wavedata%time, swan_run%timwav(itide), swan_run%modsim, swan_run%deltcom)
       !
       ! Update wave and wind conditions
       !
@@ -280,7 +281,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
          write(*,'(a)') '  Write SWAN input'
          dom%curlif = swan_grids(i_swan)%tmp_name
 
-         call write_swan_input (swan_run, itide, wavedata%output%count, i_swan, wavedata)
+         call write_swan_input (swan_run, itide, wavedata%output%count, wavedata%time%calccount, i_swan, wavedata)
 
          ! The following commented code was used for a special version
          ! - to be implemented in a more constructive way
@@ -328,7 +329,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             !
             ! Write output to WAVE map file
             !
-            write(*,'(a,i10,a,f10.3)') '  Write WAVE map file, nest ',i_swan,' time ',wavedata%time%timmin
+            write(*,'(a,i10,a,f15.3)') '  Write WAVE map file, nest ',i_swan,' time ',wavedata%time%timmin
             call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
                                & wavedata, swan_run%casl)
          endif
