@@ -91,6 +91,7 @@ void main (int argc, char *argv[], char *envp[] )   // hoofdprogramma met run ti
     char  line[513] ;                               // dit is de invoer regel, 512 + '\0' is
     char *n         ;                               //           hard gecodeerd !
     int   i         ;
+    int   j         ;
     int   maxlen = 0 ;
 
     switch ( argc )
@@ -117,6 +118,7 @@ void main (int argc, char *argv[], char *envp[] )   // hoofdprogramma met run ti
         modname = (char *) malloc ( i + 1 ) ;
         strncpy( modname, strrchr(modfile,'\\') + 1, i ) ;
         modname[i] = '\0' ;
+        j = 0; while ( j < i ) {modname[j]=tolower(modname[j]);j++;}
 		forfile = (char *) malloc ( strrchr(modfile,'\\') - modfile + 1 + strlen(modname) + 5);
 		strncpy( forfile, modfile, strrchr(modfile,'\\') - modfile + 1);
 		strncpy( strrchr(forfile,'\\') + 1, modname, i); 
@@ -132,6 +134,7 @@ void main (int argc, char *argv[], char *envp[] )   // hoofdprogramma met run ti
         modname = (char *) malloc ( i + 1 ) ;
         strncpy( modname, modfile, i ) ;
         modname[i] = '\0' ;
+        j = 0; while ( j < i ) {modname[j]=tolower(modname[j]);j++;}
 		forfile = (char *) malloc ( strlen(modname) + 5);
 		strncpy( forfile, modname, i);
 		strcpy(forfile + i, ".f90");
@@ -679,16 +682,16 @@ void wascii ( )
     fprintf ( asciifile, "         2\n" ) ;
 
     fprintf ( asciifile, "HydDuflow                     HydDuflow\n" ) ;
-    fprintf ( asciifile, "HYDDFL    ; naam module\n" ) ;
+    fprintf ( asciifile, "hyddfl    ; naam module\n" ) ;
     fprintf ( asciifile, "123       ; waarde van TRswitch\n" ) ;
     fprintf ( asciifile, "         7; aantal invoer grootheden op segment niveau\n" ) ;
     fprintf ( asciifile, "Volume         -999.000     x volume of computational cell                           m3\n" ) ;
     fprintf ( asciifile, "Surf           -999.000     x horizontal surface area of a DELWAQ segment            m2\n" ) ;
     fprintf ( asciifile, "DELT           -999.000     x timestep for processes                                 d\n" ) ;
-    fprintf ( asciifile, "Width          -999.000     x total width                                            m\n" ) ;
-    fprintf ( asciifile, "VWind          -999.000     x wind speed                                             m/s\n" ) ;
-    fprintf ( asciifile, "WindDir        -999.000     x actual wind direction                                  degrees\n" ) ;
-    fprintf ( asciifile, "Velocity       -999.000     x horizontal flow velocity                               m/s\n" ) ;
+    fprintf ( asciifile, "Width             0.000     x total width                                            m\n" ) ;
+    fprintf ( asciifile, "VWind             0.000     x wind speed                                             m/s\n" ) ;
+    fprintf ( asciifile, "WindDir           0.000     x actual wind direction                                  degrees\n" ) ;
+    fprintf ( asciifile, "Velocity          0.000     x horizontal flow velocity                               m/s\n" ) ;
     fprintf ( asciifile, "         0; aantal invoer items op exchange niveau\n" ) ;
 	fprintf ( asciifile, "         8; aantal uitvoer grootheden op segment niveau\n" ) ;
     fprintf ( asciifile, "Z                           x water depth                                            m\n" ) ;
