@@ -3657,6 +3657,8 @@ src/tools_gpl/duprol2delwaq/documentation/Duflow-manual-excerpt-on-Duprol-weirs-
 src/tools_gpl/duprol2delwaq/example/Eutrof1a.mod -text
 src/tools_gpl/duprol2delwaq/example/example.bat -text
 src/tools_gpl/duprol2delwaq/example/updateNEF.ini -text
+src/tools_gpl/duprol2delwaq/packages/hydduflow/errsys.f90 -text
+src/tools_gpl/duprol2delwaq/packages/hydduflow/hydduflow.f90 -text
 src/tools_gpl/duprol2delwaq/packages/parse/Parse.vcxproj -text
 src/tools_gpl/duprol2delwaq/packages/parse/src/parse.c -text
 src/tools_gpl/kubint/Makefile.am -text
