@@ -3658,8 +3658,8 @@ src/tools_gpl/duprol2delwaq/bin/waqpb_export.exe -text
 src/tools_gpl/duprol2delwaq/bin/waqpb_import.exe -text
 src/tools_gpl/duprol2delwaq/documentation/Duflow-manual-excerpt-on-Duprol-weirs-section-not-supported.pdf -text
 src/tools_gpl/duprol2delwaq/example/Eutrof1a.mod -text
-src/tools_gpl/duprol2delwaq/example/build_dll_with_MinGW.bat -text
-src/tools_gpl/duprol2delwaq/example/example.bat -text
+src/tools_gpl/duprol2delwaq/example/step1_parse_mod_file_example.bat -text
+src/tools_gpl/duprol2delwaq/example/step2_build_dll_with_MinGW_example.bat -text
 src/tools_gpl/duprol2delwaq/example/updateNEF.ini -text
 src/tools_gpl/duprol2delwaq/packages/hydduflow/errsys.f90 -text
 src/tools_gpl/duprol2delwaq/packages/hydduflow/hydduflow.f90 -text
