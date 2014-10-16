@@ -3653,8 +3653,12 @@ src/tools_gpl/datsel/packages/datsel_version_number/src/c2c.c -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/f2c.c -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/version.c -text
 src/tools_gpl/duprol2delwaq/Parse.sln -text
+src/tools_gpl/duprol2delwaq/bin/Parse.exe -text
+src/tools_gpl/duprol2delwaq/bin/waqpb_export.exe -text
+src/tools_gpl/duprol2delwaq/bin/waqpb_import.exe -text
 src/tools_gpl/duprol2delwaq/documentation/Duflow-manual-excerpt-on-Duprol-weirs-section-not-supported.pdf -text
 src/tools_gpl/duprol2delwaq/example/Eutrof1a.mod -text
+src/tools_gpl/duprol2delwaq/example/build_dll_with_MinGW.bat -text
 src/tools_gpl/duprol2delwaq/example/example.bat -text
 src/tools_gpl/duprol2delwaq/example/updateNEF.ini -text
 src/tools_gpl/duprol2delwaq/packages/hydduflow/errsys.f90 -text
