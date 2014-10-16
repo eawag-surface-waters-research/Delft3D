@@ -89,6 +89,7 @@ subroutine prop_file(filetype, filename , tree, error)
     character(10) :: ftype
 
     ftype = filetype
+    error = 0
     call lowercase(ftype,999)
     select case (trim(ftype))
     case ('ini')
