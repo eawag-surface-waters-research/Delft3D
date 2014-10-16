@@ -56,6 +56,7 @@ char * Gl_pager;
  */
 int main( void )
 {
+    char * GL_pager;
     int  pos        ;
     char format[30] ;
 
@@ -75,11 +76,17 @@ int main( void )
     (BVoid) GEN_init( );
 
     /* try to find the pager program */
-    Gl_pager = getenv ( "PAGER" );
-    if ( Gl_pager == NULL ) {
+    GL_pager = getenv ( "PAGER" );
+    if ( GL_pager == NULL ) {
       fprintf ( stderr, "Environment Variable PAGER not set\n" );
       exit ( 1 );
     }
+
+    Gl_pager = (char *) malloc( strlen(GL_pager)+3);
+    Gl_pager[0] = '\0';
+    strcat(Gl_pager, "\"");
+    strcat(Gl_pager, GL_pager);
+    strcat(Gl_pager, "\"");
 
     /* parse de file */
     pos = strchr(ident,';')-&ident[4] ;
