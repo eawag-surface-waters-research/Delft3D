@@ -3652,6 +3652,13 @@ src/tools_gpl/datsel/packages/datsel_version_number/src/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/c2c.c -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/f2c.c -text
 src/tools_gpl/datsel/packages/datsel_version_number/src/version.c -text
+src/tools_gpl/duprol2delwaq/Parse.sln -text
+src/tools_gpl/duprol2delwaq/documentation/Duflow-manual-excerpt-on-Duprol-weirs-section-not-supported.pdf -text
+src/tools_gpl/duprol2delwaq/example/Eutrof1a.mod -text
+src/tools_gpl/duprol2delwaq/example/example.bat -text
+src/tools_gpl/duprol2delwaq/example/updateNEF.ini -text
+src/tools_gpl/duprol2delwaq/packages/parse/Parse.vcxproj -text
+src/tools_gpl/duprol2delwaq/packages/parse/src/parse.c -text
 src/tools_gpl/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/Makefile.am -text
