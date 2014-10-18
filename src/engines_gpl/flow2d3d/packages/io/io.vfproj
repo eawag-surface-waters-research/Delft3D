@@ -211,6 +211,7 @@
 		<File RelativePath="src\output\wrfous.f90"/>
 		<File RelativePath="src\output\wrfouv.f90"/>
 		<File RelativePath="src\output\wrgrid.f90"/>
+		<File RelativePath=".\src\output\wrhfluff.f90"/>
 		<File RelativePath="src\output\wribot.f90"/>
 		<File RelativePath="src\output\wridoc.f90"/>
 		<File RelativePath="src\output\wridro.f90"/>

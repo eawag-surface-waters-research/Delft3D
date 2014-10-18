@@ -108,11 +108,13 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                                 :: i            ! Help var. 
     integer                                 :: ierror       ! Local errorflag for NEFIS files 
     integer                                 :: k
-    integer                                 :: kmaxout      ! number of layers to be written to the (history) output files
+    integer                                 :: kmaxout        ! number of layers to be written to the (history) output files, 0 (possibly) included
+    integer                                 :: kmaxout_restr  ! number of layers to be written to the (history) output files, 0 excluded
     integer                                 :: l
     integer                                 :: n
     integer, dimension(1)                   :: idummy       ! Help array to read/write Nefis files 
     integer, dimension(3,5)                 :: uindex
+    integer, dimension(:), allocatable      :: shlay_restr    ! work array
     integer                      , external :: getelt
     integer                      , external :: putelt
     integer                      , external :: inqmxi
@@ -157,8 +159,16 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     first       => nefiselem%first
     moroutput   => gdp%gdmorpar%moroutput
     !
-    !
     kmaxout = size(shlay)
+    if (shlay(1) == 0) then
+       kmaxout_restr = kmaxout - 1
+       allocate(shlay_restr(kmaxout_restr))
+       shlay_restr   = shlay(2:)
+    else
+       kmaxout_restr = kmaxout
+       allocate(shlay_restr(kmaxout_restr))
+       shlay_restr   = shlay
+    endif
     filnam = trifil(1:3) // 'h' // trifil(5:)
     errmsg = ' '
     !
@@ -215,21 +225,14 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        !
        if (nostatgl > 0) then
          if (lsed > 0) then
-           if (kmaxout == kmax) then
-             call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
-               & 'Settling velocity in station                                  ', &
-               &  3         ,nostatgl  ,kmax + 1  ,lsed      ,0         ,0       , &
-               &  lundia    ,gdp       )
-           else
-             call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
-               & 'Settling velocity in station                                  ', &
-               &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
-               &  lundia    ,gdp       )
-           endif
+          call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
+            & 'Settling velocity in station                                  ', &
+            &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
+            &  lundia    ,gdp       )
            if (kmax == 1) then
              call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
                & 'Equilibrium concentration of sediment at station (2D only)    ', &
-               &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
+               &  3         ,nostatgl  ,kmaxout_restr,lsed      ,0         ,0       , &
                &  lundia    ,gdp       )
            endif
          endif
@@ -296,6 +299,11 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
              &  lundia    ,gdp       )
          endif
        endif
+       !
+       ! Add fluff fields
+       !
+       call wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed      , &
+                   & 1         ,0         ,grnam5    ,gdp       )
        !
        call defnewgrp(nefiswrsedh ,filnam    ,grnam5   ,gdp)
        !
@@ -692,6 +700,12 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        endif
     endif
     !
+    ! Add fluff fields
+    !
+    call wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed      , &
+                & 2         ,fds       ,grnam5    ,gdp       )
+    if (error) goto 9999
+    !
     if (inode == master) ierror = clsnef(fds)
     !
     ! write errormessage if error occurred and set error = .true.
@@ -703,4 +717,5 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
+    deallocate(shlay_restr)
 end subroutine dfwrsedh

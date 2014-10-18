@@ -272,6 +272,11 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
          endif
        endif
        !
+       ! Add fluff fields
+       !
+       call wrhfluff(lundia    ,error     ,nostat    ,nostat    ,nostat    ,lsed      , &
+                   & 1         ,0         ,grnam5    ,gdp       )
+       !
        call defnewgrp(nefiswrsedh ,filnam    ,grnam5   ,gdp)
        !
        ! Get start celidt for writing
@@ -598,6 +603,12 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        endif
        deallocate (norig, stat=istat)
     endif
+    !
+    ! Add fluff fields
+    !
+    call wrhfluff(lundia    ,error     ,nostat    ,nostat    ,nostat    ,lsed      , &
+                & 2         ,fds       ,grnam5    ,gdp       )
+    if (error) goto 9999
     !
     ierror = clsnef(fds)
     !

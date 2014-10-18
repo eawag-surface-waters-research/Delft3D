@@ -759,6 +759,7 @@ src/engines_gpl/flow2d3d/packages/io/src/output/wrfou.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrfous.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrfouv.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrgrid.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/output/wrhfluff.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wribot.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wridoc.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wridro.f90 -text

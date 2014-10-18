@@ -85,6 +85,7 @@ libIOOutput_la_SOURCES = \
          wrfous.f90 \
          wrfouv.f90 \
          wrgrid.f90 \
+         wrhfluff.f90 \
          wribot.f90 \
          wridoc.f90 \
          wridro.f90 \
