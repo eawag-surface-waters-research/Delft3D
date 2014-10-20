@@ -51,5 +51,17 @@ cd 07_wave
 cd ..
 
 
+echo "Running testcase 08_part-tracer ..."
+cd 08_part-tracer
+./run_part.sh >screen.log 2>&1
+cd ..
+
+
+echo "Running testcase 09_part-oil ..."
+cd 09_part-oil
+./run_part.sh >screen.log 2>&1
+cd ..
+
+
 echo ...finished
 

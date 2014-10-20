@@ -60,7 +60,7 @@ cd ..\input
 cd ..\..
 
 
-echo "Skipping testcases 06_delwaq and 07_wave (no sp variant)"
+echo "Skipping testcases 06_delwaq, 07_wave, 08_part-tracer and 09_part-oil (no sp variant)"
 
 echo ...finished
 pause

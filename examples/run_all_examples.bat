@@ -57,5 +57,17 @@ call run_wave.bat >screen.log 2>&1
 cd ..
 
 
+echo "Running testcase 08_part-tracer ..."
+cd 08_part-tracer
+call run_part.bat >screen.log 2>&1
+cd ..
+
+
+echo "Running testcase 09_part-oil ..."
+cd 09_part-oil
+call run_part.bat >screen.log 2>&1
+cd ..
+
+
 echo ...finished
 pause
