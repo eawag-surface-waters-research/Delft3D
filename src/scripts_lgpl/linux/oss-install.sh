@@ -234,7 +234,6 @@ function part () {
     echo "Gathering libraries for delpar..."
     cp -u `$gatherScript $prefix/bin/delpar | eval grep -v $gatherExcludeFilter` $dest_bin
     cp -u `$gatherScript $prefix/bin/delpar | eval grep $gatherIncludeFilter` $dest_bin
-    cp -u `$gatherScript $prefix/bin/delpar | eval grep` $dest_bin
 
     return
 }
