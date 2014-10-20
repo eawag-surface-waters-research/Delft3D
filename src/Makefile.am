@@ -4,7 +4,6 @@ SUBDIRS = \
     third_party_open \
     utils_lgpl \
     utils_gpl \
-    engines \
     engines_gpl \
     tools_gpl \
     plugins_lgpl \

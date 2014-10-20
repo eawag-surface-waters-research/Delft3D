@@ -41,6 +41,7 @@ function install_all () {
     flow2d3d
     # flow2d3d_openda is currently not added to the Linux installation
     #flow2d3d_openda
+	part
     waq
     wave
     plugin_culvert
@@ -211,6 +212,28 @@ function waq () {
 
     # chrpath -r \$ORIGIN $dest_bin/delwaq1
     # chrpath -r \$ORIGIN $dest_bin/delwaq2
+
+    return
+}
+
+
+
+# ======================
+# === INSTALL DELPAR ===
+# ======================
+function part () {
+    echo "installing delpar . . ."
+
+    dest_bin="$dest_main/lnx/part/bin"
+
+    mkdir -p $dest_bin
+
+    copyFile "$prefix/bin/delpar"                    $dest_bin
+    copyFile "$prefix/bin/delpar"                    $dest_bin
+
+    echo "Gathering libraries for delpar..."
+    cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep -v $gatherExcludeFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep $gatherIncludeFilter` $dest_bin
 
     return
 }
