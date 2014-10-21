@@ -321,7 +321,7 @@ CUTIL_MF_OPEN (
     char* fname
     ) {
 	FILE *fh; 
-	fh = fopen(fname,"r");
+	fh = fopen(fname,"rb");
     /*---- Open file, return filepointer */
     return ((long long int) fh);
     }
