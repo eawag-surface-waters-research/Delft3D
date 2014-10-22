@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-     subroutine par2waq ( nopart  , nosys   , notot   , nosubs  , noseg   ,
+      subroutine par2waq ( nopart  , nosys   , notot   , nosubs  , noseg   ,
      &                     nolay   , volume  , surface , nmax    , mmax    ,
      &                     lgrida  , syname  , itime   , iddtim  , npwndw  ,
      &                     iptime  , npart   , mpart   , kpart   , wpart   ,
