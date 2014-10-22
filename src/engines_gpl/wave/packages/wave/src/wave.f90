@@ -272,6 +272,8 @@ program waves_main
             ! Run n_swan nested SWAN run
             !
             call swan_tot(n_swan_grids, n_flow_grids, wavedata)
+         else
+            write(*,'(a)') "  Received stop command from FLOW. Check FLOW diagnosis file."
          endif
          write(*,'(a)')'*  End of Delft3D-WAVE'
          write(*,'(a)')'*****************************************************************'
