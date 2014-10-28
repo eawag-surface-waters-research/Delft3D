@@ -57,21 +57,22 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
 !
 ! Global variables
 !
-    integer                                                         :: fds
-    integer                                                         :: irequest
-    integer                                                         :: lsed
-    integer                                                         :: lundia
-    integer                                                         :: nostat
-    integer                                                         :: nostatgl    ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
-    integer                                                         :: nostatto    ! total number of stations (including "duplicate" stations located in halo regions)
-    logical                                                         :: error
-    character(16)                                                   :: grpnam
+    integer         , intent(in)  :: fds         ! Nefis file pointer to write to
+    integer         , intent(in)  :: irequest    ! 1: define elements, 2: write data
+    integer         , intent(in)  :: lsed        ! Number of sediment constituents
+    integer         , intent(in)  :: lundia      ! File pointer to diagnosis file
+    integer         , intent(in)  :: nostat      ! local  number of stations
+    integer         , intent(in)  :: nostatgl    ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer         , intent(in)  :: nostatto    ! total  number of stations (including "duplicate" stations located in halo regions)
+    logical         , intent(out) :: error
+    character(16)   , intent(in)  :: grpnam
 !
 ! Local variables
 !
     integer                               :: ierror    ! Local errorflag for NEFIS files
     integer                               :: i
     integer                               :: ii
+    integer                               :: istat
     integer                               :: l
     integer                               :: n
     integer                               :: nm
@@ -85,6 +86,7 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
 !
 !! executable statements -------------------------------------------------------
 !
+    error = .false.
     if (gdp%gdmorpar%flufflyr%iflufflyr==0) return
     if (lsed == 0) return
     !
@@ -115,7 +117,7 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
        ! element 'MFLUFF'
        !
        mfluff => gdp%gdmorpar%flufflyr%mfluff
-       allocate (rfbuff(1:nostat,1:lsed))
+       allocate (rfbuff(1:nostat,1:lsed), stat=istat)
        rfbuff = 0.0_fp
        do l = 1, lsed
           do ii = 1, nostat
@@ -130,13 +132,16 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
           enddo
        enddo
        !
-       if (inode == master) allocate(rsbuff(1:nostatgl, 1:lsed))
+       if (inode == master) allocate(rsbuff(1:nostatgl, 1:lsed), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'wrhfluff: memory allocation error')
+       endif
        if (parll) then
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsed, order_sta, rfbuff, rsbuff, gdp)
        else
           rsbuff = real(rfbuff,sp)
        endif
-       deallocate(rfbuff)
+       deallocate(rfbuff, stat=istat)
        !
        if (inode == master) then
           call sbuff_checksize(nostatgl*lsed)
@@ -147,7 +152,7 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
                 sbuff(i) = rsbuff(ii,l)
              enddo
           enddo
-          deallocate(rsbuff)
+          deallocate(rsbuff, stat=istat)
           ierror = putelt(fds, grpnam, 'MFLUFF', uindex, 1, sbuff)
           if (ierror/= 0) goto 9999
        endif !inode==master
@@ -156,7 +161,7 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
        ! the files will be closed in clsnef (called in triend)
        !
  9999  continue
-       if (ierror/= 0) then
+       if (ierror /= 0) then
           ierror = neferr(0, errmsg)
           call prterr(lundia, 'P004', errmsg)
           error = .true.
