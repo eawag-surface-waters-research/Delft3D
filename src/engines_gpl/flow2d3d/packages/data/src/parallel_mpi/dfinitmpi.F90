@@ -105,6 +105,13 @@ subroutine dfinitmpi
        usempi = (len > 0)
     endif
     !
+    ! if not, verify whether MVAPICH 1.9 environment is used
+    !
+    if (.not. usempi) then
+       call get_environment_variable('MV2_COMM_WORLD_RANK', rankstr, len)
+       usempi = (len > 0)
+    endif  
+    !
     ! if not, verify whether POE (IBM) environment is used
     !
     if (.not. usempi) then
