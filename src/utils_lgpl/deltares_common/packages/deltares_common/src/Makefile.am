@@ -36,6 +36,7 @@ libDeltaresCommon_la_SOURCES = \
 	system_utils.F90 \
 	mathconsts.f90 \
 	tree_struct.f90 \
+	array_module.f90 \
 	buffer.f90 \
 	bilin5.f90 \
 	combinepaths.f90 \

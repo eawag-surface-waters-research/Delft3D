@@ -65,6 +65,7 @@
 				<Tool Name="VFFortranCompilerTool" FixedFormLineLength="fixedLength132"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" FixedFormLineLength="fixedLength132"/></FileConfiguration></File></Filter>
+		<File RelativePath=".\src\array_module.f90"/>
 		<File RelativePath="src\bilin5.f90"/>
 		<File RelativePath="src\buffer.f90"/>
 		<File RelativePath="src\combinepaths.f90"/>
@@ -80,7 +81,6 @@
 		<File RelativePath=".\src\deltares_common_version.F90.svn"/>
 		<File RelativePath="src\distance.f90"/>
 		<File RelativePath=".\src\geometry_module.f90"/>
-		<File RelativePath=".\src\multi_file_io.f90"/>
 		<File RelativePath=".\src\grid_dimens_module.f90"/>
 		<File RelativePath="src\handles.f90"/>
 		<File RelativePath=".\src\iso_c_utils.F90"/>
@@ -89,6 +89,7 @@
 		<File RelativePath=".\src\mathconsts.f90"/>
 		<File RelativePath=".\src\message_module.f90"/>
 		<File RelativePath="src\MessageHandling.f90"/>
+		<File RelativePath=".\src\multi_file_io.f90"/>
 		<File RelativePath="src\nan_check_module.f90"/>
 		<File RelativePath="src\newunit.f90"/>
 		<File RelativePath=".\src\precision.F90"/>

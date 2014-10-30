@@ -5242,6 +5242,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/include/tri-dyn.igd -tex
 src/utils_lgpl/deltares_common/packages/deltares_common/include/version_number.ini -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/MessageHandling.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/array_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/bilin5.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/buffer.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/combinepaths.f90 -text
