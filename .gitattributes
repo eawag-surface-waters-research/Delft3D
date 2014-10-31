@@ -1,4 +1,10 @@
 * text=auto !eol
+/Help.lnk -text
+/Settings.lnk -text
+/TortoiseIDiff.lnk -text
+/TortoiseMerge.lnk -text
+/TortoiseSVN.lnk -text
+/Website.lnk -text
 examples/01_standard/config_d_hydro.xml -text
 examples/01_standard/f34.bca -text
 examples/01_standard/f34.bch -text
