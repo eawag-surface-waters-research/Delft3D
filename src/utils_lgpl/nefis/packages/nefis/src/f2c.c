@@ -59,6 +59,7 @@
 #if defined(WIN32) || defined (WIN64)
 #  include <io.h>
 #  include <wtypes.h>
+#  define strdup _strdup
 #elif defined (salford32)
 #  include <io.h>
 #  include <windows.h>
@@ -80,6 +81,7 @@
 #   define CLOSE_FLUSH_DAT_FILE    FC_FUNC(clsdat,CLSDAT)
 #   define CLOSE_FLUSH_DEF_FILE    FC_FUNC(clsdef,CLSDEF)
 #   define CLOSE_NEFIS             FC_FUNC(clsnef,CLSNEF)
+#   define CLOSE_ALL_NEFIS         FC_FUNC(clsanf,CLSANF)
 #   define CREATE_NEFIS            FC_FUNC(crenef,CRENEF)
 #   define DEFINE_CEL              FC_FUNC(defcel,DEFCEL)
 #   define DEFINE_DATA             FC_FUNC(credat,CREDAT)
@@ -92,6 +94,7 @@
 #   define GET_ELEMENT             FC_FUNC(getelt,GETELT)
 #   define GET_ELEMENT_STRING      FC_FUNC(getels,GETELS)
 #   define GET_INT_ATTRIBUTE       FC_FUNC(getiat,GETIAT)
+#   define GET_NEFIS_VERSION       FC_FUNC(getnfv,GETNFV)
 #   define GET_REAL_ATTRIBUTE      FC_FUNC(getrat,GETRAT)
 #   define GET_STRING_ATTRIBUTE    FC_FUNC(getsat,GETSAT)
 #   define INQUIRE_CEL             FC_FUNC(inqcel,INQCEL)
@@ -121,6 +124,7 @@
 #   define PUT_INT_ATTRIBUTE       FC_FUNC(putiat,PUTIAT)
 #   define PUT_REAL_ATTRIBUTE      FC_FUNC(putrat,PUTRAT)
 #   define PUT_STRING_ATTRIBUTE    FC_FUNC(putsat,PUTSAT)
+#   define RESET_FILE_VERSION      FC_FUNC(resnfv,RESNFV)
 #else
 /* WIN32 or WIN64 */
 #if defined(STDCALL)
@@ -133,6 +137,7 @@
 #   define CLOSE_FLUSH_DAT_FILE    CLSDAT
 #   define CLOSE_FLUSH_DEF_FILE    CLSDEF
 #   define CLOSE_NEFIS             CLSNEF
+#   define CLOSE_ALL_NEFIS         CLSANF
 #   define CREATE_NEFIS            CRENEF
 #   define DEFINE_CEL              DEFCEL
 #   define DEFINE_DATA             CREDAT
@@ -145,6 +150,7 @@
 #   define GET_ELEMENT             GETELT
 #   define GET_ELEMENT_STRING      GETELS
 #   define GET_INT_ATTRIBUTE       GETIAT
+#   define GET_NEFIS_VERSION       GETNFV
 #   define GET_REAL_ATTRIBUTE      GETRAT
 #   define GET_STRING_ATTRIBUTE    GETSAT
 #   define INQUIRE_CEL             INQCEL
@@ -174,6 +180,7 @@
 #   define PUT_INT_ATTRIBUTE       PUTIAT
 #   define PUT_REAL_ATTRIBUTE      PUTRAT
 #   define PUT_STRING_ATTRIBUTE    PUTSAT
+#   define RESET_FILE_VERSION      RESNFV
 #endif
 
 
@@ -270,6 +277,23 @@ DLLEXPORT BInt4 FTN_CALL CLOSE_FLUSH_DAT_FILE ( BInt4  * set )
   nefis_errno = 0;
 
   nefis_errno = close_nefis_files( set );
+
+  return nefis_errno;
+}
+/*==========================================================================*/
+/*
+ * Close definition and data file, and fluh hash buffer
+ * Input : * fd                 Nefis file set descriptor
+ * Output: * fd                 Nefis file set descriptor set to -1
+ * Return:    0                 No error occured
+ *            !=0               Error occured
+ */
+
+DLLEXPORT BInt4 FTN_CALL CLOSE_ALL_NEFIS ( void )
+{
+  nefis_errno = 0;
+
+  nefis_errno = OC_close_all_nefis_files();
 
   return nefis_errno;
 }
@@ -375,20 +399,22 @@ DLLEXPORT BInt4 FTN_CALL DEFINE_CEL  ( BInt4 * fd             ,
 {
   BChar   cel_name [ MAX_NAME + 1           ];
   BInt4   cel_num_dim                        ;
-  BChar   elm_names[(MAX_NAME + 1) * MAX_CEL_DIM];
   BInt4   i;
   BInt4   j;
   BInt4   max_copy;
+  BText   elm_names;
+
+  elm_names = (BText) malloc(*cl_num_dim * (MAX_NAME+1));
 
   nefis_errno = 0;
 
   F_Copy_text (cel_name    , cl_name    , cl_name_length    , MAX_NAME);
 
-  for ( i=0; i<((MAX_NAME+1)*MAX_CEL_DIM); i++ )
+  for ( i=0; i<((MAX_NAME+1)* *cl_num_dim); i++ )
   {
     elm_names[i]=' ';
   }
-  for ( i=0; i<min(*cl_num_dim, MAX_CEL_DIM); i++ )
+  for ( i=0; i<*cl_num_dim; i++ )
   {
     max_copy = f2c_strlen(el_names, el_names_length);
     max_copy = min ( max_copy        , MAX_NAME              );
@@ -727,7 +753,7 @@ DLLEXPORT BInt4 FTN_CALL GET_DAT_HEADER( BInt4 * set          ,
     return nefis_errno;
   }
 
-  n_read = GP_read_file ( nefis[*set].dat_fds, header, NIL, LHDRDT);
+  n_read = GP_read_file ( nefis[*set].dat_fds, header, 0, LHDRDT);
   if ( n_read == -1 )
   {
     nefis_errno   = 2005;
@@ -764,7 +790,7 @@ DLLEXPORT BInt4 FTN_CALL GET_DEF_HEADER( BInt4 * set          ,
     return nefis_errno;
   }
 
-  n_read = GP_read_file ( nefis[*set].def_fds, header, NIL, LHDRDF);
+  n_read = GP_read_file ( nefis[*set].def_fds, header, 0, LHDRDF);
   if ( n_read == -1 )
   {
     nefis_errno   = 2008;
@@ -1052,17 +1078,13 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_CEL         ( BInt4 * fd              ,
   BChar   cel_name  [ MAX_NAME+1 ];
   BUInt8  cel_num_bytes=0;
   BUInt4  cel_num_dim  = MAX_DIM;
-  BChar   elm_names [(MAX_NAME+1) * MAX_CEL_DIM];
+  BText   elm_names;
   BUInt4  i       ;
 
   nefis_errno = 0;
+  elm_names = NULL;
 
   F_Copy_text (cel_name    , cl_name    , cl_name_length    , MAX_NAME);
-
-  for ( i=0; i<((MAX_NAME+1)*MAX_CEL_DIM); i++ )
-  {
-    elm_names[i]=' ';
-  }
 
 /* TODO: how to check, the supplied memory is enough */
 
@@ -1077,7 +1099,7 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_CEL         ( BInt4 * fd              ,
   }
 
   nefis_errno = GP_inquire_cel(*fd       , cel_name     ,&cel_num_dim,
-                                elm_names,&cel_num_bytes);
+                               &elm_names,&cel_num_bytes);
   if ( nefis_errno == 0 )
   {
     if ( cel_num_dim > (BUInt4) *cl_num_dim )
@@ -1633,12 +1655,13 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_CELL   ( BInt4 * fd                     ,
   BUInt8  cel_num_bytes = 0;
   BUInt4  cel_num_dim   = 0;
   BChar   cel_name    [MAX_NAME + 1];
-  BChar   elm_names [ (MAX_NAME+1) * MAX_CEL_DIM ];
+  BText   elm_names;
   BUInt4  i;
 
   NOREFF(cl_name_length);
 
   nefis_errno = 0;
+  elm_names = NULL;
 
   if ( el_names_length < MAX_NAME )
   {
@@ -1658,14 +1681,7 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_CELL   ( BInt4 * fd                     ,
   }
   cel_name    [MAX_NAME]='\0';
 
-  for ( i=0; i<(MAX_NAME+1)*MAX_CEL_DIM; i++ )
-  {
-    elm_names   [i]= ' ';
-  }
-  for ( i=0; i<MAX_CEL_DIM; i++ )
-  {
-    elm_names[i*(MAX_NAME+1)+MAX_NAME] = '\0';
-  }
+  elm_names = NULL;
 
   nefis_errno = GP_get_next_cell(*fd              , 0              ,
                                   cel_name        , elm_names      ,
@@ -1729,12 +1745,13 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_CELL    ( BInt4 * fd                     ,
   BUInt8  cel_num_bytes = 0;
   BUInt4  cel_num_dim = 0           ;
   BChar   cel_name    [MAX_NAME + 1];
-  BChar   elm_names [ (MAX_NAME+1) * MAX_CEL_DIM ];
+  BText   elm_names                 ;
   BUInt4  i                         ;
 
   NOREFF(cl_name_length);
 
   nefis_errno = 0;
+  elm_names   = NULL;
 
   if ( el_names_length < MAX_NAME )
   {
@@ -1754,14 +1771,7 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_CELL    ( BInt4 * fd                     ,
   }
   cel_name    [MAX_NAME]='\0';
 
-  for ( i=0; i<(MAX_NAME+1)*MAX_CEL_DIM; i++ )
-  {
-    elm_names   [i]= ' ';
-  }
-  for ( i=0; i<MAX_CEL_DIM; i++ )
-  {
-    elm_names[i*(MAX_NAME+1)+MAX_NAME] = '\0';
-  }
+  elm_names = NULL;
 
   nefis_errno = GP_get_next_cell(*fd              , 1              ,
                                   cel_name        , elm_names      ,
@@ -2928,3 +2938,50 @@ DLLEXPORT BInt4 FTN_CALL PUT_STRING_ATTRIBUTE ( BInt4 * fd             ,
 
   return nefis_errno;
 }
+/*==========================================================================*/
+/*
+ * Retrieve version number of the NEFIS library
+ * Return: 0                   No error occured
+ *         !=0                 Error occured
+ */
+
+DLLEXPORT BInt4 FTN_CALL GET_NEFIS_VERSION  ( BText nef_version, BInt4   version_length )
+{
+  BText nefis_version;
+  BInt4 min_length;
+  BInt4 i;
+
+  nefis_errno = 0;
+
+  nefis_errno = OC_get_version(&nefis_version);
+
+  min_length = min(version_length, (BInt4) strlen(nefis_version));
+
+  if ( nefis_errno == 0 )
+  {
+      strncpy( nef_version, nefis_version, min_length);
+      for (i=min_length; i<version_length; i++)
+      {
+          nef_version[i] = ' ';
+      }
+  }
+  return nefis_errno;
+}
+/*==========================================================================*/
+/*
+ * reset the NEFIS file version number
+ * Input : * fd                Nefis file set descriptor
+ *           file_version      NEFIS file version
+ * Return: 0                   No error occured
+ *         !=0                 Error occured
+ */
+
+DLLEXPORT BInt4 FTN_CALL RESET_FILE_VERSION  ( BInt4 fd, BInt4 file_version)
+{
+  nefis_errno = 0;
+
+  nefis_errno = OC_reset_file_version(fd, file_version);
+
+  return nefis_errno;
+}
+

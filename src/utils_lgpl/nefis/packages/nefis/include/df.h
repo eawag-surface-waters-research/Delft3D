@@ -44,10 +44,10 @@ union element
 
 union cel
 {
-  BChar   st [ SIZE_CEL_BUF+MAX_CEL_DIM*MAX_NAME ];
-  BUInt4  in [(SIZE_CEL_BUF+MAX_CEL_DIM*MAX_NAME)/SIZE_BINT4];
-  BUInt8  ptr[(SIZE_CEL_BUF+MAX_CEL_DIM*MAX_NAME)/SIZE_BINT8];
-} cel_buf;
+  BChar   * st ;
+  BUInt4  * in ;
+  BUInt8  * ptr;
+};
 
 union group
 {
@@ -71,7 +71,7 @@ extern BInt4 DBG_nefis_tree ( BInt4  , BText  );
 #endif
 extern BInt4 HS_check_ecg   ( BInt4  , BInt4   , BText   , BUInt8  , BUInt8 *,
                               BInt4  , BUInt8 *, BUInt4 *, BUInt4 *);
-extern BInt4 HS_get_cont_cel( BInt4   , BUInt8 , BUInt8 *, BText  , BText  ,
+extern BInt4 HS_get_cont_cel( BInt4   , BUInt8 , BUInt8 *, BText  , BText *,
                               BUInt4 *, BUInt8 *);
 extern BInt4 HS_get_cont_elm( BInt4   , BUInt8  , BUInt8 *, BText   , BText   ,
                               BText   , BText   , BText   , BUInt4 *, BUInt4 *,

@@ -183,8 +183,8 @@ BInt4 Define_element ( BInt4    set         ,
         elm_type[i] = (BChar) toupper( (BInt4) elm_type[i] );
     }
 
-    elm_buf.ptr[0] = 0;
-    elm_buf.ptr[1] = 0;
+    elm_buf.ptr[0] = NIL;
+    elm_buf.ptr[1] = NIL;
 
     strncpy(elm_buf.st+offset[2], "       1"      , 8);
 
@@ -412,7 +412,8 @@ BInt4 Define_cel ( BInt4   set       ,
     BUInt8   rest_length;
     BInt4    size_cel_buf = SIZE_CEL_BUF;
     BData    vp         ;
-
+    union cel * cel_buf ;
+    BInt4 size_cel_union;
 /*
  * Initialize local variables
  */
@@ -442,19 +443,6 @@ BInt4 Define_cel ( BInt4   set       ,
         eof_ptr = &nefis[set].def.fds[1];
         hashtb  = &nefis[set].def.fds[2];
     }
-/*
- *  number of dimensions must be > 0 and < MAX_CEL_DIM
- */
-    if ( ( cel_dimens <= 0           ) &&
-         ( cel_dimens >  MAX_CEL_DIM )    )
-    {
-        nefis_errcnt += 1;
-        nefis_errno   = 5012;
-        sprintf(error_text,
-            "Number of dimensions not within the range [1,MAX_CEL_DIM]\n Cel \'%s\'",
-        cel_name);
-    }
-
     if ( nefis[set].file_version == Version_1 )
     {
         size_cel_buf -= 4*SIZE_BINT4;   /* correction for 32-bits file */
@@ -462,24 +450,27 @@ BInt4 Define_cel ( BInt4   set       ,
 /*
  * Remark: Character string does not contain \0 at end of cel_buf.st
  */
+    size_cel_union = sizeof(char) * (SIZE_CEL_BUF + cel_dimens*MAX_NAME);
+    cel_buf = (union cel *) malloc(sizeof(char *));
+    cel_buf->st = (char *) malloc(size_cel_union);
     for ( i=0; i<SIZE_CEL_BUF+cel_dimens*MAX_NAME; i++ )
     {
-        cel_buf.st[i]= ' ';
+        cel_buf->st[i] = ' ';
     }
 
-    cel_buf.ptr[0] = NIL;
-    cel_buf.ptr[1] = NIL;
+    cel_buf->ptr[0] = NIL;
+    cel_buf->ptr[1] = NIL;
 
-    strncpy(cel_buf.st+offset[2], "       2"      , 8);
+    strncpy(cel_buf->st+offset[2], "       2"      , 8);
 
     max_copy = min( MAX_NAME, (BInt4)strlen(cel_name    ) );
-    strncpy(cel_buf.st+offset[3], cel_name    , max_copy);
+    strncpy(cel_buf->st+offset[3], cel_name    , max_copy);
 
     index  = offset[4]/SIZE_BINT8;
-    cel_buf.ptr[index] = 0;
+    cel_buf->ptr[index] = 0;
 
     index  = offset[5]/SIZE_BINT4;
-    cel_buf.in [index] = cel_dimens;
+    cel_buf->in [index] = cel_dimens;
 
 /*
  *  Loop over all elements contained in this cel
@@ -518,7 +509,7 @@ BInt4 Define_cel ( BInt4   set       ,
             }
 
             max_copy = min( MAX_NAME, (BUInt4) strlen(elm_name) );
-            strncpy( cel_buf.st+offset[6]+MAX_NAME*i, elm_name, max_copy );
+            strncpy( cel_buf->st+offset[6]+MAX_NAME*i, elm_name, max_copy );
             size_cel_buf += MAX_NAME;
             /*
              * Align the element size to macro ALIGNMENT
@@ -527,7 +518,7 @@ BInt4 Define_cel ( BInt4   set       ,
             {
                 elm_num_bytes += (ALIGNMENT - elm_num_bytes%ALIGNMENT);
             }
-            cel_buf.ptr[index] += elm_num_bytes;
+            cel_buf->ptr[index] += elm_num_bytes;
         }
         else
         {
@@ -572,8 +563,8 @@ BInt4 Define_cel ( BInt4   set       ,
             rest_length   = (BUInt8) (size_cel_buf - 2*SIZE_BINT8);
         }
 
-        cel_buf.ptr[0] = next_pnt_hash;
-        cel_buf.ptr[1] = rest_length  ;
+        cel_buf->ptr[0] = next_pnt_hash;
+        cel_buf->ptr[1] = rest_length  ;
 /*
  *    Set pointer to end-of-file and write buffer
  */
@@ -581,25 +572,25 @@ BInt4 Define_cel ( BInt4   set       ,
              nefis[set].daf_neutral == TRUE    )
         {
             from_xdr = 0;
-            cp = (BText) malloc (sizeof(cel_buf.st));
+            cp = (BText) malloc (size_cel_union);
 
-            vp = (BData) &cel_buf.ptr[0];
+            vp = (BData) &cel_buf->ptr[0];
             nefis_errno = convert_ieee( &vp, &cp, 2*SIZE_BINT8, SIZE_BINT8, "INTEGER", from_xdr);
             for ( i=0; i<2; i++ )
             {
-                cel_buf.ptr[   i] = *( (BUInt8 *) cp + i);
+                cel_buf->ptr[   i] = *( (BUInt8 *) cp + i);
             }
 
             /* size of cel in bits */
             index = offset[4]/SIZE_BINT8;
-            vp = (BData) &cel_buf.ptr[index];
+            vp = (BData) &cel_buf->ptr[index];
             nefis_errno = convert_ieee( &vp, &cp, 1*SIZE_BINT8, SIZE_BINT8, "INTEGER", from_xdr);
-            cel_buf.ptr[index] = *( (BUInt8 *) cp );
+            cel_buf->ptr[index] = *( (BUInt8 *) cp );
 
             index  = offset[5]/SIZE_BINT4;
-            vp = (BData) &cel_buf.in[index];
+            vp = (BData) &cel_buf->in[index];
             nefis_errno = convert_ieee( &vp, &cp, 1*SIZE_BINT4, SIZE_BINT4, "INTEGER", from_xdr);
-            cel_buf.in[index] = *( (BUInt4 *) cp );
+            cel_buf->in[index] = *( (BUInt4 *) cp );
 
             free( (BData) cp );
         }
@@ -609,20 +600,20 @@ BInt4 Define_cel ( BInt4   set       ,
             if ( nefis[set].daf_neutral == TRUE ||
                  nefis[set].def_neutral == TRUE    )
             {
-                MCR_B_from_int8_to_int4 ((BInt4 *) cel_buf.st, 2);
-                MCR_B_from_int8_to_int4 ((BInt4 *) (cel_buf.st+offset[4]),1);
-                MCR_shift_string_backward(cel_buf.st+offset[5]  , sizeof(cel_buf.st)-offset[5]  , 4);
-                MCR_shift_string_backward(cel_buf.st+offset[3]-4, sizeof(cel_buf.st)-offset[3]+4, 12);
+                MCR_B_from_int8_to_int4 ((BInt4 *) cel_buf->st, 2);
+                MCR_B_from_int8_to_int4 ((BInt4 *) (cel_buf->st+offset[4]),1);
+                MCR_shift_string_backward(cel_buf->st+offset[5]  , size_cel_union-offset[5]  , 4);
+                MCR_shift_string_backward(cel_buf->st+offset[3]-4, size_cel_union-offset[3]+4, 12);
             }
             else
             {
-                MCR_L_from_int8_to_int4 ((BInt4 *) cel_buf.st, 2);
-                MCR_L_from_int8_to_int4 ((BInt4 *) (cel_buf.st+offset[5]), 1);
-                MCR_shift_string_backward(cel_buf.st+offset[6]  , sizeof(cel_buf.st)-offset[6]  , 4);
-                MCR_shift_string_backward(cel_buf.st+offset[3]-4, sizeof(cel_buf.st)-offset[3]+4, 12);
+                MCR_L_from_int8_to_int4 ((BInt4 *) cel_buf->st, 2);
+                MCR_L_from_int8_to_int4 ((BInt4 *) (cel_buf->st+offset[5]), 1);
+                MCR_shift_string_backward(cel_buf->st+offset[6]  , size_cel_union-offset[6]  , 4);
+                MCR_shift_string_backward(cel_buf->st+offset[3]-4, size_cel_union-offset[3]+4, 12);
             }
         }
-        n_written = GP_write_file( fds, cel_buf.st, *eof_ptr, size_cel_buf);
+        n_written = GP_write_file( fds, cel_buf->st, *eof_ptr, size_cel_buf);
 
         if ( n_written != size_cel_buf )
         {
@@ -654,7 +645,8 @@ BInt4 Define_cel ( BInt4   set       ,
         *eof_ptr = next_pnt_hash;
         *(hashtb+LHSHEL+pnt_bucket) = pnt_hash;
     }
-
+    free(cel_buf->st);
+    free(cel_buf);
     return nefis_errno;
 }
 /*==========================================================================*/
@@ -960,13 +952,13 @@ BInt4 Define_data ( BInt4   set         ,
                     BText   grp_defined )
 {
     BChar   cel_name  [MAX_NAME+1];
+    BText   elm_names    ;
     BUInt8  cel_num      ;
     BUInt8  cel_num_bytes;
     BUInt4  cel_num_dim  ;
     BText   cp           ;
     BInt4   dat_fds      ;
     BInt4   def_fds      ;
-    BChar   elm_names [(MAX_NAME+1) * MAX_CEL_DIM];
     BUInt8 * dat_eof_ptr;
     BUInt8 * def_eof_ptr;
     BInt4   from_xdr     ;
@@ -1027,15 +1019,6 @@ BInt4 Define_data ( BInt4   set         ,
     }
     cel_name[MAX_NAME] = '\0';
 
-    for ( i=0; i<((MAX_NAME+1)*MAX_CEL_DIM); i++ )
-    {
-        elm_names[i]=' ';
-    }
-    for ( i=0; i<MAX_CEL_DIM; i++ )
-    {
-        elm_names[i*(MAX_NAME+1)+MAX_NAME] = '\0';
-    }
-
     offset[ 0] = 0;
     offset[ 1] = offset[ 0] + SIZE_BINT8;
     offset[ 2] = offset[ 1] + SIZE_BINT8;
@@ -1087,8 +1070,9 @@ BInt4 Define_data ( BInt4   set         ,
     {
         return nefis_errno;
     }
+    elm_names = NULL;
     nefis_errno = HS_get_cont_cel ( set          , pnt_hash   ,&next_pointer,
-                                    cel_name     , elm_names  ,&cel_num_dim ,
+                                    cel_name     , &elm_names  ,&cel_num_dim ,
                                    &cel_num_bytes);
 
     if ( nefis_errno != 0 )

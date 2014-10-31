@@ -320,12 +320,12 @@ BInt4 Get_element ( BInt4   set          ,
                                      v     , &var_file_offset);
       if ( nefis_errno != 0 )
       {
-		nefis_errcnt += 1   ;
-		nefis_errno   = 3006;
-		sprintf(error_text,
-		   "Variable dimension %ld not found for:\n group \"%s\", element \"%s\"\n",
-		   v+1, grp_name, elm_name);
-		return nefis_errno;
+        nefis_errcnt += 1   ;
+        nefis_errno   = 3006;
+        sprintf(error_text,
+           "Variable dimension %ld not found for:\n group \"%s\", element \"%s\"\n",
+           v+1, grp_name, elm_name);
+        return nefis_errno;
       }
     }
 

@@ -39,7 +39,7 @@ extern BInt4 DBG_nefis_tree ( BInt4  , BText  );
 
 extern BInt4  convert_ieee        ( voidp *, charp *, BUInt8 , BInt4  , BText  ,
                                     BInt4  );
-extern BInt4  GP_inquire_cel      ( BInt4  , BText   , BUInt4 *, BText   , BUInt8 *);
+extern BInt4  GP_inquire_cel      ( BInt4  , BText   , BUInt4 *, BText *, BUInt8 *);
 extern BInt4  GP_inquire_dat      ( BInt4  , BUInt8 *, BText  , BText  );
 extern BInt4  GP_inquire_elm      ( BInt4  , BText   , BText   , BText   , BText,
                                     BText  , BUInt4 *, BUInt4 *, BUInt4 *, BUInt8 *);

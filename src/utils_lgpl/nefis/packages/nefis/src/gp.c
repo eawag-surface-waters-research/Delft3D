@@ -88,7 +88,7 @@
 extern BInt4 HS_check_ecg   ( BInt4  , BInt4   , BText   , BUInt8  , BUInt8 *,
                               BInt4  , BUInt8 *, BUInt4 *, BUInt4 *);
 extern BInt4 HS_get_cont_dat( BInt4  , BUInt8  , BUInt8 *, BText  , BText  );
-extern BInt4 HS_get_cont_cel( BInt4   , BUInt8 , BUInt8 *, BText  , BText  ,
+extern BInt4 HS_get_cont_cel( BInt4   , BUInt8 , BUInt8 *, BText  , BText *,
                               BUInt4 *, BUInt8 *);
 extern BInt4 HS_get_cont_elm( BInt4   , BUInt8  , BUInt8 *, BText   , BText   ,
                               BText   , BText   , BText   , BUInt4 *, BUInt4 *,
@@ -458,7 +458,7 @@ BInt4 GP_flush_hash( BInt4 fds,
 BInt4 GP_inquire_cel( BInt4    set         ,
                       BText    cel_name    ,
                       BUInt4 * cel_num_dim ,
-                      BText    elm_names   ,
+                      BText  * elm_names   ,
                       BUInt8 * cel_num_bytes)
 {
   BInt4   fds_file  ;
@@ -493,7 +493,7 @@ BInt4 GP_inquire_cel( BInt4    set         ,
   if ( nefis_errno == 0 )
   {
     nefis_errno = HS_get_cont_cel( set        , pnt_hash     ,&next_pointer,
-                                   cel_name   , &elm_names[0], cel_num_dim ,
+                                   cel_name   , elm_names   , cel_num_dim ,
                                    cel_num_bytes);
   }
 
@@ -1221,6 +1221,16 @@ BInt4 GP_get_next_grp  ( BInt4   set        ,    /* I file set descriptor */
           dat_hash[num_hash] = nefis[set].daf.fds[2+LHSHEL+LHSHCL+LHSHGR+i];
         }
       }
+      if (num_hash == -1)
+      {
+        nefis_errcnt += 1;
+        nefis_errno   = -6021;
+        sprintf( error_text,
+          "No data groups available in DefinitonData file \'%s\'\n",
+          nefis[set].dat_name);
+        return nefis_errno;
+      }
+
 
       QuickSort( dat_hash, 0, num_hash);
 
@@ -1242,7 +1252,7 @@ BInt4 GP_get_next_grp  ( BInt4   set        ,    /* I file set descriptor */
  * Two files; definition and data file.
  */
   {
-    if ( next  == 0 )
+    if ( next == 0 )
     {
       num_hash = -1;
       for ( i=0; i<LHSHDT; i++ )
@@ -1252,6 +1262,15 @@ BInt4 GP_get_next_grp  ( BInt4   set        ,    /* I file set descriptor */
           num_hash += 1;
           dat_hash[num_hash] = nefis[set].dat.fds[2+i];
         }
+      }
+      if (num_hash == -1)
+      {
+        nefis_errcnt += 1;
+        nefis_errno   = -6022;
+        sprintf( error_text,
+          "No data groups available in data file \'%s\'\n",
+          nefis[set].dat_name);
+        return nefis_errno;
       }
 
       QuickSort( dat_hash, 0, num_hash);
@@ -1276,7 +1295,7 @@ BInt4 GP_get_next_grp  ( BInt4   set        ,    /* I file set descriptor */
   nefis_errno = HS_get_cont_dat ( set,
                                   pointer , &next_pointer,
                                   grp_name, grp_defined  );
-  if ( nefis_errno !=0 )
+  if ( nefis_errno != 0 )
   {
     return nefis_errno;
   }
@@ -1421,7 +1440,7 @@ BInt4 GP_get_next_elm  ( BInt4    set             ,/* I file set descriptor */
 BInt4 GP_get_next_cell ( BInt4    set             ,/* I file set descriptor */
                          BInt4    next            ,/* I first(0) or next(1) */
                          BText    cel_name        ,/* O */
-                         BText    elm_names       ,/* O */
+                         BText  * elm_names       ,/* O */
                          BUInt4 * cel_num_dim     ,/* O */
                          BUInt8 * cel_num_bytes   )/* O */
 {

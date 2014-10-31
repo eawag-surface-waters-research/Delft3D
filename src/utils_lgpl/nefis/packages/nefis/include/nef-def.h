@@ -48,7 +48,7 @@
 #define MAX_TREE_NAME        255
 #define MAX_TYPE               8
 
-#define MAX_VAR_GROUPS        10
+#define MAX_VAR_GROUPS      2000
 #define DEFINE_STEPS           3
 
 #define BYTE_SIZE              8 /* one byte contains eight bits */
@@ -149,7 +149,7 @@ typedef enum _file_version{
     }
 #define MCR_shift_string_backward( a, lngth, shft) \
     { \
-        BInt4 mcr_i;  \
+        BUInt4 mcr_i;  \
         for (mcr_i=0; mcr_i<(lngth); mcr_i++) \
         { \
             *((a)+mcr_i-(shft)) = *((a)+mcr_i); \
