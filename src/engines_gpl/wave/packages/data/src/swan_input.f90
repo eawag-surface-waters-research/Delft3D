@@ -3652,14 +3652,14 @@ end subroutine read_swan_mdw
 !
 !
 !==============================================================================
-subroutine write_swan_input (sr, itide, outcnt, calccnt, inest, wavedata)
+subroutine write_swan_input (sr, itide, outcnt, calccount, inest, wavedata)
     !
     implicit none
     !
     integer                           :: itide
     integer                           :: inest
     integer                           :: outcnt
-    integer                           :: calccnt
+    integer                           :: calccount
     real                              :: wdir
     real                              :: wvel
     character(37)                     :: curlif
@@ -3670,7 +3670,7 @@ subroutine write_swan_input (sr, itide, outcnt, calccnt, inest, wavedata)
     wvel   = sr%wvel(itide)
     wdir   = sr%wdir(itide)
     !
-    call write_swan_inp (wavedata, outcnt, calccnt, &
+    call write_swan_inp (wavedata, outcnt, calccount, &
                     & itide        ,sr%nttide ,inest      ,sr%nnest  ,sr%swuvt  , &
                     & sr%swuvi     ,sr%prname ,sr%prnumb  ,sr%title1 ,sr%title2 , &
                     & sr%title3    ,sr%itest  ,sr%itrace  , &
@@ -3687,7 +3687,7 @@ end subroutine write_swan_input
 !
 !
 !==============================================================================
-subroutine write_swan_inp (wavedata, outcnt, calccnt, &
+subroutine write_swan_inp (wavedata, outcnt, calccount, &
                 & itide     ,nttide    ,inest     ,nnest     ,swuvt     , &
                 & swuvi     ,prname    ,prnumb    ,title1    ,title2    , &
                 & title3    ,itest     ,itrace    , &
@@ -3708,7 +3708,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccnt, &
 !
 ! Global variables
 !
-    integer                        , intent(in)  :: calccnt
+    integer                        , intent(in)  :: calccount
     integer                        , intent(in)  :: inest
     integer                        , intent(in)  :: inrhog
     integer                        , intent(in)  :: itest
@@ -4968,7 +4968,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccnt, &
                 if (nttide > 1) then
                     write (line(i+1:), '(I6.6)') 100000*inest + itide
                 else  ! wavedata%mode /= stand_alone
-                   write (line(i+1:), '(I3.3)') calccnt
+                   write (line(i+1:), '(I3.3)') calccount
                 endif
                 i = i+7
              endif
@@ -5008,7 +5008,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccnt, &
                 if (nttide > 1) then
                    write (line(i+1:), '(I3.3)') itide
                 else  ! wavedata%mode /= stand_alone
-                   write (line(i+1:), '(I3.3)') calccnt
+                   write (line(i+1:), '(I3.3)') calccount
                 endif
                 i = i+4
              endif
@@ -5044,7 +5044,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccnt, &
                 if (nttide > 1) then
                    write (line(i+1:), '(I3.3)') itide
                 else  ! wavedata%mode /= stand_alone
-                   write (line(i+1:), '(I3.3)') calccnt
+                   write (line(i+1:), '(I3.3)') calccount
                 endif
                 i = i+4
              endif
