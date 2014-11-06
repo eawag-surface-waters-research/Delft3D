@@ -98,6 +98,20 @@ C
 C
 C
       IYEAR  = IDATE/10000
+      IF (MOD(IYEAR, 4) .NE. 0) THEN
+C        IT IS A COMMON YEAR
+         MONLEN(2) = 28
+      ELSE IF (MOD(IYEAR,100) .NE. 0) THEN
+C        IT IS A LEAP YEAR
+         MONLEN(2) = 29
+      ELSE IF (MOD(IYEAR,400) .NE. 0) THEN
+C        IT IS A COMMON YEAR
+         MONLEN(2) = 28
+      ELSE 
+C        IT IS A LEAP YEAR
+         MONLEN(2) = 29
+      END IF
+         
       IMONTH = IDATE/100 - IYEAR*100
       IDAY   = IDATE - IYEAR*10000 - IMONTH*100
       IHOUR  = ITIME/10000
