@@ -5310,7 +5310,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/src/stream.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/throwexception.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/deltares_common_mpi.vfproj -text
-src/utils_lgpl/deltares_common/packages/deltares_common_mpi/deltares_common_nompi.vfproj -text
+src/utils_lgpl/deltares_common/packages/deltares_common_mpi/nompi/deltares_common_nompi.vfproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/depfil.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/depfil_double.f90 -text
