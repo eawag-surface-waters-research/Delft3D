@@ -248,7 +248,7 @@
          if ( j .lt. ichar('0') .or. j .gt. ichar('9') ) goto 90
          num = .true.
       enddo
-      read ( line(iposl:iposr) , '(e40.0)' ,err=120 ) reel
+      read ( line(iposl:iposr) , *, err=120 ) reel
       itype = 3
       goto 95
 !     it apparently is a string
