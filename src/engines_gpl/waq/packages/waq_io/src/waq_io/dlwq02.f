@@ -72,6 +72,7 @@
       use rd_token     !   for the reading of tokens
       use subs02
       use partmem      !   for PARTicle tracking
+      use filtyp_mod   !   for PARTicle tracking
       use fileinfo     !   a filename array in PART
       use alloc_mod
       use timers       !   performance timers
@@ -256,10 +257,10 @@
             lchar(45) = cdummy
             call rdfnam ( lunitp   , cdummy   , fnamep   , nfilesp  , 2       ,
      &                    1        , .false.  )
-            ftypep = 'binary'
+            call filtyp()
             call report_date_time  ( lunitp(2))
-            call rdlgri ( nfilesp  , lunitp   , fnamep   , ftypep   )
-            call rdccol ( nmaxp    , mmaxp    , lunitp(5), fnamep(5), ftypep  ,
+            call rdlgri ( nfilesp  , lunitp   , fnamep   , ftype    )
+            call rdccol ( nmaxp    , mmaxp    , lunitp(5), fnamep(5), ftype  ,
      &                    lgrid2   , xb       , yb       , lunitp(2))
             call part01 ( lgrid    , lgrid2   , xb       , yb       , dx      ,
      &                    dy       , area     , angle    , nmaxp    , mmaxp   )
