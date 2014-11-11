@@ -17,7 +17,7 @@ copy ..\packages\hydduflow\hydduflow.f90 hydduflow.f90
 "%compiler_path%"\gfortran -c %model%.f90    -ffree-line-length-none -fno-underscoring
 "%compiler_path%"\gfortran -c errsys.f90     -ffree-line-length-none -fno-underscoring
 "%compiler_path%"\gfortran -c hydduflow.f90  -ffree-line-length-none -fno-underscoring
-"%compiler_path%"\gfortran -shared -o %model%.dll %model%.o errsys.o hydduflow.o 
+"%compiler_path%"\gfortran -shared -o %model%.dll %model%.o errsys.o hydduflow.o -static 
 
 pause
 ) else (
