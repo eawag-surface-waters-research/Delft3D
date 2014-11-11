@@ -47,9 +47,9 @@
 	<Files>
 		<Filter Name="Header Files"/>
 		<Filter Name="Source Files" Filter="fi;fd">
-		<File RelativePath="..\src\depfil.f90"/>
-		<File RelativePath="..\src\depfil_double.f90"/>
-		<File RelativePath="..\src\dfbroadc.F90">
+		<File RelativePath="..\deltares_common_mpi\src\depfil.f90"/>
+		<File RelativePath="..\deltares_common_mpi\src\depfil_double.f90"/>
+		<File RelativePath="..\deltares_common_mpi\src\dfbroadc.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -58,7 +58,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath="..\src\dfparall.F90">
+		<File RelativePath="..\deltares_common_mpi\src\dfparall.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -67,5 +67,5 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath="..\src\quickin_dep_file.f90"/></Filter></Files>
+		<File RelativePath="..\deltares_common_mpi\src\quickin_dep_file.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
