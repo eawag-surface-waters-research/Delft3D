@@ -5633,7 +5633,6 @@ src/utils_lgpl/nefis/tests/test_02/vsd.ksh -text
 src/utils_lgpl/nefis/tests/test_03/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_03/pre_c03.res -text
 src/utils_lgpl/nefis/tests/test_03/test_03.c -text
-src/utils_lgpl/nefis/tests/test_03/test_03.c.bak -text
 src/utils_lgpl/nefis/tests/test_03/test_03.dsp -text
 src/utils_lgpl/nefis/tests/test_03/test_03.vcproj -text
 src/utils_lgpl/nefis/tests/test_03/test_03.vcxproj -text
