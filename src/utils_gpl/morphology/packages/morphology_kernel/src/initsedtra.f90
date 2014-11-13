@@ -37,7 +37,7 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     use precision
     use morphology_data_module, only: sedtra_type, sedpar_type, trapar_type, morpar_type
     use bedcomposition_module, only: getfrac, bedcomp_data
-    use sediment_basics_module, only: SEDTYP_COHESIVE, SEDTYP_NONCOHESIVE_SUSPENDED, dsand, dgravel
+    use sediment_basics_module, only: SEDTYP_COHESIVE
     !
     implicit none
     !
@@ -86,7 +86,6 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     real(fp)             , dimension(:)    , pointer :: sedd50fld
     real(fp)             , dimension(:)    , pointer :: taucr
     real(fp)             , dimension(:)    , pointer :: tetacr
-    real(fp)             , dimension(:)    , pointer :: ws0
     real(fp)             , dimension(:)    , pointer :: xx
     !
     integer                                          :: ll
@@ -112,7 +111,6 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     sedtyp    => sedpar%sedtyp
     sedd50    => sedpar%sedd50
     sedd50fld => sedpar%sedd50fld
-    ws0       => sedpar%ws0
     xx        => morpar%xx
     factcr    => morpar%factcr
     !
@@ -189,22 +187,4 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
     else
        hidexp = 1.0
     endif
-    !
-    ! Initialise settling velocity for sand
-    !
-    do ll = 1, lsed
-       if (sedtyp(ll) == SEDTYP_NONCOHESIVE_SUSPENDED) then
-          s = rhosol(ll)/rhow
-          !
-          if (sedd50(ll) < 1.5_fp*dsand) then
-             ws0(ll) = (s - 1.0_fp)*ag*sedd50(ll)**2/(18.0_fp*vicmol)
-          elseif (sedd50(ll) < 0.5_fp*dgravel) then
-             ws0(ll) = 10.0_fp*vicmol/sedd50(ll)                      &
-                & *(sqrt(1.0_fp + (s - 1.0_fp)*ag*sedd50(ll)**3          &
-                &                      /(100.0_fp*vicmol**2)) - 1.0_fp)
-          else
-             ws0(ll) = 1.1_fp*sqrt((s - 1.0_fp)*ag*sedd50(ll))
-          endif
-       endif
-    enddo
 end subroutine initsedtra

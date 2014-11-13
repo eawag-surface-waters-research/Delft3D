@@ -1,7 +1,7 @@
 subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                 & frac      ,sigmol    ,dicww     ,lundia    ,taucr0    , &
                 & rksrs     ,i2d3d     ,lsecfl    ,spirint   ,suspfrac  , &
-                & tetacr    ,salmax    ,ws0       ,concin    , &
+                & tetacr    ,concin    , &
                 & dzduu     ,dzdvv     ,ubot      ,tauadd    ,sus       , &
                 & bed       ,susw      ,bedw      ,espir     ,wave      , &
                 & scour     ,ubot_from_com        ,camax     ,eps       , &
@@ -79,7 +79,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)                            , intent(in)    :: frac     !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(30)        , intent(inout) :: par
     real(fp)                            , intent(in)    :: rksrs    !  Description and declaration in esm_alloc_real.f90
-    real(fp)                            , intent(in)    :: salmax
     real(fp)     , dimension(kmax)      , intent(in)    :: sig      !  Description and declaration in esm_alloc_real.f90
     real(fp)                            , intent(in)    :: sigmol   !  Description and declaration in esm_alloc_real.f90
     real(fp)                            , intent(in)    :: spirint  !  Spiral flow intensity
@@ -91,7 +90,6 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     real(fp)     , dimension(kmax)      , intent(in)    :: thick    !  Description and declaration in esm_alloc_real.f90
     real(fp)                            , intent(in)    :: ubot     !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(0:kmax)    , intent(in)    :: ws       !  Description and declaration in esm_alloc_real.f90
-    real(fp)                            , intent(in)    :: ws0
     real(hp)     , dimension(numrealpar), intent(inout) :: realpar
     logical                             , intent(in)    :: scour
     logical                             , intent(in)    :: suspfrac !  suspended sediment fraction
@@ -302,8 +300,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        call tram2(numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                 & kmax      ,bed       ,dzduu     ,dzdvv     ,rksrs     , &
                 & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
-                & frac      ,ws0       ,sig       ,thick     ,ws        , &
-                & dicww     ,ltur      ,aks_ss3d  ,salmax    , &
+                & frac      ,sig       ,thick     ,ws        , &
+                & dicww     ,ltur      ,aks_ss3d  , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
                 & susw      ,sbcu      ,sbcv      ,sbwu      ,sbwv      , &

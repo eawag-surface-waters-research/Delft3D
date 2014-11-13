@@ -112,7 +112,6 @@ integer, parameter, public :: RP_VELMN = 44
 integer, parameter, public :: RP_USTAR = 45
 integer, parameter, public :: MAX_RP   = 45
 !
-
 integer, parameter, public :: IP_NM    =  1
 integer, parameter, public :: IP_N     =  2
 integer, parameter, public :: IP_M     =  3
@@ -122,6 +121,40 @@ integer, parameter, public :: MAX_IP   =  4
 integer, parameter, public :: SP_RUNID =  1
 integer, parameter, public :: SP_USRFL =  2
 integer, parameter, public :: MAX_SP   =  2
+
+integer, parameter, public :: WS_RP_TIME  =  1
+integer, parameter, public :: WS_RP_ULOC  =  2
+integer, parameter, public :: WS_RP_VLOC  =  3
+integer, parameter, public :: WS_RP_WLOC  =  4
+integer, parameter, public :: WS_RP_SALIN =  5
+integer, parameter, public :: WS_RP_TEMP  =  6
+integer, parameter, public :: WS_RP_RHOWT =  7
+integer, parameter, public :: WS_RP_CFRCB =  8
+integer, parameter, public :: WS_RP_CTOT  =  9
+integer, parameter, public :: WS_RP_KTUR  = 10
+integer, parameter, public :: WS_RP_EPTUR = 11
+integer, parameter, public :: WS_RP_D50   = 12
+integer, parameter, public :: WS_RP_DSS   = 13
+integer, parameter, public :: WS_RP_RHOSL = 14
+integer, parameter, public :: WS_RP_CSOIL = 15
+integer, parameter, public :: WS_RP_GRAV  = 16
+integer, parameter, public :: WS_RP_VICML = 17
+integer, parameter, public :: WS_RP_WDEPT = 18
+integer, parameter, public :: WS_RP_UMEAN = 19
+integer, parameter, public :: WS_RP_VMEAN = 20
+integer, parameter, public :: WS_RP_CHEZY = 21
+integer, parameter, public :: WS_MAX_RP   = 21
+!
+integer, parameter, public :: WS_IP_NM    =  1
+integer, parameter, public :: WS_IP_N     =  2
+integer, parameter, public :: WS_IP_M     =  3
+integer, parameter, public :: WS_IP_K     =  4
+integer, parameter, public :: WS_IP_ISED  =  5
+integer, parameter, public :: WS_MAX_IP   =  5
+!
+integer, parameter, public :: WS_SP_RUNID =  1
+integer, parameter, public :: WS_SP_USRFL =  2
+integer, parameter, public :: WS_MAX_SP   =  2
 
 ! collection of morphology output options
 !
@@ -399,15 +432,11 @@ type sedpar_type
     real(fp)      , dimension(:)    , pointer :: cdryb      !  Dry bed concentration for determining
                                                             !  sediment depths
     real(fp)      , dimension(:)    , pointer :: dstar      !  Dimensionless grain size 
-    real(fp)      , dimension(:)    , pointer :: gamflc     !  Calibration factor on flocculation parameter in Van Rijn (2004) 
     real(fp)      , dimension(:)    , pointer :: taucr      !  Critical shear stress 
     real(fp)      , dimension(:)    , pointer :: tetacr     !  Dimensionless critical shear stress (Shields parameter)
     !
     real(fp)      , dimension(:,:)  , pointer :: dss        !  Characteristic suspended sediment diameter
     real(fp)      , dimension(:)    , pointer :: facdss     !  Ratio between suspended sediment diameter and D50
-    real(fp)      , dimension(:)    , pointer :: ws0        !  Settling velocity fresh water
-    real(fp)      , dimension(:)    , pointer :: wsm        !  Settling velocity saline water
-    real(fp)      , dimension(:)    , pointer :: salmax     !  Maximum salinity [ppt]
     real(fp)      , dimension(:)    , pointer :: sdbuni     !  Uniform value of initial sediment mass at bed
     real(fp)      , dimension(:)    , pointer :: sedtrcfac  !  Calibration factor for tracer sediments
     real(fp)      , dimension(:)    , pointer :: thcmud     !  Critical stress erosion uniform values for mud
@@ -465,6 +494,8 @@ type trapar_type
     real(hp)      , dimension(:)  , pointer :: dll_reals_settle    !  Input real array to shared library
     character(256), dimension(:)  , pointer :: dll_strings_settle  !  Input character string array to shared library
     character(256), dimension(:)  , pointer :: dll_usrfil_settle   !  Name of input file to be passed to subroutine in DLL
+    integer       , dimension(:)  , pointer :: iform_settle        !  Number of sediment settling velocity formula
+    real(fp)      , dimension(:,:), pointer :: par_settle          !  Settling velocity formula parameters
     !
     character(256), dimension(:)  , pointer :: dll_function !  Name of subroutine in DLL that calculates the Sediment transport formula
     character(256), dimension(:)  , pointer :: dll_name     !  Name of DLL that calculates the Sediment transport formula
@@ -474,7 +505,7 @@ type trapar_type
     character(256), dimension(:)  , pointer :: dll_strings  !  Input character string array to shared library
     character(256), dimension(:)  , pointer :: dll_usrfil   !  Name of input file to be passed to subroutine in DLL
     character(256), dimension(:)  , pointer :: flstrn       !  Sediment transport formula file names
-    integer       , dimension(:)  , pointer :: iform        !  Numbers of sediment transport formulae
+    integer       , dimension(:)  , pointer :: iform        !  Sediment transport formula number
     character(256), dimension(:)  , pointer :: name         !  Sediment transport formula names
     real(fp)      , dimension(:,:), pointer :: par          !  Sediment transport formula parameters
     integer       , dimension(:,:), pointer :: iparfld      !  Index of parameter in parfld array (0 if constant)
@@ -931,13 +962,9 @@ subroutine nullsedpar(sedpar)
     nullify(sedpar%dstar)
     nullify(sedpar%taucr)
     nullify(sedpar%tetacr)
-    nullify(sedpar%gamflc)
     !
     nullify(sedpar%dss)
     nullify(sedpar%facdss)
-    nullify(sedpar%ws0)
-    nullify(sedpar%wsm)
-    nullify(sedpar%salmax)
     nullify(sedpar%sdbuni)
     nullify(sedpar%tcguni)
     nullify(sedpar%mudcnt)
@@ -985,13 +1012,9 @@ subroutine clrsedpar(istat     ,sedpar  )
     if (associated(sedpar%dstar))      deallocate(sedpar%dstar,      STAT = istat)
     if (associated(sedpar%taucr))      deallocate(sedpar%taucr,      STAT = istat)
     if (associated(sedpar%tetacr))     deallocate(sedpar%tetacr,     STAT = istat)
-    if (associated(sedpar%gamflc))     deallocate(sedpar%gamflc,     STAT = istat)
     !
     if (associated(sedpar%dss))        deallocate(sedpar%dss,        STAT = istat)
     if (associated(sedpar%facdss))     deallocate(sedpar%facdss,     STAT = istat)
-    if (associated(sedpar%ws0))        deallocate(sedpar%ws0,        STAT = istat)
-    if (associated(sedpar%wsm))        deallocate(sedpar%wsm,        STAT = istat)
-    if (associated(sedpar%salmax))     deallocate(sedpar%salmax,     STAT = istat)
     if (associated(sedpar%sdbuni))     deallocate(sedpar%sdbuni,     STAT = istat)
     if (associated(sedpar%tcguni))     deallocate(sedpar%tcguni,     STAT = istat)
     if (associated(sedpar%mudcnt))     deallocate(sedpar%mudcnt,     STAT = istat)
@@ -1498,6 +1521,9 @@ subroutine nulltrapar(trapar  )
     nullify(trapar%dll_reals_settle)
     nullify(trapar%dll_strings_settle)
     nullify(trapar%dll_usrfil_settle)
+    nullify(trapar%iform_settle)
+    nullify(trapar%par_settle)
+    !
     nullify(trapar%dll_function)
     nullify(trapar%dll_name)
     nullify(trapar%dll_handle)
@@ -1558,6 +1584,8 @@ subroutine clrtrapar(istat     ,trapar  )
     if (associated(trapar%dll_reals_settle   )) deallocate(trapar%dll_reals_settle   , STAT = istat)
     if (associated(trapar%dll_strings_settle )) deallocate(trapar%dll_strings_settle , STAT = istat)
     if (associated(trapar%dll_usrfil_settle  )) deallocate(trapar%dll_usrfil_settle  , STAT = istat)
+    if (associated(trapar%iform_settle       )) deallocate(trapar%iform_settle       , STAT = istat)
+    if (associated(trapar%par_settle         )) deallocate(trapar%par_settle         , STAT = istat)
     !
     if (associated(trapar%dll_function)) deallocate(trapar%dll_function, STAT = istat)
     if (associated(trapar%dll_name    )) deallocate(trapar%dll_name    , STAT = istat)

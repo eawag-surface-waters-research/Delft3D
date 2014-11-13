@@ -94,8 +94,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: taucr
     real(fp)         , dimension(:)      , pointer :: tetacr
     real(fp)         , dimension(:,:)    , pointer :: dss
-    real(fp)         , dimension(:)      , pointer :: ws0
-    real(fp)         , dimension(:)      , pointer :: salmax
     real(fp)         , dimension(:)      , pointer :: mudcnt
     real(fp)         , dimension(:)      , pointer :: pmcrit
     integer          , dimension(:)      , pointer :: nseddia
@@ -357,10 +355,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: thick0
     real(fp)                      :: thick1
     real(fp)                      :: trsedeq   ! temporary variable for rsedeq
-    real(fp)                      :: tsalmax
     real(fp)                      :: tsd
     real(fp)                      :: tsigmol   ! temporary variable for sigmol
-    real(fp)                      :: tws0
     real(fp)                      :: twsk
     real(fp)                      :: u
     real(fp)                      :: ubed
@@ -409,8 +405,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     taucr               => gdp%gdsedpar%taucr
     tetacr              => gdp%gdsedpar%tetacr
     dss                 => gdp%gdsedpar%dss
-    ws0                 => gdp%gdsedpar%ws0
-    salmax              => gdp%gdsedpar%salmax
     mudcnt              => gdp%gdsedpar%mudcnt
     pmcrit              => gdp%gdsedpar%pmcrit
     nseddia             => gdp%gdsedpar%nseddia
@@ -1126,8 +1120,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           if (suspfrac) then
              tsigmol = sigmol(ll)
              tdss    = dss(nm, l)
-             tsalmax = salmax(l)
-             tws0    = ws0(l)
              twsk    = ws(nm, kbed, l)
           else
              !
@@ -1135,8 +1127,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              !
              tsigmol =  1.0_fp
              tdss    = di50
-             tsalmax = 30.0_fp
-             tws0    =  0.0_fp
              twsk    =  0.0_fp
           endif
           !
@@ -1186,7 +1176,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              call eqtran(siglc     ,thicklc   ,kmaxlc    ,wslc      ,ltur      , &
                        & frac(nm,l),tsigmol   ,dcwwlc    ,lundia    ,taucr(l)  , &
                        & rksr(nm)  ,3         ,lsecfl    ,spirint   ,suspfrac  , &
-                       & tetacr(l) ,tsalmax   ,tws0      ,concin3d  , &
+                       & tetacr(l) ,concin3d  , &
                        & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &
@@ -1271,7 +1261,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              call eqtran(sig2d     ,thck2d    ,kmax2d    ,ws2d      ,ltur      , &
                        & frac(nm,l),tsigmol   ,dcww2d    ,lundia    ,taucr(l)  , &
                        & rksr(nm)  ,2         ,lsecfl    ,spirint   ,suspfrac  , &
-                       & tetacr(l) ,tsalmax   ,tws0      ,concin2d  , &
+                       & tetacr(l) ,concin2d  , &
                        & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
                        & bed       ,susw      ,bedw      ,espir     ,wave      , &
                        & scour     ,ubot_from_com        ,camax     ,eps       , &

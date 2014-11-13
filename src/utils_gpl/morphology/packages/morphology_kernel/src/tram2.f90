@@ -1,8 +1,8 @@
 subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                 & kmax      ,bed       ,dzduu     ,dzdvv     ,rksrs     , &
                 & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
-                & frac      ,ws0       ,sig       ,thick     ,ws        , &
-                & dicww     ,ltur      ,aks_ss3d  ,salmax    , &
+                & frac      ,sig       ,thick     ,ws        , &
+                & dicww     ,ltur      ,aks_ss3d  , &
                 & kmaxsd    ,taurat    ,caks      ,caks_ss3d ,concin    , &
                 & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
                 & susw      ,sbcu      ,sbcv      ,sbwu      ,sbwv      , &
@@ -46,6 +46,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use morphology_data_module
+    use sediment_basics_module, only: dsand, dgravel
     !
     implicit none
 !
@@ -66,13 +67,11 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp)                        , intent(in)   :: eps
     real(fp)                        , intent(in)   :: camax
     real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: ws0
     real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
     real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
     integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
-    real(fp)                        , intent(in)   :: salmax
     real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
     logical                         , intent(in)   :: scour
     real(fp)                        , intent(in)   :: bedw
@@ -121,6 +120,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp):: rhowat   
     real(fp):: rlabda   
     real(fp):: salinity 
+    real(fp):: salmax
     real(fp):: teta     
     real(fp):: tp       
     real(fp):: umod     
@@ -129,6 +129,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp):: vicmol   
     real(fp):: vonkar   
     real(fp):: vvv      
+    real(fp):: ws0
     real(fp):: z0cur    
     real(fp):: z0rou    
     real(fp):: zumod    
@@ -216,10 +217,22 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     subiw  = int(par(14))
     epspar = par(15)>0.0_fp
     gamtcr = par(16)
+    salmax = par(17)
+    !
+    drho  = (rhosol-rhowat) / rhowat
+    !
+    if (di50 < 1.5_fp*dsand) then
+       ws0 = drho*ag*di50**2/(18.0_fp*vicmol)
+    elseif (di50 < 0.5_fp*dgravel) then
+       ws0 = 10.0_fp*vicmol/di50 &
+          & *(sqrt(1.0_fp + drho*ag*di50**3/(100.0_fp*vicmol**2)) - 1.0_fp)
+    else
+       ws0 = 1.1_fp*sqrt(drho*ag*di50)
+    endif
     !
     sag    = sqrt(ag)
     !
-    call bedbc2004(tp        ,rhosol    ,rhowat    , &
+    call bedbc2004(tp        ,rhowat    , &
                  & h1        ,umod      ,d10       ,zumod     ,di50      , &
                  & d90       ,z0cur     ,z0rou     ,drho      ,dstar     , &
                  & taucr0    ,u2dhim    ,aks       ,ra        ,usus      , &

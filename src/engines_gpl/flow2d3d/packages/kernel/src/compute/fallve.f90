@@ -46,8 +46,8 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use mathconsts, only: ee, pi
-    use sediment_basics_module
+    use mathconsts, only: ee
+    use morphology_data_module
     use globaldata
     !
     implicit none
@@ -56,32 +56,30 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                         , pointer :: ag
-    real(fp)                         , pointer :: vonkar
-    real(fp)                         , pointer :: vicmol
-    real(fp)                         , pointer :: csoil
-    real(fp)           , dimension(:), pointer :: rhosol
-    real(fp)         , dimension(:,:), pointer :: dss
-    real(fp)           , dimension(:), pointer :: ws0
-    real(fp)           , dimension(:), pointer :: wsm
-    real(fp)           , dimension(:), pointer :: salmax
-    real(fp)           , dimension(:), pointer :: sedd50
-    real(fp)           , dimension(:), pointer :: sedd50fld
-    integer,             dimension(:), pointer :: iform
-    integer            , dimension(:), pointer :: sedtyp
-    real(fp)                         , pointer :: timsec
-    real(fp)           , dimension(:), pointer :: gamflc
+    real(fp)                           , pointer :: ag
+    real(fp)                           , pointer :: vonkar
     !
-    character(256)     , dimension(:), pointer :: dll_function
-    integer(pntrsize)  , dimension(:), pointer :: dll_handle
-    character(256)     , dimension(:), pointer :: dll_usrfil
+    real(fp)                           , pointer :: vicmol
+    real(fp)                           , pointer :: csoil
+    real(fp)           , dimension(:)  , pointer :: rhosol
+    real(fp)         , dimension(:,:)  , pointer :: dss
+    real(fp)           , dimension(:)  , pointer :: sedd50
+    real(fp)           , dimension(:)  , pointer :: sedd50fld
     !
-    integer                          , pointer :: max_integers
-    integer                          , pointer :: max_reals
-    integer                          , pointer :: max_strings
-    integer            , dimension(:), pointer :: dll_integers
-    real(hp)           , dimension(:), pointer :: dll_reals
-    character(256)     , dimension(:), pointer :: dll_strings
+    real(fp)                           , pointer :: timsec
+    !
+    character(256)     , dimension(:)  , pointer :: dll_usrfil
+    character(256)     , dimension(:)  , pointer :: dll_function
+    integer(pntrsize)  , dimension(:)  , pointer :: dll_handle
+    integer            , dimension(:)  , pointer :: iform_settle
+    real(fp)           , dimension(:,:), pointer :: par_settle
+    !
+    integer                            , pointer :: max_integers
+    integer                            , pointer :: max_reals
+    integer                            , pointer :: max_strings
+    integer            , dimension(:)  , pointer :: dll_integers
+    real(hp)           , dimension(:)  , pointer :: dll_reals
+    character(256)     , dimension(:)  , pointer :: dll_strings
 !
 ! Global variables
 !
@@ -122,71 +120,63 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 !
 ! Local variables
 !
-    integer(pntrsize)           :: error_ptr
+    integer                     :: i
+    integer                     :: istat
     integer                     :: k
-    integer                     :: kn
-    integer                     :: ku
+    integer                     :: kab
+    integer                     :: kbe
+    integer                     :: kend
+    integer                     :: kstart
     integer                     :: l
     integer                     :: ll
     integer                     :: lst
     integer                     :: n
-    integer                     :: m
-    integer                     :: nm
     integer                     :: ndm
+    integer                     :: nm
     integer                     :: nmd
-    integer(pntrsize), external :: perf_function_fallve
-    real(fp)                    :: a
-    real(fp)                    :: b
+    integer                     :: m
+    logical                     :: error
     real(fp)                    :: chezy
-    real(fp)                    :: coefw  
-    real(fp)                    :: h0  
-    real(fp)                    :: hinset
+    real(fp)                    :: h0
+    real(fp)                    :: kn
     real(fp)                    :: rhoint
-    real(fp)                    :: s
     real(fp)                    :: sag
     real(fp)                    :: salint
     real(fp)                    :: temint
-    real(fp)                    :: ts
-    real(fp)                    :: cgel
-    real(fp)                    :: efloc
-    real(fp)                    :: ffloc
-    real(fp)                    :: ffloc0
-    real(fp)                    :: fhulp
-    real(fp)                    :: u
-    real(fp)                    :: v
-    real(fp)                    :: vcmol
-    real(fp)                    :: w
-    real(fp)                    :: um
-    real(fp)                    :: vm
-    real(fp)                    :: tur_k
+    real(fp)                    :: tka
+    real(fp)                    :: tkb
+    real(fp)                    :: tkt
     real(fp)                    :: tur_eps
+    real(fp)                    :: tur_k
+    real(fp)                    :: u
+    real(fp)                    :: um
+    real(fp)                    :: v
+    real(fp)                    :: vm
+    real(fp)                    :: w
+    real(fp)                    :: wsloc
     real(fp)                    :: z0rou
-    real(hp)                    :: ws_dll
+    real(fp), dimension(:), pointer :: localpar
     character(256)              :: errmsg
-    character(256)              :: message                 ! Contains message from shared library
 !
 !! executable statements -------------------------------------------------------
 !
     ag                  => gdp%gdphysco%ag
     vonkar              => gdp%gdphysco%vonkar
+    !
     vicmol              => gdp%gdphysco%vicmol
     csoil               => gdp%gdsedpar%csoil
     rhosol              => gdp%gdsedpar%rhosol
     dss                 => gdp%gdsedpar%dss
-    ws0                 => gdp%gdsedpar%ws0
-    wsm                 => gdp%gdsedpar%wsm
-    salmax              => gdp%gdsedpar%salmax
-    sedtyp              => gdp%gdsedpar%sedtyp
     sedd50              => gdp%gdsedpar%sedd50
     sedd50fld           => gdp%gdsedpar%sedd50fld
-    gamflc              => gdp%gdsedpar%gamflc
-    iform               => gdp%gdtrapar%iform
     !
     timsec              => gdp%gdinttim%timsec
     !
+    dll_usrfil          => gdp%gdtrapar%dll_usrfil_settle
     dll_function        => gdp%gdtrapar%dll_function_settle
     dll_handle          => gdp%gdtrapar%dll_handle_settle
-    dll_usrfil          => gdp%gdtrapar%dll_usrfil_settle
+    iform_settle        => gdp%gdtrapar%iform_settle
+    par_settle          => gdp%gdtrapar%par_settle
     !
     max_integers        => gdp%gdtrapar%max_integers_settle
     max_reals           => gdp%gdtrapar%max_reals_settle
@@ -195,14 +185,15 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     dll_reals           => gdp%gdtrapar%dll_reals_settle
     dll_strings         => gdp%gdtrapar%dll_strings_settle
     !
-    aak = 0.0_fp
-    sag = sqrt(ag)
+    allocate (localpar (gdp%gdtrapar%npar), stat = istat)
     !
-    lst = max(lsal, ltem)
+    error = .false.
+    aak   = 0.0_fp
+    lst   = max(lsal, ltem)
     do l = 1, lsed
        ll = lst + l
        !
-       ! bulk mass concentration; UPWIND approach
+       ! bulk mass concentration
        !
        if (.not. zmodel) then
           do k = 1, kmax
@@ -223,534 +214,155 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
        endif
     enddo
     !
-    if (.not. zmodel) then
+    sag = sqrt(ag)
+    !
+    do l = 1, lsed
+       ll = lst + l
        !
-       ! Sigma-layer model
+       do i = 1,gdp%gdtrapar%npar
+          localpar(i) = par_settle(i,l)
+       enddo
        !
-       do l = 1, lsed
-          ll = lst + l
+       do nm = 1, nmmax
+          if (kfs(nm)==0 .or. kcs(nm)>2) cycle
           !
-          ! the settling velocity can be either be specified by the user, or it
-          ! may dependent on the sediment type: 'sand' or 'mud'
+          nmd  = nm - icx
+          ndm  = nm - icy
           !
-          if (dll_function(l) /= ' ') then
-             !
-             ! Settling velocity routine supplied by the user in a DLL
-             !
-             do k = 1, kmax
-                ku = min(k + 1, kmax)
-                ts = thick(k) + thick(ku)
-                do nm = 1, nmmax
-                   if (kfs(nm)==0 .or. kcs(nm)>2) cycle
-                   nmd  = nm - icx
-                   ndm  = nm - icy
-                   !
-                   ! Input parameters are passed via dll_reals/integers/strings-arrays
-                   !
-                   if (lsal > 0) then
-                      salint = (  thick(k) *r0(nm, ku, lsal) &
-                             &  + thick(ku)*r0(nm, k , lsal)  ) / ts
-                   else
-                      salint = saleqs
-                   endif
-                   !
-                   if (ltem > 0) then
-                      temint = (  thick(k) *r0(nm, ku, ltem) &
-                             &  + thick(ku)*r0(nm, k , ltem)  ) / ts
-                   else
-                      temint = temeqs
-                   endif
-                   !
-                   rhoint = (thick(k)*rhowat(nm,ku) + thick(ku)*rhowat(nm,k)) / ts
-                   !
-                   u = (thick(k)*u0(nm ,ku) + thick(ku)*u0(nm ,k) + &
-                      & thick(k)*u0(nmd,ku) + thick(ku)*u0(nmd,k)) / 2.0_fp / ts
-                   v = (thick(k)*v0(nm ,ku) + thick(ku)*v0(nm ,k) + &
-                      & thick(k)*v0(ndm,ku) + thick(ku)*v0(ndm,k)) / 2.0_fp / ts
-                   w = (thick(k)*wphy(nm,ku) + thick(ku)*wphy(nm,k)) / ts
-                   !
-                   if (ltur>0) then
-                      tur_k = rtur0(nm,k,1)
-                   else
-                      tur_k = -999.0_fp
-                   endif
-                   if (ltur>1) then
-                      tur_eps = rtur0(nm,k,2)
-                   else
-                      tur_eps = -999.0_fp
-                   endif
-                   !
-                   h0 = s0(nm) + real(dps(nm),fp)
-                   um = (umean(nm) + umean(nmd))/2.0_fp
-                   vm = (vmean(nm) + vmean(nmd))/2.0_fp
-                   !
-                   ! Calculate total (possibly wave enhanced) roughness
-                   !
-                   kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
-                   z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
-                         &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
-                   chezy = sag * log( 1.0_fp + h0/max(1.0e-8_fp,ee*z0rou) ) / vonkar
-                   !
-                   if (max_reals < 21) then
-                      write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to settling routine.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   dll_reals( 1) = real(timsec ,hp)
-                   dll_reals( 2) = real(u      ,hp)
-                   dll_reals( 3) = real(v      ,hp)
-                   dll_reals( 4) = real(w      ,hp)
-                   dll_reals( 5) = real(salint ,hp)
-                   dll_reals( 6) = real(temint ,hp)
-                   dll_reals( 7) = real(rhoint ,hp)
-                   dll_reals( 8) = real(r0(nm,ku,ll),hp)
-                   dll_reals( 9) = real(aak(nm,ku),hp)
-                   dll_reals(10) = real(tur_k  ,hp)
-                   dll_reals(11) = real(tur_eps,hp)
-                   if (sedd50(l)<0.0_fp) then
-                      dll_reals(12) = real(sedd50fld(nm),hp)
-                   else
-                      dll_reals(12) = real(sedd50(l),hp)
-                   endif
-                   dll_reals(13) = real(dss(nm,l) ,hp)
-                   dll_reals(14) = real(rhosol(l) ,hp)
-                   dll_reals(15) = real(csoil     ,hp)
-                   dll_reals(16) = real(ag        ,hp)
-                   dll_reals(17) = real(vicmol    ,hp)
-                   dll_reals(18) = real(h0        ,hp)
-                   dll_reals(19) = real(um        ,hp)
-                   dll_reals(20) = real(vm        ,hp)
-                   dll_reals(21) = real(chezy     ,hp)
-                   !
-                   if (max_integers < 5) then
-                      write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to settling routine.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   call nm_to_n_and_m(nm, n, m, gdp)
-                   dll_integers( 1) = nm
-                   dll_integers( 2) = n
-                   dll_integers( 3) = m
-                   dll_integers( 4) = k
-                   dll_integers( 5) = l
-                   !
-                   if (max_strings < 2) then
-                      write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to settling routine.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   dll_strings( 1) = gdp%runid
-                   dll_strings( 2) = dll_usrfil(l)
-                   !
-                   ! Initialisation of output variables of user defined settling velocity routine
-                   !
-                   ws_dll    = 0.0_hp
-                   message     = ' '
-                   !
-                   ! psem/vsem is used to be sure this works fine in DD calculations
-                   !
-                   call psemlun
-                   error_ptr = 0
-                   error_ptr = perf_function_fallve(dll_handle(l)       , dll_function(l)       , &
-                                                    dll_integers        , max_integers          , &
-                                                    dll_reals           , max_reals             , &
-                                                    dll_strings         , max_strings           , &
-                                                    ws_dll              , message)
-                   call vsemlun
-                   if (error_ptr /= 0) then
-                      write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   if (message /= ' ') then
-                      write (lundia,'(a,a,a)') '*** ERROR Message from user defined settling velocity routine ',trim(dll_function(l)),' :'
-                      write (lundia,'(a,a  )') '          ', trim(message)
-                      write (lundia,'(a    )') ' '
-                      call d3stop(1, gdp)
-                   endif
-                   !
-                   ! Output parameters
-                   !
-                   ws(nm, k, l) = real(ws_dll,fp)
-                enddo     ! nm
-             enddo        ! k
-          elseif (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
-             !
-             do k = 1, kmax
-                ku = min(k + 1, kmax)
-                ts = thick(k) + thick(ku)
-                do nm = 1, nmmax
-                   if (kfs(nm)==1 .and. kcs(nm)<=2) then
-                      rhoint = (thick(k)*rhowat(nm,ku) + thick(ku)*rhowat(nm,k)) / ts
-                      s = rhosol(l) / rhoint
-                      !
-                      ! Molecular viscosity vcmol computed according to Van Rijn (2004) sediment tranport
-                      ! This only needs to be done in case of temperature modelling
-                      ! Otherwise vicmol is used as computed in iniphy.f90 (also according
-                      ! to Van Rijn 2004)
-                      !
-                      if (ltem > 0) then
-                         vcmol = 4.0e-5_fp / (20.0_fp + r0(nm, k, ltem))
-                      else                     
-                         vcmol = vicmol
-                      endif
-                      if (dss(nm, l) < 1.5_fp*dsand) then
-                         ws(nm, k, l) = (s-1.0_fp) * ag * dss(nm,l)**2/(18.0_fp*vcmol)
-                      elseif (dss(nm, l) < 0.5_fp*dgravel) then
-                         if (dss(nm, l) < 2.0_fp*dsand) then
-                            coefw = (-2.9912_fp/dsand) * dss(nm,l) + 15.9824_fp
-                         else
-                            coefw = 10.0_fp
-                         endif
-                         ws(nm, k, l) = coefw * vcmol / dss(nm,l)                   &
-                                      & * (sqrt(1.0_fp + (s-1.0_fp)*ag*dss(nm,l)**3  &
-                                      & / (100.0_fp*vcmol**2)) - 1.0_fp)
-                      else
-                         ws(nm, k, l) = 1.1_fp * sqrt((s-1.0_fp)*ag*dss(nm,l))
-                      endif
-                      !
-                      ffloc = 1.0_fp
-                      if (  iform(l) == -2                          &
-                          & .and. sedd50(l) < dsand                 &
-                          & .and. (lsal     > 0 .or. saleqs > 0.0_fp)  ) then
-                         !
-                         ! Hindered settling (Van Rijn, 2004)
-                         !
-                         cgel = 0.65_fp * rhosol(l) * min(sedd50(l)/dsand , 1.0_fp)
-                         hinset = max(0.0_fp , (1.0 - max(0.0_fp, 0.65_fp*aak(nm,ku))/cgel))
-                         !
-                         ! Flocculation (Van Rijn, 2004)
-                         !
-                         if (lsal > 0) then
-                           salint = max((thick(k)*r0(nm,ku,lsal)+thick(ku)*r0(nm,k,lsal))/ts , 0.0_fp)
-                         else
-                           salint = saleqs
-                         endif
-                         if (salint >= 0.01_fp .and. salmax(l)>0.0_fp) then
-                            fhulp = max(4.0_fp+log10(2.0_fp*max(1.0e-6_fp,aak(nm,k))/cgel) , 1.0_fp)
-                            efloc = min(max(dsand/sedd50(l)-1.0_fp , 1.0_fp) , 3.0_fp)
-                            ffloc0 = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
-                            ffloc = (ffloc0-1.0_fp) * min(1.0_fp,salint/salmax(l)) + 1.0_fp
-                            !
-                            ! Calibration parameter for flocculation
-                            !
-                            ffloc = ffloc * gamflc(l)
-                            !
-                            ffloc = max(min(ffloc , 10.0_fp) , 1.0_fp)
-                         endif
-                      else
-                         !
-                         ! hindered settling Richardson and Zaki formula
-                         ! Previous approach: Oliver's formula
-                         !
-                         hinset = max(0.0_fp , (1.0_fp - max(0.0_fp , aak(nm,ku))/csoil)) 
-                      endif
-                      ws(nm, k, l) = ffloc *ws(nm,k,l) * hinset**5
-                   endif  ! kfs=1, kcs<=2
-                enddo     ! nm
-             enddo        ! k
-          elseif (sedtyp(l) == SEDTYP_COHESIVE) then
-             do k = 1, kmax
-                ku = min(k+1 , kmax)
-                ts = thick(k) + thick(ku)
-                do nm = 1, nmmax
-                   if (kfs(nm)==1 .and. kcs(nm)<=2) then
-                      if (lsal > 0) then
-                         salint = (  thick(k) *r0(nm, ku, lsal) &
-                                &  + thick(ku)*r0(nm, k , lsal)  ) / ts
-                         !
-                         ! Originally the following line was:
-                         !    if (salint.lt.salmax(l)) then
-                         ! A crash occurs due to (small) negative values of
-                         ! salint in combination with salmax(l)=0 (dividing by
-                         ! zero). This is solved by adding the test:
-                         !    salmax(l).gt.0.0
-                         !
-                         if (salint<salmax(l) .and. salmax(l)>0.0_fp) then
-                            a = 1.0_fp + wsm(l)/ws0(l)
-                            b = a - 2.0_fp
-                            ws(nm, k, l) = 0.5_fp * ws0(l) * (a-b*cos(pi*salint/salmax(l)))
-                         else
-                            ws(nm, k, l) = wsm(l)
-                         endif
-                      else
-                         ws(nm, k, l) = ws0(l)
-                      endif
-                      !
-                      ! hindered settling Richardson and Zaki/Mehta
-                      !
-                      hinset = max(0.0_fp , (1.0_fp - max(0.0_fp , aak(nm,ku))/csoil))
-                      ws(nm, k, l) = ws(nm,k,l) * hinset**5
-                   endif   ! kfs=1, kcs<=2
-                enddo      ! nm
-             enddo         ! k
+          h0 = s0(nm) + real(dps(nm),fp)
+          um = (umean(nm) + umean(nmd))/2.0_fp
+          vm = (vmean(nm) + vmean(ndm))/2.0_fp
+          !
+          ! Calculate total (possibly wave enhanced) roughness
+          !
+          kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
+          z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
+                &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
+          chezy = sag * log( 1.0_fp + h0/max(1.0e-8_fp,ee*z0rou) ) / vonkar
+          !
+          ! loop over the interfaces in the vertical
+          !
+          if (zmodel) then
+              kstart = kfsmn0(nm)-1
+              kend   = kfsmx0(nm)-1
           else
-          endif            ! dll_function/sedtyp
-       enddo               ! l
-    else
-       !
-       ! Z-layer model
-       !
-       do l = 1, lsed
-          ll = lst + l
-          !
-          ! the settling velocity can be either be specified by the user, or it
-          ! may dependent on the sediment type: 'sand' or 'mud'
-          !
-          if (dll_function(l) /= ' ') then
+              kstart = 1
+              kend   = kmax
+          endif
+          do k = kstart, kend
              !
-             ! Settling velocity routine supplied by the user in a DLL
+             ! define indices kab and kbe pointing to the layer physically ABove and BElow the interface
+             ! The variables ku/kd for up and down have been avoided because we use those for pos/neg k-index
+             ! directions elsewhere in the Delft3D code.
              !
-             do nm = 1, nmmax
-                if (kfs(nm)==0 .or. kcs(nm)>2) cycle
-                do k = kfsmn0(nm), kfsmx0(nm)
-                   ku = min(k + 1, kfsmx0(nm))
-                   ts = dzs0(nm,k) + dzs0(nm,ku)
-                   nmd  = nm - icx
-                   ndm  = nm - icy
-                   !
-                   ! Input parameters are passed via dll_reals/integers/strings-arrays
-                   !
-                   if (lsal > 0) then
-                      salint = (  dzs0(nm,k) *r0(nm, ku, lsal) &
-                             &  + dzs0(nm,ku)*r0(nm, k , lsal)  ) / ts
-                   else
-                      salint = saleqs
-                   endif
-                   !
-                   if (ltem > 0) then
-                      temint = (  dzs0(nm,k) *r0(nm, ku, ltem) &
-                             &  + dzs0(nm,ku)*r0(nm, k , ltem)  ) / ts
-                   else
-                      temint = temeqs
-                   endif
-                   !
-                   rhoint = (dzs0(nm,k)*rhowat(nm,ku) + dzs0(nm,ku)*rhowat(nm,k)) / ts
-                   !
-                   u = (dzs0(nm,k)*u0(nm ,ku) + dzs0(nm,ku)*u0(nm ,k) + &
-                      & dzs0(nm,k)*u0(nmd,ku) + dzs0(nm,ku)*u0(nmd,k)) / 2.0_fp / ts
-                   v = (dzs0(nm,k)*v0(nm ,ku) + dzs0(nm,ku)*v0(nm ,k) + &
-                      & dzs0(nm,k)*v0(ndm,ku) + dzs0(nm,ku)*v0(ndm,k)) / 2.0_fp / ts
-                   w = (dzs0(nm,k)*wphy(nm,ku) + dzs0(nm,ku)*wphy(nm,k)) / ts
-                   !
-                   if (ltur>0) then
-                      tur_k = rtur0(nm,k,1)
-                   else
-                      tur_k = -999.0_fp
-                   endif
-                   if (ltur>1) then
-                      tur_eps = rtur0(nm,k,2)
-                   else
-                      tur_eps = -999.0_fp
-                   endif
-                   !
-                   h0 = s0(nm) - real(dps(nm),fp)
-                   um = (umean(nm) + umean(nmd))/2.0_fp
-                   vm = (vmean(nm) + vmean(nmd))/2.0_fp
-                   !
-                   ! Calculate total (possibly wave enhanced) roughness
-                   !
-                   kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
-                   z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
-                         &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
-                   chezy = sag * log( 1.0_fp + h0/max(1.0e-8_fp,ee*z0rou) ) / vonkar
-                   !
-                   if (max_reals < 21) then
-                      write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to settling routine.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   dll_reals( 1) = real(timsec ,hp)
-                   dll_reals( 2) = real(u      ,hp)
-                   dll_reals( 3) = real(v      ,hp)
-                   dll_reals( 4) = real(w      ,hp)
-                   dll_reals( 5) = real(salint ,hp)
-                   dll_reals( 6) = real(temint ,hp)
-                   dll_reals( 7) = real(rhoint ,hp)
-                   dll_reals( 8) = real(r0(nm,ku,ll),hp)
-                   dll_reals( 9) = real(aak(nm,ku),hp)
-                   dll_reals(10) = real(tur_k  ,hp)
-                   dll_reals(11) = real(tur_eps,hp)
-                   if (sedd50(l)<0.0_fp) then
-                      dll_reals(12) = real(sedd50fld(nm),hp)
-                   else
-                      dll_reals(12) = real(sedd50(l),hp)
-                   endif
-                   dll_reals(13) = real(dss(nm,l) ,hp)
-                   dll_reals(14) = real(rhosol(l) ,hp)
-                   dll_reals(15) = real(csoil     ,hp)
-                   dll_reals(16) = real(ag        ,hp)
-                   dll_reals(17) = real(vicmol    ,hp)
-                   dll_reals(18) = real(h0        ,hp)
-                   dll_reals(19) = real(um        ,hp)
-                   dll_reals(20) = real(vm        ,hp)
-                   dll_reals(21) = real(chezy     ,hp)
-                   !
-                   if (max_integers < 5) then
-                      write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to settling routine.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   call nm_to_n_and_m(nm, n, m, gdp)
-                   dll_integers( 1) = nm
-                   dll_integers( 2) = n
-                   dll_integers( 3) = m
-                   dll_integers( 4) = k
-                   dll_integers( 5) = l
-                   !
-                   if (max_strings < 2) then
-                      write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to settling routine.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   dll_strings( 1) = gdp%runid
-                   dll_strings( 2) = dll_usrfil(l)
-                   !
-                   ! Initialisation of output variables of user defined settling velocity routine
-                   !
-                   ws_dll    = 0.0_hp
-                   message     = ' '
-                   !
-                   ! psem/vsem is used to be sure this works fine in DD calculations
-                   !
-                   call psemlun
-                   error_ptr = 0
-                   error_ptr = perf_function_fallve(dll_handle(l)       , dll_function(l)       , &
-                                                    dll_integers        , max_integers          , &
-                                                    dll_reals           , max_reals             , &
-                                                    dll_strings         , max_strings           , &
-                                                    ws_dll              , message)
-                   call vsemlun
-                   if (error_ptr /= 0) then
-                      write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
-                      call prterr (lundia,'U021', trim(errmsg))
-                      call d3stop(1, gdp)
-                   endif
-                   if (message /= ' ') then
-                      write (lundia,'(a,a,a)') '*** ERROR Message from user defined settling velocity routine ',trim(dll_function(l)),' :'
-                      write (lundia,'(a,a  )') '          ', trim(message)
-                      write (lundia,'(a    )') ' '
-                      call d3stop(1, gdp)
-                   endif
-                   !
-                   ! Output parameters
-                   !
-                   ws(nm, k-1, l) = real(ws_dll,fp)
-                enddo     ! k
-             enddo        ! nm
-          elseif (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then         
+             if (zmodel) then
+                kab = k + 1
+                kbe = max(k, kfsmn0(nm))
+                tka = dzs0(nm,kab)
+                tkb = dzs0(nm,kbe)
+             else
+                kab = k
+                kbe = min(k + 1, kmax)
+                tka = thick(kab)
+                tkb = thick(kbe)
+             endif
+             tkt = tka + tkb
              !
-             do nm = 1, nmmax
-                if (kfs(nm)==0 .or. kcs(nm)>2) cycle
-                do k = kfsmn0(nm), kfsmx0(nm)
-                   ku     = min(k+1, kfsmx0(nm))
-                   ts     = dzs0(nm,k) + dzs0(nm,ku)
-                   rhoint = (dzs0(nm,k)*rhowat(nm,ku) + dzs0(nm,ku)*rhowat(nm,k)) / ts
-                   s      = rhosol(l) / rhoint
-                   !
-                   ! Molecular viscosity vcmol computed according to Van Rijn (2004) sediment tranport
-                   ! This only needs to be done in case of temperature modelling
-                   ! Otherwise vicmol is used as computed in iniphy.f90 (also according
-                   ! to Van Rijn 2004)
-                   !
-                   if (ltem > 0) then
-                      vcmol = 4.0e-5_fp / (20.0_fp + r0(nm, k, ltem))
-                   else                     
-                      vcmol = vicmol
-                   endif
-                   if (dss(nm, l) < 1.5_fp*dsand) then
-                      ws(nm, k - 1, l) = (s-1.0_fp) * ag * dss(nm,l)**2/(18.0_fp*vcmol)
-                   elseif (dss(nm, l) < 0.5_fp*dgravel) then
-                      if (dss(nm, l) < 2.0_fp*dsand) then
-                         coefw = (-2.9912_fp/dsand) * dss(nm,l) + 15.9824_fp
-                      else
-                         coefw = 10.0_fp
-                      endif
-                      ws(nm, k - 1, l) = coefw * vcmol / dss(nm,l)                   &
-                                   & * (sqrt(1.0_fp + (s-1.0_fp)*ag*dss(nm,l)**3  &
-                                   & / (100.0_fp*vcmol**2)) - 1.0_fp)
-                   else
-                      ws(nm, k - 1, l) = 1.1_fp * sqrt((s-1.0_fp)*ag*dss(nm,l))
-                   endif
-                   !
-                   ffloc = 1.0_fp
-                   if (  iform(l) == -2                          &
-                       & .and. sedd50(l) < dsand                 &
-                       & .and. (lsal     > 0 .or. saleqs > 0.0_fp)  ) then
-                      !
-                      ! Hindered settling (Van Rijn, 2004)
-                      !
-                      !cgel = 1722.0_fp * min(sedd50(l)/dsand , 1.0_fp)
-                      cgel = 0.65_fp * rhosol(l) * min(sedd50(l)/dsand , 1.0_fp)
-                      hinset = max(0.0_fp , (1.0 - max(0.0_fp, 0.65_fp*aak(nm,ku))/cgel))
-                      !
-                      ! Flocculation (Van Rijn, 2004)
-                      !
-                      if (lsal > 0) then
-                        salint = max((dzs0(nm,k)*r0(nm,ku,lsal)+dzs0(nm,ku)*r0(nm,k,lsal))/ts , 0.0_fp)
-                      else
-                        salint = saleqs
-                      endif
-                         !if (salint >= 0.01_fp) then
-                         if (salint >= 0.01_fp .and. salmax(l)>0.0_fp) then
-                         fhulp  = max(4.0_fp+log10(2.0_fp*max(1.0e-6_fp,aak(nm,k))/cgel) , 1.0_fp)
-                         efloc  = min(max(dsand/sedd50(l)-1.0_fp , 1.0_fp) , 3.0_fp)
-                         ffloc0 = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
-                         ffloc  = (ffloc0-1.0_fp) * min(1.0_fp,salint/salmax(l)) + 1.0_fp
-                         !
-                         ! Calibration parameter for flocculation
-                         !
-                         ffloc = ffloc * gamflc(l)
-                         !
-                         ffloc  = max(min(ffloc , 10.0_fp) , 1.0_fp)
-                      endif
-                   else
-                      !
-                      ! hindered settling Richardson and Zaki formula
-                      ! replacement of Oliver's formula by TvK as suggested by
-                      ! H. Winterwerp 17-05-99
-                      !
-                      hinset = max(0.0_fp , (1.0_fp - max(0.0_fp , aak(nm,ku))/csoil)) 
-                   endif
-                   ws(nm, k - 1, l) = ffloc *ws(nm,k - 1,l) * hinset**5
-                enddo     ! k
-             enddo           ! nm
-          elseif (sedtyp(l) == SEDTYP_COHESIVE) then         
-             do nm = 1, nmmax
-                if (kfs(nm)==0 .or. kcs(nm)>2) cycle
-                do k = kfsmn0(nm), kfsmx0(nm)
-                   ku     = min(k + 1, kfsmx0(nm))
-                   ts     = dzs0(nm,k) + dzs0(nm,ku)
-                   if (lsal > 0) then
-                      salint = (  dzs0(nm,k) *r0(nm, ku, lsal) &
-                             &  + dzs0(nm,ku)*r0(nm, k , lsal)  ) / ts
-                      !
-                      ! Originally the following line was:
-                      !    if (salint.lt.salmax(l)) then
-                      ! A crash occurs due to (small) negative values of
-                      ! salint in combination with salmax(l)=0 (dividing by
-                      ! zero). This is solved by adding the test:
-                      !    salmax(l).gt.0.0
-                      !
-                      if (salint<salmax(l) .and. salmax(l)>0.0_fp) then
-                         a = 1.0_fp + wsm(l)/ws0(l)
-                         b = a - 2.0_fp
-                         ws(nm, k - 1, l) = 0.5_fp * ws0(l) * (a-b*cos(pi*salint/salmax(l)))
-                      else
-                         ws(nm, k - 1, l) = wsm(l)
-                      endif
-                   else
-                      ws(nm, k - 1, l) = ws0(l)
-                   endif
-                   !
-                   ! hindered settling Richardson and Zaki/Mehta
-                   !
-                   hinset = max(0.0_fp , (1.0_fp - max(0.0_fp , aak(nm,ku))/csoil))
-                   ws(nm, k - 1, l) = ws(nm,k - 1,l) * hinset**5
-                enddo        ! k
-             enddo           ! nm
-          else
-          endif            ! sedtyp = sand/mud
-       enddo               ! l
-    endif                  ! sigma- / z-model
-end subroutine fallve
+             ! Input parameters are passed via dll_reals/integers/strings-arrays
+             !
+             if (lsal > 0) then
+                salint = max(0.0_fp, (tka*r0(nm, kbe, lsal) + tkb*r0(nm, kab, lsal)  ) / tkt )
+             else
+                salint = saleqs
+             endif
+             !
+             if (ltem > 0) then
+                temint = (  tka*r0(nm, kbe, ltem) + tkb*r0(nm, kab, ltem)  ) / tkt
+             else
+                temint = temeqs
+             endif
+             !
+             rhoint = (tka*rhowat(nm,kbe) + tkb*rhowat(nm,kab)) / tkt
+             !
+             u = (tka*u0(nm ,kbe) + tkb*u0(nm ,kab) + &
+                & tka*u0(nmd,kbe) + tkb*u0(nmd,kab)) / 2.0_fp / tkt
+             v = (tka*v0(nm ,kbe) + tkb*v0(nm ,kab) + &
+                & tka*v0(ndm,kbe) + tkb*v0(ndm,kab)) / 2.0_fp / tkt
+             w = (tka*wphy(nm,kbe) + tkb*wphy(nm,kab)) / tkt
+             !
+             if (ltur>0) then
+                tur_k = rtur0(nm,k,1)
+             else
+                tur_k = -999.0_fp
+             endif
+             if (ltur>1) then
+                tur_eps = rtur0(nm,k,2)
+             else
+                tur_eps = -999.0_fp
+             endif
+             !
+             if (max_reals < WS_MAX_RP) then
+                write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to settling routine.'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
+             endif
+             dll_reals(WS_RP_TIME ) = real(timsec ,hp)
+             dll_reals(WS_RP_ULOC ) = real(u      ,hp)
+             dll_reals(WS_RP_VLOC ) = real(v      ,hp)
+             dll_reals(WS_RP_WLOC ) = real(w      ,hp)
+             dll_reals(WS_RP_SALIN) = real(salint ,hp)
+             dll_reals(WS_RP_TEMP ) = real(temint ,hp)
+             dll_reals(WS_RP_RHOWT) = real(rhoint ,hp)
+             dll_reals(WS_RP_CFRCB) = real(r0(nm,kbe,ll),hp)
+             dll_reals(WS_RP_CTOT ) = real(aak(nm,kbe),hp)
+             dll_reals(WS_RP_KTUR ) = real(tur_k  ,hp)
+             dll_reals(WS_RP_EPTUR) = real(tur_eps,hp)
+             if (sedd50(l)<0.0_fp) then
+                dll_reals(WS_RP_D50) = real(sedd50fld(nm),hp)
+             else
+                dll_reals(WS_RP_D50) = real(sedd50(l),hp)
+             endif
+             dll_reals(WS_RP_DSS  ) = real(dss(nm,l) ,hp)
+             dll_reals(WS_RP_RHOSL) = real(rhosol(l) ,hp)
+             dll_reals(WS_RP_CSOIL) = real(csoil     ,hp)
+             dll_reals(WS_RP_GRAV ) = real(ag        ,hp)
+             dll_reals(WS_RP_VICML) = real(vicmol    ,hp)
+             dll_reals(WS_RP_WDEPT) = real(h0        ,hp)
+             dll_reals(WS_RP_UMEAN) = real(um        ,hp)
+             dll_reals(WS_RP_VMEAN) = real(vm        ,hp)
+             dll_reals(WS_RP_CHEZY) = real(chezy     ,hp)
+             !
+             if (max_integers < WS_MAX_IP) then
+                write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to settling routine.'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
+             endif
+             call nm_to_n_and_m(nm, n, m, gdp)
+             dll_integers(WS_IP_NM  ) = nm
+             dll_integers(WS_IP_N   ) = n
+             dll_integers(WS_IP_M   ) = m
+             dll_integers(WS_IP_K   ) = k
+             dll_integers(WS_IP_ISED) = l
+             !
+             if (max_strings < WS_MAX_SP) then
+                write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to settling routine.'
+                call write_error(errmsg, unit=lundia)
+                error = .true.
+                return
+             endif
+             dll_strings(WS_SP_RUNID) = gdp%runid
+             dll_strings(WS_SP_USRFL) = dll_usrfil(l)
+             !
+             call eqsettle(dll_function, dll_handle, max_integers, max_reals, max_strings, &
+                         & dll_integers, dll_reals, dll_strings, lundia, iform_settle(l),  &
+                         & localpar, gdp%gdtrapar%npar, wsloc, error)
+             if (error) call d3stop(1, gdp)
+             !
+             ws(nm, k, l) = wsloc
+          enddo     ! k
+       enddo        ! nm
+    enddo           ! l
+    deallocate (localpar, stat = istat)
+end subroutine fallve          

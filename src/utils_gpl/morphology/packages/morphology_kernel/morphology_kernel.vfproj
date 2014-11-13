@@ -56,6 +56,7 @@
 		<File RelativePath=".\src\compdiam.f90"/>
 		<File RelativePath=".\src\comphidexp.f90"/>
 		<File RelativePath=".\src\compsandfrac.f90"/>
+		<File RelativePath=".\src\eqsettle.f90"/>
 		<File RelativePath=".\src\eqtran.f90"/>
 		<File RelativePath=".\src\erosilt.f90"/>
 		<File RelativePath=".\src\factor3d2d.f90"/>

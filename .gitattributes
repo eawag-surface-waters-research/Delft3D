@@ -4745,6 +4745,7 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/compbsskin.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/compdiam.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/comphidexp.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/compsandfrac.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/eqsettle.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/eqtran.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/erosilt.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/factor3d2d.f90 -text

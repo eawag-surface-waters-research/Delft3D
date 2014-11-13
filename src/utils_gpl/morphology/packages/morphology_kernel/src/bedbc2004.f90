@@ -1,4 +1,4 @@
-subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
+subroutine bedbc2004(tp        ,rhowat    , &
                    & h1        ,umod      ,d10       ,zumod     ,d50       , &
                    & d90       ,z0cur     ,z0rou     ,drho      ,dstar     , &
                    & taucr0    ,u2dhim    ,aks       ,ra        ,usus      , &
@@ -61,7 +61,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp)              :: d50
     real(fp)              :: d90
     real(fp)              :: delw
-    real(fp), intent(out) :: drho
+    real(fp), intent(in)  :: drho
     real(fp), intent(out) :: dss    !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: dstar
     real(fp), intent(out) :: fc1
@@ -75,7 +75,6 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp), intent(out) :: phicur
     real(fp)              :: ra
     real(fp)              :: rc
-    real(fp), intent(in)  :: rhosol !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: rhowat !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: rlabda !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: ta
@@ -153,7 +152,6 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     !
     ! Dimensionless density and grain size
     !
-    drho  = (rhosol-rhowat) / rhowat
     uwb   = 0.0_fp
     usus  = umod
     zusus = zumod

@@ -83,14 +83,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)         , dimension(:)    , pointer :: taucr
     real(fp)         , dimension(:)    , pointer :: tetacr
     real(fp)         , dimension(:)    , pointer :: facdss
-    real(fp)         , dimension(:)    , pointer :: ws0
-    real(fp)         , dimension(:)    , pointer :: wsm
-    real(fp)         , dimension(:)    , pointer :: salmax
     real(fp)         , dimension(:)    , pointer :: sdbuni
     real(fp)         , dimension(:)    , pointer :: sedtrcfac
     real(fp)         , dimension(:)    , pointer :: thcmud
     real(fp)         , dimension(:)    , pointer :: tcguni
-    real(fp)         , dimension(:)    , pointer :: gamflc
     real(fp)         , dimension(:)    , pointer :: mudcnt
     real(fp)         , dimension(:)    , pointer :: pmcrit
     integer          , dimension(:)    , pointer :: nseddia
@@ -108,6 +104,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     character(256)   , dimension(:)    , pointer :: dll_name_settle
     integer(pntrsize), dimension(:)    , pointer :: dll_handle_settle
     character(256)   , dimension(:)    , pointer :: dll_usrfil_settle
+    integer          , dimension(:)    , pointer :: iform_settle
+    real(fp)         , dimension(:,:)  , pointer :: par_settle
     integer          , dimension(:)    , pointer :: iform
     character(256)   , dimension(:)    , pointer :: flstrn
 !
@@ -185,9 +183,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     dstar                => sedpar%dstar
     taucr                => sedpar%taucr
     tetacr               => sedpar%tetacr
-    ws0                  => sedpar%ws0
-    wsm                  => sedpar%wsm
-    salmax               => sedpar%salmax
     sdbuni               => sedpar%sdbuni
     thcmud               => sedpar%thcmud
     mudcnt               => sedpar%mudcnt
@@ -206,6 +201,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     dll_name_settle      => trapar%dll_name_settle
     dll_handle_settle    => trapar%dll_handle_settle
     dll_usrfil_settle    => trapar%dll_usrfil_settle
+    iform_settle         => trapar%iform_settle
+    par_settle           => trapar%par_settle
     iform                => trapar%iform
     flstrn               => trapar%flstrn
     !
@@ -237,11 +234,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        if (istat==0) allocate (sedpar%dss       (nmlb:nmub            ,max(1,lsed)), stat = istat)
        if (istat==0) allocate (sedpar%facdss    (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (sedpar%ws0       (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (sedpar%wsm       (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (sedpar%salmax    (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (sedpar%tcguni    (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (sedpar%gamflc    (                      max(1,lsed)), stat = istat)
        !
        if (istat==0) allocate (sedpar%thcmud    (nmlb:nmub            ), stat = istat)
        if (istat==0) allocate (sedpar%flstcg    (                      max(1,lsed)), stat = istat)
@@ -277,16 +270,11 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        inisedunit    => sedpar%inisedunit
        !
        facdss        => sedpar%facdss
-       ws0           => sedpar%ws0
-       wsm           => sedpar%wsm
-       salmax        => sedpar%salmax
-       !
        thcmud        => sedpar%thcmud
        !
        mudcnt        => sedpar%mudcnt
        pmcrit        => sedpar%pmcrit
        sedd50fld     => sedpar%sedd50fld
-       gamflc        => sedpar%gamflc
        tcguni        => sedpar%tcguni
        flstcg        => sedpar%flstcg
        !
@@ -331,7 +319,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     sedd50fld    = rmissval
     !
     tcguni       = 1.5
-    gamflc       = 1.0
     !
     ! Initialization of local parameters/arrays
     !
@@ -580,18 +567,27 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 !
                 call prop_get_string(sedblock_ptr, '*', 'SettleFunction', dll_function_settle(l))
                 call prop_get_string(sedblock_ptr, '*', 'SettleInput'   , dll_usrfil_settle(l))
+                iform_settle(l) = 15
+             elseif (sedtyp(l) == SEDTYP_COHESIVE) then
+                iform_settle(l) = 1
+             elseif (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+                iform_settle(l) = 2
              endif
              !
-             salmax(l) = rmissval
-             ws0(l)    = rmissval
-             wsm(l)    = rmissval
-             call prop_get(sedblock_ptr, '*', 'SalMax', salmax(l))
-             call prop_get(sedblock_ptr, '*', 'WS0'   , ws0(l))
-             call prop_get(sedblock_ptr, '*', 'WSM'   , wsm(l))
-             !
-             ! Calibration parameter for flocculation
-             !
-             call prop_get(sedblock_ptr, '*', 'GamFloc', gamflc(l))
+             par_settle(:,l) = rmissval
+             if (iform_settle(l) == 1) then
+                call prop_get(sedblock_ptr, '*', 'SalMax', par_settle(1,l))
+                call prop_get(sedblock_ptr, '*', 'WS0'   , par_settle(2,l))
+                call prop_get(sedblock_ptr, '*', 'WSM'   , par_settle(3,l))
+             elseif (iform_settle(l) == 2) then
+                !
+                ! These parameters will only be used for iform = -2, but unfortunately iform hasn't been determined yet.
+                ! In the future we may have to read the parameters in a different order.
+                !
+                call prop_get(sedblock_ptr, '*', 'SalMax', par_settle(1,l))
+                par_settle(2,l) = 1.0_fp
+                call prop_get(sedblock_ptr, '*', 'GamFloc', par_settle(2,l))
+             endif
              !
              ! Tracer calibration factor
              !
@@ -674,11 +670,20 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           namsed(l) = namcon(max(0, lsal, ltem) + l)
        enddo
        call rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
-                  & facdss    ,sedtyp    ,rhosol    ,sedd50    ,salmax    , &
-                  & ws0       ,wsm       ,sdbuni    ,flsdbd    ,cdryb     , &
-                  & sedpar%sedblock      ,version   ,error     )
+                  & facdss    ,sedtyp    ,rhosol    ,sedd50    ,par_settle, &
+                  & sdbuni    ,flsdbd    ,cdryb     ,sedpar%sedblock      , &
+                  & version   ,error     )
        close (luninp)
        if (error) return
+       !
+       do l = 1, lsed
+          if (sedtyp(l) == SEDTYP_COHESIVE) then
+             iform_settle(l) = 1
+          elseif (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+             iform_settle(l) = 2
+             par_settle(2,l) = 1.0_fp ! gamflc default
+          endif
+       enddo
        !
        ! Old format: SedDia specified, but stored in "wrong" array.
        !
@@ -702,9 +707,9 @@ end subroutine rdsed
 
 
 subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
-                 & facdss    ,sedtyp    ,rhosol    ,seddia    ,salmax    , &
-                 & ws0       ,wsm       ,sdbuni    ,flsdbd    ,cdryb     , &
-                 & sedblock  ,version   ,error     )
+                 & facdss    ,sedtyp    ,rhosol    ,seddia    ,parsettle , &
+                 & sdbuni    ,flsdbd    ,cdryb     ,sedblock  ,version   , &
+                 & error     )
 !!--description-----------------------------------------------------------------
 !
 ! Reads sediment input version 0 (or no version number found) or 1
@@ -719,24 +724,22 @@ subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
 !
 ! Call variables
 !
-    integer                      , intent(out):: iopsus
-    integer                      , intent(in) :: lundia !  Description and declaration in inout.igs
-    integer                      , intent(in) :: luninp
-    integer                      , intent(in) :: version
-    integer                                   :: lsed
-    logical                      , intent(out):: error
-    real(fp)                     , intent(out):: csoil
-    real(fp)       , dimension(:), intent(out):: cdryb
-    real(fp)       , dimension(:), intent(out):: facdss
-    real(fp)       , dimension(:), intent(out):: rhosol
-    real(fp)       , dimension(:), intent(out):: salmax
-    real(fp)       , dimension(:), intent(out):: sdbuni
-    real(fp)       , dimension(:), intent(out):: seddia
-    real(fp)       , dimension(:), intent(out):: ws0
-    real(fp)       , dimension(:), intent(out):: wsm
-    integer        , dimension(:), intent(out):: sedtyp !  sediment type: 0=total/1=noncoh/2=coh
-    character(256) , dimension(:), intent(out):: flsdbd
-    type(tree_data), dimension(:), intent(out):: sedblock
+    integer                        , intent(out):: iopsus
+    integer                        , intent(in) :: lundia !  Description and declaration in inout.igs
+    integer                        , intent(in) :: luninp
+    integer                        , intent(in) :: version
+    integer                                     :: lsed
+    logical                        , intent(out):: error
+    real(fp)                       , intent(out):: csoil
+    real(fp)       , dimension(:)  , intent(out):: cdryb
+    real(fp)       , dimension(:)  , intent(out):: facdss
+    real(fp)       , dimension(:)  , intent(out):: rhosol
+    real(fp)       , dimension(:,:), intent(out):: parsettle
+    real(fp)       , dimension(:)  , intent(out):: sdbuni
+    real(fp)       , dimension(:)  , intent(out):: seddia
+    integer        , dimension(:)  , intent(out):: sedtyp !  sediment type: 0=total/1=noncoh/2=coh
+    character(256) , dimension(:)  , intent(out):: flsdbd
+    type(tree_data), dimension(:)  , intent(out):: sedblock
 
 !
 ! Local variables
@@ -790,9 +793,9 @@ subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
        endif
        read (luninp, *, iostat = iocond) rhosol(l)
        if (iocond == 0) read (luninp, *, iostat = iocond) seddia(l)
-       if (iocond == 0) read (luninp, *, iostat = iocond) salmax(l)
-       if (iocond == 0) read (luninp, *, iostat = iocond) ws0(l)
-       if (iocond == 0) read (luninp, *, iostat = iocond) wsm(l)
+       if (iocond == 0) read (luninp, *, iostat = iocond) parsettle(1,l) ! salmax
+       if (iocond == 0) read (luninp, *, iostat = iocond) parsettle(2,l) ! ws0
+       if (iocond == 0) read (luninp, *, iostat = iocond) parsettle(3,l) ! wsm
        if (iocond == 0) read (luninp, '(a)', iostat = iocond) line ! tcd
        call tree_create_node(sedblock_ptr,'TcrSed',anode)
        call tree_put_data(anode,transfer(trim(line),node_value),"STRING")
@@ -927,13 +930,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)        , dimension(:)    , pointer :: cdryb
     real(fp)        , dimension(:,:)  , pointer :: dss
     real(fp)        , dimension(:)    , pointer :: facdss
-    real(fp)        , dimension(:)    , pointer :: ws0
-    real(fp)        , dimension(:)    , pointer :: wsm
-    real(fp)        , dimension(:)    , pointer :: salmax
     real(fp)        , dimension(:)    , pointer :: sdbuni
     real(fp)        , dimension(:)    , pointer :: sedtrcfac
     real(fp)        , dimension(:)    , pointer :: tcguni
-    real(fp)        , dimension(:)    , pointer :: gamflc
     real(fp)        , dimension(:)    , pointer :: pmcrit
     integer         , dimension(:)    , pointer :: nseddia
     integer         , dimension(:)    , pointer :: sedtyp
@@ -949,6 +948,8 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     character(256)  , dimension(:)    , pointer :: dll_function_settle
     character(256)  , dimension(:)    , pointer :: dll_name_settle
     character(256)  , dimension(:)    , pointer :: dll_usrfil_settle
+    integer         , dimension(:)    , pointer :: iform_settle
+    real(fp)        , dimension(:,:)  , pointer :: par_settle
     integer         , dimension(:)    , pointer :: iform
     !
     integer                   :: i
@@ -981,13 +982,9 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     cdryb                => sedpar%cdryb
     dss                  => sedpar%dss
     facdss               => sedpar%facdss
-    ws0                  => sedpar%ws0
-    wsm                  => sedpar%wsm
-    salmax               => sedpar%salmax
     sdbuni               => sedpar%sdbuni
     sedtrcfac            => sedpar%sedtrcfac
     tcguni               => sedpar%tcguni
-    gamflc               => sedpar%gamflc
     pmcrit               => sedpar%pmcrit
     nseddia              => sedpar%nseddia
     sedtyp               => sedpar%sedtyp
@@ -1003,6 +1000,8 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     dll_function_settle  => trapar%dll_function_settle
     dll_name_settle      => trapar%dll_name_settle
     dll_usrfil_settle    => trapar%dll_usrfil_settle
+    iform_settle         => trapar%iform_settle
+    par_settle           => trapar%par_settle
     iform                => trapar%iform
     !
     rmissval = -999.0_fp
@@ -1451,17 +1450,24 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
           endif
        endif
        !
-       if (iform(l)==-2) then
-          !
-          ! Van Rijn 2007
-          !
-          txtput1 = '  Flocculation factor GamFloc'
-          write (lundia, '(2a,e12.4)') txtput1, ':', gamflc(l)
-          !
-       endif
-       !
        call echotrafrm(lundia      ,trapar     ,l         )
-       if (dll_function_settle(l) /= ' ') then
+       !
+       if (iform_settle(l) == 1) then
+          txtput1 = '  SALMAX'
+          write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(1,l)
+          txtput1 = '  WS0'
+          write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(2,l)
+          txtput1 = '  WSM'
+          write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(3,l)
+       elseif (iform_settle(l) == 2) then
+          if (iform(l) == -2) then
+             iform_settle(l) = -2
+             txtput1 = '  SALMAX'
+             write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(1,l)
+             txtput1 = '  Flocculation factor GamFloc'
+             write (lundia, '(2a,e12.4)') txtput1, ':', par_settle(2,l)
+          endif
+       elseif (iform_settle(l) == 15) then
           !
           ! User defined settling velocity function
           !
@@ -1473,13 +1479,6 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
              txtput1 = '  Input for Settle function'
              write (lundia, '(3a)') txtput1, ': ', trim(dll_usrfil_settle(l))
           endif
-       elseif (sedtyp(l) == SEDTYP_COHESIVE) then
-          txtput1 = '  SALMAX'
-          write (lundia, '(2a,e12.4)') txtput1, ':', salmax(l)
-          txtput1 = '  WS0'
-          write (lundia, '(2a,e12.4)') txtput1, ':', ws0(l)
-          txtput1 = '  WSM'
-          write (lundia, '(2a,e12.4)') txtput1, ':', wsm(l)
        endif
     enddo
     !
