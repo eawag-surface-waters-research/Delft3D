@@ -109,7 +109,6 @@
       real(fp)                           :: ksRip       !< I  ripple roughness height                            (-)
       real(fp)                           :: z0cur       !< I  current related bed roughness z_0 height           (m)
       real(fp)                           :: z0rou       !< I  wave enhanced bed roughness z_0 height             (m)
-      real(fp)                           :: SalMax      !< I  Maximum salinity                                   (g/kg)
       real(fp)                           :: TraFrm      !< I  transport formula number                           (-)
       real(fp)                           :: TraPar01    !< I  transport formula specific parameter 1             (-)
       real(fp)                           :: TraPar02    !< I  transport formula specific parameter 2             (-)
@@ -191,7 +190,6 @@
       real(fp)                           :: sigmol      !<    Prandtl-Schmidt number                             (-)
       real(fp)                           :: thick0      !<    thickness of gridcell kmaxsd during entrainment    (m)
       real(fp)                           :: thick1      !<    thickness of gridcell kmaxsd during deposition     (m)
-      real(fp)                           :: ws0         !<    -- settling velocity --
       real(fp)                           :: camax       !<    maximum sediment concentration (approx 1600/2650)  (-)
       real(fp)                           :: eps         !<    precision threshold                                (-)
       real(fp), dimension(:), allocatable:: sig         !<    sigma-level of centre of layer                     (-)
@@ -353,22 +351,21 @@
          ksRip       = real(pmsa( ipnt( 50) ),fp)
          z0cur       = real(pmsa( ipnt( 51) ),fp)
          z0rou       = real(pmsa( ipnt( 52) ),fp)
-         SalMax      = real(pmsa( ipnt( 53) ),fp)
-         TraFrm      = real(pmsa( ipnt( 54) ),fp)
-         TraPar01    = real(pmsa( ipnt( 55) ),fp)
-         TraPar02    = real(pmsa( ipnt( 56) ),fp)
-         TraPar03    = real(pmsa( ipnt( 57) ),fp)
-         TraPar04    = real(pmsa( ipnt( 58) ),fp)
-         TraPar05    = real(pmsa( ipnt( 59) ),fp)
-         TraPar06    = real(pmsa( ipnt( 60) ),fp)
-         TraPar07    = real(pmsa( ipnt( 61) ),fp)
-         TraPar08    = real(pmsa( ipnt( 62) ),fp)
-         TraPar09    = real(pmsa( ipnt( 63) ),fp)
-         TraPar10    = real(pmsa( ipnt( 64) ),fp)
-         !ITIME       = real(pmsa( ipnt( 65) ),fp)
-         !DELT        = real(pmsa( ipnt( 66) ),fp)
-         !AuxSys      = real(pmsa( ipnt( 67) ),fp)
-         fixfac      = real(pmsa( ipnt( 68) ),fp)
+         TraFrm      = real(pmsa( ipnt( 53) ),fp)
+         TraPar01    = real(pmsa( ipnt( 54) ),fp)
+         TraPar02    = real(pmsa( ipnt( 55) ),fp)
+         TraPar03    = real(pmsa( ipnt( 56) ),fp)
+         TraPar04    = real(pmsa( ipnt( 57) ),fp)
+         TraPar05    = real(pmsa( ipnt( 58) ),fp)
+         TraPar06    = real(pmsa( ipnt( 59) ),fp)
+         TraPar07    = real(pmsa( ipnt( 60) ),fp)
+         TraPar08    = real(pmsa( ipnt( 61) ),fp)
+         TraPar09    = real(pmsa( ipnt( 62) ),fp)
+         TraPar10    = real(pmsa( ipnt( 63) ),fp)
+         !ITIME       = real(pmsa( ipnt( 64) ),fp)
+         !DELT        = real(pmsa( ipnt( 65) ),fp)
+         !AuxSys      = real(pmsa( ipnt( 66) ),fp)
+         fixfac      = real(pmsa( ipnt( 67) ),fp)
 !
 !   *****     Insert your code here  *****
 !
@@ -444,7 +441,6 @@
          sigmol        = 1.0_fp
          lsecfl        = 1
          suspfrac      = TypeSed>0
-         ws0           = -999.0_fp ! Should ws0 really be an input? Use Wsettle or compute ws0 (non-coh)?
          scour         = TauAdd>0.0
          ubot_from_com = .true.
          camax         = 0.65_fp
@@ -537,7 +533,7 @@
             call eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                       & frac      ,sigmol    ,dicww     ,lundia    ,taucr0    , &
                       & ksRip     ,i2d3d     ,lsecfl    ,SpirFloInt,suspfrac  , &
-                      & tetacr    ,SalMax    ,ws0       ,concin    , &
+                      & tetacr    ,concin    , &
                       & SlopeX    ,SlopeY    ,UOrb      ,TauAdd    ,cal_sus   , &
                       & cal_bed   ,cal_susw  ,cal_bedw  ,cal_espir ,wave      , &
                       & scour     ,ubot_from_com        ,camax     ,eps       , &
@@ -634,23 +630,23 @@
 !
          fl  ( iflux +  1  ) = flxsrc
          fl  ( iflux +  2  ) = flxsnk
-         pmsa( ipnt( 69)   ) = real(SBCx     ,4)
-         pmsa( ipnt( 70)   ) = real(SBCy     ,4)
-         pmsa( ipnt( 71)   ) = real(SBWx     ,4)
-         pmsa( ipnt( 72)   ) = real(SBWy     ,4)
-         pmsa( ipnt( 73)   ) = real(SSWx     ,4)
-         pmsa( ipnt( 74)   ) = real(SSWy     ,4)
-         pmsa( ipnt( 75)   ) = real(AKS      ,4) 
-         pmsa( ipnt( 76)   ) = real(CAKS     ,4) 
-         pmsa( ipnt( 77)   ) = real(TAURAT   ,4) 
-         pmsa( ipnt( 78)   ) = real(Conc2D   ,4) 
-         pmsa( ipnt( 79)   ) = real(caks_ss3d,4) 
-         pmsa( ipnt( 80)   ) = real(aks_ss3d ,4) 
-         pmsa( ipnt( 81)   ) = real(USt2     ,4) 
-         pmsa( ipnt( 82)   ) = real(T_relax  ,4) 
-         pmsa( ipnt( 83)   ) = real(DSS      ,4)  
-         pmsa( ipnt( 84)   ) = real(SourSe   ,4)
-         pmsa( ipnt( 85)   ) = real(SinkSe   ,4)
+         pmsa( ipnt( 68)   ) = real(SBCx     ,4)
+         pmsa( ipnt( 69)   ) = real(SBCy     ,4)
+         pmsa( ipnt( 70)   ) = real(SBWx     ,4)
+         pmsa( ipnt( 71)   ) = real(SBWy     ,4)
+         pmsa( ipnt( 72)   ) = real(SSWx     ,4)
+         pmsa( ipnt( 73)   ) = real(SSWy     ,4)
+         pmsa( ipnt( 74)   ) = real(AKS      ,4) 
+         pmsa( ipnt( 75)   ) = real(CAKS     ,4) 
+         pmsa( ipnt( 76)   ) = real(TAURAT   ,4) 
+         pmsa( ipnt( 77)   ) = real(Conc2D   ,4) 
+         pmsa( ipnt( 78)   ) = real(caks_ss3d,4) 
+         pmsa( ipnt( 79)   ) = real(aks_ss3d ,4) 
+         pmsa( ipnt( 80)   ) = real(USt2     ,4) 
+         pmsa( ipnt( 81)   ) = real(T_relax  ,4) 
+         pmsa( ipnt( 82)   ) = real(DSS      ,4)  
+         pmsa( ipnt( 83)   ) = real(SourSe   ,4)
+         pmsa( ipnt( 84)   ) = real(SinkSe   ,4)
 !
 !        Increment pointers
 !
