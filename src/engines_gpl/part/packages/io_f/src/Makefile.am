@@ -37,7 +37,7 @@ libio_f_la_SOURCES = \
          meteo1temphelpers.f90 \
          meteo1.f90 \
          rdwnd.f90 \
-         openfl.F90 \
+         openfl.f90 \
          getdps.f90 \
          part12.f90 \
          part13.f90 \
