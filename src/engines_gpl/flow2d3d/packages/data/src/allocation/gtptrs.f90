@@ -53,7 +53,6 @@ subroutine gtptrs(gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer(pntrsize), pointer :: aks
     integer(pntrsize), pointer :: alfas
     integer(pntrsize), pointer :: alpha
     integer(pntrsize), pointer :: ampbc
@@ -209,7 +208,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: r1
     integer(pntrsize), pointer :: rbnd
     integer(pntrsize), pointer :: rbuff
-    integer(pntrsize), pointer :: rca
     integer(pntrsize), pointer :: rettim
     integer(pntrsize), pointer :: rho
     integer(pntrsize), pointer :: rhowat
@@ -220,7 +218,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: rnpl
     integer(pntrsize), pointer :: rob
     integer(pntrsize), pointer :: rsed
-    integer(pntrsize), pointer :: rsedeq
     integer(pntrsize), pointer :: rthbnd
     integer(pntrsize), pointer :: rtu2d0
     integer(pntrsize), pointer :: rtu2d1
@@ -531,7 +528,6 @@ subroutine gtptrs(gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    aks        => gdp%gdr_i_ch%aks
     alfas      => gdp%gdr_i_ch%alfas
     alpha      => gdp%gdr_i_ch%alpha
     ampbc      => gdp%gdr_i_ch%ampbc
@@ -687,7 +683,6 @@ subroutine gtptrs(gdp)
     r1         => gdp%gdr_i_ch%r1
     rbnd       => gdp%gdr_i_ch%rbnd
     rbuff      => gdp%gdr_i_ch%rbuff
-    rca        => gdp%gdr_i_ch%rca
     rettim     => gdp%gdr_i_ch%rettim
     rho        => gdp%gdr_i_ch%rho
     rhowat     => gdp%gdr_i_ch%rhowat
@@ -698,7 +693,6 @@ subroutine gtptrs(gdp)
     rnpl       => gdp%gdr_i_ch%rnpl
     rob        => gdp%gdr_i_ch%rob
     rsed       => gdp%gdr_i_ch%rsed
-    rsedeq     => gdp%gdr_i_ch%rsedeq
     rthbnd     => gdp%gdr_i_ch%rthbnd
     rtu2d0     => gdp%gdr_i_ch%rtu2d0
     rtu2d1     => gdp%gdr_i_ch%rtu2d1
@@ -1067,7 +1061,6 @@ subroutine gtptrs(gdp)
 !
 ! REAL POOL ARRAY
 !
-    aks        = gtrpnt('aks'   , gdp)
     alfas      = gtrpnt('alfas' , gdp)
     alpha      = gtrpnt('alpha' , gdp)
     ampbc      = gtrpnt('ampbc' , gdp)
@@ -1241,7 +1234,6 @@ subroutine gtptrs(gdp)
     r0         = gtrpnt('r0'    , gdp)
     r1         = gtrpnt('r1'    , gdp)
     rbnd       = gtrpnt('rbnd'  , gdp)
-    rca        = gtrpnt('rca'   , gdp)
     rettim     = gtrpnt('rettim', gdp)
     rho        = gtrpnt('rho'   , gdp)
     rhowat     = gtrpnt('rhowat', gdp)
@@ -1251,7 +1243,6 @@ subroutine gtptrs(gdp)
     rmneg      = gtrpnt('rmneg' , gdp)
     rob        = gtrpnt('rob'   , gdp)
     rsed       = gtrpnt('rsed'  , gdp)
-    rsedeq     = gtrpnt('rsedeq', gdp)
     rthbnd     = gtrpnt('rthbnd', gdp)
     rtu2d0     = gtrpnt('rtu2d0', gdp)
     rtu2d1     = gtrpnt('rtu2d1', gdp)

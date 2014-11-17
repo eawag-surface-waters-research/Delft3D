@@ -1,8 +1,7 @@
 subroutine red_soursin(nmmax     ,kmax      ,thick     , &
                      & lsal      ,ltem      ,lsed      ,lsedtot   , &
                      & dps       ,s0        ,s1        ,r0        , &
-                     & rsedeq    ,nst       , &
-                     & gdp       )
+                     & nst       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -52,6 +51,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
     !
     integer , dimension(:,:)         , pointer :: kmxsed
     real(fp), dimension(:,:)         , pointer :: fixfac
+    real(fp), dimension(:,:)         , pointer :: rsedeq
     real(fp), dimension(:,:)         , pointer :: sinkse
     real(fp), dimension(:,:)         , pointer :: sourse
     real(fp), dimension(:,:)         , pointer :: sour_im
@@ -86,11 +86,9 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)     , intent(in)  :: r0
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lsed)                :: rsedeq
 !
 ! Local variables
 !
-    integer        :: k
     integer        :: kmaxsd
     integer        :: l
     integer        :: ll
@@ -111,6 +109,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
 !
     kmxsed              => gdp%gderosed%kmxsed
     fixfac              => gdp%gderosed%fixfac
+    rsedeq              => gdp%gderosed%rsedeq
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     sour_im             => gdp%gderosed%sour_im
@@ -186,9 +185,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
                  sinkse(nm, l)  = sinkse(nm, l) *fixfac(nm,l)
                  sourse(nm, l)  = sourse(nm, l) *fixfac(nm,l)
                  sour_im(nm, l) = sour_im(nm, l)*fixfac(nm,l)
-                 do k = 1, kmax
-                    rsedeq(nm, k, l) = rsedeq(nm, k, l)*fixfac(nm,l)
-                 enddo
+                 rsedeq(nm, l)  = rsedeq(nm, l) *fixfac(nm,l)
               endif
           enddo
        endif

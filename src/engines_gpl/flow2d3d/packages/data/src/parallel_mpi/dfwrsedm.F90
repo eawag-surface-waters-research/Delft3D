@@ -1,7 +1,7 @@
 subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                 & mmax      ,kmax      ,nmaxus    ,lsed      ,lsedtot   , &
                 & sbuu      ,sbvv      ,ssuu      ,ssvv      ,ws        , &
-                & rsedeq    ,dps       ,rca       ,aks       ,gdp       )
+                & dps       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -93,6 +93,9 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     real(fp), dimension(:,:)             , pointer :: sswvv
     real(fp), dimension(:,:)             , pointer :: sucor
     real(fp), dimension(:,:)             , pointer :: svcor
+    real(fp), dimension(:,:)             , pointer :: aks
+    real(fp), dimension(:,:)             , pointer :: rca
+    real(fp), dimension(:,:)             , pointer :: rsedeq
     real(fp), dimension(:,:)             , pointer :: sinkse
     real(fp), dimension(:,:)             , pointer :: sourse
     real(fp), dimension(:,:)             , pointer :: taurat
@@ -121,9 +124,6 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     logical                                                                    , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)            , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed)  , intent(in)  :: rsedeq !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: rca    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssuu   !  Description and declaration in esm_alloc_real.f90
@@ -218,7 +218,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     sswvv               => gdp%gderosed%e_sswt
     sucor               => gdp%gderosed%e_scrn
     svcor               => gdp%gderosed%e_scrt
-    sinkse              => gdp%gderosed%sinkse
+    aks                 => gdp%gderosed%aks
+    rca                 => gdp%gderosed%rca
     sourse              => gdp%gderosed%sourse
     taurat              => gdp%gderosed%taurat
     ust2                => gdp%gderosed%ust2
@@ -286,7 +287,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           if (kmax==1) then
              call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
                 & 'Equilibrium concentration of sediment (2D only)'            , &
-                & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lsed      ,0     , &
+                & 4         ,nmaxgl    ,mmaxgl    ,1         ,lsed      ,0     , &
                 & lundia    ,gdp       )
           endif
        endif
@@ -623,9 +624,14 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           ! group 5: element 'RSEDEQ'
           ! kmax=1: don't use kmaxout/smlay
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed) )
-          do k=1,kmax
-             rbuff4(:, :, k, 1:lsed) = rsedeq(:, :, k, 1:lsed)
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed, 1) )
+          do l = 1 ,lsed
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff4(n, m, l, 1) = rsedeq(nm, l)
+                enddo
+             enddo
           enddo
           call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
           deallocate(rbuff4)
@@ -1337,9 +1343,10 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    !
-                   ! near-bed reference concentration of sediment
+                   ! reference height for near-bed reference concentration of sediment
                    !
-                   rbuff4(n, m, l, 1) = aks(n, m, l)
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff4(n, m, l, 1) = aks(nm, l)
                 enddo
              enddo
           enddo
@@ -1360,7 +1367,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                 !
                 ! near-bed reference concentration of sediment
                 !
-                rbuff4(n, m, l, 1) = rca(n, m, l)
+                call n_and_m_to_nm(n, m, nm, gdp)
+                rbuff4(n, m, l, 1) = rca(nm, l)
              enddo
           enddo
        enddo

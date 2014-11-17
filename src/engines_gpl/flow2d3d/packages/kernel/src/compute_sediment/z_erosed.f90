@@ -3,14 +3,14 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                   & lsecfl    ,kfs       ,kfu       ,kfv       ,dzs1      , &
                   & r0        ,u0eul     ,v0eul     ,s0        ,dps       , &
                   & z0urou    ,z0vrou    ,sour      ,sink      ,rhowat    , &
-                  & ws        ,rsedeq    ,z0ucur    ,z0vcur    ,sigmol    , &
+                  & ws        ,z0ucur    ,z0vcur    ,sigmol    , &
                   & taubmx    ,s1        ,uorb      ,tp        ,sigdif    , &
                   & lstsci    ,thick     ,dicww     ,kcs       , &
                   & kcu       ,kcv       ,guv       ,gvu       ,sbuu      , &
                   & sbvv      ,seddif    ,hrms      ,ltur      , &
-                  & teta      ,rlabda    ,aks       ,saleqs    , &
+                  & teta      ,rlabda    ,saleqs    , &
                   & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
-                  & hv        ,rca       ,ubot      ,rtur0     , &
+                  & hv        ,ubot      ,rtur0     , &
                   & temeqs    ,gsqs      ,guu       ,gvv       ,kfsmin    , &
                   & kfsmax    ,dzs0      ,kfumin    ,kfumax    ,kfvmin    , &
                   & kfvmax    ,dzu1      ,dzv1      ,dt        ,icall     , &
@@ -150,6 +150,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: sswvv
     real(fp)         , dimension(:,:)    , pointer :: sutot
     real(fp)         , dimension(:,:)    , pointer :: svtot
+    real(fp)         , dimension(:,:)    , pointer :: aks
+    real(fp)         , dimension(:,:)    , pointer :: rca
+    real(fp)         , dimension(:,:)    , pointer :: rsedeq
     real(fp)         , dimension(:,:)    , pointer :: sinkse
     real(fp)         , dimension(:,:)    , pointer :: sourse
     real(fp)         , dimension(:,:)    , pointer :: sour_im
@@ -239,7 +242,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
     real(fp)                                                  , intent(in)  :: dt
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: aks     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv     !  Description and declaration in esm_alloc_real.f90
@@ -275,8 +277,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)                   :: r0      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)                   :: sink    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)                   :: sour    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lsed)                :: rsedeq  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)        , intent(out) :: rca     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbuu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbvv    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick   !  Description and declaration in esm_alloc_real.f90
@@ -465,6 +465,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sswvv               => gdp%gderosed%e_sswt
     sutot               => gdp%gderosed%sxtot
     svtot               => gdp%gderosed%sytot
+    aks                 => gdp%gderosed%aks
+    rca                 => gdp%gderosed%rca
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     sour_im             => gdp%gderosed%sour_im
@@ -747,8 +749,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              do l = 1, lsed
                 do k = 1, kmax
                    seddif(nm, k, l) = dicww(nm, k)
-                   rsedeq(nm, k, l) = 0.0_fp
                 enddo
+                rsedeq(nm, l) = 0.0_fp
              enddo
           endif
           cycle
@@ -1200,11 +1202,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                    seddif(nm,k,l) = sddflc(klc)
                    klc            = klc + 1
                 enddo
-                klc = 1
-                do k = kfsmax(nm),kfsmin(nm),-1
-                   rsedeq(nm,k,l) = rsdqlc(klc)
-                   klc            = klc + 1
-                enddo
+                rsedeq(nm,l)   = rsdqlc(kmaxsd)
                 !
                 ! Source and sink terms for main 3d computation
                 ! note: terms are part explicit, part implicit, see
@@ -1242,10 +1240,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                    ws2d(k2d)   = ws(nm, kbed, l)
                    dcww2d(k2d) = 0.0_fp
                 enddo
-                trsedeq = rsedeq(nm, kbed, l)
-             else
-                trsedeq =  0.0_fp
              endif
+             trsedeq =  0.0_fp
              taks = taks0
              !
              if (lsecfl > 0) then
@@ -1268,20 +1264,20 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & iform(l)  ,par(1,l)  ,max_integers,max_reals,max_strings, &
                        & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
                        & taks      ,caks      ,taurat(nm,l),sddf2d  ,rsdq2d    , &
-                       & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
+                       & kmaxsd    ,trsedeq   ,sbcu(nm,l),sbcv(nm,l),sbwu(nm,l), &
                        & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
                        & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 aks   (nm, l)    = taks
                 dss   (nm, l)    = tdss
-                rsedeq(nm, kbed, l) = trsedeq
+                rsedeq(nm, l)    = trsedeq
                 kmxsed(nm, l)    = kbed
                 !
                 ! Galappatti time scale and source and sink terms
                 !
                 call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
-                              & ws(nm,kbed,l) ,tsd           ,rsedeq(nm,kbed,l),factsd , &
+                              & ws(nm,kbed,l) ,tsd           ,trsedeq       ,factsd    , &
                               & sourse(nm,l)  ,sour_im(nm,l) ,sinkse(nm,l)  )
              endif ! suspfrac
           endif ! kmaxlc = 1
@@ -1298,7 +1294,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     call   z_red_soursin(nmmax     ,kmax      ,thick     , &
                        & lsal      ,ltem      ,lsed      ,lsedtot   , &
                        & dps       ,s0        ,s1        ,r0        , &
-                       & rsedeq    ,nst       ,dzs1      ,kfsmax    , &
+                       & nst       ,dzs1      ,kfsmax    , &
                        & kfsmin    ,kfs       ,gdp       )
     !
     ! Fill sutot and svtot

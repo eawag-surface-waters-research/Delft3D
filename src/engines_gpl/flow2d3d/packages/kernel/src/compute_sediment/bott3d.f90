@@ -5,9 +5,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 & gvv       ,s1        ,thick     ,dp        , &
                 & umean     ,vmean     ,sbuu      ,sbvv      , &
                 & depchg    ,ssuu      ,ssvv      ,nst       ,hu        , &
-                & hv        ,aks       ,sig       ,u1        ,v1        , &
+                & hv        ,sig       ,u1        ,v1        , &
                 & sscomp    ,kcsbot    , &
-                & guv       ,gvu       ,rca       ,kcu       , &
+                & guv       ,gvu       ,kcu       , &
                 & kcv       ,icx       ,icy       ,timhr     , &
                 & nto       ,volum0    ,volum1    ,dt        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -117,6 +117,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp), dimension(:,:)             , pointer :: ssvvc
     real(fp), dimension(:,:)             , pointer :: sucor
     real(fp), dimension(:,:)             , pointer :: svcor
+    real(fp), dimension(:,:)             , pointer :: aks
+    real(fp), dimension(:,:)             , pointer :: rca
     real(fp), dimension(:,:)             , pointer :: sinkse
     real(fp), dimension(:,:)             , pointer :: sourse
     integer                              , pointer :: nmudfrac
@@ -159,7 +161,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     logical                                            , intent(in)  :: sscomp
     real(fp)                                           , intent(in)  :: dt
     real(fp)                                                         :: timhr
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)   , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: depchg !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dp     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                     :: dps    !  Description and declaration in esm_alloc_real.f90
@@ -179,7 +180,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in)  :: volum0 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in)  :: volum1 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)   , intent(in)  :: rca    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)              :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)              :: sbvv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                 :: ssuu   !  Description and declaration in esm_alloc_real.f90
@@ -294,6 +294,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     ssvvc               => gdp%gderosed%e_sstc
     sucor               => gdp%gderosed%e_scrn
     svcor               => gdp%gderosed%e_scrt
+    aks                 => gdp%gderosed%aks
+    rca                 => gdp%gderosed%rca
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     nmudfrac            => gdp%gdsedpar%nmudfrac

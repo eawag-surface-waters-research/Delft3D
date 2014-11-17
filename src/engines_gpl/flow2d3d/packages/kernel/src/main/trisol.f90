@@ -199,7 +199,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer      , dimension(:,:)        , pointer :: mnrtcsta
     character(20), dimension(:)          , pointer :: namrtcsta
     logical                              , pointer :: rtcact
-    integer(pntrsize)                    , pointer :: aks
     integer(pntrsize)                    , pointer :: alfas
     integer(pntrsize)                    , pointer :: alpha
     integer(pntrsize)                    , pointer :: ampbc
@@ -338,7 +337,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: r1
     integer(pntrsize)                    , pointer :: rbnd
     integer(pntrsize)                    , pointer :: rbuff
-    integer(pntrsize)                    , pointer :: rca
     integer(pntrsize)                    , pointer :: rettim
     integer(pntrsize)                    , pointer :: rho
     integer(pntrsize)                    , pointer :: rhowat
@@ -349,7 +347,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: rnpl
     integer(pntrsize)                    , pointer :: rob
     integer(pntrsize)                    , pointer :: rsed
-    integer(pntrsize)                    , pointer :: rsedeq
     integer(pntrsize)                    , pointer :: rthbnd
     integer(pntrsize)                    , pointer :: rtu2d0
     integer(pntrsize)                    , pointer :: rtu2d1
@@ -750,7 +747,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     mnrtcsta            => gdp%gdrtc%mnrtcsta
     namrtcsta           => gdp%gdrtc%namrtcsta
     rtcact              => gdp%gdrtc%rtcact
-    aks                 => gdp%gdr_i_ch%aks
     alfas               => gdp%gdr_i_ch%alfas
     alpha               => gdp%gdr_i_ch%alpha
     ampbc               => gdp%gdr_i_ch%ampbc
@@ -889,7 +885,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     r1                  => gdp%gdr_i_ch%r1
     rbnd                => gdp%gdr_i_ch%rbnd
     rbuff               => gdp%gdr_i_ch%rbuff
-    rca                 => gdp%gdr_i_ch%rca
     rettim              => gdp%gdr_i_ch%rettim
     rho                 => gdp%gdr_i_ch%rho
     rhowat              => gdp%gdr_i_ch%rhowat
@@ -900,7 +895,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     rnpl                => gdp%gdr_i_ch%rnpl
     rob                 => gdp%gdr_i_ch%rob
     rsed                => gdp%gdr_i_ch%rsed
-    rsedeq              => gdp%gdr_i_ch%rsedeq
     rthbnd              => gdp%gdr_i_ch%rthbnd
     rtu2d0              => gdp%gdr_i_ch%rtu2d0
     rtu2d1              => gdp%gdr_i_ch%rtu2d1
@@ -1947,14 +1941,14 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
                     & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
                     & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                    & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                    & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                     & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                     & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                    & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
+                    & r(teta)   ,r(rlabda) ,saleqs    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                    & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
+                    & r(hv)     ,r(ubot)   ,r(rtur0)  , &
                     & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
                     & 1         ,r(deltau) ,r(deltav) ,gdp       )
              call timer_stop(timer_erosed, gdp)
@@ -2182,9 +2176,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                     & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                     & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
-                    & r(hv)     ,r(aks)    ,r(sig)    ,r(umor)   ,r(vmor)   , &
+                    & r(hv)     ,r(sig)    ,r(umor)   ,r(vmor)   , &
                     & sscomp    ,i(iwrk1)  , &
-                    & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
+                    & r(guv)    ,r(gvu)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,hdt       , gdp       )
           if (bedupd) then
@@ -3018,14 +3012,14 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                        & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
                        & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
                        & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                       & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                       & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                        & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                        & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                        & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                        & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                       & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
+                       & r(teta)   ,r(rlabda) ,saleqs    , &
                        & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                       & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
+                       & r(hv)     ,r(ubot)   ,r(rtur0)  , &
                        & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,hdt       , &
                        & 2         ,r(deltau) ,r(deltav) ,gdp       )
              call timer_stop(timer_erosed, gdp)
@@ -3253,9 +3247,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                     & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                     & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
-                    & r(hv)     ,r(aks)    ,r(sig)    ,r(umor)   ,r(vmor)   , &
+                    & r(hv)     ,r(sig)    ,r(umor)   ,r(vmor)   , &
                     & sscomp    ,i(iwrk1)  , &
-                    & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
+                    & r(guv)    ,r(gvu)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,hdt       ,gdp       )
           if (bedupd) then

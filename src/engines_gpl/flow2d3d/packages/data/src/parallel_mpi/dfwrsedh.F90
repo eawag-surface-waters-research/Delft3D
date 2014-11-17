@@ -87,7 +87,7 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     real(fp), dimension(nostat)                       :: zdps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat)                       :: zdpsed  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, 0:kmax, lsed)         :: zws     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, kmax, lsed)           :: zrsdeq  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                 :: zrsdeq  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsedtot)              :: zbdsed  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsed)                 :: zrca    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu    !  Description and declaration in esm_alloc_real.f90
@@ -230,9 +230,14 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
             &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
             &  lundia    ,gdp       )
            if (kmax == 1) then
+             !
+             ! We keep the second dimension (previously "kmax") in NEFIS files
+             ! of structured Delft3D for backward compatibility reasons:
+             ! post-processing tools don't need to be updated.
+             !
              call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
                & 'Equilibrium concentration of sediment at station (2D only)    ', &
-               &  3         ,nostatgl  ,kmaxout_restr,lsed      ,0         ,0       , &
+               &  3         ,nostatgl  ,1      ,lsed      ,0         ,0       , &
                &  lundia    ,gdp       )
            endif
          endif
@@ -391,20 +396,18 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
              ! group 5: element 'ZRSDEQ'
              ! kmax=1: don't use kmaxout/shlay
              !
-             if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax, 1:lsed) )
-             call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax, 1, lsed, order_sta, zrsdeq, rsbuff2, gdp)
+             if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsed) )
+             call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsed, order_sta, zrsdeq, rsbuff1, gdp)
              if (inode == master) then
-                call sbuff_checksize(nostatgl*kmax*lsed)
+                call sbuff_checksize(nostatgl*lsed)
                 i = 0
                 do l = 1, lsed
-                   do k = 1, kmax
-                      do n = 1, nostatgl
-                         i        = i+1
-                         sbuff(i) = rsbuff2(n, k, l)
-                      enddo
+                   do n = 1, nostatgl
+                      i        = i+1
+                      sbuff(i) = rsbuff1(n, l)
                    enddo
                 enddo
-                deallocate( rsbuff2 )
+                deallocate( rsbuff1 )
                 ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
                 if (ierror/= 0) goto 9999
              endif !inode==master

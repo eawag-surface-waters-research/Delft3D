@@ -156,7 +156,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical                              , pointer :: roller
     logical                              , pointer :: xbeach
     integer(pntrsize)                    , pointer :: alfas
-    integer(pntrsize)                    , pointer :: aks
     integer(pntrsize)                    , pointer :: areau
     integer(pntrsize)                    , pointer :: areav
     integer(pntrsize)                    , pointer :: atr
@@ -215,13 +214,11 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: qykw
     integer(pntrsize)                    , pointer :: r1
     integer(pntrsize)                    , pointer :: rbuff
-    integer(pntrsize)                    , pointer :: rca
     integer(pntrsize)                    , pointer :: rho
     integer(pntrsize)                    , pointer :: rich
     integer(pntrsize)                    , pointer :: rint
     integer(pntrsize)                    , pointer :: rlabda
     integer(pntrsize)                    , pointer :: rsed
-    integer(pntrsize)                    , pointer :: rsedeq
     integer(pntrsize)                    , pointer :: rtur1
     integer(pntrsize)                    , pointer :: s1
     integer(pntrsize)                    , pointer :: sbtr
@@ -511,7 +508,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     roller              => gdp%gdprocs%roller
     xbeach              => gdp%gdprocs%xbeach
     alfas               => gdp%gdr_i_ch%alfas
-    aks                 => gdp%gdr_i_ch%aks
     areau               => gdp%gdr_i_ch%areau
     areav               => gdp%gdr_i_ch%areav
     atr                 => gdp%gdr_i_ch%atr
@@ -569,13 +565,11 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     precip              => gdp%gdr_i_ch%precip
     r1                  => gdp%gdr_i_ch%r1
     rbuff               => gdp%gdr_i_ch%rbuff
-    rca                 => gdp%gdr_i_ch%rca
     rho                 => gdp%gdr_i_ch%rho
     rich                => gdp%gdr_i_ch%rich
     rint                => gdp%gdr_i_ch%rint
     rlabda              => gdp%gdr_i_ch%rlabda
     rsed                => gdp%gdr_i_ch%rsed
-    rsedeq              => gdp%gdr_i_ch%rsedeq
     rtur1               => gdp%gdr_i_ch%rtur1
     s1                  => gdp%gdr_i_ch%s1
     sbtr                => gdp%gdr_i_ch%sbtr
@@ -952,7 +946,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    & r(velv)   ,r(r1)     ,r(rtur1)  ,r(wphy)   ,r(qxk)    , &
                    & r(qyk)    ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv) , &
                    & r(alfas)  ,r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    , &
-                   & r(rsedeq) ,r(ws)     ,d(dps)    , &
+                   & r(ws)     ,d(dps)    , &
                    & r(zwl)    ,r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  , &
                    & r(zqxk)   ,r(zqyk)   ,r(gro)    ,r(ztur)   ,            &
                    & r(ztauks) ,r(ztauet) ,r(zvicww) ,r(zdicww) ,r(zrich)  , &
@@ -962,7 +956,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    & r(zssv)   ,r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                    & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
                    & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
-                   & wave      ,r(rca)    ,r(zrca)   ,r(windu)  ,r(windv)  , &
+                   & wave      ,r(zrca)   ,r(windu)  ,r(windv)  , &
                    & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
                    & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
           ftstat = .true.
@@ -1155,7 +1149,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    call dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                                & mmax      ,kmax      ,nmaxus    ,lsed      ,lsedtot   , &
                                & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                               & r(rsedeq) ,d(dps)    ,r(rca)    ,r(aks)    ,gdp       )
+                               & d(dps)    ,gdp       )
                 endif
                 if (error) goto 9999
              endif

@@ -82,7 +82,7 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     real(fp), dimension(nostat)                       :: zdps   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat)                       :: zdpsed !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, 0:kmax, lsed)         :: zws    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, kmax, lsed)           :: zrsdeq !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                 :: zrsdeq !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsedtot)              :: zbdsed !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsed)                 :: zrca   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu   !  Description and declaration in esm_alloc_real.f90
@@ -202,9 +202,14 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
              &  3         ,nostat    ,kmaxout   ,lsed      ,0         ,0       , &
              &  lundia    ,gdp       )
            if (kmax == 1) then
+             !
+             ! We keep the second dimension (previously "kmax") in NEFIS files
+             ! of structured Delft3D for backward compatibility reasons:
+             ! post-processing tools don't need to be updated.
+             !
              call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
                & 'Equilibrium concentration of sediment at station (2D only)    ', &
-               &  3         ,nostat    ,kmaxout_restr,lsed      ,0         ,0       , &
+               &  3         ,nostat    ,1     ,lsed      ,0         ,0       , &
                &  lundia    ,gdp       )
            endif
          endif
@@ -351,14 +356,12 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
              ! group 5: element 'ZRSDEQ'
              ! kmax=1: don't use kmaxout/shlay
              !
-             call sbuff_checksize(nostat*kmax*lsed)
+             call sbuff_checksize(nostat*lsed)
              i = 0
              do l = 1, lsed
-                do k = 1, kmax
-                   do n = 1, nostat
-                      i        = i+1
-                      sbuff(i) = real(zrsdeq(n, k, l),sp)
-                   enddo
+                do n = 1, nostat
+                   i        = i+1
+                   sbuff(i) = real(zrsdeq(n, l),sp)
                 enddo
              enddo
              ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)

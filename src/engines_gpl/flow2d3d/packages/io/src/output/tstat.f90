@@ -7,7 +7,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & v1        ,r1        ,rtur1     ,wphy      ,qxk       , &
                & qyk       ,taubpu    ,taubpv    ,taubsu    ,taubsv    , &
                & alfas     ,vicww     ,dicww     ,rich      ,rho       , &
-               & rsedeq    ,ws        ,dps       , &
+               & ws        ,dps       , &
                & zwl       ,zalfas    ,zcuru     ,zcurv     ,zcurw     , &
                & zqxk      ,zqyk      ,gro       ,ztur      , &
                & ztauks    ,ztauet    ,zvicww    ,zdicww    ,zrich     , &
@@ -17,7 +17,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & zssv      ,sbuu      ,sbvv      ,ssuu      ,ssvv      , &
                & zhs       ,ztp       ,zdir      ,zrlabd    ,zuorb     , &
                & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
-               & wave      ,rca       ,zrca      ,windu     ,windv     , &
+               & wave      ,zrca      ,windu     ,windv     , &
                & zwndsp    ,zwnddr    ,patm      ,zairp     ,wind      , &
                & precip    ,evap      ,zprecp    ,zevap     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -70,6 +70,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     integer      , dimension(:,:)   , pointer :: mnstat
     type (flwoutputtype)            , pointer :: flwoutput
+    real(fp)     , dimension(:,:)   , pointer :: rca
+    real(fp)     , dimension(:,:)   , pointer :: rsedeq
 
 !
 ! Global variables
@@ -128,9 +130,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: vortic !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: wphy   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed)  , intent(in)  :: rsedeq !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: rca    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssuu   !  Description and declaration in esm_alloc_real.f90
@@ -170,7 +170,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zqyk   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zrho   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax)                                          , intent(out) :: zvort  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nostat, kmax, lsed)                                    , intent(out) :: zrsdeq !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nostat, lsed)                                          , intent(out) :: zrsdeq !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, kmax, lstsci)                                  , intent(out) :: gro    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, lsedtot)                                       , intent(out) :: zbdsed !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, lsed)                                          , intent(out) :: zrca   !  Description and declaration in esm_alloc_real.f90
@@ -193,6 +193,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     integer :: md    ! M-1
     integer :: n     ! Help var. counter for array index in the Y-/N-direction
     integer :: nd    ! N-1
+    integer :: nm
     real(fp):: sqrt2
 !
 !! executable statements -------------------------------------------------------
@@ -203,6 +204,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     mnstat         => gdp%gdstations%mnstat
     flwoutput      => gdp%gdflwpar%flwoutput
+    rca            => gdp%gderosed%rca
+    rsedeq         => gdp%gderosed%rsedeq
     !
     ! Store water-levels and concentrations in defined stations
     ! and calculated discharges to zeta points
@@ -612,9 +615,12 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           md = max(1, m - 1)
           nd = max(1, n - 1)
           !
+          call n_and_m_to_nm(n, m, nm, gdp)
+          !
           zdps(ii)   = real(dps(n, m),fp)
           do l = 1, lsed
-             zrca(ii, l) = rca(n, m, l)
+             zrca(ii, l)   = rca(nm, l)
+             zrsdeq(ii, l) = rsedeq(nm, l)
              zsbu(ii, l) = abs(kcs(n,m))                          &
                          & * (         kfu(n,m )*sbuu(n,m ,l)     &
                          &    + (m-md)*kfu(n,md)*sbuu(n,md,l) )/2.0_fp
@@ -629,9 +635,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                          &    + (n-nd)*kfv(nd,m)*ssvv(nd,m,l) )/2.0_fp
              do k = 0, kmax
                 zws(ii, k, l) = ws(n, m, k, l)
-                if (k>=1) then
-                   zrsdeq(ii, k, l) = rsedeq(n, m, k, l)
-                endif
              enddo
           enddo
        enddo

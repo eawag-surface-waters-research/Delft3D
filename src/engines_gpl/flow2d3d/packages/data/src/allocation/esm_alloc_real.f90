@@ -1412,7 +1412,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !
     !-----additional arrays for sediment transport
     !
-    !                           rsedeq(nmaxddb  ,mmaxddb,kmax  ,lsed  )
     !                           ws    (nmaxddb  ,mmaxddb,kmax+1,lsed  )
     !                           rhowat(nmaxddb  ,mmaxddb,kmax)
     !                           depchg(nmaxddb  ,mmaxddb)
@@ -1420,20 +1419,10 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           sbv   (nmaxddb  ,mmaxddb,lsedtot)
     !                           epscur(0:kmax)
     !                           epswav(0:kmax)
-    !                          aks   (nmaxddb  ,mmaxddb,lsed)
     !                          sbuu  (nmaxddb  ,mmaxddb,lsedtot)
     !                          sbvv  (nmaxddb  ,mmaxddb,lsedtot)
     !                          ssuu  (nmaxddb  ,mmaxddb,lsed)
     !                          ssvv  (nmaxddb  ,mmaxddb,lsed)
-    !
-    pntnam = 'rsedeq'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lsed, gdp)
-                             !  Pointer of array RSEDEQ
-                             ! 
-                             !  Equilibrium sediment concentration
-                             ! 
-                             !  Equilibrium sediment concentration
-    if (ierr<= - 9) goto 9999
     !
     pntnam = 'ws'            !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*lsed, gdp)
@@ -1480,11 +1469,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  dissipation at surface (breaking waves)
     if (ierr<= - 9) goto 9999
     !
-    pntnam = 'aks'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    !
     pntnam = 'sbuu'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsedtot, gdp)
                              !  no description (yet)
@@ -1501,16 +1485,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'ssvv'          !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'rca'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'zrca'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
                              !  no description (yet)
     if (ierr<= - 9) goto 9999
@@ -2948,7 +2922,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                      d sstrc (ntruv ,lsed  )
     !                        discum(nsrc         )
     !                        zws   (nostat,0:kmax,lsed  )
-    !                        zrsdeq(nostat,kmax  ,lsed  )
+    !                        zrsdeq(nostat,lsed  )
     !                        zbdsed(nostat       ,lsedtot  )
     !                        zdpsed(nostat       )
     !                        zdps  (nostat       )
@@ -3179,8 +3153,8 @@ subroutine esm_alloc_real(lundia, error, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'zrsdeq'        !  Global data
-    ierr = mkfpnt(pntnam, nostat*kmax*lsed, gdp)
-                             !  Equilibrium sediemnt concentration
+    ierr = mkfpnt(pntnam, nostat*lsed, gdp)
+                             !  Equilibrium sediment concentration
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'zbdsed'        !  Global data
@@ -3206,22 +3180,27 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !
     pntnam = 'zsbu'          !  Global data
     ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
-                             !  no description (yet)
+                             !  Bed load transport in u-direction at station
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'zsbv'          !  Global data
     ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
-                             !  no description (yet)
+                             !  Bed load transport in v-direction at station
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'zssu'          !  Global data
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
-                             !  no description (yet)
+                             !  Susp. load transport in u-direction at station
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'zssv'          !  Global data
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
-                             !  no description (yet)
+                             !  Susp. load transport in v-direction at station
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'zrca'          !  Global data
+    ierr = mkfpnt(pntnam, nostat*lsed, gdp)
+                             !  Near-bed reference concentration of sediment at station
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'zvort'         !  Global data

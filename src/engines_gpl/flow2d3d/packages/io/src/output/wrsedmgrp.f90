@@ -51,15 +51,12 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer(pntrsize)                    , pointer :: aks
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: ssuu
     integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: ws
-    integer(pntrsize)                    , pointer :: rsedeq
     integer(pntrsize)                    , pointer :: dps
-    integer(pntrsize)                    , pointer :: rca
     logical                              , pointer :: lfbedfrmout
     logical                              , pointer :: first
     integer                              , pointer :: celidt
@@ -108,15 +105,12 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     morft               => gdp%gdmorpar%morft
     morfac              => gdp%gdmorpar%morfac
     lfbedfrmout         => gdp%gdbedformpar%lfbedfrmout
-    aks                 => gdp%gdr_i_ch%aks
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     ssuu                => gdp%gdr_i_ch%ssuu
     ssvv                => gdp%gdr_i_ch%ssvv
     ws                  => gdp%gdr_i_ch%ws
-    rsedeq              => gdp%gdr_i_ch%rsedeq
     dps                 => gdp%gdr_i_ch%dps
-    rca                 => gdp%gdr_i_ch%rca
     !
     ! Initialize local variables
     !
@@ -157,7 +151,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
           call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                     & lsed      ,lsedtot   ,1         ,0         ,grnam5    , &
                     & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                    & r(rsedeq) ,d(dps)    ,r(rca)    ,r(aks)    ,gdp       )
+                    & d(dps)    ,gdp       )
        endif
        !
        ! Add bedform fields
@@ -223,7 +217,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
        call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                  & lsed      ,lsedtot   ,2         ,fds       ,grnam5    , &
                  & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                 & r(rsedeq) ,d(dps)    ,r(rca)    ,r(aks)    ,gdp       )
+                 & d(dps)    ,gdp       )
        if (error) goto 9999
     endif
     !

@@ -563,6 +563,9 @@ type sedtra_type
     real(fp)         , dimension(:)      , pointer :: zumod    !(nc1:nc2)
     real(fp)         , dimension(:)      , pointer :: ust2     !(nc1:nc2)
     !
+    real(fp)         , dimension(:,:)    , pointer :: aks      !(nc1:nc2,lsed)
+    real(fp)         , dimension(:,:)    , pointer :: rca      !(nc1:nc2,lsed)
+    real(fp)         , dimension(:,:)    , pointer :: rsedeq   !(nc1:nc2,lsed)
     real(fp)         , dimension(:,:)    , pointer :: sinkse   !(nc1:nc2,lsed)
     real(fp)         , dimension(:,:)    , pointer :: sourse   !(nc1:nc2,lsed)
     real(fp)         , dimension(:,:)    , pointer :: sour_im  !(nc1:nc2,lsed)
@@ -652,6 +655,9 @@ subroutine nullsedtra(sedtra)
     nullify(sedtra%zumod)
     nullify(sedtra%ust2)
     !
+    nullify(sedtra%aks)
+    nullify(sedtra%rca)
+    nullify(sedtra%rsedeq)
     nullify(sedtra%sinkse)
     nullify(sedtra%sourse)
     nullify(sedtra%sour_im)
@@ -747,6 +753,9 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     if (istat==0) allocate(sedtra%zumod   (nc1:nc2), STAT = istat)
     if (istat==0) allocate(sedtra%ust2    (nc1:nc2), STAT = istat)
     !
+    if (istat==0) allocate(sedtra%aks     (nc1:nc2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%rca     (nc1:nc2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%rsedeq  (nc1:nc2,lsed), STAT = istat)
     if (istat==0) allocate(sedtra%sinkse  (nc1:nc2,lsed), STAT = istat)
     if (istat==0) allocate(sedtra%sourse  (nc1:nc2,lsed), STAT = istat)
     if (istat==0) allocate(sedtra%sour_im (nc1:nc2,lsed), STAT = istat)
@@ -811,6 +820,9 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     sedtra%zumod    = 0.0_fp
     sedtra%ust2     = 0.0_fp
     !
+    sedtra%aks      = 0.0_fp
+    sedtra%rca      = 0.0_fp
+    sedtra%rsedeq   = 0.0_fp
     sedtra%sinkse   = 0.0_fp
     sedtra%sourse   = 0.0_fp
     sedtra%sour_im  = 0.0_fp
@@ -899,6 +911,9 @@ subroutine clrsedtra(istat, sedtra)
     if (associated(sedtra%zumod   ))   deallocate(sedtra%zumod   , STAT = istat)
     if (associated(sedtra%ust2    ))   deallocate(sedtra%ust2    , STAT = istat)
     !
+    if (associated(sedtra%aks     ))   deallocate(sedtra%aks     , STAT = istat)
+    if (associated(sedtra%rca     ))   deallocate(sedtra%rca     , STAT = istat)
+    if (associated(sedtra%rsedeq  ))   deallocate(sedtra%rsedeq  , STAT = istat)
     if (associated(sedtra%sinkse  ))   deallocate(sedtra%sinkse  , STAT = istat)
     if (associated(sedtra%sourse  ))   deallocate(sedtra%sourse  , STAT = istat)
     if (associated(sedtra%sour_im ))   deallocate(sedtra%sour_im , STAT = istat)

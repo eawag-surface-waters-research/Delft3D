@@ -171,14 +171,11 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     logical                              , pointer :: sbkol
     logical                              , pointer :: bubble
     integer                              , pointer :: lsedtot
-    integer(pntrsize)                    , pointer :: rsedeq
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: seddif
-    integer(pntrsize)                    , pointer :: aks
     integer(pntrsize)                    , pointer :: entr
     integer(pntrsize)                    , pointer :: wstau
-    integer(pntrsize)                    , pointer :: rca
     logical                              , pointer :: flmd2l
     integer(pntrsize)                    , pointer :: ssuu
     integer(pntrsize)                    , pointer :: ssvv
@@ -935,17 +932,14 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     ssuu                => gdp%gdr_i_ch%ssuu
     ssvv                => gdp%gdr_i_ch%ssvv
     lsedtot             => gdp%d%lsedtot
-    rsedeq              => gdp%gdr_i_ch%rsedeq
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     seddif              => gdp%gdr_i_ch%seddif
-    aks                 => gdp%gdr_i_ch%aks
     wstau               => gdp%gdr_i_ch%wstau
     entr                => gdp%gdr_i_ch%entr
     bedupd              => gdp%gdmorpar%bedupd
     eqmbcsand           => gdp%gdmorpar%eqmbcsand
     eqmbcmud            => gdp%gdmorpar%eqmbcmud
-    rca                 => gdp%gdr_i_ch%rca
     sedtyp              => gdp%gdsedpar%sedtyp
     !
     icx     = 0
@@ -1727,14 +1721,14 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                      & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(dzs1)   , &
                      & r(r0)     ,r(u1)     ,r(v1)     ,r(s0)     ,d(dps)    , &
                      & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                     & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                     & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                      & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                      & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
                      & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
                      & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                     & r(teta)   ,r(rlabda) ,r(aks)    ,saleqs    , &
+                     & r(teta)   ,r(rlabda) ,saleqs    , &
                      & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &                   
-                     & r(hv)     ,r(rca)    ,r(ubot)   ,r(rtur0)  , &
+                     & r(hv)     ,r(ubot)   ,r(rtur0)  , &
                      & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
                      & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
                      & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,dtsec     ,1         , &
@@ -1936,9 +1930,9 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                       & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
                       & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
-                      & r(hv)     ,r(aks)    ,r(sig)    ,r(u1)     ,r(v1)     , &
+                      & r(hv)     ,r(sig)    ,r(u1)     ,r(v1)     , &
                       & sscomp    ,i(iwrk1)  , &
-                      & r(guv)    ,r(gvu)    ,r(rca)    ,i(kcu)    , &
+                      & r(guv)    ,r(gvu)    ,i(kcu)    , &
                       & i(kcv)    ,icx       ,icy       ,timhr     , &
                       & nto       ,r(volum0) ,r(volum1) ,r(dzs1)   ,r(dzu1)   , &
                       & r(dzv1)   ,i(kfsmin) ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &

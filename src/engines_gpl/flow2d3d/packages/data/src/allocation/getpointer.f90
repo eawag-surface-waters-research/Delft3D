@@ -219,7 +219,6 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: rnpl
     integer(pntrsize) , pointer :: rob
     integer(pntrsize) , pointer :: rsed
-    integer(pntrsize) , pointer :: rsedeq
     integer(pntrsize) , pointer :: rthbnd
     integer(pntrsize) , pointer :: rtu2d0
     integer(pntrsize) , pointer :: rtu2d1
@@ -573,7 +572,6 @@ function getpointer(pntnam, gdp)
     rnpl       => gdp%gdr_i_ch%rnpl
     rob        => gdp%gdr_i_ch%rob
     rsed       => gdp%gdr_i_ch%rsed
-    rsedeq     => gdp%gdr_i_ch%rsedeq
     rthbnd     => gdp%gdr_i_ch%rthbnd
     rtu2d0     => gdp%gdr_i_ch%rtu2d0
     rtu2d1     => gdp%gdr_i_ch%rtu2d1
@@ -1095,8 +1093,6 @@ function getpointer(pntnam, gdp)
        returnval = rob
     case ('rsed')
        returnval = rsed
-    case ('rsedeq')
-       returnval = rsedeq
     case ('rthbnd')
        returnval = rthbnd
     case ('rtur0')

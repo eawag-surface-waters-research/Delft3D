@@ -97,7 +97,7 @@ subroutine u_whis(lundat    ,header    ,runid     ,itime     ,idate     , &
     real(fp)       , dimension(nostat, kmax)         , intent(in) :: zqxk   !  Description and declaration in esm_alloc_real.f90
     real(fp)       , dimension(nostat, kmax)         , intent(in) :: zqyk   !  Description and declaration in esm_alloc_real.f90
     real(fp)       , dimension(nostat, kmax)         , intent(in) :: zrho   !  Description and declaration in esm_alloc_real.f90
-    real(fp)       , dimension(nostat, kmax, lsed)   , intent(in) :: zrsdeq !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, lsed)         , intent(in) :: zrsdeq !  Description and declaration in esm_alloc_real.f90
     real(fp)       , dimension(nostat, kmax, lstsci) , intent(in) :: gro    !  Description and declaration in esm_alloc_real.f90
     real(fp)       , dimension(nostat, lsed)         , intent(in) :: zbdsed !  Description and declaration in esm_alloc_real.f90
     real(fp)       , dimension(ntruv)                , intent(in) :: ctr    !  Description and declaration in esm_alloc_real.f90
