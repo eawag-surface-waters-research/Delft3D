@@ -4550,6 +4550,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_showabout.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_state_startup.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_state_version.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_strrep.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_thinning.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_time2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_title.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_toolbarpush.m -text
