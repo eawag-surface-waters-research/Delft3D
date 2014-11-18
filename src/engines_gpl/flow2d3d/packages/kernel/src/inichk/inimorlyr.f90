@@ -1,4 +1,4 @@
-subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
+subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
                    & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
                    & lundia    ,error     ,kcs       ,gdp  )
 !----- GPL ---------------------------------------------------------------------
@@ -35,6 +35,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
 !
 !!--declarations----------------------------------------------------------------
     use precision
+    use sediment_basics_module, only: SEDTYP_COHESIVE
     use bedcomposition_module
     use globaldata
     !
@@ -49,6 +50,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     real(fp)         , dimension(:)     , pointer :: thexlyr
     real(fp)         , dimension(:)     , pointer :: thtrlyr
     real(fp)         , dimension(:)     , pointer :: rhosol
+    integer          , dimension(:)     , pointer :: sedtyp
     logical                             , pointer :: exchlyr
     character(256)                      , pointer :: flcomp
     integer                             , pointer :: i_restart
@@ -56,6 +58,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
 !
 ! Global variables
 !
+    integer                                         , intent(in)  :: lsed
     integer                                         , intent(in)  :: lsedtot
     integer                                                       :: lundia     !  Description and declaration in inout.igs
     integer                                         , intent(in)  :: mmax       !  Description and declaration in esm_alloc_int.f90
@@ -84,6 +87,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     integer                                       :: nmlb
     integer                                       :: nmaxddb
     logical                                       :: err
+    logical                                       :: ex
     logical                                       :: success
     character(11)                                 :: fmttmp   ! Format file ('formatted  ')
     character(300)                                :: message
@@ -96,6 +100,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
     real(fp)         , dimension(:,:)   , pointer :: svfrac
+    real(fp)         , dimension(:)     , pointer :: mfluni
+    character(256)   , dimension(:)     , pointer :: mflfil
 !
 !! executable statements -------------------------------------------------------
 !
@@ -103,6 +109,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     restid             => gdp%gdrestart%restid
     flcomp             => gdp%gdmorpar%flcomp
     rhosol             => gdp%gdsedpar%rhosol
+    sedtyp             => gdp%gdsedpar%sedtyp
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iunderlyr', iunderlyr)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
@@ -132,6 +139,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     !
     if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
        mfluff => gdp%gdmorpar%flufflyr%mfluff
+       mfluni => gdp%gdmorpar%flufflyr%mfluni
+       mflfil => gdp%gdmorpar%flufflyr%mflfil
        !
        ! Try restart
        !
@@ -142,11 +151,23 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                   & 'MFLUFF'  ,gdp       )
        endif
        !
-       ! Otherwise initialization to zero
-       ! (future: should be possible to define initial value in <.mor> file)
+       ! Otherwise initialization to values specified in input file
        !
        if (.not.success) then
             mfluff = 0.0_fp
+            !
+            do ised = 1, lsed
+                if (gdp%gdsedpar%sedtyp(ised) /= SEDTYP_COHESIVE) continue
+                inquire (file = mflfil(ised), exist = ex)
+                if (ex) then
+                    call depfil(lundia    ,error     ,mflfil(ised)         , &
+                              & fmttmp    ,mfluff    ,lsed      ,ised      , &
+                              & gdp%griddim)
+                    if (error) goto 9999
+                else
+                    mfluff(ised,:) = mfluni(ised)
+                endif
+            enddo
        endif
     endif 
     !

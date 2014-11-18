@@ -100,7 +100,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     ! Initialise morphology layers
     !
-    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
+    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
                  & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
                  & lundia    ,error     ,kcs       ,gdp       )
     !

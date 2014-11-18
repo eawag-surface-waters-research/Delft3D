@@ -257,12 +257,14 @@ type fluffy_type
     !
     ! pointers
     !
-    real(fp)      , dimension(:,:)  , pointer :: mfluff        ! composition of fluff layer: mass of mud fractions, units : kg /m2
+    real(fp)      , dimension(:)    , pointer :: mfluni        ! constant fluff mass
+    real(fp)      , dimension(:,:)  , pointer :: mfluff        ! composition of fluff layer: mass of mud fractions [kg /m2]
     real(fp)      , dimension(:,:)  , pointer :: bfluff0       ! burial parameter fluff layer (only when FluffLayer=1) [kg/m2/s]
     real(fp)      , dimension(:,:)  , pointer :: bfluff1       ! burial parameter fluff layer (only when FluffLayer=1) [1/s]
     real(fp)      , dimension(:,:)  , pointer :: depfac        ! Deposition factor to fluff layer (only when FluffLayer=2) [-]
     real(fp)      , dimension(:,:)  , pointer :: sinkf         ! Settling to fluff layer []
     real(fp)      , dimension(:,:)  , pointer :: sourf         ! Source from fluff layer [] 
+    character(256), dimension(:)    , pointer :: mflfil        ! fluff mass file
     ! 
     ! logicals
     !
@@ -1369,12 +1371,14 @@ subroutine initfluffy(flufflyr)
 !
     flufflyr%iflufflyr = 0
     !
+    nullify(flufflyr%mfluni)
     nullify(flufflyr%mfluff)
     nullify(flufflyr%bfluff0)
     nullify(flufflyr%bfluff1)
     nullify(flufflyr%depfac)
     nullify(flufflyr%sinkf)
     nullify(flufflyr%sourf)
+    nullify(flufflyr%mflfil)
     !
     flufflyr%bfluff0_fil = ' '
     flufflyr%bfluff1_fil = ' '
@@ -1405,9 +1409,11 @@ function allocfluffy(flufflyr, lsed, nmlb, nmub) result(istat)
 !
 !! executable statements -------------------------------------------------------
 !
-                  allocate(flufflyr%mfluff(lsed,nmlb:nmub), STAT = istat)
+                  allocate(flufflyr%mfluni(lsed), STAT = istat)
+    if (istat==0) allocate(flufflyr%mfluff(lsed,nmlb:nmub), STAT = istat)
     if (istat==0) allocate(flufflyr%sinkf(lsed,nmlb:nmub), STAT = istat)
     if (istat==0) allocate(flufflyr%sourf(lsed,nmlb:nmub), STAT = istat)
+    if (istat==0) allocate(flufflyr%mflfil(lsed), STAT = istat)
     !
     select case (flufflyr%iflufflyr)
     case (1)
@@ -1441,12 +1447,14 @@ subroutine clrfluffy(istat, flufflyr)
 !
     flufflyr%iflufflyr = 0
     !
+    if (associated(flufflyr%mfluni))      deallocate(flufflyr%mfluni,      STAT = istat)
     if (associated(flufflyr%mfluff))      deallocate(flufflyr%mfluff,      STAT = istat)
     if (associated(flufflyr%bfluff0))     deallocate(flufflyr%bfluff0,     STAT = istat)
     if (associated(flufflyr%bfluff1))     deallocate(flufflyr%bfluff1,     STAT = istat)
     if (associated(flufflyr%depfac))      deallocate(flufflyr%depfac,      STAT = istat)
     if (associated(flufflyr%sinkf))       deallocate(flufflyr%sinkf,       STAT = istat)
     if (associated(flufflyr%sourf))       deallocate(flufflyr%sourf,       STAT = istat)
+    if (associated(flufflyr%mflfil))      deallocate(flufflyr%mflfil,      STAT = istat)
 end subroutine clrfluffy
 !
 !

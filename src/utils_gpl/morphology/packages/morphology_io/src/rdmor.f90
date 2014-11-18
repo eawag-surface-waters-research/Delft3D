@@ -869,8 +869,9 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     enddo
     !
     if (anymud) then
-       call rdflufflyr(lundia    ,error    ,filmor    ,lsed , &
-                     & mor_ptr   ,morpar%flufflyr     ,griddim)
+       call rdflufflyr(lundia    ,error    ,filmor    ,lsed    , &
+                     & mor_ptr   ,morpar%flufflyr     ,sedpar  , &
+                     & griddim   )
     endif
     !
     call rdmorlyr (lundia    ,error     ,filmor    , &
@@ -1697,7 +1698,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     call echoflufflyr(lundia    ,error    ,morpar%flufflyr)
 end subroutine echomor
 
-subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr,griddim)
+subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,sedpar ,griddim )
 !!--description-----------------------------------------------------------------
 !
 ! Read fluff layer parameters from an input file
@@ -1705,6 +1706,7 @@ subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
+    use sediment_basics_module, only: SEDTYP_COHESIVE
     use morphology_data_module
     use message_module, only: write_error !, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
     use grid_dimens_module, only: griddimtype
@@ -1719,14 +1721,17 @@ subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr
     integer                                  , intent(in)  :: lsed     ! number of suspended fractions
     integer                                                :: lundia
     logical                                  , intent(out) :: error
+    type(sedpar_type)                        , pointer     :: sedpar
     type(griddimtype)             , target   , intent(in)  :: griddim
 !
 ! Local variables
 !
     integer                         , pointer :: iflufflyr
+    real(fp)      , dimension(:)    , pointer :: mfluni
     real(fp)      , dimension(:,:)  , pointer :: bfluff0
     real(fp)      , dimension(:,:)  , pointer :: bfluff1
     real(fp)      , dimension(:,:)  , pointer :: depfac
+    character(256), dimension(:)    , pointer :: mflfil
     !
     integer                   :: i
     integer                   :: istat
@@ -1737,6 +1742,7 @@ subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr
     real(fp)                  :: rmissval
     logical                   :: ex
     logical                   :: success
+    type(tree_data), pointer  :: sedblock_ptr
     character(256)            :: filfluff
     character(11)             :: fmttmp       ! Format file ('formatted  ') 
     character(256)            :: parname
@@ -1765,9 +1771,29 @@ subroutine rdflufflyr(lundia    ,error    ,filmor    ,lsed    ,mor_ptr ,flufflyr
        return
     endif
     !
+    mfluni  => flufflyr%mfluni
     depfac  => flufflyr%depfac
     bfluff0 => flufflyr%bfluff0
     bfluff1 => flufflyr%bfluff1
+    mflfil  => flufflyr%mflfil
+    !
+    mfluni = 0.0_fp
+    mflfil = ' '
+    do l = 1,lsed
+        sedblock_ptr => sedpar%sedblock(l)
+        if (sedpar%sedtyp(l) == SEDTYP_COHESIVE) then
+            call prop_get(sedblock_ptr, '*', 'IniFluffMass', mflfil(l))
+            !
+            ! Intel 7.0 crashes on an inquire statement when file = ' '
+            !
+            if (mflfil(l) == ' ') mflfil(l) = 'dummyname'
+            inquire (file = mflfil(l), exist = ex)
+            !
+            if (.not.ex) then
+                call prop_get(sedblock_ptr, '*', 'IniFluffMass', mfluni(l))
+            endif
+        endif
+    enddo
     !
     if (iflufflyr==1) then
         bfluff0 = 0.0_fp
