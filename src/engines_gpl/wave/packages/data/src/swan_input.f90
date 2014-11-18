@@ -5060,7 +5060,9 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
              tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)             
              write (line(i:), '(1X,a)')    tbegc
              i         = i+16
-             line(i:)  = ' 1 HR'
+             write (line(i:), '(f8.2)')    sr%deltc
+             i         = i+8
+             line(i:)  = ' MIN'
              write (luninp, '(1X,A)') line
              line(1:79) = ' '
           endif
