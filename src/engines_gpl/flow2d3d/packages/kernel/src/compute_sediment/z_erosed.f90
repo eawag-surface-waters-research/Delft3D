@@ -467,6 +467,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     svtot               => gdp%gderosed%sytot
     aks                 => gdp%gderosed%aks
     rca                 => gdp%gderosed%rca
+    rsedeq              => gdp%gderosed%rsedeq
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     sour_im             => gdp%gderosed%sour_im

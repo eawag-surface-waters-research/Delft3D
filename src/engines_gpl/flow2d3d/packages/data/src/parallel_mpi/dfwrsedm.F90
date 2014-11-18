@@ -220,6 +220,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     svcor               => gdp%gderosed%e_scrt
     aks                 => gdp%gderosed%aks
     rca                 => gdp%gderosed%rca
+    rsedeq              => gdp%gderosed%rsedeq
     sourse              => gdp%gderosed%sourse
     taurat              => gdp%gderosed%taurat
     ust2                => gdp%gderosed%ust2

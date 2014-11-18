@@ -116,6 +116,7 @@ subroutine z_red_soursin(nmmax     ,kmax      ,thick     , &
 !
     kmxsed              => gdp%gderosed%kmxsed
     fixfac              => gdp%gderosed%fixfac
+    rsedeq              => gdp%gderosed%rsedeq
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
     sour_im             => gdp%gderosed%sour_im
