@@ -44,7 +44,7 @@ program his2csv
     character(Len=DioMaxParLen)    :: parName        ! second or third argument (parameter)
     character(Len=DioMaxLocLen)    :: argLocName     ! string for reading next arguments (locations)
 
-    logical                        :: skipIterations         ! skip iterations lines?
+    logical                        :: skipIterations ! skip iterations lines?
     logical, pointer, dimension(:) :: locSelected    ! flag to indicate if location is selected
 
     character(Len=DioMaxStreamLen) :: hisFileName    ! incoming his file (with or without ext.)
@@ -106,7 +106,7 @@ program his2csv
 
     if (numArgs > 2) call GetArg(2, arg2)
     if (arg2(1:1) == '-') then
-        if (.not. StringsEqual( CaseInsens, arg2, '-skipIter' ) ) then
+        if (.not. StringsEqual( CaseInsens, arg2, '-skip' ) ) then
             write(*, *)
             write(*,'(2A)') 'Unknown option: ', arg2
             call write_help()
