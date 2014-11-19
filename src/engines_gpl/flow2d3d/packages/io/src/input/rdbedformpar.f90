@@ -118,6 +118,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     logical           :: existD50
     logical           :: existD90
     integer           :: istat
+    integer           :: i
     character(11)     :: fmttmp ! Format file ('formatted  ') 
 !
 !! executable statements -------------------------------------------------------
@@ -236,7 +237,9 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
              endif
           endif
        else
-          bedformD90 = 1.5_fp * bedformD50
+          do i = gdp%d%nmlb, gdp%d%nmub
+             bedformD90(i) = 1.5_fp * bedformD50(i)
+          enddo
        endif
     endif
     !
