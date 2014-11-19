@@ -4944,6 +4944,14 @@ src/utils_lgpl/delftio/packages/his2csv/his2csv.vfproj -text
 src/utils_lgpl/delftio/packages/his2csv/include/version_number.ini -text
 src/utils_lgpl/delftio/packages/his2csv/src/his2csv.F90 -text
 src/utils_lgpl/delftio/packages/his2csv/src/his2csv_version.F90.svn -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/calcpnt.his -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/expected/calcpnt-Total[!!-~]area[!!-~](m2).csv -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/expected/qlat-Lateral.csv -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/expected/qlat.csv -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/expected/reachseg-Discharge.csv -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/qlat.his -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/reachseg.his -text
+src/utils_lgpl/delftio/packages/his2csv/testdata/run_test.bat -text
 src/utils_lgpl/delftio/scripts/conv2ux -text
 src/utils_lgpl/delftio/scripts/diorun -text
 src/utils_lgpl/delftio/scripts/setup -text

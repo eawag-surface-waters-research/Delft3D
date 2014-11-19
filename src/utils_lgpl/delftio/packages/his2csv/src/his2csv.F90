@@ -29,12 +29,14 @@
 
 program his2csv
 
+    use his2csv_version_module
     use Dio_Plt_Rw
 
     implicit none
 
     integer, external :: nargs
 
+    character(Len=256)             :: version_string ! first argument (fileName)
     integer                        :: numArgs        ! #program arguments
     integer                        :: numPreLocArgs  ! #arguments before the first location argument
     character(Len=DioMaxStreamLen) :: arg1           ! first argument (fileName)
@@ -82,6 +84,9 @@ program his2csv
 
     retval = 0
 
+    call getfullversionstring_his2csv(version_string)
+    write(*,'(A)') trim(version_string)
+
     ! check / read arguments
     numArgs = nargs()
     if (numArgs >= 1) call GetArg(1, arg1)
@@ -101,7 +106,7 @@ program his2csv
 
     if (numArgs > 2) call GetArg(2, arg2)
     if (arg2(1:1) == '-') then
-        if (.not. StringsEqual( CaseInsens, arg2, '-skip' ) ) then
+        if (.not. StringsEqual( CaseInsens, arg2, '-skipIter' ) ) then
             write(*, *)
             write(*,'(2A)') 'Unknown option: ', arg2
             call write_help()

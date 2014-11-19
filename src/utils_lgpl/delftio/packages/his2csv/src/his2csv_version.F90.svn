@@ -40,7 +40,7 @@ implicit none
     character(*),  public, parameter :: his2csv_program      = 'HIS2CSV'
 
     character(*),  public, parameter :: his2csv_version      = his2csv_major//'.'//his2csv_minor//'.'//his2csv_revision//'.'//his2csv_build_number
-    character(*),  public, parameter :: his2csv_version_full = 'Deltares, '//his2csv_program//' Version '//his2csv_version//', '//__DATE__//', '//__TIME__
+    character(*),  public, parameter :: his2csv_version_full = 'Deltares, '//his2csv_program//' Version '//his2csv_version
     character(*),  public, parameter :: his2csv_version_id   = '@(#)'//his2csv_version_full
 
 contains
