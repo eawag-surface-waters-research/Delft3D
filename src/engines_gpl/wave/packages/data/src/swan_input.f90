@@ -5051,7 +5051,10 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
              line(i:)  = '.sp2'
              i         = i+4
              line(i:i) = ''''''
-             if (calccount == 1 .and. sr%modsim == 3) then
+             !
+             ! this works only when first time step of the non-stationary mode (for both stand_alone and online coupling)
+             !
+             if (calccount == 1 .and. sr%modsim == 3) then  
                 i         = i+1
                 line(i:)  = ' OUT'
                 i         = i+4
