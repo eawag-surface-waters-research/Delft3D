@@ -5052,7 +5052,11 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
              i         = i+4
              line(i:i) = ''''''
              !
-             ! this works only when first time step of the non-stationary mode (for both stand_alone and online coupling)
+             ! When running in non-stationary mode
+             ! and when this is the first WAVE calculation of the simulation:
+             ! Also produce spectral output for the start time of the simulation
+             ! This may be needed by applications using this output as input and
+             ! needing to cover the full simulation period.
              !
              if (calccount == 1 .and. sr%modsim == 3) then  
                 i         = i+1

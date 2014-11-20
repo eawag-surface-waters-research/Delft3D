@@ -237,6 +237,9 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
              endif
           endif
        else
+          ! The do loop is needed (instead of an array operation), because otherwise
+          ! the full array is copied to the stack. This goes wrong with big models
+          !
           do i = gdp%d%nmlb, gdp%d%nmub
              bedformD90(i) = 1.5_fp * bedformD50(i)
           enddo
