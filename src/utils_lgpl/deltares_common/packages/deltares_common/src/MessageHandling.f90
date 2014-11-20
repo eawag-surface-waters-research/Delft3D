@@ -177,6 +177,7 @@ private
    integer,                                    public  :: thresholdLvl_stdout = 0 !< Threshold level specific for stdout channel.
    integer,                                    public  :: thresholdLvl_log    = 0 !< Threshold level specific for the logging queue channel.
    integer,                                    public  :: thresholdLvl_file   = 0 !< Threshold level specific for the file output channel.
+   integer,                                    public  :: thresholdLvl_callback   = LEVEL_WARN !< Threshold level specific for the c callback.
 
    !> For the above threshold levels to become active, each channel must be separately enabled:
    integer, save                  :: lunMess             = 0       !< The file pointer to be used for the file output channel.
@@ -297,6 +298,8 @@ end subroutine set_logger
 
 
 
+
+
 !> The main message routine. Puts the message string to all output
 !! channels previously set up by SetMessageHandling
 recursive subroutine SetMessage(level, string)
@@ -311,59 +314,62 @@ recursive subroutine SetMessage(level, string)
   integer :: levelact
 
 
-   levelact = max(1,min(max_level, level))
+  levelact = max(1,min(max_level, level))
 
-   if (level >= 0) then
-      ! Always *count* messages, independent from any treshold level.
-      mess_level_count(levelact) = mess_level_count(levelact) + 1
+  if (level >= 0) then
+     ! Always *count* messages, independent from any treshold level.
+     mess_level_count(levelact) = mess_level_count(levelact) + 1
 
-      if (level >= thresholdLvl_stdout) then
-         if (writeMessage2Screen) then
-            write (*, '(a)') level_prefix(levelact)//trim(string)
-         end if
-      endif
+     if (level >= thresholdLvl_stdout) then
+        if (writeMessage2Screen) then
+           write (*, '(a)') level_prefix(levelact)//trim(string)
+        end if
+     endif
 
-      if (lunMess > 0) then
-         if (level >= thresholdLvl_file) then
-            write (lunMess, '(a)') level_prefix(levelact)//trim(string)
-         end if
-      end if
+     if (lunMess > 0) then
+        if (level >= thresholdLvl_file) then
+           write (lunMess, '(a)') level_prefix(levelact)//trim(string)
+        end if
+     end if
 
-      if (level > maxErrorLevel) then
-         maxErrorLevel = level
-      endif
+     if (level > maxErrorLevel) then
+        maxErrorLevel = level
+     endif
 
-      if (useLogging) then
-         if (level >= thresholdLvl_log) then
-            call pushMessage(levelact, string)
-         endif
-      endif
-   elseif (level < 0) then
+     if (useLogging) then
+        if (level >= thresholdLvl_log) then
+           call pushMessage(levelact, string)
+        endif
+     endif
+  elseif (level < 0) then
 
-      ! If negative level just put string to all output channels without prefix and counting
-      if (writeMessage2Screen) then
-         write (*, '(a)') trim(string)
-      endif
+     ! If negative level just put string to all output channels without prefix and counting
+     if (writeMessage2Screen) then
+        write (*, '(a)') trim(string)
+     endif
 
-      if (lunMess > 0) then
-         write (lunMess, '(a)') trim(string)
-      end if
+     if (lunMess > 0) then
+        write (lunMess, '(a)') trim(string)
+     end if
 
-   endif
+  endif
 
-   ! Optional callback routine for any user-specified actions (e.g., upon error)
-   if (associated(mh_callback).and. .not. alreadyInCallback) then
-      alreadyInCallback = .true.
-      call mh_callback(level, trim(string)) !In future, possibly also error #ID
-      alreadyInCallback = .false.
-   end if
+  ! Optional callback routine for any user-specified actions (e.g., upon error)
+  if (associated(mh_callback).and. .not. alreadyInCallback) then
+     alreadyInCallback = .true.
+     call mh_callback(level, trim(string)) !In future, possibly also error #ID
+     alreadyInCallback = .false.
+  end if
 
-   if (associated(c_logger).and. .not. alreadyInCallback) then
-      alreadyInCallback = .true.
-      c_string = string_to_char_array(trim(string))
-      call c_logger(level, c_string)
-      alreadyInCallback = .false.
-   end if
+  if (associated(c_logger).and. .not. alreadyInCallback) then
+     if (level >= thresholdLvl_callback) then
+        alreadyInCallback = .true.
+        c_string = string_to_char_array(trim(string))
+        call c_logger(level, c_string)
+        alreadyInCallback = .false.
+     endif
+
+  end if
 
 end subroutine SetMessage
 
