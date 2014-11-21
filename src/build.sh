@@ -44,7 +44,6 @@ function usage {
     echo "    -intel11.1"
     echo "    -intel12"
     echo "    -intel14 (-intel14.0.3)"
-    echo "WARNING: On h5 currently for Intel only -64bit and -intel14 (intel14.0.3) are supported"
     }
 
 
@@ -156,16 +155,16 @@ case $compiler in
     gnu)
         ifortInit=""
         iccInit=""
-        addpath PATH /opt/gcc/4.9.1/bin
-        addpath LD_LIBRARY_PATH /opt/gcc/4.9.1/lib /opt/gcc/4.9.1/lib64
+        addpath PATH /opt/gcc/bin
+        addpath LD_LIBRARY_PATH /opt/gcc/lib /opt/gcc/lib64
         echo "Using GNU compilers in `witch gfortran`"
         ;;
 
-	intel14)
+    intel14)
         ifortInit=". /opt/intel/composer_xe_2013_sp1.3.174/bin/compilervars.sh $platform"
         iccInit=""
         echo "Using Intel 14.0.3 Fortran ($platform) compiler"
-		;;
+        ;;
 
     intel12)
         ifortInit=". /opt/intel/bin/ifortvars.sh $platform"
@@ -240,9 +239,9 @@ fi
 # When the autotools are not installed in the default location,
 # point to them explicitly
 addpath PATH \
-    /opt/automake/1.14.1/bin \
-    /opt/autoconf/2.69/bin \
-    /opt/libtool/2.4.3/bin
+    /opt/automake/bin \
+    /opt/autoconf/bin \
+    /opt/libtool/bin
 
 
 #===============================================================================
@@ -251,18 +250,18 @@ addpath PATH \
 #---------------------
 # mpich2
 if [ "$compiler" = 'gnu' ]; then
-    addpath PATH /opt/mpich2/1.4.1_gcc4.9.1/bin
-    export MPI_INCLUDE=/opt/mpich2/1.4.1_gcc4.9.1/include
-    export MPILIBS_ADDITIONAL="-L/opt/mpich2/1.4.1_gcc4.9.1/lib -lfmpich -lmpich -lmpl"
+    addpath PATH /opt/mpich2-1.4.1-gcc-4.6.2/bin
+    export MPI_INCLUDE=/opt/mpich2-1.4.1-gcc-4.6.2/include
+    export MPILIBS_ADDITIONAL="-L/opt/mpich2-1.4.1-gcc-4.6.2/lib -lfmpich -lmpich -lmpl"
     # export MPILIBS_ADDITIONAL=" "
-    export MPIFC=/opt/mpich2/1.4.1_gcc4.9.1/bin/mpif90  
+    export MPIFC=/opt/mpich2-1.4.1-gcc-4.6.2/bin/mpif90  
 else
     # Intel compilers
-    addpath PATH /opt/mpich2/1.4.1_intel14.0.3/bin
-    export MPI_INCLUDE=/opt/mpich2/1.4.1_intel14.0.3/include
-    export MPILIBS_ADDITIONAL="-L/opt/mpich2/1.4.1_intel14.0.3/lib -lfmpich -lmpich"
+    addpath PATH /opt/mpich2-1.0.8-intel64/bin
+    export MPI_INCLUDE=/opt/mpich2-1.0.8-intel64-PIC/include
+    export MPILIBS_ADDITIONAL="-L/opt/mpich2-1.0.8-intel64-PIC/lib -lfmpich -lmpich"
     if [ "$platform" = 'intel64' ]; then
-        export MPIFC=/opt/mpich2/1.4.1_intel14.0.3/bin/mpif90  
+        export MPIFC=/opt/mpich2-1.0.8-intel64-PIC/bin/mpif90  
     fi
 fi
 
