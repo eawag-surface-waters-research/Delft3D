@@ -260,6 +260,14 @@ C
               CNVDN = 0.0
               CNVDP = 0.0
               CNVDS = 0.0
+              RC20  = 0.0
+              TEMPC = 0.0
+              ELFACT = 1.0
+              N_FACT = 0.0
+              P_FACT = 0.0
+              DECOC  = 0.0
+              DECOCE = 0.0
+
            ELSE
 C
 C             Calculate degrad. rate at 20oC for current stochiometry

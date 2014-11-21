@@ -73,6 +73,7 @@ C
       DATA CPLNUT /'Week  * PN  + DN           0.0   0.0',
      1             'Week  * PP  + DP           0.0   0.0',
      2             'Week  * PS  + DS           0.0   0.0'/
+      SAVE
 C
 C
 C  NOTE : RUN and CONTINUE/STOP should be specified for each job.
