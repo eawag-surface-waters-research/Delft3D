@@ -298,7 +298,7 @@ C     output formats
 C
  2000 FORMAT ( ' ERROR  : version proces intput ',F5.2,' NOT supported'
      &        /'          by PROCES system version,',F5.2)
- 2010 FORMAT ( ' WARNING: version proces intput ',F5.2,' greater than'
+ 2010 FORMAT ( ' WARNING: version proces input ',F5.2,' greater than'
      &        /'          PROCES system version,',F5.2)
  2020 FORMAT ( ' ERROR  : Proces work file doesn''t match dimensions in'
      &        /'          DELWAQ boot file for NIPMSA',
