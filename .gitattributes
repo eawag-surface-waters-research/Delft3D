@@ -267,6 +267,7 @@ src/TODO -text
 src/autogen.sh -text
 src/build.cmd -text
 src/build.sh -text
+src/build_h5.sh -text
 src/clean.cmd -text
 src/clean.sh -text
 src/common.am -text
