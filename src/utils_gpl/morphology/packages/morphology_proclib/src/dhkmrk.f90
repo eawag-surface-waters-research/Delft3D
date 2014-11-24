@@ -1,21 +1,40 @@
 subroutine dhkmrk ( iknmrk , kenmrk , knmrki )
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2012-2014.                                
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
+!!--description-----------------------------------------------------------------
 !
-!     DELFT HYDRAULICS     SECTOR WATERRESOURCES AND ENVIRONMENT
+! Utility that evaluates a feature from the "feature" integer
 !
-!     CREATED: june  1994 by Jan van Beek
-!
-!     FUNCTION            : utility that evaluates a feature from
-!                           the "feature" integer
-!
-!     PARAMETERS          :
-!
-!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-!     ----    -----    ------     ------- -----------
-!     IKNMRK  INTEGER     1       INPUT   Index of feature
-!     KENMRK  INTEGER     1       INPUT   feature
-!     KNMRKI  INTEGER     1       OUTPUT  evaluated feature
-!
-    integer iknmrk, kenmrk, knmrki
+!!--declarations----------------------------------------------------------------
+    integer, intent(in)  :: iknmrk  ! Index of feature
+    integer, intent(in)  :: kenmrk  ! Feature
+    integer, intent(out) :: knmrki  ! Evaluated feature
 !
 !   Local
 !

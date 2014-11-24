@@ -30,34 +30,6 @@ module m_itdate
 end module m_itdate
 
 module timespace_read
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2005, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-! see meteo.f90
-!
-!!--pseudo code and references--------------------------------------------------
-!
-! Stef.Hummel@WlDelft.nl
-! Herman.Kernkamp@WlDelft.nl
-! Adri.Mourits@WlDelft.nl
-!
-!!--declarations----------------------------------------------------------------
    use precision
    implicit none
 
@@ -455,28 +427,6 @@ end function reaspwtim
 
 function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0        , &
                          & dxa       ,dya       ,dmiss      ) result(success)
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2006, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
 
     use precision
     !
@@ -578,28 +528,6 @@ end function readarcinfoheader
 
 function reaspwheader(minp      ,mx        ,nx        ,dxa        ,dya        , &
                       & mncoor    ) result(success)
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
 
     use precision
     implicit none
@@ -664,28 +592,6 @@ function reaspwheader(minp      ,mx        ,nx        ,dxa        ,dya        , 
 end function reaspwheader
 
 function readcurviheader(minp, gridfilnam, mfirst, mlast, nfirst, nlast, mrow, dmiss ) result(success)
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
 
     use precision
     implicit none
@@ -790,28 +696,6 @@ end function readcurviheader
 
 
 function numbersonline(rec       )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     implicit none
 !
 ! Global variables
@@ -853,34 +737,6 @@ end function numbersonline
 end module timespace_read
 
 module timespace_data
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2007, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-! see meteo.f90
-!
-!!--pseudo code and references--------------------------------------------------
-!
-! Stef.Hummel@WlDelft.nl
-! Herman.Kernkamp@WlDelft.nl
-! Adri.Mourits@WlDelft.nl
-!
-!!--declarations----------------------------------------------------------------
   use precision
   use timespace_read
   implicit none
@@ -2159,32 +2015,6 @@ function getmeteoerror( ) result(retval)
 end function getmeteoerror
 
 subroutine asc(omeg, ampl, phas, inaam, itdate, ierrs)
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: Determination of FR and V0+U
-!              'stripped' VERSION OF MAIN (ASCON)
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     implicit none
 !    include 'globdat.igd'
@@ -2278,33 +2108,6 @@ subroutine asc(omeg, ampl, phas, inaam, itdate, ierrs)
 !    phas = phas*d2r + v0u(1)
 end subroutine asc
 subroutine datumi(jaar      ,jdatum    ,t         )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: Calculates the number of hours referred to
-!              January 1, 00:00 of the year 'JAAR' from a given
-!              date/time
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     !
     implicit none
@@ -2370,31 +2173,6 @@ subroutine datumi(jaar      ,jdatum    ,t         )
     endif
 end subroutine datumi
 subroutine hulpgr(jaar      ,tm1       ,v         ,f         )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: Calulates help var. V and F
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     !
     implicit none
@@ -2521,31 +2299,6 @@ subroutine hulpgr(jaar      ,tm1       ,v         ,f         )
     f(22) = 1.0924d0*ci4*sqrt(1d0 + f(22))
 end subroutine hulpgr
 function cmpnum(num       )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: Finds the name of the tidal component
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     implicit none
 !
@@ -2814,31 +2567,6 @@ function cmpnum(num       )
     endif
 end function cmpnum
 subroutine kompbs(l         )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: SIMULATION OF EXTERNAL KOMPBES-FILE
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     implicit none
 !
@@ -3092,31 +2820,6 @@ end subroutine kompbs
 subroutine bewvuf(ierrs     ,kcmp      ,mxkc      ,inaam     ,knaam     , &
                 & jnaam     ,w         ,v0u       ,fr        ,v         , &
                 & f         )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: calculates V0U() and FR()
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     !
     implicit none
@@ -4483,28 +4186,6 @@ End module M_arcuv
 
 
 
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
 
 
 module timespace_triangle
@@ -5794,63 +5475,6 @@ end subroutine polyindexweight
 
 end module timespace_triangle                           ! met leading dimensions 3 of 4
 module timespace
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2006, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-! Read time series in five possible formats:
-! uniform       : Delft3D-FLOW format: time, uniform windspeed, direction and pressure
-! space varying : Delft3D-FLOW format: time and fields of patm, windx, windy
-!                 on Delft3D-FLOW m,n grid
-! arcinfo       : time and fields on own equidistant grid
-! spiderweb     : time and fields of patm, windspeed, direction op spiderweb grid
-! curvi         : time and fields on own curvilinear grid
-!
-! Main calls from Delft3D-FLOW:
-! readmd -> rdmeteo:
-!             initmeteo        : allocate meteo structure for this domain
-!             adddataprovider  : allocate and initialized an input quantity
-!                                with specified format
-!             checkmeteo       : check whether input is available for the complete
-!                                time interval
-! trisol  -> incmeteo:
-!             meteoupdate      : prepare meteo data for the current time
-!             getmeteoval      : return meteo data for the current time and position
-!                                use optional m and n parameters to speed up in case of curvi
-!             getspiderval     : same as getmeteoval for spiderweb data
-!
-! gdp_dealloc:
-!             deallocmeteo
-!
-! Additional calls:
-!    getmeteoerror    : returns a string containing an error message
-!                       to be used in case success = false for a main call
-!    meteogetpaver    : returns the average atmospheric pressure read
-!    meteogetpcorr    : returns whether pressure correction is switched on on
-!                       the boundaries
-!
-!!--pseudo code and references--------------------------------------------------
-!
-! Stef.Hummel@WlDelft.nl
-! Herman.Kernkamp@WlDelft.nl
-! Adri.Mourits@WlDelft.nl
-!
-!!--declarations----------------------------------------------------------------
    use precision
 
    use timespace_data
@@ -6916,28 +6540,6 @@ end subroutine regdir
 
 subroutine bilin5(xa        ,ya        ,x0        ,y0        ,w         , &
                 & ier       )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
     use precision
     implicit none
 !
@@ -7072,35 +6674,6 @@ end subroutine bilin5
 
 subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
                    & d12       )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
-!!--description-----------------------------------------------------------------
-!
-!    Function: Calculates distance between two points on earth
-! Method used: Circular distance when sferic is true,
-!              Euclidic distance when sferic is false
-!
-!!--pseudo code and references--------------------------------------------------
-!
-! This subroutine is identical to subroutine distance in Delft3D-FLOW, except
-! that this version is independent of GDP
-!
-!!--declarations----------------------------------------------------------------
     use precision
     implicit none
 !

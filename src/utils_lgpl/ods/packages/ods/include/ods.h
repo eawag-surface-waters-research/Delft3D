@@ -411,7 +411,7 @@
 
 /*---------------------------------------------------------------------
  *
- * Company:        WL | delft hydraulics
+ * Company:        Deltares
  *
  * System:         ODS (Open Data Structure)
  *
