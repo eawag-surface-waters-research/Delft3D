@@ -4241,6 +4241,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/degstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/delwaq.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/dimprint.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/drawgrid.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/dxf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ecomsed.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ecoplot.ini -text
 src/tools_lgpl/matlab/quickplot/progsrc/ecoplot.m -text
@@ -4411,7 +4412,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/difffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/dimensions.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/dir2uv.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/domains.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/dxf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ecomsedfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.c -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.m -text
