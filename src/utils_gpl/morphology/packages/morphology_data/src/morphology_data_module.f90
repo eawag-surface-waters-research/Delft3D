@@ -452,6 +452,7 @@ type sedpar_type
     character(20) , dimension(:)    , pointer :: namsed     !  Names of all sediment fractions
     character(256), dimension(:)    , pointer :: flsdbd     !  File name containing initial sediment mass at bed
     character(256), dimension(:)    , pointer :: flstcg     !  File name calibration factor on critical shear stress in Van Rijn (2004) uniform values
+    character(256), dimension(:)    , pointer :: flnrd      !  Files with Node Relation Data (NRD-Files) for Morphology-1D in SOBEK-Kernel
     ! 
     ! logicals
     !

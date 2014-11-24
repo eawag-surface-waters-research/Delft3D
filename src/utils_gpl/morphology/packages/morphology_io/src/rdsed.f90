@@ -162,7 +162,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     character(10)               :: versionstring
     character(6)                :: seddxxstring
     character(256)              :: errmsg
-    type(tree_data), pointer  :: sedblock_ptr
+    type(tree_data), pointer    :: sedblock_ptr
 !
 !! executable statements -------------------------------------------------------
 !
@@ -346,6 +346,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        call prop_get_integer(sed_ptr, 'SedimentOverall', 'IopSus', iopsus)
        !
        call prop_get_string(sed_ptr, 'SedimentOverall', 'MudCnt', flsmdc)
+       
+       sedpar%flnrd(0) = ' '
+       call prop_get_string(sed_ptr, 'SedimentOverall', 'NodeRelations', sedpar%flnrd(0))
+       
        !
        ! Intel 7.0 crashes on an inquire statement when file = ' '
        !
@@ -443,11 +447,15 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              call str_lower(parname)
              if ( trim(parname) /= 'sediment') cycle
              parname = ' '
+
              call prop_get_string(sedblock_ptr, '*', 'Name', parname)
              if (.not. strcmpi(parname, sedname)) cycle
              !
              ! sediment fraction found
              !
+             sedpar%flnrd(l) = ' '
+             call prop_get_string(sedblock_ptr, '*', 'NodeRelations', sedpar%flnrd(l))
+             
              exit
           enddo
           sedpar%sedblock(l) = sedblock_ptr
@@ -1614,6 +1622,7 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
              !
              ! Determine sediment type
              !
+             
              sedtyptmp = ' '
              call prop_get_string(asedblock_ptr, '*', 'SedTyp', sedtyptmp)
              call small(sedtyptmp, 999)
@@ -1636,6 +1645,7 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
              !
              namsedim(j) = parname
              typsedim(j) = sedtypnr
+             
           endif
        enddo
     else
@@ -1654,6 +1664,7 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
                     allocate (sedpar%rhosol(lsedtot), stat = istat)
     if (istat == 0) allocate (sedpar%namsed(lsedtot), stat = istat)
     if (istat == 0) allocate (sedpar%sedtyp(lsedtot), stat = istat)
+    if (istat == 0) allocate (sedpar%flnrd(0:lsedtot), stat = istat)
     if (istat /= 0) then
        call write_error('Memory allocation error in COUNT_SED', unit=lundia)
     endif
