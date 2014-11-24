@@ -117,13 +117,8 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     integer                             :: nmd         ! Help var. nm-icx
     integer                             :: nm_pos      ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     integer , dimension(:), allocatable :: mask        ! temporary array for masking flow arrays
-    real(fp)                            :: dzfound     ! Thinnest layer found in the initial grid distribution
-    real(fp)                            :: dzin        ! Help var. in determining the thinnest layer
-    real(fp)                            :: dzmin_trsh  ! Minimum layer thickness (0.1*dryflc) as threshold
-    real(fp)                            :: dzmin_input ! Minimum layer thickness from initial input
     real(fp)                            :: hucres
     real(fp)                            :: hvcres
-    logical                             :: found
 !
 !! executable statements -------------------------------------------------------
 !
@@ -247,28 +242,6 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
                 endif
              endif
           enddo
-       endif
-       !
-       ! Check whether the minimum layer thickness (0.1*Dryflc) is smaller 
-       ! than the thinnest layer defined in the MD-File
-       !
-       dzmin_trsh  = 0.1_fp*dryflc
-       dzmin_input = minval(thick)
-       dzfound     = dryflc
-       found       = .false.
-       do nm = 1, nmmax
-          if (kfs(nm) == 1) then
-             dzin = dzmin_input*max(0.0_fp, (real(dps(nm))+s1(nm)))
-             if (dzmin_trsh > dzin) then
-                found  = .true.
-                dzfound = min(dzfound, dzin)
-             endif
-          endif
-       enddo
-       if (found) then
-          call prterr(lundia, 'U190',  'Minimum layer thickness (0.1*Dryflc) is too large for the vertical')
-          write (lundia, '(a,f10.4,a)')'            grid layering. Decrease Dryflc to smaller than ', 10.0_fp*dzfound, ' m,'
-          write (lundia, '(a)')        '            to avoid problems with the vertical layering.'
        endif
        !
        ! Delft3D-16494: NOT NECESSARY? Could the loop above for determining kfs also be done with kcs/=0?
