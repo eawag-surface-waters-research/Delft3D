@@ -27,12 +27,6 @@
 !>\file
 !>       Exceedence frequency, its complement and the mean
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    Water Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : Delft3D-WAQ

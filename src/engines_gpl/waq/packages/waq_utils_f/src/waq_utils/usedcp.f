@@ -23,8 +23,6 @@
 
       function usedcp()
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module:   FUNCTION USEDCP
 c           Function: Determines the consumed cpu system time or the
 c                     elapsed time in seconds from 0.0 hour (HARDWARE

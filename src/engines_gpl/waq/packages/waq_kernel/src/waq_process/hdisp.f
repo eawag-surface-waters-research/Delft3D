@@ -27,12 +27,6 @@
 !>\file
 !>       (1D) Horizontal dispersion as velocity dependent reprofunction
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : OSIRIS 2002

@@ -27,12 +27,6 @@
 !>\file
 !>       Digging dry matter to sediment S1 and S2
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : STANDAARDISATIE PROCES FORMULES T721.72

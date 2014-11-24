@@ -27,12 +27,6 @@
 !>\file
 !>       Average depth for a Bloom time step (typically a day)
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : Venetie WQ study, 1998

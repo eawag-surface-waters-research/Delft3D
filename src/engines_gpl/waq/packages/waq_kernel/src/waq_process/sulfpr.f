@@ -27,12 +27,6 @@
 !>\file
 !>       Precipitation and dissolution of sulphide as first order process
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : SLIK, ONTW. BODEM-WATER UITWISSELINGSMODULES, Q2935.30

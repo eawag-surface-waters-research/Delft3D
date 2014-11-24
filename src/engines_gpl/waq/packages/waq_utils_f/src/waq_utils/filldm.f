@@ -25,8 +25,6 @@
      *                  dm3       ,dm4       ,dm5       ,dm6       )
       implicit none
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE FILLDM
 c           Function: Write element dimensions in array elmdms
 c        Method used:

@@ -28,10 +28,6 @@
 !>       emersion of segments in z-layers, set segment features accordingly
 
 !***********************************************************************
-!     +----------------------------------------+
-!     |    d e l f t   h y d r a u l i c s     |
-!     +----------------------------------------+
-!***********************************************************************
 !
 !     function : emersion of segments, set segment features accordingly
 !

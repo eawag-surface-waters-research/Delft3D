@@ -4,24 +4,35 @@
 !>\file
 !>       Generic module to process resuspension, burial, digging S1 & S2
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
-C***********************************************************************
-C
-C     Author  : Jos van Gils  
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     110912  Jos van Gils    Create first version, merge RESCAR, SWBUR, DIGCAR
-C
-C***********************************************************************
+C----- GPL ---------------------------------------------------------------------
+C                                                                               
+C  Copyright (C)  Stichting Deltares, 2011-2014.                                
+C                                                                               
+C  This program is free software: you can redistribute it and/or modify         
+C  it under the terms of the GNU General Public License as published by         
+C  the Free Software Foundation version 3.                                      
+C                                                                               
+C  This program is distributed in the hope that it will be useful,              
+C  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+C  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+C  GNU General Public License for more details.                                 
+C                                                                               
+C  You should have received a copy of the GNU General Public License            
+C  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+C                                                                               
+C  contact: delft3d.support@deltares.nl                                         
+C  Stichting Deltares                                                           
+C  P.O. Box 177                                                                 
+C  2600 MH Delft, The Netherlands                                               
+C                                                                               
+C  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+C  are registered trademarks of Stichting Deltares, and remain the property of  
+C  Stichting Deltares. All rights reserved.                                     
+C                                                                               
+C-------------------------------------------------------------------------------
+C  $Id$
+C  $HeadURL$
+C-------------------------------------------------------------------------------
 C
 C     Description of the module :
 C

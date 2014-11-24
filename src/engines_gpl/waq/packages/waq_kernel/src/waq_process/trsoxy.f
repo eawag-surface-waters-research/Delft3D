@@ -24,10 +24,7 @@
       SUBROUTINE TRSOXY ( PMSA   , FL     , IPOINT , INCREM , NOSEG  ,
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
-C***********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     +----------------------------------------+
+
 C***********************************************************************
 C
 C     Function : Extra rearation flux towards sediment Drying and Flooding

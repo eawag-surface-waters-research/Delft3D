@@ -29,8 +29,6 @@ c#endif
      *                  (fname ,itype ,dimtyp, pardep, timdep, locdep,
      *                   ndim  ,ierror, option                       )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: dimension selection for maps
 c                   PHIDIAS-Spectral  NEFIS  files
 c
@@ -328,8 +326,6 @@ c#endif
      *                  maxlst, lang  , parlst, paruni, partyp, parcod,
      *                  nrlst , ierror, option                        )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: parameter name selection for maps
 c                   PHIDIAS  NEFIS  files
 c        Method used:
@@ -555,8 +551,6 @@ c#endif
      *                   loclst, loctyp, locnr , maxlst, nrlst , ierror,
      *                   option )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: location name selection for maps
 c                   PHIDIAS Spectral NEFIS  files
 c        Method used:
@@ -758,8 +752,6 @@ c#endif
      *                  maxlst ,        timlst,         timtyp ,
      *                  nrlst  ,ierror ,option                         )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: time selection for maps
 c                     PHIDIAS Spectral NEFIS  file
 c        Method used:
@@ -1047,8 +1039,6 @@ c#endif
      *                   i3gl  ,maxdim ,xdata , ierror, option,
      *                   ibuffs,rbuffs                               )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: select map data out of PHIDIAS MAP NEFIS files
 c        Method used:
 c
@@ -1460,8 +1450,6 @@ c#endif
      *                  (fname ,itype ,dimtyp, pardep, timdep, locdep,
      *                   ndim  ,ierror, option                       )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: dimension selection for maps
 c                   PHIDIAS NEFIS  files
 c
@@ -1677,8 +1665,6 @@ c#endif
      *                  maxlst, lang  , parlst, paruni, partyp, parcod,
      *                  nrlst , ierror, option                        )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: parameter name selection for maps
 c                   PHIDIAS  NEFIS  files
 c        Method used:
@@ -1859,8 +1845,6 @@ c#endif
      *                  maxlst ,        loclst ,        loctyp ,nrlst  ,
      *                  locnr  ,ierror ,zbuffs ,option                 )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: parameter name selection for time histories
 c                     PHIDIAS NEFIS files
 c        Method used:
@@ -2062,8 +2046,6 @@ c#endif
      *                  maxlst ,        timlst,         timtyp ,
      *                  nrlst  ,ierror ,option                         )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: time selection for maps
 c                     PHIDIAS NEFIS  file
 c        Method used:
@@ -2307,8 +2289,6 @@ c#endif
      *                   i3gl  ,maxdim ,xdata , ierror, option,
      *                   ibuffs,rbuffs                               )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: select map data out of PHIDIAS MAP NEFIS files
 c        Method used:
 c

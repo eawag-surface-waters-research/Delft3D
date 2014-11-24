@@ -27,12 +27,6 @@
 !>\file
 !>       Derive OOC from IM-fractions and percentage POM in IMx
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : STANDAARDISATIE PROCES FORMULES

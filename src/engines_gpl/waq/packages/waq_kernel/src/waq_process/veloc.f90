@@ -27,12 +27,6 @@
 !>\file
 !>       Horizontal stream velocity in a segment based on flows at interfaces
 
-!**********************************************************************
-!     +----------------------------------------+
-!     |    D E L F T   H Y D R A U L I C S     |
-!     |    WAter Resources and Environment     |
-!     +----------------------------------------+
-!
 !***********************************************************************
 !
 !     Project : T1519 Clyde river estuary

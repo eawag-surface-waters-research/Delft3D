@@ -27,12 +27,6 @@
 !>\file
 !>       Aeration at weirs (Gameson and Nakasone) (input is array of structures)
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |          Inland water systems          |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : Q2943.00 Osiris

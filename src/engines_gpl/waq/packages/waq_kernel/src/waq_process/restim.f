@@ -27,12 +27,6 @@
 !>\file
 !>       Residence time per volume, for advective transport only
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    Water Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : T1519 Clyde river estuary

@@ -29,8 +29,6 @@
 !  $Id$
 !  $HeadURL$
 !-----------------------------------------------------------------------
-!         D e l f t      H y d r a u l i c s   -   Section    E & Z
-!
 !             Module: SUBROUTINE INCREM
 !           Function: Computes increments (-1, 0 or 1) in the x- and y-
 !                     coordinates of the given two points

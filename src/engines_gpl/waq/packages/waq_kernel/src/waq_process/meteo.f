@@ -27,12 +27,6 @@
 !>\file
 !>       Process meteo from various meteo-stations
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C         Landelijk Warmte model Sobek River
 C     Project :

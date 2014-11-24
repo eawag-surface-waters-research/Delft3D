@@ -29,8 +29,6 @@
 !  $Id$
 !  $HeadURL$
 !-----------------------------------------------------------------------
-!         D e l f t      H y d r a u l i c s   -   Section    E & Z
-!
 !             Module: SUBROUTINE INIGRD
 !           Function: - Reads the computational grid enclosure file
 !                     - Lines formed by the vertices of the polygons are

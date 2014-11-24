@@ -23,8 +23,6 @@
 
       subroutine unlock(lunrep,l3dmod,nolic)
 
-!     Deltares Software Centre
-
 !>\File
 !>        Write intro to screen and report file
 

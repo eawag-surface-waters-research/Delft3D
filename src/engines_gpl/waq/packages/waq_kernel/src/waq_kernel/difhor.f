@@ -31,8 +31,6 @@
      *                  dflux                                      )
 
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   section    M C M
-c
 c             Module: SUBROUTINE DIFHOR
 c           Function: computes horizontal diffusion along strict
 c                     horizontal planes, using a special limiter,

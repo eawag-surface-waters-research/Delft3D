@@ -32,8 +32,6 @@
      *                  dsdksi    ,dtdksi    ,dsdeta    ,dtdeta    ,
      *                  dfluxx    ,dfluxy                          )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   section    M C M
-c
 c             Module: SUBROUTINE DIFACR
 c           Function: Computes horizontal diffusion along Z-planes.
 c                     Explicit in u-direction, explicit in v-

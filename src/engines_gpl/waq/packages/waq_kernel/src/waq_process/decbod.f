@@ -27,12 +27,6 @@
 !>\file
 !>       Oxydation of BOD-fractions with Monod kinetics for the TEWOR models
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WaterKwaliteit en Ecologie          |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : OSIRIS Q2943

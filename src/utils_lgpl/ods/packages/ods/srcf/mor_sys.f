@@ -30,8 +30,6 @@
      *                  (fname ,itype ,dimtyp, pardep, timdep, locdep,
      *                   ndim  ,ierror, option                       )
 !-----------------------------------------------------------------------
-!         D e l f t      H y d r a u l i c s   -   Section    C S O
-!
 !         Function: dimension selection for maps
 !                   MORSYS NEFIS COM files
 !
@@ -211,8 +209,6 @@
      *                maxlst, lang  , parlst, paruni, partyp, parcod,
      *                nrlst , ierror, option                        )
 !-----------------------------------------------------------------------
-!         D e l f t      H y d r a u l i c s   -   Section    C S O
-!
 !         Function: parameter name selection for maps
 !                   MORSYS  NEFIS COM files
 !        Method used:
@@ -384,8 +380,6 @@
      *                  maxlst ,        timlst,         timtyp ,
      *                  nrlst  ,ierror ,option                         )
 !-----------------------------------------------------------------------
-!         D e l f t      H y d r a u l i c s   -   Section    C S O
-!
 !           Function: time selection for maps
 !                     MORSYS NEFIS COM file
 !        Method used:
@@ -623,8 +617,6 @@
      *                   i3gl  ,maxdim ,xdata , ierror, option,
      *                   ibuffs,rbuffs                               )
 !-----------------------------------------------------------------------
-!         D e l f t      H y d r a u l i c s   -   Section    C S O
-!
 !           Function: select map data out of MORSYS COM NEFIS files
 !        Method used:
 !

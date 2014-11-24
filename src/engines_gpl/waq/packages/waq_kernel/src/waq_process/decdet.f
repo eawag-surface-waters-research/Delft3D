@@ -3,13 +3,7 @@
      &                    noq3   , noq4   )
 !>\file
 !>       Mineralisation & conversion of detritus POC1,POC2,POC3,POC4,DOC
-C
-C***********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
+
 C***********************************************************************
 C
 C     Project : Generiek Estuarium Model T2087

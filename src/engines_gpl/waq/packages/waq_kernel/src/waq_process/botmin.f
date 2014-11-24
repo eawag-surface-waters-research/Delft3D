@@ -27,12 +27,6 @@
 !>\file
 !>       Mineralisation of organic substances and desorption of AAP in the bed (S1,S2) for C, N, P and Si.
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : STANDAARDISATIE PROCES FORMULES T721.72

@@ -31,8 +31,6 @@ c#endif
      *                  maxlst, lang  , parlst, paruni, partyp, parcod,
      *                  nrlst , ierror, option                        )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: parameter name selection for maps
 c                   TRISULA NEFIS MAP files
 c        Method used:
@@ -711,8 +709,6 @@ c#endif
      *                   fname ,itype ,dimtyp, pardep, timdep, locdep,
      *                   ndim  ,ierror, option                       )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c         Function: dimension selection for maps
 c                   TRISULA NEFIS MAP files
 c
@@ -1266,8 +1262,6 @@ c#endif
      *                  maxlst ,        timlst,         timtyp ,
      *                  nrlst  ,ierror ,option                         )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: time selection for maps
 c                     TRISULA NEFIS files
 c        Method used:
@@ -1603,8 +1597,6 @@ c    *          [ALIAS:'_julind_map']
 c#endif
      *          (hdefds, hdafds, tim, nindex, ierror)
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: transform julian day to index in time series
 c        Method used:
 c
@@ -1893,8 +1885,6 @@ c#endif
      *                  maxlst ,        loclst ,        loctyp ,nrlst  ,
      *                  locnr  ,ierror ,zbuffs ,option                 )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: parameter location selection for maps
 c                     TRISULA NEFIS files
 c        Method used:
@@ -2202,8 +2192,6 @@ c#endif
      *                   i3gl  ,maxdim ,xdata , ierror, option,
      *                   ibuffs,rbuffs                               )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: select map data out of TRISULA NEFIS files
 c        Method used:
 c
@@ -2665,8 +2653,6 @@ c#endif
      *                  r1            ,vicww         ,dicww         ,
      *                  rho                                         )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    C S O
-c
 c           Function: get map data out of TRISULA NEFIS files
 c        Method used:
 c
@@ -3508,8 +3494,6 @@ c
      *                  alfas                ,dp        ,dps       ,
      *                  zbuff                                      )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHCOR
 c           Function: - read NEFIS data, coordinates from file
 c                     - calculate model frame
@@ -3844,8 +3828,6 @@ c
      *                  kcs       ,kfu       ,kfv       ,
      *                  dps       ,s1                              )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHWAT
 c           Function: Get NEFIS data for time itim for
 c                     parcod =  1  'wl' or
@@ -3980,8 +3962,6 @@ c
      *                  xcor      ,ycor      ,alfas     ,
      *                  u1        ,v1        ,thick                )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRH3DI
 c           Function: get NEFIS data for time itim for
 c                     parcod =  3  'du' or
@@ -4240,8 +4220,6 @@ c
      *                  xcor      ,ycor      ,
      *                  alfas                ,u1        ,v1        )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHUVI
 c           Function: get NEFIS data for time itim for
 c                     parcod =  7  'u ',
@@ -4491,8 +4469,6 @@ c-----------------------------------------------------------------------
      *                  xcor      ,ycor      ,alfas     ,
      *                  u1        ,v1        ,thick                )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRH3DV
 c           Function: get NEFIS data for time itim for
 c                     paramete = 38  'df'
@@ -4703,8 +4679,6 @@ c
      *                  nmax      ,mmax      ,kmax      ,lmax      ,
      *                  kcs       ,kfu       ,kfv       ,r1        )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHCON
 c           Function: get NEFIS data for time itim for
 c                     parameter = 2.  'c '
@@ -4867,8 +4841,6 @@ c
      *                  nmax      ,mmax      ,kmax      ,ltur      ,
      *                  kcs       ,kfu       ,kfv       ,rtur1     )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHTUR
 c           Function: get NEFIS data for time itim for
 c                     parameter = 2.  'c ' turbulence parameters
@@ -5016,8 +4988,6 @@ c
      *                  xcor      ,ycor      ,alfas                ,
      *                  tauksi    ,taueta                          )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHTAI
 c           Function: get NEFIS data for time itim for
 c                     parameter = 16  'tu'
@@ -5246,8 +5216,6 @@ c
      *                  xcor      ,ycor      ,alfas     ,
      *                  tauksi    ,taueta                          )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHTAV
 c           Function: get NEFIS data for time itim for
 c                     parameter = 39  'tf'
@@ -5438,8 +5406,6 @@ c
      *                  xcor      ,ycor      ,
      *                  alfas                ,u1        ,v1        )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHUVV
 c           Function: get NEFIS data for time itim for
 c                     parameter = 40  'uv'
@@ -5635,8 +5601,6 @@ c
      *                  irocol    ,kcu       ,kcv       ,iflag     ,
      *                  igrid                                      )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHGRD
 c           Function: get NEFIS time independent data for
 c                     parameter = 35  'ag'
@@ -5850,8 +5814,6 @@ c
      *                  irocol    ,kcu       ,kcv       ,
      *                  kfu       ,kfv       ,iflag                )
 c-----------------------------------------------------------------------
-c         D e l f t      H y d r a u l i c s   -   Section    E & Z
-c
 c             Module: SUBROUTINE WRHTD
 c           Function: get NEFIS data time dependent for
 c                     parameter = 37  'td'

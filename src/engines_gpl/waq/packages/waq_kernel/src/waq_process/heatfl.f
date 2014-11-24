@@ -27,12 +27,6 @@
 !>\file
 !>       Total heat flux for surface water absolute temperature model
 
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
 C***********************************************************************
 C
 C     Project : Temperatuursmodellering Maas 2003 Q3527
