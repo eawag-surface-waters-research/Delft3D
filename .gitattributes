@@ -151,6 +151,8 @@ examples/06_delwaq/com-tut_fti_waq.vol -text
 examples/06_delwaq/com-tut_fti_waq.wlk -text
 examples/06_delwaq/run_delwaq.bat -text
 examples/06_delwaq/run_delwaq.sh -text
+examples/06_delwaq/run_delwaq_parallel.bat -text
+examples/06_delwaq/run_delwaq_parallel_with_pause.bat -text
 examples/06_delwaq/run_delwaq_with_pause.bat -text
 examples/06_delwaq/run_delwaq_with_pause.sh -text
 examples/07_wave/coastw.enc -text
