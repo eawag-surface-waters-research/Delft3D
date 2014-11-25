@@ -105,6 +105,12 @@
       integer         ierr                              ! error indicator
       integer         jstart                            ! lower limit Flow arrays method 19 and 20
       integer         nmmaxj                            ! upper limit Flow arrays method 19 and 20
+      
+      logical            :: lfound                      ! argument was found
+      character(len=256) :: adummy                      ! dummy string
+      integer            :: nothreadsarg                ! optional number of threads from delwaq2 commandline arguments
+      real               :: rdummy                      ! dummy real
+      integer            :: ierr2                       ! error code
 
       integer   iivol  / 1/, iiarea / 2/, iiflow / 3/, iileng / 4/, iidisp / 5/,
      &          iiconc / 6/, iimass / 7/, iiderv / 8/, iiboun / 9/, iibset /10/,
@@ -124,6 +130,15 @@
      &          iicckl /76/, iiddkl /77/, iiwdmp /78/
 
 !     How many threads ?
+
+!     The '-nothreads [N]' argument for delwaq2 will turn on parallelism, and override
+!     any setting of the number of threads in the input file.
+!     No value or zero for [N] will use the maximum number of available threads
+      nothreadsarg = 0
+      call getcom ( '-nothreads', 1, lfound, nothreadsarg, rdummy, adummy, ierr2)
+      if (lfound) then
+         nothrd = nothreadsarg
+      end if
 
       if ( nothrd .gt. 0 ) call OMP_SET_NUM_THREADS( nothrd )
       noth = OMP_GET_MAX_THREADS()
