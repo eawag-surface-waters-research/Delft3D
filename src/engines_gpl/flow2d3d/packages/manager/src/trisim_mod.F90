@@ -256,26 +256,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     !
     prognm = 'TRISIM'
     !
-    ! Determine by trigger-file if RTC is running as well
-    !
-    luntri = newlun(gdp)
-    filsim = 'TMP_SYNC.RUN'
-    inquire (file = filsim, exist = lexist)
-    if (lexist) then
-       open (luntri, file = filsim, form = 'unformatted', status = 'unknown')
-       read (luntri) icheck
-       close (luntri)
-       !
-       ! Check 'RUNRTC' by telephone
-       !
-       if (icheck==786782) then
-          rtcmod = dataFromRTCToFLOW
-       else
-          write (*, '(a)') 'Trigger-file TMP_SYNC.RUN not made by TDATOM'
-          call d3stop(1         ,gdp       )
-       endif
-    endif
-    !
     ! Start FLOW simulation program
     !
     call remove_leading_spaces(runid     ,lenid     )
@@ -286,7 +266,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
        call tripoi(runid, filmrs, versio, filmd, &
                  & alone, gdp)
        if (gdp%errorcode > 0) then
-          if (rtcmod == dataFromRTCToFLOW) then
+          if (btest(rtcmod,dataFromRTCToFLOW)) then
              call timer_start(timer_wait, gdp)
              call syncflowrtc_quit
              call timer_stop(timer_wait, gdp)

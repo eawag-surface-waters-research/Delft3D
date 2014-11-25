@@ -719,29 +719,13 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         ! Discharge sources Time series 
         ! only if NSLUV > 0 and RTC-coupling for Barrier heights to FLOW 
         ! 
-        if (rtcmod == dataFromRTCToFLOW .and. nsluv>0) then 
+        if (btest(rtcmod,dataFromRTCToFLOW) .and. nsluv>0) then
            filnam = ' ' 
            ntimtm = 0 
            ! 
            call rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                     & runid     ,filnam    ,itstrt    ,itfinish  ,gdp       ) 
            if (error) goto 999 
-           ! 
-           ! Create trigger file for starting RTC
-           ! 
-           luntri = newlun(gdp) 
-           filsim = 'TMP_SYNC.RUN' 
-           inquire (file = filsim, exist = lexist) 
-           if (lexist) then 
-              open (luntri, file = filsim) 
-              close (luntri, status = 'delete') 
-           endif 
-           open (luntri, file = filsim, form = 'unformatted', status = 'unknown') 
-           ! 
-           ! Write 'RUNRTC' by telephone 
-           ! 
-           write (luntri) 786782 
-           close (luntri) 
         endif 
         ! 
         ! Temperature Time series for HEAT modules 

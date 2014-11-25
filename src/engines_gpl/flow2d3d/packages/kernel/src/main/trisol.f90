@@ -192,12 +192,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     logical                              , pointer :: nfl
     logical                              , pointer :: bubble
     logical , dimension(:)               , pointer :: flbub
-    real(fp)     , dimension(:,:)        , pointer :: zrtcsta
-    integer                              , pointer :: ifirstrtc
-    integer                              , pointer :: stacnt
-    integer                              , pointer :: rtcmod
-    integer      , dimension(:,:)        , pointer :: mnrtcsta
-    character(20), dimension(:)          , pointer :: namrtcsta
     logical                              , pointer :: rtcact
     integer(pntrsize)                    , pointer :: alfas
     integer(pntrsize)                    , pointer :: alpha
@@ -740,12 +734,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     nfl                 => gdp%gdprocs%nfl
     bubble              => gdp%gdprocs%bubble
     flbub               => gdp%gdbubble%flbub
-    zrtcsta             => gdp%gdrtc%zrtcsta
-    ifirstrtc           => gdp%gdrtc%ifirstrtc
-    stacnt              => gdp%gdrtc%stacnt
-    rtcmod              => gdp%gdrtc%rtcmod
-    mnrtcsta            => gdp%gdrtc%mnrtcsta
-    namrtcsta           => gdp%gdrtc%namrtcsta
     rtcact              => gdp%gdrtc%rtcact
     alfas               => gdp%gdr_i_ch%alfas
     alpha               => gdp%gdr_i_ch%alpha
@@ -1612,7 +1600,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
                     & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
-                    & r(sig)    ,r(zwork)  ,gdp       )
+                    & r(sig)    ,r(zwork)  ,timsec    ,gdp       )
           call timer_stop(timer_updbar, gdp)
        endif
        !
@@ -2631,7 +2619,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
                     & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
-                    & r(sig)    ,r(zwork)  ,gdp       )
+                    & r(sig)    ,r(zwork)  ,timsec    ,gdp       )
           call timer_stop(timer_updbar, gdp)
        endif
        !

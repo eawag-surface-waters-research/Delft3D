@@ -1238,16 +1238,19 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !
     !-----arrays for barriers;
     !
-    !                           cbuv  (2,nsluv   )
+    !                           cbuv  (9,nsluv   )
     !                           cbuvrt(2,nsluv   )
     pntnam = 'cbuv'          !  Global data
-    ierr = mkfpnt(pntnam, 4*nsluv, gdp)
-                             !  Pointer of array CBUV
-                             !  Pointer of array CBUV
-                             !  Pointer of array CBUV
-                             !  Real barrier data:
-                             !  CBUV(1,*) = Loss coefficient
-                             !  CBUV(2,*) = Initial gate height
+    ierr = mkfpnt(pntnam, 9*nsluv, gdp)
+                             !  CBUV(1,*) = Initial gate height
+                             !  CBUV(2,*) = old (1.0) or new (2.0) format of barrier specification
+                             !  CBUV(3,*) = Loss coefficient
+                             !  CBUV(4,*) = ??? used in new format only
+                             !  CBUV(5,*) = barrier velocity [m/s]. -1.0: not specified
+                             !  CBUV(6,*) = lowest position
+                             !  CBUV(7,*) = highest position
+                             !  CBUV(8,*) = mode: rtc (0.0), up (1.0), down(-1.0)
+                             !  CBUV(9,*) = gate height of previous half time step
     if (ierr<= - 9) goto 9999
     pntnam = 'cbuvrt'        !  Global data
     ierr = mkfpnt(pntnam, 2*nsluv, gdp)

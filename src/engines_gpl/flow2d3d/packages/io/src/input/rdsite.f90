@@ -119,6 +119,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                    :: it
     integer                                    :: lenc         ! Length of character var.
     integer                                    :: lkw
+    integer                                    :: luntri       ! Unit number for trigger file for TRISIM for running programs simultaniously all time dependent data if requested 
     integer                                    :: m1           ! m-index of observation/drogue point or begin point of cross-section
     integer                                    :: m2           ! m-index of end point of cross-section
     integer                                    :: n1           ! n-index of observation/drogue point or begin point of cross-section
@@ -127,6 +128,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                    :: i            ! Help var.
     integer                                    :: mfl          ! first m-index of this local partition, excluding the halo
     integer                                    :: mll          ! last  m-index of this local partition, excluding the halo
+    integer, external                          :: newlun
     integer                                    :: nfl          ! first n-index of this local partition, excluding the halo
     integer                                    :: nll          ! last  n-index of this local partition, excluding the halo
     integer                                    :: nlook        ! Help var.: nr. of data to look for in the MD-file
@@ -144,6 +146,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                                    :: dtn
     logical                                    :: found        ! FOUND=TRUE if KEYW in the MD-file was found
     logical                                    :: lerror       ! Flag=TRUE if an error is encountered
+    logical                                    :: lexist       ! Logical to determine file existence 
     logical                                    :: newkw        ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line
     logical                                    :: nodef        ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook)
     real(fp)                                   :: rdef         ! Help var. containing default va- lue(s) for real variable
@@ -154,6 +157,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     character(11)                              :: fmtdef       ! Default file format (usually=blank)
     character(11)                              :: fmttmp       ! Help variable for file format
     character(12)                              :: fildef       ! Default file name (usually = blank)
+    character(12)                              :: filsim       ! Name for trigger file for TRISIM for running programs simultaniously 
     character(20)                              :: cdef         ! Default value when CVAR not found
     character(20)                              :: chulp        ! Help var.
     character(20), dimension(:) , allocatable  :: ctemp        ! work array to store namst/namtra/namdro temporarily
@@ -1048,9 +1052,10 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        call dimstr(lunmd, filrtc, lundia, error, nrrec, stacnt, gdp)
        !
        istat = 0
-       if (istat == 0) allocate(gdp%gdrtc%mnrtcsta (2,stacnt)        , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%mnrtcsta(2,stacnt)         , stat = istat)
        if (istat == 0) allocate(gdp%gdrtc%namrtcsta(stacnt)          , stat = istat)
        if (istat == 0) allocate(gdp%gdrtc%zrtcsta(gdp%d%kmax,stacnt) , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%s1rtcsta(stacnt)           , stat = istat)
        if (istat /= 0) then
           call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
           call d3stop(1, gdp)
@@ -1068,6 +1073,13 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        call stafil(lundia   , filrtc  , fmttmp, error, stacnt, &
                  & namrtcsta, mnrtcsta, gdp   )
        if (error) goto 9999
+    else
+       stacnt = 0
+       istat  = 0
+       if (istat == 0) allocate(gdp%gdrtc%mnrtcsta(2,stacnt)         , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%namrtcsta(stacnt)          , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%zrtcsta(gdp%d%kmax,stacnt) , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%s1rtcsta(stacnt)           , stat = istat)
     endif
     !
     ! not twice the same name
@@ -1121,5 +1133,23 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
        endif
     enddo
+    !
+    ! Create trigger file for TRISIM to indicate RTC running
+    !
+    if (rtcmod /= noRTC) then
+       luntri = newlun(gdp)
+       filsim = 'TMP_SYNC.RUN'
+       inquire (file = filsim, exist = lexist)
+       if (lexist) then
+          open (luntri, file = filsim)
+          close (luntri, status = 'delete')
+       endif
+       open (luntri, file = filsim, form = 'unformatted', status = 'unknown')
+       !
+       ! Write 'RUNRTC' by telephone
+       !
+       write (luntri) 786782
+       close (luntri)
+    endif
  9999 continue
 end subroutine rdsite

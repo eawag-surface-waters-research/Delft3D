@@ -1,6 +1,4 @@
-subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
-                       & kfsmax    ,sig       ,zk        ,s1        , &
-                       & dps       ,r0        ,gdp       )
+subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -46,11 +44,13 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)                      , pointer :: hdt
     integer                       , pointer :: ifirstrtc
     integer                       , pointer :: itfinish
     integer                       , pointer :: itstrt
+    integer                       , pointer :: julday
     integer                       , pointer :: kmax
-    integer                       , pointer :: lsal
+    integer                       , pointer :: lstsci
     integer                       , pointer :: lundia
     integer                       , pointer :: mlb
     integer      , dimension(:,:) , pointer :: mnrtcsta
@@ -65,46 +65,49 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
     integer                       , pointer :: rtc_domainnr
     integer                       , pointer :: rtc_ndomains
     logical                       , pointer :: rtcact
+    logical                       , pointer :: anyRTCtoFLOW
+    logical                       , pointer :: anyFLOWtoRTC
     integer                       , pointer :: rtcmod
+    real(fp)     , dimension(:)   , pointer :: s1rtcsta
     integer                       , pointer :: stacnt
     real(fp)                      , pointer :: timsec
     integer                       , pointer :: tnparget
-    integer                       , pointer :: tnparput
+    integer                       , pointer :: tnlocput
     real(fp)     , dimension(:,:) , pointer :: tparput
+    character(80), dimension(:)   , pointer :: tlocget_names
+    character(80), dimension(:)   , pointer :: tlocput_names
     character(80), dimension(:)   , pointer :: tparput_names
-    character(80), dimension(:)   , pointer :: tparget_names
     real(fp)     , dimension(:,:) , pointer :: zrtcsta
 !
 ! Global variables
 !
-    integer       , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer       , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer       , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
-    real(prec)    , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, gdp%d%kmax, gdp%d%lstsci), intent(in) :: r0
-    real(fp)      , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: s1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(  gdp%d%kmax)                                                      , intent(in) :: sig
-    real(fp)      , dimension(0:gdp%d%kmax)                                                      , intent(in) :: zk
     logical                                                                                                   :: error  ! Flag=TRUE if an error is encountered 
     character(20) , dimension(gdp%d%nsluv)                                                                    :: nambar ! names of all parameters to get from RTC
+    character(20) , dimension(gdp%d%lstsci)                                                                   :: namcon ! Description and declaration in ckdim.f90
+
 !
 ! Local variables
 !
     integer                           :: i
+    integer                           :: iacdat      ! Actual simulation day for RTC 
+    integer                           :: iactim      ! Actual simulation time for RTC 
     integer                           :: iloc
     integer                           :: istat
     integer                           :: k
+    integer                           :: l
     integer                           :: n
     real(fp), dimension(:,:), pointer :: nparams
     logical                           :: success      ! Flag = false when an error is encountered
 !
 !! executable statements -------------------------------------------------------
 !
+    hdt            => gdp%gdnumeco%hdt
     ifirstrtc      => gdp%gdrtc%ifirstrtc
     itfinish       => gdp%gdinttim%itfinish
     itstrt         => gdp%gdinttim%itstrt
+    julday         => gdp%gdinttim%julday
     kmax           => gdp%d%kmax
-    lsal           => gdp%d%lsal
+    lstsci         => gdp%d%lstsci
     lundia         => gdp%gdinout%lundia
     mlb            => gdp%d%mlb
     mnrtcsta       => gdp%gdrtc%mnrtcsta
@@ -119,30 +122,28 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
     rtc_domainnr   => gdp%gdrtc%rtc_domainnr
     rtc_ndomains   => gdp%gdrtc%rtc_ndomains
     rtcact         => gdp%gdrtc%rtcact
+    anyRTCtoFLOW   => gdp%gdrtc%anyRTCtoFLOW
+    anyFLOWtoRTC   => gdp%gdrtc%anyFLOWtoRTC
     rtcmod         => gdp%gdrtc%rtcmod
+    s1rtcsta       => gdp%gdrtc%s1rtcsta
     stacnt         => gdp%gdrtc%stacnt
     timsec         => gdp%gdinttim%timsec
     tnparget       => gdp%gdrtc%tnparget
-    tnparput       => gdp%gdrtc%tnparput
+    tnlocput       => gdp%gdrtc%tnlocput
     tparput        => gdp%gdrtc%tparput
+    tlocget_names  => gdp%gdrtc%tlocget_names
+    tlocput_names  => gdp%gdrtc%tlocput_names
     tparput_names  => gdp%gdrtc%tparput_names
-    tparget_names  => gdp%gdrtc%tparget_names
     zrtcsta        => gdp%gdrtc%zrtcsta
     !
-    if (rtcmod == dataFromRTCToFLOW .or. rtcmod == dataFromFLOWToRTC) then
-      if (rtcmod == dataFromFLOWToRTC) then
-         !
-         ! Put z coordinates in array rtcsta
-         !
-         call zrtc(mlb, mub, nlb, nub, kfs, kfsmin, &
-                 & kfsmax, sig, zk, s1, dps, kmax, gdp)
-      endif
+    if (rtcmod /= noRTC) then
       !
       call timer_start(timer_wait, gdp)
       if (numdomains > 1) then
          call rtcstartcommunication(rtc_domainnr, rtc_ndomains)
          rtc_domainnr = rtc_domainnr+1
       else
+         rtc_ndomains = 1
          rtc_domainnr = 1
       endif
       !
@@ -160,7 +161,7 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
          call rtccommunicate(nparams, 2*rtc_ndomains)
          !
          tnparget = 0
-         tnparput = 0
+         tnlocput = 0
          parget_offset = 0
          parput_offset = 0
          do i = 1, rtc_ndomains
@@ -169,7 +170,7 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
             if (i<rtc_domainnr) parget_offset = parget_offset + n
             !
             n = nint(nparams(2,i))
-            tnparput = tnparput + n
+            tnlocput = tnlocput + n
             if (i<rtc_domainnr) parput_offset = parput_offset + n
          enddo
          deallocate(nparams,stat=istat)
@@ -177,80 +178,72 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
       else
          tnparget = nsluv
          parget_offset = 0
-         tnparput = stacnt * kmax
+         tnlocput = stacnt * kmax
          parput_offset = 0
       endif
+      anyRTCtoFLOW = tnparget > 0
+      anyFLOWtoRTC = tnlocput > 0
       !
       allocate(gdp%gdrtc%tparget(2,tnparget),stat=istat)
       if (istat /= 0) goto 999
-      allocate(gdp%gdrtc%tparget_names(tnparget),stat=istat)
+      allocate(gdp%gdrtc%tlocget_names(tnparget),stat=istat)
       if (istat /= 0) goto 999
-      tparget_names => gdp%gdrtc%tparget_names
-      tparget_names = ' '
+      tlocget_names => gdp%gdrtc%tlocget_names
+      tlocget_names = ' '
       do i = 1,nsluv
-         tparget_names(parget_offset+i) = nambar(i)
+         tlocget_names(parget_offset+i) = nambar(i)
       enddo
       !
       if (rtc_ndomains > 1) then
-         call rtccharcommunicate(tparget_names, tnparget)
+         call rtccharcommunicate(tlocget_names, tnparget)
       endif
       !
-      if (rtcmod == dataFromFLOWToRTC) then
+      if (anyFLOWtoRTC) then
          !
          ! Collect parameters for this domain
          !
-         allocate(gdp%gdrtc%tparput(2,tnparput),stat=istat)
+         allocate(gdp%gdrtc%tparput(2+lstsci,tnlocput),stat=istat)
          if (istat /= 0) goto 999
-         allocate(gdp%gdrtc%tparput_names(tnparput),stat=istat)
+         allocate(gdp%gdrtc%tlocput_names(tnlocput),stat=istat)
+         if (istat /= 0) goto 999
+         allocate(gdp%gdrtc%tparput_names(2+lstsci),stat=istat)
          if (istat /= 0) goto 999
          tparput => gdp%gdrtc%tparput
+         tlocput_names => gdp%gdrtc%tlocput_names
          tparput_names => gdp%gdrtc%tparput_names
-         tparput = 0.0_fp
-         tparput_names = ' '
          !
-         iloc = parput_offset
-         do i = 1,stacnt
-            do k = 1,kmax
-               iloc = iloc + 1
-               write(tparput_names(iloc),'(2a,i0)') trim(namrtcsta(i)), '_', k
-            enddo
+         tparput = 0.0_fp
+         !
+         tparput_names(1) = 'Elevation'
+         tparput_names(2) = 'Water level'
+         do l = 1,lstsci
+            tparput_names(2+l) = namcon(l)
          enddo
          !
          iloc = parput_offset
+         tlocput_names = ' '
          do i = 1,stacnt
             do k = 1,kmax
                iloc = iloc + 1
-               tparput(1,iloc) = zrtcsta(k,i)
-               if (lsal>0) then
-                  tparput(2,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, lsal)
-               endif
+               write(tlocput_names(iloc),'(2a,i0)') trim(namrtcsta(i)), '_', k
             enddo
          enddo
          !
          ! Collect parameters from all domains
          !
          if (rtc_ndomains>1) then
-            call rtccharcommunicate(tparput_names, tnparput)
-            call rtccommunicate(tparput, 2*tnparput)
+            call rtccharcommunicate(tlocput_names, tnlocput)
          endif
+      endif
+      !
+      ! Communication with RTC occurs only by the master domain
+      !
+      if (rtc_domainnr == 1) then
+         call timdat(julday, 0.0_fp, iacdat, iactim)
          !
-         ! Communication with RTC occurs only by the master domain
-         !
-         if (rtc_domainnr == 1) then
-            !
-            ! Write parameters to his-file
-            !
-            call datatortc(timsec, ifirstrtc, tnparput, tparput, &
-                         & tparput_names, success)
-            call syncflowrtc_init(error, tparget_names, tnparget, 80, itfinish - itstrt, commSalinity)
-         endif
-      else
-         !
-         ! Communication with RTC occurs only by the master domain
-         !
-         if (rtc_domainnr == 1) then
-            call syncflowrtc_init(error, tparget_names, tnparget, 80, itfinish - itstrt, commBarriers)
-         endif
+         call syncflowrtc_init(error, tlocget_names, tnparget, 80, &
+                             & itfinish - itstrt, anyFLOWtoRTC, &
+                             & anyRTCtoFLOW, iacdat, hdt)
       endif
       call timer_stop(timer_wait, gdp)
       if (error) then

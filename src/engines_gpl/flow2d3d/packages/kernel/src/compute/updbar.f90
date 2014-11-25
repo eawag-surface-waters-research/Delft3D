@@ -2,7 +2,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
                 & mmax      ,kmax      ,thick     ,kspu      ,kspv      , &
                 & kfumin    ,kfumax    ,kfvmin    ,kfvmax    ,ubrlsu    , &
                 & ubrlsv    ,hu        ,hv        ,dpu       ,dpv       , &
-                & zk        ,zcor      ,gdp       )
+                & zk        ,zcor      ,timsec    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -53,6 +53,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
     !
     logical                       , pointer :: zmodel
     integer                       , pointer :: rtcmod
+    integer                       , pointer :: lundia
 !
 ! Global variables
 !
@@ -67,7 +68,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfvmin !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspu   !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspv   !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(4, nsluv)                                       , intent(in) :: cbuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(9, nsluv)                                                    :: cbuv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(2, nsluv)                                       , intent(in) :: cbuvrt !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpu    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpv    !  Description and declaration in esm_alloc_real.f90
@@ -76,6 +77,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out):: ubrlsu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out):: ubrlsv !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                                           , intent(in) :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp)                                                            , intent(in) :: timsec !! Description and declaration in inout.igs
     real(fp), dimension(kmax)                                                        :: zcor
     real(fp), dimension(0:kmax)                                         , intent(in) :: zk
 !
@@ -113,18 +115,17 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
     real(fp)                       :: ubrlsuv              ! Local variable for UBRLSU or UBRLSV
     real(fp)                       :: zk_bot               ! Lower vertical coordinate relative to reference plane of layer k
     real(fp)                       :: zk_top               ! Upper vertical coordinate relative to reference plane of layer k
-!
+    character(80)                  :: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
     zmodel     => gdp%gdprocs%zmodel
     rtcmod     => gdp%gdrtc%rtcmod
+    lundia       => gdp%gdinout%lundia
     !
     do ibar = 1, nsluv
        !
-       !--------barrier location is defined in M,N coordinates
+       ! barrier location is defined in M,N coordinates
        !
        m1 = mnbar(1, ibar)
        n1 = mnbar(2, ibar)
@@ -132,22 +133,61 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
        n2 = mnbar(4, ibar)
        dir= mnbar(5, ibar)
        !
-       !--------Increments from coordinate pairs (tested in subroutine filbar)
+       ! Increments from coordinate pairs (tested in subroutine filbar)
        !
        call increm(m1        ,n1        ,m2        ,n2        ,incx      , &
                  & incy      ,maxinc    ,error     )
        m = m1 - incx
        n = n1 - incy
        !
-       !------- Only update if Flow is in RTC-Mode 1 (dataFromRTCToFLOW) and 
-       !        there is a valid barrier height available from RTC, 
-       !        otherwise take the initial value read from the barrier file.
-       !
-       if (rtcmod == dataFromRTCToFLOW .and. cbuvrt(1, ibar)>=0.0_fp) then
+       if (btest(rtcmod,dataFromRTCToFLOW)) then
+          !
+          ! barriers are updated by RTC
+          !
+          if (comparereal(cbuvrt(1,ibar),0.0_fp) == -1) then
+             write(errmsg,'(a,i0)') 'No valid value obtained from RTC for barrier number ', ibar
+             call prterr(lundia, 'P004', trim(errmsg))
+             call d3stop(1,gdp)
+          endif
           hgate = cbuvrt(2, ibar)
+          !
+          if (comparereal(cbuv(5,ibar),0.0_fp) == 1) then
+             !
+             ! Maximum gate velocity specified
+             !
+             if (comparereal(cbuv(9,ibar),-999.0_fp) == 0) then
+                !
+                ! No previous gate height available: accept the new gate height
+                !
+             elseif (hgate < cbuv(9,ibar)) then
+                !
+                ! Gate lowering: check for maximum velocity
+                !
+                hgate = max(hgate, cbuv(9,ibar) - cbuv(5,ibar)*gdp%gdexttim%dt*30.0_fp)
+             elseif (hgate > cbuv(9,ibar)) then
+                !
+                ! Gate raising: check for maximum velocity
+                !
+                hgate = min(hgate, cbuv(9,ibar) + cbuv(5,ibar)*gdp%gdexttim%dt*30.0_fp)
+             endif
+          endif
+          !
+          if (comparereal(cbuv(7,ibar),cbuv(6,ibar)) == 1) then
+             !
+             ! Min and max gate height specified: restrict gate height
+             !
+             hgate = min(max(hgate,cbuv(6,ibar)),cbuv(7,ibar))
+          endif
        else
+          !
+          ! Use constant barrier height as read from file
+          !
           hgate = cbuv(1, ibar)
        endif
+       !
+       ! Store hgate in cbuv(9,ibar) (= hgate_prev_half_timestep)
+       !
+       cbuv(9,ibar) = hgate
        !
        do inc = 1, maxinc + 1
           m = m + incx

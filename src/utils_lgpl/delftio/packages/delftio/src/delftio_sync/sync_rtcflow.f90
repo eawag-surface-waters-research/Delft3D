@@ -47,23 +47,21 @@ module SyncRtcFlow
   type(DioPltType)  :: SignalFlowToRtc
   type(DioPltType)  :: SignalRtcToFlow
   type(DioPltType)  :: DataRtcToFlow
+  type(DioPltType)  :: DataFlowToRtc
 !
   integer, dimension(:,:), pointer :: SignalRValues
   character(len=DioMaxParLen), pointer, dimension(:) :: SignalRPars
   character(len=DioMaxLocLen), pointer, dimension(:) :: SignalRLocs
 !
-  integer, dimension(1,3) :: SignalXValues
+  integer, dimension(1,5) :: SignalXValues
   character*20, dimension(1) :: SignalXPars
-  character*20, dimension(3) :: SignalXLocs
+  character*20, dimension(5) :: SignalXLocs
 !
   data SignalXPars / 'Signal' /
-  data SignalXLocs / 'Status', 'Date', 'Time' /
+  data SignalXLocs / 'Status', 'Date', 'Time', 'Init1', 'Init2' /
 !
-  integer, parameter :: commNone            = 0
-  integer, parameter :: commBarriers        = 1
-  integer, parameter :: commSalinity        = 2
-!
-  integer :: communicationMode = commNone
+  logical :: commRTCtoFLOW = .false.
+  logical :: commFLOWtoRTC = .false.
 !
 ! VARIABLES USED BY RTC SIDE
 !
@@ -74,7 +72,6 @@ module SyncRtcFlow
   real        , Allocatable, Save :: Valbar(:,:)
 !
   ! Array to store data for sending
-  ! Specification of array is rectengular to data in Flow/Rtc
   real        , Allocatable, Save :: DataValuesOut(:,:)
 !
   ! Number of barriers in Flow
@@ -85,7 +82,7 @@ module SyncRtcFlow
 !
   data Locbar / 'Status', 'Height' /
 !
-! VARIABLES USED BY D3D FLOW SIDE
+! Variables used by Delft3D-FLOW side
 !
   character(len=DioMaxParLen), pointer, dimension(:) :: DataPars
   character(len=DioMaxLocLen), pointer, dimension(:) :: DataLocs
@@ -99,15 +96,17 @@ contains
 !!!
 
 ! Initialise communication between RTC and Flow
-subroutine SyncRtcFlow_Init(n2steps, lerror, commMode)
+subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
 
   integer :: n2steps
   logical :: lerror
-  integer :: commMode
+  logical :: flagFLOWtoRTC
 
   integer :: nRpar, nRLoc
   integer :: nDummyLocs
   integer :: FlowStatus
+  integer :: idate
+  double precision :: rdt  ! time step in seconds
 
   integer :: itest
 
@@ -123,9 +122,6 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, commMode)
   ! Init DelftIO
   call DioInit
 
-  ! store commMode
-  communicationMode = commMode
-
   ! Signal from Flow to RTC
   ! First to receive number of (half) time steps
   ! Then to receive status (< 0 = Quit), Date (I8) and Time (I6)
@@ -135,18 +131,26 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, commMode)
 
   if (DioPltGet(SignalFlowToRtc, SignalRValues)) then
     n2steps = SignalRValues(1,1)
+    idate   = SignalRValues(1,2)
+    rdt     = transfer(SignalRValues(1,3:4),rdt)
+    commFLOWtoRTC = btest(SignalRValues(1,5),0)
+    commRTCtoFLOW = btest(SignalRValues(1,5),1)
+    if (commFLOWtoRTC /= flagFLOWtoRTC) then
+       n2steps = -3
+    endif
   else
+    !
+    ! Problem with DelftIO coupling. Stop immediately.
+    !
     n2steps = -2
-  endif
-
-  if (n2steps .eq. -1) then
-    lerror = .true.
+    lerror  = .true.
     return
   endif
+
   !
   ! Check whether the communication mode requires barrier heights to be sent to FLOW
   !
-  if (communicationMode == commBarriers) then
+  if (commRTCtoFLOW) then
 
     ! Signal from RTC to Flow
     ! Then to send status (< 0 = Quit), Date (I8) and Time (I6)
@@ -157,7 +161,7 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, commMode)
     SignalXValues(1,2) = 2
     SignalXValues(1,3) = 3
 
-    if (n2steps .le. 0) then
+    if (n2steps <= 0) then
       SignalXValues(1,1) = -1
       ! Send bad status
       call DioPltPut(SignalRtcToFlow, SignalXValues)
@@ -171,10 +175,10 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, commMode)
 
     ! Get stream with barrier names
     InfoFlowToRtc = DioPltGetDataset('InfoToRtc')
-    numBarriers         = DioPltGetNPar(InfoFlowToRtc)
+    numBarriers   = DioPltGetNPar(InfoFlowToRtc)
     nDummyLocs    = DioPltGetNLoc(InfoFlowToRtc)
 
-    if (numBarriers .le. 0) then
+    if (numBarriers <= 0) then
       SignalXValues(1,1) = -1
       ! Send bad status
       call DioPltPut(SignalRtcToFlow, SignalXValues)
@@ -209,44 +213,25 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, commMode)
       FlowStatus = -1
     endif
 
-    if (FlowStatus .lt. 0) then
+    if (FlowStatus < 0) then
       lerror = .true.
     endif
-
+  elseif (n2steps <= 0) then
+    !
+    ! Would like to say "stop" to Delft3D-FLOW, but I don't know how.
+    !
+    lerror = .true.
+    return  
   endif
   
 end subroutine SyncRtcFlow_Init
-
-
-subroutine SyncRtcFlow_Get(istat, idate, itime)
-
-  ! Routine to get flow status, actual date and time from Flow.
-  ! If the flow status is < 0, then RTC will quit.
-
-  ! ISTAT   O   L*4                  Status, < 0 tells RTC to quit.
-  ! IDATE   O   I*4                  Actual date (YYYYMMDD)
-  ! ITIME   O   I*4                  Actual time (HHMMSS)
-
-  integer istat, idate, itime
-
-  ! Get from Flow
-  if (DioPltGet(SignalFlowToRtc, SignalRValues)) then
-    ! Retrieve data from R-Array
-    istat = SignalRValues(1,1)
-    idate = SignalRValues(1,2)
-    itime = SignalRValues(1,3)
-  else
-    istat = -1
-  endif
-
-end subroutine SyncRtcFlow_Get
 
 
 ! Sends calculated dat to Flow
 subroutine SyncRtcFlow_Send(RtcStatus)
 
   integer :: RtcStatus
-  integer :: i, itemp    ! Loop counter
+  integer :: i         ! Loop counter
 
   ! First send status through signal
   SignalXValues(1,1) = RtcStatus
@@ -254,18 +239,13 @@ subroutine SyncRtcFlow_Send(RtcStatus)
 
   ! If RtcStatus < 0, sending data is not necessary, because
   ! Flow will quit
-  if (RtcStatus .ge. 0) then
+  if (RtcStatus >= 0) then
     ! Convert/copy data
-    itemp = 933
-    open(itemp,file='rtc_d3d.dat',position='append')
-    write(itemp,*) ' put data for timestep X for ', numBarriers, ' locations'
     do i = 1, numBarriers
       DataValuesOut(i, 1) = ValBar(1, i)
       DataValuesOut(i, 2) = ValBar(2, i)
-      write(itemp,*) ' isluv    datavalues ', i, DataValuesOut(i,1), DataValuesOut(i,2)
     enddo
     call DioPltPut(DataRtcToFlow, DataValuesOut)
-    close(itemp)
   endif
 
 end subroutine SyncRtcFlow_Send
@@ -274,14 +254,22 @@ end subroutine SyncRtcFlow_Send
 subroutine SyncRtcFlow_Close
 
   ! Close open streams
-  call DioPltDestroy(DataRtcToFlow)
   call DioPltDestroy(SignalFlowToRtc)
-  call DioPltDestroy(SignalRtcToFlow)
-
+  if ( commRTCtoFLOW ) then
+      call DioPltDestroy(SignalRtcToFlow)
+      call DioPltDestroy(DataRtcToFlow)
+  endif
+  !
+  ! DataFlowToRtc never allocated on RTC side (see inPlt_D3D in rtcmodule)
+  !
+  !if ( commFLOWtoRTC ) then
+  !    call DioPltDestroy(DataFlowToRtc)
+  !endif
+    
 end subroutine SyncRtcFlow_Close
 
 !!!
-!!! FUNCTIONS D3DFLOW SIDE
+!!! FUNCTIONS Delft3D-FLOW SIDE
 !!!
 !==============================================================================
 subroutine syncflowrtc_quit
@@ -312,7 +300,8 @@ end subroutine syncflowrtc_quit
 !
 !
 !==============================================================================
-subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
+subroutine syncflowrtc_init(fout, nambar, nsluv, charlen, nsteps, &
+                          & flagFLOWtoRTC, flagRTCtoFLOW, idate, dt)
     use precision
 ! Initialise communication between Flow and RTC
 !
@@ -321,10 +310,13 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
 ! Global variables
 !
     integer                        ,intent (in)  :: charlen
+    integer                        ,intent (in)  :: idate
+    real(fp)                       ,intent (in)  :: dt
     integer                        ,intent (in)  :: nsluv
     integer                        ,intent (in)  :: nsteps
-    integer                        ,intent (in)  :: commMode
-    logical                        ,intent (out) :: error
+    logical                        ,intent (in)  :: flagFLOWtoRTC
+    logical                        ,intent (in)  :: flagRTCtoFLOW
+    logical                        ,intent (out) :: fout
     character(charlen), dimension(nsluv)         :: nambar ! WARNING: both charlen and nsluv must be passed via parameter list for Intel 9.0
 !
 ! Local variables
@@ -333,6 +325,7 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
     integer                         :: nrloc
     integer                         :: nrpar
     integer                         :: rtcstatus
+    double precision                :: dt8
     character(20), dimension(1)     :: dummylocs
     type (dioplttype)               :: infoflowtortc
 !
@@ -341,10 +334,11 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
 !! executable statements -------------------------------------------------------
 !
     ! Init DelftIO
-    call dioinit!
+    call dioinit
 
-    ! store commMode
-    communicationMode = commMode
+    ! store RTC-FLOW communication flags in module
+    commFLOWtoRTC = flagFLOWtoRTC
+    commRTCtoFLOW = flagRTCtoFLOW
 
     !
     ! Signal from Flow to RTC
@@ -354,14 +348,18 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
                     & signalxlocs)
     ! Send number of half time steps to RTC
     signalxvalues(1, 1) = nsteps*2
-    signalxvalues(1, 2) = 1
-    signalxvalues(1, 3) = 2
+    signalxvalues(1, 2) = idate
+    dt8 = dt
+    signalxvalues(1, 3:4) = transfer(dt8,nsteps,2)
+    signalxvalues(1, 5) = 0
+    if (commFLOWtoRTC) signalxvalues(1, 5) = ibset(signalxvalues(1, 5),0)
+    if (commRTCtoFLOW) signalxvalues(1, 5) = ibset(signalxvalues(1, 5),1)
     !
     call diopltput(signalflowtortc, signalxvalues)
     !
     ! Check whether the communication mode requires barrier heights to be received from RTC
     !
-    if (communicationMode == commBarriers) then
+    if (commRTCtoFLOW) then
        !
        ! Signal from RTC to Flow
        ! Then to receive status (< 0 = Quit), Date (I8) and Time (I6)
@@ -377,7 +375,7 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
        endif
        !
        if (rtcstatus<0) then
-          error = .true.
+          fout = .true.
           return
        endif
        !
@@ -395,7 +393,7 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
        call diopltdestroy(infoflowtortc)
        !
        if (rtcstatus<0) then
-          error = .true.
+          fout = .true.
           return
        endif
        ! Get the actual data-stream to Flow
@@ -403,10 +401,10 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
        ndatapars = diopltgetnpar(datartctoflow)
        ! Check on right number of parameters
        if (ndatapars==nsluv) then
-          error = .false.
+          fout = .false.
           signalxvalues(1, 1) = 1
        else
-          error = .true.
+          fout = .true.
           signalxvalues(1, 1) = -1
        endif
        ! Send status to RTC
@@ -415,33 +413,6 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, commMode)
     endif
 
 end subroutine syncflowrtc_init
-!
-!
-!
-!==============================================================================
-subroutine syncflowrtc_send(istat, idate, itime)
-    use precision
-! Routine to send flow status, actual date and time to RTC.
-! If the flow status is < 0, then RTC will quit.
-!
-    implicit none
-!
-! Global variables
-!
-    integer,intent (in) :: idate   ! Actual date (YYYYMMDD)
-    integer,intent (in) :: istat   ! Status, < 0 tells RTC to quit.
-    integer,intent (in) :: itime   ! Actual time (HHMMSS)
-!
-!! executable statements -------------------------------------------------------
-!
-    ! Put data in X-Array
-    signalxvalues(1, 1) = istat
-    signalxvalues(1, 2) = idate
-    signalxvalues(1, 3) = itime
-    ! Send to RTC
-    call diopltput(signalflowtortc, signalxvalues)
-    !
-end subroutine syncflowrtc_send
 !
 !
 !
@@ -503,9 +474,12 @@ subroutine syncflowrtc_close
 !
     ! Close open streams
     call diopltdestroy(signalflowtortc)
-    if ( communicationMode == commBarriers ) then
+    if ( commRTCtoFLOW ) then
         call diopltdestroy(signalrtctoflow)
         call diopltdestroy(datartctoflow)
+    endif
+    if ( commFLOWtoRTC ) then
+        call diopltdestroy(dataflowtortc)
     endif
     !
 end subroutine syncflowrtc_close
@@ -513,8 +487,9 @@ end subroutine syncflowrtc_close
 !
 !
 !==============================================================================
-subroutine datatortc(timsec, ifirstrtc, tnparput, tparput,  &
-                   & tparput_names, success)
+subroutine datatortc(timsec, ifirstrtc, tparput,  &
+                   & tlocput_names, nlocput, &
+                   & tparput_names, nparput, success)
     use precision
     use dio_plt_rw
     !
@@ -523,10 +498,12 @@ subroutine datatortc(timsec, ifirstrtc, tnparput, tparput,  &
 ! Global variables
 !
     integer             :: ifirstrtc
-    integer, intent(in) :: tnparput
+    integer, intent(in) :: nlocput
+    integer, intent(in) :: nparput
     real(fp)                            , intent(in)  :: timsec
-    real(fp), dimension(2,tnparput)     , intent(in)  :: tparput
-    character(80), dimension(tnparput)  , intent(in)  :: tparput_names
+    real(fp), dimension(nparput,nlocput), intent(in)  :: tparput
+    character(80), dimension(nlocput)   , intent(in)  :: tlocput_names
+    character(80), dimension(nparput)   , intent(in)  :: tparput_names
     logical                             , intent(out) :: success
 !
 ! Local variables
@@ -538,41 +515,36 @@ subroutine datatortc(timsec, ifirstrtc, tnparput, tparput,  &
     character(256)                                    :: filename
     character(DioMaxParLen), pointer, dimension(:)    :: parNames      ! variable(s) in dataset
     character(DioMaxLocLen), pointer, dimension(:)    :: locNames
-    type (dioplttype)                                 :: dataflowtortc
 !
 !! executable statements -------------------------------------------------------
 !
    success = .false.
    !
-   ! One would like to write the header only once, instead of for each half time step
-   ! Not possible yet, due to creating and deleting of 'TMP_FLOWtoRTC.his'-file
-   !
-   if (.true.) then
+   if (ifirstrtc > 0) then
       ifirstrtc = 0
-      filename = 'TMP_FLOWtoRTC.his'
-      allocate(parNames(2),stat=istat)
-      if (istat == 0) allocate(locNames(tnparput), stat=istat)
+      filename = 'TMP_FLOWtoRTC'
+      allocate(parNames(nparput),stat=istat)
+      if (istat == 0) allocate(locNames(nlocput), stat=istat)
       if (istat /= 0) goto 99
       !
-      parNames(1) = 'Elevation'
-      parNames(2) = 'Salinity'
-      locNames = tparput_names
+      locNames = tlocput_names
+      parNames = tparput_names
       !
       dataflowtortc = DioPltDefine(trim(filename), Dio_Plt_Real, parNames, locNames)
       deallocate(parNames)
       deallocate(locNames)
+      commFLOWtoRTC = .true.
    endif
    !
-   allocate (datavaluesToRTC(2,tnparput), stat=istat)
+   allocate (datavaluesToRTC(nparput,nlocput), stat=istat)
    if (istat /= 0) goto 99
    !
-   do i = 1,tnparput
-      do k = 1,2
-         datavaluesToRTC(k,i) = real(tparput(k,i),sp)
+   do i = 1,nparput
+      do k = 1,nlocput
+         datavaluesToRTC(i,k) = real(tparput(i,k),sp)
       enddo
    enddo
    call DioPltPut (dataflowtortc, nint(timsec), datavaluesToRTC )
-   call DioPltDestroy (dataflowtortc)
    success = .true.
    deallocate (datavaluesToRTC)
    return
@@ -581,7 +553,4 @@ subroutine datatortc(timsec, ifirstrtc, tnparput, tparput,  &
    write(*,*) 'ERROR: Memory allocation error in datatortc'
 end subroutine datatortc
 
-
-
 end module SyncRtcFlow
-

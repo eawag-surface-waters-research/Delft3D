@@ -1030,10 +1030,9 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     ! default = no ('N') which means RTCMOD = noRTC (= 0)
     !
     lhelp = .false.
-    rtcmod = noRTC
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Rtcmod', lhelp)
     if (lhelp) then
-       rtcmod = dataFromRTCToFLOW
+       rtcmod = ibset(rtcmod,dataFromRTCToFLOW)
     endif
     !
     ! locate and read 'Waqmod' run Flow together with Couple

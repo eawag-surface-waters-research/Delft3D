@@ -1605,14 +1605,6 @@ subroutine tricom_init(olv_handle, gdp)
     !
     call vseminit
     !
-    ! Initialize RTC-communication (includes synchronisation across multiple
-    ! domains and hence needs to be outside semaphore block).
-    !
-    call rtc_comm_init(error     ,ch(nambar),i(kfs)    ,i(kfsmin) , &
-                     & i(kfsmax) ,r(sig)    ,r(sig)    ,r(s1)     , &
-                     & d(dps)    ,r(r1)     ,gdp)
-    if (error) goto 9998
-    !
     ! The call to initfinished synchronises all subdomains up to this point
     ! (necessary in case of multiple domains and wave online)
     !
@@ -1621,6 +1613,14 @@ subroutine tricom_init(olv_handle, gdp)
     call timer_stop(timer_d3dflowinit, gdp)
     !
     if (error) goto 9998
+    !
+    ! Initialize RTC-communication
+    !
+    call rtc_comm_init(error     ,ch(nambar),ch(namcon),gdp)
+    if (error) goto 9998
+    call rtc_comm_put (i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
+                     & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
+                     & gdp)
     !
     ! End of synchronisation point 2
     ! ==============================

@@ -64,6 +64,7 @@ subroutine d3stop(iexit, gdp)
     logical                       , pointer :: sbkol
     integer                       , pointer :: numdomains
     logical                       , pointer :: rtcact
+    integer                       , pointer :: rtc_domainnr
 !
 ! Global variables
 !
@@ -87,6 +88,7 @@ subroutine d3stop(iexit, gdp)
     couplemod    => gdp%gdprocs%couplemod
     sbkol        => gdp%gdprocs%sbkol
     numdomains   => gdp%gdprognm%numdomains
+    rtc_domainnr => gdp%gdrtc%rtc_domainnr
     rtcact       => gdp%gdrtc%rtcact
     !
     idumda =  0
@@ -104,8 +106,7 @@ subroutine d3stop(iexit, gdp)
     ! Check if RTC-connection is active and if so
     ! send (negative) status to shut down RTC
     !
-    if (rtcact) then
-       call syncflowrtc_send(istate, idumda, idate)
+    if (rtcact .and. rtc_domainnr == 1) then
        call syncflowrtc_close
     endif
     !

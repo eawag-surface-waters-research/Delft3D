@@ -453,12 +453,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer(pntrsize)                    , pointer :: tprofu
     integer(pntrsize)                    , pointer :: ubnd
     integer(pntrsize), dimension(:, :)   , pointer :: nprptr
-    real(fp)     , dimension(:,:)        , pointer :: zrtcsta
-    integer                              , pointer :: ifirstrtc
-    integer                              , pointer :: stacnt
-    integer                              , pointer :: rtcmod
-    integer      , dimension(:,:)        , pointer :: mnrtcsta
-    character(20), dimension(:)          , pointer :: namrtcsta
     logical                              , pointer :: rtcact
     real(fp)      , dimension(:)         , pointer :: rhosol
     integer                              , pointer :: ifirst
@@ -902,12 +896,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     namsrc              => gdp%gdr_i_ch%namsrc
     tprofc              => gdp%gdr_i_ch%tprofc
     tprofu              => gdp%gdr_i_ch%tprofu
-    zrtcsta             => gdp%gdrtc%zrtcsta
-    ifirstrtc           => gdp%gdrtc%ifirstrtc
-    stacnt              => gdp%gdrtc%stacnt
-    rtcmod              => gdp%gdrtc%rtcmod
-    mnrtcsta            => gdp%gdrtc%mnrtcsta
-    namrtcsta           => gdp%gdrtc%namrtcsta
     rtcact              => gdp%gdrtc%rtcact
     rhosol              => gdp%gdsedpar%rhosol
     ifirst              => gdp%gdtrisol%ifirst
@@ -1349,7 +1337,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
                     & i(kfumn0) ,i(kfumx0) ,i(kfvmn0) ,i(kfvmx0) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
-                    & r(sig)    ,r(zwork)  ,gdp       )
+                    & r(sig)    ,r(zwork)  ,timsec    ,gdp       )
           call timer_stop(timer_updbar, gdp)
        endif
        !

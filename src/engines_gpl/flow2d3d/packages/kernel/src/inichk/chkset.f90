@@ -230,10 +230,6 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        ! errors
        !
-       if (rtcmod == dataFromRTCToFLOW) then
-          call prterr(lundia    ,'Z011'    ,'Real Time Control'  )
-          ierror = ierror+ 1
-       endif
        if (couplemod) then
           call prterr(lundia    ,'Z011'    ,'Online Couple'      )
           ierror = ierror+ 1

@@ -292,10 +292,11 @@ subroutine gdp_dealloc(gdp)
     if (associated(gdp%gdpostpr%shlay))     deallocate (gdp%gdpostpr%shlay    , STAT = istat)
     deallocate (gdp%gdpostpr , STAT = istat)
     deallocate (gdp%gdrestart, STAT = istat)
-    if (gdp%gdrtc%rtcmod == dataFromFLOWToRTC) then
+    if (gdp%gdrtc%rtcmod /= noRTC) then
        if (associated(gdp%gdrtc%mnrtcsta))   deallocate (gdp%gdrtc%mnrtcsta  , STAT = istat)
        if (associated(gdp%gdrtc%namrtcsta))  deallocate (gdp%gdrtc%namrtcsta , STAT = istat)
        if (associated(gdp%gdrtc%zrtcsta))    deallocate (gdp%gdrtc%zrtcsta   , STAT = istat)
+       if (associated(gdp%gdrtc%s1rtcsta))   deallocate (gdp%gdrtc%s1rtcsta  , STAT = istat)
     endif
     deallocate (gdp%gdrtc, STAT = istat)
     if (localscour) then

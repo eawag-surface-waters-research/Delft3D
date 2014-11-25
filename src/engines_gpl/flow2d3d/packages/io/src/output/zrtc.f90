@@ -48,6 +48,7 @@ subroutine zrtc(mlb, mub, nlb, nub, kfs, kfsmin, kfsmax, sig, zk, s1, dps, kmax,
     !
     logical                       , pointer :: zmodel
     real(fp)     , dimension(:,:) , pointer :: zrtcsta
+    real(fp)     , dimension(:)   , pointer :: s1rtcsta
     integer                       , pointer :: stacnt
     integer      , dimension(:,:) , pointer :: mnrtcsta
 !
@@ -77,6 +78,7 @@ subroutine zrtc(mlb, mub, nlb, nub, kfs, kfsmin, kfsmax, sig, zk, s1, dps, kmax,
 !
     zmodel     => gdp%gdprocs%zmodel
     zrtcsta    => gdp%gdrtc%zrtcsta
+    s1rtcsta   => gdp%gdrtc%s1rtcsta
     stacnt     => gdp%gdrtc%stacnt
     mnrtcsta   => gdp%gdrtc%mnrtcsta
     !
@@ -106,5 +108,6 @@ subroutine zrtc(mlb, mub, nlb, nub, kfs, kfsmin, kfsmax, sig, zk, s1, dps, kmax,
              endif
           enddo
        endif
+       s1rtcsta(i) = s1(n,m)
     enddo
 end subroutine zrtc

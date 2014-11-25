@@ -45,23 +45,18 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                       , pointer :: ifirstrtc
-    integer                       , pointer :: julday
     integer                       , pointer :: kmax
-    integer                       , pointer :: lsal
     integer                       , pointer :: lundia
     integer      , dimension(:,:) , pointer :: mnrtcsta
     integer                       , pointer :: parget_offset
     integer                       , pointer :: rtc_domainnr
     integer                       , pointer :: rtc_ndomains
     logical                       , pointer :: rtcact
+    logical                       , pointer :: anyRTCtoFLOW
     integer                       , pointer :: rtcmod
     integer                       , pointer :: stacnt
-    real(fp)                      , pointer :: timsec
     integer                       , pointer :: tnparget
-    integer                       , pointer :: tnparput
     real(fp)     , dimension(:,:) , pointer :: tparget
-    character(80), dimension(:)   , pointer :: tparget_names
-    real(fp)     , dimension(:,:) , pointer :: zrtcsta
 !
 ! Global variables
 !
@@ -71,48 +66,33 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
 !
 ! Local variables
 !
-    integer                                :: iacdat      ! Actual simulation day for RTC 
-    integer                                :: iactim      ! Actual simulation time for RTC 
     integer                                :: id
     integer                                :: rtcsta      ! Status from RTC: If < 0, RTC quits And Flow also must quit. 
 !
 !! executable statements -------------------------------------------------------
 !
     ifirstrtc      => gdp%gdrtc%ifirstrtc
-    julday         => gdp%gdinttim%julday
     kmax           => gdp%d%kmax
-    lsal           => gdp%d%lsal
     lundia         => gdp%gdinout%lundia
     mnrtcsta       => gdp%gdrtc%mnrtcsta
     parget_offset  => gdp%gdrtc%parget_offset
     rtc_domainnr   => gdp%gdrtc%rtc_domainnr
     rtc_ndomains   => gdp%gdrtc%rtc_ndomains
     rtcact         => gdp%gdrtc%rtcact
+    anyRTCtoFLOW   => gdp%gdrtc%anyRTCtoFLOW
     rtcmod         => gdp%gdrtc%rtcmod
     stacnt         => gdp%gdrtc%stacnt
-    timsec         => gdp%gdinttim%timsec
     tnparget       => gdp%gdrtc%tnparget
-    tnparput       => gdp%gdrtc%tnparput
     tparget        => gdp%gdrtc%tparget
-    tparget_names  => gdp%gdrtc%tparget_names
-    zrtcsta        => gdp%gdrtc%zrtcsta
     !
-    ! FLOW -> RTC  : send current date and time
     ! RTC  -> FLOW : get steering parameters for current date and time
     !
-    call timdat(julday, cursec, iacdat, iactim)
-    !
-    ! send current date and time to RTC
-    !
     call timer_start(timer_wait, gdp)
-    if (rtc_domainnr == 1) then
-       call syncflowrtc_send(1, iacdat, iactim)
-    endif
     !
-    ! optionally get data back
+    ! get barrier levels
     !
     rtcsta = 0
-    if (rtcmod == dataFromRTCToFLOW) then
+    if (anyRTCtoFLOW) then
        !
        ! communication with RTC occurs only by the master domain
        !

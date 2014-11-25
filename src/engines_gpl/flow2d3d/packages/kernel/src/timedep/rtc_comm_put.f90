@@ -48,16 +48,19 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     !
     integer                       , pointer :: ifirstrtc
     integer                       , pointer :: kmax
-    integer                       , pointer :: lsal
+    integer                       , pointer :: lstsci
     integer      , dimension(:,:) , pointer :: mnrtcsta
     integer                       , pointer :: parput_offset
     integer                       , pointer :: rtc_domainnr
     integer                       , pointer :: rtc_ndomains
     integer                       , pointer :: rtcmod
+    logical                       , pointer :: anyFLOWtoRTC
+    real(fp)     , dimension(:)   , pointer :: s1rtcsta
     integer                       , pointer :: stacnt
     real(fp)                      , pointer :: timsec
-    integer                       , pointer :: tnparput
+    integer                       , pointer :: tnlocput
     real(fp)     , dimension(:,:) , pointer :: tparput
+    character(80), dimension(:)   , pointer :: tlocput_names
     character(80), dimension(:)   , pointer :: tparput_names
     real(fp)     , dimension(:,:) , pointer :: zrtcsta
 !
@@ -77,29 +80,33 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     integer                                :: i
     integer                                :: iloc
     integer                                :: k
+    integer                                :: l
     logical                                :: success
 !
 !! executable statements -------------------------------------------------------
 !
     ifirstrtc      => gdp%gdrtc%ifirstrtc
     kmax           => gdp%d%kmax
-    lsal           => gdp%d%lsal
+    lstsci         => gdp%d%lstsci
     mnrtcsta       => gdp%gdrtc%mnrtcsta
     parput_offset  => gdp%gdrtc%parput_offset
     rtc_domainnr   => gdp%gdrtc%rtc_domainnr
     rtc_ndomains   => gdp%gdrtc%rtc_ndomains
     rtcmod         => gdp%gdrtc%rtcmod
+    anyFLOWtoRTC   => gdp%gdrtc%anyFLOWtoRTC
+    s1rtcsta       => gdp%gdrtc%s1rtcsta
     stacnt         => gdp%gdrtc%stacnt
     timsec         => gdp%gdinttim%timsec
-    tnparput       => gdp%gdrtc%tnparput
+    tnlocput       => gdp%gdrtc%tnlocput
     tparput        => gdp%gdrtc%tparput
+    tlocput_names  => gdp%gdrtc%tlocput_names
     tparput_names  => gdp%gdrtc%tparput_names
     zrtcsta        => gdp%gdrtc%zrtcsta
     !
     ! FLOW -> RTC  : send parameters (salinity levels)
     ! RTC  -> FLOW : no communication
     !
-    if (rtcmod == dataFromFLOWToRTC) then
+    if (anyFLOWtoRTC) then
        call zrtc(gdp%d%mlb, gdp%d%mub, gdp%d%nlb, gdp%d%nub, kfs, kfsmin, &
                & kfsmax, sig, zk, s1, dps, kmax, gdp)
        !
@@ -111,22 +118,26 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
           do k = 1,kmax
              iloc = iloc + 1
              tparput(1,iloc) = zrtcsta(k,i)
-             tparput(2,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, lsal)
+             tparput(2,iloc) = s1rtcsta(i)
+             do l = 1,lstsci
+                tparput(2+l,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, l)
+             enddo
           enddo
        enddo
        !
        ! Collect parameters from all domains
        !
+       call timer_start(timer_wait, gdp)
        if (rtc_ndomains>1) then
-          call rtccommunicate(tparput, 2*tnparput)
+          call rtccommunicate(tparput, (2+lstsci)*tnlocput)
        endif
        !
        ! Communication with RTC occurs only by the master domain
        !
-       call timer_start(timer_wait, gdp)
        if (rtc_domainnr == 1) then
-          call datatortc(timsec, ifirstrtc, tnparput, tparput, &
-                       & tparput_names, success)
+          call datatortc(timsec, ifirstrtc, tparput, &
+                       & tlocput_names, tnlocput, &
+                       & tparput_names, 2+lstsci, success)
        endif
        call timer_stop(timer_wait, gdp)
     endif

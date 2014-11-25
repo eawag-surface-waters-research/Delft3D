@@ -28,8 +28,8 @@
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
 integer, parameter :: noRTC              =  0    ! No coupling with rtc module
-integer, parameter :: dataFromRTCToFLOW  =  1    ! Coupling where RTC sends barrier heights to FLOW
-integer, parameter :: dataFromFLOWToRTC  =  2    ! Coupling where FLOW sends data to RTC
+integer, parameter :: dataFromRTCToFLOW  =  0    ! Coupling bit: RTC sends barrier heights to FLOW
+integer, parameter :: dataFromFLOWToRTC  =  1    ! Coupling bit: FLOW sends data to RTC
 !   
 type sv_rtc
     !
@@ -48,23 +48,27 @@ type sv_rtc
     integer :: rtc_domainnr   ! number of this domain in list of domains participating in RTC communication
     integer :: rtc_ndomains   ! number of domains that participate in RTC communication
     integer :: tnparget       ! total number of parameters to get from RTC module
-    integer :: tnparput       ! total number of parameters to put to RTC module
+    integer :: tnlocput       ! total number of parameters to put to RTC module
     integer :: parget_offset  ! offset for parameters of this domain in tparget(_names)
     integer :: parput_offset  ! offset for parameters of this domain in tparput(_names)
     !
     ! pointers
     !
-    real(fp)     , dimension(:,:), pointer :: zrtcsta         ! depths of layer interfaces at the stations to be communicated to RTC
+    real(fp)     , dimension(:,:), pointer :: zrtcsta         ! elevation of layer centres at the stations to be communicated to RTC
+    real(fp)     , dimension(:)  , pointer :: s1rtcsta        ! water level at the stations to be communicated to RTC
     real(fp)     , dimension(:,:), pointer :: tparget         ! array for all parameters to get from RTC
     real(fp)     , dimension(:,:), pointer :: tparput         ! array for all parameters to put to RTC
     integer      , dimension(:,:), pointer :: mnrtcsta        ! array for m,n indices of stations to be communicated with RTC
     character(20), dimension(:)  , pointer :: namrtcsta       ! array for names of stations to be communicated with RTC
-    character(80), dimension(:)  , pointer :: tparget_names   ! array for names of all parameters to get from RTC
+    character(80), dimension(:)  , pointer :: tlocget_names   ! array for names of all parameters to get from RTC
+    character(80), dimension(:)  , pointer :: tlocput_names   ! array for names of all locations to put to RTC
     character(80), dimension(:)  , pointer :: tparput_names   ! array for names of all parameters to put to RTC
     ! 
     ! logicals
     !
     logical        :: rtcact  ! Online Real Time Control is active (initialisation has been done)
+    logical        :: anyRTCtoFLOW ! Flag to verify whether any domain should receive data from RTC
+    logical        :: anyFLOWtoRTC ! Flag to verify whether any domain should send data to RTC
     !
     ! characters
     !

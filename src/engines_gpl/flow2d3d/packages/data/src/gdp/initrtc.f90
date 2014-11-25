@@ -42,23 +42,17 @@ subroutine initrtc(gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)     , dimension(:,:) , pointer :: zrtcsta
     integer                       , pointer :: ifirstrtc
     integer                       , pointer :: stacnt
     integer                       , pointer :: rtcmod
-    integer      , dimension(:,:) , pointer :: mnrtcsta
-    character(20), dimension(:)   , pointer :: namrtcsta
     logical                       , pointer :: rtcact
     character(256)                , pointer :: filrtc
 !
 !! executable statements -------------------------------------------------------
 !
-    zrtcsta    => gdp%gdrtc%zrtcsta
     ifirstrtc  => gdp%gdrtc%ifirstrtc
     stacnt     => gdp%gdrtc%stacnt
     rtcmod     => gdp%gdrtc%rtcmod
-    mnrtcsta   => gdp%gdrtc%mnrtcsta
-    namrtcsta  => gdp%gdrtc%namrtcsta
     rtcact     => gdp%gdrtc%rtcact
     filrtc     => gdp%gdrtc%filrtc
     !
