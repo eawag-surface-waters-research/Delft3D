@@ -24,41 +24,41 @@
       SUBROUTINE DLWQ5H ( LUNUT  , IAR    , ITMNR  , NOITM  , IDMNR  ,
      *                    NODIM  , IORDER , CNAMES , IOFFI  , IOFFC  ,
      *                             IODS   , IOFFD  , I      , ICNT   )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : October '00  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : Compacts USEFOR lists if unresolved externals
-C
-C     SUBROUTINES CALLED : none
-C
-C     LOGICAL UNITS      : LUN(27) = unit stripped DELWAQ input file
-C                          LUN(29) = unit formatted output file
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUNUT   INTEGER    1         INPUT   unit number for ASCII output
-C     IAR     INTEGER  IIMAX       IN/OUT  integer   workspace
-C     ITMNR   INTEGER    1         IN/OUT  nr of items for assignment
-C     NOITM   INTEGER    1         IN      nr of items in computational rule
-C     IDMNR   INTEGER    1         IN/OUT  nr of subst for assignment
-C     NODIM   INTEGER    1         IN      nr of subst in computational rule
-C     IORDER  INTEGER    1         IN      1 = items first, 2 is subst first
-C     CNAMES  CHAR*(*)  NITM       INPUT   Items to check for presence
-C     IOFFI   INTEGER    1         IN/OUT  Offset in input array
-C     IOFFC   INTEGER    1         IN/OUT  Offset in character array
-C     IOFFD   INTEGER    1         IN/OUT  Base offset in both arrays
-C     IODS    INTEGER    1         INPUT   Shift counter ODS files
-C     I       INTEGER    1         INPUT   loop counter
-C     ICNT    INTEGER    1         IN/OUT  counter
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : October '00  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : Compacts USEFOR lists if unresolved externals
+!
+!     SUBROUTINES CALLED : none
+!
+!     LOGICAL UNITS      : LUN(27) = unit stripped DELWAQ input file
+!                          LUN(29) = unit formatted output file
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUNUT   INTEGER    1         INPUT   unit number for ASCII output
+!     IAR     INTEGER  IIMAX       IN/OUT  integer   workspace
+!     ITMNR   INTEGER    1         IN/OUT  nr of items for assignment
+!     NOITM   INTEGER    1         IN      nr of items in computational rule
+!     IDMNR   INTEGER    1         IN/OUT  nr of subst for assignment
+!     NODIM   INTEGER    1         IN      nr of subst in computational rule
+!     IORDER  INTEGER    1         IN      1 = items first, 2 is subst first
+!     CNAMES  CHAR*(*)  NITM       INPUT   Items to check for presence
+!     IOFFI   INTEGER    1         IN/OUT  Offset in input array
+!     IOFFC   INTEGER    1         IN/OUT  Offset in character array
+!     IOFFD   INTEGER    1         IN/OUT  Base offset in both arrays
+!     IODS    INTEGER    1         INPUT   Shift counter ODS files
+!     I       INTEGER    1         INPUT   loop counter
+!     ICNT    INTEGER    1         IN/OUT  counter
+!
+!
       use timers       !   performance timers
 
       CHARACTER*(*) CNAMES(*)
@@ -66,9 +66,9 @@ C
       CHARACTER*20  CHULP
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq5h", ithndl )
-C
-C       Write message
-C
+!
+!       Write message
+!
       WRITE ( LUNUT ,   *  )
       WRITE ( LUNUT , 1010 ) I+ICNT, CNAMES(I+IOFFC)
       IF ( IORDER .EQ. 1 ) THEN
@@ -78,18 +78,18 @@ C
           NTT  = ITMNR
           NITM = NOITM
       ENDIF
-C
-C       Look backwards
-C
+!
+!       Look backwards
+!
       DO 10 I1 = I,1,-1
          I2 = IAR(I1+IOFFC)
          IF ( I2 .GT. -100000 ) GOTO 20
    10 CONTINUE
-C
-C       Additional messages for this sequence
-C
+!
+!       Additional messages for this sequence
+!
    20 IF ( I2 .LE. 0 .AND. I2 .GT. -100000 ) THEN
-C       Try to find the reference
+!       Try to find the reference
          I4 = 0
          DO 25 I3 = 1 , I
             I5 = IAR(I3+IOFFC)
@@ -117,24 +117,24 @@ C       Try to find the reference
          ENDIF
       ENDIF
       I2 = I4
-C
-C       Determine the shift in locations
-C
+!
+!       Determine the shift in locations
+!
       ISHFT = 1
       DO 30 I4 = I1+1,NITM
          I3 = IAR(I4+IOFFC)
          IF ( I3 .GT. -1000000 ) GOTO 40
          ISHFT = ISHFT + 1
    30 CONTINUE
-C
-C      Shift the third array heap
-C
+!
+!      Shift the third array heap
+!
    40 DO 50 I4 = I1, NITM
          IAR   (I4+IOFFI) = IAR(I4+IOFFI+ISHFT)
    50 CONTINUE
-C
-C      Shift the second array heap
-C
+!
+!      Shift the second array heap
+!
       DO 60 I4 = I1, NITM*2+IODS
          IAR   (I4+IOFFC) = IAR   (I4+IOFFC+ISHFT)
          CNAMES(I4+IOFFC) = CNAMES(I4+IOFFC+ISHFT)
@@ -144,22 +144,22 @@ C
       IOFFC = IOFFC - 1
       IOFFI = IOFFI - 1
       ICNT  = ICNT  + ISHFT
-C
-C      Shift the base array heap
-C
+!
+!      Shift the base array heap
+!
       DO 70 I5 = I2+IOFFD , NTT+IOFFD+NITM*2+IODS
          IAR   (I5) = IAR   (I5+1)
          CNAMES(I5) = CNAMES(I5+1)
    70 CONTINUE
-C
-C      Renumber the second array heap
-C
+!
+!      Renumber the second array heap
+!
       DO 80 I4 = I1 , NITM
          IF ( IAR(I4+IOFFC) .GT. I2 ) IAR(I4+IOFFC) = IAR(I4+IOFFC) -1
    80 CONTINUE
-C
-C      Update totals
-C
+!
+!      Update totals
+!
       IF ( IORDER .EQ. 1 .OR.  IODS .GT. 0 ) THEN
          IDMNR = IDMNR-1
          NODIM = NODIM-ISHFT
@@ -168,13 +168,13 @@ C
          ITMNR = ITMNR-1
          NOITM = NOITM-ISHFT
       ENDIF
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
-C
+!
  1010 FORMAT ( ' WARNING: Input item : ',I3,' not resolved: ',A)
  1020 FORMAT ( ' WARNING: also not resolved: ',A)
  1030 FORMAT ( ' WARNING: Item number: ',I3,' also not resolved: ',A)
  1040 FORMAT ( ' WARNING: Substance  : ',I3,' also not resolved: ',A)
-C
+!
       END

@@ -21,91 +21,91 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE INPUT4 TO READ GRAZER COEFFICIENTS                 *
-C  *********************************************************************
-C
-C  0895 MvdV New subroutine to read the grazing coefficients for the
-C            subroutine CONSBL. This subroutine is called from BLOOMPC if
-C            NUGRAZ > 0 and reads the input file with the extension
-C            .D23.
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE INPUT4 TO READ GRAZER COEFFICIENTS                 *
+!  *********************************************************************
+!
+!  0895 MvdV New subroutine to read the grazing coefficients for the
+!            subroutine CONSBL. This subroutine is called from BLOOMPC if
+!            NUGRAZ > 0 and reads the input file with the extension
+!            .D23.
+!
       SUBROUTINE INPUT4 (INPU)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'graas.inc'
-C
-C  Read grazer cofficients from unit 23:
-C     fecal fractions per grazer per algae type
-C     preferences per grazer per algae type
-C     grazer coeffients per grazer
-C
+!
+!  Read grazer cofficients from unit 23:
+!     fecal fractions per grazer per algae type
+!     preferences per grazer per algae type
+!     grazer coeffients per grazer
+!
 
-C     Fecal fractions
+!     Fecal fractions
       DO 10 I=1,NUSPEC
    10 READ(INPU,99999) (GFECFR(I,J),J=1,NUGRAZ)
 
-C     Preferences
+!     Preferences
       DO 20 I=1,NUSPEC
    20 READ(INPU,99999) (ZOOPR(I,J),J=1,NUGRAZ)
 
-C     Grazing coefficients
-C     Feacal fraction for detritus
+!     Grazing coefficients
+!     Feacal fraction for detritus
       READ(INPU,99999,END=40) (GDETFF(J),J=1,NUGRAZ)
 
-C     Preference for detritus
+!     Preference for detritus
       READ(INPU,99999,END=40) (GDETPR(J),J=1,NUGRAZ)
 
-C     Maximum filtration rate
+!     Maximum filtration rate
       READ(INPU,99999,END=40) (GRZFM (J),J=1,NUGRAZ)
 
-C     Maximum growth rate
+!     Maximum growth rate
       READ(INPU,99999,END=40) (GRZGM (J),J=1,NUGRAZ)
 
-C     Maximum mortality rate
+!     Maximum mortality rate
       READ(INPU,99999,END=40) (GRZMM (J),J=1,NUGRAZ)
 
-C     Monod half-saturation value for filtration rate
+!     Monod half-saturation value for filtration rate
       READ(INPU,99999,END=40) (GRZMO (J),J=1,NUGRAZ)
 
-C     Routine respiration
+!     Routine respiration
       READ(INPU,99999,END=40) (GRZRE (J),J=1,NUGRAZ)
 
-C     Maximum uptake
+!     Maximum uptake
       READ(INPU,99999,END=40) (GRZRM (J),J=1,NUGRAZ)
 
-C     Standard respiration
+!     Standard respiration
       READ(INPU,99999,END=40) (GRZSE (J),J=1,NUGRAZ)
 
-C     Stochiometry in nutrient content per gram carbon
+!     Stochiometry in nutrient content per gram carbon
       DO 30 I=1,NUNUCO
    30 READ(INPU,99999,END=40) (ZOONUT(I,J),J=1,NUGRAZ)
 
-C     Temp. coef. filtration
+!     Temp. coef. filtration
       READ(INPU,99999,END=40) (GTMPFM(J),J=1,NUGRAZ)
 
-C     Temp. coef. maximum growth
+!     Temp. coef. maximum growth
       READ(INPU,99999,END=40) (GTMPGM(J),J=1,NUGRAZ)
 
-C     Temp. coef. maximum mortality
+!     Temp. coef. maximum mortality
       READ(INPU,99999,END=40) (GTMPMM(J),J=1,NUGRAZ)
 
-C     Temp. coef. routine respiration
+!     Temp. coef. routine respiration
       READ(INPU,99999,END=40) (GTMPRE(J),J=1,NUGRAZ)
 
-C     Temp. coef. maximum uptake
+!     Temp. coef. maximum uptake
       READ(INPU,99999,END=40) (GTMPRM(J),J=1,NUGRAZ)
 
-C     Temp. coef. standard respiration
+!     Temp. coef. standard respiration
       READ(INPU,99999,END=40) (GTMPSE(J),J=1,NUGRAZ)
 
-C     Fraction excretion to the water column
+!     Fraction excretion to the water column
       READ(INPU,99999,END=40) (GTODET(J),J=1,NUGRAZ)
 
-C     Carbon to dry weight ratio
+!     Carbon to dry weight ratio
       READ(INPU,99999,END=40) (GCTDRY(J),J=1,NUGRAZ)
 
       RETURN

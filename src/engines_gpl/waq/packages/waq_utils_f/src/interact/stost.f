@@ -21,15 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
+!
       INTEGER FUNCTION STOST (SOURCE, POS, LENGTH, RESULT, LENOUT)
-C
+!
       IMPLICIT INTEGER (A-Z)
       CHARACTER*1 SOURCE(1), RESULT(1), BLANK
       COMMON /ZDLMTZ/DLM(256), IGN(256)
       DATA CHR/0/
       DATA BLANK /' '/
-C
+!
       IF (POS .LE. 0) GO TO 30
       IF (LENGTH .LT. POS) GO TO 40
       J = LENGTH + 1
@@ -40,7 +40,7 @@ C
 10    CONTINUE
       GO TO 25
 15    CONTINUE
-C
+!
       LENSIG = LENGTH - IFND + POS
       LENOUT = 0
       DO 20 I = POS,LENSIG

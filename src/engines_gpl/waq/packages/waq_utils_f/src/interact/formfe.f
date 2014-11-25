@@ -21,17 +21,17 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE TO PERFORM A FORMFEED ON A PARTICULAR UNIT         *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE TO PERFORM A FORMFEED ON A PARTICULAR UNIT         *
+!  *********************************************************************
+!
       SUBROUTINE FORMFE (NOUT)
       CHARACTER*1 CC
       INTEGER NOUT
-C
-C Write ASCI character 12 to column 2 of output unit.
-C
+!
+! Write ASCI character 12 to column 2 of output unit.
+!
       CC = CHAR (12)
       WRITE (NOUT,10) CC
 10    FORMAT (1X,A1)

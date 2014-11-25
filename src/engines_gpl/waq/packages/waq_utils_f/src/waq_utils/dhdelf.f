@@ -22,40 +22,40 @@
 !!  rights reserved.
 
       SUBROUTINE DHDELF ( FILNAM, IERROR )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: aug   1993 by Jan van Beek
-C
-C     FUNCTION            : deletes a file by name
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     FILNAM  CHAR*(*)      1     INPUT   file to be deleted
-C     IERROR  INTEGER       1     OUTPUT  Error indication
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: aug   1993 by Jan van Beek
+!
+!     FUNCTION            : deletes a file by name
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     FILNAM  CHAR*(*)      1     INPUT   file to be deleted
+!     IERROR  INTEGER       1     OUTPUT  Error indication
+!
       CHARACTER*(*) FILNAM
       INTEGER       IERROR
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER IOLUN, ILUN
       LOGICAL LOPEN, LEXIST
-C
-C     Init
-C
+!
+!     Init
+!
       IERROR = 0
       IOLUN  = 0
-C
-C     If file exist
-C
+!
+!     If file exist
+!
       INQUIRE ( FILE=FILNAM, EXIST = LEXIST )
       IF ( .NOT. LEXIST ) RETURN
-C
-C     Select availeble ubitnumber
-C
+!
+!     Select availeble ubitnumber
+!
       DO 100 ILUN = 10, 99
          INQUIRE ( UNIT=ILUN, OPENED = LOPEN )
          IF ( .NOT. LOPEN ) THEN
@@ -64,20 +64,20 @@ C
          ENDIF
   100 CONTINUE
   101 CONTINUE
-C
-C     Open and close file
-C
+!
+!     Open and close file
+!
       IF ( IOLUN .NE. 0 ) THEN
          OPEN  ( IOLUN, FILE = FILNAM  , ERR = 900 )
          CLOSE ( IOLUN, STATUS='DELETE', ERR = 900 )
       ELSE
          IERROR = 1
       ENDIF
-C
+!
       RETURN
-C
-C     Errors close anyway
-C
+!
+!     Errors close anyway
+!
   900 CONTINUE
       CLOSE (IOLUN)
       IERROR = 1

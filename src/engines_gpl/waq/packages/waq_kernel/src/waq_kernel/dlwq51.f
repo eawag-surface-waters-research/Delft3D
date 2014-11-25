@@ -200,7 +200,7 @@
          endif
          dl = a / al
          e  = e*dl                              ! in m3/s
-C
+!
          if ( ifrom .lt. 0 ) goto 20
          if ( ito   .lt. 0 ) goto 40
 

@@ -22,17 +22,17 @@
 !!  rights reserved.
 
       SUBROUTINE DHGGD( NONUMB, NUMBRS, IGGD  )
-C
-C     Determine largest common denominator
-C
+!
+!     Determine largest common denominator
+!
       INTEGER           NONUMB, IGGD
       INTEGER           NUMBRS(NONUMB)
-C
+!
       MINNUM = NUMBRS(1)
       DO I = 2 , NONUMB
          MINNUM = MIN(NUMBRS(I),MINNUM)
       ENDDO
-C
+!
       DO I = MINNUM , 1 , -1
          IGGD = I
          DO IN = 1 , NONUMB
@@ -42,6 +42,6 @@ C
    50    CONTINUE
       ENDDO
   100 CONTINUE
-C
+!
       RETURN
       END

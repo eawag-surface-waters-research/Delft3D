@@ -21,52 +21,52 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       5 Augustus 1994
-C    Program:    GETCOE.FOR
-C    Version:    0.1
-C    Programmer: Jos van Gils
-C
-C    Get characteristices of algae
-C
-C    Called by: PDFBLO
-C    Calls    : -
+!    Date:       5 Augustus 1994
+!    Program:    GETCOE.FOR
+!    Version:    0.1
+!    Programmer: Jos van Gils
+!
+!    Get characteristices of algae
+!
+!    Called by: PDFBLO
+!    Calls    : -
 
       SUBROUTINE GETCOE (NTYPE , DMCRAT, NCRAT , PCRAT , SCRAT , SPEXT )
-C
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     NTYPE   I     1        I    Number of species
-C     DMCRAT  R     NTYPE    O    DM/C Ratio
-C     NCRAT   R     NTYPE    O    N/C Ratio
-C     PCRAT   R     NTYPE    O    P/C Ratio
-C     SCRAT   R     NTYPE    O    SI/C Ratio
-C     SPEXT   R     NTYPE    O    Specific extinction (m2/gC)
-C
+!
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     NTYPE   I     1        I    Number of species
+!     DMCRAT  R     NTYPE    O    DM/C Ratio
+!     NCRAT   R     NTYPE    O    N/C Ratio
+!     PCRAT   R     NTYPE    O    P/C Ratio
+!     SCRAT   R     NTYPE    O    SI/C Ratio
+!     SPEXT   R     NTYPE    O    Specific extinction (m2/gC)
+!
       INTEGER         NTYPE
       REAL            DMCRAT(NTYPE), NCRAT(NTYPE), PCRAT(NTYPE),
      J                SCRAT(NTYPE), SPEXT(NTYPE)
 
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     MN      I     1        I    blmdim    Max. number of nutrients
-C     MT      I     1        I    blmdim    Max. number of species
-C     NUSPEC  I     1        I    phyt2     Actual number of species
-C     MS      I     1        I    blmdim    Max. number of groups
-C     NUECOG  I     1        I    phyt2     Actual number of groups
-C     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
-C     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
-C     EKX     R*8   MT       I    phyt1     Specific extinction
-C                                           (1/m/(gDW/m3))
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     MN      I     1        I    blmdim    Max. number of nutrients
+!     MT      I     1        I    blmdim    Max. number of species
+!     NUSPEC  I     1        I    phyt2     Actual number of species
+!     MS      I     1        I    blmdim    Max. number of groups
+!     NUECOG  I     1        I    phyt2     Actual number of groups
+!     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
+!     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
+!     EKX     R*8   MT       I    phyt1     Specific extinction
+!                                           (1/m/(gDW/m3))
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'size.inc'
 
-C     Local variables
+!     Local variables
 
       INTEGER     I
 

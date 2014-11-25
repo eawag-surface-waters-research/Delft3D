@@ -136,9 +136,9 @@
       character*255 lchloc            ! Local character variable for file name
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq09", ithndl )
-C
-C     Some init
-C
+!
+!     Some init
+!
       NOQTT  = NOQ   + NOQ4
       NOSSS = NOSEG + NSEG2 ! with or without bottom
       LUNUT = LUN(29)
@@ -161,9 +161,9 @@ C
       ELSE
          LHOUTP = .FALSE.
       ENDIF
-C
-C     Test voor steady state opties
-C
+!
+!     Test voor steady state opties
+!
       IF ( (INTSRT .GT. 5     .AND.  INTSRT .LT. 10  ) .OR.
      +     INTSRT .EQ. 17    .OR.    INTSRT .EQ. 18  ) THEN
          LMOUTP = .TRUE.

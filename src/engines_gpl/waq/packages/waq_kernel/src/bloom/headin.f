@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE TO PRINT HEADINGS FOR SEVERAL OUTPUT FILES         *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE TO PRINT HEADINGS FOR SEVERAL OUTPUT FILES         *
+!  *********************************************************************
+!
       SUBROUTINE HEADIN(NZOUT,WORDS)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -39,23 +39,23 @@ C
       INTEGER NUMTYP(MT)
       CHARACTER*4 WORDS2(12),WORDS3(20),WORDS4(20)
       CHARACTER*8 WORDS(*),WWORDS(MG)
-C
-C  Print heading for output on units OUUNI, IOU(14), NZOUT, IOU(21),
-C  IOU(24) and IOU(25).
-C
-C  Set print-array indices.
-C
+!
+!  Print heading for output on units OUUNI, IOU(14), NZOUT, IOU(21),
+!  IOU(24) and IOU(25).
+!
+!  Set print-array indices.
+!
       NUNU2 = NUNUCO * 2
       NTS6=NUABCO+3
       NTS7=NTS6+1
       NTS14=NUECOG+NTS7+1
-C
-C Exit if LPRINT <= 1: nothing more to be done here.
-C
+!
+! Exit if LPRINT <= 1: nothing more to be done here.
+!
       IF (LPRINT .LE. 1) RETURN
-C
-C  Write heading for (optional) zooplankton output NZOUT.
-C
+!
+!  Write heading for (optional) zooplankton output NZOUT.
+!
       IF (NUGRAZ.GT.1) THEN
         DO 11 IG=1,NUGRAZ
           WRITE(WWORDS(IG),'(A4,1X,I2)') WORDS(5),IG
@@ -75,9 +75,9 @@ C
          ENDIF
          WRITE (NZOUT,150)
       END IF
-C
-C  Determine main active program options and store them in WORDS4.
-C
+!
+!  Determine main active program options and store them in WORDS4.
+!
       J = 1
       IF (LOBFUN .EQ. 1) THEN
          WORDS4(J) = 'Grow'
@@ -112,36 +112,36 @@ C
          J = J + 1
          WORDS4(J) = '+Mor'
       END IF
-C
-C  Write heading for standard output file (OUUNI).
-C
+!
+!  Write heading for standard output file (OUUNI).
+!
       WRITE(OUUNI,25) (WORDS4(I),I=1,J)
       IF (IOFLAG .EQ. 1) WRITE(IOU(21),25) (WORDS4(I),I=1,J)
       WRITE(OUUNI,30)
    25 FORMAT(4X,'Model objective: Maximize ',2A4,/,
      1       4X,'Main active program options: ',9(A4,A4,'; '))
    30 FORMAT(2(' ',/),14X,'Summary of solutions for this run:',/,' ')
-C
-C  Write heading unit IOU(24). This file contains biomasses of all
-C  types.
-C
+!
+!  Write heading unit IOU(24). This file contains biomasses of all
+!  types.
+!
       CALL FORMFE (IOU(24))
       WRITE(IOU(24),40)
    40 FORMAT(8X,'Dry weight biomasses of phytoplankton types:',2(/,' '))
-C
-C  Split species names in two parts and store truncated second parts
-C  of names in "WORDS2".
-C
+!
+!  Split species names in two parts and store truncated second parts
+!  of names in "WORDS2".
+!
       DO 50 K=1,NUECOG
       WORDS2(K) = GRNAME(K) (5:8)
    50 CONTINUE
       WORDS2(NUECOG+1) = WORDS(6) (5:8)
       WORDS2(NUECOG+2) = WORDS(7) (5:8)
       NUECO2=NUECOG+2
-C
-C Get names and relative numbers of types for heading unit IOU(24).
-C Store first parts of names in WORDS3, get second parts from WORDS2.
-C
+!
+! Get names and relative numbers of types for heading unit IOU(24).
+! Store first parts of names in WORDS3, get second parts from WORDS2.
+!
       KK = 0
       DO 70 I = 1,NUECOG
       K = 0
@@ -153,19 +153,19 @@ C
          WORDS4(KK) = WORDS2(I)
    60 CONTINUE
    70 CONTINUE
-C
-C Print names and relative numbers of types to unit IOU(24).
-C
+!
+! Print names and relative numbers of types to unit IOU(24).
+!
       WRITE(IOU(24),80) WORDS(1),(WORDS3(K),K=1,NUSPEC)
       WRITE(IOU(24),90) (WORDS4(K),K=1,NUSPEC)
    80 FORMAT (1X,A4,1X,2X,20(A4,'-',1X))
    90 FORMAT (9X,20(A4,2X))
       WRITE(IOU(24),100) (NUMTYP(K),K=1,NUSPEC)
   100 FORMAT (7X,20(I4,2X))
-C
-C Write heading for unit OUUNI. This heading differs for interactive
-C and batch runs.
-C
+!
+! Write heading for unit OUUNI. This heading differs for interactive
+! and batch runs.
+!
       IF (IOFLAG .EQ. 0) THEN
         IF (NUGRAZ.GT.1) THEN
           WRITE(OUUNI,141) (WORDS(K),K=1,3),(WWORDS(IG),IG=1,NUGRAZ),
@@ -181,10 +181,10 @@ C
   110    FORMAT(1X,A4,1X,A5,4X,A4,3X,11(A4,'-',1X))
          WRITE(OUUNI,120) (WORDS2(K),K=1,NUECO2)
   120    FORMAT(24X,11(A4,2X))
-C
-C  Write heading for output IOU(21). This is the same heading written to
-C  unit OUUNI in a batch job.
-C
+!
+!  Write heading for output IOU(21). This is the same heading written to
+!  unit OUUNI in a batch job.
+!
          WRITE(IOU(21),30)
          IF (NUGRAZ.GT.1) THEN
            WRITE(IOU(21),141) (WORDS(K),K=1,3),(WWORDS(IG),IG=1,NUGRAZ),
@@ -200,11 +200,11 @@ C
       END IF
       WRITE (OUUNI,150)
   150 FORMAT(' ',/,' ')
-C
-C  Write heading unit IOU(25). This unit contains forcing function
-C  values. Overwrite (!) WORDS3, which is no longer needed for species
-C  names.
-C
+!
+!  Write heading unit IOU(25). This unit contains forcing function
+!  values. Overwrite (!) WORDS3, which is no longer needed for species
+!  names.
+!
       CALL FORMFE (IOU(25))
       WRITE (IOU(25),160)
   160 FORMAT (10X,'Summary of forcing functions used this run.',
@@ -223,9 +223,9 @@ C
       WORDS3(NUNUCO+9) = 'Dept'
       WRITE(IOU(25),180) (WORDS3(I),I=1,NUNUCO+9)
   180 FORMAT(1X,15(A4,4X))
-C
-C  Write heading for output IOU(14).
-C
+!
+!  Write heading for output IOU(14).
+!
       WRITE (IOU(14),200)
   200 FORMAT (2X,'Particulate organic and dissolved nutrient concentra',
      1        'tions at equilibrium in mg / m3',/,'  Comparison of ',
@@ -236,11 +236,11 @@ C
   220 FORMAT (2X,A4,6X,12(A8,4X))
       WRITE (IOU(14),240) ((CSTRA(K),I=1,2),K=1,NUNUCO)
   240 FORMAT (10X,10(A8,4X))
-C
-C Future heading for output IOU(26). This file contains the limiting
-C factors.
-C
-C     WRITE (IOU(26),250) (LIMNAM(I),I=1,NUNUCO+3)
-C 250 FORMAT (1X,8(A3,1X))
+!
+! Future heading for output IOU(26). This file contains the limiting
+! factors.
+!
+!     WRITE (IOU(26),250) (LIMNAM(I),I=1,NUNUCO+3)
+! 250 FORMAT (1X,8(A3,1X))
       RETURN
       END

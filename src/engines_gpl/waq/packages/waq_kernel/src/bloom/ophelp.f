@@ -21,20 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *        SUBROUTINE OPHELP TO PRINT INFORMATION ON OPTIONS          *
-C  *                     OF THE PROGRAM                                *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *        SUBROUTINE OPHELP TO PRINT INFORMATION ON OPTIONS          *
+!  *                     OF THE PROGRAM                                *
+!  *********************************************************************
+!
       SUBROUTINE OPHELP (WOPTIO,NOPT,LOPHLP)
       IMPLICIT REAL*8 (A-H,O-Z)
       CHARACTER*8 WOPTIO(*),WORD
       INCLUDE 'ioblck.inc'
-C
-C  Clear the screen.
-C  Match option names for which "HELP" is requested.
-C
+!
+!  Clear the screen.
+!  Match option names for which "HELP" is requested.
+!
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99900)
       CALL VIDEO (1)
@@ -51,14 +51,14 @@ C
      2        280,   320,  330,   90,  200,  260,  300,   60,
      3        230,   150,  170,  270,  340,  190,  310,  250,
      4         25), NUM
-C
-C  Return to input option mode if "END" is entered.
-C
+!
+!  Return to input option mode if "END" is entered.
+!
    20 CONTINUE
       RETURN
-C
-C  Error in HELP option mode.
-C
+!
+!  Error in HELP option mode.
+!
    25 WRITE (OUUNI,99890) WORD
       IF (IOFLAG .EQ. 0) GO TO 30
       GO TO 10
@@ -66,9 +66,9 @@ C
       WRITE (OUUNI,99970)
       LOPHLP = 1
       RETURN
-C
-C  Print HELP information.
-C
+!
+!  Print HELP information.
+!
    40 CONTINUE
       WRITE (OUUNI,99880) WOPTIO(NUM)
       WRITE (OUUNI,99875) WOPTIO(NUM)
@@ -169,9 +169,9 @@ C
   340 CONTINUE
       WRITE (OUUNI,99530) WOPTIO(NUM)
       GO TO 10
-C
-C  Formats for this subroutine.
-C
+!
+!  Formats for this subroutine.
+!
 99970 FORMAT (//,1X,'Execution terminates.',//)
 99900 FORMAT (1X,'This section of the program gives you information:',
      1        //,5X,'1. How to use its options.',/,5X,'2. What these',

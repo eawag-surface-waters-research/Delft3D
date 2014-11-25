@@ -22,35 +22,35 @@
 !!  rights reserved.
 
       SUBROUTINE SRSTOP ( IEXIT )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : June  '91  BY  Jan van Beek
-C
-C     FUNCTION           : stops execution if possible with return value
-C
-C*********************************************************************
-C     System dependent routine
-C     configuration
-C     PC - MS DOS operating system - MSF 4.1 compiler
-C     PC - OS2    operating system - MSF 4.1 compiler
-C     PC - NT     operating system - Powerstation compiler
-C*********************************************************************
-C
-C     LOGICAL UNITS      : -
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     IEXIT   INTEGER    1         INPUT   return value
-C     ---------------------------------------------------------
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : June  '91  BY  Jan van Beek
+!
+!     FUNCTION           : stops execution if possible with return value
+!
+!*********************************************************************
+!     System dependent routine
+!     configuration
+!     PC - MS DOS operating system - MSF 4.1 compiler
+!     PC - OS2    operating system - MSF 4.1 compiler
+!     PC - NT     operating system - Powerstation compiler
+!*********************************************************************
+!
+!     LOGICAL UNITS      : -
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     IEXIT   INTEGER    1         INPUT   return value
+!     ---------------------------------------------------------
+!
       INTEGER   IEXIT
-C
-C     PC VERSION, for MicroSoft Fortran 4.01
-C
+!
+!     PC VERSION, for MicroSoft Fortran 4.01
+!
       IF ( IEXIT .NE. 0 ) THEN
          WRITE (*,*) 'Stopped with error code :',IEXIT
       ELSE
@@ -80,5 +80,5 @@ C
       ELSE
          STOP 255
       ENDIF
-C
+!
       END

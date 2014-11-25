@@ -22,33 +22,33 @@
 !!  rights reserved.
 
       SUBROUTINE DHGVAR ( IAR_NR, INDX  , IVAR  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : Jan van Beek
-C
-C     FUNCTION            : Initialisation of Variables structure
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               :
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IAR_NR  INTEGER       1     INPUT   Array number
-C     INDX    INTEGER       1     INPUT   Index number variable in array
-C     IVAR    INTEGER       1     OUTPUT  Variable number, else -1
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : Jan van Beek
+!
+!     FUNCTION            : Initialisation of Variables structure
+!
+!     SUBROUTINES CALLED  :
+!
+!     FILES               :
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IAR_NR  INTEGER       1     INPUT   Array number
+!     INDX    INTEGER       1     INPUT   Index number variable in array
+!     IVAR    INTEGER       1     OUTPUT  Variable number, else -1
+!
+!     Declaration of arguments
+!
       INTEGER             IAR_NR, INDX  , IVAR
-C
+!
       INCLUDE 'sysn.inc'
-C
-C     Just take the used array's in the right order
-C
+!
+!     Just take the used array's in the right order
+!
       IIVOL  =  1
       IIAREA =  2
       IIFLOW =  3
@@ -126,7 +126,7 @@ C
       IIBBKL = 75
       IICCKL = 76
       IIDDKL = 77
-C
+!
       IVVOL = 1
       IVARE = IVVOL + 1
       IVFLO = IVARE + 1
@@ -146,112 +146,112 @@ C
       IVVLX = IVDSX + NDSPX
       IVLCX = IVVLX + NVELX
       IVFLX = IVLCX + NLOCX
-C
+!
       IVAR = -1
-C
+!
       IF ( IAR_NR .EQ. IIVOL ) THEN
          IF ( INDX .GT. 1 ) GOTO 900
          IVAR = IVVOL + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIAREA ) THEN
          IF ( INDX .GT. 1 ) GOTO 900
          IVAR = IVARE + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIFLOW ) THEN
          IF ( INDX .GT. 1 ) GOTO 900
          IVAR = IVFLO + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IILENG ) THEN
          IF ( INDX .GT. 2 ) GOTO 900
          IVAR = IVLEN + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IICONS ) THEN
          IF ( INDX .GT. NOCONS ) GOTO 900
          IVAR = IVCNS + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIPARM ) THEN
          IF ( INDX .GT. NOPA ) GOTO 900
          IVAR = IVPAR + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIFUNC ) THEN
          IF ( INDX .GT. NOFUN ) GOTO 900
          IVAR = IVFUN + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IISFUN ) THEN
          IF ( INDX .GT. NOSFUN ) GOTO 900
          IVAR = IVSFU + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IICONC ) THEN
          IF ( INDX .GT. NOTOT ) GOTO 900
          IVAR = IVCNC + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIMASS ) THEN
          IF ( INDX .GT. NOTOT ) GOTO 900
          IVAR = IVMAS + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIDERV ) THEN
          IF ( INDX .GT. NOTOT ) GOTO 900
          IVAR = IVDER + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIDISP ) THEN
          IF ( INDX .GT. NODISP ) GOTO 900
          IVAR = IVDSP + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIVELO ) THEN
          IF ( INDX .GT. NOVELO ) GOTO 900
          IVAR = IVVEL + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIDEFA ) THEN
          IF ( INDX .GT. NODEF ) GOTO 900
          IVAR = IVDEF + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIPLOC ) THEN
          IF ( INDX .GT. NOLOC ) GOTO 900
          IVAR = IVLOC + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIDSPX  ) THEN
          IF ( INDX .GT. NDSPX ) GOTO 900
          IVAR = IVDSX + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIVELX  ) THEN
          IF ( INDX .GT. NVELX ) GOTO 900
          IVAR = IVVLX + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IILOCX  ) THEN
          IF ( INDX .GT. NLOCX ) GOTO 900
          IVAR = IVLCX + INDX - 1
       ENDIF
-C
+!
       IF ( IAR_NR .EQ. IIFLUX  ) THEN
          IF ( INDX .GT. NFLUX ) GOTO 900
          IVAR = IVFLX + INDX - 1
       ENDIF
-C
+!
       IF ( IVAR .EQ. -1 ) GOTO 900
-C
+!
       RETURN
-C
+!
   900 CONTINUE
       CALL GETMLU(LUNREP)
       WRITE(LUNREP,2000) IAR_NR,INDX
       RETURN
  2000 FORMAT (' WARNING in DHGVAR, array or index out of range',I10,I10)
-C
+!
       END

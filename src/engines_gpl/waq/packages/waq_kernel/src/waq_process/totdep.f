@@ -27,39 +27,22 @@
 !>\file
 !>       Total depth water column
 
-C***********************************************************************
-C
-C     Project : T1519 Clyde river estuary
-C     Author  : M. Bokhorst
-C     Date    : 13-1-95            Version : 0.1
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     13-1-95 M. Bokhorst     Create first version
-C     29-8-97 Jan van Beek    Uitvoer locale diepte toegevoegd
-C     17-3-98 Jos van Gils    Define TOTDEPTH also for 2D situation
-C     16-6-98 Jos van Gils    Beveiliging voor randen in 3-e richting
-C                             Beveiliging voor bodem in 3-e richting
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                  Units
-C ----    --- -  -    -------------------                          -----
-C
-C DEPTH               segment diepte
-C TDEPTH              totale diepte ( van surf tot bottom )
-C LDEPTH              locale diepte ( = van surf tot onderkant segment )
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                  Units
+! ----    --- -  -    -------------------                          -----
+!
+! DEPTH               segment diepte
+! TDEPTH              totale diepte ( van surf tot bottom )
+! LDEPTH              locale diepte ( = van surf tot onderkant segment )
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       USE BottomSet     !  Module with definition of the waterbottom segments
 
@@ -91,7 +74,7 @@ C     ------   -----  ------------
       REAL               :: TOTSURF            ! cummulative surf in averaging totaldepth
 
 
-C     initialise bottom if necessary
+!     initialise bottom if necessary
 
       CALL MAKKO2 ( IEXPNT , IKNMRK , NOQ1   , NOQ2   , NOQ3   ,
      +              NOQ4   )
@@ -108,9 +91,9 @@ C     initialise bottom if necessary
       IN4 = INCREM(4)
       IN5 = INCREM(5)
 
-c.....Zet de totale en lokale diepte initieel op de diepte
-c.....voor actieve watersegmenten, anders 0
-c.....zet sediment dikte to onderkant segment op 0
+!.....Zet de totale en lokale diepte initieel op de diepte
+!.....voor actieve watersegmenten, anders 0
+!.....zet sediment dikte to onderkant segment op 0
       DO 9000 ISEG=1,NOSEG
 
          PMSA(IP3) = PMSA(IP1)
@@ -129,7 +112,7 @@ c.....zet sediment dikte to onderkant segment op 0
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
 
-c.....Exchange-loop over de derde richting
+!.....Exchange-loop over de derde richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
 
          IFROM = IEXPNT(1,IQ)
@@ -137,9 +120,9 @@ c.....Exchange-loop over de derde richting
 
          IF ( IFROM.GT.0 .AND. ITO.GT.0 ) THEN
 
-C           CALL DHKMRK(1,IKNMRK(IFROM),IKMRK1)
-C           CALL DHKMRK(1,IKNMRK(ITO  ),IKMRK2)
-C           IF ( IKMRK1.EQ.1 .AND. IKMRK2.EQ.1 ) THEN
+!           CALL DHKMRK(1,IKNMRK(IFROM),IKMRK1)
+!           CALL DHKMRK(1,IKNMRK(ITO  ),IKMRK2)
+!           IF ( IKMRK1.EQ.1 .AND. IKMRK2.EQ.1 ) THEN
 
                CALL DHKMRK(2,IKNMRK(IFROM),IKMRK)
                IF ((IKMRK.EQ.0).OR.(IKMRK.EQ.1)) THEN
@@ -172,20 +155,20 @@ C           IF ( IKMRK1.EQ.1 .AND. IKMRK2.EQ.1 ) THEN
      +            PMSA ( IP4 + (ITO  -1) * IN4 )
 
                ENDIF
-C           ENDIF
+!           ENDIF
          ENDIF
 
  7000 CONTINUE
 
 
-c.....Exchange-loop over de derde richting
+!.....Exchange-loop over de derde richting
       DO 8000 IQ =  NOQ1+NOQ2+NOQ3, NOQ1+NOQ2+1,-1
 
          IFROM = IEXPNT(1,IQ)
          ITO   = IEXPNT(2,IQ)
 
-c........Berekende totale dieptes voor de onderste laag segmenten
-c        toekennen aan de bovenliggende segmenten
+!........Berekende totale dieptes voor de onderste laag segmenten
+!        toekennen aan de bovenliggende segmenten
 
          IF ( IFROM.GT.0 .AND. ITO.GT.0 )
 
@@ -194,7 +177,7 @@ c        toekennen aan de bovenliggende segmenten
 
  8000 CONTINUE
 
-C     loop over the sediment columns, set sediment depth
+!     loop over the sediment columns, set sediment depth
 
       IP1 = IPOINT(1)
       IP2 = IPOINT(2)

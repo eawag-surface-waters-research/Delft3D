@@ -27,13 +27,13 @@
 !>\file
 !>       (2D) Horizontal dispersion as velocity dependent reprofunction
 
-c
-c*******************************************************************************
-c
+!
+!*******************************************************************************
+!
       implicit none
-c
-c     type    name         i/o description
-c
+!
+!     type    name         i/o description
+!
       real(4) pmsa(*)     !i/o process manager system array, window of routine to process library
       real(4) fl(*)       ! o  array of fluxes made by this process in mass/volume/time
       integer ipoint( 12) ! i  array of pointers in pmsa to get and store the data
@@ -53,11 +53,11 @@ c
       real    velocity    !    velocity
       real    depth1      !    depth from segment
       real    depth2      !    depth to segment
-c
-c*******************************************************************************
-c
-c     type    name         i/o description                                        unit
-c
+!
+!*******************************************************************************
+!
+!     type    name         i/o description                                        unit
+!
       real(4) dfact_a     ! i  dispersion coefficient at low velocities           (m2/s)
       real(4) dfact_b     ! i  dispersion coefficient at low velocities           (m2/s)
       real(4) dfact_c     ! i  dispersion coefficient at low velocities           (m2/s)
@@ -70,8 +70,8 @@ c
       real(4) ddir1       ! o  variable horizontal dispersion direction 1         (m2/s)
       real(4) ddir2       ! o  variable horizontal dispersion direction 2         (m2/s)
       real(4) horzdispv   ! o  variable horizontal dispersion                     (m2/s)
-c
-c*******************************************************************************
+!
+!*******************************************************************************
 
       ipnt        = ipoint
 

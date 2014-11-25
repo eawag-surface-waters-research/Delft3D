@@ -24,65 +24,65 @@
       SUBROUTINE DLWQTB ( LUNUT  , IOFF   , A      , J      , IIPNT  ,
      *                    IRPNT  , IIMAX  , ITIME  , KTYPE  , AVAL   ,
      *                                               IVAL   , IERR   )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : april 1996 by L. Postma
-C     MODIFIED            : march 2000 by L. Postma
-C                                 skip assignments if aal values missing
-C
-C     FUNCTION            : Updates the boundary and waste arrays
-C
-C     LOGICAL UNITNUMBERS : LUNUT - monitoring file
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNUT   INTEGER    1        INPUT   unit number monitoring file
-C     IOFF    INTEGER    1        INPUT   index of first concentration
-C     A       REAL       ?        INPUT   Real    boundary workspace
-C     J       INTEGER    ?        INPUT   Integer boundary workspace
-C     IIPNT   INTEGER    1        IN/OUT  Offset in integer array space
-C     IRPNT   INTEGER    1        IN/OUT  Offset in real array space
-C     IIMAX   INTEGER    1        INPUT   Maximum integer array size
-C     ITIME   INTEGER    1        INPUT   Time in units of the system clock
-C     KTYPE   INTEGER   NOITM     INPUT   Type of items
-C     AVAL    REAL    NOTOT,NOITM OUTPUT  Values of the bounds/wastes
-C     IVAL    INTEGER NOTOT,NOITM LOCAL   Count array for averages
-C     IERR    INTEGER    1        IN/OUT  error count
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : april 1996 by L. Postma
+!     MODIFIED            : march 2000 by L. Postma
+!                                 skip assignments if aal values missing
+!
+!     FUNCTION            : Updates the boundary and waste arrays
+!
+!     LOGICAL UNITNUMBERS : LUNUT - monitoring file
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNUT   INTEGER    1        INPUT   unit number monitoring file
+!     IOFF    INTEGER    1        INPUT   index of first concentration
+!     A       REAL       ?        INPUT   Real    boundary workspace
+!     J       INTEGER    ?        INPUT   Integer boundary workspace
+!     IIPNT   INTEGER    1        IN/OUT  Offset in integer array space
+!     IRPNT   INTEGER    1        IN/OUT  Offset in real array space
+!     IIMAX   INTEGER    1        INPUT   Maximum integer array size
+!     ITIME   INTEGER    1        INPUT   Time in units of the system clock
+!     KTYPE   INTEGER   NOITM     INPUT   Type of items
+!     AVAL    REAL    NOTOT,NOITM OUTPUT  Values of the bounds/wastes
+!     IVAL    INTEGER NOTOT,NOITM LOCAL   Count array for averages
+!     IERR    INTEGER    1        IN/OUT  error count
+!
+!     Declaration of arguments
+!
       use timers
 
       PARAMETER     ( TWOPI = 6.28319 )
       DIMENSION       A(*)   , J(*) , KTYPE(*) , AVAL(*) , IVAL(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtb", ithandl )
-C
-C         initialise the system
-C
+!
+!         initialise the system
+!
       AMISS = -999.
-C       Number of items
+!       Number of items
       NOITM = J(1)
       NOTOT = J(2)
       IA = 0
       IJ = 2
-C
-C       Determine switch for this block 1 = items,subst
-C                                       2 = subst,items
-C       Start of the loop over blocks
-C
-C       Determine parameters NPNT = nr of items
-C                            NPST = start of item nr's in the J-array
-C                            NDIM = nr of substances
-C                            NDST = start of subs nr's in the J-array
-C                            IOPT = option 1 and 2 at breakpoints etc.
-C                            IPRO = procedure (overrule or not)
-C
+!
+!       Determine switch for this block 1 = items,subst
+!                                       2 = subst,items
+!       Start of the loop over blocks
+!
+!       Determine parameters NPNT = nr of items
+!                            NPST = start of item nr's in the J-array
+!                            NDIM = nr of substances
+!                            NDST = start of subs nr's in the J-array
+!                            IOPT = option 1 and 2 at breakpoints etc.
+!                            IPRO = procedure (overrule or not)
+!
    10 IJ   = IJ + 1
       IORD = J(IJ)
       IJ   = IJ + 1
@@ -102,13 +102,13 @@ C
       IOPT = J(IJ-2)
       IPRO = J(IJ-1)
       NTT  = NDIM*NPNT
-C
-C       Nr of breakpoints or harmonics
-C
+!
+!       Nr of breakpoints or harmonics
+!
       NOBRK = J(IJ)
-C
-C           Setting of default values
-C
+!
+!           Setting of default values
+!
       IF ( NPNT .EQ. 0 ) THEN
          DO 30 I2 = 1 , NDIM
             IA = IA + 1
@@ -121,13 +121,13 @@ C
          IJ = IJ + 1
          GOTO 150
       ENDIF
-C
-C       IOPT = 1 : Block function , IOPT = 2 : Linearly interpolated
-C
+!
+!       IOPT = 1 : Block function , IOPT = 2 : Linearly interpolated
+!
       IF ( IOPT .EQ. 1 .OR. IOPT .EQ. 2 ) THEN
-C
-C           Get the right time in the block
-C
+!
+!           Get the right time in the block
+!
          IF ( NOBRK .GT. 1 ) THEN
             ITIM1 = J(IJ+1)
             ITIM2 = J(IJ+NOBRK)
@@ -142,9 +142,9 @@ C
             ITIMF = ITIME
             IF ( ITIME .GE. ITIM2 )
      *                ITIMF = ITIME - ( (ITIME-ITIM2)/IDT + 1 ) * IDT
-C
-C           Make interpolation constants if IOPT = 2
-C
+!
+!           Make interpolation constants if IOPT = 2
+!
             DO 40 I = 2 , NOBRK
                IF ( J(IJ+I) .GT. ITIMF ) THEN
                   IF ( IOPT .EQ. 2 ) THEN
@@ -165,20 +165,20 @@ C
             ITIM1 = 0
             IDT   = 1
          ENDIF
-C
-C           Set or interpolate the correct values
-C
+!
+!           Set or interpolate the correct values
+!
    50    I = IA + (IREC-1)*NTT
-C           Inner loop in A over the substances
+!           Inner loop in A over the substances
          IF ( IORD .EQ. 1 ) THEN
             DO 70 I1 = 1 , NPNT
                II = J(NPST+I1)
                IB = (II-1)*NOTOT
                DO 60 I2 = 1 , NDIM
                   IC = IOFF+J(NDST+I2)
-C
-C                 Ignore negative indexes (0 equal to flow wastes??)
-C
+!
+!                 Ignore negative indexes (0 equal to flow wastes??)
+!
                   IF ( IC .GE. 0 ) THEN
                      I  = I + 1
                      AA = A(I)
@@ -190,19 +190,19 @@ C
                      IT1C = ITIM1
                      IT2C = ITIM2
                      IDTC   = IDT
-C     Dealing with missing values
+!     Dealing with missing values
                      IF ( AA .EQ. AMISS .OR. AB .EQ. AMISS )
      *                 CALL DLWMIS( A    , I    , AMISS , NTT   , IREC ,
      *                              J    , IJ   , NOBRK , ITIMF , IOPT ,
      *                              IT1C , IT2C , IDTC  , AA    , AB   )
-C           If no value is found, then skip the assignment, except flow set missing
+!           If no value is found, then skip the assignment, except flow set missing
                      IF ( IT1C .NE. 0 .OR. IT2C .NE. 0 ) THEN
-C           Make the wanted value
+!           Make the wanted value
                         AA = ( IT2C*AA + IT1C*AB ) / IDTC
                         IF ( II .GT. 0 ) THEN
                            AVAL(IB+IC) = AA
                         ELSE
-C              Set a whole type
+!              Set a whole type
                            DO 55 I3 = 1 , NOITM
                               IF ( KTYPE(I3) .EQ. -II ) THEN
                                  AVAL ( (I3-1)*NOTOT + IC ) = AA
@@ -210,11 +210,11 @@ C              Set a whole type
    55                      CONTINUE
                         ENDIF
                      ELSEIF ( IC - IOFF .EQ. 0 ) THEN
-C                       for flow accept missing (detected flow)
+!                       for flow accept missing (detected flow)
                         IF ( II .GT. 0 ) THEN
                            AVAL(IB+IC) = AMISS
                         ELSE
-C                          Set a whole type
+!                          Set a whole type
                            DO I3 = 1 , NOITM
                               IF ( KTYPE(I3) .EQ. -II ) THEN
                                  AVAL ( (I3-1)*NOTOT + IC ) = AMISS
@@ -224,14 +224,14 @@ C                          Set a whole type
 
                      ENDIF
                   ELSE
-C
-C                    Ignore value
-C
+!
+!                    Ignore value
+!
                      I = I + 1
                   ENDIF
    60          CONTINUE
    70       CONTINUE
-C           Inner loop in A over the items
+!           Inner loop in A over the items
          ELSE
             DO 90 I1 = 1 , NDIM
                IC = IOFF+J(NDST+I1)
@@ -247,14 +247,14 @@ C           Inner loop in A over the items
                      IT1C = ITIM1
                      IT2C = ITIM2
                      IDTC   = IDT
-C     Dealing with missing values
+!     Dealing with missing values
                      IF ( AA .EQ. AMISS .OR. AB .EQ. AMISS )
      *                 CALL DLWMIS( A    , I    , AMISS , NTT   , IREC ,
      *                              J    , IJ   , NOBRK , ITIMF , IOPT ,
      *                              IT1C , IT2C , IDTC  , AA    , AB   )
-C           If no value is found, then skip the assignment
+!           If no value is found, then skip the assignment
                      IF ( IT1C .NE. 0 .OR. IT2C .NE. 0 ) THEN
-C           Make the wanted value
+!           Make the wanted value
                         AA = ( IT2C*AA + IT1C*AB ) / IDTC
                         II = J(NPST+I2)
                         IF ( II .GT. 0 ) THEN
@@ -267,7 +267,7 @@ C           Make the wanted value
    75                      CONTINUE
                         ENDIF
                      ELSEIF ( IC -IOFF .EQ. 0 ) THEN
-C                       for flow accept missing (detected flow)
+!                       for flow accept missing (detected flow)
                         IF ( II .GT. 0 ) THEN
                            IB = (J(NPST+I2)-1)*NOTOT
                            AVAL(IB+IC) = AMISS
@@ -280,9 +280,9 @@ C                       for flow accept missing (detected flow)
                      ENDIF
    80             CONTINUE
                ELSE
-C
-C                 Ignore value
-C
+!
+!                 Ignore value
+!
                   I = I + NPNT
                ENDIF
    90       CONTINUE
@@ -290,15 +290,15 @@ C
          IJ = IJ + NOBRK
          IA = IA + NOBRK*NTT
       ENDIF
-C
-C       IOPT = 3 and 4 : Harmonics and fouriers, treated equally
-C
+!
+!       IOPT = 3 and 4 : Harmonics and fouriers, treated equally
+!
       IF ( IOPT .EQ. 3 .OR. IOPT .EQ. 4 ) THEN
-C
+!
          DO 140 I = 1 , NOBRK
-C
-C            harmonic function
-C
+!
+!            harmonic function
+!
             IJ = IJ + 1
             IPERIO = J(IJ)
             IA = IA + 1
@@ -308,10 +308,10 @@ C
             ELSE
                FUNC = SIN( (FLOAT(ITIME)/IPERIO-APHASE)*TWOPI )
             ENDIF
-C
-C            multiply with amplitudes and set values
-C
-C              Inner loop in A over the substances
+!
+!            multiply with amplitudes and set values
+!
+!              Inner loop in A over the substances
             IF ( IORD .EQ. 1 ) THEN
                DO 110 I1 = 1 , NPNT
                   IB = (J(NPST+I1)-1)*NOTOT
@@ -325,7 +325,7 @@ C              Inner loop in A over the substances
                      ENDIF
   100             CONTINUE
   110          CONTINUE
-C              Inner loop in A over the items
+!              Inner loop in A over the items
             ELSE
                DO 130 I1 = 1 , NDIM
                   IC = IOFF+J(NDST+I1)
@@ -342,9 +342,9 @@ C              Inner loop in A over the items
             ENDIF
   140    CONTINUE
       ENDIF
-C
-C       Return until finished
-C
+!
+!       Return until finished
+!
   150 IF ( IJ .LT. IIMAX ) GOTO 10
       IF ( IJ .EQ. IIMAX ) THEN
          IIPNT = IIPNT + IJ
@@ -355,29 +355,29 @@ C
       IERR = IERR + 1
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
  2000 FORMAT ( ' WARNING: System time: ',I10,' earlier than function',
      *         ' time: ',I10,' Function skipped !' )
  2010 FORMAT ( ' ERROR, updating time functions new style !' )
-C
+!
       END
-C
+!
       SUBROUTINE DLWMIS ( A      , I      , AMISS  , NTT    , IREC   ,
      *                    J      , IJ     , NOBRK  , ITIMF  , IOPT   ,
      *                    IT1C   , IT2C   , IDTC   , AA     , AB     )
       use timers
-C
+!
       DIMENSION  A( * ) , J( * )
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwmis", ithandl )
-C           Search backward for the first valid point
+!           Search backward for the first valid point
       LL = I
       DO 10 JJ = IREC , 1 , -1
          IF ( A(LL) .NE. AMISS ) GOTO 20
          LL = LL - NTT
    10 CONTINUE
       JJ = 0
-C           Search forward for the first valid point
+!           Search forward for the first valid point
    20 LL = I + NTT
       DO 30 KK = IREC+1 , NOBRK
          IF ( A(LL) .NE. AMISS ) GOTO 40
@@ -388,7 +388,7 @@ C           Search forward for the first valid point
       AB = 0.0
       IT1C = 0
       IT2C = 0
-C           There was a backward valid point
+!           There was a backward valid point
       IF ( JJ .NE. 0 ) THEN
          AA = A(I + (JJ-IREC)*NTT )
          IF ( IOPT .EQ. 1 ) IT2C = 1
@@ -400,7 +400,7 @@ C           There was a backward valid point
             ENDIF
          ENDIF
       ENDIF
-C           There was a forward valid point
+!           There was a forward valid point
       IF ( KK .NE. 0 ) THEN
          AB = A(I + (KK-IREC)*NTT )
          IF ( IOPT .EQ. 1 .AND. JJ .EQ. 0 ) IT1C = 1
@@ -414,7 +414,7 @@ C           There was a forward valid point
       ENDIF
       IDTC = IT1C + IT2C
       IF ( IDTC .EQ. 0 ) IDTC = 1
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

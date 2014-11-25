@@ -21,14 +21,14 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE TO DELAY OUTPUT WRITTEN TO DISPLAY                 *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE TO DELAY OUTPUT WRITTEN TO DISPLAY                 *
+!  *********************************************************************
+!
       SUBROUTINE MORESC
       INTEGER KEY
-C
+!
       CALL VIDEO (1)
       WRITE (*,10)
 10    FORMAT (' Press any key to continue ...')

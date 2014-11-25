@@ -31,79 +31,79 @@
      *                    NOQ2   , NOQ3   , DISPER , VELO   , ASMASS ,
      *                    IBFLAG , NOCONS , NOFUN  , CONAME , PANAME ,
      *                    FUNAME , SFNAME , BONAME )
-C
-C
-C     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : june 1988 by L. Postma
-C
-C     FUNCTION            : Parameter list and header for user supplied
-C                           subroutine for POSTPROCESSING.
-C
-C     LOGICAL UNITS       : none explicitly, the user may use any unit
-C                           number if NOT between 10 and 35 !!!!!!!!!!
-C
-C     SUBROUTINES CALLED  : none explicitly
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     IMFLAG  LOGICAL       1     INPUT   .TRUE. if DELWAQ sets a
-C                                                     monitoring step
-C     IDFLAG  LOGICAL       1     INPUT   as IMFLAG for dump actions
-C     IHFLAG  LOGICAL       1     INPUT   as IMFLAG for history actions
-C     MONAME  CHAR*40       4     INPUT   Model and run names
-C     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
-C     DUNAME  CHAR*20    NODUMP   INPUT   names of dump locations
-C     WANAME  CHAR*20    NOWAST   INPUT   names of waste locations
-C     IDUMP   INTEGER    NODUMP   INPUT   dump segment numbers
-C     NODUMP  INTEGER       1     INPUT   number of dump locations
-C     IWASTE  INTEGER    NOWAST   INPUT   waste segment numbers
-C     NOWAST  INTEGER       1     INPUT   number of waste locations
-C     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
-C     CONS    REAL          *     IN/OUT  Model constants
-C     PARAM   REAL    NOPA,NOSEG  IN/OUT  Model parameters
-C     FUNC    REAL          *     IN/OUT  Model functions at ITIME
-C     SEGFUN  REAL   NOSEG,NOSFUN IN/OUT  Segment functions at ITIME
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     WASTE   REAL NOTOT+1,NOWAST INPUT   waste loads
-C     BOUND   REAL   NOSYS,NOBND  INPUT   boundary concentrations
-C     NOBND   INTEGER     1       INPUT   number of boundary conditions
-C     ITSTRT  INTEGER     1       INPUT   model start time in units
-C     ITSTOP  INTEGER     1       INPUT   model stop  time in units
-C     NX      INTEGER     1       INPUT   width of grid
-C     NY      INTEGER     1       INPUT   depth of grid
-C     LGRID   INTEGER     NX*NY   INPUT   grid-layout
-C     NOQ     INTEGER       1     INPUT   Total number of exchanges
-C     NOQ1    INTEGER       1     INPUT   number of exchanges 1st direction
-C     NOQ2    INTEGER       1     INPUT   number of exchanges 2nd direction
-C     NOQ3    INTEGER       1     INPUT   number of exchanges 3rd direction
-C     NOVELO  INTEGER       1     INPUT   Number of user-flows
-C     NODISP  INTEGER       1     INPUT   Number of user-dispersions
-C     DISPER  REAL   NODISP*NOQ   OUTPUT  User defined dispersion
-C     VELO    REAL   NOVELO*NOQ   OUTPUT  User defined flows
-C     ASMASS  REAL  NOTOT*NOSEG*? IN/OUT  mass balance per comp. elems.
-C                                         if IBFLAG = 1
-C     IBFLAG  INTEGER    1        INPUT   if 1 then mass balance p.c.e.
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     CONAME  CHAR*20   NOCONS    INPUT   Constant names
-C     PANAME  CHAR*20   NOPA      INPUT   Parameter names
-C     FUNAME  CHAR*20   NOFUN     INPUT   Function names
-C     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
-C     BONAME  CHAR*20   NOBND     INPUT   Boundary names
-C
-C     ==================================================================
-C
-C
-C
+!
+!
+!     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : june 1988 by L. Postma
+!
+!     FUNCTION            : Parameter list and header for user supplied
+!                           subroutine for POSTPROCESSING.
+!
+!     LOGICAL UNITS       : none explicitly, the user may use any unit
+!                           number if NOT between 10 and 35 !!!!!!!!!!
+!
+!     SUBROUTINES CALLED  : none explicitly
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     IMFLAG  LOGICAL       1     INPUT   .TRUE. if DELWAQ sets a
+!                                                     monitoring step
+!     IDFLAG  LOGICAL       1     INPUT   as IMFLAG for dump actions
+!     IHFLAG  LOGICAL       1     INPUT   as IMFLAG for history actions
+!     MONAME  CHAR*40       4     INPUT   Model and run names
+!     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
+!     DUNAME  CHAR*20    NODUMP   INPUT   names of dump locations
+!     WANAME  CHAR*20    NOWAST   INPUT   names of waste locations
+!     IDUMP   INTEGER    NODUMP   INPUT   dump segment numbers
+!     NODUMP  INTEGER       1     INPUT   number of dump locations
+!     IWASTE  INTEGER    NOWAST   INPUT   waste segment numbers
+!     NOWAST  INTEGER       1     INPUT   number of waste locations
+!     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
+!     CONS    REAL          *     IN/OUT  Model constants
+!     PARAM   REAL    NOPA,NOSEG  IN/OUT  Model parameters
+!     FUNC    REAL          *     IN/OUT  Model functions at ITIME
+!     SEGFUN  REAL   NOSEG,NOSFUN IN/OUT  Segment functions at ITIME
+!     VOLUME  REAL      NOSEG     INPUT   Segment volumes
+!     WASTE   REAL NOTOT+1,NOWAST INPUT   waste loads
+!     BOUND   REAL   NOSYS,NOBND  INPUT   boundary concentrations
+!     NOBND   INTEGER     1       INPUT   number of boundary conditions
+!     ITSTRT  INTEGER     1       INPUT   model start time in units
+!     ITSTOP  INTEGER     1       INPUT   model stop  time in units
+!     NX      INTEGER     1       INPUT   width of grid
+!     NY      INTEGER     1       INPUT   depth of grid
+!     LGRID   INTEGER     NX*NY   INPUT   grid-layout
+!     NOQ     INTEGER       1     INPUT   Total number of exchanges
+!     NOQ1    INTEGER       1     INPUT   number of exchanges 1st direction
+!     NOQ2    INTEGER       1     INPUT   number of exchanges 2nd direction
+!     NOQ3    INTEGER       1     INPUT   number of exchanges 3rd direction
+!     NOVELO  INTEGER       1     INPUT   Number of user-flows
+!     NODISP  INTEGER       1     INPUT   Number of user-dispersions
+!     DISPER  REAL   NODISP*NOQ   OUTPUT  User defined dispersion
+!     VELO    REAL   NOVELO*NOQ   OUTPUT  User defined flows
+!     ASMASS  REAL  NOTOT*NOSEG*? IN/OUT  mass balance per comp. elems.
+!                                         if IBFLAG = 1
+!     IBFLAG  INTEGER    1        INPUT   if 1 then mass balance p.c.e.
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     CONAME  CHAR*20   NOCONS    INPUT   Constant names
+!     PANAME  CHAR*20   NOPA      INPUT   Parameter names
+!     FUNAME  CHAR*20   NOFUN     INPUT   Function names
+!     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
+!     BONAME  CHAR*20   NOBND     INPUT   Boundary names
+!
+!     ==================================================================
+!
+!
+!
       CHARACTER*40 MONAME(4)
       CHARACTER*20 SYNAME (NOTOT), DUNAME (NODUMP), WANAME (NOWAST),
      &             CONAME (*)    , PANAME (*)     , FUNAME (*)     ,
@@ -116,7 +116,7 @@ C
      &             DISPER( NODISP, NOQ  )           ,VELO  (NOVELO,NOQ),
      &             ASMASS( NOTOT,NOSEG,*)
       LOGICAL IMFLAG, IDFLAG, IHFLAG
-C
-C
+!
+!
       RETURN
       END

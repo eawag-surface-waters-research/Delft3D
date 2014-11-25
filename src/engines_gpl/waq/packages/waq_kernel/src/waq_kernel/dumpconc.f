@@ -23,22 +23,22 @@
 
       subroutine dumpconc(lunrep, msg   , rarray  , ndim1 , ndim2 ,
      +                    iprin1 )
-c
-c     Purpose: rarray is a 2D array with size (ndim1,ndim2);
-c              print row i1=iprin1, for all i2=1:ndim2
-c
-c              typically, ndim1 is 1 or noflux or notot
-c                         ndim2 is noseg or noq
-c                         iprin1 is 1 or one of [1:notot]
-c
-c-----subroutine parameters
-c
+!
+!     Purpose: rarray is a 2D array with size (ndim1,ndim2);
+!              print row i1=iprin1, for all i2=1:ndim2
+!
+!              typically, ndim1 is 1 or noflux or notot
+!                         ndim2 is noseg or noq
+!                         iprin1 is 1 or one of [1:notot]
+!
+!-----subroutine parameters
+!
       use timers
       implicit none
       integer          :: lunrep, ndim1, iprin1, ndim2
       real             :: rarray(ndim1,ndim2)
       character(len=*) :: msg
-c-----local variables
+!-----local variables
       integer   :: iseg
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dumpconc", ithandl )

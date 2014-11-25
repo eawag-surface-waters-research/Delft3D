@@ -59,11 +59,11 @@
       integer                             :: ilen
       integer(4)                :: ithndl = 0        ! handle for performance timer
       if (timon) call timstrt( "wrtoys", ithndl )
-c
+!
       lunwrk = 81
-c
-c     write altoys.inp for all output in history file
-c
+!
+!     write altoys.inp for all output in history file
+!
       open ( lunwrk , file = 'altoys.inp' )
       if ( ioutps(5,3) .eq. ihi3 ) then
          do 100 isys = 1 , notot
@@ -78,9 +78,9 @@ c
   200    continue
       endif
       close ( lunwrk )
-c
-c     write batoys.inp for all substances
-c
+!
+!     write batoys.inp for all substances
+!
       if ( ioutps(5,5) .eq. ibal ) then
          open ( lunwrk , file = 'batoys.inp' )
          write(lunwrk,1010) notot
@@ -92,9 +92,9 @@ c
   400    continue
          close ( lunwrk )
       endif
-c
-c     construct filename pst en stu file
-c
+!
+!     construct filename pst en stu file
+!
       filpst = lchar(21)
       filstu = filpst
       indx = index(filpst,'.his ')
@@ -112,9 +112,9 @@ c
          indx2 = indx2 - 1
          indx2 = max(indx2,1)
       endif
-c
-c     write altoys.fil, file filetje for altoys
-c
+!
+!     write altoys.fil, file filetje for altoys
+!
       open ( lunwrk , file = 'altoys.fil' )
       write(lunwrk,1040) lchar(36)(1:indx2)
       write(lunwrk,1040) lchar(37)(1:indx)
@@ -126,16 +126,16 @@ c
       write(lunwrk,1040) 'altoys.inp'
       write(lunwrk,1040) '      .   '
       close ( lunwrk )
-c
-c     write altoys.ini default settings
-c
+!
+!     write altoys.ini default settings
+!
       open ( lunwrk , file = 'altoys.ini' )
       write(lunwrk,1050)
       write(lunwrk,1060)
       write(lunwrk,1070)
       write(lunwrk,1070)
       close ( lunwrk )
-c
+!
       if (timon) call timstop( ithndl )
       return
  1000 format ( a20,'a',9x,a20,'1.0')

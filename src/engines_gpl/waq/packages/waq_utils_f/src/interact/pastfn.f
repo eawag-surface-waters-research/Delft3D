@@ -21,18 +21,18 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C-----------------------------------------------------------------------
-C Function PASTFN to get full file name and check its existence.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Function PASTFN to get full file name and check its existence.
+!-----------------------------------------------------------------------
       INTEGER FUNCTION PASTFN (PATH,NAME,EXT,FLNAM)
       INTEGER STOST,STOSH,GETS,WIPE,LENSTR,POSIT
       LOGICAL LEXIST
       CHARACTER FLNAM*(*),PATH*(*),NAME*(*),EXT*(*)
       CHARACTER*80 CNAME
-C
-C Get (maximum) lengths of character variables as declared in the main
-C program. Get actual lengths.
-C
+!
+! Get (maximum) lengths of character variables as declared in the main
+! program. Get actual lengths.
+!
       IRC = WIPE (CNAME,1,80)
       MAXF  = LEN (FLNAM)
       IF (MAXF .EQ. 1 .OR. MAXF .GT. 80) THEN
@@ -53,11 +53,11 @@ C
       LENPAT = LENSTR (PATH,MAXP)
       LENNAM = LENSTR (NAME,MAXN)
       LENEXT = LENSTR (EXT,MAXE)
-C
-C Construct (new) full file name.
-C Use STOSH to concat the various parts of the full name.
-C Use STOST to remove trailing characters.
-C
+!
+! Construct (new) full file name.
+! Use STOSH to concat the various parts of the full name.
+! Use STOST to remove trailing characters.
+!
       IRC = STOSH (PATH,1,LENPAT,CNAME,1,LEN1)
       IRC = STOSH (NAME,1,LENNAM,CNAME,LENPAT+1,LEN1)
       LEN1 = LENPAT + LENNAM
@@ -67,9 +67,9 @@ C
          IRC = STOSH (EXT,1,LENEXT,CNAME,LEN1+2,LENNEW)
       END IF
       IRC = STOST (CNAME,1,MAXF,FLNAM,LENNEW)
-C
-C Is this a valid file name?
-C
+!
+! Is this a valid file name?
+!
       INQUIRE (FILE = CNAME, EXIST = LEXIST)
       IF (LEXIST) THEN
          PASTFN = 0

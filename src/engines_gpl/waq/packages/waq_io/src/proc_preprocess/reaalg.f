@@ -26,9 +26,9 @@
      +                    ALGTYP , ABRTYP , ALGDSC , COFNAM, ALGCOF,
      +                    OUTGRP , OUTTYP , NOPROT , NAMPROT,NAMPACT,
      +                    NOPRALG,NAMPRALG)
-C
-C     Read the BLOOM-species database.
-C
+!
+!     Read the BLOOM-species database.
+!
       use timers       !   performance timers
 
       INTEGER       LUNREP, LUNBLM
@@ -45,7 +45,7 @@ C
      +              NAMPRALG(MAXTYP)
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "reaalg", ithndl )
-C
+!
       READ(LUNBLM,*,ERR=900) NOTYP
       READ(LUNBLM,*,ERR=901) NOCOF
       READ(LUNBLM,2000,ERR=902) (COFNAM(I),I=1,NOCOF)
@@ -70,15 +70,15 @@ C
       DO I = 1 , NOPRALG
          READ(LUNBLM,2020,ERR=911) NAMPRALG(I)
       ENDDO
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
-C
+!
  2000 FORMAT(10X,1X,5X,1X,10X,1X,5X,1X,30X,50(1X,A10))
  2010 FORMAT(A10,1X,A5,1X,A10,1X,A5,1X,A30,50(1X,F10.0))
  2020 FORMAT(A10)
  2030 FORMAT(A10,1X,A10)
-C
+!
   900 CONTINUE
       WRITE(LUNREP,3000)
       WRITE( *    ,3000)
@@ -139,5 +139,5 @@ C
       WRITE( *    ,3011)
       CALL SRSTOP(1)
  3011 FORMAT(' Error reading BLOOM database, processes per type')
-C
+!
       END

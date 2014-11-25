@@ -27,37 +27,19 @@
 !>\file
 !>       Sum of sedimentation flux of algae Dynamo - Bloom - GEM
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Jos van Gils
-C     Date    : 940725             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     940725  Jos van Gils    Created
-C     980428  Jos van Gils    Switch from d-fluxes to f-fluxes
-C     980604  Nolte/vGils     Change for processing GEM as well
-C     980717  Jos van Gils    Computation of VxSed added
-c     121015  Jos van Gils    Differences for BLOOM and DYNAMO removed
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -70,11 +52,11 @@ C     ------   -----  ------------
       REAL     DEPTH , SEDCAR, SEDDM , SEDNIT, SEDPHO, SEDSIL, SEDSPE,
      J         CTODRY, NCRAT , PCRAT , SCRAT , TOTFLX, TOTCON, CONSPE,
      J         VELSPE
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER  NALG
-C
+!
       NALG  = NINT(PMSA(IPOINT(1)))
       IFLUX = 0
       IP2   = IPOINT(  2 )
@@ -84,7 +66,7 @@ C
       IF (IKMRK1.EQ.1) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
           DEPTH   = PMSA(IP2)
           SEDCAR  = 0.0
           SEDDM   = 0.0
@@ -101,7 +83,7 @@ C
               SEDCAR = SEDCAR + SEDSPE
               SEDDM  = SEDDM  + SEDSPE*CTODRY
 
-c              IF ( NALG .GT. 6 ) THEN
+!              IF ( NALG .GT. 6 ) THEN
 
                  IN = 2 + 2*NALG + IALG
                  NCRAT  = PMSA( IPOINT(IN) + (ISEG-1)*INCREM(IN) )
@@ -114,7 +96,7 @@ c              IF ( NALG .GT. 6 ) THEN
                  SEDPHO = SEDPHO + SEDSPE*PCRAT
                  SEDSIL = SEDSIL + SEDSPE*SCRAT
 
-c              ENDIF
+!              ENDIF
 
   100     CONTINUE
 
@@ -123,9 +105,9 @@ c              ENDIF
           IP =  IPOINT(2+7*NALG+2) + (ISEG-1)*INCREM(2+7*NALG+2)
           PMSA (IP) = SEDDM
 
-C         NO LONGER Define fluxes only for Bloom (NALG .GT. 6)
+!         NO LONGER Define fluxes only for Bloom (NALG .GT. 6)
 
-c          IF (NALG.GT.6) THEN
+!          IF (NALG.GT.6) THEN
              IF (DEPTH .GT. 0.0) THEN
                 FL(IFLUX+1) = SEDCAR/DEPTH
                 FL(IFLUX+2) = SEDNIT/DEPTH
@@ -137,16 +119,16 @@ c          IF (NALG.GT.6) THEN
                 FL(IFLUX+3) = 0.0
                 FL(IFLUX+4) = 0.0
              ENDIF
-c          ENDIF
+!          ENDIF
 
       ENDIF
       ENDIF
       IFLUX = IFLUX + NOFLUX
       IP2   = IP2   + INCREM(  2 )
-c
+!
  9000 CONTINUE
-c
-c.....Exchangeloop over de horizontale richting ter initialisatie
+!
+!.....Exchangeloop over de horizontale richting ter initialisatie
       DO 8000 IQ=1,NOQ1+NOQ2+NOQ3
 
           IP =  IPOINT(2+7*NALG+3) + (IQ-1)*INCREM(2+7*NALG+3)
@@ -154,13 +136,13 @@ c.....Exchangeloop over de horizontale richting ter initialisatie
 
  8000 CONTINUE
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3+NOQ4
 
          IVAN  = IEXPNT(1,IQ)
          INAAR = IEXPNT(2,IQ)
 
-C        Zoek eerste kenmerk van- en naar-segmenten
+!        Zoek eerste kenmerk van- en naar-segmenten
 
          IF ( IVAN.GT.0 .AND. INAAR.GT.0 ) THEN
          CALL DHKMRK(1,IKNMRK(IVAN ),IKMRKV)
@@ -168,7 +150,7 @@ C        Zoek eerste kenmerk van- en naar-segmenten
          IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1 .OR.
      +       IKMRKV.EQ.1.AND.IKMRKN.EQ.3) THEN
 
-C            Water-water uitwisseling
+!            Water-water uitwisseling
 
            TOTFLX = 0.0
            TOTCON = 0.0
@@ -191,5 +173,5 @@ C            Water-water uitwisseling
 
  7000 CONTINUE
       RETURN
-C
+!
       END

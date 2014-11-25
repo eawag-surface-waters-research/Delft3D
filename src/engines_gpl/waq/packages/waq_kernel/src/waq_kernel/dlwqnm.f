@@ -43,39 +43,39 @@
 !                          August    2010 Leo Postma OMP parallel version
 !                          January   2011 Leo Postma Boris and Book limiter added
 
-c     logical units      : lun(19) , output, monitoring file
-c                          lun(20) , output, formatted dump file
-c                          lun(21) , output, unformatted hist. file
-c                          lun(22) , output, unformatted dump file
-c                          lun(23) , output, unformatted dump file
-c
-c     subroutines called : dlwqtr, user transport routine
-c                          dlwqwq, user waterquality routine
-c                          proces, delwaq proces system
-c                          dlwqo2, delwaq output system
-c                          dlwqpp, user postprocessing routine
-c                          dlwq13, system postpro-dump routine
-c                          dlwq14, scales waterquality
-c                          dlwq15, wasteload routine
-c                          dlwq17, boundary routine
-c                          dlwq41, updates volumes
-c                          dlwqt0, updates other time dependent items
-c                          dlwq62, adds transport to matrix and rhs
-c                          dlwqb3, computes volumes
-c                          dlwqb4, computation of mass array
-c                          dlwqb5, performs mass balance computation
-c                          dlwqb6, updates right hand side
-c                          dlwqb7, adds open boundaries to deriv
-c                          dlwqb8, restores conc array
-c                          dlwqf1, initializes matrix pointer administration
-c                          dlwql1, computes variable theta coefficients
-c                          dlwql2, fills matrix
-c                          dlwql3, sets (scaled) rhs of system of equations
-c                          move,   copies one array to another
-c                          proint, integration of fluxes
-c                          dhopnf, opens files
-c                          sgmres, solves (iteratively) system of equations
-c                          zercum, zero's the cummulative array's
+!     logical units      : lun(19) , output, monitoring file
+!                          lun(20) , output, formatted dump file
+!                          lun(21) , output, unformatted hist. file
+!                          lun(22) , output, unformatted dump file
+!                          lun(23) , output, unformatted dump file
+!
+!     subroutines called : dlwqtr, user transport routine
+!                          dlwqwq, user waterquality routine
+!                          proces, delwaq proces system
+!                          dlwqo2, delwaq output system
+!                          dlwqpp, user postprocessing routine
+!                          dlwq13, system postpro-dump routine
+!                          dlwq14, scales waterquality
+!                          dlwq15, wasteload routine
+!                          dlwq17, boundary routine
+!                          dlwq41, updates volumes
+!                          dlwqt0, updates other time dependent items
+!                          dlwq62, adds transport to matrix and rhs
+!                          dlwqb3, computes volumes
+!                          dlwqb4, computation of mass array
+!                          dlwqb5, performs mass balance computation
+!                          dlwqb6, updates right hand side
+!                          dlwqb7, adds open boundaries to deriv
+!                          dlwqb8, restores conc array
+!                          dlwqf1, initializes matrix pointer administration
+!                          dlwql1, computes variable theta coefficients
+!                          dlwql2, fills matrix
+!                          dlwql3, sets (scaled) rhs of system of equations
+!                          move,   copies one array to another
+!                          proint, integration of fluxes
+!                          dhopnf, opens files
+!                          sgmres, solves (iteratively) system of equations
+!                          zercum, zero's the cummulative array's
 
       use grids
       use timers
@@ -175,50 +175,50 @@ c                          zercum, zero's the cummulative array's
 
       include 'state_data.inc'
 
-c     special remarks    : mass-array is used for rhs vector!!
-c
-c     this option is a mix of option 1 (discretization of transport
-c     in space) and option 6 (matrix inversion to perform implicit
-c     integration in time.
-c     the processes part is integrated explicitly, in order to allow
-c     for any complexity of the processes.
-c     strictly speaking, a loop over substances should be added
-c     to anticipate this, the method uses an
-c     extra volume-array (ivol2), and uses the amass-array (imass)
-c     for the rhs-matrix, instead of the deriv-array as in method 6.
-c     (jvg, may 8 1992)
-c
-c     this option implements:
-c     1) euler backward time integration
-c     2) upwind differences for advection
-c     3) central differences for diffusion
-c     the resulting systems of equations are solved by an iterative
-c     solution method (gmres).
-c     with such an iterative method, systems with multiple rhs cannot be solved
-c     (simultaneously). so we loop over the substances and solve each system
-c     individually. so rhs can be reduced to an real array of size noseg+nobnd.
-c
-c     possible improvements:
-c
-c     - use fgmres instead of gmres for solving system of equations.
-c       this makes it possible to keep search directions which have already
-c       been computed in previous fgmres calls and hence find the solution
-c       of new systems at lower costs!
-c
-c     - tune the preconditioner to speed up the iteration process.
-c       only gaus-seidel, and ssor preconditioning has been implemented yet.
-c
-c     - integrate processes in an implicit way as well. enables users to
-c       potentially take larger time steps (better stability properties)
-c       or even compute steady states in "one time step" (the latter subject
-c       to constraint that proces formulation is time independent).
-c       implicit time integration of processes requires the inexact newton
-c       solution method described in:
-c
-c       "delwaq fastsolver ii"
-c       newton-krylov methods for solving linear and non-linear equations
-c       report t1596, january 1996, Deltares
-c                                                              (kht, 13/11/96)
+!     special remarks    : mass-array is used for rhs vector!!
+!
+!     this option is a mix of option 1 (discretization of transport
+!     in space) and option 6 (matrix inversion to perform implicit
+!     integration in time.
+!     the processes part is integrated explicitly, in order to allow
+!     for any complexity of the processes.
+!     strictly speaking, a loop over substances should be added
+!     to anticipate this, the method uses an
+!     extra volume-array (ivol2), and uses the amass-array (imass)
+!     for the rhs-matrix, instead of the deriv-array as in method 6.
+!     (jvg, may 8 1992)
+!
+!     this option implements:
+!     1) euler backward time integration
+!     2) upwind differences for advection
+!     3) central differences for diffusion
+!     the resulting systems of equations are solved by an iterative
+!     solution method (gmres).
+!     with such an iterative method, systems with multiple rhs cannot be solved
+!     (simultaneously). so we loop over the substances and solve each system
+!     individually. so rhs can be reduced to an real array of size noseg+nobnd.
+!
+!     possible improvements:
+!
+!     - use fgmres instead of gmres for solving system of equations.
+!       this makes it possible to keep search directions which have already
+!       been computed in previous fgmres calls and hence find the solution
+!       of new systems at lower costs!
+!
+!     - tune the preconditioner to speed up the iteration process.
+!       only gaus-seidel, and ssor preconditioning has been implemented yet.
+!
+!     - integrate processes in an implicit way as well. enables users to
+!       potentially take larger time steps (better stability properties)
+!       or even compute steady states in "one time step" (the latter subject
+!       to constraint that proces formulation is time independent).
+!       implicit time integration of processes requires the inexact newton
+!       solution method described in:
+!
+!       "delwaq fastsolver ii"
+!       newton-krylov methods for solving linear and non-linear equations
+!       report t1596, january 1996, Deltares
+!                                                              (kht, 13/11/96)
 
       if ( action == ACTION_FINALISATION ) then
           include 'dlwqdata_restore.inc'
@@ -228,12 +228,12 @@ c                                                              (kht, 13/11/96)
       if ( action == ACTION_INITIALISATION  .or.
      &     action == ACTION_FULLCOMPUTATION        ) then
 
-c        some initialisation
-c        ioptpc = preconditioner switch [0 = none, 1 = gs (l), 2 = gs (u),
-c        3 = ssor], iter = maximum number of iterations [ > 0],
-c        tol = relative tolerance [10^-3, 10^-10], iscale = row scaling
-c        of system of equations [0 = no, 1 =yes], klat = number of
-c        layers in preconditioner [1,kmax]
+!        some initialisation
+!        ioptpc = preconditioner switch [0 = none, 1 = gs (l), 2 = gs (u),
+!        3 = ssor], iter = maximum number of iterations [ > 0],
+!        tol = relative tolerance [10^-3, 10^-10], iscale = row scaling
+!        of system of equations [0 = no, 1 =yes], klat = number of
+!        layers in preconditioner [1,kmax]
 
           call dlwqf5 ( lun(19) , nocons  , c(icnam), a(icons), ioptpc  ,
      &                  iter    , tol     , iscale  , litrep  , noseg   ,

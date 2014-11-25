@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *        SUBROUTINE TO PRINT MAXIMUM SOLUTION ON TAPE IOU(6)        *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *        SUBROUTINE TO PRINT MAXIMUM SOLUTION ON TAPE IOU(6)        *
+!  *********************************************************************
+!
       SUBROUTINE PRINMA(X,BIO2,TOTAL,NI,NIN,INT)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -33,9 +33,9 @@ C
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       DIMENSION X(MX)
-C
-C  PRINT MAXIMUM SOLUTION ON UNIT IOU(6)
-C
+!
+!  PRINT MAXIMUM SOLUTION ON UNIT IOU(6)
+!
       IF (IOFLAG .EQ. 1) CALL MORESC
       WRITE (IOU(6),10)
    10 FORMAT (12X,'******* MAXIMUM SOLUTION *******')
@@ -54,9 +54,9 @@ C
    70 FORMAT (2X,'Total biomass',6X,F11.4,3X,'mgm/m3')
       WRITE (IOU(6),90) TOTAL
    90 FORMAT (2X,'Chlorophyll',8X,F11.4,3X,'mgm/m3',/)
-C
-C  PRINT NUTRIENT CONCENTRATIONS
-C
+!
+!  PRINT NUTRIENT CONCENTRATIONS
+!
       WRITE (IOU(6),100)
   100 FORMAT (2X,'Nutrient',14X,'Total',9X,'Slacks')
       WRITE (IOU(6),110) (CSTRA(K),CONCEN(K),X(K),K=1,NUNUCO)

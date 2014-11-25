@@ -24,67 +24,67 @@
       subroutine filldm(elmdms    ,ielem     ,dm1       ,dm2       ,
      *                  dm3       ,dm4       ,dm5       ,dm6       )
       implicit none
-c-----------------------------------------------------------------------
-c             Module: SUBROUTINE FILLDM
-c           Function: Write element dimensions in array elmdms
-c        Method used:
-c               Date: 08-06-1995
-c         Programmer: A. Hoekstra, H.H. Leepel
-c         CVS header
-c            $Author: Beek_j $
-c              $Date: 17-03-03 15:38 $
-c            $Source: /u/trisula/cvsroot/trisula/output/filldm.f,v $
-c          $Revision: 1 $
-c-----------------------------------------------------------------------
-c   Calling routines:            numerous
-c-----------------------------------------------------------------------
-c   Called  routines:              NONE
-c-----------------------------------------------------------------------
-c          Constants:
-c
-c Const.      Type
-c
-c-----------------------------------------------------------------------
-c  Formal parameters:
-c  ------------------
-c
-c   Var. I/O  Type Dimensions
-c   -------------------------
-c
-c DM1     I   I*4                  Number of dimensions
-c DM2     I   I*4                  Size of first dimension
-c DM3     I   I*4                  Size of second dimension
-c DM4     I   I*4                  Size of third dimension
-c DM5     I   I*4                  Size of fourth dimension
-c DM6     I   I*4                  Size of fifth dimension
-c ELMDMS   O  I*4   6,*            Array containing info about the
-c                                  element dimensions ELMDMS(1,*) is
-c                                  the number of dimensions
-c                                  ELMDMS(2-ELMDMS(1,*),*) is the size
-c                                  of each dimension. The size of the
-c                                  array is (6,NELEMS).
-c IELEM   I   I*4                  Index number of element in group
-c-----------------------------------------------------------------------
-c    Local variables:
-c    ----------------
-c
-c   Var.      Type Dimensions
-c   -------------------------
-c
-c-----------------------------------------------------------------------
-c
-c  declaration and specification
-c
+!-----------------------------------------------------------------------
+!             Module: SUBROUTINE FILLDM
+!           Function: Write element dimensions in array elmdms
+!        Method used:
+!               Date: 08-06-1995
+!         Programmer: A. Hoekstra, H.H. Leepel
+!         CVS header
+!            $Author: Beek_j $
+!              $Date: 17-03-03 15:38 $
+!            $Source: /u/trisula/cvsroot/trisula/output/filldm.f,v $
+!          $Revision: 1 $
+!-----------------------------------------------------------------------
+!   Calling routines:            numerous
+!-----------------------------------------------------------------------
+!   Called  routines:              NONE
+!-----------------------------------------------------------------------
+!          Constants:
+!
+! Const.      Type
+!
+!-----------------------------------------------------------------------
+!  Formal parameters:
+!  ------------------
+!
+!   Var. I/O  Type Dimensions
+!   -------------------------
+!
+! DM1     I   I*4                  Number of dimensions
+! DM2     I   I*4                  Size of first dimension
+! DM3     I   I*4                  Size of second dimension
+! DM4     I   I*4                  Size of third dimension
+! DM5     I   I*4                  Size of fourth dimension
+! DM6     I   I*4                  Size of fifth dimension
+! ELMDMS   O  I*4   6,*            Array containing info about the
+!                                  element dimensions ELMDMS(1,*) is
+!                                  the number of dimensions
+!                                  ELMDMS(2-ELMDMS(1,*),*) is the size
+!                                  of each dimension. The size of the
+!                                  array is (6,NELEMS).
+! IELEM   I   I*4                  Index number of element in group
+!-----------------------------------------------------------------------
+!    Local variables:
+!    ----------------
+!
+!   Var.      Type Dimensions
+!   -------------------------
+!
+!-----------------------------------------------------------------------
+!
+!  declaration and specification
+!
       integer elmdms( 6, *), ielem,
      *        dm1   ,dm2   ,dm3   ,dm4   ,dm5   ,dm6
-c-----------------------------------------------------------------------
-c-----define element dimensions
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!-----define element dimensions
+!-----------------------------------------------------------------------
       elmdms(1,ielem) = dm1
       elmdms(2,ielem) = dm2
       elmdms(3,ielem) = dm3
       elmdms(4,ielem) = dm4
       elmdms(5,ielem) = dm5
       elmdms(6,ielem) = dm6
-c
+!
       end

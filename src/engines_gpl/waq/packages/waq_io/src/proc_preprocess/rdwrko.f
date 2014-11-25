@@ -24,43 +24,43 @@
       SUBROUTINE RDWRKO ( LUNWRO, LCH   , LUREP , NOUTP , NRVART,
      +                    NBUFMX, IOUTPS, IOPOIN, OUNAM , VERSIO,
      +                    NOWARN, IERR  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : november 1994 by Jan van Beek
-C
-C     FUNCTION            : Reads output work file.
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : LUNWRO, Proces work file
-C                           LUREP , Monitoring file
-C
-C     PARAMETERS          : 11
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNWRO  INTEGER       1     INPUT   Output work file
-C     LCH     CHA*(*)       1     INPUT   Name output work file
-C     LUREP   INTEGER       1     INPUT   Monitoring file
-C     NOUTP   INTEGER       1     INPUT   Number of output files
-C     NRVART  INTEGER       1     INPUT   Number of extra output vars
-C     NBUFMX  INTEGER       1     INPUT   length of output buffer
-C     IOUTPS  INTEGER 7*NOUTP    OUTPUT   Output structure
-C                                            index 1 = start time
-C                                            index 2 = stop time
-C                                            index 3 = time step
-C                                            index 4 = number of vars
-C                                            index 5 = kind of output
-C                                            index 6 = format of output
-C                                            index 7 = initialize flag
-C     IOPOIN  INTEGER  NRVART    OUTPUT   Pointer to DELWAQ array's
-C     OUNAM   CHAR*(*) NRVART    OUTPUT   name of output variable
-C     NOWARN  INTEGER       1    IN/OUT   Cummulative warning count
-C     IERR    INTEGER       1    IN/OUT   cummulative error count
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : november 1994 by Jan van Beek
+!
+!     FUNCTION            : Reads output work file.
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : LUNWRO, Proces work file
+!                           LUREP , Monitoring file
+!
+!     PARAMETERS          : 11
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNWRO  INTEGER       1     INPUT   Output work file
+!     LCH     CHA*(*)       1     INPUT   Name output work file
+!     LUREP   INTEGER       1     INPUT   Monitoring file
+!     NOUTP   INTEGER       1     INPUT   Number of output files
+!     NRVART  INTEGER       1     INPUT   Number of extra output vars
+!     NBUFMX  INTEGER       1     INPUT   length of output buffer
+!     IOUTPS  INTEGER 7*NOUTP    OUTPUT   Output structure
+!                                            index 1 = start time
+!                                            index 2 = stop time
+!                                            index 3 = time step
+!                                            index 4 = number of vars
+!                                            index 5 = kind of output
+!                                            index 6 = format of output
+!                                            index 7 = initialize flag
+!     IOPOIN  INTEGER  NRVART    OUTPUT   Pointer to DELWAQ array's
+!     OUNAM   CHAR*(*) NRVART    OUTPUT   name of output variable
+!     NOWARN  INTEGER       1    IN/OUT   Cummulative warning count
+!     IERR    INTEGER       1    IN/OUT   cummulative error count
+!
+!     Declaration of arguments
+!
       use timers       !   performance timers
 
       INTEGER       LUNWRO, LUREP , NOUTP , NRVART, NBUFMX,
@@ -69,34 +69,34 @@ C
       REAL          VERSIO
       CHARACTER*(*) LCH
       CHARACTER*(*) OUNAM(*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       PARAMETER   ( VERSI1 = 0.0 , VERSI2 = 0.1 )
       INTEGER       NOUTPD, NRVARD, NBUFMD
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "rdwrko", ithndl )
-C
-C     read and check version number
-C
+!
+!     read and check version number
+!
       READ (LUNWRO, ERR=900, END=900) VERSIO
-C
-C     less than lowest supported version, ERROR
-C
+!
+!     less than lowest supported version, ERROR
+!
       IF ( VERSIO .LT. VERSI1 ) THEN
          WRITE ( LUREP, 2000 ) VERSIO , VERSI1
          CALL SRSTOP(1)
       ENDIF
-C
-C     greater than this version, WARNING
-C
+!
+!     greater than this version, WARNING
+!
       IF ( VERSIO .GT. VERSI2 ) THEN
          NOWARN = NOWARN + 1
          WRITE ( LUREP, 2010 ) VERSIO , VERSI2
       ENDIF
-C
-C     read and check dimensions
-C
+!
+!     read and check dimensions
+!
       READ (LUNWRO, ERR=900, END=900) NOUTPD, NRVARD, NBUFMD
       IF ( NOUTPD .NE. NOUTP  ) THEN
          WRITE ( LUREP, 2020 ) NOUTPD, NOUTP
@@ -111,7 +111,7 @@ C
          IERR = IERR + 1
       ENDIF
       IF ( IERR .GT. 0 ) GOTO 910
-C
+!
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(1,K) , K = 1 , NOUTP )
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(2,K) , K = 1 , NOUTP )
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(3,K) , K = 1 , NOUTP )
@@ -120,22 +120,22 @@ C
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(6,K) , K = 1 , NOUTP )
       READ (LUNWRO, ERR=900, END=900) ( IOPOIN(K)   , K = 1 , NRVART)
       READ (LUNWRO, ERR=900, END=900) ( OUNAM (K)   , K = 1 , NRVART)
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
-C
-C     unsuccessful read
-C
+!
+!     unsuccessful read
+!
   900 CONTINUE
       WRITE ( LUREP   , 2050 ) LCH, LUNWRO
       IDUM = IDUM + 1
-C
+!
   910 CONTINUE
       if (timon) call timstop( ithndl )
       RETURN
-C
-C     output formats
-C
+!
+!     output formats
+!
  2000 FORMAT ( ' ERROR  : version output intput ',F5.2,' NOT supported'
      +        /'          by OUTPUT sytem version,',F5.2)
  2010 FORMAT ( ' WARNING: version output intput ',F5.2,' greater than'
@@ -151,5 +151,5 @@ C
      +        /'          ',I6,' in output,',I6,' in boot file.')
  2050 FORMAT ( ' ERROR  : Reading output work file;',A,
      +        /'          on unit number ',I3)
-C
+!
       END

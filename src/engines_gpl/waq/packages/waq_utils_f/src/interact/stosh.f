@@ -21,16 +21,16 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Integer function to extract part of one string and move it to another
-C string. The move operation starts at POSIN en continues to LENIN,
-C putting the result in elements POSOUT through LENOUT of RESULT.
-C
+!
+! Integer function to extract part of one string and move it to another
+! string. The move operation starts at POSIN en continues to LENIN,
+! putting the result in elements POSOUT through LENOUT of RESULT.
+!
       INTEGER FUNCTION STOSH (SOURCE,POSIN,LENIN,RESULT,POSOUT,LENOUT)
-C
+!
       CHARACTER*(*) SOURCE, RESULT
       INTEGER POSIN, POSOUT, LENIN, LENOUT
-C
+!
       IF (POSIN .LE. 0) GO TO 30
       IF (POSOUT .LE. 0) GO TO 30
       IF (LENIN .LT. POSIN) GO TO 40

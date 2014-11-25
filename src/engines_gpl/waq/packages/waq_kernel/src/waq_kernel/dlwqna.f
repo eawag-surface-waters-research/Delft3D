@@ -32,47 +32,47 @@
 !>                         Performs time dependent integration. Flux Corrected Transport
 !>                         (Boris and Book) horizontally, upwind implicit vertically.\n
 
-C
-C
-C     Deltares
-C
-C     CREATED            : jan  1996 by R.J. Vos and Jan van Beek
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C                          LUN(23) , output, unformatted dump file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          PROCES, DELWAQ proces system
-C                          DLWQO2, DELWAQ output system
-C                          DLWQPP, user postprocessing routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ14, scales waterquality
-C                          DLWQ15, wasteload routine
-C                          DLWQ17, boundary routine
-C                          DLWQ50, explicit derivative
-C                          DLWQ51, flux correction
-C                          DLWQ52, makes masses and concentrations
-C                          DLWQ41, update volumes
-C                          DLWQ44, update arrays
-C                          DLWQT0, update other time functions
-C                          PROINT, integration of fluxes
-C                          DHOPNF, opens files
-C                          ZERCUM, zero's the cummulative array's
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHAR*(*)   *      INPUT  filenames
-C
+!
+!
+!     Deltares
+!
+!     CREATED            : jan  1996 by R.J. Vos and Jan van Beek
+!
+!     LOGICAL UNITS      : LUN(19) , output, monitoring file
+!                          LUN(20) , output, formatted dump file
+!                          LUN(21) , output, unformatted hist. file
+!                          LUN(22) , output, unformatted dump file
+!                          LUN(23) , output, unformatted dump file
+!
+!     SUBROUTINES CALLED : DLWQTR, user transport routine
+!                          DLWQWQ, user waterquality routine
+!                          PROCES, DELWAQ proces system
+!                          DLWQO2, DELWAQ output system
+!                          DLWQPP, user postprocessing routine
+!                          DLWQ13, system postpro-dump routine
+!                          DLWQ14, scales waterquality
+!                          DLWQ15, wasteload routine
+!                          DLWQ17, boundary routine
+!                          DLWQ50, explicit derivative
+!                          DLWQ51, flux correction
+!                          DLWQ52, makes masses and concentrations
+!                          DLWQ41, update volumes
+!                          DLWQ44, update arrays
+!                          DLWQT0, update other time functions
+!                          PROINT, integration of fluxes
+!                          DHOPNF, opens files
+!                          ZERCUM, zero's the cummulative array's
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL       *      LOCAL  real      workspace array
+!     J       INTEGER    *      LOCAL  integer   workspace array
+!     C       CHARACTER  *      LOCAL  character workspace array
+!     LUN     INTEGER    *      INPUT  array with unit numbers
+!     LCHAR   CHAR*(*)   *      INPUT  filenames
+!
       use grids
       use timers
       use m_couplib
@@ -85,9 +85,9 @@ C
       implicit none
 
       include 'actions.inc'
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       REAL, DIMENSION(*)             :: A
       INTEGER, DIMENSION(*)          :: J
       INTEGER, DIMENSION(*)          :: LUN
@@ -97,29 +97,29 @@ C
       TYPE(DELWAQ_DATA), TARGET      :: DLWQD
       type(GridPointerColl)          :: GridPs               ! collection of all grid definitions
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       LOGICAL         IMFLAG , IDFLAG , IHFLAG
       LOGICAL         LDUMMY , LSTREC , LREWIN , LDUMM2
       LOGICAL         FORESTER
@@ -172,9 +172,9 @@ C
       IF ( ACTION == ACTION_INITIALISATION  .OR.
      &     ACTION == ACTION_FULLCOMPUTATION        ) THEN
 
-C
-C          some initialisation
-C
+!
+!          some initialisation
+!
          ithandl = 0
          ITIME   = ITSTRT
          NSTEP   = (ITSTOP-ITSTRT)/IDT
@@ -199,20 +199,20 @@ C
          IF ( ILFLAG .EQ. 0 ) LLENG = ILENG+2
 
          call initialise_progress( dlwqd%progress, nstep, lchar(44) )
-C
-C          initialize second volume array with the first one
-C
+!
+!          initialize second volume array with the first one
+!
          nosss  = noseg + nseg2
          CALL MOVE   ( A(IVOL ), A(IVOL2) , nosss   )
       ENDIF
 
-C
-C     Save/restore the local persistent variables,
-C     if the computation is split up in steps
-C
-C     Note: the handle to the timer (ithandl) needs to be
-C     properly initialised and restored
-C
+!
+!     Save/restore the local persistent variables,
+!     if the computation is split up in steps
+!
+!     Note: the handle to the timer (ithandl) needs to be
+!     properly initialised and restored
+!
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqna", ithandl )
           INCLUDE 'dlwqdata_save.inc'
@@ -230,9 +230,9 @@ C
       nosss  = noseg + nseg2
       NOQTT  = NOQ + NOQ4
       inwtyp = intyp + nobnd
-C
-C          set alternating set of pointers
-C
+!
+!          set alternating set of pointers
+!
       NOQT  = NOQ1+NOQ2
       lnoq  = noqtt - noqt
       LDISP = IDISP+2
@@ -328,9 +328,9 @@ C
           call dlwq17 ( a(ibset), a(ibsav), j(ibpnt), nobnd   , nosys   ,
      *                  notot   , idt     , a(iconc), a(iflow), a(iboun))
       endif
-C
-C     Call OUTPUT system
-C
+!
+!     Call OUTPUT system
+!
       CALL DLWQO2 ( NOTOT   , nosss   , NOPA    , NOSFUN  , ITIME   ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
@@ -454,9 +454,9 @@ C
          call dlwq42 ( nosys    , notot    , nototp   , nosss    , a(ivol2) ,
      &                 surface  , a(imass) , a(iconc) , a(iderv) , idt      ,
      &                 ivflag   , lun(19)  , j(iowns) , mypart   )
-C
-C          user water quality processes implicit part
-C
+!
+!          user water quality processes implicit part
+!
       CALL DLWQWX ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
      *              A(IVOL2), A(IDERV), A(ICONS), A(IPARM), A(IFUNC),
      *              A(ISFUN), A(ICONC), ITIME   , IDT     , A(ISMAS),
@@ -472,9 +472,9 @@ C
      &                 ilflag   , idt      , a(iderv) , iaflag   , a(imas2) ,
      &                 j(iowns) , mypart   , lun(19)  , ndmpq    , j(lqdmp) ,
      &                 a(idmpq) , arhs     , adiag    , acodia   , bcodia   )
-C
-C          user water quality processes implicit part
-C
+!
+!          user water quality processes implicit part
+!
       CALL DLWQWY ( NOTOT   , NOSYS   , nosss   , NOPA    , NOSFUN  ,
      *              A(IVOL2), A(IDERV), A(ICONS), A(IPARM), A(IFUNC),
      *              A(ISFUN), A(ICONC), ITIME   , IDT     , A(ISMAS),
@@ -540,5 +540,5 @@ C
       dlwqd%itime = itime
 
       RETURN
-C
+!
       END

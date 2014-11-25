@@ -4,116 +4,88 @@
 !>\file
 !>       Mineralisation & conversion of detritus POC1,POC2,POC3,POC4,DOC
 
-C***********************************************************************
-C
-C     Project : Generiek Estuarium Model T2087
-C     Author  : Rik Sonneveldt
-C     Date    : 05mei97            Version : 0.00
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     970505  Rik Sonneveldt  Create first version, based on WATMIN 0.01
-C                             created by Pascal Boderie/Jos van Gils
-C     970929  Rik Sonneveldt  Loop ikenmerk1 aangepast
-C     010713  Johannes Smits  correction with respect to nutrient
-C                             accelleration and conversion fluxes
-C     2009/11 Jan van Beek    merging routines for POC2 and POC3
-C                             extension with conversion of POC2 to DOC
-C                             and POC4
-C                             extension with sulphur
-C     120904  Johannes Smits  extension with option for input rates for
-C                             N and P in stead of nutrient stripping
-C                             merging of decfsn, decsln and decren
-C                             plus prevention of dividing by zero when
-C                             AUN=ALN or AUP=ALP
-C                             plus correction critical concentrations
-C                             for B_NO3 and B_SULF
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        Mineralization and conversion of detritus Carbon, Nitrogen,
-C        Phosphorus and Sulphur.
-C        Two options are available, with or without nutrient stripping.
-C        Input mineralization rates can be different for C, N and P.
-C        Input rates for C are also used for S.
-C        Mineralization for nutrients N, P and S can be faster than for
-C        C, also due to nutrient stripping. Hence C:N , C:P and C:S in
-C        other detritus can be higher than in fast detritus.
-C        POC, PON, POP and POS refer not only to fast, medium, slow,
-C        refractory particulate detritus (POC1, POC2, POC3, POC4),
-C        but also to dissolved detritus (DOC).
-C        In case of POC4 and DOC some of the iput items are dummies and
-C        have fixed values that lead to:
-C        a) basic rate is always upper limit and equal for C,N,P,S
-C        b) nutrient availability does not affact the rate
-C        c) nutrient stripping is not applied
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C POC     R*4 1 I     concentration of detritus C                 [gC/m3]
-C PON     R*4 1 I     concentration of detritus N                 [gN/m3]
-C POP     R*4 1 I     concentration of detritus P                 [gP/m3]
-C POS     R*4 1 I     concentration of detritus S                 [gS/m3]
-C RC20LOC R*4 1 I     degradation rate detC at 20 oC, lower value [1/day]
-C RC20UPC R*4 1 I     degradation rate detC at 20 oC, upper value [1/day]
-C RC20LON R*4 1 I     degradation rate detN at 20 oC, lower value [1/day]
-C RC20UPN R*4 1 I     degradation rate detN at 20 oC, upper value [1/day]
-C RC20LOP R*4 1 I     degradation rate detP at 20 oC, lower value [1/day]
-C RC20UPP R*4 1 I     degradation rate detP at 20 oC, upper value [1/day]
-C RC20C   R*4 1 -     degradation rate detC at 20 oC              [1/day]
-C RC20N   R*4 1 -     degradation rate detN at 20 oC              [1/day]
-C RC20P   R*4 1 -     degradation rate detP at 20 oC              [1/day]
-C RC20S   R*4 1 -     degradation rate detS at 20 oC              [1/day]
-C TEMP    R*4 1 I     temperature                                    [oC]
-C TC      R*4 1 I     temperature coefficient                         [-]
-C TEMPC   R*4 1 -     temperature function                            [-]
-C ANR     R*4 1 I     nitrogen content of refractory detritus     [gN/gC]
-C APR     R*4 1 I     phosphorus content of refractory detritus   [gP/gC]
-C ASR     R*4 1 I     sulfur content of refractory detritus       [gS/gC]
-C ALN     R*4 1 I     nitrogen content of detritus, lower value   [gN/gC]
-C ALP     R*4 1 I     phosphorus content of detritus, lower value [gN/gC]
-C AUN     R*4 1 I     nitrogen content of detritus, upper value   [gN/gC]
-C AUP     R*4 1 I     phosphorus content of detritus, upper value [gN/gC]
-C FNUT    R*4 1 -     limiting factor for nutrient availability       [-]
-C N_FACT  R*4 1 -     accelleration factor for nitrogen               [-]
-C P_FACT  R*4 1 -     accelleration factor for phosphorus             [-]
-C S_FACT  R*4 1 -     accelleration factor for sulphur                [-]
-C OXY     R*4 1 I     concentration of dissolved oxygen          [gO2/m3]
-C NO3     R*4 1 I     concentration of nitrate                    [gN/m3]
-C B_NO3   R*4 1 I     attenuation constant for denitrification        [-]
-C B_SULF  R*4 1 I     attenuation constant for sulfate reduction      [-]
-C ELFACT  R*4 1 -     attenuation factor for electron acceptor        [-]
-C B_DTP   R*4 1 I     conversion ratio for particulate detritus       [-]
-C B_DTD   R*4 1 I     conversion ratio for dissolved detritus         [-]
-C SWOMDEC R*4 1 I     option: 0.0 with nutrient stripping, 1.0 without
-C ID      R*4 1 I     ident.=1 (POC1, POC2, POC3), indent.=2 (POC4, DOC)
-C DECOC   R*4 1 O     degradation flux for detritus C         [gC/m3/day]
-C DECON   R*4 1 O     degradation flux for detritus N         [gN/m3/day]
-C DECOP   R*4 1 O     degradation flux for detritus P         [gP/m3/day]
-C DECOS   R*4 1 O     degradation flux for detritus S         [gS/m3/day]
-C CNVPC   R*4 1 O     conversion flux for part. detritus C    [gC/m3/day]
-C CNVPN   R*4 1 O     conversion flux for part. detritus N    [gN/m3/day]
-C CNVPP   R*4 1 O     conversion flux for part. detritus P    [gP/m3/day]
-C CNVPS   R*4 1 O     conversion flux for part. detritus S    [gS/m3/day]
-C CNVDC   R*4 1 O     conversion flux for diss. detritus C    [gC/m3/day]
-C CNVDN   R*4 1 O     conversion flux for diss. detritus N    [gN/m3/day]
-C CNVDP   R*4 1 O     conversion flux for diss. detritus P    [gP/m3/day]
-C CNVDS   R*4 1 O     conversion flux for diss. detritus S    [gS/m3/day]
-C
-C     Logical Units : -
-C
-C     Modules called : -
-C
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        Mineralization and conversion of detritus Carbon, Nitrogen,
+!        Phosphorus and Sulphur.
+!        Two options are available, with or without nutrient stripping.
+!        Input mineralization rates can be different for C, N and P.
+!        Input rates for C are also used for S.
+!        Mineralization for nutrients N, P and S can be faster than for
+!        C, also due to nutrient stripping. Hence C:N , C:P and C:S in
+!        other detritus can be higher than in fast detritus.
+!        POC, PON, POP and POS refer not only to fast, medium, slow,
+!        refractory particulate detritus (POC1, POC2, POC3, POC4),
+!        but also to dissolved detritus (DOC).
+!        In case of POC4 and DOC some of the iput items are dummies and
+!        have fixed values that lead to:
+!        a) basic rate is always upper limit and equal for C,N,P,S
+!        b) nutrient availability does not affact the rate
+!        c) nutrient stripping is not applied
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! POC     R*4 1 I     concentration of detritus C                 [gC/m3]
+! PON     R*4 1 I     concentration of detritus N                 [gN/m3]
+! POP     R*4 1 I     concentration of detritus P                 [gP/m3]
+! POS     R*4 1 I     concentration of detritus S                 [gS/m3]
+! RC20LOC R*4 1 I     degradation rate detC at 20 oC, lower value [1/day]
+! RC20UPC R*4 1 I     degradation rate detC at 20 oC, upper value [1/day]
+! RC20LON R*4 1 I     degradation rate detN at 20 oC, lower value [1/day]
+! RC20UPN R*4 1 I     degradation rate detN at 20 oC, upper value [1/day]
+! RC20LOP R*4 1 I     degradation rate detP at 20 oC, lower value [1/day]
+! RC20UPP R*4 1 I     degradation rate detP at 20 oC, upper value [1/day]
+! RC20C   R*4 1 -     degradation rate detC at 20 oC              [1/day]
+! RC20N   R*4 1 -     degradation rate detN at 20 oC              [1/day]
+! RC20P   R*4 1 -     degradation rate detP at 20 oC              [1/day]
+! RC20S   R*4 1 -     degradation rate detS at 20 oC              [1/day]
+! TEMP    R*4 1 I     temperature                                    [oC]
+! TC      R*4 1 I     temperature coefficient                         [-]
+! TEMPC   R*4 1 -     temperature function                            [-]
+! ANR     R*4 1 I     nitrogen content of refractory detritus     [gN/gC]
+! APR     R*4 1 I     phosphorus content of refractory detritus   [gP/gC]
+! ASR     R*4 1 I     sulfur content of refractory detritus       [gS/gC]
+! ALN     R*4 1 I     nitrogen content of detritus, lower value   [gN/gC]
+! ALP     R*4 1 I     phosphorus content of detritus, lower value [gN/gC]
+! AUN     R*4 1 I     nitrogen content of detritus, upper value   [gN/gC]
+! AUP     R*4 1 I     phosphorus content of detritus, upper value [gN/gC]
+! FNUT    R*4 1 -     limiting factor for nutrient availability       [-]
+! N_FACT  R*4 1 -     accelleration factor for nitrogen               [-]
+! P_FACT  R*4 1 -     accelleration factor for phosphorus             [-]
+! S_FACT  R*4 1 -     accelleration factor for sulphur                [-]
+! OXY     R*4 1 I     concentration of dissolved oxygen          [gO2/m3]
+! NO3     R*4 1 I     concentration of nitrate                    [gN/m3]
+! B_NO3   R*4 1 I     attenuation constant for denitrification        [-]
+! B_SULF  R*4 1 I     attenuation constant for sulfate reduction      [-]
+! ELFACT  R*4 1 -     attenuation factor for electron acceptor        [-]
+! B_DTP   R*4 1 I     conversion ratio for particulate detritus       [-]
+! B_DTD   R*4 1 I     conversion ratio for dissolved detritus         [-]
+! SWOMDEC R*4 1 I     option: 0.0 with nutrient stripping, 1.0 without
+! ID      R*4 1 I     ident.=1 (POC1, POC2, POC3), indent.=2 (POC4, DOC)
+! DECOC   R*4 1 O     degradation flux for detritus C         [gC/m3/day]
+! DECON   R*4 1 O     degradation flux for detritus N         [gN/m3/day]
+! DECOP   R*4 1 O     degradation flux for detritus P         [gP/m3/day]
+! DECOS   R*4 1 O     degradation flux for detritus S         [gS/m3/day]
+! CNVPC   R*4 1 O     conversion flux for part. detritus C    [gC/m3/day]
+! CNVPN   R*4 1 O     conversion flux for part. detritus N    [gN/m3/day]
+! CNVPP   R*4 1 O     conversion flux for part. detritus P    [gP/m3/day]
+! CNVPS   R*4 1 O     conversion flux for part. detritus S    [gS/m3/day]
+! CNVDC   R*4 1 O     conversion flux for diss. detritus C    [gC/m3/day]
+! CNVDN   R*4 1 O     conversion flux for diss. detritus N    [gN/m3/day]
+! CNVDP   R*4 1 O     conversion flux for diss. detritus P    [gP/m3/day]
+! CNVDS   R*4 1 O     conversion flux for diss. detritus S    [gS/m3/day]
+!
+!     Logical Units : -
+!
+!     Modules called : -
+!
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT REAL (A-H,J-Z)
-C
+!
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
@@ -128,7 +100,7 @@ C
      +         DECOC   , DECON   , DECOP   , DECOS   , CNVPC   ,
      +         CNVPN   , CNVPP   , CNVPS   , CNVDC   , CNVDN   ,
      +         CNVDP   , CNVDS   , SWOMDEC , ID
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -163,7 +135,7 @@ C
       IP32 = IPOINT(32)
       IP33 = IPOINT(33)
       IP34 = IPOINT(34)
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -198,27 +170,27 @@ C
       IN32 = INCREM(32)
       IN33 = INCREM(33)
       IN34 = INCREM(34)
-C
+!
       IFLUX = 0
-C
+!
       DO 9000 ISEG = 1 , NOSEG
-C
-C       In all "active" segments
-C
+!
+!       In all "active" segments
+!
 !!      CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!      IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.3) THEN
         IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C          INPUT of subroutine
-C
+!
+!          INPUT of subroutine
+!
            POC     = MAX(PMSA(IP1),0.0)
            PON     = MAX(PMSA(IP2),0.0)
            POP     = MAX(PMSA(IP3),0.0)
            POS     = MAX(PMSA(IP4),0.0)
            ID      = PMSA(IP5)
-C
-C          all rates are equal for ID=2 (POC4 and DOC)
-C
+!
+!          all rates are equal for ID=2 (POC4 and DOC)
+!
            RC20UPC = PMSA(IP6)
            IF (NINT(ID) .EQ. 2) THEN
            RC20LOC = PMSA(IP6)
@@ -233,7 +205,7 @@ C
            RC20UPP = PMSA(IP10)
            RC20LOP = PMSA(IP11)
            ENDIF
-C
+!
            TC      = PMSA(IP12)
            TEMP    = PMSA(IP13)
            ANR     = PMSA(IP14)
@@ -250,9 +222,9 @@ C
            B_DTP   = PMSA(IP25)
            B_DTD   = PMSA(IP26)
            SWOMDEC = PMSA(IP27)
-C
-C          Errors if certain vars =< 0
-C
+!
+!          Errors if certain vars =< 0
+!
            IF (ANR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dNpr =< 0', 1 )
            IF (APR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dPpr =< 0', 1 )
            IF (ASR .LT. 1E-30) CALL ERRSYS ('DECDET: a_dSpr =< 0', 1 )
@@ -264,27 +236,27 @@ C
      &     CALL ERRSYS ('DECDET: au_dN/F/M/S/ =< 0', 1 )
            IF (AUP .LT. 1E-30)
      &     CALL ERRSYS ('DECDET: au_dP/F/M/S/ =< 0', 1 )
-C
-C          Errors if upper limits =< lower limits
-C
+!
+!          Errors if upper limits =< lower limits
+!
            IF (AUN .LT. ALN)
      &     CALL ERRSYS ('DECDET: au_dN/F/M/S/ < al_dN/F/M/S/ ',1)
            IF (AUP .LT. ALP)
      &     CALL ERRSYS ('DECDET: au_dP/F/M/S/ < al_dP/F/M/S/ ',1)
-C
+!
            IF (RC20UPC .LT. RC20LOC)
      &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dec20 < kl_d/F/M/S/dec20 ',1)
            IF (RC20UPN .LT. RC20LON)
      &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dcN20 < kl_d/F/M/S/dcN20 ',1)
            IF (RC20UPP .LT. RC20LOP)
      &     CALL ERRSYS ('DECDET: ku_d/F/M/S/dcP20 < kl_d/F/M/S/dcP20 ',1)
-C
-C          If  detritus = 0 : set fluxes to zero and skip algorithm
-C
+!
+!          If  detritus = 0 : set fluxes to zero and skip algorithm
+!
 !jvb       IF (POC .LT. 1E-10 .OR. PON .LT. 1E-10 .OR. POP .LT. 1E-10)
            IF (POC .LT. 1E-10)
      &        THEN
-C
+!
               DECOC = 0.0
               DECON = 0.0
               DECOP = 0.0
@@ -306,55 +278,55 @@ C
               N_FACT = 1.0
               P_FACT = 1.0
               S_FACT = 1.0
-C
+!
            ELSE
-C
-C             Calculate degrad. rate at 20oC for current stochiometry
-C
+!
+!             Calculate degrad. rate at 20oC for current stochiometry
+!
               IF ((PON/POC) .GT. AUN .AND. (POP/POC) .GT. AUP) THEN
-C
-C                -- both stoch's above upper limit
-C
+!
+!                -- both stoch's above upper limit
+!
                  RC20C = RC20UPC
                  RC20N = RC20UPN
                  RC20P = RC20UPP
-C
+!
               ELSE IF ((PON/POC) .LT. ALN .OR. (POP/POC) .LT. ALP)
      &                THEN
-C
-C                -- one or both stoch's below lower limit
-C
+!
+!                -- one or both stoch's below lower limit
+!
                  RC20C = RC20LOC
                  RC20N = RC20LON
                  RC20P = RC20LOP
-C
+!
               ELSE
-C
-C                -- both stoch's between upper and lower limit
-C                   or one stoch above ul and one between ul and ll
-C
+!
+!                -- both stoch's between upper and lower limit
+!                   or one stoch above ul and one between ul and ll
+!
                  IF (AUN .EQ. ALN .OR. AUP .EQ. ALP) THEN
                     FNUT = 0.5
                  ELSE
                     FNUT = MIN( ((PON/POC)-ALN) / (AUN-ALN) ,
      &                          ((POP/POC)-ALP) / (AUP-ALP) )
                  ENDIF
-C
+!
                  RC20C = RC20LOC + FNUT * (RC20UPC-RC20LOC)
                  RC20N = RC20LON + FNUT * (RC20UPN-RC20LON)
                  RC20P = RC20LOP + FNUT * (RC20UPP-RC20LOP)
-C
+!
               ENDIF
-C
+!
               RC20S = RC20C
-C
-C             Calculate correction factors
-C             for temperature
-C
+!
+!             Calculate correction factors
+!             for temperature
+!
               TEMPC = TC**(TEMP-20)
-C
-C             for dominant electron acceptor
-C
+!
+!             for dominant electron acceptor
+!
               IF (OXY .GT. 0.1) THEN
                  ELFACT = 1.0
               ELSE IF (NO3 .GT. 0.1) THEN
@@ -362,9 +334,9 @@ C
               ELSE
                  ELFACT = B_SULF
               ENDIF
-C
-C             for nutrient stripping
-C
+!
+!             for nutrient stripping
+!
               IF (NINT(SWOMDEC) .EQ. 0 ) THEN
                  N_FACT = 1.0 + ((PON/POC) - ANR) / ANR
                  P_FACT = 1.0 + ((POP/POC) - APR) / APR
@@ -380,29 +352,29 @@ C
                  P_FACT = 1.0
                  S_FACT = 1.0
               ENDIF
-C
-C             Calculate the fluxes for mineralization and conversion
-C
+!
+!             Calculate the fluxes for mineralization and conversion
+!
               DECOC = RC20C * TEMPC * ELFACT * POC
               CNVPC = B_DTP * DECOC
               CNVDC = B_DTD * DECOC
-C
+!
               DECON = RC20N * TEMPC * ELFACT * N_FACT * PON
               CNVPN = (1/N_FACT) * B_DTP * DECON
               CNVDN = (1/N_FACT) * B_DTD * DECON
-C
+!
               DECOP = RC20P * TEMPC * ELFACT * P_FACT * POP
               CNVPP = (1/P_FACT) * B_DTP * DECOP
               CNVDP = (1/P_FACT) * B_DTD * DECOP
-C
+!
               DECOS = RC20S * TEMPC * ELFACT * S_FACT * POS
               CNVPS = (1/S_FACT) * B_DTP * DECOS
               CNVDS = (1/S_FACT) * B_DTD * DECOS
-C
+!
            ENDIF
-C
-C          OUTPUT of subroutine
-C
+!
+!          OUTPUT of subroutine
+!
            PMSA(IP28) = RC20C * TEMPC * ELFACT
            PMSA(IP29) = RC20N * TEMPC * ELFACT
            PMSA(IP30) = RC20P * TEMPC * ELFACT
@@ -410,7 +382,7 @@ C
            PMSA(IP32) = P_FACT
            PMSA(IP33) = S_FACT
            PMSA(IP34) = DECOC
-C
+!
            FL( 1 + IFLUX) = CNVPC
            FL( 2 + IFLUX) = CNVPN
            FL( 3 + IFLUX) = CNVPP
@@ -423,11 +395,11 @@ C
            FL(10 + IFLUX) = DECON
            FL(11 + IFLUX) = DECOP
            FL(12 + IFLUX) = DECOS
-C
+!
         ENDIF
-C
-C       Pointers ophogen
-C
+!
+!       Pointers ophogen
+!
         IFLUX = IFLUX + NOFLUX
         IP1   = IP1   + IN1
         IP2   = IP2   + IN2
@@ -463,8 +435,8 @@ C
         IP32  = IP32  + IN32
         IP33  = IP33  + IN33
         IP34  = IP34  + IN34
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
       END

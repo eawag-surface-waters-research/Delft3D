@@ -24,38 +24,38 @@
       SUBROUTINE OUTHIS ( IOHIS , NAMFIH, ITIME , MONAME, NODUMP,
      +                    IDUMP , DUNAME, NOTOT1, SYNAM1, CONC1 ,
      +                    NOTOT2, SYNAM2, CONC2 , INIT  )
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : may  1993  BY Jan van Beek
-C
-C     FUNCTION           : Writes history output
-C
-C     LOGICAL UNITS      : IOHIS = number of history file
-C
-C     SUBROUTINES CALLED : none
-C
-C     PARAMETERS         : 19
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     IOHIS   INTEGER  1           INPUT   unit number output file
-C     NAMFIH  CHAR*(*) 1           INPUT   name output file
-C     ITIME   INTEGER  1           INPUT   present time in clock units
-C     MONAME  CHAR*40  4           INPUT   model identhification
-C     NODUMP  INTEGER  1           INPUT   number of dump locations
-C     IDUMP   INTEGER  NODUMP      INPUT   dump segment numbers
-C     DUNAME  CHAR*20  NODUMP      INPUT   names of dump locations
-C     NOTOT1  INTEGER  1           INPUT   number of vars in CONC1
-C     SYNAM1  CHAR*20  NOTOT1      INPUT   names of vars in CONC1
-C     CONC1   REAL     NOTOT1*?    INPUT   values
-C     NOTOT2  INTEGER  1           INPUT   number of extra output vars
-C     SYNAM2  CHAR*20  NOTOT       INPUT   names of extra vars
-C     CONC2   REAL    NOTOT2,NX*NY INPUT   values for extra vars
-C     INIT    INTEGER  1           IN/OUT  Initialize flag
-C
-C     Declaration of arguments
-C
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : may  1993  BY Jan van Beek
+!
+!     FUNCTION           : Writes history output
+!
+!     LOGICAL UNITS      : IOHIS = number of history file
+!
+!     SUBROUTINES CALLED : none
+!
+!     PARAMETERS         : 19
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     IOHIS   INTEGER  1           INPUT   unit number output file
+!     NAMFIH  CHAR*(*) 1           INPUT   name output file
+!     ITIME   INTEGER  1           INPUT   present time in clock units
+!     MONAME  CHAR*40  4           INPUT   model identhification
+!     NODUMP  INTEGER  1           INPUT   number of dump locations
+!     IDUMP   INTEGER  NODUMP      INPUT   dump segment numbers
+!     DUNAME  CHAR*20  NODUMP      INPUT   names of dump locations
+!     NOTOT1  INTEGER  1           INPUT   number of vars in CONC1
+!     SYNAM1  CHAR*20  NOTOT1      INPUT   names of vars in CONC1
+!     CONC1   REAL     NOTOT1*?    INPUT   values
+!     NOTOT2  INTEGER  1           INPUT   number of extra output vars
+!     SYNAM2  CHAR*20  NOTOT       INPUT   names of extra vars
+!     CONC2   REAL    NOTOT2,NX*NY INPUT   values for extra vars
+!     INIT    INTEGER  1           IN/OUT  Initialize flag
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER       IOHIS , ITIME , NODUMP, NOTOT1, NOTOT2,
@@ -66,9 +66,9 @@ C
       REAL          CONC1(*) , CONC2(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outhis", ithandl )
-C
-C     Initialize file
-C
+!
+!     Initialize file
+!
       IF ( INIT .EQ. 1 ) THEN
          INIT = 0
          WRITE (IOHIS) (MONAME(I),I=1,4)
@@ -76,14 +76,14 @@ C
          WRITE (IOHIS) (SYNAM1(I),I=1,NOTOT1),(SYNAM2(I),I=1,NOTOT2)
          WRITE (IOHIS) (I,DUNAME(I),I=1,NODUMP)
       ENDIF
-C
-C     Perform output
-C
+!
+!     Perform output
+!
       WRITE (IOHIS) ITIME,(
      +              (CONC1(K1+(IDUMP(J)-1)*NOTOT1),K1=1,NOTOT1),
      +              (CONC2(K2+(J-1)*NOTOT2)       ,K2=1,NOTOT2),
      +                                             J=1,NODUMP   )
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -29,51 +29,51 @@
      +                   NCOUT , NTDMPQ, paname, sfname, funame,
      +                   danam )
       use timers
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : may 1993 by Jan van Beek
-C
-C     FUNCTION            : Fills output buffer OUTVAL on sub grid.
-C
-C     SUBROUTINES CALLED  : ZERO  , zero's a real array
-C
-C     FILES               : -
-C
-C     PARAMETERS          : 27
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     OUTVAL  REAL  NCOUT+NRVAR,* OUTPUT  Values for vars on output grid
-C     IOPOIN  INTEGER       *     INPUT   Pointers to arrays for vars
-C     NRVAR   INTEGER       1     INPUT   Number of extra output vars
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
-C     SEGFUN  REAL   NOSEG,NOSFUN INPUT   Segment functions at ITIME
-C     FUNC    REAL          *     INPUT   Model functions at ITIME
-C     PARAM   REAL    NOPA,NOSEG  INPUT   Model parameters
-C     CONS    REAL          *     INPUT   Model constants
-C     IDT     INTEGER       1     INPUT   Simulation timestep
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     NDMPAR  INTEGER       1     INPUT   number of dump locations
-C     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
-C     BOUND   REAL     NOTOT*?    INPUT   boundary      values
-C     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
-C     PARAM   REAL   NOLOC,NOSEG  INPUT   Parameters local in PROCES system
-C     NODEF   INTEGER       1     INPUT   Number of used defaults
-C     DEFAUL  REAL          *     INPUT   Default proces parameters
-C     NCOUT   INTEGER       1     INPUT   number of conc in output
-C     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : may 1993 by Jan van Beek
+!
+!     FUNCTION            : Fills output buffer OUTVAL on sub grid.
+!
+!     SUBROUTINES CALLED  : ZERO  , zero's a real array
+!
+!     FILES               : -
+!
+!     PARAMETERS          : 27
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     OUTVAL  REAL  NCOUT+NRVAR,* OUTPUT  Values for vars on output grid
+!     IOPOIN  INTEGER       *     INPUT   Pointers to arrays for vars
+!     NRVAR   INTEGER       1     INPUT   Number of extra output vars
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
+!     SEGFUN  REAL   NOSEG,NOSFUN INPUT   Segment functions at ITIME
+!     FUNC    REAL          *     INPUT   Model functions at ITIME
+!     PARAM   REAL    NOPA,NOSEG  INPUT   Model parameters
+!     CONS    REAL          *     INPUT   Model constants
+!     IDT     INTEGER       1     INPUT   Simulation timestep
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     VOLUME  REAL      NOSEG     INPUT   Segment volumes
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     NDMPAR  INTEGER       1     INPUT   number of dump locations
+!     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
+!     BOUND   REAL     NOTOT*?    INPUT   boundary      values
+!     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
+!     PARAM   REAL   NOLOC,NOSEG  INPUT   Parameters local in PROCES system
+!     NODEF   INTEGER       1     INPUT   Number of used defaults
+!     DEFAUL  REAL          *     INPUT   Default proces parameters
+!     NCOUT   INTEGER       1     INPUT   number of conc in output
+!     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
+!
+!     Declaration of arguments
+!
       INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
      +           NOTOT , IDT   , ITIME , NOSEG , NOSYS ,
      +           NDMPAR, NOLOC , NODEF , NCOUT , NTDMPQ
@@ -86,9 +86,9 @@ C
       character(20) paname(*) , sfname(*)
       character(len=20), intent(in   ) :: funame(*) ! function names
       character(len=20), intent(in   ) :: danam(*)  ! dump area names
-C
-C     Local
-C
+!
+!     Local
+!
       PARAMETER ( RMISS = -999. )
       PARAMETER ( NOPRED= 6     )
       INTEGER     IOPA  , IOFUNC, IOSFUN, IOCONC, IOLOC ,
@@ -100,9 +100,9 @@ C
       logical     parm
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "fiosub", ithandl )
-C
-C     Pointer offsets
-C
+!
+!     Pointer offsets
+!
       IOCONS = NOPRED + 1
       IOPA   = IOCONS + NOCONS
       IOFUNC = IOPA   + NOPA
@@ -110,27 +110,27 @@ C
       IOCONC = IOSFUN + NOSFUN
       IOLOC  = IOCONC + NOTOT
       IODEF  = IOLOC  + NOLOC
-C
-C     Zero the output buffer for it is used as accumulation variable.
-C
+!
+!     Zero the output buffer for it is used as accumulation variable.
+!
       CALL ZERO(OUTVAL,(NCOUT+NRVAR)*NDMPAR)
-C
-C     Fill the output buffer OUTVAL
-C
+!
+!     Fill the output buffer OUTVAL
+!
       IP1   = NDMPAR + NTDMPQ
       ITEL2 = NDMPAR + NTDMPQ + NDMPAR
-C
-C     Loop over the dump area's
-C
+!
+!     Loop over the dump area's
+!
       DO 300 IDUMP = 1 , NDMPAR
-C
-C        the segment contributes
-C
+!
+!        the segment contributes
+!
          NSC = IPDMP(IP1+IDUMP)
          IOFDMP = (IDUMP-1)*(NCOUT+NRVAR)
-C
-C        If one segment don't bother to calculate mean value
-C
+!
+!        If one segment don't bother to calculate mean value
+!
          IF ( NSC .EQ. 1 ) THEN
             ITEL2 = ITEL2 + 1
             ISEG  = IPDMP(ITEL2)
@@ -141,9 +141,9 @@ C
                   endif
                enddo
             endif
-C
-C           The substances
-C
+!
+!           The substances
+!
             IF ( NCOUT .GT. 0 ) THEN
                IF ( ISEG .LT. 0 ) THEN
                   DO 10 ISYS = 1 , NOSYS
@@ -167,9 +167,9 @@ C
   40              CONTINUE
                ENDIF
             ENDIF
-C
-C           The extra variables
-C
+!
+!           The extra variables
+!
             DO 50 IVAR = 1 , NRVAR
                IP = IOPOIN(IVAR)
                IIDUMP = IOFDMP+NCOUT+IVAR
@@ -208,17 +208,17 @@ C
                      OUTVAL(IIDUMP) = RMISS
                   ENDIF
                ENDIF
-C
+!
   50        CONTINUE
-C
+!
          ELSE
-C
-C           The substances ( if asked ) in one loop
-C
+!
+!           The substances ( if asked ) in one loop
+!
             IF ( NCOUT .GT. 0 ) THEN
-C
-C              Zero the accummulative variables, OUTVAL already done.
-C
+!
+!              Zero the accummulative variables, OUTVAL already done.
+!
                HLPCUM = 0.0
                if ( nosys .ne. notot ) then
                   cumsrf = 1.0
@@ -234,18 +234,18 @@ C
                      endif
                   endif
                endif
-C
+!
                DO 120 ISC = 1 , NSC
                   ISEG  = IPDMP(ITEL2+ISC)
-C
-C                 Accumulate VOLUME, substances in OUTVAL
-C
+!
+!                 Accumulate VOLUME, substances in OUTVAL
+!
                   IF ( ISEG .GT. 0 ) THEN
                      HLPVAR = VOLUME(ISEG)
                      HLPCUM = HLPCUM + HLPVAR
-C
-C                    All active substances weighted by volume
-C
+!
+!                    All active substances weighted by volume
+!
                      DO 100 ISYS = 1 , NOSYS
                         IIDUMP = IOFDMP+ISYS
                         OUTVAL(IIDUMP) = OUTVAL(IIDUMP) +
@@ -274,11 +274,11 @@ C
                         endif
                      endif
                   ENDIF
-C
+!
   120          CONTINUE
-C
-C              Calculate mean for then active and inactive substances
-C
+!
+!              Calculate mean for then active and inactive substances
+!
                IF ( ABS(HLPCUM) .GT. 1.0E-20 ) THEN
                   DO 130 ISYS = 1 , NOSYS
                      IIDUMP = IOFDMP+ISYS
@@ -291,24 +291,24 @@ C
                      outval(iidump) = outval(iidump) / cumsrf
                   enddo
                endif
-C
+!
             ENDIF
-C
-C           The extra output variables each in a seperate loop
-C
+!
+!           The extra output variables each in a seperate loop
+!
             DO 210 IVAR = 1 , NRVAR
-C
-C              Accumulate
-C
+!
+!              Accumulate
+!
                IP  = IOPOIN(IVAR)
                IP2 = IOPOIN(NRVAR+IVAR)
                VALCUM = 0.0
                HLPCUM = 0.0
                DO 200 ISC = 1 , NSC
                   ISEG  = IPDMP(ITEL2+ISC)
-C
-C                 The output variable
-C
+!
+!                 The output variable
+!
                   IF ( ISEG .GT. 0 ) THEN
                      IP = IOPOIN(IVAR)
                      IF ( ISEG .LT. 0 ) THEN
@@ -346,9 +346,9 @@ C
                            VALVAR = RMISS
                         ENDIF
                      ENDIF
-C
-C                    The weigth variable
-C
+!
+!                    The weigth variable
+!
                      IF ( ISEG .LT. 0 ) THEN
                         HLPVAR = 1.0
                      ELSEIF ( ISEG .EQ. 0 ) THEN
@@ -381,7 +381,7 @@ C
                            HLPVAR = 1.
                         ENDIF
                      ENDIF
-C
+!
                      IF ( IP2 .EQ. 0 ) THEN
                         VALCUM = VALCUM + VALVAR
                      ELSE
@@ -389,27 +389,27 @@ C
                         HLPCUM = HLPCUM + HLPVAR
                      ENDIF
                   ENDIF
-C
+!
   200          CONTINUE
-C
-C              Calculate mean , HLPCUM = 0.0 has a double meaning
-C              1. only accumulation, 2. no divide by zero HLPCUM
-C
+!
+!              Calculate mean , HLPCUM = 0.0 has a double meaning
+!              1. only accumulation, 2. no divide by zero HLPCUM
+!
                IIDUMP = IOFDMP+NCOUT+IVAR
-C
+!
                IF ( ABS(HLPCUM) .GT. 1.0E-20 ) THEN
                   OUTVAL(IIDUMP) = VALCUM / HLPCUM
                ELSE
                   OUTVAL(IIDUMP) = VALCUM
                ENDIF
-C
+!
   210       CONTINUE
-C
+!
             ITEL2 = ITEL2 + NSC
          ENDIF
-C
+!
   300 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

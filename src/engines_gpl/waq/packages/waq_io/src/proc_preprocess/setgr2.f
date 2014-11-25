@@ -23,52 +23,52 @@
 
       SUBROUTINE SETGR2 ( NOGRID, NOTOTG, GRDREF, PROSYS, GRPATH,
      +                    IPGRID)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : Oct 1998 by Jan van Beek
-C
-C     FUNCTION            : sets most aggregated grid possible for a process
-C                           taken into a list of grids.
-C
-C     LOGICAL UNITNUMBERS : -
-C
-C     SUBROUTINES CALLED  :
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOGRID  INTEGER       1     INPUT   Number of grids
-C     NOTOTG  INTEGER       1     INPUT   Number of substances for this grid
-C     GRDREF  INTEGER    NOGRID   INPUT   Reference grid number
-C     PROSYS  INTEGER    NOTOTG   INPUT   Substance numbers for this process
-C     GRPATH  INTEGER    NOGRID   LOCAL   Reference path to base grid
-C     IPGRID  INTEGER       1     OUTPUT  Grid number set for this process
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : Oct 1998 by Jan van Beek
+!
+!     FUNCTION            : sets most aggregated grid possible for a process
+!                           taken into a list of grids.
+!
+!     LOGICAL UNITNUMBERS : -
+!
+!     SUBROUTINES CALLED  :
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOGRID  INTEGER       1     INPUT   Number of grids
+!     NOTOTG  INTEGER       1     INPUT   Number of substances for this grid
+!     GRDREF  INTEGER    NOGRID   INPUT   Reference grid number
+!     PROSYS  INTEGER    NOTOTG   INPUT   Substance numbers for this process
+!     GRPATH  INTEGER    NOGRID   LOCAL   Reference path to base grid
+!     IPGRID  INTEGER       1     OUTPUT  Grid number set for this process
+!
+!     Declaration of arguments
+!
       use timers       !   performance timers
 
       INTEGER             NOGRID, NOTOTG, IPGRID
       INTEGER             GRDREF(NOGRID), PROSYS(NOTOTG),
      +                    GRPATH(NOGRID)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER             NPATH , IPATH , IGRID
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "setgr2", ithndl )
-C
-C     Check number of substances for this grid
-C
+!
+!     Check number of substances for this grid
+!
       IF ( NOTOTG .LT. 1 ) THEN
          IPGRID = -1
          goto 9999
       ENDIF
-C
-C     Count length of path for first grid in list
-C
+!
+!     Count length of path for first grid in list
+!
       IPGRID = PROSYS(1)
       IGRID  = IPGRID
       NPATH  = 1
@@ -77,38 +77,38 @@ C
          IGRID  = GRDREF(IGRID)
          IF ( IGRID .LE. 0 ) THEN
 
-C           not defined on reference grid
+!           not defined on reference grid
             IPGRID = -2
             goto 9999
 
          ENDIF
          NPATH = NPATH + 1
          IF ( NPATH .GT. NOGRID ) THEN
-C
-C           Base grid not found in reference
-C
+!
+!           Base grid not found in reference
+!
             IPGRID = -2
             goto 9999
          ENDIF
          GOTO 10
       ENDIF
-C
-C     Set path for first grid in list
-C
+!
+!     Set path for first grid in list
+!
       GRPATH(NPATH) = PROSYS(1)
       DO IPATH = NPATH - 1 , 1 , -1
          GRPATH(IPATH) = GRDREF(GRPATH(IPATH+1))
       ENDDO
-C
-C     For next grids in list check where the reference comes together
-C
+!
+!     For next grids in list check where the reference comes together
+!
       DO IGSYS = 2 , NOTOTG
          IGRID = PROSYS(IGSYS)
          NCHECK = 1
    40    CONTINUE
-C
-C           Check path previously found
-C
+!
+!           Check path previously found
+!
             DO IPATH = NPATH , 1 , -1
                IF ( GRPATH(IPATH) .EQ. IGRID ) THEN
                   IPGRID = IGRID
@@ -124,9 +124,9 @@ C
             IGRID = GRDREF(IGRID)
             GOTO 40
    50    CONTINUE
-C
+!
       ENDDO
-C
+!
  9999 if (timon) call timstop( ithndl )
       RETURN
       END

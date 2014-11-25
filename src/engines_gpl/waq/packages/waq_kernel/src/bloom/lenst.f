@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Iintermediate integer function to obtain the length of a character
-C string. Because there is a variable LENSTR in BLOOM, the function
-C LENSTR cannot be called directly.
-C
+!
+! Iintermediate integer function to obtain the length of a character
+! string. Because there is a variable LENSTR in BLOOM, the function
+! LENSTR cannot be called directly.
+!
       INTEGER FUNCTION LENST (SOURCE,MAXLEN)
       CHARACTER*1 SOURCE(*)
       LENST = LENSTR(SOURCE,MAXLEN)

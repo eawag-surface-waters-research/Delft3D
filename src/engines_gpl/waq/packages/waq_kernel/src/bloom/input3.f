@@ -21,28 +21,28 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE INPUT3 TO READ LAKE-SPECIFIC INPUTS                *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE INPUT3 TO READ LAKE-SPECIFIC INPUTS                *
+!  *********************************************************************
+!
       SUBROUTINE INPUT3 (NDEC,INPU)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'putin2.inc'
       INCLUDE 'phyt2.inc'
-C
-C  Note: this subroutine is NOT used by the coupled BLOOM II/CHARON
-C  program.
-C
-C
-C  Read lake specific inputs for each week from unit 11:
-C  Read: DATE--week name; IDEC--week position; TEMP--water
-C   temperature; SOLINT--solar radiation level; PHYT--chlorophyll
-C   concentration; CONNUT--nutrient concentrations;
-C   BACKGR--background extinction.
-C
+!
+!  Note: this subroutine is NOT used by the coupled BLOOM II/CHARON
+!  program.
+!
+!
+!  Read lake specific inputs for each week from unit 11:
+!  Read: DATE--week name; IDEC--week position; TEMP--water
+!   temperature; SOLINT--solar radiation level; PHYT--chlorophyll
+!   concentration; CONNUT--nutrient concentrations;
+!   BACKGR--background extinction.
+!
       DO 10 I=1,NDEC
    10 READ (INPU,99999) DATE(I),IDEC(I),TEMP(I),SOLINT(I),PHYT(I),
      1                (CONNUT(I,K),K=1,NUNUCO),BACKGR(I)

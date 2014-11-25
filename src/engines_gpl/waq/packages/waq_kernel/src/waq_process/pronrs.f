@@ -25,34 +25,34 @@
 !>\file
 !>       Returns number of the process routine
 
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : jan -1994 by Jan van Beek
-C
-C     FUNCTION            : Returns module number
-C                           NOTE the numbers in this subroutine must have
-C                           an 1 to 1 relation with the labels in the
-C                           subroutine PROCEZ.
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     PRONAM  CHA*(*)       1     INPUT   Name of called module
-C     IMODUL  INTEGER       1     OUTPUT  Module number proces
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : jan -1994 by Jan van Beek
+!
+!     FUNCTION            : Returns module number
+!                           NOTE the numbers in this subroutine must have
+!                           an 1 to 1 relation with the labels in the
+!                           subroutine PROCEZ.
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     PRONAM  CHA*(*)       1     INPUT   Name of called module
+!     IMODUL  INTEGER       1     OUTPUT  Module number proces
+!
+!     Declaration of arguments
+!
       INTEGER       IMODUL
       CHARACTER*(*) PRONAM
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       PARAMETER   ( NOMODU = 126)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
@@ -184,13 +184,13 @@ C
      +   'FLXFRC',
      +   'PHCARB'
      +    /
-C
-C     Set module number
-C
+!
+!     Set module number
+!
       IMODUL = 0
       DO 10 J = 1,NOMODU
          IF (PRONAM(1:6).EQ.MODNAM(J)) IMODUL = J
    10 CONTINUE
-C
+!
       RETURN
       END

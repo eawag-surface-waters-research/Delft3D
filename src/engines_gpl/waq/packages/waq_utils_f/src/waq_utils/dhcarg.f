@@ -22,33 +22,33 @@
 !!  rights reserved.
 
       INTEGER FUNCTION DHCARG ( )
-C
-C     Delwaq Hulp Count ARGuments
-C
-C     Arguments
-C
-C
-C     Local
-C
+!
+!     Delwaq Hulp Count ARGuments
+!
+!     Arguments
+!
+!
+!     Local
+!
       USE DHCOMMAND
 
       INTEGER           NARGS
       LOGICAL           EXISTS, OPENED
       INTEGER           I     , LUN   , IERR
       CHARACTER(LEN=20) LINE
-C
-C     Any stored arguments?
-C
+!
+!     Any stored arguments?
+!
       DHCARG = DHSTORED_NUMBER_ARGS()
 
       IF ( DHCARG .EQ. 0 ) THEN
-C
-C         Call system routine
-C
+!
+!         Call system routine
+!
           DHCARG = IARGC() + 1
-C
-C         Take care of virtual zeroth argument
-C
+!
+!         Take care of virtual zeroth argument
+!
           IF ( DHCARG .EQ. 0 ) THEN
               DHCARG = 1
           ENDIF
@@ -78,6 +78,6 @@ C
               ENDIF
           ENDIF
       ENDIF
-C
+!
       RETURN
       END

@@ -23,7 +23,7 @@
 
       SUBROUTINE DHREP2( NAME1 , NAME2 , CARRAY, NOCAR , NCHAR ,
      +                   RARRAY, RVALUE)
-C
+!
       use timers       !   performance timers
 
       INTEGER            NOCAR , NCHAR
@@ -33,10 +33,10 @@ C
       REAL               RARRAY(NOCAR)
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dhrep2", ithndl )
-C
-C     Search and replace all occurences of NAME1 in CARRAY with NAME2
-C     Also replace RARRAY with the same indexes with RVALUE
-C
+!
+!     Search and replace all occurences of NAME1 in CARRAY with NAME2
+!     Also replace RARRAY with the same indexes with RVALUE
+!
       DO I = 1 , NOCAR
          CALL ZOEK(NAME1,1,CARRAY(I),NCHAR,ICAR)
          IF ( ICAR .GT. 0 ) THEN
@@ -44,7 +44,7 @@ C
             RARRAY(I) = RVALUE
          ENDIF
       ENDDO
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
       END

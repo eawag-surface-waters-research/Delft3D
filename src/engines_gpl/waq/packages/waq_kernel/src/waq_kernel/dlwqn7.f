@@ -35,43 +35,43 @@
 !>                         the method can be used. In 1D the method outperforms the
 !>                         iterative methods.
 
-C     CREATED            : june 1988 by L. Postma
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          DLWQPP, user postprocessing routine
-C                          DLWQ10, system monitoring routine
-C                          DLWQ11, system dump routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ15, wasteload routine
-C                          DLWQ60, scales water quality
-C                          DLWQ61, clears the matrix
-C                          DLWQ63, stores the results
-C                          DLWQ65, computes closure error
-C                          DLWQ66, makes masses
-C                          DLWQ67, zeros the matrix
-C                          DLWQ70, fills the matrix
-C                          DLWQ71, performs mass balance computation
-C                          DELMAT, inverts the matrix
-C                          DHOPNF, opens files
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHARACTER  *      INPUT  filenames
-C
-C     Declaration of arguments
-C
+!     CREATED            : june 1988 by L. Postma
+!
+!     LOGICAL UNITS      : LUN(19) , output, monitoring file
+!                          LUN(20) , output, formatted dump file
+!                          LUN(21) , output, unformatted hist. file
+!                          LUN(22) , output, unformatted dump file
+!
+!     SUBROUTINES CALLED : DLWQTR, user transport routine
+!                          DLWQWQ, user waterquality routine
+!                          DLWQPP, user postprocessing routine
+!                          DLWQ10, system monitoring routine
+!                          DLWQ11, system dump routine
+!                          DLWQ13, system postpro-dump routine
+!                          DLWQ15, wasteload routine
+!                          DLWQ60, scales water quality
+!                          DLWQ61, clears the matrix
+!                          DLWQ63, stores the results
+!                          DLWQ65, computes closure error
+!                          DLWQ66, makes masses
+!                          DLWQ67, zeros the matrix
+!                          DLWQ70, fills the matrix
+!                          DLWQ71, performs mass balance computation
+!                          DELMAT, inverts the matrix
+!                          DHOPNF, opens files
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL       *      LOCAL  real      workspace array
+!     J       INTEGER    *      LOCAL  integer   workspace array
+!     C       CHARACTER  *      LOCAL  character workspace array
+!     LUN     INTEGER    *      INPUT  array with unit numbers
+!     LCHAR   CHARACTER  *      INPUT  filenames
+!
+!     Declaration of arguments
+!
       use grids
       use timers
       use delwaq2_data
@@ -82,9 +82,9 @@ C
       implicit none
 
       include 'actions.inc'
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       REAL, DIMENSION(*)          :: A
       INTEGER, DIMENSION(*)       :: J
       INTEGER, DIMENSION(*)       :: LUN
@@ -94,29 +94,29 @@ C
       TYPE(DELWAQ_DATA)           :: DLWQD
       type(GridPointerColl)       :: GridPs               ! collection off all grid definitions
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       LOGICAL         IMFLAG , IDFLAG , IHFLAG
       LOGICAL         LDUMMY , LSTREC , LREWIN
 
@@ -143,9 +143,9 @@ C
      &     ACTION == ACTION_FINALISATION        ) THEN
           RETURN
       ENDIF
-C
-C          some initialisation
-C
+!
+!          some initialisation
+!
       ithandl = 0
       if ( timon ) call timstrt ( "dlwqn7", ithandl )
 
@@ -168,9 +168,9 @@ C
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
      &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
      &                 surface  , j(iknmr) , iknmkv   )
-C
-C          makes closure error
-C
+!
+!          makes closure error
+!
       IF ( IDT.EQ.0 ) THEN
          CALL ZERO ( A(IVOL2), NOSEG )
       ELSE IF ( J(INRH2+1).GE.0 .AND. IVFLAG.EQ.0 ) THEN
@@ -184,16 +184,16 @@ C
          CALL ZERO ( A(IVOL2) , NOSEG )
          WRITE ( LUN(19), 1000 )
       ENDIF
-C
-C          loop over the systems
-C
+!
+!          loop over the systems
+!
       NSYS   = 1
       IAFLAG = 1
       DO 10 ISYS = 1 , NOSYS
          IF ( ISYS .EQ. NOSYS ) NSYS   = 1 + NOTOT - NOSYS
-C
-C             do the user transport processes
-C
+!
+!             do the user transport processes
+!
          ICSYS = ISYS
          CALL DLWQTR ( NOTOT   , NOSYS   , NOSEG   , NOQ     , NOQ1    ,
      *                 NOQ2    , NOQ3    , NOPA    , NOSFUN  , NODISP  ,
@@ -203,9 +203,9 @@ C
      *                 IDT     , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
      *                 C(IPNAM), C(IFNAM), C(ISFNA), LDUMMY  , ILFLAG  ,
      *                 NPARTp  )
-C
-C             do the user water quality processes
-C
+!
+!             do the user water quality processes
+!
          CALL DLWQWQ ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
      *                 A(IVOL) , A(ICONC), A(ICONS), A(IPARM), A(IFUNC),
      *                 A(ISFUN), A(IDERV), ICSYS   , IDT     , A(ISMAS),
@@ -214,9 +214,9 @@ C
          CALL DLWQ60 ( A(IDERV), A(ICONC), NOTOT   , NOSEG   , ITFACT  ,
      *                 A(IMAS2), ISYS    , NSYS    , A(IDMPS), INTOPT  ,
      *                 J(ISDMP))
-C
-C             add the waste loads
-C
+!
+!             add the waste loads
+!
          call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
      &                 nowtyp    , ndmps    , intopt   ,     1    , itime    ,
      &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
@@ -225,9 +225,9 @@ C
      &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
      &                 a(iwdmp)  , isys     , nsys     , j(iowns ), mypart   )
-C
-C          fill the matrix
-C
+!
+!          fill the matrix
+!
          CALL DLWQ61 ( A(ICONC), A(IDERV), A(IVOL2), A(ITIMR), NOSEG   ,
      *                           NOTOT   , ISYS    , NSYS    , JTRACK  )
          CALL DLWQ70 ( A(IDISP), A(IDIFF), A(IAREA), A(IFLOW), A(ILENG),
@@ -236,17 +236,17 @@ C
      *                 NOVELO  , J(IDPNT), J(IVPNT), A(IDERV), A(ITIMR),
      *                                     JTRACK  , INTOPT  , ILFLAG  )
          CALL DLWQ67 ( A(ITIMR), NOSEG   , JTRACK  )
-C
-C             invert the matrix and store the results
-C
+!
+!             invert the matrix and store the results
+!
          CALL DELMAT ( NOSEG   , JTRACK  , JTRACK  , NSYS    , A(ITIMR),
      *                                               A(IDERV),    0    )
          CALL DLWQ63 ( A(ICONC), A(IDERV), A(IMAS2), NOSEG   , NOTOT   ,
      *                 ISYS    , NSYS    , A(IDMPS), INTOPT  , J(ISDMP))
    10 CONTINUE
-C
-C          mass balance
-C
+!
+!          mass balance
+!
       IAFLAG = 1
       CALL DLWQ71 ( A(IDISP), A(IDIFF), A(IAREA), A(IFLOW), A(ILENG),
      *              A(IVELO), A(ICONC), A(IBOUN), J(IXPNT), NOSYS   ,
@@ -254,9 +254,9 @@ C
      *              NOVELO  , J(IDPNT), J(IVPNT), INTOPT  , A(IMAS2),
      *              ILFLAG  , A(IDMPQ), NDMPQ   , J(IQDMP))
       CALL DLWQ66 ( A(IDERV), A(IVOL) , A(ICONC), NOTOT   , NOSEG   )
-C
-C     Call OUTPUT system
-C
+!
+!     Call OUTPUT system
+!
       CALL DLWQO2 ( NOTOT   , NOSEG   , NOPA    , NOSFUN  , ITSTRT  ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
@@ -280,19 +280,19 @@ C
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
-C
-C          close files, except monitor file
-C
+!
+!          close files, except monitor file
+!
       call CloseHydroFiles( dlwqd%collcoll )
       call close_files( lun )
-C
-C          write restart file
-C
+!
+!          write restart file
+!
       CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITSTRT, C(IMNAM) ,
      *              C(ISNAM) , NOTOT , NOSEG    )
-C
-C          user output routine
-C
+!
+!          user output routine
+!
       CALL DLWQPP ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
      *              ITSTRT  , IMFLAG  , IDFLAG  , IHFLAG  , C(IMNAM),
      *              C(ISNAM), C(IDNAM), C(IWSID), J(IDUMP), NODUMP  ,
@@ -303,11 +303,11 @@ C
      *              NOQ2    , NOQ3    , A(IDISP), A(IVELO), A(ISMAS),
      *              IBFLAG  , NOCONS  , NOFUN   , C(ICNAM), C(IPNAM),
      *              C(IFNAM), C(ISFNA), C(IBNID))
-C
-C          output formats
-C
+!
+!          output formats
+!
  1000 FORMAT ( 'No closure error corrections !' )
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

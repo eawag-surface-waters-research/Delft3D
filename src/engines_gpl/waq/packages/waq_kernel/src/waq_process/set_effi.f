@@ -26,11 +26,11 @@
 !>\file
 !>       calculate and store efficiency for all species
 
-C     modules
+!     modules
 
       USE      DATA_3DL   ! data and routine for 3D light approach
 
-C     BLOOM commons
+!     BLOOM commons
 
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
@@ -38,7 +38,7 @@ C     BLOOM commons
       INCLUDE 'putin1.inc'
       INCLUDE 'arran.inc'
 
-C     arguments
+!     arguments
 
       REAL     TEMPER     ! input , temperature
       REAL     RADIAT     ! input , radiation
@@ -47,7 +47,7 @@ C     arguments
       REAL     DAYLEN     ! input , daylength in hours
       INTEGER  ID         ! input , weeknumber
 
-C     local decalarations
+!     local decalarations
 
       REAL*8   ALPHA      ! reflection factor
       REAL*8   TEMP       ! temperature
@@ -76,7 +76,7 @@ C     local decalarations
       DO ITYPE = 1,NTYP_3DL
          IF (SDMIX(ITYPE) .LT. 0.0) THEN
             SDMIXN(ITYPE) = 1.0D0 + SDMIX(ITYPE)
-C           DMIX(K) = DABS(SDMIX(ITYPE)) * DEP
+!           DMIX(K) = DABS(SDMIX(ITYPE)) * DEP
          ELSE
             SDMIXN(ITYPE) = 0.0D0
          ENDIF

@@ -21,18 +21,18 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-c    23-12-97: Store computed biomass in BIOMAS array for use in D40BLO
-C    Version 0.2 22 July 1994
-C    Version 0.1 7 Januari 1994
-C    Program:    BLPRIM.FOR
-C    Programmer: Jos van Gils
-C
-C    Compute primary production and associated fluxes
-C
-C    Called by: BLOOMC
-C    Calls    : BVECT , DYNRUN
+!    23-12-97: Store computed biomass in BIOMAS array for use in D40BLO
+!    Version 0.2 22 July 1994
+!    Version 0.1 7 Januari 1994
+!    Program:    BLPRIM.FOR
+!    Programmer: Jos van Gils
+!
+!    Compute primary production and associated fluxes
+!
+!    Called by: BLOOMC
+!    Calls    : BVECT , DYNRUN
 
-c     22062006 Bugfixes Uptake fluxes, streamlining of NUNUCO based loops
+!     22062006 Bugfixes Uptake fluxes, streamlining of NUNUCO based loops
 
       SUBROUTINE BLPRIM (BIOMAS, CNH4  , CNO3  , CPO4  , CSIO  , 
      J                   CDETN , CDETP ,         CCO2  , CTIC  ,
@@ -46,55 +46,55 @@ c     22062006 Bugfixes Uptake fluxes, streamlining of NUNUCO based loops
 
       IMPLICIT NONE
 
-C  
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     BIOMAS  R*4   NUSPEC   I    Biomass (gC/m3)
-C     CNH4    R*4   1        I    Concentration NH4 (gN/m3)
-C     CNO3    R*4   1        I    Concentration NO3 (gN/m3)
-C     CPO4    R*4   1        I    Concentration PO4 (gP/m3)
-C     CSIO    R*4   1        I    Concentration SIO (gSi/m3)
-C     CDETN   R*4   1        I    Concentration DetN (gN/m3)
-C     CDETP   R*4   1        I    Concentration DetP (gP/m3) 
-C     CCO2    R*4   1        I    Concentration CO2 (g/m3)
-C     CTIC    R*4   1        I    Concentration TIC (gC/m3)
-C     FLMORA  R*4   NUSPEC   I/O  Mortality fluxes (gC/m3/d)
-C     FLDETN  R*4   4        I/O  Detritus production (g/m3/d)
-C     TSTEPI  R*4   1        I    Time step (d)
-C     EXTOT   R*4   1        I    Total extinction (1/m)
-C     EXALG   R*4   1        I    Extinction from living algae (1/m)
-C     TEMP    R*4   1        I    Temperature (deg.C)
-C     RAD     R*4   1        I    Radiation (J/cm2/week)
-C     DEPTH   R*4   1        I    Depth (m)
-C     DAYL    R*4   1        I    Length of light period (h)
-C     ID      I     1        I    Week number (1 to 52)
-C     LCOUPL  I     1        I    Coupling flag
-C     NSET    I     1        I    Counter
-C     DEAT4   R*4   1        I    ??
-C     TOTNUT  R*4   4        O    Total C,N,P,Si in algae (g/m3)
-C     CHLTOT  R*4   1        O    Total chlorophyl in algae (mgChl/m3)
-C     FLPRPA  R*4   NUSPEC   O    Primary production fluxes (gC/m3/d)
-C     FLUPTN  R*4   5        O    Uptake fluxes (g/m3/d)
-C     FACLIM  R*4   6        O    Limiting factors (-)
-C     UPTNIT  R*4   1        O    Nitrogen uptake per day
-C     FRACAM  R*4   1        O    Fraction NH4 of N uptake
-C     FBOD5   R*4   1        O    BOD5/BODinf in algae
-C     RATGRO  R*4   NUECOG   O    Effective growth rate per group (1/day)
-C     RATMOR  R*4   NUECOG   O    Effective mortality per group (1/day)
-C     ALGDM   R*4   1        O    Dry matter in algae (gDM/m3)
-C     ISEG    I     1        I    Segment number
-C     CGROUP  r*4   NUECOG   O    Group biomass
-C     LMIXO   L     1        I    FLAG mixotrophy
-C     LFIXN   L     1        I    FLAG N fixation
-C     LCARB   L     1        I    FLAG C limitation
-C     NOUTLIM I     1        I    dimension of OUTLIM
-C     OUTLIM  R*4   NOUTLIM  O    limiting factors (extended)
-C     NUNUCOM I     1        I    max nr of nutrient constraints in DELWAQ output
-C     NUECOGM I     1        I    max nr of algae groups in DELWAQ in/out
-C     CON2OUT I     1        I    mapping of actual nutrient constraints to DELWAQ output
-C
+!  
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     BIOMAS  R*4   NUSPEC   I    Biomass (gC/m3)
+!     CNH4    R*4   1        I    Concentration NH4 (gN/m3)
+!     CNO3    R*4   1        I    Concentration NO3 (gN/m3)
+!     CPO4    R*4   1        I    Concentration PO4 (gP/m3)
+!     CSIO    R*4   1        I    Concentration SIO (gSi/m3)
+!     CDETN   R*4   1        I    Concentration DetN (gN/m3)
+!     CDETP   R*4   1        I    Concentration DetP (gP/m3) 
+!     CCO2    R*4   1        I    Concentration CO2 (g/m3)
+!     CTIC    R*4   1        I    Concentration TIC (gC/m3)
+!     FLMORA  R*4   NUSPEC   I/O  Mortality fluxes (gC/m3/d)
+!     FLDETN  R*4   4        I/O  Detritus production (g/m3/d)
+!     TSTEPI  R*4   1        I    Time step (d)
+!     EXTOT   R*4   1        I    Total extinction (1/m)
+!     EXALG   R*4   1        I    Extinction from living algae (1/m)
+!     TEMP    R*4   1        I    Temperature (deg.C)
+!     RAD     R*4   1        I    Radiation (J/cm2/week)
+!     DEPTH   R*4   1        I    Depth (m)
+!     DAYL    R*4   1        I    Length of light period (h)
+!     ID      I     1        I    Week number (1 to 52)
+!     LCOUPL  I     1        I    Coupling flag
+!     NSET    I     1        I    Counter
+!     DEAT4   R*4   1        I    ??
+!     TOTNUT  R*4   4        O    Total C,N,P,Si in algae (g/m3)
+!     CHLTOT  R*4   1        O    Total chlorophyl in algae (mgChl/m3)
+!     FLPRPA  R*4   NUSPEC   O    Primary production fluxes (gC/m3/d)
+!     FLUPTN  R*4   5        O    Uptake fluxes (g/m3/d)
+!     FACLIM  R*4   6        O    Limiting factors (-)
+!     UPTNIT  R*4   1        O    Nitrogen uptake per day
+!     FRACAM  R*4   1        O    Fraction NH4 of N uptake
+!     FBOD5   R*4   1        O    BOD5/BODinf in algae
+!     RATGRO  R*4   NUECOG   O    Effective growth rate per group (1/day)
+!     RATMOR  R*4   NUECOG   O    Effective mortality per group (1/day)
+!     ALGDM   R*4   1        O    Dry matter in algae (gDM/m3)
+!     ISEG    I     1        I    Segment number
+!     CGROUP  r*4   NUECOG   O    Group biomass
+!     LMIXO   L     1        I    FLAG mixotrophy
+!     LFIXN   L     1        I    FLAG N fixation
+!     LCARB   L     1        I    FLAG C limitation
+!     NOUTLIM I     1        I    dimension of OUTLIM
+!     OUTLIM  R*4   NOUTLIM  O    limiting factors (extended)
+!     NUNUCOM I     1        I    max nr of nutrient constraints in DELWAQ output
+!     NUECOGM I     1        I    max nr of algae groups in DELWAQ in/out
+!     CON2OUT I     1        I    mapping of actual nutrient constraints to DELWAQ output
+!
       REAL            BIOMAS(*), CNH4, CNO3, CPO4, CSIO, RATGRO(*),
      J                CCO2  , CTIC  , CDETN , CDETP,
      J                FLMORA(*), FLDETN(*), TSTEPI, EXTOT, EXALG, TEMP,
@@ -106,28 +106,28 @@ C
       REAL            OUTLIM(NOUTLIM)
       LOGICAL         LMIXO , LFIXN , LCARB
       
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     NUSPEC  I     1        I    phyt2     Number of types
-C     NUECOG  I     1        I    phyt2     Number of groups
-C     NUROWS  I     1        I    phyt2
-C     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
-C     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
-C     NREP    I     1        I/O  phyt2     Counter
-C     IT2     I     MS,2     I    phyt2     Administration of groups/types
-C     BIOBAS  R*8   1        I    size      Base level per group (gDW/m3)
-C     TOPLEV  R*8   1        I    size      Base level per type (gDW/m3)
-C     CONCEN  R*8   3        I/O  phyt1     Available nutrients (g/m3)
-C     IOU     I     99       I    ioblck    Logical unit numbers
-C     ISDPER  I     2        I    sumout    First and last week selective dump
-C     XDEF    R*8   MX+1     I    xvect     System vector of Bloom
-C     LIMIT   C*18  1        I    sumout    Limiting factors
-C     XINIT   R*8   MS       O    xvect     Initial biomass per group
-C     TSTEP   R*8   1        O    dynam     Time step
-C     RMORT   R*8   MT       I    size      Mortality rate (1/day)
-C
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     NUSPEC  I     1        I    phyt2     Number of types
+!     NUECOG  I     1        I    phyt2     Number of groups
+!     NUROWS  I     1        I    phyt2
+!     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
+!     CTODRY  R*8   MT       I    size      Conversion (gDW/gC)
+!     NREP    I     1        I/O  phyt2     Counter
+!     IT2     I     MS,2     I    phyt2     Administration of groups/types
+!     BIOBAS  R*8   1        I    size      Base level per group (gDW/m3)
+!     TOPLEV  R*8   1        I    size      Base level per type (gDW/m3)
+!     CONCEN  R*8   3        I/O  phyt1     Available nutrients (g/m3)
+!     IOU     I     99       I    ioblck    Logical unit numbers
+!     ISDPER  I     2        I    sumout    First and last week selective dump
+!     XDEF    R*8   MX+1     I    xvect     System vector of Bloom
+!     LIMIT   C*18  1        I    sumout    Limiting factors
+!     XINIT   R*8   MS       O    xvect     Initial biomass per group
+!     TSTEP   R*8   1        O    dynam     Time step
+!     RMORT   R*8   MT       I    size      Mortality rate (1/day)
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
@@ -136,35 +136,35 @@ C
       INCLUDE 'sumout.inc'
       INCLUDE 'xvect.inc'
       INCLUDE 'dynam.inc'
-C
-C     Local variables
-C
-C     Name    Type  Length   I/O  Description
-C
-C     CMORT   R*4   1             Additional mortality flux (gDW/m3/d)
-C     X       R*8   MT            Remaining after mortality (gDW/m3)
-C     XJ      R*8   1             Biomass per group (gDW/m3)
-C     J       I     1
-C     IHULP   I     1
-C     IERROR  I     1             Present number of mass errors
-C     MERROR  I     1             Maximum number of mass errors
-C     EXTOT8  R*8   1             Real*8 version of input parameter
-C     EXBAC8  R*8   1             ..
-C     TEMP8   R*8   1             ..
-C     RAD8    R*8   1             ..
-C     DEPTH8  R*8   1             ..
-C     DAYL8   R*8   1             ..
-C     CHLOR8  R*8   1             ..
-C     EXTLIM  R*8   1             ??
-C     DEAT    R*8   1             ??
-C     TOTCHL  R*8   1             Real*8 version of output parameter
-C     TOTDRY  R*8   1             Real*8 version of output parameter
-C     TOTCAR  R*8   1             Real*8 version of output parameter
-C     UPTAKE  R*4   1             Nitrogen uptake (gN/m3/d)
-C     I       I     1
-C     FRMIXX  R*4   1             Fraction of mixotrophy in production
-c     NUTCON  I*4   8             Nutrients involved in active nutrient constraints
-c     FLXCON  I*4   8             Uptake fluxes involved in active nutrient constraints
+!
+!     Local variables
+!
+!     Name    Type  Length   I/O  Description
+!
+!     CMORT   R*4   1             Additional mortality flux (gDW/m3/d)
+!     X       R*8   MT            Remaining after mortality (gDW/m3)
+!     XJ      R*8   1             Biomass per group (gDW/m3)
+!     J       I     1
+!     IHULP   I     1
+!     IERROR  I     1             Present number of mass errors
+!     MERROR  I     1             Maximum number of mass errors
+!     EXTOT8  R*8   1             Real*8 version of input parameter
+!     EXBAC8  R*8   1             ..
+!     TEMP8   R*8   1             ..
+!     RAD8    R*8   1             ..
+!     DEPTH8  R*8   1             ..
+!     DAYL8   R*8   1             ..
+!     CHLOR8  R*8   1             ..
+!     EXTLIM  R*8   1             ??
+!     DEAT    R*8   1             ??
+!     TOTCHL  R*8   1             Real*8 version of output parameter
+!     TOTDRY  R*8   1             Real*8 version of output parameter
+!     TOTCAR  R*8   1             Real*8 version of output parameter
+!     UPTAKE  R*4   1             Nitrogen uptake (gN/m3/d)
+!     I       I     1
+!     FRMIXX  R*4   1             Fraction of mixotrophy in production
+!     NUTCON  I*4   8             Nutrients involved in active nutrient constraints
+!     FLXCON  I*4   8             Uptake fluxes involved in active nutrient constraints
 
       REAL*8          EXTOT8, EXBAC8, TEMP8, RAD8, DAYL8, CHLOR8, XJ,
      J                DEPTH8, EXTLIM, DEAT, TOTCHL, TOTDRY, TOTCAR,
@@ -175,15 +175,15 @@ c     FLXCON  I*4   8             Uptake fluxes involved in active nutrient cons
       SAVE IERROR
       DATA IERROR /0/
 
-C
-C Increase BLOOM II indicator for the number of runs.
+!
+! Increase BLOOM II indicator for the number of runs.
       NREP = NREP + 1
-C
-C  Transfer actual time step to Bloom (through common variable TSTEP)
+!
+!  Transfer actual time step to Bloom (through common variable TSTEP)
       TSTEP = DBLE(TSTEPI)
 
-C
-C  Compute totals per species group (XINIT), limit to BIOBAS
+!
+!  Compute totals per species group (XINIT), limit to BIOBAS
       DO J=1,NUECOG
         XJ = 0D0
         DO I = IT2(J,1), IT2(J,2)
@@ -191,9 +191,9 @@ C  Compute totals per species group (XINIT), limit to BIOBAS
         ENDDO
         XINIT(J) = MAX(XJ,BIOBAS)
       ENDDO
-C
-C  Compute available nutrients (CONCEN) start with nutrients outside algae pool (dissolved , detritus)
-C
+!
+!  Compute available nutrients (CONCEN) start with nutrients outside algae pool (dissolved , detritus)
+!
       CONCEN (1) = DBLE(CNO3 + CNH4)
       CONCEN (2) = DBLE(CPO4)
       CONCEN (3) = DBLE(CSIO)
@@ -202,37 +202,37 @@ C
         CONCEN (INUCO+1) = DBLE(CTIC)          ! DECIDE IF THIS SHOULD BE TIC
         INUCO = INUCO + 1
       ENDIF
-C     MIXOTROPHY
+!     MIXOTROPHY
       IF (LMIXO) THEN
         CONCEN(INUCO+1) = DBLE(CDETN)
         CONCEN(INUCO+2) = DBLE(CDETP)
         INUCO = INUCO + 2
       ENDIF
-C     N-FIXATION
+!     N-FIXATION
       IF (LFIXN) THEN
         CONCEN(INUCO+1) = FIXINF
         INUCO = INUCO + 1
       ENDIF
       AUTO = 0.D0
-C
-C Check whether biomass minus mortality is reasonably large.
-C If the value has dropped below TOPLEV, then set the biomass to
-C zero and correct the detritus fluxes.
-C Otherwise add nutrients in live phytoplankton to CONCEN.
-C
-C Loop over algae species
+!
+! Check whether biomass minus mortality is reasonably large.
+! If the value has dropped below TOPLEV, then set the biomass to
+! zero and correct the detritus fluxes.
+! Otherwise add nutrients in live phytoplankton to CONCEN.
+!
+! Loop over algae species
 
       DO J=1,NUSPEC
 
-C Compute remaining biomass after mortality
+! Compute remaining biomass after mortality
 
          IF (BIOMAS (J) .LT. 0.0) THEN
             X (J) = BIOMAS (J)
          ELSE
             X(J) = DBLE( BIOMAS(J) - TSTEPI * FLMORA(J) ) * CTODRY(J)
-C
-C  Add nutrients in autolyses to CONCEN and AUTO
-C
+!
+!  Add nutrients in autolyses to CONCEN and AUTO
+!
             DO K=1,NUNUCO
                I = NUTCON(K)
                AUTNUT  = DBLE( TSTEPI * FLMORA(J)) * CTODRY(J) *
@@ -242,9 +242,9 @@ C
                  CONCEN(I) = CONCEN(I) + AUTNUT
                ENDIF
             ENDDO
-C
-C Negative biomass after mortality? Message!
-C
+!
+! Negative biomass after mortality? Message!
+!
             IF (X(J) .LT. -1.0D-2) THEN
                IERROR = IERROR + 1
                WRITE (IOU(61), 1050) IERROR,J,BIOMAS(J), ISEG, X(J)
@@ -258,10 +258,10 @@ C
      &            ' mortality')
 
             IF (X(J) .LT. TOPLEV) THEN
-C
-C  Set small biomasses to zero, putting mass into the detritus pools,
-C  by increasing the mortality and detritus production fluxes
-C
+!
+!  Set small biomasses to zero, putting mass into the detritus pools,
+!  by increasing the mortality and detritus production fluxes
+!
                CMORT = SNGL(X(J))/TSTEPI
                FLMORA(J) = FLMORA(J) + CMORT/SNGL(CTODRY(J))
                FLDETN(1) = FLDETN(1) + CMORT/SNGL(CTODRY(J))
@@ -270,36 +270,36 @@ C
                    IF (I.LE.3)                         ! ONLY N,P,Si
      J             FLDETN(I+1) = FLDETN(I+1) + CMORT*SNGL(AA(K,J))
                ENDDO
-C  Biomass set to zero, for BLOOM to make proper mortality constraint
-C  and for correct calculation of production fluxes afterwards
-C  (JvG, June 2006)
+!  Biomass set to zero, for BLOOM to make proper mortality constraint
+!  and for correct calculation of production fluxes afterwards
+!  (JvG, June 2006)
 
                X(J) = 0.0D0
             ENDIF
-C  End of code for positive biomass
+!  End of code for positive biomass
          ENDIF
-C
-C  Add nutrients in live phytoplankton to CONCEN.
-C  Contrary to earlier versions ALL cases pass this
-C  code, because X(J) is used afterwards to calculate 
-C  production flux, the same value needs to be given to 
-C  BLOOM as available nutrients in CONCEN
-C  (JvG, June 2006)
-C
+!
+!  Add nutrients in live phytoplankton to CONCEN.
+!  Contrary to earlier versions ALL cases pass this
+!  code, because X(J) is used afterwards to calculate 
+!  production flux, the same value needs to be given to 
+!  BLOOM as available nutrients in CONCEN
+!  (JvG, June 2006)
+!
          DO K=1,NUNUCO
              I = NUTCON(K)
              CONCEN(I) = CONCEN(I) + AA(K,J) * X(J)
          ENDDO
 
-C  End of loop over algae species
+!  End of loop over algae species
       ENDDO
-C
-C Call BVECT to set the mortality constraints.
-C
+!
+! Call BVECT to set the mortality constraints.
+!
       CALL BVECT (X, XDEF)
-C
-C  Call DYNRUN. This routine calls the actual BLOOM II module
-C
+!
+!  Call DYNRUN. This routine calls the actual BLOOM II module
+!
       EXTOT8 = DBLE(EXTOT)
       EXBAC8 = DBLE(EXTOT-EXALG)
       TEMP8  = DBLE(TEMP)
@@ -310,21 +310,21 @@ C
       EXTLIM = 0D0
       DEAT   = DBLE(DEAT4)
 
-C      write (1961,*   ) 'BLOOM   ',NREP
-C      write (1961,1001) 'XINIT   ',(XINIT(J), J=1,NUECOG)
-C      write (1961,1001) 'CONCEN  ',(CONCEN(J), J=1,NUNUCO)
-C      write (1961,1001) 'X       ',(X(J), J=1,NUSPEC)
+!      write (1961,*   ) 'BLOOM   ',NREP
+!      write (1961,1001) 'XINIT   ',(XINIT(J), J=1,NUECOG)
+!      write (1961,1001) 'CONCEN  ',(CONCEN(J), J=1,NUNUCO)
+!      write (1961,1001) 'X       ',(X(J), J=1,NUSPEC)
 
       CALL DYNRUN (EXTOT8, EXBAC8, TEMP8 , RAD8  , DEPTH8, DAYL8 ,
      J             CHLOR8, ID    , ISEG  , LCOUPL, NSET  , EXTLIM,
      J             DEAT  , TOTCHL, TOTDRY, TOTCAR)
 
-C      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)
-C      write (1961,1001) 'XDEFB   ',(XDEF(NUROWS+J), J=1,NUSPEC)
+!      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)
+!      write (1961,1001) 'XDEFB   ',(XDEF(NUROWS+J), J=1,NUSPEC)
 
-C
-C Store total carbon and chlorophyll concentration
-C
+!
+! Store total carbon and chlorophyll concentration
+!
       TOTNUT(1) = SNGL(TOTCAR)
       CHLTOT    = SNGL(TOTCHL)
       ALGDM     = SNGL(TOTDRY)
@@ -337,10 +337,10 @@ C
       ENDDO
       FBOD5     = 0.0
 
-C Compute gross production: computed biomass by Bloom is in XDEF(NUROWS+J)
-C Loop over algae species, compute production per species and total pr.pr.
-C Added: computation of total nutrients
-C Added: Calculate uptake fluxes (JvG, June 2006)
+! Compute gross production: computed biomass by Bloom is in XDEF(NUROWS+J)
+! Loop over algae species, compute production per species and total pr.pr.
+! Added: computation of total nutrients
+! Added: Calculate uptake fluxes (JvG, June 2006)
 
       DO J = 1, NUSPEC
          FLPRPA(J) = SNGL( (XDEF(J+NUROWS)-X(J)) / CTODRY(J) ) / TSTEPI
@@ -355,10 +355,10 @@ C Added: Calculate uptake fluxes (JvG, June 2006)
              FLUPTN(I2)  = FLUPTN(I2) + FLPRPA(J)*AA(K,J)*CTODRY(J)
          ENDDO
 
-c Determine carbon uptake mixotrophy
+! Determine carbon uptake mixotrophy
 
          IF (LMIXO) THEN
-C           FRACTION MIXOTROPHY IN PRODUCTION
+!           FRACTION MIXOTROPHY IN PRODUCTION
            IF (LCARB) THEN
             FRMIXN = AA(5,J) / (AA(1,J) + AA(5,J))
             FRMIXP = AA(6,J) / (AA(2,J) + AA(6,J))
@@ -368,7 +368,7 @@ C           FRACTION MIXOTROPHY IN PRODUCTION
            ENDIF
            FRMIX  = MAX(FRMIXN,FRMIXP)
            FLUPTN(9) = FLUPTN(9) + FRMIX*FLPRPA(J)
-c          Uptake of DetC should be subtracted from total C-uptake 
+!          Uptake of DetC should be subtracted from total C-uptake 
            FLUPTN(1) = FLUPTN(1) - FRMIX*FLPRPA(J)
          ENDIF
       ENDDO   
@@ -379,8 +379,8 @@ c          Uptake of DetC should be subtracted from total C-uptake
           FBOD5 = 1.0
       ENDIF
 
-C  Correct for depletion of NH4 assume that
-C  phytoplankton first depletes ammonia (completely)
+!  Correct for depletion of NH4 assume that
+!  phytoplankton first depletes ammonia (completely)
 
       IF (XDEF(1) .LE. CNO3) THEN
          UPTAKE = FLUPTN(2)
@@ -394,9 +394,9 @@ C  phytoplankton first depletes ammonia (completely)
           FRACAM = 1.0
       ENDIF
 
-C Find limiting factors, this algorithm just takes first 3 (inorganic N,P,Si) and last 3 (e,gro,mor)
-c regardless of additional nutrient constraints. This cnnects to traditional 6 limiting factors output
-c For extended output (extra nutrient contstraints, grow/mort per group) see below
+! Find limiting factors, this algorithm just takes first 3 (inorganic N,P,Si) and last 3 (e,gro,mor)
+! regardless of additional nutrient constraints. This cnnects to traditional 6 limiting factors output
+! For extended output (extra nutrient contstraints, grow/mort per group) see below
 
       I = 0
       DO J = 1,NUNUCO + 3
@@ -406,15 +406,15 @@ c For extended output (extra nutrient contstraints, grow/mort per group) see bel
             FACLIM(I) = REAL(IHULP)
           ENDIF
       ENDDO
-c      write (1963,*) 'stap ',nrep
-c      write (1963,*) 'faclim ',(faclim(i),i=1,6)
+!      write (1963,*) 'stap ',nrep
+!      write (1963,*) 'faclim ',(faclim(i),i=1,6)
       
-C     Extended output for limiting factors
+!     Extended output for limiting factors
 
       CALL BL_ISPLIM(NOUTLIM,OUTLIM,NUNUCOM,NUECOGM,CON2OUT)
-C
-C Loop to compute effective growth and mortality rates
-C
+!
+! Loop to compute effective growth and mortality rates
+!
       DO  J=1,NUECOG
           RATGRO(J) = 0.0
           RATMOR(J) = 0.0
@@ -431,12 +431,12 @@ C
           RATMOR(J) = RATMOR(J) / SNGL(XINIT(J)) / TSTEPI
       ENDDO
 
-C      write (1961,1001) 'FLMORA  ',(FLMORA(J), J=1,NUSPEC)
-C      write (1961,1001) 'FLDETN  ',(FLDETN(J), J=1,4)
-C      write (1961,1001) 'FLUPTN  ',(FLUPTN(J), J=1,9)
-C
-C Exit
-C
+!      write (1961,1001) 'FLMORA  ',(FLMORA(J), J=1,NUSPEC)
+!      write (1961,1001) 'FLDETN  ',(FLDETN(J), J=1,4)
+!      write (1961,1001) 'FLUPTN  ',(FLUPTN(J), J=1,9)
+!
+! Exit
+!
       RETURN
 
   901 WRITE (*,*) 'Fatal ERROR in Bloom module: time step too big'
@@ -477,11 +477,11 @@ C
 !       NUNUCOM + 3 to NUNUCOM + 2 + NUECOGM for Growth limitation
 !       NUNUCOM + 2 + NUECOGM + 1 to NUNUCOM + 2 + 2*NUECOGM for mortality limitation
 !
-c      WRITE (*,*) 'in'
-c      write (1963,*) 'isplim ',(isplim(i),i=1,12)
+!      WRITE (*,*) 'in'
+!      write (1963,*) 'isplim ',(isplim(i),i=1,12)
       OUTLIM = 0.0
-c                  write (1963,*) 'NUECOG ',NUECOG
-c                  write (1963,*) 'NUNUCO ',NUNUCO
+!                  write (1963,*) 'NUECOG ',NUECOG
+!                  write (1963,*) 'NUNUCO ',NUNUCO
       DO II = 1,MT   ! MT is dimension of ISPLIM according to blmdim.inc
           ICON = ISPLIM(II)
           IF (ICON.GT.0) THEN
@@ -498,12 +498,12 @@ c                  write (1963,*) 'NUNUCO ',NUNUCO
               ENDIF
               OUTLIM(ICONOUT) = 1.0
           ENDIF
-c          write (1963,*) 'loop ',ii,icon,iconout
+!          write (1963,*) 'loop ',ii,icon,iconout
       ENDDO
-c      WRITE (*,*) 'UIT'
-c      write (1963,*) 'outlim ',(outlim(i),i=1,10)
-c      write (1963,*) 'grow  ',(outlim(i),i=11,13)
-c      write (1963,*) 'mort  ',(outlim(i),i=41,43)
+!      WRITE (*,*) 'UIT'
+!      write (1963,*) 'outlim ',(outlim(i),i=1,10)
+!      write (1963,*) 'grow  ',(outlim(i),i=11,13)
+!      write (1963,*) 'mort  ',(outlim(i),i=41,43)
 
       RETURN
       END

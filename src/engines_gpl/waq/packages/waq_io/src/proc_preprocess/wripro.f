@@ -29,49 +29,49 @@
      +                    PROGRD, PRONDT , NOVAR , VARARR, VARIDX,
      +                    VARTDA, VARDAG , VARTAG, VARAGG, nrref ,
      &                    proref)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: dec -1992 by Jan van Beek
-C
-C     FUNCTION            : Writes proces intermediate work file
-C
-C     LOGICAL UNITNUMBERS : LUWRKP , proces wrk file
-C
-C     SUBROUTINES CALLED  : -
-C
-C     PARAMETERS          : 15
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NPROC   INTEGER       1     INPUT   Number of called processes
-C     NSVAR   INTEGER       *     INPUT   Number of variables per proces
-C     IFLUX   INTEGER       *     INPUT   Pointer in FLUX per proces inst.
-C     NIPMSA  INTEGER       1     INPUT   Length IPMSA
-C     IPMSA   INTEGER       *     INPUT   Pointer in SSA per proces inst.
-C     IPSSA   INTEGER       *     INPUT   Pointer to SSA per proces inst.
-C     NOLOC   INTEGER       1     INPUT   Number of local variables
-C     NODEF   INTEGER       1     INPUT   Number of used defaults
-C     DEFAUL  REAL          *     INPUT   Default values
-C     PRONAM  CHA*(*)       *     INPUT   Name of called module
-C     NFLUX   INTEGER       1     INPUT   total number of fluxes
-C     LUWRKP  INTEGER       1     INPUT   unit number proces work file
-C     VERSIO  INTEGER       1     INPUT   Versie number of program
-C     STOCHI  REAL   NOTOT*NFLUX  INPUT   Proces stochiometry
-C     NOTOT   INTEGER       1     INPUT   Number of substances
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     NDSPX   INTEGER       1     INPUT   Number of extra dispersion array
-C     NVELX   INTEGER       1     INPUT   Number of extra velocity array
-C     NLOCX   INTEGER       1     INPUT   No.loc.var.exhange level
-C     DSTO    INTEGER NOSYS,*     INPUT   dispersion stochi matrix
-C     VSTO    INTEGER NOSYS,*     INPUT   velocity stochi matrix
-C     NDSPN   INTEGER       1     INPUT   Number of new dispersion array
-C     IDPNW   INTEGER   NOSYS     INPUT   Pointers to new dispersion array
-C     NVELN   INTEGER       1     INPUT   Number of new velocity array
-C     IVPNW   INTEGER   NOSYS     INPUT   Pointers to new velocity array
-C     PROGRD  INTEGER       1     INPUT   Grid number for active processes
-C     PRONDT  INTEGER       1     INPUT   Step size for active processes
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: dec -1992 by Jan van Beek
+!
+!     FUNCTION            : Writes proces intermediate work file
+!
+!     LOGICAL UNITNUMBERS : LUWRKP , proces wrk file
+!
+!     SUBROUTINES CALLED  : -
+!
+!     PARAMETERS          : 15
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NPROC   INTEGER       1     INPUT   Number of called processes
+!     NSVAR   INTEGER       *     INPUT   Number of variables per proces
+!     IFLUX   INTEGER       *     INPUT   Pointer in FLUX per proces inst.
+!     NIPMSA  INTEGER       1     INPUT   Length IPMSA
+!     IPMSA   INTEGER       *     INPUT   Pointer in SSA per proces inst.
+!     IPSSA   INTEGER       *     INPUT   Pointer to SSA per proces inst.
+!     NOLOC   INTEGER       1     INPUT   Number of local variables
+!     NODEF   INTEGER       1     INPUT   Number of used defaults
+!     DEFAUL  REAL          *     INPUT   Default values
+!     PRONAM  CHA*(*)       *     INPUT   Name of called module
+!     NFLUX   INTEGER       1     INPUT   total number of fluxes
+!     LUWRKP  INTEGER       1     INPUT   unit number proces work file
+!     VERSIO  INTEGER       1     INPUT   Versie number of program
+!     STOCHI  REAL   NOTOT*NFLUX  INPUT   Proces stochiometry
+!     NOTOT   INTEGER       1     INPUT   Number of substances
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     NDSPX   INTEGER       1     INPUT   Number of extra dispersion array
+!     NVELX   INTEGER       1     INPUT   Number of extra velocity array
+!     NLOCX   INTEGER       1     INPUT   No.loc.var.exhange level
+!     DSTO    INTEGER NOSYS,*     INPUT   dispersion stochi matrix
+!     VSTO    INTEGER NOSYS,*     INPUT   velocity stochi matrix
+!     NDSPN   INTEGER       1     INPUT   Number of new dispersion array
+!     IDPNW   INTEGER   NOSYS     INPUT   Pointers to new dispersion array
+!     NVELN   INTEGER       1     INPUT   Number of new velocity array
+!     IVPNW   INTEGER   NOSYS     INPUT   Pointers to new velocity array
+!     PROGRD  INTEGER       1     INPUT   Grid number for active processes
+!     PRONDT  INTEGER       1     INPUT   Step size for active processes
+!
       use timers       !   performance timers
 
       INTEGER     NPROC , NIPMSA, NOLOC , NODEF , NFLUX ,
@@ -90,7 +90,7 @@ C
       CHARACTER*10 PRONAM(*)
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "wripro", ithndl )
-C
+!
       WRITE (LUWRKP) VERSIO
       WRITE (LUWRKP) NIPMSA,NPROC,NFLUX,NOLOC,NODEF,
      +               NOTOT ,NOSYS,NDSPX,NVELX,NLOCX,
@@ -119,7 +119,7 @@ C
       WRITE (LUWRKP) ( VARTAG(K), K = 1 , NOVAR )
       WRITE (LUWRKP) ( VARAGG(K), K = 1 , NOVAR )
       write (luwrkp) ( proref(k), k = 1 , nproc*nrref )
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
       END

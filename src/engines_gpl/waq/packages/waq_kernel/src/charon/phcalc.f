@@ -21,19 +21,19 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       23:54
-C    Program:    PHCALC.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
-C
+!    Date:       22 Oct 1992
+!    Time:       23:54
+!    Program:    PHCALC.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
+!
       subroutine phcalc
-c        4-69
-c        phcalc uses double precision version of
-c           alog
+!        4-69
+!        phcalc uses double precision version of
+!           alog
       include  'char1.inc'
-c        aliter is the constant used in the ph calculation
+!        aliter is the constant used in the ph calculation
       mta = kl(1)
       mtb = kl(2) - 1
       do 10 j=mta,mtb

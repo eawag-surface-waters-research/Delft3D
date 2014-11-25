@@ -21,20 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-c
-c     HASP-3 and MemoHASP interface for Sobek
-c     for F77L-EM/32 LAHEY FORTRAN 77 Version 5.01 under 386 Pharlap
-c     Dos Extender.
-c
+!
+!     HASP-3 and MemoHASP interface for Sobek
+!     for F77L-EM/32 LAHEY FORTRAN 77 Version 5.01 under 386 Pharlap
+!     Dos Extender.
+!
       subroutine dhhasp
-c
-c     A list of the Hasp services.
+!
+!     A list of the Hasp services.
       integer    ISHASP,
      &           KETCOD,
      &           KETSTA,
      &           MEMORD,
      &           LENGTH
-c
+!
       parameter (ISHASP        = 1)
       parameter (KETCOD        = 2)
       parameter (KETSTA        = 5)
@@ -58,37 +58,37 @@ c
      &     'HxAxSxPx xnxoxtx xfxoxuxnxdx x x x x x x x x x x x x',
      &     'ixlxlxexgxaxlx xHxAxSxPx x x x x x x x x x x x x x x',
      &     'Nxox xDxExLxWxAxQx xaxuxtxhxoxrxixzxaxtxixoxnx x x x'/
-c
-c     Set Passwords
-c
+!
+!     Set Passwords
+!
       read(pas,'(i4)') th
       Passw1 = 2*th-623
       Passw2 = 16*th-301
-c
-c     LPTNUM=0  (Do an automatic search at all ports)
-c
+!
+!     LPTNUM=0  (Do an automatic search at all ports)
+!
       LptNum = 0
-c
-c     Check if hasp is connected
-c
+!
+!     Check if hasp is connected
+!
       Servic = ISHASP
       call hasp(Servic,Seed,LptNum,Passw1,Passw2,p1,p2,p3,p4)
       if (p1 .ne. 1) then
         nr=1
         goto 100
       endif
-c
-c     Get HASP status
-c
+!
+!     Get HASP status
+!
       Servic = KETSTA
       call hasp(Servic,Seed,LptNum,Passw1,Passw2,p1,p2,p3,p4)
       if (p2.ne.1) then
         nr=2
         goto 100
       endif
-c
-c     Get HASP code
-c
+!
+!     Get HASP code
+!
       Seed=100
       Servic = KETCOD
       call hasp(Servic,Seed,LptNum,Passw1,Passw2,p1,p2,p3,p4)
@@ -97,15 +97,15 @@ c
         nr=2
         goto 100
       endif
-c
-c Read block from HASP memory.
-c
-c Clear buffer.
-c
+!
+! Read block from HASP memory.
+!
+! Clear buffer.
+!
       do 10 i=1,LENGTH
          RetPar(i) = 0
  10   continue
-c
+!
       return
 
  100  continue
@@ -115,6 +115,6 @@ c
       else
          write (*,'(1x,26a1)') (mes(nr)(i:i),i=1,52,2)
       endif
-c
+!
       call srstop(1)
       end

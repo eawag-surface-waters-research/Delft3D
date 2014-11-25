@@ -23,39 +23,39 @@
 
       SUBROUTINE DLWQB6 ( CONC   , DERIV  , NOSEG  , NOTOT  , VOLOLD ,
      *                    IDT    , ISYS   , RHS    , NSYS   )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: august 1992 by L. Postma
-C
-C     FUNCTION            : define right hand side
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
-C     ----    -----      ------       ------- -----------
-C     CONC    REAL     NOTOT*NOSEG    INPUT   concentrations
-C     DERIV   REAL     NOTOT*NOSEG    INPUT   derivatives
-C     NOSEG   INTEGER       1         INPUT   number of segments
-C     NOTOT   INTEGER       1         INPUT   total number of systems
-C     VOLOLD  REAL        NOSEG       INPUT   volumes at beginning of step
-C     IDT     INTEGER       1         INPUT   timestep in scu's
-C     ISYS    INTEGER       1         INPUT   first substance
-C     RHS     REAL        NOSEG       OUTPUT  right hand side vector
-C     NSYS    INTEGER       1         INPUT   number of substances
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: august 1992 by L. Postma
+!
+!     FUNCTION            : define right hand side
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
+!     ----    -----      ------       ------- -----------
+!     CONC    REAL     NOTOT*NOSEG    INPUT   concentrations
+!     DERIV   REAL     NOTOT*NOSEG    INPUT   derivatives
+!     NOSEG   INTEGER       1         INPUT   number of segments
+!     NOTOT   INTEGER       1         INPUT   total number of systems
+!     VOLOLD  REAL        NOSEG       INPUT   volumes at beginning of step
+!     IDT     INTEGER       1         INPUT   timestep in scu's
+!     ISYS    INTEGER       1         INPUT   first substance
+!     RHS     REAL        NOSEG       OUTPUT  right hand side vector
+!     NSYS    INTEGER       1         INPUT   number of substances
+!
       use timers
 
       DIMENSION   CONC (*)  ,  DERIV(*)  ,  VOLOLD(*) ,  RHS(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb6", ithandl )
-C
-C         set the right hand side
-C
+!
+!         set the right hand side
+!
       DT = REAL(IDT)
       ISET = 1
       DO 10 ISEG = 1 , NOSEG
@@ -64,7 +64,7 @@ C
             RHS(ISET) = DERIV(I1+K1) + VOLOLD(ISEG)*CONC(I1+K1)/DT
             ISET = ISET + 1
    10 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

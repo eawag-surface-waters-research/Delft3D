@@ -132,7 +132,7 @@
          icopt1 = -1
          idum = 0
          write ( lunut , 2150 ) icopt1
-C                call with record length 0 => ICOPT1 of -4 not allowed
+!                call with record length 0 => ICOPT1 of -4 not allowed
          call opt1 ( icopt1  , lun     , idum    , lchar   , filtype ,
      &               ldummy  , dtflg3  , 0       , ierr2   , iwar    )
          if ( ierr2 .gt. 0 ) goto 80
@@ -252,7 +252,7 @@ C                call with record length 0 => ICOPT1 of -4 not allowed
       endif
 
       write ( lunut , 2020 ) ipopt1
-C                call with record length 0 => IPOPT1 of -4 not allowed
+!                call with record length 0 => IPOPT1 of -4 not allowed
       call opt1 ( ipopt1  , lun     , 33      , lchar   , filtype ,
      &            ldummy  , dtflg3  , 0       , ierr2   , iwar    )
       if ( ierr2 .gt. 0 ) goto 80
@@ -374,7 +374,7 @@ C                call with record length 0 => IPOPT1 of -4 not allowed
       ! attention, temporarily use IS = 17
 
       write ( lunut , 2060 ) ifopt1
-C                call with record length NOFUN => IFOPT1 of -4 allowed
+!                call with record length NOFUN => IFOPT1 of -4 allowed
       call opt1 ( ifopt1  , lun     , 17      , lchar   , filtype ,
      &            dtflg2  , dtflg3  , nofun   , ierr2   , iwar    )
       if ( ierr2 .gt. 0 ) goto 80
@@ -528,7 +528,7 @@ C                call with record length NOFUN => IFOPT1 of -4 allowed
          dlwqdata%param_scaled    = .false.
          dlwqdata%loc_scaled      = .false.
          do isfun = 1 , nosfun
-C                call with record length NOSEG => IFOP of -4 allowed
+!                call with record length NOSEG => IFOP of -4 allowed
             call opt1 ( ifop   , lun    , 17     , lchar  , filtype,
      &                  dtflg2 , dtflg3 , noseg  , ierr2  , iwar   )
             if ( ierr2 .gt. 0 ) goto 80

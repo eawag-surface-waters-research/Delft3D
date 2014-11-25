@@ -203,13 +203,13 @@
       logical                    :: l_stop
 
 
-C     LOGICAL PROFLG
+!     LOGICAL PROFLG
       SAVE    ISTEP
       DATA    ISTEP  / 0 /
-C     DATA    PROFLG / .TRUE. /
-C
-Cjvb  Store fractional step flag in common CFRACS
-C
+!     DATA    PROFLG / .TRUE. /
+!
+!jvb  Store fractional step flag in common CFRACS
+!
       COMMON /CFRACS/ IFRACS
       logical                 run              ! lp for OMP
       integer                 aproc            ! lp for OMP
@@ -218,10 +218,10 @@ C
       integer(4) ithandl /0/
       integer(4) ithand2 /0/
       if ( timon ) call timstrt ( "proces", ithandl )
-Cjvb
-C
-C     If no processes, get out of here
-C
+!jvb
+!
+!     If no processes, get out of here
+!
       IF ( NPROC .EQ. 0 ) goto 9999
 
       ! open openpb dll
@@ -257,18 +257,18 @@ C
          endif
          ifirst = 0
       endif
-C
-C     Count calls of this module
-C
+!
+!     Count calls of this module
+!
       ISTEP = ISTEP + 1
       done = 0                                           ! this zeros the whole array
-C
-C     Start timings
-C
+!
+!     Start timings
+!
 !     call timer_start(timer_proces)
-C
-C     allocate velndt, dspndt
-C
+!
+!     allocate velndt, dspndt
+!
       if ( .not. allocated(velndt) ) then
          allocate(velndt(nvelx))
          velndt = 1
@@ -278,13 +278,13 @@ C
          dspndt = 1
       endif
 
-C
-CJVB
-C     TEMPORARY HERE ?
-C
-C     aggregate kenmerk array
-C
-Cgrd  only if there is a process on a higher grid
+!
+!JVB
+!     TEMPORARY HERE ?
+!
+!     aggregate kenmerk array
+!
+!grd  only if there is a process on a higher grid
       maxgrid= maxval(progrd(1:nproc))
       iiknmr = 78 + 30                 !   = iasize + 30
       if ( maxgrid .gt. 1 ) then
@@ -726,20 +726,20 @@ Cgrd  only if there is a process on a higher grid
 !grd  IF ( NOFLUX .GT. 0 .AND. NOGRID .GT. 1 ) THEN
       if ( noflux .gt. 0 .and. maxgrid .gt. 1 ) then
          do igrd = 2 , nogrid
-c           DO ISYS = 1 , NOTOT
-c              ISWCUM = 1
-c              NOSEG2 = GRDNOS(IGRD)
-c              IPGR   = NOTOT*NOSEG*(IGRD-1) + 1
-c              CALL DHDAGG( NOSEG         , NOSEG2     ,
-c    +                      NOTOT         , NOTOT      ,
-c    +                      NOTOT         , NOTOT      ,
-c    +                      ISYS          , ISYS       ,
-c    +                      ISYS          , ISYS       ,
-c    +                      GRDSEG(1,IGRD), 2          ,
-c    +                      DERIV(1,1,igrd)   , AMASS      ,
-c    +                      ISWCUM        , AMASS(IPGR),
-c    +                      DERIV         )
-c           ENDDO
+!           DO ISYS = 1 , NOTOT
+!              ISWCUM = 1
+!              NOSEG2 = GRDNOS(IGRD)
+!              IPGR   = NOTOT*NOSEG*(IGRD-1) + 1
+!              CALL DHDAGG( NOSEG         , NOSEG2     ,
+!    +                      NOTOT         , NOTOT      ,
+!    +                      NOTOT         , NOTOT      ,
+!    +                      ISYS          , ISYS       ,
+!    +                      ISYS          , ISYS       ,
+!    +                      GRDSEG(1,IGRD), 2          ,
+!    +                      DERIV(1,1,igrd)   , AMASS      ,
+!    +                      ISWCUM        , AMASS(IPGR),
+!    +                      DERIV         )
+!           ENDDO
             iswcum = 1
             noseg2 = grdnos(igrd)
             call dhdag2( noseg   , noseg2           , notot  , notot           , notot  ,
@@ -825,11 +825,11 @@ c           ENDDO
      +                    PRONDT, IBFLAG, ISDMP , FLXDMP, NOVAR ,
      +                    VARTAG, IIKNMR, PRONAM, OWNERS, MYPART,
      +                    DSPNDT, VELNDT, dll_opb)
-C
+!
       use timers
 !     use m_timers_waq
       use m_couplib
-c
+!
       INTEGER             IPROC , K     , IDT   , ITFACT, NOGRID,
      +                    NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,
      +                    NOQ4  , NPROC , NOTOT , IBFLAG, NOVAR ,
@@ -853,13 +853,13 @@ c
      +                    VOLUME(*)      , FLXDMP(*)
       CHARACTER*10        PRONAM(*)
       integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER             IDTPRO, ITYP
-C
-C     get the general local work array, first index of LOCAL array
-C
+!
+!     get the general local work array, first index of LOCAL array
+!
 !     call timer_start(timer_proces_grids)
       IX_HLP = 1
       IA_HLP = 33
@@ -868,14 +868,14 @@ C
       IP_HLP = ARRPOI(IA_HLP)
       ID1HLP = ARRDM1(IA_HLP)
       ID2HLP = ARRDM2(IA_HLP)
-C
-C     Which grid
-C
+!
+!     Which grid
+!
       IGRID = PROGRD(IPROC)
       NOSEG2 = GRDNOS(IGRID)
-C
-C     Set the variable for this grid
-C
+!
+!     Set the variable for this grid
+!
 
       DO IVARIO = 1 , PRVNIO(IPROC)
          ITYP   = PRVTYP(K+IVARIO-1)
@@ -887,24 +887,24 @@ C
          IDIM1  = ARRDM1(IARR)
          IDIM2  = ARRDM2(IARR)
          IF ( ITYP .EQ. 1 ) THEN
-C
-C           Only for space varying array's
-C
+!
+!           Only for space varying array's
+!
             IF ( IARKND .GE. 2 ) THEN
-C
-C              Only if variable isn't actual set for this grid
-C
+!
+!              Only if variable isn't actual set for this grid
+!
                IF ( VGRSET(IVAR,IGRID) .EQ. 0 ) THEN
-C
-C                 Set variable for base grid
-C
+!
+!                 Set variable for base grid
+!
                   IF ( VGRSET(IVAR,1) .EQ. 0 ) THEN
                      DO IGR3 = 2 , NOGRID
                         IF ( VGRSET(IVAR,IGR3) .EQ. 1 ) THEN
                            NOSEG3 = GRDNOS(IGR3)
-C
-C                          Determine characteristics of variable
-C
+!
+!                          Determine characteristics of variable
+!
                            CALL DHGPOI( IVAR  , IARR  ,
      +                                  IARKND, IV_IDX,
      +                                  IDIM1 , IDIM2 ,
@@ -917,19 +917,19 @@ C
      +                                  IP_ARR, 1     ,
      +                                  ISYSO , NOTOTO,
      +                                  IP_ARO)
-C
-C                          Determine characteristics of WEIGHT variable
-C                          ( Don't mind if this one is actual ? )
-C
+!
+!                          Determine characteristics of WEIGHT variable
+!                          ( Don't mind if this one is actual ? )
+!
                            IDATYP = VARTDA(IVAR)
                            IF ( IDATYP .EQ. 2 ) THEN
                               IV_DA  = VARDAG(IVAR)
                               IA_DA  = VARARR(IV_DA)
                               IK_DA  = ARRKND(IA_DA)
                               IF ( IK_DA .EQ. 1 ) THEN
-C
-C                                Not variable in space use help var
-C
+!
+!                                Not variable in space use help var
+!
                                  IDATYP = 3
                                  IV_DA  = IV_HLP
                                  IA_DA  = VARARR(IV_DA)
@@ -972,19 +972,19 @@ C
      +                                     ISYSH , NOTOTH,
      +                                     IP_ARH)
                            ELSE
-C
-C                             Weight and help array's dummy's
-C                             so set to the variable itself
-C
+!
+!                             Weight and help array's dummy's
+!                             so set to the variable itself
+!
                               ISYSW  = ISYSO
                               ISYSH  = ISYSI
                               NOTOTW = NOTOTO
                               NOTOTH = NOTOTI
                               IP_ARW = IP_ARO
                               IP_ARH = IP_ARI
-C
+!
                            ENDIF
-C
+!
                            ISWCUM = 0
                            CALL DHDAGG( NOSEG         , NOSEG3   ,
      +                                  NOTOTI        , NOTOTW   ,
@@ -999,13 +999,13 @@ C
                         ENDIF
                      ENDDO
                   ENDIF
-C
-C                 Set the variable for this grid
-C
+!
+!                 Set the variable for this grid
+!
                   IF ( IGRID .NE. 1 ) THEN
-C
-C                    Determine characteristics of variable
-C
+!
+!                    Determine characteristics of variable
+!
                      CALL DHGPOI( IVAR  , IARR  ,
      +                            IARKND, IV_IDX,
      +                            IDIM1 , IDIM2 ,
@@ -1018,9 +1018,9 @@ C
      +                            IP_ARR, IGRID ,
      +                            ISYSO , NOTOTO,
      +                            IP_ARO)
-C
-C                    Determine characteristics of WEIGHT variable
-C
+!
+!                    Determine characteristics of WEIGHT variable
+!
                      IAGTYP = VARTAG(IVAR)
                      IF ( IAGTYP .EQ. 2 .OR. IAGTYP .EQ. 3) THEN
                         IV_AG  = VARAGG(IVAR)
@@ -1043,19 +1043,19 @@ C
      +                               ISYSH , NOTOTH,
      +                               IP_ARH)
                      ELSE
-C
-C                       Weight and help array's dummy's
-C                       so set to the variable itself
-C
+!
+!                       Weight and help array's dummy's
+!                       so set to the variable itself
+!
                         ISYSW  = ISYSO
                         ISYSH  = ISYSI
                         NOTOTW = NOTOTO
                         NOTOTH = NOTOTI
                         IP_ARW = IP_ARO
                         IP_ARH = IP_ARI
-C
+!
                      ENDIF
-C
+!
                      CALL DHAGGR( NOSEG          , NOSEG2   ,
      +                            NOTOTI         , NOTOTW   ,
      +                            NOTOTH         , NOTOTO   ,
@@ -1066,13 +1066,13 @@ C
      +                            A(IP_ARH)      , A(IP_ARO))
                      VGRSET(IVAR,IGRID) = 1
                   ENDIF
-C
+!
                ENDIF
             ENDIF
          ENDIF
-C
-C        Zet pointer structuur voor procesmodule, dit hoeft eigenlijk maar 1 keer
-C
+!
+!        Zet pointer structuur voor procesmodule, dit hoeft eigenlijk maar 1 keer
+!
          IF ( IARKND .EQ. 1 ) THEN
             IPMSA (K+IVARIO-1) = IP_ARR + IV_IDX - 1
             INCREM(K+IVARIO-1) = 0
@@ -1085,30 +1085,30 @@ C
      +                           (IV_IDX-1)*IDIM1
             INCREM(K+IVARIO-1) = 1
          ENDIF
-C
+!
       ENDDO
 !     call timer_stop(timer_proces_grids)
-C
-C     compute fluxes
-C
+!
+!     compute fluxes
+!
       IPFLUX = (IGRID-1)*NOFLUX*NOSEG + IFLUX(IPROC)
       IPKNMR = (IGRID-1)*ARRDM1(IIKNMR)*ARRDM2(IIKNMR) + 1
       CALL PROCAL (A        , PROMNR(IPROC), FLUX(IPFLUX), IPMSA(K)      , INCREM(K)    ,
      &             NOSEG2   , NOFLUX       , IEXPNT      , IKNMRK(IPKNMR), NOQ1         ,
      &             NOQ2     , NOQ3         , NOQ4        , PRONAM(IPROC) , PRVNIO(IPROC),
      &             PRVTYP(K), iproc        , dll_opb     )
-C
-C     the used grid is now the only actual value for the output
-C
+!
+!     the used grid is now the only actual value for the output
+!
       DO IVARIO = 1 , PRVNIO(IPROC)
          ITYP   = PRVTYP(K+IVARIO-1)
          IF ( ITYP .EQ. 3 .OR. ITYP .EQ. 4 .OR. ITYP .EQ. 5 ) THEN
             IVAR   = PRVVAR(K+IVARIO-1)
             IARR   = VARARR(IVAR)
             IARKND = ARRKND(IARR)
-C
-C           Only for space varying array's
-C
+!
+!           Only for space varying array's
+!
             IF ( IARKND .GE. 2 ) THEN
                DO IGR2 = 1 , NOGRID
                   VGRSET(IVAR,IGR2) = 0
@@ -1136,38 +1136,38 @@ C
          ENDIF
 
       ENDDO
-C
-C     Scale fluxes with fractional step
-C
-C
-C     Dis-aggregate fluxes to base grid
-C     Dit is niet volgens ontwerp, flux zou op stof moeten werken
-C     En de stof daarna herverdeeld over volgens de oude verdeling.
-C     dus is deze herverdeling voor twee stoffen anders dus kunnen
-C     we niet eerst de flux op het basis nivo brengen
-C
-C     Oplossing zou zijn de flux voor iedere stof te disaggregeren
-C     met als gewicht de massa van die stof en dan meteen de deriv
-C     voor die stof met de fractional step te vullen. Vervolgens
-C     voor de volgende stof hetzelfde geintje te herhalen. Dus een
-C     loop over de stochi's toe te voegen. Op deze manier loop je voor een
-C     stof met veel fluxen wel eindeloss te aggregeren natuurlijk.
-C
-C     Dus zou je ook eerst deriv op geaggregeerd grid kunnen cummuleren en
-C     daarna eenmaal naar het basis grid. Dit betekend dat ook DERIV
-C     voor alle grids gedefinieerd moet zijn. We moeten er nu wel voor zorgen
-C     dat alle derivs voor een stof op hetzelfde grid komt of dat we alle
-C     derivs bij disaggregatie mee moeten nemen. Als we dan een vlaggetje
-C     per stof per grid meenemen of de deriv gevuld is doen we geen extra werk.
-C     Kunnen we de disaggregatie zo maken dat deze cummuleert in de variable op
-C     het target grid. PRODER vervalt hiermee, wat doen we met met de FLXDMP
-C     functionaliteit van PRODER hier is theoretisch nog een probleem .
-C     verder is nodig STOCHI, DTSTEP, VOLUME
-C
-C     NOG checken of VOLUME OP HET GRID ACTUEEL IS !!! PROBLEEM we
-C     weten het variable nummer van vol niet.
-C
-C
+!
+!     Scale fluxes with fractional step
+!
+!
+!     Dis-aggregate fluxes to base grid
+!     Dit is niet volgens ontwerp, flux zou op stof moeten werken
+!     En de stof daarna herverdeeld over volgens de oude verdeling.
+!     dus is deze herverdeling voor twee stoffen anders dus kunnen
+!     we niet eerst de flux op het basis nivo brengen
+!
+!     Oplossing zou zijn de flux voor iedere stof te disaggregeren
+!     met als gewicht de massa van die stof en dan meteen de deriv
+!     voor die stof met de fractional step te vullen. Vervolgens
+!     voor de volgende stof hetzelfde geintje te herhalen. Dus een
+!     loop over de stochi's toe te voegen. Op deze manier loop je voor een
+!     stof met veel fluxen wel eindeloss te aggregeren natuurlijk.
+!
+!     Dus zou je ook eerst deriv op geaggregeerd grid kunnen cummuleren en
+!     daarna eenmaal naar het basis grid. Dit betekend dat ook DERIV
+!     voor alle grids gedefinieerd moet zijn. We moeten er nu wel voor zorgen
+!     dat alle derivs voor een stof op hetzelfde grid komt of dat we alle
+!     derivs bij disaggregatie mee moeten nemen. Als we dan een vlaggetje
+!     per stof per grid meenemen of de deriv gevuld is doen we geen extra werk.
+!     Kunnen we de disaggregatie zo maken dat deze cummuleert in de variable op
+!     het target grid. PRODER vervalt hiermee, wat doen we met met de FLXDMP
+!     functionaliteit van PRODER hier is theoretisch nog een probleem .
+!     verder is nodig STOCHI, DTSTEP, VOLUME
+!
+!     NOG checken of VOLUME OP HET GRID ACTUEEL IS !!! PROBLEEM we
+!     weten het variable nummer van vol niet.
+!
+!
 
       RETURN
       END

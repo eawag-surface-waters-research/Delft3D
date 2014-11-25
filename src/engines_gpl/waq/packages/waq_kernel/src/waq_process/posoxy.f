@@ -27,34 +27,19 @@
 !>\file
 !>       Returns positive oxygen concentration or zero
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta study)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C OXY     R*4 1 I  oxygen concentration (might be negative       [gO2/m3]
-C DO      R*4 1 O  dissolved oxygen , always positive            [gO2/m3]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! OXY     R*4 1 I  oxygen concentration (might be negative       [gO2/m3]
+! DO      R*4 1 O  dissolved oxygen , always positive            [gO2/m3]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -64,32 +49,32 @@ C     ------   -----  ------------
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.GT.0) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
 
       OXY    = PMSA(IP1 )
 
-C*******************************************************************************
-C**** Processes connected to the RESUSENSION
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the RESUSENSION
+!***********************************************************************
 
-C     CALCULATE POSITIVE DO FROM OXY
+!     CALCULATE POSITIVE DO FROM OXY
 
       PMSA(IP2 ) = MAX (OXY, 0.0)
 
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

@@ -24,36 +24,36 @@
       SUBROUTINE DLWQ80 ( DERIV  , NOTOT  , NOSEG  , ITFACT , TIMER  ,
      *                    AMASS  , AMASS2 , IAFLAG , DMPS   , INTOPT ,
      *                    ISDMP  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april 3, 1988 by L.Postma
-C
-C     FUNCTION            : utility that scales the DERIV array after
-C                           the user quality processes routine and
-C                           accumulates if needed.
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DERIV   REAL   NOTOT*NOSEG  IN/OUT  derivatives to be scaled
-C     NOTOT   INTEGER     1       INPUT   total number of systems
-C     NOSEG   INTEGER     1       INPUT   number of computational elems
-C     ITFACT  INTEGER     1       INPUT   scale factor
-C     TIMER   REAL   NOTOT*NOSEG  IN/OUT  timer accumulator
-C     AMASS   REAL   NOTOT*NOSEG  INPUT   mass in the system
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
-C     DMPS    REAL        *       IN/OUT  dumped segment fluxes
-C                                         if INTOPT > 7
-C     INTOPT  INTEGER     1       INPUT   Integration suboptions
-C     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: april 3, 1988 by L.Postma
+!
+!     FUNCTION            : utility that scales the DERIV array after
+!                           the user quality processes routine and
+!                           accumulates if needed.
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DERIV   REAL   NOTOT*NOSEG  IN/OUT  derivatives to be scaled
+!     NOTOT   INTEGER     1       INPUT   total number of systems
+!     NOSEG   INTEGER     1       INPUT   number of computational elems
+!     ITFACT  INTEGER     1       INPUT   scale factor
+!     TIMER   REAL   NOTOT*NOSEG  IN/OUT  timer accumulator
+!     AMASS   REAL   NOTOT*NOSEG  INPUT   mass in the system
+!     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
+!     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
+!     DMPS    REAL        *       IN/OUT  dumped segment fluxes
+!                                         if INTOPT > 7
+!     INTOPT  INTEGER     1       INPUT   Integration suboptions
+!     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
+!
       use timers
 
       INTEGER     ISDMP(*)
@@ -61,24 +61,24 @@ C
      *            DMPS(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq80", ithandl )
-C
-C         loop accross deriv
-C
+!
+!         loop accross deriv
+!
       DO  10 I1 = 1 , NOTOT*NOSEG
       DERIV(I1) = DERIV(I1)/ITFACT
       IF ( DERIV(I1) .LT. 0.0 ) TIMER(I1)=TIMER(I1)-DERIV(I1)/AMASS(I1)
    10 CONTINUE
       IF ( IAFLAG .EQ. 0 ) RETURN
-C
-C     total mass balance
-C
+!
+!     total mass balance
+!
       DO  20  I1 = 1 , NOTOT*NOSEG
       I2         = MOD   (I1-1,NOTOT) + NOTOT + 1
       AMASS2(I2) = AMASS2(I2) + DERIV(I1)
    20 CONTINUE
-C
-C     segment mass balance
-C
+!
+!     segment mass balance
+!
       IF ( MOD(INTOPT,16) .GE. 8  ) THEN
          DO  40  ISEG = 1 , NOSEG
             IF ( ISDMP(ISEG) .GT. 0 ) THEN
@@ -90,7 +90,7 @@ C
             ENDIF
    40    CONTINUE
       ENDIF
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

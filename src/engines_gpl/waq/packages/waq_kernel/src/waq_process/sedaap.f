@@ -27,37 +27,21 @@
 !>\file
 !>       Sedimentation flux and velocity for PAP and AAP (adsorbed PO4)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta st
-C     950216  M. Bokhorst     Add calculation sedimentation velocity
-C     980904  Jos van Gils    Use of PMSA as work space removed
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                    Uni
-C ----    --- -  -    -------------------                            ---
-C SFL1    R*4 1 I  sedimentation flux carriers                 [gC/m2/d]
-C Q1      R*4 1 I  quality of carrier                          [gOMV/gC]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                    Uni
+! ----    --- -  -    -------------------                            ---
+! SFL1    R*4 1 I  sedimentation flux carriers                 [gC/m2/d]
+! Q1      R*4 1 I  quality of carrier                          [gOMV/gC]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -100,7 +84,7 @@ C     ------   -----  ------------
       IN14 = INCREM(14)
       IN15 = INCREM(15)
       IN16 = INCREM(16)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -108,7 +92,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
 
       SFL1  = PMSA(IP1 )
       SFL2  = PMSA(IP2 )
@@ -119,26 +103,26 @@ C
       DEPTH = PMSA(IP10)
       SWITCH= PMSA(IP11)
 
-C***********************************************************************
-C**** Processes connected to the SEDIMENTATION of AAP
-C***********************************************************************
+!***********************************************************************
+!**** Processes connected to the SEDIMENTATION of AAP
+!***********************************************************************
 
-C     SEDIMENTATION
+!     SEDIMENTATION
       HULP = SFL1 * Q1 + SFL2 * Q2 + SFL3 * Q3
       PMSA(IP15) = HULP
       IF (ABS(SWITCH).LT.0.5) THEN
-C       NO SWITCH
+!       NO SWITCH
         FL( 1 + IFLUX ) =  HULP  / DEPTH
         FL( 2 + IFLUX ) =  0.0
       ELSE
-C       SWITCH
+!       SWITCH
         FL( 1 + IFLUX ) =  0.0
         FL( 2 + IFLUX ) =  HULP / DEPTH
       ENDIF
 
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
@@ -149,25 +133,25 @@ C
       IP10  = IP10  + IN10
       IP11  = IP11  + IN11
       IP15  = IP15  + IN15
-c
+!
  9000 CONTINUE
 
-c.....Exchangeloop over de horizontale richting
+!.....Exchangeloop over de horizontale richting
       DO 8000 IQ= 1 , NOQ1+NOQ2
 
-c........VxSedAAP op nul
+!........VxSedAAP op nul
          PMSA(IP16) = 0.0
 
          IP16 = IP16 + IN16
 
  8000 CONTINUE
 
-c.....Startwaarde in de PMSA voor VxSedIMX in de 3e richting
+!.....Startwaarde in de PMSA voor VxSedIMX in de 3e richting
       IP12= IP12+ ( NOQ1+NOQ2 ) * IN12
       IP13= IP13+ ( NOQ1+NOQ2 ) * IN13
       IP14= IP14+ ( NOQ1+NOQ2 ) * IN14
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
 
          IVAN  = IEXPNT(1,IQ)
@@ -179,11 +163,11 @@ c.....Exchangeloop over de verticale richting
             VSIM1 = PMSA(IP12)
             VSIM2 = PMSA(IP13)
             VSIM3 = PMSA(IP14)
-c...........berekenen VxSedAAP
+!...........berekenen VxSedAAP
             PMSA(IP16) = FPIM1*VSIM1+FPIM2*VSIM2+FPIM3*VSIM3
          ENDIF
 
-c........Exchangepointers ophogen
+!........Exchangepointers ophogen
          IP12= IP12+ IN12
          IP13= IP13+ IN13
          IP14= IP14+ IN14

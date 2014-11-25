@@ -27,27 +27,6 @@
 !>\file
 !>       Fixation of BLOOM algae at the water bed (e.g. for Ulvae)
 
-!     -----------------------------------------------------------------
-!     function: calculates the fraction of algae fixed to the botom
-!     project : venice lagoon
-!     author  : marnix van der vat
-!     date    : 971217             version : 1.00
-!
-!     history :
-!
-!     date    author          description
-!     ------  --------------  -----------------------------------------
-!     140526  jos van gils    modify for inactive variables in g/m2
-!     090219  jan van beek    3D implementation,
-!                             restyle,
-!                             do not use bloomdepth this makes no sense
-!     971217  marnix vd vat   first version
-!     980612  jos van gils    algae concentrations /m2 added as output
-!                             bug fixed
-!     981115  marnix vd vat   depth added as alternative for bloomdepth
-!                             removed opening of not used output file
-!     -----------------------------------------------------------------
-
       implicit none
 
 !     arguments

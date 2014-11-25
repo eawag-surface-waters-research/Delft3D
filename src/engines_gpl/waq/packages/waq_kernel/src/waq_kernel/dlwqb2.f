@@ -23,32 +23,32 @@
 
       SUBROUTINE DLWQB2 ( CONC   , RHS    , NOSEG  , NOTOT  , ISYS   ,
      *                    NSYS   )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june 1988 by L.Postma
-C
-C     FUNCTION            : puts solution from RHS in CONC, zeros RHS
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
-C     ----    -----      ------       ------- -----------
-C     CONC    REAL     NOTOT*NOSEG    IN/OUT  old/new concentration
-C     RHS     REAL        NOSEG       IN/OUT  right hand side matrix
-C     NOSEG   INTEGER       1         INPUT   number of segments
-C     NOTOT   INTEGER       1         INPUT   total number of systems
-C     ISYS    INTEGER       1         INPUT   system considered
-C     NSYS    INTEGER       1         INPUT   number of systems
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june 1988 by L.Postma
+!
+!     FUNCTION            : puts solution from RHS in CONC, zeros RHS
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
+!     ----    -----      ------       ------- -----------
+!     CONC    REAL     NOTOT*NOSEG    IN/OUT  old/new concentration
+!     RHS     REAL        NOSEG       IN/OUT  right hand side matrix
+!     NOSEG   INTEGER       1         INPUT   number of segments
+!     NOTOT   INTEGER       1         INPUT   total number of systems
+!     ISYS    INTEGER       1         INPUT   system considered
+!     NSYS    INTEGER       1         INPUT   number of systems
+!
       DIMENSION   CONC(*) , RHS(*)
-C
-C         put result in concentration array
-C
+!
+!         put result in concentration array
+!
       ISET = 1
       DO 10 ISEG = 1 , NOSEG
       I1 = (ISEG-1)*NOTOT
@@ -57,6 +57,6 @@ C
       RHS ( ISET ) = 0.0
       ISET = ISET + 1
    10 CONTINUE
-C
+!
       RETURN
       END

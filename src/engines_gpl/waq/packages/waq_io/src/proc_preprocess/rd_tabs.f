@@ -49,17 +49,17 @@
       ! common declarations
 
       include 'data.inc'
-c
-c     declaration of file identification group
-c
+!
+!     declaration of file identification group
+!
       real          vfform
       character*20  rundat
       character*40  fform      , conten      ,
      +              source
       character*40  remark(4)
-c
-c     local variables
-c
+!
+!     local variables
+!
       integer       iconf           , ilen            ,
      +              iend            , i               ,
      +              ierror
@@ -69,18 +69,18 @@ c
       character*256 fildef, fildat
       character*256 filext
       integer       extpos, extlen
-c
-c     external nefis functions
-c
+!
+!     external nefis functions
+!
       integer   clsnef
      +         ,crenef
       external  clsnef
      +         ,crenef
       integer(4)                :: ithndl = 0      ! handle for performance timer
       if (timon) call timstrt( "rd_tabs", ithndl )
-c
-c     initialize proces definition file
-c
+!
+!     initialize proces definition file
+!
       call dhfext (pdffil, filext, extpos, extlen)
       if ( filext .ne. ' ' ) then
 
@@ -133,9 +133,9 @@ c
          write(lunrep,*) 'files do not exist'
          goto 900
       endif
-c
-c     last file identification group
-c
+!
+!     last file identification group
+!
       call rd_filid ( deffds,         fform , vfform, conten,
      +                versio, serial, rundat, source, remark,
      +                lunrep, ierror)
@@ -145,9 +145,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table p1 (substance groups)
-c
+!
+!     table p1 (substance groups)
+!
       call rd_tabp1 ( deffds      ,
      +                nsgrpm      , nsgrp       ,
      +                sgrpid      , sgrpnm      ,
@@ -158,9 +158,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table p2 (items)
-c
+!
+!     table p2 (items)
+!
       call rd_tabp2 ( deffds      ,
      +                nitemm      , nitem       ,
      +                itemid      , itemnm      ,
@@ -176,9 +176,9 @@ cjvb +                itemgr      , itemsx      ,
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table p3 (process modules)
-c
+!
+!     table p3 (process modules)
+!
       call rd_tabp3 ( deffds      ,
      +                nfortm      , nfort       ,
      +                fortid      , lunrep      ,
@@ -189,9 +189,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table p4 (processes)
-c
+!
+!     table p4 (processes)
+!
       call rd_tabp4 ( deffds      ,
      +                nprocm      , nproc       ,
      +                procid      , procnm      ,
@@ -203,9 +203,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table p5 (configurations)
-c
+!
+!     table p5 (configurations)
+!
       call rd_tabp5 ( deffds      ,
      +                nconfm      , nconf       ,
      +                confid      , confnm      ,
@@ -216,9 +216,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r1 (configurations-processes)
-c
+!
+!     table r1 (configurations-processes)
+!
       call rd_tabr1 ( deffds       ,
      +                nconfm*nprocm, nconf       ,
      +                nproc        , icnpro      ,
@@ -229,9 +229,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r2 (configurations-substances)
-c
+!
+!     table r2 (configurations-substances)
+!
       call rd_tabr2 ( deffds      ,
      +                ncnsbm      , ncnsb       ,
      +                r2_cid      , r2_sid      ,
@@ -242,9 +242,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r3 (input items)
-c
+!
+!     table r3 (input items)
+!
       call rd_tabr3 ( deffds      ,
      +                ninpum      , ninpu       ,
      +                inpupr      , inpuit      ,
@@ -257,9 +257,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r4 (output items)
-c
+!
+!     table r4 (output items)
+!
       call rd_tabr4 ( deffds      ,
      +                noutpm      , noutp       ,
      +                outppr      , outpit      ,
@@ -272,9 +272,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r5 (output fluxes)
-c
+!
+!     table r5 (output fluxes)
+!
       call rd_tabr5 ( deffds      ,
      +                noutfm      , noutf       ,
      +                outfpr      , outffl      ,
@@ -286,9 +286,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r6 (flux-substance)
-c
+!
+!     table r6 (flux-substance)
+!
       call rd_tabr6 ( deffds      ,
      +                nstocm      , nstoc       ,
      +                stocfl      , stocsu      ,
@@ -300,9 +300,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r7 (velocity-substance)
-c
+!
+!     table r7 (velocity-substance)
+!
       call rd_tabr7 ( deffds      ,
      +                nvelom      , nvelo       ,
      +                veloit      , velosu      ,
@@ -314,9 +314,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table r8 (dispersion-substance)
-c
+!
+!     table r8 (dispersion-substance)
+!
       call rd_tabr8 ( deffds      ,
      +                ndispm      , ndisp       ,
      +                dispit      , dispsu      ,
@@ -328,9 +328,9 @@ c
          write(lunrep,*) 'error number:',ierror
          goto 900
       endif
-c
-c     table m1 (old-items)
-c
+!
+!     table m1 (old-items)
+!
       if ( vfform .gt. 1.99 ) then
          call rd_tabm1 ( deffds      ,
      +                   n_old_items_max,
@@ -350,9 +350,9 @@ c
             goto 900
          endif
       endif
-c
-c     close files
-c
+!
+!     close files
+!
       ierror = clsnef(deffds)
       if ( ierror .ne. 0 ) then
          write(lunrep,*) 'error closing nefis process defintion file'

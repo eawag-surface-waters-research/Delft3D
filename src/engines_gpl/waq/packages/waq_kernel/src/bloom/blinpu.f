@@ -21,60 +21,60 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Module to read BLOOM input files
-C
-C    Called by: BLOOMC
-C    Calls    : INPUT2, OPTION, CHANGE, VIDEO
-C
+!    Module to read BLOOM input files
+!
+!    Called by: BLOOMC
+!    Calls    : INPUT2, OPTION, CHANGE, VIDEO
+!
       SUBROUTINE BLINPU (NTYP_M, NTYP_A, NGRO_A, ALGTYP, LMIXO , LFIXN ,
      J                   LCARB , NUNUCOM, NUTCON, FLXCON, CON2OUT)
       
       IMPLICIT NONE
 
-C     Arguments
-C
-C     131011  Jos van Gils    optional C limitation
-C     971217  Marnix vd Vat   MrtExAlg added
-C
-C     Name    Type  Length   I/O  Description
-C
-C     NTYP_A  I     1        O    Actual number of types
-C     NGRO_A  I     1        O    Actual number of groups
-C     ALGTYP  R   0:20,*     O    Characteristics per algae type
-C     LMIXO   L     1        O    Flag mixotrophy
-C     LFIXN   L     1        O    Flag N-fixation
-C     LCARB   L     1        I    Flag carbon limitation
-c     NUTCON  I*4   8        O    Nutrients involved in active nutrient constraints
-c     FLXCON  I*4   8        O    Uptake fluxes involved in active nutrient constraints
+!     Arguments
+!
+!     131011  Jos van Gils    optional C limitation
+!     971217  Marnix vd Vat   MrtExAlg added
+!
+!     Name    Type  Length   I/O  Description
+!
+!     NTYP_A  I     1        O    Actual number of types
+!     NGRO_A  I     1        O    Actual number of groups
+!     ALGTYP  R   0:20,*     O    Characteristics per algae type
+!     LMIXO   L     1        O    Flag mixotrophy
+!     LFIXN   L     1        O    Flag N-fixation
+!     LCARB   L     1        I    Flag carbon limitation
+!     NUTCON  I*4   8        O    Nutrients involved in active nutrient constraints
+!     FLXCON  I*4   8        O    Uptake fluxes involved in active nutrient constraints
 
       INTEGER      NTYP_M, NTYP_A, NGRO_A, NUNUCOM
       INTEGER      J, K, IS
       REAL         ALGTYP(0:20,NTYP_M)
       LOGICAL      LMIXO,LFIXN,LCARB
       INTEGER      NUTCON(NUNUCOM), FLXCON(NUNUCOM), CON2OUT(NUNUCOM)
-C
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     IOU     I     99       I    ioblck    Logical unit numbers
-C     INUNI   I     1        I    ioblck    Logical unit number
-C     OUUNI   I     1        I    ioblck    Logical unit number
-C     IYEAR   I     1        O    putin1
-C     CASE    C*8   13       O    putin1
-C     COM     C*8   18       O    putin1
-C     NREP    I     1        O    phyt2
-C     NPRINT  I     1        O    sumout
-C     NPRODU  I     1        O    size
-C     LPRINT  I     1        O    sumout
-C     LDYN    I     1        O    dynam
-C     MI      I     1        O    putin1
-C     NPER    I     10,3     I    putin1
-C     IMU     I     1        O    putin1
-C     NUSPEC  I     1        I    phyt2
-C     NUECOG  I     1        I    phyt2
-C     MT      I     1        I    blmdim
-C     LRUN    I     1        I    putin1
+!
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     IOU     I     99       I    ioblck    Logical unit numbers
+!     INUNI   I     1        I    ioblck    Logical unit number
+!     OUUNI   I     1        I    ioblck    Logical unit number
+!     IYEAR   I     1        O    putin1
+!     CASE    C*8   13       O    putin1
+!     COM     C*8   18       O    putin1
+!     NREP    I     1        O    phyt2
+!     NPRINT  I     1        O    sumout
+!     NPRODU  I     1        O    size
+!     LPRINT  I     1        O    sumout
+!     LDYN    I     1        O    dynam
+!     MI      I     1        O    putin1
+!     NPER    I     10,3     I    putin1
+!     IMU     I     1        O    putin1
+!     NUSPEC  I     1        I    phyt2
+!     NUECOG  I     1        I    phyt2
+!     MT      I     1        I    blmdim
+!     LRUN    I     1        I    putin1
 
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
@@ -87,22 +87,22 @@ C     LRUN    I     1        I    putin1
       INCLUDE 'cal1.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'dynam.inc'
-C
-C     Local variables
-C
-C     Name    Type  Length   I/O  Description
-C
-C     NDEC    I     1             Dummy in coupled version
-C     LPARAM  I     1
-C     I       I     1
+!
+!     Local variables
+!
+!     Name    Type  Length   I/O  Description
+!
+!     NDEC    I     1             Dummy in coupled version
+!     LPARAM  I     1
+!     I       I     1
 
       INTEGER      NDEC  , LPARAM, I
       REAL         AUTOFR
-C
-C  Read title lines of BLOOM II input file.
-C  Note: In the standalone BLOOM II version these comments are read by
-C  INPUT1.
-C
+!
+!  Read title lines of BLOOM II input file.
+!  Note: In the standalone BLOOM II version these comments are read by
+!  INPUT1.
+!
       READ (INUNI, '(I4,1X,9A8)') IYEAR, (CASE (I), I = 1,9)
       READ (INUNI, '(9A8,8X)') COM
       DO I = 0 , MG
@@ -111,7 +111,7 @@ C
          ENDDO
       ENDDO
 
-C  DETERMINE NUSPEC AND NUECOG
+!  DETERMINE NUSPEC AND NUECOG
       IS = 0
       NUECOG = 0
    60   IS = IS + 1
@@ -135,8 +135,8 @@ C  DETERMINE NUSPEC AND NUECOG
       NUSPEC = IS - 1
       IF ((IS.EQ.NTYP_M).AND.(ALGTYP(0,NTYP_M).GT.-100.)) NUSPEC =NTYP_M
 
-C  SET THE ALGAE CHARACTERISTICS
-C 
+!  SET THE ALGAE CHARACTERISTICS
+! 
       LMIXO = .FALSE.
       LFIXN = .FALSE.
       DO 70 J=1,NUECOG
@@ -179,11 +179,11 @@ C
    80   CONTINUE
    70 CONTINUE
 
-C     Set admin dependent on NUNUCO
-C     Note that we handle different sets of nutrient constraints
-C      - optional carbon limitation (LCARB) 
-C      - mixotrophy (N,P) (LMIXO)
-C      - N-fixation (LFIXN)
+!     Set admin dependent on NUNUCO
+!     Note that we handle different sets of nutrient constraints
+!      - optional carbon limitation (LCARB) 
+!      - mixotrophy (N,P) (LMIXO)
+!      - N-fixation (LFIXN)
 
       DO I=1,NUSPEC
         AA(1,I)   = ALGTYP(4,I) / CTODRY(I)
@@ -236,29 +236,29 @@ C      - N-fixation (LFIXN)
         NUNUCO = NUNUCO + 1
       ENDIF
       IF (NUNUCO.GT.NUNUCOM) GOTO 901
-C
-C  Call subroutine INPUT2 to read BLOOM specific data for
-C  species, constraints, stochiometry etc.
-C
+!
+!  Call subroutine INPUT2 to read BLOOM specific data for
+!  species, constraints, stochiometry etc.
+!
       NDEC = 0
       CALL INPUT2 (NDEC,INUNI,IOU(12),1)
-C
-C  Close the efficiency file.
-C
+!
+!  Close the efficiency file.
+!
       CLOSE (IOU(12))
-C
-C  Set various counters used in several routines of BLOOM II.
-C  NREP   = counter for number of calls to all main BLOOM II routines.
-C  NPRINT = counter for print routines.
-C  NPRODU = counter for BLOOM II production routines (which are NOT
-C           used here).
-C  LPRINT = flag indicating whether normal BLOOM II output routines
-C           are called (LPRINT = 1) or not (LPRINT = 0).
-C  LDYN   = flag indicating whether BLOOM II runs in full dynamic mode
-C           (LDYN = 1)
-C  MI     = number of time periods considered in one computation step of
-C           BLOOM II.
-C
+!
+!  Set various counters used in several routines of BLOOM II.
+!  NREP   = counter for number of calls to all main BLOOM II routines.
+!  NPRINT = counter for print routines.
+!  NPRODU = counter for BLOOM II production routines (which are NOT
+!           used here).
+!  LPRINT = flag indicating whether normal BLOOM II output routines
+!           are called (LPRINT = 1) or not (LPRINT = 0).
+!  LDYN   = flag indicating whether BLOOM II runs in full dynamic mode
+!           (LDYN = 1)
+!  MI     = number of time periods considered in one computation step of
+!           BLOOM II.
+!
       NREP   = 0
       NPRINT = 0
       NPRODU = 0
@@ -266,11 +266,11 @@ C
       LDYN   = 1
       MI     = NPER (1,3)
       IMU    = 1
-C
-C  Call subroutine "OPTION" to read options for program control.
-C  If "RUN" was not specified or if the program has detected
-C  an error, it will terminate.
-C
+!
+!  Call subroutine "OPTION" to read options for program control.
+!  If "RUN" was not specified or if the program has detected
+!  an error, it will terminate.
+!
       CALL OPTION (0,LPARAM)
       IF (LPARAM. EQ. 1) CALL CHANGE(1)
       CLOSE (IOU(9))
@@ -280,13 +280,13 @@ C
          WRITE (OUUNI,40)
    40    FORMAT (1X,'No "RUN" command or a fatal error was detected; ',
      1           'execution terminates',/)
-C$ Dit moet waarschijnlijk gewoon weg, is alleen maar scherm-actie??
+!$ Dit moet waarschijnlijk gewoon weg, is alleen maar scherm-actie??
          CALL VIDEO (0)
          CALL VIDEO (3744)
          GOTO 902
       ENDIF
 
-C     Pass actual number of groups and species to main program
+!     Pass actual number of groups and species to main program
 
       NTYP_A = NUSPEC
       NGRO_A = NUECOG
@@ -295,13 +295,13 @@ C     Pass actual number of groups and species to main program
 
       RETURN
 
-C     Maximum number permitted species exceeded
-C     Present program version can only handle MT phytoplankton species.
+!     Maximum number permitted species exceeded
+!     Present program version can only handle MT phytoplankton species.
   901 WRITE(*,*) 'Fatal error 901 in BLINPU'
       CALL SRSTOP(1)
 
-C     No "RUN" command or a fatal error was detected,
-C     execution terminates
+!     No "RUN" command or a fatal error was detected,
+!     execution terminates
   902 WRITE(*,*) 'Fatal error 902 in BLINPU'
       CALL SRSTOP(1)
 

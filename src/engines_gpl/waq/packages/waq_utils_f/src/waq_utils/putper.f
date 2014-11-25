@@ -22,17 +22,17 @@
 !!  rights reserved.
 
       SUBROUTINE PUTPEV (StreamName,DataSetName,Intval)
-C
-C     Deltares
-C
-C     CREATED             : jan  2001 by J.v.Gils
-C
-C     FUNCTION            : Gives permission to DIO to proceed
-C                           one step (synchronised mode)
-C
-C
-c     use dio_streams
-c     use dio_plt_rw
+!
+!     Deltares
+!
+!     CREATED             : jan  2001 by J.v.Gils
+!
+!     FUNCTION            : Gives permission to DIO to proceed
+!                           one step (synchronised mode)
+!
+!
+!     use dio_streams
+!     use dio_plt_rw
       include 'dio-plt.inc'
 
       character*(*) StreamName,DataSetName
@@ -61,11 +61,11 @@ c     use dio_plt_rw
 
       first = .false.
 
-C     Open data stream
+!     Open data stream
       dioOutStream = DioCreateStreamSynched(dio_Binary_stream,
      +                    StreamName, 'w')
 
-C     Create data set
+!     Create data set
       Nr_Locations = 1
       Nr_Variables = 1
       locs(1) = 'dioLocNam'
@@ -81,7 +81,7 @@ C     Create data set
 
       endif
 
-C     Put dataset values
+!     Put dataset values
 
       values(1,1) = real(Intval)
       call DioPutPltDataSetReals (dioOutSet,tims(1),1,1,values)
@@ -89,17 +89,17 @@ C     Put dataset values
       RETURN
       END
       SUBROUTINE PUTPER (StreamName,DataSetName)
-C
-C     Deltares
-C
-C     CREATED             : jan  2001 by J.v.Gils
-C
-C     FUNCTION            : Gives permission to DIO to proceed
-C                           one step (synchronised mode)
-C
-C
-c     use dio_streams
-c     use dio_plt_rw
+!
+!     Deltares
+!
+!     CREATED             : jan  2001 by J.v.Gils
+!
+!     FUNCTION            : Gives permission to DIO to proceed
+!                           one step (synchronised mode)
+!
+!
+!     use dio_streams
+!     use dio_plt_rw
       include 'dio-plt.inc'
 
       character*(*) StreamName,DataSetName
@@ -128,11 +128,11 @@ c     use dio_plt_rw
 
       first = .false.
 
-C     Open data stream
+!     Open data stream
       dioOutStream = DioCreateStreamSynched(dio_Binary_stream,
      +                    StreamName, 'w')
 
-C     Create data set
+!     Create data set
       Nr_Locations = 1
       Nr_Variables = 1
       locs(1) = 'dioLocNam'
@@ -148,24 +148,24 @@ C     Create data set
 
       endif
 
-C     Put dataset values
+!     Put dataset values
 
       call DioPutPltDataSetReals (dioOutSet,tims(1),1,1,values)
 
       RETURN
       END
       SUBROUTINE PUTPCF (StreamName,DataSetName)
-C
-C     Deltares
-C
-C     CREATED             : jan  2001 by J.v.Gils
-C
-C     FUNCTION            : Gives permission to DIO to proceed
-C                           one step (synchronised mode)
-C
-C
-c     use dio_streams
-c     use dio_plt_rw
+!
+!     Deltares
+!
+!     CREATED             : jan  2001 by J.v.Gils
+!
+!     FUNCTION            : Gives permission to DIO to proceed
+!                           one step (synchronised mode)
+!
+!
+!     use dio_streams
+!     use dio_plt_rw
       include 'dio-plt.inc'
 
       character*(*) StreamName,DataSetName
@@ -194,11 +194,11 @@ c     use dio_plt_rw
 
       first = .false.
 
-C     Open data stream
+!     Open data stream
       dioOutStream = DioCreateStreamSynched(dio_Binary_stream,
      +                    StreamName, 'w')
 
-C     Create data set
+!     Create data set
       Nr_Locations = 1
       Nr_Variables = 1
       locs(1) = 'dioLocNam'
@@ -214,7 +214,7 @@ C     Create data set
 
       endif
 
-C     Put dataset values
+!     Put dataset values
 
       call DioPutPltDataSetReals (dioOutSet,tims(1),1,1,values)
 

@@ -28,91 +28,91 @@
 !>\file
 !>       Transparency due to Chlorophyll, detritus, inorganics and humic accids
 
-C***********************************************************************
-C     SUBROUTINE UIT_ZI, GEBASEERD OP HET MODEL UITZICHT VAN
-C     H. BUITEVELD, RIZA, POSTBUS 17, 8200 AA LELYSTAD (TEL 03200-70737)
-C
-C     BEREKEND DOORZICHT EN EXTINKTIE OP BASIS VAN CHLOROFYL, DETRITUS
-C     GLOEIREST, ABSORPTIE HUMUSZUREN BIJ 380 NM EN SPECTRA OM DE 5 NM
-C     VAN DE ABSORPTIE EN VERSTROOIING VAN WATER, DE VERDELING DE
-C     INVALLEND LICHT EN DE SPECIFIEKE SPECIFIEKE ABSORPTIE ALGEN
-C
-C     CHANGES IN THE MODULE:
-C     DATE   AUTHOR          DESCRIPTION
-C     ------ --------------- -------------------------------------------
-C     971119 Jan van Beek    Extended Ascii characters verwijderd
-C     970127 Rik Sonneveldt  In subroutine BEP_D beveiliging tegen CHLORO
-C                            < 0 ingebouwd (op verzoek van Maarten Ouboter).
-C     911125 Andre Hendriks  Code beter leesbaar gemaakt, en variabele-
-C                            namen langer dan 6 letters vervangen door korte
-C                            namen.
-C     910926 WOLF MOOIJ      IMPLEMENTATION IN DELWAQ-BLOOM
-C                            BELANGRIJKSTE VERANDERING: INPLAATS VAN
-C                            TOTAAL ZWEVEND STOF WORDT NU DIRECT
-C                            DE DETRITUS CONCENTRATIE INGELEZEN
-C***********************************************************************
-C***********************************************************************
-C     ARGUMENTS:
-C     NAME   TYPE SIZE   I/O DESCRIPTION
-C     ------ ---- ------ --- -------------------------------------------
-C     ANGLE   R*4        IN  FUNCTION, DEFAULT constant = 30 x
-C     AH_380  R*4        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/m)
-C     CHLORO  R*4        IN  PARAMETER: CHLOROPHYL (mg/m3)
-C     CORCHL  R*4        IN  CONSTANT, DEFAULT = 2.5
-C     C_DET   R*4        IN  CONSTANT, DEFAULT = 0.026
-C     C_GL1   R*4        IN  CONSTANT, DEFAULT = 0.73
-C     C_GL2   R*4        IN  CONSTANT, DEFAULT = 1.0
-C     DETRIT  R*4        IN  PARAMETER: GESUSPENDEERD DETRITUS (gDW/m3)
-C     DIEP1   R*4        IN  CONSTANT, DEFAULT = 1.0 (m)
-C     DIEP2   R*4        IN  CONSTANT, DEFAULT = 1.2 (m)
-C     D_1     R*4        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (m)
-C     EXTPAR  R*4        OUT PARAMETER: EXTINCTIE OP 1M (1/m)
-C     EXTP_D  R*4        OUT DUMMY PARAMETER EXTINCTIE OP D_1 (1/m)
-C     GLOEIR  R*4        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (gDW/m3)
-C     HELHUM  R*4        IN  CONSTANT, DEFAULT = 0.014
-C     SECCHI  R*4        OUT PARAMETER: DOORZICHT (m)
-C     TAU     R*4        IN  CONSTANT, DEFAULT = 7.8
-C***********************************************************************
-C***********************************************************************
-C     COMMON VARIABLES:
-C     NAME   TYPE SIZE   DESCRIPTION
-C     ------ ---- ------ -----------------------------------------------
-C     AWATER  R*4 (61)   ABSORPTIE WATER
-C     BWATER  R*4 (61)   VERSTROOING WATER
-C     CHLSPE  R*4 (61)   SPECIFIEKE ABSORPTIE ALGEN
-C     PLANCK  R*4 (61)   VERDELING INVALLEND LICHT
-C***********************************************************************
-C***********************************************************************
-C     LOCAL VARIABLES:
-C     NAME   TYPE SIZE   DESCRIPTION
-C     ------ ---- ------ -----------------------------------------------
-C     A       R*4
-C     A_CHL   R*4
-C     A_DET   R*4
-C     A_HUM   R*4
-C     B       R*4
-C     B_CHL   R*4
-C     B_GL    R*4
-C     C_CHL   R*4
-C     C_GL    R*4
-C     C_MU    R*4
-C     D_2     R*4
-C     EXT_KI  R*4
-C     I_550   I*4
-C     LAMBDA  I*4
-C     SOM_C   R*4
-C     SOM_D1  R*4
-C     SOM_D2  R*4
-C     SOM_H   R*4
-C     S_D1    R*4
-C     S_D2    R*4
-C     TELLER  I*4
-C     ZW_STF  R*4
-C***********************************************************************
-C
-C     include '..\inc\ioblck.inc'
+!***********************************************************************
+!     SUBROUTINE UIT_ZI, GEBASEERD OP HET MODEL UITZICHT VAN
+!     H. BUITEVELD, RIZA, POSTBUS 17, 8200 AA LELYSTAD (TEL 03200-70737)
+!
+!     BEREKEND DOORZICHT EN EXTINKTIE OP BASIS VAN CHLOROFYL, DETRITUS
+!     GLOEIREST, ABSORPTIE HUMUSZUREN BIJ 380 NM EN SPECTRA OM DE 5 NM
+!     VAN DE ABSORPTIE EN VERSTROOIING VAN WATER, DE VERDELING DE
+!     INVALLEND LICHT EN DE SPECIFIEKE SPECIFIEKE ABSORPTIE ALGEN
+!
+!     CHANGES IN THE MODULE:
+!     DATE   AUTHOR          DESCRIPTION
+!     ------ --------------- -------------------------------------------
+!     971119 Jan van Beek    Extended Ascii characters verwijderd
+!     970127 Rik Sonneveldt  In subroutine BEP_D beveiliging tegen CHLORO
+!                            < 0 ingebouwd (op verzoek van Maarten Ouboter).
+!     911125 Andre Hendriks  Code beter leesbaar gemaakt, en variabele-
+!                            namen langer dan 6 letters vervangen door korte
+!                            namen.
+!     910926 WOLF MOOIJ      IMPLEMENTATION IN DELWAQ-BLOOM
+!                            BELANGRIJKSTE VERANDERING: INPLAATS VAN
+!                            TOTAAL ZWEVEND STOF WORDT NU DIRECT
+!                            DE DETRITUS CONCENTRATIE INGELEZEN
+!***********************************************************************
+!***********************************************************************
+!     ARGUMENTS:
+!     NAME   TYPE SIZE   I/O DESCRIPTION
+!     ------ ---- ------ --- -------------------------------------------
+!     ANGLE   R*4        IN  FUNCTION, DEFAULT constant = 30 x
+!     AH_380  R*4        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/m)
+!     CHLORO  R*4        IN  PARAMETER: CHLOROPHYL (mg/m3)
+!     CORCHL  R*4        IN  CONSTANT, DEFAULT = 2.5
+!     C_DET   R*4        IN  CONSTANT, DEFAULT = 0.026
+!     C_GL1   R*4        IN  CONSTANT, DEFAULT = 0.73
+!     C_GL2   R*4        IN  CONSTANT, DEFAULT = 1.0
+!     DETRIT  R*4        IN  PARAMETER: GESUSPENDEERD DETRITUS (gDW/m3)
+!     DIEP1   R*4        IN  CONSTANT, DEFAULT = 1.0 (m)
+!     DIEP2   R*4        IN  CONSTANT, DEFAULT = 1.2 (m)
+!     D_1     R*4        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (m)
+!     EXTPAR  R*4        OUT PARAMETER: EXTINCTIE OP 1M (1/m)
+!     EXTP_D  R*4        OUT DUMMY PARAMETER EXTINCTIE OP D_1 (1/m)
+!     GLOEIR  R*4        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (gDW/m3)
+!     HELHUM  R*4        IN  CONSTANT, DEFAULT = 0.014
+!     SECCHI  R*4        OUT PARAMETER: DOORZICHT (m)
+!     TAU     R*4        IN  CONSTANT, DEFAULT = 7.8
+!***********************************************************************
+!***********************************************************************
+!     COMMON VARIABLES:
+!     NAME   TYPE SIZE   DESCRIPTION
+!     ------ ---- ------ -----------------------------------------------
+!     AWATER  R*4 (61)   ABSORPTIE WATER
+!     BWATER  R*4 (61)   VERSTROOING WATER
+!     CHLSPE  R*4 (61)   SPECIFIEKE ABSORPTIE ALGEN
+!     PLANCK  R*4 (61)   VERDELING INVALLEND LICHT
+!***********************************************************************
+!***********************************************************************
+!     LOCAL VARIABLES:
+!     NAME   TYPE SIZE   DESCRIPTION
+!     ------ ---- ------ -----------------------------------------------
+!     A       R*4
+!     A_CHL   R*4
+!     A_DET   R*4
+!     A_HUM   R*4
+!     B       R*4
+!     B_CHL   R*4
+!     B_GL    R*4
+!     C_CHL   R*4
+!     C_GL    R*4
+!     C_MU    R*4
+!     D_2     R*4
+!     EXT_KI  R*4
+!     I_550   I*4
+!     LAMBDA  I*4
+!     SOM_C   R*4
+!     SOM_D1  R*4
+!     SOM_D2  R*4
+!     SOM_H   R*4
+!     S_D1    R*4
+!     S_D2    R*4
+!     TELLER  I*4
+!     ZW_STF  R*4
+!***********************************************************************
+!
+!     include '..\inc\ioblck.inc'
       COMMON / REEKS/ AWATER(61),  BWATER(61),  CHLSPE(61),  PLANCK(61)
-C
+!
       REAL    A     , A_CHL , A_DET , A_HUM , AH_380,
      1        ANGLE , B     , B_CHL , B_GL  ,
      2        C_CHL , C_DET , C_GL  , C_GL1 , C_GL2 ,
@@ -123,7 +123,7 @@ C
      7        TAU   , ZW_STF
       INTEGER I_550 , LAMBDA, TELLER
       LOGICAL DOSECC
-C
+!
       IF ( CHLORO .GE. 0.0 .OR. DETRIT .GE. 0.0 .OR.
      1     GLOEIR .GE. 0.0) THEN
          C_MU = COS ( ANGLE * 0.0174533)
@@ -132,9 +132,9 @@ C
      1                 C_MU  , CHLORO, DETRIT, GLOEIR, AH_380,
      2                 D_1   , D_2   )
          I_550 = ((550-400)/5)+1
-C
-C        CHLOROFYL BUNDELVERZWAKKING
-C
+!
+!        CHLOROFYL BUNDELVERZWAKKING
+!
          C_CHL  = ( 0.058 + 0.018 * CHLORO)* CHLSPE (I_550)
          C_CHL  = ( C_CHL + 0.12 * ( CHLORO**0.63)) * CORCHL
          SOM_D1 = 0.0
@@ -145,13 +145,13 @@ C
          SOM_H  = 0.0
          DO 100 TELLER  =  1, 61
             LAMBDA = 400+(TELLER-1)*5
-C
-C           HUMUSZUREN ABOSORPTIE
-C
+!
+!           HUMUSZUREN ABOSORPTIE
+!
             A_HUM = AH_380 * EXP ( -HELHUM * (LAMBDA-380.0))
-C
-C           ALGEN ABSOROPTIE EN VERSTROOIING
-C
+!
+!           ALGEN ABSOROPTIE EN VERSTROOIING
+!
             IF ( CHLORO .LT. 0.000001) THEN
                A_CHL = 0.0
                B_CHL = 0.0
@@ -160,21 +160,21 @@ C
      1                 CORCHL
                B_CHL = C_CHL - A_CHL
             ENDIF
-C
-C           GLOEIREST EN DETRITUS
-C
+!
+!           GLOEIREST EN DETRITUS
+!
             ZW_STF = GLOEIR + DETRIT
             C_GL   = C_GL1 * (( ZW_STF**C_GL2)) * (400.0 / LAMBDA)
             A_DET  = C_DET * DETRIT * ( 400.0/ LAMBDA)
             B_GL   = C_GL - A_DET
-C
-C           TOTAAL ABSORPTIE EN VERSTROOIING BIJ LAMBDA
-C
+!
+!           TOTAAL ABSORPTIE EN VERSTROOIING BIJ LAMBDA
+!
             A = AWATER ( TELLER) + A_HUM + A_DET + A_CHL
             B = BWATER ( TELLER) + B_GL + B_CHL
-C
-C           EXTINKTIE BIJ LAMBDA
-C
+!
+!           EXTINKTIE BIJ LAMBDA
+!
             EXT_KI = 1 / C_MU *
      1               SQRT ( A * A + (0.425 * C_MU - 0.19) * A * B)
             SOM_D1 = SOM_D1 + PLANCK ( TELLER) * EXP ( -EXT_KI * DIEP1)
@@ -201,83 +201,83 @@ C
       SUBROUTINE BEP_D ( C_GL1 , C_GL2 , C_DET , HELHUM, CORCHL,
      1                   C_MU  , CHLORO, DETRIT, GLOEIR, AH_380,
      2                   D_1   , D_2   )
-C***********************************************************************
-C     BEPAALD DIEPTE WAAR 10 % VAN HET LICHT OVER IS BIJ 550  NM
-C***********************************************************************
-C***********************************************************************
-C     ARGUMENTS:
-C     NAME   TYPE SIZE   I/O DESCRIPTION
-C     ------ ---- ------ --- -------------------------------------------
-C     AH_380  R*4        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/M)
-C     CHLORO  R*4        IN  PARAMETER: CHLOROPHYL (fG/L)
-C     CORCHL  R*4        IN  CONSTANT,  DEFAULT  =  2.5
-C     C_DET   R*4        IN  CONSTANT,  DEFAULT  =  0.026
-C     C_GL1   R*4        IN  CONSTANT,  DEFAULT  =  0.73
-C     C_GL2   R*4        IN  CONSTANT,  DEFAULT  =  1.0
-C     C_MU    R*4        IN  CONSTANT,  COSINUS VAN ANGLE (DEFAULT  =  30)
-C     DETRIT  R*4        IN  PARAMETER: GESUSPENDEERD DETRITUS (MG/L)
-C     D_1     R*4        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (M)
-C     D_2     R*4        OUT DUMMY PARAMETER D_1 + 0.1 (M)
-C     GLOEIR  R*4        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (MG/L)
-C     HELHUM R*4        IN  CONSTANT,  DEFAULT  =  0.014
-C***********************************************************************
-C***********************************************************************
-C     COMMON VARIABLES:
-C     NAME   TYPE SIZE   DESCRIPTION
-C     ------ ---- ------ -----------------------------------------------
-C     AWATER  R*4 (61)   ABSORPTIE WATER
-C     BWATER  R*4 (61)   VERSTROOING WATER
-C     CHLSPE  R*4 (61)   SPECIFIEKE ABSORPTIE ALGEN
-C     PLANCK  R*4 (61)   VERDELING INVALLEND LICHT
-C***********************************************************************
-C***********************************************************************
-C     LOCAL VARIABLES:
-C     NAME   TYPE SIZE   DESCRIPTION
-C     ------ ---- ------ -----------------------------------------------
-C     A      R*4
-C     A_CHL  R*4
-C     A_DET  R*4
-C     A_HUM  R*4
-C     B      R*4
-C     B_CHL  R*4
-C     B_GL   R*4
-C     C_CHL  R*4
-C     C_GL   R*4
-C     EXT_KI R*4
-C     I_550  I*4
-C     LAMBDA I*4
-C     TELLER I*4
-C     ZW_STF R*4
-C***********************************************************************
+!***********************************************************************
+!     BEPAALD DIEPTE WAAR 10 % VAN HET LICHT OVER IS BIJ 550  NM
+!***********************************************************************
+!***********************************************************************
+!     ARGUMENTS:
+!     NAME   TYPE SIZE   I/O DESCRIPTION
+!     ------ ---- ------ --- -------------------------------------------
+!     AH_380  R*4        IN  PARAMETER: EXTINCTIE HUMUSZUREN (1/M)
+!     CHLORO  R*4        IN  PARAMETER: CHLOROPHYL (fG/L)
+!     CORCHL  R*4        IN  CONSTANT,  DEFAULT  =  2.5
+!     C_DET   R*4        IN  CONSTANT,  DEFAULT  =  0.026
+!     C_GL1   R*4        IN  CONSTANT,  DEFAULT  =  0.73
+!     C_GL2   R*4        IN  CONSTANT,  DEFAULT  =  1.0
+!     C_MU    R*4        IN  CONSTANT,  COSINUS VAN ANGLE (DEFAULT  =  30)
+!     DETRIT  R*4        IN  PARAMETER: GESUSPENDEERD DETRITUS (MG/L)
+!     D_1     R*4        OUT DUMMY PARAMETER D 10% TRANSMIS 560 NM (M)
+!     D_2     R*4        OUT DUMMY PARAMETER D_1 + 0.1 (M)
+!     GLOEIR  R*4        IN  PARAMETER: ANORGANISCH ZWEVEND STOF (MG/L)
+!     HELHUM R*4        IN  CONSTANT,  DEFAULT  =  0.014
+!***********************************************************************
+!***********************************************************************
+!     COMMON VARIABLES:
+!     NAME   TYPE SIZE   DESCRIPTION
+!     ------ ---- ------ -----------------------------------------------
+!     AWATER  R*4 (61)   ABSORPTIE WATER
+!     BWATER  R*4 (61)   VERSTROOING WATER
+!     CHLSPE  R*4 (61)   SPECIFIEKE ABSORPTIE ALGEN
+!     PLANCK  R*4 (61)   VERDELING INVALLEND LICHT
+!***********************************************************************
+!***********************************************************************
+!     LOCAL VARIABLES:
+!     NAME   TYPE SIZE   DESCRIPTION
+!     ------ ---- ------ -----------------------------------------------
+!     A      R*4
+!     A_CHL  R*4
+!     A_DET  R*4
+!     A_HUM  R*4
+!     B      R*4
+!     B_CHL  R*4
+!     B_GL   R*4
+!     C_CHL  R*4
+!     C_GL   R*4
+!     EXT_KI R*4
+!     I_550  I*4
+!     LAMBDA I*4
+!     TELLER I*4
+!     ZW_STF R*4
+!***********************************************************************
 
       COMMON/REEKS/AWATER(61), BWATER(61), CHLSPE(61), PLANCK(61)
-C
+!
       REAL    A     , A_CHL , A_DET , A_HUM , AH_380,
      1        B     , B_CHL , B_GL  , C_CHL , C_DET ,
      2        C_GL  , C_GL1 , C_GL2 , C_MU  , CHLORO,
      3        CORCHL, D_1   , D_2   , DETRIT, EXT_KI,
      4        GLOEIR, HELHUM, ZW_STF
       INTEGER I_550 , LAMBDA, TELLER
-C
+!
       I_550 = ((550-400)/5)+1
-C
-C     Beveiliging tegen negatieve waarde CHLORO (RS27jan97 voor Maarten O.)
-C
+!
+!     Beveiliging tegen negatieve waarde CHLORO (RS27jan97 voor Maarten O.)
+!
       CHLORO = MAX(0.0,CHLORO)
-C
-C     CHLOROFYL BUNDEL VERZWAKKING
-C
+!
+!     CHLOROFYL BUNDEL VERZWAKKING
+!
       C_CHL = ( 0.058 + 0.018 * CHLORO) * CHLSPE ( I_550)
       C_CHL = ( C_CHL + 0.12 * ( CHLORO**0.63)) * CORCHL
       TELLER = (( 560 - 400) / 5) + 1
       LAMBDA = 400 + ( TELLER - 1) * 5
-C
-C     ABSORPTIE HUMUSZUREN
-C
+!
+!     ABSORPTIE HUMUSZUREN
+!
       A_HUM = AH_380 * EXP ( -HELHUM * ( LAMBDA - 380))
-C
-C     CHLOROFYL
-C
+!
+!     CHLOROFYL
+!
       IF ( CHLORO .LT. 0.000001) THEN
          A_CHL = 0.0
          B_CHL = 0.0
@@ -285,9 +285,9 @@ C
          A_CHL = ( 0.058 + 0.018 * CHLORO) * CHLSPE ( TELLER) * CORCHL
          B_CHL = C_CHL - A_CHL
       ENDIF
-C
-C     GLOEIREST EN DETRITUS
-C
+!
+!     GLOEIREST EN DETRITUS
+!
       ZW_STF = GLOEIR + DETRIT
       C_GL   = C_GL1 * ( ZW_STF**C_GL2) * ( 400.0 / LAMBDA)
       A_DET  = C_DET * DETRIT * ( 400.0 / LAMBDA)
@@ -296,24 +296,24 @@ C
       B      = BWATER ( TELLER) + B_GL  + B_CHL
       EXT_KI = 1 / C_MU *
      1         SQRT (( A * A + ( 0.425 * C_MU - 0.19) * A * B))
-C
-C     DIEPTE 10 % TRANSMISSIE 560 NM
-C
+!
+!     DIEPTE 10 % TRANSMISSIE 560 NM
+!
       D_1 = 2.3 / EXT_KI
       D_2 = D_1 + 0.1
       RETURN
       END
 
       BLOCK DATA INIT
-C***********************************************************************
-C     SPECTRALE GEGEVENS VAN 400 TOT 700 NM MET STAPPEN VAN 5 NM
-C***********************************************************************
-C
+!***********************************************************************
+!     SPECTRALE GEGEVENS VAN 400 TOT 700 NM MET STAPPEN VAN 5 NM
+!***********************************************************************
+!
       COMMON / REEKS/ AWATER ( 61), BWATER ( 61), CHLSPE ( 61),
      1                PLANCK ( 61)
-C
-C     SPECIFIEKE ABSORPTIE ALGEN
-C
+!
+!     SPECIFIEKE ABSORPTIE ALGEN
+!
       DATA CHLSPE / 0.685, 0.781, 0.828, 0.883, 0.913,
      1              0.939, 0.973, 1.001, 1.000, 0.971,
      2              0.944, 0.928, 0.917, 0.902, 0.870,
@@ -327,8 +327,8 @@ C
      A              0.361, 0.397, 0.457, 0.529, 0.556,
      B              0.534, 0.485, 0.411, 0.334, 0.270,
      C              0.215/
-C
-C     SPECTRALE VERDELING INVALLEND LICHT
+!
+!     SPECTRALE VERDELING INVALLEND LICHT
       DATA PLANCK / 0.18380, 0.18836, 0.19280, 0.19710, 0.20134,
      1              0.20542, 0.20937, 0.21320, 0.21689, 0.22046,
      2              0.22389, 0.22720, 0.23037, 0.23342, 0.23630,
@@ -342,9 +342,9 @@ C     SPECTRALE VERDELING INVALLEND LICHT
      A              0.27050, 0.27004, 0.26950, 0.26894, 0.26833,
      B              0.26767, 0.26697, 0.26620, 0.26545, 0.26464,
      C              0.26379/
-C
-C     VERSTROOIING WATER
-C
+!
+!     VERSTROOIING WATER
+!
       DATA BWATER / 0.005290, 0.005025, 0.004776, 0.004543, 0.004323,
      1              0.004117, 0.003922, 0.003739, 0.003567, 0.003404,
      2              0.003250, 0.003105, 0.002968, 0.002838, 0.002715,
@@ -358,9 +358,9 @@ C
      A              0.000708, 0.000686, 0.000664, 0.000644, 0.000624,
      B              0.000605, 0.000587, 0.000569, 0.000552, 0.000536,
      C              0.00052/
-C
-C     ABSORPTIE WATER
-C
+!
+!     ABSORPTIE WATER
+!
       DATA AWATER / 0.00576, 0.00617, 0.00669, 0.00727, 0.00790,
      1              0.00854, 0.00918, 0.00980, 0.01039, 0.01093,
      2              0.01144, 0.01193, 0.01241, 0.01293, 0.01353,

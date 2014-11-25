@@ -27,70 +27,70 @@
      *                    IPI    , LUNTXT , IS     , ISFLAG , IFFLAG ,
      *                    UPDATE , NEWSET , IOFF   , IWORK  , LSTREC ,
      *                    LREWIN , RECLST , ftype  , dlwqd  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : March   1988 by L.Postma
-C
-C     UPDATED:            : January 2001 by J.v.Gils:
-C                           add Synchronisation mode
-C
-C                           July    2002 by Leo Postma
-C                           Call to DLWQT4 changed and file opening in T4.
-C
-C     FUNCTION            : Makes values at ITIME for time dependent
-C                                                            aspects
-C
-C     LOGICAL UNITNUMBERS : LUN(IS) - input unit intermediate file
-C                           LUN( 4) - function pointers file
-C                           LUN(19) - job-log output file
-C
-C     SUBROUTINES CALLED  : DLWQT2, makes values for user supplied files
-C                           DLWQT3, makes values for harmonic function
-C                           DLWQT4, makes values for block / linear
-C                                   interpolated functions
-C                           DHOPNF, opens files
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUN     INTEGER       *     INPUT   unit numbers
-C     ITIME   INTEGER       1     INPUT   Model timer
-C     ITIMEL  INTEGER       1     INPUT   Model timer previous time step
-C     IHARM   INTEGER   NRHARM    IN/OUT  integer harmonics space
-C                           *     INPUT   integer array space new version
-C     HARMAT  REAL    (NRHARM,*)  INPUT   matrix with harmonic info
-C                           *     INPUT   real array space new version
-C     FARRAY  REAL    (NRFTOT,2)  INPUT   double file buffer
-C     IPOINT  INTEGER   NTOT+3    INPUT   pointer to result array + ...
-C                                 INPUT   type definition of items
-C     RESULT  REAL          *     OUTPUT  result array at time ITIME
-C     NOSUB   INTEGER       1     INPUT   amount of values per item
-C     NRHARM  INTEGER       1     INPUT   amount of harmonic records
-C     NTOT    INTEGER       1     INPUT   number of items to be filled
-C     NRFTOT  INTEGER       1     INPUT   record lengt file
-C     IPA     INTEGER       1     IN/OUT  pointer in FARRAY
-C                                 INPUT   array space IHARM (new version)
-C     IPH     INTEGER       1     IN/OUT  pointer in HARMAT
-C                                 INPUT   array space HARMAT (new version)
-C     IPF     INTEGER       1     IN/OUT  pointer in IHARM
-C     IPI     INTEGER       1     IN/OUT  pointer in IPOINT
-C     LUNTXT  CHAR*(*)      ?     INPUT   txt with the unit numbers
-C     IS      INTEGER       1     INPUT   offset in LUN and LUNTXT
-C     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
-C     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
-C     UPDATE  LOGICAL       1     OUTPUT  set to T if function is updated
-C                                         else set to F
-C     NEWSET  LOGICAL       1     INPUT   T if new function processing
-C     IOFF    INTEGER       1     LOCAL   offset in the concentration array
-C     IWORK   INTEGER       *     LOCAL   workspace
-C     LSTREC  LOGICAL       1     INPUT   Switch last record on rewind wanted
-C     LREWIN  LOGICAL       1     OUTPUT  Then rewind took place
-C     RECLST  REAL          *     OUTPUT  Last record before rewind
-C
-C     DECLARATIONS        :
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : March   1988 by L.Postma
+!
+!     UPDATED:            : January 2001 by J.v.Gils:
+!                           add Synchronisation mode
+!
+!                           July    2002 by Leo Postma
+!                           Call to DLWQT4 changed and file opening in T4.
+!
+!     FUNCTION            : Makes values at ITIME for time dependent
+!                                                            aspects
+!
+!     LOGICAL UNITNUMBERS : LUN(IS) - input unit intermediate file
+!                           LUN( 4) - function pointers file
+!                           LUN(19) - job-log output file
+!
+!     SUBROUTINES CALLED  : DLWQT2, makes values for user supplied files
+!                           DLWQT3, makes values for harmonic function
+!                           DLWQT4, makes values for block / linear
+!                                   interpolated functions
+!                           DHOPNF, opens files
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUN     INTEGER       *     INPUT   unit numbers
+!     ITIME   INTEGER       1     INPUT   Model timer
+!     ITIMEL  INTEGER       1     INPUT   Model timer previous time step
+!     IHARM   INTEGER   NRHARM    IN/OUT  integer harmonics space
+!                           *     INPUT   integer array space new version
+!     HARMAT  REAL    (NRHARM,*)  INPUT   matrix with harmonic info
+!                           *     INPUT   real array space new version
+!     FARRAY  REAL    (NRFTOT,2)  INPUT   double file buffer
+!     IPOINT  INTEGER   NTOT+3    INPUT   pointer to result array + ...
+!                                 INPUT   type definition of items
+!     RESULT  REAL          *     OUTPUT  result array at time ITIME
+!     NOSUB   INTEGER       1     INPUT   amount of values per item
+!     NRHARM  INTEGER       1     INPUT   amount of harmonic records
+!     NTOT    INTEGER       1     INPUT   number of items to be filled
+!     NRFTOT  INTEGER       1     INPUT   record lengt file
+!     IPA     INTEGER       1     IN/OUT  pointer in FARRAY
+!                                 INPUT   array space IHARM (new version)
+!     IPH     INTEGER       1     IN/OUT  pointer in HARMAT
+!                                 INPUT   array space HARMAT (new version)
+!     IPF     INTEGER       1     IN/OUT  pointer in IHARM
+!     IPI     INTEGER       1     IN/OUT  pointer in IPOINT
+!     LUNTXT  CHAR*(*)      ?     INPUT   txt with the unit numbers
+!     IS      INTEGER       1     INPUT   offset in LUN and LUNTXT
+!     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
+!     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
+!     UPDATE  LOGICAL       1     OUTPUT  set to T if function is updated
+!                                         else set to F
+!     NEWSET  LOGICAL       1     INPUT   T if new function processing
+!     IOFF    INTEGER       1     LOCAL   offset in the concentration array
+!     IWORK   INTEGER       *     LOCAL   workspace
+!     LSTREC  LOGICAL       1     INPUT   Switch last record on rewind wanted
+!     LREWIN  LOGICAL       1     OUTPUT  Then rewind took place
+!     RECLST  REAL          *     OUTPUT  Last record before rewind
+!
+!     DECLARATIONS        :
+!
       use timers
       use delwaq2_data
 
@@ -102,30 +102,30 @@ C
       CHARACTER*(*) LUNTXT(*)
       CHARACTER*12  CHLP
       LOGICAL       UPDATE    , NEWSET    , LSTREC    , LREWIN
-C
-C     Local
-C
+!
+!     Local
+!
       LOGICAL       UPDATH    , UPDATB
       LOGICAL       ONLINE
 
-c     Common to define external communications in SOBEK
-c     OLCFWQ             Flag indicating ONLINE running of CF and WQ
-c     SRWACT             Flag indicating active data exchange with SRW
-c     RTCACT             Flag indicating output for RTC
+!     Common to define external communications in SOBEK
+!     OLCFWQ             Flag indicating ONLINE running of CF and WQ
+!     SRWACT             Flag indicating active data exchange with SRW
+!     RTCACT             Flag indicating output for RTC
 
       LOGICAL            OLCFWQ, SRWACT, RTCACT
       COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt1", ithandl )
-C
-C         Prescribe ONLINE mode for selected files
-C
+!
+!         Prescribe ONLINE mode for selected files
+!
       ONLINE = .FALSE.
       IF ( OLCFWQ .OR. SRWACT )
      JONLINE = ( IS.EQ.11 .OR. IS.EQ.7 .OR. IS.EQ.10 )
-C
-C         If NRHARM =  0 and NRFTOT= 0, one record per time step,
-C                                       no harmonics and interpolation.
+!
+!         If NRHARM =  0 and NRFTOT= 0, one record per time step,
+!                                       no harmonics and interpolation.
       UPDATE = .FALSE.
       NTOTAL = NOSUB*NTOT
       IERR   = 0
@@ -165,9 +165,9 @@ C                                       no harmonics and interpolation.
                ENDIF
             ENDIF
          ENDIF
-C
-C        If new time setting processing, only take this:
-C
+!
+!        If new time setting processing, only take this:
+!
          IF ( NEWSET ) THEN
             IPB = IPH
             CALL DLWQTB ( LUN(19), IOFF   , HARMAT , IHARM  , IPA    ,
@@ -193,39 +193,39 @@ C
          NRHARM = -1
       ENDIF
       goto 9999    !   return
-C
-C         first set result zero and evaluate the harmonic components
-C
+!
+!         first set result zero and evaluate the harmonic components
+!
    10 IF ( IFFLAG .EQ. 1 ) THEN
          READ ( LUN(4) ) ( IPOINT(K),K=1,NTOT+3 )
       ENDIF
       DO 20 I = 1 , NTOTAL
          RESULT(I) = 0.0
    20 CONTINUE
-C
+!
       I2 =  NRHARM+1
       CALL DLWQT3 ( ITIME  , IHARM  , HARMAT   , HARMAT(I2) , NRHARM ,
      *              NOSUB  , NOSPAC , IPOINT   , NPOINT     , RESULT ,
      *              LUNTXT(3), LUN(3), LUN(19) , ISFLAG     , IFFLAG ,
      *              UPDATH )
       IF ( UPDATH ) UPDATE = .TRUE.
-C
+!
       NPOINT = NPOINT + 1
-C
-C         then evaluate the block- and linear functions
-C
+!
+!         then evaluate the block- and linear functions
+!
       I2 =  NTOT +1
       J2 =  NRFTOT +1
-C         5 arguments of integer and real array space removed
-C         opening of binary file moved inside DLWQT4         July 2002
+!         5 arguments of integer and real array space removed
+!         opening of binary file moved inside DLWQT4         July 2002
       CALL DLWQT4 ( LUN    , LUNTXT , ftype         , LUN(19) , IS     ,
      *              ITIME  , RESULT , IPOINT(NPOINT), NOSUB   , NRFTOT ,
      *              ISFLAG , IFFLAG , UPDATB        , NTOTAL  , LSTREC ,
      *              LREWIN , RECLST , dlwqd         )
       IF ( UPDATB ) UPDATE = .TRUE.
-C
-C         update the pointers
-C
+!
+!         update the pointers
+!
       IPH = IPH + NOSPAC + NRHARM
       IPF = IPF + NRHARM
       IPA = IPA + NRFTOT*2

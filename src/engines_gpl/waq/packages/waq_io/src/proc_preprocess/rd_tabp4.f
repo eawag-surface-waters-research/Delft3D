@@ -26,40 +26,40 @@
      +                      PROC_ID     , PROC_NAME   ,
      +                      PROC_FORT   , PROC_TRCO   ,
      +                      LUNREP      , IERROR      )
-C
-C     Deltares
-C
-C     CREATED            :  june 1999 by Jan van Beek
-C
-C     FUNCTION           :  Read TABLE_P4 group from NEFIS file
-C
-C     FILES              :  NEFIS file assumed opened
-C
-C     SUBROUTINES CALLED :
-C
-C     ARGUMENTS
-C
-C     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DEFFDS       INT    2993    I/O     Definition file descriptor
-C     DATFDS       INT    999     I/O     Data file descriptor
-C     NO_PROC_MAX  INT            I       maximum number of processes
-C     NO_PROC      INT            I       number of processes
-C     PROC_ID      CHA*10 NO_PROC I       unique process identification
-C     PROC_NAME    CHA*50 NO_PROC I       process name
-C     PROC_FORT    CHA*10 NO_PROC I       reference to fortran routine
-C     PROC_TRCO    INT    NO_PROC I       transport code (123)
-C     LUNREP       INT    1       I       Unit number report file
-C     IERROR       INT    1       O       Error
-C
-C     IMPLICIT NONE for extra compiler checks
-C     SAVE to keep the group definition intact
-C
+!
+!     Deltares
+!
+!     CREATED            :  june 1999 by Jan van Beek
+!
+!     FUNCTION           :  Read TABLE_P4 group from NEFIS file
+!
+!     FILES              :  NEFIS file assumed opened
+!
+!     SUBROUTINES CALLED :
+!
+!     ARGUMENTS
+!
+!     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DEFFDS       INT    2993    I/O     Definition file descriptor
+!     DATFDS       INT    999     I/O     Data file descriptor
+!     NO_PROC_MAX  INT            I       maximum number of processes
+!     NO_PROC      INT            I       number of processes
+!     PROC_ID      CHA*10 NO_PROC I       unique process identification
+!     PROC_NAME    CHA*50 NO_PROC I       process name
+!     PROC_FORT    CHA*10 NO_PROC I       reference to fortran routine
+!     PROC_TRCO    INT    NO_PROC I       transport code (123)
+!     LUNREP       INT    1       I       Unit number report file
+!     IERROR       INT    1       O       Error
+!
+!     IMPLICIT NONE for extra compiler checks
+!     SAVE to keep the group definition intact
+!
       IMPLICIT NONE
       SAVE
-C
-C     declaration of arguments
-C
+!
+!     declaration of arguments
+!
       INTEGER       NO_PROC_MAX , NO_PROC     ,
      +              LUNREP      , IERROR
       INTEGER       DEFFDS
@@ -67,19 +67,19 @@ C
       CHARACTER*50  PROC_NAME   (NO_PROC_MAX)
       CHARACTER*10  PROC_FORT   (NO_PROC_MAX)
       INTEGER       PROC_TRCO   (NO_PROC_MAX)
-C
-C     Local variables
-C
-C     GRPNAM  CHAR*16     1       LOCAL   group name (table)
-C     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
-C     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
-C     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
-C     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
-C     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
-C
+!
+!     Local variables
+!
+!     GRPNAM  CHAR*16     1       LOCAL   group name (table)
+!     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
+!     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
+!     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
+!     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
+!     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
+!
       INTEGER       NELEMS
       PARAMETER   ( NELEMS = 5 )
-C
+!
       INTEGER       I               , IELM          ,
      +              BUFLEN
       INTEGER       ELMDMS(2,NELEMS), NBYTSG(NELEMS),
@@ -87,16 +87,16 @@ C
       CHARACTER*16  GRPNAM
       CHARACTER*16  ELMNMS(NELEMS)  , ELMTPS(NELEMS)
       CHARACTER*64  ELMDES(NELEMS)
-C
-C     External NEFIS Functions
-C
+!
+!     External NEFIS Functions
+!
       INTEGER   GETELS
      +         ,GETELT
       EXTERNAL  GETELS
      +         ,GETELT
-C
-C     element names
-C
+!
+!     element names
+!
       DATA  GRPNAM  /'TABLE_P4'/
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
@@ -106,14 +106,14 @@ C
      + 'PROC_NAME','CHARACTER',50,1,0,'process name'                   ,
      + 'PROC_FORT','CHARACTER',10,1,0,'fortran subroutine'             ,
      + 'PROC_TRCO','INTEGER'  , 4,1,0,'transport code (123)'           /
-C
-C     Read group
-C
-C     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
+!
+!     Read group
+!
+!     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
       UINDEX(1) = 1
       UINDEX(2) = 1
       UINDEX(3) = 1
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
       BUFLEN = NBYTSG(1)*ELMDMS(2,1)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(1),
@@ -131,13 +131,13 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
          IERROR = 1
          GOTO 900
       ENDIF
-C
-C     Set dimension of table
-C
+!
+!     Set dimension of table
+!
       DO IELM = 2 , NELEMS
          ELMDMS(2,IELM) = NO_PROC
       ENDDO
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
       BUFLEN = NBYTSG(2)*ELMDMS(2,2)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(2),
@@ -148,7 +148,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
       BUFLEN = NBYTSG(3)*ELMDMS(2,3)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(3),
@@ -159,7 +159,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
       BUFLEN = NBYTSG(4)*ELMDMS(2,4)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(4),
@@ -170,7 +170,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
       BUFLEN = NBYTSG(5)*ELMDMS(2,5)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(5),
@@ -181,8 +181,8 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C
+!
   900 CONTINUE
       RETURN
-C
+!
       END

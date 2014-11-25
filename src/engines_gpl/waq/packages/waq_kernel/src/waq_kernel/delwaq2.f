@@ -21,85 +21,85 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C     Module DELWAQ2:
-C     - Encapsulate the interface of DELWQ2 and DLWQI0:
-C       A, J and C are now pointers to arrays
-C
+!     Module DELWAQ2:
+!     - Encapsulate the interface of DELWQ2 and DLWQI0:
+!       A, J and C are now pointers to arrays
+!
       MODULE DELWAQ2
 
       CONTAINS
 
       SUBROUTINE DELWQ2 ( A, J, C, IMAXA, IMAXI, IMAXC, INIT,
      &                    ACTION, DLWQD                     )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C            DELWAQ - Deltares WAter Quality programme
-C
-C                     Version 4.30           june 1997
-C                     Replaces:
-C                     Version 4.22           feb 1997
-C                     Version 4.21           jan 1997
-C                     Version 4.20           may 1996
-C                     Version 4.01           may 1994
-C                     Version 4.00           september 1993
-C                     Release 3.05           november 1991.
-C                     Release 3.0 - RWS-DIV, june 1988.
-C                     Release 2.0 of july     1984.
-C                     Release 1.0 of december 1981.
-C
-C     INFORMATION   : Deltares
-C                     L. Postma,
-C                     Rotterdamse weg 185,
-C                     P.O. Box 177,
-C                     2600 MH Delft,
-C                     Netherlands.
-C                     telephone (31) 15-569353
-C                     telefax   (31) 15-619674
-C
-C     FUNCTION      : Performs the waterquality simulations on a
-C                     consistent set of binary intermediate files.
-C
-C     LOGICAL UNITS : LUNIN  , input , binary common-block file
-C                       *    , output, user console file
-C
-C     SUBROUTINES CALLED : DLWQI0, initialises the system
-C                          DLWQN1, first   integration procedure
-C                          DLWQN2, second  integration procedure
-C                          DLWQN3, third   integration procedure
-C                          DLWQN4, fourth  integration procedure
-C                          DLWQN5, fifth   integration procedure
-C                          DLWQN6, sixth   integration procedure
-C                          DLWQN7, seventh integration procedure
-C                          DLWQN8, eighth  integration procedure
-C                          DLWQN9, nineth  integration procedure
-C                          DLWQNB, tenth   integration procedure
-C                          DLWQNC, 11th    integration procedure
-C                          DLWQND, 12th    integration procedure
-C                          DLWQNE, 13th    integration procedure
-C                          DLWQNA, 14th    integration procedure
-C                          DLWQNF, 15th    integration procedure
-C                          DLWQNG, 16th    integration procedure
-C                          DLWQNH, 17th    integration procedure
-C                          DLWQNI, 18th    integration procedure
-C                          DLWQNJ, 19+20   integration procedure
-C                          SRSTOP, stops execution
-C                          DHOPNF, opens files
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL     IMAXA   real      workspace array
-C     J       INTEGER  IMAXJ   integer   workspace array
-C     C       CHAR*20  IMAXC   character workspace array
-C     DLWQD   TYPE(..) 1       derived type for persistent storage
-C     IMAXA   INTEGER  1       maximum real      workspace array
-C     IMAXI   INTEGER  1       maximum integer   workspace array
-C     IMAXC   INTEGER  1       maximum character workspace array
-C     INIT    LOGICAL  1       if T boot the system if F no initialisation
-C     ACTION  INTEGER  1       indication of the action to be performed
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!            DELWAQ - Deltares WAter Quality programme
+!
+!                     Version 4.30           june 1997
+!                     Replaces:
+!                     Version 4.22           feb 1997
+!                     Version 4.21           jan 1997
+!                     Version 4.20           may 1996
+!                     Version 4.01           may 1994
+!                     Version 4.00           september 1993
+!                     Release 3.05           november 1991.
+!                     Release 3.0 - RWS-DIV, june 1988.
+!                     Release 2.0 of july     1984.
+!                     Release 1.0 of december 1981.
+!
+!     INFORMATION   : Deltares
+!                     L. Postma,
+!                     Rotterdamse weg 185,
+!                     P.O. Box 177,
+!                     2600 MH Delft,
+!                     Netherlands.
+!                     telephone (31) 15-569353
+!                     telefax   (31) 15-619674
+!
+!     FUNCTION      : Performs the waterquality simulations on a
+!                     consistent set of binary intermediate files.
+!
+!     LOGICAL UNITS : LUNIN  , input , binary common-block file
+!                       *    , output, user console file
+!
+!     SUBROUTINES CALLED : DLWQI0, initialises the system
+!                          DLWQN1, first   integration procedure
+!                          DLWQN2, second  integration procedure
+!                          DLWQN3, third   integration procedure
+!                          DLWQN4, fourth  integration procedure
+!                          DLWQN5, fifth   integration procedure
+!                          DLWQN6, sixth   integration procedure
+!                          DLWQN7, seventh integration procedure
+!                          DLWQN8, eighth  integration procedure
+!                          DLWQN9, nineth  integration procedure
+!                          DLWQNB, tenth   integration procedure
+!                          DLWQNC, 11th    integration procedure
+!                          DLWQND, 12th    integration procedure
+!                          DLWQNE, 13th    integration procedure
+!                          DLWQNA, 14th    integration procedure
+!                          DLWQNF, 15th    integration procedure
+!                          DLWQNG, 16th    integration procedure
+!                          DLWQNH, 17th    integration procedure
+!                          DLWQNI, 18th    integration procedure
+!                          DLWQNJ, 19+20   integration procedure
+!                          SRSTOP, stops execution
+!                          DHOPNF, opens files
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL     IMAXA   real      workspace array
+!     J       INTEGER  IMAXJ   integer   workspace array
+!     C       CHAR*20  IMAXC   character workspace array
+!     DLWQD   TYPE(..) 1       derived type for persistent storage
+!     IMAXA   INTEGER  1       maximum real      workspace array
+!     IMAXI   INTEGER  1       maximum integer   workspace array
+!     IMAXC   INTEGER  1       maximum character workspace array
+!     INIT    LOGICAL  1       if T boot the system if F no initialisation
+!     ACTION  INTEGER  1       indication of the action to be performed
+!
       USE DIO_PLT_RW
       use grids
       USE DLWQI0_MOD
@@ -111,9 +111,9 @@ C
       implicit none
 
       include 'actions.inc'
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       IMAXA , IMAXI , IMAXC
       INTEGER, DIMENSION(:), POINTER          :: J
       REAL, DIMENSION(:), POINTER             :: A
@@ -123,50 +123,50 @@ C
       TYPE(DELWAQ_DATA), TARGET               :: DLWQD
       type(GridPointerColl), pointer          :: GridPs               ! collection of all grid definitions
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUNIN   INTEGER  1       unit nummer of the common BOOT-file
-C     IPAGE   INTEGER  1       pagelength for output in lines
-C     NLUN    INTEGER  1       number of unit numbers
-C     LCHMAX  INTEGER  1       length file names
-C
-C
-C     Local declarations
-C
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUNIN   INTEGER  1       unit nummer of the common BOOT-file
+!     IPAGE   INTEGER  1       pagelength for output in lines
+!     NLUN    INTEGER  1       number of unit numbers
+!     LCHMAX  INTEGER  1       length file names
+!
+!
+!     Local declarations
+!
       INTEGER, PARAMETER ::   LUNIN  =   914
       INTEGER, PARAMETER ::   IPAGE  =    64
       INTEGER, PARAMETER ::   NLUN   =    50
       INTEGER, PARAMETER ::   LCHMAX =   255
-C
-C           input structure for boot-file
-C
+!
+!           input structure for boot-file
+!
       INTEGER, DIMENSION(INSIZE)  :: IN
       INTEGER, DIMENSION(IISIZE)  :: II
       EQUIVALENCE ( IN( 1) , NOSEG ) , ( II( 1) , ITSTRT )
-C
+!
       INTEGER, SAVE            :: LUN(NLUN)
       CHARACTER*(LCHMAX), SAVE :: LCHAR(NLUN)
       integer, save            :: filtype(nlun)
@@ -174,10 +174,10 @@ C
       LOGICAL, SAVE            :: INIT2        = .TRUE. ! To suppress the start-up screen
       LOGICAL, SAVE            :: INIT_COUPLIB = .TRUE. ! Initialise the couplib library only once
 
-c     Common to define external communications in SOBEK
-c     OLCFWQ             Flag indicating ONLINE running of CF and WQ
-c     SRWACT             Flag indicating active data exchange with SRW
-c     RTCACT             Flag indicating output for RTC
+!     Common to define external communications in SOBEK
+!     OLCFWQ             Flag indicating ONLINE running of CF and WQ
+!     SRWACT             Flag indicating active data exchange with SRW
+!     RTCACT             Flag indicating output for RTC
 
       character*(lchmax)       :: inifil, dioconfig
       logical                  :: lfound
@@ -187,11 +187,11 @@ c     RTCACT             Flag indicating output for RTC
       CHARACTER*2              :: C2
       LOGICAL                  :: OLCFWQ, SRWACT, RTCACT, DDWAQ
       COMMON /COMMUN/             OLCFWQ, SRWACT, RTCACT, DDWAQ
-C
+!
       integer(4), save         :: ithndl = 0
-C
-C     Local variables
-C
+!
+!     Local variables
+!
       INTEGER, SAVE            :: INDX
       INTEGER                  :: IERR
       INTEGER                  :: IMR
@@ -201,16 +201,16 @@ C
       INTEGER                  :: IERRD
       INTEGER                  :: K
       LOGICAL                  :: NOLIC
-C
+!
       IF ( INIT ) THEN
          call timini ( )
          ! for openda-usage, where multiple instances are launched,
          ! the time module does not work correctly.
          if ( dlwqd%set_timer ) timon = .true.
          if (timon) call timstrt( "delwaq2", ithndl )
-C
-C        boot the system; read dimensions of sysn from delwaq03.wrk-file
-C
+!
+!        boot the system; read dimensions of sysn from delwaq03.wrk-file
+!
          CALL DHGNAM(RUNID,'.mon')
          LCHAR(1) = TRIM(RUNID)//'-delwaq03.wrk'
          CALL DHOPNF ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
@@ -225,21 +225,21 @@ C
             CLOSE ( LUN(ILUN) )
     5    CONTINUE
          close(lunin)
-C
-C        start couplib
-C
+!
+!        start couplib
+!
          if ( init_couplib ) then
              init_couplib = .false.
              call couplib_init(lunout=lun(19), idebug=0)
          endif
-c
-c        store number of processes and own process number in sysn
-c
+!
+!        store number of processes and own process number in sysn
+!
          mypart = myprc
          npartp = numprc
-C
+!
          if (mypart .gt. 1) then
-C open lokale monitor-files voor uitvoer tijdens initialisatie
+! open lokale monitor-files voor uitvoer tijdens initialisatie
             write(lchar(19),'(a,i3.3,a)') 'part-', mypart,'.mon'
          end if
 
@@ -248,7 +248,7 @@ C open lokale monitor-files voor uitvoer tijdens initialisatie
 
          IF (MYPART .EQ. 1) THEN
 
-C      Initialise communication options SOBEK
+!      Initialise communication options SOBEK
 
             OLCFWQ = .FALSE.
             SRWACT = .FALSE.
@@ -308,9 +308,9 @@ C      Initialise communication options SOBEK
                   CALL DIOINIT()
                endif
             ENDIF
-C
-C     The unlocking !
-C
+!
+!     The unlocking !
+!
             IF ( INIT2 ) THEN
                INIT2 = .FALSE.
                IF ( NOQ3 .GT. 0 ) THEN
@@ -331,34 +331,34 @@ C
                call srstop(1)
             endif
          endif
-C
-C        end of reading master proces
-C
-C        initialize timers
-C
+!
+!        end of reading master proces
+!
+!        initialize timers
+!
          call timers_waq_init(lun(19))
          call couplib_timers_init(timer_start_couplib,
      +       couplib_max_timers, measr_idle=.false.)
-C
+!
          call timer_start(timer_total)
-C
+!
          call timer_start(timer_init)
 
-C collaborative call to i0
+! collaborative call to i0
          call sync_processes()
-c
+!
          IERR = 0
          gridps => dlwqd%gridps
          call dlwqi0 ( nlun   , a      , j      , c      , imaxa  ,
      &                 imaxi  , imaxc  , ipage  , lun    , lchar  ,
      &                 filtype, gridps , dlwqd  , ierr   )
-C
+!
          if (mypart .eq. 1) then
             CLOSE ( LUNIN )
             IF ( IERR .GT. 0 ) GOTO 992
-C
-C        end of initialisation
-C
+!
+!        end of initialisation
+!
             WRITE ( * , *)
             WRITE ( * , * ) ' SIMULATION STARTED '
             WRITE ( * , * )
@@ -366,36 +366,36 @@ C
          endif
          call timer_stop(timer_init)
       ENDIF
-c     SOBEK external communications ONLY implemented in scheme 10!
+!     SOBEK external communications ONLY implemented in scheme 10!
       IF ( OLCFWQ .OR. SRWACT .OR. RTCACT ) THEN
           IF ( INTSRT .NE. 10 .AND. (INTSRT .NE. 15 .AND. INTSRT .NE. 19) ) GOTO 991
       ENDIF
 
-C
-C     Store the local persistent variables
-C
+!
+!     Store the local persistent variables
+!
       DLWQD%II = II
       DLWQD%IN = IN
 
-C
-C     Check restrictions of Parallel computing
-C
+!
+!     Check restrictions of Parallel computing
+!
       IF ( NPARTp .GT. 1 ) THEN
-C
-C        Parallel computing only allowed for schemes 1, 5, 12
-C
+!
+!        Parallel computing only allowed for schemes 1, 5, 12
+!
          IF ( INTSRT.NE.1 .AND. INTSRT.NE.5 .AND. INTSRT.NE.12 ) GOTO 993
-C
-C        Bottom layers not allowed in parallel runs
-C
+!
+!        Bottom layers not allowed in parallel runs
+!
          IF ( NOQ4.GT.0 ) GOTO 994
-C
-C        Multiple grids not allowed in parallel runs
-C
+!
+!        Multiple grids not allowed in parallel runs
+!
          IF ( NOGRID.GT.1 ) GOTO 995
-C
-C        Use of DelftIO coupling not allowed in parallel runs
-C
+!
+!        Use of DelftIO coupling not allowed in parallel runs
+!
          IF ( OLCFWQ .OR. SRWACT .OR. RTCACT .OR. DDWAQ ) GOTO 996
       ENDIF
 

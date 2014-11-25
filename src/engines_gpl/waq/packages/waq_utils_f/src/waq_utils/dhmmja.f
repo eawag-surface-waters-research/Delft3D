@@ -114,7 +114,7 @@
       integer         jstart                            ! lower limit Flow arrays method 19 and 20
       integer         nmmaxj                            ! upper limit Flow arrays method 19 and 20
       integer         nr_jar_new                        ! counter for newly allocated arrays
-C
+!
       IIAPOI = IASIZE +  1
       IIATYP = IASIZE +  2
       IIABYT = IASIZE +  3
@@ -211,133 +211,133 @@ C
          ARRDM3(I_JAR) = 0
          ARRLEN(I_JAR) = 0
       ENDDO
-C
+!
       ARRNAM(IIXPNT) = 'IXPOIN'
       ARRKND(IIXPNT) = 3
       ARRDM1(IIXPNT) = 4
       ARRDM2(IIXPNT) = NOQ+NOQ4
       ARRDM3(IIXPNT) = 1
-C
+!
       ARRNAM(IIDUMP) = 'IIDUMP'
       ARRKND(IIDUMP) = 1
       ARRDM1(IIDUMP) = NODUMP
       ARRDM2(IIDUMP) = 1
       ARRDM3(IIDUMP) = 1
-C
+!
       ARRNAM(IIBPNT) = 'IBPNT '
       ARRKND(IIBPNT) = 2
       ARRDM1(IIBPNT) = 4
       ARRDM2(IIBPNT) = NOBND
       ARRDM3(IIBPNT) = 1
-C
+!
       ARRNAM(IIWAST) = 'IWAST '
       ARRKND(IIWAST) = 1
       ARRDM1(IIWAST) = NOWST
       ARRDM2(IIWAST) = 1
       ARRDM3(IIWAST) = 1
-C
+!
       ARRNAM(IIDPNW) = 'IDPNEW'
       ARRKND(IIDPNW) = 1
       ARRDM1(IIDPNW) = NOSYS
       ARRDM2(IIDPNW) = 1
       ARRDM3(IIDPNW) = 1
-C
+!
       ARRNAM(IIDPNT) = 'IDPNT '
       ARRKND(IIDPNT) = 1
       ARRDM1(IIDPNT) = NOSYS
       ARRDM2(IIDPNT) = 1
       ARRDM3(IIDPNT) = 1
-C
+!
       ARRNAM(IIVPNW) = 'IVPNEW'
       ARRKND(IIVPNW) = 1
       ARRDM1(IIVPNW) = NOSYS
       ARRDM2(IIVPNW) = 1
       ARRDM3(IIVPNW) = 1
-C
+!
       ARRNAM(IIVPNT) = 'IVPNT '
       ARRKND(IIVPNT) = 1
       ARRDM1(IIVPNT) = NOSYS
       ARRDM2(IIVPNT) = 1
       ARRDM3(IIVPNT) = 1
-C
+!
       ARRNAM(IINRHA) = 'IHARM '
       ARRKND(IINRHA) = 1
       ARRDM1(IINRHA) = NIHARM
       ARRDM2(IINRHA) = 1
       ARRDM3(IINRHA) = 1
-C
+!
       ARRNAM(IINRH2) = 'NRHARM'
       ARRKND(IINRH2) = 1
       ARRDM1(IINRH2) = NOITEM
       ARRDM2(IINRH2) = 1
       ARRDM3(IINRH2) = 1
-C
+!
       ARRNAM(IINRFT) = 'NRFTOT'
       ARRKND(IINRFT) = 1
       ARRDM1(IINRFT) = NOITEM
       ARRDM2(IINRFT) = 1
       ARRDM3(IINRFT) = 1
-C
+!
       ARRNAM(IIBULK) = 'IPOINT'
       ARRKND(IIBULK) = 1
       ARRDM1(IIBULK) = NPOINS
       ARRDM2(IIBULK) = 1
       ARRDM3(IIBULK) = 1
-C
+!
       ARRNAM(IILP  ) = 'IP    '
       ARRKND(IILP  ) = 1
       ARRDM1(IILP  ) = 8
       ARRDM2(IILP  ) = 1
       ARRDM3(IILP  ) = 1
-C
+!
       ARRNAM(IIGRID) = 'LGRID '
       ARRKND(IIGRID) = 1
       ARRDM1(IIGRID) = NX
       ARRDM2(IIGRID) = NY
       ARRDM3(IIGRID) = 1
-C
+!
       ARRNAM(IINSVA) = 'NSVAR '
       ARRKND(IINSVA) = 1
       ARRDM1(IINSVA) = NPROC
       ARRDM2(IINSVA) = 1
       ARRDM3(IINSVA) = 1
-C
+!
       ARRNAM(IIIFLU) = 'IFLUX '
       ARRKND(IIIFLU) = 1
       ARRDM1(IIIFLU) = NPROC
       ARRDM2(IIIFLU) = 1
       ARRDM3(IIIFLU) = 1
-C
+!
       ARRNAM(IIIPMS) = 'IPMSA '
       ARRKND(IIIPMS) = 1
       ARRDM1(IIIPMS) = NIPMSA
       ARRDM2(IIIPMS) = 1
       ARRDM3(IIIPMS) = 1
-C
+!
       ARRNAM(IIIPSS) = 'IPSSA '
       ARRKND(IIIPSS) = 1
       ARRDM1(IIIPSS) = NIPMSA
       ARRDM2(IIIPSS) = 1
       ARRDM3(IIIPSS) = 1
-C
+!
       ARRNAM(IIIMOD) = 'IMODU '
       ARRKND(IIIMOD) = 1
       ARRDM1(IIIMOD) = NPROC
       ARRDM2(IIIMOD) = 1
       ARRDM3(IIIMOD) = 1
-C
+!
       ARRNAM(IIIOUT) = 'IOUTPS'
       ARRKND(IIIOUT) = 2
       ARRDM1(IIIOUT) = 7
       ARRDM2(IIIOUT) = NOUTP
       ARRDM3(IIIOUT) = 1
-C
+!
       ARRNAM(IIIOPO) = 'IOPOIN'
       ARRKND(IIIOPO) = 1
       ARRDM1(IIIOPO) = NRVART
       ARRDM2(IIIOPO) = 1
       ARRDM3(IIIOPO) = 1
-C
+!
       ARRNAM(IIKNMR) = 'IKNMRK'
       ARRKND(IIKNMR) = 3
       ARRDM1(IIKNMR) = NOSEG+NSEG2
@@ -349,7 +349,7 @@ C
          ARRDM2(IIKNMR) = 4
       ENDIF
       ARRDM3(IIKNMR) = NOGRID
-C
+!
       ARRNAM(IIKTIM) = 'IKTIM '
       ARRKND(IIKTIM) = 1
       IF ( IFIOPK .EQ. 0 ) THEN
@@ -361,93 +361,93 @@ C
       ENDIF
       ARRDM2(IIKTIM) = 1
       ARRDM3(IIKTIM) = 1
-C
+!
       ARRNAM(IIQDMP) = 'IQDMP '
       ARRKND(IIQDMP) = 1
       ARRDM1(IIQDMP) = NOQ+NOQ4
       ARRDM2(IIQDMP) = 1
       ARRDM3(IIQDMP) = 1
-C
+!
       ARRNAM(IISDMP) = 'ISDMP '
       ARRKND(IISDMP) = 1
       ARRDM1(IISDMP) = NOSEG+NSEG2
       ARRDM2(IISDMP) = 1
       ARRDM3(IISDMP) = 1
-C
+!
       ARRNAM(IIPDMP) = 'IPDMP '
       ARRKND(IIPDMP) = 1
       ARRDM1(IIPDMP) = 2*NDMPAR + NTDMPQ + NTDMPS
       ARRDM2(IIPDMP) = 1
       ARRDM3(IIPDMP) = 1
-C
+!
       ARRNAM(IIORAA) = 'IORAAI'
       ARRKND(IIORAA) = 1
       ARRDM1(IIORAA) = NORAAI
       ARRDM2(IIORAA) = 1
       ARRDM3(IIORAA) = 1
-C
+!
       ARRNAM(INQRAA) = 'NQRAAI'
       ARRKND(INQRAA) = 1
       ARRDM1(INQRAA) = NORAAI
       ARRDM2(INQRAA) = 1
       ARRDM3(INQRAA) = 1
-C
+!
       ARRNAM(IIQRAA) = 'IQRAAI'
       ARRKND(IIQRAA) = 1
       ARRDM1(IIQRAA) = NTRAAQ
       ARRDM2(IIQRAA) = 1
       ARRDM3(IIQRAA) = 1
-C
+!
       ARRNAM(IINISP) = 'INWISP'
       ARRKND(IINISP) = 1
       ARRDM1(IINISP) = NEWISP
       ARRDM2(IINISP) = 1
       ARRDM3(IINISP) = 1
-C
+!
       ARRNAM(IINTYP) = 'INTYPE'
       ARRKND(IINTYP) = 1
       ARRDM1(IINTYP) = NOBND + NOWST
       ARRDM2(IINTYP) = 1
       ARRDM3(IINTYP) = 1
-C
+!
       ARRNAM(IIWORK) = 'IWORK '
       ARRKND(IIWORK) = 1
       ARRDM1(IIWORK) = MAX(NOBND*NOSYS,NOWST*(NOTOT+2))
       ARRDM2(IIWORK) = 1
       ARRDM3(IIWORK) = 1
-C
+!
       IF ( F_SOLV ) THEN
          ARRNAM(IJTRAC) = 'ITRACE'
          ARRKND(IJTRAC) = 1
          ARRDM1(IJTRAC) = NOSEG+NSEG2+NOBND
          ARRDM2(IJTRAC) = 1
          ARRDM3(IJTRAC) = 1
-C
+!
          ARRNAM(IIMAT ) = 'IMATRX'
          ARRKND(IIMAT ) = 1
          ARRDM1(IIMAT ) = NOMAT
          ARRDM2(IIMAT ) = 1
          ARRDM3(IIMAT ) = 1
-C
+!
          ARRNAM(IIWRK ) = 'IWRK  '
          ARRKND(IIWRK ) = 1
          ARRDM1(IIWRK ) = NOSEG+NSEG2 + NOBND
          ARRDM2(IIWRK ) = 1
          ARRDM3(IIWRK ) = 1
       ENDIF
-C
+!
       ARRNAM(IISYSN) = 'ISYSN '
       ARRKND(IISYSN) = 1
       ARRDM1(IISYSN) = INSIZE
       ARRDM2(IISYSN) = 1
       ARRDM3(IISYSN) = 1
-C
+!
       ARRNAM(IISYSI) = 'ISYSI '
       ARRKND(IISYSI) = 1
       ARRDM1(IISYSI) = IISIZE
       ARRDM2(IISYSI) = 1
       ARRDM3(IISYSI) = 1
-C
+!
       IF ( TRIADI ) THEN
          NOHOR = NMAX * (MMAX+4)
          ARRNAM(IIKFU ) = 'KFU   '
@@ -455,31 +455,31 @@ C
          ARRDM1(IIKFU ) = NOHOR*KMAX
          ARRDM2(IIKFU ) = 1
          ARRDM3(IIKFU ) = 1
-C
+!
          ARRNAM(IIKFV ) = 'KFV   '
          ARRKND(IIKFV ) = 1
          ARRDM1(IIKFV ) = NOHOR*KMAX
          ARRDM2(IIKFV ) = 1
          ARRDM3(IIKFV ) = 1
-C
+!
          ARRNAM(IIKCS ) = 'KCS   '
          ARRKND(IIKCS ) = 1
          ARRDM1(IIKCS ) = NOHOR*KMAX
          ARRDM2(IIKCS ) = 1
          ARRDM3(IIKCS ) = 1
-C
+!
          ARRNAM(IIKFS ) = 'KFS   '
          ARRKND(IIKFS ) = 1
          ARRDM1(IIKFS ) = NOHOR*KMAX
          ARRDM2(IIKFS ) = 1
          ARRDM3(IIKFS ) = 1
-C
+!
          ARRNAM(IILGRA) = 'LGRACT'
          ARRKND(IILGRA) = 1
          ARRDM1(IILGRA) = MMAX*NMAX
          ARRDM2(IILGRA) = 1
          ARRDM3(IILGRA) = 1
-C
+!
          ARRNAM(IIKBND) = 'IKBND '
          ARRKND(IIKBND) = 1
          ARRDM1(IIKBND) = NOBND
@@ -495,121 +495,121 @@ C
          ARRDM3(IILGRA) = 1
 
       ENDIF
-C
+!
       ARRNAM(IIPGRD) = 'PROGRD'
       ARRKND(IIPGRD) = 1
       ARRDM1(IIPGRD) = NPROC
       ARRDM2(IIPGRD) = 1
       ARRDM3(IIPGRD) = 1
-C
+!
       ARRNAM(IIPNDT) = 'PRONDT'
       ARRKND(IIPNDT) = 1
       ARRDM1(IIPNDT) = NPROC
       ARRDM2(IIPNDT) = 1
       ARRDM3(IIPNDT) = 1
-C
+!
       ARRNAM(IIPVAR) = 'PRVVAR'
       ARRKND(IIPVAR) = 1
       ARRDM1(IIPVAR) = NIPMSA
       ARRDM2(IIPVAR) = 1
       ARRDM3(IIPVAR) = 1
-C
+!
       ARRNAM(IIPTYP) = 'PRVTYP'
       ARRKND(IIPTYP) = 1
       ARRDM1(IIPTYP) = NIPMSA
       ARRDM2(IIPTYP) = 1
       ARRDM3(IIPTYP) = 1
-C
+!
       ARRNAM(IIVARR) = 'VARARR'
       ARRKND(IIVARR) = 1
       ARRDM1(IIVARR) = NOVAR
       ARRDM2(IIVARR) = 1
       ARRDM3(IIVARR) = 1
-C
+!
       ARRNAM(IIVIDX) = 'VARIDX'
       ARRKND(IIVIDX) = 1
       ARRDM1(IIVIDX) = NOVAR
       ARRDM2(IIVIDX) = 1
       ARRDM3(IIVIDX) = 1
-C
+!
       ARRNAM(IIVTDA) = 'VARTDA'
       ARRKND(IIVTDA) = 1
       ARRDM1(IIVTDA) = NOVAR
       ARRDM2(IIVTDA) = 1
       ARRDM3(IIVTDA) = 1
-C
+!
       ARRNAM(IIVDAG) = 'VARDAG'
       ARRKND(IIVDAG) = 1
       ARRDM1(IIVDAG) = NOVAR
       ARRDM2(IIVDAG) = 1
       ARRDM3(IIVDAG) = 1
-C
+!
       ARRNAM(IIVTAG) = 'VARTAG'
       ARRKND(IIVTAG) = 1
       ARRDM1(IIVTAG) = NOVAR
       ARRDM2(IIVTAG) = 1
       ARRDM3(IIVTAG) = 1
-C
+!
       ARRNAM(IIVAGG) = 'VARAGG'
       ARRKND(IIVAGG) = 1
       ARRDM1(IIVAGG) = NOVAR
       ARRDM2(IIVAGG) = 1
       ARRDM3(IIVAGG) = 1
-C
+!
       ARRNAM(IIVSET) = 'VGRSET'
       ARRKND(IIVSET) = 2
       ARRDM1(IIVSET) = NOVAR
       ARRDM2(IIVSET) = NOGRID
       ARRDM3(IIVSET) = 1
-C
+!
       ARRNAM(IIGNOS) = 'GRDNOS'
       ARRKND(IIGNOS) = 1
       ARRDM1(IIGNOS) = NOGRID
       ARRDM2(IIGNOS) = 1
       ARRDM3(IIGNOS) = 1
-C
+!
       ARRNAM(IIGREF) = 'GRDREF'
       ARRKND(IIGREF) = 1
       ARRDM1(IIGREF) = NOGRID
       ARRDM2(IIGREF) = 1
       ARRDM3(IIGREF) = 1
-C
+!
       ARRNAM(IIGSEG) = 'GRDSEG'
       ARRKND(IIGSEG) = 2
       ARRDM1(IIGSEG) = NOSEG+NSEG2
       ARRDM2(IIGSEG) = NOGRID
       ARRDM3(IIGSEG) = 1
-C
+!
       ARRNAM(IOWNS)  = 'OWNERS'
       ARRKND(IOWNS)  = 1
       ARRDM1(IOWNS)  = NOSEG+NSEG2
       ARRDM2(IOWNS)  = 1
       ARRDM3(IOWNS)  = 1
-C
+!
       ARRNAM(IOWNQ)  = 'OWNERQ'
       ARRKND(IOWNQ)  = 1
       ARRDM1(IOWNQ)  = NOQ+NOQ4
       ARRDM2(IOWNQ)  = 1
       ARRDM3(IOWNQ)  = 1
-C
+!
       arrnam(ipror)  = 'PROREF'
       arrknd(ipror)  = 1
       arrdm1(ipror)  = nrref
       arrdm2(ipror)  = nproc
       arrdm3(ipror)  = 1
-C
+!
       arrnam(iprvpt) = 'PROPNT'
       arrknd(iprvpt) = 1
       arrdm1(iprvpt) = nproc
       arrdm2(iprvpt) = 1
       arrdm3(iprvpt) = 1
-C
+!
       arrnam(iprdon) = 'PRODON'
       arrknd(iprdon) = 1
       arrdm1(iprdon) = nproc
       arrdm2(iprdon) = 1
       arrdm3(iprdon) = 1
-C
+!
       ARRNAM(IIDMPB) = 'DMPBAL'
       ARRKND(IIDMPB) = 1
       ARRDM1(IIDMPB) = NDMPAR
@@ -646,17 +646,17 @@ C
             else
                ip = 0
             endif
-C
-C           Add one extra because of the shift between IBUF(0) and J(1)
-C
+!
+!           Add one extra because of the shift between IBUF(0) and J(1)
+!
             ip = ip + 1
             ip_jar(i_jar-iasize) = ip
             arrpoi(i_jar)        = ip
          enddo
       endif
-C
-C     Reset new disp and velo pointers if array's are the same
-C
+!
+!     Reset new disp and velo pointers if array's are the same
+!
       if ( ndspn .eq. 0 ) then
          idpnw = idpnt
          arrpoi(iidpnw) = arrpoi(iidpnt)

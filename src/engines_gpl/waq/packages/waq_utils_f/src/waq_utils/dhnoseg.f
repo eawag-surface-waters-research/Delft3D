@@ -22,29 +22,29 @@
 !!  rights reserved.
 
       subroutine dhnoseg( pnoseg )
-c
-c     Deltares
-c
-c     created             : nov 07 by jan van beek
-c
-c     function            : get noseg from /sysn/ common , system characteristics
-c
-c     logical unitnumbers : -
-c
-c     subroutines called  : -
-c
-c     parameters          : -
-c
-c     name    kind     length     funct.  description
-c     ----    -----    ------     ------- -----------
-c     pnoseg  integer       1     output  copy of the noseg from sysn
-c
-c     declarations
-c
+!
+!     Deltares
+!
+!     created             : nov 07 by jan van beek
+!
+!     function            : get noseg from /sysn/ common , system characteristics
+!
+!     logical unitnumbers : -
+!
+!     subroutines called  : -
+!
+!     parameters          : -
+!
+!     name    kind     length     funct.  description
+!     ----    -----    ------     ------- -----------
+!     pnoseg  integer       1     output  copy of the noseg from sysn
+!
+!     declarations
+!
       integer       pnoseg
-c
-c     common  /  sysn   /   system characteristics
-c
+!
+!     common  /  sysn   /   system characteristics
+!
       include 'sysn.inc'
 
       pnoseg = noseg

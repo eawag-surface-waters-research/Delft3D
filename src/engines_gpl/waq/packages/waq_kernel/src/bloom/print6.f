@@ -21,25 +21,25 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       4 Jan 1994
-C    Time:       19:05
-C    Program:    PRINT6.FOR
-C    Version:    1.2
-C    Programmer: Hans Los
-C    Previous version(s):
-C    1.1 -- 12 Feb 1993 -- 08:36 -- Operating System: DOS
-C    PRINT6 FORTRAN -- 14 Jun 1991 -- 10:46 -- Operating System: DOS
-C    0.0 -- 14 Jun 1991 --  8:53 -- Operating System: CMS
-C
-C    Update 1.2: removed storage limiting factors in ISPLIM.
-C    Update 1.1: added JNOW to paramter list and replaced SOME
-C    occurences if INOW by JNOW
-C
-C  *********************************************************************
-C  *   SUBROUTINE TO PRINT SOLUTIONS FOR ALL FEASIBILITY INTERVALS     *
-C  *         DETERMINE AND RECORD THE MAXIMUM SOLUTION                 *
-C  *********************************************************************
-C
+!    Date:       4 Jan 1994
+!    Time:       19:05
+!    Program:    PRINT6.FOR
+!    Version:    1.2
+!    Programmer: Hans Los
+!    Previous version(s):
+!    1.1 -- 12 Feb 1993 -- 08:36 -- Operating System: DOS
+!    PRINT6 FORTRAN -- 14 Jun 1991 -- 10:46 -- Operating System: DOS
+!    0.0 -- 14 Jun 1991 --  8:53 -- Operating System: CMS
+!
+!    Update 1.2: removed storage limiting factors in ISPLIM.
+!    Update 1.1: added JNOW to paramter list and replaced SOME
+!    occurences if INOW by JNOW
+!
+!  *********************************************************************
+!  *   SUBROUTINE TO PRINT SOLUTIONS FOR ALL FEASIBILITY INTERVALS     *
+!  *         DETERMINE AND RECORD THE MAXIMUM SOLUTION                 *
+!  *********************************************************************
+!
       SUBROUTINE PRINT6(BIO,BIOMAX,X,XDEF,INOW,JNOW,LINF,IRS,INT,NIN,
      1           NONUNI,NONUN,NUMUNI,NUMUN,LIB)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -52,10 +52,10 @@ C
       INTEGER JT(MT),NONUNI(*),NONUN(*),IRS(*),LIB(*)
       DIMENSION X(*),XDEF(*),BIO(*)
       DATA NPAUSE /0/
-C
-C  Initialize XOPT if this is the first interval for a time period.
-C  If DUMP is specified, then print solution for interval JNOW.
-C
+!
+!  Initialize XOPT if this is the first interval for a time period.
+!  If DUMP is specified, then print solution for interval JNOW.
+!
       IF (INOW .EQ. 1) XOPT = 0.0D0
       IF (IDUMP .EQ. 0) GO TO 40
       IF (INOW .EQ. 1 .OR. NPAUSE .GE. 20) THEN
@@ -75,10 +75,10 @@ C
       WRITE (IOU(6),30) (JT(JJJ),JJJ=1,KLX)
    30 FORMAT(2X,'Types permitted',4X,20I4)
    40 CONTINUE
-C
-C  Check for feasibility of interval JNOW.
-C  if LINF ne 0, exit after increasing NIN with 1
-C
+!
+!  Check for feasibility of interval JNOW.
+!  if LINF ne 0, exit after increasing NIN with 1
+!
       IF (LINF .EQ. 0) GO TO 180
       IF (INOW .EQ. 1 .AND. LMORCH .EQ. 0) GO TO 50
       IF (IDUMP .EQ. 0) GO TO 170
@@ -104,24 +104,24 @@ C
      1       '  all elements of a prospective pivot column are zero')
   170 NIN = NIN + 1
       RETURN
-C
-C  Solution for interval JNOW is feasible.
-C  Determine maximum biomass and record in BIO(1)
-C
+!
+!  Solution for interval JNOW is feasible.
+!  Determine maximum biomass and record in BIO(1)
+!
   180 CONTINUE
       BIO(1)=BIOMAX
-C
-C  Print solution for interval JNOW, if DUMP was specified.
-C
+!
+!  Print solution for interval JNOW, if DUMP was specified.
+!
       IF (IDUMP .EQ. 0) GO TO 290
       NPAUSE = NPAUSE + 10
       WRITE (IOU(6),190) (X(II),II=1,NUNUCO)
   190 FORMAT (2X,'Nutrient Slacks',2X,6(F8.2,2X))
       WRITE (IOU(6),200) (X(II),II=NUFILI,NUABCO)
   200 FORMAT (4X,'Energy Slacks',2X,2(F8.2,2X))
-C
-C  Print slacks for (optional) growth constraints.
-C
+!
+!  Print slacks for (optional) growth constraints.
+!
       IF (LGROCH .EQ. 0) GO TO 250
       II1 = NUEXRO - 4
       II2 = II1 + 5
@@ -132,9 +132,9 @@ C
       WRITE (IOU(6),220) (X(II),II=II1,II2)
   220 FORMAT (4X,'Growth slacks',2X,10(F8.2,2X))
       IF (II2 .LT. II2MAX) GO TO 210
-C
-C  Print slacks for (optional) mortality constraints.
-C
+!
+!  Print slacks for (optional) mortality constraints.
+!
       IF (LMORCH .EQ. 0) GO TO 250
       II1 = NUEXRO + NUECOG- 4
       II2 = II1 + 5
@@ -145,9 +145,9 @@ C
       WRITE (IOU(6),240) (X(II),II=II1,II2)
   240 FORMAT (3X,'Mortal. slacks',2X,10(F8.2,2X))
       IF (II2 .LT. II2MAX) GO TO 230
-C
-C Print type biomasses and the optimum of the solution.
-C
+!
+! Print type biomasses and the optimum of the solution.
+!
   250 CONTINUE
       II1 = NUSPE1 - 5
       II2 = NUSPE1 - 1
@@ -160,24 +160,24 @@ C
       WRITE (IOU(6),280) BIOMAX,X(NUCOLS+1)
   280 FORMAT (2X,'Total biomass',2X,F8.2,2X,'Optimum',2X,F8.2)
   290 CONTINUE
-C
-C  Compare optimum solution of JNOW to the absolute optimum of ALL
-C  previous intervals recorded in XOPT, and exit if XOPT is larger.
-C
-C  Update 14 june 1991.
-C  Use a truely small number rather than 0.01 to determine whether
-C  solutions are unique. Never check the first interval.
-C
+!
+!  Compare optimum solution of JNOW to the absolute optimum of ALL
+!  previous intervals recorded in XOPT, and exit if XOPT is larger.
+!
+!  Update 14 june 1991.
+!  Use a truely small number rather than 0.01 to determine whether
+!  solutions are unique. Never check the first interval.
+!
       DBIO=X(NUCOLS+1) - XOPT
       IF (INOW .EQ. 1) GO TO 310
       IF (DBIO .LT. -1.0D-6) RETURN
       IF (DBIO .GT.  1.0D-6) GO TO 310
-C
-C  BIO(1) is equal to BIO(2):
-C  two intervals have (approximately) the same total biomass.
-C  Record solution in XST, maximum in BIOST,
-C  and the interval number in INTST.
-C
+!
+!  BIO(1) is equal to BIO(2):
+!  two intervals have (approximately) the same total biomass.
+!  Record solution in XST, maximum in BIOST,
+!  and the interval number in INTST.
+!
       LST=1
       BIOST=BIO(1)
       XOPT = X(NUCOLS+1)
@@ -186,12 +186,12 @@ C
       DO 300 K=1,NUCOLS+1
   300 XST(K)=X(K)
       RETURN
-C
-C  BIO(1) is larger than BIO(2):
-C  Record solution in XDEF, maximum in BIO(2), the number of types
-C  with 0.0 reduced cost in NUMUN and the types with reduced costs
-C  of 0.0 in NONUM(20). Put the interval number in INT.
-C
+!
+!  BIO(1) is larger than BIO(2):
+!  Record solution in XDEF, maximum in BIO(2), the number of types
+!  with 0.0 reduced cost in NUMUN and the types with reduced costs
+!  of 0.0 in NONUM(20). Put the interval number in INT.
+!
   310 CONTINUE
       LST=0
       BIO(2)=BIO(1)
@@ -200,10 +200,10 @@ C
       INT=JNOW
       DO 320 K=1,NUCOLS+1
   320 XDEF(K)=X(K)
-C
-C Update 1.2: removed storage limiting factors in ISPLIM.
-C Implemented new agorithm in PRINT6
-C
+!
+! Update 1.2: removed storage limiting factors in ISPLIM.
+! Implemented new agorithm in PRINT6
+!
       NUMUN = NUMUNI
       IF (NUMUN .EQ. 0) RETURN
       DO 350 K=1,NUMUN

@@ -21,14 +21,14 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *        SUBROUTINE INPUT2 TO READ UNIVERSAL INPUTS, CONTROL        *
-C  *            WORDS AND THE INTEGRATED EFFICIENCY CURVES.            *
-C  *********************************************************************
-C
-C  Lahey fortran PC version: use FORMATTED input for efficiency curves.
-C
+!
+!  *********************************************************************
+!  *        SUBROUTINE INPUT2 TO READ UNIVERSAL INPUTS, CONTROL        *
+!  *            WORDS AND THE INTEGRATED EFFICIENCY CURVES.            *
+!  *********************************************************************
+!
+!  Lahey fortran PC version: use FORMATTED input for efficiency curves.
+!
       SUBROUTINE INPUT2 (NDEC,INPU,INEFF,LCOUPL)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -41,7 +41,7 @@ C
       INCLUDE 'cal1.inc'
       INCLUDE 'ioblck.inc'
       INCLUDE 'sumout.inc'
-C
+!
       character*60 aline
 
       CHARACTER*8 CUDATE(3)
@@ -51,39 +51,39 @@ C
       DATA CWORDS /'TEMPDEP ','NOMINAL ','MULTIPLI','INCREM  ',
      1             'DUMMY   ','TOTALRAD','EXPONENT','LINEAR  '/
       DATA BLANK /'        '/
-C
-C  Equate CWORDS and CONTRO.
-C
+!
+!  Equate CWORDS and CONTRO.
+!
       DO 10 I = 1,NIMP
    10 CONTRO(I) = CWORDS(I)
-C
-C  General comment: if "NOMINAL" was entered as control word
-C  for some parameter, the program will use the NOMINAL input,
-C  whatever multiplier or increment was specified.
-C
-C
-C  Initialize mode indicator IOFLAG to 0: default mode of program
-C  is batch.
-C
+!
+!  General comment: if "NOMINAL" was entered as control word
+!  for some parameter, the program will use the NOMINAL input,
+!  whatever multiplier or increment was specified.
+!
+!
+!  Initialize mode indicator IOFLAG to 0: default mode of program
+!  is batch.
+!
       IOFLAG = 0
       POSIT = -1
-C
-C  Read descriptive data for program control.
-C  Read: NUSPEC--number of types; NUECOG--number of species;
-C   NUNUCO--number of nutrient constraints; NUADCO--number of
-C   additional constraints in the program; NPER(J,1)--number of
-C   first week in a run; NPER(J,2)--number of last week in a run;
-C   NPER(J,3)--interval step size between NPER(J,1) and NPER(J,2)
-C   NRUN--number of successive runs.
-C
+!
+!  Read descriptive data for program control.
+!  Read: NUSPEC--number of types; NUECOG--number of species;
+!   NUNUCO--number of nutrient constraints; NUADCO--number of
+!   additional constraints in the program; NPER(J,1)--number of
+!   first week in a run; NPER(J,2)--number of last week in a run;
+!   NPER(J,3)--interval step size between NPER(J,1) and NPER(J,2)
+!   NRUN--number of successive runs.
+!
       IF (LCOUPL.NE.0) THEN
         READ (INPU,99980) NUADCO
         NUGRAZ = 0
       ELSE
         READ (INPU,99987) NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
       ENDIF
-c     write(*,*) 'Arjen: LCOUPL:',lcoupl
-c     write(*,*) 'Arjen: ',NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
+!     write(*,*) 'Arjen: LCOUPL:',lcoupl
+!     write(*,*) 'Arjen: ',NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
 
       IF (NUSPEC .GT. MT) THEN
          WRITE (OUUNI,99985) NUSPEC,MT
@@ -111,18 +111,18 @@ c     write(*,*) 'Arjen: ',NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
          DO 20 J=2,NRUN
    20    READ (INPU,99987) NPER(J,1),NPER(J,2),NPER(J,3)
       END IF
-C
-C  Establish various column and row indicators for A-matrix and output
-C  output vector X (or XDEF).
-C  It is assumed there are 2 energy constraints.
-C
-C       NUFILI--number of first light constaint.
-C       NUABCO--number of abiotic constaints (total).
-C       NUEXRO--number of the exclusion row in A-matrix.
-C       NUROWS--number of rows in A-matrix.
-C       NUCOLS--number of elements in X-vector.
-C       NUSPE1--position of first type in X-vector.
-C
+!
+!  Establish various column and row indicators for A-matrix and output
+!  output vector X (or XDEF).
+!  It is assumed there are 2 energy constraints.
+!
+!       NUFILI--number of first light constaint.
+!       NUABCO--number of abiotic constaints (total).
+!       NUEXRO--number of the exclusion row in A-matrix.
+!       NUROWS--number of rows in A-matrix.
+!       NUCOLS--number of elements in X-vector.
+!       NUSPE1--position of first type in X-vector.
+!
       NUFILI=NUNUCO+1
       NUABCO=NUNUCO+2
       NUEXRO=NUABCO+NUADCO
@@ -130,14 +130,14 @@ C
       NUSPE1=NUROWS+1
       NUCOLS=NUROWS+NUSPEC
 
-c     write(*,*)'Arjen: ', NUFILI,NOABCO,NOEXRO,NOROWS,NUSPE1,NOCOLS
-c     write(*,*)'Arjen: reading'
-c     write(*,*)'Arjen: nunuco:',nunuco
-C
-C  Read names of nutrient constraints, temperature (in)dependence,
-C  and whether the input value is to be used or some externally
-C  specified modification.
-C
+!     write(*,*)'Arjen: ', NUFILI,NOABCO,NOEXRO,NOROWS,NUSPE1,NOCOLS
+!     write(*,*)'Arjen: reading'
+!     write(*,*)'Arjen: nunuco:',nunuco
+!
+!  Read names of nutrient constraints, temperature (in)dependence,
+!  and whether the input value is to be used or some externally
+!  specified modification.
+!
       NUNUC2 = NUNUCO
       IF ((LCOUPL.NE.0).AND.(NUNUCO.GT.3)) NUNUCO = 3
 
@@ -154,25 +154,25 @@ C
          DNUT(J)=0.0
       END IF
    40 CONTINUE
-C
-C  Read control parameters for the background extinction.
-C
+!
+!  Read control parameters for the background extinction.
+!
       READ (INPU,99998) WBASE,WMULT,BACKMU,WINCR,BACKAD
       IF (WBASE .EQ. CONTRO(2)) THEN
          BACKMU=1.0
          BACKAD=0.0
       END IF
-C
-C  Read control parameters for the temperature.
-C
+!
+!  Read control parameters for the temperature.
+!
       READ (INPU,99998) WBASE,WMULT,TEMPMU,WINCR,TEMPAD
       IF (WBASE .EQ. CONTRO(2)) THEN
          TEMPMU=1.0
          TEMPAD=0.0
       END IF
-C
-C  Read control parameters for the solarintensity.
-C
+!
+!  Read control parameters for the solarintensity.
+!
       READ (INPU,99997) WRAD,WBASE,WMULT,SOLAMU,WINCR,SOLAAD
       IF (WRAD .EQ. CONTRO(6)) THEN
          SOLACO=0.45
@@ -183,38 +183,38 @@ C
          SOLAMU=1.0
          SOLAAD=0.0
       END IF
-C
-C  Read control parameters for the depth.
-C
+!
+!  Read control parameters for the depth.
+!
       READ (INPU,99998) WBASE,WMULT,DEPTMU,WINCR,DEPTAD
       IF (WBASE .EQ. CONTRO(2)) THEN
          DEPTMU=1.0
          DEPTAD=0.0
       END IF
-C
-C  Set control parameters for daylength.
-C
+!
+!  Set control parameters for daylength.
+!
       DLGTAD=0.0
       DLGTMU=1.0
-C
-C  Read mineralization rate constant of organic material.
-C  Temperature dependence is assumed.
-C
+!
+!  Read mineralization rate constant of organic material.
+!  Temperature dependence is assumed.
+!
       READ (INPU,99988) REMIOR
-C
-C  Read names of light constraints and the constants to calculate
-C  the disappearance rate of light absorption by dead phytoplankton.
-C
+!
+!  Read names of light constraints and the constants to calculate
+!  the disappearance rate of light absorption by dead phytoplankton.
+!
       READ (INPU,99996) (CSTRA(J),J=NUFILI,NUABCO),REMILI(1),REMILI(2)
-C
-C  Read natural mortality rate constants:
-C  options are: (1) Nominal (=input) values.
-C               (2) A species dependent function. The coefficients
-C                   are read following lable 140 of this subroutine.
-C
-c     read(inpu,'(a)') aline
-c     write(*,*)'Arjen: >',aline,'<'
-c     READ (aline,99995) WMODE,FLUSH
+!
+!  Read natural mortality rate constants:
+!  options are: (1) Nominal (=input) values.
+!               (2) A species dependent function. The coefficients
+!                   are read following lable 140 of this subroutine.
+!
+!     read(inpu,'(a)') aline
+!     write(*,*)'Arjen: >',aline,'<'
+!     READ (aline,99995) WMODE,FLUSH
       READ (INPU,99995) WMODE,FLUSH
       IF (WMODE .NE. CONTRO(2)) GO TO 90
       LCAL=1
@@ -230,61 +230,61 @@ c     READ (aline,99995) WMODE,FLUSH
   110 CONTINUE
       LCAL=4
   120 CONTINUE
-C
-C  Read zooplankton composition.
-C  Read grazing coefficients.
-C  Read maximum number of grazing iterations.
-C
-C  If the maximum number of iterations is put to 1, the program
-C  will supress the output on unit 15.
-C
+!
+!  Read zooplankton composition.
+!  Read grazing coefficients.
+!  Read maximum number of grazing iterations.
+!
+!  If the maximum number of iterations is put to 1, the program
+!  will supress the output on unit 15.
+!
       READ (INPU,99994) (ZOONUT(I,0),I=1,NUNUCO)
       READ (INPU,99993) ZOOK,ZOOGR,XMIN,GRAMO1,IPERM
-C
-C  Read fraction of nutrients from dying phytoplankton, which is release
-C  instantaneously at autolysis and does not enter the dead algal pool.
-C  Read sedimentation rate of dead algae.
-C
+!
+!  Read fraction of nutrients from dying phytoplankton, which is release
+!  instantaneously at autolysis and does not enter the dead algal pool.
+!  Read sedimentation rate of dead algae.
+!
       IF (LCOUPL.NE.0) THEN
         READ (INPU,99992) SEDRAT
       ELSE
         READ (INPU,99978) AUTOFR,SEDRAT
         AVAILN=1.0-AUTOFR
       ENDIF
-C
-C  Read species matrix name.
-C
+!
+!  Read species matrix name.
+!
       IF (LCOUPL.EQ.0) READ (INPU,99991) WSTOCH
-C
-C  Read species name, specific extinction, stochiometric
-C  constants for nutrients and dry weight to chlrophyll ratio of the
-C  types. CHLTOC--conversion from
-C  chlorophyll to C and CTODRY--conversion from C to dry weight.
-C
+!
+!  Read species name, specific extinction, stochiometric
+!  constants for nutrients and dry weight to chlrophyll ratio of the
+!  types. CHLTOC--conversion from
+!  chlorophyll to C and CTODRY--conversion from C to dry weight.
+!
       IF (LCOUPL.EQ.0) THEN
         DO 130 I=1,NUSPEC
         READ (INPU,99990) SPNAME(I),EKX(I),(AA(K,I),K=1,NUNUCO),
      1                    CHLTOC(I),CTODRY(I)
   130   CONTINUE
-C
-C  Calculate CHLR--the conversion from chlorophyll to dry weight.
-C
+!
+!  Calculate CHLR--the conversion from chlorophyll to dry weight.
+!
         DO 140 I=1,NUSPEC
   140   CHLR(I)=CHLTOC(I)*CTODRY(I)
-C
-C  Read additional phytoplankton characteristics for the computation
-C   of the net growth: PMAX1, PMAX2, LPMAX, RMORT1, RMORT2, RES1, RES2,
-C   SDMIX--mixing depth multiplier and ZOOPR--zooplankton preference
-C   coefficient.
-C
+!
+!  Read additional phytoplankton characteristics for the computation
+!   of the net growth: PMAX1, PMAX2, LPMAX, RMORT1, RMORT2, RES1, RES2,
+!   SDMIX--mixing depth multiplier and ZOOPR--zooplankton preference
+!   coefficient.
+!
         READ (INPU,99991) WGROUP
       ENDIF
 
       DO 150 I=1,NUSPEC
         IF (LCOUPL.NE.0) THEN
-C
-C Hans Los: Why? Origin: Marinus sources
-C         SDMIX(I) = 1.0
+!
+! Hans Los: Why? Origin: Marinus sources
+!         SDMIX(I) = 1.0
           ZOOPR(I,0) = 1.0
         ELSE
           READ (INPU,99989) PMAX1(I),PMAX2(I),PWORD,RMORT1(I),RMORT2(I),
@@ -301,29 +301,29 @@ C         SDMIX(I) = 1.0
           END IF
         ENDIF
   150 CONTINUE
-C
-C  Call subroutine "SPINDI" to determine the number of the first and
-C  the last type of each species.
-C
+!
+!  Call subroutine "SPINDI" to determine the number of the first and
+!  the last type of each species.
+!
       IF (LCOUPL.EQ.0) THEN
         CALL SPINDI (LSPIND)
         IF (LSPIND .EQ. 1) STOP
       ENDIF
-C
-C  Read data for the integrated photosynthetic efficiency curves
-C  from unit 12. These data are produced by the efficiency program
-C  "BLEFFPRO" and transformed for unformatted read.
-C
-C     READ (INEFF) NZ,TEFCUR,(ZVEC(I),I=1,NZ),NZ
-C     DO 160 I=1,NZ
-C     READ (INEFF) (FUN(I,J),J=1,NUECOG)
-C 160 READ (INEFF) (DER(I,J),J=1,NUECOG)
-C     DO 170 I=1,24
-C 170 READ (INEFF) DL(I),(DAYMUL(I,J),J=1,NUECOG)
-C
-C----------------------------------------------------------------------
-C  Input section for FORMATTED read of efficiency curves!
-C
+!
+!  Read data for the integrated photosynthetic efficiency curves
+!  from unit 12. These data are produced by the efficiency program
+!  "BLEFFPRO" and transformed for unformatted read.
+!
+!     READ (INEFF) NZ,TEFCUR,(ZVEC(I),I=1,NZ),NZ
+!     DO 160 I=1,NZ
+!     READ (INEFF) (FUN(I,J),J=1,NUECOG)
+! 160 READ (INEFF) (DER(I,J),J=1,NUECOG)
+!     DO 170 I=1,24
+! 170 READ (INEFF) DL(I),(DAYMUL(I,J),J=1,NUECOG)
+!
+!----------------------------------------------------------------------
+!  Input section for FORMATTED read of efficiency curves!
+!
       READ (INEFF,200) NZ,TEFCUR
   200 FORMAT (I5,5X,F10.2)
       READ (INEFF,210) (ZVEC(I),I=1,NZ)
@@ -335,18 +335,18 @@ C
       DO 230 I=1,24
   230 READ (INEFF,240) DL(I),(DAYMUL(I,J),J=1,NUECOG)
   240 FORMAT (11F5.0)
-C----------------------------------------------------------------------
-C
-C  Get current date.
-C
+!----------------------------------------------------------------------
+!
+!  Get current date.
+!
       CALL CALEND (CUDATE,IOU(5))
       CASE(10) = BLANK
       CASE(11) = CUDATE(1)
       CASE(12) = CUDATE(2)
       CASE(13) = CUDATE(3)
-C
-C  Record names of limiting factors.
-C
+!
+!  Record names of limiting factors.
+!
       DO 250 I = 1,NUNUCO
       LIMNAM (I) = CSTRA (I) (1:3)
 250   CONTINUE
@@ -357,10 +357,10 @@ C
       LIMNAM (NUNUCO+2) = 'Gro'
       LIMNAM (NUNUCO+3) = 'Mor'
 
-c     write(*,*)'Arjen: 2', NUFILI,NOABCO,NOEXRO,NOROWS,NUSPE1,NOCOLS
-C
-C  Formats.
-C
+!     write(*,*)'Arjen: 2', NUFILI,NOABCO,NOEXRO,NOROWS,NUSPE1,NOCOLS
+!
+!  Formats.
+!
 99999 FORMAT (A8,7X,A8,F7.0,A8,7X,2(A8,F7.0))
 99998 FORMAT (30X,A8,7X,2(A8,F7.0))
 99997 FORMAT (15X,2(A8,7X),2(A8,F7.0))

@@ -22,15 +22,15 @@
 !!  rights reserved.
 
       subroutine rcalc
-c           4-69
-c           compute the r matrix which equals aij * aij transposed * x
-c        r is symmetric and has a dimension of (mend,mend)
-c           rcalc uses subprogram
-c              find
-c           from 7/11/79 rcalc doesn't use find anymore, takes too
-c           much time. it find the entries in the ijfind array
-c           which is filled each time that solve is called.
-c           (n.m. de rooij)
+!           4-69
+!           compute the r matrix which equals aij * aij transposed * x
+!        r is symmetric and has a dimension of (mend,mend)
+!           rcalc uses subprogram
+!              find
+!           from 7/11/79 rcalc doesn't use find anymore, takes too
+!           much time. it find the entries in the ijfind array
+!           which is filled each time that solve is called.
+!           (n.m. de rooij)
       include  'char1.inc'
       include  'char5.inc'
       if (ijfind(1) .ge. 0) go to 9
@@ -42,7 +42,7 @@ c           (n.m. de rooij)
       jj = jj + 1
 8     continue
       ijfind(jj) = naij +1
-c        compute r
+!        compute r
 9     do 20 i=1,mend
          do 10 j=1,i
             r(i,j) = 0.0
@@ -51,12 +51,12 @@ c        compute r
       do 50 k=1,ntot
          mta=ijfind(k)
          mtb=ijfind(k+1)-1
-c        call find(0, k, mta, mtb)
+!        call find(0, k, mta, mtb)
          if (mta.eq.0) go to 50
          do 40 ii=mta,mtb
             aikx = aij(ii)*x(k)
             i = irow(ii)
-c        do computation for j ranging from 1 to i
+!        do computation for j ranging from 1 to i
             do 30 jk=mta,mtb
                j = irow(jk)
                if (j.le.i) r(i,j) = r(i,j) + aij(jk)*aikx
@@ -71,14 +71,14 @@ c        do computation for j ranging from 1 to i
          j2 = kl(k+1) - 1
    60    mta=ijfind(j1)
          ii= ijfind(j1+1)-1
-c  60    call find(0, j1, mta, ii)
+!  60    call find(0, j1, mta, ii)
          if (mta.ne.0) go to 70
          j1 = j1 + 1
          if (j1.gt.j2) go to 100
          go to 60
    70    ii= ijfind(j2)
          mtb=ijfind(j2+1)-1
-c  70    call find(0, j2, ii, mtb)
+!  70    call find(0, j2, ii, mtb)
          if (ii.ne.0) go to 80
          j2 = j2 - 1
          if (j2.lt.kl(k)) go to 100

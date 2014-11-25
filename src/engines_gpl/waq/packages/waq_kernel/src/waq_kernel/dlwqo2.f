@@ -44,127 +44,127 @@
      +                    INTOPT, PANAME, FUNAME, SFNAME, DMPBAL,
      +                    NOWST , NOWTYP, WSTTYP, IWASTE, INXTYP,
      +                    WSTDMP, iknmrk, OWNERS, MYPART, ISEGCOL)
-C
-C
-C     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : january 1993 Jan van Beek
-C
-C
-C     FUNCTION            : Driver output system
-C
-C     LOGICAL UNITS       : -
-C
-C     SUBROUTINES CALLED  : BALDMP, fills balance for dump area's
-C                           FIOUTV, fills output buffer, single cel grids
-C                           FIOSUB, fills output buffer, sub-grids
-C                           OUTMON, performs a monitor output step
-C                           OUTDMP, performs a grid dump output step
-C                           OUTHIS, performs a history output step
-C                           OUTHNF, performs a history NEFIS step
-C                           OUTMAP, performs a map output step
-C                           OUTMNF, performs a map NEFIS step
-C                           OUTBAL, performs a balance output step
-C                           RAATRA, fills transport for raaien
-C                           STEPYN, evaluates timers
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     MONAME  CHAR*40       4     INPUT   Model and run names
-C     SYNAME  CHAR*20    NOTOT    INPUT   names of substances
-C     DUNAME  CHAR*20    NODUMP   INPUT   names of dump locations
-C     IDUMP   INTEGER    NODUMP   INPUT   dump segment numbers
-C     NODUMP  INTEGER       1     INPUT   number of dump locations
-C     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
-C     CONS    REAL          *     IN/OUT  Model constants
-C     PARAM   REAL    NOPA,NOSEG  IN/OUT  Model parameters
-C     FUNC    REAL          *     IN/OUT  Model functions at ITIME
-C     SEGFUN  REAL   NOSEG,NOSFUN IN/OUT  Segment functions at ITIME
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     IDT     INTEGER       1     INPUT   Simulation timestep
-C     NOUTP   INTEGER       1     INPUT   Number of output files
-C     LCHAR   CHAR*(*)      *     INPUT   File names
-C     LUN     INTEGER       *     INPUT   Uint numbers
-C     IOUTPS  INTEGER 7*NOUTP    IN/OUT   Output structure
-C                                            index 1 = start time
-C                                            index 2 = stop time
-C                                            index 3 = time step
-C                                            index 4 = number of vars
-C                                            index 5 = kind of output
-C                                            index 6 = grid of output
-C                                            index 7 = initialize flag
-C     IOPOIN  INTEGER       *     INPUT   Pointer to DELWAQ array's
-C     RIOBUF  REAL          *     LOCAL   Output buffer
-C     OUNAM   CHAR*20       *     INPUT   name of output variable
-C     NX      INTEGER       1     INPUT   Width of output grid
-C     NY      INTEGER       1     INPUT   Depth of output grid
-C     LGRID   INTEGER     NX*NY   INPUT   grid-layout
-C     CGRID   CHAR*20       *     LOCAL   Char buffer for dmp output
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     BOUND   REAL          *     INPUT   Bounary conditions
-C     IP      INTEGER       *     IN/OUT  Paging structure
-C     AMASS   REAL       NOTOT,*  INPUT   Mass array
-C     AMASS2  REAL       NOTOT,*  IN/OUT  Cummulative balance on whole
-C     ASMASS  REAL       NOTOT,*  IN/OUT  Cummulative balance per segment
-C     NOFLUX  INTEGER       1     INPUT   Number of fluxes
-C     FLXINT  REAL  NOFLUX*NDMPAR IN/OUT  Integrated fluxes at dump segments
-C     ISFLAG  INTEGER       1     INPUT   if 1 then dd-hh:mm'ss"
-C     IAFLAG  INTEGER       1     OUTPUT  if 1 then accumulate mass bal
-C     IBFLAG  INTEGER       1     INPUT   Flag = 1 then balances
-C     IMSTRT  INTEGER       1     INPUT   Monitoring start time ( scu )
-C     IMSTOP  INTEGER       1     INPUT   Monitoring stop time ( scu )
-C     IMSTEP  INTEGER       1     INPUT   Monitoring time step ( scu )
-C     IDSTRT  INTEGER       1     INPUT   Dump start time ( scu )
-C     IDSTOP  INTEGER       1     INPUT   Dump stop time ( scu )
-C     IDSTEP  INTEGER       1     INPUT   Dump time step ( scu )
-C     IHSTRT  INTEGER       1     INPUT   History start time ( scu )
-C     IHSTOP  INTEGER       1     INPUT   History stop time ( scu )
-C     IHSTEP  INTEGER       1     INPUT   History time step ( scu )
-C     IMFLAG  LOGICAL       1     OUTPUT  If .T. then monitor step
-C     IDFLAG  LOGICAL       1     OUTPUT  If .T. then dump step
-C     IHFLAG  LOGICAL       1     OUTPUT  If .T. then history step
-C     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
-C     PARAM   REAL   NOLOC,NOSEG  INPUT   Parameters local in PROCES system
-C     NODEF   INTEGER       1     INPUT   Number of used defaults
-C     DEFAUL  REAL          *     INPUT   Default proces parameters
-C     ITSTRT  INTEGER     1       INPUT   start time
-C     ITSTOP  INTEGER     1       INPUT   stop time
-C     NDMPAR  INTEGER     1       INPUT   Number of dump areas
-C     DANAM   CHAR*20  NDMPAR     INPUT   Dump area names
-C     NDMPQ   INTEGER     1       INPUT   Number of dumped exchanges
-C     NDMPS   INTEGER     1       INPUT   Number of dumped segments
-C     IQDMP   INTEGER       *     INPUT   Exchange to dumped exchange pointer
-C     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
-C     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
-C     DMPQ    REAL  NOTOT*NDMPS*? INPUT   mass balance dumped segments
-C     DMPS    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
-C     FLXDMP  REAL  NOFLUX*NDMPS  INPUT   Integrated fluxes
-C     NAMBUF  CHAR*20       *     INPUT   Buffer for names
-C     NORAAI  INTEGER       1     INPUT   Number of raaien
-C     NTRAAQ  INTEGER       1     INPUT   Total number of exch. in raaien
-C     IORAAI  INTEGER       *     INPUT   Output option for raai
-C     NQRAAI  INTEGER       *     INPUT   Number of exchanges in raai
-C     IQRAAI  INTEGER       *     INPUT   Exchanges in raai
-C     TRRAAI  REAL NOTOT*NDMPAR*6 IN/OUT  Cummulative transport over raai
-C     RANAM   CHAR*20       *     INPUT   Raaien names
-C     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
-C     INTOPT  INTEGER     1       INPUT   Integration and balance suboptions
-C     OWNERS  INTEGER   NOSEG     INPUT   ownership of segments
-C     MYPART  INTEGER     1       INPUT   number of current part/subdomain
-C     ==================================================================
-C
+!
+!
+!     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : january 1993 Jan van Beek
+!
+!
+!     FUNCTION            : Driver output system
+!
+!     LOGICAL UNITS       : -
+!
+!     SUBROUTINES CALLED  : BALDMP, fills balance for dump area's
+!                           FIOUTV, fills output buffer, single cel grids
+!                           FIOSUB, fills output buffer, sub-grids
+!                           OUTMON, performs a monitor output step
+!                           OUTDMP, performs a grid dump output step
+!                           OUTHIS, performs a history output step
+!                           OUTHNF, performs a history NEFIS step
+!                           OUTMAP, performs a map output step
+!                           OUTMNF, performs a map NEFIS step
+!                           OUTBAL, performs a balance output step
+!                           RAATRA, fills transport for raaien
+!                           STEPYN, evaluates timers
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     MONAME  CHAR*40       4     INPUT   Model and run names
+!     SYNAME  CHAR*20    NOTOT    INPUT   names of substances
+!     DUNAME  CHAR*20    NODUMP   INPUT   names of dump locations
+!     IDUMP   INTEGER    NODUMP   INPUT   dump segment numbers
+!     NODUMP  INTEGER       1     INPUT   number of dump locations
+!     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
+!     CONS    REAL          *     IN/OUT  Model constants
+!     PARAM   REAL    NOPA,NOSEG  IN/OUT  Model parameters
+!     FUNC    REAL          *     IN/OUT  Model functions at ITIME
+!     SEGFUN  REAL   NOSEG,NOSFUN IN/OUT  Segment functions at ITIME
+!     VOLUME  REAL      NOSEG     INPUT   Segment volumes
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     IDT     INTEGER       1     INPUT   Simulation timestep
+!     NOUTP   INTEGER       1     INPUT   Number of output files
+!     LCHAR   CHAR*(*)      *     INPUT   File names
+!     LUN     INTEGER       *     INPUT   Uint numbers
+!     IOUTPS  INTEGER 7*NOUTP    IN/OUT   Output structure
+!                                            index 1 = start time
+!                                            index 2 = stop time
+!                                            index 3 = time step
+!                                            index 4 = number of vars
+!                                            index 5 = kind of output
+!                                            index 6 = grid of output
+!                                            index 7 = initialize flag
+!     IOPOIN  INTEGER       *     INPUT   Pointer to DELWAQ array's
+!     RIOBUF  REAL          *     LOCAL   Output buffer
+!     OUNAM   CHAR*20       *     INPUT   name of output variable
+!     NX      INTEGER       1     INPUT   Width of output grid
+!     NY      INTEGER       1     INPUT   Depth of output grid
+!     LGRID   INTEGER     NX*NY   INPUT   grid-layout
+!     CGRID   CHAR*20       *     LOCAL   Char buffer for dmp output
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     BOUND   REAL          *     INPUT   Bounary conditions
+!     IP      INTEGER       *     IN/OUT  Paging structure
+!     AMASS   REAL       NOTOT,*  INPUT   Mass array
+!     AMASS2  REAL       NOTOT,*  IN/OUT  Cummulative balance on whole
+!     ASMASS  REAL       NOTOT,*  IN/OUT  Cummulative balance per segment
+!     NOFLUX  INTEGER       1     INPUT   Number of fluxes
+!     FLXINT  REAL  NOFLUX*NDMPAR IN/OUT  Integrated fluxes at dump segments
+!     ISFLAG  INTEGER       1     INPUT   if 1 then dd-hh:mm'ss"
+!     IAFLAG  INTEGER       1     OUTPUT  if 1 then accumulate mass bal
+!     IBFLAG  INTEGER       1     INPUT   Flag = 1 then balances
+!     IMSTRT  INTEGER       1     INPUT   Monitoring start time ( scu )
+!     IMSTOP  INTEGER       1     INPUT   Monitoring stop time ( scu )
+!     IMSTEP  INTEGER       1     INPUT   Monitoring time step ( scu )
+!     IDSTRT  INTEGER       1     INPUT   Dump start time ( scu )
+!     IDSTOP  INTEGER       1     INPUT   Dump stop time ( scu )
+!     IDSTEP  INTEGER       1     INPUT   Dump time step ( scu )
+!     IHSTRT  INTEGER       1     INPUT   History start time ( scu )
+!     IHSTOP  INTEGER       1     INPUT   History stop time ( scu )
+!     IHSTEP  INTEGER       1     INPUT   History time step ( scu )
+!     IMFLAG  LOGICAL       1     OUTPUT  If .T. then monitor step
+!     IDFLAG  LOGICAL       1     OUTPUT  If .T. then dump step
+!     IHFLAG  LOGICAL       1     OUTPUT  If .T. then history step
+!     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
+!     PARAM   REAL   NOLOC,NOSEG  INPUT   Parameters local in PROCES system
+!     NODEF   INTEGER       1     INPUT   Number of used defaults
+!     DEFAUL  REAL          *     INPUT   Default proces parameters
+!     ITSTRT  INTEGER     1       INPUT   start time
+!     ITSTOP  INTEGER     1       INPUT   stop time
+!     NDMPAR  INTEGER     1       INPUT   Number of dump areas
+!     DANAM   CHAR*20  NDMPAR     INPUT   Dump area names
+!     NDMPQ   INTEGER     1       INPUT   Number of dumped exchanges
+!     NDMPS   INTEGER     1       INPUT   Number of dumped segments
+!     IQDMP   INTEGER       *     INPUT   Exchange to dumped exchange pointer
+!     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
+!     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
+!     DMPQ    REAL  NOTOT*NDMPS*? INPUT   mass balance dumped segments
+!     DMPS    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
+!     FLXDMP  REAL  NOFLUX*NDMPS  INPUT   Integrated fluxes
+!     NAMBUF  CHAR*20       *     INPUT   Buffer for names
+!     NORAAI  INTEGER       1     INPUT   Number of raaien
+!     NTRAAQ  INTEGER       1     INPUT   Total number of exch. in raaien
+!     IORAAI  INTEGER       *     INPUT   Output option for raai
+!     NQRAAI  INTEGER       *     INPUT   Number of exchanges in raai
+!     IQRAAI  INTEGER       *     INPUT   Exchanges in raai
+!     TRRAAI  REAL NOTOT*NDMPAR*6 IN/OUT  Cummulative transport over raai
+!     RANAM   CHAR*20       *     INPUT   Raaien names
+!     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
+!     INTOPT  INTEGER     1       INPUT   Integration and balance suboptions
+!     OWNERS  INTEGER   NOSEG     INPUT   ownership of segments
+!     MYPART  INTEGER     1       INPUT   number of current part/subdomain
+!     ==================================================================
+!
       use timers
       use m_couplib
-C
+!
       INTEGER       NOTOT , NOSEG , NOPA  , NOSFUN, ITIME ,
      +              NODUMP, NOCONS, NOFUN , IDT   , NOUTP ,
      +              NX    , NY    , NOSYS , NOFLUX, ISFLAG,
@@ -220,9 +220,9 @@ C
       integer                    :: inxtyp(nowst)         ! wasteload type number (index in wsttyp)
       real                       :: wstdmp(notot,nowst,2) ! accumulated wasteloads 1/2 in and out
       integer, intent(in   )     :: isegcol(*)            ! pointer from segment to top of column
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       PARAMETER   ( IMON = 1 , IMO2 = 2 , IDMP = 3 , IDM2 = 4 ,
      +              IHIS = 5 , IHI2 = 6 , IMAP = 7 , IMA2 = 8 ,
      +              IBAL = 9 , IHNF =10 , IHN2 =11 , IMNF =12 ,
@@ -241,18 +241,18 @@ C
       REAL, ALLOCATABLE :: SURF(:)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqo2", ithandl )
-C
-C     Evaluate standard DELWAQ output timers
-C
+!
+!     Evaluate standard DELWAQ output timers
+!
       CALL STEPYN (ITIME , IDT   , IMSTRT, IMSTOP, IMSTEP,
      +             IMFLAG, LMFIRS)
       CALL STEPYN (ITIME , IDT   , IDSTRT, IDSTOP, IDSTEP,
      +             IDFLAG, LDFIRS)
       CALL STEPYN (ITIME , IDT   , IHSTRT, IHSTOP, IHSTEP,
      +             IHFLAG, LHFIRS)
-C
-C     Fill mass in AMASS2 array by summing AMASS over all segments
-C
+!
+!     Fill mass in AMASS2 array by summing AMASS over all segments
+!
       IF ( IMFLAG ) THEN
          call collect_data(mypart, amass , notot,'noseg',1,ierr)
          call combine_1d_rdata(amass2, notot*5, CP_SUM, ierr)
@@ -266,9 +266,9 @@ C
    20       CONTINUE
          endif
       ENDIF
-C
-C     Fill mass in ASMASS array using DMPQ and DMPS
-C
+!
+!     Fill mass in ASMASS array using DMPQ and DMPS
+!
       IF ( IMFLAG .OR. ( IHFLAG .AND. NORAAI .GT. 0) ) THEN
          IF ( IBFLAG .EQ. 1 ) THEN
             call collect_data(mypart, flxdmp, noflux,'ndmps',1, ierr)
@@ -293,34 +293,34 @@ C
                endif
             ENDIF
          ENDIF
-C
+!
       ENDIF
-C
-C     Initialize K1, pointer in IOPOIN and OUNAM
-C
+!
+!     Initialize K1, pointer in IOPOIN and OUNAM
+!
       lread = .true.
       K1 = 1
-C
-C     Loop over the output files
-C
+!
+!     Loop over the output files
+!
       DO 200 IOUT = 1 , NOUTP
-C
-C        Map output structure to single variables part 1
-C
+!
+!        Map output structure to single variables part 1
+!
          IOSTRT = IOUTPS(1,IOUT)
          IOSTOP = IOUTPS(2,IOUT)
          IOSTEP = IOUTPS(3,IOUT)
          NRVAR  = IOUTPS(4,IOUT)
-C
-C        Output required ?
-C
+!
+!        Output required ?
+!
          CALL STEPYN (ITIME , IDT   , IOSTRT, IOSTOP, IOSTEP,
      +                LOFLAG, LDUMMY)
-C
+!
          IF ( .NOT. LOFLAG ) GOTO 100
-C
-C        Collect data on master-process
-C
+!
+!        Collect data on master-process
+!
          if (lread) then
             call collect_data(mypart, conc  , notot ,'noseg',1, ierr)
             call collect_data(mypart, volume, 1     ,'noseg',1, ierr)
@@ -331,9 +331,9 @@ C
          endif
 
          if (mypart.eq.1) then
-C
-C        Map output structure to single variables part 2
-C
+!
+!        Map output structure to single variables part 2
+!
             ISRTOU = IOUTPS(5,IOUT)
             IGRDOU = IOUTPS(6,IOUT)
             INIOUT = IOUTPS(7,IOUT)
@@ -346,29 +346,29 @@ C
             ENDIF
             LUNOUT = LUN(IFI)
             LCHOUT = LCHAR(IFI)
-C
-C        No balance output if they are not active
-C
+!
+!        No balance output if they are not active
+!
             IF ( ( ISRTOU .EQ. IBAL .OR. ISRTOU .EQ. IBA2 .OR.
      +             ISRTOU .EQ. IBA2) .AND. IBFLAG .NE. 1 ) GOTO 100
-C
-C        Set all local variables used active on base grid
-C
+!
+!        Set all local variables used active on base grid
+!
             CALL ACTLOC (IOPOIN, NRVAR , NOCONS, NOPA  , NOFUN ,
      +                   NOSFUN, NOTOT , NOSEG , NOLOC , NOGRID,
      +                   NOVAR , VARARR, VARIDX, VARTDA, VARDAG,
      +                   ARRKND, ARRPOI, ARRDM1, ARRDM2, VGRSET,
      +                   GRDNOS, GRDSEG, A     )
-C
-C        Fill output buffer
-C
+!
+!        Fill output buffer
+!
             IF ( ISRTOU .EQ. IBA2 ) THEN
-C
+!
                CALL FLXBAL (NOTOT , NOFLUX, NDMPAR, NRVAR , STOCHI,
      +                      FLXINT, ASMASS, RIOBUF)
-C
+!
             ELSEIF ( ISRTOU .EQ. IBA3 ) THEN
-C     jos doet het zelf
+!     jos doet het zelf
             ELSEIF ( IGRDOU .EQ. IGSUB ) THEN
                IF (ISRTOU .EQ. IMO3 .OR.
      +             ISRTOU .EQ. IHI3 .OR.
@@ -378,9 +378,9 @@ C     jos doet het zelf
                   NCOUT = 0
                ENDIF
                NRVAR2 = NRVAR/2
-C
-C           For the dump area's
-C
+!
+!           For the dump area's
+!
                CALL FIOSUB (RIOBUF, IOPOIN(K1), NRVAR2, NOCONS, NOPA  ,
      +                      NOFUN , NOSFUN    , NOTOT , CONC  , SEGFUN,
      +                      FUNC  , PARAM     , CONS  , IDT   , ITIME ,
@@ -388,9 +388,9 @@ C
      +                      BOUND , NOLOC     , PROLOC, NODEF , DEFAUL,
      +                      NCOUT , NTDMPQ    , paname, sfname, funame,
      +                      danam )
-C
-C           For the raaien
-C
+!
+!           For the raaien
+!
                IF ((ISRTOU .EQ. IHI3 .OR.
      +              ISRTOU .EQ. IHN3     ) .AND.
      +              NORAAI .GT. 0               ) THEN
@@ -398,7 +398,7 @@ C
                   IP1 = (NCOUT+NRVAR2)*NDMPAR + 1
                   CALL FIORAA (RIOBUF(IP1), NRVAR3, TRRAAI, NORAAI, NOSYS)
                ENDIF
-C
+!
             ELSE
                NRVAR2 = NRVAR
                CALL FIOUTV ( RIOBUF, IOPOIN(K1), NRVAR , NOCONS, NOPA  ,
@@ -408,9 +408,9 @@ C
      +                       NX    , NY        , LGRID , IGRDOU, BOUND ,
      +                       NOLOC , PROLOC    , NODEF , DEFAUL)
             ENDIF
-C
-C        Fill character buffer with substance names and output names
-C
+!
+!        Fill character buffer with substance names and output names
+!
             IF ( ISRTOU .EQ. IMNF .OR.
      +           ISRTOU .EQ. IHNF .OR.
      +           ISRTOU .EQ. IMO3 .OR.
@@ -423,95 +423,95 @@ C
                   NAMBUF(NOTOT+I) = OUNAM(K1+I-1)
    40          CONTINUE
             ENDIF
-C
-C        Perform output
-C
+!
+!        Perform output
+!
             IF ( ISRTOU .EQ. IMON ) THEN
-C
+!
                CALL OUTMON ( LUNOUT   , IDUMP , CONC  , AMASS2, ITIME ,
      +                       DUNAME   , SYNAME, MONAME, NODUMP, NOTOT ,
      +                       IP       , ISFLAG, ASMASS, IBFLAG, NRVAR ,
      +                       OUNAM(K1), RIOBUF, ITSTRT, ITSTOP, NDMPAR,
      +                       DANAM    )
-C
+!
             ELSEIF ( ISRTOU .EQ. IMO2 ) THEN
-C
+!
                CALL OUTMON ( LUNOUT   , IDUMP , CONC  , AMASS2, ITIME ,
      +                       DUNAME   , SYNAME, MONAME, NODUMP, 0     ,
      +                       IP       , ISFLAG, ASMASS, IBFLAG, NRVAR ,
      +                       OUNAM(K1), RIOBUF, ITSTRT, ITSTOP, NDMPAR,
      +                       DANAM    )
-C
+!
             ELSEIF ( ISRTOU .EQ. IMO3 ) THEN
-C
+!
                CALL OUTMO3 ( LUNOUT, AMASS2   , ITIME , SYNAME, MONAME,
      +                       NOTOT , IP       , ISFLAG, ASMASS, IBFLAG,
      +                       NRVAR2, OUNAM(K1), RIOBUF, ITSTRT, ITSTOP,
      +                       NDMPAR, DANAM    )
-C
+!
             ELSEIF ( ISRTOU .EQ. IMO4 ) THEN
-C
+!
                CALL OUTMO3 ( LUNOUT, AMASS2   , ITIME , SYNAME, MONAME,
      +                       0     , IP       , ISFLAG, ASMASS, IBFLAG,
      +                       NRVAR2, OUNAM(K1), RIOBUF, ITSTRT, ITSTOP,
      +                       NDMPAR, DANAM    )
-C
+!
             ELSEIF ( ISRTOU .EQ. IDMP ) THEN
-C
+!
                CALL OUTDMP (LUNOUT, LCHOUT, ITIME , MONAME, NX       ,
      +                      NY    , LGRID , CGRID , NOTOT , NOSYS    ,
      +                      SYNAME, CONC  , BOUND , NRVAR , OUNAM(K1),
      +                      RIOBUF, IP(5) , ISFLAG, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IDM2 ) THEN
-C
+!
                CALL OUTDMP (LUNOUT, LCHOUT, ITIME , MONAME, NX       ,
      +                      NY    , LGRID , CGRID , 0     , 0        ,
      +                      SYNAME, CONC  , BOUND , NRVAR , OUNAM(K1),
      +                      RIOBUF, IP(5) , ISFLAG, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IHIS ) THEN
-C
+!
                CALL OUTHIS (LUNOUT, LCHOUT   , ITIME , MONAME, NODUMP,
      +                      IDUMP , DUNAME   , NOTOT , SYNAME, CONC  ,
      +                      NRVAR , OUNAM(K1), RIOBUF, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IHNF ) THEN
-C
+!
                IOF = NRVAR*NODUMP + 1
                CALL OUTHNF (LUNOUT, LCHOUT     , ITIME , MONAME, NOSEG ,
      +                      NOTOT , CONC       , NAMBUF, NRVAR , RIOBUF,
      +                      IOSTRT, IOSTOP     , IOSTEP, NODUMP, IDUMP ,
      +                      DUNAME, RIOBUF(IOF), INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IHI2 ) THEN
-C
+!
                CALL OUTHIS (LUNOUT, LCHOUT   , ITIME , MONAME, NODUMP,
      +                      IDUMP , DUNAME   , 0     , SYNAME, CONC  ,
      +                      NRVAR , OUNAM(K1), RIOBUF, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IHN2 ) THEN
-C
+!
                IOF = NRVAR*NODUMP + 1
                CALL OUTHNF (LUNOUT, LCHOUT     , ITIME    , MONAME, NOSEG ,
      +                      0     , CONC       , OUNAM(K1), NRVAR , RIOBUF,
      +                      IOSTRT, IOSTOP     , IOSTEP   , NODUMP, IDUMP ,
      +                      DUNAME, RIOBUF(IOF), INIOUT   )
-C
+!
             ELSEIF ( ISRTOU .EQ. IHI3 ) THEN
-C
-C           Let op RANAM achter DANAM
-C
+!
+!           Let op RANAM achter DANAM
+!
                NRVAR3 = NOTOT + NRVAR2
                NSEGOU = NDMPAR + NORAAI
                CALL OUTHIS (LUNOUT, LCHOUT   , ITIME , MONAME, NSEGOU,
      +                      IDUMP , DANAM    , 0     , SYNAME, CONC  ,
      +                      NRVAR3, NAMBUF   , RIOBUF, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IHN3 ) THEN
-C
-C           Let op RANAM achter DANAM
-C
+!
+!           Let op RANAM achter DANAM
+!
                NRVAR3 = NOTOT + NRVAR2
                NSEGOU = NDMPAR + NORAAI
                IOF = NRVAR3*NSEGOU + 1
@@ -519,63 +519,63 @@ C
      +                      0     , CONC       , NAMBUF   , NRVAR3, RIOBUF,
      +                      IOSTRT, IOSTOP     , IOSTEP   , NSEGOU, IDUMP ,
      +                      DANAM , RIOBUF(IOF), INIOUT   )
-C
+!
             ELSEIF ( ISRTOU .EQ. IHI4 ) THEN
-C
+!
                CALL OUTHIS (LUNOUT, LCHOUT   , ITIME , MONAME, NDMPAR,
      +                      IDUMP , DANAM    , 0     , SYNAME, CONC  ,
      +                      NRVAR2, OUNAM(K1), RIOBUF, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IHN4 ) THEN
-C
+!
                IOF = NRVAR2*NDMPAR + 1
                CALL OUTHNF (LUNOUT, LCHOUT     , ITIME    , MONAME, NOSEG ,
      +                      0     , CONC       , OUNAM(K1), NRVAR2, RIOBUF,
      +                      IOSTRT, IOSTOP     , IOSTEP   , NDMPAR, IDUMP ,
      +                      DANAM , RIOBUF(IOF), INIOUT   )
-C
+!
             ELSEIF ( ISRTOU .EQ. IMAP ) THEN
-C
+!
                CALL OUTMAP (LUNOUT   , LCHOUT, ITIME , MONAME, NOSEG ,
      +                      NOTOT    , CONC  , SYNAME, NRVAR , RIOBUF,
      +                      OUNAM(K1), iknmrk, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IMNF ) THEN
-C
+!
                IOF = NRVAR*NOSEG + 1
                CALL OUTMNF (LUNOUT   , LCHOUT, ITIME , MONAME, NOSEG      ,
      +                      NOTOT    , CONC  , SYNAME, NRVAR , RIOBUF     ,
      +                      OUNAM(K1), IOSTRT, IOSTOP, IOSTEP, RIOBUF(IOF),
      +                      INIOUT   )
-C
+!
             ELSEIF ( ISRTOU .EQ. IMA2 ) THEN
-C
+!
                CALL OUTMAP (LUNOUT   , LCHOUT, ITIME , MONAME, NOSEG ,
      +                      0        , CONC  , SYNAME, NRVAR , RIOBUF,
      +                      OUNAM(K1), iknmrk, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IMN2 ) THEN
-C
+!
                IOF = NRVAR*NOSEG + 1
                CALL OUTMNF (LUNOUT   , LCHOUT, ITIME , MONAME, NOSEG      ,
      +                      0        , CONC  , SYNAME, NRVAR , RIOBUF     ,
      +                      OUNAM(K1), IOSTRT, IOSTOP, IOSTEP, RIOBUF(IOF),
      +                      INIOUT   )
-C
+!
             ELSEIF ( ISRTOU .EQ. IBAL ) THEN
-C
+!
                CALL OUTBAL (LUNOUT, LCHOUT, ITIME , MONAME, NOTOT ,
      +                      NOFLUX, SYNAME, NDMPAR, DANAM , ASMASS,
      +                      FLXINT, NRVAR2, RIOBUF, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IBA2 ) THEN
-C
+!
                CALL OUTHIS (LUNOUT, LCHOUT   , ITIME , MONAME, NDMPAR,
      +                      IDUMP , DANAM    , 0     , SYNAME, CONC  ,
      +                      NRVAR , OUNAM(K1), RIOBUF, INIOUT)
-C
+!
             ELSEIF ( ISRTOU .EQ. IBA3 ) THEN
-C
+!
                ALLOCATE(SURF(NOSEG))
                NAME = 'SURF'
                LGET = .TRUE.
@@ -594,19 +594,19 @@ C
      J                       INIOUT, DMPBAL, NOWST , NOWTYP   , WSTTYP,
      J                       IWASTE, INXTYP, WSTDMP, ISEGCOL  )
                DEALLOCATE (SURF)
-C
+!
             ENDIF
-C
+!
             IOUTPS(7,IOUT) = INIOUT
-C
+!
          endif !(mypart.eq.1)
-C
+!
   100    CONTINUE
-C
-C        Update K1, pointer in IOPOIN and OUNAM
-C
+!
+!        Update K1, pointer in IOPOIN and OUNAM
+!
          K1 = K1 + NRVAR
-C
+!
   200 CONTINUE
 
       if ( timon ) call timstop ( ithandl )

@@ -27,51 +27,36 @@
 !>\file
 !>       Saturation concentration carbon dioxide
 
-C***********************************************************************
-C
-C     Project : WESTERSCHELDE
-C     Author  : Jos van Gils
-C     Date    : 950103             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     981222  Jan van Beek    Alternative formulation added
-C     981215  Jos van Gils    Compute saturation concentration
-C                             for all layers
-C     950103  Jos van Gils    Create first version
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        COMPUTATION OF CARBON DIOXIDE SATURATION CONCENTRATION
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C CL2     R*4 1 I concentration of chloride                        [kg/m3]
-C CO2SAT  R*4 1 0 saturation concentration                          [g/m3]
-C PAPCO2  R*4 1 0 partial CO2 pressure                             [g/m3]
-C SAL     R*4 1 I Salinity                                           [ppt]
-C SWITCH  I*4 1 I Switch for formulation options                       [-]
-C TEMP    R*4 1 I ambient temperature                                 [xC]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        COMPUTATION OF CARBON DIOXIDE SATURATION CONCENTRATION
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! CL2     R*4 1 I concentration of chloride                        [kg/m3]
+! CO2SAT  R*4 1 0 saturation concentration                          [g/m3]
+! PAPCO2  R*4 1 0 partial CO2 pressure                             [g/m3]
+! SAL     R*4 1 I Salinity                                           [ppt]
+! SWITCH  I*4 1 I Switch for formulation options                       [-]
+! TEMP    R*4 1 I ambient temperature                                 [xC]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER  SWITCH, LUNREP, IKMRK1, ISEG  , IP1   ,
      +         IP2   , IP3   , IP4   , IP5   , IP6
       REAL     CL2   , TEMP  , TEMPA , SAL   , PAPCO2,
@@ -84,7 +69,7 @@ C
      +            B1 =    0.027766 ,
      +            B2 =   -0.025888 ,
      +            B3 =    0.0050578)
-C
+!
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -92,36 +77,36 @@ C
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
 !jvb  IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       CL2    = PMSA(IP1 )/1000.
       TEMP   = PMSA(IP2 )
       SWITCH = NINT(PMSA(IP3 ))
       SAL    = PMSA(IP4 )
       PAPCO2 = PMSA(IP5)
-C     PAPCO2 = 3.162E-4
-C
+!     PAPCO2 = 3.162E-4
+!
 
       IF ( SWITCH .EQ. 1 ) THEN
 
-C === REAERATION CO2 ==================================================
-C
-C     SATURATION CONCENTRATION CO2 = PARTIAL PRESSURE CO2 IN ATMOSPHERE
-C     (ASSUMED MOL/L)              * REACTION CONSTANT
-C
-C     PARTIAL PRESSURE = 10**-3.5 ATM (PAG. 180)
-C
-C     REACTION CONSTANT KCO2 = FUNCTION (ABS.TEMPERATURE,CHLORINITY)
-C     ABS. TEMP  = 273.15 + TEMPD (MODEL TEMP. IN DEGREES CELSIUS)
-C     CHLORINITY = 0.001*CL (CL IS MODEL CONC. CL- IN MG/L)
-C
-C     REF.: AQUATIC CHEMISTRY,  STUMM & MORGAN, WILEY & SONS, 1981
-C
-C =====================================================================
+! === REAERATION CO2 ==================================================
+!
+!     SATURATION CONCENTRATION CO2 = PARTIAL PRESSURE CO2 IN ATMOSPHERE
+!     (ASSUMED MOL/L)              * REACTION CONSTANT
+!
+!     PARTIAL PRESSURE = 10**-3.5 ATM (PAG. 180)
+!
+!     REACTION CONSTANT KCO2 = FUNCTION (ABS.TEMPERATURE,CHLORINITY)
+!     ABS. TEMP  = 273.15 + TEMPD (MODEL TEMP. IN DEGREES CELSIUS)
+!     CHLORINITY = 0.001*CL (CL IS MODEL CONC. CL- IN MG/L)
+!
+!     REF.: AQUATIC CHEMISTRY,  STUMM & MORGAN, WILEY & SONS, 1981
+!
+! =====================================================================
 
          TEMPA  = TEMP + 273.15
          RION   = 0.147E-02 + 0.3592E-01*CL2 + 0.68E-04*CL2**2
@@ -129,14 +114,14 @@ C =====================================================================
      J         0.152642E-01*TEMPA + RION*(0.28569 - 0.6167E-05*TEMPA)))
 
       ELSEIF ( SWITCH .EQ. 2 ) THEN
-C
-C        Weiss volgen Monteiro (CISR)
-C
+!
+!        Weiss volgen Monteiro (CISR)
+!
          TEMP2  = (TEMP+273.)/100.
          PART1  = A1 + A2/TEMP2 + A3*LOG(TEMP2)
          PART2  = SAL*(B1+B2*TEMP2+B3*TEMP2*TEMP2)
          RKCO2  = EXP(PART1+PART2)
-C
+!
       ELSE
           CALL GETMLU(LUNREP)
           WRITE(LUNREP,*) 'ERROR in SATCO2'
@@ -148,22 +133,22 @@ C
           CALL SRSTOP(1)
       ENDIF
 
-C     Output of calculated saturation
+!     Output of calculated saturation
 
       CO2SAT = PAPCO2 * RKCO2 * 1000. * 44.
       PMSA (IP6) = CO2SAT
-C
+!
 !jvb  ENDIF
-C
+!
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
       IP3   = IP3   + INCREM (  3 )
       IP4   = IP4   + INCREM (  4 )
       IP5   = IP5   + INCREM (  5 )
       IP6   = IP6   + INCREM (  6 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

@@ -25,17 +25,17 @@
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
 
-C***********************************************************************
-C
-C     Function : Computes irradiance over the day from daily average irradiance
-C                from "Zonnestraling in Nederland",
-C                C.A.Velds, Thieme/KNMI, 1992, 1st imp., ISBN 90-5210-140-X
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     Function : Computes irradiance over the day from daily average irradiance
+!                from "Zonnestraling in Nederland",
+!                C.A.Velds, Thieme/KNMI, 1992, 1st imp., ISBN 90-5210-140-X
+!
+!***********************************************************************
 
       IMPLICIT NONE
 
-C     arguments
+!     arguments
 
       REAL               :: PMSA(*)            ! in/out input-output array space to be adressed with IPOINT/INCREM
       REAL               :: FL(*)              ! in/out flux array
@@ -50,7 +50,7 @@ C     arguments
       INTEGER            :: NOQ3               ! in     number of exchanges in third direction
       INTEGER            :: NOQ4               ! in     number of exchanges in fourth direction
 
-C     from PMSA array
+!     from PMSA array
 
       REAL               :: RADSURF            ! 1  in  irradiation at the water surface            (W/m2)
       REAL               :: TIME               ! 2  in  DELWAQ time                                  (scu)
@@ -59,7 +59,7 @@ C     from PMSA array
       REAL               :: AUXSYS             ! 5  in  ratio between days and system clock        (scu/d)
       REAL               :: DAYRADSURF         ! 6  out actual irradiance over the day              (W/m2)
 
-C     local decalrations
+!     local decalrations
 
       DOUBLE PRECISION , PARAMETER :: SIN50M = -1.454389765D-2
       DOUBLE PRECISION , PARAMETER :: E      = 1.721420632D-2
@@ -98,20 +98,20 @@ C     local decalrations
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
-C
+!
       VARFLG = .TRUE.
       IF ( IN2 .EQ. 0 .AND. IN3 .EQ. 0 .AND. IN4 .EQ. 0 .AND.
      +     IN5 .EQ. 0                                        ) THEN
-C
+!
          VARFLG = .FALSE.
-C
+!
          TIME      = PMSA( IP2 )
-C        Conversion Latitude to rads
+!        Conversion Latitude to rads
          LATITUDE  = PMSA( IP3 ) / 360 * 2 * PI
          REFDAY    = PMSA( IP4 )
          AUXSYS    = PMSA( IP5 )
 
-C        Conversion time to daynumbers relative to refday
+!        Conversion time to daynumbers relative to refday
          DAYNR =  MOD (TIME / AUXSYS + REFDAY, 365.)
          HOUR  =  MOD (TIME / AUXSYS + REFDAY, 1.  )*24.
          RDIST =  1.D0+.033*COS(E*DAYNR)
@@ -125,7 +125,7 @@ C        Conversion time to daynumbers relative to refday
      5            9.07D-4    * DSIN ( 2.0D0 * E * DAYNR) +
      6            1.480D-3   * DSIN ( 3.0D0 * E * DAYNR)
 
-C        compute actual irradiance
+!        compute actual irradiance
 
          OMEGA0= ACOS(-TAN(DECLIN)*TAN(LATITUDE))
          SIN_DECLIN = SIN(DECLIN)
@@ -137,24 +137,24 @@ C        compute actual irradiance
          RADTIME = I0*RDIST*(SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*COS_OMEGA)
          RADTIME = MAX(0.0,RADTIME)
          RADDAY  = I0/PI*RDIST*(OMEGA0*SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*SIN_OMEGA0)
-C
+!
       ENDIF
-C
+!
       DO ISEG = 1 , NOSEG
          CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-C        IF (IKMRK1.GT.0) THEN
+!        IF (IKMRK1.GT.0) THEN
 
             RADSURF = PMSA( IP1 )
 
             IF ( VARFLG ) THEN
-C
+!
                TIME      = PMSA( IP2 )
-C              Conversion Latitude to rads
+!              Conversion Latitude to rads
                LATITUDE  = PMSA( IP3 ) / 360 * 2 * PI
                REFDAY    = PMSA( IP4 )
                AUXSYS    = PMSA( IP5 )
 
-C              Conversion time to daynumbers relative to refday
+!              Conversion time to daynumbers relative to refday
                DAYNR =  MOD (TIME / AUXSYS + REFDAY, 365.)
                HOUR  =  MOD (TIME / AUXSYS + REFDAY, 1.  )*24.
                RDIST =  1.D0+.033*COS(E*DAYNR)
@@ -169,7 +169,7 @@ C              Conversion time to daynumbers relative to refday
      5                  9.07D-4    * DSIN ( 2.0D0 * E * DAYNR) +
      6                  1.480D-3   * DSIN ( 3.0D0 * E * DAYNR)
 
-C              compute actual irradiance
+!              compute actual irradiance
 
                OMEGA0= ACOS(-TAN(DECLIN)*TAN(LATITUDE))
                SIN_DECLIN = SIN(DECLIN)
@@ -183,22 +183,22 @@ C              compute actual irradiance
                RADDAY  = I0/PI*RDIST*(OMEGA0*SIN_DECLIN*SIN_LATITU+COS_DECLIN*COS_LATITU*SIN_OMEGA0)
 
             ENDIF
-C
+!
             DAYRADSURF = RADTIME * RADSURF / RADDAY
 
             PMSA (IP6) = DAYRADSURF
-C
-C        ENDIF
-C
+!
+!        ENDIF
+!
          IP1   = IP1   + IN1
          IP2   = IP2   + IN2
          IP3   = IP3   + IN3
          IP4   = IP4   + IN4
          IP5   = IP5   + IN5
          IP6   = IP6   + IN6
-C
+!
       ENDDO
 
       RETURN
-C
+!
       END

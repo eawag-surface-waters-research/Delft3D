@@ -26,41 +26,41 @@
      *                  elmnam    ,celidt    ,wrilog    ,error     ,
      *                  buffr     )
       implicit none
-c-----------------------------------------------------------------------
-c     Small adjustment wrt Delft3D-FLOW code
-c     element description
-c     element quantity
-c     element unity
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Small adjustment wrt Delft3D-FLOW code
+!     element description
+!     element quantity
+!     element unity
+!-----------------------------------------------------------------------
 cf    subroutine putgtc(filnam    ,grpnam    ,nelems    ,elmnms    ,
 cf   *                  elmdms               ,elmqty    ,elmunt    ,
 cf   *                  elmdes    ,elmtps    ,nbytsg    ,elmnam    ,
 cf   *                  celidt    ,wrilog    ,error     ,buffr     )
-c-----------------------------------------------------------------------
-c
+!-----------------------------------------------------------------------
+!
       integer         elmdms( 6, *),nbytsg(    *)
       integer         celidt,nelems,error
-c
+!
       integer         buffr(*)
       character*(*)   elmnms(nelems),elmtps(     nelems)
 cf   *                elmqty(    *),elmunt(    *),elmdes(     *)
       character*(*)   elmnam,grpnam
-c
+!
       logical         wrilog
-c
-c-local declarations
-c
+!
+!-local declarations
+!
       integer         start ,stopp ,incr
       parameter      (start =     1,stopp =    2,incr   =    3)
-c
+!
       integer         buflen, elmndm
       integer         i     , ierror, j
       integer         lelmnr, ind
       integer         n
-c
+!
       integer         fd_nef
       integer         elmdim(    5),uindex(    3)
-c
+!
       character*2     access
       character*1     coding
       character*16    elmqta,elmant
@@ -68,19 +68,19 @@ c
       character*(*)   defnam
       character*64    elmdas
       character*134   errstr
-c
-c-External Functions
-c
+!
+!-External Functions
+!
       integer         clsnef, credat, crenef, defcel, defelm,
      *                defgrp, getelt, inqelm, neferr, putelt
       external        clsnef, credat, crenef, defcel, defelm,
      *                defgrp, getelt, inqelm, neferr, putelt
-c
+!
       save fd_nef
       data fd_nef /-1/
-c-----------------------------------------------------------------------
-c-----Initialization
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!-----Initialization
+!-----------------------------------------------------------------------
       coding        = 'N'
       elmndm        = 5
       uindex(start) = celidt
@@ -90,15 +90,15 @@ c-----------------------------------------------------------------------
       elmant = '  '
       elmqta = '   '
       elmdas = '    '
-c-----------------------------------------------------------------------
-c-----write or read data from nefis files
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!-----write or read data from nefis files
+!-----------------------------------------------------------------------
       if (wrilog) then
         access = 'u'
       else
         access = 'r'
       endif
-c
+!
       error  = CRENEF (fd_nef, datnam, defnam,
      *                         coding, access)
       if (error.ne.0 .and. .not.wrilog) then
@@ -125,13 +125,13 @@ c
      *                  uindex,1     ,buflen,buffr )
         if (error.ne.0) goto 9999
       endif
-c-----------------------------------------------------------------------
-c-----error:
-c     writing: most likely error non existing group, so define it
-c     reading: error, no error expected
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!-----error:
+!     writing: most likely error non existing group, so define it
+!     reading: error, no error expected
+!-----------------------------------------------------------------------
       if ( error .ne. 0 .and. wrilog ) then
-c Create elements
+! Create elements
         do 110 lelmnr=1,nelems
           error  = DEFELM(fd_nef        ,elmnms(  lelmnr),
      *                    elmtps(lelmnr),nbytsg(  lelmnr),
@@ -140,26 +140,26 @@ cf   *                    elmdes(lelmnr),elmdms(1,lelmnr),
      *                    elmqta        ,elmant          ,
      *                    elmdas        ,elmdms(1,lelmnr),
      *                    elmdms(2,lelmnr)               )
-c      most likely error, element already exist
+!      most likely error, element already exist
           error = 0
   110   continue
-c Create cells
+! Create cells
         error  = DEFCEL(fd_nef,grpnam,nelems,elmnms)
         if ( error .ne. 0 ) goto 9999
-c Create group on definition file
+! Create group on definition file
         error  = DEFGRP(fd_nef,grpnam,grpnam,1,0,1)
         if ( error .ne. 0 ) goto 9999
-c Create group on data       file
+! Create group on data       file
         error  = CREDAT(fd_nef,grpnam,grpnam)
         if ( error .ne. 0 ) goto 9999
-c try again to write data
+! try again to write data
         error  = putelt(fd_nef,grpnam,elmnam,
      *                  uindex,1     ,buffr        )
         if ( error .ne. 0 ) goto 9999
       endif
-c
-c     No error when reading elements
-c
+!
+!     No error when reading elements
+!
       if (error.eq.0 .and. .not.wrilog) then
 	write(*,*) 'putget'
 	write(*,*) elmnam
@@ -180,12 +180,12 @@ c
   210   continue
   220   continue
         if (lelmnr.ne.0) goto 9999
-c----------------------------------------------------------
+!----------------------------------------------------------
         do 230 i = 1,elmndm
-c----------------------------------------------------------
-c----------Compare local and global dimensions, not equal
-c          => new error number and exit
-c----------------------------------------------------------
+!----------------------------------------------------------
+!----------Compare local and global dimensions, not equal
+!          => new error number and exit
+!----------------------------------------------------------
            if (elmdim(i) .ne. elmdms(1+i,lelmnr)) then
               error  = -15025
               goto 9999
@@ -193,11 +193,11 @@ c----------------------------------------------------------
   230   continue
       endif
       goto 10000
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
  9999 continue
       if (error .ne. 0) ierror = Neferr(1, errstr)
 10000 continue
       ierror = clsnef( fd_nef )
-c
+!
       return
       end

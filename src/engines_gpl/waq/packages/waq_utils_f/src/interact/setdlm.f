@@ -22,12 +22,12 @@
 !!  rights reserved.
 
       INTEGER FUNCTION SETDLM(DLMCHR, NDLM, IGNCHR, NIGN)
-C
+!
       IMPLICIT INTEGER (A-Z)
       CHARACTER*1 DLMCHR(1), IGNCHR(1)
       COMMON /ZDLMTZ/DLM(256), IGN(256), IDLM, IIGN, PUSH(256), PTR
       DATA CHR/0/
-C
+!
       IF (NDLM.LE.0 .OR. NDLM.GT.256) GOTO 1001
       IF (NIGN.LE.0 .OR. NIGN.GT.256) GOTO 1002
       DO 10 I=1,256
@@ -36,15 +36,15 @@ C
       IDLM = 0
       IIGN = 0
       DO 20 I=1,NDLM
-C *** Convert CHARACTER to INTEGER.
+! *** Convert CHARACTER to INTEGER.
       CHR = ICHAR(DLMCHR(I))
-C *** Conversion completed.
+! *** Conversion completed.
       IF (DLM(CHR+1).EQ.0) IDLM = IDLM + 1
 20    DLM(CHR+1) = 1
       DO 30 I=1,NIGN
-C *** Convert CHARACTER to INTEGER.
+! *** Convert CHARACTER to INTEGER.
       CHR = ICHAR(IGNCHR(I))
-C *** Conversion completed.
+! *** Conversion completed.
       IF (IGN(CHR+1).EQ.0) IIGN = IIGN + 1
 30    IGN(CHR+1) = 1
       SETDLM = 0

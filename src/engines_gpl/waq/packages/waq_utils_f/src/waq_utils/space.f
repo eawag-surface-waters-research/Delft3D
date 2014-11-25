@@ -33,36 +33,36 @@
 
       SUBROUTINE SPACE  ( LUNREP , L_DECL , A      , J      , C      ,
      +                    IMAXA  , IMAXI  , IMAXC  )
-C
-C     Deltares
-C
-C     CREATED             : april- 8-1988 by L. Postma
-C
-C     FUNCTION            : Sets the array pointers in the
-C                           SYSA, SYSI and SYSC common blocks.
-C                           This is the only place where these
-C                           common blocks are changed.
-C                           WARNING: The order in the common block
-C                           must be the same as the order in which the
-C                           pointers are set.
-C
-C     LOGICAL UNITNUMBERS : LUNREP- monitoring output file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNREP  INTEGER       1     INPUT   logical unitnumber output file
-C     L_DECL  LOGICAL       1     INPUT   Declare memory y/n
-C     A       INTEGER       *     OUTPUT  real workspace array
-C     J       INTEGER       *     OUTPUT  integer workspace array
-C     C       CHAR*20       *     OUTPUT  character workspace array
-C     IMAXA   INTEGER       1     INPUT   Maximum real  array space
-C     IMAXI   INTEGER       1     INPUT   Maximum integer array space
-C     IMAXC   INTEGER       1     INPUT   Maximum character array space
-C
+!
+!     Deltares
+!
+!     CREATED             : april- 8-1988 by L. Postma
+!
+!     FUNCTION            : Sets the array pointers in the
+!                           SYSA, SYSI and SYSC common blocks.
+!                           This is the only place where these
+!                           common blocks are changed.
+!                           WARNING: The order in the common block
+!                           must be the same as the order in which the
+!                           pointers are set.
+!
+!     LOGICAL UNITNUMBERS : LUNREP- monitoring output file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNREP  INTEGER       1     INPUT   logical unitnumber output file
+!     L_DECL  LOGICAL       1     INPUT   Declare memory y/n
+!     A       INTEGER       *     OUTPUT  real workspace array
+!     J       INTEGER       *     OUTPUT  integer workspace array
+!     C       CHAR*20       *     OUTPUT  character workspace array
+!     IMAXA   INTEGER       1     INPUT   Maximum real  array space
+!     IMAXI   INTEGER       1     INPUT   Maximum integer array space
+!     IMAXC   INTEGER       1     INPUT   Maximum character array space
+!
       INTEGER       LUNREP, IMAXA  , IMAXI  , IMAXC
       LOGICAL       L_DECL
       REAL, DIMENSION(:), POINTER             :: A
@@ -77,29 +77,29 @@ C
       INTEGER*8              :: ITOT
 
       TYPE(MEMORY_PARTITION) :: PART
-C
-C     COMMON  /  SYSI   /   Timer characteristics
-C
+!
+!     COMMON  /  SYSI   /   Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Allocate initial space
-C
+!
+!     Allocate initial space
+!
       NOARR  = IASIZE + IJSIZE + ICSIZE
 
       IF ( ASSOCIATED(J)    ) DEALLOCATE( J )
@@ -114,37 +114,37 @@ C
       C = ' '
       CNAME = ' '
 
-C
-C     Total number of "separate" variables
-C
+!
+!     Total number of "separate" variables
+!
       NOVAR = 5 + NOCONS + NOPA   + NOFUN  + NOSFUN + NOTOT + NOTOT +
      +            NOTOT  + NODISP + NOVELO + NODEF  + NOLOC + NDSPX +
      +            NVELX  + NLOCX  + NFLUX
-C
-C     Sets the array pointers for the array administration array's.
-C
+!
+!     Sets the array pointers for the array administration array's.
+!
       CALL DHMMAR( LUNREP  , J       , CNAME   , PART )
-C
-C     Set the real array workspace
-C
+!
+!     Set the real array workspace
+!
       CALL DHMMRA( LUNREP   ,L_DECL   ,J(IAPOI:), J(IATYP:), J(IABYT:),
      +             J(IALEN:),J(IAKND:),J(IADM1:), J(IADM2:), J(IADM3:),
      +             CNAME, ITOTA, PART )
-C
-C     Set the integer array workspace
-C
+!
+!     Set the integer array workspace
+!
       CALL DHMMJA( LUNREP   ,L_DECL   ,J(IAPOI:), J(IATYP:), J(IABYT:),
      +             J(IALEN:),J(IAKND:),J(IADM1:), J(IADM2:), J(IADM3:),
      +             CNAME, ITOTI, PART )
-C
-C     Set the integer array workspace
-C
+!
+!     Set the integer array workspace
+!
       CALL DHMMCA( LUNREP   ,L_DECL   ,J(IAPOI:), J(IATYP:), J(IABYT:),
      +             J(IALEN:),J(IAKND:),J(IADM1:), J(IADM2:), J(IADM3:),
      +             CNAME, ITOTC, PART )
-C
-C     messages and tests on array space
-C
+!
+!     messages and tests on array space
+!
       ITOT = INT8(ITOTA+ITOTI+ITOTC)*4_2
       WRITE ( LUNREP, 2000 ) ITOTA, ITOTI, ITOTC, ITOT/4,
      &                       ITOT/1000000000,
@@ -172,9 +172,9 @@ C
       IMAXI = ITOTI
       IMAXC = ITOTC
 
-C
-C     Allocate the arrays, first C then J then A for least memory requiremnt
-C
+!
+!     Allocate the arrays, first C then J then A for least memory requiremnt
+!
 
       IF ( L_DECL ) THEN
 
@@ -202,9 +202,9 @@ C
       ENDIF
 
       RETURN
-C
-C         output formats
-C
+!
+!         output formats
+!
  2000 FORMAT ( ' total real      array space: ',I10,/
      *         ' total integer   array space: ',I10,/
      *         ' total character array space: ',I10,/
@@ -217,7 +217,7 @@ C
  2030 FORMAT ( ' ERROR. Character array space exceeded !!! ',/,
      *         ' total Character*20  space: ',I10,', allowed = ',I10)
  2040 FORMAT ( ' EXECUTION HALTED, CONSULT YOUR SYSTEM MANAGER !!!')
-C
+!
       END SUBROUTINE
 
       END MODULE WORKSPACE

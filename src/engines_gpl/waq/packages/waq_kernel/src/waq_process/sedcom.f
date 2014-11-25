@@ -27,56 +27,37 @@
 !>\file
 !>       Composition, thickness, total dry mass and density in sediment layers
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta st
-C     930303  Pascal Boderie  Adding diatoms as a sediment substance
-C     930406  Pascal Boderie  Changing functionality adding three ss fra
-C     990305  Jos van Gils    MFB added
-C     120915  Jos van Gils    Inverse Det and OOX ratios, frAAPDM
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        CALCULATES THE ACTUAL THICKNESS OF THE LAYER BY SUMMING
-C        THE SUBSTANCES THAT CONTRIBUTE TO SEDIMENT VOLUME: IM, IM2, IM3
-C        DETC, OOC, DIATOMS, GREEN ALGAE and BLUE algae
-C        SECONDLY IT CALCULATES THE DRY-MATTER FRACTIONS FOR THESE
-C        SUBSTANCES
-C        THIRDLY IT CALCULATES THE TOTAL AMOUNT OF DRY MASS IN THE LAYER
-C        AND THE OVERALL DENSITY OF THE THE LAYER
-C
-C Name    T   L I/O   Description                                    Uni
-C ----    --- -  -    -------------------                            ---
-C THICK   R*4 1 O  actual thickness of the mixed layer               [m]
-C DEPTH   R*4 1 I  depth water column                                [m]
-C DMCFy   R*4 1 I  conversion factor for gX->dry matter substy  [gDM/gX]
-C FRACy   R*4 1 O  fraction of substance_y in layr              [gX/gDM]
-C MASSy   R*4 1 I  amount substance y in layer                      [gX/m2]
-C RHOy    R*4 1 I  bulk density of substance y (per dry matter) [gDM/m3]
-C SOMDM   R*4 1 I  sum of dry matter in layer                      [gDM/m2]
-C SOMVOL  R*4 1 I  sum of volume in layer                            [m]
-C VOLUME  R*4 1 I  volume computed by DELWAQ                         [m]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        CALCULATES THE ACTUAL THICKNESS OF THE LAYER BY SUMMING
+!        THE SUBSTANCES THAT CONTRIBUTE TO SEDIMENT VOLUME: IM, IM2, IM3
+!        DETC, OOC, DIATOMS, GREEN ALGAE and BLUE algae
+!        SECONDLY IT CALCULATES THE DRY-MATTER FRACTIONS FOR THESE
+!        SUBSTANCES
+!        THIRDLY IT CALCULATES THE TOTAL AMOUNT OF DRY MASS IN THE LAYER
+!        AND THE OVERALL DENSITY OF THE THE LAYER
+!
+! Name    T   L I/O   Description                                    Uni
+! ----    --- -  -    -------------------                            ---
+! THICK   R*4 1 O  actual thickness of the mixed layer               [m]
+! DEPTH   R*4 1 I  depth water column                                [m]
+! DMCFy   R*4 1 I  conversion factor for gX->dry matter substy  [gDM/gX]
+! FRACy   R*4 1 O  fraction of substance_y in layr              [gX/gDM]
+! MASSy   R*4 1 I  amount substance y in layer                      [gX/m2]
+! RHOy    R*4 1 I  bulk density of substance y (per dry matter) [gDM/m3]
+! SOMDM   R*4 1 I  sum of dry matter in layer                      [gDM/m2]
+! SOMVOL  R*4 1 I  sum of volume in layer                            [m]
+! VOLUME  R*4 1 I  volume computed by DELWAQ                         [m]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -87,7 +68,7 @@ C     ------   -----  ------------
       LOGICAL  NO1OPT , NO2OPT , NO3OPT , NO4OPT , NO5OPT , NO6OPT ,
      *         NO7OPT , NO8OPT , NO9OPT
 
-C        Substance 1 IM1
+!        Substance 1 IM1
       IF ( INCREM( 1) .EQ. 0 .AND. INCREM( 9) .EQ. 0 .AND.
      *     INCREM(16) .EQ. 0                               ) THEN
          MASS1  = PMSA(IPOINT( 1))
@@ -99,7 +80,7 @@ C        Substance 1 IM1
       ELSE
          NO1OPT = .FALSE.
       ENDIF
-C        Substance 2  IM2
+!        Substance 2  IM2
       IF ( INCREM( 2) .EQ. 0 .AND. INCREM(10) .EQ. 0 .AND.
      *     INCREM(17) .EQ. 0                               ) THEN
          MASS2  = PMSA(IPOINT( 2))
@@ -111,7 +92,7 @@ C        Substance 2  IM2
       ELSE
          NO2OPT = .FALSE.
       ENDIF
-C        Substance 3 IM3
+!        Substance 3 IM3
       IF ( INCREM( 3) .EQ. 0 .AND. INCREM(11) .EQ. 0 .AND.
      *     INCREM(18) .EQ. 0                               ) THEN
          MASS3  = PMSA(IPOINT( 3))
@@ -123,7 +104,7 @@ C        Substance 3 IM3
       ELSE
          NO3OPT = .FALSE.
       ENDIF
-C        Substance 4 DetC
+!        Substance 4 DetC
       IF ( INCREM( 4) .EQ. 0 .AND. INCREM(12) .EQ. 0 .AND.
      *     INCREM(19) .EQ. 0 .AND. INCREM(25) .EQ. 0 .AND.
      *     INCREM(26) .EQ. 0 .AND. INCREM(27) .EQ. 0       ) THEN
@@ -147,7 +128,7 @@ C        Substance 4 DetC
       ELSE
          NO4OPT = .FALSE.
       ENDIF
-C        Substance 5 OOC
+!        Substance 5 OOC
       IF ( INCREM( 5) .EQ. 0 .AND. INCREM(13) .EQ. 0 .AND.
      *     INCREM(20) .EQ. 0 .AND. INCREM(28) .EQ. 0 .AND.
      *     INCREM(29) .EQ. 0 .AND. INCREM(30) .EQ. 0       ) THEN
@@ -172,7 +153,7 @@ C        Substance 5 OOC
       ELSE
          NO5OPT = .FALSE.
       ENDIF
-C        Substance 6 Diat
+!        Substance 6 Diat
       IF ( INCREM( 6) .EQ. 0 .AND. INCREM(14) .EQ. 0 .AND.
      *     INCREM(21) .EQ. 0                               ) THEN
          MASS6  = PMSA(IPOINT( 6))
@@ -184,7 +165,7 @@ C        Substance 6 Diat
       ELSE
          NO6OPT = .FALSE.
       ENDIF
-C        Substance 7 Green
+!        Substance 7 Green
       IF ( INCREM( 7) .EQ. 0 .AND. INCREM(15) .EQ. 0 .AND.
      *     INCREM(22) .EQ. 0                               ) THEN
          MASS7  = PMSA(IPOINT( 7))
@@ -196,7 +177,7 @@ C        Substance 7 Green
       ELSE
          NO7OPT = .FALSE.
       ENDIF
-C        Substance 8 MFB1
+!        Substance 8 MFB1
       IF ( INCREM(31) .EQ. 0 .AND. INCREM(33) .EQ. 0 .AND.
      *     INCREM(35) .EQ. 0                               ) THEN
          MASS8  = PMSA(IPOINT(31))
@@ -208,7 +189,7 @@ C        Substance 8 MFB1
       ELSE
          NO8OPT = .FALSE.
       ENDIF
-C        Substance 9 MFB2
+!        Substance 9 MFB2
       IF ( INCREM(32) .EQ. 0 .AND. INCREM(34) .EQ. 0 .AND.
      *     INCREM(36) .EQ. 0                               ) THEN
          MASS9  = PMSA(IPOINT(32))
@@ -220,7 +201,7 @@ C        Substance 9 MFB2
       ELSE
          NO9OPT = .FALSE.
       ENDIF
-C
+!
       IN1   = INCREM(1 )
       IN2   = INCREM(2 )
       IN3   = INCREM(3 )
@@ -282,7 +263,7 @@ C
       IN59  = INCREM(59)
       IN60  = INCREM(60)
       IN61  = INCREM(61)
-C
+!
       IP1   = IPOINT(1 )
       IP2   = IPOINT(2 )
       IP3   = IPOINT(3 )
@@ -344,7 +325,7 @@ C
       IP59  = IPOINT(59)
       IP60  = IPOINT(60)
       IP61  = IPOINT(61)
-C
+!
       IFLUX = 0
       DO 100 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -353,7 +334,7 @@ C
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
 
-C        Substance 1
+!        Substance 1
       IF ( .NOT. NO1OPT ) THEN
          MASS1  = PMSA(IP1 )
          DMCF1  = PMSA(IP9 )
@@ -361,7 +342,7 @@ C        Substance 1
          SOM1   = MASS1 * DMCF1
          SOMV1  = SOM1  / RHO1
       ENDIF
-C        Substance 2
+!        Substance 2
       IF ( .NOT. NO2OPT ) THEN
          MASS2  = PMSA(IP2 )
          DMCF2  = PMSA(IP10)
@@ -369,7 +350,7 @@ C        Substance 2
          SOM2   = MASS2 * DMCF2
          SOMV2  = SOM2  / RHO2
       ENDIF
-C        Substance 3
+!        Substance 3
       IF ( .NOT. NO3OPT ) THEN
          MASS3  = PMSA(IP3 )
          DMCF3  = PMSA(IP11)
@@ -377,7 +358,7 @@ C        Substance 3
          SOM3   = MASS3 * DMCF3
          SOMV3  = SOM3  / RHO3
       ENDIF
-C        Substance 4
+!        Substance 4
       IF ( .NOT. NO4OPT ) THEN
          MASS4  = PMSA(IP4 )
          DMCF4  = PMSA(IP12)
@@ -396,7 +377,7 @@ C        Substance 4
             CS4 = SMASS4 / MASS4
          ENDIF
       ENDIF
-C        Substance 5
+!        Substance 5
       IF ( .NOT. NO5OPT ) THEN
          MASS5  = PMSA(IP5 )
          DMCF5  = PMSA(IP13)
@@ -415,7 +396,7 @@ C        Substance 5
             CS5 = SMASS5 / MASS5
          ENDIF
       ENDIF
-C        Substance 6
+!        Substance 6
       IF ( .NOT. NO6OPT ) THEN
          MASS6  = PMSA(IP6 )
          DMCF6  = PMSA(IP14)
@@ -423,7 +404,7 @@ C        Substance 6
          SOM6   = MASS6 * DMCF6
          SOMV6  = SOM6  / RHO6
       ENDIF
-C        Substance 7
+!        Substance 7
       IF ( .NOT. NO7OPT ) THEN
          MASS7  = PMSA(IP7 )
          DMCF7  = PMSA(IP15)
@@ -431,7 +412,7 @@ C        Substance 7
          SOM7   = MASS7 * DMCF7
          SOMV7  = SOM7  / RHO7
       ENDIF
-C        Substance 8
+!        Substance 8
       IF ( .NOT. NO8OPT ) THEN
          MASS8  = PMSA(IP31)
          DMCF8  = PMSA(IP33)
@@ -439,7 +420,7 @@ C        Substance 8
          SOM8   = MASS8 * DMCF8
          SOMV8  = SOM8  / RHO8
       ENDIF
-C        Substance 9
+!        Substance 9
       IF ( .NOT. NO9OPT ) THEN
          MASS9  = PMSA(IP32)
          DMCF9  = PMSA(IP34)
@@ -447,16 +428,16 @@ C        Substance 9
          SOM9   = MASS9 * DMCF9
          SOMV9  = SOM9  / RHO9
       ENDIF
-C
+!
       MASS10  = PMSA(IP8 )
       POR     = PMSA(IP23)
       SURF    = PMSA(IP24)
 
-C***********************************************************************
-C**** Calculations connected to the status of the mixed layer
-C***********************************************************************
+!***********************************************************************
+!**** Calculations connected to the status of the mixed layer
+!***********************************************************************
 
-C    Calculate som dry matter in mixed layer
+!    Calculate som dry matter in mixed layer
       SOMDM = SOM1 + SOM2 + SOM3 + SOM4 + SOM5 + SOM6 + SOM7
      J             + SOM8 + SOM9
       TIM   = MASS1 + MASS2 + MASS3
@@ -532,7 +513,7 @@ C    Calculate som dry matter in mixed layer
 
       ENDIF
       ENDIF
-C
+!
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
       IP3   = IP3   + IN3
@@ -594,9 +575,9 @@ C
       IP59  = IP59  + IN59
       IP60  = IP60  + IN60
       IP61  = IP61  + IN61
-c
+!
   100 CONTINUE
-c
+!
       RETURN
-C
+!
       END

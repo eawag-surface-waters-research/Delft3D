@@ -27,54 +27,34 @@
 !>\file
 !>       Sedimentation routine used for IMx, OOC, algae, BOD pools, bacteria etc.
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta study)
-C     942211  Pascal Boderie  Version with adaptions JANGTZE
-C     950215  M. Bokhorst     Add calculation sedimentation velocity
-C     951018  Jos van Gils    Upgrade sedimentation as transport process
-C    2000419  Jan van Beek    Check on dummy exchanges (0->0)
-C     010208  Jos van Gils    Check on Mindepth also for water-water exch
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        SEDIMENTATION FORMULATIONS
-C        MODULE VALID FOR IM, IM2, IM3, DETC, OOC, DIAT, AAP
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C CONC    R*4 1 I  concentration sedimenting material water        [gX/m3]
-C DEPTH   R*4 1 I  DELWAQ depth                                        [m]
-C FL (1)  R*4 1 O  sedimentation flux (water->mixinglayer)       [gX/m3/d]
-C MINDEP  R*4 1 I  minimal depth for sedimentation                     [m]
-C PSED    R*4 1 L  sedimentaion probability (0 - 1)                    [-]
-C POTSED  R*4 1 L  potential sedimentation flux                  [gX/m2/d]
-C TAU     R*4 1 I  calculated sheerstress                        [kg/m/s2]
-C TAUVEL  R*4 1 I  total velocity calcualted from tau                [m/s]
-C TCRSED  R*4 1 I  critical sheerstress sedimentation            [kg/m/s2]
-C VCRSED  R*4 1 I  critical velocity sedimentation                   [m/s]
-C VSED    R*4 1 O  first order sedimentaion rate (calculated)        [m/d]
-C ZERSED  R*4 1 I  zeroth order sedimentation flux               [gX/m2/d]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        SEDIMENTATION FORMULATIONS
+!        MODULE VALID FOR IM, IM2, IM3, DETC, OOC, DIAT, AAP
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! CONC    R*4 1 I  concentration sedimenting material water        [gX/m3]
+! DEPTH   R*4 1 I  DELWAQ depth                                        [m]
+! FL (1)  R*4 1 O  sedimentation flux (water->mixinglayer)       [gX/m3/d]
+! MINDEP  R*4 1 I  minimal depth for sedimentation                     [m]
+! PSED    R*4 1 L  sedimentaion probability (0 - 1)                    [-]
+! POTSED  R*4 1 L  potential sedimentation flux                  [gX/m2/d]
+! TAU     R*4 1 I  calculated sheerstress                        [kg/m/s2]
+! TAUVEL  R*4 1 I  total velocity calcualted from tau                [m/s]
+! TCRSED  R*4 1 I  critical sheerstress sedimentation            [kg/m/s2]
+! VCRSED  R*4 1 I  critical velocity sedimentation                   [m/s]
+! VSED    R*4 1 O  first order sedimentaion rate (calculated)        [m/d]
+! ZERSED  R*4 1 I  zeroth order sedimentation flux               [gX/m2/d]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       USE BottomSet     !  Module with definition of the waterbottom segments
 
@@ -138,18 +118,18 @@ C     ------   -----  ------------
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 
-C     zero output
+!     zero output
 
       PMSA (IP10) = 0.0
       PMSA (IP11) = 0.0
 
-c     sedimentation towards the bottom
+!     sedimentation towards the bottom
 
       CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
       IF (IKMRK1.EQ.1) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
       CONC    = MAX (0.0, PMSA(IP1) )
       ZERSED  = PMSA(IP2 )
       VSED    = PMSA(IP3 )
@@ -159,25 +139,25 @@ C
       DELT    = PMSA(IP7 )
       MINDEP  = PMSA(IP8 )
 
-C*******************************************************************************
-C**** Processes connected to the SEDIMENTATION
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the SEDIMENTATION
+!***********************************************************************
 
-C     Calculate sedimenation probability
+!     Calculate sedimenation probability
 
       IF (TAU .EQ. -1.0) THEN
           PSED = 1.0
       ELSEIF (TCRSED .LT. 1E-20 )  THEN
           PSED = 0.0
       ELSE
-C         vergelijking met critische schuifspanning
+!         vergelijking met critische schuifspanning
           PSED = MAX ( 0.0, (1.0 - TAU/TCRSED) )
       ENDIF
 
       PSED = MAX( PSEDMIN, PSED )
 
-C     Bereken de potentiele sedimentatie fluxen
-C     Geen sedimentatie onder een minimale diepte
+!     Bereken de potentiele sedimentatie fluxen
+!     Geen sedimentatie onder een minimale diepte
 
       IF ( DEPTH .LT. MINDEP) THEN
          MAXSED       = 0.0
@@ -185,20 +165,20 @@ C     Geen sedimentatie onder een minimale diepte
       ELSE
          POTSED = ZERSED + ( VSED * CONC ) * PSED
 
-C        sedimenteer maximaal de aanwezige hoeveelheid (M/L2/DAY)
+!        sedimenteer maximaal de aanwezige hoeveelheid (M/L2/DAY)
          MAXSED = MIN (POTSED, CONC / DELT * DEPTH)
 
-C        omrekening van sedimentatie flux in M/L3/DAY
+!        omrekening van sedimentatie flux in M/L3/DAY
          FL( 1+IFLUX) =  MAXSED / DEPTH
       ENDIF
 
-C     Output of calculated sedimentation rate
+!     Output of calculated sedimentation rate
       PMSA (IP10) = PSED
       PMSA (IP11) = MAXSED
-C
+!
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
@@ -210,15 +190,15 @@ C
       IP8   = IP8   + IN8
       IP10  = IP10  + IN10
       IP11  = IP11  + IN11
-C
+!
  9000 CONTINUE
-C
+!
       IP1  = IPOINT(1 )
       IP6  = IPOINT(6 )
       IP8  = IPOINT(8 )
       IP11 = IPOINT(11)
 
-c.....Exchangeloop over de horizontale richting
+!.....Exchangeloop over de horizontale richting
       DO 8000 IQ=1,NOQ1+NOQ2
 
          PMSA(IP12) = 0.0
@@ -229,7 +209,7 @@ c.....Exchangeloop over de horizontale richting
 
       IP9 = IP9 + ( NOQ1+NOQ2 ) * IN9
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3+NOQ4
 
          IVAN  = IEXPNT(1,IQ)
@@ -237,28 +217,28 @@ c.....Exchangeloop over de verticale richting
 
          IF ( IVAN .GT. 0 .AND. INAAR .GT. 0 ) THEN
 
-C           Zoek eerste kenmerk van- en naar-segmenten
+!           Zoek eerste kenmerk van- en naar-segmenten
 
             CALL DHKMRK(1,IKNMRK(IVAN ),IKMRKV)
             CALL DHKMRK(1,IKNMRK(INAAR),IKMRKN)
             IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.3) THEN
 
-C               Bodem-water uitwisseling: NUL FLUX OM OOK OUDE PDF's
-C                                         TE KUNNEN GEBRUIKEN
-C               Snelheid behoeft niet gezet (gebeurt in TRASED)
+!               Bodem-water uitwisseling: NUL FLUX OM OOK OUDE PDF's
+!                                         TE KUNNEN GEBRUIKEN
+!               Snelheid behoeft niet gezet (gebeurt in TRASED)
 
-C               MAXSED = PMSA (IP11+(IVAN-1)*IN11)
-C               CONC   = MAX (1E-20, PMSA(IP1+(IVAN-1)*IN1) )
-C               PMSA(IP12) = MAXSED/86400./CONC
+!               MAXSED = PMSA (IP11+(IVAN-1)*IN11)
+!               CONC   = MAX (1E-20, PMSA(IP1+(IVAN-1)*IN1) )
+!               PMSA(IP12) = MAXSED/86400./CONC
                 FL ( 1 + (IVAN-1)*NOFLUX ) = 0.0
 
             ELSEIF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
-c           IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
+!           IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
 
-C               Water-water uitwisseling
-Crs             merk op: sedimentatie tussen waterlagen: geen taucr correctie,
-Crs             alleen conversie van 1/d naar 1/s. Ten overvloede:
-Crs             scu (s) en aux-timer (d) liggen dus vast!
+!               Water-water uitwisseling
+!rs             merk op: sedimentatie tussen waterlagen: geen taucr correctie,
+!rs             alleen conversie van 1/d naar 1/s. Ten overvloede:
+!rs             scu (s) en aux-timer (d) liggen dus vast!
 
                 DEPTH  = PMSA(IP6+(IVAN -1)*IN6)
                 DEPTH2 = PMSA(IP6+(INAAR-1)*IN6)
@@ -280,7 +260,7 @@ Crs             scu (s) en aux-timer (d) liggen dus vast!
 
  7000 CONTINUE
 
-C     Handle velocity to the delwaq-g bottom
+!     Handle velocity to the delwaq-g bottom
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -312,26 +292,26 @@ C     Handle velocity to the delwaq-g bottom
             DELT    = PMSA(IP7+(IWATER-1)*IN7)
             MINDEP  = PMSA(IP8+(IWATER-1)*IN8)
 
-C           Calculate sedimenation probability
+!           Calculate sedimenation probability
 
             IF (TAU .EQ. -1.0) THEN
                 PSED = 1.0
             ELSEIF (TCRSED .LT. 1E-20 )  THEN
                 PSED = 0.0
             ELSE
-C               vergelijking met critische schuifspanning
+!               vergelijking met critische schuifspanning
                 PSED = MAX ( 0.0, (1.0 - TAU/TCRSED) )
             ENDIF
 
-C           Bereken de potentiele sedimentatie fluxen
-C           Geen sedimentatie onder een minimale diepte
+!           Bereken de potentiele sedimentatie fluxen
+!           Geen sedimentatie onder een minimale diepte
 
             IF ( DEPTH .LT. MINDEP) THEN
                MAXSED       = 0.0
             ELSE
                POTSED = ZERSED + ( VSED * CONC ) * PSED
 
-C              sedimenteer maximaal de aanwezige hoeveelheid (M/L2/DAY)
+!              sedimenteer maximaal de aanwezige hoeveelheid (M/L2/DAY)
                MAXSED = MIN (POTSED, CONC / DELT * DEPTH)
 
             ENDIF
@@ -343,6 +323,6 @@ C              sedimenteer maximaal de aanwezige hoeveelheid (M/L2/DAY)
          ENDDO
 
       ENDDO
-C
+!
       RETURN
       END

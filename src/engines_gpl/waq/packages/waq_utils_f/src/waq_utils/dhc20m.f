@@ -22,28 +22,28 @@
 !!  rights reserved.
 
       SUBROUTINE DHC20M ( CARRA1 , CARRA2 , NOTOT )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : march 1998 by Jan van Beek
-C
-C     FUNCTION            : moves NOTOT values from character*20 array
-C                           CARRA1 to CARRA2
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     CARRA1  CH*(*)    NOTOT     INPUT   array to be copied
-C     CARRA2  CH*(*)    NOTOT     OUTPUT  array to copy to
-C     NOTOT   INTEGER     1       INPUT   total number of entries
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : march 1998 by Jan van Beek
+!
+!     FUNCTION            : moves NOTOT values from character*20 array
+!                           CARRA1 to CARRA2
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     CARRA1  CH*(*)    NOTOT     INPUT   array to be copied
+!     CARRA2  CH*(*)    NOTOT     OUTPUT  array to copy to
+!     NOTOT   INTEGER     1       INPUT   total number of entries
+!
       INTEGER       NOTOT
       CHARACTER*20  CARRA1(*) , CARRA2(*)
-C
+!
       DO I = 1,NOTOT
          CARRA2(I) = CARRA1(I)
       ENDDO
-C
+!
       RETURN
       END

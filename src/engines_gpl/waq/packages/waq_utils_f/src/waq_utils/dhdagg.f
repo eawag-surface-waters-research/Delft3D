@@ -25,51 +25,51 @@
      +                    NOTOTO, ISYSI , ISYSW , ISYSH , ISYSO ,
      +                    IPGRID, IDATYP, ARRINP, WEIGHT, ISWCUM,
      +                    ARRHLP, ARROUT)
-C
-C     Deltares
-C
-C     Created             : June 1998 by Jan van Beek
-C
-C     Function            : Dis-aggregates value to finer grid
-C
-C     Subroutines called  : GETMLU, Get unit number report file
-C                           SRSTOP, Stops execution
-C                           ZERO  , Zero's a real array
-C
-C     Arguments           :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOSEG1  INTEGER  1          INPUT   Number of segments on finer grid
-C     NOSEG2  INTEGER  1          INPUT   Number of segments on coarser grid
-C     IPGRID  INTEGER  NOSEG1     INPUT   Grid pointers to coarser grid
-C     IDATYP  INTEGER  1          INPUT   Dis-aggregation type
-C                                         1 = expansion of value
-C                                         2 = distribute by WEIGHT
-C                                         3 = distribute
-C     ARRINP  REAL     NOSEG2     INPUT   Array to be dis-aggregated
-C     WEIGHT  REAL     NOSEG1     INPUT   Weigth in dis-aggregation
-C     ISWCUM  INTEGER  1          INPUT   Accummulaton in ARROUT switch (0=no/1=yes)
-C     ARRHLP  REAL     NOSEG2     LOCAL   Local help array
-C     ARROUT  REAL     NOSEG1     OUTPUT  Dis-aggregated array
-C
-C     Declaration of arguments
-C
+!
+!     Deltares
+!
+!     Created             : June 1998 by Jan van Beek
+!
+!     Function            : Dis-aggregates value to finer grid
+!
+!     Subroutines called  : GETMLU, Get unit number report file
+!                           SRSTOP, Stops execution
+!                           ZERO  , Zero's a real array
+!
+!     Arguments           :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOSEG1  INTEGER  1          INPUT   Number of segments on finer grid
+!     NOSEG2  INTEGER  1          INPUT   Number of segments on coarser grid
+!     IPGRID  INTEGER  NOSEG1     INPUT   Grid pointers to coarser grid
+!     IDATYP  INTEGER  1          INPUT   Dis-aggregation type
+!                                         1 = expansion of value
+!                                         2 = distribute by WEIGHT
+!                                         3 = distribute
+!     ARRINP  REAL     NOSEG2     INPUT   Array to be dis-aggregated
+!     WEIGHT  REAL     NOSEG1     INPUT   Weigth in dis-aggregation
+!     ISWCUM  INTEGER  1          INPUT   Accummulaton in ARROUT switch (0=no/1=yes)
+!     ARRHLP  REAL     NOSEG2     LOCAL   Local help array
+!     ARROUT  REAL     NOSEG1     OUTPUT  Dis-aggregated array
+!
+!     Declaration of arguments
+!
       INTEGER        NOSEG1, NOSEG2, IDATYP, ISWCUM
       INTEGER        IPGRID(NOSEG1)
       REAL           ARRINP(NOTOTI,NOSEG2) , WEIGHT(NOTOTW,NOSEG1) ,
      +               ARRHLP(NOTOTH,NOSEG2) , ARROUT(NOTOTO,NOSEG1)
-C
-C     Local declaration
-C
-C     ISEG1   INTEGER  1          LOCAL   Segment index finer grid
-C     ISEG2   INTEGER  1          LOCAL   Segment index coarser grid
-C     LUREP   INTEGER  1          LOCAL   Unit number report file
-C
+!
+!     Local declaration
+!
+!     ISEG1   INTEGER  1          LOCAL   Segment index finer grid
+!     ISEG2   INTEGER  1          LOCAL   Segment index coarser grid
+!     LUREP   INTEGER  1          LOCAL   Unit number report file
+!
       INTEGER        ISEG1 , ISEG2 , LUREP
-C
-C     Zero arrays
-C
+!
+!     Zero arrays
+!
       IF ( ISWCUM .EQ. 0 ) THEN
          DO ISEG1 = 1 , NOSEG1
             ARROUT(ISYSO,ISEG1) = 0.0
@@ -80,9 +80,9 @@ C
             ARRHLP(ISYSH,ISEG2) = 0.0
          ENDDO
       ENDIF
-C
-C     Accumulate WEIGHT in ARRHLP
-C
+!
+!     Accumulate WEIGHT in ARRHLP
+!
       IF ( IDATYP .EQ. 3 ) THEN
          DO ISEG1 = 1 , NOSEG1
             ISEG2 = IPGRID(ISEG1)
@@ -100,13 +100,13 @@ C
             ENDIF
          ENDDO
       ENDIF
-C
-C     Expand or distribute
-C
+!
+!     Expand or distribute
+!
       IF ( IDATYP .EQ. 1 ) THEN
-C
-C        Expand
-C
+!
+!        Expand
+!
          DO ISEG1 = 1 , NOSEG1
             ISEG2 = IPGRID(ISEG1)
             IF ( ISEG2 .GT. 0 ) THEN
@@ -119,9 +119,9 @@ C
             ENDIF
          ENDDO
       ELSEIF ( IDATYP .EQ. 3 ) THEN
-C
-C        Distribute by weight
-C
+!
+!        Distribute by weight
+!
          DO ISEG1 = 1 , NOSEG1
             ISEG2 = IPGRID(ISEG1)
             IF ( ISEG2 .GT. 0 ) THEN
@@ -138,9 +138,9 @@ C
             ENDIF
          ENDDO
       ELSEIF ( IDATYP .EQ. 2 ) THEN
-C
-C        Distribute
-C
+!
+!        Distribute
+!
          DO ISEG1 = 1 , NOSEG1
             ISEG2 = IPGRID(ISEG1)
             IF ( ISEG2 .GT. 0 ) THEN
@@ -159,14 +159,14 @@ C
             ENDIF
          ENDDO
       ELSE
-C
-C        ERROR , undefined dis-aggregation type
-C
+!
+!        ERROR , undefined dis-aggregation type
+!
          CALL GETMLU(LUREP)
          WRITE(LUREP,2000) IDATYP
          CALL SRSTOP(1)
       ENDIF
-C
+!
       RETURN
  2000 FORMAT ( ' ERROR: undefined dis-aggregation type in DHDAGG :',I8 )
       END

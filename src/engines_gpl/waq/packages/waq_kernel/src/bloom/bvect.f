@@ -21,37 +21,37 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       30 Oct 1989
-C    Time:       14:47
-C    Program:    BVECT    FORTRAN
-C    Version:    1.1
-C    Programmer: Hans Los
-C    (c) 1989 Deltares Sektor W&M
-C    Previous versions:
-C    1.0 -- 30 Oct 1989 -- 14:45
-C    BVECT.FOR  -- 25 Apr 1989 -- 10:28
-C
-C  *********************************************************************
-C  *  SUBROUTINE TO SET THE MORTALITY CONSTRAINTS INTO THE B-VECTOR    *
-C  *********************************************************************
-C
+!    Date:       30 Oct 1989
+!    Time:       14:47
+!    Program:    BVECT    FORTRAN
+!    Version:    1.1
+!    Programmer: Hans Los
+!    (c) 1989 Deltares Sektor W&M
+!    Previous versions:
+!    1.0 -- 30 Oct 1989 -- 14:45
+!    BVECT.FOR  -- 25 Apr 1989 -- 10:28
+!
+!  *********************************************************************
+!  *  SUBROUTINE TO SET THE MORTALITY CONSTRAINTS INTO THE B-VECTOR    *
+!  *********************************************************************
+!
       SUBROUTINE BVECT(X,XDEF)
       IMPLICIT REAL*8 (A-H,O-Z)
-C
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'matri.inc'
       DIMENSION X(*),B2(MS),XDEF(*)
-C
-C To tell Bloom how much biomass of the living phytoplankton
-C species is left at the end of the time-step, the 'minimum
-C biomass' of each species is set in the B-vector. This value is used
-C as the mortality constraint (the minimum biomass to be returned
-C by simplex).
-C The new, minimum biomass levels are also stored in the original
-C XDEF-vector. This is to enable the program to deal with infeasible
-C solutions for example due to light limitation.
-C
+!
+! To tell Bloom how much biomass of the living phytoplankton
+! species is left at the end of the time-step, the 'minimum
+! biomass' of each species is set in the B-vector. This value is used
+! as the mortality constraint (the minimum biomass to be returned
+! by simplex).
+! The new, minimum biomass levels are also stored in the original
+! XDEF-vector. This is to enable the program to deal with infeasible
+! solutions for example due to light limitation.
+!
 
       I1 = 0
       K1 = NUROWS
@@ -67,12 +67,12 @@ C
    30     CONTINUE
           B2(I) = DMAX1(SUMSP,0.0D0)
    40 CONTINUE
-C
+!
       I1 = NUEXRO + NUECOG
       DO 53 I = 1,NUECOG
           I1 = I1 + 1
           B(I1) = B2(I)
 53    CONTINUE
-C
+!
       RETURN
       END

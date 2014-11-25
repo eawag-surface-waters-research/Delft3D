@@ -21,20 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE CLRSCR TO REFRESH THE TERMINAL SCREEN              *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE CLRSCR TO REFRESH THE TERMINAL SCREEN              *
+!  *********************************************************************
+!
       SUBROUTINE CLRSCR
       CHARACTER*1 CLEAR(4)
       INTEGER ICL
       DATA ICL /27/
       DATA CLEAR /' ','[','2','J'/
-C
-C Note: the data in ICL corresponds with HEX 1B.
-C     DATA CLEAR2 /'1B','5B','32','4A'/
-C
+!
+! Note: the data in ICL corresponds with HEX 1B.
+!     DATA CLEAR2 /'1B','5B','32','4A'/
+!
       CLEAR(1) = CHAR(ICL)
       WRITE (*,10) CLEAR
 10    FORMAT (1X,4A1)

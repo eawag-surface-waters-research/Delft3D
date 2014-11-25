@@ -29,45 +29,45 @@
      +                      ITEM_GROUPID, ITEM_SEGX   ,
      +                      ITEM_WK     , LUNREP      ,
      +                      IERROR      )
-C
-C     Deltares
-C
-C     CREATED            :  june 1999 by Jan van Beek
-C
-C     FUNCTION           :  Read TABLE_P2 group from NEFIS file
-C
-C     FILES              :  NEFIS file assumed opened
-C
-C     SUBROUTINES CALLED :
-C
-C     ARGUMENTS
-C
-C     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DEFFDS       INT    2993    I/O     Definition file descriptor
-C     DATFDS       INT    999     I/O     Data file descriptor
-C     NO_ITEM_MAX  INT            I       maximum number of items
-C     NO_ITEM      INT            0       number of items
-C     ITEM_ID      CHA*10 NO_ITEM 0       unique item identification
-C     ITEM_NAME    CHA*50 NO_ITEM 0       item name
-C     ITEM_UNIT    CHA*20 NO_ITEM 0       unit
-C     ITEM_DEFAULT REA    NO_ITEM 0       default value
-C     ITEM_AGGREGA CHA*10 NO_ITEM 0       variable used for aggregation
-C     ITEM_DISAGGR CHA*10 NO_ITEM 0       variable used for dis-aggregation
-C     ITEM_GROUPID CHA*30 NO_ITEM 0       subtance group ID
-C     ITEM_SEGX    CHA*1  NO_ITEM 0       segment / exchange indication
-C     ITEM_WK      CHA*1  NO_ITEM 0       active / inactive indication
-C     LUNREP       INT    1       I       Unit number report file
-C     IERROR       INT    1       0       Error
-C
-C     IMPLICIT NONE for extra compiler checks
-C     SAVE to keep the group definition intact
-C
+!
+!     Deltares
+!
+!     CREATED            :  june 1999 by Jan van Beek
+!
+!     FUNCTION           :  Read TABLE_P2 group from NEFIS file
+!
+!     FILES              :  NEFIS file assumed opened
+!
+!     SUBROUTINES CALLED :
+!
+!     ARGUMENTS
+!
+!     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DEFFDS       INT    2993    I/O     Definition file descriptor
+!     DATFDS       INT    999     I/O     Data file descriptor
+!     NO_ITEM_MAX  INT            I       maximum number of items
+!     NO_ITEM      INT            0       number of items
+!     ITEM_ID      CHA*10 NO_ITEM 0       unique item identification
+!     ITEM_NAME    CHA*50 NO_ITEM 0       item name
+!     ITEM_UNIT    CHA*20 NO_ITEM 0       unit
+!     ITEM_DEFAULT REA    NO_ITEM 0       default value
+!     ITEM_AGGREGA CHA*10 NO_ITEM 0       variable used for aggregation
+!     ITEM_DISAGGR CHA*10 NO_ITEM 0       variable used for dis-aggregation
+!     ITEM_GROUPID CHA*30 NO_ITEM 0       subtance group ID
+!     ITEM_SEGX    CHA*1  NO_ITEM 0       segment / exchange indication
+!     ITEM_WK      CHA*1  NO_ITEM 0       active / inactive indication
+!     LUNREP       INT    1       I       Unit number report file
+!     IERROR       INT    1       0       Error
+!
+!     IMPLICIT NONE for extra compiler checks
+!     SAVE to keep the group definition intact
+!
       IMPLICIT NONE
       SAVE
-C
-C     declaration of arguments
-C
+!
+!     declaration of arguments
+!
       INTEGER       NO_ITEM_MAX , NO_ITEM     ,
      +              LUNREP      , IERROR
       INTEGER       DEFFDS
@@ -80,19 +80,19 @@ C
       CHARACTER*30  ITEM_GROUPID(NO_ITEM_MAX)
       CHARACTER*1   ITEM_SEGX   (NO_ITEM_MAX)
       CHARACTER*1   ITEM_WK     (NO_ITEM_MAX)
-C
-C     Local variables
-C
-C     GRPNAM  CHAR*16     1       LOCAL   group name (table)
-C     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
-C     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
-C     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
-C     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
-C     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
-C
+!
+!     Local variables
+!
+!     GRPNAM  CHAR*16     1       LOCAL   group name (table)
+!     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
+!     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
+!     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
+!     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
+!     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
+!
       INTEGER       NELEMS
       PARAMETER   ( NELEMS = 10 )
-C
+!
       INTEGER       I               , IELM          ,
      +              BUFLEN
       INTEGER       ELMDMS(2,NELEMS), NBYTSG(NELEMS),
@@ -100,16 +100,16 @@ C
       CHARACTER*16  GRPNAM
       CHARACTER*16  ELMNMS(NELEMS)  , ELMTPS(NELEMS)
       CHARACTER*64  ELMDES(NELEMS)
-C
-C     External NEFIS Functions
-C
+!
+!     External NEFIS Functions
+!
       INTEGER   GETELS
      +         ,GETELT
       EXTERNAL  GETELS
      +         ,GETELT
-C
-C     element names
-C
+!
+!     element names
+!
       DATA  GRPNAM  /'TABLE_P2'/
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
@@ -124,14 +124,14 @@ C
      + 'GROUPID','CHARACTER',30,1,0,'subtance group ID                ',
      + 'SEG_EXC','CHARACTER', 1,1,0,'segment / exchange indication    ',
      + 'WK'     ,'CHARACTER', 1,1,0,'active / inactive indication     '/
-C
-C     Read all elements
-C
-C     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
+!
+!     Read all elements
+!
+!     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
       UINDEX(1) = 1
       UINDEX(2) = 1
       UINDEX(3) = 1
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
       BUFLEN = NBYTSG(1)*ELMDMS(2,1)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(1),
@@ -149,13 +149,13 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
          IERROR = 1
          GOTO 900
       ENDIF
-C
-C     Set dimension of table
-C
+!
+!     Set dimension of table
+!
       DO IELM = 2 , NELEMS
          ELMDMS(2,IELM) = NO_ITEM
       ENDDO
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
       BUFLEN = NBYTSG(2)*ELMDMS(2,2)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(2),
@@ -166,7 +166,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
       BUFLEN = NBYTSG(3)*ELMDMS(2,3)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(3),
@@ -177,7 +177,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
       BUFLEN = NBYTSG(4)*ELMDMS(2,4)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(4),
@@ -188,7 +188,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
       BUFLEN = NBYTSG(5)*ELMDMS(2,5)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(5),
@@ -199,7 +199,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
       BUFLEN = NBYTSG(6)*ELMDMS(2,6)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(6),
@@ -210,7 +210,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(7)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(7)
       BUFLEN = NBYTSG(7)*ELMDMS(2,7)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(7),
@@ -221,7 +221,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(7)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(8)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(8)
       BUFLEN = NBYTSG(8)*ELMDMS(2,8)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(8),
@@ -232,7 +232,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(8)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(9)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(9)
       BUFLEN = NBYTSG(9)*ELMDMS(2,9)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(9),
@@ -243,7 +243,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(9)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(10)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(10)
       BUFLEN = NBYTSG(10)*ELMDMS(2,10)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(10),
@@ -254,8 +254,8 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(10)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C
+!
   900 CONTINUE
       RETURN
-C
+!
       END

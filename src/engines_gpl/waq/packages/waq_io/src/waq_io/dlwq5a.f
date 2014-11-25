@@ -134,9 +134,9 @@
       LOGICAL       NEWREC   , SCALE , ODS   , BINFIL , FIRST , TDELAY
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq5a", ithndl )
-C
-C     Initialise a number of variables
-C
+!
+!     Initialise a number of variables
+!
       LUNUT  = LUN(29)
       LUNWR2 = LUN(IU)
       IFILSZ = 0
@@ -148,25 +148,25 @@ C
       ITFACW = 1
       DELTIM = OTIME
       AMISS  = -999.0
-C
-C          Initialise new data block
-C
-C     IORDER is the binary input flag,
-C                    0 = not set, 1 = items , 2 = concentr.
-C     IFLAG  is the ASCII input flag,
-C                    0 = not set, 1 = items , 2 = concentr.  3 = data
-C                    4 = scales
-C     ITTIM  is the Time function flag
-C                    0 = constant, 1 = time function
-C     NOBRK  is the number of breakpoints
-C     SCALE  is the Scale values flag .TRUE. is present
-C     USEFOR is the Alias flag, .TRUE. is alias string expected
-C     ODS    is the ODS   flag, .TRUE. ODS datafile expected
-C     NEWREC is the flag for new records
-C     IOPT   is option flag 1 = block function, 2 = linear
-C                           3 = harmonics     , 4 = fourier
-C     IOFF   is offset in the array of integers and strings
-C
+!
+!          Initialise new data block
+!
+!     IORDER is the binary input flag,
+!                    0 = not set, 1 = items , 2 = concentr.
+!     IFLAG  is the ASCII input flag,
+!                    0 = not set, 1 = items , 2 = concentr.  3 = data
+!                    4 = scales
+!     ITTIM  is the Time function flag
+!                    0 = constant, 1 = time function
+!     NOBRK  is the number of breakpoints
+!     SCALE  is the Scale values flag .TRUE. is present
+!     USEFOR is the Alias flag, .TRUE. is alias string expected
+!     ODS    is the ODS   flag, .TRUE. ODS datafile expected
+!     NEWREC is the flag for new records
+!     IOPT   is option flag 1 = block function, 2 = linear
+!                           3 = harmonics     , 4 = fourier
+!     IOFF   is offset in the array of integers and strings
+!
       IF ( IOUTPT .LT. 3 ) WRITE ( LUNUT , 1340 )
       IF ( IOUTPT .LT. 4 ) WRITE ( LUNUT , 1350 )
       IORDER = 0
@@ -179,9 +179,9 @@ C
       ODS    = .FALSE.
       BINFIL = .FALSE.
       NEWREC = .FALSE.
-C
-C          Get a token string (and return if something else was found)
-C
+!
+!          Get a token string (and return if something else was found)
+!
    10 IF ( IFLAG .EQ. 0 ) ITYPE = 0
       IF ( IFLAG .EQ. 1 .OR. IFLAG .EQ. 2 ) ITYPE = -3
       IF ( IFLAG .EQ. 3 ) THEN
@@ -195,15 +195,15 @@ C
    20 CALL RDTOK1 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
      *              IPOSR  , NPOS   , CHULP  , IHULP  , RHULP  ,
      *                                         ITYPE  , IERR2  )
-C        End of block detected
+!        End of block detected
       IF ( IERR2 .EQ. 2 ) THEN
          IF( ITYPE .GT. 0 ) IERR = IERR + 1
          GOTO 530
       ENDIF
       IF ( IERR2 .NE. 0 ) GOTO 510
-C
-C          All the following has the old file structure
-C
+!
+!          All the following has the old file structure
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. FIRST .AND.
      *                     CHULP .EQ. 'OLD-FILE-STRUCTURE' ) THEN
          WRITE ( LUNUT , 1000 )
@@ -212,9 +212,9 @@ C
          goto 540
       ENDIF
       IF ( FIRST ) THEN
-C
-C     Open the binary work file and privide a zero overall default
-C
+!
+!     Open the binary work file and privide a zero overall default
+!
          CALL DHOPNF ( LUN(IU) , LCHAR(IU) , IU    , 1     , IOERR )
          IF ( IU .EQ. 14 ) THEN
             WRITE ( LUNWR2 ) ' 4.900BOUND '
@@ -235,26 +235,26 @@ C
          JFILSZ = JFILSZ + NTDIM
          FIRST = .FALSE.
       ENDIF
-C
-C          A local redirection of the name of an item or substance
-C                                                   is not valid here
-C
+!
+!          A local redirection of the name of an item or substance
+!                                                   is not valid here
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'USEFOR') THEN
          WRITE ( LUNUT , 1010 )
          IERR2 = 1
          GOTO 510
       ENDIF
-C
-C          Time delay for ODS files
-C
+!
+!          Time delay for ODS files
+!
    30 IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:10) .EQ. 'TIME_DELAY' ) THEN
          call read_time_delay ( ierr2 )
          IF ( IERR2 .NE. 0 ) GOTO 510
          GOTO 10
       ENDIF
-C
-C          Time interpolation instead of block function
-C
+!
+!          Time interpolation instead of block function
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:6) .EQ. 'LINEAR' ) THEN
          IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1005 )
          IOPT  = 2
@@ -264,9 +264,9 @@ C
          IOPT  = 1
          GOTO 10
       ENDIF
-C
-C          Items
-C
+!
+!          Items
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'ITEM' ) THEN
          IF ( IORDER .EQ. 0 ) THEN
             IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1020 )
@@ -293,9 +293,9 @@ C
          IF ( IERR2 .NE. 0 ) GOTO 510
          GOTO 30
       ENDIF
-C
-C          Concentrations
-C
+!
+!          Concentrations
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:6) .EQ. 'CONCEN' ) THEN
          IF ( IORDER .EQ. 0 ) THEN
             IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1050 )
@@ -322,23 +322,23 @@ C
          IF ( IERR2 .NE. 0 ) GOTO 510
          GOTO 30
       ENDIF
-C
-C          Data
-C
+!
+!          Data
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:6) .EQ. 'DATA' ) THEN
          IF ( NOITM*NODIM .EQ. 0 ) THEN
             WRITE ( LUNUT , 1080 ) NOITM, NODIM
             IERR2 = 1
             GOTO 510
          ENDIF
-C          Checks if an inner loop collumn header exists for the data matrix
+!          Checks if an inner loop collumn header exists for the data matrix
          CALL DLWQ5G ( LUNUT  , IAR    , ITMNR  , NOITM  , IDMNR  ,
      *                 NODIM  , IORDER , IIMAX  , CAR    , IPOSR  ,
      *                 NPOS   , ILUN   , LCH    , LSTACK , CCHAR  ,
      *                 CHULP  , NOCOL  , DTFLG1 , DTFLG3 , ITFACW ,
      *                 ITYPE  , IHULP  , RHULP  , IERR2  , iwar   )
          IF ( IERR2 .GT. 1 ) GOTO 510
-C          Reads blocks of data
+!          Reads blocks of data
          IF ( IORDER .EQ. 2 ) THEN
             NITM  = NOITM
          ELSE
@@ -367,13 +367,13 @@ C          Reads blocks of data
             WRITE(LUNUT,1360)
             IERR = IERR + 1
          ENDIF
-C          Assigns according to computational rules
+!          Assigns according to computational rules
          NR2 = NTR + NOTTT*NOBRK
          CALL DLWQ5E ( LUNUT, IAR   , NOITM, ITMNR   , NODIM   ,
      *                 IDMNR, IORDER, RAR  , IOPT    , RAR(NTR),
      *                 NOCOL, NOBRK , AMISS, IAR(NTI), RAR(NR2))
          STRNG3 = 'breakpoint'
-C          Writes to the binary intermediate file
+!          Writes to the binary intermediate file
          NTS   = NCONST + 1
          NTC   = NTI
          ICM   = ICMAX - NTC
@@ -410,9 +410,9 @@ C          Writes to the binary intermediate file
 !        nufil = nufil + 1
 !        goto 10
 !     endif
-C
-C          ODS-file option selected
-C
+!
+!          ODS-file option selected
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:8) .EQ. 'ODS_FILE' ) THEN
          IF ( NOITM*NODIM .EQ. 0 ) THEN
             WRITE ( LUNUT , 1080 ) NOITM, NODIM
@@ -423,9 +423,9 @@ C
          ITYPE = 1
          GOTO 20
       ENDIF
-C
-C          ODS-file-data retrieval
-C
+!
+!          ODS-file-data retrieval
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. ODS ) THEN
          NTI  = NOITM + NODIM + ITMNR + IDMNR + 1
          NTR  = ITEL  + NCONST + 1
@@ -467,24 +467,24 @@ C
          NEWREC = .FALSE.
          GOTO  10
       ENDIF
-C
-C          Absolute or relative timers
-C
+!
+!          Absolute or relative timers
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:8) .EQ. 'ABSOLUTE') THEN
          WRITE ( LUNUT , 1135 )
          CHULP = 'TIME'
       ENDIF
-C
-C          Say it is a time function
-C
+!
+!          Say it is a time function
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:4) .EQ. 'TIME' ) THEN
          ITTIM = 1
          IOPT  = 1
          GOTO 10
       ENDIF
-C
-C          Scale factors begin
-C
+!
+!          Scale factors begin
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'SCALE' ) THEN
          IF ( NODIM .EQ. 0 ) THEN
             WRITE ( LUNUT , 1180 )
@@ -500,14 +500,14 @@ C
          SCALE = .TRUE.
          GOTO 10
       ENDIF
-C          Getting the scale factors
+!          Getting the scale factors
       IF ( IFLAG .EQ. 4 ) THEN
          ITEL = ITEL + 1
          RAR(ITEL+NCONST) = RHULP
          IF ( ITEL .EQ. IDMNR ) IFLAG = 0
          GOTO 10
       ENDIF
-C
+!
       WRITE ( LUNUT , 1320  ) CHULP
       WRITE ( LUNUT , '(A)' )
      *   ' Expected character string should be a valid level 2 keyword'
@@ -525,7 +525,7 @@ C
       call check  ( chulp  , iwidth , iblock , ierr2  , ierr   )
   540 if ( timon ) call timstop( ithndl )
       RETURN
-C
+!
  1000 FORMAT ( /' WARNING: Old file structure is used for this data !' )
  1002 FORMAT (  ' Delay integers: IDATE = ',I6,', ITIME = ',I6,'.' )
  1003 FORMAT (  ' New reference time is day: ',I2,'-',I2,'-',I4,
@@ -562,73 +562,73 @@ C
      *          ' option 4 and higher !' )
  1360 FORMAT (  ' ERROR: no (valid) DATA record available !' )
  2220 FORMAT (  ' Input comes from binary file: ',A      )
-C
+!
       END
-C
-C     Additional documentation on the memory lay out
-C
-C     After ITEM, 5B reads Item names. It produces:
-C     a) in CAR: a series of that item name and then a second series
-C        with the same name, or the substituted name after USEFOR
-C        If ' ' is specified, 'Item-nnn' will appear.
-C        If a positive integer is specified, the name of the
-C        corresponding item is given. For negative numbers the name
-C        of the corresponding type is provided
-C        FLOW is a valid item name if concentrations are expected for
-C        wasteloads.
-C        If a segment number is expected, 'Segment mmmmmmmm' is produced.
-C        ITMNR counts the first series, NOITM the second series.
-C     b) in IAR: a series of the number of the item from the items list
-C                the same series again
-C                a series with sequence numbers
-C        ITMNR counts the first series, NOITM the second and third series
-C        For types a negative number is used
-C        If FLOW is allowed, it has number 0
-C     If a number is used after a USEFOR, it is stored in RAR. In the
-C        CAR location now the word "&$&$SYSTEM_NAME&$&$!" is placed.
-C        In the second series location in IAR, the negative value of the
-C        location in RAR is placed. The sequence number is decremented
-C     If a computational sign is (*,/,+,-,MIN,MAX) is encountered:
-C        The second series location in IAR contains a large negative
-C           number depending on the computational sign. Sequence number
-C           and item number are incremented
-C        If now the name of a previously used item is given, the first
-C           series location of IAR contains this item number, the second
-C           series location in CAR contains "&$&$SYSTEM_NAME&$&$!" and
-C           the sequence number is decremented
-C        If a new name was provided, the 3rd series of IAR is set at
-C           the corresponding sequence number and the second series
-C           location in CAR contains that name
-C     At first invocation, this all starts at the beginning of the arrays
-C     ITMNR contains the number of items processed. It is the dimension
-C        of the first series in IAR and CAR
-C     NOITS contains the sequence number. That many things are waiting to
-C        be resolved and this number was used as dimension for SCALE
-C     NOITM contains the second and third series dimension in IAR and CAR
-C     NCONST is the number of constants that was put in RAR
-C     ITYPE and CHULP are the type and content of the token at exit
-C
-C     After CONCENTRATION the same happens. Depending on who is first,
-C        the arrays are first filled with Items (IORDER = 1) or with
-C        Concentrations (IORDER = 2).
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
-C
+!
+!     Additional documentation on the memory lay out
+!
+!     After ITEM, 5B reads Item names. It produces:
+!     a) in CAR: a series of that item name and then a second series
+!        with the same name, or the substituted name after USEFOR
+!        If ' ' is specified, 'Item-nnn' will appear.
+!        If a positive integer is specified, the name of the
+!        corresponding item is given. For negative numbers the name
+!        of the corresponding type is provided
+!        FLOW is a valid item name if concentrations are expected for
+!        wasteloads.
+!        If a segment number is expected, 'Segment mmmmmmmm' is produced.
+!        ITMNR counts the first series, NOITM the second series.
+!     b) in IAR: a series of the number of the item from the items list
+!                the same series again
+!                a series with sequence numbers
+!        ITMNR counts the first series, NOITM the second and third series
+!        For types a negative number is used
+!        If FLOW is allowed, it has number 0
+!     If a number is used after a USEFOR, it is stored in RAR. In the
+!        CAR location now the word "&$&$SYSTEM_NAME&$&$!" is placed.
+!        In the second series location in IAR, the negative value of the
+!        location in RAR is placed. The sequence number is decremented
+!     If a computational sign is (*,/,+,-,MIN,MAX) is encountered:
+!        The second series location in IAR contains a large negative
+!           number depending on the computational sign. Sequence number
+!           and item number are incremented
+!        If now the name of a previously used item is given, the first
+!           series location of IAR contains this item number, the second
+!           series location in CAR contains "&$&$SYSTEM_NAME&$&$!" and
+!           the sequence number is decremented
+!        If a new name was provided, the 3rd series of IAR is set at
+!           the corresponding sequence number and the second series
+!           location in CAR contains that name
+!     At first invocation, this all starts at the beginning of the arrays
+!     ITMNR contains the number of items processed. It is the dimension
+!        of the first series in IAR and CAR
+!     NOITS contains the sequence number. That many things are waiting to
+!        be resolved and this number was used as dimension for SCALE
+!     NOITM contains the second and third series dimension in IAR and CAR
+!     NCONST is the number of constants that was put in RAR
+!     ITYPE and CHULP are the type and content of the token at exit
+!
+!     After CONCENTRATION the same happens. Depending on who is first,
+!        the arrays are first filled with Items (IORDER = 1) or with
+!        Concentrations (IORDER = 2).
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!

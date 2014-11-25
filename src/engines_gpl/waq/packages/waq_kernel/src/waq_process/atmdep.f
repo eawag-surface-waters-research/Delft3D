@@ -27,37 +27,24 @@
 !>\file
 !>       Atmosferic deposition and diffuse input of IMx, N, P, Org_us and Metals
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  :
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        Atmosferic deposition
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C ZFL     REAL        Zero'th oreder flux         M/m3/s
-C DEPTH   R*4 1 I     depth                                          [m]
-C SW1                 load option 0=all, 1=top, 2=bottom segments    (-)
-C SW2                 maximise withdrawel to mass 0=no, 1=yes        (-)
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        Atmosferic deposition
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! ZFL     REAL        Zero'th oreder flux         M/m3/s
+! DEPTH   R*4 1 I     depth                                          [m]
+! SW1                 load option 0=all, 1=top, 2=bottom segments    (-)
+! SW2                 maximise withdrawel to mass 0=no, 1=yes        (-)
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
@@ -69,7 +56,7 @@ C     ------   -----  ------------
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
       CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -88,11 +75,11 @@ C
      +     ( IKMRK2 .EQ. 0                   ) .OR.    ! segment with surface and bottom always a load
      +     ( IKMRK2 .EQ. 1 .AND. ISW1 .EQ. 1 ) .OR.    ! top segment and option top segment
      +     ( IKMRK2 .EQ. 3 .AND. ISW1 .EQ. 2 ) ) THEN  ! bottom segment and option bottom segment
-C
+!
 
-C*******************************************************************************
-C**** FLUX equals input divided by depth , M/m2/d * 1/m = M/m3/d
-C***********************************************************************
+!*******************************************************************************
+!**** FLUX equals input divided by depth , M/m2/d * 1/m = M/m3/d
+!***********************************************************************
 
       ZFL = ZFL / DEPTH
 
@@ -107,7 +94,7 @@ C***********************************************************************
 
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -115,9 +102,9 @@ C
       IP4   = IP4   + INCREM (  4 )
       IP5   = IP5   + INCREM (  5 )
       IP6   = IP6   + INCREM (  6 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

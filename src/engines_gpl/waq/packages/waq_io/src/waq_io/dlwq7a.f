@@ -238,9 +238,9 @@
       call check ( ctoken, iwidth, 7     , ierr2  , ierr  )
       if ( timon ) call timstop( ithndl )
       return
-C
-C       Output formats
-C
+!
+!       Output formats
+!
  2040 FORMAT (/' ERROR, unrecognized token: ',A)
  2050 FORMAT(/' Total number of constants        : ',I4  )
  2060 FORMAT(/' Total number of parameters       : ',I4  )
@@ -254,5 +254,5 @@ C
  2340 FORMAT (   ' WARNING: TAU not found. DELPAR will try to get its own TAU or compute it!' )
  2350 FORMAT (   ' VertDisp from DELWAQ will be used for DELPAR'  )
  2360 FORMAT (   ' WARNING: VertDisp not found. DELPAR will try to get its own VertDisp or compute it!' )
-C
+!
       END

@@ -26,49 +26,49 @@
      *                    NSYS   , NOQ1   , NOQ2   , NOQ    , NODISP ,
      *                    NOVELO , IDPNT  , IVPNT  , DERIV  , AMAT   ,
      *                                      JTRACK , IOPT   , ILFLAG )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : june 1988 by L.Postma
-C
-C     FUNCTION            : Fills matrix according to central
-C                                       differencing in space.
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DISP    REAL        3       INPUT   dispersion in 3 directions
-C     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
-C     AREA    REAL       NOQ      INPUT   exchange surface area
-C     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
-C     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
-C     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
-C     BOUND   REAL     NOTOT*?    INPUT   boundary concentrations
-C     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
-C     NOTOT   INTEGER     1       INPUT   number of total substances
-C     ISYS    INTEGER     1       INPUT   system number considered
-C     NSYS    INTEGER     1       INPUT   number of systems considered
-C     NOQ1    INTEGER     1       INPUT   nr of exchanges in first dir.
-C     NOQ2    INTEGER     1       INPUT   nr of exchanges in second dir.
-C     NOQ     INTEGER     1       INPUT   total number of exchanges
-C     NODISP  INTEGER     1       INPUT   number of additional dispers.
-C     NOVELO  INTEGER     1       INPUT   number of additional velos.
-C     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
-C     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
-C     DERIV   REAL   NOTOT*NOSEG  OUTPUT  derivatives
-C     AMAT    REAL      large     IN/OUT  matrix to be updated
-C     JTRACK  INTEGER     1       INPUT   number of codiagonals of AMAT
-C     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
-C                                         = 1 or 3 no DISP at zero flow
-C                                         = 0 or 1 DISP over boundary
-C                                         = 2 or 3 no DISP over boundary
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : june 1988 by L.Postma
+!
+!     FUNCTION            : Fills matrix according to central
+!                                       differencing in space.
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DISP    REAL        3       INPUT   dispersion in 3 directions
+!     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
+!     AREA    REAL       NOQ      INPUT   exchange surface area
+!     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
+!     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
+!     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
+!     BOUND   REAL     NOTOT*?    INPUT   boundary concentrations
+!     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
+!     NOTOT   INTEGER     1       INPUT   number of total substances
+!     ISYS    INTEGER     1       INPUT   system number considered
+!     NSYS    INTEGER     1       INPUT   number of systems considered
+!     NOQ1    INTEGER     1       INPUT   nr of exchanges in first dir.
+!     NOQ2    INTEGER     1       INPUT   nr of exchanges in second dir.
+!     NOQ     INTEGER     1       INPUT   total number of exchanges
+!     NODISP  INTEGER     1       INPUT   number of additional dispers.
+!     NOVELO  INTEGER     1       INPUT   number of additional velos.
+!     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
+!     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
+!     DERIV   REAL   NOTOT*NOSEG  OUTPUT  derivatives
+!     AMAT    REAL      large     IN/OUT  matrix to be updated
+!     JTRACK  INTEGER     1       INPUT   number of codiagonals of AMAT
+!     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
+!                                         = 1 or 3 no DISP at zero flow
+!                                         = 0 or 1 DISP over boundary
+!                                         = 2 or 3 no DISP over boundary
+!     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
+!
       use timers
 
       DIMENSION  DISP  (  3) , DISPER(*) , AREA (*) , FLOW (*) ,
@@ -76,12 +76,12 @@ C
      *           IPOINT(4,*) , IDPNT(*)  , IVPNT(*) , DERIV(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq70", ithandl )
-C
+!
       IBAND = 2*JTRACK + 1
       DO 50 IQ = 1 , NOQ
-C
-C         initialisations , check for transport anyhow
-C
+!
+!         initialisations , check for transport anyhow
+!
       I    = IPOINT(1,IQ)
       J    = IPOINT(2,IQ)
       IF ( I .EQ. 0 .OR. J .EQ. 0 ) GOTO 50
@@ -115,9 +115,9 @@ C
       Q2 = F2*Q
       IF ( I .LT. 0 ) GOTO 10
       IF ( J .LT. 0 ) GOTO 30
-C
-C        the regular case
-C
+!
+!        the regular case
+!
       JT = (I-1)*IBAND + JTRACK + 1
       KT = JT + (J-I)
       AMAT(JT) = AMAT(JT) + Q1 + E
@@ -127,9 +127,9 @@ C
       AMAT(IT) = AMAT(IT) - Q2 + E
       AMAT(KT) = AMAT(KT) - Q1 - E
       GOTO 50
-C
-C        The 'from' segment is a boundary
-C
+!
+!        The 'from' segment is a boundary
+!
    10 IF ( J    .LT. 0 ) GOTO 50
       IF ( MOD(IOPT,4) .GT. 1 ) E = 0.0
       IF ( MOD(IOPT,8) .GE. 4 ) THEN
@@ -149,9 +149,9 @@ C
       IT = (J-1)*IBAND + JTRACK + 1
       AMAT(IT) = AMAT(IT) - Q2 + E
       GOTO 50
-C
-C        The 'to' element was a boundary.
-C
+!
+!        The 'to' element was a boundary.
+!
    30 IF ( MOD(IOPT,4) .GT. 1 ) E = 0.0
       IF ( MOD(IOPT,8) .GE. 4 ) THEN
            IF ( Q .GT. 0.0 ) THEN
@@ -169,11 +169,11 @@ C
    40 I4=I4+1
       JT = (I-1)*IBAND + JTRACK + 1
       AMAT(JT) = AMAT(JT) + Q1 + E
-C
-C        end of the loop over exchanges
-C
+!
+!        end of the loop over exchanges
+!
    50 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

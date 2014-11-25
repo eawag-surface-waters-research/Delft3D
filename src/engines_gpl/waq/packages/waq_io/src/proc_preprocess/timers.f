@@ -22,28 +22,28 @@
 !!  rights reserved.
 
       SUBROUTINE BEGTIM ()
-C
+!
       COMMON / CDHTIM / IH1 , IM1 , IS1 , I1
       SAVE   / CDHTIM /
-C
+!
       CALL DHTIME ( IH1 , IM1 , IS1 , I1 )
-C
+!
       RETURN
       END
       SUBROUTINE ENDTIM ( TIME )
-C
+!
       REAL     TIME
-C
+!
       COMMON / CDHTIM / IH1 , IM1 , IS1 , I1
       SAVE   / CDHTIM /
-C
+!
       CALL DHTIME ( IH2 , IM2 , IS2 , I2 )
-C
+!
       IF ( IH2 .NE. IH1 ) THEN
          TIME = 3600.+ 60.*(IM2-IM1) + IS2-IS1 + (I2-I1)/100.
       ELSE
          TIME = 60.*(IM2-IM1) + IS2-IS1 + (I2-I1)/100.
       ENDIF
-C
+!
       RETURN
       END

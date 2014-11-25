@@ -22,38 +22,38 @@
 !!  rights reserved.
 
       SUBROUTINE DMPVAL (NDMPAR, IPDMP , VALSEG, VALDMP)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : dec 2003 by Jan van Beek
-C
-C     FUNCTION            : sums values for sub-area's
-C
-C     PARAMETERS          : 4
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NDMPAR  INTEGER       1     INPUT   Number of dump areas
-C     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
-C     VALSEG  REAL          *     INPUT   values on segment grid
-C     VALDMP  REAL          *     INPUT   values on dump grid
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : dec 2003 by Jan van Beek
+!
+!     FUNCTION            : sums values for sub-area's
+!
+!     PARAMETERS          : 4
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NDMPAR  INTEGER       1     INPUT   Number of dump areas
+!     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
+!     VALSEG  REAL          *     INPUT   values on segment grid
+!     VALDMP  REAL          *     INPUT   values on dump grid
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER       NDMPAR
       INTEGER       IPDMP(*)
       REAL          VALSEG(*)
       REAL          VALDMP(*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER       ITEL  , IDUMP , NSC   , ISC   , ISEG
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dmpval", ithandl )
 
-C     Loop over the dump area's, sum value
+!     Loop over the dump area's, sum value
 
       VALDMP(1:NDMPAR) = 0.0
       ITEL              = 0

@@ -21,63 +21,63 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            :
-C
-C     V0.02  230395  Jos van Gils  Modify for hybrid coupling
-C     V0.01  040894  Jos van Gils  First version
-C
-C     MODULE              : CHINPU
-C
-C     FUNCTION            : Reads input Charon
-C                           Coupling Charon - Delwaq 4.0
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            :
+!
+!     V0.02  230395  Jos van Gils  Modify for hybrid coupling
+!     V0.01  040894  Jos van Gils  First version
+!
+!     MODULE              : CHINPU
+!
+!     FUNCTION            : Reads input Charon
+!                           Coupling Charon - Delwaq 4.0
+!
+!     SUBROUTINES CALLED  :
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
       SUBROUTINE CHINP2 (RUNNAM, LUIC  , LUOC  )
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     RUNNAM  C*12     1          I       Filename
-C     LUIC    I        1          I       Lu input file
-C     LUOC    I        1          I       LU output file
-C
-C     Declarations
-C
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     RUNNAM  C*12     1          I       Filename
+!     LUIC    I        1          I       Lu input file
+!     LUOC    I        1          I       LU output file
+!
+!     Declarations
+!
       CHARACTER*20    C20
       CHARACTER*12    RUNNAM
       INTEGER         LUIC  , LUOC  , I1 , I2 , I , i3(1)
       REAL            R1(1,12)
-C
-C     Commons CHARON
+!
+!     Commons CHARON
 
       INCLUDE 'charon.inc'
 
-C     Initialization of CHARON
+!     Initialization of CHARON
 
       INTITL = 846342
 
-C     Open input files and set LU's for Charon
+!     Open input files and set LU's for Charon
 
       NIT    = LUIC
       NOT    = LUOC
 
       ILEN = LEN(RUNNAM)
-C
-C     Find last blank
-C
+!
+!     Find last blank
+!
       DO INDX = ILEN-4 , 1 , -1
          IF ( RUNNAM(INDX:INDX) .NE. ' ' ) GOTO 5
       ENDDO
-C
-C     empty string, error
-C
+!
+!     empty string, error
+!
       WRITE(*,*) 'ERROR in CHEM coupling, empty CHEM input'
       CALL SRSTOP(1)
     5 CONTINUE
@@ -87,7 +87,7 @@ C
       WRITE (RUNNAM(INDX:),'(''.out'')')
       OPEN (NOT,FILE=RUNNAM)
 
-C     Read input file (N.B. Fixed order of input blocks!!!)
+!     Read input file (N.B. Fixed order of input blocks!!!)
 
       CALL START
       READ (NIT,*)
@@ -95,7 +95,7 @@ C     Read input file (N.B. Fixed order of input blocks!!!)
       READ (NIT,*)
       CALL MATRIX (0,I1,I1,I2,I2,I1,1,I3,I3,I3,R1)
       READ (NIT,*)
-c     (this variable switches on dimensionless input for cjor)
+!     (this variable switches on dimensionless input for cjor)
       KA(2) = 'NEW   '
       CALL CJCOR
       ITMAX = 200
@@ -111,7 +111,7 @@ c     (this variable switches on dimensionless input for cjor)
           WRITE (NOT,*) 'NO MESSAGES'
       ENDIF
 
-C     New part to read molar mass components
+!     New part to read molar mass components
 
       read (nit,*)
       read (nit,'(12x,f12.0)') (commas(i),i=1,m)
@@ -119,27 +119,27 @@ C     New part to read molar mass components
       write (not,'(''COMPONENT MASSES''/(a6,6x,f12.4))')
      j      (nr(i,1),commas(i),i=1,m)
 
-C     New part to read desired list of transported substances
+!     New part to read desired list of transported substances
 
-c     read (nit,*,end=40)
-c     ntrans = 0
-c  10 read (nit,'(a20)') C20
-c     if ( c20(1:3) .eq. 'END' ) goto 50
-c     ntrans = ntrans + 1
-c     read ( c20 , '(6x,a10,4x)' ) varnam(ntrans)
-c     goto 10
+!     read (nit,*,end=40)
+!     ntrans = 0
+!  10 read (nit,'(a20)') C20
+!     if ( c20(1:3) .eq. 'END' ) goto 50
+!     ntrans = ntrans + 1
+!     read ( c20 , '(6x,a10,4x)' ) varnam(ntrans)
+!     goto 10
 
-C     Defaults: all components are transported substances
+!     Defaults: all components are transported substances
 
-c  40 continue
-c     ntrans = m
-c     do 45 i = 1,m
-c  45 write ( varnam(i) , '(a6,''_tot'')' ) nr(i,1)
+!  40 continue
+!     ntrans = m
+!     do 45 i = 1,m
+!  45 write ( varnam(i) , '(a6,''_tot'')' ) nr(i,1)
 
-c  50 CONTINUE
-c     write (not,'(''TRANSPORTED VECTOR''/(i4,2x,a10))')
-c    j      (i, varnam(i),i=1,ntrans)
-c     CLOSE (NIT)
+!  50 CONTINUE
+!     write (not,'(''TRANSPORTED VECTOR''/(i4,2x,a10))')
+!    j      (i, varnam(i),i=1,ntrans)
+!     CLOSE (NIT)
       WRITE (NOT,*)'STOP READING INPUT FILE COUPLING DELWAQ-CHARON'
 
       RETURN

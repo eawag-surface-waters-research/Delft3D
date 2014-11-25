@@ -22,61 +22,61 @@
 !!  rights reserved.
 
       SUBROUTINE WRWRK3 ( LUN   , LCHAR ,ITOTA , ITOTI , ITOTC  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : march 93 by Jan van Beek
-C
-C     FUNCTION            : Writes DELWAQ2 boot file
-C
-C     LOGICAL UNITNUMBERS : LUN(1)  - DELWAQ boot file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C                           DHOPNF, opens files
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUN     INTEGER    *         IN      Logical unit numbers
-C     LCHAR   CHAR*(*)   *         IN      File names
-C     ITOTA   INTEGER    1         IN      Dimension real array
-C     ITOTI   INTEGER    1         IN      Dimension integer array
-C     ITOTC   INTEGER    1         IN      Dimension character array
-C
-C     declarations
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : march 93 by Jan van Beek
+!
+!     FUNCTION            : Writes DELWAQ2 boot file
+!
+!     LOGICAL UNITNUMBERS : LUN(1)  - DELWAQ boot file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!                           DHOPNF, opens files
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUN     INTEGER    *         IN      Logical unit numbers
+!     LCHAR   CHAR*(*)   *         IN      File names
+!     ITOTA   INTEGER    1         IN      Dimension real array
+!     ITOTI   INTEGER    1         IN      Dimension integer array
+!     ITOTC   INTEGER    1         IN      Dimension character array
+!
+!     declarations
+!
       INTEGER       LUN(*)
       CHARACTER*(*) LCHAR(*)
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     input structure for boot-file
-C
+!
+!     input structure for boot-file
+!
       DIMENSION           IN(INSIZE)       , II(IISIZE)
       EQUIVALENCE       ( IN(1)  , NOSEG ) , ( II(1), ITSTRT  )
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER       IERR
-C
-C     write the boot file
-C
+!
+!     write the boot file
+!
       CALL DHOPNF ( LUN(1) , LCHAR(1), 1     , 1     , IERR  )
-C
+!
       WRITE ( LUN(1) )   IN
       WRITE ( LUN(1) )   II
       WRITE ( LUN(1) )   ITOTA , ITOTI , ITOTC
       WRITE ( LUN(1) ) ( LUN  (K) , K = 1, NOLUN )
       WRITE ( LUN(1) ) ( LCHAR(K) , K = 1, NOLUN )
-C
+!
       CLOSE ( LUN(1) )
-C
+!
       RETURN
       END

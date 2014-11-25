@@ -21,21 +21,21 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Integer function to search for the first occurrence of a needle in
-C a haystack.
-C The arguments of this function are similar to the EXEC2 function
-C &LOCATION OF.
-C
+!
+! Integer function to search for the first occurrence of a needle in
+! a haystack.
+! The arguments of this function are similar to the EXEC2 function
+! &LOCATION OF.
+!
       INTEGER FUNCTION LOCATE (SOURCE,NEEDLE,MAXSO,MAXNE)
       CHARACTER*(*) SOURCE,NEEDLE
       INTEGER MAXSO,MAXNE,LENSTR
-C
-C Determine the lengths of SOURCE and NEEDLE. Compare the first
-C character in NEEDLE with each character in SOURCE. If a match is
-C found, continue up to the last character in NEEDLE to get a complete
-C match.
-C
+!
+! Determine the lengths of SOURCE and NEEDLE. Compare the first
+! character in NEEDLE with each character in SOURCE. If a match is
+! found, continue up to the last character in NEEDLE to get a complete
+! match.
+!
       IF (MAXSO .LE. 0 .OR. MAXSO .GT. 255) GO TO 100
       IF (MAXNE .LE. 0 .OR. MAXNE .GT. 255) GO TO 100
       LENSO = LENSTR (SOURCE,MAXSO)
@@ -49,14 +49,14 @@ C
       RETURN
 15    CONTINUE
 20    CONTINUE
-C
-C No match is found. Set LOCATE to 0.
-C
+!
+! No match is found. Set LOCATE to 0.
+!
       LOCATE = 0
       RETURN
-C
-C An error is determined. Set LOCATE to -1.
-C
+!
+! An error is determined. Set LOCATE to -1.
+!
 100   LOCATE = -1
       RETURN
       END

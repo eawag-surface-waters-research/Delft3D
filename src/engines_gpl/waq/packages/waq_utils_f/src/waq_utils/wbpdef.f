@@ -31,70 +31,70 @@
      +                    VXOTXT, NDST  , IPDST , GENDST, OUTDST,
      +                    STODST, NVST  , IPVST , GENVST, OUTVST,
      +                    STOVST, ISWITR)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: nov -1992 by Jan van Beek
-C
-C     FUNCTION            : Writes the binary proces definition file
-C
-C     LOGICAL UNITNUMBERS : LUPDEF  - proces definition file
-C                         : LUREP   - report file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUPDEF  INTEGER       1     INPUT   Porces definition file
-C     LUREP   INTEGER       1     INPUT   Report file
-C     NBPR    INTEGER       1     INPUT   Number of processes in def file
-C     NBPRM   INTEGER       1     INPUT   Max number of processes
-C     BPRNAM  CHARACTER*(*) *     INPUT   Name of processes
-C     BPRTXT  CHARACTER*(*) *     INPUT   Text of processes
-C     MODNAM  CHARACTER*(*) *     INPUT   Name of module of processes
-C     NSVAI   INTEGER       *     INPUT   No of input vars per proces
-C     VAINAM  CHARACTER*(*) *     INPUT   Name of input variable
-C     VAITXT  CHARACTER*(*) *     INPUT   Text of input variable
-C     VAIDEF  REAL          *,*   INPUT   Default values input variables
-C     NSVAO   INTEGER       *     INPUT   No of output vars per proces
-C     VAONAM  CHARACTER*(*) *     INPUT   Name of input variable
-C     VAOTXT  CHARACTER*(*) *     INPUT   Text of output variable
-C     NBFL    INTEGER       *     INPUT   No of basic fluxes per proces
-C     BFLNAM  CHARACTER*(*) *     INPUT   Name of basix fluxe
-C     BFLTXT  CHARACTER*(*) *     INPUT   Text of basix fluxe
-C     NBST    INTEGER       *     INPUT   No of basic stochis per proces
-C     GENBST  CHARACTER*(*) *,*   INPUT   Name of substance in stochi
-C     FLXBST  CHARACTER*(*) *,*   INPUT   Name of flux in stochi
-C     STOBST  REAL          *,*   INPUT   Stochimetric factor
-C     IPVAI   INTEGER       *     INPUT   Pointers for arrays on VAI
-C     IPVAO   INTEGER       *     INPUT   Pointers for arrays on VAO
-C     IPBFL   INTEGER       *     INPUT   Pointers for arrays on BFL
-C     IPBST   INTEGER       *     INPUT   Pointers for arrays on BST
-C     NSVXI   INTEGER       *     INPUT   No of input vars X per proces
-C     IPVXI   INTEGER       *     INPUT   Pointers for arrays on VXI
-C     VXINAM  CHARACTER*(*) *     INPUT   Name of input variable X
-C     VXITXT  CHARACTER*(*) *     INPUT   Text of input variable X
-C     VXIDEF  REAL          *     INPUT   Default values input X variables
-C     NSVXO   INTEGER       *     INPUT   No of output vars X per proces
-C     IPVXO   INTEGER       *     INPUT   Pointers for arrays on VXO
-C     VXONAM  CHARACTER*(*) *     INPUT   Name of output variable X
-C     VXOTXT  CHARACTER*(*) *     INPUT   Text of output variable X
-C     NSDST   INTEGER       *     INPUT   No of dispersion rules p.proces
-C     IPDST   INTEGER       *     INPUT   Pointers for arrays on DST
-C     GENDST  CHARACTER*(*) *     INPUT   Name of substance in disp rule
-C     OUTDST  CHARACTER*(*) *     INPUT   Name of output item in disp rule
-C     STODST  REAL          *     INPUT   factor in dispersion rule
-C     NSVST   INTEGER       *     INPUT   No of velocity rules p.proces
-C     IPVST   INTEGER       *     INPUT   Pointers for arrays on VST
-C     GENVST  CHARACTER*(*) *     INPUT   Name of substance in velo rule
-C     OUTVST  CHARACTER*(*) *     INPUT   Name of output item in velo rule
-C     STOVST  REAL          *     INPUT   factor in velocity rule
-C     ISWITR  INTEGER       *     INPUT   Target dimension indicator
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: nov -1992 by Jan van Beek
+!
+!     FUNCTION            : Writes the binary proces definition file
+!
+!     LOGICAL UNITNUMBERS : LUPDEF  - proces definition file
+!                         : LUREP   - report file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUPDEF  INTEGER       1     INPUT   Porces definition file
+!     LUREP   INTEGER       1     INPUT   Report file
+!     NBPR    INTEGER       1     INPUT   Number of processes in def file
+!     NBPRM   INTEGER       1     INPUT   Max number of processes
+!     BPRNAM  CHARACTER*(*) *     INPUT   Name of processes
+!     BPRTXT  CHARACTER*(*) *     INPUT   Text of processes
+!     MODNAM  CHARACTER*(*) *     INPUT   Name of module of processes
+!     NSVAI   INTEGER       *     INPUT   No of input vars per proces
+!     VAINAM  CHARACTER*(*) *     INPUT   Name of input variable
+!     VAITXT  CHARACTER*(*) *     INPUT   Text of input variable
+!     VAIDEF  REAL          *,*   INPUT   Default values input variables
+!     NSVAO   INTEGER       *     INPUT   No of output vars per proces
+!     VAONAM  CHARACTER*(*) *     INPUT   Name of input variable
+!     VAOTXT  CHARACTER*(*) *     INPUT   Text of output variable
+!     NBFL    INTEGER       *     INPUT   No of basic fluxes per proces
+!     BFLNAM  CHARACTER*(*) *     INPUT   Name of basix fluxe
+!     BFLTXT  CHARACTER*(*) *     INPUT   Text of basix fluxe
+!     NBST    INTEGER       *     INPUT   No of basic stochis per proces
+!     GENBST  CHARACTER*(*) *,*   INPUT   Name of substance in stochi
+!     FLXBST  CHARACTER*(*) *,*   INPUT   Name of flux in stochi
+!     STOBST  REAL          *,*   INPUT   Stochimetric factor
+!     IPVAI   INTEGER       *     INPUT   Pointers for arrays on VAI
+!     IPVAO   INTEGER       *     INPUT   Pointers for arrays on VAO
+!     IPBFL   INTEGER       *     INPUT   Pointers for arrays on BFL
+!     IPBST   INTEGER       *     INPUT   Pointers for arrays on BST
+!     NSVXI   INTEGER       *     INPUT   No of input vars X per proces
+!     IPVXI   INTEGER       *     INPUT   Pointers for arrays on VXI
+!     VXINAM  CHARACTER*(*) *     INPUT   Name of input variable X
+!     VXITXT  CHARACTER*(*) *     INPUT   Text of input variable X
+!     VXIDEF  REAL          *     INPUT   Default values input X variables
+!     NSVXO   INTEGER       *     INPUT   No of output vars X per proces
+!     IPVXO   INTEGER       *     INPUT   Pointers for arrays on VXO
+!     VXONAM  CHARACTER*(*) *     INPUT   Name of output variable X
+!     VXOTXT  CHARACTER*(*) *     INPUT   Text of output variable X
+!     NSDST   INTEGER       *     INPUT   No of dispersion rules p.proces
+!     IPDST   INTEGER       *     INPUT   Pointers for arrays on DST
+!     GENDST  CHARACTER*(*) *     INPUT   Name of substance in disp rule
+!     OUTDST  CHARACTER*(*) *     INPUT   Name of output item in disp rule
+!     STODST  REAL          *     INPUT   factor in dispersion rule
+!     NSVST   INTEGER       *     INPUT   No of velocity rules p.proces
+!     IPVST   INTEGER       *     INPUT   Pointers for arrays on VST
+!     GENVST  CHARACTER*(*) *     INPUT   Name of substance in velo rule
+!     OUTVST  CHARACTER*(*) *     INPUT   Name of output item in velo rule
+!     STOVST  REAL          *     INPUT   factor in velocity rule
+!     ISWITR  INTEGER       *     INPUT   Target dimension indicator
+!
+!     Declaration of arguments
+!
       INTEGER        LUPDEF          , LUREP           ,
      +               NBPR            , NBPRM           ,
      +               SERIAL
@@ -121,35 +121,35 @@ C
       CHARACTER*(*)  BPRTXT(*)       , VAITXT(*)       ,
      +               VAOTXT(*)       , BFLTXT(*)       ,
      +               VXITXT(*)       , VXOTXT(*)
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER        NSV   , NFL   , NST
-C
-C     Write version number and serial number
-C
+!
+!     Write version number and serial number
+!
       WRITE ( LUPDEF ) VERSIO, SERIAL
-C
-C     Write NBPR  number of proces modules
-C
+!
+!     Write NBPR  number of proces modules
+!
       WRITE ( LUPDEF ) NBPR
-C
-C     Write name , input vars, output vars and fluxes
-C
+!
+!     Write name , input vars, output vars and fluxes
+!
       DO 700 IP = 1 , NBPR
-C
-C        Write proces name , module name
-C
+!
+!        Write proces name , module name
+!
          WRITE ( LUPDEF )
      +         BPRNAM(IP),BPRTXT(IP)
          WRITE ( LUPDEF ) MODNAM(IP)
-C
-C        Write the xD target dimension indicator
-C
+!
+!        Write the xD target dimension indicator
+!
          WRITE ( LUPDEF ) ISWITR(IP)
-C
-C        Write input variables VAI with defaults
-C
+!
+!        Write input variables VAI with defaults
+!
          NSV = NSVAI(IP)
          WRITE ( LUPDEF ) NSV
          DO 100 IV = 1 , NSV
@@ -157,9 +157,9 @@ C
             WRITE ( LUPDEF )
      +           VAINAM(IPV), VAIDEF(IPV),VAITXT(IPV)
   100    CONTINUE
-C
-C        Write input variables VXI with defaults
-C
+!
+!        Write input variables VXI with defaults
+!
          NSV = NSVXI(IP)
          WRITE ( LUPDEF ) NSV
          DO 150 IV = 1 , NSV
@@ -167,9 +167,9 @@ C
             WRITE ( LUPDEF )
      +           VXINAM(IPV), VXIDEF(IPV),VXITXT(IPV)
   150    CONTINUE
-C
-C        Write output variables VAO
-C
+!
+!        Write output variables VAO
+!
          NSV = NSVAO(IP)
          WRITE ( LUPDEF ) NSV
          DO 200 IVAO = 1 , NSV
@@ -177,9 +177,9 @@ C
             WRITE ( LUPDEF )
      +           VAONAM(IPV),VAOTXT(IPV)
   200    CONTINUE
-C
-C        Write output variables VXO
-C
+!
+!        Write output variables VXO
+!
          NSV = NSVXO(IP)
          WRITE ( LUPDEF ) NSV
          DO 250 IVAO = 1 , NSV
@@ -187,9 +187,9 @@ C
             WRITE ( LUPDEF )
      +           VXONAM(IPV),VXOTXT(IPV)
   250    CONTINUE
-C
-C        Write basis fluxes  BFL
-C
+!
+!        Write basis fluxes  BFL
+!
          NFL = NBFL(IP)
          WRITE ( LUPDEF ) NFL
          DO 300 IFLX = 1 , NFL
@@ -197,9 +197,9 @@ C
             WRITE ( LUPDEF )
      +             BFLNAM(IPV),BFLTXT(IPV)
   300    CONTINUE
-C
-C        Write basis stochiometry  BST
-C
+!
+!        Write basis stochiometry  BST
+!
          NST = NBST(IP)
          WRITE ( LUPDEF ) NST
          DO 400 IST = 1 , NST
@@ -207,9 +207,9 @@ C
             WRITE ( LUPDEF ) GENBST(IPV), FLXBST(IPV),
      +                       STOBST(IPV)
   400    CONTINUE
-C
-C        Write dispersion rules DST
-C
+!
+!        Write dispersion rules DST
+!
          NST = NDST(IP)
          WRITE ( LUPDEF ) NST
          DO 500 IST = 1 , NST
@@ -217,9 +217,9 @@ C
             WRITE ( LUPDEF ) GENDST(IPV), OUTDST(IPV),
      +                       STODST(IPV)
   500    CONTINUE
-C
-C        Write velocity rules VST
-C
+!
+!        Write velocity rules VST
+!
          NST = NVST(IP)
          WRITE ( LUPDEF ) NST
          DO 600 IST = 1 , NST
@@ -227,8 +227,8 @@ C
             WRITE ( LUPDEF ) GENVST(IPV), OUTVST(IPV),
      +                       STOVST(IPV)
   600    CONTINUE
-C
+!
   700 CONTINUE
-C
+!
       RETURN
       END

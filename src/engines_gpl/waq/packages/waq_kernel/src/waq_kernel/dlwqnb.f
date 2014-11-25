@@ -35,52 +35,52 @@
 !>                         the method can be used. In 1D the method outperforms the
 !>                         iterative methods.
 
-C     CREATED            : april 1992 by J.v.Gils
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C                          LUN(23) , output, unformatted dump file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          PROCES, DELWAQ proces system
-C                          DLWQO2, DELWAQ output system
-C                          DLWQPP, user postprocessing routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ14, scales waterquality
-C                          DLWQ15, wasteload routine
-C                          DLWQ17, boundary routine
-C                          DLWQ41, updates volumes
-C                          DLWQT0, updates other time dependent items
-C                          DLWQ62, adds transport to matrix and rhs
-C                          DELMAT, inverts the matrix
-C                          DLWQB1, initializes matrix and rhs
-C                          DLWQB2, checks matrix
-C                          DLWQB3, computes volumes
-C                          DLWQB4, computation of mass array
-C                          DLWQB5, performs mass balance computation
-C                          DLWQB6, updates right hand side
-C                          DLWQB7, adds open boundaries to deriv
-C                          DLWQB8, restores conc array
-C                          MOVE,   copies one array to another
-C                          PROINT, integration of fluxes
-C                          DHOPNF, opens files
-C                          ZERCUM, zero's the cummulative array's
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHAR*(*)   *      INPUT  filenames
-C
-C     Declaration of arguments
-C
+!     CREATED            : april 1992 by J.v.Gils
+!
+!     LOGICAL UNITS      : LUN(19) , output, monitoring file
+!                          LUN(20) , output, formatted dump file
+!                          LUN(21) , output, unformatted hist. file
+!                          LUN(22) , output, unformatted dump file
+!                          LUN(23) , output, unformatted dump file
+!
+!     SUBROUTINES CALLED : DLWQTR, user transport routine
+!                          DLWQWQ, user waterquality routine
+!                          PROCES, DELWAQ proces system
+!                          DLWQO2, DELWAQ output system
+!                          DLWQPP, user postprocessing routine
+!                          DLWQ13, system postpro-dump routine
+!                          DLWQ14, scales waterquality
+!                          DLWQ15, wasteload routine
+!                          DLWQ17, boundary routine
+!                          DLWQ41, updates volumes
+!                          DLWQT0, updates other time dependent items
+!                          DLWQ62, adds transport to matrix and rhs
+!                          DELMAT, inverts the matrix
+!                          DLWQB1, initializes matrix and rhs
+!                          DLWQB2, checks matrix
+!                          DLWQB3, computes volumes
+!                          DLWQB4, computation of mass array
+!                          DLWQB5, performs mass balance computation
+!                          DLWQB6, updates right hand side
+!                          DLWQB7, adds open boundaries to deriv
+!                          DLWQB8, restores conc array
+!                          MOVE,   copies one array to another
+!                          PROINT, integration of fluxes
+!                          DHOPNF, opens files
+!                          ZERCUM, zero's the cummulative array's
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL       *      LOCAL  real      workspace array
+!     J       INTEGER    *      LOCAL  integer   workspace array
+!     C       CHARACTER  *      LOCAL  character workspace array
+!     LUN     INTEGER    *      INPUT  array with unit numbers
+!     LCHAR   CHAR*(*)   *      INPUT  filenames
+!
+!     Declaration of arguments
+!
       use grids
       use timers
       use m_timers_waq
@@ -93,9 +93,9 @@ C
       implicit none
 
       include 'actions.inc'
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       REAL, DIMENSION(*)             :: A
       INTEGER, DIMENSION(*)          :: J
       INTEGER, DIMENSION(*)          :: LUN
@@ -105,37 +105,37 @@ C
       TYPE(DELWAQ_DATA), TARGET      :: DLWQD
       type(GridPointerColl)          :: GridPs               ! collection of all grid definitions
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
 
-c     Common to define external communications in SOBEK
-c     OLCFWQ             Flag indicating ONLINE running of CF and WQ
-c     SRWACT             Flag indicating active data exchange with SRW
-c     RTCACT             Flag indicating output for RTC
+!     Common to define external communications in SOBEK
+!     OLCFWQ             Flag indicating ONLINE running of CF and WQ
+!     SRWACT             Flag indicating active data exchange with SRW
+!     RTCACT             Flag indicating output for RTC
 
       LOGICAL            OLCFWQ, SRWACT, RTCACT
       COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       LOGICAL         IMFLAG , IDFLAG , IHFLAG , LDUMMY
       LOGICAL         UPDATR , UPDATE , LSTREC , LREWIN
       INTEGER         ITIME
@@ -175,19 +175,19 @@ C
 
       INCLUDE 'state_data.inc'
 
-C
-C     SPECIAL REMARKS    : MASS-ARRAY IS USED FOR RHS VECTOR!!
-C
-C     This option is a mix of option 1 (discretization of transport
-C     in space) and option 6 (matrix inversion to perform implicit
-C     integration in time.
-C     The processes part is integrated EXPLICITLY, in order to allow
-C     for any complexity of the processes.
-C     Strictly speaking, a loop over substances should be added
-C     (see below, DLWQB1). To anticipate this, the method uses an
-C     extra VOLUME-array (IVOL2), and uses the AMASS-array (IMASS)
-C     for the rhs-matrix, in stead of the DERIV-array as in method 6.
-C     (JvG, May 8 1992)
+!
+!     SPECIAL REMARKS    : MASS-ARRAY IS USED FOR RHS VECTOR!!
+!
+!     This option is a mix of option 1 (discretization of transport
+!     in space) and option 6 (matrix inversion to perform implicit
+!     integration in time.
+!     The processes part is integrated EXPLICITLY, in order to allow
+!     for any complexity of the processes.
+!     Strictly speaking, a loop over substances should be added
+!     (see below, DLWQB1). To anticipate this, the method uses an
+!     extra VOLUME-array (IVOL2), and uses the AMASS-array (IMASS)
+!     for the rhs-matrix, in stead of the DERIV-array as in method 6.
+!     (JvG, May 8 1992)
 
       if ( action == action_finalisation ) then
           include 'dlwqdata_restore.inc'
@@ -197,9 +197,9 @@ C     (JvG, May 8 1992)
       IF ( ACTION == ACTION_INITIALISATION  .OR.
      &     ACTION == ACTION_FULLCOMPUTATION        ) THEN
 
-C
-C          some initialisation
-C
+!
+!          some initialisation
+!
           ithandl = 0
           ITIME   = ITSTRT
           NSTEP   = (ITSTOP-ITSTRT)/IDT
@@ -225,19 +225,19 @@ C
           UPDATR = .TRUE.
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
-C
-C          initialize second volume array with the first one
-C
+!
+!          initialize second volume array with the first one
+!
           CALL MOVE   ( A(IVOL ), A(IVOL2) , NOSEG   )
       ENDIF
 
-C
-C     Save/restore the local persistent variables,
-C     if the computation is split up in steps
-C
-C     Note: the handle to the timer (ithandl) needs to be
-C     properly initialised and restored
-C
+!
+!     Save/restore the local persistent variables,
+!     if the computation is split up in steps
+!
+!     Note: the handle to the timer (ithandl) needs to be
+!     properly initialised and restored
+!
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqnb", ithandl )
           INCLUDE 'dlwqdata_save.inc'
@@ -344,9 +344,9 @@ C
             CALL DLWQ17 ( A(IBSET), A(IBSAV), J(IBPNT), NOBND   , NOSYS   ,
      *                    NOTOT   , IDT     , A(ICONC), A(IFLOW), A(IBOUN))
          endif
-C
-C     Call OUTPUT system
-C
+!
+!     Call OUTPUT system
+!
       CALL DLWQO2 ( NOTOT   , NOSEG   , NOPA    , NOSFUN  , ITIME   ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
@@ -396,15 +396,15 @@ C
          call dlwq14 ( a(iderv) , notot    , nosss    , itfact   , a(imas2) ,
      &                 idt      , iaflag   , a(idmps) , intopt   , j(isdmp) ,
      &                 j(iowns) , mypart   )
-C
-C          get new volumes
-C
+!
+!          get new volumes
+!
       ITIMEL = ITIME
       ITIME  = ITIME + IDT
       IF ( IVFLAG .EQ. 1 ) THEN
-C
-C          computation of volumes for computed volumes only
-C
+!
+!          computation of volumes for computed volumes only
+!
          CALL MOVE   ( A(IVOL) , A(IVOL2), NOSEG   )
          CALL DLWQB3 ( A(IAREA), A(IFLOW), A(IVNEW), J(IXPNT), NOTOT   ,
      *                 NOQ     , NVDIM   , J(IVPNW), A(IVOL2), INTOPT  ,
@@ -412,9 +412,9 @@ C
      *                 NDMPQ   , J(IQDMP))
          UPDATR = .TRUE.
       ELSE
-C
-C          read new volumes from files
-C
+!
+!          read new volumes from files
+!
          CALL DLWQ41 ( LUN     , ITIME   , ITIMEL  , A(IHARM), A(IFARR),
      *                 J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
      *                 J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
@@ -469,49 +469,49 @@ C
          call dlwqb1 ( notot   , noseg   , a(ivol) , a(ivol2), a(iconc),
      &                 a(iderv), isys    , nsys    , jtrack  , a(itimr),
      &                 rhs     , idt     )
-C
-C          do the transport itself (Attn.: NOTOT replaced by NOSYS)
-C
+!
+!          do the transport itself (Attn.: NOTOT replaced by NOSYS)
+!
          CALL DLWQB9 ( A(IDISP), A(IDNEW), A(IAREA), A(IFLOW), A(ILENG),
      *                 A(IVNEW), A(IBOUN), J(IXPNT), NOSYS   , ISYS    ,
      *                 NSYS    , NOQ1    , NOQ2    , NOQ     , NDDIM   ,
      *                 NVDIM   , J(IDPNW), J(IVPNW), rhs     , A(ITIMR),
      *                 JTRACK  , INTOPT  , ILFLAG  )
-C
-C          invert the matrix
-C
+!
+!          invert the matrix
+!
          CALL DELMAT ( NOSEG   , JTRACK  , JTRACK  , NSYS    , A(ITIMR),
      *                                               rhs     ,    0    )
       ELSE
-C          compute RHS
+!          compute RHS
          CALL DLWQB6 ( A(ICONC), A(IDERV), NOSEG   , NOTOT   , A(IVOL) ,
      *                           IDT     , 1       , rhs     , NOSYS   )
-C
-C          do the transport itself, only accross boundaries
-C
+!
+!          do the transport itself, only accross boundaries
+!
          CALL DLWQB7 ( A(IDISP), A(IDNEW), A(IAREA), A(IFLOW), A(ILENG),
      *                 A(IVNEW), A(IBOUN), J(IXPNT), NOSYS   , 1       ,
      *                 NOSYS   , NOQ1    , NOQ2    , NOQ     , NDDIM   ,
      *                 NVDIM   , J(IDPNW), J(IVPNW), rhs     , INTOPT  ,
      *                                                         ILFLAG  )
-C
-C          calculate the concentration with known matrix
-C
+!
+!          calculate the concentration with known matrix
+!
          CALL DELMAT ( NOSEG   , JTRACK  , JTRACK  , NOSYS   , A(ITIMR),
      *                                               rhs     ,    2    )
       ENDIF
-C
-C          store results from RHS in concentration matrix
-C
+!
+!          store results from RHS in concentration matrix
+!
       CALL DLWQB2 ( A(ICONC), rhs     , NOSEG   , NOTOT   , ISYS    ,
      *              NSYS    )
-C
-C          Back for new cycle if last substance does not equal NOSYS
-C
+!
+!          Back for new cycle if last substance does not equal NOSYS
+!
       IF ( (ISYS+NSYS-1) .NE. NOSYS ) GOTO 20
-C
-C          mass balance of transport
-C
+!
+!          mass balance of transport
+!
       CALL DLWQB5 ( A(IDISP), A(IDNEW), A(IAREA), A(IFLOW), A(ILENG),
      *              A(IVNEW), A(ICONC), A(IBOUN), J(IXPNT), NOSYS   ,
      *              NOTOT   , NOQ1    , NOQ2    , NOQ     , NDDIM   ,
@@ -522,69 +522,69 @@ C
 
       call dlwqb4 ( nosys   , notot   , nototp  , noseg   , a(ivol2),
      &              surface , a(imass), a(iconc), a(iderv), idt     )
-C
-C          replace old by new volumes
-C
+!
+!          replace old by new volumes
+!
       CALL MOVE   ( A(IVOL2), A(IVOL) , NOSEG   )
-C
-C          calculate closure error
-C
+!
+!          calculate closure error
+!
       IF ( LREWIN .AND. LSTREC ) THEN
          CALL DLWQCE ( A(IMASS), A(IVOLL), A(IVOL2), NOSYS , NOTOT ,
      +                 NOSEG   , LUN(19) )
          CALL MOVE   ( A(IVOLL), A(IVOL) , NOSEG   )
       ENDIF
-C
-C          integrate the fluxes at dump segments fill ASMASS with mass
-C
+!
+!          integrate the fluxes at dump segments fill ASMASS with mass
+!
       IF ( IBFLAG .GT. 0 ) THEN
          CALL PROINT ( NFLUX   , NDMPAR  , IDT     , ITFACT  , A(IFLXD),
      +                 A(IFLXI), J(ISDMP), J(IPDMP), NTDMPQ  )
       ENDIF
 
       IF ( RTCACT )
-c     Interface to RTC (i)
+!     Interface to RTC (i)
      Jcall RTCSHL (ITIME, A, J, C)
 
       IF ( SRWACT )
-C     Interface to SRW (i)
+!     Interface to SRW (i)
      JCALL SRWSHL (ITIME, A, J, C)
 
       IF ( OLCFWQ ) THEN
-c     Synchronizing with CF(i) for on-line mode outside SRW only
-c         write (*,*) ' Stop WQ i=',TELLER,' '
-c          read  (*,*)
-c         write (*,*) ' PUTPER WQtoCF'
+!     Synchronizing with CF(i) for on-line mode outside SRW only
+!         write (*,*) ' Stop WQ i=',TELLER,' '
+!          read  (*,*)
+!         write (*,*) ' PUTPER WQtoCF'
           call putpcf('WQtoCF','DataWQtoCF')
-c         write (*,*) ' DONE'
-c     Synchronizing with CF(i+1) for on-line mode outside SRW only
-c     ONLY if this is NOT the last time step!!!!!!!!!!!!!
+!         write (*,*) ' DONE'
+!     Synchronizing with CF(i+1) for on-line mode outside SRW only
+!     ONLY if this is NOT the last time step!!!!!!!!!!!!!
           IF ( ITIME+IDT .LT. ITSTOP ) then
-c             write (*,*) ' GETPER CFtoWQ'
+!             write (*,*) ' GETPER CFtoWQ'
               call getpcf('CFtoWQ','DataCFtoWQ')
-c             write (*,*) ' DONE'
-c             write (*,*) ' Start WQ i=',TELLER+1,' '
-c              read  (*,*)
+!             write (*,*) ' DONE'
+!             write (*,*) ' Start WQ i=',TELLER+1,' '
+!              read  (*,*)
               LAATST = 0
           ELSE
               LAATST = -1
           ENDIF
       ENDIF
-C
-C          new time values, volumes excluded
-c
+!
+!          new time values, volumes excluded
+!
       IF ( OLCFWQ .OR. SRWACT ) THEN
-c     Note: time step (i+1) of WQINT!
-c         write (*,*) ' Start WQI i=',TELLER+1,' '
-c          read  (*,*)
-c         write (*,*) ' PUTPEV WQtoWQI'
+!     Note: time step (i+1) of WQINT!
+!         write (*,*) ' Start WQI i=',TELLER+1,' '
+!          read  (*,*)
+!         write (*,*) ' PUTPEV WQtoWQI'
           call putpev ('WQtoWQI','DataWQtoWQI',LAATST)
-c         write (*,*) ' DONE '
-c         write (*,*) ' GETPER WQItoWQ'
+!         write (*,*) ' DONE '
+!         write (*,*) ' GETPER WQItoWQ'
           call GETPER ('WQItoWQ','DataWQItoWQ')
-c         write (*,*) ' DONE '
-c         write (*,*) ' Stop WQI i=',TELLER+1,' '
-c          read  (*,*)
+!         write (*,*) ' DONE '
+!         write (*,*) ' Stop WQI i=',TELLER+1,' '
+!          read  (*,*)
       ENDIF
 
          call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
@@ -608,15 +608,15 @@ c          read  (*,*)
 
       IF ( ACTION == ACTION_FINALISATION    .OR.
      &     ACTION == ACTION_FULLCOMPUTATION      ) THEN
-C
-C
-C          close files, except monitor file
-C
+!
+!
+!          close files, except monitor file
+!
           call CloseHydroFiles( dlwqd%collcoll )
           call close_files( lun )
-C
-C          write restart file
-C
+!
+!          write restart file
+!
           CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITIME , C(IMNAM) ,
      *                  C(ISNAM) , NOTOT , NOSEG    )
       ENDIF

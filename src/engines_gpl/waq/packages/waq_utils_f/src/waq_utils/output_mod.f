@@ -22,18 +22,18 @@
 !!  rights reserved.
 
       module Output
-C
-C          module contains everything for specification of output variables
-C          created 31 January 2003 by Leo Postma
-C
-C     contains the fiollowing derived types:
-C          OutputPointer          ! a set of information with respect to one grid pointer
-C          OutputPointerColl      ! a collection of these grid pointers
-C
-C     contains the following functions:
-C
-C     contains the following subroutine:
-C
+!
+!          module contains everything for specification of output variables
+!          created 31 January 2003 by Leo Postma
+!
+!     contains the fiollowing derived types:
+!          OutputPointer          ! a set of information with respect to one grid pointer
+!          OutputPointerColl      ! a collection of these grid pointers
+!
+!     contains the following functions:
+!
+!     contains the following subroutine:
+!
       integer, parameter :: NAME_SIZE      =  20                ! size of descriptive names
 
       integer, parameter :: IMON              =   1          ! type monitoring file
@@ -57,13 +57,13 @@ C
       integer, parameter :: IHN4              =  19          ! type of output file
       integer, parameter :: IBA2              =  20          ! type of output file
       integer, parameter :: IBA3              =  21          ! type of output file
-C
-C          this is the collection of the output pointers
-C
+!
+!          this is the collection of the output pointers
+!
       type OutputColl
          character(LEN=NAME_SIZE),pointer :: names(:)           ! names of variables
          integer, pointer                 :: pointers(:)        ! ponters in waq arrays
          integer                          :: cursize            ! filled up to this size
       end type OutputColl
-C
+!
       end module Output

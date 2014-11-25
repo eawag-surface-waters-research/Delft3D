@@ -22,17 +22,17 @@
 !!  rights reserved.
 
       SUBROUTINE GETPER (StreamName,DataSetName)
-C
-C     Deltares
-C
-C     CREATED             : jan  2001 by J.v.Gils
-C
-C     FUNCTION            : Gets permission from DIO to proceed
-C                           one step (synchronised mode)
-C
-C
-c     use dio_streams
-c     use dio_plt_rw
+!
+!     Deltares
+!
+!     CREATED             : jan  2001 by J.v.Gils
+!
+!     FUNCTION            : Gets permission from DIO to proceed
+!                           one step (synchronised mode)
+!
+!
+!     use dio_streams
+!     use dio_plt_rw
       include 'dio-plt.inc'
 
       character*(*) StreamName,DataSetName
@@ -57,18 +57,18 @@ cjvb  logical getResult
 
       logical first
       save
-c     save first, dioInSet
+!     save first, dioInSet
       data first /.true./
 
       if ( first ) then
 
       first = .false.
 
-C     Open data stream
+!     Open data stream
       dioInStream = DioCreateStreamSynched(dio_Binary_stream,
      +                    StreamName, 'r')
 
-C     Get data set info
+!     Get data set info
       dioInSet = DioGetPltDataSetInfo(dioInStream,
      +                                 DataSetName,
      +                                 Nr_Variables,vars,
@@ -77,7 +77,7 @@ C     Get data set info
 
       endif
 
-C     Get dataset values
+!     Get dataset values
 
       getResult = DioGetPltDataSetReals (dioInSet,tims(1),
      +                                   Nr_Variables,
@@ -87,17 +87,17 @@ C     Get dataset values
       RETURN
       END
       SUBROUTINE GETPCF (StreamName,DataSetName)
-C
-C     Deltares
-C
-C     CREATED             : jan  2001 by J.v.Gils
-C
-C     FUNCTION            : Gets permission from DIO to proceed
-C                           one step (synchronised mode)
-C
-C
-c     use dio_streams
-c     use dio_plt_rw
+!
+!     Deltares
+!
+!     CREATED             : jan  2001 by J.v.Gils
+!
+!     FUNCTION            : Gets permission from DIO to proceed
+!                           one step (synchronised mode)
+!
+!
+!     use dio_streams
+!     use dio_plt_rw
       include 'dio-plt.inc'
 
       character*(*) StreamName,DataSetName
@@ -122,18 +122,18 @@ cjvb  logical getResult
 
       logical first
       save
-c     save first, dioInSet
+!     save first, dioInSet
       data first /.true./
 
       if ( first ) then
 
       first = .false.
 
-C     Open data stream
+!     Open data stream
       dioInStream = DioCreateStreamSynched(dio_Binary_stream,
      +                    StreamName, 'r')
 
-C     Get data set info
+!     Get data set info
       dioInSet = DioGetPltDataSetInfo(dioInStream,
      +                                 DataSetName,
      +                                 Nr_Variables,vars,
@@ -142,7 +142,7 @@ C     Get data set info
 
       endif
 
-C     Get dataset values
+!     Get dataset values
 
       getResult = DioGetPltDataSetReals (dioInSet,tims(1),
      +                                   Nr_Variables,

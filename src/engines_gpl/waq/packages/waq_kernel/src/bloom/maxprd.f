@@ -21,31 +21,31 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO CALCULATE MAXIMAL PRIMARY PRODUCTION AND         *
-C  *                  RESPIRATION RATES                                *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO CALCULATE MAXIMAL PRIMARY PRODUCTION AND         *
+!  *                  RESPIRATION RATES                                *
+!  *********************************************************************
+!
       SUBROUTINE MAXPRD(T)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'ioblck.inc'
-C
-C  Calculate respiration rate constants.
-C  Calculate the maximum gross growth rate per day as a linear or
-C  exponential function of the temperature T.
-C  It is assumed that the input function should be incremented with
-C  the respiration rate constant. As an option the mortality rate
-C  constant can be added as well (LPMORT=1).
-C  As another option, Pmax can be set to some small number (BASMOR) if
-C  the temperature is below the value stored in TEMLIM.
-C  If, however, NREP is 1, the temperature limitation option is ignored
-C  because otherwise the model does not have an intial solution for the
-C  first time step.
-C
+!
+!  Calculate respiration rate constants.
+!  Calculate the maximum gross growth rate per day as a linear or
+!  exponential function of the temperature T.
+!  It is assumed that the input function should be incremented with
+!  the respiration rate constant. As an option the mortality rate
+!  constant can be added as well (LPMORT=1).
+!  As another option, Pmax can be set to some small number (BASMOR) if
+!  the temperature is below the value stored in TEMLIM.
+!  If, however, NREP is 1, the temperature limitation option is ignored
+!  because otherwise the model does not have an intial solution for the
+!  first time step.
+!
       IF (LTLIM .EQ. 0) GO TO 20
       IF (T .GE. TEMLIM) GO TO 20
       IF (NREP .EQ. 1) GO TO 20
@@ -68,9 +68,9 @@ C
       END IF
    30 CONTINUE
    40 CONTINUE
-C
-C  If option "DUMP" was turned on, print PMAX, RESP and RMORT.
-C
+!
+!  If option "DUMP" was turned on, print PMAX, RESP and RMORT.
+!
       IF (IDUMP .NE. 0) THEN
          WRITE (IOU(6),50) (PMAX(K),K=1,NUSPEC)
    50    FORMAT ('  Pmax(T,j): ',10(F5.2,1X))

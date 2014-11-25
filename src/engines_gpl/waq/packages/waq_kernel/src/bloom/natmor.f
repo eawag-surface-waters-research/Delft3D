@@ -21,14 +21,14 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE TO SET,CALCULATE OR CALIBRATE NATURAL MORTALITY    *
-C  *                       RATE CONSTANT                               *
-C  *********************************************************************
-C
-C  971217 MvdV extra mortality above critical temp for ulvae
-C  0895 MvdV output of grazer biomass extended for multiple grazer types
+!
+!  *********************************************************************
+!  *     SUBROUTINE TO SET,CALCULATE OR CALIBRATE NATURAL MORTALITY    *
+!  *                       RATE CONSTANT                               *
+!  *********************************************************************
+!
+!  971217 MvdV extra mortality above critical temp for ulvae
+!  0895 MvdV output of grazer biomass extended for multiple grazer types
 
       SUBROUTINE NATMOR(DEATH,ZOOD,TEMP,LCOUPL)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -39,17 +39,17 @@ C  0895 MvdV output of grazer biomass extended for multiple grazer types
       INCLUDE 'graas.inc'
       INCLUDE 'ioblck.inc'
       REAL*8 ZOOD(0:MG)
-C
-C  IF LCAL=1 DEATH IS PUT EQUAL TO THE INPUT VALUE
-C
-C  IF LCAL=4 DEATH IS CALCULATED AS RMORT1(I) * RMORT2(I) ** TEMP
-C
-C  DETERMINE HOW DEATH IS TO BE ESTABLISHED
-C
+!
+!  IF LCAL=1 DEATH IS PUT EQUAL TO THE INPUT VALUE
+!
+!  IF LCAL=4 DEATH IS CALCULATED AS RMORT1(I) * RMORT2(I) ** TEMP
+!
+!  DETERMINE HOW DEATH IS TO BE ESTABLISHED
+!
       IF (LCAL .EQ. 4) GO TO 70
-C
-C  LCAL=1
-C
+!
+!  LCAL=1
+!
       DO 10 I = 1,NUSPEC
    10 RMORT(I) = DEATH
       IF (NREP .GT. 1) GO TO 110
@@ -64,11 +64,11 @@ C
       IF (GRAMO1 .GT. 0. .AND. IDUMP .EQ. 1) WRITE(IOU(6),60) GRAMO1
    60 FORMAT(2X,'Initial grazing rate:',2X,F6.2)
       GO TO 110
-C
-C  LCAL=4. STORE MAXIMUM DEATH RATE IN DEATH.
-C  Compute mortatlity rate constant or set to BASMOR if option TEMPLIM
-C  is on and TEMP is below TEMLIM.
-C
+!
+!  LCAL=4. STORE MAXIMUM DEATH RATE IN DEATH.
+!  Compute mortatlity rate constant or set to BASMOR if option TEMPLIM
+!  is on and TEMP is below TEMLIM.
+!
    70 CONTINUE
       TEMP2 = TEMP
       IF (LTLIM .EQ. 0) GO TO 90
@@ -84,10 +84,10 @@ C
          GO TO 110
    90 DEATH = 0.0
       DO 100 I = 1,NUSPEC
-C       MvdV 971217 addition for ulvae
-C       critical temperature in RMORT2
-C       RMORT2 (temperature correction) = 1.0
-C       temperature muliplication factor in RMORT3
+!       MvdV 971217 addition for ulvae
+!       critical temperature in RMORT2
+!       RMORT2 (temperature correction) = 1.0
+!       temperature muliplication factor in RMORT3
         IF (RMORT2(I).GE.0) THEN
           TMPCOR = RMORT2(I)
         ELSE
@@ -98,13 +98,13 @@ C       temperature muliplication factor in RMORT3
      1    RMORT(I) = MAX(RMORT(I),(TEMP+RMORT2(I)) * RMORT3(I))
         IF (RMORT(I) .GT. DEATH) DEATH = RMORT(I)
   100 CONTINUE
-C
-C  Print zooplankton biomass.
-C
+!
+!  Print zooplankton biomass.
+!
   110 CONTINUE
       IF (IDUMP .EQ. 0) RETURN
 
-C     Write for all grazers 0895 MvdV
+!     Write for all grazers 0895 MvdV
       IF (NUGRAZ .GT. 0) THEN
         WRITE(IOU(6),130) (ZOOD(J),J=1,NUGRAZ)
       ELSE

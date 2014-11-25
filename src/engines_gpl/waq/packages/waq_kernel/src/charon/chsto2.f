@@ -33,9 +33,9 @@
       integer                   :: lurep           ! Unit number report file
       integer                   :: naij2           ! naij2
       type(procespropcoll)      :: procesdef       ! all processes
-C
-C     Local Declarations
-C
+!
+!     Local Declarations
+!
       INTEGER      LUIN  , LUOUT , I     , ICOMP , ISPEC , IS    ,
      J                     NSTOC , NSTOCN, NSTOCM, ISTOC , NSKIP,
      J             INDEX
@@ -61,13 +61,13 @@ C
 
       DATA LUIN  /21/
       DATA LUOUT /22/
-C
-C     get monitoring level
-C
+!
+!     get monitoring level
+!
       CALL GETMMO(MLEVEL)
-C
-C     If NH4 is not being modelled and NH4+ is, then set the NH4 fluxes to NH4+
-C
+!
+!     If NH4 is not being modelled and NH4+ is, then set the NH4 fluxes to NH4+
+!
       L_NH4  = .FALSE.
       NH4    = 'NH4'
       CALL ZOEK (NH4,NTRANS,VARNAM,10,INDX)
@@ -78,9 +78,9 @@ C
             L_NH4 = .TRUE.
          ENDIF
       ENDIF
-C
-C     If PO4 is not being modelled and PO4--- is, then set the PO4 fluxes to PO4---
-C
+!
+!     If PO4 is not being modelled and PO4--- is, then set the PO4 fluxes to PO4---
+!
       L_PO4  = .FALSE.
       PO4    = 'PO4'
       CALL ZOEK (PO4,NTRANS,VARNAM,10,INDX)
@@ -91,9 +91,9 @@ C
             L_PO4 = .TRUE.
          ENDIF
       ENDIF
-C
-C     If CARBTOT is not being modelled and CO2 is, then set the CARBTOT fluxes to CO2
-C
+!
+!     If CARBTOT is not being modelled and CO2 is, then set the CARBTOT fluxes to CO2
+!
       L_CO2  = .FALSE.
       CARBTO = 'CARBTOT'
       CALL ZOEK (CARBTO,NTRANS,VARNAM,10,INDX)
@@ -123,10 +123,10 @@ C
             actflu = proc%fluxstochi(is)%ioitem
             actsto = proc%fluxstochi(is)%scale
 
-c           solve problem with double meaning of po4 and nh4 and co2
+!           solve problem with double meaning of po4 and nh4 and co2
 
-c           if ( actsub .eq. 'nh4         ' ) actsub = 'nh4+        '
-c           if ( actsub .eq. 'po4         ' ) actsub = 'po4---      '
+!           if ( actsub .eq. 'nh4         ' ) actsub = 'nh4+        '
+!           if ( actsub .eq. 'po4         ' ) actsub = 'po4---      '
             if ( l_nh4 ) then
                call zoek (nh4,1,actsub,10,indx)
                if ( indx .gt. 0 ) then
@@ -146,38 +146,38 @@ c           if ( actsub .eq. 'po4         ' ) actsub = 'po4---      '
                endif
             endif
 
-c           is this a charon species?? is it transported??
+!           is this a charon species?? is it transported??
 
             call zoek (actsub,n,kn,6,ispec)
             write ( c10 , '(a6,''    '')' ) actsub
             call zoek (c10,ntrans,varnam,10,index)
-c           write(lurep,*) actsub,c10,index,varnam(6)
+!           write(lurep,*) actsub,c10,index,varnam(6)
             if (ispec .gt. 0 .and. index .le. 0 ) then
 
-c              charon-species, which is not transported
+!              charon-species, which is not transported
 
                if (mlevel.ge.10)
      +            write (lurep,'(''Remove :'',2a12,f10.3)')
      j         actsub, actflu, actsto
 
-c              find molar mass to make flux in moles
+!              find molar mass to make flux in moles
 
                rmspec = gfw(ispec)
 
-c              loop over non-zero matrix-entries charon
+!              loop over non-zero matrix-entries charon
 
                do 20 i = 1,naij
                   if ( jcol(i) .eq. ispec ) then
 
-c                     this entry concerns the right species!!
+!                     this entry concerns the right species!!
 
                       icomp = irow(i)
 
-c                     find molar mass of component
+!                     find molar mass of component
 
                       rmcomp = commas(icomp)
 
-c                     find component in transported vector
+!                     find component in transported vector
 
                       if ( i .le. naij2 ) then
                           write (c10,'(a6,''_dis'')') nr(icomp,1)
@@ -191,18 +191,18 @@ c                     find component in transported vector
                       endif
                       if ( index .le. 0 ) stop 'CHSTOC: 001'
 
-c                     component has been found: index
+!                     component has been found: index
 
                       write (actsub,'(a10,''  '')') varnam(index)
 
-c                     compute new stochi coefficient
+!                     compute new stochi coefficient
 
                       stochi = actsto * aij(i) * rmcomp / rmspec
 
-c                     new stoichiometry line found
-c                     check if the affected substance is a new one
-c                     if not, increase stoch. coefficient
-c                             and skip creating new line
+!                     new stoichiometry line found
+!                     check if the affected substance is a new one
+!                     if not, increase stoch. coefficient
+!                             and skip creating new line
 
                       do 15 istoc = 1,nstocn
                       if ( subarr(istoc) .eq. actsub .and.
@@ -212,7 +212,7 @@ c                             and skip creating new line
                       endif
    15                 continue
 
-c                     copy to block of new lines
+!                     copy to block of new lines
 
                       nstocn = nstocn + 1
                       if ( nstocn .gt. nstocm ) goto 900
@@ -223,20 +223,20 @@ c                     copy to block of new lines
    18                 continue
 
 
-c                 end block for right component
+!                 end block for right component
 
                   endif
 
-c                 end loop non-zero matrix-entries charon
+!                 end loop non-zero matrix-entries charon
 
    20          continue
 
-c              end block of not-transported affected charon-species
+!              end block of not-transported affected charon-species
 
             else
 
-c              stoichiometry line does not concern charon species
-c              copy to block of new lines and give message
+!              stoichiometry line does not concern charon species
+!              copy to block of new lines and give message
 
                if (mlevel.ge.10)
      +            write (lurep,'(''Accept :'',2a12,f10.3)')
@@ -248,36 +248,36 @@ c              copy to block of new lines and give message
                stoarr(nstocn) = actsto
             endif
 
-c           end loop over old stochi lines
+!           end loop over old stochi lines
 
          enddo
 
-c        check stochi lines, skip if coefficient is low
+!        check stochi lines, skip if coefficient is low
 
          nskip = 0
          do i = 1,nstocn
             if ( abs(stoarr(i)) .lt. 0.005 ) nskip = nskip + 1
          enddo
 
-c        store new block of stochi lines, skip if coefficient is low
+!        store new block of stochi lines, skip if coefficient is low
 
          fluxstochi%cursize = 0
          fluxstochi%maxsize = 0
          is = 0
          do i = 1,nstocn
             if ( abs(stoarr(i)) .gt. 0.005 ) then
-c
+!
                if (mlevel.ge.10)
      +            write(lurep,'(''Final  :'',2a12,f10.3)')
      j         subarr(i), fluarr(i), stoarr(i)
-c
+!
                astochiprop%type      = STOCHITYPE_FLUX
                astochiprop%ioitem    = fluarr(i)
                astochiprop%substance = subarr(i)
                astochiprop%subindx   = 0
                astochiprop%scale     = stoarr(i)
                iret = stochipropcolladd( fluxstochi , astochiprop )
-c
+!
             else
                if (mlevel.ge.10)
      +            write(lurep,'(''Neglect:'',2a12,f10.3)')
@@ -291,11 +291,11 @@ c
          proc%no_fluxstochi= fluxstochi%cursize
          proc%fluxstochi   =>fluxstochi%stochiprops
 
-c        end loop processes
+!        end loop processes
 
       enddo
 
-c     close file
+!     close file
 
       return
   900 stop 'Dimension error in CHSTO2'

@@ -27,66 +27,51 @@
 !>\file
 !>       Burial total bottom mass (dry matter)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta study)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        BURIAL FLUX OF DRY MATTER ONLY
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C ACTHS1  R*4 1 I  actual thickness of S1                              [m]
-C ACTHS2  R*4 1 I  actual thickness of S2                              [m]
-C DMS1    R*4 1 I  dry matter in S1                                    [g]
-C DMS2    R*4 1 I  dry matter in S1                                    [g]
-C DELT    R*4 1 I  DELWAQ timestep                                   [scu]
-C EXCBS1  R*4 1 L  excess burial flux layer S1                  [gDM/m2/d]
-C EXCBS2  R*4 1 L  excess burial flux layer S2                  [gDM/m2/d]
-C FIXS1   R*4 1 I  fixed thickness of layer S1 (option fixed)          [m]
-C FIXS2   R*4 1 I  fixed thickness of layer S2 (option fixed)          [m]
-C FL (1)  R*4 1 O  burial flux S1->S2                           [gDM/m3/d]
-C FL (2)  R*4 1 O  burial flxu S2->from system                  [gDM/m3/d]
-C IAUSYS  R*4 1 I  ratio between auxiliary and system clock unit       [-]
-C MAXS1   R*4 1 I  maximum thickness of layer S1 (option variable)     [m]
-C MAXS2   R*4 1 I  maximum thickness of layer S2 (option variable)     [m]
-C MAXBS1  R*4 1 L  max. burial flux layer S1                    [gDM/m2/d]
-C MAXBS2  R*4 1 L  max. burial flux layer S2                    [gDM/m2/d]
-C SOMSED  R*4 1 I  total sedimentation flux                     [gDM/m2/d]
-C SW      R*4 1 I  swithc for burial option                            [-]
-C UDFBS1  R*4 1 L  user defined burial from layer S1            [gDM/m2/d]
-C UDFBS2  R*4 1 L  user defined burial from layer S2            [gDM/m2/d]
-C VBUR    R*4 1 I  first order burial rate constant                  [1/d]
-C SURF    R*4 1 I  surfce area                                        [m2]
-C ZERBUR  R*4 1 I  zeroth order burial flux                     [gDM/m2/d]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        BURIAL FLUX OF DRY MATTER ONLY
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! ACTHS1  R*4 1 I  actual thickness of S1                              [m]
+! ACTHS2  R*4 1 I  actual thickness of S2                              [m]
+! DMS1    R*4 1 I  dry matter in S1                                    [g]
+! DMS2    R*4 1 I  dry matter in S1                                    [g]
+! DELT    R*4 1 I  DELWAQ timestep                                   [scu]
+! EXCBS1  R*4 1 L  excess burial flux layer S1                  [gDM/m2/d]
+! EXCBS2  R*4 1 L  excess burial flux layer S2                  [gDM/m2/d]
+! FIXS1   R*4 1 I  fixed thickness of layer S1 (option fixed)          [m]
+! FIXS2   R*4 1 I  fixed thickness of layer S2 (option fixed)          [m]
+! FL (1)  R*4 1 O  burial flux S1->S2                           [gDM/m3/d]
+! FL (2)  R*4 1 O  burial flxu S2->from system                  [gDM/m3/d]
+! IAUSYS  R*4 1 I  ratio between auxiliary and system clock unit       [-]
+! MAXS1   R*4 1 I  maximum thickness of layer S1 (option variable)     [m]
+! MAXS2   R*4 1 I  maximum thickness of layer S2 (option variable)     [m]
+! MAXBS1  R*4 1 L  max. burial flux layer S1                    [gDM/m2/d]
+! MAXBS2  R*4 1 L  max. burial flux layer S2                    [gDM/m2/d]
+! SOMSED  R*4 1 I  total sedimentation flux                     [gDM/m2/d]
+! SW      R*4 1 I  swithc for burial option                            [-]
+! UDFBS1  R*4 1 L  user defined burial from layer S1            [gDM/m2/d]
+! UDFBS2  R*4 1 L  user defined burial from layer S2            [gDM/m2/d]
+! VBUR    R*4 1 I  first order burial rate constant                  [1/d]
+! SURF    R*4 1 I  surfce area                                        [m2]
+! ZERBUR  R*4 1 I  zeroth order burial flux                     [gDM/m2/d]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -113,7 +98,7 @@ C
       IP24 = IPOINT(24)
       IP25 = IPOINT(25)
       IP26 = IPOINT(26)
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -140,14 +125,14 @@ C
       IN24 = INCREM(24)
       IN25 = INCREM(25)
       IN26 = INCREM(26)
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
       SOMSED  = PMSA(IP1 )
       RESS1   = PMSA(IP2 )
       RESS2   = PMSA(IP3 )
@@ -169,9 +154,9 @@ C
       DELT    = PMSA(IP19 )
       SURF    = PMSA(IP20 )
 
-C*******************************************************************************
-C**** Processes connected to the BURIAL of dry matter
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the BURIAL of dry matter
+!***********************************************************************
 
       BURS1   =  0.0
       UDFBS1  =  0.0
@@ -180,7 +165,7 @@ C***********************************************************************
       UDFBS2  =  0.0
       EXCBS2  =  0.0
 
-C --- First option (fixed layer thickness)
+! --- First option (fixed layer thickness)
       IF ( ISW .EQ. 0 ) THEN
 
          IF (ACTHS1 .LT. FIXS1 ) THEN
@@ -198,35 +183,35 @@ C --- First option (fixed layer thickness)
             BURS2 = BURS1 + EXCBS2
          ENDIF
 
-C --- Second  option (variable layer with variable but maximum thickness)
+! --- Second  option (variable layer with variable but maximum thickness)
       ELSEIF ( ISW .EQ. 1 ) THEN
 
       DMS1 = ACTHS1 * SURF * RHOS1 * (1.-PORS1)
       DMS2 = ACTHS2 * SURF * RHOS2 * (1.-PORS2)
 
-C     Determine maximum burial flux for layer S1
-C     (available mass + sedimentation - resuspension)
+!     Determine maximum burial flux for layer S1
+!     (available mass + sedimentation - resuspension)
       MAXBS1 = MAX (0.0, DMS1 / DELT / SURF +  SOMSED - RESS1 )
 
-C     Determine user-defined burial fluxes
+!     Determine user-defined burial fluxes
       UDFBS1 = ZBURS1 + VBURS1 * MAX (DMS1, 0.0) / SURF
       UDFBS2 = ZBURS2 + VBURS2 * MAX (DMS2, 0.0) / SURF
 
-C     Determine excess burial fluxes (if layer is > max u-d thickness)
+!     Determine excess burial fluxes (if layer is > max u-d thickness)
       EXCBS1 = MAX(0.0,(ACTHS1-MAXS1)) * RHOS1 * (1-PORS1) / DELT
       EXCBS2 = MAX(0.0,(ACTHS2-MAXS2)) * RHOS2 * (1-PORS2) / DELT
 
-C     Determine actual burial flux layer S1
+!     Determine actual burial flux layer S1
       BURS1 = MIN ( UDFBS1 + EXCBS1, MAXBS1 )
 
-C     Determine maximum burial flux for layer S2
-C     (available mass + sedimentation - resuspension)
+!     Determine maximum burial flux for layer S2
+!     (available mass + sedimentation - resuspension)
       MAXBS2 = MAX (0.0, DMS2 / DELT / SURF +  BURS1  - RESS2 )
 
-C     Determine actual burial flux layer S1
+!     Determine actual burial flux layer S1
       BURS2 = MIN ( UDFBS2 + EXCBS2, MAXBS2 )
 
-C     Unknown option SwSediment
+!     Unknown option SwSediment
       ELSE
         WRITE(*,*) 'BURIAL: SwSediment should equal 0 or 1! Not', ISW
         CALL SRSTOP(1)
@@ -239,10 +224,10 @@ C     Unknown option SwSediment
       PMSA ( IP24 ) =  BURS2
       PMSA ( IP25 ) =  UDFBS2
       PMSA ( IP26 ) =  EXCBS2
-C
+!
       ENDIF
       ENDIF
-C
+!
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
       IP3   = IP3   + IN3
@@ -269,9 +254,9 @@ C
       IP24  = IP24  + IN24
       IP25  = IP25  + IN25
       IP26  = IP26  + IN26
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

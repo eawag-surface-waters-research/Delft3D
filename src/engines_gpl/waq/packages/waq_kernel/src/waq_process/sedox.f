@@ -27,64 +27,41 @@
 !>\file
 !>       Sediment Oxygen Demand (SOD)
 
-C***********************************************************************
-C
-C     Project : T1235 / T2037
-C     Author  : Pascal Boderie / Marnix van der Vat / Rik Sonneveldt
-C     Date    : 970813             Version : 0.03
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     960410  Marnix vd Vat   Create first version, based on SOD module
-C     970120  Rik Sonneveldt  Uitbreiding met CH4-bel module van Nico.
-C     970219  Rik Sonneveldt  Gasbel module nu in alle bodem segmenten.
-C                             In aanroep gasbel moduul wordt TotalDepth
-C                             gebruikt.
-C     970429  Rik Sonneveldt  Uitvoervariabele FlSODtot toegevoegd
-C                             (op nr 21, rest een plaats opgeschoven).
-C     970813  Rik Sonneveldt  Bug eruit gehaald waardoor pmsa(20) = dep
-C                             altijd op 0 werd gezet (en voor dep altijd
-C                             Depth werd gebruikt).
-C     980520  Jos van Gils    O2Func toegevoegd
-C     000519  Jos van Gils    Autonomous SOD added (not reducing SOD pool)
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C ZFL     REAL        Zero'th order flux                        [gO2/m2/d]
-C ZFLAUT  REAL        Zero'th order flux (autonomous)           [gO2/m2/d]
-C DEPTH   R*4 1 I     Depth                                            [m]
-C SOD     R*4 1 I     oxygen demand in sediment                   [gO2/m2]
-C RCSOD   R*4 1 I     decay reaction rate SOD at 20 xC               [1/d]
-C TCSOD   R*4 1 I     decay temperature coefficient SOD                [-]
-C TEMP    R*4 1 I     ambient water temperature                        [C]
-C DSOD    R*4 1 O     sediment oxygen demand flux               [gO2/m3/d]
-C GASBEL  Log 1 L     Calculate methane bubbles if true
-C BODEM   Log 1 L     Calculate SOD if true
-C x1(6)   R*4 6 O     See below : output of methane bubble routine.
-C diagen  R*4 1 L     = total diagenesis, as oxygen demand      [gO2/m2/d]
-C dep     R*4 1 I     = DEPTH
-C hsed    R*4 1 I     Active layer of sediment                         [m]
-C kapc20  R*4 1 I     See SODCH4 routine - in the comment it is called KAPC
-C thetak  R*4 1 I     See SODCH4 routine
-C edwcsd  R*4 1 I     See SODCH4 routine
-C diamb   R*4 1 I     See SODCH4 routine
-C xox     R*4 1 I     Oxygen concentration in water column        [gO2/m3]
-C kappad  R*4 1 I     See SODCH4 routine
-C OXY     R*4 1 I     Oxygen concentration in water column        [gO2/m3]
-C COXSOD  R*4 1 I     critical oxygen concentration for SOD       [gO2/m3]
-C OOXSOD  R*4 1 I     optimum oxygen concentration for SOD        [gO2/m3]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! ZFL     REAL        Zero'th order flux                        [gO2/m2/d]
+! ZFLAUT  REAL        Zero'th order flux (autonomous)           [gO2/m2/d]
+! DEPTH   R*4 1 I     Depth                                            [m]
+! SOD     R*4 1 I     oxygen demand in sediment                   [gO2/m2]
+! RCSOD   R*4 1 I     decay reaction rate SOD at 20 xC               [1/d]
+! TCSOD   R*4 1 I     decay temperature coefficient SOD                [-]
+! TEMP    R*4 1 I     ambient water temperature                        [C]
+! DSOD    R*4 1 O     sediment oxygen demand flux               [gO2/m3/d]
+! GASBEL  Log 1 L     Calculate methane bubbles if true
+! BODEM   Log 1 L     Calculate SOD if true
+! x1(6)   R*4 6 O     See below : output of methane bubble routine.
+! diagen  R*4 1 L     = total diagenesis, as oxygen demand      [gO2/m2/d]
+! dep     R*4 1 I     = DEPTH
+! hsed    R*4 1 I     Active layer of sediment                         [m]
+! kapc20  R*4 1 I     See SODCH4 routine - in the comment it is called KAPC
+! thetak  R*4 1 I     See SODCH4 routine
+! edwcsd  R*4 1 I     See SODCH4 routine
+! diamb   R*4 1 I     See SODCH4 routine
+! xox     R*4 1 I     Oxygen concentration in water column        [gO2/m3]
+! kappad  R*4 1 I     See SODCH4 routine
+! OXY     R*4 1 I     Oxygen concentration in water column        [gO2/m3]
+! COXSOD  R*4 1 I     critical oxygen concentration for SOD       [gO2/m3]
+! OOXSOD  R*4 1 I     optimum oxygen concentration for SOD        [gO2/m3]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
@@ -192,7 +169,7 @@ C     ------   -----  ------------
         COXSOD = PMSA(IP22)
         OOXSOD = PMSA(IP23)
 
-C       Zuurstoffunctie
+!       Zuurstoffunctie
 
         IF ( COXSOD .LT. OOXSOD-0.01 ) THEN
             IF ( OXY .LE. COXSOD ) THEN
@@ -211,7 +188,7 @@ C       Zuurstoffunctie
       ELSE
         OFACT  = .TRUE.
       ENDIF
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
          PMSA (IP24)  = 0.0
@@ -230,7 +207,7 @@ C
          IF (BTEST(IKNMRK(ISEG),0)) THEN
             CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
 
-C           Alleen bij vaktype met een bodem...
+!           Alleen bij vaktype met een bodem...
             BODEM = .FALSE.
             IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
                BODEM = .TRUE.
@@ -243,8 +220,8 @@ C           Alleen bij vaktype met een bodem...
             RCSOD = PMSA( IP5 )
             VOL   = PMSA( IP8 )
 
-C           Indien diepte of volume bijna of < 0, bereken dan niks.
-C           Dit is tevens beveiliging tegen delen door 0.
+!           Indien diepte of volume bijna of < 0, bereken dan niks.
+!           Dit is tevens beveiliging tegen delen door 0.
             IF (DEPTH.LT.1.E-15) BODEM = .FALSE.
             IF (VOL.LT.1.E-15)   BODEM = .FALSE.
 
@@ -257,45 +234,45 @@ C           Dit is tevens beveiliging tegen delen door 0.
                ENDIF
 
 
-C****************************************************************************
-C**** FLUX equainput divided by depth , M/m2/d * 1/m = M/m3/d + decay SOD
-C********************************************************************
+!****************************************************************************
+!**** FLUX equainput divided by depth , M/m2/d * 1/m = M/m3/d + decay SOD
+!********************************************************************
 
                DSOD = ZFL / DEPTH + SOD * RCSOD * TFSOD / DEPTH 
                
                DOXSOD = (ZFL+ZFLAUT)/DEPTH + SOD*RCSOD*TFSOD/DEPTH
 
-C              beveiliging(en) tegen deling door nul in sodch4
+!              beveiliging(en) tegen deling door nul in sodch4
                IF (DOXSOD.LT.1.E-15) DOXSOD = 1.E-15
                DMINER   = 2.67 * ( PMSA(IP17)+PMSA(IP18)+
      &                             PMSA(IP19)+PMSA(IP20) )
 
-C              Indien nodig DOXSOD corrigeren voor methaanbellen
-C              DOXSOD is het effect op zuurstof, dat dus kleiner wordt
-C              als er methaan bubbels ontsnappen.
+!              Indien nodig DOXSOD corrigeren voor methaanbellen
+!              DOXSOD is het effect op zuurstof, dat dus kleiner wordt
+!              als er methaan bubbels ontsnappen.
 
                GASBEL = .FALSE.
                IF (INT(PMSA(IP9)) .EQ. 1) GASBEL = .TRUE.
 
                IF (GASBEL) THEN
 
-c   Te doen :
-c   - mag ik dsod gebruiken voor diagen?
-c   - declaraties !!!!!
-c   - Is de temperatuurcorrectie in deze routine niet dubbelop ???
-c   - Correctie voor mineralisatie DetC enOOC in S1 en S2:
-c     nog heel goed controleren of deze vlieger wel opgaat zo !!
-c     (groot risico dubbeltellingen).
-c
-c -- Opgelet: ook de zuurstofvraag van DetC en OOC in S1 en S2 moet worden
-c    gecorrigeerd voor de vorming van gasbellen. Dit gebeurt door de (eventuele)
-c    fluxen 2.67*dMin[DetC|OOC][S1|S2] op te tellen bij diagen.
-c    Let op: dMin(etc) is in gC/m3/d, vandaar de omrekening naar gO2.
-c    Dit betekent dat er mogelijk een produktie van O2 wordt berekend,
-c    namelijk als de mineralisatiefluxen al tot methaanbelvorming leidt.
-c    Op die manier wordt de zuurstofvraag van DetC en OOC in het sediment
-c    gecorrigeerd voor de belvorming.
-c
+!   Te doen :
+!   - mag ik dsod gebruiken voor diagen?
+!   - declaraties !!!!!
+!   - Is de temperatuurcorrectie in deze routine niet dubbelop ???
+!   - Correctie voor mineralisatie DetC enOOC in S1 en S2:
+!     nog heel goed controleren of deze vlieger wel opgaat zo !!
+!     (groot risico dubbeltellingen).
+!
+! -- Opgelet: ook de zuurstofvraag van DetC en OOC in S1 en S2 moet worden
+!    gecorrigeerd voor de vorming van gasbellen. Dit gebeurt door de (eventuele)
+!    fluxen 2.67*dMin[DetC|OOC][S1|S2] op te tellen bij diagen.
+!    Let op: dMin(etc) is in gC/m3/d, vandaar de omrekening naar gO2.
+!    Dit betekent dat er mogelijk een produktie van O2 wordt berekend,
+!    namelijk als de mineralisatiefluxen al tot methaanbelvorming leidt.
+!    Op die manier wordt de zuurstofvraag van DetC en OOC in het sediment
+!    gecorrigeerd voor de belvorming.
+!
                    diagen   = DOXSOD * DEPTH + DMINER * DEPTH
 
                    temp     = PMSA(IP7)
@@ -307,8 +284,8 @@ c
                    xox      = PMSA(IP15)
                    kappad   = PMSA(IP16)
 
-C                  OPGELET Hier wordt de totale diepte gebruikt indien
-C                  gelaagde schematisatie...
+!                  OPGELET Hier wordt de totale diepte gebruikt indien
+!                  gelaagde schematisatie...
 
                    dep      = PMSA(IP21)
                    IF (dep .LT. DEPTH) THEN
@@ -318,17 +295,17 @@ C                  gelaagde schematisatie...
                    CALL SODCH4 (diagen,hsed,kapc20,thetak,temp,dep,
      &                         edwcsd,diamb,xox,kappad,x1real)
 
-C                 x1real(1) = O2-consumptie                    (gO2/m2/d)
-C                 x1real(2) = dCH4    = methaanproduktie (als O2) (gO2/m2/d)
-C                 x1real(3) = DfCH4b  = O2 vraag door diffusie CH4 uit bellen na
-C                 x1real(4) = DfCH4d  = O2 vraag door direkte CH4 diffusie naar
-C                 x1real(5) = hSaCH4  = diepte vanaf waar CH4 verzadigd (m)
-C                 x1real(6) = hAerob  = aerobe diepte (m)
-C
-C           Overschrijf de waarde van DOXSOD met de voor methaan gecorrigeerde
-C           waarde.
-C           De zuurstofvraag DMINER wel weer aftrekken van DOXSOD !!!!!
-C           (anders dubbeltelling met BotMin !!!!)
+!                 x1real(1) = O2-consumptie                    (gO2/m2/d)
+!                 x1real(2) = dCH4    = methaanproduktie (als O2) (gO2/m2/d)
+!                 x1real(3) = DfCH4b  = O2 vraag door diffusie CH4 uit bellen na
+!                 x1real(4) = DfCH4d  = O2 vraag door direkte CH4 diffusie naar
+!                 x1real(5) = hSaCH4  = diepte vanaf waar CH4 verzadigd (m)
+!                 x1real(6) = hAerob  = aerobe diepte (m)
+!
+!           Overschrijf de waarde van DOXSOD met de voor methaan gecorrigeerde
+!           waarde.
+!           De zuurstofvraag DMINER wel weer aftrekken van DOXSOD !!!!!
+!           (anders dubbeltelling met BotMin !!!!)
 
                    DOXSOD = (x1real(1) + x1real(3) + x1real(4)) / DEPTH
      &                     - DMINER
@@ -342,7 +319,7 @@ C           (anders dubbeltelling met BotMin !!!!)
 
                ELSE
 
-C                  Zuurstoffunctie
+!                  Zuurstoffunctie
 
                    IF (OFACT) THEN
                    OXY    = PMSA(IP15)
@@ -366,7 +343,7 @@ C                  Zuurstoffunctie
                    DOXSOD = DOXSOD * O2FUNC
                ENDIF
 
-C    Dit ook doen indien geen gasbellen gewenst
+!    Dit ook doen indien geen gasbellen gewenst
                PMSA (IP24)  = (DOXSOD + DMINER) * DEPTH
                PMSA (IP31)  = DOXSOD
                PMSA (IP32)  = DMINER
@@ -377,7 +354,7 @@ C    Dit ook doen indien geen gasbellen gewenst
 
             ENDIF
          ENDIF
-C
+!
          IFLUX = IFLUX + NOFLUX
          IP1   = IP1   + IN1
          IP2   = IP2   + IN2
@@ -412,76 +389,76 @@ C
          IP31  = IP31  + IN31
          IP32  = IP32  + IN32
          IP33  = IP33  + IN33
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
       END
-C
-C--- Hieronder de routine van Nico ('sodcard.for'), de naam heb ik
-C    gewijzigd in SODCH4 (rs11dec96)
-C
+!
+!--- Hieronder de routine van Nico ('sodcard.for'), de naam heb ik
+!    gewijzigd in SODCH4 (rs11dec96)
+!
       subroutine sodCH4(diagen,hsed,kapc20,thetak,temp,dep,
      2     edwcsd,diamb,xox,kappad,x1real)
-C INPUT:
-C DIAGEN (decay organic materials in sediment (GRAMS O2/M2/DAY))
-C HSED   (active depth sediment (mostly 0.1 meter))
-C KAPC   (constant in formula's (See orpheus report)) ->1.6
-C thetak (temperat constant (See orpheus report)) ->1.079
-C temp   (temperature in sediment (degrees C)
-C dep    (thickness of water column (meters)
-C edwcsd (diffusion coeff) -> 0.00025
-C diamb  (diameter of methan bubbles in cm -> 1.0
-C xox    (oxygen in water column (grams/m3)
-C kappad (transfer coefficient (m/day) -> .003
-C OUTPUT:
-c x1(1)  oxygen transfer (g O2/m2/day)
-c x1(2)  gas formation   (g O2/m2/day)
-c x1(3)  diffusion from gas bubbles  (g O2/m2/day)
-c x1(4)  diffusion dissolved methane  (g O2/m2/day)
-c x1(5)  methane sat depth   (m)
-c x1(6)  aerobic depth  (m)
-c total consumption O2 = x1(1) + x1(3) + x1(4) (g O2/m2/day)
-c
-c RS 20dec96 : all variables in the argument list of this routine must be
-c single precision because of delwaq.
-c
-c
+! INPUT:
+! DIAGEN (decay organic materials in sediment (GRAMS O2/M2/DAY))
+! HSED   (active depth sediment (mostly 0.1 meter))
+! KAPC   (constant in formula's (See orpheus report)) ->1.6
+! thetak (temperat constant (See orpheus report)) ->1.079
+! temp   (temperature in sediment (degrees C)
+! dep    (thickness of water column (meters)
+! edwcsd (diffusion coeff) -> 0.00025
+! diamb  (diameter of methan bubbles in cm -> 1.0
+! xox    (oxygen in water column (grams/m3)
+! kappad (transfer coefficient (m/day) -> .003
+! OUTPUT:
+! x1(1)  oxygen transfer (g O2/m2/day)
+! x1(2)  gas formation   (g O2/m2/day)
+! x1(3)  diffusion from gas bubbles  (g O2/m2/day)
+! x1(4)  diffusion dissolved methane  (g O2/m2/day)
+! x1(5)  methane sat depth   (m)
+! x1(6)  aerobic depth  (m)
+! total consumption O2 = x1(1) + x1(3) + x1(4) (g O2/m2/day)
+!
+! RS 20dec96 : all variables in the argument list of this routine must be
+! single precision because of delwaq.
+!
+!
       implicit real*8 (a-z)
       dimension x1(6)
-c
-c RS: input variables must be single precision
-c     output is converted to single precision
-c
+!
+! RS: input variables must be single precision
+!     output is converted to single precision
+!
       real*4 diagen,hsed,kapc20,thetak,temp,dep,
      &        edwcsd,diamb,xox,kappad,x1real(6)
 
-c**************************************************************
-cdiagenese + flux aan sod
-c**************************************************************
-cdiagenese snelheid gedeeld door de dikte van het sediment
+!**************************************************************
+!diagenese + flux aan sod
+!**************************************************************
+!diagenese snelheid gedeeld door de dikte van het sediment
       stp20 = temp-20.0
       diagv = diagen/hsed
-c        temperature correct kappas
+!        temperature correct kappas
       kappac = kapc20*thetak**stp20
-c        methane saturation
+!        methane saturation
       ch4ssd = 99.*(1.+(dep+hsed/2.)/10.)*0.9759**stp20
       dowc = xox
-c        to prevent numerical difficulty with diagenesis computation
+!        to prevent numerical difficulty with diagenesis computation
       if(dowc.lt.1.e-3)  dowc = 1.e-3
-c        initial sod estimate
+!        initial sod estimate
       sodi = 1.
       delsod = 0.01
-c        max carbonaceous sod if all methane transferred to
-c        sediment-water column interface were oxidized
+!        max carbonaceous sod if all methane transferred to
+!        sediment-water column interface were oxidized
 ********************************************************
       csodmx = dsqrt(2.*kappad*ch4ssd*diagen)
 ********************************************************
-c     write(not,1330)  csodmx,edwcsd,ch4ssd,diagv
-c1330 format(' csodmx,edwcsd,ch4ssd,diagv',4e11.4)
+!     write(not,1330)  csodmx,edwcsd,ch4ssd,diagv
+!1330 format(' csodmx,edwcsd,ch4ssd,diagv',4e11.4)
       if(csodmx.gt.diagen)  csodmx = diagen
-c
-c        iterate on total sod
+!
+!        iterate on total sod
   110 continue
       xc = kappac*dowc/sodi
 **************************************************************
@@ -489,35 +466,35 @@ c        iterate on total sod
 **************************************************************
       csod = csodmx*(1.-sechxc)
 ****************************************************************
-c        check convergence
+!        check convergence
       delta = csod - sodi
-c     write(not,1333)  nsod,csodmx,csod,tsod,delta
-c1333 format(' nosd,effjt,csod,tsod,delta'/5e10.3)
+!     write(not,1333)  nsod,csodmx,csod,tsod,delta
+!1333 format(' nosd,effjt,csod,tsod,delta'/5e10.3)
       if(abs(delta).le.delsod)  go to 120
-c        did not converge - new estimate and try again
+!        did not converge - new estimate and try again
       sodi = sodi + delta/2.
       go to 110
-c
-c             converged - compute remaining fluxes
-c        depth of methane saturation
+!
+!             converged - compute remaining fluxes
+!        depth of methane saturation
  120  x1(1) = csod
-c     lch4s = dsqrt(2.0 * edwcsd*ch4ssd/diagv)
+!     lch4s = dsqrt(2.0 * edwcsd*ch4ssd/diagv)
       lch4s = dsqrt(2.0 * kappad*ch4ssd*hsed*hsed/diagen)
       x1(5) = lch4s
-c        methane gas diffusive flux (g o2/m**2-day)
+!        methane gas diffusive flux (g o2/m**2-day)
       jch4d = dsqrt(2.*kappad*ch4ssd*diagen)*sechxc
-c        ch4 production only if saturation depth < sediment depth
+!        ch4 production only if saturation depth < sediment depth
       if(lch4s.le.hsed)  then
-c          methane saturation therefore methane gas (l/m**2-day)
-c          (gm c/5.33 gm o2 * 22.4 l/12 gm c ==> 0.3502)
+!          methane saturation therefore methane gas (l/m**2-day)
+!          (gm c/5.33 gm o2 * 22.4 l/12 gm c ==> 0.3502)
         jch4g = 0.3502*diagv*(hsed-lch4s)
-c          compute methane bubble transfer
-c          methane transfer from bubble to water column (gm o2/m**2-day)
+!          compute methane bubble transfer
+!          methane transfer from bubble to water column (gm o2/m**2-day)
         jbt = 0.0961*jch4g*dep**0.6667/diamb
-c          methane gas bubble transfer (l/m**2-day)
+!          methane gas bubble transfer (l/m**2-day)
         jbtf = 0.3502*jbt/jch4g
-c          if bubble transfer > ch4(gas) then
-c          set bubble transfer equal to total ch4(gas)
+!          if bubble transfer > ch4(gas) then
+!          set bubble transfer equal to total ch4(gas)
         if(jbtf.gt.1.) then
           jbtf = 1.
           jbt = jch4g/0.3502
@@ -534,9 +511,9 @@ c          set bubble transfer equal to total ch4(gas)
       x1(4) = jch4d
       laero = edwcsd*dowc/csod
       x1(6) = laero
-c
-c RS : conversion of double to single precision for delwaq variable
-c
+!
+! RS : conversion of double to single precision for delwaq variable
+!
       x1real(1) = real(x1(1))
       x1real(2) = real(x1(2))
       x1real(3) = real(x1(3))

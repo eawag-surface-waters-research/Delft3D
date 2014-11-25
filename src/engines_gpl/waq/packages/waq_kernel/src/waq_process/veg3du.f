@@ -202,24 +202,24 @@
 
                if ( vbxxnavail .gt. 1e-20 ) then
                   pNvbxxup=fNvbxxup*delt/vbxxNavail
-c                 pn5vbxxup=fn5vbxxup*delt/vbxxnavail
+!                 pn5vbxxup=fn5vbxxup*delt/vbxxnavail
                else
                   pNvbxxup=0.0
-c                 pn5vbxxup=0.0
+!                 pn5vbxxup=0.0
                endif
                if ( vbxxpavail .gt. 1e-20 ) then
                   pPvbxxup=fPvbxxup*delt/vbxxPavail
-c                 pp5vbxxup=fp5vbxxup*delt/vbxxpavail
+!                 pp5vbxxup=fp5vbxxup*delt/vbxxpavail
                else
                   pPvbxxup=0.0
-c                 pp5vbxxup=0.0
+!                 pp5vbxxup=0.0
                endif
                if ( vbxxsavail .gt. 1e-20 ) then
                   pSvbxxup=fSvbxxup*delt/vbxxSavail
-c                 ps5vbxxup=fs5vbxxup*delt/vbxxsavail
+!                 ps5vbxxup=fs5vbxxup*delt/vbxxsavail
                else
                   pSvbxxup=0.0
-c                 ps5vbxxup=0.0
+!                 ps5vbxxup=0.0
                endif
 
                if ( ikmrk1.eq.1 .and. hmax .gt. 0.0 ) then

@@ -27,83 +27,62 @@
 !>\file
 !>       Denitrification in water column
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C     930527  Rik Sonneveldt  Formulation O2FUNC corrected.
-C     940105  Jos van Gils    Extension O2FUNC for Sawes
-C     971111  Jan van Beek    Bug verbeterd (PR 006)
-C     020503  Johannes Smits  New generic version with MM-kinetics
-C                             for NO3 and OXY (IVERSN = 1)
-C                             Maintained old version with O2FUNC
-C                             (IVERSN = 0)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        ----- old version -----
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            ----
-C CROXY   R*4 1 I critical oxy. concentration for denititrification [g/m3]
-C CRTEMP  R*4 1 L critical temperature for denitrification            [oC]
-C CURVA   R*4 1 L constant in oxygen function                          [-]
-C DENR    R*4 1 I zero-order denitrification rate                [gN/m3/d]
-C DENRC   R*4 1 I first-order denitrification rate                   [1/d]
-C FL (1)  R*4 1 O denitrification flux                           [gN/m3/d]
-C NO3     R*4 1 I nitrate concentration                            [gN/m3]
-C O2FUNC  R*4 1 L oxygen inhibition function                           [-]
-C COXDEN  R*4 1 I critical oxy. concentration for denititrification [g/m3]
-C OOXDEN  R*4 1 I critical oxy. concentration for denititrification [g/m3]
-C OXY     R*4 1 I concentration of dissolved oxygen                [gN/m3]
-C POROS   R*4 1 L porosity                                             [-]
-C TC      R*4 1 I temperature coefficient for denitrif.                [-]
-C TEMP    R*4 1 I ambient temperature                                 [oC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
-C
-C        ----- new version -----
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            ----
-C CROXY   R*4 1 I critical oxy. concentration for denititrification [g/m3]
-C CRTEMP  R*4 1 L critical temperature for denitrification            [oC]
-C FL (1)  R*4 1 O denitrification flux                           [gN/m3/d]
-C KDEN    R*4 1 I MM denitrification rate                        [gN/m3/d]
-C K0DEN   R*4 1 I zero-order denitrification rate                [gN/m3/d]
-C K0TEMP  R*4 1 I zero-order denitrification rate below CRTEMP   [gN/m3/d]
-C K0OX    R*4 1 I zero-order denitrification rate below CROXY    [gN/m3/d]
-C KSOX    R*4 1 L half saturation concentration for oxygen       [gN/m3/d]
-C KSNI    R*4 1 L half saturation concentration for nitrate      [gN/m3/d]
-C NIFUNC  R*4 1 L MM nitrate function                                  [-]
-C NO3     R*4 1 I nitrate concentration                            [gN/m3]
-C OXFUNC  R*4 1 L MM oxygen inhibition function                        [-]
-C OXY     R*4 1 I concentration of dissolved oxygen                [gN/m3]
-C POROS   R*4 1 L porosity                                             [-]
-C TC      R*4 1 I temperature coefficient for denitrif.                [-]
-C TEMP    R*4 1 I ambient temperature                                 [oC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        ----- old version -----
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            ----
+! CROXY   R*4 1 I critical oxy. concentration for denititrification [g/m3]
+! CRTEMP  R*4 1 L critical temperature for denitrification            [oC]
+! CURVA   R*4 1 L constant in oxygen function                          [-]
+! DENR    R*4 1 I zero-order denitrification rate                [gN/m3/d]
+! DENRC   R*4 1 I first-order denitrification rate                   [1/d]
+! FL (1)  R*4 1 O denitrification flux                           [gN/m3/d]
+! NO3     R*4 1 I nitrate concentration                            [gN/m3]
+! O2FUNC  R*4 1 L oxygen inhibition function                           [-]
+! COXDEN  R*4 1 I critical oxy. concentration for denititrification [g/m3]
+! OOXDEN  R*4 1 I critical oxy. concentration for denititrification [g/m3]
+! OXY     R*4 1 I concentration of dissolved oxygen                [gN/m3]
+! POROS   R*4 1 L porosity                                             [-]
+! TC      R*4 1 I temperature coefficient for denitrif.                [-]
+! TEMP    R*4 1 I ambient temperature                                 [oC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
+!
+!        ----- new version -----
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            ----
+! CROXY   R*4 1 I critical oxy. concentration for denititrification [g/m3]
+! CRTEMP  R*4 1 L critical temperature for denitrification            [oC]
+! FL (1)  R*4 1 O denitrification flux                           [gN/m3/d]
+! KDEN    R*4 1 I MM denitrification rate                        [gN/m3/d]
+! K0DEN   R*4 1 I zero-order denitrification rate                [gN/m3/d]
+! K0TEMP  R*4 1 I zero-order denitrification rate below CRTEMP   [gN/m3/d]
+! K0OX    R*4 1 I zero-order denitrification rate below CROXY    [gN/m3/d]
+! KSOX    R*4 1 L half saturation concentration for oxygen       [gN/m3/d]
+! KSNI    R*4 1 L half saturation concentration for nitrate      [gN/m3/d]
+! NIFUNC  R*4 1 L MM nitrate function                                  [-]
+! NO3     R*4 1 I nitrate concentration                            [gN/m3]
+! OXFUNC  R*4 1 L MM oxygen inhibition function                        [-]
+! OXY     R*4 1 I concentration of dissolved oxygen                [gN/m3]
+! POROS   R*4 1 L porosity                                             [-]
+! TC      R*4 1 I temperature coefficient for denitrif.                [-]
+! TEMP    R*4 1 I ambient temperature                                 [oC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10,
      +         IP11, IP12, IP13, IP14, IP15, IP16, IP17
       INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10,
@@ -116,9 +95,9 @@ C
      +         CROXY  , NIFUNC , OXFUNC
       REAL     POROS  , CRTEMP , OXY    , NO3    , TEMP   , TEMPC  ,
      +         TEMP20
-C
+!
       LOGICAL  TMPOPT , OXYOPT
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -136,7 +115,7 @@ C
       IN15 = INCREM(15)
       IN16 = INCREM(16)
       IN17 = INCREM(17)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -154,36 +133,36 @@ C
       IP15 = IPOINT(15)
       IP16 = IPOINT(16)
       IP17 = IPOINT(17)
-C
-C     Factors that determine temperature effect space dependent?
-C
+!
+!     Factors that determine temperature effect space dependent?
+!
       IF ( IN4 .EQ. 0 .AND. IN8 .EQ. 0 ) THEN
-C
-C        NO! Compute temperature effect and switch TMPOPT off
-C
+!
+!        NO! Compute temperature effect and switch TMPOPT off
+!
          TEMP   = PMSA(IP8)
          TC     = PMSA(IP4)
          TEMP20 = TEMP - 20.0
          TEMPC  = TC ** TEMP20
          TMPOPT = .FALSE.
       ELSE
-C
-C        YES! Switch TMPOPT on
-C
+!
+!        YES! Switch TMPOPT on
+!
          TMPOPT = .TRUE.
       ENDIF
-C
-C     Factors that determine oxygen effect space dependent?
-C     Only relevant for old version IVERSN=0
-C
+!
+!     Factors that determine oxygen effect space dependent?
+!     Only relevant for old version IVERSN=0
+!
       IVERSN = NINT ( PMSA( IP13) )
       IF ( IVERSN .EQ. 0 ) THEN
 
          IF ( IN5 .EQ. 0 .AND. IN15 .EQ. 0 .AND. IN11 .EQ. 0 .AND.
      +        IN16 .EQ. 0 .AND. IN12 .EQ. 0 ) THEN
-C
-C        NO! Compute oxygen effect and switch OXYOPT off
-C
+!
+!        NO! Compute oxygen effect and switch OXYOPT off
+!
             OXY    = PMSA(IP5 )
             POROS  = PMSA(IP12)
             OOXDEN = PMSA(IP15)
@@ -203,26 +182,26 @@ C
             ENDIF
             OXYOPT = .FALSE.
          ELSE
-C
-C        YES! Switch OXYOPT on
-C
+!
+!        YES! Switch OXYOPT on
+!
             OXYOPT = .TRUE.
          ENDIF
-C
+!
       ENDIF
-C
-C     Loop over segments
-C
+!
+!     Loop over segments
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.GT.0) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C     Use new version when IVERSN=1
-C
+!
+!     Use new version when IVERSN=1
+!
       IF ( IVERSN .EQ. 1 ) THEN
-C
+!
             K0TEMP = PMSA(IP1 )
             NO3    = MAX ( 0.0, PMSA(IP2 ) )
             KDEN   = PMSA(IP3 )
@@ -235,59 +214,59 @@ C
             K0OX   = PMSA(IP10)
             CROXY  = PMSA(IP11)
             POROS  = PMSA(IP12)
-C
-C           Set the rates according to CRTEMP and CROXY
-C
+!
+!           Set the rates according to CRTEMP and CROXY
+!
             IF (TEMP .LT. CRTEMP .OR. OXY .GE. (CROXY*POROS)) KDEN = 0.0
-C
+!
             K0DEN = 0.0
-C
+!
             IF (TEMP .LT. CRTEMP .AND. OXY .LT. (CROXY * POROS)) THEN
                   K0DEN = K0TEMP
             ELSEIF (TEMP .GE. CRTEMP .AND. OXY .LT.(CROXY * POROS)) THEN
                   K0DEN = K0OX
             ENDIF
-C
-C           Compute space dependent temperature effect if TMPOPT on
-C
+!
+!           Compute space dependent temperature effect if TMPOPT on
+!
             IF ( TMPOPT ) THEN
                   TEMP20 = TEMP - 20.0
                   TEMPC  = TC ** TEMP20
             ENDIF
-C
-C           Calculation of denitrification flux
-C
+!
+!           Calculation of denitrification flux
+!
             NIFUNC = NO3 / ( KSNI * POROS + NO3 )
             OXFUNC = 1.0 - OXY / ( KSOX * POROS + OXY )
             IF ( OXY .LT. 0.0 ) OXFUNC = 1.0
-C
+!
             FL( 1 + IFLUX ) = K0DEN + KDEN * TEMPC * NIFUNC * OXFUNC
-C
-C           Zuurstoffunctie als uitvoer
-C
+!
+!           Zuurstoffunctie als uitvoer
+!
             PMSA(IP17) = OXFUNC
-C
+!
       ELSE
-C
-C     Use old version whem IVERSN=0
-C
+!
+!     Use old version whem IVERSN=0
+!
             NO3    = MAX ( 0.0, PMSA(IP2 ) )
             DENR   = PMSA(IP1)
             TEMP   = PMSA(IP8)
             CRTEMP = PMSA(IP9 )
             DENRC  = PMSA(IP14)
-C
-C           Compute space dependent temperature effect if TMPOPT on
-C
+!
+!           Compute space dependent temperature effect if TMPOPT on
+!
             IF ( TMPOPT ) THEN
                   TC     = PMSA(IP4)
                   TEMP20 = TEMP - 20.0
                   TEMPC  = TC ** TEMP20
             ENDIF
             IF (TEMP .LE. CRTEMP ) DENRC = 0.0
-C
-C           Compute space dependent oxygen effect if OXYOPT on
-C
+!
+!           Compute space dependent oxygen effect if OXYOPT on
+!
             IF ( OXYOPT ) THEN
                   OXY    = PMSA(IP5 )
                   POROS  = PMSA(IP12)
@@ -306,30 +285,30 @@ C
                         O2FUNC = ( COXDEN*POROS - OXY ) /
      &                           ( DELTOX + CURVAQ*(OXY-OOXDEN*POROS))
                   ENDIF
-C
+!
             ENDIF
-C
-C           Denitrification is assumed to take place in the water
-C           below a certain oxygen concentration in the water
-C           Calculation of denitrification flux ( M.L-3.t-1)
-C           Old:
-C           O2FUNC = MAX ( 0.0 , ( COXDEN - OXY ) / DELTOX )
-C           O2FUNC = (COXDEN - OXY) / (DELTOX + CURVAQ*(OXY - OOXDEN))
-C           O2FUNC = MAX ( 0.0 , O2FUNC )
-C           O2FUNC = MIN ( 1.0 , O2FUNC )
-C           TEMFAK = DENRC * DENTC ** TEMP20
-C           FL( 1 + IFLUX ) = DENR + TEMFAK * NO3 * O2FUNC
-C
+!
+!           Denitrification is assumed to take place in the water
+!           below a certain oxygen concentration in the water
+!           Calculation of denitrification flux ( M.L-3.t-1)
+!           Old:
+!           O2FUNC = MAX ( 0.0 , ( COXDEN - OXY ) / DELTOX )
+!           O2FUNC = (COXDEN - OXY) / (DELTOX + CURVAQ*(OXY - OOXDEN))
+!           O2FUNC = MAX ( 0.0 , O2FUNC )
+!           O2FUNC = MIN ( 1.0 , O2FUNC )
+!           TEMFAK = DENRC * DENTC ** TEMP20
+!           FL( 1 + IFLUX ) = DENR + TEMFAK * NO3 * O2FUNC
+!
             FL( 1 + IFLUX ) = DENR + DENRC * TEMPC * NO3 * O2FUNC
-C
-C           Zuurstoffunctie als uitvoer
-C
+!
+!           Zuurstoffunctie als uitvoer
+!
             PMSA(IP17) = O2FUNC
-C
+!
       ENDIF
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1  = IP1  + IN1
       IP2  = IP2  + IN2
@@ -348,8 +327,8 @@ C
       IP15 = IP15 + IN15
       IP16 = IP16 + IN16
       IP17 = IP17 + IN17
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
       END

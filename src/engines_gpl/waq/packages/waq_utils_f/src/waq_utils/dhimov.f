@@ -22,26 +22,26 @@
 !!  rights reserved.
 
       SUBROUTINE DHIMOV ( IARRA1 , IARRA2 , NOTOT )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : december 1994 by Jan van Beek
-C
-C     FUNCTION            : moves NOTOT values from IARRA1 to IARRA2
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IARRA1  INTEGER   NOTOT     INPUT   array to be copied
-C     IARRA2  INTEGER   NOTOT     OUTPUT  array to copy to
-C     NOTOT   INTEGER     1       INPUT   total number of entries
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : december 1994 by Jan van Beek
+!
+!     FUNCTION            : moves NOTOT values from IARRA1 to IARRA2
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IARRA1  INTEGER   NOTOT     INPUT   array to be copied
+!     IARRA2  INTEGER   NOTOT     OUTPUT  array to copy to
+!     NOTOT   INTEGER     1       INPUT   total number of entries
+!
       INTEGER     NOTOT
       INTEGER     IARRA1(*) , IARRA2(*)
-C
+!
       DO  10 I = 1,NOTOT
    10 IARRA2(I) = IARRA1(I)
-C
+!
       RETURN
       END

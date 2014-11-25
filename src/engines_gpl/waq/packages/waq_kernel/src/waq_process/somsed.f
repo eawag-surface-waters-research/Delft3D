@@ -27,39 +27,21 @@
 !>\file
 !>       Total of all sedimenting substances
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     930406  Pascal Boderie  Create first version
-C     940722  Jos van Gils    Removed computation of phytoplankton flux
-C     980605  Arno Nolte      Removed computation of POC flux (--> SSedPOC)
-C             Jos van Gils    and removed AAP flux from fSedDM
-C     980717  Jos van Gils    Computation of VxSedTIM added
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C DMCFy   R*4 1 I  conversion factor for gX->dry matter subst y   [gDM/gX]
-C FLXy    R*4 1 I  sedimentation flux substance y                [gX/m3/d]
-C TDMSED  R*4 1 O  total dry matter sedimentation flux          [gDM/m2/d]
-C TIMSED  R*4 1 O  total inorganic mattter sedimentation flux   [gDM/m2/d]
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! DMCFy   R*4 1 I  conversion factor for gX->dry matter subst y   [gDM/gX]
+! FLXy    R*4 1 I  sedimentation flux substance y                [gX/m3/d]
+! TDMSED  R*4 1 O  total dry matter sedimentation flux          [gDM/m2/d]
+! TIMSED  R*4 1 O  total inorganic mattter sedimentation flux   [gDM/m2/d]
 
-C     Logical Units : -
-C     Modules called : -
-C     Name     Type   Library
+!     Logical Units : -
+!     Modules called : -
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT none
 
@@ -81,7 +63,7 @@ C     ------   -----  ------------
       INTEGER  IKMRKN, IKMRKV
 
       IP = IPOINT
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -89,7 +71,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
 
       FLX1    = PMSA(IP(1 ))
       FLX2    = PMSA(IP(2 ))
@@ -108,11 +90,11 @@ C
       DMPOC3  = PMSA(IP(15))
       DMPOC4  = PMSA(IP(16))
 
-C*******************************************************************************
-C**** Calculations connected to the sedimentation
-C***********************************************************************
+!*******************************************************************************
+!**** Calculations connected to the sedimentation
+!***********************************************************************
 
-C    Calculate som sedimentation of dry matter
+!    Calculate som sedimentation of dry matter
       TIMSED = FLX1 * DMCF1 +
      &         FLX2 * DMCF2 +
      &         FLX3 * DMCF3
@@ -134,11 +116,11 @@ C    Calculate som sedimentation of dry matter
       ENDIF
       IFLUX = IFLUX + NOFLUX
       IP    = IP    + INCREM 
-c
+!
  9000 CONTINUE
-c
+!
 
-c.....Exchangeloop over de horizontale richting
+!.....Exchangeloop over de horizontale richting
       IP = IPOINT
       DO 8000 IQ=1,NOQ1+NOQ2
          PMSA(IP(36)) = 0.0
@@ -146,7 +128,7 @@ c.....Exchangeloop over de horizontale richting
          IP = IP + INCREM
  8000 CONTINUE
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
 
          PMSA(IP(36)) = 0.0
@@ -154,14 +136,14 @@ c.....Exchangeloop over de verticale richting
          IVAN  = IEXPNT(1,IQ)
          INAAR = IEXPNT(2,IQ)
 
-C        Zoek eerste kenmerk van- en naar-segmenten
+!        Zoek eerste kenmerk van- en naar-segmenten
 
          IF ( IVAN .GT. 0 .AND. INAAR .GT. 0 ) THEN
          CALL DHKMRK(1,IKNMRK(IVAN ),IKMRKV)
          CALL DHKMRK(1,IKNMRK(INAAR),IKMRKN)
          IF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
 
-C            Water-water uitwisseling
+!            Water-water uitwisseling
 
              C1 = PMSA(IPOINT(17)+(IVAN-1)*INCREM(17))
              C2 = PMSA(IPOINT(18)+(IVAN-1)*INCREM(18))
@@ -192,5 +174,5 @@ C            Water-water uitwisseling
 
 
       RETURN
-C
+!
       END

@@ -34,52 +34,52 @@
 !>                         Horizontal fluxes are discretized upwind.\n
 !>                         Vertical fluxes are discretized central.\n
 
-C     CREATED            : june 1988 by L. Postma
-C
-C     MODIFIED           : feb 1997, by RJ Vos; like 6 but steady state solver
-C                          is GMRES and compact storage from option 16
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C                          LUN(23) , output, unformatted restart file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          DLWQPP, user postprocessing routine
-C                          DLWQO2, DELWAQ4 output routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ15, wasteload routine
-C                          DLWQ60, scales water quality
-C                          DLWQH1, set diagonal and deriv in deriv(1)
-C                          DLWQG3, fills the matrix (except diagonal)
-C                          DLWQ63, stores the results
-C                          DLWQ64, performs mass balance computation
-C                          DLWQ65, computes closure error
-C                          DLWQ66, makes masses
-C                          DLWQH3, check diagonal on zero's
-C                          SGMRES, fast solver
-C                          DHOPNF, opens files
-C                          MOVE  , copy an array
-C
-C      NOTE             :   " DELWAQ FASTSOLVERS 2 " (R.J.Vos, M.Borsboom and K.
-C       Newton-Krylov methods for solving linear and non-linear equations
-C       report T1596, January 1996, Deltares
-C                       :   NSYS = 1 always
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHARACTER  *      INPUT  filenames
-C
-C     Declaration of arguments
-C
+!     CREATED            : june 1988 by L. Postma
+!
+!     MODIFIED           : feb 1997, by RJ Vos; like 6 but steady state solver
+!                          is GMRES and compact storage from option 16
+!
+!     LOGICAL UNITS      : LUN(19) , output, monitoring file
+!                          LUN(20) , output, formatted dump file
+!                          LUN(21) , output, unformatted hist. file
+!                          LUN(22) , output, unformatted dump file
+!                          LUN(23) , output, unformatted restart file
+!
+!     SUBROUTINES CALLED : DLWQTR, user transport routine
+!                          DLWQWQ, user waterquality routine
+!                          DLWQPP, user postprocessing routine
+!                          DLWQO2, DELWAQ4 output routine
+!                          DLWQ13, system postpro-dump routine
+!                          DLWQ15, wasteload routine
+!                          DLWQ60, scales water quality
+!                          DLWQH1, set diagonal and deriv in deriv(1)
+!                          DLWQG3, fills the matrix (except diagonal)
+!                          DLWQ63, stores the results
+!                          DLWQ64, performs mass balance computation
+!                          DLWQ65, computes closure error
+!                          DLWQ66, makes masses
+!                          DLWQH3, check diagonal on zero's
+!                          SGMRES, fast solver
+!                          DHOPNF, opens files
+!                          MOVE  , copy an array
+!
+!      NOTE             :   " DELWAQ FASTSOLVERS 2 " (R.J.Vos, M.Borsboom and K.
+!       Newton-Krylov methods for solving linear and non-linear equations
+!       report T1596, January 1996, Deltares
+!                       :   NSYS = 1 always
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL       *      LOCAL  real      workspace array
+!     J       INTEGER    *      LOCAL  integer   workspace array
+!     C       CHARACTER  *      LOCAL  character workspace array
+!     LUN     INTEGER    *      INPUT  array with unit numbers
+!     LCHAR   CHARACTER  *      INPUT  filenames
+!
+!     Declaration of arguments
+!
       use grids
       use timers
       use waqmem
@@ -90,9 +90,9 @@ C
       implicit none
 
       include 'actions.inc'
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       REAL, DIMENSION(*)          :: A
       INTEGER, DIMENSION(*)       :: J
       INTEGER, DIMENSION(*)       :: LUN
@@ -104,29 +104,29 @@ C
 
 !$    include "omp_lib.h"
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       LOGICAL          IMFLAG , IDFLAG , IHFLAG
       LOGICAL          LDUMMY , LSTREC , LREWIN
       LOGICAL          LITREP , UPDATE
@@ -164,15 +164,15 @@ C
           return
       endif
 
-C
-C          some initialisation for fast solver
-C
-C       IOPTPC = preconditioner switch [0 = none, 1 = GS (L), 2 = GS (U),
-C       3 = SSOR], ITER = maximum number of iterations [ > 0],
-C       TOL = relative tolerance [10^-3, 10^-10], ISCALE = row scaling
-C       of system of equations [0 = no, 1 =yes], KLAT = number of
-C       layers in preconditioner [1,KMAX]
-C
+!
+!          some initialisation for fast solver
+!
+!       IOPTPC = preconditioner switch [0 = none, 1 = GS (L), 2 = GS (U),
+!       3 = SSOR], ITER = maximum number of iterations [ > 0],
+!       TOL = relative tolerance [10^-3, 10^-10], ISCALE = row scaling
+!       of system of equations [0 = no, 1 =yes], KLAT = number of
+!       layers in preconditioner [1,KMAX]
+!
       ithandl = 0
       if ( timon ) call timstrt ( "dlwqni", ithandl )
 
@@ -209,11 +209,11 @@ C
 
       iexseg = 1     !  There is nothing to mask. This array is meant for method 21
 
-C
-C======================= simulation loop ============================
-C
-C          make closure error correction
-C
+!
+!======================= simulation loop ============================
+!
+!          make closure error correction
+!
       if ( j(inrh2+1) .ge. 0 .and. ivflag .eq. 0 .and.
      &      idt       .gt. 0 .and. lstrec               ) then
          call dlwq41 ( lun     , itstrt+idt, itstrt  , a(iharm), a(ifarr),
@@ -339,9 +339,9 @@ C
      &                 gm_sol(1,ith), a(imas2), a(idmps), intopt  , j(isdmp))
 
    10 continue
-C
-C          mass balance
-C
+!
+!          mass balance
+!
       IAFLAG = 1
       CALL DLWQ64 ( A(IDISP), A(IDNEW), A(IAREA), A(IFLOW), A(ILENG),
      *              A(IVNEW), A(ICONC), A(IBOUN), J(IXPNT), NOSYS   ,
@@ -349,9 +349,9 @@ C
      *              NVDIM   , J(IDPNW), J(IVPNW), INTOPT  , A(IMAS2),
      *              ILFLAG  , A(IDMPQ), NDMPQ   , J(IQDMP))
       CALL DLWQ66 ( A(IDERV), A(IVOL) , A(ICONC), NOTOT   , NOSEG   )
-C
-C     Call OUTPUT system ( note that mass is in A(IDERV) )
-C
+!
+!     Call OUTPUT system ( note that mass is in A(IDERV) )
+!
       CALL DLWQO2 ( NOTOT   , NOSEG   , NOPA    , NOSFUN  , ITSTRT  ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
@@ -375,29 +375,29 @@ C
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
-C
-C
-C          printout of results
-C
-c     CALL DLWQ10 ( LUN(19) , J(IDUMP), A(IDERV), A(ICONC), A(IMAS2),
-c    *              ITSTRT  ,    1    , ITSTRT  , ITSTRT+1,    1    ,
-c    *              C(IDNAM), C(ISNAM), C(IMNAM), NODUMP  , NOTOT   ,
-c    *              NOSEG   , J(ILP)  , ISFLAG  , IAFLAG  , IMFLAG  ,
-c    *              A(ISMAS), INTOPT  , NDMPAR  , C(IDANA))
-C
-C          close files, except monitor file
-C
+!
+!
+!          printout of results
+!
+!     CALL DLWQ10 ( LUN(19) , J(IDUMP), A(IDERV), A(ICONC), A(IMAS2),
+!    *              ITSTRT  ,    1    , ITSTRT  , ITSTRT+1,    1    ,
+!    *              C(IDNAM), C(ISNAM), C(IMNAM), NODUMP  , NOTOT   ,
+!    *              NOSEG   , J(ILP)  , ISFLAG  , IAFLAG  , IMFLAG  ,
+!    *              A(ISMAS), INTOPT  , NDMPAR  , C(IDANA))
+!
+!          close files, except monitor file
+!
 
       call CloseHydroFiles( dlwqd%collcoll )
       call close_files( lun )
-C
-C          write restart file
-C
+!
+!          write restart file
+!
       CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITSTRT, C(IMNAM) ,
      *              C(ISNAM) , NOTOT , NOSEG    )
-C
-C          user output routine
-C
+!
+!          user output routine
+!
       CALL DLWQPP ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
      *              ITSTRT  , IMFLAG  , IDFLAG  , IHFLAG  , C(IMNAM),
      *              C(ISNAM), C(IDNAM), C(IWSID), J(IDUMP), NODUMP  ,
@@ -408,7 +408,7 @@ C
      *              NOQ2    , NOQ3    , A(IDISP), A(IVELO), A(ISMAS),
      *              IBFLAG  , NOCONS  , NOFUN   , C(ICNAM), C(IPNAM),
      *              C(IFNAM), C(ISFNA), C(IBNID))
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

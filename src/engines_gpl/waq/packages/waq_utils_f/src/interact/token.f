@@ -21,25 +21,25 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Fortran version of INTERACT function TOKEN.
-C
+!
+! Fortran version of INTERACT function TOKEN.
+!
       INTEGER FUNCTION TOKEN (SOURCE, LENGTH, MAXOUT, RESULT, NTOKEN)
       CHARACTER*(*) SOURCE, RESULT
       character*(1) BLANK
       CHARACTER*132 CTOKEN
       INTEGER LENGTH, MAXOUT, NTOKEN, GETS, STOSH, POS, RPOS
       DATA BLANK /' '/
-C
-C Perform initial checks. Initialize variables.
-C
+!
+! Perform initial checks. Initialize variables.
+!
       IF (LENGTH .LE. 0) GO TO 300
       IF (MAXOUT .LE. 0 .OR. MAXOUT .GT. 132) GO TO 400
       POS = 1
-C
-C Major program loop. Use GETS to obtain the next token. Store the
-C result at the appropriate positions of RESULT using function STOSH.
-C
+!
+! Major program loop. Use GETS to obtain the next token. Store the
+! result at the appropriate positions of RESULT using function STOSH.
+!
       DO 10 I = 1,NTOKEN
       IF (GETS (SOURCE, POS, LENGTH, MAXOUT, CTOKEN, LENOUT) .NE. 0)
      *    GO TO 20
@@ -49,18 +49,18 @@ C
 5     CONTINUE
       IRC = STOSH (CTOKEN, 1, LENOUT, RESULT, RPOS, LENRES)
 10    CONTINUE
-C
-C The number of tokens equals its maximum NTOKEN. If there are still
-C more tokens, exit with a non-zero return code.
-C
+!
+! The number of tokens equals its maximum NTOKEN. If there are still
+! more tokens, exit with a non-zero return code.
+!
       IF (GETS (SOURCE, POS, LENGTH, MAXOUT, CTOKEN, LENOUT) .EQ. 0)
      *    GO TO 100
 20    CONTINUE
-C
-C All tokens have been handeled. Perform checks for error conditions.
-C If all is ok, write blanks into the remaining part of RESULT, store
-C the length of the original string and set the return code to 0.
-C
+!
+! All tokens have been handeled. Perform checks for error conditions.
+! If all is ok, write blanks into the remaining part of RESULT, store
+! the length of the original string and set the return code to 0.
+!
       IF (I .EQ. 1 .AND. POS .EQ. LENGTH) GO TO 200
       NTOKEN = I - 1
       IF (NTOKEN .EQ. 0) GO TO 500

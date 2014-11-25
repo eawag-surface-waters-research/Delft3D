@@ -26,49 +26,49 @@
      +                   NOVAR , VARARR, VARIDX, VARTDA, VARDAG,
      +                   ARRKND, ARRPOI, ARRDM1, ARRDM2, VGRSET,
      +                   GRDNOS, GRDSEG, A     )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : may 1993 by Jan van Beek
-C
-C     FUNCTION            : Sets all variable from the LOCAL array used
-C                           for output actual for the base grid.
-C                           (ouput always uses the value from base grid)
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IOPOIN  INTEGER       *     INPUT   Pointers to arrays for vars
-C     NRVAR   INTEGER       1     INPUT   Number of output vars
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
-C     NOGRID  INTEGER       1     INPUT   Number of grids
-C     NOVAR   INTEGER       1     INPUT   Number of variables
-C     VARARR  INTEGER   NOVAR     INPUT   Variable array number
-C     VARIDX  INTEGER   NOVAR     INPUT   Variable index in array
-C     VARTDA  INTEGER   NOVAR     INPUT   Type of disaggregation
-C     VARDAG  INTEGER   NOVAR     INPUT   Variable disaggr. weight var.
-C     ARRKND  INTEGER   NOARR     INPUT   Kind of array
-C     ARRPOI  INTEGER   NOARR     INPUT   Array pointer in A
-C     ARRDM1  INTEGER   NOARR     INPUT   First dimension
-C     ARRDM2  INTEGER   NOARR     INPUT   Second dimension
-C     VGRSET  INTEGER   NOVAR,*   IN/OUT  Actual indication
-C     GRDNOS  INTEGER   NOGRID    INPUT   Number of segments in grid
-C     GRDSEG  INTEGER   NOGRID    INPUT   Segment pointering
-C     A       REAL      *         IN/OUT  Real array work space
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : may 1993 by Jan van Beek
+!
+!     FUNCTION            : Sets all variable from the LOCAL array used
+!                           for output actual for the base grid.
+!                           (ouput always uses the value from base grid)
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IOPOIN  INTEGER       *     INPUT   Pointers to arrays for vars
+!     NRVAR   INTEGER       1     INPUT   Number of output vars
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
+!     NOGRID  INTEGER       1     INPUT   Number of grids
+!     NOVAR   INTEGER       1     INPUT   Number of variables
+!     VARARR  INTEGER   NOVAR     INPUT   Variable array number
+!     VARIDX  INTEGER   NOVAR     INPUT   Variable index in array
+!     VARTDA  INTEGER   NOVAR     INPUT   Type of disaggregation
+!     VARDAG  INTEGER   NOVAR     INPUT   Variable disaggr. weight var.
+!     ARRKND  INTEGER   NOARR     INPUT   Kind of array
+!     ARRPOI  INTEGER   NOARR     INPUT   Array pointer in A
+!     ARRDM1  INTEGER   NOARR     INPUT   First dimension
+!     ARRDM2  INTEGER   NOARR     INPUT   Second dimension
+!     VGRSET  INTEGER   NOVAR,*   IN/OUT  Actual indication
+!     GRDNOS  INTEGER   NOGRID    INPUT   Number of segments in grid
+!     GRDSEG  INTEGER   NOGRID    INPUT   Segment pointering
+!     A       REAL      *         IN/OUT  Real array work space
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
@@ -80,21 +80,21 @@ C
      +           ARRDM2(*)     , VGRSET(NOVAR,*),
      +           GRDNOS(NOGRID), GRDSEG(NOSEG,NOGRID)
       REAL       A(*)
-C
-C     Local
-C
+!
+!     Local
+!
       PARAMETER ( NOPRED= 6 )
       INTEGER     IOPA  , IOFUNC, IOSFUN, IOCONC, IOLOC ,
      +            IODEF , IP
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "actloc", ithandl )
-C
-C     If no locals get out of here
-C
+!
+!     If no locals get out of here
+!
       IF ( NOLOC .EQ. 0 ) RETURN
-C
-C     Pointer offsets
-C
+!
+!     Pointer offsets
+!
       IOCONS = NOPRED + 1
       IOPA   = IOCONS + NOCONS
       IOFUNC = IOPA   + NOPA
@@ -102,7 +102,7 @@ C
       IOCONC = IOSFUN + NOSFUN
       IOLOC  = IOCONC + NOTOT
       IODEF  = IOLOC  + NOLOC
-C
+!
       IA_LOC = 33
       IX_HLP = 1
       IA_HLP = 33
@@ -111,38 +111,38 @@ C
       IP_HLP = ARRPOI(IA_HLP)
       ID1HLP = ARRDM1(IA_HLP)
       ID2HLP = ARRDM2(IA_HLP)
-C
+!
       DO I = 1 , NRVAR
          IP = IOPOIN(I)
-C
-C        Is it a local value
-C
+!
+!        Is it a local value
+!
          IF ( IP .LT. IODEF .AND. IP .GE. IOLOC ) THEN
-C
-C           Get variable number
-C
+!
+!           Get variable number
+!
             ILOC = IP-IOLOC+1
             CALL DHGVAR( IA_LOC, ILOC  , IVAR  )
-C
-C           Check is variable is active for base grid
-C
+!
+!           Check is variable is active for base grid
+!
             IF ( VGRSET(IVAR,1) .EQ. 0 ) THEN
-C
+!
                IARR   = IA_LOC
                IV_IDX = VARIDX(IVAR)
                IARKND = ARRKND(IARR)
                IP_ARR = ARRPOI(IARR)
                IDIM1  = ARRDM1(IARR)
                IDIM2  = ARRDM2(IARR)
-C
-C              Set variable
-C
+!
+!              Set variable
+!
                DO IGRID = 2 , NOGRID
                   IF ( VGRSET(IVAR,IGRID) .EQ. 1 ) THEN
                      NOSEG2 = GRDNOS(IGRID)
-C
-C                    Determine characteristics of variable
-C
+!
+!                    Determine characteristics of variable
+!
                      CALL DHGPOI( IVAR  , IARR  ,
      +                            IARKND, IV_IDX,
      +                            IDIM1 , IDIM2 ,
@@ -155,19 +155,19 @@ C
      +                            IP_ARR, 1     ,
      +                            ISYSO , NOTOTO,
      +                            IP_ARO)
-C
-C                    Determine characteristics of WEIGHT variable
-C                    ( Don't mind if this one is actuel ? )
-C
+!
+!                    Determine characteristics of WEIGHT variable
+!                    ( Don't mind if this one is actuel ? )
+!
                      IDATYP = VARTDA(IVAR)
                      IF ( IDATYP .EQ. 2 ) THEN
                         IV_DA  = VARDAG(IVAR)
                         IA_DA  = VARARR(IV_DA)
                         IK_DA  = ARRKND(IA_DA)
                         IF ( IK_DA .EQ. 1 ) THEN
-C
-C                          Not variable in space use help var
-C
+!
+!                          Not variable in space use help var
+!
                            IDATYP = 3
                            IV_DA  = IV_HLP
                            IA_DA  = VARARR(IV_DA)
@@ -210,19 +210,19 @@ C
      +                               ISYSH , NOTOTH,
      +                               IP_ARH)
                      ELSE
-C
-C                       Weight and help array's dummy's
-C                       so set to the variable itself
-C
+!
+!                       Weight and help array's dummy's
+!                       so set to the variable itself
+!
                         ISYSW  = ISYSO
                         ISYSH  = ISYSI
                         NOTOTW = NOTOTO
                         NOTOTH = NOTOTI
                         IP_ARW = IP_ARO
                         IP_ARH = IP_ARI
-C
+!
                      ENDIF
-C
+!
                      ISWCUM = 0
                      CALL DHDAGG( NOSEG          , NOSEG2   ,
      +                            NOTOTI         , NOTOTW   ,
@@ -236,13 +236,13 @@ C
                      VGRSET(IVAR,1) = 1
                   ENDIF
                ENDDO
-C
+!
             ENDIF
-C
+!
          ENDIF
-C
+!
       ENDDO
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -21,32 +21,32 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       7 Nov 1992
-C    Time:       16:17
-C    Program:    CJTEMP.FOR
-C    Version:    1.1
-C    Programmer: Nicolaas M de Rooij
-C    Previous version(s):
-C    1.0 -- 7 Nov 1992 -- 16:12
-C    0.0 -- 23 Oct 1992 --  1:09
+!    Date:       7 Nov 1992
+!    Time:       16:17
+!    Program:    CJTEMP.FOR
+!    Version:    1.1
+!    Programmer: Nicolaas M de Rooij
+!    Previous version(s):
+!    1.0 -- 7 Nov 1992 -- 16:12
+!    0.0 -- 23 Oct 1992 --  1:09
       subroutine cjtemp
-c        cjtemp computes a and b for debye huckel equation, for a given
-c        temperature.
-c        it recomputes c-value with delta(h),and also gives a new rt
-c        value
+!        cjtemp computes a and b for debye huckel equation, for a given
+!        temperature.
+!        it recomputes c-value with delta(h),and also gives a new rt
+!        value
       include  'char1.inc'
       data rv / .0239/
-c convert r in 1.98719 to 83.147 cm3 bar /K. Mol
+! convert r in 1.98719 to 83.147 cm3 bar /K. Mol
       tt = temp+273.16
       cc = (298.16-tt)/298.16
-c divide by RT removed 5-11-92 NMdR
+! divide by RT removed 5-11-92 NMdR
       do 10 i = 1, ntot
          c1(i) = c2(i) + delth(i)*cc
          c(i) = c1(i)
-c         c2 contains original value
-c         c1 contains c-value corrected for temperature and pressure
-c        c contains c-value used in computations, it will be recom-
-c         puted in cgamma if activity corrections are carried out.
+!         c2 contains original value
+!         c1 contains c-value corrected for temperature and pressure
+!        c contains c-value used in computations, it will be recom-
+!         puted in cgamma if activity corrections are carried out.
    10 continue
       if(.not.bactiv) go to 19
       s1 = 374.11 - temp
@@ -61,8 +61,8 @@ c         puted in cgamma if activity corrections are carried out.
    30 cc = dsqrt(cc*tt)
       adt = 1824600.0*s3/cc**3
       adt = adt*dlog(1.0d01)
-c        multipliing adt with dlog(1.0d01) gives possibility to
-c        compute the natural log of gamma in subroutine cgamma
+!        multipliing adt with dlog(1.0d01) gives possibility to
+!        compute the natural log of gamma in subroutine cgamma
       bdt = 50.29*s3/cc
       if (pf.gt.0) write (not,99998) adt, bdt, temp, tt
 19    do 50 i=1,ntot

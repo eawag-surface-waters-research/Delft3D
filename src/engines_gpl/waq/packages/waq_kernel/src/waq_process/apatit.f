@@ -25,49 +25,36 @@
      +                   NOFLUX, IEXPNT, IKNMRK, NOQ1  , NOQ2  ,
      +                   NOQ3  , NOQ4  )
 
-C***********************************************************************
-C
-C     Project : GEM  (Z3543)
-C     Author  : Johannes Smits
-C     Date    : 031126             Version : 0.0
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     031126  Johannes Smits  first version, based on VIVIAN.FOR
-C
-C***********************************************************************
-C
-C     Description of the module :
-C     precipitation and dissolution of an apatite-like P-mineral
-C
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C CPHD    R*4 1 I     concentration dissolved phosphate            [gP/m3]
-C CPHDE   R*4 1 I     saturation concentration dissolved phosphate [gP/m3]
-C CPHPR   R*4 1 I     concentration apatite                        [gP/m3]
-C DELT    R*4 1 I     timestep                                         [d]
-C FPRC    R*4 1 O     precipitation flux                         [gP/m3/d]
-C FRR     R*4 1 I     ratio of apatite and vivianite preciptation rates[-]
-C FSOL    R*4 1 O     dissolution flux                           [gP/m3/d]
-C KPRC    R*4 1 I     precipitation rate                             [1/d]
-C KSOL    R*4 1 I     dissolution rate                           [m3/gP/d]
-C POROS   R*4 1 I     porosity                                         [-]
-C TCPRC   R*4 1 I     temperature coefficient of precipitation         [-]
-C TCSOL   R*4 1 I     temperature coefficient of dissolution           [-]
-C TEMP    R*4 1 I     temperature                                     [oC]
-C TMPPRC  R*4 1 -     temperature function for precipitation           [-]
-C TMPSOL  R*4 1 -     temperature function for dissolution             [-]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!     precipitation and dissolution of an apatite-like P-mineral
+!
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! CPHD    R*4 1 I     concentration dissolved phosphate            [gP/m3]
+! CPHDE   R*4 1 I     saturation concentration dissolved phosphate [gP/m3]
+! CPHPR   R*4 1 I     concentration apatite                        [gP/m3]
+! DELT    R*4 1 I     timestep                                         [d]
+! FPRC    R*4 1 O     precipitation flux                         [gP/m3/d]
+! FRR     R*4 1 I     ratio of apatite and vivianite preciptation rates[-]
+! FSOL    R*4 1 O     dissolution flux                           [gP/m3/d]
+! KPRC    R*4 1 I     precipitation rate                             [1/d]
+! KSOL    R*4 1 I     dissolution rate                           [m3/gP/d]
+! POROS   R*4 1 I     porosity                                         [-]
+! TCPRC   R*4 1 I     temperature coefficient of precipitation         [-]
+! TCSOL   R*4 1 I     temperature coefficient of dissolution           [-]
+! TEMP    R*4 1 I     temperature                                     [oC]
+! TMPPRC  R*4 1 -     temperature function for precipitation           [-]
+! TMPSOL  R*4 1 -     temperature function for dissolution             [-]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT REAL (A-H,J-Z)
 
       INTEGER  NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  ,  NOQ4
@@ -91,7 +78,7 @@ C
       IP9  = IPOINT( 9)
       IP10 = IPOINT(10)
       IP11 = IPOINT(11)
-C
+!
       IFLUX = 0
 
       DO 9000 ISEG = 1 , NOSEG
@@ -111,28 +98,28 @@ C
          TEMP    = PMSA(IP9)
          POROS   = PMSA(IP10)
          DELT    = PMSA(IP11)
-C
-C     Calculation of the precipitation or dissolution flux
-C
+!
+!     Calculation of the precipitation or dissolution flux
+!
          FPRC = 0.0
          FSOL = 0.0
          TMPPRC = TCPRC**(TEMP - 20.0)
          TMPSOL = TCSOL**(TEMP - 20.0)
-C
+!
          FPRC = FRR * KPRC * TMPPRC * ( CPHD / POROS - CPHDE ) * POROS
          FSOL = KSOL * TMPSOL * CPHPR * ( CPHDE - CPHD / POROS )
-C
+!
          IF ( FPRC .LT. 0.0) FPRC = 0.0
          IF ( FSOL .LT. 0.0) FSOL = 0.0
          IF ( FSOL*DELT .GE. CPHPR) FSOL = 0.5 * CPHPR / DELT
-C
-C     Output of module
-C
+!
+!     Output of module
+!
          FL(1+IFLUX) = FPRC
          FL(2+IFLUX) = FSOL
-C
-C     End active cells block
-C
+!
+!     End active cells block
+!
       ENDIF
 
       IFLUX = IFLUX + NOFLUX
@@ -147,9 +134,9 @@ C
       IP9   = IP9   + INCREM (  9 )
       IP10  = IP10  + INCREM ( 10 )
       IP11  = IP11  + INCREM ( 11 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

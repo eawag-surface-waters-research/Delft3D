@@ -27,36 +27,21 @@
 !>\file
 !>       Resuspension of nutrients in organic carbon matrix
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta study)
-C     980428  Jos van Gils    Use f-flux in stead of d-flux
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C RFLS1-2 R*4 1 I  sedimention flux organic from S1 or S2        [gX/m2/d]
-C CNS1-2  R*4 1 I  C-N ratio substance in S1-S2                    [gC/gN]
-C CPS1-2  R*4 1 I  C-P ratio substance in S1-S2                    [gC/gP]
-C CSS1-2  R*4 1 I  C-S ratio substance in S1-S2                    [gC/gS]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! RFLS1-2 R*4 1 I  sedimention flux organic from S1 or S2        [gX/m2/d]
+! CNS1-2  R*4 1 I  C-N ratio substance in S1-S2                    [gC/gN]
+! CPS1-2  R*4 1 I  C-P ratio substance in S1-S2                    [gC/gP]
+! CSS1-2  R*4 1 I  C-S ratio substance in S1-S2                    [gC/gS]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -69,7 +54,7 @@ C     ------   -----  ------------
       IP3  = IPOINT( 3)
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -77,7 +62,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
 
       RFLS1  = PMSA(IP1 )
       CNS1   = PMSA(IP2 )
@@ -90,13 +75,13 @@ C
           RFLS1 = 0.0
       ENDIF
 
-C*******************************************************************************
-C**** Processes connected to the SEDIMENTAION and RESUSENSION
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the SEDIMENTAION and RESUSENSION
+!***********************************************************************
 
-C     RESUSPENSION
+!     RESUSPENSION
 
-C
+!
          FL( 1 + IFLUX ) = RFLS1 * CNS1
 
          FL( 2 + IFLUX ) = RFLS1 * CPS1
@@ -105,17 +90,17 @@ C
 
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
       IP3   = IP3   + INCREM (  3 )
       IP4   = IP4   + INCREM (  4 )
       IP5   = IP5   + INCREM (  5 )
-c
+!
  9000 CONTINUE
-c
+!
 
       RETURN
-C
+!
       END

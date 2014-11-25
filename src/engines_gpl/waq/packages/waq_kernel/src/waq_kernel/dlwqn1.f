@@ -197,13 +197,13 @@
           CALL MOVE   ( A(IVOL ), A(IVOL2) , NOSSS   )
 
       endif
-C
-C     Save/restore the local persistent variables,
-C     if the computation is split up in steps
-C
-C     Note: the handle to the timer (ithandl) needs to be
-C     properly initialised and restored
-C
+!
+!     Save/restore the local persistent variables,
+!     if the computation is split up in steps
+!
+!     Note: the handle to the timer (ithandl) needs to be
+!     properly initialised and restored
+!
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqn1", ithandl )
           INCLUDE 'dlwqdata_save.inc'

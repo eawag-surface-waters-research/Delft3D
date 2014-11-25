@@ -22,36 +22,36 @@
 !!  rights reserved.
 
       SUBROUTINE DHSCAL ( ARRAY1, NOVAL , RSCALE )
-C
-C     Deltares           SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     Created : June 1994 by Jan van Beek
-C
-C     Function            : Scales a real array.
-C
-C     Parameters          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ARRAY1  REAL     *          IN/OUT  Array to be scaled
-C     NOVAL   INTEGER  1          INPUT   Number of value's to be scaled
-C     RSCALE  REAL     1          INPUT   Scale factor
-C
-C     Declaration of arguments
-C
+!
+!     Deltares           SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     Created : June 1994 by Jan van Beek
+!
+!     Function            : Scales a real array.
+!
+!     Parameters          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ARRAY1  REAL     *          IN/OUT  Array to be scaled
+!     NOVAL   INTEGER  1          INPUT   Number of value's to be scaled
+!     RSCALE  REAL     1          INPUT   Scale factor
+!
+!     Declaration of arguments
+!
       INTEGER    NOVAL
       REAL       RSCALE
       REAL       ARRAY1(*)
-C
-C     Local declaration
-C
-C     IVAL    INTEGER  1          LOCAL   Loop counter on NOVAL
-C
+!
+!     Local declaration
+!
+!     IVAL    INTEGER  1          LOCAL   Loop counter on NOVAL
+!
       INTEGER    IVAL
-C
+!
       DO 100 IVAL = 1 , NOVAL
          ARRAY1(IVAL) = ARRAY1(IVAL) * RSCALE
   100 CONTINUE
-C
+!
       RETURN
       END

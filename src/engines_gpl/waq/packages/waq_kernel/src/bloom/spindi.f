@@ -21,23 +21,23 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *         SUBROUTINE SPINDI TO DETERMINE TYPE INDICES               *
-C  *********************************************************************
-C
-C
+!
+!  *********************************************************************
+!  *         SUBROUTINE SPINDI TO DETERMINE TYPE INDICES               *
+!  *********************************************************************
+!
+!
       SUBROUTINE SPINDI(LSPIND)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'ioblck.inc'
-C
-C  Determine the number of the first and last type of each species.
-C  Check whether the number of different names agrees with the total
-C  number of species which has previously been read by the program.
-C
+!
+!  Determine the number of the first and last type of each species.
+!  Check whether the number of different names agrees with the total
+!  number of species which has previously been read by the program.
+!
       LSPIND = 0
       NGR = 0
       J = 0
@@ -52,9 +52,9 @@ C
       GRNAME (NGR) = SPNAME (I)
       IF (J .EQ. NUSPEC) GO TO 20
       GO TO 5
-C
-C  Check the number of species.
-C
+!
+!  Check the number of species.
+!
   20  IF (NGR .EQ. NUECOG) RETURN
       LSPIND = 1
       WRITE (IOU(10),30) NGR,NUECOG

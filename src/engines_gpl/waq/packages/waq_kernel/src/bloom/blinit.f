@@ -21,69 +21,69 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       7 Januari 1994
-C    Program:    BLINIT.FOR
-C    Version:    0.1
-C    Programmer: Jos van Gils
-C
-C    Initialization
-C
-C    Called by: BLOOMC
-C    Calls    : CVRBLM, HDRBLM
+!    Date:       7 Januari 1994
+!    Program:    BLINIT.FOR
+!    Version:    0.1
+!    Programmer: Jos van Gils
+!
+!    Initialization
+!
+!    Called by: BLOOMC
+!    Calls    : CVRBLM, HDRBLM
 
       SUBROUTINE BLINIT (LPRINO,LDUMPO)
-C
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     LPRINO  I     1        O    Saves original value of LPRINT
-C     LDUMPO  I     1        O    Saves original value of IDUMP
+!
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     LPRINO  I     1        O    Saves original value of LPRINT
+!     LDUMPO  I     1        O    Saves original value of IDUMP
 
       INTEGER         LPRINO, LDUMPO
 
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     NUSPEC  I     1        I    phyt2     Number of types
-C     NUNUCO  I     1        I    phyt2     Number of nutrients
-C     NUFILI  I     1        I    phyt2     First position of EKX in A
-C     NUABCO  I     1        I    phyt2     Last position of EKX in A
-C     A       R*8   IA,MT    O    matri     System matrix Bloom
-C     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
-C     EKX     R*8   MT       I    phyt1     Specific extinctions, converted
-C                                           to be (1/m/(gDW/m3))
-C     LPRINT  I     1        I    sumout    Print flag
-C     IDUMP   I     1        I    sumout    Print flag
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     NUSPEC  I     1        I    phyt2     Number of types
+!     NUNUCO  I     1        I    phyt2     Number of nutrients
+!     NUFILI  I     1        I    phyt2     First position of EKX in A
+!     NUABCO  I     1        I    phyt2     Last position of EKX in A
+!     A       R*8   IA,MT    O    matri     System matrix Bloom
+!     AA      R*8   MN,MT    I    phyt1     Stoichiometry matrix (g/gDW)
+!     EKX     R*8   MT       I    phyt1     Specific extinctions, converted
+!                                           to be (1/m/(gDW/m3))
+!     LPRINT  I     1        I    sumout    Print flag
+!     IDUMP   I     1        I    sumout    Print flag
 
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'sumout.inc'
-C
-C     Local variables
-C
-C     Name    Type  Length   I/O  Description
-C
-C     J       I     1
-C     I       I     1
+!
+!     Local variables
+!
+!     Name    Type  Length   I/O  Description
+!
+!     J       I     1
+!     I       I     1
 
       INTEGER         J    , I
 
-C     Convert BLOOM II specific units to DLWQWQ specific units
-C     (The module still converts SPEXDE, although this variable
-C     is not used anymore)
+!     Convert BLOOM II specific units to DLWQWQ specific units
+!     (The module still converts SPEXDE, although this variable
+!     is not used anymore)
 
       CALL CVRBLM
-C
-C Set A-matrix. Copy nutrient rows from AA (stochiometry matrix).
-C Copy the extinction rows.
-C Note: in steady state version of BLOOM the A matrix is updated each
-C call of subroutine SETABC. This is not necessary now; the section
-C in SETABC is skipped in the the dynamic version of the model.
-C
+!
+! Set A-matrix. Copy nutrient rows from AA (stochiometry matrix).
+! Copy the extinction rows.
+! Note: in steady state version of BLOOM the A matrix is updated each
+! call of subroutine SETABC. This is not necessary now; the section
+! in SETABC is skipped in the the dynamic version of the model.
+!
       DO 80 J = 1,NUSPEC
          DO 75 I = 1,NUNUCO
             A(I,J) = AA(I,J)
@@ -94,19 +94,19 @@ C
             A(I,J) = EKX(J)
    85    CONTINUE
    90 CONTINUE
-C
-C  Call subroutine HDRBLM to write the headers for a number of output
-C  files.
-C
+!
+!  Call subroutine HDRBLM to write the headers for a number of output
+!  files.
+!
       IF (LPRINT .GT. 1) CALL HDRBLM
 
-C  Save originals of print flags for later use in BLOUTC
+!  Save originals of print flags for later use in BLOUTC
 
       LPRINO = LPRINT
       LDUMPO = IDUMP
-C
-C  Exit
-C
+!
+!  Exit
+!
       RETURN
       END
 

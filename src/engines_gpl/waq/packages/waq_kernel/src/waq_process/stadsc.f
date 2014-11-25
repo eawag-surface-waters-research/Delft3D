@@ -27,51 +27,38 @@
 !>\file
 !>       Mean, min, max, stdev of a variable during a certain time
 
-C***********************************************************************
-C
-C     Project : Delft3D-WAQ
-C     Author  : Arjen Markus
-C     Date    : 8-1-2002           Version : 0.1
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C      8-1-02 Arjen Markus    Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                  Units
-C ----    --- -  -    -------------------                          -----
-C
-C CONC           I    Concentration of the substance            1
-C TSTART         I    Start of statistical period               2
-C TSTOP          I    Stop of statistical period                3
-C TIME           I    Time in calculation                       4
-C DELT           I    Timestep                                  5
-C
-C TCOUNT         O    Count of times (must be imported!)        6
-C CMAX           O    Maximum value over the given period       7
-C CMIN           O    Minimum value over the given period       8
-C CMEAN          O    Mean value over the given period          9
-C CSTDEV         O    Standard deviation over the given period 10
-C
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                  Units
+! ----    --- -  -    -------------------                          -----
+!
+! CONC           I    Concentration of the substance            1
+! TSTART         I    Start of statistical period               2
+! TSTOP          I    Stop of statistical period                3
+! TIME           I    Time in calculation                       4
+! DELT           I    Timestep                                  5
+!
+! TCOUNT         O    Count of times (must be imported!)        6
+! CMAX           O    Maximum value over the given period       7
+! CMIN           O    Minimum value over the given period       8
+! CMEAN          O    Mean value over the given period          9
+! CSTDEV         O    Standard deviation over the given period 10
+!
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
      +         IP6   , IP7   , IP8   , IP9   , IP10  ,
      +         IN1   , IN2   , IN3   , IN4   , IN5   ,
@@ -103,33 +90,33 @@ C
       IN9 = INCREM(9)
       IN10= INCREM(10)
 
-C
-C     There are five cases, defined by the time:
-C                        TIME <  TSTART-0.5*DELT : do nothing
-C     TSTART-0.5*DELT <= TIME <  TSTART+0.5*DELT : initialise
-C     TSTART          <  TIME <  TSTOP           : accumulate
-C     TSTOP           <= TIME <  TSTOP+0.5*DELT  : finalise
-C     TSTOP+0.5*DELT  <  TIME                    : do nothing
-C
-C     (Use a safe margin)
-C
+!
+!     There are five cases, defined by the time:
+!                        TIME <  TSTART-0.5*DELT : do nothing
+!     TSTART-0.5*DELT <= TIME <  TSTART+0.5*DELT : initialise
+!     TSTART          <  TIME <  TSTOP           : accumulate
+!     TSTOP           <= TIME <  TSTOP+0.5*DELT  : finalise
+!     TSTOP+0.5*DELT  <  TIME                    : do nothing
+!
+!     (Use a safe margin)
+!
       TSTART = PMSA(IP2)
       TSTOP  = PMSA(IP3)
       TIME   = PMSA(IP4)
       DELT   = PMSA(IP5)
       TCOUNT = PMSA(IP6)
 
-C
-C      Start and stop criteria are somewhat involved. Be careful
-C      to avoid spurious calculations (initial and final) when
-C      none is expected.
-C      Notes:
-C      - The initial value for TCOUNT must be 0.0
-C      - Time is expected to be the model time (same time frame
-C        as the start and stop times of course)
-C      - Check that the NEXT timestep will not exceed the stop time,
-C        otherwise this is the last one
-C
+!
+!      Start and stop criteria are somewhat involved. Be careful
+!      to avoid spurious calculations (initial and final) when
+!      none is expected.
+!      Notes:
+!      - The initial value for TCOUNT must be 0.0
+!      - Time is expected to be the model time (same time frame
+!        as the start and stop times of course)
+!      - Check that the NEXT timestep will not exceed the stop time,
+!        otherwise this is the last one
+!
       ITYPE  = 0
       IF ( TIME .GE. TSTART-0.001*DELT ) THEN
          ITYPE = 2
@@ -148,10 +135,10 @@ C
       DO 9000 ISEG=1,NOSEG
 
          IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C        The first time is special. Initialise the arrays.
-C        The last time requires additional processing.
-C
+!
+!        The first time is special. Initialise the arrays.
+!        The last time requires additional processing.
+!
          IF ( ITYPE .EQ. 1 ) THEN
             PMSA(IP7)  = PMSA(IP1)
             PMSA(IP8)  = PMSA(IP1)
@@ -167,14 +154,14 @@ C
          IF ( ITYPE .EQ. 3 ) THEN
             IF ( TCOUNT .GT. 0.0 ) PMSA(IP9)  = PMSA(IP9) / TCOUNT
             IF ( TCOUNT .GT. 1.0 ) THEN
-C
-C              If we do not have the standard deviation or the mean,
-C              then the calculation may fail (horribly). We detect
-C              whether the mean and the standard deviation are there
-C              by examining the increments.
-C              Be tolerant to possible negative values, there may be
-C              some roundoff errors!
-C
+!
+!              If we do not have the standard deviation or the mean,
+!              then the calculation may fail (horribly). We detect
+!              whether the mean and the standard deviation are there
+!              by examining the increments.
+!              Be tolerant to possible negative values, there may be
+!              some roundoff errors!
+!
                IF ( IN9 .NE. 0 .AND. IN10 .NE. 0 ) THEN
                   CDIFF = (PMSA(IP10) - TCOUNT*PMSA(IP9)**2)
                   IF ( CDIFF .GE. -1.0E-5*PMSA(IP10) ) THEN
@@ -198,10 +185,10 @@ C
 
  9000 CONTINUE
 
-C
-C     Be sure to turn off the statistical procedure, once the end has been
-C     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
-C
+!
+!     Be sure to turn off the statistical procedure, once the end has been
+!     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
+!
       IF ( ITYPE .EQ. 3 ) THEN
          PMSA(IP6) = -TCOUNT
       ENDIF

@@ -34,9 +34,9 @@
       type(procespropcoll)  :: procesdef           ! all processes
       type(ProcesProp)      :: procha              ! charon process definition
 
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       integer                   :: nproc           ! number of processes
       integer                   :: iproc           ! loop counter processes
       type(procesprop), pointer :: proc            ! process description

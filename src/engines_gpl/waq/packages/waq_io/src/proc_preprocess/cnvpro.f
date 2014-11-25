@@ -33,84 +33,84 @@
      +                    ISWITR, NSVICH   , NSVOCH, NFLCH , NSTCH ,
      +                            NOINFO   , NOWARN, IERROR, VAIORD,
      +                    VXIORD, VAOORD   , VXOORD)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: nov -1992 by Jan van Beek
-C
-C     FUNCTION            : convert procesdef structure to old structure
-C
-C     LOGICAL UNITNUMBERS : LUREP   - report file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUREP   INTEGER       1     INPUT   Report file
-C     ProcesDef                   INPUT   the proces definition
-C     NBPR    INTEGER       1     OUTPUT  Number of processes in def file
-C     BPRNAM  CHARACTER*(*) *     OUTPUT  Name of processes
-C     BPRTXT  CHARACTER*(*) *     OUTPUT  Text of processes
-C     MODNAM  CHARACTER*(*) *     OUTPUT  Name of module of processes
-C     NSVAI   INTEGER       *     OUTPUT  No of input vars per proces
-C     INS_ID  CHARACTER*(*) *     OUTPUT  Name of input variable
-C     INS_NM  CHARACTER*(*) *     OUTPUT  Text of input variable
-C     INS_VA  REAL          *,*   OUTPUT  Default values input variables
-C     NSVAO   INTEGER       *     OUTPUT  No of output vars per proces
-C     OUS_ID  CHARACTER*(*) *     OUTPUT  Name of input variable
-C     OUS_NM  CHARACTER*(*) *     OUTPUT  Text of output variable
-C     NBFL    INTEGER       *     OUTPUT  No of basic fluxes per proces
-C     FLU_ID  CHARACTER*(*) *     OUTPUT  Name of basix fluxe
-C     FLU_NM  CHARACTER*(*) *     OUTPUT  Text of basix fluxe
-C     NBST    INTEGER       *     OUTPUT  No of basic stochis per proces
-C     STO_SU  CHARACTER*(*) *,*   OUTPUT  Name of substance in stochi
-C     STO_FL  CHARACTER*(*) *,*   OUTPUT  Name of flux in stochi
-C     STO_SC  REAL          *,*   OUTPUT  Stochimetric factor
-C     IPVAI   INTEGER       *     OUTPUT  Pointers for arrays on VAI
-C     IPVAO   INTEGER       *     OUTPUT  Pointers for arrays on VAO
-C     IPBFL   INTEGER       *     OUTPUT  Pointers for arrays on BFL
-C     IPBST   INTEGER       *     OUTPUT  Pointers for arrays on BST
-C     NSVXI   INTEGER       *     OUTPUT  No of input vars X per proces
-C     IPVXI   INTEGER       *     OUTPUT  Pointers for arrays on VXI
-C     INE_ID  CHARACTER*(*) *     OUTPUT  Name of input variable X
-C     INE_NM  CHARACTER*(*) *     OUTPUT  Text of input variable X
-C     INE_VA  REAL          *     OUTPUT  Default values input X variables
-C     NSVXO   INTEGER       *     OUTPUT  No of output vars X per proces
-C     IPVXO   INTEGER       *     OUTPUT  Pointers for arrays on VXO
-C     OUE_ID  CHARACTER*(*) *     OUTPUT  Name of output variable X
-C     OUE_NM  CHARACTER*(*) *     OUTPUT  Text of output variable X
-C     NSDST   INTEGER       *     OUTPUT  No of dispersion rules p.proces
-C     IPDST   INTEGER       *     OUTPUT  Pointers for arrays on DST
-C     DIS_SU  CHARACTER*(*) *     OUTPUT  Name of substance in disp rule
-C     DIS_IT  CHARACTER*(*) *     OUTPUT  Name of output item in disp rule
-C     VEL_SC  REAL          *     OUTPUT  factor in dispersion rule
-C     NSVST   INTEGER       *     OUTPUT  No of velocity rules p.proces
-C     IPVST   INTEGER       *     OUTPUT  Pointers for arrays on VST
-C     VEL_SU  CHARACTER*(*) *     OUTPUT  Name of substance in velo rule
-C     VEL_IT  CHARACTER*(*) *     OUTPUT  Name of output item in velo rule
-C     VEL_SC  REAL          *     OUTPUT  factor in velocity rule
-C     ISWITR  INTEGER       *     OUTPUT  Target dimension indicator
-C     NSVICH  INTEGER       1     INPUT   No of extra input variables for charon
-C     NSVOCH  INTEGER       1     INPUT   No of extra output variables for charon
-C     NFLCH   INTEGER       1     INPUT   No of fluxes for charon
-C     NSTCH   INTEGER       1     INPUT   No of stochiometric terms for charon
-C     NOINFO  INTEGER       1     IN/OUT  Cummulative information count
-C     NOWARN  INTEGER       1     IN/OUT  Cummulative warning count
-C     IERROR  INTEGER       1     OUTPUT  Error indicatior
-C
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: nov -1992 by Jan van Beek
+!
+!     FUNCTION            : convert procesdef structure to old structure
+!
+!     LOGICAL UNITNUMBERS : LUREP   - report file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUREP   INTEGER       1     INPUT   Report file
+!     ProcesDef                   INPUT   the proces definition
+!     NBPR    INTEGER       1     OUTPUT  Number of processes in def file
+!     BPRNAM  CHARACTER*(*) *     OUTPUT  Name of processes
+!     BPRTXT  CHARACTER*(*) *     OUTPUT  Text of processes
+!     MODNAM  CHARACTER*(*) *     OUTPUT  Name of module of processes
+!     NSVAI   INTEGER       *     OUTPUT  No of input vars per proces
+!     INS_ID  CHARACTER*(*) *     OUTPUT  Name of input variable
+!     INS_NM  CHARACTER*(*) *     OUTPUT  Text of input variable
+!     INS_VA  REAL          *,*   OUTPUT  Default values input variables
+!     NSVAO   INTEGER       *     OUTPUT  No of output vars per proces
+!     OUS_ID  CHARACTER*(*) *     OUTPUT  Name of input variable
+!     OUS_NM  CHARACTER*(*) *     OUTPUT  Text of output variable
+!     NBFL    INTEGER       *     OUTPUT  No of basic fluxes per proces
+!     FLU_ID  CHARACTER*(*) *     OUTPUT  Name of basix fluxe
+!     FLU_NM  CHARACTER*(*) *     OUTPUT  Text of basix fluxe
+!     NBST    INTEGER       *     OUTPUT  No of basic stochis per proces
+!     STO_SU  CHARACTER*(*) *,*   OUTPUT  Name of substance in stochi
+!     STO_FL  CHARACTER*(*) *,*   OUTPUT  Name of flux in stochi
+!     STO_SC  REAL          *,*   OUTPUT  Stochimetric factor
+!     IPVAI   INTEGER       *     OUTPUT  Pointers for arrays on VAI
+!     IPVAO   INTEGER       *     OUTPUT  Pointers for arrays on VAO
+!     IPBFL   INTEGER       *     OUTPUT  Pointers for arrays on BFL
+!     IPBST   INTEGER       *     OUTPUT  Pointers for arrays on BST
+!     NSVXI   INTEGER       *     OUTPUT  No of input vars X per proces
+!     IPVXI   INTEGER       *     OUTPUT  Pointers for arrays on VXI
+!     INE_ID  CHARACTER*(*) *     OUTPUT  Name of input variable X
+!     INE_NM  CHARACTER*(*) *     OUTPUT  Text of input variable X
+!     INE_VA  REAL          *     OUTPUT  Default values input X variables
+!     NSVXO   INTEGER       *     OUTPUT  No of output vars X per proces
+!     IPVXO   INTEGER       *     OUTPUT  Pointers for arrays on VXO
+!     OUE_ID  CHARACTER*(*) *     OUTPUT  Name of output variable X
+!     OUE_NM  CHARACTER*(*) *     OUTPUT  Text of output variable X
+!     NSDST   INTEGER       *     OUTPUT  No of dispersion rules p.proces
+!     IPDST   INTEGER       *     OUTPUT  Pointers for arrays on DST
+!     DIS_SU  CHARACTER*(*) *     OUTPUT  Name of substance in disp rule
+!     DIS_IT  CHARACTER*(*) *     OUTPUT  Name of output item in disp rule
+!     VEL_SC  REAL          *     OUTPUT  factor in dispersion rule
+!     NSVST   INTEGER       *     OUTPUT  No of velocity rules p.proces
+!     IPVST   INTEGER       *     OUTPUT  Pointers for arrays on VST
+!     VEL_SU  CHARACTER*(*) *     OUTPUT  Name of substance in velo rule
+!     VEL_IT  CHARACTER*(*) *     OUTPUT  Name of output item in velo rule
+!     VEL_SC  REAL          *     OUTPUT  factor in velocity rule
+!     ISWITR  INTEGER       *     OUTPUT  Target dimension indicator
+!     NSVICH  INTEGER       1     INPUT   No of extra input variables for charon
+!     NSVOCH  INTEGER       1     INPUT   No of extra output variables for charon
+!     NFLCH   INTEGER       1     INPUT   No of fluxes for charon
+!     NSTCH   INTEGER       1     INPUT   No of stochiometric terms for charon
+!     NOINFO  INTEGER       1     IN/OUT  Cummulative information count
+!     NOWARN  INTEGER       1     IN/OUT  Cummulative warning count
+!     IERROR  INTEGER       1     OUTPUT  Error indicatior
+!
+!
       USE ProcesSet ! all definitions of structures used
-C
-C     IMPLICIT NONE for extra compiler checks
-C
+!
+!     IMPLICIT NONE for extra compiler checks
+!
       use timers       !   performance timers
 
       IMPLICIT NONE
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       type(ProcesPropColl)  :: procesdef           ! the proces definition
       INTEGER                          LUREP           ,
      +               NBPRX           ,
@@ -163,9 +163,9 @@ C
       INTEGER      :: VXIORD(*)
       INTEGER      :: VAOORD(*)
       INTEGER      :: VXOORD(*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER        INS   , INE   , OUS   , OUE   , FLU   ,
      +               STO   , DIS   , VEL
       integer      :: nproc           ! number of processes
@@ -178,9 +178,9 @@ C
       integer      :: i_flst          ! loop counter flux stochi
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "cnvpro", ithndl )
-C
-C     Some init
-C
+!
+!     Some init
+!
       IERROR = 0
       ins = 0
       ine = 0

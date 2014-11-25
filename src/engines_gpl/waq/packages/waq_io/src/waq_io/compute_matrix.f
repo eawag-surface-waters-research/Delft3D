@@ -294,12 +294,12 @@
 
       if (timon) call timstop( ithndl )
       return
-c
+!
  1000 format ( ' warning: processing breakpoint',i6,' for substance',i3,
      *         ' at station',i5)
  1010 format ( ' the value of ',e15.6,' is overwritten by the maximum ',
      *         ' of ',e15.6,' !' )
  1020 format ( ' the value of ',e15.6,' is overwritten by the minimum ',
      *         ' of ',e15.6,' !' )
-c
+!
       end

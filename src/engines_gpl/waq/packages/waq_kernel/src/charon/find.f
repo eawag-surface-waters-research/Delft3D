@@ -22,30 +22,30 @@
 !!  rights reserved.
 
       subroutine find(i, j, ijloc, iflag)
-c           4-69
-c           given  the row and column numbers find the location of the
-c        number (ijloc) in the matrix array.  if there is no entry,
-c        exit with iflag non zero and ijloc as the location into which
-c        to insert the entry after the other values have been pushed
-c        down.
-c           if i=0, find the first and last locations for column j
-c           ijloc will have the first location and iflag the last
-c           the entries are stored in ascending order of j.  the order
-c        of i within j is immaterial.
-c           if j has no entries and i equals zero, set ijloc = 0
-c           if j has no entries and i not equal zero, set ijloc equal
-c        to current value.
-c           in both cases set iflag equal to one
+!           4-69
+!           given  the row and column numbers find the location of the
+!        number (ijloc) in the matrix array.  if there is no entry,
+!        exit with iflag non zero and ijloc as the location into which
+!        to insert the entry after the other values have been pushed
+!        down.
+!           if i=0, find the first and last locations for column j
+!           ijloc will have the first location and iflag the last
+!           the entries are stored in ascending order of j.  the order
+!        of i within j is immaterial.
+!           if j has no entries and i equals zero, set ijloc = 0
+!           if j has no entries and i not equal zero, set ijloc equal
+!        to current value.
+!           in both cases set iflag equal to one
       include  'char1.inc'
       iflag = 0
       ij = 1
       if (j.lt.jcol(1)) go to 100
       if (j.gt.jcol(naij)) go to 110
       if (jcol(1).eq.j) go to 50
-c        compute a guess for start of column, using average density
+!        compute a guess for start of column, using average density
       ij = (naij/ntot)*(j-1)
       if (ij.gt.naij) ij = naij
-c        find first entry for column j
+!        find first entry for column j
    10 if (jcol(ij).lt.j) go to 20
       ij = ij - 1 - naij/ntot/2
       if (ij.le.0) ij = 1
@@ -57,7 +57,7 @@ c        find first entry for column j
       go to 110
    40 if (jcol(ij).gt.j) go to 120
    50 if (i.eq.0) ijloc = ij
-c        look for row number in column storage
+!        look for row number in column storage
    60 if (jcol(ij).gt.j) go to 70
       if (irow(ij).eq.i) go to 80
       ij = ij + 1

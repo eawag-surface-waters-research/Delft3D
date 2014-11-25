@@ -26,58 +26,58 @@
      +                      R7_VID      , R7_SID      ,
      +                      R7_SCAL     , LUNREP      ,
      +                      IERROR      )
-C
-C     Deltares
-C
-C     CREATED            :  june 1999 by Jan van Beek
-C
-C     FUNCTION           :  Read TABLE_R7 group from NEFIS file
-C
-C     FILES              :  NEFIS file assumed opened
-C
-C     SUBROUTINES CALLED :
-C
-C     ARGUMENTS
-C
-C     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DEFFDS       INT    2993    I/O     Definition file descriptor
-C     DATFDS       INT    999     I/O     Data file descriptor
-C     NO_VSTO_MAX  INT            I       maximum number of rows in table r7
-C     NO_VSTO      INT            O       number of rows in table r7
-C     R7_VID       CHA*10 NO_VSTO O       velocity identification
-C     R7_SID       CHA*10 NO_VSTO O       substance identification
-C     R7_SCAL      REAL   NO_VSTO O       scale factor
-C     LUNREP       INT    1       I       Unit number report file
-C     IERROR       INT    1       O       Error
-C
-C     IMPLICIT NONE for extra compiler checks
-C     SAVE to keep the group definition intact
-C
+!
+!     Deltares
+!
+!     CREATED            :  june 1999 by Jan van Beek
+!
+!     FUNCTION           :  Read TABLE_R7 group from NEFIS file
+!
+!     FILES              :  NEFIS file assumed opened
+!
+!     SUBROUTINES CALLED :
+!
+!     ARGUMENTS
+!
+!     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DEFFDS       INT    2993    I/O     Definition file descriptor
+!     DATFDS       INT    999     I/O     Data file descriptor
+!     NO_VSTO_MAX  INT            I       maximum number of rows in table r7
+!     NO_VSTO      INT            O       number of rows in table r7
+!     R7_VID       CHA*10 NO_VSTO O       velocity identification
+!     R7_SID       CHA*10 NO_VSTO O       substance identification
+!     R7_SCAL      REAL   NO_VSTO O       scale factor
+!     LUNREP       INT    1       I       Unit number report file
+!     IERROR       INT    1       O       Error
+!
+!     IMPLICIT NONE for extra compiler checks
+!     SAVE to keep the group definition intact
+!
       IMPLICIT NONE
       SAVE
-C
-C     declaration of arguments
-C
+!
+!     declaration of arguments
+!
       INTEGER       NO_VSTO_MAX , NO_VSTO     ,
      +              LUNREP      , IERROR
       INTEGER       DEFFDS
       CHARACTER*10  R7_VID      (NO_VSTO_MAX)
       CHARACTER*10  R7_SID      (NO_VSTO_MAX)
       REAL          R7_SCAL(NO_VSTO_MAX)
-C
-C     Local variables
-C
-C     GRPNAM  CHAR*16     1       LOCAL   group name (table)
-C     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
-C     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
-C     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
-C     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
-C     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
-C
+!
+!     Local variables
+!
+!     GRPNAM  CHAR*16     1       LOCAL   group name (table)
+!     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
+!     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
+!     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
+!     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
+!     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
+!
       INTEGER       NELEMS
       PARAMETER   ( NELEMS = 4 )
-C
+!
       INTEGER       I               , IELM          ,
      +              BUFLEN
       INTEGER       ELMDMS(2,NELEMS), NBYTSG(NELEMS),
@@ -85,16 +85,16 @@ C
       CHARACTER*16  GRPNAM
       CHARACTER*16  ELMNMS(NELEMS)  , ELMTPS(NELEMS)
       CHARACTER*64  ELMDES(NELEMS)
-C
-C     External NEFIS Functions
-C
+!
+!     External NEFIS Functions
+!
       INTEGER   GETELS
      +         ,GETELT
       EXTERNAL  GETELS
      +         ,GETELT
-C
-C     element names
-C
+!
+!     element names
+!
       DATA  GRPNAM  /'TABLE_R7'/
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
@@ -103,14 +103,14 @@ C
      + 'R7_VID'   ,'CHARACTER',10,1,0,'velocity identification'        ,
      + 'R7_SID'   ,'CHARACTER',10,1,0,'substance identification'       ,
      + 'R7_SCAL'  ,'REAL'     , 4,1,0,'scale factor'                   /
-C
-C     Read group
-C
-C     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
+!
+!     Read group
+!
+!     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
       UINDEX(1) = 1
       UINDEX(2) = 1
       UINDEX(3) = 1
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
       BUFLEN = NBYTSG(1)*ELMDMS(2,1)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(1),
@@ -128,13 +128,13 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
          IERROR = 1
          GOTO 900
       ENDIF
-C
-C     Set dimension of table
-C
+!
+!     Set dimension of table
+!
       DO IELM = 2 , NELEMS
          ELMDMS(2,IELM) = NO_VSTO
       ENDDO
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
       BUFLEN = NBYTSG(2)*ELMDMS(2,2)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(2),
@@ -145,7 +145,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
       BUFLEN = NBYTSG(3)*ELMDMS(2,3)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(3),
@@ -156,7 +156,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
       BUFLEN = NBYTSG(4)*ELMDMS(2,4)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(4),
@@ -167,8 +167,8 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C
+!
   900 CONTINUE
       RETURN
-C
+!
       END

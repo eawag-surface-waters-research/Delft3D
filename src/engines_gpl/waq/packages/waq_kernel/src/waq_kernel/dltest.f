@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       SUBROUTINE DLTEST(
-c trisula parameters:
+! trisula parameters:
      *                  lundia    ,timest    ,
      *                  icx       ,icy       ,jstart    ,nmmaxj    ,
      *                  nmmax     ,kmax      ,
@@ -35,100 +35,100 @@ c trisula parameters:
      *                  buuux     ,buux      ,bux       ,
      *                  uvdwk     ,vvdwk     ,
      *                  aakl      ,bbkl      ,cckl      ,ddkl      ,
-c delwaq parameters:
+! delwaq parameters:
      *                  nosys     ,notot     ,vol0      ,vol1      ,
      *                  intsrt    ,
      *                  difx      ,dify      ,difz      )
-C
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : August 1996 by E. de Goede
-C
-C     FUNCTION            : TRISULA transport scheme implemented in DELWAQ
-C                           A choice between central and upwind differences
-C                           in the vertical has been implemented.
-C                           (INTSRT = 19 OR 20)
-C                           (this option is not available in TRISULA)
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND      FUNCT.  DESCRIPTION
-C     ----    -----     ------  -----------
-C     DIFX    REAL      INPUT   flux in x-direction due to diffusive transport
-C     DIFY    REAL      INPUT   flux in y-direction due to diffusive transport
-C     DIFZ    REAL      INPUT   flux in z-direction due to diffusive transport
-C     GUV     REAL      INPUT   Grid distance in the eta-/y-direction
-C                               at v-velocity point
-C     GVU     REAL      INPUT   Grid distance in the ksi-/x-direction
-C                               at u-velocity point
-C     GZZ     REAL      INPUT   Grid distance in the z-direction
-C                               at w-velocity point
-C       remark: GZZ is not an original TRISULA array
-C     ICX     INTEGER   INPUT   Increment in the X-dir., if ICX= NMAX
-C                               then computation proceeds in the X-
-C                               dir. If icx=1 then computation pro-
-C                               ceeds in the Y-dir.
-C     ICY     INTEGER   INPUT   Increment in the Y-dir. (see ICX)
-C     INTSRT  INTEGER   INPUT   integration option number
-C     JSTART  INTEGER   INPUT   start pointer   (jstart=1-2*nmax)
-C       remark: in TRISULA j instead of jstart
-C     KCS     INTEGER   INPUT   Mask array for the zeta points
-C                                      (time independent)
-C                                      =0 inactive point
-C                                      =1 active   point
-C                                      =2 open boundary point
-C     KFS     INTEGER   INPUT   Mask array for the zeta points
-C                                  (time dependent)
-C                                  =0 dry      point
-C                                  =1 active   point
-C     KFU     INTEGER   INPUT   Mask array for the u-velocity point
-C                                      (time dependent)
-C                                      =0 dry      point
-C                                      =1 active   point
-C     KFV     INTEGER   INPUT   Mask array for the v-velocity point
-C                                      (time dependent)
-C                                      =0 dry      point
-C                                      =1 active   point
-C     KMAX    INTEGER   INPUT   nr of layers in third dimension (=noq3)
-C     LUNDIA  INTEGER   INPUT   integer number for monitoring file
-C     NMMAX   INTEGER   INPUT   nmax * mmax (= noq2 * noq1)
-C     NMMAXJ  INTEGER   INPUT   end pointer   (nmmaxj=(mmax+2)*nmax)
-C     NOSYS   INTEGER   INPUT   number of active substances
-C     NOTOT   INTEGER   INPUT   number of total substances
-C     QXK     REAL      INPUT   flux in x-direction due to advective transport
-C     QYK     REAL      INPUT   flux in y-direction due to advective transport
-C     QZK     REAl      INPUT   flux in z-direction due to advective transport
-C     R1      REAL      IN/OUT  concentration array
-C     TIMEST  REAL      INPUT   time step
-C     VOL0    REAL      INPUT   volumes at old time level
-C     VOL1    REAL      INPUT   volumes at new time level
-C work arrays:
-C     AAK     real      INPUT   work array for (n,m,k+1)
-C     AAKL    real      INPUT   work array for (n,m,k+1,l)
-C     BBK     real      INPUT   work array for (n,m,k)
-C     BBKL    real      INPUT   work array for (n,m,k,l)
-C     CCK     real      INPUT   work array for (n,m,k-1)
-C     CCKL    real      INPUT   work array for (n,m,k-1,l)
-C     on input AAKLK/BBKL/CCKL contain additional dispersions + velocities
-C     for the vertical direction
-C     DDKL    real      INPUT   work array for (n,m,k,l)
-C     on input DDKL contains processes and waste loads and
-C     additional dispersions and velocities in horizontal direction
-C     BDDDX   real      INPUT   work array for (n,m-3,k)
-C     BDDX    real      INPUT   work array for (n,m-2,k)
-C     BDX     real      INPUT   work array for (n,m-1,k)
-C     BUX     real      INPUT   work array for (n,m+1,k)
-C     BUUX    real      INPUT   work array for (n,m+2,k)
-C     BUUUX   real      INPUT   work array for (n,m+3,k)
-C     UVDWK   real      INPUT   work array
-C     VVDWK   real      INPUT   work array
-C
+!
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : August 1996 by E. de Goede
+!
+!     FUNCTION            : TRISULA transport scheme implemented in DELWAQ
+!                           A choice between central and upwind differences
+!                           in the vertical has been implemented.
+!                           (INTSRT = 19 OR 20)
+!                           (this option is not available in TRISULA)
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND      FUNCT.  DESCRIPTION
+!     ----    -----     ------  -----------
+!     DIFX    REAL      INPUT   flux in x-direction due to diffusive transport
+!     DIFY    REAL      INPUT   flux in y-direction due to diffusive transport
+!     DIFZ    REAL      INPUT   flux in z-direction due to diffusive transport
+!     GUV     REAL      INPUT   Grid distance in the eta-/y-direction
+!                               at v-velocity point
+!     GVU     REAL      INPUT   Grid distance in the ksi-/x-direction
+!                               at u-velocity point
+!     GZZ     REAL      INPUT   Grid distance in the z-direction
+!                               at w-velocity point
+!       remark: GZZ is not an original TRISULA array
+!     ICX     INTEGER   INPUT   Increment in the X-dir., if ICX= NMAX
+!                               then computation proceeds in the X-
+!                               dir. If icx=1 then computation pro-
+!                               ceeds in the Y-dir.
+!     ICY     INTEGER   INPUT   Increment in the Y-dir. (see ICX)
+!     INTSRT  INTEGER   INPUT   integration option number
+!     JSTART  INTEGER   INPUT   start pointer   (jstart=1-2*nmax)
+!       remark: in TRISULA j instead of jstart
+!     KCS     INTEGER   INPUT   Mask array for the zeta points
+!                                      (time independent)
+!                                      =0 inactive point
+!                                      =1 active   point
+!                                      =2 open boundary point
+!     KFS     INTEGER   INPUT   Mask array for the zeta points
+!                                  (time dependent)
+!                                  =0 dry      point
+!                                  =1 active   point
+!     KFU     INTEGER   INPUT   Mask array for the u-velocity point
+!                                      (time dependent)
+!                                      =0 dry      point
+!                                      =1 active   point
+!     KFV     INTEGER   INPUT   Mask array for the v-velocity point
+!                                      (time dependent)
+!                                      =0 dry      point
+!                                      =1 active   point
+!     KMAX    INTEGER   INPUT   nr of layers in third dimension (=noq3)
+!     LUNDIA  INTEGER   INPUT   integer number for monitoring file
+!     NMMAX   INTEGER   INPUT   nmax * mmax (= noq2 * noq1)
+!     NMMAXJ  INTEGER   INPUT   end pointer   (nmmaxj=(mmax+2)*nmax)
+!     NOSYS   INTEGER   INPUT   number of active substances
+!     NOTOT   INTEGER   INPUT   number of total substances
+!     QXK     REAL      INPUT   flux in x-direction due to advective transport
+!     QYK     REAL      INPUT   flux in y-direction due to advective transport
+!     QZK     REAl      INPUT   flux in z-direction due to advective transport
+!     R1      REAL      IN/OUT  concentration array
+!     TIMEST  REAL      INPUT   time step
+!     VOL0    REAL      INPUT   volumes at old time level
+!     VOL1    REAL      INPUT   volumes at new time level
+! work arrays:
+!     AAK     real      INPUT   work array for (n,m,k+1)
+!     AAKL    real      INPUT   work array for (n,m,k+1,l)
+!     BBK     real      INPUT   work array for (n,m,k)
+!     BBKL    real      INPUT   work array for (n,m,k,l)
+!     CCK     real      INPUT   work array for (n,m,k-1)
+!     CCKL    real      INPUT   work array for (n,m,k-1,l)
+!     on input AAKLK/BBKL/CCKL contain additional dispersions + velocities
+!     for the vertical direction
+!     DDKL    real      INPUT   work array for (n,m,k,l)
+!     on input DDKL contains processes and waste loads and
+!     additional dispersions and velocities in horizontal direction
+!     BDDDX   real      INPUT   work array for (n,m-3,k)
+!     BDDX    real      INPUT   work array for (n,m-2,k)
+!     BDX     real      INPUT   work array for (n,m-1,k)
+!     BUX     real      INPUT   work array for (n,m+1,k)
+!     BUUX    real      INPUT   work array for (n,m+2,k)
+!     BUUUX   real      INPUT   work array for (n,m+3,k)
+!     UVDWK   real      INPUT   work array
+!     VVDWK   real      INPUT   work array
+!
       INTEGER   kfu    (jstart:nmmaxj),
      *          kfv    (jstart:nmmaxj),
      *          kfs    (jstart:nmmaxj),
      *          kcs    (jstart:nmmaxj)
-c
+!
       DIMENSION  qxk    (jstart:nmmaxj, kmax),
      *           qyk    (jstart:nmmaxj, kmax),
      *           qzk    (jstart:nmmaxj, 0:kmax),
@@ -141,8 +141,8 @@ c
      *           guv    (jstart:nmmaxj),
      *           gvu    (jstart:nmmaxj),
      *           gzz    (jstart:nmmaxj, 0:kmax)
-c
-c work arrays:
+!
+! work arrays:
       DIMENSION  bdddx  (jstart:nmmaxj, kmax),
      *           bddx   (jstart:nmmaxj, kmax),
      *           bdx    (jstart:nmmaxj, kmax),

@@ -24,76 +24,76 @@
       SUBROUTINE DLWQKB ( LUNIN  , LUNOUT , ITIME  , IDTIME , ITIME1 ,
      +                    ITIME2 , IARRA1 , IARRA2 , NFTOT  , LUNTXT ,
      +                    ISFLAG , IFFLAG )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : december 1994 by Jan van Beek
-C
-C     FUNCTION            : Steps along in a time variable database
-C                           for integer block functions
-C
-C     LOGICAL UNITNUMBERS : LUNIN  - input unit intermediate file
-C                           LUNOUT - monitor file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNIN   INTEGER       1     INPUT   unit number intermediate file
-C     LUNOUT  INTEGER       1     INPUT   unit number monitor file
-C     ITIME   INTEGER       1     INPUT   Model timer
-C     IDTIME  INTEGER       1     IN/OUT  Delta for this function
-C     ITIME1  INTEGER       1     IN/OUT  Lower time in file
-C     ITIME2  INTEGER       1     IN/OUT  Higher time in file
-C     IARRA1  REAL       NFTOT    IN/OUT  record at lower time
-C     IARRA2  REAL       NFTOT    IN/OUT  record at higher time
-C     NFTOT   INTEGER       1     INPUT   record length
-C     LUNTXT  CHAR*(*)      1     INPUT   text with the unit number
-C     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
-C     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
-C
-C     DECLARATIONS        :
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : december 1994 by Jan van Beek
+!
+!     FUNCTION            : Steps along in a time variable database
+!                           for integer block functions
+!
+!     LOGICAL UNITNUMBERS : LUNIN  - input unit intermediate file
+!                           LUNOUT - monitor file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNIN   INTEGER       1     INPUT   unit number intermediate file
+!     LUNOUT  INTEGER       1     INPUT   unit number monitor file
+!     ITIME   INTEGER       1     INPUT   Model timer
+!     IDTIME  INTEGER       1     IN/OUT  Delta for this function
+!     ITIME1  INTEGER       1     IN/OUT  Lower time in file
+!     ITIME2  INTEGER       1     IN/OUT  Higher time in file
+!     IARRA1  REAL       NFTOT    IN/OUT  record at lower time
+!     IARRA2  REAL       NFTOT    IN/OUT  record at higher time
+!     NFTOT   INTEGER       1     INPUT   record length
+!     LUNTXT  CHAR*(*)      1     INPUT   text with the unit number
+!     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
+!     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
+!
+!     DECLARATIONS        :
+!
       use timers
       INTEGER       LUNIN  , LUNOUT , ITIME  , IDTIME , ITIME1 ,
      +              ITIME2 , NFTOT  , ISFLAG , IFFLAG
       INTEGER       IARRA1(*), IARRA2(*)
       CHARACTER*(*) LUNTXT
-C
-C     Local
-C
+!
+!     Local
+!
       CHARACTER*16  MSGTXT(3)
       DATA          MSGTXT / ' REWIND ON      ' , ' WARNING READING' ,
      +                       ' REWIND ERROR   ' /
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqkb", ithandl )
-C
+!
       MESSGE = 0
       IF ( NFTOT  .EQ. 0 ) goto 9999
       IF ( IFFLAG .EQ. 0 ) GOTO 10
-C
-C         This is the first time, so read.
-C
+!
+!         This is the first time, so read.
+!
       READ ( LUNIN , END=80 , ERR=80 ) ITIME1 , (IARRA1(K),K=1,NFTOT)
       READ ( LUNIN , END=80 , ERR=80 ) ITIME2 , (IARRA2(K),K=1,NFTOT)
       IDTIME = 0
-C
-C         Check for start time simulation before start time file
-C
+!
+!         Check for start time simulation before start time file
+!
       IF ( ITIME .LT. ITIME1 ) MESSGE = 2
-C
-C         a new record required?
-C
+!
+!         a new record required?
+!
    10 IF ( ITIME-IDTIME .LT. ITIME2 ) GOTO 100
       CALL DHIMOV ( IARRA2 , IARRA1 , NFTOT )
       ITIME1 = ITIME2
       READ ( LUNIN , END=60 , ERR=80 ) ITIME2 , (IARRA2(K),K=1,NFTOT)
       GOTO 10
-C
-C         normal rewind.
-C
+!
+!         normal rewind.
+!
    60 MESSGE = 1
       REWIND LUNIN
       IDTIME = IDTIME + ITIME1
@@ -101,14 +101,14 @@ C
       READ ( LUNIN , END=80 , ERR=80 ) ITIME2 , (IARRA2(K),K=1,NFTOT)
       IDTIME = IDTIME - ITIME1
       GOTO 100
-C
-C         error, reading the unit
-C
+!
+!         error, reading the unit
+!
    80 MESSGE = 3
       GOTO 100
-C
-C         write the messages
-C
+!
+!         write the messages
+!
   100 IF ( MESSGE .EQ. 0 ) goto 9999
       IF ( ISFLAG .NE. 1 ) THEN
            WRITE(LUNOUT,2000) MSGTXT(MESSGE), LUNIN, LUNTXT,
@@ -128,12 +128,12 @@ C
       CALL SRSTOP ( 1 )
  9999 if ( timon ) call timstop ( ithandl )
 
-C
+!
  2000 FORMAT (   A16          ,' UNIT: ',I3,', READING: ',A20,/
      *         ' AT SIMULATION TIME:',I12,' !',/,
      *         ' TIME IN FILE:      ',I12,' !')
  2010 FORMAT (   A16          ,' UNIT: ',I3,', READING: ',A20,/
      *         ' AT SIMULATION TIME:',I5,'D ',I2,'H ',I2,'M ',I2,'S !',/
      *         ' TIME IN FILE:      ',I5,'D ',I2,'H ',I2,'M ',I2,'S !')
-C
+!
       END

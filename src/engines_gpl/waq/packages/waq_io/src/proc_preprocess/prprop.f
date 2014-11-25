@@ -52,13 +52,13 @@
       integer           , intent(inout) :: nowarn                 !< cummulative warning count
       type(old_item_coll)               :: old_items              !< old_items table
       integer           , intent(  out) :: ierror                 !< error indicator
-C
-C     Common declarations
-C
+!
+!     Common declarations
+!
       INCLUDE 'data.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       type(ProcesProp)      :: aProcesProp         ! one statistical proces definition
       type(ItemProp)        :: aItemProp           ! one item
       type(IOitemProp)      :: aIOitemProp         ! one IOitem
@@ -69,7 +69,7 @@ C
       type(StochiPropColl)  :: FluxStochi          ! one collection of Stochis
       type(StochiPropColl)  :: VeloStochi          ! one collection of Stochis
       type(StochiPropColl)  :: DispStochi          ! one collection of Stochis
-C
+!
       INTEGER
      +                                       IPROC , IOFFSE,
      +               NAANTA, IINPU , IITEM , JNDEX , IOUTP ,
@@ -87,28 +87,28 @@ C
       integer               :: ifound
       integer , allocatable :: actuse(:)           ! activated processes status indicator
       integer               :: iitem2              ! temporary index item
-c
-c     license stuff
-c
+!
+!     license stuff
+!
       logical       nolic
       integer       iconf
       integer(4)                :: ithndl = 0      ! handle for performance timer
       if (timon) call timstrt( "prprop", ithndl )
-C
-C     Some init
-C
+!
+!     Some init
+!
       SWITUI = .FALSE.
       SWIT2D = .FALSE.
       IERROR = 0
-c
-c     get license infromation on configurations, removed always license
-c
+!
+!     get license infromation on configurations, removed always license
+!
       liconf = 1
       nolic  = .false.
-c
-c     check licence for configuration if not in active only mode
-c     (if no license - nolic = true - use the "active only" mode
-c
+!
+!     check licence for configuration if not in active only mode
+!     (if no license - nolic = true - use the "active only" mode
+!
       if ( nolic ) then
          laswi = .true.
       endif
@@ -130,10 +130,10 @@ c
       else
          iconf = 0
       endif
-c
-c     fill the items collection, add them to the statistical items check for doubles
-c     first find then replace to speed up the process
-c
+!
+!     fill the items collection, add them to the statistical items check for doubles
+!     first find then replace to speed up the process
+!
       allocate(itemidx(nitem),stat=ierr_alloc)
       if ( ierr_alloc .ne. 0 ) then
          WRITE ( lunrep , * ) 'error allocating work array in PRPROP:',ierr_alloc,nitem
@@ -156,14 +156,14 @@ c
          aItemProp%waqtype = WAQTYPE_UNKNOWN
          iret = itemidx(iitem)
          if ( iret .gt. 0 ) then
-c
-c           from statistics, replace content
-c
+!
+!           from statistics, replace content
+!
             AllItems%ItempropPnts(iret)%pnt = aItemProp
          else
-c
-c           add item
-c
+!
+!           add item
+!
             iret = ItemPropCollAdd( AllItems, aItemProp )
          endif
       enddo
@@ -190,14 +190,14 @@ c
             endif
          endif
       enddo
-c
-c     loop over all processes
-c
+!
+!     loop over all processes
+!
       allocate(actuse(no_act))
       do 800 iproc=1,nproc
-C
-C        Check if process is requested and licensed
-C
+!
+!        Check if process is requested and licensed
+!
          IF ( .NOT. LASWI ) THEN
             IPRCNF = (IPROC-1)*NCONF + ICONF
             IGET   = ICNPRO(IPRCNF)
@@ -427,7 +427,7 @@ C
          endif
 
   800 continue
-C
+!
       IF ( LASWI ) THEN
          DO IACT = 1 , NO_ACT
             IF ( ACTUSE(IACT) .NE. 1 ) THEN
@@ -439,7 +439,7 @@ C
          ENDDO
       ENDIF
       deallocate(actuse)
-c
+!
   900 CONTINUE
       if (timon) call timstop( ithndl )
       RETURN

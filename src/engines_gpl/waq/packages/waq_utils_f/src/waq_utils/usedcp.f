@@ -22,49 +22,49 @@
 !!  rights reserved.
 
       function usedcp()
-c-----------------------------------------------------------------------
-c             Module:   FUNCTION USEDCP
-c           Function: Determines the consumed cpu system time or the
-c                     elapsed time in seconds from 0.0 hour (HARDWARE
-c                     dependent routine)
-c        Method used:
-c               Date: 08-06-1995
-c         Programmer: P. Koole, Heleen Leepel
-c         CVS header
-c            $Author: Beek_j $
-c              $Date: 7-09-98 10:30 $
-c            $Source: /u/trisula/cvsroot/trisula/alg/usedcp.f,v $
-c          $Revision: 3 $
-c-----------------------------------------------------------------------
-c   Calling routines:              SYSINI
-c                                  TRICOM
-c                                  TRIEND
-c                                  TRISOL
-c-----------------------------------------------------------------------
-c   Called  routines:              CGETCP (c-routine)
-c-----------------------------------------------------------------------
-c  Formal parameters:
-c  ------------------
-c
-c   Var. I/O  Type Dimensions
-c   -------------------------
-c
-c USEDCP   O  R*4                  Function name for the HARDWARE DEPEN-
-c                                  DENT routine. It gets the system time
-c                                  in order to derive the CPU'S
-c-----------------------------------------------------------------------
-c    Local variables:
-c    ----------------
-c
-c   Var.      Type Dimensions
-c   -------------------------
-c
-c CPU         R*8                  Cur. time to be used for the compu-
-c                                  tation of CPU's
-c-----------------------------------------------------------------------
-c
-c declarations and specifications
-c
+!-----------------------------------------------------------------------
+!             Module:   FUNCTION USEDCP
+!           Function: Determines the consumed cpu system time or the
+!                     elapsed time in seconds from 0.0 hour (HARDWARE
+!                     dependent routine)
+!        Method used:
+!               Date: 08-06-1995
+!         Programmer: P. Koole, Heleen Leepel
+!         CVS header
+!            $Author: Beek_j $
+!              $Date: 7-09-98 10:30 $
+!            $Source: /u/trisula/cvsroot/trisula/alg/usedcp.f,v $
+!          $Revision: 3 $
+!-----------------------------------------------------------------------
+!   Calling routines:              SYSINI
+!                                  TRICOM
+!                                  TRIEND
+!                                  TRISOL
+!-----------------------------------------------------------------------
+!   Called  routines:              CGETCP (c-routine)
+!-----------------------------------------------------------------------
+!  Formal parameters:
+!  ------------------
+!
+!   Var. I/O  Type Dimensions
+!   -------------------------
+!
+! USEDCP   O  R*4                  Function name for the HARDWARE DEPEN-
+!                                  DENT routine. It gets the system time
+!                                  in order to derive the CPU'S
+!-----------------------------------------------------------------------
+!    Local variables:
+!    ----------------
+!
+!   Var.      Type Dimensions
+!   -------------------------
+!
+! CPU         R*8                  Cur. time to be used for the compu-
+!                                  tation of CPU's
+!-----------------------------------------------------------------------
+!
+! declarations and specifications
+!
       usedcp = 0.0
-c
+!
       end

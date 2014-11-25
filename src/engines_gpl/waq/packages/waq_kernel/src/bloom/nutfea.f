@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO CHECK FEASIBILITY OF NUTRIENT CONSTRAINTS        *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO CHECK FEASIBILITY OF NUTRIENT CONSTRAINTS        *
+!  *********************************************************************
+!
       SUBROUTINE NUTFEA(INFEAS)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -35,11 +35,11 @@ C
       INCLUDE 'ioblck.inc'
       DIMENSION X(MX)
       DATA SLACK/1.D-12/
-C
-C  If a negative righthand side is determined, check whther all species
-C  have a positive A-coefficient or not; introduce slack to avoid
-C  negative concentrations.
-C
+!
+!  If a negative righthand side is determined, check whther all species
+!  have a positive A-coefficient or not; introduce slack to avoid
+!  negative concentrations.
+!
       INFEAS=0
       DO 40 I=1,NUNUCO
       IF (B(I) .GE. 0.0) GO TO 40

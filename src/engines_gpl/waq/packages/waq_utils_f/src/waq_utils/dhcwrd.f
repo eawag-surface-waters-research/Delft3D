@@ -22,30 +22,30 @@
 !!  rights reserved.
 
       INTEGER FUNCTION DHCWRD ( LINE  )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED       : june  1993 BY J.K.L. van Beek
-C
-C     FUNCTION      : Counts number of words, blank delimitted
-C
-C     SUBROUTINE CALLED  : none
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS         : none
-C
-C
-C     Local declaration
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED       : june  1993 BY J.K.L. van Beek
+!
+!     FUNCTION      : Counts number of words, blank delimitted
+!
+!     SUBROUTINE CALLED  : none
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS         : none
+!
+!
+!     Local declaration
+!
       CHARACTER*(*) LINE
-C
+!
       IA = 0
       LENLIN = LEN(LINE)
-C
-C     Count the number of first blanks in a row
-C
+!
+!     Count the number of first blanks in a row
+!
       DO 100 ICH = 1 , LENLIN
          IF ( LINE(ICH:ICH)     .NE. ' ' .AND.
      +        LINE(ICH+1:ICH+1) .EQ. ' '       ) THEN
@@ -55,8 +55,8 @@ C
       IF ( LINE(LENLIN:LENLIN) .NE. ' ' ) THEN
          IA = IA + 1
       ENDIF
-C
+!
       DHCWRD = IA
-C
+!
       RETURN
       END

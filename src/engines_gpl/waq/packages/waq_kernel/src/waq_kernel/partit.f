@@ -23,20 +23,20 @@
 
       subroutine partit ( lunrep , noseg  , nolay  , noq    , ipoint ,
      +                    mypart , npart  , owners , ownerq , intsrt )
-c
-c     Deltares     Sector Waterresources and Environment
-c
-c     Created:    october 2007 by E. Vollebregt
-c
-c     Function            : Determines the partitioning of the Delwaq
-c                           mesh/grid for parallel computing
-c
-C     Logical unitnumbers : lunrep - monitoring output file
-c
-C     Subroutines called  : SRSTOP, stops execution
-c
-c     Parameters          :
-c
+!
+!     Deltares     Sector Waterresources and Environment
+!
+!     Created:    october 2007 by E. Vollebregt
+!
+!     Function            : Determines the partitioning of the Delwaq
+!                           mesh/grid for parallel computing
+!
+!     Logical unitnumbers : lunrep - monitoring output file
+!
+!     Subroutines called  : SRSTOP, stops execution
+!
+!     Parameters          :
+!
       use timers
       implicit none
       integer, intent(in)  :: lunrep        ! logical unit of stdout
@@ -51,9 +51,9 @@ c
                                             ! part to which it belongs
       integer, intent(out) :: ownerq(noq)   ! partitioning of exchanges
       integer, intent(in)  :: intsrt
-c
-c     Local variables     :
-c
+!
+!     Local variables     :
+!
       integer, parameter :: idebug=2     ! level of debug output, 0=none
       real, parameter    :: frac1st=0.90 ! relative size of first subdomain
                                          ! when compared to other subdomains
@@ -87,11 +87,11 @@ c
 !     write(*,*) 'Arjen P (1): SRWACT = ', SRWACT
 !     write(*,*) 'Arjen P (1): OLCFWQ = ', OLCFWQ
 
-c
-c     use trivial partitioning of the segments in the horizontal plane
-c
-c     compute segments per part in horizontal plane plus remaining segments
-c
+!
+!     use trivial partitioning of the segments in the horizontal plane
+!
+!     compute segments per part in horizontal plane plus remaining segments
+!
       nseghr = noseg / nolay
       if (mod(noseg,nolay).ne.0) then
 
@@ -178,21 +178,21 @@ c
 !     write(*,*) 'Arjen P (3): SRWACT = ', SRWACT
 !     write(*,*) 'Arjen P (3): OLCFWQ = ', OLCFWQ
 
-c
-c        assign nsegpp segments to each part, assign one extra segment to the
-c        last nsegrm parts
-c
+!
+!        assign nsegpp segments to each part, assign one extra segment to the
+!        last nsegrm parts
+!
          ioffs = 0
          do ilay = 1, nolay
-c
-c           original ordering of subdomains:
-c
-c           do ipart = 1, npart
-c
-c           reversed ordering of subdomains:
-c
+!
+!           original ordering of subdomains:
+!
+!           do ipart = 1, npart
+!
+!           reversed ordering of subdomains:
+!
             do ipart = npart, 1, -1
-c
+!
                if (ipart.eq.1) then
                   nassgn = nseg1st
                elseif (ipart.lt.npart-nsegrm+1) then
@@ -209,10 +209,10 @@ c
             enddo
          enddo ! ilay
       endif
-c
-c     determine partitioning of exchanges:
-c     assign each exchange to the "from"-segment using the ipoint-table
-c
+!
+!     determine partitioning of exchanges:
+!     assign each exchange to the "from"-segment using the ipoint-table
+!
       do iq = 1, noq
          ifrom = ipoint(1,iq)
          ito   = ipoint(2,iq)
@@ -224,9 +224,9 @@ c
             ownerq(iq) = 0
          endif
       enddo
-c
-c     write partitioning to output-file for visualisation by user
-c
+!
+!     write partitioning to output-file for visualisation by user
+!
       if (mypart.eq.1 .and. npart.gt.1) then
          lunout = 8
          is_ok  = .false.

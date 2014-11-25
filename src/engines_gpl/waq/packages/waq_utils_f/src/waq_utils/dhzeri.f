@@ -22,24 +22,24 @@
 !!  rights reserved.
 
       SUBROUTINE DHZERI ( IARRAY , NOTOT  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june  1988 by L.Postma
-C
-C     FUNCTION            : utility that zeros an array
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IARRAY  INTEGER  NOTOT      OUTPUT  array to be zeroed
-C     NOTOT   INTEGER     1       INPUT   total number of entries
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june  1988 by L.Postma
+!
+!     FUNCTION            : utility that zeros an array
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IARRAY  INTEGER  NOTOT      OUTPUT  array to be zeroed
+!     NOTOT   INTEGER     1       INPUT   total number of entries
+!
       DIMENSION  IARRAY(*)
-C
+!
       DO  10 I  = 1,NOTOT
    10 IARRAY(I) = 0
-C
+!
       RETURN
       END

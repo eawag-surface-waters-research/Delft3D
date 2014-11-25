@@ -336,7 +336,7 @@
             wasteloads(ipout)%loads(isys) = 0.0
          enddo
       enddo
-c
+!
       return
  2000 format (' extra functionality INLET/OUTLET')
  2001 format ('    waste number:',i5,' name:',a20,' (INLET) coupled to')

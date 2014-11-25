@@ -27,64 +27,48 @@
 !>\file
 !>       Uptake of nutrients by growth of algae (DYNAMO)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C     940629  Pascal Boderie  Prevent divisions by zero
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Unit
-C ----    --- -  -    -------------------                            ---
-C CONMXN  R*4 1 L conc. beschikbaar N voor opname (positief)       [gN/m3
-C CONMXP  R*4 1 L conc. beschikbaar P voor opname (positief)       [gP/m
-C CONMXS  R*4 1 L conc. beschikbaar Si voor opname (positief)     [gSi/m
-C DELT    R*4 1 I timestep in the computation                         [D]
-C FL (1)  R*4 1 O uptake of NH4                                  [gN/m3/
-C FL( 2)  R*4 1 O uptake of NO3                                  [gN/m3/
-C FL( 3)  R*4 1 O uptake of PO4                                  [gP/m3/
-C FL( 4)  R*4 1 O uptake of Si                                  [gSi/m3/
-C IAUSYS  R*4 1 I ratio SCU and AUX                                    [
-C MXPR1N  R*4 1 L max prod rate green algea based on avail N     [gC/m3/
-C MXPR2N  R*4 1 L max prod rate diatoms based on avail N         [gC/m3/
-C MXPR1P  R*4 1 L max prod rate green algea based on avail P     [gC/m3/
-C MXPR2P  R*4 1 L max prod rate diatoms based on avail P         [gC/m3/
-C MXPR2S  R*4 1 L max prod rate diatoms based on avail Si        [gC/m3/
-C MXPRD1  R*4 1 L max prod rate green algea based on nutrients   [g/C/m3
-C MXPRD2  R*4 1 L max prod rate diatoms based on nutrients      [g/C/m3/
-C MXPRD   R*4 1 L max prod rate total algea based on nutrients  [g/C/m3/
-C NCRAT1  R*4 1 I Nitrogen-Carbon ratio in green-algea             [gN/g
-C NCRAT2  R*4 1 I Nitrogen-Carbon ratio in diatoms                 [gN/g
-C NH4D    R*4 1 L fraction ammonium uptake all algea                   [
-C NO3D    R*4 1 L fraction nitrate uptake all algea                    [
-C NH4KR   R*4 1 I below this NH4 conc. no preference NO3/NH4       [gN/m
-C NH4N    R*4 1 L available ammonium conc. (NH4-crit.NH4)          [gN/m
-C PCRAT1  R*4 1 I Phosphorus-Carbon ratio in green-algea           [gP/g
-C PCRAT2  R*4 1 I Phosphorus-Carbon ratio in diatoms               [gP/g
-C FPP1    R*4 1 L total net production of algea1               [gC/m3/d]
-C FPP2    R*4 1 L total net production of algea2               [gC/m3/d]
-C SICRAT  R*4 1 I Silicate-Carbon ratio in diatoms                [gSi/g
-C XNREST  R*4 1 L XNTOT - amount ammonia available for uptake       [g/m
-C XNTOT   R*4 1 L total DIN uptake in one timestep                  [g/m
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Unit
+! ----    --- -  -    -------------------                            ---
+! CONMXN  R*4 1 L conc. beschikbaar N voor opname (positief)       [gN/m3
+! CONMXP  R*4 1 L conc. beschikbaar P voor opname (positief)       [gP/m
+! CONMXS  R*4 1 L conc. beschikbaar Si voor opname (positief)     [gSi/m
+! DELT    R*4 1 I timestep in the computation                         [D]
+! FL (1)  R*4 1 O uptake of NH4                                  [gN/m3/
+! FL( 2)  R*4 1 O uptake of NO3                                  [gN/m3/
+! FL( 3)  R*4 1 O uptake of PO4                                  [gP/m3/
+! FL( 4)  R*4 1 O uptake of Si                                  [gSi/m3/
+! IAUSYS  R*4 1 I ratio SCU and AUX                                    [
+! MXPR1N  R*4 1 L max prod rate green algea based on avail N     [gC/m3/
+! MXPR2N  R*4 1 L max prod rate diatoms based on avail N         [gC/m3/
+! MXPR1P  R*4 1 L max prod rate green algea based on avail P     [gC/m3/
+! MXPR2P  R*4 1 L max prod rate diatoms based on avail P         [gC/m3/
+! MXPR2S  R*4 1 L max prod rate diatoms based on avail Si        [gC/m3/
+! MXPRD1  R*4 1 L max prod rate green algea based on nutrients   [g/C/m3
+! MXPRD2  R*4 1 L max prod rate diatoms based on nutrients      [g/C/m3/
+! MXPRD   R*4 1 L max prod rate total algea based on nutrients  [g/C/m3/
+! NCRAT1  R*4 1 I Nitrogen-Carbon ratio in green-algea             [gN/g
+! NCRAT2  R*4 1 I Nitrogen-Carbon ratio in diatoms                 [gN/g
+! NH4D    R*4 1 L fraction ammonium uptake all algea                   [
+! NO3D    R*4 1 L fraction nitrate uptake all algea                    [
+! NH4KR   R*4 1 I below this NH4 conc. no preference NO3/NH4       [gN/m
+! NH4N    R*4 1 L available ammonium conc. (NH4-crit.NH4)          [gN/m
+! PCRAT1  R*4 1 I Phosphorus-Carbon ratio in green-algea           [gP/g
+! PCRAT2  R*4 1 I Phosphorus-Carbon ratio in diatoms               [gP/g
+! FPP1    R*4 1 L total net production of algea1               [gC/m3/d]
+! FPP2    R*4 1 L total net production of algea2               [gC/m3/d]
+! SICRAT  R*4 1 I Silicate-Carbon ratio in diatoms                [gSi/g
+! XNREST  R*4 1 L XNTOT - amount ammonia available for uptake       [g/m
+! XNTOT   R*4 1 L total DIN uptake in one timestep                  [g/m
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -105,13 +89,13 @@ C     ------   -----  ------------
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
       IP13 = IPOINT(13)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.GT.0) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       PROD1     = PMSA(IP1)
       NCRAT1    = PMSA(IP2)
       PCRAT1    = PMSA(IP3)
@@ -124,15 +108,15 @@ C
       NO3       = PMSA(IP10)
       NH4KR     = PMSA(IP11)
 
-C***********************************************************************
-C**** Processes connected to the ALGEA model
-C***********************************************************************
+!***********************************************************************
+!**** Processes connected to the ALGEA model
+!***********************************************************************
 
-C      maximum uptake of N in one day (gC/m3)
+!      maximum uptake of N in one day (gC/m3)
        XNTOT = (NCRAT1 * PROD1 +
      &          NCRAT2 * PROD2 ) * DELT
 
-C      check if NH4+NO3 available
+!      check if NH4+NO3 available
        IF ( ((NH4 + NO3) .LE. 0.0) .OR. (XNTOT .LE. 0.0) ) THEN
            NH4D = 0.0
            NO3D = 0.0
@@ -149,33 +133,33 @@ C      check if NH4+NO3 available
                   NO3D   = 1. - NH4D
               ENDIF
           ELSE
-C          below the critical NH4 conentration distribution of
-C          NO3 and NH4 uptake based on availability!
+!          below the critical NH4 conentration distribution of
+!          NO3 and NH4 uptake based on availability!
                   NH4D = NH4 / ( NO3 + NH4 )
                   NO3D = 1. - NH4D
           ENDIF
        ENDIF
-C     uitvoer fraction adsorbed as NH4
+!     uitvoer fraction adsorbed as NH4
       PMSA (IP12 ) = NH4D
       PMSA (IP13 ) = XNTOT
 
-C@    Uptake of NH4
+!@    Uptake of NH4
       FL ( 1+IFLUX) = ( NCRAT1 * PROD1 +
      &            NCRAT2 * PROD2 ) * NH4D
 
-C@    Uptake of NO3
+!@    Uptake of NO3
       FL ( 2+IFLUX) = ( NCRAT1 * PROD1 +
      &            NCRAT2 * PROD2 ) * NO3D
 
-C@    Uptake of PO4
+!@    Uptake of PO4
       FL ( 3+IFLUX) =   PCRAT1 * PROD1 +
      &            PCRAT2 * PROD2
 
-C@    Uptake of Si
+!@    Uptake of Si
       FL ( 4+IFLUX) =   SCRAT2 * PROD2
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM ( 1  )
       IP2   = IP2   + INCREM ( 2  )
@@ -190,9 +174,9 @@ C
       IP11  = IP11  + INCREM ( 11 )
       IP12  = IP12  + INCREM ( 12 )
       IP13  = IP13  + INCREM ( 13 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

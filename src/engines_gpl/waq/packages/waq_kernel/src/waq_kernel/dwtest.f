@@ -26,10 +26,10 @@
      *                    NOQ1   , NOQ2   , NOQ3   , NOQ    , NOBND  ,
      *                    IVPNT  , IDPNT  , NOVELO , BPTOR  ,
      *                    DERIV  , IDT    , INTSRT ,
-c
+!
      *                    DISP   , DISPER , ALENG  , NODISP ,
      *                    DVOL0  , DVOL1  , ILFLAG , IOPT   ,
-c trisula arrays:
+! trisula arrays:
      *                    qxk    , qyk    , qzk   ,
      *                    kcs    , kfs    , kfu   , kfv     ,
      *                    gvu    , guv    , gzz   ,
@@ -39,69 +39,69 @@ c trisula arrays:
      *                    aakl   ,bbkl    ,cckl   ,ddkl     ,
      *                    lundia
      *                 )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : August 1996 by E. de Goede
-C
-C     FUNCTION            : Conversion of arrays for
-C                           routine DLDIFU
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
-C     AREA    REAL       NOQ      INPUT   exchange surfaces
-C     BOUND   REAL   NOSYS,NOBND  INPUT   boundary concentrations
-C     BPTOR   REAL     NOBND      INPUT   pointers to original cel numbers
-C     CONC    REAL   NOTOT*NOSEG  INPUT   concentrations
-C     AAKL    REAL                OUTPUT  contains additional vel. + disp.
-C                                         for the vertical direction
-C     BBKL    REAL                OUTPUT  contains additional vel. + disp.
-C                                         for the vertical direction
-C     CCKL    REAL                OUTPUT  contains additional vel. + disp.
-C                                         for the vertical direction
-C     DDKL    REAL                OUTPUT  contains processes, waste loads
-C     DERIV   REAL   NOTOT,NOSEG  INPUT   derivatives
-C     DISP    REAL        3       INPUT   dispersion in 3 directions
-C     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
-C     DVOL0   REAL      NOSEG     INPUT   DELWAQ volumes at old time level
-C     DVOL1   REAL      NOSEG     INPUT   DELWAQ volumes at new time level
-C     FLOW    REAL      NOQ       INPUT   flows accross exchange surfs
-c     GUV     REAL                OUTPUT  Grid distance in the eta-/y-direction
-c                                         at v-velocity point
-c     GVU     REAL                OUTPUT  Grid distance in the ksi-/x-direction
-c                                         at u-velocity point
-c     GZZ     REAL                OUTPUT  Grid distance in the z-direction
-c                                         at w-velocity point
-C     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C     INTSRT  INTEGER     1       INPUT   integration option number
-C     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
-C                                         = 1 or 3 no DISP at zero flow
-C                                         = 0 or 1 DISP over boundary
-C                                         = 2 or 3 no DISP over boundary
-C     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
-C     IMAT    INT    NOQ1,NOQ2    INPUT   grid layout matrix
-C     NOBND   INTEGER     1       INPUT   number of boundary cells
-C     NODISP  INTEGER     1       INPUT   number  of additional dispers.
-C     NOQ     INTEGER     1       INPUT   nr of segments for all 3 directions
-C     NOQ1    INTEGER     1       INPUT   nr of grid points in y-direction
-C       remark: N0Q1 = nmax in TRISULA
-C     NOQ2    INTEGER     1       INPUT   nr of grid points in x-direction
-C       remark: N0Q2 = mmax in TRISULA
-C     NOQ3    INTEGER     1       INPUT   nr of grid points in z-direction
-C       remark: N0Q3 = kmax in TRISULA
-C     NOSEG   INTEGER     1       INPUT   number of segments
-C     NOSYS   INTEGER     1       INPUT   number of active substances
-C     NOTOT   INTEGER     1       INPUT   number of total substances
-C     NOVELO  INTEGER     1       INPUT   number of velocity arrays
-C     r1      real                OUTPUT  concentration array
-C     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
-C     VOL0    REAL                OUTPUT  TRISULA volumes at old time level
-C     VOL1    REAL                OUTPUT  TRISULA volumes at new time level
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : August 1996 by E. de Goede
+!
+!     FUNCTION            : Conversion of arrays for
+!                           routine DLDIFU
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
+!     AREA    REAL       NOQ      INPUT   exchange surfaces
+!     BOUND   REAL   NOSYS,NOBND  INPUT   boundary concentrations
+!     BPTOR   REAL     NOBND      INPUT   pointers to original cel numbers
+!     CONC    REAL   NOTOT*NOSEG  INPUT   concentrations
+!     AAKL    REAL                OUTPUT  contains additional vel. + disp.
+!                                         for the vertical direction
+!     BBKL    REAL                OUTPUT  contains additional vel. + disp.
+!                                         for the vertical direction
+!     CCKL    REAL                OUTPUT  contains additional vel. + disp.
+!                                         for the vertical direction
+!     DDKL    REAL                OUTPUT  contains processes, waste loads
+!     DERIV   REAL   NOTOT,NOSEG  INPUT   derivatives
+!     DISP    REAL        3       INPUT   dispersion in 3 directions
+!     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
+!     DVOL0   REAL      NOSEG     INPUT   DELWAQ volumes at old time level
+!     DVOL1   REAL      NOSEG     INPUT   DELWAQ volumes at new time level
+!     FLOW    REAL      NOQ       INPUT   flows accross exchange surfs
+!     GUV     REAL                OUTPUT  Grid distance in the eta-/y-direction
+!                                         at v-velocity point
+!     GVU     REAL                OUTPUT  Grid distance in the ksi-/x-direction
+!                                         at u-velocity point
+!     GZZ     REAL                OUTPUT  Grid distance in the z-direction
+!                                         at w-velocity point
+!     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
+!     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
+!     INTSRT  INTEGER     1       INPUT   integration option number
+!     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
+!                                         = 1 or 3 no DISP at zero flow
+!                                         = 0 or 1 DISP over boundary
+!                                         = 2 or 3 no DISP over boundary
+!     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
+!     IMAT    INT    NOQ1,NOQ2    INPUT   grid layout matrix
+!     NOBND   INTEGER     1       INPUT   number of boundary cells
+!     NODISP  INTEGER     1       INPUT   number  of additional dispers.
+!     NOQ     INTEGER     1       INPUT   nr of segments for all 3 directions
+!     NOQ1    INTEGER     1       INPUT   nr of grid points in y-direction
+!       remark: N0Q1 = nmax in TRISULA
+!     NOQ2    INTEGER     1       INPUT   nr of grid points in x-direction
+!       remark: N0Q2 = mmax in TRISULA
+!     NOQ3    INTEGER     1       INPUT   nr of grid points in z-direction
+!       remark: N0Q3 = kmax in TRISULA
+!     NOSEG   INTEGER     1       INPUT   number of segments
+!     NOSYS   INTEGER     1       INPUT   number of active substances
+!     NOTOT   INTEGER     1       INPUT   number of total substances
+!     NOVELO  INTEGER     1       INPUT   number of velocity arrays
+!     r1      real                OUTPUT  concentration array
+!     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
+!     VOL0    REAL                OUTPUT  TRISULA volumes at old time level
+!     VOL1    REAL                OUTPUT  TRISULA volumes at new time level
+!
       use timers
       DIMENSION  FLOW (*) , VELO (*) , CONC (NOTOT,NOSEG) ,
      *           BOUND (NOSYS,NOBND) ,
@@ -109,14 +109,14 @@ C
      *           DVOL0(*) , DVOL1(*) ,
      *           IMAT ( noq1 , noq2 ),
      *           DISP  (  3) , DISPER(*) ,  ALENG (*) , IDPNT(*)
-c
+!
       INTEGER    BPTOR (NOBND)
-c
+!
       INTEGER    kfu    (noq1, -1:noq2+2),
      *           kfv    (noq1, -1:noq2+2),
      *           kfs    (noq1, -1:noq2+2),
      *           kcs    (noq1, -1:noq2+2)
-c
+!
       DIMENSION  qxk    (noq1, -1:noq2+2, noq3),
      *           qyk    (noq1, -1:noq2+2, noq3),
      *           qzk    (noq1, -1:noq2+2, 0:noq3),
@@ -135,8 +135,8 @@ c
      *           gzz    (noq1, -1:noq2+2, 0:noq3)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dwtest", ithandl )
-c
-C
+!
+!
       write(lundia, * ) nosys,notot,noseg,noq1,noq2,noq3
       write(lundia, * ) noq,nobnd,novelo,idt,ilflag,iopt
       write(lundia,'(A)') 'ivpnt'

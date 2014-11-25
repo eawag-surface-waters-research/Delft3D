@@ -21,29 +21,29 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       4 Jan 1994
-C    Time:       19:51
-C    Program:    PRINUN.FOR
-C    Version:    1.3
-C    Programmer: Hans Los
-C    Previous version(s):
-C    1.2 -- 21 Feb 1992 -- 11:52 -- Operating System: DOS
-C    1.18 -- 9 Jan 1990 -- 08:08 -- Operating System: DOS
-C    1.17 -- 2 Jan 1990 -- 07:41 -- Operating System: DOS
-C    1.16 -- 2 Jan 1990 -- 07:39 -- Operating System: DOS
-C    1.15 -- 29 Dec 1989 -- 20:22 -- Operating System: DOS
-C    1.14 -- 29 Dec 1989 -- 20:16 -- Operating System: DOS
-C    1.13 -- 29 Dec 1989 -- 20:14 -- Operating System: DOS
-C    1.12 -- 19 Dec 1989 -- 16:42 -- Operating System: DOS
-C
-C Update 1.3: print names of constrains and detailed limiting factors.
-C Update 1.2: write names of species, types and nutrients to output.
-C
-C  *********************************************************************
-C  *   SUBROUTINE TO PRINT RELEVANT MODEL RESULTS IN UNFORMATTED FILE  *
-C  *********************************************************************
-C
-C
+!    Date:       4 Jan 1994
+!    Time:       19:51
+!    Program:    PRINUN.FOR
+!    Version:    1.3
+!    Programmer: Hans Los
+!    Previous version(s):
+!    1.2 -- 21 Feb 1992 -- 11:52 -- Operating System: DOS
+!    1.18 -- 9 Jan 1990 -- 08:08 -- Operating System: DOS
+!    1.17 -- 2 Jan 1990 -- 07:41 -- Operating System: DOS
+!    1.16 -- 2 Jan 1990 -- 07:39 -- Operating System: DOS
+!    1.15 -- 29 Dec 1989 -- 20:22 -- Operating System: DOS
+!    1.14 -- 29 Dec 1989 -- 20:16 -- Operating System: DOS
+!    1.13 -- 29 Dec 1989 -- 20:14 -- Operating System: DOS
+!    1.12 -- 19 Dec 1989 -- 16:42 -- Operating System: DOS
+!
+! Update 1.3: print names of constrains and detailed limiting factors.
+! Update 1.2: write names of species, types and nutrients to output.
+!
+!  *********************************************************************
+!  *   SUBROUTINE TO PRINT RELEVANT MODEL RESULTS IN UNFORMATTED FILE  *
+!  *********************************************************************
+!
+!
       SUBROUTINE PRINUN (CDATE, TOTAL, PHYT, EXTTOT, EXLIVE, EXDEAD,
      1                   EXTB, T, CSOL, DAY, DEP , ZOOD,ZMAX,GRAMX)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -62,7 +62,7 @@ C
       CHARACTER*8 CDATE
       LOGICAL FIRST
       DATA FIRST /.TRUE./
-C
+!
       IF (FIRST) THEN
          FIRST = .FALSE.
          WRITE (IOU(26)) NUSPEC, NUECOG, NUNUCO, NUROWS, NUGRAZ

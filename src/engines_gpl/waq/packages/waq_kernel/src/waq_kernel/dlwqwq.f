@@ -26,70 +26,70 @@
      *                    SEGFUN , DERIV  , ITIME  , IDT    , ASMASS ,
      *                    IBFLAG , SYNAME , NOCONS , NOFUN  , CONAME ,
      *                    PANAME , FUNAME , SFNAME , NODUMP , IDUMP  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:    march 1988 by L.Postma
-C
-C     FUNCTION            : WATERQUALITY subroutine
-C
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     CONC    REAL   NOTOT*NOSEG  INPUT   Model concentrations, first
-C                                         NOSYS are active and expressed
-C                                         as concentrations, others are
-C                                         inactive, expressed in MASS!!!
-C     CONS    REAL          *     IN/OUT  Model constants
-C     PARAM   REAL    NOPA*NOSEG  IN/OUT  Model parameters
-C     FUNC    REAL          *     IN/OUT  Model functions at ITIME
-C     SEGFUN  REAL   NOSEG*NOSFUN IN/OUT  Segment functions at ITIME
-C     DERIV   REAL   NOTOT*NOSEG  OUTPUT  Model derivatives
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     IDT     INTEGER       1     INPUT   Time step system clock units
-C     ASMASS  REAL  NOTOT*NOSEG*? IN/OUT  mass balance per comp. elems.
-C                                         if IBFLAG = 1
-C     IBFLAG  INTEGER    1        INPUT   if 1 then mass balance p.c.e.
-C     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     CONAME  CHAR*20   NOCONS    INPUT   Constant names
-C     PANAME  CHAR*20   NOPA      INPUT   Parameter names
-C     FUNAME  CHAR*20   NOFUN     INPUT   Function names
-C     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
-C     NODUMP  INTEGER       1     INPUT   Number of monitor points
-C     IDUMP   INTEGER   NODUMP    INPUT   Segment numbers monitor points
-C
-C     ==================================================================
-C
-C          DIMENSION  PARAM (NOPA,NOSEG) , SEGFUN(NOSEG,NOSFUN)
-C
-C     NOTE that previous dimension statement is only correct if
-C          PARAM and NOSFUN are larger than zero, which is not
-C          always the case. The user may insert 2-D dimensioning
-C          for applications with non-zero PARAM and/or NOSFUN.
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:    march 1988 by L.Postma
+!
+!     FUNCTION            : WATERQUALITY subroutine
+!
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     VOLUME  REAL      NOSEG     INPUT   Segment volumes
+!     CONC    REAL   NOTOT*NOSEG  INPUT   Model concentrations, first
+!                                         NOSYS are active and expressed
+!                                         as concentrations, others are
+!                                         inactive, expressed in MASS!!!
+!     CONS    REAL          *     IN/OUT  Model constants
+!     PARAM   REAL    NOPA*NOSEG  IN/OUT  Model parameters
+!     FUNC    REAL          *     IN/OUT  Model functions at ITIME
+!     SEGFUN  REAL   NOSEG*NOSFUN IN/OUT  Segment functions at ITIME
+!     DERIV   REAL   NOTOT*NOSEG  OUTPUT  Model derivatives
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     IDT     INTEGER       1     INPUT   Time step system clock units
+!     ASMASS  REAL  NOTOT*NOSEG*? IN/OUT  mass balance per comp. elems.
+!                                         if IBFLAG = 1
+!     IBFLAG  INTEGER    1        INPUT   if 1 then mass balance p.c.e.
+!     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     CONAME  CHAR*20   NOCONS    INPUT   Constant names
+!     PANAME  CHAR*20   NOPA      INPUT   Parameter names
+!     FUNAME  CHAR*20   NOFUN     INPUT   Function names
+!     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
+!     NODUMP  INTEGER       1     INPUT   Number of monitor points
+!     IDUMP   INTEGER   NODUMP    INPUT   Segment numbers monitor points
+!
+!     ==================================================================
+!
+!          DIMENSION  PARAM (NOPA,NOSEG) , SEGFUN(NOSEG,NOSFUN)
+!
+!     NOTE that previous dimension statement is only correct if
+!          PARAM and NOSFUN are larger than zero, which is not
+!          always the case. The user may insert 2-D dimensioning
+!          for applications with non-zero PARAM and/or NOSFUN.
+!
       CHARACTER*20 SYNAME (NOTOT), CONAME (*), PANAME (*),
      &             FUNAME (*)    , SFNAME (*)
       DIMENSION    VOLUME(NOSEG) , CONC  (NOTOT,NOSEG) , CONS(*) ,
      &             FUNC  (  *  ) , DERIV (NOTOT,NOSEG) ,
      &             PARAM (NOPA,NOSEG) , SEGFUN(NOSEG,NOSFUN),
      &             ASMASS(NOTOT,NOSEG,*), IDUMP(*)
-C
-C          user-defined waterquality processes
-C                -  expressed in mass per time
-C                -  positive derivative is growth
-C                -  DERIV is zero at entrance
-C                -  CONC   may be changed but it has no effect
-C                -  VOLUME may NEVER be changed
-C
+!
+!          user-defined waterquality processes
+!                -  expressed in mass per time
+!                -  positive derivative is growth
+!                -  DERIV is zero at entrance
+!                -  CONC   may be changed but it has no effect
+!                -  VOLUME may NEVER be changed
+!
       RETURN
       END

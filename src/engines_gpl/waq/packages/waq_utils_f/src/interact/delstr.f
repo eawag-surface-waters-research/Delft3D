@@ -21,29 +21,29 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       14 Jan 1990
-C    Time:       15:28
-C    Program:    DELSTR.FOR
-C    Version:    2.2
-C    Programmer: Hans Los
-C    Previous version(s):
-C    2.1 -- 14 Jan 1990 -- 15:04 -- Operating System: DOS
-C    2.0 -- 12 Jan 1990 -- 12:14 -- Operating System: DOS
-C    2.0 -- 12 Jan 1990 -- 12:14 -- Operating System: DOS
-C    1.0 -- 16 Aug 1988 -- 10:36 -- Operating System: DOS
-C
-C FORTRAN function to delimit a character string. This function is
-C is used in Microsoft fortran routines calling HALO.
-C Update 2.0: check if the string is already delimited. If so, leave
-C alone and exit.
-C
+!    Date:       14 Jan 1990
+!    Time:       15:28
+!    Program:    DELSTR.FOR
+!    Version:    2.2
+!    Programmer: Hans Los
+!    Previous version(s):
+!    2.1 -- 14 Jan 1990 -- 15:04 -- Operating System: DOS
+!    2.0 -- 12 Jan 1990 -- 12:14 -- Operating System: DOS
+!    2.0 -- 12 Jan 1990 -- 12:14 -- Operating System: DOS
+!    1.0 -- 16 Aug 1988 -- 10:36 -- Operating System: DOS
+!
+! FORTRAN function to delimit a character string. This function is
+! is used in Microsoft fortran routines calling HALO.
+! Update 2.0: check if the string is already delimited. If so, leave
+! alone and exit.
+!
       INTEGER FUNCTION DELSTR (STRING, NEWSTR, MAXLEN)
       CHARACTER*(*)STRING, NEWSTR
       CHARACTER*80 TMPSTR
       CHARACTER*1  CHAR
       INTEGER MAXLEN, LENSTR, MAXOUT, WIPE, STOS
       DATA MAXOUT /78/
-C
+!
       DELSTR = 0
       LENS = LENSTR (STRING, MAXLEN)
       IF (LENS .GE. MAXOUT) THEN
@@ -59,9 +59,9 @@ C
          NEWSTR (1:LENS) = STRING (1:LENS)
          RETURN
       END IF
-C
-C  Delimite the string.
-C
+!
+!  Delimite the string.
+!
       TMPSTR (1:1) = '|'
       TMPSTR (2:LENS+1) = STRING (1:LENS)
       TMPSTR (LENS+2:LENS+2) = '|'

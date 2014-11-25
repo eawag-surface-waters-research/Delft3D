@@ -81,27 +81,27 @@
       CHARACTER*20, POINTER :: STA_OUT_NAM(:)
       CHARACTER*50, POINTER :: STA_OUT_TXT(:)
       CHARACTER*10, POINTER :: STA_MODNAM(:)
-C
+!
       INTEGER       NKEY  , IPOSR , NSPROC
       CHARACTER*20, POINTER :: KEYNAM(:)
       CHARACTER*20, POINTER :: KEYVAL(:)
       CHARACTER*20, ALLOCATABLE :: KEYNAM2(:)
       CHARACTER*20, ALLOCATABLE :: KEYVAL2(:)
       INTEGER     , POINTER :: NOKEY(:)
-C
+!
       INTEGER       NPERIOD
       CHARACTER*20, POINTER :: PERNAM(:)
       CHARACTER*20, POINTER :: PERSFX(:)
       INTEGER     , POINTER :: PSTART(:)
       INTEGER     , POINTER :: PSTOP(:)
-C
+!
       INTEGER       NSVAI , NSVAO , ISWITR
       CHARACTER*20, POINTER :: VAINAM(:)
       CHARACTER*50, POINTER :: VAITXT(:)
       REAL        , POINTER :: VAIDEF(:)
       CHARACTER*20, POINTER :: VAONAM(:)
       CHARACTER*50, POINTER :: VAOTXT(:)
-C
+!
       INTEGER       IKSTAT, ISTAT , IKEY   , IFOUND, IERR_ALLOC,
      +              NOSTAT, ISPROC, IPERIOD, IRET  , IHULP1    ,
      +              IHULP2
@@ -109,7 +109,7 @@ C
       CHARACTER*4   CH4
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwqs1", ithndl )
-C
+!
       WRITE(LUNREP,2000)
       IPOSR = 0
       CALL RDSTAT ( LUNREP , IPOSR  , NPOS   , CCHAR  , VRSION ,
@@ -117,9 +117,9 @@ C
      +              DTFLG3 , IERR   , NOSTAT , NKEY   , NOKEY  ,
      +              KEYNAM , KEYVAL , NPERIOD, PERNAM , PERSFX ,
      +              PSTART , PSTOP  )
-C
-C     set number of statistical processes (some once , some per period )
-C
+!
+!     set number of statistical processes (some once , some per period )
+!
       IKSTAT = 1
       NSPROC = 0
       DO ISTAT = 1 , NOSTAT
@@ -167,20 +167,20 @@ C
          ENDIF
          IKSTAT = IKSTAT + NOKEY(ISTAT)
       ENDDO
-C
+!
       ALLOCATE (STA_NO_IN(NSPROC))
       ALLOCATE(STA_NO_OUT(NSPROC))
       ALLOCATE(STA_SWITR(NSPROC))
       ALLOCATE(STA_MODNAM(NSPROC))
-c
-c     emergency solution
-c
+!
+!     emergency solution
+!
       ALLOCATE(KEYNAM2(NKEY),KEYVAL2(NKEY))
       KEYNAM2=KEYNAM
       KEYVAL2=KEYVAL
-C
-C     report on periods
-C
+!
+!     report on periods
+!
       WRITE(LUNREP,'(A,I6)') 'Number of periods defined:',NPERIOD
       WRITE(LUNREP,*)
       DO IPERIOD = 1 , NPERIOD
@@ -200,9 +200,9 @@ C
             WRITE(LUNREP,2030) PSTART(IPERIOD),PSTOP(IPERIOD)
          ENDIF
       ENDDO
-C
-C     loop over the ouput operations, setup administration and report
-C
+!
+!     loop over the ouput operations, setup administration and report
+!
       IKSTAT = 1
       ISPROC = 0
       DO ISTAT = 1 , NOSTAT
@@ -321,14 +321,14 @@ C
          WRITE(LUNREP,'(A)') 'END-OUTPUT-OPERATION'
          IKSTAT = IKSTAT + NOKEY(ISTAT)
       ENDDO
-C
+!
       DEALLOCATE (KEYNAM,KEYVAL,NOKEY,STAT=IERR_ALLOC)
       DEALLOCATE (KEYNAM2,KEYVAL2,STAT=IERR_ALLOC)
       NSPROC = ISPROC
-C
+!
   500 CONTINUE
       WRITE ( LUNREP , 3000 ) 10
-C
+!
       if ( timon ) call timstop( ithndl )
       RETURN
  2000 FORMAT ( /,' Output operations')

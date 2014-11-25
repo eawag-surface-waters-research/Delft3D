@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *        SUBROUTINE OPTION TO (RE)SET CONTROL OPTIONS               *
-C  *                     FOR THE PROGRAM                               *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *        SUBROUTINE OPTION TO (RE)SET CONTROL OPTIONS               *
+!  *                     FOR THE PROGRAM                               *
+!  *********************************************************************
+!
       SUBROUTINE OPTION(LOMODE,LPARAM)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -39,7 +39,7 @@ C
       INCLUDE 'sumout.inc'
       INCLUDE 'dynam.inc'
       INCLUDE 'arran.inc'
-C
+!
       PARAMETER (NOPT = 32)
       INTEGER CMS,STOS
       INTEGER OFON(NOPT)
@@ -49,7 +49,7 @@ C
       CHARACTER*11 CHLTIT,PFON,PFOFF
       CHARACTER*8 SUBTIT(6),PRODUC,DIURNA,WBASE(2),WOPTIO(NOPT)
       CHARACTER*8 WORD,WO1,TNAME,WA,OJECT(2)
-C
+!
       DATA WOPTIO /'?       ','ALL     ','CARBON  ','CMS-DOS ',
      1             'CONTINUE','DAYEUPHO','DIURNAL ','DOMINANC',
      2             'DUMP    ','DYNADEAD','DYNAEXT ','END     ',
@@ -74,22 +74,22 @@ C
      1             'Week  * PP  + DP           0.0   0.0',
      2             'Week  * PS  + DS           0.0   0.0'/
       SAVE
-C
-C
-C  NOTE : RUN and CONTINUE/STOP should be specified for each job.
-C  In an interactive job, the first option name should be INTERACT.
-C  From that moment on the program will read user respones fronm unit 30
-C  and prompt for a re-entry in case of an error.
-C
-C  If unspecified, the program will put all options "OFF".
-C
-C
-C
-C  Initiate default option values (turn them "off"
-C
-C  If subroutine OPTION is called by CHANGE, options "RUN" and "STOP"
-C  are automatically reset.
-C
+!
+!
+!  NOTE : RUN and CONTINUE/STOP should be specified for each job.
+!  In an interactive job, the first option name should be INTERACT.
+!  From that moment on the program will read user respones fronm unit 30
+!  and prompt for a re-entry in case of an error.
+!
+!  If unspecified, the program will put all options "OFF".
+!
+!
+!
+!  Initiate default option values (turn them "off"
+!
+!  If subroutine OPTION is called by CHANGE, options "RUN" and "STOP"
+!  are automatically reset.
+!
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       IF (LOMODE .EQ. 1) GO TO 60
       DO 20 I = 1,NOPT
@@ -137,15 +137,15 @@ C
    60 LRUN=0
       LPARAM=0
       LSTOP=1
-C
-C----------------------------------------------------------------------
-C      Start INPUT option mode
-C----------------------------------------------------------------------
-C
-C  Here is the main loop of the program, where all options are read.
-C
+!
+!----------------------------------------------------------------------
+!      Start INPUT option mode
+!----------------------------------------------------------------------
+!
+!  Here is the main loop of the program, where all options are read.
+!
 
-C     RETURN
+!     RETURN
 
    70 IF (POSIT .LT. 0) POSIT = 0
       if (ioflag .eq. 1) call blselect (woptio, nopt, 1071)
@@ -157,19 +157,19 @@ C     RETURN
      2         530,  595,  596,  160,  600,  500,  580,  130,
      3         340,  610,  220,  510,  960,  940,  590,  480,
      4          80), NUMWRD
-C
-C  Error in input option mode.
-C  Terminate in batch mode.
-C
+!
+!  Error in input option mode.
+!  Terminate in batch mode.
+!
    80 CONTINUE
       IF (IOFLAG .EQ. 1) GO TO 90
       WRITE (OUUNI,99990) WO1
       WRITE (OUUNI,99980)
       LRUN=0
       RETURN
-C
-C  In an interactive run, try if a valid CMS command was entered.
-C
+!
+!  In an interactive run, try if a valid CMS command was entered.
+!
    90 CONTINUE
       IRC = CMS (LINE,80)
       POSIT = 0
@@ -179,9 +179,9 @@ C
       GO TO 70
   100 WRITE (OUUNI,99990) WO1
       GO TO 70
-C
-C  Set control parameters for selected options.
-C
+!
+!  Set control parameters for selected options.
+!
   110 IDUMP=1
       OFON(NUMWRD)=1
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
@@ -238,10 +238,10 @@ C
       GO TO 70
   220 LRUN=1
       GO TO 70
-C
-C  Put "GROCHECK" on; check if this option had already been put on
-C  and check for erroneous values of BIOBASS.
-C
+!
+!  Put "GROCHECK" on; check if this option had already been put on
+!  and check for erroneous values of BIOBASS.
+!
   230 CONTINUE
       IF (LGROCH .NE. 1) GO TO 240
       WRITE (OUUNI,99830) WOPTIO(NUMWRD)
@@ -254,14 +254,14 @@ C
       IF (MATCH(WBASE,2,8,WORD,LENWRD,0,NUMWRD) .NE. 1)
      1    NUMWRD=3
        GO TO (270,290,260), NUMWRD
-C
-C  Error in input.
-C
+!
+!  Error in input.
+!
   260 IF (IOFLAG .EQ. 0) GO TO 80
       GO TO 250
-C
-C  Read constant baselevel.
-C
+!
+!  Read constant baselevel.
+!
   270 I=INPTNM(1072,BIOBAS,0,1)
       IF (BIOBAS .LE. 0.0) GO TO 280
       LGBASE = 1
@@ -269,17 +269,17 @@ C
   280 IF (IOFLAG .EQ. 0) GO TO 80
       WRITE (OUUNI,99800) BIOBAS
       GO TO 270
-C
-C  Read fractional baselevel.
-C
+!
+!  Read fractional baselevel.
+!
   290 I=INPTNM(1076,BIOBAS,0,1)
       IF (BIOBAS .GT. 0.0 .AND. BIOBAS .LE. 1.0) GO TO 300
       IF (IOFLAG .EQ. 0) GO TO 80
       WRITE (OUUNI,99790) BIOBAS
       GO TO 290
-C
-C  Change array indices for extra constraints.
-C
+!
+!  Change array indices for extra constraints.
+!
   300 CONTINUE
       NUROWS=NUROWS+NUECOG
       NUSPE1=NUSPE1+NUECOG
@@ -287,9 +287,9 @@ C
       IF (LGBASE .EQ. 1) WRITE (OUUNI,99920) BIOBAS
       IF (LGBASE .EQ. 0) WRITE (OUUNI,99910) BIOBAS
       GO TO 70
-C
-C  Execute CMS or CP command.
-C
+!
+!  Execute CMS or CP command.
+!
   310 CONTINUE
       IF (IOFLAG .EQ. 1) GO TO 320
       WRITE (OUUNI,99780)
@@ -300,15 +300,15 @@ C
       IF(IRC .NE. 0) WRITE (OUUNI,330) IRC
   330 FORMAT (' Return code from CMS: ',I5,'.')
       GO TO 70
-C
-C  Create input file for printplot routines.
-C  Create title and subtitle; read upper limits for plots.
-C  Put unit number for in- and output; rewind plot input units.
-C  Note: use ERR = 370 construction for rewind of console. This is
-C  because microsoft fortran does not permit the console to be rewinded,
-C  where as IBM mainframe requires the console to be rewinded when an
-C  empty line is entered (user hits carriage return).
-C
+!
+!  Create input file for printplot routines.
+!  Create title and subtitle; read upper limits for plots.
+!  Put unit number for in- and output; rewind plot input units.
+!  Note: use ERR = 370 construction for rewind of console. This is
+!  because microsoft fortran does not permit the console to be rewinded,
+!  where as IBM mainframe requires the console to be rewinded when an
+!  empty line is entered (user hits carriage return).
+!
   340 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       LPLOT=1
@@ -336,9 +336,9 @@ C
   430 FORMAT(6X,F6.0,63X,'2')
       WRITE(IPL1,440)
   440 FORMAT(12X,'Predicted (-) and observed (+) chlorophyll')
-C
-C  Read and write nutrient data.
-C
+!
+!  Read and write nutrient data.
+!
       DO 460 K=1,NUNUCO
       TNAME=CSTRA(K)
       IRC = STOS(TNAME,1,8,STRING,LENSTR)
@@ -350,9 +350,9 @@ C
   450 FORMAT(12X,6A8)
   460 CONTINUE
       GO TO 70
-C
-C  Put option "DOMINANCE" on.
-C
+!
+!  Put option "DOMINANCE" on.
+!
   470 LDOM = 1
       OFON(NUMWRD)=1
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
@@ -364,9 +364,9 @@ C
       WRITE (OUUNI,99970) WOPTIO(K)
   490 CONTINUE
       GO TO 70
-C
-C  Set PF-keys to BLOOM commands.
-C
+!
+!  Set PF-keys to BLOOM commands.
+!
   500 CONTINUE
       IRC=CMS(PFON,11)
       IF (IRC .NE. 0) THEN
@@ -377,11 +377,11 @@ C
       OFON(NUMWRD)=1
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
       GO TO 70
-C
-C  Create input file for screenplot routines.
-C  Read upper limits for chlorophyll plot.
-C  Put unit number for in- and output; rewind plot input units.
-C
+!
+!  Create input file for screenplot routines.
+!  Read upper limits for chlorophyll plot.
+!  Put unit number for in- and output; rewind plot input units.
+!
   510 CONTINUE
       LSCR=1
       OFON(NUMWRD)=1
@@ -398,27 +398,27 @@ C
       WRITE(IPL2,440)
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
       GO TO 70
-C
-C  Put "MORCHECK" on; check if this option had already been put on
-C  and check for erroneous values of TOPLEV.
-C
+!
+!  Put "MORCHECK" on; check if this option had already been put on
+!  and check for erroneous values of TOPLEV.
+!
   530 CONTINUE
       IF (LMORCH .NE. 1) GO TO 540
       WRITE (OUUNI,99830) WOPTIO(NUMWRD)
       GO TO 70
   540 LMORCH=1
       OFON(NUMWRD)=1
-C
-C  Read toplevel.
-C
+!
+!  Read toplevel.
+!
   550 I=INPTNM(1078,TOPLEV,0,1)
       IF (TOPLEV .GT. 0.0) GO TO 560
       WRITE (OUUNI,99770) TOPLEV
       IF (IOFLAG .EQ. 0) GO TO 80
       GO TO 550
-C
-C  Change array indices for extra constraints.
-C
+!
+!  Change array indices for extra constraints.
+!
   560 CONTINUE
       NUROWS=NUROWS+NUECOG
       NUSPE1=NUSPE1+NUECOG
@@ -431,45 +431,45 @@ C
          NUMWRD = 13
          GO TO 240
       END IF
-C
-C  Put option "DAYEUPHO" on: compute the euphotic depth and assume that
-C  the actual day length observed by the phytoplankton cells equals the
-C  time spend in the euphotic zone.
-C
+!
+!  Put option "DAYEUPHO" on: compute the euphotic depth and assume that
+!  the actual day length observed by the phytoplankton cells equals the
+!  time spend in the euphotic zone.
+!
   570 LDAYEU=1
       OFON(NUMWRD)=1
       IRC=INPTNM(1079,EULIGH,0,1)
       WRITE (OUUNI,99730) EULIGH
       GO TO 70
-C
-C Put option "PMAX+MOR" on: add the mortality rate constant of each
-C species to the net gross rate in order to compute the gross growth
-C rate. This option is included to maintain compatibility with older
-C program versions.
-C
+!
+! Put option "PMAX+MOR" on: add the mortality rate constant of each
+! species to the net gross rate in order to compute the gross growth
+! rate. This option is included to maintain compatibility with older
+! program versions.
+!
   580 LPMORT=1
       OFON(NUMWRD)=1
       WRITE (OUUNI,99970) WOPTIO(NUMWRD)
       GO TO 70
-C
-C Put option "TEMPLIM" on: set a lower temperature limit for the
-C the growth and mortality rates of all types.
-C
+!
+! Put option "TEMPLIM" on: set a lower temperature limit for the
+! the growth and mortality rates of all types.
+!
   590 LTLIM=1
       OFON(NUMWRD)=1
       IRC=INPTNM(1080,TEMLIM,0,1)
       IRC=INPTNM(1081,BASMOR,0,1)
       WRITE (OUUNI,99710) BASMOR,TEMLIM
       GO TO 70
-C
-C Call subroutine NEWS to print release notes.
-C
+!
+! Call subroutine NEWS to print release notes.
+!
   595 OFON(NUMWRD)=1
       CALL NEWS
       GO TO 70
-C
-C Determine the objective of the model: maximize biomass or growth.
-C
+!
+! Determine the objective of the model: maximize biomass or growth.
+!
   596 CONTINUE
   597 if (ioflag .eq. 1) call blselect (oject, 2, 1082)
       I=INPTDT(1082,WORD,LENWRD)
@@ -483,25 +483,25 @@ C
       OFON(NUMWRD)=1
       WRITE (OUUNI,99690)
       GO TO 70
-C
-C Activate selective dump option.
-C
+!
+! Activate selective dump option.
+!
   960 ISDUMP=1
       OFON(NUMWRD)=1
       IRC = INPTNM(1083,0.0D0,ISDPER(1),2)
       IRC = INPTNM(1084,0.0D0,ISDPER(2),2)
       WRITE (OUUNI,99680) ISDPER(1),ISDPER(2)
       GO TO 70
-C
-C     Return to parameter mode to modify input values.
-C
+!
+!     Return to parameter mode to modify input values.
+!
   600 LPARAM=1
       RETURN
-C
-C----------------------------------------------------------------------
-C       Start RESET option mode
-C----------------------------------------------------------------------
-C
+!
+!----------------------------------------------------------------------
+!       Start RESET option mode
+!----------------------------------------------------------------------
+!
   610 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
   620 if (ioflag .eq. 1) call blselect (woptio, nopt, 1073)
@@ -513,9 +513,9 @@ C
      2         870,  620,  915,  700,  770,  850,  900,  670,
      3         810,  620,  770,  860,  970,  770,  910,  830,
      4        630), NUM2
-C
-C  Error in reset option mode.
-C
+!
+!  Error in reset option mode.
+!
   630 CONTINUE
       WRITE (OUUNI,99900) WA
       IF (IOFLAG .EQ. 0) GO TO 640
@@ -524,9 +524,9 @@ C
       WRITE (OUUNI,99980)
       LRUN=0
       RETURN
-C
-C Reset control parameters for selected options.
-C
+!
+! Reset control parameters for selected options.
+!
   650 IDUMP=0
       OFON(NUM2)=-1
       WRITE (OUUNI,99960) WOPTIO(NUM2)
@@ -574,10 +574,10 @@ C
   770 CONTINUE
       WRITE (OUUNI,99860) WOPTIO(NUM2)
       GO TO 620
-C
-C  Put "GROCHECK" off.
-C  Reset array indices to remove extra constraints.
-C
+!
+!  Put "GROCHECK" off.
+!  Reset array indices to remove extra constraints.
+!
   780 CONTINUE
       IF (LGROCH .EQ. 1) GO TO 790
       WRITE (OUUNI,99810) WOPTIO(NUM2)
@@ -619,10 +619,10 @@ C
       LSCR = 0
       OFON(NUM2)=-1
       GO TO 620
-C
-C  Put "MORCHECK" off.
-C  Reset array indices to remove extra constraints.
-C
+!
+!  Put "MORCHECK" off.
+!  Reset array indices to remove extra constraints.
+!
   870 CONTINUE
       IF (LMORCH .EQ. 1) GO TO 880
       WRITE (OUUNI,99810) WOPTIO(NUM2)
@@ -639,58 +639,58 @@ C
          NUM2 = 13
          GO TO 790
       END IF
-C
-C  Reset option "DAYEUPHO": blooms are computed at the surface daylength
-C
+!
+!  Reset option "DAYEUPHO": blooms are computed at the surface daylength
+!
   890 CONTINUE
       LDAYEU=0
       OFON(NUM2)=-1
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
-C
+!
   900 LPMORT=0
       OFON(NUM2)=-1
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
-C
+!
   910 LTLIM=0
       OFON(NUM2)=-1
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
-C
+!
   915 LOBFUN=0
       OFON(NUM2)=-1
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
-C
+!
   970 ISDUMP=0
       OFON(NUM2)=-1
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
-C
-C----------------------------------------------------------------------
-C       Call SUBROUTINE OPHELP for help
-C----------------------------------------------------------------------
-C
+!
+!----------------------------------------------------------------------
+!       Call SUBROUTINE OPHELP for help
+!----------------------------------------------------------------------
+!
   920 LOPHLP = 0
       CALL OPHELP (WOPTIO,NOPT,LOPHLP)
       IF (LOPHLP .EQ. 0) GO TO 70
       LRUN = 0
       RETURN
-C
-C  Exit after "STOP"/"CONTINUE" has been set.
-C
+!
+!  Exit after "STOP"/"CONTINUE" has been set.
+!
   930 LSTOP=0
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       GO TO 950
   940 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       IF (LPF .EQ. 1) IRC=CMS(PFOFF,11)
-C
-C Exit the subroutine. In a dynamic run check whether both
-C "GROWTHCHECK" and "MORCHECK" have been put on. Do not leave the
-C subroutine until both options have been initialized!
-C
+!
+! Exit the subroutine. In a dynamic run check whether both
+! "GROWTHCHECK" and "MORCHECK" have been put on. Do not leave the
+! subroutine until both options have been initialized!
+!
   950 CONTINUE
       IF (LRUN .EQ. 0) RETURN
       IF (LDYN .EQ. 0) RETURN
@@ -709,9 +709,9 @@ C
       ELSE
          GO TO 70
       END IF
-C
-C  Formats for this subroutine.
-C
+!
+!  Formats for this subroutine.
+!
 99999 FORMAT (' All options have been (re)set to default values',/)
 99990 FORMAT (1X,'Invalid option',1X,A8)
 99980 FORMAT (//,1X,'Execution terminates',//)

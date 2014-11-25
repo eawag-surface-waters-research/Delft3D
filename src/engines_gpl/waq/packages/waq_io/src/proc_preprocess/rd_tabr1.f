@@ -25,56 +25,56 @@
      +                      NO_C_P_MAX  , NO_CONF     ,
      +                      NO_PROC     , CON_PRO     ,
      +                      LUNREP      , IERROR      )
-C
-C     Deltares
-C
-C     CREATED            :  june 1999 by Jan van Beek
-C
-C     FUNCTION           :  Read TABLE_R1 group from NEFIS file
-C
-C     FILES              :  NEFIS file assumed opened
-C
-C     SUBROUTINES CALLED :
-C
-C     ARGUMENTS
-C
-C     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DEFFDS       INT    2993    I/O     Definition file descriptor
-C     DATFDS       INT    999     I/O     Data file descriptor
-C     NO_C_P_MAX   INT            I       maximum number of configurations * processes
-C     NO_CONF      INT            I       number of configurations
-C     NO_PROC      INT            I       number of processes
-C     CON_PRO      INT    NO_CONF*0       configuration process table
-C     LUNREP       INT    1       I       Unit number report file
-C     IERROR       INT    1       O       Error
-C
-C     IMPLICIT NONE for extra compiler checks
-C     SAVE to keep the group definition intact
-C
+!
+!     Deltares
+!
+!     CREATED            :  june 1999 by Jan van Beek
+!
+!     FUNCTION           :  Read TABLE_R1 group from NEFIS file
+!
+!     FILES              :  NEFIS file assumed opened
+!
+!     SUBROUTINES CALLED :
+!
+!     ARGUMENTS
+!
+!     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DEFFDS       INT    2993    I/O     Definition file descriptor
+!     DATFDS       INT    999     I/O     Data file descriptor
+!     NO_C_P_MAX   INT            I       maximum number of configurations * processes
+!     NO_CONF      INT            I       number of configurations
+!     NO_PROC      INT            I       number of processes
+!     CON_PRO      INT    NO_CONF*0       configuration process table
+!     LUNREP       INT    1       I       Unit number report file
+!     IERROR       INT    1       O       Error
+!
+!     IMPLICIT NONE for extra compiler checks
+!     SAVE to keep the group definition intact
+!
       IMPLICIT NONE
       SAVE
-C
-C     declaration of arguments
-C
+!
+!     declaration of arguments
+!
       INTEGER       NO_C_P_MAX  , NO_CONF     ,
      +              NO_PROC     , LUNREP      ,
      +              IERROR
       INTEGER       DEFFDS
       INTEGER       CON_PRO(NO_C_P_MAX)
-C
-C     Local variables
-C
-C     GRPNAM  CHAR*16     1       LOCAL   group name (table)
-C     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
-C     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
-C     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
-C     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
-C     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
-C
+!
+!     Local variables
+!
+!     GRPNAM  CHAR*16     1       LOCAL   group name (table)
+!     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
+!     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
+!     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
+!     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
+!     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
+!
       INTEGER       NELEMS
       PARAMETER   ( NELEMS = 3 )
-C
+!
       INTEGER       I               , IELM          ,
      +              BUFLEN          , NO_CONF_R1    ,
      +              NO_PROC_R1
@@ -83,16 +83,16 @@ C
       CHARACTER*16  GRPNAM
       CHARACTER*16  ELMNMS(NELEMS)  , ELMTPS(NELEMS)
       CHARACTER*64  ELMDES(NELEMS)
-C
-C     External NEFIS Functions
-C
+!
+!     External NEFIS Functions
+!
       INTEGER   GETELS
      +         ,GETELT
       EXTERNAL  GETELS
      +         ,GETELT
-C
-C     element names
-C
+!
+!     element names
+!
       DATA  GRPNAM  /'TABLE_R1'/
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
@@ -100,14 +100,14 @@ C
      +/'NO_CONF_R1'  ,'INTEGER'  , 4,1,1,'number of configurations'    ,
      + 'NO_PROC_R1'  ,'INTEGER'  , 4,1,1,'number of processes'         ,
      + 'CON_PRO'     ,'INTEGER'  , 4,1,0,'unique group identification' /
-C
-C     Read the group
-C
-C     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
+!
+!     Read the group
+!
+!     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
       UINDEX(1) = 1
       UINDEX(2) = 1
       UINDEX(3) = 1
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
       BUFLEN = NBYTSG(1)*ELMDMS(2,1)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(1) ,
@@ -126,7 +126,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
          IERROR = 2
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
       BUFLEN = NBYTSG(2)*ELMDMS(2,2)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(2) ,
@@ -153,13 +153,13 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
          IERROR = 1
          GOTO 900
       ENDIF
-C
-C     Set dimension of table
-C
+!
+!     Set dimension of table
+!
       DO IELM = 3 , NELEMS
          ELMDMS(2,IELM) = NO_CONF*NO_PROC
       ENDDO
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
       BUFLEN = NBYTSG(3)*ELMDMS(2,3)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(3),
@@ -170,8 +170,8 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C
+!
   900 CONTINUE
       RETURN
-C
+!
       END

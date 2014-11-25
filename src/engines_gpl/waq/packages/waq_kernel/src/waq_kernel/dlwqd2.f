@@ -24,71 +24,71 @@
       SUBROUTINE DLWQD2 ( LUNUT , NOSYS , NOTOT , NOSEG , NOQ3 ,
      *                    KMAX  , CONC  , ALENG , NOWARN, OWNERS,
      *                    MYPART )
-C
-C
-C       Forester filter for the vertical.
-C
-C       Then loops over the number of horizontal segments en over the
-C       the number of active substances are made. All these verticals
-C       are filtered at most MAXFIL times.
-C
-C       Everything starts with layer 2 (from the top in WAQ). IL is
-C       the counter here with starting values ISEG+NOSEG. ILU points
-C       to the layer upper (IL-NOSEG) en ILD points to the layer down-
-C       wards (IL+NOSEG).
-C
-C       The from- and to- lengthes are in the ALENG array. The third
-C       direction last. Than means that NOQT-NOQ3+ISEG is the pointer
-C       for the exchange with the layer above and that value plus NOSEG
-C       is the pointer to the exchange downward. The from- value is
-C       the first one that is in the higher layer, The to- value is in
-C       the lower layer. You can check that the to- value for the upper
-C       exchange should equal the from- value for the downward exchange.
-C
-C       The filter starts action if the layer value is over DD larger
-C       than or over DD smaller than both bordering values. If that
-C       the IFIL flag signals a filter step.
-C       The filter corrects the difference that is largest. It does so
-C       by taking half of that difference, or the other difference
-C       which one is smallest. It multiplies this with the smallest
-C       thickness (and unknown A thus with the smallest volume). It
-C       corrects with this mass and divides by the volume (the unknown
-C       A and the thickness) to get a concentration again. This means
-C       that per step at most 0.5 times the largest difference is
-C       corrected.
-C
-C       Because WAQ has halflengthes, you must read "half the volume"
-C       but that does not differ because 0.5/0.5 = 1.0. There is an
-C       upperbound to the coorection that is at 1.0 m thickness in the
-C       original code. Because we work with half distances, it is 0.5
-C       here.
-C
-C       A maximum/minimum of DD remains. This value is a somewhat
-C       strange construct. If you got 0.01 mg Cadmium per liter in
-C       your water you better call on an environmental specialist.
-C
+!
+!
+!       Forester filter for the vertical.
+!
+!       Then loops over the number of horizontal segments en over the
+!       the number of active substances are made. All these verticals
+!       are filtered at most MAXFIL times.
+!
+!       Everything starts with layer 2 (from the top in WAQ). IL is
+!       the counter here with starting values ISEG+NOSEG. ILU points
+!       to the layer upper (IL-NOSEG) en ILD points to the layer down-
+!       wards (IL+NOSEG).
+!
+!       The from- and to- lengthes are in the ALENG array. The third
+!       direction last. Than means that NOQT-NOQ3+ISEG is the pointer
+!       for the exchange with the layer above and that value plus NOSEG
+!       is the pointer to the exchange downward. The from- value is
+!       the first one that is in the higher layer, The to- value is in
+!       the lower layer. You can check that the to- value for the upper
+!       exchange should equal the from- value for the downward exchange.
+!
+!       The filter starts action if the layer value is over DD larger
+!       than or over DD smaller than both bordering values. If that
+!       the IFIL flag signals a filter step.
+!       The filter corrects the difference that is largest. It does so
+!       by taking half of that difference, or the other difference
+!       which one is smallest. It multiplies this with the smallest
+!       thickness (and unknown A thus with the smallest volume). It
+!       corrects with this mass and divides by the volume (the unknown
+!       A and the thickness) to get a concentration again. This means
+!       that per step at most 0.5 times the largest difference is
+!       corrected.
+!
+!       Because WAQ has halflengthes, you must read "half the volume"
+!       but that does not differ because 0.5/0.5 = 1.0. There is an
+!       upperbound to the coorection that is at 1.0 m thickness in the
+!       original code. Because we work with half distances, it is 0.5
+!       here.
+!
+!       A maximum/minimum of DD remains. This value is a somewhat
+!       strange construct. If you got 0.01 mg Cadmium per liter in
+!       your water you better call on an environmental specialist.
+!
       use timers
-C
+!
       INTEGER     LUNUT , NOSYS , NOTOT , NOSEG , NOQ3  , NOWARN
       REAL        CONC(NOTOT,NOSEG) , ALENG(2,NOQ3)
       INTEGER     OWNERS(NOSEG), MYPART
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqd2", ithandl )
-C
+!
       DD     = 1.0E-02
       MAXFIL = 100
-C
-C     Only for structured 3D
-C
+!
+!     Only for structured 3D
+!
       IF ( KMAX .LE. 1 ) goto 9999
-C
+!
       NHOR = NOSEG/KMAX
-C          for all horizontal segments
+!          for all horizontal segments
       DO 40 ISEG = 1 , NHOR
          IF (OWNERS(ISEG).EQ.MYPART) THEN
-C          for all active substances
+!          for all active substances
             DO 30 ISYS = 1 , NOSYS
-C          do until maximum iteration or untill satisfied
+!          do until maximum iteration or untill satisfied
                DO 20 IFILT = 1 , MAXFIL
                   IFIL = 0
                   IL  = ISEG
@@ -100,7 +100,7 @@ C          do until maximum iteration or untill satisfied
                      ILD = ILD + NHOR
                      DR1 = CONC(ISYS,IL) - CONC(ISYS,ILU)
                      DR2 = CONC(ISYS,IL) - CONC(ISYS,ILD)
-C                    test for local maximum
+!                    test for local maximum
                      IF ( DR1 .GT.  DD .AND. DR2 .GT.  DD ) THEN
                         IFIL = 1
                         IF ( DR1 .GT. DR2 ) THEN
@@ -119,7 +119,7 @@ C                    test for local maximum
                            CONC(ISYS,ILD) = CONC(ISYS,ILD) + COEF/DZ2
                         ENDIF
                      ENDIF
-C     test for local minimum
+!     test for local minimum
                      IF ( DR1 .LT. -DD .AND. DR2 .LT. -DD ) THEN
                         IFIL = 1
                         IF ( DR1 .LT. DR2 ) THEN
@@ -148,11 +148,11 @@ C     test for local minimum
    30       CONTINUE
          END IF  ! (owners(iseg.eq.mypart)
    40 CONTINUE
-C
+!
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
  1010 FORMAT ( ' WARNING: Forester filter max. iterations reached for substance: ',
      *         I2,'; segment: ', I6,'; layer: ',I2,' !' )
-C
+!
       END

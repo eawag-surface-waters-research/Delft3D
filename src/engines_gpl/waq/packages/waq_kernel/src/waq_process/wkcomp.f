@@ -27,31 +27,16 @@
 !>\file
 !>       Computes sum parameters from fractions (GEM)
 
-C***********************************************************************
-C
-C     Project : GEM T2087
-C     Author  : Jos van Gils
-C
-C     Date    : 05jun98            Version : 0.00
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     980605  Jos van Gils    Created for integration GEM
-C     121008  Johannes Smits  Modified for sulphur, PAP removed
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
@@ -70,14 +55,14 @@ C     ------   -----  ------------
      J         POC4, PON4, POP4, POS4, DmPOC4, CN4, CP4, CS4
       INTEGER  IFLUX, IKMRK1, ISEG
       INTEGER  IP(80)
-C
+!
       IP = IPOINT
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-C        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-C        IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.2) THEN
-C
+!        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+!        IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.2) THEN
+!
             NO3     = PMSA(IP(1 ))
             NH4     = PMSA(IP(2 ))
             PO4     = PMSA(IP(3 ))
@@ -102,11 +87,11 @@ C
             AAP     = PMSA(IP(22))
             VIVP    = PMSA(IP(23))
             APATP   = PMSA(IP(24))
-C
+!
             DmIM1   = PMSA(IP(25))
             DmIM2   = PMSA(IP(26))
             DmIM3   = PMSA(IP(27))
-C
+!
             PON2    = PMSA(IP(28))
             PON3    = PMSA(IP(29))
             PON4    = PMSA(IP(30))
@@ -118,37 +103,37 @@ C
             POS2    = PMSA(IP(36))
             POS3    = PMSA(IP(37))
             POS4    = PMSA(IP(38))
-C
+!
             POSnoa  = PMSA(IP(39))
-C
+!
             DmPOC1  = PMSA(IP(40))
             DmPOC2  = PMSA(IP(41))
             DmPOC3  = PMSA(IP(42))
             DmPOC4  = PMSA(IP(43))
-C
+!
             TIM = DmIM1*IM1 + DmIM2*IM2 + DmIM3*IM3
-C
+!
             POCnoa = POC1 + POC2 + POC3 + POC4
             POMnoa = POC1*DmPOC1 + POC2*DmPOC2
      J             + POC3*DmPOC3 + POC4*DmPOC4
             PONnoa = PON1 + PON2 + PON3 + PON4
             POPnoa = POP1 + POP2 + POP3 + POP4
             TOSnoa = POS1 + POS2 + POS3 + POS4 + DOS
-C
+!
             POC   = Phyt + POCnoa
             TOC   = POC + DOC
-C
+!
             PON   = AlgN + PONnoa
             TON   = PON + DON
             DIN   = NH4 + NO3
             TotN  = TON + DIN
             Kjel  = TON + NH4
-C
+!
             POP   = AlgP + POPnoa
             TOP   = POP + DOP
             PIP   = AAP + VIVP + APATP
             TotP  = TOP + PO4 + PIP
-C
+!
             IF ( TIM .GT. 0.0 ) THEN
             FrAAP = AAP/TIM
             FrVAP = (VIVP+APATP)/TIM
@@ -156,9 +141,9 @@ C
             FrAAP = 0.0
             FrVAP = 0.0
             ENDIF
-C
+!
             TotSi = AlgSi + POSnoa + Si
-C
+!
             CN1 = 0.0
             CN2 = 0.0
             CN3 = 0.0
@@ -171,7 +156,7 @@ C
             CS2 = 0.0
             CS3 = 0.0
             CS4 = 0.0
-C
+!
             IF (PON1.GT.0.0) CN1 = POC1/PON1
             IF (PON2.GT.0.0) CN2 = POC2/PON2
             IF (PON3.GT.0.0) CN3 = POC3/PON3
@@ -184,38 +169,38 @@ C
             IF (POS2.GT.0.0) CS2 = POC2/POS2
             IF (POS3.GT.0.0) CS3 = POC3/POS3
             IF (POS4.GT.0.0) CS4 = POC4/POS4
-C
+!
             PMSA (IP(44)) = TIM + AlgDM + POMnoa
             PMSA (IP(45)) = TIM + POMnoa
             PMSA (IP(46)) = TIM + AlgDM + POMnoa
             PMSA (IP(47)) = TIM
-C
+!
             PMSA (IP(48)) = AlgDM + POMnoa
             PMSA (IP(49)) = TOC
             PMSA (IP(50)) = POC
-C
+!
             PMSA (IP(51)) = TotN
             PMSA (IP(52)) = Kjel
             PMSA (IP(53)) = DIN
             PMSA (IP(54)) = TON
             PMSA (IP(55)) = PON
-C
+!
             PMSA (IP(56)) = TotP
             PMSA (IP(57)) = TOP
             PMSA (IP(58)) = POP
             PMSA (IP(59)) = PIP
             PMSA (IP(60)) = FrAAP
             PMSA (IP(61)) = FrVAP
-C
+!
             PMSA (IP(62)) = TotSi
-C
+!
             PMSA (IP(63)) = POCnoa
             PMSA (IP(64)) = POMnoa
             PMSA (IP(65)) = PONnoa
             PMSA (IP(66)) = POPnoa
             PMSA (IP(67)) = POSnoa
             PMSA (IP(68)) = TOSnoa
-C
+!
             PMSA (IP(69)) = CN1
             PMSA (IP(70)) = CN2
             PMSA (IP(71)) = CN3
@@ -228,14 +213,14 @@ C
             PMSA (IP(78)) = CS2
             PMSA (IP(79)) = CS3
             PMSA (IP(80)) = CS4
-C
-C        ENDIF
-C
+!
+!        ENDIF
+!
          IFLUX = IFLUX + NOFLUX
          IP    = IP    + INCREM
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

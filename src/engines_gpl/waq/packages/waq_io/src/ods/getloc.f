@@ -24,39 +24,39 @@
       SUBROUTINE GETLOC ( FNAME  , ITYPE  , LOCDEF , MAXDEF , IPRDEP ,
      *                    ITMDEP , MAXLST , LOCLST , LOCTYP , LOCNR  ,
      *                                      NRLST  , IERROR , OPTION )
-C
-C
-C     Deltares        MARINE & COASTAL MANAGEMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : ODS GETLOC routine for DELWAQ HIS-files
-C
-C     SUBROUTINES CALLED :
-C
-C     LOGICAL UNITS      :
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     FNAME   CHAR*256   3        IN/LOC  Complete file name
-C     ITYPE   INTEGER    1        INPUT   File type
-C     LOCDEF  CHAR*20  MAXDEF     INPUT   List with wanted locations
-C     MAXDEF  INTEGER    1        INPUT   Length of LOCDEF
-C     IPRDEP  INTEGER    1        INPUT   Par code for dimensions
-C     ITMDEP  INTEGER    1        INPUT   Time code for dimensions
-C     MAXLST  INTEGER    1        INPUT   Dimension of the output arrays
-C     LOCLST  CHAR*20  MAXLST     OUTPUT  List of locations found
-C     LOCTYP  INTEGER  MAXLST     OUTPUT  List of location types
-C     LOCNR   INTEGER  MAXLST     OUTPUT  List of index nr. locations
-C     NRLST   INTEGER    1        OUTPUT  Nr of parameters found
-C     IERROR  INTEGER    1        OUTPUT  Error code
-C     OPTION  CHAR*256   1        IN/OUT  For future use
-C
-C
+!
+!
+!     Deltares        MARINE & COASTAL MANAGEMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : ODS GETLOC routine for DELWAQ HIS-files
+!
+!     SUBROUTINES CALLED :
+!
+!     LOGICAL UNITS      :
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     FNAME   CHAR*256   3        IN/LOC  Complete file name
+!     ITYPE   INTEGER    1        INPUT   File type
+!     LOCDEF  CHAR*20  MAXDEF     INPUT   List with wanted locations
+!     MAXDEF  INTEGER    1        INPUT   Length of LOCDEF
+!     IPRDEP  INTEGER    1        INPUT   Par code for dimensions
+!     ITMDEP  INTEGER    1        INPUT   Time code for dimensions
+!     MAXLST  INTEGER    1        INPUT   Dimension of the output arrays
+!     LOCLST  CHAR*20  MAXLST     OUTPUT  List of locations found
+!     LOCTYP  INTEGER  MAXLST     OUTPUT  List of location types
+!     LOCNR   INTEGER  MAXLST     OUTPUT  List of index nr. locations
+!     NRLST   INTEGER    1        OUTPUT  Nr of parameters found
+!     IERROR  INTEGER    1        OUTPUT  Error code
+!     OPTION  CHAR*256   1        IN/OUT  For future use
+!
+!
       CHARACTER*256 FNAME(3) , OPTION
       CHARACTER*20  LOCDEF(MAXDEF) , LOCLST(MAXLST)
       DIMENSION     LOCTYP(MAXLST) , LOCNR (MAXLST)
@@ -65,9 +65,9 @@ C
       integer               :: extpos  ! position of extension
       integer               :: extlen  ! length of file extension
       logical               :: mapfil  ! true if map file extension
-C
-C         Open the DELWAQ .HIS file
-C
+!
+!         Open the DELWAQ .HIS file
+!
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
@@ -80,15 +80,15 @@ C
       else
          mapfil = .false.
       endif
-C
-C         Read primary system characteristics
-C
+!
+!         Read primary system characteristics
+!
       READ ( 10 , ERR=100 )   FNAME(3)(1:160)
       READ ( 10 , ERR=110 )   NOTOT, NODUMP
       READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
-C
-C         Read parameter names and try to find the wanted subset
-C
+!
+!         Read parameter names and try to find the wanted subset
+!
       NRLST = 0
       SETALL = .FALSE.
       IF ( LOCDEF(1) .EQ. '*' ) SETALL = .TRUE.
@@ -118,16 +118,16 @@ C
    20       CONTINUE
    30    CONTINUE
    40 CONTINUE
-C
-C         Supply the desired statistics
-C
+!
+!         Supply the desired statistics
+!
    50 DO 60 I1 = 1 , NRLST
          LOCTYP(I1) = 2
    60 CONTINUE
       GOTO 200
-C
-C         Supply the desired statistics
-C
+!
+!         Supply the desired statistics
+!
   100 IERROR = 10
       GOTO 200
   110 IERROR = 11
@@ -135,9 +135,9 @@ C
   120 IERROR = 12
       GOTO 200
   130 IERROR = 13
-C
-C         Close the unit
-C
+!
+!         Close the unit
+!
   200 CLOSE ( 10 )
       RETURN
       END

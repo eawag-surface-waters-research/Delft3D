@@ -21,23 +21,23 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *  SUBROUTINE INTPOL TO PERFORM A LINEAR INTERPOLATION              *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *  SUBROUTINE INTPOL TO PERFORM A LINEAR INTERPOLATION              *
+!  *********************************************************************
+!
       SUBROUTINE INTPOL_bloom (ARRAY,TESTVA,FIRST,LAST)
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 ARRAY(1),TESTVA
       INTEGER FIRST,LAST
-C
-C  Data in the input array ARRAY are linearly interpolated
-C  starting with element FIRST and ending with element LAST.
-C  Missing values for begin and end points are assumed to be equal
-C  to the first (last) number.
-C  The interpolation points are determined by the value TESTVA.
-C  The resulting data are returned in ARRAY.
-C
+!
+!  Data in the input array ARRAY are linearly interpolated
+!  starting with element FIRST and ending with element LAST.
+!  Missing values for begin and end points are assumed to be equal
+!  to the first (last) number.
+!  The interpolation points are determined by the value TESTVA.
+!  The resulting data are returned in ARRAY.
+!
       NFIRST = FIRST
       NLAST = LAST
       DO 5 K=FIRST,LAST
@@ -56,9 +56,9 @@ C
     8 CONTINUE
       ARRAY(FIRST)=ARRAY(NFIRST)
       ARRAY(LAST)=ARRAY(NLAST)
-C
-C  start interpolation.
-C
+!
+!  start interpolation.
+!
       N2=FIRST
       DO 20 K=FIRST,LAST
       IF (ARRAY(K) .EQ. TESTVA) GO TO 20

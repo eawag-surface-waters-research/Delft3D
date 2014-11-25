@@ -22,20 +22,20 @@
 !!  rights reserved.
 
       subroutine scopy (n,sx,incx,sy,incy)
-c
-c     copies a vector, x, to a vector, y.
-c     uses unrolled loops for increments equal to 1.
-c     jack dongarra, linpack, 3/11/78.
-c
+!
+!     copies a vector, x, to a vector, y.
+!     uses unrolled loops for increments equal to 1.
+!     jack dongarra, linpack, 3/11/78.
+!
       real(8) sx(1),sy(1)
       integer i,incx,incy,ix,iy,m,mp1,n
-c
+!
       if(n.le.0)return
       if(incx.eq.1.and.incy.eq.1)go to 20
-c
-c        code for unequal increments or equal increments
-c          not equal to 1
-c
+!
+!        code for unequal increments or equal increments
+!          not equal to 1
+!
       ix = 1
       iy = 1
       if(incx.lt.0)ix = (-n+1)*incx + 1
@@ -46,12 +46,12 @@ c
         iy = iy + incy
    10 continue
       return
-c
-c        code for both increments equal to 1
-c
-c
-c        clean-up loop
-c
+!
+!        code for both increments equal to 1
+!
+!
+!        clean-up loop
+!
    20 m = mod(n,7)
       if( m .eq. 0 ) go to 40
       do 30 i = 1,m

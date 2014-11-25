@@ -21,36 +21,36 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       1 Oct 1992
-C    Time:       12:03
-C    Program:    SIMPLE.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       1 Oct 1992
+!    Time:       12:03
+!    Program:    SIMPLE.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine simple(inflag, mx, nn, nct, a, iro, jc, b, c, ko, zb,
      1 p, jh, x, y, pe, e)
-c               4-69
-c        automatic simplex       redundant equations cause infeasibility
-c               zb(j) replaces kb(j) of earlier versions.  the index for
-c              position in basis is a floating point number.
-c               simple uses subprogram
-c                  find
-c               simple uses double precision version of
-c                  abs, amax1
+!               4-69
+!        automatic simplex       redundant equations cause infeasibility
+!               zb(j) replaces kb(j) of earlier versions.  the index for
+!              position in basis is a floating point number.
+!               simple uses subprogram
+!                  find
+!               simple uses double precision version of
+!                  abs, amax1
       implicit real*8 (a-h,o-z)
       equivalence (xx,ll)
       dimension b(1), c(1), p(1), x(1), y(1), pe(1), e(1)
       dimension zb(1)
-c        real aa,aijt,bb,cost,dt,rcost,texp,tpiv,ty,xold,xx,xy,yi,ymax
+!        real aa,aijt,bb,cost,dt,rcost,texp,tpiv,ty,xold,xx,xy,yi,ymax
       integer inflag, mx, nn, ko(6), jh(1)
       integer i, ia, invc, ir, iter, j, jt, k, kbj, l, ll, m, m2, mm, n
       integer ncut, numvr, nver, numpv
       logical feas, trig, ver, kq
-c        matrix is single dimensioned, with row and column numbers
-c        in separate arrays
+!        matrix is single dimensioned, with row and column numbers
+!        in separate arrays
       real*8 a(1)
       integer iro(1), jc(1)
-c        set initial values, set constant values
+!        set initial values, set constant values
       iter = 0
       numvr = 0
       numpv = 0
@@ -62,7 +62,7 @@ c        set initial values, set constant values
       m2 = m**2
       feas = .false.
       if (inflag.ne.0) go to 30
-c        *          start  phase one with singleton basis
+!        *          start  phase one with singleton basis
       j = 0
       ko(1) = 0
       do 20 ii=1,nct
@@ -80,7 +80,7 @@ c        *          start  phase one with singleton basis
    30 do 40 i=1,m
          jh(i) = -1
    40 continue
-c        create inverse from 'zb' and 'jh'     (step 7)
+!        create inverse from 'zb' and 'jh'     (step 7)
    50 ver = .true.
       invc = 0
       numvr = numvr + 1
@@ -99,7 +99,7 @@ c        create inverse from 'zb' and 'jh'     (step 7)
       jt = 1
    80 if (zb(jt).eq.0.0) go to 130
       go to 290
-c        get column(jt)
+!        get column(jt)
    90 ty = tpiv
       ir = 0
       do 100 i=1,m
@@ -122,21 +122,21 @@ c        get column(jt)
   120 zb(jt) = 0.0
       if (ir.eq.0) go to 130
       go to 400
-c        pivot(ir,jt)
+!        pivot(ir,jt)
   130 jt = jt + 1
       if (jt.le.n) go to 80
       do 140 i=1,m
          if (jh(i).eq.(-1)) jh(i) = 0
          if (jh(i).eq.0) feas = .false.
   140 continue
-c        *          determine feasibility                 (step 1)
+!        *          determine feasibility                 (step 1)
   150 ver = .false.
       if (feas) go to 170
       do 160 i=1,m
          if (x(i).lt.0.0 .or. jh(i).eq.0) go to 190
   160 continue
       feas = .true.
-c        *          get applicable prices                 (step 2)
+!        *          get applicable prices                 (step 2)
   170 do 180 i=1,m
          p(i) = pe(i)
          if (x(i).lt.0.) x(i) = 0.
@@ -164,7 +164,7 @@ c        *          get applicable prices                 (step 2)
             mm = mm + m
   230    continue
   240 continue
-c        *          find minimum reduced cost             (step 3)
+!        *          find minimum reduced cost             (step 3)
   250 jt = 0
       bb = 0.0
       jj = 0
@@ -187,8 +187,8 @@ c        *          find minimum reduced cost             (step 3)
       if (jt.le.0) go to 470
       if (iter.ge.ncut) go to 460
       iter = iter + 1
-c        *          multiply inverse times a(.,jt)        (step 4)
-c             begin subroutine get column(jt)
+!        *          multiply inverse times a(.,jt)        (step 4)
+!             begin subroutine get column(jt)
   290 do 300 i=1,m
          y(i) = 0.0
   300 continue
@@ -211,12 +211,12 @@ c             begin subroutine get column(jt)
          ymax = dmax1(dabs(y(i)),ymax)
   340 continue
       tpiv = ymax*texp
-c        end of get column
+!        end of get column
       if (ver) go to 90
       rcost = ymax/bb
       if (trig .and. bb.ge.(-tpiv)) go to 470
       trig = bb.ge.(-tpiv)
-c        *          select pivot row                      (step 5)
+!        *          select pivot row                      (step 5)
       aa = tpiv
       ir = 0
       if (feas) go to 360
@@ -241,10 +241,10 @@ c        *          select pivot row                      (step 5)
          ir = i
   380 continue
       if (ir.eq.0) go to 450
-c        *          pivot on (ir,jt)                      (step 6)
+!        *          pivot on (ir,jt)                      (step 6)
   390 ia = jh(ir)
       if (ia.gt.0) zb(ia) = 0.0
-c        begin subroutine pivot(ir,jt)
+!        begin subroutine pivot(ir,jt)
   400 numpv = numpv + 1
       jh(ir) = jt
       zb(jt) = ir
@@ -272,27 +272,27 @@ c        begin subroutine pivot(ir,jt)
   440 continue
       y(ir) = -yi
       x(ir) = -xy
-c        end of pivot
+!        end of pivot
       if (ver) go to 130
-c        to step 1 if not inverting, to step 7 if inverting
+!        to step 1 if not inverting, to step 7 if inverting
       if (numpv.le.m) go to 150
       invc = invc + 1
       if (invc.eq.nver) go to 50
       go to 150
-c        *  end of algorithm, set exit values            ***
+!        *  end of algorithm, set exit values            ***
   450 if (.not.feas .or. rcost.le.(-1000.0)) go to 470
-c        infinite solution
+!        infinite solution
       k = 2
       go to 480
-c        problem is cycling perhaps
+!        problem is cycling perhaps
   460 k = 4
       go to 480
-c        feasible or infeasible solution
+!        feasible or infeasible solution
   470 k = 0
   480 if (.not.feas) k = k + 1
       do 490 j=1,n
          kbj = zb(j)
-c        store final solution values in zb
+!        store final solution values in zb
          if (kbj.eq.0) zb(j) = 0.0
          if (kbj.ne.0) zb(j) = x(kbj)
   490 continue

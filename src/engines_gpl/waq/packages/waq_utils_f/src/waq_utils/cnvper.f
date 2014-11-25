@@ -22,51 +22,51 @@
 !!  rights reserved.
 
       SUBROUTINE CNVPER ( CHULP  , IHULP  , DTFLG1 , DTFLG3 , IERR   )
-C
-C
-C     Deltares        SECTOR MARINE AND COASTAL MANAGEMENT
-C
-C     CREATED            : August '02 by Jan van Beek
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : Detects standard timer string period
-C                          converts to system timer
-C
-C     SUBROUTINES CALLED : none
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     CHULP   CHAR*(*)   1         INPUT   string to be analised
-C     IHULP   INTEGER    1         OUTPUT  system timer to get out
-C     DTFLG1  LOGICAL    1         INPUT   TRUE if date format
-C     DTFLG3  LOGICAL    1         INPUT   TRUE if HH instead of SS
-C     IERR    INTEGER    1         OUTPUT  = 1 string is no timer
-C
-C     IN THE COMMON BLOCK:
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     block sysi.inc
-C     ITSTRT  INTEGER    1         INPUT   Simulation start time ( scu )
-C     ITSTOP  INTEGER    1         INPUT   Simulation stop time ( scu )
-C     ISFACT  INTEGER    1         INPUT   system clock in seconds
-C     OTIME   REAL*8     1         INPUT   Julian offset of the real time
-C
-C
+!
+!
+!     Deltares        SECTOR MARINE AND COASTAL MANAGEMENT
+!
+!     CREATED            : August '02 by Jan van Beek
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : Detects standard timer string period
+!                          converts to system timer
+!
+!     SUBROUTINES CALLED : none
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     CHULP   CHAR*(*)   1         INPUT   string to be analised
+!     IHULP   INTEGER    1         OUTPUT  system timer to get out
+!     DTFLG1  LOGICAL    1         INPUT   TRUE if date format
+!     DTFLG3  LOGICAL    1         INPUT   TRUE if HH instead of SS
+!     IERR    INTEGER    1         OUTPUT  = 1 string is no timer
+!
+!     IN THE COMMON BLOCK:
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     block sysi.inc
+!     ITSTRT  INTEGER    1         INPUT   Simulation start time ( scu )
+!     ITSTOP  INTEGER    1         INPUT   Simulation stop time ( scu )
+!     ISFACT  INTEGER    1         INPUT   system clock in seconds
+!     OTIME   REAL*8     1         INPUT   Julian offset of the real time
+!
+!
       CHARACTER*(*) CHULP
       REAL*8        OTIM2  , OTIM3  , JULIAN , AFACT
       LOGICAL       DTFLG1 , DTFLG3
       CHARACTER*20  KEY
-C
-C     COMMON  /  SYSI   /   System timers
-C
+!
+!     COMMON  /  SYSI   /   System timers
+!
       INCLUDE 'sysi.inc'
-C
+!
       IERR = 1
       IF ( CHULP( 5: 5) .NE. '/' .OR. CHULP( 8: 8) .NE. '/' .OR.
      *     CHULP(11:11) .NE. '-' .OR. CHULP(14:14) .NE. ':' .OR.
@@ -77,7 +77,7 @@ C
       READ ( CHULP(12:13) , '(I2)' ) IHOUR
       READ ( CHULP(15:16) , '(I2)' ) IMINUT
       READ ( CHULP(18:19) , '(I2)' ) ISECND
-C
+!
       ISEC   = IYEAR*31536000 + IMONTH*2592000+IDAY*86400+
      +         IHOUR*3600+IMINUT*60+ISECND
       IF ( ISFACT .LT. 0 ) THEN
@@ -85,7 +85,7 @@ C
       ELSE
          IHULP = ISEC/ISFACT
       ENDIF
-C
+!
       IF ( DTFLG3 ) THEN
          IHULP =  IHULP/3600
          IHULP = (IHULP/8760)*100000 + (MOD(IHULP,8760)/24)*100

@@ -21,19 +21,19 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
+!
 
-C  *********************************************************************
+!  *********************************************************************
 
-C  *     SUBROUTINE CLRLIN TO ERASE THE CONTENTS OF THE CURRENT LINE   *
+!  *     SUBROUTINE CLRLIN TO ERASE THE CONTENTS OF THE CURRENT LINE   *
 
-C  *********************************************************************
+!  *********************************************************************
 
-C
+!
 
       SUBROUTINE CLRLIN
 
-C
+!
 
       WRITE (*,10)
 

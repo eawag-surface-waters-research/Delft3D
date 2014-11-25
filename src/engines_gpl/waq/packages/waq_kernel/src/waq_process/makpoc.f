@@ -27,37 +27,23 @@
 !>\file
 !>       Derive OOC from IM-fractions and percentage POM in IMx
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES
-C     Author  : Pascal Boderie
-C     Date    : 940730             Version : 0.04
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     940730  Pascal Boderie  Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Uni
-C ----    --- -  -    -------------------                            ---
-C IMx     R*4 1 I  conversion factor for gX->dry matter substy [gDM/gm3]
-C FrCx    R*4 1 I  percentage OM in sediment x                 [gOC/gDM]
-C POC(x)  R*4 1 I  particulate carbon content                   [gOC/m3]
-C OCPOM   R*4 1 I  Dry weight of Organic Carbonin Part.Org.Mat [gDM/gOC]
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Uni
+! ----    --- -  -    -------------------                            ---
+! IMx     R*4 1 I  conversion factor for gX->dry matter substy [gDM/gm3]
+! FrCx    R*4 1 I  percentage OM in sediment x                 [gOC/gDM]
+! POC(x)  R*4 1 I  particulate carbon content                   [gOC/m3]
+! OCPOM   R*4 1 I  Dry weight of Organic Carbonin Part.Org.Mat [gDM/gOC]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
@@ -65,14 +51,14 @@ C     ------   -----  ------------
       INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, ISEG
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX, LUNREP,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local
-C
+!
+!     Local
+!
       REAL     IM1   , IM2   , IM3
       REAL     FRC1  , FRC2  , FRC3
       REAL     OCPOM
       REAL     poc, POC1  , POC2  , POC3
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -81,12 +67,12 @@ C
       IP6  = IPOINT( 6)
       IP7  = IPOINT( 7)
       IP8  = IPOINT( 8)
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.GT.0) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       IM1   = MAX(0.0, PMSA(IP1))
       IM2   = MAX(0.0, PMSA(IP2))
       IM3   = MAX(0.0, PMSA(IP3))
@@ -95,11 +81,11 @@ C
       FRC3 = PMSA(IP6)
       OCPOM = PMSA(IP7)
 
-C***********************************************************************
-C**** Calculations connected to the POC calculation
-C***********************************************************************
+!***********************************************************************
+!**** Calculations connected to the POC calculation
+!***********************************************************************
 
-C     Calculate amount POC to be made
+!     Calculate amount POC to be made
       IF (OCPOM * FRC1 .LT. 1.0D0) THEN
            POC1  =  FRC1 * IM1 /(1- OCPOM * FRC1)
       ELSE
@@ -136,13 +122,13 @@ C     Calculate amount POC to be made
            CALL SRSTOP( 1 )
       END IF
       
-C     Total POC
+!     Total POC
       POC  = POC1 + POC2 + POC3
 
       PMSA (IP8) = POC
-C
+!
       ENDIF
-C
+!
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
       IP3   = IP3   + INCREM (  3 )
@@ -151,9 +137,9 @@ C
       IP6   = IP6   + INCREM (  6 )
       IP7   = IP7   + INCREM (  7 )
       IP8   = IP8   + INCREM (  8 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

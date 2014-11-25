@@ -34,19 +34,19 @@
 !                          February 2011 by Leo Postma  : Fortran 90 look and feel
 !                                                          support of unformatted and big-endian files
 
-C*********************************************************************
-C     System dependent routine
-C     configuration
-C     PC - WINDOWS operating system - , CDF compiler (ARCH=w32)
-C
-C*********************************************************************
-C     SHARED is used for those files which are optionally prepared
-C     at runtime by another programme, running on-line.
-C     To enable this, the reading is synchronised (DLWQI0, DLWQT4)
-C     Files opened with this option are:
-C     volumes, flows, areas, lengths, segment functions
-C     and harmonics (see local comments)
-C*********************************************************************
+!*********************************************************************
+!     System dependent routine
+!     configuration
+!     PC - WINDOWS operating system - , CDF compiler (ARCH=w32)
+!
+!*********************************************************************
+!     SHARED is used for those files which are optionally prepared
+!     at runtime by another programme, running on-line.
+!     To enable this, the reading is synchronised (DLWQI0, DLWQT4)
+!     Files opened with this option are:
+!     volumes, flows, areas, lengths, segment functions
+!     and harmonics (see local comments)
+!*********************************************************************
 
 !     SUBROUTINE CALLED  : SRSTOP, stopexecution
 

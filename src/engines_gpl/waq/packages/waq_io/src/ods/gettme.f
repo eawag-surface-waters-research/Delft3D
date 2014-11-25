@@ -24,53 +24,53 @@
       SUBROUTINE GETTME ( FNAME  , ITYPE  , TIMDEF , MAXDEF , IPRDEP ,
      *                    LOCDEP , MAXLST , TIMLST , ITMTYP , NRLST  ,
      *                                               IERROR , OPTION )
-C
-C
-C     Deltares        MARINE & COASTAL MANAGEMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : ODS GETTME routine for DELWAQ HIS-files
-C
-C     SUBROUTINES CALLED :
-C
-C     LOGICAL UNITS      :
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     FNAME   CHAR*256   3        IN/LOC  Complete file name
-C     ITYPE   INTEGER    1        INPUT   File type
-C     TIMDEF  REAL*8   2,MAXDEF   INPUT   Wanted start and stop time
-C     MAXDEF  INTEGER    1        INPUT   Wanted time dimension
-C     IPRDEP  INTEGER    1        INPUT   Par code for dimensions
-C     LOCDEP  INTEGER    1        INPUT   Par code for dimensions
-C     MAXLST  INTEGER    1        INPUT   Dimension output arrays
-C     TIMLST  REAL*8   MAXLST     OUTPUT  List with times found
-C     ITMTYP  INTEGER  MAXLST     OUTPUT  List with time types
-C     NRLST   INTEGER    1        OUTPUT  Nr of times found
-C     IERROR  INTEGER    1        OUTPUT  Error code
-C     OPTION  CHAR*256   1        IN/OUT  For future use
-C
-C
+!
+!
+!     Deltares        MARINE & COASTAL MANAGEMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : ODS GETTME routine for DELWAQ HIS-files
+!
+!     SUBROUTINES CALLED :
+!
+!     LOGICAL UNITS      :
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     FNAME   CHAR*256   3        IN/LOC  Complete file name
+!     ITYPE   INTEGER    1        INPUT   File type
+!     TIMDEF  REAL*8   2,MAXDEF   INPUT   Wanted start and stop time
+!     MAXDEF  INTEGER    1        INPUT   Wanted time dimension
+!     IPRDEP  INTEGER    1        INPUT   Par code for dimensions
+!     LOCDEP  INTEGER    1        INPUT   Par code for dimensions
+!     MAXLST  INTEGER    1        INPUT   Dimension output arrays
+!     TIMLST  REAL*8   MAXLST     OUTPUT  List with times found
+!     ITMTYP  INTEGER  MAXLST     OUTPUT  List with time types
+!     NRLST   INTEGER    1        OUTPUT  Nr of times found
+!     IERROR  INTEGER    1        OUTPUT  Error code
+!     OPTION  CHAR*256   1        IN/OUT  For future use
+!
+!
       CHARACTER*256    FNAME (3) , OPTION
       INTEGER          ITMTYP(*)
       DOUBLE PRECISION TIMLST(*) , TIMDEF(2,*) , ATIME , OTIME, SECOND,
      *                 JULIAN
       LOGICAL          SETALL
       EXTERNAL         JULIAN
-C
+!
       REAL, ALLOCATABLE :: RDATA(:)
       character*256         :: ext     ! file extension
       integer               :: extpos  ! position of extension
       integer               :: extlen  ! length of file extension
       logical               :: mapfil  ! true if map file extension
-C
-C         Open the DELWAQ .HIS file
-C
+!
+!         Open the DELWAQ .HIS file
+!
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
@@ -83,9 +83,9 @@ C
       else
          mapfil = .false.
       endif
-C
-C         Read primary system characteristics
-C
+!
+!         Read primary system characteristics
+!
       READ ( 10 , ERR=100 )   FNAME(3)(1:160)
       IF ( FNAME(3)(121:123) .NE. 'T0: ' .AND.
      *     FNAME(3)(121:123) .NE. 't0: ' .AND.
@@ -109,15 +109,15 @@ C
       ITIME  = IHOUR*10000+IMINUT*100+ISECND
       OTIME  = JULIAN ( IDATE , ITIME )
       SECOND = 1/864.00D+02
-C
-C         Read the values at all times
-C
+!
+!         Read the values at all times
+!
       NTT   = NODUMP*NOTOT
       ALLOCATE(RDATA(NTT))
       NRLST = 0
       SETALL = .FALSE.
       IF ( TIMDEF(1,1) .LT. 0.5 ) SETALL = .TRUE.
-C  10 READ ( 10 , ERR=140 , END=200 ) IDUMMY, ( ADUMMY , K=1,NTT )
+!  10 READ ( 10 , ERR=140 , END=200 ) IDUMMY, ( ADUMMY , K=1,NTT )
    10 READ ( 10 , ERR=140 , END=200 ) IDUMMY, ( RDATA(K), K=1,NTT )
       DO 20 I = 1 , MAXDEF
          ATIME = OTIME + IDUMMY*ISFACT*SECOND
@@ -131,9 +131,9 @@ C  10 READ ( 10 , ERR=140 , END=200 ) IDUMMY, ( ADUMMY , K=1,NTT )
          ENDIF
    20 CONTINUE
       GOTO 10
-C
-C         Error messages
-C
+!
+!         Error messages
+!
   100 IERROR = 10
       GOTO 200
   110 IERROR = 11
@@ -147,9 +147,9 @@ C
   150 IERROR = 15
       GOTO 200
   160 IERROR = 16
-C
+!
   200 CLOSE ( 10 )
       IF (ALLOCATED(RDATA)) DEALLOCATE(RDATA)
       RETURN
-C
+!
       END

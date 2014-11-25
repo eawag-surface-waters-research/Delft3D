@@ -21,41 +21,41 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            :
-C
-C     V0.01  040894  Jos van Gils  First version
-C
-C     MODULE              : CHALSP
-C
-C     FUNCTION            : Process aliasses for species names
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NIN     I        1          I       Lenght of array to be modified
-C     NAME    C*(*)    NIN        I/O     Array to be modified
-C     NC      I        1          I       Number of relevant characters
-C     NALIAS  I        1          I       Number of aliases
-C     ALIAS   C*(*)    2,NALIAS   I       Aliases
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            :
+!
+!     V0.01  040894  Jos van Gils  First version
+!
+!     MODULE              : CHALSP
+!
+!     FUNCTION            : Process aliasses for species names
+!
+!     SUBROUTINES CALLED  :
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NIN     I        1          I       Lenght of array to be modified
+!     NAME    C*(*)    NIN        I/O     Array to be modified
+!     NC      I        1          I       Number of relevant characters
+!     NALIAS  I        1          I       Number of aliases
+!     ALIAS   C*(*)    2,NALIAS   I       Aliases
 
       SUBROUTINE CHALIA ( NIN , NAME , NC , NALIAS , ALIAS )
-C
-C     Declarations
-C
+!
+!     Declarations
+!
       INTEGER         NIN   , NC    , NALIAS, J     , K     ,
      J                JOLD  , JNEW
       CHARACTER*(*)   NAME(NIN), ALIAS(2,NALIAS)
       DATA JOLD,JNEW /1,2/
 
-C     Local declarations
+!     Local declarations
 
       DO 200 J = 1,NIN
           DO 100 K = 1,NALIAS
@@ -72,15 +72,15 @@ C     Local declarations
       RETURN
       END
       SUBROUTINE CHALI2 ( NIN , NAME , NC , NALIAS , ALIAS )
-C
-C     Declarations
-C
+!
+!     Declarations
+!
       INTEGER         NIN   , NC    , NALIAS, J     , K     ,
      J                JOLD  , JNEW
       CHARACTER*(*)   NAME(NIN), ALIAS(2,NALIAS)
       DATA JOLD,JNEW /2,1/
 
-C     Local declarations
+!     Local declarations
 
       DO 200 J = 1,NIN
           DO 100 K = 1,NALIAS

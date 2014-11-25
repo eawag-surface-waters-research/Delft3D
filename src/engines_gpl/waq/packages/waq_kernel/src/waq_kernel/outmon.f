@@ -26,46 +26,46 @@
      +                    IP    , ISFLAG, ASMASS, IBFLAG, NOTOT2,
      +                    SYNAM2, CONC2 , ITSTRT, ITSTOP, NDMPAR,
      +                    DANAM )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april 4, 1988 by L.Postma
-C
-C     FUNCTION            : Writes monitoring results to IOUT in
-C                                          blocks of 10 systems.
-C
-C     LOGICAL UNITNUMBERS : IOUT = number of monitoring output file
-C
-C     SUBROUTINES CALLED  : OUTMO1, print routine
-C                           OUTMO2, print routine
-C                           REPTIM, writes time in specific formats
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IOUT    INTEGER     1       INPUT   unit number output file
-C     IDUMP   INTEGER  NODUMP     INPUT   segment numbers for dump
-C     AMASS   REAL     NOTOT*?    INPUT   mass in the whole system
-C     CONC    REAL     NOTOT*?    INPUT   concentration values
-C     AMASS2  REAL     NOTOT*5    INPUT   mass balance whole system
-C     ITIME   INTEGER     1       INPUT   present time in clock units
-C     DNAME   CHAR*20   NODUMP    INPUT   names of monitoring stations
-C     SNAME   CHAR*20   NOTOT     INPUT   names of substances
-C     MNAME   CHAR*40     4       INPUT   model identification
-C     NODUMP  INTEGER     1       INPUT   amount of dump segments
-C     NOTOT   INTEGER     1       INPUT   total number of systems
-C     IP      INTEGER     4       IN/OUT  paging structure
-C     ISFLAG  INTEGER     1       INPUT   if 1 then dd-hh:mm'ss"
-C     ASMASS  REAL NOTOT*NDMPAR*? INPUT   Mass balance per segment
-C     IBFLAG  INTEGER     1       INPUT   Flag = 1 then balances
-C     NOTOT2  INTEGER             INPUT   Number of extra output vars
-C     SYNAM2  CHAR*20             INPUT   Names of extra output vars
-C     CONC2   REAL    NOTOT1*?    INPUT   Value of extra vars
-C     ITSTRT  INTEGER     1       INPUT   start time
-C     ITSTOP  INTEGER     1       INPUT   stop time
-C
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: april 4, 1988 by L.Postma
+!
+!     FUNCTION            : Writes monitoring results to IOUT in
+!                                          blocks of 10 systems.
+!
+!     LOGICAL UNITNUMBERS : IOUT = number of monitoring output file
+!
+!     SUBROUTINES CALLED  : OUTMO1, print routine
+!                           OUTMO2, print routine
+!                           REPTIM, writes time in specific formats
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IOUT    INTEGER     1       INPUT   unit number output file
+!     IDUMP   INTEGER  NODUMP     INPUT   segment numbers for dump
+!     AMASS   REAL     NOTOT*?    INPUT   mass in the whole system
+!     CONC    REAL     NOTOT*?    INPUT   concentration values
+!     AMASS2  REAL     NOTOT*5    INPUT   mass balance whole system
+!     ITIME   INTEGER     1       INPUT   present time in clock units
+!     DNAME   CHAR*20   NODUMP    INPUT   names of monitoring stations
+!     SNAME   CHAR*20   NOTOT     INPUT   names of substances
+!     MNAME   CHAR*40     4       INPUT   model identification
+!     NODUMP  INTEGER     1       INPUT   amount of dump segments
+!     NOTOT   INTEGER     1       INPUT   total number of systems
+!     IP      INTEGER     4       IN/OUT  paging structure
+!     ISFLAG  INTEGER     1       INPUT   if 1 then dd-hh:mm'ss"
+!     ASMASS  REAL NOTOT*NDMPAR*? INPUT   Mass balance per segment
+!     IBFLAG  INTEGER     1       INPUT   Flag = 1 then balances
+!     NOTOT2  INTEGER             INPUT   Number of extra output vars
+!     SYNAM2  CHAR*20             INPUT   Names of extra output vars
+!     CONC2   REAL    NOTOT1*?    INPUT   Value of extra vars
+!     ITSTRT  INTEGER     1       INPUT   start time
+!     ITSTOP  INTEGER     1       INPUT   stop time
+!
+!
       use timers
 
       INTEGER      IOUT  , ITIME , NODUMP, NOTOT , ISFLAG,
@@ -75,35 +75,35 @@ C
      +             ASMASS(NOTOT,NDMPAR,*) , CONC2(*)
       CHARACTER*20 DNAME(*) , SNAME(*) , SYNAM2(*) , DANAM(*)
       CHARACTER*40 MNAME(*)
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       CHARACTER*40 VNAME
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outmon", ithandl )
-C
-C         initialise the paging, accumulation arrays and acumul flag
-C
+!
+!         initialise the paging, accumulation arrays and acumul flag
+!
       IF ( IP(3) .EQ. 0 ) THEN
          IP(3) = MAX(1,IP(1)/(7+(NODUMP+7)*((NOTOT+IP(2)-1)/IP(2))))
          IP(4) = 0
       ENDIF
-C
-C         start printing
-C
+!
+!         start printing
+!
       IF ( MOD(IP(4),IP(3)) .EQ. 0 ) THEN
          WRITE (IOUT,'(''1'')')
          WRITE (IOUT,2100 ) ( MNAME(K),K=1,4)
       ENDIF
       IP(4) = IP(4) + 1
-C
+!
       PERCIT = 100.*(ITIME-ITSTRT)/(ITSTOP-ITSTRT)
       WRITE ( IOUT, 2080 ) PERCIT
       CALL REPTIM ( 6     , ITIME , ISFLAG, PERCIT)
       WRITE ( IOUT, 2000 )
       CALL REPTIM ( IOUT  , ITIME , ISFLAG, -999.0)
       WRITE ( IOUT, *    )
-C
+!
       DO 50 ID = 1 , NOTOT , IP(2)
          NEND = MIN ( NOTOT , ID+IP(2)-1 )
          WRITE (IOUT,2030) (AMASS2(K,1)    ,K=ID,NEND)
@@ -113,7 +113,7 @@ C
          WRITE (IOUT,2070) (AMASS2(K,5)    ,K=ID,NEND)
          WRITE (IOUT,2020) (SNAME(K)( 1:10),K=ID,NEND)
          WRITE (IOUT,2020) (SNAME(K)(11:20),K=ID,NEND)
-C
+!
          VNAME = 'CONCENTRATION'
          CALL OUTMO1 ( IOUT  , IDUMP , CONC  , VNAME , DNAME ,
      *                 NODUMP, ID    , NEND  , NOTOT )
@@ -137,27 +137,27 @@ C
             CALL OUTMO2 ( IOUT  , ASMASS(1,1,6), VNAME , DANAM , NDMPAR,
      +                    ID    , NEND         , NOTOT )
          ENDIF
-C
+!
          WRITE (IOUT,'('' '')')
    50 CONTINUE
-C
-C     extra vars
-C
+!
+!     extra vars
+!
       DO 60 ID = 1 , NOTOT2, IP(2)
          NEND = MIN ( NOTOT2, ID+IP(2)-1 )
          WRITE (IOUT,2020) (SYNAM2(K)( 1:10),K=ID,NEND)
          WRITE (IOUT,2020) (SYNAM2(K)(11:20),K=ID,NEND)
-C
+!
          VNAME = 'VALUE'
          CALL OUTMO2 ( IOUT  , CONC2 , VNAME , DNAME , NODUMP,
      +                 ID    , NEND  , NOTOT2)
-C
+!
          WRITE (IOUT,'('' '')')
    60 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
  2000 FORMAT (//' DUMP OF INTERMEDIATE RESULTS IN SELECTED SEGMENTS')
  2020 FORMAT (22X,10(A10,' '))
  2030 FORMAT (  ' TOTAL MASS IN SYSTEM',10(1P,E11.4))
@@ -167,5 +167,5 @@ C
  2070 FORMAT (  ' BOUNDARY OUTFLOWS   ',10(1P,E11.4))
  2080 FORMAT (' ',F6.2,'% Completed')
  2100 FORMAT (       45X, A40                       )
-C
+!
       END

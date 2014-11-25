@@ -24,37 +24,37 @@
       SUBROUTINE GETMAT ( FNAME  , ITYPE  , IPRCOD , LOC    , TIM    ,
      *                    AMISS  , I3GL   , MAXDIM , DATA   , IERROR ,
      *                                                        OPTION )
-C
-C
-C     Deltares        MARINE & COASTAL MANAGEMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : ODS GETMAT routine for DELWAQ HIS-files
-C
-C     SUBROUTINES CALLED :
-C
-C     LOGICAL UNITS      :
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     FNAME   CHAR*256   3        IN/LOC  Complete file name
-C     ITYPE   INTEGER    1        INPUT   File type
-C     IPRCOD  INTEGER  IERROR     INPUT   List of wanted parameters
-C     LOC     INTEGER   3*3       INPUT   List of indices of locations
-C     TIM     REAL*8     3        INPUT   Interval and step for data
-C     AMISS   REAL*4     2        INPUT   Missing value in output/input
-C     I3GL    INTEGER    1        INPUT   Nonsens
-C     MAXDIM  INTEGER    1        INPUT   Maximum dimension of output arr
-C     DATA    REAL*4   MAXDIM     OUTPUT  The produced information
-C     IERROR  INTEGER    1        IN/OUT  Error code
-C     OPTION  CHAR*256   1        IN/OUT  For future use
-C
-C
+!
+!
+!     Deltares        MARINE & COASTAL MANAGEMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : ODS GETMAT routine for DELWAQ HIS-files
+!
+!     SUBROUTINES CALLED :
+!
+!     LOGICAL UNITS      :
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     FNAME   CHAR*256   3        IN/LOC  Complete file name
+!     ITYPE   INTEGER    1        INPUT   File type
+!     IPRCOD  INTEGER  IERROR     INPUT   List of wanted parameters
+!     LOC     INTEGER   3*3       INPUT   List of indices of locations
+!     TIM     REAL*8     3        INPUT   Interval and step for data
+!     AMISS   REAL*4     2        INPUT   Missing value in output/input
+!     I3GL    INTEGER    1        INPUT   Nonsens
+!     MAXDIM  INTEGER    1        INPUT   Maximum dimension of output arr
+!     DATA    REAL*4   MAXDIM     OUTPUT  The produced information
+!     IERROR  INTEGER    1        IN/OUT  Error code
+!     OPTION  CHAR*256   1        IN/OUT  For future use
+!
+!
       CHARACTER*256 FNAME (3) , OPTION
       DIMENSION     LOC(*)    , DATA(*)
       REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
@@ -64,9 +64,9 @@ C
       integer               :: extpos  ! position of extension
       integer               :: extlen  ! length of file extension
       logical               :: mapfil  ! true if map file extension
-C
-C         Open the DELWAQ .HIS file if needed
-C
+!
+!         Open the DELWAQ .HIS file if needed
+!
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
@@ -79,9 +79,9 @@ C
       else
          mapfil = .false.
       endif
-C
-C         Read primary system characteristics
-C
+!
+!         Read primary system characteristics
+!
       READ ( 10 , ERR=100 )   FNAME(3)(1:160)
       IF ( FNAME(3)(121:123) .NE. 'T0: ' .AND.
      *     FNAME(3)(121:123) .NE. 't0: ' .AND.
@@ -105,19 +105,19 @@ C
       ITIME  = IHOUR*10000+IMINUT*100+ISECND
       OTIME  = JULIAN ( IDATE , ITIME )
       SECOND = ISFACT/864.00D+02
-C
-C         Standard ODS processing
-C
+!
+!         Standard ODS processing
+!
       NTT   = NODUMP*NOTOT
       ISET  = 0
    10 I1 = (LOC(1)-1)*NOTOT + IPRCOD - 1
       I2 = (LOC(2)-LOC(1))/LOC(3)
       I3 =  LOC(3)*NOTOT - 1
       I4 =  NTT - I1 - ( 1 + I3 ) * I2 - 1
-C     READ ( 10 , ERR=150 , END=200 ) IDUMMY , ( DATA(K) , K=1,NTT)
-C     WRITE ( 20 , * ) I1, I2, I3, I4
-C     WRITE ( 20 , * ) IDUMMY
-C     WRITE ( 20 , '(25E12.6)' ) ( DATA(K),K=1,NTT )
+!     READ ( 10 , ERR=150 , END=200 ) IDUMMY , ( DATA(K) , K=1,NTT)
+!     WRITE ( 20 , * ) I1, I2, I3, I4
+!     WRITE ( 20 , * ) IDUMMY
+!     WRITE ( 20 , '(25E12.6)' ) ( DATA(K),K=1,NTT )
       IF ( ISET+I2+1 .GT. MAXDIM ) GOTO 150
       READ ( 10 , ERR=150 , END=200 ) IDUMMY , ( ADUMMY , K=1,I1 ) ,
      *          ( DATA(ISET+K)    , ( ADUMMY , L=1,I3 ) , K=1,I2 ) ,
@@ -127,9 +127,9 @@ C     WRITE ( 20 , '(25E12.6)' ) ( DATA(K),K=1,NTT )
          ISET = ISET + I2 + 1
       ENDIF
       GOTO 10
-C
-C         Error messages
-C
+!
+!         Error messages
+!
   100 IERROR = 10
       GOTO 200
   110 IERROR = 11
@@ -141,45 +141,45 @@ C
   140 IERROR = 14
       GOTO 200
   150 IERROR = 15
-C
+!
   200 CLOSE ( 10 )
       RETURN
-C
+!
       END
       SUBROUTINE GETMAT2( FNAME  , ITYPE  , IPRCOD , LOC    , TIM    ,
      *                    AMISS  , I3GL   , MAXDIM , DATA   , IERROR ,
      *                                                        OPTION )
-C
-C
-C     Deltares        MARINE & COASTAL MANAGEMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : ODS GETMAT routine for DELWAQ HIS-files
-C
-C     SUBROUTINES CALLED :
-C
-C     LOGICAL UNITS      :
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     FNAME   CHAR*256   3        IN/LOC  Complete file name
-C     ITYPE   INTEGER    1        INPUT   File type
-C     IPRCOD  INTEGER  IERROR     INPUT   List of wanted parameters
-C     LOC     INTEGER   3*3       INPUT   List of indices of locations
-C     TIM     REAL*8     3        INPUT   Interval and step for data
-C     AMISS   REAL*4     2        INPUT   Missing value in output/input
-C     I3GL    INTEGER    1        INPUT   Nonsens
-C     MAXDIM  INTEGER    1        INPUT   Maximum dimension of output arr
-C     DATA    REAL*4   MAXDIM     OUTPUT  The produced information
-C     IERROR  INTEGER    1        IN/OUT  Error code
-C     OPTION  CHAR*256   1        IN/OUT  For future use
-C
-C
+!
+!
+!     Deltares        MARINE & COASTAL MANAGEMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : ODS GETMAT routine for DELWAQ HIS-files
+!
+!     SUBROUTINES CALLED :
+!
+!     LOGICAL UNITS      :
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     FNAME   CHAR*256   3        IN/LOC  Complete file name
+!     ITYPE   INTEGER    1        INPUT   File type
+!     IPRCOD  INTEGER  IERROR     INPUT   List of wanted parameters
+!     LOC     INTEGER   3*3       INPUT   List of indices of locations
+!     TIM     REAL*8     3        INPUT   Interval and step for data
+!     AMISS   REAL*4     2        INPUT   Missing value in output/input
+!     I3GL    INTEGER    1        INPUT   Nonsens
+!     MAXDIM  INTEGER    1        INPUT   Maximum dimension of output arr
+!     DATA    REAL*4   MAXDIM     OUTPUT  The produced information
+!     IERROR  INTEGER    1        IN/OUT  Error code
+!     OPTION  CHAR*256   1        IN/OUT  For future use
+!
+!
       CHARACTER*256 FNAME (3) , OPTION
       DIMENSION     LOC(*)    , DATA(*)
       REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
@@ -189,9 +189,9 @@ C
       integer               :: extpos  ! position of extension
       integer               :: extlen  ! length of file extension
       logical               :: mapfil  ! true if map file extension
-C
-C         Open the DELWAQ .HIS file if needed
-C
+!
+!         Open the DELWAQ .HIS file if needed
+!
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
 
@@ -204,9 +204,9 @@ C
       else
          mapfil = .false.
       endif
-C
-C         Read primary system characteristics
-C
+!
+!         Read primary system characteristics
+!
       READ ( 10 , ERR=100 )   FNAME(3)(1:160)
       IF ( FNAME(3)(121:123) .NE. 'T0: ' .AND.
      *     FNAME(3)(121:123) .NE. 't0: ' .AND.
@@ -230,9 +230,9 @@ C
       ITIME  = IHOUR*10000+IMINUT*100+ISECND
       OTIME  = JULIAN ( IDATE , ITIME )
       SECOND = ISFACT/864.00D+02
-C
-C         Standard ODS processing
-C
+!
+!         Standard ODS processing
+!
       NTT   = NODUMP*NOTOT
       ISET  = 0
       DO
@@ -243,9 +243,9 @@ C
             ISET = ISET + NTT
          ENDIF
       ENDDO
-C
-C         Error messages
-C
+!
+!         Error messages
+!
   100 IERROR = 10
       GOTO 200
   110 IERROR = 11
@@ -257,8 +257,8 @@ C
   140 IERROR = 14
       GOTO 200
   150 IERROR = 15
-C
+!
   200 CLOSE ( 10 )
       RETURN
-C
+!
       END

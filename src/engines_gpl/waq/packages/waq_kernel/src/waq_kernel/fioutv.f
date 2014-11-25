@@ -27,53 +27,53 @@
      +                   VOLUME, NOSEG , NOSYS , NODUMP, IDUMP ,
      +                   NX    , NY    , LGRID , IGRID , BOUND ,
      +                   NOLOC , PROLOC, NODEF , DEFAUL)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : may 1993 by Jan van Beek
-C
-C     FUNCTION            : Fills output buffer OUTVAL.
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     PARAMETERS          : 29
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     OUTVAL  REAL    NRVAR,*     OUTPUT  Values for vars on output grid
-C     IOPOIN  INTEGER       *     INPUT   Pointers to arrays for vars
-C     NRVAR   INTEGER       1     INPUT   Number of output vars
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
-C     SEGFUN  REAL   NOSEG,NOSFUN IN/OUT  Segment functions at ITIME
-C     FUNC    REAL          *     IN/OUT  Model functions at ITIME
-C     PARAM   REAL    NOPA,NOSEG  IN/OUT  Model parameters
-C     CONS    REAL          *     IN/OUT  Model constants
-C     IDT     INTEGER       1     INPUT   Simulation timestep
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     NODUMP  INTEGER       1     INPUT   number of dump locations
-C     IDUMP   INTEGER    NODUMP   INPUT   dump segment numbers
-C     NX      INTEGER       1     INPUT   Width of output grid
-C     NY      INTEGER       1     INPUT   Depth of output grid
-C     LGRID   INTEGER     NX*NY   INPUT   grid-layout
-C     IGRID   INTEGER       1     INPUT   Output grid indication
-C     BOUND   REAL     NOTOT*?    INPUT   boundary      values
-C     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
-C     PARAM   REAL   NOLOC,NOSEG  INPUT   Parameters local in PROCES system
-C     NODEF   INTEGER       1     INPUT   Number of used defaults
-C     DEFAUL  REAL          *     INPUT   Default proces parameters
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : may 1993 by Jan van Beek
+!
+!     FUNCTION            : Fills output buffer OUTVAL.
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     PARAMETERS          : 29
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     OUTVAL  REAL    NRVAR,*     OUTPUT  Values for vars on output grid
+!     IOPOIN  INTEGER       *     INPUT   Pointers to arrays for vars
+!     NRVAR   INTEGER       1     INPUT   Number of output vars
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     CONC    REAL   NOTOT,NOSEG  INPUT   Model concentrations
+!     SEGFUN  REAL   NOSEG,NOSFUN IN/OUT  Segment functions at ITIME
+!     FUNC    REAL          *     IN/OUT  Model functions at ITIME
+!     PARAM   REAL    NOPA,NOSEG  IN/OUT  Model parameters
+!     CONS    REAL          *     IN/OUT  Model constants
+!     IDT     INTEGER       1     INPUT   Simulation timestep
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     VOLUME  REAL      NOSEG     INPUT   Segment volumes
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     NODUMP  INTEGER       1     INPUT   number of dump locations
+!     IDUMP   INTEGER    NODUMP   INPUT   dump segment numbers
+!     NX      INTEGER       1     INPUT   Width of output grid
+!     NY      INTEGER       1     INPUT   Depth of output grid
+!     LGRID   INTEGER     NX*NY   INPUT   grid-layout
+!     IGRID   INTEGER       1     INPUT   Output grid indication
+!     BOUND   REAL     NOTOT*?    INPUT   boundary      values
+!     NOLOC   INTEGER       1     INPUT   Number of variables in PROLOC
+!     PARAM   REAL   NOLOC,NOSEG  INPUT   Parameters local in PROCES system
+!     NODEF   INTEGER       1     INPUT   Number of used defaults
+!     DEFAUL  REAL          *     INPUT   Default proces parameters
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
@@ -87,9 +87,9 @@ C
      +           PARAM(*)       , CONS(*)      ,
      +           VOLUME(*)      , BOUND(*)     ,
      +           PROLOC(*)      , DEFAUL(*)
-C
-C     Local
-C
+!
+!     Local
+!
       PARAMETER ( IGSEG = 1 , IGMON = 2 , IGGRD = 3 , IGSUB = 4 )
       PARAMETER ( RMISS = -999. )
       PARAMETER ( NOPRED= 6 )
@@ -97,9 +97,9 @@ C
      +            IODEF , IP
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "fioutv", ithandl )
-C
-C     Pointer offsets
-C
+!
+!     Pointer offsets
+!
       IOCONS = NOPRED + 1
       IOPA   = IOCONS + NOCONS
       IOFUNC = IOPA   + NOPA
@@ -107,9 +107,9 @@ C
       IOCONC = IOSFUN + NOSFUN
       IOLOC  = IOCONC + NOTOT
       IODEF  = IOLOC  + NOLOC
-C
-C     GRID
-C
+!
+!     GRID
+!
       IF ( IGRID .EQ. IGSEG ) THEN
          NOCEL = NOSEG
       ELSEIF ( IGRID .EQ. IGMON ) THEN
@@ -117,13 +117,13 @@ C
       ELSEIF ( IGRID .EQ. IGGRD ) THEN
          NOCEL = NX*NY
       ENDIF
-C
-C     FILL OUTVAL
-C
+!
+!     FILL OUTVAL
+!
       DO 200 ICEL = 1 , NOCEL
-C
-C        What segment ?
-C
+!
+!        What segment ?
+!
          IF ( IGRID .EQ. IGSEG ) THEN
             ISEG = ICEL
          ELSEIF ( IGRID .EQ. IGMON ) THEN
@@ -135,9 +135,9 @@ C
          DO 100 I = 1 , NRVAR
             IICEL = (ICEL-1)*NRVAR+I
             IP = IOPOIN(I)
-C
-C           What value
-C
+!
+!           What value
+!
             IF ( ISEG .LT. 0 ) THEN
                IF ( IP .GE. IOCONC .AND. IP .LT. IOCONC+NOSYS ) THEN
                   IIP = (-ISEG-1)*NOSYS + IP-IOCONC+1
@@ -176,7 +176,7 @@ C
             ENDIF
   100    CONTINUE
   200 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

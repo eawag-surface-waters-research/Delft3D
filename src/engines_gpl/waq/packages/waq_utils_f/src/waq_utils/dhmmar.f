@@ -24,62 +24,62 @@
       MODULE DHMMAR_MOD
       CONTAINS
       SUBROUTINE DHMMAR(LUNREP,J,C,PART)
-C
-C     Deltares
-C
-C     CREATED             : Jun. 1998 by Jan van Beek
-C
-C     FUNCTION            : Sets the array pointers for the array
-C                           administration array's.
-C                           Declares memory.
-C
-C     LOGICAL UNITNUMBERS : LUNREP - monitoring output file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     Deltares
+!
+!     CREATED             : Jun. 1998 by Jan van Beek
+!
+!     FUNCTION            : Sets the array pointers for the array
+!                           administration array's.
+!                           Declares memory.
+!
+!     LOGICAL UNITNUMBERS : LUNREP - monitoring output file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
 
       use partition_arrays ! module for computing the pointers into the arrays
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNREP  INTEGER       1     INPUT   logical unitnumber output file
-C     J       INTEGER       *     OUTPUT  integer workspace array
-C     C       CHAR*20       *     OUTPUT  character workspace array
-C
-C     Declaration of arguments
-C
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNREP  INTEGER       1     INPUT   logical unitnumber output file
+!     J       INTEGER       *     OUTPUT  integer workspace array
+!     C       CHAR*20       *     OUTPUT  character workspace array
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP
       INTEGER       J(:)
       CHARACTER*(*) C(:)
       type(memory_partition), intent(inout) :: part ! Private variables for MAKPTR
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI   /   Timer characteristics
-C
+!
+!     COMMON  /  SYSI   /   Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       CHARACTER(LEN=20 ) :: ARRNAM   ! name of the array for esmfsm
 !     CHARACTER(LEN=256) :: ERRSTR   ! error string from esmfsm routines
-C
+!
       IIAPOI =  IASIZE + 1
       IIATYP =  IASIZE + 2
       IIABYT =  IASIZE + 3
@@ -88,12 +88,12 @@ C
       IIADM1 =  IASIZE + 6
       IIADM2 =  IASIZE + 7
       IIADM3 =  IASIZE + 8
-C
+!
       IIANAM =  IASIZE + IJSIZE + 1
-C
-C     First set and declare memory for array administration
-C     directly use the array with pointers
-C
+!
+!     First set and declare memory for array administration
+!     directly use the array with pointers
+!
       ARRNAM = 'ARRPOI'
       IAPOI  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IAPOI .EQ. 0 ) THEN
@@ -105,7 +105,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IAPOI = IAPOI + 1
-C
+!
       ARRNAM = 'ARRTYP'
       IATYP  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IATYP .EQ. 0 ) THEN
@@ -117,7 +117,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IATYP = IATYP + 1
-C
+!
       ARRNAM = 'ARRBYT'
       IABYT  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IABYT .EQ. 0 ) THEN
@@ -129,7 +129,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IABYT = IABYT + 1
-C
+!
       ARRNAM = 'ARRLEN'
       IALEN  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IALEN .EQ. 0 ) THEN
@@ -141,7 +141,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IALEN = IALEN + 1
-C
+!
       ARRNAM = 'ARRKND'
       IAKND  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IAKND .EQ. 0 ) THEN
@@ -153,7 +153,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IAKND = IAKND + 1
-C
+!
       ARRNAM = 'ARRDM1'
       IADM1  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IADM1 .EQ. 0 ) THEN
@@ -165,7 +165,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IADM1 = IADM1 + 1
-C
+!
       ARRNAM = 'ARRDM2'
       IADM2  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IADM2 .EQ. 0 ) THEN
@@ -177,7 +177,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IADM2 = IADM2 + 1
-C
+!
       ARRNAM = 'ARRDM3'
       IADM3  = MAKPTR(PART, ARRNAM,ITYP ,NOARR)
       IF ( IADM3 .EQ. 0 ) THEN
@@ -189,7 +189,7 @@ C
          CALL SRSTOP(1)
       ENDIF
       IADM3 = IADM3 + 1
-C
+!
       ARRNAM = 'ARRNAM'
       IANAM  = MAKPTR(PART, ARRNAM,CHTYP ,NOARR*20)
       IF ( IANAM .EQ. 0 ) THEN
@@ -201,10 +201,10 @@ C
          CALL SRSTOP(1)
       ENDIF
       IANAM = IANAM + 1
-C
-C
-C     Fill the array's themselves
-C
+!
+!
+!     Fill the array's themselves
+!
       J(IAPOI+IIAPOI-1) = IAPOI
       J(IAPOI+IIATYP-1) = IATYP
       J(IAPOI+IIABYT-1) = IABYT
@@ -214,7 +214,7 @@ C
       J(IAPOI+IIADM2-1) = IADM2
       J(IAPOI+IIADM3-1) = IADM3
       J(IAPOI+IIANAM-1) = IANAM
-C
+!
       J(IATYP+IIAPOI-1) = ITYP
       J(IATYP+IIATYP-1) = ITYP
       J(IATYP+IIABYT-1) = ITYP
@@ -224,7 +224,7 @@ C
       J(IATYP+IIADM2-1) = ITYP
       J(IATYP+IIADM3-1) = ITYP
       J(IATYP+IIANAM-1) = CHTYP
-C
+!
       J(IABYT+IIAPOI-1) = 4
       J(IABYT+IIATYP-1) = 4
       J(IABYT+IIABYT-1) = 4
@@ -234,7 +234,7 @@ C
       J(IABYT+IIADM2-1) = 4
       J(IABYT+IIADM3-1) = 4
       J(IABYT+IIANAM-1) = 20
-C
+!
       J(IALEN+IIAPOI-1) = NOARR
       J(IALEN+IIATYP-1) = NOARR
       J(IALEN+IIABYT-1) = NOARR
@@ -244,7 +244,7 @@ C
       J(IALEN+IIADM2-1) = NOARR
       J(IALEN+IIADM3-1) = NOARR
       J(IALEN+IIANAM-1) = NOARR
-C
+!
       J(IAKND+IIAPOI-1) = 1
       J(IAKND+IIATYP-1) = 1
       J(IAKND+IIABYT-1) = 1
@@ -254,7 +254,7 @@ C
       J(IAKND+IIADM2-1) = 1
       J(IAKND+IIADM3-1) = 1
       J(IAKND+IIANAM-1) = 1
-C
+!
       J(IADM1+IIAPOI-1) = NOARR
       J(IADM1+IIATYP-1) = NOARR
       J(IADM1+IIABYT-1) = NOARR
@@ -264,7 +264,7 @@ C
       J(IADM1+IIADM2-1) = NOARR
       J(IADM1+IIADM3-1) = NOARR
       J(IADM1+IIANAM-1) = NOARR
-C
+!
       J(IADM2+IIAPOI-1) = 1
       J(IADM2+IIATYP-1) = 1
       J(IADM2+IIABYT-1) = 1
@@ -274,7 +274,7 @@ C
       J(IADM2+IIADM2-1) = 1
       J(IADM2+IIADM3-1) = 1
       J(IADM2+IIANAM-1) = 1
-C
+!
       J(IADM3+IIAPOI-1) = 1
       J(IADM3+IIATYP-1) = 1
       J(IADM3+IIABYT-1) = 1
@@ -284,7 +284,7 @@ C
       J(IADM3+IIADM2-1) = 1
       J(IADM3+IIADM3-1) = 1
       J(IADM3+IIANAM-1) = 1
-C
+!
       C(IIAPOI) = 'ARRPOI'
       C(IIATYP) = 'ARRTYP'
       C(IIABYT) = 'ARRBYT'
@@ -294,7 +294,7 @@ C
       C(IIADM2) = 'ARRDM2'
       C(IIADM3) = 'ARRDM3'
       C(IIANAM) = 'ARRNAM'
-C
+!
       RETURN
  2010 FORMAT ( ' ERROR  : allocating administration array')
  2020 FORMAT ( ' name   : ',A)

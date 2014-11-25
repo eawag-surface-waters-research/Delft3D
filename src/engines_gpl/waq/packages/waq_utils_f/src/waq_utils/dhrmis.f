@@ -22,35 +22,35 @@
 !!  rights reserved.
 
       LOGICAL FUNCTION DHRMIS (VALUE)
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED       : june  1993 BY J.K.L. van Beek
-C
-C     FUNCTION      : Checks if a real value is "missing"
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS         : 1
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     VALUE   REAL        1       INPUT   Value to be checked
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED       : june  1993 BY J.K.L. van Beek
+!
+!     FUNCTION      : Checks if a real value is "missing"
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS         : 1
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     VALUE   REAL        1       INPUT   Value to be checked
+!
       REAL    VALUE
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       PARAMETER ( RMISS = -999. )
-C
-C     Check
-C
+!
+!     Check
+!
       IF ( VALUE .EQ. RMISS ) THEN
          DHRMIS = .TRUE.
       ELSE
          DHRMIS = .FALSE.
       ENDIF
-C
+!
       RETURN
       END

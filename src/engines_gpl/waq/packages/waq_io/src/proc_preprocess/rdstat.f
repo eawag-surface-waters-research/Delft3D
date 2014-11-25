@@ -26,50 +26,50 @@
      +                    DTFLG3 , IERR   , NOSTAT , NKEY   , NOKEY  ,
      +                    KEYNAM , KEYVAL , NPERIOD, PERNAM , PERSFX ,
      +                    PSTART , PSTOP  )
-C
-C
-C     Deltares
-C
-C     CREATED            : Feb 2002 by Jan van Beek
-C
-C     FUNCTION           : Reads statistical output spec. block 10
-C
-C     SUBROUTINES CALLED : RDTOK1 tokenized data file reading
-C
-C     LOGICAL UNITS      : LUNIN = unit formatted inputfile
-C                          LUNREP= unit formatted outputfile
-C
-C     PARAMETERS         :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     IPOSR   INTEGER  1           IN/OUT  position on input record
-C     NPOS    INTEGER  1           INPUT   length of input record
-C     CCHAR   CHAR*1   1           INPUT   comment character
-C     VERSION REAL     1           INPUT   program version number
-C     ILUN    INTEGER  LSTACK      IN/OUT  unit number stack
-C     LCH     CHAR*(*) LSTACK      IN/OUT  Filename stack
-C     LSTACK  INTEGER  1           INPUT   size of the stack
-C     IOUTPT  INTEGER  1           INPUT   output file option
-C     DTFLG1  LOGICAL  1           INPUT   'date'-format 1st timescale
-C     DTFLG3  LOGICAL  1           INPUT   'date'-format (F;ddmmhhss,T;yydddhh)
-C     IERR    INTEGER  1           IN/OUT  Cumulative error count
-C     NOSTAT  INTEGER  1           OUTPUT  number of statistical processes
-C     NKEY    INTEGER  1           OUTPUT  total number of keywords
-C     NOKEY   INTEGER  NOSTAT      OUTPUT  number of keywords per stat. proc.
-C     KEYNAM  CHAR*20  NKEY        OUTPUT  names of the keywords read
-C     KEYVAL  CHAR*20  NKEY        OUTPUT  values of the keywords
-C     NPERIOD INTEGER  1           OUTPUT  number of periods
-C     PERNAM  CHAR*20  NPERIOD     OUTPUT  period name
-C     PERSFX  CHAR*20  NPERIOD     OUTPUT  period suffix
-C     PSTART  INTEGER  NPERIOD     OUTPUT  period start
-C     PSTOP   INTEGER  NPERIOD     OUTPUT  period stop
-C
+!
+!
+!     Deltares
+!
+!     CREATED            : Feb 2002 by Jan van Beek
+!
+!     FUNCTION           : Reads statistical output spec. block 10
+!
+!     SUBROUTINES CALLED : RDTOK1 tokenized data file reading
+!
+!     LOGICAL UNITS      : LUNIN = unit formatted inputfile
+!                          LUNREP= unit formatted outputfile
+!
+!     PARAMETERS         :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     IPOSR   INTEGER  1           IN/OUT  position on input record
+!     NPOS    INTEGER  1           INPUT   length of input record
+!     CCHAR   CHAR*1   1           INPUT   comment character
+!     VERSION REAL     1           INPUT   program version number
+!     ILUN    INTEGER  LSTACK      IN/OUT  unit number stack
+!     LCH     CHAR*(*) LSTACK      IN/OUT  Filename stack
+!     LSTACK  INTEGER  1           INPUT   size of the stack
+!     IOUTPT  INTEGER  1           INPUT   output file option
+!     DTFLG1  LOGICAL  1           INPUT   'date'-format 1st timescale
+!     DTFLG3  LOGICAL  1           INPUT   'date'-format (F;ddmmhhss,T;yydddhh)
+!     IERR    INTEGER  1           IN/OUT  Cumulative error count
+!     NOSTAT  INTEGER  1           OUTPUT  number of statistical processes
+!     NKEY    INTEGER  1           OUTPUT  total number of keywords
+!     NOKEY   INTEGER  NOSTAT      OUTPUT  number of keywords per stat. proc.
+!     KEYNAM  CHAR*20  NKEY        OUTPUT  names of the keywords read
+!     KEYVAL  CHAR*20  NKEY        OUTPUT  values of the keywords
+!     NPERIOD INTEGER  1           OUTPUT  number of periods
+!     PERNAM  CHAR*20  NPERIOD     OUTPUT  period name
+!     PERSFX  CHAR*20  NPERIOD     OUTPUT  period suffix
+!     PSTART  INTEGER  NPERIOD     OUTPUT  period start
+!     PSTOP   INTEGER  NPERIOD     OUTPUT  period stop
+!
       use timers       !   performance timers
       USE      DHRALLOC
 
       IMPLICIT NONE
-C
+!
       INTEGER       LUNREP , IPOSR  , NPOS   , LSTACK , IOUTPT ,
      +              IERR   , NOSTAT , NKEY
       LOGICAL       DTFLG1 , DTFLG3
@@ -85,9 +85,9 @@ C
       CHARACTER*20, POINTER :: PERSFX(:)
       INTEGER     , POINTER :: PSTART(:)
       INTEGER     , POINTER :: PSTOP(:)
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER       NPKEY  , NKEYPER, NKEYPAR, IPAR
       PARAMETER   ( NPKEY = 4 )
       PARAMETER   ( NKEYPER = 4 )
@@ -104,7 +104,7 @@ C
       integer       istart, istop
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "rdstat", ithndl )
-C
+!
       NOSTAT = 0
       NKEY   = 0
       MAXSTAT = 10
@@ -118,16 +118,16 @@ C
       ALLOCATE(PERSFX(MPERIOD))
       ALLOCATE(PSTART(MPERIOD))
       ALLOCATE(PSTOP (MPERIOD))
-C
+!
       KEYS(1) = 'VERSION'
       KEYS(2) = 'MINOR'
       KEYS(3) = 'PERIOD'
       KEYS(4) = 'OUTPUT-OPERATION'
-C
+!
       KEYPAR(1) = 'real-parameter'
       KEYPAR(2) = 'time-parameter'
       KEYPAR(3) = 'logical-parameter'
-C
+!
   100 CONTINUE
          ITYPE = 0
          CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR  ,
@@ -157,27 +157,27 @@ C
             IERR = IERR + 1
             GOTO 100
          ELSEIF ( IKEY .EQ. 1 ) THEN
-C
-C           version
-C
+!
+!           version
+!
             ITYPE = 2
             CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR  ,
      +                    IPOSR  , NPOS   , CDUMMY , VERSTAT, ADUMMY ,
      +                                               ITYPE  , IERR2  )
             IF ( IERR2 .NE. 0 ) GOTO 900
          ELSEIF ( IKEY .EQ. 2 ) THEN
-C
-C           minor
-C
+!
+!           minor
+!
             ITYPE = 2
             CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR  ,
      +                    IPOSR  , NPOS   , CDUMMY , MINSTAT, ADUMMY ,
      +                                               ITYPE  , IERR2  )
             IF ( IERR2 .NE. 0 ) GOTO 900
          ELSEIF ( IKEY .EQ. 3 ) THEN
-C
-C           period
-C
+!
+!           period
+!
             NPERIOD = NPERIOD + 1
             IF ( NPERIOD .GT. MPERIOD ) THEN
                MPERIOD = 2*MPERIOD
@@ -199,16 +199,16 @@ C
             CALL DLWQ0T ( KEY, istop, .FALSE., .FALSE., IERR2 )
             PSTOP (NPERIOD) = istop
             WRITE(PERSFX(NPERIOD),'(''period'',i2.2)') NPERIOD
-C
-C           suffix,start, stop, more ?
-C
+!
+!           suffix,start, stop, more ?
+!
   200       CONTINUE
             ITYPE = 0
             CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR  ,
      +                    IPOSR  , NPOS   , KNAM   , IDUMMY , ADUMMY ,
      +                                               ITYPE  , IERR2  )
             IF ( IERR2 .NE. 0 ) GOTO 900
-C
+!
             KEYPER(1) = 'SUFFIX'
             KEYPER(2) = 'START-TIME'
             KEYPER(3) = 'STOP-TIME'
@@ -220,20 +220,20 @@ C
                IERR = IERR + 1
                GOTO 200
             ELSEIF ( IKEY2 .EQ. 1 ) THEN
-C
-C              SUFFIX
-C
+!
+!              SUFFIX
+!
                ITYPE = 0
                CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR ,
      +                       IPOSR  , NPOS   , KNAM   , IDUMMY , ADUMMY,
      +                                                  ITYPE  , IERR2 )
                IF ( IERR2 .NE. 0 ) GOTO 900
                PERSFX(NPERIOD) = KNAM
-C
+!
             ELSEIF ( IKEY2 .EQ. 2 ) THEN
-C
-C              START-TIME
-C
+!
+!              START-TIME
+!
                ITYPE = -3
                CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR ,
      +                       IPOSR  , NPOS   , KNAM   , IDUMMY , ADUMMY,
@@ -251,11 +251,11 @@ C
                   CALL CNVTIM ( istart, 1     , DTFLG1 , DTFLG3 )
                ENDIF
                PSTART(NPERIOD) = istart
-C
+!
             ELSEIF ( IKEY2 .EQ. 3 ) THEN
-C
-C              STOP-TIME
-C
+!
+!              STOP-TIME
+!
                ITYPE = -3
                CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR ,
      +                       IPOSR  , NPOS   , KNAM   , IDUMMY , ADUMMY,
@@ -272,52 +272,52 @@ C
                   CALL CNVTIM ( istop , 1     , DTFLG1 , DTFLG3 )
                ENDIF
                PSTOP(NPERIOD) = istop
-C
+!
             ELSEIF ( IKEY2 .EQ. 4 ) THEN
-C
-C              END-PERIOD
-C
+!
+!              END-PERIOD
+!
                GOTO 100
-C
+!
             ENDIF
-C
+!
             GOTO 200
-C
+!
          ELSEIF ( IKEY .EQ. 4 ) THEN
-C
-C           statistical operation
-C
+!
+!           statistical operation
+!
             NOSTAT = NOSTAT + 1
             IF ( NOSTAT .GT. MAXSTAT ) THEN
                MAXSTAT = 2*MAXSTAT
                CALL DHRALLOC_INT(NOKEY,MAXSTAT,NOSTAT-1)
             ENDIF
             NOKEY(NOSTAT) = 0
-C
+!
   300       CONTINUE
-C
-C           check if it a parameter with extra key word real-parameter, time-parameter, logical-parameter, ?integer-parameter
-C
+!
+!           check if it a parameter with extra key word real-parameter, time-parameter, logical-parameter, ?integer-parameter
+!
             CALL ZOEK (KNAM,3,KEYPAR,20,IPAR)
             IF ( IPAR .GT. 0 ) THEN
-C
-C              get real KNAM
-C
+!
+!              get real KNAM
+!
                ITYPE = 0
                CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR ,
      +                       IPOSR  , NPOS   , KNAM   , IDUMMY , ADUMMY,
      +                                                  ITYPE  , IERR2 )
                IF ( IERR2 .NE. 0 ) GOTO 900
-C
+!
             ENDIF
 
-C
+!
             ITYPE = 0
             CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR  ,
      +                    IPOSR  , NPOS   , KVAL   , IDUMMY , ADUMMY ,
      +                                               ITYPE  , IERR2  )
             IF ( IERR2 .NE. 0 ) GOTO 900
-C
+!
             NOKEY(NOSTAT)= NOKEY(NOSTAT) + 1
             NKEY         = NKEY + 1
             IF ( NKEY .GT. MAXKEY ) THEN
@@ -327,29 +327,29 @@ C
             ENDIF
             KEYNAM(NKEY) = KNAM
             KEYVAL(NKEY) = KVAL
-C
+!
             ITYPE = 0
             CALL RDTOK1 ( LUNREP , ILUN   , LCH    , LSTACK , CCHAR  ,
      +                    IPOSR  , NPOS   , KNAM   , IDUMMY , ADUMMY ,
      +                                               ITYPE  , IERR2  )
             IF ( IERR2 .NE. 0 ) GOTO 900
-C
+!
             KEY = 'END-OUTPUT-OPERATION'
             CALL ZOEK (KNAM,1,KEY,20,IKEY)
             IF ( IKEY .LE. 0 ) THEN
                GOTO 300
             ENDIF
          ENDIF
-C
-C        next keyword
-C
+!
+!        next keyword
+!
          GOTO 100
-C
+!
   500 CONTINUE
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
-C
+!
   900 CONTINUE
       IF ( IERR2 .EQ. 3 ) THEN
          WRITE(LUNREP,*) 'ERROR : unexpected end of input file'
@@ -361,5 +361,5 @@ C
       IERR = IERR + 1
       if (timon) call timstop( ithndl )
       RETURN
-C
+!
       END

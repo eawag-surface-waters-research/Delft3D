@@ -27,78 +27,65 @@
 !>\file
 !>       Total heat flux for surface water absolute temperature model
 
-C***********************************************************************
-C
-C     Project : Temperatuursmodellering Maas 2003 Q3527
-C     Author  : Annette Kuin
-C     Date    : 030707             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     030707  Annette Kuin    total heat flux for surface water
-C     161006  PBO3            Bowen ratio
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C beta    R*4 1 L Bowens constant                                [mbar/°C]
-C cloud   R*4 1 L Cloud coverage (fraction)                            [-]
-C cpa     R*4 1 I Specific heat capacity of air                   [J/kg,K]
-C cp      R*4 1 I Specific heat capacity of water                [J/kg,°C]
-C CwindA  R*4 1 I Coefficient in wind function a                       [-]
-C CwindB  R*4 1 I Coefficient in wind function b                       [-]
-C CwindC  R*4 1 I Coefficient in wind function c                       [-]
-C DeltaT  R*4 1 I Correction factor for TempWa near discharge          [-]
-C Depth   R*4 1 I Water depth of segment                               [m]
-C dTemp   R*4 1 O Flux on water temperature                         [°C/d]
-C Emiss   R*4 1 L Emissivity (colour factor) for the atmosphere        [-]
-C EWater  R*4 1 I Emissivity (colour factor) of surface water          [-]
-C Fa      R*4 1 I Reflection factor for Qa                             [-]
-C Fsw     R*4 1 I Reflection factor for Qsw                            [-]
-C Fwind   R*4 1 L Wind function for evaporation                 [m/s,mbar]
-C Fwind2  R*4 1 L Wind function for evaporation, incl corr.    [W/m2,mbar]
-C Ha      R*4 1 I Height of wind speed needed for wind function        [m]
-C Hm      R*4 1 I Height at which wind speed is measured               [m]
-C HTVap   R*4 1 L Heat of evaporation                               [J/kg]
-C HTVap   R*4 1 L Heat of evaporation at reference temperature      [J/kg]
-C K       R*4 1 I Roughness coef for calculation vwind                 [-]
-C Patm    R*4 1 I Air pressure                                 [mb of HPa]
-C Pvap    R*4 1 L Actual vapour pressure in air                     [mbar]
-C Psvap   R*4 1 L Saturated vapour pressure in air                  [mbar]
-C PvapWa  R*4 1 L Saturated vapour pressure at water-air interface  [mbar]
-C Qa      R*4 1 L Long wave atmospheric radiation reaching water    [W/m2]
-C Qan     R*4 1 L Non refl. (net) atm. long wave rad. reaching water[W/m2]
-C Qbr     R*4 1 L Long wave back radiation from water               [W/m2]
-C Ql      R*4 1 L Latent heat flux by evaporation or condensation   [W/m2]
-C Qrb     R*4 1 I Heat exchange between water and riverbed          [W/m2]
-C Qsg     R*4 1 L Sensible heat of conduction                       [W/m2]
-C Qsn     R*4 1 L Non refl. (net) short wave rad. reaching water    [W/m2]
-C Qsw     R*4 1 L Short wave radiation reaching water               [W/m2]
-C Qt      R*4 1 L Total heat flux                                   [W/m2]
-C RatBow  R*4 1 L Bowens ratio                                         [-]
-C RelHum  R*4 1 I Relative air humidity                                [%]
-C Rho0    R*4 1 I Density of surface water at 4°C                  [kg/m3]
-C RhoRef  R*4 1 L Density of surface water at reference temperature[kg/m3]
-C SBC     R*4 1 I StefanBolzman Constant                        [W/m2/K-4]
-C SunFac  R*4 1 I Percentage sunshine                                  [%]
-C SWEmis  R*4 1 I Switch for calculation of emissivity                 [-]
-C TempAt  R*4 1 I Air temperature                                     [°C]
-C TempWa  R*4 1 I Surface water temperature                           [°C]
-C Tref    R*4 1 I Reference water temperature for wind function       [°C]
-C Vevap   R*4 1 L Evaporation rate                                   [m/s]
-C VWinda  R*4 1 L Calculated wind speed                              [m/s]
-C VWindm  R*4 1 I Measured wind speed                                [m/s]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! beta    R*4 1 L Bowens constant                                [mbar/°C]
+! cloud   R*4 1 L Cloud coverage (fraction)                            [-]
+! cpa     R*4 1 I Specific heat capacity of air                   [J/kg,K]
+! cp      R*4 1 I Specific heat capacity of water                [J/kg,°C]
+! CwindA  R*4 1 I Coefficient in wind function a                       [-]
+! CwindB  R*4 1 I Coefficient in wind function b                       [-]
+! CwindC  R*4 1 I Coefficient in wind function c                       [-]
+! DeltaT  R*4 1 I Correction factor for TempWa near discharge          [-]
+! Depth   R*4 1 I Water depth of segment                               [m]
+! dTemp   R*4 1 O Flux on water temperature                         [°C/d]
+! Emiss   R*4 1 L Emissivity (colour factor) for the atmosphere        [-]
+! EWater  R*4 1 I Emissivity (colour factor) of surface water          [-]
+! Fa      R*4 1 I Reflection factor for Qa                             [-]
+! Fsw     R*4 1 I Reflection factor for Qsw                            [-]
+! Fwind   R*4 1 L Wind function for evaporation                 [m/s,mbar]
+! Fwind2  R*4 1 L Wind function for evaporation, incl corr.    [W/m2,mbar]
+! Ha      R*4 1 I Height of wind speed needed for wind function        [m]
+! Hm      R*4 1 I Height at which wind speed is measured               [m]
+! HTVap   R*4 1 L Heat of evaporation                               [J/kg]
+! HTVap   R*4 1 L Heat of evaporation at reference temperature      [J/kg]
+! K       R*4 1 I Roughness coef for calculation vwind                 [-]
+! Patm    R*4 1 I Air pressure                                 [mb of HPa]
+! Pvap    R*4 1 L Actual vapour pressure in air                     [mbar]
+! Psvap   R*4 1 L Saturated vapour pressure in air                  [mbar]
+! PvapWa  R*4 1 L Saturated vapour pressure at water-air interface  [mbar]
+! Qa      R*4 1 L Long wave atmospheric radiation reaching water    [W/m2]
+! Qan     R*4 1 L Non refl. (net) atm. long wave rad. reaching water[W/m2]
+! Qbr     R*4 1 L Long wave back radiation from water               [W/m2]
+! Ql      R*4 1 L Latent heat flux by evaporation or condensation   [W/m2]
+! Qrb     R*4 1 I Heat exchange between water and riverbed          [W/m2]
+! Qsg     R*4 1 L Sensible heat of conduction                       [W/m2]
+! Qsn     R*4 1 L Non refl. (net) short wave rad. reaching water    [W/m2]
+! Qsw     R*4 1 L Short wave radiation reaching water               [W/m2]
+! Qt      R*4 1 L Total heat flux                                   [W/m2]
+! RatBow  R*4 1 L Bowens ratio                                         [-]
+! RelHum  R*4 1 I Relative air humidity                                [%]
+! Rho0    R*4 1 I Density of surface water at 4°C                  [kg/m3]
+! RhoRef  R*4 1 L Density of surface water at reference temperature[kg/m3]
+! SBC     R*4 1 I StefanBolzman Constant                        [W/m2/K-4]
+! SunFac  R*4 1 I Percentage sunshine                                  [%]
+! SWEmis  R*4 1 I Switch for calculation of emissivity                 [-]
+! TempAt  R*4 1 I Air temperature                                     [°C]
+! TempWa  R*4 1 I Surface water temperature                           [°C]
+! Tref    R*4 1 I Reference water temperature for wind function       [°C]
+! Vevap   R*4 1 L Evaporation rate                                   [m/s]
+! VWinda  R*4 1 L Calculated wind speed                              [m/s]
+! VWindm  R*4 1 I Measured wind speed                                [m/s]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
       REAL     PMSA  ( * ) , FL  (*)
@@ -159,21 +146,21 @@ C     ------   -----  ------------
       IP39  = IPOINT(39)
       IP40  = IPOINT(40)
       IP41  = IPOINT(41)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 
-C     Heat exchange only for active water segments
-C
+!     Heat exchange only for active water segments
+!
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C     Heat exchange only for top layer segments
-C
+!
+!     Heat exchange only for top layer segments
+!
          CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
          IF (IKMRK2.EQ.0 .OR. IKMRK2.EQ.1) THEN
-C
+!
             Qsw     = PMSA(IP1 )
             Fsw     = PMSA(IP2 )
             SunFac  = PMSA(IP3 )
@@ -202,86 +189,86 @@ C
             ISWTEMP = NINT(PMSA(IP26))
             mindeptht = PMSA(IP27)
 
-C
-C     ------Short wave solar radiation-----------
-C
+!
+!     ------Short wave solar radiation-----------
+!
             Qsn = Qsw * (1- Fsw)
-C
-C     ------Long wave atmospheric radiation------
-C
+!
+!     ------Long wave atmospheric radiation------
+!
             cloud = (100.0 - SunFac) / 100.0
-C
+!
             Psvap = 6.131 + 0.467 * TempAt + 0.0089 *
      j               TempAt ** 2.0 + 0.000527 * TempAt ** 3.0
-C
+!
             Pvap = RelHum * Psvap
-C
-C           ----1.  Option 1 = Brunt, 1932
-C
+!
+!           ----1.  Option 1 = Brunt, 1932
+!
             IF (ISWEmis.EQ.1) THEN
-C
+!
                Emiss = (0.51 + 0.066 * SQRT(Pvap)) *
      j                 (1.0 + 0.17 * cloud ** 2.0)
-C
+!
                Qa = Emiss * SBC * (TempAt + 273.15) ** 4.0
-C
-C           ----2.  Option 2 = Edinger, 1965 and Koberg, 1962
-C
+!
+!           ----2.  Option 2 = Edinger, 1965 and Koberg, 1962
+!
             ELSEIF (ISWEmis.EQ.2) THEN
-C
-C           Pascal heeft formulering voor C (Brunt coefficient)
-C           aangevraagd, wordt later ingevuld...
-C
+!
+!           Pascal heeft formulering voor C (Brunt coefficient)
+!           aangevraagd, wordt later ingevuld...
+!
                C = 1
-C
+!
                Emiss = 1.1 * C + 0.030 * SQRT(Pvap)
-C
+!
                Qa = Emiss * SBC * (TempAt + 273.15) ** 4.0
-C
-C           ----3.  Option 3 = Edinger, 1965
-C
+!
+!           ----3.  Option 3 = Edinger, 1965
+!
             ELSEIF (ISWEmis.EQ.3) THEN
-C
+!
                Emiss = 0.74 * (1 + 0.17 * cloud) +
      j                 0.0045 * (1 - 0.4 * cloud) *
      j                 Pvap
-C
+!
                Qa = Emiss * SBC * (TempAt + 273.15) ** 4.0
-C
-C           ----4.  Option 4 = Ludikhuize, 1994 as in WAQUA
-C
+!
+!           ----4.  Option 4 = Ludikhuize, 1994 as in WAQUA
+!
             ELSEIF (ISWEmis.EQ.4) THEN
-C
+!
                Qa = (218.0 + 6.3 * TempAt) *
      j                 (1.0 + 0.17 * cloud ** 2.0)
-C
+!
             ELSE
                WRITE (*,*) ' Illegal option for emissivity formula'
                CALL SRSTOP(1)
             ENDIF
-C
+!
             Qan = Qa * (1 - Fa)
-C
-C     ------Long wave back radiation from water------
-C
+!
+!     ------Long wave back radiation from water------
+!
             Qbr = Ewater * SBC * ((TempWa + DeltaT + 273.15) ** 4.0)
-C
-C     ------Latent heat (evaporation or condensation)-----
-C
+!
+!     ------Latent heat (evaporation or condensation)-----
+!
             RhoWat = Rho0 * (1.0 - 7.17e-6 *
      j               (TempWa + DeltaT - 4.0) ** 2.0)
-C
+!
             RhoRef = Rho0 * (1.0 - 7.17e-6 *
      j               (Tref - 4.0) ** 2.0)
-C
+!
             HtVap = 2.5e+06 - 2300.0 * (TempWa + DeltaT)
-C
+!
             HtVRef = 2.5e+06 - 2300.0 * Tref
-C
+!
             PvapWa = 6.131 + 0.467 * (TempWa + DeltaT) + 0.0089 *
      j               (TempWa + DeltaT) ** 2.0 + 0.000527 *
      j               (TempWa + DeltaT) ** 3.0
-C
+!
             IF (ABS(Hm - Ha) .LT. 0.0001) THEN
                VWinda = VWindm
             ELSE
@@ -291,34 +278,34 @@ C
                    VWinda = VWindm
                ENDIF
             ENDIF
-C
+!
             FWind = CwindA + CwindB * VWinda + CwindC * VWinda ** 2.0
-C
+!
             FWind2 = Fwind / (RhoRef * HtVRef)
-C
+!
             Vevap = FWind2 * (PvapWa - Pvap)
-C
+!
             Ql = RhoWat * HtVap * Vevap
-C
-C     ------Convective heat-----------------------------
-C
+!
+!     ------Convective heat-----------------------------
+!
             beta = (cpa * Patm) / (0.62 * HtVap)
-C
+!
             Qsg = beta * (TempWa + DeltaT - TempAt) * RhoWat * HtVap * Fwind2
-C
-C     ------Convective heat to river bed----------------
-C           formulations can be included later...
-C
-C     ------Total heat flux-----------------------------
-C
+!
+!     ------Convective heat to river bed----------------
+!           formulations can be included later...
+!
+!     ------Total heat flux-----------------------------
+!
             Qt = Qsn + Qan - Qbr - Ql - Qsg + Qrb
-C
-C     ------Change of water temperature-----------------
-C
+!
+!     ------Change of water temperature-----------------
+!
             dTemp = (Qt * 86400.0) / (RhoWat * Cp * Depth)
-C
-C     ------For output to exces temperature moddeling
-C
+!
+!     ------For output to exces temperature moddeling
+!
             IF ( ISWTEMP .EQ. 0 ) THEN
                MODTEMP = TEMPWA
             ELSE
@@ -347,17 +334,17 @@ C
                dTemp = 0.0
 
             ENDIF
-C
+!
          ELSE
-C
-C           For non top layer segments no heat flux is calculated
-C
+!
+!           For non top layer segments no heat flux is calculated
+!
             dTemp = 0.0
-C
+!
          ENDIF
-C
+!
       ENDIF
-C
+!
       FL( 1+IFLUX) = dTemp
 
       IFLUX = IFLUX + NOFLUX
@@ -402,9 +389,9 @@ C
       IP39  = IP39  + INCREM ( 39 )
       IP40  = IP40  + INCREM ( 40 )
       IP41  = IP41  + INCREM ( 41 )
-C
+!
  9000 CONTINUE
-C
+!
 
       RETURN
       END

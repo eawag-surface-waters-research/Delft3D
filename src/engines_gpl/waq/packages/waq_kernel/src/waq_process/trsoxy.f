@@ -25,17 +25,17 @@
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
 
-C***********************************************************************
-C
-C     Function : Extra rearation flux towards sediment Drying and Flooding
-C
-C***********************************************************************
+!***********************************************************************
+!
+!     Function : Extra rearation flux towards sediment Drying and Flooding
+!
+!***********************************************************************
 
       USE BottomSet     !  Module with definition of the waterbottom segments
 
       IMPLICIT NONE
 
-C     arguments
+!     arguments
 
       REAL               :: PMSA(*)            ! in/out input-output array space to be adressed with IPOINT/INCREM
       REAL               :: FL(*)              ! in/out flux array
@@ -50,7 +50,7 @@ C     arguments
       INTEGER            :: NOQ3               ! in     number of exchanges in third direction
       INTEGER            :: NOQ4               ! in     number of exchanges in fourth direction
 
-C     from PMSA array
+!     from PMSA array
 
       INTEGER            :: SWEMERSION         ! 1  in  switch indicating submersion(0) or emersion (1)
       REAL               :: OXY                ! 2  in  dissolved oxygen concentration
@@ -60,7 +60,7 @@ C     from PMSA array
       REAL               :: VDOWN              ! 6  in  downward velocity
       REAL               :: CORFLX             ! 7  out correction flux
 
-C     local decalrations
+!     local decalrations
 
       INTEGER                      :: IP1,IP2,IP3,IP4,IP5 ! index pointer in PMSA array
       INTEGER                      :: IP6,IP7             ! index pointer in PMSA array
@@ -74,7 +74,7 @@ C     local decalrations
       INTEGER                      :: IVAN                ! index from segment in exchange
       INTEGER                      :: INAAR               ! index to segment in exchange
 
-C     initialise bottom if necessary
+!     initialise bottom if necessary
 
       CALL MAKKO2 ( IEXPNT , IKNMRK , NOQ1   , NOQ2   , NOQ3   ,
      +              NOQ4   )
@@ -87,7 +87,7 @@ C     initialise bottom if necessary
       IP5   = IPOINT( 5)
       IP6   = IPOINT( 6)
       IP7   = IPOINT( 7)
-C
+!
       IN1   = INCREM( 1)
       IN2   = INCREM( 2)
       IN3   = INCREM( 3)
@@ -96,7 +96,7 @@ C
       IN6   = INCREM( 6)
       IN7   = INCREM( 7)
 
-C     zero the output
+!     zero the output
 
       DO ISEG = 1 , NOSEG
          PMSA(IP7) = 0.0
@@ -104,11 +104,11 @@ C     zero the output
       ENDDO
       IP7   = IPOINT( 7)
 
-C     Loop over kolommen
+!     Loop over kolommen
 
       DO IK = 1 , Coll%cursize
 
-C        Select first column of exchanges for DOWNWARD advection, sediment water exchanges only
+!        Select first column of exchanges for DOWNWARD advection, sediment water exchanges only
 
          IWA1 = Coll%set(IK)%fstwatsed
          IWA2 = Coll%set(IK)%lstwatsed
@@ -128,7 +128,7 @@ C        Select first column of exchanges for DOWNWARD advection, sediment water
                AUXSYS     = PMSA(IP5+(IVAN -1)*IN5)
                VDOWN      = PMSA(IP6+(IQ   -1)*IN6)
 
-C              coorection flux is equal to saturated velocity flux minus actual velocity flux, scaled for time and volume
+!              coorection flux is equal to saturated velocity flux minus actual velocity flux, scaled for time and volume
 
                CORFLX     = VDOWN*(OXYSAT-OXY)*AUXSYS/DEPTH
 

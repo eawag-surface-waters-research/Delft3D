@@ -27,52 +27,40 @@
 !>\file
 !>       Process meteo from various meteo-stations
 
-C***********************************************************************
-C         Landelijk Warmte model Sobek River
-C     Project :
-C     Author  :
-C     Date    :2004 november           Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     0811004 P.Boderie         Ruimtelijk middelen van 5 meteo stations tbv warmtemodel
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C Y       R*4 8 I     dependent value pairs
-C X       R*4 8 I     independent value pairs
-C VALUE   R*4 1 I     independent value
-C RESULT  R*4 1 I     resulting dependent value
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! Y       R*4 8 I     dependent value pairs
+! X       R*4 8 I     independent value pairs
+! VALUE   R*4 1 I     independent value
+! RESULT  R*4 1 I     resulting dependent value
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
       INTEGER   MAXSTA,MAXVAR, IP , NP
-c
-C     aantal meteo stations
-c
+!
+!     aantal meteo stations
+!
       PARAMETER (MAXSTA=5)
-c
-C     aantal variabelen per station
-c
+!
+!     aantal variabelen per station
+!
       PARAMETER (MAXVAR=7)
 
-c
-C     aantal ongebonden variabelen
-c
+!
+!     aantal ongebonden variabelen
+!
       PARAMETER (NP=5)
 
 
@@ -85,14 +73,14 @@ c
       DO 10 I=1,(MAXSTA+1)* MAXVAR +  MAXSTA*2 + NP
         IP(I) = IPOINT(I)
    10 CONTINUE
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C     waarden per station
-c
+!
+!     waarden per station
+!
       DO 20 I   = 1,MAXSTA
         RAD(I)  = PMSA(IP((I-1)*MAXVAR+1))
         VWIND(I)= PMSA(IP((I-1)*MAXVAR+2))
@@ -102,30 +90,30 @@ c
         PRES(I) = PMSA(IP((I-1)*MAXVAR+6))
         SUN(I) =  PMSA(IP((I-1)*MAXVAR+7))
    20 CONTINUE
-C
-C     coordinaten van de stations
+!
+!     coordinaten van de stations
 
       DO 21 I = 1, MAXSTA
           X(I) = PMSA(IP(MAXSTA*MAXVAR+(I-1)*2+1))
           Y(I) = PMSA(IP(MAXSTA*MAXVAR+(I-1)*2+2))
    21 CONTINUE
-c
-C     overige parameters
-C
+!
+!     overige parameters
+!
       SCALE  = PMSA(IP(MAXSTA*(MAXVAR+2)+1))
       NOSTAT = PMSA(IP(MAXSTA*(MAXVAR+2)+2))
       ICALCSW= NINT(PMSA(IP(MAXSTA*(MAXVAR+2)+3)))
       XSEG   = PMSA(IP(MAXSTA*(MAXVAR+2)+4))
       YSEG   = PMSA(IP(MAXSTA*(MAXVAR+2)+5))
 
-C*******************************************************************************
-C**** RESULT Calculated meteo parameters based on 1-MAXSTA meteo stations.
-C*****       Option 1 looks up the nearest meteo station for each segment
-C*****       Option 2 calculates the distance weighted average of NoStations
-C*****                for each segment
-C***********************************************************************
+!*******************************************************************************
+!**** RESULT Calculated meteo parameters based on 1-MAXSTA meteo stations.
+!*****       Option 1 looks up the nearest meteo station for each segment
+!*****       Option 2 calculates the distance weighted average of NoStations
+!*****                for each segment
+!***********************************************************************
 
-c     Bereken Distance Cell to all stations (in meters)
+!     Bereken Distance Cell to all stations (in meters)
       MIN = -1.0
       SUM = 0.0
       SUM2 = 0.0
@@ -137,16 +125,16 @@ c     Bereken Distance Cell to all stations (in meters)
           NOSTAT = 1
       ENDIF
 
-c
+!
       DO 30 I = 1, NOSTAT
           DIST(I) = SQRT ( (XSEG - X(I)*SCALE)*(XSEG - X(I)*SCALE) +
      &                     (YSEG - Y(I)*SCALE)*(YSEG - Y(I)*SCALE) )
-c
+!
         dist(i) = 1./max(dist(i),1.0)
         SUM  = SUM  + DIST(I)
         SUM2 = SUM2 + DIST(I) * DIST(I)
 
-c
+!
       IF (MIN .LT. 0.0) THEN
            MIN = DIST(I)
            INEAR = I
@@ -154,13 +142,13 @@ c
            MIN = DIST(I)
            INEAR = I
       ENDIF
-c
+!
    30 CONTINUE
 
 
-c
-c     optie 1:  nearest station
-c
+!
+!     optie 1:  nearest station
+!
       IF  ( ICALCSW .EQ. 1 ) THEN
           PMSA(IP(MAXSTA*(MAXVAR+2)+NP +1)) = RAD(INEAR)
           PMSA(IP(MAXSTA*(MAXVAR+2)+NP +2)) = VWIND(INEAR)
@@ -169,17 +157,17 @@ c
           PMSA(IP(MAXSTA*(MAXVAR+2)+NP +5)) = TEMP(INEAR)
           PMSA(IP(MAXSTA*(MAXVAR+2)+NP +6)) = PRES(INEAR)
           PMSA(IP(MAXSTA*(MAXVAR+2)+NP +7)) = SUN(INEAR)
-c
-c     optie 2a: dist weighted lineair
-c
+!
+!     optie 2a: dist weighted lineair
+!
       ELSE
-c         optie 2 lineair inv dist
+!         optie 2 lineair inv dist
           IF ( ICALCSW .EQ. 2 ) THEN
               DO 41 I = 1 ,  NOSTAT
                                 WFAC(I) = DIST(I) / SUM
    41         CONTINUE
-c
-c         optie 2b: inv dist kwadratisch
+!
+!         optie 2b: inv dist kwadratisch
           ELSEIF ( ICALCSW .EQ. 3 ) THEN
               DO 42 I = 1 ,  NOSTAT
                   WFAC(I) = DIST(I)*DIST(I) / SUM2
@@ -213,23 +201,23 @@ c         optie 2b: inv dist kwadratisch
      &        PMSA(IP(MAXSTA*(MAXVAR+2)+NP + 7)) + WFAC(I) * SUN(I)
 
    50     CONTINUE
-c
-c         wind ricthing niet middelen
-c
+!
+!         wind ricthing niet middelen
+!
           PMSA(IP(MAXSTA*(MAXVAR+2) + NP +3)) = DIR(INEAR)
 
       ENDIF
 
       ENDIF
 
-C
+!
       DO 60 I=1,(MAXSTA+1)* MAXVAR + MAXSTA*2 + NP
           IP(I) = IP(I) + INCREM (I)
    60 CONTINUE
 
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

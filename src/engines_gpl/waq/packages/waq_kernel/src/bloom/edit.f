@@ -25,9 +25,9 @@
       CHARACTER*8 FNAME,PROFIL
       INTEGER CMS
       INCLUDE 'ioblck.inc'
-C
-C Call EDITBLM.BAT to invoke a user-specified editor.
-C
+!
+! Call EDITBLM.BAT to invoke a user-specified editor.
+!
       LINE(1) = 'EDITBLM '
       LINE(2) = FNAME
       CLOSE (IOU(29))

@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE TO CALCULATE PRODUCTION,RESPIRATION,MORTALITY,     *
-C  *            FLUSHING AND GRAZING RATES OF THE BLOOM                *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE TO CALCULATE PRODUCTION,RESPIRATION,MORTALITY,     *
+!  *            FLUSHING AND GRAZING RATES OF THE BLOOM                *
+!  *********************************************************************
+!
       SUBROUTINE PRODUC(XDEF,GRAMOR,DEATH,CDATE,DAY,TEMP,DEP,LFIN)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -40,22 +40,22 @@ C
      2          FLUSGR(MS),GRAZGR(MS)
       CHARACTER*8 WORDS(3),CDATE
       DATA WORDS /'Date    ','Total-C ','Total-O2'/
-C
-C  Calculate production, respiration, mortality, flushing and
-C  grazing rates in the bloom at equilibrium.
-C  Units: mg C / m2 / day for the species and total-C, and
-C  mg O2 /m2 / day for total-O2.
-C
-C  Notice that non-unique solutions, no matter how they occur,
-C  should all have the same amount of edible algae with the
-C  same grazing rate; if not, the solution with the lowest grazing
-C  grazing rate would have been unique.
-C
-C  Use the conversion array CTODRY to convert dry weights to C.
-C  Respiratory quotient RQ=1.00
-C  PhotosynthetiC quotient PQ=1.20
-C  Print heading for output on tape IOU(17)
-C
+!
+!  Calculate production, respiration, mortality, flushing and
+!  grazing rates in the bloom at equilibrium.
+!  Units: mg C / m2 / day for the species and total-C, and
+!  mg O2 /m2 / day for total-O2.
+!
+!  Notice that non-unique solutions, no matter how they occur,
+!  should all have the same amount of edible algae with the
+!  same grazing rate; if not, the solution with the lowest grazing
+!  grazing rate would have been unique.
+!
+!  Use the conversion array CTODRY to convert dry weights to C.
+!  Respiratory quotient RQ=1.00
+!  PhotosynthetiC quotient PQ=1.20
+!  Print heading for output on tape IOU(17)
+!
       IF (LFIN .EQ. 1) GOTO 130
       NPRODU=NPRODU+1
       IF (NPRODU .GT. 1) GO TO 30
@@ -104,9 +104,9 @@ C
       SUMFLU=SUMFLU+FLUSRA(K)
       SUMGRA=SUMGRA+GRAZRA(K)
    40 CONTINUE
-C
-C  Get totals for groups from totals per species.
-C
+!
+!  Get totals for groups from totals per species.
+!
       DO 45 I=1,NUECOG
       PRODGR(I) = 0.0
       RESPGR(I) = 0.0
@@ -123,33 +123,33 @@ C
       GRAZGR(I) = GRAZGR(I) + GRAZRA(L)
    44 CONTINUE
    45 CONTINUE
-C
-C  Convert production, respiration, mortality and grazing rates
-C  to oxygen units.
-C
+!
+!  Convert production, respiration, mortality and grazing rates
+!  to oxygen units.
+!
       COXPQ=COXRAT*PQ
       SUMPOX=SUMPRO*COXPQ
       SUMROX=SUMRES*COXRAT/RQ
       SUMDOX=SUMDEA*COXPQ
       SUMFOX=SUMFLU*COXPQ
       SUMGOX=SUMGRA*COXPQ
-C
-C  Increase YEARPR and YEAROX to compute average production.
-C
+!
+!  Increase YEARPR and YEAROX to compute average production.
+!
       YEARPR = YEARPR + SUMPRO
       YEAROX = YEAROX + SUMPOX
-C
-C  Print heading for new page.
-C
+!
+!  Print heading for new page.
+!
       LINEPA = LINEPA + 1
       IF (LINEPA .LE. 8) GO TO 50
       CALL FORMFE (IOU(17))
       WRITE(IOU(17),10)
       WRITE(IOU(17),20) WORDS(1),(GRNAME(K),K=1,NUECOG),(WORDS(K),K=2,3)
       LINEPA = 1
-C
-C  Print production, respiration, mortality flushing and grazing rates.
-C
+!
+!  Print production, respiration, mortality flushing and grazing rates.
+!
    50 CONTINUE
       WRITE(IOU(17),60) CDATE,(PRODGR(K),K=1,NUECOG),SUMPRO,SUMPOX
    60 FORMAT(/,4X,A4,2X,'Production',1X,12(F8.1,1X))
@@ -161,25 +161,25 @@ C
    85 FORMAT(10X,'Flushing',3X,12(F8.1,1X))
       WRITE(IOU(17),100) (GRAZGR(K),K=1,NUECOG),SUMGRA,SUMGOX
   100 FORMAT(10X,'Grazing',4X,12(F8.1,1X))
-C
-C  Call subroutine to distribute the production and respiration rates
-C  during the day.
-C
+!
+!  Call subroutine to distribute the production and respiration rates
+!  during the day.
+!
       IF (LDIEL .NE. 1) GO TO 110
       CALL DIEL(SUMPOX,SUMROX,DAY,CDATE)
   110 CONTINUE
-C
-C  Call subroutine to calculate the concentrations of living and dead
-C  algae and the sedimentation rate of dead algae.
-C
+!
+!  Call subroutine to calculate the concentrations of living and dead
+!  algae and the sedimentation rate of dead algae.
+!
       IF (LPOOLS .NE. 1) GO TO 120
       CALL POOLS(CDATE,DEATH,ALIVE,TEMP)
   120 CONTINUE
       RETURN
   130 CONTINUE
-C
-C Compute and print average production rate.
-C
+!
+! Compute and print average production rate.
+!
       CAV = YEARPR / (1000. * NREP)
       OAV = YEAROX / (1000. * NREP)
       WRITE (IOU(17),140) CAV,OAV

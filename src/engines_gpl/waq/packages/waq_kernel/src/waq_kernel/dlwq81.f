@@ -24,37 +24,37 @@
       SUBROUTINE DLWQ81 ( WASTE  , IWASTE , NOWST  , NOTOT  , CONC   ,
      *                    DERIV  , TIMER  , VOLUME , AMASS2 , IAFLAG ,
      *                    DMPS   , NDMPS  , INTOPT , ISDMP  , NOSYS  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april 3, 1988 by L.Postma
-C
-C     FUNCTION            : Adds the wasteloads to DERIV.
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     WASTE   REAL  NOTOT+1*NOWST INPUT   waste masses per system clock
-C     IWASTE  INTEGER    NOWST    INPUT   segment numbers of the wastes
-C     NOWST   INTEGER     1       INPUT   number of wastes
-C     NOTOT   INTEGER     1       INPUT   number of substances
-C     CONC    REAL     NOTOT*?    INPUT   concentrations for withdrawals
-C     DERIV   REAL     NOTOT*?    IN/OUT  derivative to be updated
-C     TIMER   REAL     NOTOT*?    IN/OUT  time step accumulator
-C     VOLUME  REAL      NOSEG     INPUT   segment volumes
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
-C     DMPS    REAL  NOTOT*NDMPAR*?IN/OUT  dumped segment fluxes
-C                                         if INTOPT > 7
-C     NDMPS   INTEGER     1       INPUT   number of dumped segments
-C     INTOPT  INTEGER     1       INPUT   Integration suboptions
-C     ISDMP   INTEGER     *       INPUT   pointer dumped segments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: april 3, 1988 by L.Postma
+!
+!     FUNCTION            : Adds the wasteloads to DERIV.
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     WASTE   REAL  NOTOT+1*NOWST INPUT   waste masses per system clock
+!     IWASTE  INTEGER    NOWST    INPUT   segment numbers of the wastes
+!     NOWST   INTEGER     1       INPUT   number of wastes
+!     NOTOT   INTEGER     1       INPUT   number of substances
+!     CONC    REAL     NOTOT*?    INPUT   concentrations for withdrawals
+!     DERIV   REAL     NOTOT*?    IN/OUT  derivative to be updated
+!     TIMER   REAL     NOTOT*?    IN/OUT  time step accumulator
+!     VOLUME  REAL      NOSEG     INPUT   segment volumes
+!     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
+!     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
+!     DMPS    REAL  NOTOT*NDMPAR*?IN/OUT  dumped segment fluxes
+!                                         if INTOPT > 7
+!     NDMPS   INTEGER     1       INPUT   number of dumped segments
+!     INTOPT  INTEGER     1       INPUT   Integration suboptions
+!     ISDMP   INTEGER     *       INPUT   pointer dumped segments
+!
       use timers
 
       INTEGER     INTOPT, NDMPS
@@ -64,23 +64,23 @@ C
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq81", ithandl )
       IF ( NOWST .EQ. 0 ) RETURN
-C
-C     pointers in mass balance array
-C
+!
+!     pointers in mass balance array
+!
       IF ( MOD(INTOPT,16) .GE. 8  ) THEN
          IBFLAG = 1
       ELSE
          IBFLAG = 0
       ENDIF
-C
+!
       I4 = NOTOT*NDMPS
       I5 = NOTOT*NDMPS*2
-C
+!
       ITEL = 1
       DO 40 I = 1 , NOWST
-C
+!
       I3 = ( IWASTE(I) - 1 ) * NOTOT
-C
+!
       IF ( IBFLAG .EQ. 1 ) THEN
          ISEG = IWASTE(I)
          IF ( ISDMP(ISEG) .GT. 0 ) THEN
@@ -92,20 +92,20 @@ C
       ELSE
          IPB = 0
       ENDIF
-C
-C         a load or a withdrawal with a flow?
-C
+!
+!         a load or a withdrawal with a flow?
+!
       ALOAD = WASTE(ITEL)
       IF (     ALOAD  .LT.-1.0E-30 ) GOTO 20
       IF ( ABS(ALOAD) .LE. 1.0E-30 ) ALOAD = 1.0
-C
+!
       ITEL = ITEL + 1
       DO 10 I1=1,NOTOT
          AHLP = WASTE(ITEL)*ALOAD
          DERIV(I3+I1) = DERIV (I3+I1) + AHLP
-C
-C        accumulation ?
-C
+!
+!        accumulation ?
+!
          IF ( IAFLAG .EQ. 1 ) THEN
             AMASS2(I1+2*NOTOT) = AMASS2(I1+2*NOTOT) + AHLP
             IF ( IPB .GT. 0  ) THEN
@@ -116,11 +116,11 @@ C
                ENDIF
             ENDIF
          ENDIF
-C
+!
          ITEL = ITEL + 1
    10 CONTINUE
       GOTO 40
-C
+!
    20 ITEL  = ITEL + 1
       DO 30 I1 = 1,NOTOT
          IF ( ABS(WASTE(I3+I1)) .LT. 1.0E-30 ) THEN
@@ -136,9 +136,9 @@ C
          IF ( C .LT. 1.0E-30 ) C = 1.0
          TIMER (I3+I1) = TIMER (I3+I1)      - AHLP/C/VOLUME(IWASTE(I))
          DERIV (I3+I1) = DERIV (I3+I1)      + AHLP
-C
-C        accumulation ?
-C
+!
+!        accumulation ?
+!
          IF ( IAFLAG .EQ. 1 ) THEN
             AMASS2(I1+2*NOTOT) = AMASS2(I1+2*NOTOT) + AHLP
             IF ( IPB .GT. 0  ) THEN
@@ -151,9 +151,9 @@ C
          ENDIF
          ITEL = ITEL + 1
    30 CONTINUE
-C
+!
    40 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -21,21 +21,21 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Integer function to obtain the datatype of a character.
-C Notice that numbers in exponential notation such as 2.3E3 are
-C recognised as valid numerical data by this function.
-C DATYPE = 0 for numerical data and 1 otherwise.
-C The arguments of this function are similar to the EXEC2 function
-C &DATATYPE OF.
-C
+!
+! Integer function to obtain the datatype of a character.
+! Notice that numbers in exponential notation such as 2.3E3 are
+! recognised as valid numerical data by this function.
+! DATYPE = 0 for numerical data and 1 otherwise.
+! The arguments of this function are similar to the EXEC2 function
+! &DATATYPE OF.
+!
       INTEGER FUNCTION DATYPE (SOURCE,LENGTH)
       CHARACTER*1 SOURCE(*)
       CHARACTER*255 RESULT
       INTEGER GETS, STOR, POS, LENGTH
-C
-C Use STOR to determine whether SOURCE contains a valid number.
-C
+!
+! Use STOR to determine whether SOURCE contains a valid number.
+!
       POS = 1
       IRCS = STOR (SOURCE, POS, LENGTH, RNUM)
       IF (IRCS .EQ. 0) GO TO 100
@@ -43,10 +43,10 @@ C
       IF (IRCG .EQ. 0) GO TO 200
       DATYPE = IRCS
       RETURN
-C
+!
 100   DATYPE = 0
       RETURN
-C
+!
 200   DATYPE = 1
       RETURN
       END

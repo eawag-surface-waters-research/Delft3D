@@ -21,20 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       7 Nov 1992
-C    Time:       16:13
-C    Program:    CJCOR.FOR
-C    Version:    1.0
-C    Programmer: Nicolaas M de Rooij
-C    Previous version(s):
-C    0.0 -- 23 Oct 1992 --  1:09
+!    Date:       7 Nov 1992
+!    Time:       16:13
+!    Program:    CJCOR.FOR
+!    Version:    1.0
+!    Programmer: Nicolaas M de Rooij
+!    Previous version(s):
+!    0.0 -- 23 Oct 1992 --  1:09
       subroutine cjcor
-c        cjcor reads charge and ionic diameter for charged species
-c        and reads delta(h) values for species.
-c        it is not necessary to give this information for all species
-c        although charges and ionic diameters for water species are
-c        required for activity calculation.
-c        read in procedure is equivalent to that of matrix.
+!        cjcor reads charge and ionic diameter for charged species
+!        and reads delta(h) values for species.
+!        it is not necessary to give this information for all species
+!        although charges and ionic diameters for water species are
+!        required for activity calculation.
+!        read in procedure is equivalent to that of matrix.
       include  'char1.inc'
       dimension z(4)
       equivalence (z(1),t(1))
@@ -45,7 +45,7 @@ c        read in procedure is equivalent to that of matrix.
       if (ka(1).eq.end) return
       if (ka(1).eq.blank) go to 20
       if (pf.ge.0) write (not,99997) ka(1)
-c        find compartment number k
+!        find compartment number k
       call lookup(ka(1), k, 1, ncomp, nam)
       if (k.gt.ncomp) go to 40
       go to 10
@@ -56,14 +56,14 @@ c        find compartment number k
       if (pf.ge.0 .and. ka(1).eq.blank) write (not,99998) kk,
      1                    ka(2), (z(i),i=1,4)
       call lookup(ka(2), j, mta, mtb, kn)
-c        find species number j
+!        find species number j
       if (j.gt.mtb) go to 31
       ch(j) = z(1)
       if(bnew) ch(j) = ch(j) * ch(j)
       diam(j) = z(2)
       delth(j) = z(3)
-c     if(bnew) delth(j) = delth(j)*rt
-c change 5-11-92 NMdR
+!     if(bnew) delth(j) = delth(j)*rt
+! change 5-11-92 NMdR
       gfw(j) = z(4)
       go to 30
 25    if (pf.ge.0 .and. ka(1).eq.blank) write (not,99994)(z(i),i=1,4)
@@ -75,8 +75,8 @@ c change 5-11-92 NMdR
       go to 10
    31 write (not,99996) ka(1), ka(2)
       go to 10
-c        if a compartment name is invalid, information will be skipped
-c         till next compartment name or end.
+!        if a compartment name is invalid, information will be skipped
+!         till next compartment name or end.
    40 write (not,99995) ka(1)
    50 read (nit,99999) ka(1)
       if (ka(1).eq.blank) go to 50

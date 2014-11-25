@@ -21,29 +21,29 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       21:28
-C    Program:    MATINV.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       22 Oct 1992
+!    Time:       21:28
+!    Program:    MATINV.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine matinv(a, n, b, m, d, w, ising)
-c           4-69
-c           cholesky's diagonal method -- for symmetric matrices only
-c           matrix inversion and / or simultaneous equation solution
-c             m =  0    invert only and store inverse in a
-c             m = -1    solve simultaneous equations.  solution in b
-c             m =  1    combination of m = 0 and m = -1.
-c             m = -2    solve simultaneous equations with already
-c                       calculated upper triangular and diagonal
-c                       inverse stored in a, and solution in b
-c           dimension of the arrays should be equal to the value of
-c        maxmd in common labeled /intgr/ of other routines in deck.
+!           4-69
+!           cholesky's diagonal method -- for symmetric matrices only
+!           matrix inversion and / or simultaneous equation solution
+!             m =  0    invert only and store inverse in a
+!             m = -1    solve simultaneous equations.  solution in b
+!             m =  1    combination of m = 0 and m = -1.
+!             m = -2    solve simultaneous equations with already
+!                       calculated upper triangular and diagonal
+!                       inverse stored in a, and solution in b
+!           dimension of the arrays should be equal to the value of
+!        maxmd in common labeled /intgr/ of other routines in deck.
       implicit real*8 (a-h,o-z)
       dimension a(60,60), b(60), d(60), w(60)
       ising = 0
       if(m.eq.-2)go to 35
-c        find upper triangular matrix and diagonal matrix
+!        find upper triangular matrix and diagonal matrix
       do 30 i=1,n
          if (a(i,i).eq.0.) go to 170
          d(i) = a(i,i)
@@ -58,7 +58,7 @@ c        find upper triangular matrix and diagonal matrix
    20    continue
    30 continue
       if (m.eq.0) go to 80
-c        solve simultaneous equations
+!        solve simultaneous equations
    35 w(1) = b(1)
       do 50 i=2,n
          s = 0.
@@ -79,7 +79,7 @@ c        solve simultaneous equations
          b(i) = w(i)/d(i) - s
    70 continue
    80 if (m.lt.0) return
-c        invert upper triangular matrix  to get  inverse
+!        invert upper triangular matrix  to get  inverse
       do 110 ii=2,n
          i = n + 1 - ii
          jj = ii - 1
@@ -93,7 +93,7 @@ c        invert upper triangular matrix  to get  inverse
             a(i,j) = -s
   100    continue
   110 continue
-c        multiply inverse * reciprocal diagonal * inverse transposed
+!        multiply inverse * reciprocal diagonal * inverse transposed
       do 140 i=1,n
          do 130 j=i,n
             s = 0.
@@ -103,7 +103,7 @@ c        multiply inverse * reciprocal diagonal * inverse transposed
             a(i,j) = s
   130    continue
   140 continue
-c        re-symmetrize
+!        re-symmetrize
       do 160 j=2,n
          j2 = j - 1
          do 150 i=1,j2

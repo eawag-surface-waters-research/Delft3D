@@ -27,61 +27,47 @@
 !>\file
 !>       Sedimentation velocity IMx, DetC OOC, BODC, all algea = f (Temp SS Sal)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 941122             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     941122  Pascal Boderie  Create first version
-C   20000419  Jan van Beek    Check on dummy exchanges (0->0)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        SEDIMENTATION VELOCITY BASED ON TEMP, SUSPENDED SOLID CONC AND
-C        SALINITY
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C CRSUSP  R*4 1 I  critical susp solid conc. for flocculation     [gDM/m3]
-C N       R*4 1 I  coefficient in sedimentation formulation            [-]
-C SUSP    R*4 1 I  total suspended solid concentration            [gDM/m3]
-C SEDTC   R*4 1 I  temperature coefficient for sedimentation           [-]
-C TEMP    R*4 1 I  ambient temperature                             [gradC]
-C V0SED   R*4 1 I  sedimentaion velocity (no temp, sal, ss influence)[m/d]
-C SAL     R*4 1 I  salinity                                         [g/kg]
-C MAXSAL  R*4 1 I  salinity where salinity function is at max       [g/kg]
-C ENHFAC  R*4 1 I  enhancement factor in salinity functin              [-]
-C SALFUN  R*4 1 I  salinity function on sedimentation velocity         [-]
-C FLOFUN  R*4 1 I  flocculation function on sedimentation velocity     [-]
-C TEMFUN  R*4 1 I  temperature function on sedimentation velocity      [-]
-C VSED    R*4 1 I  sedimentaion velocity, temp, sal, ss corrected    [m/d]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        SEDIMENTATION VELOCITY BASED ON TEMP, SUSPENDED SOLID CONC AND
+!        SALINITY
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! CRSUSP  R*4 1 I  critical susp solid conc. for flocculation     [gDM/m3]
+! N       R*4 1 I  coefficient in sedimentation formulation            [-]
+! SUSP    R*4 1 I  total suspended solid concentration            [gDM/m3]
+! SEDTC   R*4 1 I  temperature coefficient for sedimentation           [-]
+! TEMP    R*4 1 I  ambient temperature                             [gradC]
+! V0SED   R*4 1 I  sedimentaion velocity (no temp, sal, ss influence)[m/d]
+! SAL     R*4 1 I  salinity                                         [g/kg]
+! MAXSAL  R*4 1 I  salinity where salinity function is at max       [g/kg]
+! ENHFAC  R*4 1 I  enhancement factor in salinity functin              [-]
+! SALFUN  R*4 1 I  salinity function on sedimentation velocity         [-]
+! FLOFUN  R*4 1 I  flocculation function on sedimentation velocity     [-]
+! TEMFUN  R*4 1 I  temperature function on sedimentation velocity      [-]
+! VSED    R*4 1 I  sedimentaion velocity, temp, sal, ss corrected    [m/d]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local
-C
+!
+!     Local
+!
       PARAMETER ( PI     = 3.14159265 )
       INTEGER  NOQ
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -94,15 +80,15 @@ C
       IP10 = IPOINT(10)
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-c     CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-c     IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!     CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+!     IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
+!
       V0SED   = PMSA( IP1 )
       SUSP    = MAX (PMSA( IP2 ), 0.0)
       CRSUSP  = PMSA( IP3 )
@@ -115,29 +101,29 @@ C
 
       IF (CRSUSP .LT. 1E-20 )  CALL ERRSYS ('CRSUSP in CALSED zero', 1 )
 
-C*******************************************************************************
-C**** Processes connected to the sedimentation VELOCITY
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the sedimentation VELOCITY
+!***********************************************************************
 
 
-C     Initialisatie
+!     Initialisatie
       FLOFUN = 1.0
       SALFUN = 1.0
       TEMFUN = 1.0
 
-C     Flocculatie functie
+!     Flocculatie functie
 
       IF ( SUSP/CRSUSP .GE. 1.E-30 ) THEN
           FLOFUN = (SUSP / CRSUSP)**N
       ENDIF
 
-C     Temperatuur functie
+!     Temperatuur functie
 
       IF (SEDTC .NE. 1.0) THEN
           TEMFUN = SEDTC **(TEMP-20.0)
       ENDIF
 
-C     Salinity functie
+!     Salinity functie
 
       IF ( SAL .LT. MAXSAL ) THEN
          SALFUN = (ENHFAC + 1.)/2.- ((ENHFAC-1.)/2.)*COS(PI*SAL/MAXSAL)
@@ -147,17 +133,17 @@ C     Salinity functie
          SALFUN = 1.0
       ENDIF
 
-C     Bereken VSED
+!     Bereken VSED
       VSED = V0SED * TEMFUN * SALFUN * FLOFUN
 
-C     Output of calculated sedimentation rate
+!     Output of calculated sedimentation rate
       PMSA ( IP10 ) = VSED
       PMSA ( IP11 ) = SALFUN
       PMSA ( IP12 ) = FLOFUN
-C
-c     ENDIF
+!
+!     ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -171,9 +157,9 @@ C
       IP10  = IP10  + INCREM ( 10 )
       IP11  = IP11  + INCREM ( 11 )
       IP12  = IP12  + INCREM ( 12 )
-C
+!
  9000 CONTINUE
-C
+!
 
       NOQ = NOQ1 + NOQ2 + NOQ3
 
@@ -193,9 +179,9 @@ C
       DO 7000 IQ=NOQ1+NOQ2+1,NOQ
 
          IVAN = IEXPNT(1,IQ)
-C
-C        Sedimentation velocity from segment to exchange-area
-C
+!
+!        Sedimentation velocity from segment to exchange-area
+!
          IF ( IVAN .GT. 0 ) THEN
             PMSA(IP13) = PMSA( IP10 + (IVAN-1) * IN10 )
          ENDIF
@@ -205,5 +191,5 @@ C
  7000 CONTINUE
 
       RETURN
-C
+!
       END

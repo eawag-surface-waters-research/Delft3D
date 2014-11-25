@@ -27,55 +27,55 @@
      *                    IVPNT  , IOPT   , IDT    , ILFLAG , DMPQ   ,
      *                    NDMPQ  , IQDMP  , IBACKW , NOQW   , OWNERS ,
      *                    MYPART )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : october 1991 by J. van Beek
-C
-C     FUNCTION            : makes mass balance for segments for the past
-C                           implicit step with the new concentrations
-C                           and the old flow's
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DISP    REAL        3       INPUT   dispersion in 3 directions
-C     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
-C     AREA    REAL       NOQ      INPUT   exchange surface area
-C     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
-C     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
-C     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
-C     CONC    REAL   NOTOT*NOSEG  INPUT   concentrations
-C     BOUND   REAL     NOSYS*?    INPUT   boundary concentrations
-C     IPOINT  INTEGER    4*NOQ    INPUT   exchange pointers
-C     NOSYS   INTEGER     1       INPUT   number  of active substances
-C     NOTOT   INTEGER     1       INPUT   number  of total substances
-C     NOQ     INTEGER     1       INPUT   total number of exchanges
-C     NODISP  INTEGER     1       INPUT   number  of additional dispers.
-C     NOVELO  INTEGER     1       INPUT   number  of additional velos.
-C     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
-C     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
-C     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
-C                                         = 1 or 3 no DISP at zero flow
-C                                         = 0 or 1 DISP over boundary
-C                                         = 2 or 3 no DISP over boundary
-C     IDT     INTEGER     1       INPUT   time step size
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C     DMPQ    REAL  NOTOT*NDMPQ*? IN/OUT  mass balance dumped exchange
-C                                         if INTOPT > 7
-C     NDMPQ   INTEGER     1       INPUT   number of dumped exchanges
-C     IQDMP   INTEGER     *       INPUT   pointer dumped exchanges
-C     IBACKW  INTEGER     *       INPUT   flag = 0 central differences
-C                                              = 1 backward differences
-C     NOQW    INTEGER     1       INPUT   number of water exchanges
-C     OWNERS  INTEGER   NOSEG     INPUT   ownership of segments
-C     MYPART  INTEGER     1       INPUT   number of current part/subdomain
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : october 1991 by J. van Beek
+!
+!     FUNCTION            : makes mass balance for segments for the past
+!                           implicit step with the new concentrations
+!                           and the old flow's
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DISP    REAL        3       INPUT   dispersion in 3 directions
+!     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
+!     AREA    REAL       NOQ      INPUT   exchange surface area
+!     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
+!     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
+!     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
+!     CONC    REAL   NOTOT*NOSEG  INPUT   concentrations
+!     BOUND   REAL     NOSYS*?    INPUT   boundary concentrations
+!     IPOINT  INTEGER    4*NOQ    INPUT   exchange pointers
+!     NOSYS   INTEGER     1       INPUT   number  of active substances
+!     NOTOT   INTEGER     1       INPUT   number  of total substances
+!     NOQ     INTEGER     1       INPUT   total number of exchanges
+!     NODISP  INTEGER     1       INPUT   number  of additional dispers.
+!     NOVELO  INTEGER     1       INPUT   number  of additional velos.
+!     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
+!     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
+!     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
+!                                         = 1 or 3 no DISP at zero flow
+!                                         = 0 or 1 DISP over boundary
+!                                         = 2 or 3 no DISP over boundary
+!     IDT     INTEGER     1       INPUT   time step size
+!     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
+!     DMPQ    REAL  NOTOT*NDMPQ*? IN/OUT  mass balance dumped exchange
+!                                         if INTOPT > 7
+!     NDMPQ   INTEGER     1       INPUT   number of dumped exchanges
+!     IQDMP   INTEGER     *       INPUT   pointer dumped exchanges
+!     IBACKW  INTEGER     *       INPUT   flag = 0 central differences
+!                                              = 1 backward differences
+!     NOQW    INTEGER     1       INPUT   number of water exchanges
+!     OWNERS  INTEGER   NOSEG     INPUT   ownership of segments
+!     MYPART  INTEGER     1       INPUT   number of current part/subdomain
+!
       use timers
       INTEGER    NDMPQ         , IBACKW
       INTEGER    IQDMP   (*)
@@ -93,17 +93,17 @@ C
       disp0q0  = btest( iopt , 0 )
       disp0bnd = btest( iopt , 1 )
       loword   = btest( iopt , 2 )
-C
-C     offsets in mass balance array
-C
+!
+!     offsets in mass balance array
+!
       I6 = NOSYS*NDMPQ
-C
-C     loop accross the number of exchanges
-C
+!
+!     loop accross the number of exchanges
+!
       DO 60 IQ = 1 , NOQ
-C
-C        initialisations , check for transport anyhow
-C
+!
+!        initialisations , check for transport anyhow
+!
          I    = IPOINT(1,IQ)
          J    = IPOINT(2,IQ)
          IF ( I .EQ. 0 .OR. J .EQ. 0 ) GOTO 60
@@ -119,9 +119,9 @@ C
 !jvb     IF ( MOD(IOPT,2) .EQ. 1 ) THEN
 !             IF ( ABS(Q) .LT. 10.0E-25 )  GOTO 60
 !jvb     ENDIF
-C
-C     Check if exchange is dump exchange, set IPB
-C
+!
+!     Check if exchange is dump exchange, set IPB
+!
          IF ( IQDMP(IQ) .GT. 0 ) THEN
             IPB = (IQDMP(IQ)-1)*NOSYS
          ELSE
@@ -144,23 +144,23 @@ C
          if ( iq .gt. noqw ) e = 0.0      !  no water diffusion in the bottom
          IF ( I .LT. 0 ) GOTO 20
          IF ( J .LT. 0 ) GOTO 40
-C
-C            The regular case
-C
+!
+!            The regular case
+!
          K1 = (I-1)*NOTOT
          K2 = (J-1)*NOTOT
          DO 10 I3=1,NOSYS
-C
-C           dispersion
-C
+!
+!           dispersion
+!
             IF ( IDPNT(I3) .GT. 0 ) THEN
                D = E + DISPER((IQ-1)*NODISP+IDPNT(I3))*DL
             ELSE
                D = E
             ENDIF
-C
-C           flow
-C
+!
+!           flow
+!
             IF ( IVPNT(I3) .GT. 0 ) THEN
                V = Q + VELO((IQ-1)*NOVELO+IVPNT(I3))  *A
             ELSE
@@ -178,13 +178,13 @@ C
                   G2 = 1.0
                ENDIF
             ENDIF
-C
-C           transport
-C
+!
+!           transport
+!
             DQ = (V*G1+D)*CONC(K1+I3) + (V*G2-D)*CONC(K2+I3)
-C
-C           update mass balance array ( internal transport )
-C
+!
+!           update mass balance array ( internal transport )
+!
             IF ( DQ .GT. 0.0 ) THEN
                DMPQ(IPB+I3)=DMPQ(IPB+I3) + DQ*IDT
             ELSE
@@ -192,16 +192,16 @@ C
             ENDIF
    10    CONTINUE
          GOTO 60
-C
-C           The 'from' element was a boundary. Note the 2 options.
-C
+!
+!           The 'from' element was a boundary. Note the 2 options.
+!
    20    IF ( J .LT. 0 ) GOTO 60
          K1 = (-I-1)*NOSYS
          K2 = ( J-1)*NOTOT
          DO 30 I3=1,NOSYS
-C
-C           flow
-C
+!
+!           flow
+!
             IF ( IVPNT(I3) .GT. 0 ) THEN
                V = Q + VELO((IQ-1)*NOVELO+IVPNT(I3))*A
             ELSE
@@ -216,9 +216,9 @@ C
                   G2 = 1.0
                ENDIF
             ENDIF
-C
-C           dispersion
-C
+!
+!           dispersion
+!
             IF ( MOD(IOPT,4) .LT.  2 ) THEN
                IF ( IDPNT(I3).GT.0 ) THEN
                   D = E + DISPER((IQ-1)*NODISP+IDPNT(I3))*DL
@@ -231,13 +231,13 @@ C
             if ( disp0q0 ) then
                if ( a .le. 0.0 .or. abs(v) .lt. 10.0E-25 ) d = 0.0
             endif
-C
-C           tranport
-C
+!
+!           tranport
+!
             DQ = (V*G1+D)*BOUND(K1+I3) + (V*G2-D)*CONC(K2+I3)
-C
-C           update mass balance array ( boundaries in / out )
-C
+!
+!           update mass balance array ( boundaries in / out )
+!
             IF ( DQ .GT. 0.0 ) THEN
                DMPQ(IPB+I3)=DMPQ(IPB+I3) + DQ*IDT
             ELSE
@@ -245,15 +245,15 @@ C
             ENDIF
    30    CONTINUE
          GOTO 60
-C
-C        The 'to' element was a boundary.
-C
+!
+!        The 'to' element was a boundary.
+!
    40    K1 = ( I-1)*NOTOT
          K2 = (-J-1)*NOSYS
          DO 50 I3=1,NOSYS
-C
-C           flow
-C
+!
+!           flow
+!
             IF ( IVPNT(I3) .GT. 0 ) THEN
                V = Q + VELO((IQ-1)*NOVELO+IVPNT(I3))*A
             ELSE
@@ -268,9 +268,9 @@ C
                   G2 = 1.0
                ENDIF
             ENDIF
-C
-C           dispersion
-C
+!
+!           dispersion
+!
             IF ( MOD(IOPT,4) .LT.  2 ) THEN
                IF ( IDPNT(I3).GT.0 ) THEN
                   D = E + DISPER((IQ-1)*NODISP+IDPNT(I3))*DL
@@ -283,24 +283,24 @@ C
             if ( disp0q0 ) then
                if ( a .le. 0.0 .or. abs(v) .lt. 10.0E-25 ) d = 0.0
             endif
-C
-C           transport
-C
+!
+!           transport
+!
             DQ = (V*G1+D)*CONC(K1+I3) + (V*G2-D)*BOUND(K2+I3)
-C
-C           update mass balance array ( boundaries in / out )
-C
+!
+!           update mass balance array ( boundaries in / out )
+!
             IF ( DQ .GT. 0.0 ) THEN
                DMPQ(IPB+I3)=DMPQ(IPB+I3) + DQ*IDT
             ELSE
                DMPQ(IPB+I3+I6)=DMPQ(IPB+I3+I6) - DQ*IDT
             ENDIF
    50    CONTINUE
-C
-C        end of the loop over exchanges
-C
+!
+!        end of the loop over exchanges
+!
    60 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

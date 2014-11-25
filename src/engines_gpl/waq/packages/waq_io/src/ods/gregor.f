@@ -21,90 +21,90 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       29 Apr 1993
-C    Time:       09:35
-C    Program:    GREGOR.FOR
-C    Version:    1.01
-C    Programmer: Andre Hendriks
-C    Previous version(s):
-C    1.00 -- 29 Apr 1993 -- 09:23 -- Operating System: DOS
-C    0.0 -- 29 Apr 1993 --  9:22 -- Operating System: DOS
-C    Project:    T1234.56
-C    Module:     GREGOR
-C    Function:
-C    Comment:
-C    Reference:
-C    Review:
+!    Date:       29 Apr 1993
+!    Time:       09:35
+!    Program:    GREGOR.FOR
+!    Version:    1.01
+!    Programmer: Andre Hendriks
+!    Previous version(s):
+!    1.00 -- 29 Apr 1993 -- 09:23 -- Operating System: DOS
+!    0.0 -- 29 Apr 1993 --  9:22 -- Operating System: DOS
+!    Project:    T1234.56
+!    Module:     GREGOR
+!    Function:
+!    Comment:
+!    Reference:
+!    Review:
       SUBROUTINE GREGOR ( JULIAN, IYEAR , IMONTH, IDAY  , IHOUR ,
      1                    IMIN  , ISEC  )
-C
-C     +----------------------------------------------------------------+
-C     |    W A T E R L O O P K U N D I G   L A B O R A T O R I U M     |
-C     |               Sector Waterbeheer & Milieu                      |
-C     +----------------------------------------------------------------+
-C
-C***********************************************************************
-C
-C     Project : T0467
-C     Author  : Andre Hendriks
-C     Date    : 891215             Version : 1.00
-C
-C     Changes in this module :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     891215  Andre Hendriks  Version 1.00
-C
-C***********************************************************************
-C
-C     Description of module :
-C
-C        This functions returns the Gregorian date and the time of a so
-C        called Julian day, or iyear -9999 if an error occurred.
-C
-C        The Julian day of a date is the number of days that has passed
-C        since January 1, 4712 BC at 12h00 ( Gregorian). It is usefull
-C        to compute differces between dates. ( See DOUBLE PRECISION
-C        FUNCTION JULIAN for the reverse proces ).
-C
-C***********************************************************************
-C
-C     Arguments :
-C
-C     Name   Type     In/Out Size            Description
-C     ------ -----    ------ -------         ---------------------------
-C     JULIAN real*8   in     -               Julian day
-C     IYEAR  integer  out    -               Year   ( -4713-.. )
-C     IMONTH integer  out    -               Month  ( 1-12 )
-C     IDAY   integer  out    -               Day    ( 1-28,29,30 or 31 )
-C     IHOUR  integer  out    -               Hour   ( 0-23 )
-C     IMIN   integer  out    -               Minute ( 0-59 )
-C     ISEC   integer  out    -               Second ( 0-59 )
-C
-C     Local variables :
-C
-C     Name   Type     Size   Description
-C     ------ -----    ------ ------------------------
-C     TEMP1  real*8   -      Temporary variable
-C     TEMP2  real*8   -      Temporary variable
-C     TEMP3  real*8   -      Temporary variable
-C     TEMP4  real*8   -      Temporary variable, JULIAN
-C     TEMP5  real*8   -      Temporary variable, fractional part JULIAN
-C
-C     Calls to : none
-C
-C***********************************************************************
-C
-C     Variables :
-C
+!
+!     +----------------------------------------------------------------+
+!     |    W A T E R L O O P K U N D I G   L A B O R A T O R I U M     |
+!     |               Sector Waterbeheer & Milieu                      |
+!     +----------------------------------------------------------------+
+!
+!***********************************************************************
+!
+!     Project : T0467
+!     Author  : Andre Hendriks
+!     Date    : 891215             Version : 1.00
+!
+!     Changes in this module :
+!
+!     Date    Author          Description
+!     ------  --------------  -----------------------------------
+!     ......  ..............  ..............................
+!     891215  Andre Hendriks  Version 1.00
+!
+!***********************************************************************
+!
+!     Description of module :
+!
+!        This functions returns the Gregorian date and the time of a so
+!        called Julian day, or iyear -9999 if an error occurred.
+!
+!        The Julian day of a date is the number of days that has passed
+!        since January 1, 4712 BC at 12h00 ( Gregorian). It is usefull
+!        to compute differces between dates. ( See DOUBLE PRECISION
+!        FUNCTION JULIAN for the reverse proces ).
+!
+!***********************************************************************
+!
+!     Arguments :
+!
+!     Name   Type     In/Out Size            Description
+!     ------ -----    ------ -------         ---------------------------
+!     JULIAN real*8   in     -               Julian day
+!     IYEAR  integer  out    -               Year   ( -4713-.. )
+!     IMONTH integer  out    -               Month  ( 1-12 )
+!     IDAY   integer  out    -               Day    ( 1-28,29,30 or 31 )
+!     IHOUR  integer  out    -               Hour   ( 0-23 )
+!     IMIN   integer  out    -               Minute ( 0-59 )
+!     ISEC   integer  out    -               Second ( 0-59 )
+!
+!     Local variables :
+!
+!     Name   Type     Size   Description
+!     ------ -----    ------ ------------------------
+!     TEMP1  real*8   -      Temporary variable
+!     TEMP2  real*8   -      Temporary variable
+!     TEMP3  real*8   -      Temporary variable
+!     TEMP4  real*8   -      Temporary variable, JULIAN
+!     TEMP5  real*8   -      Temporary variable, fractional part JULIAN
+!
+!     Calls to : none
+!
+!***********************************************************************
+!
+!     Variables :
+!
       INTEGER           IYEAR , IMONTH, IDAY  , IHOUR , IMIN  , ISEC
       DOUBLE PRECISION  JULIAN, TEMP1 , TEMP2 , TEMP3 , TEMP4 , TEMP5
-C
-C***********************************************************************
-C
-C
-C
+!
+!***********************************************************************
+!
+!
+!
       IF ( JULIAN .LT. 0.0 ) THEN
          IYEAR = -9999
          GOTO 999
@@ -119,12 +119,12 @@ C
             TEMP4  = DINT ( TEMP4 ) + 1.0
          ENDIF
          TEMP1  = TEMP4 + 68569.0
-C TEMP4 used here to avoid compiler error in POWERSTATION
+! TEMP4 used here to avoid compiler error in POWERSTATION
          TEMP4  =   4.0 * TEMP1 / 146097.0
          TEMP2  = DINT  ( TEMP4 )
          TEMP1  = TEMP1 - DINT ( ( 146097.0 * TEMP2 + 3.0 ) / 4.0 )
          IYEAR  = INT   ( 4000.0 * ( TEMP1 + 1.0 ) / 1461001.0 )
-C TEMP4 used here to avoid compiler error in POWERSTATION
+! TEMP4 used here to avoid compiler error in POWERSTATION
          TEMP4  = 1461.0 * IYEAR / 4.0
          TEMP1  = TEMP1 - DINT ( TEMP4  ) + 31.0
          IMONTH = INT   ( 80.0 * TEMP1 / 2447.0 )

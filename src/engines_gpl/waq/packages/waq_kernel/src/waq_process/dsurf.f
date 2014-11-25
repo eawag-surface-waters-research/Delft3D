@@ -27,36 +27,23 @@
 !>\file
 !>       Dynamic calculation of the horizontal surface area from volume and depth
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Jan van Beek
-C     Date    : 921211             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     921210  Pascal Boderie  Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                             ----
-C DEPTH   R*4 1 O depth of the water column                            [m]
-C SURF    R*4 1 I surface area of segment                             [m2]
-C VOLUME  R*4 1 I volume of segment                                   [m3]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                             ----
+! DEPTH   R*4 1 O depth of the water column                            [m]
+! SURF    R*4 1 I surface area of segment                             [m2]
+! VOLUME  R*4 1 I volume of segment                                   [m3]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -67,36 +54,36 @@ C     ------   -----  ------------
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
 
       VOLUME = PMSA(IP1 )
       DEPTH  = PMSA(IP2 )
 
       IF (DEPTH .LT. 1E-30) CALL ERRSYS ('DEPTH in DSURF zero', 1 )
 
-C***********************************************************************
-C**** Calculate SURF
-C***********************************************************************
-C
+!***********************************************************************
+!**** Calculate SURF
+!***********************************************************************
+!
       SURF = VOLUME / DEPTH
-C
+!
       PMSA(IP3 ) = SURF
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
       IP3   = IP3   + INCREM (  3 )
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

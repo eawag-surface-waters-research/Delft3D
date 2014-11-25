@@ -27,58 +27,42 @@
 !>\file
 !>       Resuspension total bottom material (dry mass)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta study)
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! DM1     R*4 1 I  amount dry matter in layer S1                     [gDM/m2]
+! DM2     R*4 1 I  amount dry matter in layer S2                     [gDM/m2]
+! DELT    R*4 1 I  DELWAQ timestep                                   [scu]
+! DEPTH   R*4 1 I  depth water column                                  [m]
+! FLRES1  R*4 1 O  resuspension flux DM from layer S1           [gDM/m2/d]
+! FLRES2  R*4 1 O  resuspension flux DM from layer S2           [gDM/m2/d]
+! IAUSYS  R*4 1 I  ratio between auxiliary and system clock unit       [-]
+! MRDMS1  R*4 1 L  max. res. flux (contents of layer S1)        [gDM/m2/d]
+! MRDMS2  R*4 1 L  max. res. flux (contents of layer S2)        [gDM/m2/d]
+! MINDEP  R*4 1 I  minimal depth for resuspension                      [m]
+! PRESS1  R*4 1 L  resuspension probability from S1 (0 - endless)      [-]
+! PRESS2  R*4 1 L  resuspension probability from S2 (0 - endless)      [-]
+! POTRES  R*4 1 L  potential resuspension flux                  [gDM/m2/d]
+! FLRES1  R*4 1 L  resuspension flux DM from layer S1           [gDM/m2/d]
+! FLRES2  R*4 1 L  resuspension flux DM from layer S2           [gDM/m2/d]
+! TAU     R*4 1 I  calculated sheerstress                        [kg/m/s2]
+! TAUVEL  R*4 1 I  total velocity calcualted from tau                [m/s]
+! TCRRS1  R*4 1 I  critical sheerstress resuspension S1          [kg/m/s2]
+! TCRRS2  R*4 1 I  critical sheerstress resuspension S2          [kg/m/s2]
+! VCRRS1  R*4 1 I  critical velocity resuspension S1                 [m/s]
+! VCRRS2  R*4 1 I  critical velocity resuspension S2                 [m/s]
+! VRES    R*4 1 I  first order resuspensionrate constant             [1/d]
+! VOLUME  R*4 1 I  volume computed by DELWAQ                          [m3]
+! ZRES    R*4 1 I  zeroth order resuspension flux               [gDM/m2/d]
 
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C DM1     R*4 1 I  amount dry matter in layer S1                     [gDM/m2]
-C DM2     R*4 1 I  amount dry matter in layer S2                     [gDM/m2]
-C DELT    R*4 1 I  DELWAQ timestep                                   [scu]
-C DEPTH   R*4 1 I  depth water column                                  [m]
-C FLRES1  R*4 1 O  resuspension flux DM from layer S1           [gDM/m2/d]
-C FLRES2  R*4 1 O  resuspension flux DM from layer S2           [gDM/m2/d]
-C IAUSYS  R*4 1 I  ratio between auxiliary and system clock unit       [-]
-C MRDMS1  R*4 1 L  max. res. flux (contents of layer S1)        [gDM/m2/d]
-C MRDMS2  R*4 1 L  max. res. flux (contents of layer S2)        [gDM/m2/d]
-C MINDEP  R*4 1 I  minimal depth for resuspension                      [m]
-C PRESS1  R*4 1 L  resuspension probability from S1 (0 - endless)      [-]
-C PRESS2  R*4 1 L  resuspension probability from S2 (0 - endless)      [-]
-C POTRES  R*4 1 L  potential resuspension flux                  [gDM/m2/d]
-C FLRES1  R*4 1 L  resuspension flux DM from layer S1           [gDM/m2/d]
-C FLRES2  R*4 1 L  resuspension flux DM from layer S2           [gDM/m2/d]
-C TAU     R*4 1 I  calculated sheerstress                        [kg/m/s2]
-C TAUVEL  R*4 1 I  total velocity calcualted from tau                [m/s]
-C TCRRS1  R*4 1 I  critical sheerstress resuspension S1          [kg/m/s2]
-C TCRRS2  R*4 1 I  critical sheerstress resuspension S2          [kg/m/s2]
-C VCRRS1  R*4 1 I  critical velocity resuspension S1                 [m/s]
-C VCRRS2  R*4 1 I  critical velocity resuspension S2                 [m/s]
-C VRES    R*4 1 I  first order resuspensionrate constant             [1/d]
-C VOLUME  R*4 1 I  volume computed by DELWAQ                          [m3]
-C ZRES    R*4 1 I  zeroth order resuspension flux               [gDM/m2/d]
+!     Logical Units : -
 
-C     Logical Units : -
+!     Modules called : -
 
-C     Modules called : -
-
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -101,7 +85,7 @@ C     ------   -----  ------------
       IP13 = IPOINT(13)
       IP14 = IPOINT(14)
       IP15 = IPOINT(15)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -109,7 +93,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
 
       DMS1    = PMSA(IP1 )
       DMS2    = PMSA(IP2 )
@@ -123,46 +107,46 @@ C
       MINDEP  = PMSA(IP10)
       SURF    = PMSA(IP11)
 
-C*******************************************************************************
-C**** Processes connected to the RESUSENSION
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the RESUSENSION
+!***********************************************************************
 
       PRESS1 = 0.0
       PRESS2 = 0.0
 
-C        Bereken de resuspensie kansen in S1
+!        Bereken de resuspensie kansen in S1
          IF (TAU .EQ. -1.0) THEN
               PRESS1 = 1.0
          ELSE
-C           vergelijking met critische schuifspanning
+!           vergelijking met critische schuifspanning
              PRESS1 = MAX ( 0.0, (TAU/TCRRS1 - 1.0) )
          ENDIF
 
-C        Bereken de resuspensie kansen in S2
+!        Bereken de resuspensie kansen in S2
          IF (TAU .EQ. -1.0) THEN
             PRESS2 = 1.0
          ELSE
-C           vergelijking met critische schuifspanning
+!           vergelijking met critische schuifspanning
             PRESS2 = MAX ( 0.0, (TAU/TCRRS2 - 1.0) )
          ENDIF
 
-C     BEREKENING RESUSPENSION
+!     BEREKENING RESUSPENSION
 
-C     Green resuspension by ondiepe vakken
+!     Green resuspension by ondiepe vakken
       IF ( DEPTH .LT. MINDEP) THEN
          FLRES1 = 0.0
          FLRES2 = 0.0
       ELSE
 
-C        Resuspensie uit S1
+!        Resuspensie uit S1
          RFDMS1 = ZRES + ( VRES * DMS1 )
 
-C        Testen of genoeg materiaal aanwezig is in laag 1
+!        Testen of genoeg materiaal aanwezig is in laag 1
          MRDMS1 = MAX (0.0, DMS1 / DELT )
 
          FLRES1 = MIN ( RFDMS1 * PRESS1,  MRDMS1 )
 
-C        If first layer is exhausted then resuspension from the second layer for the remaining of the timestep (DELTS2)
+!        If first layer is exhausted then resuspension from the second layer for the remaining of the timestep (DELTS2)
 
          IF ( RFDMS1*PRESS1 .GT. 1E-20 ) THEN
             DELTS2 = MAX(0.0,(1.-FLRES1/(RFDMS1*PRESS1))*DELT)
@@ -172,7 +156,7 @@ C        If first layer is exhausted then resuspension from the second layer for
 
          RFDMS2 = ZRES + ( VRES * DMS2 )
 
-C        Testen of genoeg materiaal aanwezig is
+!        Testen of genoeg materiaal aanwezig is
          MRDMS2 = MAX (0.0, DMS2 / DELT )
 
          FLRES2 = MIN ( RFDMS2 * PRESS2 * DELTS2/DELT , MRDMS2 )
@@ -186,7 +170,7 @@ C        Testen of genoeg materiaal aanwezig is
 
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -203,9 +187,9 @@ C
       IP13  = IP13  + INCREM ( 13 )
       IP14  = IP14  + INCREM ( 14 )
       IP15  = IP15  + INCREM ( 15 )
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

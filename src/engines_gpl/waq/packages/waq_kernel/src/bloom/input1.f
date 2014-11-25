@@ -21,39 +21,39 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *   SUBROUTINE INPUT1 TO READ TITLE AND SOME LAKE-SPECIFIC INPUTS   *
-C  *********************************************************************
-C
-C  0895 MvdV
-C  read time series biomass for several grazer types
-C
+!
+!  *********************************************************************
+!  *   SUBROUTINE INPUT1 TO READ TITLE AND SOME LAKE-SPECIFIC INPUTS   *
+!  *********************************************************************
+!
+!  0895 MvdV
+!  read time series biomass for several grazer types
+!
       SUBROUTINE INPUT1 (NDEC,INPU)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
       INCLUDE 'putin2.inc'
-C
-C  Note: this subroutine is NOT used by the coupled BLOOM II/CHARON
-C  program.
-C
-C  Read year number and comments for particular run.
-C
+!
+!  Note: this subroutine is NOT used by the coupled BLOOM II/CHARON
+!  program.
+!
+!  Read year number and comments for particular run.
+!
       READ (INPU,99999) IYEAR,(CASE(I),I=1,9)
       READ (INPU,99998) COM
-C
-C  Read number of weeks in the input data set
-C
+!
+!  Read number of weeks in the input data set
+!
       READ (INPU,99997) NDEC
-C
-C  Read data for all weeks of the year:
-C  Read: DAYLGT--day length; DEATH--death rate for weeks of year
-C  Read: zooplankton dryweigth for weeks; depth for weeks.
-C
-C  0895 MvdV
-C  read time series biomass for several grazer types
-C
+!
+!  Read data for all weeks of the year:
+!  Read: DAYLGT--day length; DEATH--death rate for weeks of year
+!  Read: zooplankton dryweigth for weeks; depth for weeks.
+!
+!  0895 MvdV
+!  read time series biomass for several grazer types
+!
       DO 10 I=1,NDEC
       READ (INPU,99996) DAYLGT(I),DEATH(I),ZOOD(0,I),DEPTH(I),
      1     (ZOOD(J,I),J=1,MG)

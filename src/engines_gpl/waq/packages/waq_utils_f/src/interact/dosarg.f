@@ -21,15 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C Integer function to parse the argument string of the last dos
-C command. This function returns
-C 1. The name of the dos program (CMD).
-C 2. The argument list (ARGSTR).
-C 3. The length of the argument list (LENS).
-C 4. Each individual argument (ARGS).
-C 5. The length of each argument (LENARG).
-C 6. The number of actual arguments (INDEX).
-C
+! Integer function to parse the argument string of the last dos
+! command. This function returns
+! 1. The name of the dos program (CMD).
+! 2. The argument list (ARGSTR).
+! 3. The length of the argument list (LENS).
+! 4. Each individual argument (ARGS).
+! 5. The length of each argument (LENARG).
+! 6. The number of actual arguments (INDEX).
+!
       INTEGER FUNCTION DOSARG (MAXLA, MAXLS, CMD, ARGSTR, LENS, ARGS,
      *                         LENARG, INDEX)
       INTEGER LENARG(*), MAXLA, MAXLS, INDEX, LENSTR, STOS, WIPE
@@ -37,28 +37,28 @@ C
       CHARACTER*1 ARGS(*)
       CHARACTER*(*) ARGSTR, CMD
       CHARACTER*80 ARGV, STRTMP, STRTM2
-C
-C Initiate DOSARG at 0. Get value of INDEX from function IARGC. Write
-C the 0-argument to CMD.
-C
+!
+! Initiate DOSARG at 0. Get value of INDEX from function IARGC. Write
+! the 0-argument to CMD.
+!
       DOSARG = 0
 cjvb
-c     INDEX = IARGC() - 1
-c     CALL DHCARG(INDEX)
+!     INDEX = IARGC() - 1
+!     CALL DHCARG(INDEX)
       index = dhcarg()
       INDEX = INDEX - 1
-c     WRITE(STRTMP,10) ARGV(0)
+!     WRITE(STRTMP,10) ARGV(0)
       CALL DHGARG(0,STRTMP)
 cjvb
   10  FORMAT(A80)
       LENS = LENSTR (STRTMP,80)
       IRC = STOS (STRTMP, 1, LENS, CMD, LENCMD)
       IRC = WIPE (STRTMP, 1, LENS)
-C
-C Loop through the argument list. Copy each individual argument to ARGS.
-C Store its length in LENARG. Append STRTMP, which hold a temporary copy
-C of ARGSTRING.
-C
+!
+! Loop through the argument list. Copy each individual argument to ARGS.
+! Store its length in LENARG. Append STRTMP, which hold a temporary copy
+! of ARGSTRING.
+!
       LENS = 1
       K = 0
 cjvb  DO 30 I=1,IARGC()-1
@@ -74,22 +74,22 @@ cjvb     WRITE(STRTM2,20) ARGV(I)
          STRTMP (LENS:LENS+LENI) = STRTM2 (1:LENI)
          LENS = LENS + LENI + 1
   30  CONTINUE
-C
-C Exit. Set lens (=length argstring) and copy STRTMP to ARGSTR.
-C
+!
+! Exit. Set lens (=length argstring) and copy STRTMP to ARGSTR.
+!
       LENS = LENS - 2
       IF (LENS .GT. MAXLS) GO TO 300
       IRC = STOS (STRTMP, 1, LENS, ARGSTR, LENTOT)
       GO TO 1000
-C
-C Argument to long.
-C
+!
+! Argument to long.
+!
 200   CONTINUE
       DOSARG = 1
       GO TO 1000
-C
-C Argstring to long.
-C
+!
+! Argstring to long.
+!
 300   CONTINUE
       DOSARG = 2
       GO TO 1000

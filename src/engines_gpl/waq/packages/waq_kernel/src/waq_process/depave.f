@@ -27,27 +27,15 @@
 !>\file
 !>       Average depth for a Bloom time step (typically a day)
 
-C***********************************************************************
-C
-C     Project : Venetie WQ study, 1998
-C     Author  : Jos van Gils
-C     Date    : 980612             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     971221  Jos van Gils    First Version
-C***********************************************************************
-C
-C     Description of the module :
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
@@ -69,7 +57,7 @@ C     ------   -----  ------------
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
 
-c     Check whether certain input parameters are independent of X
+!     Check whether certain input parameters are independent of X
 
       IF (FIRST) THEN
           FIRST = .FALSE.
@@ -81,17 +69,17 @@ c     Check whether certain input parameters are independent of X
           ENDIF
       ENDIF
 
-C     Retrieve switch for averaging and nr. of steps to be averaged
+!     Retrieve switch for averaging and nr. of steps to be averaged
 
       NSWITS = NINT(PMSA(IP1))
       NAVERA = NINT(PMSA(IP2))
 
-C     Add 1 to counter and check for period
+!     Add 1 to counter and check for period
 
       TELLER = TELLER + 1
       IF ( TELLER .GT. NAVERA ) TELLER = TELLER - NAVERA
 
-C     Loop over segments
+!     Loop over segments
 
       DO 9000 ISEG = 1 , NOSEG
 
@@ -105,28 +93,28 @@ C     Loop over segments
 
               IF ( NSWITS .EQ. 0 ) THEN
 
-C                 No averaging: copy depth to average depth
+!                 No averaging: copy depth to average depth
 
                   PMSA(IP5) = DEPTH
 
               ELSE
 
-C                 Averaging: FANCY FORMULA!!!!!
+!                 Averaging: FANCY FORMULA!!!!!
 
                   PMSA(IP5) = ( ADEPTH*REAL(TELLER-1) + DEPTH )
      J                          / REAL(TELLER)
               ENDIF
           ENDIF
-C
+!
           IP1  = IP1  + INCREM( 1)
           IP2  = IP2  + INCREM( 2)
           IP3  = IP3  + INCREM( 3)
           IP4  = IP4  + INCREM( 4)
           IP5  = IP5  + INCREM( 5)
           IP6  = IP6  + INCREM( 6)
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

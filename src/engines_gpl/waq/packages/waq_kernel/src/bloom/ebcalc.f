@@ -21,18 +21,18 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *         SUBROUTINE TO PERFORM SPECIAL INTERPOLATION               *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *         SUBROUTINE TO PERFORM SPECIAL INTERPOLATION               *
+!  *********************************************************************
+!
       SUBROUTINE EBCALC(X,F,FPR,NUMGR)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'arran.inc'
-C
-C  CHECK WHETHER X IS TOO LOW OR TOO HIGH
-C
+!
+!  CHECK WHETHER X IS TOO LOW OR TOO HIGH
+!
       IF (X .GT. ZVEC(1)) GO TO 20
       F=FUN(1,NUMGR)
       FPR=0.0

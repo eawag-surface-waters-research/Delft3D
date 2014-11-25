@@ -21,21 +21,21 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       4 Nov 1992
-C    Time:       14:12
-C    Program:    MAXGRA.FOR
-C    Version:    1.0
-C    Programmer: Hans Los
-C    Previous version(s):
-C    0.0 -- 27 Sep 1989 --  8:42 -- Operating System: DOS
-C
-C  *********************************************************************
-C  *      SUBROUTINE TO CALCULATE MAXIMUM GRAZING RATES AT WHICH       *
-C  *                   ECOGROUPS CAN SURVIVE                           *
-C  *********************************************************************
-C
-C 0895 MvdV GRAMX added for output of maximum grazing rate and
-C           dimension ZOOD and ZOOPR adapted for more than one grazer
+!    Date:       4 Nov 1992
+!    Time:       14:12
+!    Program:    MAXGRA.FOR
+!    Version:    1.0
+!    Programmer: Hans Los
+!    Previous version(s):
+!    0.0 -- 27 Sep 1989 --  8:42 -- Operating System: DOS
+!
+!  *********************************************************************
+!  *      SUBROUTINE TO CALCULATE MAXIMUM GRAZING RATES AT WHICH       *
+!  *                   ECOGROUPS CAN SURVIVE                           *
+!  *********************************************************************
+!
+! 0895 MvdV GRAMX added for output of maximum grazing rate and
+!           dimension ZOOD and ZOOPR adapted for more than one grazer
       SUBROUTINE MAXGRA(ROOT,EXTB,DAY,DSURF,EADJ,PMAXJ,CDATE,ZOOD,NUMGR,
      1                  NUMSP,DEP,GRAMX)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -47,19 +47,19 @@ C           dimension ZOOD and ZOOPR adapted for more than one grazer
       INCLUDE 'ioblck.inc'
       DIMENSION ROOT(2),OUTP(2,20),ZOOD(0:MG)
       CHARACTER*8 CDATE
-C
-C  Stop criteria:
-C  1. Extinction of ecogroup j = background ext. +/- 0.05
-C     (equivalent to a chlorophyll concentration < 10.0 mg/m3).
-C  2. GHI-GLOW < 0.001.
-C  3. After 20 iteration steps.
-C If the algorithm stops by either criterium 2 or 3,
-C Gmax will be preceeded by a "-" sign in the output.
-C
-C
-C Print heading and compute ZMAX.
-C
-C
+!
+!  Stop criteria:
+!  1. Extinction of ecogroup j = background ext. +/- 0.05
+!     (equivalent to a chlorophyll concentration < 10.0 mg/m3).
+!  2. GHI-GLOW < 0.001.
+!  3. After 20 iteration steps.
+! If the algorithm stops by either criterium 2 or 3,
+! Gmax will be preceeded by a "-" sign in the output.
+!
+!
+! Print heading and compute ZMAX.
+!
+!
       IF (NUMSP .GT. 1) GO TO 50
       IF (NREP .GT. 1) GO TO 30
       CALL FORMFE (IOU(16))
@@ -90,62 +90,62 @@ C
       WRITE (IOU(16),20) (SPNAME(K),K=1,NUSPEC)
    50 CONTINUE
       IF (ZOOPR(NUMSP,NG) .GT. 0.0 ) GO TO 70
-C
-C   Exit for unedible types, putting a large number in OUTP.
-C
+!
+!   Exit for unedible types, putting a large number in OUTP.
+!
       DO 60 I=1,2
    60 OUTP(I,NUMSP+1)=1.D7
       IF (NUMSP .EQ. NUSPEC) GO TO 400
       RETURN
    70 IF (ROOT(2) .GT. EXTB) GO TO 90
-C
-C  Net growth rate is negative, even if G = 0.0
-C
+!
+!  Net growth rate is negative, even if G = 0.0
+!
       DO 80 I=1,2
    80 OUTP(I,NUMSP+1)=0.0
       IF (NUMSP .EQ. NUSPEC) GO TO 400
       RETURN
    90 CONTINUE
       ITE=0
-C
-C  Establish initial boundaries for G interval. Start with:
-C  Glow=0.0, and GHI is obtained by demanding EMIN=0.3 and R(T) and
-C  M(T) of ecogroup j are both 0.1*PGMAX(T).
-C
+!
+!  Establish initial boundaries for G interval. Start with:
+!  Glow=0.0, and GHI is obtained by demanding EMIN=0.3 and R(T) and
+!  M(T) of ecogroup j are both 0.1*PGMAX(T).
+!
       GLOW=0.0
       GHI=0.03*PMAXJ*DAY-0.5
   100 GHI=GHI+0.5
       EADJST=EADJ+GHI/PMAXJ
 
-C
-C  Update nov 4 1992: use total depth rather than partial depth.
-C  See also MAXGRO and BLOOM
-C
+!
+!  Update nov 4 1992: use total depth rather than partial depth.
+!  See also MAXGRO and BLOOM
+!
 *     CALL CONSTR(DSURF,DMIX(NUMSP),EADJST,ROOT,NUMGR)
       CALL CONSTR(DSURF,DEP,EADJST,ROOT,NUMGR)
-C
-C  If groupp j still has a positive growth rate (Kmax > Kb), increase
-C  GHI with 0.5.
-C
+!
+!  If groupp j still has a positive growth rate (Kmax > Kb), increase
+!  GHI with 0.5.
+!
       IF (ROOT(2) .LT. EXTB) GO TO 110
       GLOW=GHI
       GO TO 100
-C
-C  Half G interval.
-C
+!
+!  Half G interval.
+!
   110 GMID=(GHI+GLOW)/2.
   120 ITE=ITE+1
       EADJST=EADJ+GMID/PMAXJ
-C
-C  Update nov 4 1992: use total depth rather than partial depth.
-C  See also MAXGRO and BLOOM
-C
+!
+!  Update nov 4 1992: use total depth rather than partial depth.
+!  See also MAXGRO and BLOOM
+!
 *     CALL CONSTR(DSURF,DMIX(NUMSP),EADJST,ROOT,NUMGR)
       CALL CONSTR(DSURF,DEP,EADJST,ROOT,NUMGR)
-C
-C  Test whether ROOT(2) (UKmax) is close enough to EXTB:
-C  stop criterium 1.
-C
+!
+!  Test whether ROOT(2) (UKmax) is close enough to EXTB:
+!  stop criterium 1.
+!
       IF (ROOT(2) .GT. EXTB+0.05) GO TO 160
       IF (ROOT(2) .LT. EXTB-0.05) GO TO 130
       ZMAXJ=ZMAX*GMID/ZOOPR(NUMSP,NG)
@@ -153,14 +153,14 @@ C
       OUTP(2,NUMSP+1)=ZMAXJ
       IF (NUMSP .EQ. NUSPEC) GO TO 400
       RETURN
-C
-C  Establish the next (lower) grazing rate.
-C
+!
+!  Establish the next (lower) grazing rate.
+!
   130 GHI=GMID
       GMID=(GMID+GLOW)/2.
-C
-C  Test for stop criterium 2: GHI-GLOW.
-C
+!
+!  Test for stop criterium 2: GHI-GLOW.
+!
   140 GSTOP=GHI-GLOW
       IF (GSTOP .LT. 1.D-3) GO TO 150
       IF (ITE .LT. 20) GO TO 120
@@ -169,15 +169,15 @@ C
       OUTP(2,NUMSP+1)=ZMAXJ
       IF (NUMSP .EQ. NUSPEC) GO TO 400
       RETURN
-C
-C  Establish the next (higher) grazing rate.
-C
+!
+!  Establish the next (higher) grazing rate.
+!
   160 GLOW=GMID
       GMID=(GHI+GMID)/2.
       GO TO 140
-C
-C   Print output for each ecogoup for this time-step.
-C
+!
+!   Print output for each ecogoup for this time-step.
+!
   400 CONTINUE
       NTOT=NUSPEC+1
 

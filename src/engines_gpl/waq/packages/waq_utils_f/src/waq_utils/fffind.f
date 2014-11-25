@@ -23,22 +23,22 @@
 
       SUBROUTINE FFFIND ( LUNUT , SGET , AFILE , BFILE , ISTEP ,
      *                    IT2   , IT3  , IT4   , NUMBR , IERR  )
-C
+!
       CHARACTER*25  SGET  , S1
       CHARACTER*255 AFILE , BFILE
-C
-C     COMMON  /  SYSI   /   System timers
-C
+!
+!     COMMON  /  SYSI   /   System timers
+!
       INCLUDE 'sysi.inc'
-C
-C     local declarations
-C
+!
+!     local declarations
+!
       REAL*8        REFTIM, STARTTIM, STOPTIM, AFACT, JULIAN
       CHARACTER*255 FILPATH
       INTEGER       PATHLEN
-C
-C          Open the ASCII .hyd file
-C
+!
+!          Open the ASCII .hyd file
+!
       ILUN = 148
       CALL DHOPNF  ( ILUN , AFILE  , 33 , 1   , IERR )
       IF ( IERR .GT. 0 ) THEN
@@ -46,9 +46,9 @@ C
          RETURN
       ENDIF
       CALL DHPATH(AFILE,FILPATH,PATHLEN)
-C
-C          Search for the file name of this item
-C
+!
+!          Search for the file name of this item
+!
       DO 10 I = 1,10000
          READ ( ILUN , * , END=20 ) S1, BFILE
          IF ( S1 .EQ. 'conversion-ref-time  ' )
@@ -88,17 +88,17 @@ C
       IT2      = (STARTTIM-REFTIM)/AFACT + 0.5
       IT3      = (STOPTIM-REFTIM)/AFACT + 0.5
       CLOSE ( ILUN )
-C
-C          Open the binary file for this item
-C
+!
+!          Open the binary file for this item
+!
       CALL DHOPNF  ( ILUN , BFILE  , 33 , 2   , IERR )
       IF ( IERR .GT. 0 ) THEN
          WRITE ( LUNUT , 1020 ) BFILE
          RETURN
       ENDIF
-C
-C          Find the time step in the file where to start
-C
+!
+!          Find the time step in the file where to start
+!
       READ ( ILUN , END=50 ) ITIM , (A,K=1,ABS(NUMBR))
       IF ( ITIM .NE. IT2 ) THEN
          WRITE ( LUNUT , 1030 ) IT2, ITIM, BFILE
@@ -116,11 +116,11 @@ C
          CLOSE ( ILUN )
          RETURN
       ENDIF
-C
+!
    50 WRITE ( LUNUT , 1050 ) ISTEP, BFILE
       IERR = 1
       RETURN
-C
+!
  1000 FORMAT (/' ERROR: Opening ASCII coupling file: ',A)
  1010 FORMAT (/' ERROR: Search string not found: ',A)
  1020 FORMAT (/' ERROR: Opening binary file: ',A)
@@ -129,6 +129,6 @@ C
  1040 FORMAT (/' ERROR: Time step is not: ',I10,' but: ',I10,
      *         ' in file: ',A)
  1050 FORMAT (/' ERROR: Time: ',I10,' not found in file: ',A)
-C
+!
       END
-C                                      *** end of addition of July 2002
+!                                      *** end of addition of July 2002

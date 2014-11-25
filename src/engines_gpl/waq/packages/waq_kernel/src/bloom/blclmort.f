@@ -21,50 +21,50 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C     This file contains the subroutines concerning the chlorinity
-C     dependend mortality rates:
-C     BLCLST - adapt the rates
-C     BLCLRS - reset the rates
-C     And a routine to set ppmax for a specific alg
-C     BLSPPM - set ppmax
+!     This file contains the subroutines concerning the chlorinity
+!     dependend mortality rates:
+!     BLCLST - adapt the rates
+!     BLCLRS - reset the rates
+!     And a routine to set ppmax for a specific alg
+!     BLSPPM - set ppmax
 
       SUBROUTINE BLCLST (MRTM1,MRTM2,MRTB1,MRTB2,NTYP_A,CL)
 
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     MRTM1   R     NTYP_A   O    Original mortality rates
-C     MRTM2   R     NTYP_A   I    M2 mort rate coeff
-C     MRTB1   R     NTYP_A   I    B1 mort rate sal stress coeff
-C     MRTB2   R     NTYP_A   I    B2 mort rate sal stress coeff
-C
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     MRTM1   R     NTYP_A   O    Original mortality rates
+!     MRTM2   R     NTYP_A   I    M2 mort rate coeff
+!     MRTB1   R     NTYP_A   I    B1 mort rate sal stress coeff
+!     MRTB2   R     NTYP_A   I    B2 mort rate sal stress coeff
+!
       INTEGER NTYP_A
       REAL    MRTM1(NTYP_A),MRTM2(NTYP_A),MRTB1(NTYP_A),MRTB2(NTYP_A),
      1        CL
-C
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     SIZE    I     ??       I/O  size      A.o.mortality rate in RMORT1
-C
+!
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     SIZE    I     ??       I/O  size      A.o.mortality rate in RMORT1
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
-C
-C     Local variables
-C
-C     Name    Type  Length   I/O  Description
-C
-C     IALG    I     1             counter over algae types
+!
+!     Local variables
+!
+!     Name    Type  Length   I/O  Description
+!
+!     IALG    I     1             counter over algae types
 
       INTEGER      IALG
 
-C     Loop over algae types
+!     Loop over algae types
       DO 10 IALG = 1, NTYP_A
-C       Store the original value
+!       Store the original value
         MRTM1(IALG) = RMORT1(IALG)
-C       Salinity dep. mortality ??
+!       Salinity dep. mortality ??
         IF (MRTM2(IALG).GT.0.) THEN
           CL = MIN(CL,35000.)
           RMORT1(IALG) =  (MRTM2(IALG)-MRTM1(IALG))/
@@ -77,35 +77,35 @@ C       Salinity dep. mortality ??
       END
       SUBROUTINE BLCLRS (MRTM1,NTYP_A)
 
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     MRTM1   R     NTYP_A   O    Original mortality rates
-C
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     MRTM1   R     NTYP_A   O    Original mortality rates
+!
       INTEGER NTYP_A
       REAL    MRTM1(NTYP_A)
-C
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     SIZE    I     ??       I/O  size      A.o.mortality rate in RMORT1
-C
+!
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     SIZE    I     ??       I/O  size      A.o.mortality rate in RMORT1
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
-C
-C     Local variables
-C
-C     Name    Type  Length   I/O  Description
-C
-C     IALG    I     1             counter over algae types
+!
+!     Local variables
+!
+!     Name    Type  Length   I/O  Description
+!
+!     IALG    I     1             counter over algae types
 
       INTEGER      IALG
 
-C     Loop over algae types
+!     Loop over algae types
       DO 20 IALG = 1, NTYP_A
-C       Store the original value
+!       Store the original value
         RMORT1(IALG)= MRTM1(IALG)
    20 CONTINUE
 
@@ -113,44 +113,44 @@ C       Store the original value
 
       END
       SUBROUTINE BLSPPM (IALG  , PPMAX )
-C
-C     Set PPMAX in BLOOM array for specific alg
-C
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     IALG    1     1        I    index alg involved
-C     PPMAX   R     1        I    PPMAX value to be set
-C
+!
+!     Set PPMAX in BLOOM array for specific alg
+!
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     IALG    1     1        I    index alg involved
+!     PPMAX   R     1        I    PPMAX value to be set
+!
       INTEGER IALG
       REAL    PPMAX
-C
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
-C
+!
       PMAX1(IALG) = PPMAX
-C
+!
       RETURN
       END
       SUBROUTINE BLSSDM (IALG  , SDMIXN )
-C
-C     Set SDMIX in BLOOM array for specific alg
-C
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     IALG    1     1        I    index alg involved
-C     SDMIXN  R     1        I    SDMIX value to be set
-C
+!
+!     Set SDMIX in BLOOM array for specific alg
+!
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     IALG    1     1        I    index alg involved
+!     SDMIXN  R     1        I    SDMIX value to be set
+!
       INTEGER IALG
       REAL    SDMIXN
-C
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
-C
+!
       SDMIX(IALG) = SDMIXN
-C
+!
       RETURN
       END

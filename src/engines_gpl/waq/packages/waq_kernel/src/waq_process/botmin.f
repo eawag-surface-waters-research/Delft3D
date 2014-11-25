@@ -27,49 +27,34 @@
 !>\file
 !>       Mineralisation of organic substances and desorption of AAP in the bed (S1,S2) for C, N, P and Si.
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     951205  Marnix v.d. Vat Extension for use with SWITCH
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        GENERAL MINERALISATION OF ORGANIC SUBSTANCES IN THE BOTTOM LAYERS
-C        FOR CARBON, NITROGEN, PHOSPHORUS AND SILICATE). FORMULATION
-C        IS ZERO AND FIRST ORDER AND TEMPERATURE CORRECTED.
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C CRTEMP  R*4 1 I critical temperature for mineralisation             [xC]
-C DEPTH   R*4 1 I actual depth of a segment                            [m]
-C FL (1)  R*4 1 O mineralisation flux mixing layer (x=C,N,P,Si)  [gX/m3/d]
-C MINRC   R*4 1 I first order mineralisation rate                    [1/d]
-C MINTCR  R*4 1 I temperature coefficient two bottom layers          [1/d]
-C ORG     R*4 1 I amount decaying organic material in mixing layer    [gX/m2]
-C TEMP    R*4 1 I ambient temperature                                 [xC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
-C TEMPC   R*4 1 L temperature coefficient                              [-]
-C VOLUME  R*4 1 L volume calculated by DELWAQ                         [m3]
-C ZEMIN   R*4 1 I zeroth order mineralisation rate mixing layer  [gX/m2/d]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        GENERAL MINERALISATION OF ORGANIC SUBSTANCES IN THE BOTTOM LAYERS
+!        FOR CARBON, NITROGEN, PHOSPHORUS AND SILICATE). FORMULATION
+!        IS ZERO AND FIRST ORDER AND TEMPERATURE CORRECTED.
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! CRTEMP  R*4 1 I critical temperature for mineralisation             [xC]
+! DEPTH   R*4 1 I actual depth of a segment                            [m]
+! FL (1)  R*4 1 O mineralisation flux mixing layer (x=C,N,P,Si)  [gX/m3/d]
+! MINRC   R*4 1 I first order mineralisation rate                    [1/d]
+! MINTCR  R*4 1 I temperature coefficient two bottom layers          [1/d]
+! ORG     R*4 1 I amount decaying organic material in mixing layer    [gX/m2]
+! TEMP    R*4 1 I ambient temperature                                 [xC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
+! TEMPC   R*4 1 L temperature coefficient                              [-]
+! VOLUME  R*4 1 L volume calculated by DELWAQ                         [m3]
+! ZEMIN   R*4 1 I zeroth order mineralisation rate mixing layer  [gX/m2/d]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -88,7 +73,7 @@ C     ------   -----  ------------
       IN7  = INCREM( 7)
       IN8  = INCREM( 8)
       IN9  = INCREM( 9)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -98,13 +83,13 @@ C
       IP7  = IPOINT( 7)
       IP8  = IPOINT( 8)
       IP9  = IPOINT( 9)
-C
+!
       IF ( IN3 .EQ. 0 .AND. IN4 .EQ. 0 .AND.
      *     IN5 .EQ. 0 .AND. IN6 .EQ. 0        ) THEN
          TEMP   = PMSA(IP5 )
          CRTEMP = PMSA(IP6 )
          IF ( TEMP .LT. CRTEMP ) THEN
-C        Only the zeroth order term
+!        Only the zeroth order term
             TEMFAK = 0.0
          ELSE
             MINRC  = PMSA(IP3 )
@@ -116,7 +101,7 @@ C        Only the zeroth order term
       ELSE
          TFACT  = .TRUE.
       ENDIF
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -124,12 +109,12 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
       IF ( TFACT ) THEN
          TEMP   = PMSA(IP5 )
          CRTEMP = PMSA(IP6 )
          IF ( TEMP .LT. CRTEMP ) THEN
-C        Only the zeroth order term
+!        Only the zeroth order term
             TEMFAK = 0.0
          ELSE
             MINRC  = PMSA(IP3 )
@@ -138,7 +123,7 @@ C        Only the zeroth order term
             TEMFAK = MINRC * MINTC ** TEMP20
          ENDIF
       ENDIF
-C
+!
 
       ZEMIN   = PMSA(IP1 )
       ORG     = MAX ( 0.0, PMSA(IP2 ) )
@@ -146,26 +131,26 @@ C
       DEPTH   = PMSA(IP8 )
       SWITCH  = PMSA(IP9 )
 
-C***********************************************************************
-C**** Processes connected to the MINERALISATION
-C***********************************************************************
-C
-C
-C        Calculation of mineralisation flux ( M.L-3.t-1)
-C
+!***********************************************************************
+!**** Processes connected to the MINERALISATION
+!***********************************************************************
+!
+!
+!        Calculation of mineralisation flux ( M.L-3.t-1)
+!
       IF (ABS(SWITCH).LT.0.5) THEN
-C       NO SWITCH
+!       NO SWITCH
         FL( 1 + IFLUX ) = ZEMIN/DEPTH + TEMFAK * ORG / DEPTH
         FL( 2 + IFLUX ) = 0.0
       ELSE
-C       SWITCH
+!       SWITCH
         FL( 1 + IFLUX ) = 0.0
         FL( 2 + IFLUX ) = ZEMIN/DEPTH + TEMFAK * ORG / DEPTH
       ENDIF
-C
+!
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
@@ -176,9 +161,9 @@ C
       IP7   = IP7   + IN7
       IP8   = IP8   + IN8
       IP9   = IP9   + IN9
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

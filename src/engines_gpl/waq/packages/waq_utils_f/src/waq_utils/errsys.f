@@ -22,17 +22,17 @@
 !!  rights reserved.
 
       SUBROUTINE ERRSYS(STRING,IERR)
-C
+!
       CHARACTER*(*) STRING
-C
+!
       CALL GETMLU(IMLUN)
       IF ( IMLUN .NE. 0 ) THEN
          WRITE(IMLUN,'(A)') STRING
       ELSE
          WRITE(*,*) STRING
       ENDIF
-C
+!
       CALL SRSTOP(2)
-C
+!
       RETURN
       END

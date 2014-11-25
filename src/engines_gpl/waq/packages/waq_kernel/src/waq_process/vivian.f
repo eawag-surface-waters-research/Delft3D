@@ -27,57 +27,40 @@
 !>\file
 !>       Dissolution/precipitation of P in vivianite
 
-C***********************************************************************
-C
-C     Project : GEM  (T2087)
-C     Author  : Rik Sonneveldt
-C     Date    : 970512             Version : 0.0
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     970512  Rik SOnneveldt  first version, based on ADSPO4.FOR
-C     970929  Rik SOnneveldt  IKMRK1 LOOP AAngepast
-C     010711  Johannes Smits  corrected for porosity, change of names
-C     021218  Johannes Smits  corrected to prevent negative fluxes
-C                             and negative concentrations
-C
-C***********************************************************************
-C
-C     Description of the module :
-C     precipitation and dissolution of vivianite
-C
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
+!
+!     Description of the module :
+!     precipitation and dissolution of vivianite
+!
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
 
-C CPHD    R*4 1 I     concentration dissolved phosphate            [gP/m3]
-C CPHDE   R*4 1 I     saturation concentration dissolved phosphate [gP/m3]
-C CPHPR   R*4 1 I     concentration vivianite                      [gP/m3]
-C CROXY   R*4 1 I     critical concentration dissolved oxygen     [gO2/m3]
-C DELT    R*4 1 I     timestep                                         [d]
-C FPRC    R*4 1 O     precipitation flux                         [gP/m3/d]
-C FRP     R*4 1 -     switch concerning redox pot. for precipitation   [-]
-C FRS     R*4 1 -     switch concerning redox pot. for dissolution     [-]
-C FSOL    R*4 1 O     dissolution flux                           [gP/m3/d]
-C KPRC    R*4 1 I     precipitation rate                             [1/d]
-C KSOL    R*4 1 I     dissolution rate                          [m3/gO2/d]
-C OXY     R*4 1 I     concentration dissolved oxygen              [gO2/m3]
-C POROS   R*4 1 I     porosity                                         [-]
-C TCPRC   R*4 1 I     temperature coefficient of precipitation         [-]
-C TCSOL   R*4 1 I     temperature coefficient of dissolution           [-]
-C TEMP    R*4 1 I     temperature                                     [oC]
-C TMPPRC  R*4 1 -     temperature function for precipitation           [-]
-C TMPSOL  R*4 1 -     temperature function for dissolution             [-]
+! CPHD    R*4 1 I     concentration dissolved phosphate            [gP/m3]
+! CPHDE   R*4 1 I     saturation concentration dissolved phosphate [gP/m3]
+! CPHPR   R*4 1 I     concentration vivianite                      [gP/m3]
+! CROXY   R*4 1 I     critical concentration dissolved oxygen     [gO2/m3]
+! DELT    R*4 1 I     timestep                                         [d]
+! FPRC    R*4 1 O     precipitation flux                         [gP/m3/d]
+! FRP     R*4 1 -     switch concerning redox pot. for precipitation   [-]
+! FRS     R*4 1 -     switch concerning redox pot. for dissolution     [-]
+! FSOL    R*4 1 O     dissolution flux                           [gP/m3/d]
+! KPRC    R*4 1 I     precipitation rate                             [1/d]
+! KSOL    R*4 1 I     dissolution rate                          [m3/gO2/d]
+! OXY     R*4 1 I     concentration dissolved oxygen              [gO2/m3]
+! POROS   R*4 1 I     porosity                                         [-]
+! TCPRC   R*4 1 I     temperature coefficient of precipitation         [-]
+! TCSOL   R*4 1 I     temperature coefficient of dissolution           [-]
+! TEMP    R*4 1 I     temperature                                     [oC]
+! TMPPRC  R*4 1 -     temperature function for precipitation           [-]
+! TMPSOL  R*4 1 -     temperature function for dissolution             [-]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT REAL (A-H,J-Z)
 
       INTEGER  NOSEG , NOFLUX, NOQ1  , NOQ2  , NOQ3  , NOQ4
@@ -102,7 +85,7 @@ C
       IP10 = IPOINT(10)
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
-C
+!
       IFLUX = 0
 
       DO 9000 ISEG = 1 , NOSEG
@@ -123,10 +106,10 @@ C
          TEMP    = PMSA(IP10)
          POROS   = PMSA(IP11)
          DELT    = PMSA(IP12)
-C
-C     Calculation of the precipitation or dissolution flux
-C     dependent on dissolved oxygen
-C
+!
+!     Calculation of the precipitation or dissolution flux
+!     dependent on dissolved oxygen
+!
          IF ( OXY .GE. CROXY ) THEN
             FPRC   = 0.0
             TMPSOL = TCSOL**(TEMP - 20.0)
@@ -139,14 +122,14 @@ C
             FPRC   = KPRC * TMPPRC * ( CPHD / POROS - CPHDE ) * POROS
             IF ( FPRC .LT. 0.0) FPRC = 0.0
          ENDIF
-C
-C     Output of module
-C
+!
+!     Output of module
+!
          FL(1+IFLUX) = FPRC
          FL(2+IFLUX) = FSOL
-C
-C     End active cells block
-C
+!
+!     End active cells block
+!
       ENDIF
 
       IFLUX = IFLUX + NOFLUX
@@ -162,9 +145,9 @@ C
       IP10  = IP10  + INCREM ( 10 )
       IP11  = IP11  + INCREM ( 11 )
       IP12  = IP12  + INCREM ( 12 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

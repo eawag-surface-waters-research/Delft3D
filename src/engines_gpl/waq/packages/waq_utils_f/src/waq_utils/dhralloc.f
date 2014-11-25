@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       MODULE DHRALLOC
-C
+!
       INTERFACE
       SUBROUTINE DHRALLOC_REAL ( PREAL , NEW_LENGTH, OLD_LENGTH )
       REAL        , POINTER :: PREAL(:)
@@ -48,22 +48,22 @@ C
       LOGICAL     , POINTER :: PLOGI(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
       END SUBROUTINE
-C
+!
       END INTERFACE
-C
+!
       END MODULE
       SUBROUTINE DHRALLOC_REAL ( PREAL , NEW_LENGTH, OLD_LENGTH )
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       REAL        , POINTER :: PREAL(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
-C
+!
       LOGICAL       L_ASSOCIATED
       REAL        , POINTER :: P_HULP(:)
-C
+!
       MIN_LENGTH = MIN(OLD_LENGTH,NEW_LENGTH)
-C
+!
       L_ASSOCIATED = ASSOCIATED(PREAL)
       IF (  L_ASSOCIATED ) THEN
          IF ( MIN_LENGTH .GT. 0 ) THEN
@@ -78,20 +78,20 @@ C
       ELSE
          ALLOCATE(PREAL(NEW_LENGTH))
       ENDIF
-C
+!
       END
       SUBROUTINE DHRALLOC_INT ( PINT  , NEW_LENGTH, OLD_LENGTH )
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER     , POINTER :: PINT(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
-C
+!
       LOGICAL       L_ASSOCIATED
       INTEGER     , POINTER :: P_HULP(:)
-C
+!
       MIN_LENGTH = MIN(OLD_LENGTH,NEW_LENGTH)
-C
+!
       L_ASSOCIATED = ASSOCIATED(PINT)
       IF (  L_ASSOCIATED ) THEN
          IF ( MIN_LENGTH .GT. 0 ) THEN
@@ -106,20 +106,20 @@ C
       ELSE
          ALLOCATE(PINT(NEW_LENGTH))
       ENDIF
-C
+!
       END
       SUBROUTINE DHRALLOC_CH10( PCH10  , NEW_LENGTH, OLD_LENGTH )
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       CHARACTER*10, POINTER :: PCH10(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
-C
+!
       LOGICAL       L_ASSOCIATED
       CHARACTER*10, POINTER :: P_HULP(:)
-C
+!
       MIN_LENGTH = MIN(OLD_LENGTH,NEW_LENGTH)
-C
+!
       L_ASSOCIATED = ASSOCIATED(PCH10)
       IF (  L_ASSOCIATED ) THEN
          IF ( MIN_LENGTH .GT. 0 ) THEN
@@ -134,20 +134,20 @@ C
       ELSE
          ALLOCATE(PCH10(NEW_LENGTH))
       ENDIF
-C
+!
       END
       SUBROUTINE DHRALLOC_CH20( PCH20  , NEW_LENGTH, OLD_LENGTH )
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       CHARACTER*20, POINTER :: PCH20(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
-C
+!
       LOGICAL       L_ASSOCIATED
       CHARACTER*20, POINTER :: P_HULP(:)
-C
+!
       MIN_LENGTH = MIN(OLD_LENGTH,NEW_LENGTH)
-C
+!
       L_ASSOCIATED = ASSOCIATED(PCH20)
       IF (  L_ASSOCIATED ) THEN
          IF ( MIN_LENGTH .GT. 0 ) THEN
@@ -162,20 +162,20 @@ C
       ELSE
          ALLOCATE(PCH20(NEW_LENGTH))
       ENDIF
-C
+!
       END
       SUBROUTINE DHRALLOC_CH50( PCH50  , NEW_LENGTH, OLD_LENGTH )
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       CHARACTER*50, POINTER :: PCH50(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
-C
+!
       LOGICAL       L_ASSOCIATED
       CHARACTER*50, POINTER :: P_HULP(:)
-C
+!
       MIN_LENGTH = MIN(OLD_LENGTH,NEW_LENGTH)
-C
+!
       L_ASSOCIATED = ASSOCIATED(PCH50)
       IF (  L_ASSOCIATED ) THEN
          IF ( MIN_LENGTH .GT. 0 ) THEN
@@ -190,20 +190,20 @@ C
       ELSE
          ALLOCATE(PCH50(NEW_LENGTH))
       ENDIF
-C
+!
       END
       SUBROUTINE DHRALLOC_LOGI( PLOGI  , NEW_LENGTH, OLD_LENGTH )
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       LOGICAL     , POINTER :: PLOGI(:)
       INTEGER       OLD_LENGTH, NEW_LENGTH
-C
+!
       LOGICAL       L_ASSOCIATED
       LOGICAL     , POINTER :: P_HULP(:)
-C
+!
       MIN_LENGTH = MIN(OLD_LENGTH,NEW_LENGTH)
-C
+!
       L_ASSOCIATED = ASSOCIATED(PLOGI)
       IF (  L_ASSOCIATED ) THEN
          IF ( MIN_LENGTH .GT. 0 ) THEN
@@ -218,5 +218,5 @@ C
       ELSE
          ALLOCATE(PLOGI(NEW_LENGTH))
       ENDIF
-C
+!
       END

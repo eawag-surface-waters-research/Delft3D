@@ -21,20 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Character function to obtain part of one string and put it into
-C another string.
-C The arguments of this function are similar to the EXEC2 function
-C &PIECE OF.
-C
+!
+! Character function to obtain part of one string and put it into
+! another string.
+! The arguments of this function are similar to the EXEC2 function
+! &PIECE OF.
+!
       CHARACTER*(*) FUNCTION PIECE (SOURCE,FIRST,LENGTH)
       CHARACTER*1 SOURCE(1),BLANK
       INTEGER FIRST,LAST,LENGTH,STOS,WIPE
       DATA BLANK /' '/
-C
-C Use STOS the put the significant part of SOURCE into PIECE.
-C The remainder of the string is filled with blanks by function WIPE.
-C
+!
+! Use STOS the put the significant part of SOURCE into PIECE.
+! The remainder of the string is filled with blanks by function WIPE.
+!
       PIECE = BLANK
       LAST = FIRST + LENGTH - 1
       LENPI = LEN (PIECE)

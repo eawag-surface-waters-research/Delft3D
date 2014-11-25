@@ -25,37 +25,16 @@
      +                    NOFLUX , IEXPNT , IKNMRK , NOQ1   , NOQ2   ,
      +                    NOQ3   , NOQ4   )
 
-C***********************************************************************
-C
-C     Project : KSENOS T1236.03
-C     Author  : M. Bokhorst
-C     Date    : 21-12-94           Version : 0.1
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     211294  M. Bokhorst     First version
-C     111295  M. Bokhorst     Added radiation at the bottom of a segment
-C     090497  M. Bokhorst     Update new DELWAQ bottom
-C                             Project pilot GEM (T2087)
-C                             - evaluation extra first feature
-C                               = 2: active bottom segment)
-C   20000419  Jan van Beek    Controleren op dummy uitwisselingen ter
-C                             voorkoming van array overschrijdingen
-C   20031107  Jan van Beek    GEM - delwaq-g en drying flooding
-C***********************************************************************
-C
-C     Function : Calculates the radiation at the surface and at the bottom of the
-C                active water segments
-C
-C***********************************************************************
+!
+!     Function : Calculates the radiation at the surface and at the bottom of the
+!                active water segments
+!
 
       USE BottomSet     !  Module with definition of the waterbottom segments
 
       IMPLICIT NONE
 
-C     arguments
+!     arguments
 
       REAL               :: PMSA(*)            ! in/out input-output array space to be adressed with IPOINT/INCREM
       REAL               :: FL(*)              ! in/out flux array
@@ -70,7 +49,7 @@ C     arguments
       INTEGER            :: NOQ3               ! in     number of exchanges in third direction
       INTEGER            :: NOQ4               ! in     number of exchanges in fourth direction
 
-C     from PMSA array
+!     from PMSA array
 
       REAL               :: EXTVL              ! 1  in  total extinction coefficient visible light   (1/m)
       REAL               :: DEPTH              ! 2  in  depth of segment                               (m)
@@ -81,7 +60,7 @@ C     from PMSA array
       REAL               :: RADBOT             ! 7  loc/out 9 irradiation at the segment lower-boundary   (W/m2)
       REAL               :: RAD                ! 8  out irradiation at the segment upper-boundary   (W/m2)
 
-C     local decalrations
+!     local decalrations
 
       INTEGER            :: IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP9 ! index pointers in PMSA array
       INTEGER            :: IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9 ! increments in PMSA array
@@ -127,37 +106,37 @@ C     local decalrations
       IN8  = INCREM(8)
       IN9  = INCREM(9)
 
-c.....2DH afhandeling
+!.....2DH afhandeling
 
       DO 1000 ISEG=1,NOSEG
 
          CALL DHKMRK( 1, IKNMRK(ISEG ), IKMRK1 )
 
-c........Segment is inactief
+!........Segment is inactief
          IF      (IKMRK1 .EQ. 0) THEN
 
-c          RadTop = RadSurf
+!          RadTop = RadSurf
            PMSA(IP8) = PMSA(IP3)
 
-c          RadBot    = RadSurf
+!          RadBot    = RadSurf
            PMSA(IP9) = PMSA(IP3)
 
-c........Segment is actief watersegment
+!........Segment is actief watersegment
          ELSE IF (IKMRK1 .EQ. 1) THEN
 
-c          RadTop    = RadSurf
+!          RadTop    = RadSurf
            PMSA(IP8) = PMSA(IP3)
 
-c          RadBot    = RadSurf   * EXP( -ExtVl    *Depth     )
+!          RadBot    = RadSurf   * EXP( -ExtVl    *Depth     )
            PMSA(IP9) = PMSA(IP3) * EXP( -PMSA(IP1)*PMSA(IP2) )
 
-c........Segment is actief bodemsegment
+!........Segment is actief bodemsegment
          ELSE IF (IKMRK1 .EQ. 3) THEN
 
-c          RadTop    = 0.0
+!          RadTop    = 0.0
            PMSA(IP8) = 0.0
 
-c          RadBot    = 0.0
+!          RadBot    = 0.0
            PMSA(IP9) = 0.0
 
          ENDIF
@@ -174,9 +153,9 @@ c          RadBot    = 0.0
  1000 CONTINUE
 
 
-c.....3D afhandeling
+!.....3D afhandeling
 
-c.....Waterkolom
+!.....Waterkolom
 
       IP1  = IPOINT(1)
       IP2  = IPOINT(2)
@@ -198,19 +177,19 @@ c.....Waterkolom
             CALL DHKMRK( 2, IKNMRK(IVAN ), IK2VN )
             CALL DHKMRK( 2, IKNMRK(INAAR), IK2NR )
 
-c...........Van segment = inactief
+!...........Van segment = inactief
             IF ( IK1VN .EQ. 0 ) THEN
 
-c              RadTop = RadSurf
+!              RadTop = RadSurf
                PMSA(IP8 + (IVAN-1)  * IN8) = PMSA( IP3 + (IVAN-1)*IN3 )
 
-c              RadBot = Radsurf
+!              RadBot = Radsurf
                PMSA(IP9 + (IVAN-1)  * IN9) = PMSA( IP3 + (IVAN-1)*IN3 )
 
-c...........Van segment = actief water segment
+!...........Van segment = actief water segment
             ELSE IF (IK1VN .EQ. 1) THEN
 
-c..............Van segment = water segment met surface
+!..............Van segment = water segment met surface
                IF ( IK2VN .EQ. 1 ) THEN
 
                   EXTVL  = PMSA( IP1 + (IVAN-1) * IN1 )
@@ -224,7 +203,7 @@ c..............Van segment = water segment met surface
 
                ENDIF
 
-c..............Van segment = water segment zonder surface of bodem
+!..............Van segment = water segment zonder surface of bodem
                IF ( IK2VN .EQ. 2 ) THEN
 
                   EXTVL  = PMSA( IP1 + (IVAN -1) * IN1 )
@@ -240,19 +219,19 @@ c..............Van segment = water segment zonder surface of bodem
 
             ENDIF
 
-c...........Naar segment = inactief
+!...........Naar segment = inactief
             IF ( IK1NR .EQ. 0 ) THEN
 
-c              RadTop = RadSurf
+!              RadTop = RadSurf
                PMSA(IP8 + (INAAR-1) * IN8) = PMSA( IP3 + (INAAR-1)*IN3 )
 
-c              RadBot = Radsurf
+!              RadBot = Radsurf
                PMSA(IP9 + (INAAR-1) * IN9) = PMSA( IP3 + (INAAR-1)*IN3 )
 
-c...........Naar segment = actief water segment
+!...........Naar segment = actief water segment
             ELSE IF (IK1NR .EQ. 1) THEN
 
-c...........Naar segment = water segment met bodem
+!...........Naar segment = water segment met bodem
                IF ( IK2NR .EQ. 3 ) THEN
 
                   EXTVL  = PMSA( IP1 + (INAAR-1) * IN1 )
@@ -271,7 +250,7 @@ c...........Naar segment = water segment met bodem
  2000 CONTINUE
 
 
-C     the sediment columns
+!     the sediment columns
 
       DO IK = 1 , Coll%cursize
 
@@ -280,7 +259,7 @@ C     the sediment columns
           ITOP = Coll%set(IK)%topsedsed
           IBOT = Coll%set(IK)%botsedsed
 
-C         average RAD at water-sediment interface
+!         average RAD at water-sediment interface
 
           RADTOP  = 0.0
           TOTSURF = 0.0
@@ -301,7 +280,7 @@ C         average RAD at water-sediment interface
           A_ENH  = PMSA(IP4+(IWATER-1)*IN4)
           RADTOP = RADTOP*A_ENH/TOTSURF
 
-C         extinction over the layers of the column
+!         extinction over the layers of the column
 
           DO IQ = ITOP,IBOT
               IBODEM = IEXPNT(1,IQ)

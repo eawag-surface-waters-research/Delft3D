@@ -30,44 +30,44 @@
 !>                         Performs iterative steady state computation
 !>                         backward in space (8).
 
-C
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : june 1988 by L. Postma
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C                          LUN(23) , output, unformatted dump file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          DLWQPP, user postprocessing routine
-C                          DLWQ10, system monitoring routine
-C                          DLWQ11, system dump routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ41, reads second volume
-C                          DLWQ65, computes closure error
-C                          DLWQ80, convert water quality processes
-C                          DLWQ81, add waste loads
-C                          DLWQ82, do the transport
-C                          DLWQ83, set iteration step and check
-C                          DHOPNF, opens files
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHARACTER  *      INPUT  filenames
-C
-C     Declaration of arguments
-C
+!
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : june 1988 by L. Postma
+!
+!     LOGICAL UNITS      : LUN(19) , output, monitoring file
+!                          LUN(20) , output, formatted dump file
+!                          LUN(21) , output, unformatted hist. file
+!                          LUN(22) , output, unformatted dump file
+!                          LUN(23) , output, unformatted dump file
+!
+!     SUBROUTINES CALLED : DLWQTR, user transport routine
+!                          DLWQWQ, user waterquality routine
+!                          DLWQPP, user postprocessing routine
+!                          DLWQ10, system monitoring routine
+!                          DLWQ11, system dump routine
+!                          DLWQ13, system postpro-dump routine
+!                          DLWQ41, reads second volume
+!                          DLWQ65, computes closure error
+!                          DLWQ80, convert water quality processes
+!                          DLWQ81, add waste loads
+!                          DLWQ82, do the transport
+!                          DLWQ83, set iteration step and check
+!                          DHOPNF, opens files
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL       *      LOCAL  real      workspace array
+!     J       INTEGER    *      LOCAL  integer   workspace array
+!     C       CHARACTER  *      LOCAL  character workspace array
+!     LUN     INTEGER    *      INPUT  array with unit numbers
+!     LCHAR   CHARACTER  *      INPUT  filenames
+!
+!     Declaration of arguments
+!
       use grids
       use timers
       use delwaq2_data
@@ -81,29 +81,29 @@ C
       TYPE(DELWAQ_DATA)           :: DLWQD
       type(GridPointerColl)       :: GridPs               ! collection off all grid definitions
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       LOGICAL         IMFLAG , IDFLAG , IHFLAG , CONVER
       LOGICAL         LDUMMY , LSTREC , LREWIN
 
@@ -136,9 +136,9 @@ C
      &     ACTION == ACTION_FINALISATION        ) THEN
           RETURN
       ENDIF
-C
-C          some initialisation
-C
+!
+!          some initialisation
+!
       ithandl = 0
       if ( timon ) call timstrt ( "dlwqn8", ithandl )
 
@@ -163,9 +163,9 @@ C
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
      &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
      &                 surface  , j(iknmr) , iknmkv   )
-C
-C          make closure error correction
-C
+!
+!          make closure error correction
+!
       IF ( IDT.EQ.0 ) THEN
          CALL ZERO ( A(IVOL2), NOSEG )
       ELSE IF ( J(INRH2+1).GE.0 .AND. IVFLAG.EQ.0 ) THEN
@@ -179,17 +179,17 @@ C
          CALL ZERO   ( A(IVOL2), NOSEG   )
          WRITE ( LUN(19), 1000 )
       ENDIF
-C
+!
       ASTOP  = 1.0
       DO 10 I = 1,IMSTOP
       ASTOP  = ASTOP/10.0
    10 CONTINUE
       CALL ZERO ( A(ITIMR) , NOTOT*NOSEG )
-C
-C======================= iteration loop =============================
-C
-C          do the user transport processes
-C
+!
+!======================= iteration loop =============================
+!
+!          do the user transport processes
+!
       DO  20 ISTEP = 1,ITSTOP
       CALL DLWQTR ( NOTOT   , NOSYS   , NOSEG   , NOQ     , NOQ1    ,
      *              NOQ2    , NOQ3    , NOPA    , NOSFUN  , NODISP  ,
@@ -199,9 +199,9 @@ C
      *              IDT     , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
      *              C(IPNAM), C(IFNAM), C(ISFNA), LDUMMY  , ILFLAG  ,
      *              NPARTp  )
-C
-C          do the user water quality processes
-C
+!
+!          do the user water quality processes
+!
       CALL DLWQWQ ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
      *              A(IVOL) , A(ICONC), A(ICONS), A(IPARM), A(IFUNC),
      *              A(ISFUN), A(IDERV), ITSTRT  , IDT     , A(ISMAS),
@@ -210,39 +210,39 @@ C
       CALL DLWQ80 ( A(IDERV), NOTOT   , NOSEG   , ITFACT  , A(ITIMR),
      *              A(IMASS), A(IMAS2), IAFLAG  , A(IDMPS), INTOPT  ,
      *              J(ISDMP))
-C
-C          add the waste loads
-C
+!
+!          add the waste loads
+!
       CALL DLWQ81 ( A(IWSTE), J(IWAST), NOWST   , NOTOT   , A(ICONC),
      *              A(IDERV), A(ITIMR), A(IVOL) , A(IMAS2), IAFLAG  ,
      *              A(IDMPS), NDMPS   , INTOPT  , J(ISDMP), NOSYS   )
-C
-C          do the transport itself
-C
+!
+!          do the transport itself
+!
       CALL DLWQ82 ( A(IDISP), A(IDIFF), A(IAREA), A(IFLOW), A(ILENG),
      *              A(IVELO), A(ICONC), A(IBOUN), J(IXPNT), NOSYS   ,
      *              NOTOT   , NOQ1    , NOQ2    , NOQ     , NODISP  ,
      *              NOVELO  , J(IDPNT), J(IVPNT), A(IDERV), A(ITIMR),
      *              A(IVOL) , INTOPT  , A(IMAS2), IAFLAG  , ILFLAG  ,
      *              A(IDMPQ), NDMPQ   , J(IQDMP))
-C
-C          set an iteration step and check convergence
-C
+!
+!          set an iteration step and check convergence
+!
       CALL DLWQ83 ( A(ICONC), A(IMASS), A(IDERV), A(IVOL) , A(IVOL2),
      *              A(ITIMR), NOSYS   , NOTOT   , NOSEG   , ISTEP   ,
      *                                  ASTOP   , CONVER  , LUN(19) )
-C
-C          simulation done ?
-C
+!
+!          simulation done ?
+!
       IF ( CONVER .AND. IHFLAG ) GOTO 30
       IF ( CONVER .OR. ISTEP .EQ. ITSTOP-1 ) THEN
            IAFLAG = 1
            IHFLAG = .TRUE.
       ENDIF
    20 CONTINUE
-C
-C     Call OUTPUT system
-C
+!
+!     Call OUTPUT system
+!
    30 CONTINUE
       CALL DLWQO2 ( NOTOT   , NOSEG   , NOPA    , NOSFUN  , ITSTRT  ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
@@ -267,19 +267,19 @@ C
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  , isegcol )
-C
-C          close files, except monitor file
-C
+!
+!          close files, except monitor file
+!
       call CloseHydroFiles( dlwqd%collcoll )
       call close_files( lun )
-C
-C          write restart file
-C
+!
+!          write restart file
+!
       CALL DLWQ13 ( LUN      , LCHAR , A(ICONC) , ITSTRT, C(IMNAM) ,
      *              C(ISNAM) , NOTOT , NOSEG    )
-C
-C          user output routine
-C
+!
+!          user output routine
+!
       CALL DLWQPP ( NOTOT   , NOSYS   , NOSEG   , NOPA    , NOSFUN  ,
      *              ITSTRT  , IMFLAG  , IDFLAG  , IHFLAG  , C(IMNAM),
      *              C(ISNAM), C(IDNAM), C(IWSID), J(IDUMP), NODUMP  ,
@@ -290,11 +290,11 @@ C
      *              NOQ2    , NOQ3    , A(IDISP), A(IVELO), A(ISMAS),
      *              IBFLAG  , NOCONS  , NOFUN   , C(ICNAM), C(IPNAM),
      *              C(IFNAM), C(ISFNA), C(IBNID))
-C
-C          output formats
-C
+!
+!          output formats
+!
  1000 FORMAT ( 'No closure error corrections !' )
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

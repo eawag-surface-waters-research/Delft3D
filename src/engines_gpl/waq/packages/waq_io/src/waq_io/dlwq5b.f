@@ -27,52 +27,52 @@
      *                    CALLR  , ILUN   , LCH    , LSTACK , VRSION ,
      *                    ITYPE  , RAR    , NCONST , ITMNR  , CHULP  ,
      *                                      IOUTPT , IERR   , iwar   )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : May '97  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : Item name retrieval
-C
-C     SUBROUTINES CALLED : RDTOK1 - reading tokenized input
-C
-C     LOGICAL UNITS      : LUNUT   = unit formatted output file
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     IPOSR   INTEGER    1         IN/OUT  Start position on input line
-C     NPOS    INTEGER    1         INPUT   nr of significant characters
-C     CCHAR   CHAR*1     1         INPUT   comment character
-C     CAR     CHARACTER  *         OUTPUT  character workspace
-C     IAR     INTEGER  IIMAX       OUTPUT  integer   workspace
-C     ICMAX   INTEGER    1         INPUT   max. char workspace dimension
-C     IIMAX   INTEGER    1         INPUT   max. int. workspace dimension
-C     ANAME   CHAR*20    *         INPUT   ID's of the boundaries/wastes
-C     ATYPE   CHAR*20    *         INPUT   Types of the boundaries/wastes
-C     NTITM   INTEGER    1         INPUT   number of bounds/wastes
-C     NTTYPE  INTEGER    1         INPUT   number of bound/waste types
-C     NOITM   INTEGER    1         OUTPUT  number of items read
-C     NOITS   INTEGER    1         OUTPUT  number of items for SCALE
-C     CHKFLG  INTEGER    1         INPUT   check on input or add items
-C     CALLR   CHAR*(6)   1         INPUT   calling subject
-C     ILUN    INTEGER   LSTACK     IN/OUT  unitnumb include stack
-C     LCH     CHAR*(*)  LSTACK     IN/OUT  file name stack, 4 deep
-C     LSTACK  INTEGER    1         INPUT   include file stack size
-C     VRSION  REAL       1         INPUT   Input file version number
-C     ITYPE   INTEGER    1         OUTPUT  Type of the token at exit
-C     RAR     REAL       *         OUTPUT  Array with real values
-C     NCONST  REAL       *         OUTPUT  Number of those values
-C     CHULP   CHAR*(*)   1         OUTPUT  Input string at end of routine
-C     IOUTPT  INTEGER    1         INPUT   Output file option
-C     IERR    INTEGER    1         OUTPUT  Error indicator
-C     iwar    INTEGER    1         OUTPUT  Cumulative warning count
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : May '97  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : Item name retrieval
+!
+!     SUBROUTINES CALLED : RDTOK1 - reading tokenized input
+!
+!     LOGICAL UNITS      : LUNUT   = unit formatted output file
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     IPOSR   INTEGER    1         IN/OUT  Start position on input line
+!     NPOS    INTEGER    1         INPUT   nr of significant characters
+!     CCHAR   CHAR*1     1         INPUT   comment character
+!     CAR     CHARACTER  *         OUTPUT  character workspace
+!     IAR     INTEGER  IIMAX       OUTPUT  integer   workspace
+!     ICMAX   INTEGER    1         INPUT   max. char workspace dimension
+!     IIMAX   INTEGER    1         INPUT   max. int. workspace dimension
+!     ANAME   CHAR*20    *         INPUT   ID's of the boundaries/wastes
+!     ATYPE   CHAR*20    *         INPUT   Types of the boundaries/wastes
+!     NTITM   INTEGER    1         INPUT   number of bounds/wastes
+!     NTTYPE  INTEGER    1         INPUT   number of bound/waste types
+!     NOITM   INTEGER    1         OUTPUT  number of items read
+!     NOITS   INTEGER    1         OUTPUT  number of items for SCALE
+!     CHKFLG  INTEGER    1         INPUT   check on input or add items
+!     CALLR   CHAR*(6)   1         INPUT   calling subject
+!     ILUN    INTEGER   LSTACK     IN/OUT  unitnumb include stack
+!     LCH     CHAR*(*)  LSTACK     IN/OUT  file name stack, 4 deep
+!     LSTACK  INTEGER    1         INPUT   include file stack size
+!     VRSION  REAL       1         INPUT   Input file version number
+!     ITYPE   INTEGER    1         OUTPUT  Type of the token at exit
+!     RAR     REAL       *         OUTPUT  Array with real values
+!     NCONST  REAL       *         OUTPUT  Number of those values
+!     CHULP   CHAR*(*)   1         OUTPUT  Input string at end of routine
+!     IOUTPT  INTEGER    1         INPUT   Output file option
+!     IERR    INTEGER    1         OUTPUT  Error indicator
+!     iwar    INTEGER    1         OUTPUT  Cumulative warning count
+!
+!
       use timers       !   performance timers
 
       INTEGER       ICMAX   , IIMAX    , CHKFLG
@@ -84,9 +84,9 @@ C
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq5b", ithndl )
 
-C
-C          some initialisations
-C
+!
+!          some initialisations
+!
       USEFOR = .FALSE.
       SETNAM = .FALSE.
       COMPUT = .FALSE.
@@ -98,18 +98,18 @@ C
       IOFFC  = 0
       IOFFI  = 0
       NCONST = 0
-C
-C          Get a token string (and return if something else was found)
-C
+!
+!          Get a token string (and return if something else was found)
+!
    10 ITYPE = -3
       IF ( SIGNON .OR. ( USEFOR .AND. SETNAM ) ) ITYPE = 0
       CALL RDTOK1 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
      *              IPOSR  , NPOS   , CHULP  , IHULP  , RHULP  ,
      *                                         ITYPE  , IERR   )
       IF ( IERR .NE. 0 ) goto 9999
-C
-C          A keyword was met
-C
+!
+!          A keyword was met
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND.
      *         (  CHULP(1: 5) .EQ. 'BLOCK'        .OR.
      *            CHULP(1: 6) .EQ. 'LINEAR'       .OR.
@@ -138,9 +138,9 @@ C
             goto 9999
          ENDIF
       ENDIF
-C
-C          Computations
-C
+!
+!          Computations
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND.
      *     ( CHULP .EQ.  '*'  .OR. CHULP .EQ.  '/'  .OR.
      *       CHULP .EQ.  '+'  .OR. CHULP .EQ.  '-'  .OR.
@@ -166,9 +166,9 @@ C
          SIGNON = .TRUE.
          GOTO 10
       ENDIF
-C
-C          An item used in computations
-C
+!
+!          An item used in computations
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. SIGNON ) THEN
          DO 15 I = 1 , ITMNR-1
             IF ( IAR(I) .EQ. -1300000000 ) GOTO 15
@@ -200,9 +200,9 @@ C
          SIGNON = .FALSE.
          GOTO 10
       ENDIF
-C
-C          A number is used in computations
-C
+!
+!          A number is used in computations
+!
       IF ( IABS(ITYPE) .EQ. 2 .OR. IABS(ITYPE) .EQ. 3 ) THEN
          IF ( SETNAM .OR. SIGNON ) THEN
             NCONST = NCONST + 1
@@ -244,9 +244,9 @@ C
             GOTO 10
          ENDIF
       ENDIF
-C
-C          A local redirection of the name of an item or substance
-C
+!
+!          A local redirection of the name of an item or substance
+!
       IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'USEFOR') THEN
          IF ( USEFOR ) THEN
             WRITE ( LUNUT , 1035 ) CHULP
@@ -257,15 +257,15 @@ C
             GOTO 10
          ENDIF
       ENDIF
-C
-C          Getting the items of this block
-C                        NOITM  is the order number in the series
-C                        NAMSET is the ID number of NOITMth name
-C                        ANAME/ATYPE(NAMSET) is the corresponding
-C                        reserved name or type
-C                        CHULP is the name that should be used.
-C                        IARR(ITMNR) stores NAMSET
-C
+!
+!          Getting the items of this block
+!                        NOITM  is the order number in the series
+!                        NAMSET is the ID number of NOITMth name
+!                        ANAME/ATYPE(NAMSET) is the corresponding
+!                        reserved name or type
+!                        CHULP is the name that should be used.
+!                        IARR(ITMNR) stores NAMSET
+!
       IF ( ITYPE .EQ. 1 ) THEN
          IF ( USEFOR .AND. SETNAM ) THEN
             NAMSET = IAR( ITMNR )
@@ -286,21 +286,21 @@ C
             CAR ( ITMNR + NOITM + IOFF ) = CHULP
             USEFOR = .FALSE.
             SETNAM = .FALSE.
-C                     it is now possible to compute
+!                     it is now possible to compute
             COMPUT = .TRUE.
             GOTO 10
          ENDIF
-C
-C              fill in a string value if an empty string is provided
-C
+!
+!              fill in a string value if an empty string is provided
+!
          IF ( CHKFLG      .EQ. -1 .AND.
      *        CHULP(1:20) .EQ. '                    ' ) THEN
             CHULP = 'Item-'
             WRITE ( CHULP(6:12) , '(I7)' ) NOITM+1
          ENDIF
-C
-C              FLOW is only valid as CONCENTR. and item number is 0
-C
+!
+!              FLOW is only valid as CONCENTR. and item number is 0
+!
          CALL ZOEK(CHULP,1,(/'FLOW                '/),20,IFOUND)
          IF ( IFOUND .EQ. 1 .AND. CALLR .EQ. 'CONCENTR. ' ) THEN
             NOITM = NOITM + 1
@@ -320,9 +320,9 @@ C
      *      WRITE ( LUNUT , 1020 ) CALLR , ITMNR , CALLR , 0 , 'FLOW'
             GOTO 10
          ENDIF
-C
-C              CHULP equals an item-NAME
-C
+!
+!              CHULP equals an item-NAME
+!
          CALL ZOEK(CHULP,NTITM,ANAME,20,I2)
          IF ( I2 .GE. 1 ) THEN
             NOITM = NOITM + 1
@@ -342,9 +342,9 @@ C
      *      WRITE ( LUNUT , 1020 ) CALLR, ITMNR, CALLR, I2, ANAME(I2)
             GOTO 10
          ENDIF
-C
-C              CHULP equals an item-TYPE. IAR now is negative.
-C
+!
+!              CHULP equals an item-TYPE. IAR now is negative.
+!
          CALL ZOEK(CHULP,NTTYPE,ATYPE,20,I2)
          IF ( I2 .GE. 1 ) THEN
             NOITM = NOITM + 1
@@ -364,11 +364,11 @@ C
      *      WRITE ( LUNUT , 1030 ) CALLR, ITMNR, CALLR, I2, ATYPE(I2)
             GOTO 10
          ENDIF
-C
-C              If only existing names or types are allowed then
-C                     this is the place for an error massage
-C              JVB stick to just a warning keep on reading IAR = 0?, or used for flow??
-C
+!
+!              If only existing names or types are allowed then
+!                     this is the place for an error massage
+!              JVB stick to just a warning keep on reading IAR = 0?, or used for flow??
+!
          IF ( CHKFLG .EQ. 1 ) THEN
             NOITM = NOITM + 1
             NOITS = NOITS + 1
@@ -389,16 +389,16 @@ C
 CJVB        WRITE ( LUNUT , 1050 ) CHULP
 CJVB        GOTO 40
          ELSE
-C
-C              Now a new name is added to the list of names
-C                     the rest is moved upward since it is all 1 array
-C
+!
+!              Now a new name is added to the list of names
+!                     the rest is moved upward since it is all 1 array
+!
             NTITM = NTITM + 1
             IOFF  = IOFF  + 1
             ICM   = ICMAX + NTITM
             CALL MOVCHR ( ANAME , NTITM  , ICM  )
             ANAME(NTITM) = CHULP
-C              Plus normal procedure
+!              Plus normal procedure
             NOITM = NOITM + 1
             NOITS = NOITS + 1
             ITMNR = ITMNR + 1
@@ -418,9 +418,9 @@ C              Plus normal procedure
             GOTO 10
          ENDIF
       ENDIF
-C
-C              No item name was given, but an item number
-C
+!
+!              No item name was given, but an item number
+!
       IF ( ITYPE .EQ. 2 ) THEN
          IF ( IHULP .LE.  NTITM .AND. IHULP .GE. -NTTYPE ) THEN
             NOITM = NOITM + 1
@@ -469,11 +469,11 @@ C
             GOTO 40
          ENDIF
       ENDIF
-C
+!
    40 IERR = 1
  9999 if (timon) call timstop( ithndl )
       RETURN
-C
+!
  1000 FORMAT (  ' Input ',A,' nr:',I5,' is ',A,' nr:',I5,' with ID  : ',
      *          A20,' and local substitution: ',A20 )
  1001 FORMAT (  ' Input ',A,' nr:',I5,' is ',A,' nr:',I5,' with ID  : ',
@@ -514,5 +514,5 @@ C
  1200 FORMAT (  ' Subtracted by: ',E15.6 )
  1210 FORMAT (  ' Minimum value is: ',E15.6 )
  1220 FORMAT (  ' Maximum value is: ',E15.6 )
-C
+!
       END

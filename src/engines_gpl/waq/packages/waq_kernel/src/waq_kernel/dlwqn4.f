@@ -33,47 +33,47 @@
 !>                         Direction Implicit method as implemented in WAQUA. The vertical
 !>                         is resolved fullimplicit and centrally discretized.
 
-C     CREATED            : june 1988 by L. Postma
-C
-C     LOGICAL UNITS      : LUN(19) , output, monitoring file
-C                          LUN(20) , output, formatted dump file
-C                          LUN(21) , output, unformatted hist. file
-C                          LUN(22) , output, unformatted dump file
-C                          LUN(23) , output, unformatted dump file
-C
-C     SUBROUTINES CALLED : DLWQTR, user transport routine
-C                          DLWQWQ, user waterquality routine
-C                          PROCES, DELWAQ proces system
-C                          DLWQO2, DELWAQ output system
-C                          DLWQPP, user postprocessing routine
-C                          DLWQ13, system postpro-dump routine
-C                          DLWQ14, scales waterquality
-C                          DLWQ15, wasteload routine
-C                          DLWQ17, boundary routine
-C                          DLWQ40, explicit derivative
-C                          DLWQ41, update volumes
-C                          DLWQ42, set explicit step
-C                          DLWQ43, implicit step
-C                          DLWQ44, update arrays
-C                          DLWQT0, update other time functions
-C                          DLWQ46, makes mass balance impicit step
-C                          PROINT, integration of fluxes
-C                          DHOPNF, opens files
-C                          SRSTOP, stops execution
-C                          ZERCUM, zero's the cummulative array's
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     A       REAL       *      LOCAL  real      workspace array
-C     J       INTEGER    *      LOCAL  integer   workspace array
-C     C       CHARACTER  *      LOCAL  character workspace array
-C     LUN     INTEGER    *      INPUT  array with unit numbers
-C     LCHAR   CHARACTER  *      INPUT  filenames
-C
-C     Declaration of arguments
-C
+!     CREATED            : june 1988 by L. Postma
+!
+!     LOGICAL UNITS      : LUN(19) , output, monitoring file
+!                          LUN(20) , output, formatted dump file
+!                          LUN(21) , output, unformatted hist. file
+!                          LUN(22) , output, unformatted dump file
+!                          LUN(23) , output, unformatted dump file
+!
+!     SUBROUTINES CALLED : DLWQTR, user transport routine
+!                          DLWQWQ, user waterquality routine
+!                          PROCES, DELWAQ proces system
+!                          DLWQO2, DELWAQ output system
+!                          DLWQPP, user postprocessing routine
+!                          DLWQ13, system postpro-dump routine
+!                          DLWQ14, scales waterquality
+!                          DLWQ15, wasteload routine
+!                          DLWQ17, boundary routine
+!                          DLWQ40, explicit derivative
+!                          DLWQ41, update volumes
+!                          DLWQ42, set explicit step
+!                          DLWQ43, implicit step
+!                          DLWQ44, update arrays
+!                          DLWQT0, update other time functions
+!                          DLWQ46, makes mass balance impicit step
+!                          PROINT, integration of fluxes
+!                          DHOPNF, opens files
+!                          SRSTOP, stops execution
+!                          ZERCUM, zero's the cummulative array's
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     A       REAL       *      LOCAL  real      workspace array
+!     J       INTEGER    *      LOCAL  integer   workspace array
+!     C       CHARACTER  *      LOCAL  character workspace array
+!     LUN     INTEGER    *      INPUT  array with unit numbers
+!     LCHAR   CHARACTER  *      INPUT  filenames
+!
+!     Declaration of arguments
+!
       use grids
       use timers
       use m_timers_waq
@@ -97,29 +97,29 @@ C
       integer                        :: action
       type(delwaq_data), target      :: dlwqd
       type(GridPointerColl)          :: GridPs               ! collection of all grid definitions
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       LOGICAL          :: IMFLAG , IDFLAG , IHFLAG
       LOGICAL          :: LDUMMY , LSTREC , LREWIN , LDUMM2
       REAL             :: RDUMMY(1)
@@ -160,9 +160,9 @@ C
       IF ( ACTION == ACTION_INITIALISATION  .OR.
      &     ACTION == ACTION_FULLCOMPUTATION        ) THEN
 
-C
-C          some initialisation
-C
+!
+!          some initialisation
+!
           IF ( NOQ3 .GT. 0 ) THEN
              WRITE ( LUN(19),*)  ' ERROR: NO THIRD DIMENSION IMPLEMENTED '
              CALL SRSTOP(1)
@@ -192,19 +192,19 @@ C
           inwtyp = intyp + nobnd
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
-C
-C          initialize second volume array with the first one
-C
+!
+!          initialize second volume array with the first one
+!
           CALL MOVE   ( A(IVOL ), A(IVOL2) , NOSSS   )
       ENDIF
 
-C
-C     Save/restore the local persistent variables,
-C     if the computation is split up in steps
-C
-C     Note: the handle to the timer (ithandl) needs to be
-C     properly initialised and restored
-C
+!
+!     Save/restore the local persistent variables,
+!     if the computation is split up in steps
+!
+!     Note: the handle to the timer (ithandl) needs to be
+!     properly initialised and restored
+!
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqn4", ithandl )
           INCLUDE 'dlwqdata_save.inc'
@@ -345,9 +345,9 @@ C
              call dlwq17 ( a(ibset), a(ibsav), j(ibpnt), nobnd   , nosys   ,
      &                     notot   , idt     , a(iconc), a(iflow), a(iboun))
          endif
-C
-C     Call OUTPUT system
-C
+!
+!     Call OUTPUT system
+!
       CALL DLWQO2 ( NOTOT   , NOSEG   , NOPA    , NOSFUN  , ITIME   ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
      +              A(ICONC), A(ICONS), A(IPARM), A(IFUNC), A(ISFUN),
@@ -490,9 +490,9 @@ C
 !     replace old by new volumes
             call move   ( a(ivol2), a(ivol) , noseg   )
          endif
-C
-C          mass balance of implicit part
-C
+!
+!          mass balance of implicit part
+!
       IF ( MOD(INTOPT,16) .GE. 8  )
      *CALL DLWQ46 ( A(LDISP), A(LDIFF), A(LAREA), A(LFLOW), A(LLENG),
      *              A(LVELO), A(ICONC), A(IBOUN), J(LXPNT), NOSYS   ,

@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *      SUBROUTINE CSPGRO TO MODIFY SPECIES GROWTH COEFFICIENTS      *
-C  *********************************************************************
-C
-C  0895 MvdV adaptation dimension ZOOPR for more than one grazer type
+!
+!  *********************************************************************
+!  *      SUBROUTINE CSPGRO TO MODIFY SPECIES GROWTH COEFFICIENTS      *
+!  *********************************************************************
+!
+!  0895 MvdV adaptation dimension ZOOPR for more than one grazer type
       SUBROUTINE CSPGRO(LERR)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -47,13 +47,13 @@ C  0895 MvdV adaptation dimension ZOOPR for more than one grazer type
       DATA WSPE  /'?       ','END     ','EDIT    ','MORTAL  ',
      1            'PMAX    ','PRINT   ','RELMIX  ','RESPIRAT',
      2            'ZOOPREF '/
-C
-C  General comment: in case an error is detected in this subroutine
-C  -- for instance a missing or misspelled control word --
-C  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
-C  Hence a batch job will be terminated,
-C  but re-entry is possible in an interactive run.
-C
+!
+!  General comment: in case an error is detected in this subroutine
+!  -- for instance a missing or misspelled control word --
+!  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
+!  Hence a batch job will be terminated,
+!  but re-entry is possible in an interactive run.
+!
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       LERR=0
    10 IF (IOFLAG .EQ. 1) CALL BLSELECT (WSPE, NSPE, 1051)
@@ -61,18 +61,18 @@ C
       IF (MATCH(WSPE,NSPE,8,WORD,LENWRD,0,NUMCA) .NE. 1) NUMCA=NSPE+1
       GO TO (   100,  2000,   400,   500,   500,
      1          300,   500,   500,   500,   20), NUMCA
-C
-C  Error detected in input.
-C
+!
+!  Error detected in input.
+!
    20 WRITE (OUUNI,99990) WORD
       IF (IOFLAG .EQ. 0) GO TO 30
       GO TO 10
    30 WRITE (OUUNI,99980)
       LERR=1
       RETURN
-C
-C  Print characteristics which may be modified.
-C
+!
+!  Print characteristics which may be modified.
+!
   100 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99970)
@@ -86,9 +86,9 @@ C
       WRITE (OUUNI,99950)
       WRITE (OUUNI,99940)
       GO TO 10
-C
-C  Print present growth characteristics.
-C
+!
+!  Print present growth characteristics.
+!
   300 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99920)
@@ -109,9 +109,9 @@ C
      2                ZOOPR(I,0)
   320 CONTINUE
       GO TO 10
-C
-C  Make a global change of many characteristics using the system editor.
-C
+!
+!  Make a global change of many characteristics using the system editor.
+!
   400 CONTINUE
       IF (IOFLAG .EQ. 1) GO TO 410
       WRITE (OUUNI,99900)
@@ -139,9 +139,9 @@ C
      2                ZOOPR(I,0)
   430 CONTINUE
       CLOSE (IOU(29), STATUS = 'DELETE')
-C
-C  Set control values for Pmax function. Check for errors.
-C
+!
+!  Set control values for Pmax function. Check for errors.
+!
       DO 460 I=1,NUSPEC
       IPOS = 1
       K = GETS (PWORDS(I),IPOS,8,8,PWORD1,LEN)
@@ -150,9 +150,9 @@ C
       LPMAX(I) = 0
       IF (NUMPMA .EQ. 8) LPMAX(I) = 1
       GO TO 460
-C
-C  Invalid control word for Pmax function.
-C
+!
+!  Invalid control word for Pmax function.
+!
   450 CONTINUE
       WRITE (OUUNI,99890) PWORD,I
       WRITE (OUUNI,99880) CONTRO(7),CONTRO(8)
@@ -160,17 +160,17 @@ C
       GO TO 440
   460 CONTINUE
       GO TO 10
-C
-C  Read species name and find species and type number.
-C
+!
+!  Read species name and find species and type number.
+!
   500 NSGR=0
       NSGR2 = 1
       IF (IOFLAG .EQ. 1) CALL BLSELECT (GRNAME, NUECOG, 1032)
       I=INPTDT(1032,WORD2,LENWRD)
       IF (MATCH(GRNAME,NUECOG,8,WORD2,LENWRD,0,NUMGR) .EQ. 1) GO TO 510
-C
-C  Incorrect species name.
-C
+!
+!  Incorrect species name.
+!
       WRITE (OUUNI,99870) WORD2
       WRITE (OUUNI,99860) (GRNAME(J),J=1,NUECOG)
       IF (IOFLAG .EQ. 0) GO TO 30
@@ -191,9 +191,9 @@ C
       NUMSP=IT2(NUMGR,1)+NSGR
       GO TO (   100,  2000,   400,   700,   600,  300,  900,
      1          800,  1000), NUMCA
-C
-C  Modify Pmax.
-C
+!
+!  Modify Pmax.
+!
   600 CONTINUE
       IF (IOFLAG .EQ. 1) THEN
         IF (LPMAX(NUMSP) .EQ. 1) THEN
@@ -218,9 +218,9 @@ C
       WRITE (OUUNI,99820) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    WSPE(NUMCA),PMAX1(NUMSP),PMAX2(NUMSP)
       GO TO 10
-C
-C  Invalid control word for Pmax function.
-C
+!
+!  Invalid control word for Pmax function.
+!
   630 CONTINUE
       WRITE (OUUNI,99810) PWORD
       IF (IOFLAG .EQ. 1) GO TO 640
@@ -230,9 +230,9 @@ C
   640 CONTINUE
       WRITE (OUUNI,99880) CONTRO(7),CONTRO(8)
       GO TO 610
-C
-C  Modify mortality.
-C
+!
+!  Modify mortality.
+!
   700 CONTINUE
       IF (IOFLAG .EQ. 1)
      1   WRITE (OUUNI,99820) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
@@ -242,9 +242,9 @@ C
       WRITE (OUUNI,99820) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    WSPE(NUMCA),RMORT1(NUMSP),RMORT2(NUMSP)
       GO TO 10
-C
-C  Modify respiration.
-C
+!
+!  Modify respiration.
+!
   800 CONTINUE
       IF (IOFLAG .EQ. 1)
      1   WRITE (OUUNI,99820) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
@@ -254,9 +254,9 @@ C
       WRITE (OUUNI,99820) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    WSPE(NUMCA),RES1(NUMSP),RES2(NUMSP)
       GO TO 10
-C
-C  Modify mixing depth multiplier.
-C
+!
+!  Modify mixing depth multiplier.
+!
   900 CONTINUE
       IF (IOFLAG .EQ. 1)
      1    WRITE (OUUNI,99800) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
@@ -265,9 +265,9 @@ C
       WRITE (OUUNI,99800) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    SDMIX(NUMSP)
       GO TO 10
-C
-C  Modify zooplankton preference rates.
-C
+!
+!  Modify zooplankton preference rates.
+!
  1000 CONTINUE
       IF (IOFLAG .EQ. 1)
      1  WRITE (OUUNI,99800) OLD,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
@@ -276,13 +276,13 @@ C
       WRITE (OUUNI,99800) NEW,WSPE(NUMCA),NSGR2,GRNAME(NUMGR),
      1                    ZOOPR(NUMSP,0)
       GO TO 10
-C
-C  Exit
-C
+!
+!  Exit
+!
  2000 CONTINUE
-C
-C  Formats for this subroutine.
-C
+!
+!  Formats for this subroutine.
+!
 99990 FORMAT(1X,'Invalid Growth command',2X,A8)
 99980 FORMAT (//,1X,'Excecution terminates following an error in',
      1       ' subroutine "CSPGRO"',//)

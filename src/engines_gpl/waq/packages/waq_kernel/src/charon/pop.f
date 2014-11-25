@@ -22,9 +22,9 @@
 !!  rights reserved.
 
       subroutine pop(ij)
-c           5-69
-c           eliminate the ij entry from the matrix list.  move all
-c        entries up by one
+!           5-69
+!           eliminate the ij entry from the matrix list.  move all
+!        entries up by one
       include  'char1.inc'
       naij = naij - 1
       do 10 i=ij,naij

@@ -21,26 +21,26 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO DETERMINE LIMITS ON THE EXTINCTION COEFFICIENT   *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO DETERMINE LIMITS ON THE EXTINCTION COEFFICIENT   *
+!  *********************************************************************
+!
       SUBROUTINE CONSTR(SURF,DMIX,EMIN,ROOT,NUMGR)
       IMPLICIT REAL*8 (A-H,O-Z)
       DIMENSION A(2),B(2),ROOT(2)
       INCLUDE 'blmdim.inc'
       INCLUDE 'arran.inc'
-C
-C  DETERMINES LIMITS ON THE EXTINCTION COEFFICIENT
-C
+!
+!  DETERMINES LIMITS ON THE EXTINCTION COEFFICIENT
+!
     1 ROOT(1)=-1.0
       ROOT(2)=-1.0
       S0=DEXP(-ZVEC(NZ))
       IF (SURF .LE. S0) RETURN
-C
-C  FIND INTERVAL CONTAINING ALL ROOTS
-C
+!
+!  FIND INTERVAL CONTAINING ALL ROOTS
+!
       X=-DLOG(SURF)
       CALL EBCALC(X,FX,DERX,NUMGR)
       PHI=(FUN(NZ,NUMGR)-FX)/EMIN
@@ -48,9 +48,9 @@ C
       IF (DERX .GE. EMIN) ROOT(1)=0.0
       IF (Y .GE. ZVEC(NZ)) ROOT(2)=PHI/DMIX
       IF (ROOT(1) .GE. 0.0 .AND. ROOT(2) .GE. 0.0) RETURN
-C
-C  SPLIT INTERVAL TO ISOLATE EACH ROOT.
-C
+!
+!  SPLIT INTERVAL TO ISOLATE EACH ROOT.
+!
       B(1)=X
       B(2)=Y
       DO 110 K=1,10
@@ -61,13 +61,13 @@ C
       DERIV=(FPR-EBAR)/(A(1)-X)
       IF (DERIV .LT. 0.0) B(2)=A(1)
   110 IF (DERIV .GE. 0.0) B(1)=A(1)
-C
-C  NO ROOTS EXIST
-C
+!
+!  NO ROOTS EXIST
+!
       RETURN
-C
-C  WE HAVE SEPARATED THE ROOTS.
-C
+!
+!  WE HAVE SEPARATED THE ROOTS.
+!
   120 A(2)=A(1)
       DO 130 I=1,2
       IF (ROOT(I) .GE. 0.0) GO TO 130

@@ -21,21 +21,21 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  Subroutine DELAY (NSEC)
-C  This program pauses execution for NSEC seconds, unless the user hits
-C  any key, in which case execution continues immediately.
-C
-C  Program written by Hans Los
-C  Version 1.0
-C  Released july 1989.
-C  Part of the INTERACT.LIB.
-C
-C
+!
+!  Subroutine DELAY (NSEC)
+!  This program pauses execution for NSEC seconds, unless the user hits
+!  any key, in which case execution continues immediately.
+!
+!  Program written by Hans Los
+!  Version 1.0
+!  Released july 1989.
+!  Part of the INTERACT.LIB.
+!
+!
       SUBROUTINE DELAY (NSEC)
       INTEGER*2 HOUR, MINUTE, SEC, SEC100
       INTEGER*4 SECMID, SECEND, NSEC, KEY
-C
+!
       CALL GETTIM (HOUR, MINUTE, SEC, SEC100)
       SECMID = HOUR * 3600 + MINUTE * 60 + SEC
       SECEND = SECMID + NSEC

@@ -27,53 +27,40 @@
 !>\file
 !>       Exceedence frequency, its complement and the mean
 
-C***********************************************************************
-C
-C     Project : Delft3D-WAQ
-C     Author  : Arjen Markus
-C     Date    : 8-1-2002           Version : 0.1
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C      9-1-02 Arjen Markus    Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                  Units
-C ----    --- -  -    -------------------                          -----
-C
-C CONC           I    Concentration of the substance              1
-C TSTART         I    Start of statistical period                 2
-C TSTOP          I    Stop of statistical period                  3
-C TIME           I    Time in calculation                         4
-C DELT           I    Timestep                                    5
-C CCRIT          I    Critical value                              6
-C ABOVE          I    Whether to register values above or below   7
-C
-C TCOUNT         O    Count of timesteps                          8
-C CEXCD          O    Fraction of the time the value is exceeded  9
-C CEXMN          O    Mean value over that period                10
-C
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                  Units
+! ----    --- -  -    -------------------                          -----
+!
+! CONC           I    Concentration of the substance              1
+! TSTART         I    Start of statistical period                 2
+! TSTOP          I    Stop of statistical period                  3
+! TIME           I    Time in calculation                         4
+! DELT           I    Timestep                                    5
+! CCRIT          I    Critical value                              6
+! ABOVE          I    Whether to register values above or below   7
+!
+! TCOUNT         O    Count of timesteps                          8
+! CEXCD          O    Fraction of the time the value is exceeded  9
+! CEXMN          O    Mean value over that period                10
+!
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
      +         IP6   , IP7   , IP8   , IP9   , IP10  ,
      +         IN1   , IN2   , IN3   , IN4   , IN5   ,
@@ -106,16 +93,16 @@ C
       IN9 = INCREM(9)
       IN10= INCREM(10)
 
-C
-C     There are five cases, defined by the time:
-C                        TIME <  TSTART-0.5*DELT : do nothing
-C     TSTART-0.5*DELT <= TIME <  TSTART+0.5*DELT : initialise
-C     TSTART          <  TIME <  TSTOP           : accumulate
-C     TSTOP           <= TIME <  TSTOP+0.5*DELT  : finalise
-C     TSTOP+0.5*DELT  <  TIME                    : do nothing
-C
-C     (Use a safe margin)
-C
+!
+!     There are five cases, defined by the time:
+!                        TIME <  TSTART-0.5*DELT : do nothing
+!     TSTART-0.5*DELT <= TIME <  TSTART+0.5*DELT : initialise
+!     TSTART          <  TIME <  TSTOP           : accumulate
+!     TSTOP           <= TIME <  TSTOP+0.5*DELT  : finalise
+!     TSTOP+0.5*DELT  <  TIME                    : do nothing
+!
+!     (Use a safe margin)
+!
       TSTART = PMSA(IP2)
       TSTOP  = PMSA(IP3)
       TIME   = PMSA(IP4)
@@ -131,17 +118,17 @@ C
 
       TCOUNT = PMSA(IP8)
 
-C
-C      Start and stop criteria are somewhat involved. Be careful
-C      to avoid spurious calculations (initial and final) when
-C      none is expected.
-C      Notes:
-C      - The initial value for TCOUNT must be 0.0
-C      - Time is expected to be the model time (same time frame
-C        as the start and stop times of course)
-C      - Check that the NEXT timestep will not exceed the stop time,
-C        otherwise this is the last one
-C
+!
+!      Start and stop criteria are somewhat involved. Be careful
+!      to avoid spurious calculations (initial and final) when
+!      none is expected.
+!      Notes:
+!      - The initial value for TCOUNT must be 0.0
+!      - Time is expected to be the model time (same time frame
+!        as the start and stop times of course)
+!      - Check that the NEXT timestep will not exceed the stop time,
+!        otherwise this is the last one
+!
       ITYPE  = 0
       IF ( TIME .GE. TSTART-0.001*DELT ) THEN
          ITYPE = 2
@@ -160,10 +147,10 @@ C
       DO 9000 ISEG=1,NOSEG
          IF (BTEST(IKNMRK(ISEG),0)) THEN
 
-C
-C        The first time is special. Initialise the arrays.
-C        The last time requires additional processing.
-C
+!
+!        The first time is special. Initialise the arrays.
+!        The last time requires additional processing.
+!
          IF ( ITYPE .EQ. 1 ) THEN
             PMSA(IP9) = 0.0
             PMSA(IP10)= 0.0
@@ -194,10 +181,10 @@ C
 
  9000 CONTINUE
 
-C
-C     Be sure to turn off the statistical procedure, once the end has been
-C     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
-C
+!
+!     Be sure to turn off the statistical procedure, once the end has been
+!     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
+!
       IF ( ITYPE .EQ. 3 ) THEN
          PMSA(IP8) = -TCOUNT
       ENDIF

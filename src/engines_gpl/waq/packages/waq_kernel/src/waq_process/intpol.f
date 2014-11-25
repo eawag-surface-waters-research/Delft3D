@@ -27,38 +27,24 @@
 !>\file
 !>       Depth where wave is created or wind fetch from wind direction
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES IMPAQT M4.70
-C     Author  :
-C     Date    : 960501             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     030808  Joost Icke      Bugfix, check on number of parameters
-C                             Sobek ARS 11826
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        BLOCK INTERPOLATION
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C Y       R*4 8 I     dependent value pairs
-C X       R*4 8 I     independent value pairs
-C VALUE   R*4 1 I     independent value
-C RESULT  R*4 1 I     resulting dependent value
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        BLOCK INTERPOLATION
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! Y       R*4 8 I     dependent value pairs
+! X       R*4 8 I     independent value pairs
+! VALUE   R*4 1 I     independent value
+! RESULT  R*4 1 I     resulting dependent value
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
@@ -71,13 +57,13 @@ C     ------   -----  ------------
       DO 10 I=1,2*MAXPAR+2
         IP(I) = IPOINT(I)
    10 CONTINUE
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 
-C     fill and count the number of classes
+!     fill and count the number of classes
 
       VALUE = PMSA(IP(1))
       NUMPAR = 1
@@ -88,10 +74,10 @@ C     fill and count the number of classes
          NUMPAR = I
       ENDDO
 
-C*******************************************************************************
-C**** RESULT equals the Y corresponding with the interval from the previous
-C****        to the current X (assuming the first interval to be 0 - X(1)
-C***********************************************************************
+!*******************************************************************************
+!**** RESULT equals the Y corresponding with the interval from the previous
+!****        to the current X (assuming the first interval to be 0 - X(1)
+!***********************************************************************
 
       I = 0
    30 I = I + 1
@@ -105,13 +91,13 @@ C***********************************************************************
       PMSA(IP(2*MAXPAR+2)) = RESULT
 
       ENDIF
-C
+!
       DO 40 I=1,2*MAXPAR+2
         IP(I) = IP(I) + INCREM ( I  )
    40 CONTINUE
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

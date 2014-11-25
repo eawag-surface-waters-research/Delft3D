@@ -21,27 +21,27 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       22:01
-C    Program:    LP.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       22 Oct 1992
+!    Time:       22:01
+!    Program:    LP.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine lp(mon)
-c           4-69
-c           sets up a linear programming problem and calls subroutine
-c        simple to find a feasible solution.
-c           lp uses subprograms
-c              bar, leave, simple
-c           lp uses double precision version of
-c              alog, amin1, float
+!           4-69
+!           sets up a linear programming problem and calls subroutine
+!        simple to find a feasible solution.
+!           lp uses subprograms
+!              bar, leave, simple
+!           lp uses double precision version of
+!              alog, amin1, float
       include  'char1.inc'
       equivalence (cc(1),xmf(1)),(xx(1),x2(1)),(p(1),v1(1)),
      2   (jh(1),v2(1))
       dimension xx(1), kout(7), cc(1), p(1), jh(1)
       mon = 0
       if (xstart.le.0.0) xstart = 1.e-6
-c        clear v4 storage for new column of matrix
+!        clear v4 storage for new column of matrix
       do 10 i=1,m
          p(i) = b(i)
          v4(i) = 0.0
@@ -50,13 +50,13 @@ c        clear v4 storage for new column of matrix
          i = irow(j)
          v4(i) = v4(i) + aij(j)
    20 continue
-c        test for space for new column
+!        test for space for new column
       if (naij+m.le.maxaij) go to 30
-c        no room for new column
+!        no room for new column
       write (not,99999) naij
       call leave(ilp, not)
       return
-c        move summation column into matrix area
+!        move summation column into matrix area
    30 j = ntot + 1
       do 40 i=1,m
          ii = naij + i
@@ -69,7 +69,7 @@ c        move summation column into matrix area
          cc(j) = 0.0
    50 continue
       cc(n+1) = -1.0
-c        zero-th simplex is to determine feasibility
+!        zero-th simplex is to determine feasibility
       call simple(0, m, n+1, naij, aij, irow, jcol, p, cc, kout, xx,
      1 pie, jh, v3, v4, x3, r)
       zt = xx(n+1)
@@ -81,7 +81,7 @@ c        zero-th simplex is to determine feasibility
       p(i) = p(i) - zzt*aij(k)
       k = k - 1
       go to 60
-c        restore element count to original value
+!        restore element count to original value
    70 naij = naij - m
       do 80 j=1,ntot
          x(j) = xx(j)
@@ -89,19 +89,19 @@ c        restore element count to original value
          x1(j) = 0.0
    80 continue
       if (zt.le.0. .or. kout(1).ne.0) go to 160
-c        simplex loop
+!        simplex loop
       fr2 = 1.e+20
       do 130 nn=1,ncomp
          do 90 j=1,ntot
             cc(j) = c(j) + xmf(j) - 1.0
    90    continue
          fn = dble(nn) - 1.0
-c     write(not,1234)nn
-c1234  format(' loop in lp, simplex: ',i4)
+!     write(not,1234)nn
+!1234  format(' loop in lp, simplex: ',i4)
          call simple(1, m, n, naij, aij, irow, jcol, p, cc, kout, xx,
      1    pie, jh, v3, v4, x3, r)
-c     write(not,1235)kout(1)
-c1235  format(' loop in lp, kout(1): ',i4)
+!     write(not,1235)kout(1)
+!1235  format(' loop in lp, kout(1): ',i4)
          if (kout(1).ne.0) go to 240
          do 110 j=1,ntot
             x(j) = xx(j)
@@ -155,12 +155,12 @@ c1235  format(' loop in lp, kout(1): ',i4)
   230 mon = 1
       return
   240 if (kout(1).ne.2) go to 250
-c           simplex declared an unbounded solution.  species number is
-c        in kout(6).  lp will continue with current solution.  no
-c        message output.
-c     go to 100
-c     write(not,99990)
-c99990 format(' lp: the microsoft compiler could not handle this, apologies')
+!           simplex declared an unbounded solution.  species number is
+!        in kout(6).  lp will continue with current solution.  no
+!        message output.
+!     go to 100
+!     write(not,99990)
+!99990 format(' lp: the microsoft compiler could not handle this, apologies')
       mon = -kout(6)
       write(not,1001)kn(-mon)
 1001  format(' simplex declared an unbounded solution for species: ',a6)

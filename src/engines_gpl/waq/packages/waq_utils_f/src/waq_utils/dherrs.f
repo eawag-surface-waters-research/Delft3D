@@ -22,24 +22,24 @@
 !!  rights reserved.
 
       SUBROUTINE DHERRS(STRING,IERR)
-C
+!
       CHARACTER*(*) STRING
 
       INTEGER       LUNREP
 
-C     message to screen
+!     message to screen
 
       WRITE(*,*) STRING
 
-C     message to monitor or report file
+!     message to monitor or report file
 
       CALL GETMLU(LUNREP)
       IF ( LUNREP .GT. 0 ) THEN
          WRITE(LUNREP,*) STRING
       ENDIF
-C
+!
       CALL SRSTOP(1)
-C
+!
       RETURN
       END
       SUBROUTINE DHERR2 ( NAME  , VALUE , ISEG  , MODULE )
@@ -50,7 +50,7 @@ C
 
       INTEGER       LUNREP
 
-C     message to screen
+!     message to screen
 
       WRITE (*,*) ' Coefficient value out of range'
       WRITE (*,*) ' Coefficient name:',NAME
@@ -58,7 +58,7 @@ C     message to screen
       WRITE (*,*) ' Coefficient value',MODULE
       IF ( ISEG .GT. 0 ) WRITE(*,*) ' in segment number:',ISEG
 
-C     message to monitor or report file
+!     message to monitor or report file
 
       CALL GETMLU(LUNREP)
       IF ( LUNREP .GT. 0 ) THEN

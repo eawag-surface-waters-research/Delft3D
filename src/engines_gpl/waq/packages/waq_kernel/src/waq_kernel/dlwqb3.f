@@ -25,40 +25,40 @@
      *                    NOQ    , NOVELO , IVPNT  , VOLUME , IOPT   ,
      *                    AMASS2 , IDT    , IAFLAG , NOSYS  , DMPQ   ,
      *                    NDMPQ  , IQDMP  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : october 1995 by L.Postma
-C
-C     FUNCTION            : Makes new volumes for computed volumes
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     AREA    REAL       NOQ      INPUT   exchange surface area
-C     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
-C     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
-C     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
-C     NOTOT   INTEGER     1       INPUT   number  of total substances
-C     NOQ     INTEGER     1       INPUT   total number of exchanges
-C     NOVELO  INTEGER     1       INPUT   number  of additional velos.
-C     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
-C     VOLUME  REAL      NOSEG     IN/OUT  volumes to update
-C     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
-C                                         = 1 or 3 no DISP at zero flow
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     IDT     INTEGER     1       INPUT   integration time step size
-C     LUN     INTEGER     1       INPUT   unitnumber of monitoring file
-C     IAFLAG  INTEGER     1       INPUT   if 1 then accumulate mass
-C     NOSYS   INTEGER     1       INPUT   number  of active substances
-C     DMPQ    REAL  NOSYS*NDMPQ*? IN/OUT  mass balance dumped exchange
-C                                         if INTOPT > 7
-C     NDMPQ   INTEGER     1       INPUT   number of dumped exchanges
-C     IQDMP   INTEGER     *       INPUT   pointer dumped exchanges
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : october 1995 by L.Postma
+!
+!     FUNCTION            : Makes new volumes for computed volumes
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     AREA    REAL       NOQ      INPUT   exchange surface area
+!     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
+!     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
+!     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
+!     NOTOT   INTEGER     1       INPUT   number  of total substances
+!     NOQ     INTEGER     1       INPUT   total number of exchanges
+!     NOVELO  INTEGER     1       INPUT   number  of additional velos.
+!     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
+!     VOLUME  REAL      NOSEG     IN/OUT  volumes to update
+!     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
+!                                         = 1 or 3 no DISP at zero flow
+!     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
+!     IDT     INTEGER     1       INPUT   integration time step size
+!     LUN     INTEGER     1       INPUT   unitnumber of monitoring file
+!     IAFLAG  INTEGER     1       INPUT   if 1 then accumulate mass
+!     NOSYS   INTEGER     1       INPUT   number  of active substances
+!     DMPQ    REAL  NOSYS*NDMPQ*? IN/OUT  mass balance dumped exchange
+!                                         if INTOPT > 7
+!     NDMPQ   INTEGER     1       INPUT   number of dumped exchanges
+!     IQDMP   INTEGER     *       INPUT   pointer dumped exchanges
+!
       use timers
 
       INTEGER    NDMPQ
@@ -68,9 +68,9 @@ C
       LOGICAL    MASBAL
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb3", ithandl )
-C
-C         loop accross the number of exchanges
-C
+!
+!         loop accross the number of exchanges
+!
       I4 = 3*NOTOT+1
       I5 = 4*NOTOT+1
       I6 = NOSYS*NDMPQ
@@ -79,18 +79,18 @@ C
       MASBAL = .FALSE.
       IF ( MOD(IOPT,16) .GE. 8  ) MASBAL = .TRUE.
       DO 60 IQ = 1 , NOQ
-C
-C         initialisations, check for transport anyhow
-C
+!
+!         initialisations, check for transport anyhow
+!
       I    = IPOINT(1,IQ)
       J    = IPOINT(2,IQ)
       IF ( I .EQ. 0 .OR. J .EQ. 0 ) GOTO 60
       Q    = FLOW(IQ)*IDT
       IF ( IVPNT(1) .GT. 0 )
      *      Q = Q + VELO((IQ-1)*NOVELO+IVPNT(1)) * AREA(IQ) * IDT
-C
-C     accumulate balance for dumped exchanges
-C
+!
+!     accumulate balance for dumped exchanges
+!
       IF ( MASBAL ) THEN
          IF ( IQDMP(IQ) .GT. 0 ) THEN
             IPQ = (IQDMP(IQ)-1)*NOSYS + 1
@@ -101,18 +101,18 @@ C
             ENDIF
          ENDIF
       ENDIF
-C
+!
       IF ( I .LT. 0 ) GOTO 20
       IF ( J .LT. 0 ) GOTO 40
-C
-C         The regular case
-C
+!
+!         The regular case
+!
       VOLUME(I) = VOLUME(I) - Q
       VOLUME(J) = VOLUME(J) + Q
       GOTO 60
-C
-C        The 'from' element was a boundary. Note the 2 options.
-C
+!
+!        The 'from' element was a boundary. Note the 2 options.
+!
    20 IF ( J .LT. 0 ) GOTO 60
       VOLUME(J) = VOLUME(J) + Q
       IF ( Q .GT. 0.0 ) THEN
@@ -121,20 +121,20 @@ C
            AMASS2(I5) = AMASS2(I5) - Q*B
       ENDIF
       GOTO 60
-C
-C        The 'to' element was a boundary.
-C
+!
+!        The 'to' element was a boundary.
+!
    40 VOLUME(I) = VOLUME(I) - Q
       IF ( Q .GT. 0.0 ) THEN
          AMASS2(I5) = AMASS2(I5) + Q*B
       ELSE
          AMASS2(I4) = AMASS2(I4) - Q*B
       ENDIF
-C
-C        end of the loop over exchanges
-C
+!
+!        end of the loop over exchanges
+!
    60 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

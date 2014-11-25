@@ -22,29 +22,29 @@
 !!  rights reserved.
 
       SUBROUTINE DHGNAM ( NAME   , CHECK )
-C
-C     Deltares
-C
-C     CREATED           : Jan 2003 by Jan van Beek
-C
-C     FUNCTION          : Reads the input filename from keyboard /command (ini file?)
-C
-C     SUBROUTINE CALLED : DHGARG
-C                         SRSTOP
-C
-C     PARAMETERS        :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     NAME    CHAR*(*)   *         OUT     file name input file
-C     CHECK   CHAR*(*)   *         IN      if not empty then check existance of file with this extension
-C                                          when name is enterd interactive from keyboard
-C
+!
+!     Deltares
+!
+!     CREATED           : Jan 2003 by Jan van Beek
+!
+!     FUNCTION          : Reads the input filename from keyboard /command (ini file?)
+!
+!     SUBROUTINE CALLED : DHGARG
+!                         SRSTOP
+!
+!     PARAMETERS        :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     NAME    CHAR*(*)   *         OUT     file name input file
+!     CHECK   CHAR*(*)   *         IN      if not empty then check existance of file with this extension
+!                                          when name is enterd interactive from keyboard
+!
       CHARACTER*(*) NAME
       CHARACTER*(*) CHECK
-C
-C     Local
-C
+!
+!     Local
+!
       CHARACTER*4   EXTS
       CHARACTER*9   EXTS9,FILRUN
       CHARACTER*256 CHECK2
@@ -53,17 +53,17 @@ C
       CHARACTER*1   CRJV  , CJVB  , CDUMMY
       CRJV = '/'
       CJVB = '\\'
-C
+!
       MAXNAM = LEN(NAME)
-C
-C     first argument from command line if it is not a option starting with -
-C
+!
+!     first argument from command line if it is not a option starting with -
+!
       CALL DHGARG ( 1     , NAME  )
 
-C     write(*,*) 'AM: ',trim(name)
-C
-C     Get filename from steering file Delft3D
-C
+!     write(*,*) 'AM: ',trim(name)
+!
+!     Get filename from steering file Delft3D
+!
       IF ( NAME .EQ. ' ' .OR. NAME(1:1) .EQ. '-' ) THEN
          FILRUN = ' '
          CALL GETCOM ( '-waq' , 0    , LFOUND, IDUMMY, RDUMMY,
@@ -96,16 +96,16 @@ C
             ENDIF
          ENDIF
       ENDIF
-C
-C     Get filename filename from keyboard
-C
+!
+!     Get filename filename from keyboard
+!
       IF ( NAME .EQ. ' ' .OR. NAME(1:1) .EQ. '-' ) THEN
          WRITE (  6  ,  *  ) ' Name of the model files ? '
          WRITE (  6  ,  *  ) ' DELWAQ will provide the extensions. '
          READ  (  5  , '(A)' )   NAME
-C
-C        remove quotes if they are the first and the last
-C
+!
+!        remove quotes if they are the first and the last
+!
          IF ( NAME(1:1) .EQ. '''' ) THEN
             INDX = INDEX ( NAME(2:),'''' )
             IF ( INDX .NE. 0 ) THEN
@@ -118,22 +118,22 @@ C
                ENDIF
             ENDIF
          ENDIF
-C
-C        If empty string then stop
-C
+!
+!        If empty string then stop
+!
          IF ( NAME .EQ. ' ' ) THEN
             WRITE (  6  ,  *  ) ' ERROR no filename entered!'
             CALL SRSTOP(1)
          ENDIF
-C
-C        check existence of output file
-C
+!
+!        check existence of output file
+!
          IF ( CHECK .NE. ' ' ) THEN
             INDX  = INDEX ( NAME , ' ' )
             IF ( INDX .EQ. 0 ) INDX = MAXNAM + 1
             CHECK2 = NAME(1:INDX-1)//CHECK
             INQUIRE ( FILE = CHECK2 , EXIST = EXI )
-C
+!
             IF ( EXI ) THEN
                WRITE ( 6 , * ) ' File:',CHECK2(1:INDX+3),
      +                         ' already exist.'
@@ -144,11 +144,11 @@ C
      *              CALL SRSTOP ( 1 )
             ENDIF
          ENDIF
-C
+!
       ELSE
-C
-C           if there is remove extension
-C
+!
+!           if there is remove extension
+!
          DO 7 INDX1 = MAXNAM , 1 , -1
             IF ( NAME(INDX1:INDX1) .EQ. CRJV) GOTO 8
             IF ( NAME(INDX1:INDX1) .EQ. CJVB) GOTO 8
@@ -157,8 +157,8 @@ C
          IF ( INDX1 .EQ. 0 ) INDX1 = 1
          INDX2 = INDEX ( NAME(INDX1:), '.', .TRUE. )
          IF ( INDX2 .GT. 0 ) NAME(INDX1+INDX2-1:MAXNAM) = ' '
-C
+!
       ENDIF
-C
+!
       RETURN
       END

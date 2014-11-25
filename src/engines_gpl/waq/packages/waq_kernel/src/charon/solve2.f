@@ -21,20 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       21:30
-C    Program:    SOLVE2.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       22 Oct 1992
+!    Time:       21:30
+!    Program:    SOLVE2.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine solve2(kkk)
-c           finds an initial feasible solution, does the first and
-c        second order methods to obtain an optimal solution.
-c           normal termination sets ierror = 1
-c           solve uses subprograms
-c              bar, berror, xlog, del, lp, matinx, rcalc
-c           solve uses double precision version of
-c              abs, amax1, amin1, exp, float, sqrt
+!           finds an initial feasible solution, does the first and
+!        second order methods to obtain an optimal solution.
+!           normal termination sets ierror = 1
+!           solve uses subprograms
+!              bar, berror, xlog, del, lp, matinx, rcalc
+!           solve uses double precision version of
+!              abs, amax1, amin1, exp, float, sqrt
       include  'char1.inc'
       equivalence (g(1),v1(1)), (dx(1),x1(1))
       equivalence (alpha(1),x2(1)), (th(1),x3(1))
@@ -43,14 +43,14 @@ c              abs, amax1, amin1, exp, float, sqrt
       data ittt/1/
       bsec=.false.
       bready = .false.
-c***********************************************************************
-c    note ijfind(1) is set to -1 in: matrix, intera, delete
-c    if a change or install of coeffficients did occur.
-c***********************************************************************
-c***********************************************************************
-c          store entry locations in ijfind, rcalc uses this array
-c          instead of calling find each time (n.m.de rooij 7/11/79)
-c***********************************************************************
+!***********************************************************************
+!    note ijfind(1) is set to -1 in: matrix, intera, delete
+!    if a change or install of coeffficients did occur.
+!***********************************************************************
+!***********************************************************************
+!          store entry locations in ijfind, rcalc uses this array
+!          instead of calling find each time (n.m.de rooij 7/11/79)
+!***********************************************************************
       if(ijfind(1) .ge. 0) go to 9
       jj=2
       ijfind(1)=1
@@ -70,27 +70,27 @@ c***********************************************************************
      1 ncomp.gt.maxp) go to 420
       if (tol1.le.0.0) tol1 = .01
       if (tol2.le.0.0) tol2 = 1.0e-5
-c        values for xmin, barmin, and slacks are set in
-c        subroutine start
+!        values for xmin, barmin, and slacks are set in
+!        subroutine start
       if (itmax.le.0) itmax = 40
       if (pf.gt.0) write (not,99999)
       do 10 j=1,ntot
          if (x(j).lt.0.0d+00) go to 70
    10 continue
-c        if x is strictly positive,  begin projection
-c                 try projection up to 5 times
-c
-c        no projection method used any more ( n.m. de rooij 20/5/80)
-c        go directly to second order method
-c        try second order method up to 15 times, err must be lesser
-c        than  1.0 d-4.
-c******
+!        if x is strictly positive,  begin projection
+!                 try projection up to 5 times
+!
+!        no projection method used any more ( n.m. de rooij 20/5/80)
+!        go directly to second order method
+!        try second order method up to 15 times, err must be lesser
+!        than  1.0 d-4.
+!******
 15    bsec=.true.
       iter=0
       err = 0.0
       if(kkk .eq. 0) go to 280
       if(kkk .eq. 2) go to 70
-c******
+!******
       kkk = 1
       size0 = 1.0e+20
       if(ijohn .ge. 1)call scrgen('Solve ','projec',0,25,60)
@@ -98,7 +98,7 @@ c******
          call barx(x, xbar)
          call berror(err)
          call rcalc
-c        call matinx(r, mend, g, -1, v2, v3, ke)
+!        call matinx(r, mend, g, -1, v2, v3, ke)
          call matinv(r, mend, g, -1, v2, v3, ke)
          if (ke.ne.0) go to 70
          call del(dx, g)
@@ -125,18 +125,18 @@ c        call matinx(r, mend, g, -1, v2, v3, ke)
    50    continue
          if (scale.eq.1.) go to 80
    60 continue
-c        linear programming routine
-c******
+!        linear programming routine
+!******
    70 bsec=.false.
       kkk = 2
-c******
+!******
       if(ijohn .ge. 1)call scrgen('Solve ','lin pr',0,25,60)
       call lp(kf)
       if (kf.ne.0) go to 410
    80 call barx(x, xbar)
       call xlog(x, xbar)
       fe2 = 1.e+20
-c        first order method loop
+!        first order method loop
       do 240 iter=1,itmax
          call berror(err)
          do 90 i=1,mend
@@ -161,7 +161,7 @@ c        first order method loop
             pie(i) = g(i) + pie(i)
   130    continue
          call rcalc
-c        call matinx(r, mend, pie, -1, v2, v3, ke)
+!        call matinx(r, mend, pie, -1, v2, v3, ke)
          call matinv(r, mend, pie, -1, v2, v3, ke)
          if (ke.ne.0) go to 380
          dmax = 1.e+20
@@ -182,7 +182,7 @@ c        call matinx(r, mend, pie, -1, v2, v3, ke)
                ideg = ideg + 1
                th(j) = dmax1(th(j),0.0d00)
   140          tda = tda + th(j)*alpha(j)
-c              if (x(j).lt.(-dmax)*th(j)) dmax = -x(j)/th(j)
+!              if (x(j).lt.(-dmax)*th(j)) dmax = -x(j)/th(j)
                if (x(j).lt.(-dmax)*th(j)) dmax = divide(-x(j),th(j))
                fe = fe + x(j)*alpha(j)
   150       continue
@@ -192,7 +192,7 @@ c              if (x(j).lt.(-dmax)*th(j)) dmax = -x(j)/th(j)
          fe2 = fe
          if (iter.eq.1) go to 170
          itr = iter - 1
-c        if (pf.gt.0) write (not,99997)itr,dfe,fe,optl,eps,err,tda,ideg
+!        if (pf.gt.0) write (not,99997)itr,dfe,fe,optl,eps,err,tda,ideg
          if (pf.gt.0) write (not,99997)itr,dfe,eps,err,tda,ideg
 170      if(ijohn .ge. 1) call scrgen('Solve ','meth 1',iter,25,60)
          optl = dmin1(1.0d00,0.99*dmax)
@@ -222,22 +222,22 @@ c        if (pf.gt.0) write (not,99997)itr,dfe,fe,optl,eps,err,tda,ideg
   230    continue
   240 continue
       go to 370
-c        end of first order method loop
+!        end of first order method loop
   250 if (pf.gt.0) write (not,99994) iter
       go to 280
   260 if (pf.gt.0) write (not,99993) iter
       go to 280
   270 if (pf.gt.0) write (not,99992) iter
-c        second order method loop
+!        second order method loop
   280 iter1 = iter + 1
       pmax = 1.e+20
       pmax1 = 1.e+21
       pmax2 = 1.e+22
-c*****
+!*****
       itt=0
-c*****
+!*****
       do 340 iter=iter1,itmax
-c*****
+!*****
        itt=itt+1
          call del(dx, pie)
          do 300 k=1,ncomp
@@ -249,7 +249,7 @@ c*****
   290       continue
             if (xbar(k).le.barmin ) go to 400
   300    continue
-c        test for end of second order method
+!        test for end of second order method
          aa=pmax
          if(bsec)aa=dmax1(err,pmax)
          if (aa.lt.tol2 .and. dabs(err) .lt. tol1) go
@@ -258,7 +258,7 @@ c        test for end of second order method
      1    to 350
          call berror(err)
          call rcalc
-c        call matinx(r, mend, g, -1, v2, v3, ke)
+!        call matinx(r, mend, g, -1, v2, v3, ke)
          call matinv(r, mend, g, -1, v2, v3, ke)
          if (ke.ne.0) go to 380
          pmax2 = pmax1
@@ -280,12 +280,12 @@ c        call matinx(r, mend, g, -1, v2, v3, ke)
          if(ijohn .ge. 1) call scrgen('Solve ','meth 2',itt,25,60)
   340 continue
       go to 370
-c        end of second order method loop
-c******
+!        end of second order method loop
+!******
 350      if (pf.eq.0) write (not,99991) iter, pmax, err
-c*******
-c  calculate mass balance mass action errors
-c*******
+!*******
+!  calculate mass balance mass action errors
+!*******
       if(ijohn .ge. 1)call scrgen('Solve ','contrl',iter,25,60)
       marith = 1
       call arith
@@ -293,7 +293,7 @@ c*******
       if(pf.gt.0) write(not,1235)kn(nema),xema,nr(nemb,1),xemb
  1235 format(' solve, mass action error: ',a6,e14.5,/,
      2       '       mass balance error: ',a6,e14.5)
-c******
+!******
       ierror = 8
       go to 360
 355   ierror = 1
@@ -303,11 +303,11 @@ c******
       call actcon
       kkk   = 1
       if(pf.gt.0)write(not,99990)str
-c        carry out new computation with corrected c values.
+!        carry out new computation with corrected c values.
       go to 15
-c******
-c     go to 280
-c******
+!******
+!     go to 280
+!******
  360  return
   370 ierror = 2
       write (not,99989)

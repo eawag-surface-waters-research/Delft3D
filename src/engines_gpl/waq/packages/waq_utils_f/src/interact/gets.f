@@ -21,46 +21,46 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C FORTRAN 77 version of INTERACT routines.
-C
-C Most functions can be executed normally, as long as CHARACTER*1
-C is available.
-C
-C NOT AVAILABLE: CMS.
-C
-C Note: CHARACTER and INTEGER variables should be equivalenced in
-C several routines. In IBM FORTRAN this is possible, according to ANSI
-C standard it is not. To emulate this equivalence, the build-in
-C functions "ICHAR" and "CHAR" are used here, WHENEVER one of the
-C variables to be equivalenced is changed in one of the programs.
-C
-C Further note: default delimiters are set in block data according to
-C EBDIC ordering. When routines are used on computers using ASCI code,
-C a number 1 should be set for elements 33 and 45 of arrays DLM and
-C IGN.
-C
+!
+! FORTRAN 77 version of INTERACT routines.
+!
+! Most functions can be executed normally, as long as CHARACTER*1
+! is available.
+!
+! NOT AVAILABLE: CMS.
+!
+! Note: CHARACTER and INTEGER variables should be equivalenced in
+! several routines. In IBM FORTRAN this is possible, according to ANSI
+! standard it is not. To emulate this equivalence, the build-in
+! functions "ICHAR" and "CHAR" are used here, WHENEVER one of the
+! variables to be equivalenced is changed in one of the programs.
+!
+! Further note: default delimiters are set in block data according to
+! EBDIC ordering. When routines are used on computers using ASCI code,
+! a number 1 should be set for elements 33 and 45 of arrays DLM and
+! IGN.
+!
       INTEGER FUNCTION GETS(SOURCE, STPOS, LENGTH, MAXOUT,OUTPUT,LENOUT)
-C
+!
       IMPLICIT INTEGER (A-Z)
       CHARACTER*1 SOURCE(1), OUTPUT(1), BLANK
       COMMON /ZDLMTZ/DLM(256), IGN(256)
       DATA CHR/0/, BLANK/' '/
-C
+!
       IF (STPOS.LE.0) GOTO 1001
       IF (LENGTH.LT.STPOS) GOTO 1002
       IF (MAXOUT.LE.0.OR.MAXOUT.GT.256) GOTO 1003
       DO 10 IFND=STPOS,LENGTH
-C *** Convert CHARACTER to INTEGER.
+! *** Convert CHARACTER to INTEGER.
       CHR = ICHAR(SOURCE(IFND))
-C *** Conversion completed.
+! *** Conversion completed.
       IF (IGN(CHR+1).EQ.0) GOTO 15
 10    CONTINUE
       GOTO 100
 15    DO 20 JFND=IFND,LENGTH
-C *** Convert CHARACTER to INTEGER.
+! *** Convert CHARACTER to INTEGER.
       CHR = ICHAR(SOURCE(JFND))
-C *** Conversion completed.
+! *** Conversion completed.
       IF (DLM(CHR+1).NE.0) GOTO 22
 20    CONTINUE
       JFND = LENGTH + 1

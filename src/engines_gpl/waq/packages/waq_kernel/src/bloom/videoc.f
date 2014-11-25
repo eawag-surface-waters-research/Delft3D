@@ -21,16 +21,16 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE VIDEO TO CHANGE CHARATERISTICS OF DISPLAY          *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE VIDEO TO CHANGE CHARATERISTICS OF DISPLAY          *
+!  *********************************************************************
+!
       SUBROUTINE VIDEO (CODE)
-C
+!
       INTEGER CODE
-C
-C     Dummy unix version
-C
+!
+!     Dummy unix version
+!
       RETURN
       END

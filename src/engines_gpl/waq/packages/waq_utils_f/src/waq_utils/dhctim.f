@@ -22,31 +22,31 @@
 !!  rights reserved.
 
       SUBROUTINE DHCTIM ( ITIME , ITIME2, DTFLG , DTFLG3 )
-C
-C
-C     Deltares
-C
-C     CREATED       : 1996 BY Jan van Beek
-C
-C     FUNCTION      : Conversion of an integer variable in seconds to
-C                     DD:HH:MM:SS or YY:DDD:HH format
-C
-C     LOGICAL UNITS : none
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     ITIME   INTEGER  1           INPUT   TIME in seconds
-C     ITIME2  INTEGER  1           OUTPUT  TIME in format
-C     DTFLG   LOGICAL  1           INPUT   if .TRUE. then 'date'-format
-C     DTFLG3  LOGICAL  1           INPUT   (F;ddmmhhss,T;yydddhh)
-C
-C     Declaration of arguments
-C
+!
+!
+!     Deltares
+!
+!     CREATED       : 1996 BY Jan van Beek
+!
+!     FUNCTION      : Conversion of an integer variable in seconds to
+!                     DD:HH:MM:SS or YY:DDD:HH format
+!
+!     LOGICAL UNITS : none
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     ITIME   INTEGER  1           INPUT   TIME in seconds
+!     ITIME2  INTEGER  1           OUTPUT  TIME in format
+!     DTFLG   LOGICAL  1           INPUT   if .TRUE. then 'date'-format
+!     DTFLG3  LOGICAL  1           INPUT   (F;ddmmhhss,T;yydddhh)
+!
+!     Declaration of arguments
+!
       INTEGER   ITIME , ITIME2
       LOGICAL   DTFLG , DTFLG3
-C
+!
       IF ( DTFLG ) THEN
          IF ( DTFLG3 ) THEN
             IYEAR   = ITIME/31536000
@@ -65,6 +65,6 @@ C
             ITIME2  = IDAY*1000000 + IHOUR*10000 + IMIN*100 + ISEC
          ENDIF
       ENDIF
-C
+!
       RETURN
       END

@@ -23,72 +23,72 @@
 
       SUBROUTINE DHAGKM ( NOSEG , NODIM2, NOGRID, IKNMRK, GRDNOS,
      +                    GRDSEG)
-C
-C     Deltares
-C
-C     Created             : Oct. 1998 by Jan van Beek
-C
-C     Function            : Aggregates kenmerk array
-C
-C     Subroutines called  : DHKMRK, evaluate kenmerk
-C
-C     Arguments           :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOSEG   INTEGER  1          INPUT   Number of segments
-C     NODIM2  INTEGER  1          INPUT   second dimension kenmerk array
-C     NOGRID  INTEGER  1          INPUT   number of grids
-C     IKNMRK  INTEGER  *          IN/OUT  kenmerk array
-C     GRDNOS  INTEGER  *          INPUT   number of grid cells per grid
-C     GRDSEG  INTEGER  *          INPUT   segment pointers
-C
-C     Declaration of arguments
-C
+!
+!     Deltares
+!
+!     Created             : Oct. 1998 by Jan van Beek
+!
+!     Function            : Aggregates kenmerk array
+!
+!     Subroutines called  : DHKMRK, evaluate kenmerk
+!
+!     Arguments           :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOSEG   INTEGER  1          INPUT   Number of segments
+!     NODIM2  INTEGER  1          INPUT   second dimension kenmerk array
+!     NOGRID  INTEGER  1          INPUT   number of grids
+!     IKNMRK  INTEGER  *          IN/OUT  kenmerk array
+!     GRDNOS  INTEGER  *          INPUT   number of grid cells per grid
+!     GRDSEG  INTEGER  *          INPUT   segment pointers
+!
+!     Declaration of arguments
+!
       INTEGER        NOSEG , NODIM2, NOGRID
       INTEGER        GRDNOS(NOGRID)
       INTEGER        GRDSEG(NOSEG,NOGRID)
       INTEGER        IKNMRK(NOSEG,NODIM2,NOGRID)
-C
-C     Local declaration
-C
-C     IGRID   INTEGER  1          LOCAL   Grid index
-C     ISEG    INTEGER  1          LOCAL   Segment index base grid
-C     ISEG2   INTEGER  1          LOCAL   Segment index coarser grid
-C     K1_G1   INTEGER  1          LOCAL   Kenmerk 1 base grid
-C     K1_G2   INTEGER  1          LOCAL   Kenmerk 1 coarser grid
-C     K2_G1   INTEGER  1          LOCAL   Kenmerk 2 base grid
-C     K2_G2   INTEGER  1          LOCAL   Kenmerk 2 coarser grid
-C
+!
+!     Local declaration
+!
+!     IGRID   INTEGER  1          LOCAL   Grid index
+!     ISEG    INTEGER  1          LOCAL   Segment index base grid
+!     ISEG2   INTEGER  1          LOCAL   Segment index coarser grid
+!     K1_G1   INTEGER  1          LOCAL   Kenmerk 1 base grid
+!     K1_G2   INTEGER  1          LOCAL   Kenmerk 1 coarser grid
+!     K2_G1   INTEGER  1          LOCAL   Kenmerk 2 base grid
+!     K2_G2   INTEGER  1          LOCAL   Kenmerk 2 coarser grid
+!
       INTEGER        IGRID , ISEG  , ISEG2 , K1_G1 , K1_G2 ,
      +               K2_G1 , K2_G2
-C
-C     Set kenmerk array for all coarser grids
-C
+!
+!     Set kenmerk array for all coarser grids
+!
       DO IGRID = 2 , NOGRID
-C
-C        Set all first kenmerk inactive, all second kenmerk middle ( 20 )
-C
+!
+!        Set all first kenmerk inactive, all second kenmerk middle ( 20 )
+!
          DO ISEG2 = 1 , GRDNOS(IGRID)
             IKNMRK(ISEG2,1,IGRID) = 20
          ENDDO
-C
+!
          DO ISEG = 1 , NOSEG
             ISEG2 = GRDSEG(ISEG,IGRID)
-C
-C           Kenmerk 1 , 0 = inactive , 1 = active , 2 = GEM bottom
-C
+!
+!           Kenmerk 1 , 0 = inactive , 1 = active , 2 = GEM bottom
+!
             CALL DHKMRK(1,IKNMRK(ISEG,1,1)     ,K1_G1)
             CALL DHKMRK(1,IKNMRK(ISEG2,1,IGRID),K1_G2)
             IF ( K1_G1 .GT. 0 ) THEN
                K1_G2 = K1_G1
             ENDIF
-C
-C           Kenmerk 2 , 0 = depth integrated
-C                       1 = surface
-C                       2 = middle segment
-C                       3 = bottom
-C
+!
+!           Kenmerk 2 , 0 = depth integrated
+!                       1 = surface
+!                       2 = middle segment
+!                       3 = bottom
+!
             CALL DHKMRK(2,IKNMRK(ISEG,1,1)     ,K2_G1)
             CALL DHKMRK(2,IKNMRK(ISEG2,1,IGRID),K2_G2)
             IF ( K2_G1 .EQ. 0 ) THEN
@@ -106,11 +106,11 @@ C
                   K2_G2 = 0
                ENDIF
             ENDIF
-C
+!
             IKNMRK(ISEG2,1,IGRID) = K1_G2 + 10*K2_G2
-C
+!
          ENDDO
       ENDDO
-C
+!
       RETURN
       END

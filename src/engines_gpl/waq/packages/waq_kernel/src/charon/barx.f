@@ -22,9 +22,9 @@
 !!  rights reserved.
 
       subroutine barx(w, wbar)
-c           4-69
-c           for each compartment k compute wbar(k) as the sum of w(j),
-c        where j is each substance in the compartment
+!           4-69
+!           for each compartment k compute wbar(k) as the sum of w(j),
+!        where j is each substance in the compartment
       include  'char1.inc'
       include  'char5.inc'
       dimension w(1), wbar(1)

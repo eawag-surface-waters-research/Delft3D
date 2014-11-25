@@ -21,26 +21,26 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       27 Dec 1989
-C    Time:       09:33
-C    Program:    INPTDT.FOR
-C    Version:    1.2
-C    Programmer: Hans Los
-C    Previous version(s):
-C    1.1 -- 27 Dec 1989 -- 09:32 -- Operating System: DOS
-C    1.0 -- 12 Dec 1989 -- 11:59 -- Operating System: DOS
-C    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-C
-C  *********************************************************************
-C  *  INTEGER FUNCTION INPTDT TO READ CHARACTER STRINGS USING          *
-C  *          INTERACTIVE ROUTINES IN "INTERACT TXTLIB"                *
-C  *********************************************************************
-C
+!    Date:       27 Dec 1989
+!    Time:       09:33
+!    Program:    INPTDT.FOR
+!    Version:    1.2
+!    Programmer: Hans Los
+!    Previous version(s):
+!    1.1 -- 27 Dec 1989 -- 09:32 -- Operating System: DOS
+!    1.0 -- 12 Dec 1989 -- 11:59 -- Operating System: DOS
+!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
+!
+!  *********************************************************************
+!  *  INTEGER FUNCTION INPTDT TO READ CHARACTER STRINGS USING          *
+!  *          INTERACTIVE ROUTINES IN "INTERACT TXTLIB"                *
+!  *********************************************************************
+!
       INTEGER FUNCTION INPTDT(PRMPT,TOKEN,LEN)
       INCLUDE 'ioblck.inc'
       CHARACTER*8 TOKEN
       INTEGER PRMPT,GETS,LEN,UPRCAS
-C
+!
       INPTDT = 0
     1 CONTINUE
       IF (GETS(LINE,POSIT,80,8,TOKEN,LEN) .EQ. 0) RETURN

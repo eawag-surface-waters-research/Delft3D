@@ -27,72 +27,59 @@
 !>\file
 !>       Degradation of organic micropolutants (new, generic!)
 
-C***********************************************************************
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C     020215  Johannes Smits  New generic version, with options
-C                             regarding 1)oxidising and reducing cond.
-C                             and 2)fraction that is degraded (IVERSN=1)
-C                             The old version is maintained (IVERSN=0)
-C                             for water and sediment
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        Overall degradation of organic micropollutants in the
-C        water and sediment.
-C
-C         ----- old version -----
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C CRTEMP  R*4 1 I critical temperature for decay                       [xC]
-C DEPTH   R*4 1 I actual depth of a segment                            [m]
-C FL (1)  R*4 1 O decay flux mixing layer (x=C,N,P,Si)           [gX/m3/d]
-C MINRC   R*4 1 I first order decay rate                             [1/d]
-C FDIS    R*4 1 I fraction free dissolved mive                         [-]
-C MINTCR  R*4 1 I temperature coefficient two bottom layers          [1/d]
-C ORG     R*4 1 I amount decaying organic material in mixing layer    [gX]
-C TEMP    R*4 1 I ambient temperature                                 [xC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
-C TEMPC   R*4 1 L temperature coefficient                              [-]
-C VOLUME  R*4 1 L volume calculated by DELWAQ                         [m3]
-C ZERMIN  R*4 1 I zeroth order decay rate mixing layer           [gX/m2/d]
-C
-C         ----- new version -----
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C IVERSN  I   1 I option for version of process                        [-]
-C ISWOXY  I   1 I option for oxidising or reducing condition           [-]
-C ISWDEG  I   1 I option for fraction micropoll. that is degraded      [-]
-C CRTEMP  R*4 1 I critical temperature for decay                      [oC]
-C DEPTH   R*4 1 I actual depth of a water segment                      [m]
-C FL (1)  R*4 1 O decay flux (x = C, N, P, Si)                   [gX/m3/d]
-C FTOTR   R*4 1 - fraction of micropollutant that is gedraded          [-]
-C FDFREE  R*4 1 I fraction free dissolved micropollutant               [-]
-C FDDOC   R*4 1 I fraction DOC-bound micropollutant                    [-]
-C KDEG    R*4 1 - first order degradation rate                       [1/d]
-C KDEGO   R*4 1 I first order degradation rate at oxidising cond.    [1/d]
-C KDEGR   R*4 1 I first order degradation rate at reducing cond.     [1/d]
-C KTDEG   R*4 1 I temperature coefficient for decay                    [-]
-C ORGMP   R*4 1 I concentration organic micropollutant             [gX/m3]
-C TEMP    R*4 1 I ambient temperature                                 [oC]
-C TEMP20  R*4 1 L ambient temperature - reference temp.(20)           [oC]
-C TEMPC   R*4 1 L temperature coefficient                              [-]
-C VOLUME  R*4 1 L volume calculated by DELWAQ                         [m3]
-C ZDEGMP  R*4 1 I zero order degradation rate                    [gX/m3/d]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        Overall degradation of organic micropollutants in the
+!        water and sediment.
+!
+!         ----- old version -----
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! CRTEMP  R*4 1 I critical temperature for decay                       [xC]
+! DEPTH   R*4 1 I actual depth of a segment                            [m]
+! FL (1)  R*4 1 O decay flux mixing layer (x=C,N,P,Si)           [gX/m3/d]
+! MINRC   R*4 1 I first order decay rate                             [1/d]
+! FDIS    R*4 1 I fraction free dissolved mive                         [-]
+! MINTCR  R*4 1 I temperature coefficient two bottom layers          [1/d]
+! ORG     R*4 1 I amount decaying organic material in mixing layer    [gX]
+! TEMP    R*4 1 I ambient temperature                                 [xC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
+! TEMPC   R*4 1 L temperature coefficient                              [-]
+! VOLUME  R*4 1 L volume calculated by DELWAQ                         [m3]
+! ZERMIN  R*4 1 I zeroth order decay rate mixing layer           [gX/m2/d]
+!
+!         ----- new version -----
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! IVERSN  I   1 I option for version of process                        [-]
+! ISWOXY  I   1 I option for oxidising or reducing condition           [-]
+! ISWDEG  I   1 I option for fraction micropoll. that is degraded      [-]
+! CRTEMP  R*4 1 I critical temperature for decay                      [oC]
+! DEPTH   R*4 1 I actual depth of a water segment                      [m]
+! FL (1)  R*4 1 O decay flux (x = C, N, P, Si)                   [gX/m3/d]
+! FTOTR   R*4 1 - fraction of micropollutant that is gedraded          [-]
+! FDFREE  R*4 1 I fraction free dissolved micropollutant               [-]
+! FDDOC   R*4 1 I fraction DOC-bound micropollutant                    [-]
+! KDEG    R*4 1 - first order degradation rate                       [1/d]
+! KDEGO   R*4 1 I first order degradation rate at oxidising cond.    [1/d]
+! KDEGR   R*4 1 I first order degradation rate at reducing cond.     [1/d]
+! KTDEG   R*4 1 I temperature coefficient for decay                    [-]
+! ORGMP   R*4 1 I concentration organic micropollutant             [gX/m3]
+! TEMP    R*4 1 I ambient temperature                                 [oC]
+! TEMP20  R*4 1 L ambient temperature - reference temp.(20)           [oC]
+! TEMPC   R*4 1 L temperature coefficient                              [-]
+! VOLUME  R*4 1 L volume calculated by DELWAQ                         [m3]
+! ZDEGMP  R*4 1 I zero order degradation rate                    [gX/m3/d]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
@@ -108,7 +95,7 @@ C
      +         KDEG, FTOTR
       REAL     TEMP, CRTEMP, TEMPC, TEMP20, VOLUME, DEPTH
       LOGICAL  SEDIME
-C
+!
       IP1  = IPOINT( 1 )
       IP2  = IPOINT( 2 )
       IP3  = IPOINT( 3 )
@@ -125,12 +112,12 @@ C
       IP14 = IPOINT( 14)
       IP15 = IPOINT( 15)
       IP16 = IPOINT( 16)
-C
-C     Check sediment switch for first segment
-C
+!
+!     Check sediment switch for first segment
+!
       SEDIME = .FALSE.
       IF ( PMSA(IP16) .GT. 0.5 ) SEDIME = .TRUE.
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -139,11 +126,11 @@ C
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0.OR.IKMRK2.EQ.3).OR..NOT.SEDIME) THEN
       IVERSN = NINT( PMSA( IP10 ))
-C
-C     Use old version when IVERSN=0
-C
+!
+!     Use old version when IVERSN=0
+!
       IF (IVERSN .EQ. 0) THEN
-C
+!
          ZERMIN  = PMSA( IP1 )
          ORG     = MAX (0.0, PMSA( IP2 ) )
          FDIS    = PMSA( IP3 )
@@ -153,26 +140,26 @@ C
          CRTEMP  = PMSA( IP7 )
          VOLUME  = PMSA( IP8 )
          DEPTH   = PMSA( IP9 )
-C
-C        Calculate the degradation flux
-C
+!
+!        Calculate the degradation flux
+!
          IF (TEMP .LE. CRTEMP) THEN
-C
-C           Only the zero order term
-C
+!
+!           Only the zero order term
+!
             IF ( SEDIME ) THEN
                FL( 1+IFLUX) = ZERMIN  / DEPTH
             ELSE
                FL( 1+IFLUX) = ZERMIN
             ENDIF
-C
+!
          ELSE
-C
-C           Sum of zero and first order terms
-C
+!
+!           Sum of zero and first order terms
+!
             TEMP20 = TEMP - 20.0
             TEMPC  = MINTC ** TEMP20
-C
+!
             IF ( SEDIME ) THEN
                FL( 1+IFLUX) = ( ZERMIN  / DEPTH  +
      &                 FDIS * MINRC * TEMPC * ORG / DEPTH  )
@@ -181,11 +168,11 @@ C
             ENDIF
 
          ENDIF
-C
-C     Use new version when IVERSN=1
-C
+!
+!     Use new version when IVERSN=1
+!
       ELSE
-C
+!
          ZDEGMP = PMSA( IP1 )
          ORGMP  = MAX ( 0.0, PMSA( IP2 ) )
          FDFREE = PMSA( IP3 )
@@ -199,36 +186,36 @@ C
          FDDOC  = PMSA( IP13)
          KDEGO  = PMSA( IP14)
          KDEGR  = PMSA( IP15)
-C
-C        Calculate the degradation flux
-C
+!
+!        Calculate the degradation flux
+!
          IF (TEMP .LE. CRTEMP) THEN
-C
-C           Only the zero order term
-C
+!
+!           Only the zero order term
+!
             IF ( SEDIME ) THEN
                FL( 1+IFLUX) = ZDEGMP / DEPTH
             ELSE
                FL( 1+IFLUX) = ZDEGMP
             ENDIF
-C
+!
          ELSE
-C
-C           Sum of zero and first order terms
-C
+!
+!           Sum of zero and first order terms
+!
             TEMP20 = TEMP - 20.0
             TEMPC  = KTDEG ** TEMP20
-C
-C           Select rate for oxidising conditions (ISWOXY = 1)
-C                        or reducing conditions (ISWOXY = 0)
-C
+!
+!           Select rate for oxidising conditions (ISWOXY = 1)
+!                        or reducing conditions (ISWOXY = 0)
+!
             KDEG = KDEGO
             IF (ISWOXY .EQ. 0) KDEG = KDEGR
-C
-C           Select the fractions that are degraded,
-C           total (ISWDEG = 0), free dissolved (ISWDEG = 1),
-C           free dissolved plus DOC-bound (ISWDEG = 2)
-C
+!
+!           Select the fractions that are degraded,
+!           total (ISWDEG = 0), free dissolved (ISWDEG = 1),
+!           free dissolved plus DOC-bound (ISWDEG = 2)
+!
             IF (ISWDEG .EQ. 1) THEN
                FTOTR = FDFREE
                ELSE IF (ISWDEG .EQ. 2) THEN
@@ -236,22 +223,22 @@ C
                ELSE
                FTOTR = 1.0
             ENDIF
-C
+!
             IF ( SEDIME ) THEN
                FL( 1+IFLUX) = ZDEGMP / DEPTH +
      +                     KDEG * TEMPC * FTOTR * ORGMP / DEPTH
             ELSE
                FL( 1+IFLUX) = ZDEGMP + KDEG * TEMPC * FTOTR * ORGMP
             ENDIF
-C
+!
          ENDIF
-C
+!
       ENDIF
-C
+!
       ENDIF
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM ( 1 )
       IP2   = IP2   + INCREM ( 2 )
@@ -268,10 +255,10 @@ C
       IP13  = IP13  + INCREM ( 13)
       IP14  = IP14  + INCREM ( 14)
       IP15  = IP15  + INCREM ( 15)
-C     IP16 wordt niet opgehoogd, want deze staat buiten segmentloop!!!
-C
+!     IP16 wordt niet opgehoogd, want deze staat buiten segmentloop!!!
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

@@ -23,46 +23,46 @@
 
       SUBROUTINE STRIP ( LUNIN  , LFILE  , LUNUT  , LUREP  , NPOS   ,
      *                                              CCHAR  , VRSION )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : march '88  BY  M.E.Sileon
-C
-C     FUNCTION            : Deletes empty lines and comment in the
-C                           DELWAQ input file
-C
-C     SUBROUTINE CALLED   : SRSTOP
-C
-C     LOGICAL UNITNUMBERS : LUNIN = unitnumber auxilary input file
-C                           LUNUT = unitnumber scratch file
-C                           LUREP = unitnumber error messages
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LFILE   CHAR*?     1         INPUT   file name
-C     NPOS    INTEGER    1         INPUT   number of significant
-C                                          positions in one line
-C     CCHAR   CHAR*1     1         INPUT   'comment' indicator
-C     VRSION  REAL*4     1         OUTPUT  Version number
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : march '88  BY  M.E.Sileon
+!
+!     FUNCTION            : Deletes empty lines and comment in the
+!                           DELWAQ input file
+!
+!     SUBROUTINE CALLED   : SRSTOP
+!
+!     LOGICAL UNITNUMBERS : LUNIN = unitnumber auxilary input file
+!                           LUNUT = unitnumber scratch file
+!                           LUREP = unitnumber error messages
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LFILE   CHAR*?     1         INPUT   file name
+!     NPOS    INTEGER    1         INPUT   number of significant
+!                                          positions in one line
+!     CCHAR   CHAR*1     1         INPUT   'comment' indicator
+!     VRSION  REAL*4     1         OUTPUT  Version number
+!
+!
       CHARACTER*2000 CAR
       CHARACTER*1    CCHAR
       CHARACTER*(*)  LFILE
       LOGICAL        EMPTY, STRING
-C
+!
       IF ( NPOS .GT. 2000 ) GOTO 60
-C
+!
       DO 30 IL = 1 , 1000000
       READ ( LUNIN , '(A)' , END=40 , ERR=50 ) CAR  (1:NPOS)
       EMPTY = .TRUE.
       STRING = .FALSE.
-C
-C        write line until CCHAR in LUNUT, strip heading spaces
-C
+!
+!        write line until CCHAR in LUNUT, strip heading spaces
+!
       DO 5 I  = 1 , NPOS-19
          IF ( CAR(I:I+14) .EQ. 'DELWAQ_VERSION_' ) THEN
             READ ( CAR(I+15:I+20) , '(F5.0)' ) VERS2
@@ -74,9 +74,9 @@ C
             CAR(I:I+19) = ' '
          ENDIF
     5 CONTINUE
-C
-C        write line until CCHAR in LUNUT, strip heading spaces
-C
+!
+!        write line until CCHAR in LUNUT, strip heading spaces
+!
       IS = 0
       DO 10 I  = 1 , NPOS
       IF ( CAR  (I:I) .EQ. CCHAR ) GOTO 20
@@ -97,26 +97,26 @@ C
    10 CONTINUE
    20 IF ( .NOT. EMPTY ) WRITE( LUNUT , '(A)' )  CAR  (1:IS)
    30 CONTINUE
-C
-C        end of file encountered
-C
+!
+!        end of file encountered
+!
    40 REWIND LUNUT
       RETURN
-C
-C        errors during read
-C
+!
+!        errors during read
+!
    50 WRITE ( LUREP , 2000 ) LUNIN , LFILE
       CALL SRSTOP(1)
-C
-C        work string to short
-C
+!
+!        work string to short
+!
    60 WRITE ( LUREP , 2001 ) NPOS
       CALL SRSTOP(1)
-C
+!
  2000 FORMAT (  ' ERROR, reading file on unit',I3,' !!',
      *         /' Filename is: ',A20,
      *         /' ********** EXECUTION TERMINATED ********' )
  2001 FORMAT (  ' ERROR, number of characters per line exceed maximum',
      *         /' In file ',I4,' , maximum is 1000 ' )
-C
+!
       END

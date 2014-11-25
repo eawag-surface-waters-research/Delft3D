@@ -21,59 +21,59 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       26 Feb 1992
-C    Time:       19:10
-C    Program:    FIXINF.FOR
-C    Version:    2.0
-C    Programmer: Hans Los
-C    Previous version(s):
-C    1.1 -- 25 Feb 1992 -- 13:42 -- Operating System: DOS
-C    1.0 -- 11 Oct 1990 -- 13:09 -- Operating System: DOS
-C    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-C
-C  Update 1.1: store total biomass not only in BIO(2) but also in
-C  X(NUCOLS+2)
-C
-C  Update 2.0: Included a new section for coupled model versions.
-C              Changed the subroutine call.
-C              Cosmetics and comments.
-C
-C  Purpose of this module: modify some of the boundary conditions for
-C  infeasible systems. We follow a different approach for different
-C  model versions for reasons to be explained here. Infeasible systems
-C  occur, when a minimum constrain (usually a mortality constraint)
-C  conflicts with a maximum constraint (nutrient; energy). To deal with
-C  this problem we must either lower the value of the mortality
-C  constraint, or increase the available amount of the maximum
-C  constraint, which is violated.
-C
-C
-C  1. Stand alone BLOOM II
-C     a. Steady state computation.
-C        If there is no valid solution, simply put all biomasses to 0.0:
-C        this is obviously the correct steady state solution.
-C     b. Dynamic computation.
-C        Drop the mortality constraint which is violated. Argument:
-C        the boundary conditions are based on measured conditions and
-C        therefore relatively well defined. Little is known about the
-C        mortality of declining species. Therefore drop the moratlity
-C        constraint.
-C   2. BLOOM as a module (DELWAQ; JSBACH)
-C        The mortality is pre-calculated and so are the corresponding
-C        nutrient fluxes. Conflicts between nutrient and mortality
-C        constraints cannot occur in theory (they do occasionally though
-C        due to numerical round-off errors and small time-step
-C        problems). In almost all cases the infeasibility is caused by
-C        a mortality constraint and the energy constraint. Therefore
-C        try to increase the energy consrtaint sufficiently and rerun
-C        the problem. If this won't help, drop the mortality constraint.
-C        Note: this may lead to NEGATIVE production rates as BLOOM
-C        returns a value below the mortality constraint!
-C
-C  *********************************************************************
-C  * SUBROUTINE TO DEAL WITH CASES WHERE ALL INTERVALS ARE INFEASIBLE  *
-C  *********************************************************************
-C
+!    Date:       26 Feb 1992
+!    Time:       19:10
+!    Program:    FIXINF.FOR
+!    Version:    2.0
+!    Programmer: Hans Los
+!    Previous version(s):
+!    1.1 -- 25 Feb 1992 -- 13:42 -- Operating System: DOS
+!    1.0 -- 11 Oct 1990 -- 13:09 -- Operating System: DOS
+!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
+!
+!  Update 1.1: store total biomass not only in BIO(2) but also in
+!  X(NUCOLS+2)
+!
+!  Update 2.0: Included a new section for coupled model versions.
+!              Changed the subroutine call.
+!              Cosmetics and comments.
+!
+!  Purpose of this module: modify some of the boundary conditions for
+!  infeasible systems. We follow a different approach for different
+!  model versions for reasons to be explained here. Infeasible systems
+!  occur, when a minimum constrain (usually a mortality constraint)
+!  conflicts with a maximum constraint (nutrient; energy). To deal with
+!  this problem we must either lower the value of the mortality
+!  constraint, or increase the available amount of the maximum
+!  constraint, which is violated.
+!
+!
+!  1. Stand alone BLOOM II
+!     a. Steady state computation.
+!        If there is no valid solution, simply put all biomasses to 0.0:
+!        this is obviously the correct steady state solution.
+!     b. Dynamic computation.
+!        Drop the mortality constraint which is violated. Argument:
+!        the boundary conditions are based on measured conditions and
+!        therefore relatively well defined. Little is known about the
+!        mortality of declining species. Therefore drop the moratlity
+!        constraint.
+!   2. BLOOM as a module (DELWAQ; JSBACH)
+!        The mortality is pre-calculated and so are the corresponding
+!        nutrient fluxes. Conflicts between nutrient and mortality
+!        constraints cannot occur in theory (they do occasionally though
+!        due to numerical round-off errors and small time-step
+!        problems). In almost all cases the infeasibility is caused by
+!        a mortality constraint and the energy constraint. Therefore
+!        try to increase the energy consrtaint sufficiently and rerun
+!        the problem. If this won't help, drop the mortality constraint.
+!        Note: this may lead to NEGATIVE production rates as BLOOM
+!        returns a value below the mortality constraint!
+!
+!  *********************************************************************
+!  * SUBROUTINE TO DEAL WITH CASES WHERE ALL INTERVALS ARE INFEASIBLE  *
+!  *********************************************************************
+!
       SUBROUTINE FIXINF(X,BIO,EXTTOT,EXTB,INHIB,NI,IRERUN,IRS,INFEAS,
      &                  ERRIND,JKMAX,AROOT,CDATE,LCOUPL)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -89,26 +89,26 @@ C
       INTEGER IRS (*),JKMAX(*),LCOUPL
       CHARACTER*8 CDATE
       CHARACTER*1 ERRIND
-C
-C Determine output unit for error messages.
-C
+!
+! Determine output unit for error messages.
+!
       IF (IOFLAG .EQ. 0) THEN
          NOUT = IOU(6)
       ELSE
          NOUT = IOU(10)
       END IF
-C
-C Set flag for non-unique solutions (LST) to 0.
+!
+! Set flag for non-unique solutions (LST) to 0.
       LST = 0
 
-C ----------------------------------------------------------------------
-C Start of steady state BLOOM section.
-C In a run WITHOUT mortality constraints, set all biomasses to zero,
-C all nutrient slacks to the total available concentrations and the
-C total extinction to the background extinction.
-C Note: this is also the final solution in dynamic runs when everything
-C else fails.
-C
+! ----------------------------------------------------------------------
+! Start of steady state BLOOM section.
+! In a run WITHOUT mortality constraints, set all biomasses to zero,
+! all nutrient slacks to the total available concentrations and the
+! total extinction to the background extinction.
+! Note: this is also the final solution in dynamic runs when everything
+! else fails.
+!
       IF (LMORCH .EQ. 1) GO TO 40
    10 CONTINUE
       DO 20 J=1,NUNUCO
@@ -127,11 +127,11 @@ C
       IRERUN = 0
       RETURN
 
-C ----------------------------------------------------------------------
-C The ultimate solution: put all biomasses to 0!
-C Was the problem rerun already? Is there still hope for a neat
-C solution?
-C
+! ----------------------------------------------------------------------
+! The ultimate solution: put all biomasses to 0!
+! Was the problem rerun already? Is there still hope for a neat
+! solution?
+!
    40 CONTINUE
       IF (IRERUN .EQ. 3) THEN
          WRITE (NOUT,50) CDATE
@@ -143,30 +143,30 @@ C
          GO TO 10
       END IF
 
-C ----------------------------------------------------------------------
-C If there are no intervals at all, or if the infeasibility is not due
-C to a mortality constraint, set all species at their mortality
-C constraint.
-C
+! ----------------------------------------------------------------------
+! If there are no intervals at all, or if the infeasibility is not due
+! to a mortality constraint, set all species at their mortality
+! constraint.
+!
       IF (NI .EQ. 0 .OR. IRS(3) .LE. NUEXRO + NUECOG) GO TO 130
 
-C ----------------------------------------------------------------------
-C Problem is infeasible due to a mortality constraint. In stand-alone
-C BLOOM (LCOUPL = 0) drop the violated mortality constraint. Rerun.
-C
-C In coupled model versions, it is almost always sufficient to increase
-C the energy constraint. Compute the minimum extinction value that could
-C make the problem feasible. This is the background extinction EXTB
-C (which includes detritus) plus the extinction of all phytoplankton
-C species at their minimum level. If the old Kmax is high enough, the
-C violation must be due to a nutrient constraint afterall so drop the
-C mortality constraint. Rerun.
-C Note: we have assumed that the type whose objective function is the
-C highest of a species also has the highest specific extinction
-C coefficient. This is quite logical, and therefore UNCHECKED!
-C
-C Note: Restore the original growth constraint vector.
-C
+! ----------------------------------------------------------------------
+! Problem is infeasible due to a mortality constraint. In stand-alone
+! BLOOM (LCOUPL = 0) drop the violated mortality constraint. Rerun.
+!
+! In coupled model versions, it is almost always sufficient to increase
+! the energy constraint. Compute the minimum extinction value that could
+! make the problem feasible. This is the background extinction EXTB
+! (which includes detritus) plus the extinction of all phytoplankton
+! species at their minimum level. If the old Kmax is high enough, the
+! violation must be due to a nutrient constraint afterall so drop the
+! mortality constraint. Rerun.
+! Note: we have assumed that the type whose objective function is the
+! highest of a species also has the highest specific extinction
+! coefficient. This is quite logical, and therefore UNCHECKED!
+!
+! Note: Restore the original growth constraint vector.
+!
          INDEX = IRS(3) - NUEXRO - NUECOG
          IF (INDEX .GT. NUECOG) GO TO 130
          IF (IRERUN .NE. 2) IRMAX = 0
@@ -202,22 +202,22 @@ C
          END IF
          RETURN
 
-C ----------------------------------------------------------------------
-C In a final attempt to fix the problem set all biomasses to their
-C minimum permissible values: solve the differential equation for
-C the mortality. This solution has been optained elsewhere; the result
-C must have been stored in the X-vector. It is computed as:
-C
-C     XDEFJ = X(NUROWS + J) * DEXP(-MI * TSTEP * RMORT(J))
-C
-C Note: the total extinction will be computed in subroutine BLOOM no
-C matter wheter the solution was feasible.
-C Get minimum (=actual) biomasses from X-vector.
-C Compute nutrients in phytoplankton and (in a non-dynamic run) in
-C detritus. Compute the total biomass. Set slacks for mortality
-C constraints of all species, whose biomasses are set equal to the
-C mortality constraint.
-C
+! ----------------------------------------------------------------------
+! In a final attempt to fix the problem set all biomasses to their
+! minimum permissible values: solve the differential equation for
+! the mortality. This solution has been optained elsewhere; the result
+! must have been stored in the X-vector. It is computed as:
+!
+!     XDEFJ = X(NUROWS + J) * DEXP(-MI * TSTEP * RMORT(J))
+!
+! Note: the total extinction will be computed in subroutine BLOOM no
+! matter wheter the solution was feasible.
+! Get minimum (=actual) biomasses from X-vector.
+! Compute nutrients in phytoplankton and (in a non-dynamic run) in
+! detritus. Compute the total biomass. Set slacks for mortality
+! constraints of all species, whose biomasses are set equal to the
+! mortality constraint.
+!
   130 CONTINUE
       DO 140 I = 1,NUNUCO
   140 SUMNUT(I) = 0.0
@@ -238,18 +238,18 @@ C
   170 CONTINUE
       BIO(2) = BIOMAX
       X(NUCOLS+2) = BIO(2)
-C
-C  Compute the nutrient slacks. Check, whether they are positive.
-C  If not, perform various actions depending on the kind of run:
-C
-C  1. In a dynamic run, declare the problem to be infeasible.
-C     This situation should NEVER occur!
-C  Otherwise,
-C  2. Set all species equal to their mortality constraint, if
-C     no extinction intervals exist,
-C  3. Release the mortality constraints and re-run the problem if
-C     valid extinction intervals do exist.
-C
+!
+!  Compute the nutrient slacks. Check, whether they are positive.
+!  If not, perform various actions depending on the kind of run:
+!
+!  1. In a dynamic run, declare the problem to be infeasible.
+!     This situation should NEVER occur!
+!  Otherwise,
+!  2. Set all species equal to their mortality constraint, if
+!     no extinction intervals exist,
+!  3. Release the mortality constraints and re-run the problem if
+!     valid extinction intervals do exist.
+!
       DO 220 I = 1,NUNUCO
       XI = B(I) - SUMNUT(I)
       IF (XI .LT. 0.0) THEN
@@ -297,7 +297,7 @@ C
       ELSE
          X(NUFILI)=1.0
       END IF
-C     IF (NI .EQ. 0 .AND. BIOMAX .LT. 1.0D-6) THEN
+!     IF (NI .EQ. 0 .AND. BIOMAX .LT. 1.0D-6) THEN
       IF (NI .EQ. 0) THEN
          X(NUABCO) = 0.0D0
       ELSE

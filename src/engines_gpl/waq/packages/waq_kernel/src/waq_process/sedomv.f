@@ -27,39 +27,23 @@
 !>\file
 !>       Sedimentation flux and velocity of adsorbed organic micro pollutants
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta st
-C     950216  M. Bokhorst     Add calculation sedimentation velocity
-C   20000419  Jan van Beek    Check on dummy exchanges (0->0)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        CALCULATES THE DERIV-CONTRIBUTION FOR SEDIMENTATION OF OMV
-C        CALCULATES THE SEDIMENTATION VELOCITY OF OMV (DIRECTION 3)
-C
-C Name    T   L I/O   Description                                    Uni
-C ----    --- -  -    -------------------                            ---
-C SFL1-2  R*4 1 I  sedimentaion flux carriers                  [gC/m2/d]
-C Q1-2    R*4 1 I  quality of carrier                          [gOMV/gC]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        CALCULATES THE DERIV-CONTRIBUTION FOR SEDIMENTATION OF OMV
+!        CALCULATES THE SEDIMENTATION VELOCITY OF OMV (DIRECTION 3)
+!
+! Name    T   L I/O   Description                                    Uni
+! ----    --- -  -    -------------------                            ---
+! SFL1-2  R*4 1 I  sedimentaion flux carriers                  [gC/m2/d]
+! Q1-2    R*4 1 I  quality of carrier                          [gOMV/gC]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -90,33 +74,33 @@ C     ------   -----  ------------
       IN9  = INCREM( 9)
       IN10 = INCREM(10)
       IN11 = INCREM(11)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
       CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
       IF (IKMRK1.EQ.1) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
       SFL1  = PMSA(IP1 )
       SFL2  = PMSA(IP2 )
       Q1    = PMSA(IP3 )
       Q2    = PMSA(IP4 )
       DEPTH = PMSA(IP5 )
 
-C***********************************************************************
-C**** Processes connected to the SEDIMENTATION of OMV
-C***********************************************************************
+!***********************************************************************
+!**** Processes connected to the SEDIMENTATION of OMV
+!***********************************************************************
 
-C     SEDIMENTATION
+!     SEDIMENTATION
       FL( 1 + IFLUX ) =  ( SFL1 * Q1 + SFL2 * Q2 ) / DEPTH
 
-C     SEDIMENTATION SCALED
+!     SEDIMENTATION SCALED
       PMSA(IP10) = FL( 1 + IFLUX ) * DEPTH
 
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -124,24 +108,24 @@ C
       IP4   = IP4   + INCREM (  4 )
       IP5   = IP5   + INCREM (  5 )
       IP10  = IP10  + INCREM ( 10 )
-c
+!
  9000 CONTINUE
-c
-c.....Exchangeloop over de horizontale richting
+!
+!.....Exchangeloop over de horizontale richting
       DO 8000 IQ=1,NOQ1+NOQ2
 
-c........VxSedOMI op nul
+!........VxSedOMI op nul
          PMSA(IP11) = 0.0
 
          IP11 = IP11 + IN11
 
  8000 CONTINUE
 
-c.....Startwaarden VxSedPOC en VxSedPhyt
+!.....Startwaarden VxSedPOC en VxSedPhyt
       IP8 = IP8 + ( NOQ1+NOQ2 ) * IN8
       IP9 = IP9 + ( NOQ1+NOQ2 ) * IN9
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
       DO 7000 IQ=NOQ1+NOQ2+1,NOQ1+NOQ2+NOQ3+NOQ4
 
          IVAN  = IEXPNT(1,IQ)
@@ -183,7 +167,7 @@ c.....Exchangeloop over de verticale richting
                VSOMI = FOMPOC*VSPOC +
      &                 FOMPHY*VSPHY
 
-c..............VxSedOMI toekennen aan de PMSA
+!..............VxSedOMI toekennen aan de PMSA
                PMSA(IP11) = VSOMI
 
             ELSE
@@ -193,7 +177,7 @@ c..............VxSedOMI toekennen aan de PMSA
             PMSA(IP11) = 0.0
          ENDIF
 
-c........Exchangepointers ophogen
+!........Exchangepointers ophogen
          IP8  = IP8 + IN8
          IP9  = IP9 + IN9
          IP11 = IP11 + IN11

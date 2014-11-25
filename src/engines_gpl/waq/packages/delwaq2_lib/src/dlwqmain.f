@@ -21,41 +21,41 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C            DELWAQ - Deltares WAter Quality program
-C
-C                     Version 4.xx - june 2009 - DLL version
-C                     Version 4.33 - july 1998
-C                     Version 4.32 - june 1998
-C
-C     INFORMATION   : Deltares
-C                     L. Postma,
-C                     Rotterdamseweg 185,
-C                     P.O. Box 177,
-C                     2600 MH Delft,
-C                     Netherlands.
-C                     telephone (31) 88-3358273
-C                     telefax   (31) 88-3358582
-C
-C     FUNCTION            : MAIN module for DELWAQ2 , dimensioning
-C                           of the work array's.
-C
-C     SUBROUTINES CALLED  : DELWQ2, performs the simulation
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ACTION  INTEGER  1          INPUT   Action to be taken
-C     ARGC    INTEGER  1          INPUT   Number of simulated command-line arguments
-C     ARGV    INTEGER  1          INPUT   Simulated command-line arguments
-C
-C     ITOTA   INTEGER  1          INPUT   length of real workarray
-C     ITOTI   INTEGER  1          INPUT   length of integer workarray
-C     ITOTC   INTEGER  1          INPUT   length of character workarray
-C
-C
-C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
+!
+!            DELWAQ - Deltares WAter Quality program
+!
+!                     Version 4.xx - june 2009 - DLL version
+!                     Version 4.33 - july 1998
+!                     Version 4.32 - june 1998
+!
+!     INFORMATION   : Deltares
+!                     L. Postma,
+!                     Rotterdamseweg 185,
+!                     P.O. Box 177,
+!                     2600 MH Delft,
+!                     Netherlands.
+!                     telephone (31) 88-3358273
+!                     telefax   (31) 88-3358582
+!
+!     FUNCTION            : MAIN module for DELWAQ2 , dimensioning
+!                           of the work array's.
+!
+!     SUBROUTINES CALLED  : DELWQ2, performs the simulation
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ACTION  INTEGER  1          INPUT   Action to be taken
+!     ARGC    INTEGER  1          INPUT   Number of simulated command-line arguments
+!     ARGV    INTEGER  1          INPUT   Simulated command-line arguments
+!
+!     ITOTA   INTEGER  1          INPUT   length of real workarray
+!     ITOTI   INTEGER  1          INPUT   length of integer workarray
+!     ITOTC   INTEGER  1          INPUT   length of character workarray
+!
+!
+!      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
 
       subroutine delwaq2( argc, argv, errorcode )
       !DEC$ ATTRIBUTES DLLEXPORT::delwaq2
@@ -98,7 +98,7 @@ C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
       TYPE(DELWAQ_DATA)                             :: DLWQD
 
       CHARACTER*20  RUNDAT
-C
+!
       LOGICAL                                       :: INIT        ! Do not save!
       INTEGER                                       :: LUNREP
 
@@ -111,9 +111,9 @@ C
       INCLUDE 'actions.inc'
       INCLUDE 'fsm-fix.i'
 
-C
-C     Initial step ...
-C
+!
+!     Initial step ...
+!
       INIT = .FALSE.
       IF ( ACTION == ACTION_INITIALISATION  .OR.
      &     ACTION == ACTION_FULLCOMPUTATION      ) THEN
@@ -122,7 +122,7 @@ C
           call dhstore_command( argv )
 
           CALL AVUNDF
-C
+!
           ITOTA=0
           ITOTI=0
           ITOTC=0
@@ -142,9 +142,9 @@ C
       CALL DELWQ2 ( DLWQD%RBUF, DLWQD%IBUF, DLWQD%CHBUF, ITOTA, ITOTI,
      &              ITOTC, INIT, ACTION, DLWQD )
 
-C
-C     Finalise - only if the full computation was done
-C
+!
+!     Finalise - only if the full computation was done
+!
       IF ( ACTION == ACTION_FULLCOMPUTATION      ) THEN
 
           CALL GETMLU(LUNREP)
@@ -154,7 +154,7 @@ C
           WRITE ( LUNREP , '(A)' ) ' Simulation ended normal'
           CALL DATTIM(RUNDAT)
           WRITE (LUNREP,'(2A)') ' Execution stop : ',RUNDAT
-C
+!
           close(lunrep)
 
           RETURN
@@ -171,7 +171,7 @@ C
           WRITE ( LUNREP , '(A)' ) ' Simulation ended normal'
           CALL DATTIM(RUNDAT)
           WRITE (LUNREP,'(2A)') ' Execution stop : ',RUNDAT
-C
+!
           close(lunrep)
 
       ENDIF

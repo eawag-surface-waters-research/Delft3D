@@ -26,54 +26,54 @@
      *                    NPOS   , ILUN   , LCH    , LSTACK , CCHAR  ,
      *                    CHULP  , NOCOL  , DTFLG1 , DTFLG3 , ITFACT ,
      *                    ITYPE  , IHULP  , RHULP  , IERR   , iwar   )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : March '00  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : Checks if collumn header exists
-C
-C     SUBROUTINES CALLED : none
-C
-C     LOGICAL UNITS      : LUN(27) = unit stripped DELWAQ input file
-C                          LUN(29) = unit formatted output file
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUNUT   INTEGER    1         INPUT   unit number for ASCII output
-C     IAR     INTEGER  IIMAX       IN/OUT  integer   workspace
-C     ITMNR   INTEGER    1         IN/OUT  nr of items for assignment
-C     NOITM   INTEGER    1         IN      nr of items in computational rule
-C     NOITS   INTEGER    1         IN      nr of items entries to be filled
-C     IDMNR   INTEGER    1         IN/OUT  nr of subst for assignment
-C     NODIM   INTEGER    1         IN      nr of subst in computational rule
-C     NODIS   INTEGER    1         IN      nr of subst entries to be filled
-C     IORDER  INTEGER    1         IN      1 = items first, 2 is subst first
-C     IIMAX   INTEGER    1         INPUT   max. int. workspace dimension
-C     CNAMES  CHAR*(*)  NITM       INPUT   Items to check for presence
-C     IPOSR   INTEGER    1         IN/OUT  Start position on input line
-C     NPOS    INTEGER    1         INPUT   nr of significant characters
-C     ILUN    INTEGER   LSTACK     INPUT   unitnumb include stack
-C     LCH     CHAR*(*)  LSTACK     INPUT   file name stack, 4 deep
-C     LSTACK  INTEGER    1         INPUT   include file stack size
-C     CCHAR   CHAR*1     1         INPUT   comment character
-C     CHULP   CHAR*(*)   1         OUTPUT  space for limiting token
-C     NOCOL   INTEGER    1         OUTPUT  number of collums in matrix
-C     DTFLG1  LOGICAL    1         INPUT   True if time in 'date' format
-C     DTFLG3  LOGICAL    1         INPUT   True if YYetc instead of DDetc
-C     ITFACT  INTEGER    1         INPUT   factor between clocks
-C     ITYPE   INTEGER    1         OUTPUT  type of info at end
-C     IHULP   INTEGER    1         OUTPUT  parameter read to be transferred
-C     RHULP   REAL       1         OUTPUT  parameter read to be transferred
-C     IERR    INTEGER    1         OUTPUT  actual error indicator
-C     Iwar    INTEGER    1         OUTPUT  cumulative warning count
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : March '00  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : Checks if collumn header exists
+!
+!     SUBROUTINES CALLED : none
+!
+!     LOGICAL UNITS      : LUN(27) = unit stripped DELWAQ input file
+!                          LUN(29) = unit formatted output file
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUNUT   INTEGER    1         INPUT   unit number for ASCII output
+!     IAR     INTEGER  IIMAX       IN/OUT  integer   workspace
+!     ITMNR   INTEGER    1         IN/OUT  nr of items for assignment
+!     NOITM   INTEGER    1         IN      nr of items in computational rule
+!     NOITS   INTEGER    1         IN      nr of items entries to be filled
+!     IDMNR   INTEGER    1         IN/OUT  nr of subst for assignment
+!     NODIM   INTEGER    1         IN      nr of subst in computational rule
+!     NODIS   INTEGER    1         IN      nr of subst entries to be filled
+!     IORDER  INTEGER    1         IN      1 = items first, 2 is subst first
+!     IIMAX   INTEGER    1         INPUT   max. int. workspace dimension
+!     CNAMES  CHAR*(*)  NITM       INPUT   Items to check for presence
+!     IPOSR   INTEGER    1         IN/OUT  Start position on input line
+!     NPOS    INTEGER    1         INPUT   nr of significant characters
+!     ILUN    INTEGER   LSTACK     INPUT   unitnumb include stack
+!     LCH     CHAR*(*)  LSTACK     INPUT   file name stack, 4 deep
+!     LSTACK  INTEGER    1         INPUT   include file stack size
+!     CCHAR   CHAR*1     1         INPUT   comment character
+!     CHULP   CHAR*(*)   1         OUTPUT  space for limiting token
+!     NOCOL   INTEGER    1         OUTPUT  number of collums in matrix
+!     DTFLG1  LOGICAL    1         INPUT   True if time in 'date' format
+!     DTFLG3  LOGICAL    1         INPUT   True if YYetc instead of DDetc
+!     ITFACT  INTEGER    1         INPUT   factor between clocks
+!     ITYPE   INTEGER    1         OUTPUT  type of info at end
+!     IHULP   INTEGER    1         OUTPUT  parameter read to be transferred
+!     RHULP   REAL       1         OUTPUT  parameter read to be transferred
+!     IERR    INTEGER    1         OUTPUT  actual error indicator
+!     Iwar    INTEGER    1         OUTPUT  cumulative warning count
+!
+!
       use timers       !   performance timers
 
       INTEGER       IIMAX
@@ -84,9 +84,9 @@ C
       integer ( 8)  ihulp8
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq5g", ithndl )
-C
-C     Array offsets
-C
+!
+!     Array offsets
+!
       IOFFI = ITMNR + NOITM + IDMNR + NODIM
       IF ( IORDER .EQ. 1 ) THEN
          IOFFC = ITMNR + NOITM + IDMNR
@@ -98,17 +98,17 @@ C
          IOFFD = IDMNR + NODIM
          NITM  = NOITM
       ENDIF
-C
-C     Read loop
-C
+!
+!     Read loop
+!
       FIRST = .TRUE.
    20 ITYPE = 0
       CALL RDTOK1 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
      *              IPOSR  , NPOS   , CHULP  , IHULP  , RHULP  ,
      *                                         ITYPE  , IERR   )
-C          A read error
+!          A read error
       IF ( IERR  .NE. 0 ) goto 9999
-C          A string has arrived
+!          A string has arrived
       IF ( ITYPE .EQ. 1 ) THEN
          CALL DLWQ0T ( CHULP , ihulp, .FALSE., .FALSE., IERR )
          IF ( IERR .EQ. 0 ) THEN
@@ -145,9 +145,9 @@ C          A string has arrived
          IERR = -1
          IF ( FIRST ) goto 9999
       ENDIF
-C
-C       Is everything resolved ?
-C
+!
+!       Is everything resolved ?
+!
    50 ICNT = 0
       IODS = 0
       DO  70 I = 1 , NITM
@@ -160,10 +160,10 @@ C
          iwar = iwar + 1
          IF ( I + ICNT .GE. NITM ) GOTO 9999
    70 CONTINUE
-C
+!
  9999 if (timon) call timstop( ithndl )
       RETURN
-C
+!
  1000 FORMAT ( ' Column:',I3,' contains: ',A40,' Status: ',A8)
-C
+!
       END

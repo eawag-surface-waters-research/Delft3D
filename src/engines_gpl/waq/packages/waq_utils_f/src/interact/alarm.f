@@ -25,7 +25,7 @@
       CHARACTER*1 ESCAP
       INTEGER IESCAP
       DATA IESCAP /7/
-C
+!
       ESCAP = CHAR (IESCAP)
       WRITE (*,10) ESCAP
 10    FORMAT (1X,A1)

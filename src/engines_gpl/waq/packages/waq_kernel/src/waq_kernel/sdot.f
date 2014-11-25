@@ -22,11 +22,11 @@
 !!  rights reserved.
 
       real(8) function sdot (n,sx,incx,sy,incy)
-c
-c     forms the dot product of two vectors.
-c     uses unrolled loops for increments equal to one.
-c     jack dongarra, linpack, 3/11/78.
-c
+!
+!     forms the dot product of two vectors.
+!     uses unrolled loops for increments equal to one.
+!     jack dongarra, linpack, 3/11/78.
+!
       use timers
 
  !    real(8) sx(1),sy(1),stemp
@@ -36,15 +36,15 @@ c
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "sdot", ithandl )
       sdot = sum ( sx*sy )
-c
+!
  !    stemp = 0.0e0
  !    sdot  = 0.0e0
  !    if(n.le.0)return
  !    if(incx.eq.1.and.incy.eq.1)go to 20
-c
-c        code for unequal increments or equal increments
-c          not equal to 1
-c
+!
+!        code for unequal increments or equal increments
+!          not equal to 1
+!
  !    ix = 1
  !    iy = 1
  !    if(incx.lt.0)ix = (-n+1)*incx + 1
@@ -56,12 +56,12 @@ c
  ! 10 continue
  !    sdot = stemp
  !    goto 9999  !   return
-c
-c        code for both increments equal to 1
-c
-c
-c        clean-up loop
-c
+!
+!        code for both increments equal to 1
+!
+!
+!        clean-up loop
+!
  ! 20 m = mod(n,5)
  !    if( m .eq. 0 ) go to 40
  !    do 30 i = 1,m

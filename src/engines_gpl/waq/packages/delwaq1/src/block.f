@@ -25,9 +25,9 @@
       IMPLICIT INTEGER (A-Z)
       COMMON /ZDLMTZ/DLM(256), IGN(256), IDLM, IIGN, PUSH(256), PTR
       DATA PTR/0/, IDLM, IIGN/2, 2/
-C     DATA DLM/64*0, 1, 42*0, 1, 148*0/
-C     DATA IGN/64*0, 1, 42*0, 1, 148*0/
-C *** Replaced previous two line by following two lines on ASCI computers
+!     DATA DLM/64*0, 1, 42*0, 1, 148*0/
+!     DATA IGN/64*0, 1, 42*0, 1, 148*0/
+! *** Replaced previous two line by following two lines on ASCI computers
       DATA DLM/32*0, 1, 11*0, 1, 211*0/
       DATA IGN/32*0, 1, 11*0, 1, 211*0/
       END

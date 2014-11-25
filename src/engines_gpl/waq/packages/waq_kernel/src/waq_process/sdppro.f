@@ -27,43 +27,24 @@
 !>\file
 !>       Traditional algal growth module (DYNAMO)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C     921229  Pascal Boderie  Add third algae type, nutrient ratio's
-C                             per species
-C     .......
-C     950922  Pascal Boderie  Toevoegen Respiration rate in uitvoer
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Unit
-C ----    --- -  -    -------------------                            ---
-C DL      R*4 1 I daylength for growth saturation green-algea          [
-C EFF     R*4 1 L average light efficiency green-algea                 [
-C FNUT    R*4 1 L nutrient limitation function green-algea             [
-C PPMAX1  R*4 1 I pot. max. pr. prod. rc. green-algea (st.temp)      [1/
-C PMSA    R*4 1 L Gross act. pr. prod. rc. green-algea               [1/
-C TFUNG1  R*4 1 L temp. function for growth processes green            [
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Unit
+! ----    --- -  -    -------------------                            ---
+! DL      R*4 1 I daylength for growth saturation green-algea          [
+! EFF     R*4 1 L average light efficiency green-algea                 [
+! FNUT    R*4 1 L nutrient limitation function green-algea             [
+! PPMAX1  R*4 1 I pot. max. pr. prod. rc. green-algea (st.temp)      [1/
+! PMSA    R*4 1 L Gross act. pr. prod. rc. green-algea               [1/
+! TFUNG1  R*4 1 L temp. function for growth processes green            [
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -109,7 +90,7 @@ C     ------   -----  ------------
       IP34 = IPOINT(34)
       IP35 = IPOINT(35)
       IP36 = IPOINT(36)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -117,7 +98,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
 
       SURF      = PMSA(IP26)
       DEPTH     = PMSA(IP27)
@@ -150,7 +131,7 @@ C
       DELTAT    = PMSA(IP29)
       NH4KR     = PMSA(IP30)
 
-C     DIATOMS IN SEDIMENT - IF PPMAX -1 ONLY MORTALITY
+!     DIATOMS IN SEDIMENT - IF PPMAX -1 ONLY MORTALITY
       IF (PPMAX.LT.0.0) THEN
         PRODD = 0.0
         RESP = 0.0
@@ -170,47 +151,47 @@ C     DIATOMS IN SEDIMENT - IF PPMAX -1 ONLY MORTALITY
         EFNMFB = 0.0
       ELSE
 
-C       Gross primary production (no nutrient limitation yet, 1/day)
+!       Gross primary production (no nutrient limitation yet, 1/day)
         PPRODD =  DL * EFF  * TFUNG  * PPMAX
 
-C       Respiration = maintainance part + growth part (1/day)
+!       Respiration = maintainance part + growth part (1/day)
         RESP    = MRESP  * TFUNM  + GRESP  * (PPRODD - MRESP * TFUNM )
 
-C       Nett production (g/m2/day)
-C       Minimale biomassa bij initialisatie
+!       Nett production (g/m2/day)
+!       Minimale biomassa bij initialisatie
         DIAT2 = MAX(DIAT, DINI)
         PRODD   = MAX ( (PPRODD - RESP) * DIAT2, 0.0 )
 
-C       Requested uptake of nutrients (g/m2/day)
+!       Requested uptake of nutrients (g/m2/day)
 
         UPTAKC = PRODD
         UPTAKN = PRODD*NCRAT
         UPTAKP = PRODD*PCRAT
         UPTAKS = PRODD*SICRAT
 
-C       Compute requested uptake of nutrients from the water column
-C       Note: N is consumed by bacteria with a fraction FRNBAC
+!       Compute requested uptake of nutrients from the water column
+!       Note: N is consumed by bacteria with a fraction FRNBAC
 
         UPTA2N = UPTAKN - (MINN+SWMINN)*(1.-FRNBAC)
         UPTA2P = UPTAKP - (MINP+SWMINP)
         UPTA2S = UPTAKS - (MINS+SWMINS)
 
-C       UPTA2x is filled by CHKLIM with maximum available uptake
-C       of nutrients from the water column (considering Monod limitation)
+!       UPTA2x is filled by CHKLIM with maximum available uptake
+!       of nutrients from the water column (considering Monod limitation)
 
         DIN = CNH4 + CNO3
         CALL CHKLIM (UPTA2N, DIN   , DEPTH , DELTAT, KMDIN )
         CALL CHKLIM (UPTA2P, CPO4  , DEPTH , DELTAT, KMPO4 )
         CALL CHKLIM (UPTA2S, CSI   , DEPTH , DELTAT, KMSIL )
 
-C       Find total available uptake of nutrients from mineralization flux
-C       and from the water column
+!       Find total available uptake of nutrients from mineralization flux
+!       and from the water column
 
         UPTAKN = UPTA2N + (MINN+SWMINN)*(1.-FRNBAC)
         UPTAKP = UPTA2P + (MINP+SWMINP)
         UPTAKS = UPTA2S + (MINS+SWMINS)
 
-C       Find actual production and compute 'nutrient efficiency'
+!       Find actual production and compute 'nutrient efficiency'
 
         IF (PRODD.GT.1E-30) THEN
           EFNMFB = AMIN1 (UPTAKC, UPTAKN/NCRAT, UPTAKP/PCRAT,
@@ -222,13 +203,13 @@ C       Find actual production and compute 'nutrient efficiency'
         PRODD = AMIN1(UPTAKC, UPTAKN/NCRAT, UPTAKP/PCRAT, UPTAKS/SICRAT)
         PRODD = AMAX1 ( PRODD , 0.0 )
 
-C16/2   PMSA(IP11) = PRODD
+!16/2   PMSA(IP11) = PRODD
 
-C       Nett primary production and uptake of nutrients
+!       Nett primary production and uptake of nutrients
 
         FL ( 1 + IFLUX ) =  PRODD / DEPTH
 
-C       Division of nitrogen uptake over NH4 and NO3 and mineralization
+!       Division of nitrogen uptake over NH4 and NO3 and mineralization
         IF ((PRODD*NCRAT).LE.(MINN+SWMINN)) THEN
           IF (SWMINN.GT.0.0) THEN
             FL (10 + IFLUX ) =  PRODD * NCRAT/ DEPTH
@@ -266,7 +247,7 @@ C       Division of nitrogen uptake over NH4 and NO3 and mineralization
           FL ( 4 + IFLUX ) =  XNTOT / DELTAT * NO3D
         ENDIF
 
-C       Division of phosphorus dissolved and from mineralization
+!       Division of phosphorus dissolved and from mineralization
         IF ((PRODD*PCRAT).LE.(MINP+SWMINP)) THEN
           FL ( 5 + IFLUX ) =  0.0
           IF (SWMINP.GT.0.0) THEN
@@ -287,7 +268,7 @@ C       Division of phosphorus dissolved and from mineralization
           FL ( 5 + IFLUX ) =  (PRODD* PCRAT-MINP-SWMINP)/DEPTH
         ENDIF
 
-C       Division of silicium dissolved and from mineralization
+!       Division of silicium dissolved and from mineralization
         IF ((PRODD*SICRAT).LE.(MINS+SWMINS)) THEN
           FL ( 6 + IFLUX ) =  0.0
           IF (SWMINS.GT.0.0) THEN
@@ -310,10 +291,10 @@ C       Division of silicium dissolved and from mineralization
 
       ENDIF
 
-C16/2   PMSA(IP12) = RESP
+!16/2   PMSA(IP12) = RESP
 
 
-C     Mortality, including processes as autolysis and zooplankton 'graas
+!     Mortality, including processes as autolysis and zooplankton 'graas
       FL ( 2 + IFLUX ) = MORT0  *  TFUNM * DIAT / DEPTH
 
       PMSA (IP31) = PRODD
@@ -325,7 +306,7 @@ C     Mortality, including processes as autolysis and zooplankton 'graas
 
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -363,22 +344,22 @@ C
       IP34  = IP34  + INCREM ( 34 )
       IP35  = IP35  + INCREM ( 35 )
       IP36  = IP36  + INCREM ( 36 )
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
       END
 
-C
-C***********************************************************************
-C
+!
+!***********************************************************************
+!
       SUBROUTINE CHKLIM ( REQFLX, CONC  , DEPTH , DELTAT, KM    )
       IMPLICIT REAL (A-Z)
       REAL    AVAFLX, CONC  , DEPTH , DELTAT, KM    ,
      1        REQFLX
-C
-C     Nutrient limited flux (g/m2/day)
-C
+!
+!     Nutrient limited flux (g/m2/day)
+!
       AVAFLX = (CONC/(KM+CONC)) * CONC / DELTAT * DEPTH
       AVAFLX = AMAX1 ( AVAFLX, 0.0 )
       IF (AVAFLX .LT. REQFLX) REQFLX = AVAFLX

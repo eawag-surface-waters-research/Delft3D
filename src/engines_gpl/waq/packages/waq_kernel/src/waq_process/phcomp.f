@@ -27,31 +27,16 @@
 !>\file
 !>       Composition of phytoplankton by summing algae fractions - Dynamo - GEM
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Jos van Gils
-C     Date    : 940725             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     940725  Jos van Gils    Create first version
-C     980603  Jos van Gils    Generalized for use with GEM as well
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -65,7 +50,7 @@ C     ------   -----  ------------
      J         NCRAT , PCRAT , SICRAT, DMCF  , CATOCL
 
       NTYPE   = PMSA(IPOINT(1))
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1 .OR. IKMRK1.EQ.3) THEN
@@ -93,31 +78,31 @@ C
               ITEL   = 1 + ITYPE + NTYPE*5
               CATOCL = PMSA ( IPOINT(ITEL) + (ISEG-1)*INCREM(ITEL) )
 
-C***********************************************************************
-C**** Calculations connected to the status of the algae
-C***********************************************************************
+!***********************************************************************
+!**** Calculations connected to the status of the algae
+!***********************************************************************
 
-C             Total Carbon in algae
+!             Total Carbon in algae
 
               PHYT = PHYT + BIOMAS
 
-C             Total nitrogen
+!             Total nitrogen
 
               ALGN = ALGN + BIOMAS * NCRAT
 
-C             Total phosphorus
+!             Total phosphorus
 
               ALGP = ALGP + BIOMAS * PCRAT
 
-C             Total silica
+!             Total silica
 
               ALGSI = ALGSI + BIOMAS * SICRAT
 
-C             Total dry matter
+!             Total dry matter
 
               ALGDM = ALGDM + BIOMAS * DMCF
 
-C             Chlorophyll
+!             Chlorophyll
 
               CHLFA = CHLFA + BIOMAS * CATOCL
 
@@ -137,9 +122,9 @@ C             Chlorophyll
           PMSA (IPOINT(ITEL)+(ISEG-1)*INCREM(ITEL)) = CHLFA
 
       ENDIF
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

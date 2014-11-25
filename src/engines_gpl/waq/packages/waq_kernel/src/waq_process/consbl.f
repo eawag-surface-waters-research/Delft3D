@@ -27,102 +27,67 @@
 !>\file
 !>       Grazing module
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES DBS T1449.15
-C     Author  : Marnix van der Vat
-C     Date    : 951204             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     951204  Marnix v.d.Vat  First Version
-C     981130  Marnix v.d.Vat  Fixed bug division faecal fraction over
-C                             bottom sediment and water
-C                             POC1, PON1, POP1 and POSi1 added as edible
-C                             organic matter for GEM
-C                             flux POC1, etc. converted to velocity
-c     990326  A. Blauw and J. van Beek: various bugs related to 2d to 3d
-c     000410  J. van Gils     Add trick to reserve memory, =/ STATVAR
-c                             Output velocities shifted over 5 positions
-c     000412  J. van Gils     Make grazers bottom species if they produce
-c                             bottom detritus, biomass unit becomes g/m2
-c     000413  J. van Gils     Bug fixed: limit biomass to zero
-c                             not noticed since default pref=0
-c     000413  J. van Gils     Bug fixed: NFLUX = 37 and not 33
-c                             not used, so removed
-c     000413  J. van Gils     Bug fixed: NIN was NTONUT too high
-c                             probably no effect
-c     000414  J. van Gils     Switch for GEM introduced
-c     000517  J. van Gils     Additional switch for biomass unit
-c     000517  J. van Gils     Switch for GEM from input!
-C     000905  Jan van Beek    Check on dummy exchanges (0->0)
-c     070625  J. van Gils     Division by zero in item 6 removed
-C     070801  J. van Gils     Apparent bug in item 18 removed
-C     071023  J. van Gils     Optimisation to improve performance
-C***********************************************************************
-C
-C     Description of the module :
-C
-C     CONSBL ROUTINE FOR CALCULATION OF GRAZING PRESSURE ON ALGAE
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
+!
+!     Description of the module :
+!
+!     CONSBL ROUTINE FOR CALCULATION OF GRAZING PRESSURE ON ALGAE
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local
-C
-C     Name    Type  Length   I/O  Description
-C     ------  ----  ------   ---  -----------
+!
+!     Local
+!
+!     Name    Type  Length   I/O  Description
+!     ------  ----  ------   ---  -----------
 
-C     ALGDM   R     1             Dry matter in algae (gDM/m3)
-c ZDETFF         0.500000     x Faecal fraction for detritus of Zooplank       (-)
-c ZDETPR          1.00000     x Preference of Zooplank for detritus            (-)
-c ZGRZFM          1.50000     x Max. filtration velocity Zooplank        (m3/gC/d)
-c ZGRZGM         0.500000     x Max. relative growth rate Zooplank           (1/d)
-c ZGRZML          1.00000     x Mult. factor for biomass Zooplank              (-)
-c ZGRZMM         0.500000     x Max. relative mortality Zooplank             (1/d)
-c ZGRZMO         0.100000     x Monod term filtration rate Zooplank        (gC/m3)
-c ZGRZRE         0.250000     x Maintenance respiration coefficient Zooplank   (-)
-c ZGRZRM          1.50000     x Max. daily uptake Zooplank             (mgC/mgC.d)
-c ZGRZSE         0.500000E-01 x Standard respiration coefficient Zooplank    (1/d)
-c ZFrDetBot       0.00000     x Fract. produced detritus to bottom Zooplank    (-)
-c ZGRZSTC         1.00000     x C:C ratio Zooplank                         (gC/gC)
-c ZGRZSTN        0.181800     x N:C ratio Zooplank                         (gN/gC)
-c ZGRZSTP        0.263000E-01 x P:C ratio Zooplank                         (gP/gC)
-c ZGRZSTSi        0.00000     x Si:C ratio Zooplank                       (gSi/gC)
-c ZTMPFM         0.400000E-01 x temperature coefficient Zooplank filtration (1/oC)
-c ZTMPGM         0.400000E-01 x temperature coefficient Zooplank growth     (1/oC)
-c ZTMPMM         0.400000E-01 x temperature coefficient Zooplank mortality  (1/oC)
-c ZTMPRE         0.400000E-01 x temperature coefficient Zooplank routine met(1/oC)
-c ZTMPRM         0.400000E-01 x temperature coefficient Zooplank feeding rat(1/oC)
-c ZTMPSE         0.400000E-01 x temperature coefficient Zooplank standard me(1/oC)
-c ZUnitSW         0.00000     x Use gC/m3 (0) or gC/m2 (1) for Zooplankton     (-)
-c Zooplank       -999.000     x input concentration of zooplankton-grazer1 (gC/m3)
-c CZooplank      -999.000       calculated concentration of zooplankton-gra(gC/m3)
-c DetC            0.00000     x Detritus Carbon  (DetC)                    (gC/m3)
-c POC1            0.00000       POC1 (fast decaying fraction)              (gC/m3)
-c GREEN           0.00000       Algae (non-Diatoms)                        (gC/m3)
-c DIAT            0.00000       Diatoms                                    (gC/m3)
-c BLOOMALG01     -101.000       concentration of algae type 1              (gC/m3)
-c ..
-c BLOOMALG15     -101.000       concentration of algae type 15             (gC/m3)
-c NCRatGreen     0.160000       N:C ratio Greens                           (gN/gC)
-c PCRatGreen     0.200000E-01   P:C ratio Greens                           (gP/gC)
-c SCRatGreen      0.00000       Si:C ratio Greens                         (gSi/gC)
-c ZALGPRGrn       1.00000       Preference of Zooplank for Greens              (-)
-c ZALGFFGrn      0.500000       Faecal fraction Greens for Zooplank            (-)
+!     ALGDM   R     1             Dry matter in algae (gDM/m3)
+! ZDETFF         0.500000     x Faecal fraction for detritus of Zooplank       (-)
+! ZDETPR          1.00000     x Preference of Zooplank for detritus            (-)
+! ZGRZFM          1.50000     x Max. filtration velocity Zooplank        (m3/gC/d)
+! ZGRZGM         0.500000     x Max. relative growth rate Zooplank           (1/d)
+! ZGRZML          1.00000     x Mult. factor for biomass Zooplank              (-)
+! ZGRZMM         0.500000     x Max. relative mortality Zooplank             (1/d)
+! ZGRZMO         0.100000     x Monod term filtration rate Zooplank        (gC/m3)
+! ZGRZRE         0.250000     x Maintenance respiration coefficient Zooplank   (-)
+! ZGRZRM          1.50000     x Max. daily uptake Zooplank             (mgC/mgC.d)
+! ZGRZSE         0.500000E-01 x Standard respiration coefficient Zooplank    (1/d)
+! ZFrDetBot       0.00000     x Fract. produced detritus to bottom Zooplank    (-)
+! ZGRZSTC         1.00000     x C:C ratio Zooplank                         (gC/gC)
+! ZGRZSTN        0.181800     x N:C ratio Zooplank                         (gN/gC)
+! ZGRZSTP        0.263000E-01 x P:C ratio Zooplank                         (gP/gC)
+! ZGRZSTSi        0.00000     x Si:C ratio Zooplank                       (gSi/gC)
+! ZTMPFM         0.400000E-01 x temperature coefficient Zooplank filtration (1/oC)
+! ZTMPGM         0.400000E-01 x temperature coefficient Zooplank growth     (1/oC)
+! ZTMPMM         0.400000E-01 x temperature coefficient Zooplank mortality  (1/oC)
+! ZTMPRE         0.400000E-01 x temperature coefficient Zooplank routine met(1/oC)
+! ZTMPRM         0.400000E-01 x temperature coefficient Zooplank feeding rat(1/oC)
+! ZTMPSE         0.400000E-01 x temperature coefficient Zooplank standard me(1/oC)
+! ZUnitSW         0.00000     x Use gC/m3 (0) or gC/m2 (1) for Zooplankton     (-)
+! Zooplank       -999.000     x input concentration of zooplankton-grazer1 (gC/m3)
+! CZooplank      -999.000       calculated concentration of zooplankton-gra(gC/m3)
+! DetC            0.00000     x Detritus Carbon  (DetC)                    (gC/m3)
+! POC1            0.00000       POC1 (fast decaying fraction)              (gC/m3)
+! GREEN           0.00000       Algae (non-Diatoms)                        (gC/m3)
+! DIAT            0.00000       Diatoms                                    (gC/m3)
+! BLOOMALG01     -101.000       concentration of algae type 1              (gC/m3)
+! ..
+! BLOOMALG15     -101.000       concentration of algae type 15             (gC/m3)
+! NCRatGreen     0.160000       N:C ratio Greens                           (gN/gC)
+! PCRatGreen     0.200000E-01   P:C ratio Greens                           (gP/gC)
+! SCRatGreen      0.00000       Si:C ratio Greens                         (gSi/gC)
+! ZALGPRGrn       1.00000       Preference of Zooplank for Greens              (-)
+! ZALGFFGrn      0.500000       Faecal fraction Greens for Zooplank            (-)
 
       INTEGER NTOGRZ,        NTONUT,          NTOALG,
      1        IFILSP,        I     ,          J     ,
@@ -164,13 +129,13 @@ c ZALGFFGrn      0.500000       Faecal fraction Greens for Zooplank            (
       SAVE INIT
       DATA INIT /.TRUE./
 
-C     Segment pointers en incrementen
+!     Segment pointers en incrementen
       DO 10 I=1,NIN
         IP(I)  = IPOINT( I)
    10 CONTINUE
-C
-c     Check parameters not space dependent
-C
+!
+!     Check parameters not space dependent
+!
       if (init) then
         problem = .false.
         if (increm(1) .gt. 0 ) problem = .true.
@@ -218,7 +183,7 @@ C
 
       IFLUX = 0
 
-c     Skip homogeneous grazers at old AND new biomass zero
+!     Skip homogeneous grazers at old AND new biomass zero
 
       DO IFILSP = 1,NTOGRZ
         active_grazer(ifilsp) = .false.
@@ -228,7 +193,7 @@ c     Skip homogeneous grazers at old AND new biomass zero
      j   active_grazer(ifilsp) = .true.
       ENDDO
 
-c     Set parameters not space dependent, active grazers only
+!     Set parameters not space dependent, active grazers only
 
       PERIOD = PMSA(IP(1))
       GEM    = PMSA(IP(5))
@@ -272,7 +237,7 @@ c     Set parameters not space dependent, active grazers only
    81   CONTINUE
       ENDDO
 
-c     Loop over segments
+!     Loop over segments
 
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -281,12 +246,12 @@ c     Loop over segments
 
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
 
-C     RESET FLUXES
+!     RESET FLUXES
       DO 31 I=1,5*NTONUT+NTOALG
         FL(I+IFLUX) = 0.0
    31 CONTINUE
-C
-c     Input items (potentially) dependent on space
+!
+!     Input items (potentially) dependent on space
       VOLUME = PMSA(IP(2))
       WATEMP = PMSA(IP(3))
       DEPTH  = PMSA(IP(4))
@@ -296,15 +261,15 @@ c     Input items (potentially) dependent on space
      1                   GRZML(IFILSP)
         GRZOLD(IFILSP) = MAX(PMSA(IP(7+(IFILSP-1)*NINGRZ)),1.0E-2) *
      1                   GRZML(IFILSP)
-c       Correct unit of input concentration for zoobenthos
-c       Force concentration zero for zoobenthos segments without bottom
+!       Correct unit of input concentration for zoobenthos
+!       Force concentration zero for zoobenthos segments without bottom
         FRDBOT(IFILSP) = FRDBOT_SAVE(IFILSP)
         IF ( BENTHS(IFILSP) .EQ. 1 ) THEN
-C         Species, defined in g/m2 (typically ZOOBENTHOS)
-C         Convert input unit to g/m3!!
+!         Species, defined in g/m2 (typically ZOOBENTHOS)
+!         Convert input unit to g/m3!!
           GRZNEW(IFILSP) = GRZNEW(IFILSP)/DEPTH
           GRZOLD(IFILSP) = GRZOLD(IFILSP)/DEPTH
-C         FRDBOT(IFILSP) = FRDBOT_SAVE(IFILSP)
+!         FRDBOT(IFILSP) = FRDBOT_SAVE(IFILSP)
           CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
           IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
              GRZNEW(IFILSP) = 0.0
@@ -323,18 +288,18 @@ C         FRDBOT(IFILSP) = FRDBOT_SAVE(IFILSP)
         ALGBIO(I) = MAX ( PMSA(IP(5+2*NTONUT+NTOGRZ*NINGRZ+I)) ,0.0 )
    61 CONTINUE
 
-C*******************************************************************************
-C**** Processes connected to the GRAZING of algae
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the GRAZING of algae
+!***********************************************************************
 
-C****
-C*  2 Loop over the grazers
-C****
+!****
+!*  2 Loop over the grazers
+!****
       DO 200 IFILSP = 1, NTOGRZ
        if (active_grazer(ifilsp)) then
-C****
-C*  3 Initialize output variables
-C****
+!****
+!*  3 Initialize output variables
+!****
           DO 40 I = 1, NTONUT
               DISFLX(I) = 0.0E0
               DETFLX(I) = 0.0E0
@@ -343,14 +308,14 @@ C****
           DO 50 I = 1, NTOALG
               ALGFLX(I) = 0.0
    50     CONTINUE
-C****
-C*  4 Check if grazer growth or mortality exceeds constraints
-C*    If this is the case, correct new biomass to constraint value
-C****
+!****
+!*  4 Check if grazer growth or mortality exceeds constraints
+!*    If this is the case, correct new biomass to constraint value
+!****
           IF (GRZOLD(IFILSP) .GT. 0.0) THEN
-c             There was biomass
+!             There was biomass
               IF ((GRZNEW(IFILSP) - GRZOLD(IFILSP)) .GE. 0.0) THEN
-c                 Net growth
+!                 Net growth
                   IF (GRZNEW(IFILSP) .GT. GRZOLD(IFILSP) *
      &            (1.0 + GRZGM(IFILSP) * EXP(TMPGM(IFILSP) *
      &            (WATEMP - 20.0)) * PERIOD)) THEN
@@ -359,7 +324,7 @@ c                 Net growth
      &                (WATEMP - 20.0)) * PERIOD)
                   ENDIF
               ELSE
-c                 Net mortality
+!                 Net mortality
                   IF (GRZNEW(IFILSP) .LT. GRZOLD(IFILSP) *
      &            (1.0 - GRZMM(IFILSP) * EXP(TMPMM(IFILSP) *
      &            (WATEMP - 20.0)) * PERIOD)) THEN
@@ -369,16 +334,16 @@ c                 Net mortality
                   ENDIF
               ENDIF
           ENDIF
-C****
-C*  5 Calculate total available amount of food (mg C/l)
-C****
+!****
+!*  5 Calculate total available amount of food (mg C/l)
+!****
           GRZFOO = DETBIO(1) * DETPR(IFILSP)
           DO 60 I = 1, NTOALG
               GRZFOO = GRZFOO + ALGBIO(I) * ALGPR(I,IFILSP)
    60     CONTINUE
-C****
-C*  6 Calculate grazing (1/d) rate
-C****
+!****
+!*  6 Calculate grazing (1/d) rate
+!****
           IF (GRZFOO .GT. 0.0) THEN
 
               MaxFiltration = EXP(TMPFM(IFILSP) * (WATEMP - 20.0)) *
@@ -386,24 +351,24 @@ C****
               MaxUptake = EXP(TMPRM(IFILSP) * (WATEMP - 20.0)) *
      j        GRZRM(IFILSP)
               if ( MaxFiltration .lt. 1e-20 ) then
-c               grazing rate limited by filtration
+!               grazing rate limited by filtration
                 GRZGRZ = GRZOLD(IFILSP) * MaxFiltration
               else
                 IF (GRZFOO .LT. (MaxUptake/MaxFiltration) ) THEN
-c                 grazing rate limited by filtration
+!                 grazing rate limited by filtration
                   GRZGRZ = GRZOLD(IFILSP) * MaxFiltration
                 ELSE
-c                 grazing rate limited by uptake
+!                 grazing rate limited by uptake
                   GRZGRZ = GRZOLD(IFILSP) * MaxUptake / GRZFOO
                 ENDIF
               endif
           ELSE
               GRZGRZ = 0.0
           ENDIF
-C****
-C*  7 Calculate realized feeding (mg C/mg C.d) and filtration rate (l/mg C.d)
-C*    GRZRAT and GRZFIL are output variables, not used at the moment
-C****
+!****
+!*  7 Calculate realized feeding (mg C/mg C.d) and filtration rate (l/mg C.d)
+!*    GRZRAT and GRZFIL are output variables, not used at the moment
+!****
           IF (GRZOLD(IFILSP) .GT. 0.0) THEN
               GRZRAT = GRZFOO * GRZGRZ / GRZOLD(IFILSP)
               GRZFIL = GRZGRZ / GRZOLD(IFILSP)
@@ -411,9 +376,9 @@ C****
               GRZRAT = 0.0
               GRZFIL = 0.0
           ENDIF
-C****
-C*  8 Add grazing part to fluxes for algae and detritus
-C****
+!****
+!*  8 Add grazing part to fluxes for algae and detritus
+!****
           DO 70 I = 1, NTONUT
               DETFLX(I) = -(DETBIO(I) * GRZGRZ * DETPR(IFILSP))
    70     CONTINUE
@@ -421,16 +386,16 @@ C****
               ALGFLX(I) = -(ALGBIO(I) * GRZGRZ *
      &        ALGPR(I,IFILSP))
    80     CONTINUE
-C****
-C*  9 Add fecal fraction to fluxes (choose water/sediment detritus)
-C****
+!****
+!*  9 Add fecal fraction to fluxes (choose water/sediment detritus)
+!****
           DO 100 J = 1, NTONUT
-c             JvG Code is not consistent for FRDBOT/=0 or 1!
-c              GRZUPT(J) = -(DETFLX(J) * (1.0 - DETFF(IFILSP)))
-c              DETFLX(J) = DETFLX(J) - DETFLX(J) * DETFF(IFILSP) *
-c     &                    (1. - FRDBOT(IFILSP))
-c              BOTFLX(J) = BOTFLX(J) - DETFLX(J) * DETFF(IFILSP) *
-c     &                    FRDBOT(IFILSP)
+!             JvG Code is not consistent for FRDBOT/=0 or 1!
+!              GRZUPT(J) = -(DETFLX(J) * (1.0 - DETFF(IFILSP)))
+!              DETFLX(J) = DETFLX(J) - DETFLX(J) * DETFF(IFILSP) *
+!     &                    (1. - FRDBOT(IFILSP))
+!              BOTFLX(J) = BOTFLX(J) - DETFLX(J) * DETFF(IFILSP) *
+!     &                    FRDBOT(IFILSP)
               DetrGrazing = DETFLX(J)
               GRZUPT(J) = -(DetrGrazing * (1.0 - DETFF(IFILSP)))
               DETFLX(J) = DETFLX(J) - DetrGrazing * DETFF(IFILSP) *
@@ -446,9 +411,9 @@ c     &                    FRDBOT(IFILSP)
      1                        ALGFF(I,IFILSP) * FRDBOT(IFILSP)
    90         CONTINUE
   100     CONTINUE
-C****
-C* 10 Calculate limiting element for growth
-C****
+!****
+!* 10 Calculate limiting element for growth
+!****
           GRZPMX = 10.0E20
           DO 110 I = 1, NTONUT
               IF (GRZST(I,IFILSP) .GT. 0.0) THEN
@@ -458,23 +423,23 @@ C****
                   ENDIF
               ENDIF
   110     CONTINUE
-C****
-C* 11 Calculate routine respiration (mgC/l.d)
-C****
+!****
+!* 11 Calculate routine respiration (mgC/l.d)
+!****
           GrowthResp = EXP(TMPRE(IFILSP)*(WATEMP-20.))*GRZRE(IFILSP)
           DO 120 I = 1, NTONUT
               DISFLX(I) = GRZPMX * GrowthResp * GRZST(I,IFILSP)
               GRZUPT(I) = GRZUPT(I) - DISFLX(I)
   120     CONTINUE
           GRZPMX = GRZPMX * (1.0 - GrowthResp)
-C****
-C* 12 Calculate the standard respiration (1/d)
-C****
+!****
+!* 12 Calculate the standard respiration (1/d)
+!****
           GRZMET = EXP(TMPSE(IFILSP) * (WATEMP - 20.0)) *
      &    GRZSE(IFILSP)
-C****
-C* 13 Correct for length of period (d)
-C****
+!****
+!* 13 Correct for length of period (d)
+!****
           DO 130 I = 1, NTOALG
               ALGFLX(I) = ALGFLX(I) * PERIOD
   130     CONTINUE
@@ -486,46 +451,46 @@ C****
   140     CONTINUE
           GRZPMX = GRZPMX * PERIOD
           GRZMET = GRZMET * PERIOD
-C****
-C* 14 Calculate bruto growth (mg C/period)
-C****
+!****
+!* 14 Calculate bruto growth (mg C/period)
+!****
           GRZBRU = GRZNEW(IFILSP) - GRZOLD(IFILSP) * (1.0 - GRZMET)
-C****
-C* 15 Correct bruto growth if intake can not sustain respiration and growth
-C****
+!****
+!* 15 Correct bruto growth if intake can not sustain respiration and growth
+!****
           IF (GRZBRU .GT. GRZPMX) THEN
               GRZBRU = GRZPMX
               GRZNEW(IFILSP) = GRZOLD(IFILSP) * (1.0 - GRZMET) + GRZPMX
           ENDIF
-C****
-C* 16 Add respiration to dissolved nutrients
-C****
+!****
+!* 16 Add respiration to dissolved nutrients
+!****
           DO 150 I = 1, NTONUT
               DISFLX(I) = DISFLX(I) + GRZOLD(IFILSP) * GRZMET *
      &        GRZST(I,IFILSP)
-C****
-C* 17 If there is bruto growth, subtract nutrients from the intake
-C****
+!****
+!* 17 If there is bruto growth, subtract nutrients from the intake
+!****
               IF (GRZBRU .GE. 0.0) THEN
                   GRZUPT(I) = GRZUPT(I) - GRZBRU * GRZST(I,IFILSP)
-C****
-C* 18 If their is mortality, add the nutrients to the detritus pool
-C****
+!****
+!* 18 If their is mortality, add the nutrients to the detritus pool
+!****
               ELSE
                 DETFLX(I) = DETFLX(I) - (GRZBRU * GRZST(I,IFILSP)*
      &          (1 -FRDBOT(IFILSP)))
                 BOTFLX(I) = BOTFLX(I) - (GRZBRU * GRZST(I,IFILSP)*
      &          FRDBOT(IFILSP))
               ENDIF
-C****
-C* 19 Convert the intake not used for bruto growth to the detritus pool
-C****
+!****
+!* 19 Convert the intake not used for bruto growth to the detritus pool
+!****
               DETFLX(I) = DETFLX(I) + GRZUPT(I) * (1. - FRDBOT(IFILSP))
               BOTFLX(I) = BOTFLX(I) + GRZUPT(I) * FRDBOT(IFILSP)
   150     CONTINUE
-C****
-C* 20 Check massbalans
-C****
+!****
+!* 20 Check massbalans
+!****
           DO 170 J=1,NTONUT
               ALTFLX(J) = 0.0E0
               DO 160 I=1,NTOALG
@@ -535,17 +500,17 @@ C****
      &        GRZST(J,IFILSP)
               TOTFLX(J) = DISFLX(J) + DETFLX(J) + BOTFLX(J) +
      &        ALTFLX(J) + GRZFLX(J)
-C
-C             Total nutrients in PHYT:
-C
+!
+!             Total nutrients in PHYT:
+!
               FL(4 + J + IFLUX) = FL(4 + J + IFLUX) - ALTFLX(J)/PERIOD
   170     CONTINUE
-C****
-C* 21 Update total fluxes and detritus and algal biomass
-C****
+!****
+!* 21 Update total fluxes and detritus and algal biomass
+!****
           DO 180 I = 1, NTONUT
               FL(I + IFLUX)      = FL(I + IFLUX)      + DISFLX(I)/PERIOD
-C             MvdV 981130 added division over Detr and GEM POC
+!             MvdV 981130 added division over Detr and GEM POC
               FL(I+8+IFLUX) = FL(I+8+IFLUX) + DETFLX(I)/PERIOD
      &                      * (1.0-GEM)
               FL(I+12+IFLUX) = FL(I+12+IFLUX) + DETFLX(I)/PERIOD * GEM
@@ -554,12 +519,12 @@ C             MvdV 981130 added division over Detr and GEM POC
           DO 190 I = 1, NTOALG
               FL(I + 20 + IFLUX) = FL(I + 20 + IFLUX) - ALGFLX(I)/PERIOD
   190     CONTINUE
-C****
-C* 23 Save biomass grazers for next time step
-C****
+!****
+!* 23 Save biomass grazers for next time step
+!****
           IF ( BENTHS(IFILSP) .EQ. 1 ) THEN
-C           Zoobenthos species
-C           Convert input unit to g/m2!!
+!           Zoobenthos species
+!           Convert input unit to g/m2!!
             GRZNEW(IFILSP) = GRZNEW(IFILSP)*DEPTH
           ENDIF
           IF (GRZML(IFILSP).GT.0.0) THEN
@@ -567,86 +532,86 @@ C           Convert input unit to g/m2!!
           ELSE
             PMSA(IP(7+(IFILSP-1)*NINGRZ)) = 0.0
           ENDIF
-C****
-C* 22 End loop over filter feeders
-C****
+!****
+!* 22 End loop over filter feeders
+!****
        endif
   200 CONTINUE
-C
+!
       ENDIF
       IFLUX = IFLUX + NOFLUX
       DO 20 I=1,NIN
         IP(I) = IP(I) + INCREM (  I )
    20 CONTINUE
-C
+!
  9000 CONTINUE
 
-C     MvdV 981130 added velocity
-C     Loop over nutrients
-c     JvG 11-12-2009
-c     Fecal pellets from zooplankton are rapidly sinking
-c     to the bootm. In 2D this can be arranged
-c     by producing some of the detritus as bottom detritus (FRDBOT)
-c     The code below was added to emulate this in 3D
-c     it contains a bug (no extra production of water detritus
-c     in stead of produced bottom detritus)
-c     and it contains a conceptual flaw (POC is shifted only one layer down)
-c     Therefore, we omit it, and consequently neglect the rapid
-c     sinking of fecal pellets in a 3D environment, they just become
-c     POC. A conceptually sound solution would be to create a
-c     state variable fecal pellets
-c     We also reduce the computational burden in 3D models
-c     (especially Z-layer with a lot of dummy exchanges)
-c     NOTE also that this version does not support the production of
-c     bottom detritus by filterfeeding benthos in a DELWAQ-G
-c     context
+!     MvdV 981130 added velocity
+!     Loop over nutrients
+!     JvG 11-12-2009
+!     Fecal pellets from zooplankton are rapidly sinking
+!     to the bootm. In 2D this can be arranged
+!     by producing some of the detritus as bottom detritus (FRDBOT)
+!     The code below was added to emulate this in 3D
+!     it contains a bug (no extra production of water detritus
+!     in stead of produced bottom detritus)
+!     and it contains a conceptual flaw (POC is shifted only one layer down)
+!     Therefore, we omit it, and consequently neglect the rapid
+!     sinking of fecal pellets in a 3D environment, they just become
+!     POC. A conceptually sound solution would be to create a
+!     state variable fecal pellets
+!     We also reduce the computational burden in 3D models
+!     (especially Z-layer with a lot of dummy exchanges)
+!     NOTE also that this version does not support the production of
+!     bottom detritus by filterfeeding benthos in a DELWAQ-G
+!     context
 
-c     DO 300 I = 1, NTONUT
-cC      Determine pointers for velocities
-c       IPV = 5+(NTONUT+2*NTOGRZ)*NTOALG+2*NTONUT+NTOGRZ*NINGRZ+NTOGRZ+I
-c       INV = INCREM(IPV)
-c       IPP = IPOINT(IPV)
-c
-cC      Exchangeloop over horizontal direction
-c       DO 8000 IQ=1,NOQ1+NOQ2
-cC        set horizontal velocities to zero
-c         PMSA(IPP) = 0.0
-c
-c         IPP = IPP + INV
-c
-c8000   CONTINUE
-c
-cC      Exchangeloop over vertical direction
-c       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
-cC        Calculate vertical velocities
-c         IFROM  = IEXPNT(1,IQ)
-c         IF ( IFROM .GT. 0 ) THEN
-cC           Get total flux
-c            DFLUX = FL(I+16+(IFROM-1)*NOFLUX)
-cC           Get GEM POC,N.P,Si concentration
-c            J = 5+NTOGRZ*NINGRZ+NTONUT+I
-c            POC(I) = PMSA(IPOINT(J)+(IFROM-1)*INCREM(J))
-cC           divide flux over Detritus and GEM POC
-c            FL(I+16+(IFROM-1)*NOFLUX) = DFLUX * (1.0-GEM)
-c            IF (GEM*POC(I).LE.1E-20) THEN
-c               PMSA(IPP) = 0.
-c            ELSE
-cC                     convert flux (g/m3/d) to velocity (m/s)
-cC             velo=flux/86400 * Cpoc / Ctot * Depth / Cpoc
-cC             velo=flux/86400 * Depth / Ctot
-c                  PMSA(IPP) = DFLUX / 86400. * DEPTH / POC(I)
-c            ENDIF
-c         ELSE
-c            PMSA(IPP) = 0.0
-c         ENDIF
-c         IPP = IPP + INV
-c
-c7000   CONTINUE
-c
-c 300 CONTINUE
+!     DO 300 I = 1, NTONUT
+!C      Determine pointers for velocities
+!       IPV = 5+(NTONUT+2*NTOGRZ)*NTOALG+2*NTONUT+NTOGRZ*NINGRZ+NTOGRZ+I
+!       INV = INCREM(IPV)
+!       IPP = IPOINT(IPV)
+!
+!C      Exchangeloop over horizontal direction
+!       DO 8000 IQ=1,NOQ1+NOQ2
+!C        set horizontal velocities to zero
+!         PMSA(IPP) = 0.0
+!
+!         IPP = IPP + INV
+!
+!8000   CONTINUE
+!
+!C      Exchangeloop over vertical direction
+!       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
+!C        Calculate vertical velocities
+!         IFROM  = IEXPNT(1,IQ)
+!         IF ( IFROM .GT. 0 ) THEN
+!C           Get total flux
+!            DFLUX = FL(I+16+(IFROM-1)*NOFLUX)
+!C           Get GEM POC,N.P,Si concentration
+!            J = 5+NTOGRZ*NINGRZ+NTONUT+I
+!            POC(I) = PMSA(IPOINT(J)+(IFROM-1)*INCREM(J))
+!C           divide flux over Detritus and GEM POC
+!            FL(I+16+(IFROM-1)*NOFLUX) = DFLUX * (1.0-GEM)
+!            IF (GEM*POC(I).LE.1E-20) THEN
+!               PMSA(IPP) = 0.
+!            ELSE
+!C                     convert flux (g/m3/d) to velocity (m/s)
+!C             velo=flux/86400 * Cpoc / Ctot * Depth / Cpoc
+!C             velo=flux/86400 * Depth / Ctot
+!                  PMSA(IPP) = DFLUX / 86400. * DEPTH / POC(I)
+!            ENDIF
+!         ELSE
+!            PMSA(IPP) = 0.0
+!         ENDIF
+!         IPP = IPP + INV
+!
+!7000   CONTINUE
+!
+! 300 CONTINUE
 
       IF (INIT) INIT = .FALSE.
 
       RETURN
-C
+!
       END

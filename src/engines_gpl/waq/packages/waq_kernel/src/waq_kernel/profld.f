@@ -24,38 +24,38 @@
       SUBROUTINE PROFLD (NOFLUX, NFLUX1, NFLUXP, IGRID , NOSEG2,
      +                   NOSEG , NDT   , ISDMP , GRDSEG, FLUX  ,
      +                   VOLUME, FLXDMP)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : Oct 1998 by Jan van Beek
-C
-C     FUNCTION            : make FLXDMP array from FLUX array
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          : 12
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes (total)
-C     NFLUX1  INTEGER       1     INPUT   first flux to be dumped
-C     NFLUXP  INTEGER       1     INPUT   number of fluxes to be dumped
-C     IGRID   INTEGER       1     INPUT   Grid number for FLUX array
-C     NOSEG2  INTEGER       1     INPUT   number of segments in IGRID
-C     NOSEG   INTEGER       1     INPUT   number of segments
-C     NDT     INTEGER       1     INPUT   timestep multiplier in fractional step
-C     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
-C     GRDSEG  INTEGER       *     INPUT   Segment to sub-segment pointer for grids
-C     FLUX    REAL          *     INPUT   fluxes at all segments
-C     VOLUME  REAL          *     INPUT   Segment volumes
-C     FLXDMP  REAL    NOFLUX*?    OUTPUT  fluxes at dump segments
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : Oct 1998 by Jan van Beek
+!
+!     FUNCTION            : make FLXDMP array from FLUX array
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          : 12
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes (total)
+!     NFLUX1  INTEGER       1     INPUT   first flux to be dumped
+!     NFLUXP  INTEGER       1     INPUT   number of fluxes to be dumped
+!     IGRID   INTEGER       1     INPUT   Grid number for FLUX array
+!     NOSEG2  INTEGER       1     INPUT   number of segments in IGRID
+!     NOSEG   INTEGER       1     INPUT   number of segments
+!     NDT     INTEGER       1     INPUT   timestep multiplier in fractional step
+!     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
+!     GRDSEG  INTEGER       *     INPUT   Segment to sub-segment pointer for grids
+!     FLUX    REAL          *     INPUT   fluxes at all segments
+!     VOLUME  REAL          *     INPUT   Segment volumes
+!     FLXDMP  REAL    NOFLUX*?    OUTPUT  fluxes at dump segments
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER NOFLUX, NFLUX1, NFLUXP, IGRID , NOSEG2,
@@ -65,9 +65,9 @@ C
      +        FLXDMP(NOFLUX,*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "profld", ithandl )
-C
-C     We construeren nu de FLUXDUMPEN
-C
+!
+!     We construeren nu de FLUXDUMPEN
+!
       DO ISEG = 1 , NOSEG
          IF ( ISDMP(ISEG) .GT. 0 ) THEN
             VOL   = VOLUME(ISEG)
@@ -82,7 +82,7 @@ C
             ENDDO
          ENDIF
       ENDDO
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

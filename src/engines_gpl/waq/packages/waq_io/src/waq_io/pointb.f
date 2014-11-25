@@ -69,31 +69,31 @@
       integer  ( 4), intent(in   ) :: noqt               !< total number of exchanges
       integer  ( 4), intent(inout) :: ipoint(  4  ,noqt) !< exchange pointers
       integer  ( 4), intent(inout) :: ierr               !< cumulative error   count
-C
-C     COMMON BLOCK  / SYSN / :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     NOSEG   INTEGER  1           INPUT   number of segments
-C     NSEG2   INTEGER  1           INPUT   number of bottom segments
-C     NOSYS   INTEGER  1           INPUT   number of active substances
-C     NODISP  INTEGER  1           OUTPUT  number of dispersion arrays
-C     NOVELO  INTEGER  1           OUTPUT  number of velocity arrays
-C     NOQ1    INTEGER  1           OUTPUT  number of exch. 1st direction
-C     NOQ2    INTEGER  1           OUTPUT  number of exch. 2nd direction
-C     NOQ3    INTEGER  1           OUTPUT  number of exch. 3rd direction
+!
+!     COMMON BLOCK  / SYSN / :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     NOSEG   INTEGER  1           INPUT   number of segments
+!     NSEG2   INTEGER  1           INPUT   number of bottom segments
+!     NOSYS   INTEGER  1           INPUT   number of active substances
+!     NODISP  INTEGER  1           OUTPUT  number of dispersion arrays
+!     NOVELO  INTEGER  1           OUTPUT  number of velocity arrays
+!     NOQ1    INTEGER  1           OUTPUT  number of exch. 1st direction
+!     NOQ2    INTEGER  1           OUTPUT  number of exch. 2nd direction
+!     NOQ3    INTEGER  1           OUTPUT  number of exch. 3rd direction
 !     NOQ4    INTEGER  1           OUTPUT  number of exch. bottom direction
-C     NOQ     INTEGER  1           OUTPUT  number of exchanges
+!     NOQ     INTEGER  1           OUTPUT  number of exchanges
 !     NOBND   INTEGER  1           OUTPUT  number of boundaries
-C     JTRACK  INTEGER  1           OUTPUT  number of codiagonals
-C     NDMPAR  INTEGER  1           INPUT   number of dump areas
-C     NDMPQ   INTEGER  1           OUTPUT  number exchanges dumped
-C     NDMPS   INTEGER  1           OUTPUT  number segments dumped
-C     NTDMPQ  INTEGER  1           OUTPUT  total number exchanges in dump area
-C     NTDMPS  INTEGER  1           INPUT   total number segments in dump area
-C     NORAAI  INTEGER  1           INPUT   number of raaien
-C     NTRAAQ  INTEGER  1           INPUT   total number of exch. in raaien
-C     NOMAT   INTEGER  1           OUTPUT  size of the fastsolvers matrix
+!     JTRACK  INTEGER  1           OUTPUT  number of codiagonals
+!     NDMPAR  INTEGER  1           INPUT   number of dump areas
+!     NDMPQ   INTEGER  1           OUTPUT  number exchanges dumped
+!     NDMPS   INTEGER  1           OUTPUT  number segments dumped
+!     NTDMPQ  INTEGER  1           OUTPUT  total number exchanges in dump area
+!     NTDMPS  INTEGER  1           INPUT   total number segments in dump area
+!     NORAAI  INTEGER  1           INPUT   number of raaien
+!     NTRAAQ  INTEGER  1           INPUT   total number of exch. in raaien
+!     NOMAT   INTEGER  1           OUTPUT  size of the fastsolvers matrix
 
 !     local declarations
 

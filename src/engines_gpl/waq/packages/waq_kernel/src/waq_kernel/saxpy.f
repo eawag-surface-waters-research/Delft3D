@@ -22,25 +22,25 @@
 !!  rights reserved.
 
       subroutine saxpy (n,sa,sx,incx,sy,incy)
-c
-c     constant times a vector plus a vector.
-c     uses unrolled loop for increments equal to one.
-c     jack dongarra, linpack, 3/11/78.
-c
+!
+!     constant times a vector plus a vector.
+!     uses unrolled loop for increments equal to one.
+!     jack dongarra, linpack, 3/11/78.
+!
       use timers
 
       real(8) sx(1),sy(1),sa
       integer i,incx,incy,ix,iy,m,mp1,n
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "saxpy", ithandl )
-c
+!
       if(n.le.0) goto 9999 ! return
       if (sa .eq. 0.0) goto 9999 ! return
       if(incx.eq.1.and.incy.eq.1)go to 20
-c
-c        code for unequal increments or equal increments
-c          not equal to 1
-c
+!
+!        code for unequal increments or equal increments
+!          not equal to 1
+!
       ix = 1
       iy = 1
       if(incx.lt.0)ix = (-n+1)*incx + 1
@@ -51,12 +51,12 @@ c
         iy = iy + incy
    10 continue
       goto 9999  !   return
-c
-c        code for both increments equal to 1
-c
-c
-c        clean-up loop
-c
+!
+!        code for both increments equal to 1
+!
+!
+!        clean-up loop
+!
    20 m = mod(n,4)
       if( m .eq. 0 ) go to 40
       do 30 i = 1,m

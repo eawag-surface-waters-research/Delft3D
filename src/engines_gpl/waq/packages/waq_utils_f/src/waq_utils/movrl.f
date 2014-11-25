@@ -22,33 +22,33 @@
 !!  rights reserved.
 
       SUBROUTINE MOVRL  ( RAR    , NSTRT  , NOTOT  , NLOC   )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : May '97    BY L. Postma
-C
-C     FUNCTION           : Shifts an array of reals NLOC locations
-C
-C     SUBROUTINES CALLED : none
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     RAR     REAL     *          IN/OUT  array to be shifted
-C     NSTRT   INTEGER  1          INPUT   start of shift
-C     NOTOT   INTEGER  1          IN/OUT  stop of shift
-C     NLOC    INTEGER  1          INPUT   nr of locations to shift
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : May '97    BY L. Postma
+!
+!     FUNCTION           : Shifts an array of reals NLOC locations
+!
+!     SUBROUTINES CALLED : none
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     RAR     REAL     *          IN/OUT  array to be shifted
+!     NSTRT   INTEGER  1          INPUT   start of shift
+!     NOTOT   INTEGER  1          IN/OUT  stop of shift
+!     NLOC    INTEGER  1          INPUT   nr of locations to shift
+!
+!
       DIMENSION RAR(*)
-C
+!
       DO 10 I=NOTOT,NSTRT,-1
          RAR(I+NLOC) = RAR(I)
    10 CONTINUE
-C
+!
       RETURN
       END

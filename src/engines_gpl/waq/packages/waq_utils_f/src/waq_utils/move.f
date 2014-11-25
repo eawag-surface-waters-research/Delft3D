@@ -22,26 +22,26 @@
 !!  rights reserved.
 
       SUBROUTINE MOVE ( ARRAY1 , ARRAY2 , NOTOT )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june  1988 by L.Postma
-C
-C     FUNCTION            : moves NVAL values from ARRAY1 to ARRAY2
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ARRAY1  REAL      NOTOT     INPUT   array to be copied
-C     ARRAY2  REAL      NOTOT     OUTPUT  array to copy to
-C     NOTOT   INTEGER     1       INPUT   total number of entries
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june  1988 by L.Postma
+!
+!     FUNCTION            : moves NVAL values from ARRAY1 to ARRAY2
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ARRAY1  REAL      NOTOT     INPUT   array to be copied
+!     ARRAY2  REAL      NOTOT     OUTPUT  array to copy to
+!     NOTOT   INTEGER     1       INPUT   total number of entries
+!
       DIMENSION   ARRAY1(*) , ARRAY2(*)
-C
+!
       DO  10 I = 1,NOTOT
    10 ARRAY2(I) = ARRAY1(I)
-C
+!
       RETURN
       END
       subroutine dmove ( array1 , array2 , notot )

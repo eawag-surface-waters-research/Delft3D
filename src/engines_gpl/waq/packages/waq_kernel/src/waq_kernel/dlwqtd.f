@@ -27,51 +27,51 @@
      *                    PARAM  , PANAME , FUNCS  , FUNAME , SFUNCS ,
      *                    SFNAME , IPOINT , VOLUME , AREA   , FLOW   ,
      *                    ALENG  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:              January-2003 by L.Postma
-C
-C     LAST UPDATE:          ........
-C
-C     FUNCTION            : Expands volume, area etc. for bottom cells
-C
-C     LOGICAL UNITS       : LUN(19), error messages
-C
-C     SUBROUTINES CALLED  : GETVAL, to retrieve a value from the data
-C                           SRSTOP, to stop with error
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOSEG   INTEGER    1        INPUT   Number of water segments
-C     NSEG2   INTEGER    1        INPUT   Number of bottom segments
-C     NOLAY   INTEGER    1        INPUT   Number of water layers
-C     NOGRID  INTEGER    1        INPUT   Nunber of grids
-C     NOQ     INTEGER    1        INPUT   Nunber of water exchanges
-C     NOQ4    INTEGER    1        INPUT   Nunber of bottom exchanges
-C     IGREF   INTEGER  NOGRID     INPUT   Ref, neg = nr of bottom layers
-C     IGSEG   INTEGER NOSEG,NOGRID INPUT  pointer from water to bottom
-C     NOCONS  INTEGER    1        INPUT   Number of constants used
-C     NOPA    INTEGER    1        INPUT   Number of parameters
-C     NOFUN   INTEGER    1        INPUT   Number of functions ( user )
-C     NOSFUN  INTEGER    1        INPUT   Number of segment functions
-C     CONST   REAL     NOCONS     INPUT   value of constants
-C     CONAME  CHAR*20  NOCONS     INPUT   Constant names
-C     PARAM   REAL    NOPA,NOSEG  INPUT   value of parameters
-C     PANAME  CHAR*20  NOPA       INPUT   Parameter names
-C     FUNCS   REAL     NOFUN      INPUT   Function values
-C     FUNAME  CHAR*20  NOFUN      INPUT   Function names
-C     SFUNCS  REAL   NOSEG,NOSFUN INPUT   Segment function values
-C     SFNAME  CHAR*20  NOSFUN     INPUT   Segment function names
-C     IPOINT  INTEGER   4,NOQT    INPUT   All exchange pointers
-C     VOLUME  REAL   NOSEG+NSEG2  IN/OUT  Segment volumes
-C     AREA    REAL    NOQ+NOQ4    IN/OUT  Exchange surfaces
-C     FLOW    REAL    NOQ+NOQ4    IN/OUT  Exchange flows
-C     ALENG   REAL   2,NOQ+NOQ4   IN/OUT  Diffusion lengthes
-C
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:              January-2003 by L.Postma
+!
+!     LAST UPDATE:          ........
+!
+!     FUNCTION            : Expands volume, area etc. for bottom cells
+!
+!     LOGICAL UNITS       : LUN(19), error messages
+!
+!     SUBROUTINES CALLED  : GETVAL, to retrieve a value from the data
+!                           SRSTOP, to stop with error
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOSEG   INTEGER    1        INPUT   Number of water segments
+!     NSEG2   INTEGER    1        INPUT   Number of bottom segments
+!     NOLAY   INTEGER    1        INPUT   Number of water layers
+!     NOGRID  INTEGER    1        INPUT   Nunber of grids
+!     NOQ     INTEGER    1        INPUT   Nunber of water exchanges
+!     NOQ4    INTEGER    1        INPUT   Nunber of bottom exchanges
+!     IGREF   INTEGER  NOGRID     INPUT   Ref, neg = nr of bottom layers
+!     IGSEG   INTEGER NOSEG,NOGRID INPUT  pointer from water to bottom
+!     NOCONS  INTEGER    1        INPUT   Number of constants used
+!     NOPA    INTEGER    1        INPUT   Number of parameters
+!     NOFUN   INTEGER    1        INPUT   Number of functions ( user )
+!     NOSFUN  INTEGER    1        INPUT   Number of segment functions
+!     CONST   REAL     NOCONS     INPUT   value of constants
+!     CONAME  CHAR*20  NOCONS     INPUT   Constant names
+!     PARAM   REAL    NOPA,NOSEG  INPUT   value of parameters
+!     PANAME  CHAR*20  NOPA       INPUT   Parameter names
+!     FUNCS   REAL     NOFUN      INPUT   Function values
+!     FUNAME  CHAR*20  NOFUN      INPUT   Function names
+!     SFUNCS  REAL   NOSEG,NOSFUN INPUT   Segment function values
+!     SFNAME  CHAR*20  NOSFUN     INPUT   Segment function names
+!     IPOINT  INTEGER   4,NOQT    INPUT   All exchange pointers
+!     VOLUME  REAL   NOSEG+NSEG2  IN/OUT  Segment volumes
+!     AREA    REAL    NOQ+NOQ4    IN/OUT  Exchange surfaces
+!     FLOW    REAL    NOQ+NOQ4    IN/OUT  Exchange flows
+!     ALENG   REAL   2,NOQ+NOQ4   IN/OUT  Diffusion lengthes
+!
+!
       use grids
       use timers
 
@@ -83,18 +83,18 @@ C
      *                     ALENG (2,NOQ+NOQ4 ), FLOW(NOQ+NOQ4)
       CHARACTER*20         CONAME(NOCONS), PANAME(NOPA  ),
      *                     FUNAME(NOFUN ), SFNAME(NOSFUN)
-C
+!
       LOGICAL              LGET
       logical           :: first_q_column
       REAL, Allocatable :: Horsurf(:), Thickn(:)
       CHARACTER*20         CTAG
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtd", ithandl )
-C
+!
       NOSSS = NOSEG + NSEG2
-c
-c     Set up the horizontal surfaces
-c
+!
+!     Set up the horizontal surfaces
+!
    10 CTAG = 'SURF'
       LGET = .true.
       Allocate ( Horsurf(NOSSS) )
@@ -147,9 +147,9 @@ c
      *              NOFUN  , NOSFUN , CONST  , CONAME , PARAM  ,
      *              PANAME , FUNCS  , FUNAME , SFUNCS , SFNAME ,
      *              LGET   , IERR   )
-C
-C        Expand the volumes
-C
+!
+!        Expand the volumes
+!
       CTAG = 'FIXTH'
       LGET = .true.
       Allocate ( Thickn(NOSSS) )
@@ -164,18 +164,18 @@ C
       do iseg = noseg+1, noseg+nseg2
          volume(iseg) = Horsurf(iseg)*Thickn(iseg)
       enddo
-C
-C        Expand the areas, lengthes and flows
-C
+!
+!        Expand the areas, lengthes and flows
+!
       do iq = 1 , NOQ4
          area (  NOQ+iq) = Horsurf(IPOINT(1,NOQ+iq))
          aleng(1,NOQ+iq) = 1.0
          aleng(2,NOQ+iq) = 1.0
          flow (  NOQ+iq) = 0.0
       enddo
-C
+!
       deallocate ( Horsurf, Thickn )
-C
+!
       if ( timon ) call timstop ( ithandl )
       return
       end

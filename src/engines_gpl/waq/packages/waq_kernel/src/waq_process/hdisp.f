@@ -27,31 +27,18 @@
 !>\file
 !>       (1D) Horizontal dispersion as velocity dependent reprofunction
 
-C***********************************************************************
-C
-C     Project : OSIRIS 2002
-C     Author  : Annette Kuin
-C     Date    : 021216             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     021216  Annette Kuin    Variable dispersion in 1D models
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
       REAL     PMSA  ( * ) , FL    (*)
@@ -73,7 +60,7 @@ C     ------   -----  ------------
       IP5   = IPOINT( 5)
       IP6   = IPOINT( 6)
       IP7   = IPOINT( 7)
-C
+!
       IN1   = INCREM( 1)
       IN2   = INCREM( 2)
       IN3   = INCREM( 3)
@@ -82,15 +69,15 @@ C
       IN6   = INCREM( 6)
       IN7   = INCREM( 7)
 
-c.....Exchangeloop over de verticale en breedterichtingen om
-c.....ze op 0 te zetten en over de verticale richting om deze
-c.....te initialiseren
+!.....Exchangeloop over de verticale en breedterichtingen om
+!.....ze op 0 te zetten en over de verticale richting om deze
+!.....te initialiseren
       DO IQ=1, NOQ1+NOQ2+NOQ3+NOQ4
          PMSA(IP7 ) = 0.0
          IP7  = IP7  + IN7
       ENDDO
 
-c.....Exchangeloop over horizontale lengterichting
+!.....Exchangeloop over horizontale lengterichting
       IP7 = IPOINT( 7)
 
       DO IQ = 1 , NOQ1

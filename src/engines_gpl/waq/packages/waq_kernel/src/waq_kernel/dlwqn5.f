@@ -155,9 +155,9 @@
       IF ( ACTION == ACTION_INITIALISATION  .OR.
      &     ACTION == ACTION_FULLCOMPUTATION        ) THEN
 
-C
-C          some initialisation
-C
+!
+!          some initialisation
+!
           ithandl = 0
           ITIME   = ITSTRT
           NSTEP   = (ITSTOP-ITSTRT)/IDT
@@ -194,19 +194,19 @@ C
           inwtyp = intyp + nobnd
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
-C
-C          initialize second volume array with the first one
-C
+!
+!          initialize second volume array with the first one
+!
           CALL MOVE   ( A(IVOL ), A(IVOL2) , nosss   )
       ENDIF
 
-C
-C     Save/restore the local persistent variables,
-C     if the computation is split up in steps
-C
-C     Note: the handle to the timer (ithandl) needs to be
-C     properly initialised and restored
-C
+!
+!     Save/restore the local persistent variables,
+!     if the computation is split up in steps
+!
+!     Note: the handle to the timer (ithandl) needs to be
+!     properly initialised and restored
+!
       IF ( ACTION == ACTION_INITIALISATION ) THEN
           if ( timon ) call timstrt ( "dlwqn5", ithandl )
           INCLUDE 'dlwqdata_save.inc'
@@ -304,9 +304,9 @@ C
      &                     notot   , idt     , a(iconc), a(iflow), a(iboun))
          endif
          call timer_stop(timer_bound)
-C
-C     Call OUTPUT system
-C
+!
+!     Call OUTPUT system
+!
       call timer_start(timer_output)
       CALL DLWQO2 ( NOTOT   , nosss   , NOPA    , NOSFUN  , ITIME   ,
      +              C(IMNAM), C(ISNAM), C(IDNAM), J(IDUMP), NODUMP  ,
@@ -472,7 +472,7 @@ C
 !     calculate closure error
          call collect_rdata(mypart,A(imass), notot,'noseg',1, ierr)
          if ( lrewin .and. lstrec ) then
-c collect information on master for computation of closure error before rewind
+! collect information on master for computation of closure error before rewind
             call collect_rdata(mypart,A(imass), notot,'noseg',1, ierr)
             if (mypart.eq.1)
      &      call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
@@ -483,7 +483,7 @@ c collect information on master for computation of closure error before rewind
             call move   ( a(ivol2), a(ivol) , noseg   )
          endif
          call distribute_rdata(mypart,A(IMASS),notot,'noseg',1,'distrib_itf', ierr)
-c collect information on master for computation of closure error before rewind
+! collect information on master for computation of closure error before rewind
 
 !          integrate the fluxes at dump segments fill ASMASS with mass
 

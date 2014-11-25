@@ -27,45 +27,27 @@
 !>\file
 !>       Vertical dispersion (segment -> exchange)
 
-C***********************************************************************
-C
-C     Project :
-C     Author  : M. Bokhorst
-C     Date    : 19-3-96            Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     19-3-96 M. Bokhorst     Create first version
-C   20000419  Jan van Beek    Check on dummy exchanges (0->0)
-C***********************************************************************
-C
-C     Description of the module :
-C
-C***********************************************************************
-
       IMPLICIT NONE
-C
-C     declaration of arguments
-C
+!
+!     declaration of arguments
+!
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     i/o from PMSA array
-C
+!
+!     i/o from PMSA array
+!
       REAL     SPARAM                      ! process parameter on segment
       REAL     FACTOR                      ! scaling factor
       REAL     QPARAM                      ! process parameter on segment
-C
-C     local declarations
-C
+!
+!     local declarations
+!
       INTEGER  IP1, IP2, IP3               ! index pointers in PMSA array
       INTEGER  IN1, IN2, IN3               ! increments in PMSA array
       INTEGER  IQ                          ! loop counter exchanges
       INTEGER  IFROM                       ! number from-segment
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -74,11 +56,11 @@ C
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
 
-C     Exchange-loop over de eerste twee richtingen
+!     Exchange-loop over de eerste twee richtingen
 
       DO IQ=1,NOQ1+NOQ2
 
-C        Uitvoer op exchange niveau gelijk aan nul
+!        Uitvoer op exchange niveau gelijk aan nul
 
          PMSA(IP3 ) =  0.0
 
@@ -86,7 +68,7 @@ C        Uitvoer op exchange niveau gelijk aan nul
 
       ENDDO
 
-C     Exchange-loop over de derde richting
+!     Exchange-loop over de derde richting
 
       DO IQ=NOQ1+NOQ2+1,NOQ1+NOQ2+NOQ3
 
@@ -94,7 +76,7 @@ C     Exchange-loop over de derde richting
 
          IF ( IFROM .GT. 0 ) THEN
 
-C           Invoer op segment niveau naar uitvoer op exchange niveau
+!           Invoer op segment niveau naar uitvoer op exchange niveau
 
             SPARAM = PMSA(IP1+(IFROM-1)*IN1)
             FACTOR = PMSA(IP2+(IFROM-1)*IN2)
@@ -105,7 +87,7 @@ C           Invoer op segment niveau naar uitvoer op exchange niveau
 
          PMSA(IP3) = QPARAM
 
-C        Ophogen pointering uitvoer op exchange niveau
+!        Ophogen pointering uitvoer op exchange niveau
 
          IP3  = IP3  + IN3
 

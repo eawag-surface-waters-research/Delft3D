@@ -27,27 +27,13 @@
 !>\file
 !>       Vertical distribution after a longer time span to correct 3D-BLOOM
 
-C***********************************************************************
-C
-C     Project : 3d-licht
-C     Author  : Jan van Beek
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     200717  Jan van Beek    initial version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C NOLAY   I*4 1 I     number of layers
-C
-C***********************************************************************
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! NOLAY   I*4 1 I     number of layers
+!
 
       USE      DATA_VTRANS
 
@@ -56,9 +42,9 @@ C***********************************************************************
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER  IERR_ALLOC      , LUNREP
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
      +         IP6   , IP7   , IP8   , IP9   , IP10  ,
@@ -86,13 +72,13 @@ C
       integer                  :: idummy
       integer                  :: ierr2
       logical                  :: dhltim
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
       IP5  = IPOINT( 5)
       IP11 = IPOINT(11)
-C
+!
       IDT    = NINT(PMSA(IP1))
       DELT   =      PMSA(IP2)
       PERIOD =      PMSA(IP3)/24.
@@ -100,9 +86,9 @@ C
 
       CALL DHNOSEG(NOSEGW)
       CALL DHNOLAY(NOLAY)
-C
-C     initialise and allocate memory in module data_vtrans
-C
+!
+!     initialise and allocate memory in module data_vtrans
+!
       IF ( .NOT. INIT_VTRANS ) THEN
          INIT_VTRANS = .TRUE.
          CALL GETMLU(LUNREP)
@@ -173,9 +159,9 @@ C
       else
          l_initial = .false.
       ENDIF
-C
+!
       IF ( .NOT. ACTIVE_VTRANS ) RETURN
-C
+!
       NOLAY  = NOLAYLOCAL
       NOSEGL = NOSEGW/NOLAY
       NOSUB  = NOLAY
@@ -185,9 +171,9 @@ C
       ! not the first time if initialised to prevent double step
 
       if ( .not. l_initial ) then
-C
-C        make masses , volumes on diagonal + test for active exchange for z model
-C
+!
+!        make masses , volumes on diagonal + test for active exchange for z model
+!
          IN4  = INCREM(4)
          IP4  = IPOINT(4)
          DO ISEG = 1 , NOSEGW
@@ -198,9 +184,9 @@ C
                ENDDO
             IP4 = IP4 + IN4
          ENDDO
-C
-C        do a transport step in the vertical, dispersion only, double sweep see also DLWQD1
-C
+!
+!        do a transport step in the vertical, dispersion only, double sweep see also DLWQD1
+!
          IN6  = INCREM(6)
          IN7  = INCREM(7)
          IN8  = INCREM(8)
@@ -224,19 +210,19 @@ C
                AREA  = PMSA(IP7)
                LENFR = PMSA(IP8)
                LENTO = PMSA(IP9)
-C
+!
                AL = LENFR + LENTO
                E  = IDT*DISP*AREA/AL
                DO ISUB=1,NOSUB
-C
-C                 row of the 'from' segment
-C
+!
+!                 row of the 'from' segment
+!
                   DIAG              = DERVV(ISUB,IFROM) + E
                   CODIAG            = -E / DIAG
                   RHS               = CONCV(ISUB,IFROM) / DIAG
                   DERVV(ISUB,IFROM) = CODIAG
                   CONCV(ISUB,IFROM) = RHS
-C                 row of the 'to  ' segment
+!                 row of the 'to  ' segment
                   DERVV(ISUB,ITO)   = DERVV(ISUB,ITO) + E + E*CODIAG
                   CONCV(ISUB,ITO)   = CONCV(ISUB,ITO) + E*RHS
                ENDDO
@@ -247,9 +233,9 @@ C                 row of the 'to  ' segment
             IP9  = IP9  + IN9
             IP10 = IP10 + IN10
          ENDDO
-C
-C            Loop over exchanges, single sweep backward
-C
+!
+!            Loop over exchanges, single sweep backward
+!
          DO IQ = NOQ , NOQ12+1 , -1
             IFROM = IEXPNT(1,IQ)
             ITO   = IEXPNT(2,IQ)
@@ -272,15 +258,15 @@ C
                dervv(ilay,iseg) = 1.0
             enddo
          enddo
-C
-C        cummulate time
-C
+!
+!        cummulate time
+!
          TIMEV = TIMEV + CONCV*DELT
          TIMTOT = TIMTOT + DELT
-C
-C        if accumulated time equal or greater then accumulation period then calculate fraction of time
-C        and reset the distribution
-C
+!
+!        if accumulated time equal or greater then accumulation period then calculate fraction of time
+!        and reset the distribution
+!
          IF ( TIMTOT .GE. (PERIOD-DELT*0.5) ) THEN
             FRACV = TIMEV/TIMTOT
             CONCV=0.0
@@ -293,10 +279,10 @@ C
          ENDIF
 
       endif
-C
-C     output IP11 is switch for the PLCT/BLOOM
-C     furthermore there is a max of 100 output, the fraction of time
-C
+!
+!     output IP11 is switch for the PLCT/BLOOM
+!     furthermore there is a max of 100 output, the fraction of time
+!
       DO ISEG = 1 , NOSEG
          DO ILAY = 1 , MIN(100,NOLAY)
             IP12 = IPOINT(11+ILAY)+(ISEG-1)*INCREM(11+ILAY)
@@ -318,7 +304,7 @@ C
             close(ilun)
          endif
       endif
-C
+!
       RETURN
  1000 FORMAT(' ERROR: allocating memory in VTRANS :',I10)
  1001 FORMAT(' NOSEG = ',I10)

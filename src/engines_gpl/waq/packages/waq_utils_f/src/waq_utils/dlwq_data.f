@@ -936,7 +936,7 @@
       endif
       idtc = it1c + it2c
       if ( idtc .eq. 0 ) idtc = 1
-c
+!
       return
       end subroutine dlwqdataGetValueMiss
 

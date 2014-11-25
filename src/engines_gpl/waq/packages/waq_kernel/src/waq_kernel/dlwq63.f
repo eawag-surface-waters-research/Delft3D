@@ -23,35 +23,35 @@
 
       SUBROUTINE DLWQ63 ( CONC   , DERIV  , AMASS2 , NOSEG  , NOTOT  ,
      *                    ISYS   , NSYS   , DMPS   , INTOPT , ISDMP  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june 1988 by L.Postma
-C
-C     FUNCTION            : derives concentrations from deriv
-C                           zeros DERIV
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
-C     ----    -----      ------       ------- -----------
-C     CONC    REAL     NOTOT*NOSEG    INPUT   first order term
-C     DERIV   REAL     NOTOT*NOSEG    IN/OUT  right hand side matrix
-C     AMASS2  REAL     NOTOT*5        IN/OUT  mass accumulation array
-C     NOSEG   INTEGER       1         INPUT   number of segments
-C     NOTOT   INTEGER       1         INPUT   total number of systems
-C     ISYS    INTEGER       1         INPUT   system considered
-C     NSYS    INTEGER       1         INPUT   number of systems to take
-C     DMPS    REAL          *         IN/OUT  dumped segment fluxes
-C                                             if INTOPT > 7
-C     INTOPT  INTEGER     1       INPUT   Integration suboptions
-C
-C     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june 1988 by L.Postma
+!
+!     FUNCTION            : derives concentrations from deriv
+!                           zeros DERIV
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
+!     ----    -----      ------       ------- -----------
+!     CONC    REAL     NOTOT*NOSEG    INPUT   first order term
+!     DERIV   REAL     NOTOT*NOSEG    IN/OUT  right hand side matrix
+!     AMASS2  REAL     NOTOT*5        IN/OUT  mass accumulation array
+!     NOSEG   INTEGER       1         INPUT   number of segments
+!     NOTOT   INTEGER       1         INPUT   total number of systems
+!     ISYS    INTEGER       1         INPUT   system considered
+!     NSYS    INTEGER       1         INPUT   number of systems to take
+!     DMPS    REAL          *         IN/OUT  dumped segment fluxes
+!                                             if INTOPT > 7
+!     INTOPT  INTEGER     1       INPUT   Integration suboptions
+!
+!     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
+!
       use timers
 
       INTEGER     ISDMP(*)
@@ -59,9 +59,9 @@ C
      *            DMPS(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq63", ithandl )
-C
-C         gets concentrations
-C
+!
+!         gets concentrations
+!
       ISET = 1
       IF ( MOD(INTOPT,16) .LT. 8  ) THEN
          DO 10 ISEG = 1 , NOSEG
@@ -83,13 +83,13 @@ C
                ISET = ISET+1
    20    CONTINUE
       ENDIF
-C
-C         zero the derivative
-C
+!
+!         zero the derivative
+!
       NTOT = NOTOT*NOSEG
       DO 30 I = 1 , NTOT
    30 DERIV(I) = 0.0
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -40,91 +40,91 @@
 !>                          for the simulation from the binary system
 !>                          file at LUN(2).
 
-C     CREATED: may -1988 by L. Postma
-C
-C     LOGICAL UNITNUMBERS : LUN( 2) - system intermediate file
-C                           LUN(19) - monitoring output file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
+!     CREATED: may -1988 by L. Postma
+!
+!     LOGICAL UNITNUMBERS : LUN( 2) - system intermediate file
+!                           LUN(19) - monitoring output file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
 
       use timers
       use grids
       use delwaq2_data
 
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUN     INTEGER       *     INPUT   logical unitnumbers
-C     MODID   CHAR*40       4     OUTPUT  Model and run-ID
-C     SYSID   CHAR*20   NOTOT     OUTPUT  Systems ID
-C     IDUMP   INTEGER  NODUMP     OUTPUT  Dump segment numbers
-C     DUMPID  CHAR*20  NODUMP     OUTPUT  Dump-segment ID
-C     IDPNT   INTEGER   NOSYS     OUTPUT  Pointers to dispersion array
-C     IVPNT   INTEGER   NOSYS     OUTPUT  Pointers to velocity array
-C     DISP    REAL          3     OUTPUT  dispersion in 3 directions
-C     IBPNT   INTEGER  4*NOBND    OUTPUT  1,* = timelag
-C                                         2,* = flow pointer
-C                                         3,* = segment pointer
-C                                         4,* = time on timelag
-C     BNDID   CHAR*20   NOBND     OUTPUT  Open boundary ID's
-C     BNDNAM  CHAR*40   NOBND     OUTPUT  Open boundary names
-C     BNDTYP  CHAR*20   NOBND     OUTPUT  Open boundary types
-C     INWTYP  INTEGER     *       OUTPUT  Types of items
-C     IWASTE  INTEGER   NOWST     OUTPUT  waste load segment numbers
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUN     INTEGER       *     INPUT   logical unitnumbers
+!     MODID   CHAR*40       4     OUTPUT  Model and run-ID
+!     SYSID   CHAR*20   NOTOT     OUTPUT  Systems ID
+!     IDUMP   INTEGER  NODUMP     OUTPUT  Dump segment numbers
+!     DUMPID  CHAR*20  NODUMP     OUTPUT  Dump-segment ID
+!     IDPNT   INTEGER   NOSYS     OUTPUT  Pointers to dispersion array
+!     IVPNT   INTEGER   NOSYS     OUTPUT  Pointers to velocity array
+!     DISP    REAL          3     OUTPUT  dispersion in 3 directions
+!     IBPNT   INTEGER  4*NOBND    OUTPUT  1,* = timelag
+!                                         2,* = flow pointer
+!                                         3,* = segment pointer
+!                                         4,* = time on timelag
+!     BNDID   CHAR*20   NOBND     OUTPUT  Open boundary ID's
+!     BNDNAM  CHAR*40   NOBND     OUTPUT  Open boundary names
+!     BNDTYP  CHAR*20   NOBND     OUTPUT  Open boundary types
+!     INWTYP  INTEGER     *       OUTPUT  Types of items
+!     IWASTE  INTEGER   NOWST     OUTPUT  waste load segment numbers
       integer  ( 4), intent(  out) :: iwsknd(*) !  wasteload processing
-C     WASTID  CHAR*20   NOWST     OUTPUT  Waste location ID
-C     WSTNAM  CHAR*40   NOWST     OUTPUT  Waste location names
-C     WSTTYP  CHAR*20   NOWST     OUTPUT  Waste location types
-C     ALENG   REAL        3       OUTPUT  Lengthes in 3 directions
-C     CONST   REAL     NOCONS     OUTPUT  value of constants
-C     PARAM   REAL    NOPA,NOSEG  OUTPUT  value of parameters
-C     NRFTOT  INTEGER  NOITEM     OUTPUT  file lengthes per item
-C     NRHARM  INTEGER  NOITEM     OUTPUT  nr of harmonics per item
-C     CONAME  CHAR*20  NOCONS     OUTPUT  Constant names
-C     PANAME  CHAR*20  NOPA       OUTPUT  Parameter names
-C     FUNAME  CHAR*20  NOFUN      OUTPUT  Function names
-C     SFNAME  CHAR*20  NOSFUN     OUTPUT  Segment function names
-C     DINAME  CHAR*20  NODISP     OUTPUT  Dispersion array names
-C     VENAME  CHAR*20  NOVELO     OUTPUT  Velocity array names
-C     DANAM   CHAR*20  NDMPAR     OUTPUT  Dump-area    ID
-C     IPDMP   INTEGER       *     OUTPUT  pointer structure dump area's
-C     IQDMP   INTEGER       *     OUTPUT  Exchange to dumped exchange pointer
-C     ISDMP   INTEGER       *     OUTPUT  Segment to dumped segment pointer
-C     RANAM   CHAR*20       *     OUTPUT  Raaien names
-C     IORAAI  INTEGER       *     OUTPUT  option output raaien
-C     NQRAAI  INTEGER       *     OUTPUT  number of exch. per raai
-C     IQRAAI  INTEGER       *     OUTPUT  exchange nunbers raaien
-C
-C
-C     IN COMMON BLOCK     :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOSEG   INTEGER       1     INPUT   Number of segments
-C     NOSYS   INTEGER       1     INPUT   Number of active systems
-C     NOTOT   INTEGER       1     INPUT   Number of systems
-C     NODISP  INTEGER       1     INPUT   Number of dispersion array's
-C     NOVELO  INTEGER       1     INPUT   Number of velocity array's
-C     NOQ     INTEGER       1     INPUT   total number of exchanges
-C     NODUMP  INTEGER       1     INPUT   Number of dump segments
-C     NOBND   INTEGER       1     INPUT   Number of open boundaries
-C     NOBTYP  INTEGER       1     INPUT   Number of boundarie types
-C     NOWST   INTEGER       1     INPUT   Number of load locations
-C     NOWTYP  INTEGER       1     INPUT   Number of waste load types
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     NOITEM  INTEGER       1     INPUT   Number possible functions
-C     NDMPAR  INTEGER       1     INPUT   Number of dump area's
-C     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
-C     NTDMPS  INTEGER       1     INPUT   total number segments in dump area
-C     NORAAI  INTEGER       1     INPUT   number of raaien
-C     NTRAAQ  INTEGER       1     INPUT   total number of exch. in raaien
-C
-C
+!     WASTID  CHAR*20   NOWST     OUTPUT  Waste location ID
+!     WSTNAM  CHAR*40   NOWST     OUTPUT  Waste location names
+!     WSTTYP  CHAR*20   NOWST     OUTPUT  Waste location types
+!     ALENG   REAL        3       OUTPUT  Lengthes in 3 directions
+!     CONST   REAL     NOCONS     OUTPUT  value of constants
+!     PARAM   REAL    NOPA,NOSEG  OUTPUT  value of parameters
+!     NRFTOT  INTEGER  NOITEM     OUTPUT  file lengthes per item
+!     NRHARM  INTEGER  NOITEM     OUTPUT  nr of harmonics per item
+!     CONAME  CHAR*20  NOCONS     OUTPUT  Constant names
+!     PANAME  CHAR*20  NOPA       OUTPUT  Parameter names
+!     FUNAME  CHAR*20  NOFUN      OUTPUT  Function names
+!     SFNAME  CHAR*20  NOSFUN     OUTPUT  Segment function names
+!     DINAME  CHAR*20  NODISP     OUTPUT  Dispersion array names
+!     VENAME  CHAR*20  NOVELO     OUTPUT  Velocity array names
+!     DANAM   CHAR*20  NDMPAR     OUTPUT  Dump-area    ID
+!     IPDMP   INTEGER       *     OUTPUT  pointer structure dump area's
+!     IQDMP   INTEGER       *     OUTPUT  Exchange to dumped exchange pointer
+!     ISDMP   INTEGER       *     OUTPUT  Segment to dumped segment pointer
+!     RANAM   CHAR*20       *     OUTPUT  Raaien names
+!     IORAAI  INTEGER       *     OUTPUT  option output raaien
+!     NQRAAI  INTEGER       *     OUTPUT  number of exch. per raai
+!     IQRAAI  INTEGER       *     OUTPUT  exchange nunbers raaien
+!
+!
+!     IN COMMON BLOCK     :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOSEG   INTEGER       1     INPUT   Number of segments
+!     NOSYS   INTEGER       1     INPUT   Number of active systems
+!     NOTOT   INTEGER       1     INPUT   Number of systems
+!     NODISP  INTEGER       1     INPUT   Number of dispersion array's
+!     NOVELO  INTEGER       1     INPUT   Number of velocity array's
+!     NOQ     INTEGER       1     INPUT   total number of exchanges
+!     NODUMP  INTEGER       1     INPUT   Number of dump segments
+!     NOBND   INTEGER       1     INPUT   Number of open boundaries
+!     NOBTYP  INTEGER       1     INPUT   Number of boundarie types
+!     NOWST   INTEGER       1     INPUT   Number of load locations
+!     NOWTYP  INTEGER       1     INPUT   Number of waste load types
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     NOITEM  INTEGER       1     INPUT   Number possible functions
+!     NDMPAR  INTEGER       1     INPUT   Number of dump area's
+!     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
+!     NTDMPS  INTEGER       1     INPUT   total number segments in dump area
+!     NORAAI  INTEGER       1     INPUT   number of raaien
+!     NTRAAQ  INTEGER       1     INPUT   total number of exch. in raaien
+!
+!
 
       INTEGER      IPDMP(*)  , IQDMP(*)   , ISDMP (*) , IORAAI(*) ,
      +             NQRAAI(*) , IQRAAI(*)  , GRDNOS(*) , GRDREF(*)
@@ -143,24 +143,24 @@ C
       type(delwaq_data),     intent(inout) :: dlwqd      !< derived type for persistent storage
       integer                              :: dmpbal(*)  !< indicates if dump area is included in the balance
       type(GridPointer)    :: aGrid      ! a single grid
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI   /   Timer characteristics
-C
+!
+!     COMMON  /  SYSI   /   Timer characteristics
+!
       INCLUDE 'sysi.inc'
 
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqi2", ithandl )
-C
-C     Local
-C
+!
+!     Local
+!
       IT = 0
-C
-C         read from the system file
-C
+!
+!         read from the system file
+!
       NOQTT = NOQ + NOQ4
       NOSSS = NOSEG + NSEG2
       IIN = LUN(2)
@@ -175,14 +175,14 @@ C
      &   READ ( IIN , END=40, ERR=40) (DMPBAL(K), K=1,NDMPAR)
       IF ( NORAAI .GT. 0 )
      &   READ ( IIN , END=40, ERR=40) (RANAM(K), K=1,NORAAI)
-C
-C     sub-grid
-C
+!
+!     sub-grid
+!
       DO IGRID = 1 , NOGRID
          READ ( IIN , END=40, ERR=40)  GRDNOS(IGRID), GRDREF(IGRID),
      +                                (GRDSEG(ISEG,IGRID),ISEG=1,NOSSS)
       ENDDO
-c     the grid structures
+!     the grid structures
       DO IGRID = 1 , NOGRID
          ierror = GridRead( iin, aGrid, nosss )
          if ( ierror .ne. 0 ) goto 40
@@ -226,7 +226,7 @@ c     the grid structures
          READ ( IIN , END=40, ERR=40) ( BNDTYP(K)   , K=1,NOBTYP )
          READ ( IIN , END=40, ERR=40) ( INWTYP(K+IT), K=1,NOBND  )
          IT = IT + NOBND
-C          read time lags
+!          read time lags
          READ ( IIN , END=40, ERR=40) ( IBPNT(1,K), K=1,NOBND  )
       ENDIF
       IF ( NOWST  .GT. 0 ) THEN
@@ -250,43 +250,43 @@ C          read time lags
       IF ( NOSFUN .GT. 0 ) THEN
          READ ( IIN , END=40, ERR=40) (SFNAME(K),K=1,NOSFUN)
       ENDIF
-C
-C     Time function info
-C
+!
+!     Time function info
+!
       READ ( IIN    , END=40, ERR=40) (NRFTOT( K), K=1,NOITEM)
       READ ( IIN    , END=40, ERR=40) (NRHARM( K), K=1,NOITEM)
-C
-C         boundary timings greater then timelag
-C
+!
+!         boundary timings greater then timelag
+!
       DO 30 I=1,NOBND
       IBPNT(4,I)  = IBPNT(1,I) + 1
    30 CONTINUE
-C
-C         extract reference date and time
-C
+!
+!         extract reference date and time
+!
       CALL MODIFIED_JULIAN( MODID(4) )
       dlwqd%otime  = otime
       dlwqd%tscale = tscale
-C
-C         completion successful
-C
+!
+!         completion successful
+!
       WRITE ( LUN(19) , 2000 ) (MODID(K),K=1,4)
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
-C         unsuccessful read
-C
+!
+!         unsuccessful read
+!
    40 WRITE ( LUN(19) , 2010 )
       CALL SRSTOP(1)
-C
-C         output formats
-C
+!
+!         output formats
+!
  2000 FORMAT ( '1',20X,A40/21X,A40//21X,A40/21X,A40//
      &             21X,'Initialisation from system file completed.')
  2010 FORMAT ( '1  ERROR reading binary system file !!'/
      &         '   initialisation NOT successful    !!'/
      &         '   simulation impossible            !!')
-C
+!
       CONTAINS
       SUBROUTINE MODIFIED_JULIAN( T0STRING )
       IMPLICIT NONE

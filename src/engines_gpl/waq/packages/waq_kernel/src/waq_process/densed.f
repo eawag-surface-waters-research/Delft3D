@@ -27,44 +27,30 @@
 !>\file
 !>       Denitrification in sediment
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            ----
-C CRTEMP  R*4 1 I critical temperature for both processes             [xC]
-C DEPTH   R*4 1 I depth                                                [m]
-C DENR    R*4 1 I zeroth order denitrification rate              [gN/m2/d]
-C DENRC   R*4 1 I firstt order denitrification rate                  [m/d]
-C DENTC   R*4 1 I temperature coefficient for denitrif.                [-]
-C FL (1)  R*4 1 O denitrification flux                           [gN/m3/d]
-C NO3     R*4 1 I nitrate concentration                            [gN/m3]
-C TEMP    R*4 1 I ambient temperature                                 [xC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
-C TEMPC   R*4 1 L temperatuur coefficient                              [-]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            ----
+! CRTEMP  R*4 1 I critical temperature for both processes             [xC]
+! DEPTH   R*4 1 I depth                                                [m]
+! DENR    R*4 1 I zeroth order denitrification rate              [gN/m2/d]
+! DENRC   R*4 1 I firstt order denitrification rate                  [m/d]
+! DENTC   R*4 1 I temperature coefficient for denitrif.                [-]
+! FL (1)  R*4 1 O denitrification flux                           [gN/m3/d]
+! NO3     R*4 1 I nitrate concentration                            [gN/m3]
+! TEMP    R*4 1 I ambient temperature                                 [xC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [xC]
+! TEMPC   R*4 1 L temperatuur coefficient                              [-]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -73,7 +59,7 @@ C     ------   -----  ------------
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
       LOGICAL  TMPOPT
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -81,7 +67,7 @@ C
       IN5  = INCREM( 5)
       IN6  = INCREM( 6)
       IN7  = INCREM( 7)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -89,7 +75,7 @@ C
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
       IP7  = IPOINT( 7)
-C
+!
       IF ( IN1 .EQ. 0 .AND. IN3 .EQ. 0 .AND. IN4 .EQ. 0 .AND.
      *     IN5 .EQ. 0 .AND. IN6 .EQ. 0                        ) THEN
          DENR   = PMSA(IP1)
@@ -107,7 +93,7 @@ C
       ELSE
          TMPOPT = .TRUE.
       ENDIF
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -115,7 +101,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
       IF ( TMPOPT ) THEN
          DENR   = PMSA(IP1)
          TEMP   = PMSA(IP5)
@@ -129,22 +115,22 @@ C
             TEMFAK = DENRC * DENTC ** TEMP20
          ENDIF
       ENDIF
-C
+!
       NO3    = MAX ( 0.0, PMSA(IP2 ) )
       DEPTH  = PMSA(IP7)
 
-C***********************************************************************
-C**** Processes connected to the DENITRIFICATION
-C***********************************************************************
-C
-C     Denitrification is assumed to take place in the sediment
-C     Calculation of denitrification flux ( M.L-3.t-1)
+!***********************************************************************
+!**** Processes connected to the DENITRIFICATION
+!***********************************************************************
+!
+!     Denitrification is assumed to take place in the sediment
+!     Calculation of denitrification flux ( M.L-3.t-1)
 
       FL( 1 + IFLUX ) = ( DENR +  TEMFAK * NO3 ) / DEPTH
-C
+!
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
          IP1 = IP1 + IN1
       IP2   = IP2   + IN2
@@ -153,9 +139,9 @@ C
          IP5 = IP5 + IN5
          IP6 = IP6 + IN6
       IP7   = IP7   + IN7
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

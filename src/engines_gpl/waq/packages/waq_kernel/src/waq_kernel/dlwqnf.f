@@ -182,50 +182,50 @@
 
       include 'state_data.inc'
 
-C     SPECIAL REMARKS    : MASS-ARRAY IS USED FOR RHS VECTOR!!
-C
-C     This option is a mix of option 1 (discretization of transport
-C     in space) and option 6 (matrix inversion to perform implicit
-C     integration in time.
-C     The processes part is integrated EXPLICITLY, in order to allow
-C     for any complexity of the processes.
-C     Strictly speaking, a loop over substances should be added
-C     To anticipate this, the method uses an
-C     extra VOLUME-array (IVOL2), and uses the AMASS-array (IMASS)
-C     for the rhs-matrix, instead of the DERIV-array as in method 6.
-C     (JvG, May 8 1992)
-C
-C     This option implements:
-C     1) Euler backward time integration
-C     2) upwind differences for advection
-C     3) central differences for diffusion
-C     The resulting systems of equations are solved by an iterative
-C     solution method (GMRES).
-C     With such an iterative method, systems with multiple rhs cannot be solved
-C     (simultaneously). So we loop over the substances and solve each system
-C     individually. So RHS can be reduced to an REAL array of size NOSEG+NOBND.
-C
-C     possible improvements:
-C
-C     - Use FGMRES instead of GMRES for solving system of equations.
-C       This makes it possible to keep search directions which have already
-C       been computed in previous FGMRES calls and hence find the solution
-C       of new systems at lower costs!
-C
-C     - Tune the preconditioner to speed up the iteration process.
-C       Only Gaus-Seidel, and SSOR preconditioning has been implemented yet.
-C
-C     - Integrate processes in an implicit way as well. Enables users to
-C       potentially take larger time steps (better stability properties)
-C       or even compute steady states in "one time step" (the latter subject
-C       to constraint that proces formulation is time independent).
-C       Implicit time integration of processes requires the Inexact Newton
-C       solution method described in:
-C
-C       "DELWAQ FASTSOLVER II"
-C       Newton-Krylov methods for solving linear and non-linear equations
-C       report T1596, January 1996, Deltares
-C                                                              (KHT, 13/11/96)
+!     SPECIAL REMARKS    : MASS-ARRAY IS USED FOR RHS VECTOR!!
+!
+!     This option is a mix of option 1 (discretization of transport
+!     in space) and option 6 (matrix inversion to perform implicit
+!     integration in time.
+!     The processes part is integrated EXPLICITLY, in order to allow
+!     for any complexity of the processes.
+!     Strictly speaking, a loop over substances should be added
+!     To anticipate this, the method uses an
+!     extra VOLUME-array (IVOL2), and uses the AMASS-array (IMASS)
+!     for the rhs-matrix, instead of the DERIV-array as in method 6.
+!     (JvG, May 8 1992)
+!
+!     This option implements:
+!     1) Euler backward time integration
+!     2) upwind differences for advection
+!     3) central differences for diffusion
+!     The resulting systems of equations are solved by an iterative
+!     solution method (GMRES).
+!     With such an iterative method, systems with multiple rhs cannot be solved
+!     (simultaneously). So we loop over the substances and solve each system
+!     individually. So RHS can be reduced to an REAL array of size NOSEG+NOBND.
+!
+!     possible improvements:
+!
+!     - Use FGMRES instead of GMRES for solving system of equations.
+!       This makes it possible to keep search directions which have already
+!       been computed in previous FGMRES calls and hence find the solution
+!       of new systems at lower costs!
+!
+!     - Tune the preconditioner to speed up the iteration process.
+!       Only Gaus-Seidel, and SSOR preconditioning has been implemented yet.
+!
+!     - Integrate processes in an implicit way as well. Enables users to
+!       potentially take larger time steps (better stability properties)
+!       or even compute steady states in "one time step" (the latter subject
+!       to constraint that proces formulation is time independent).
+!       Implicit time integration of processes requires the Inexact Newton
+!       solution method described in:
+!
+!       "DELWAQ FASTSOLVER II"
+!       Newton-Krylov methods for solving linear and non-linear equations
+!       report T1596, January 1996, Deltares
+!                                                              (KHT, 13/11/96)
 
       if ( action == ACTION_FINALISATION ) then
           include 'dlwqdata_restore.inc'
@@ -235,14 +235,14 @@ C                                                              (KHT, 13/11/96)
       if ( action == ACTION_INITIALISATION  .or.
      &     action == ACTION_FULLCOMPUTATION        ) then
 
-C
-C        some initialisation
-C        IOPTPC = preconditioner switch [0 = none, 1 = GS (L), 2 = GS (U),
-C        3 = SSOR], ITER = maximum number of iterations [ > 0],
-C        TOL = relative tolerance [10^-3, 10^-10], ISCALE = row scaling
-C        of system of equations [0 = no, 1 =yes], KLAT = number of
-C        layers in preconditioner [1,KMAX]
-C
+!
+!        some initialisation
+!        IOPTPC = preconditioner switch [0 = none, 1 = GS (L), 2 = GS (U),
+!        3 = SSOR], ITER = maximum number of iterations [ > 0],
+!        TOL = relative tolerance [10^-3, 10^-10], ISCALE = row scaling
+!        of system of equations [0 = no, 1 =yes], KLAT = number of
+!        layers in preconditioner [1,KMAX]
+!
           call dlwqf5 ( lun(19) , nocons  , c(icnam), a(icons), ioptpc  ,
      &                  iter    , tol     , iscale  , litrep  , noseg   ,
      &                  noq3    , noq     , nobnd   , novec   , nomat   ,
@@ -278,13 +278,13 @@ C
           call move   ( a(ivol ), a(ivol2) , nosss   )
       endif
 
-C
-C     Save/restore the local persistent variables,
-C     if the computation is split up in steps
-C
-C     Note: the handle to the timer (ithandl) needs to be
-C     properly initialised and restored
-C
+!
+!     Save/restore the local persistent variables,
+!     if the computation is split up in steps
+!
+!     Note: the handle to the timer (ithandl) needs to be
+!     properly initialised and restored
+!
       if ( action == ACTION_INITIALISATION ) then
           if ( timon ) call timstrt ( "dlwqnf", ithandl )
           include 'dlwqdata_save.inc'

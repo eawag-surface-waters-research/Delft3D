@@ -21,27 +21,27 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO CALCULATE DEAD ALGAL POOLS DYNAMICALLY           *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO CALCULATE DEAD ALGAL POOLS DYNAMICALLY           *
+!  *********************************************************************
+!
       SUBROUTINE DYNADE(X,DEATH,INFEAS)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       DIMENSION X(MX)
-C
-C  CHECK FOR FEASIBILITY
-C
+!
+!  CHECK FOR FEASIBILITY
+!
       IF (INFEAS .EQ. 0) GO TO 8
       DO 5 I=1,NUNUCO
     5 DETRIT(I)=DETRIT(I)*REMEXP(I)
       RETURN
-C
-C  FEASIBILE SOLUTION
-C
+!
+!  FEASIBILE SOLUTION
+!
     8 CONTINUE
       AVAND=DEATH*AVAILN
       DO 20 I=1,NUNUCO

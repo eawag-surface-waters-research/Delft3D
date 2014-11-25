@@ -224,7 +224,7 @@
       write ( lunut , 1050 ) nobrk
       if ( nobrk .eq. 1 )    write ( lunut , 1060 )
 
-c      times are converted to delwaq times
+!      times are converted to delwaq times
 
       data_block%no_brk = nobrk
       allocate(data_block%times(nobrk))
@@ -338,5 +338,5 @@ c      times are converted to delwaq times
  1070 FORMAT (  ' WARNING: location : ',I8,' not found. Name is: ',A )
  1080 FORMAT (  ' ERROR  : location is used in a computation',
      *          ' that will become corrupted !' )
-C
+!
       END

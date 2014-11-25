@@ -24,35 +24,35 @@
       SUBROUTINE DLWQ83 ( CONC   , AMASS  , DERIV  , VOLUME , VOLUM2 ,
      *                    TIMER  , NOSYS  , NOTOT  , NOSEG  , ISTEP  ,
      *                                      ASTOP  , CONVER , IOUT   )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:    april 1988 by L.Postma
-C
-C     FUNCTION            : Sets an explicit time step from DERIV.
-C
-C     UNIT NUMBERS        : IOUT , monitor file
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     CONC    REAL   NOTOT*NOSEG  OUTPUT  new concentrations
-C     AMASS   REAL   NOTOT*NOSEG  IN/OUT  mass array to be updated
-C     DERIV   REAL   NOTOT*NOSEG  INPUT   derivetives for time step
-C     VOLUME  REAL      NOSEG     INPUT   segment volumes
-C     VOLUM2  REAL      NOSEG     INPUT   closure error correction
-C     TIMER   REAL   NOTOT*NOSEG  INPUT   time step size in flow units
-C     NOSYS   INTEGER     1       INPUT   number of active substances
-C     NOTOT   INTEGER     1       INPUT   number of total substances
-C     NOSEG   INTEGER     1       INPUT   number of computational elts.
-C     ISTEP   INTEGER     1       INPUT   iteration step count
-C     ASTOP   INTEGER     1       INPUT   stop criterion
-C     CONVER  LOGICAL     1       OUTPUT  TRUE if iteration successful
-C     IOUT    INTEGER     1       INPUT   unit number monitor file
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:    april 1988 by L.Postma
+!
+!     FUNCTION            : Sets an explicit time step from DERIV.
+!
+!     UNIT NUMBERS        : IOUT , monitor file
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     CONC    REAL   NOTOT*NOSEG  OUTPUT  new concentrations
+!     AMASS   REAL   NOTOT*NOSEG  IN/OUT  mass array to be updated
+!     DERIV   REAL   NOTOT*NOSEG  INPUT   derivetives for time step
+!     VOLUME  REAL      NOSEG     INPUT   segment volumes
+!     VOLUM2  REAL      NOSEG     INPUT   closure error correction
+!     TIMER   REAL   NOTOT*NOSEG  INPUT   time step size in flow units
+!     NOSYS   INTEGER     1       INPUT   number of active substances
+!     NOTOT   INTEGER     1       INPUT   number of total substances
+!     NOSEG   INTEGER     1       INPUT   number of computational elts.
+!     ISTEP   INTEGER     1       INPUT   iteration step count
+!     ASTOP   INTEGER     1       INPUT   stop criterion
+!     CONVER  LOGICAL     1       OUTPUT  TRUE if iteration successful
+!     IOUT    INTEGER     1       INPUT   unit number monitor file
+!
       use timers
 
       DIMENSION  CONC (*) , AMASS (*) , DERIV(*) , VOLUME(*) ,
@@ -60,9 +60,9 @@ C
       LOGICAL    CONVER
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq83", ithandl )
-C
-C         loop accross the number of computational elements
-C
+!
+!         loop accross the number of computational elements
+!
       CONVER = .FALSE.
       DCMAX  = 0.0
       ISMAX  =  0
@@ -72,9 +72,9 @@ C
       V1 = VOLUME(ISEG)
       V2 = VOLUM2(ISEG)
       IF ( V1 .LT. 1.0E-30 ) V1 = 1.0
-C
-C         active substances first
-C
+!
+!         active substances first
+!
       DO 10 I=1,NOSYS
       DT = 1.0
       IF ( TIMER(ITEL) .NE. 0.0 ) DT = 0.75/TIMER(ITEL)
@@ -94,9 +94,9 @@ C
       TIMER(ITEL) = 0.0
       ITEL = ITEL+1
    10 CONTINUE
-C
-C         then the inactive substances
-C
+!
+!         then the inactive substances
+!
       DO 20 I=NOSYS+1,NOTOT
       DT = 1.0
       IF ( TIMER(ITEL) .NE. 0.0 ) DT = 0.75/TIMER(ITEL)
@@ -115,11 +115,11 @@ C
       TIMER(ITEL) = 0.0
       ITEL = ITEL+1
    20 CONTINUE
-C
-C         end of the loop
-C
+!
+!         end of the loop
+!
    30 CONTINUE
-C
+!
       IF ( ICMAX .NE. 0 ) THEN
           WRITE ( IOUT , 2000 ) ISTEP, ISMAX, ICMAX, CSAVE, CNEW, DCMAX
           IF ( DCMAX .LT. ASTOP ) CONVER = .TRUE.
@@ -129,10 +129,10 @@ C
       ENDIF
       if ( timon ) call timstop ( ithandl )
       return
-C
+!
  2000 FORMAT(' ITERATION STEP:',I5,' MAXIMUM ADAPTATION IN SEGMENT:',I7,
      *       '  SUBSTANCE:',I3,/
      *       ' OLD:',E15.6,'  NEW:',E15.6,'  DIFFERENCE:',E15.6 )
  2010 FORMAT(' ALL DERIVATIVES ARE ZERO, NO IMPROVEMENTS POSSIBLE')
-C
+!
       END

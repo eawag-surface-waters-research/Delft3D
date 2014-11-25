@@ -21,34 +21,34 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C-----------------------------------------------------------------------
-C QSLP Quick Simplex algorithm to solve a Linear Program.
-C The technique used here is a variant of the primal - dual algorithm.
-C The call to this routine is similar to the one to DOSP.
-C
-C Version 1.1
-C Update 1.1: added check for negative "<" constraints.
-C
-C Program written by Hans Los.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! QSLP Quick Simplex algorithm to solve a Linear Program.
+! The technique used here is a variant of the primal - dual algorithm.
+! The call to this routine is similar to the one to DOSP.
+!
+! Version 1.1
+! Update 1.1: added check for negative "<" constraints.
+!
+! Program written by Hans Los.
+!-----------------------------------------------------------------------
       SUBROUTINE QSLP(A,IA,NR,NC,B,LSC,C,IOPT,IRS,LIB,D,ID,X,P,IER)
       IMPLICIT REAL*8 (A-H,O-Z)
       DIMENSION A(1:IA,1:ID),B(*),C(*),D(*),X(*),P(*)
       INTEGER LIB(*),IER,LSC(*),IOPT(*),IRS(*)
       DATA NQSLP /0/
-C
-C If the subroutine is called for the first time, perform some initial
-C checks.
-C
+!
+! If the subroutine is called for the first time, perform some initial
+! checks.
+!
       NQSLP = NQSLP + 1
       IF (NQSLP .GT. 1) GO TO 10
       IF (NR .GE. IA .OR. NC .GE. ID) THEN
          IER = 1000
          GO TO 340
       END IF
-C
-C Initiate control integers, copy arrays and set signs for constraints.
-C
+!
+! Initiate control integers, copy arrays and set signs for constraints.
+!
    10 CONTINUE
       IER = 0
       IRS(2) = 0
@@ -56,19 +56,19 @@ C
       ITFLAG = 0
       XOPT = 0.0D0
       X (NR+NC+1) = 0.0D0
-C
-C Initiate LIB. This array contains information on currently basic
-C variables.
-C
+!
+! Initiate LIB. This array contains information on currently basic
+! variables.
+!
       DO 20 I = 1, NR + NC
          LIB(I) = I
          X (I) = 0.0D0
    20 CONTINUE
-C
-C Optionally copy A, B and C to D, which is not used for computational
-C purposes in this subroutine (unlike DOSP).
-C At the end the original values of these arrays are restored.
-C
+!
+! Optionally copy A, B and C to D, which is not used for computational
+! purposes in this subroutine (unlike DOSP).
+! At the end the original values of these arrays are restored.
+!
       IF (IOPT(3) .EQ. 1) GO TO 60
       K = 0
       L = NR*NC
@@ -85,12 +85,12 @@ C
             D(L) = B(I)
    50    CONTINUE
    60    CONTINUE
-C
-C Check if there are any ">" constraint. Reverse the sign of the entries
-C in the A matrix and of the B vector.
-C Check if all "<" constraints are positive. If not, problem is
-C infeasible. Set exit values and leave.
-C
+!
+! Check if there are any ">" constraint. Reverse the sign of the entries
+! in the A matrix and of the B vector.
+! Check if all "<" constraints are positive. If not, problem is
+! infeasible. Set exit values and leave.
+!
       INEG = 0
       DO 80 I = 1, NR
          IF (LSC (I) .LE. 0) THEN
@@ -107,31 +107,31 @@ C
          B (I) = - B(I)
          INEG = INEG + 1
    80 CONTINUE
-C
-C Reverse the sign of the C vector for a maximization problem.
-C Note: minimization is NOT currently supported!
-C
+!
+! Reverse the sign of the C vector for a maximization problem.
+! Note: minimization is NOT currently supported!
+!
       IF (IOPT(4) .EQ. 1) THEN
          DO 90 J = 1,NC
             C (J) = - C(J)
    90    CONTINUE
       END IF
       IF (INEG .EQ. 0) GO TO 170
-C-----------------------------------------------------------------------
-C Satisfy greater than constraints, if there are any. Use the
-C Dual method.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Satisfy greater than constraints, if there are any. Use the
+! Dual method.
+!-----------------------------------------------------------------------
   100 CONTINUE
       IER = 100
       IRS(2) = 4
       METHOD = 1
-C
-C Get pivot row. Use two different steps. First determine if there
-C are any negative ">" constraints left. If this is the case, these
-C are resolved first (INEG > 0). If there are none left, variables
-C which may have become negative are selected for pivoting.
-C Select the minimum value of B(I) as pivot row.
-C
+!
+! Get pivot row. Use two different steps. First determine if there
+! are any negative ">" constraints left. If this is the case, these
+! are resolved first (INEG > 0). If there are none left, variables
+! which may have become negative are selected for pivoting.
+! Select the minimum value of B(I) as pivot row.
+!
       INEG = 0
       DO 110 I = 1,NR
          IF (B(I) .GE. -1.0D-12) GO TO 110
@@ -147,23 +147,23 @@ C
          BPIVOT = B(I)
          IP = I
   120 CONTINUE
-C
-C If minimum of B(I) is positive, the DUAL part of the algorithm can
-C be terminated successfully. Continue with the primal method. A
-C feasible solution exists. If no pivot was found, but the BMIN is
-C still negative, no feasible solution exists.
-C
+!
+! If minimum of B(I) is positive, the DUAL part of the algorithm can
+! be terminated successfully. Continue with the primal method. A
+! feasible solution exists. If no pivot was found, but the BMIN is
+! still negative, no feasible solution exists.
+!
       IF (BMIN .GT. -1.0D-12) GO TO 170
       IF (BPIVOT .GT. -1.0D-12) GO TO 140
-C
-C Get pivot column. For ">" constraints select Min C(J)/A(IP,J)
-C under the condition that A(IP,J) and C(J) are negative.
-C Additionally record the (absolute) minimum A(IP,J). If no pivot row
-C was found, but there is at least one negative A(IP,J) value, this
-C is used for pivoting. This pivot row is also used for "<" constraints
-C and structural variables, which have become negative in previous
-C iterations.
-C
+!
+! Get pivot column. For ">" constraints select Min C(J)/A(IP,J)
+! under the condition that A(IP,J) and C(J) are negative.
+! Additionally record the (absolute) minimum A(IP,J). If no pivot row
+! was found, but there is at least one negative A(IP,J) value, this
+! is used for pivoting. This pivot row is also used for "<" constraints
+! and structural variables, which have become negative in previous
+! iterations.
+!
       JP = 0
       JPNEG = 0
       CPIVOT = 1.0D40
@@ -187,11 +187,11 @@ C
          JP = JPNEG
          GO TO 200
       END IF
-C-----------------------------------------------------------------------
-C No feasible solution. Check which variables are negative. Replace
-C all neagative structural variables and "<" constraint by ">"
-C constraints.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! No feasible solution. Check which variables are negative. Replace
+! all neagative structural variables and "<" constraint by ">"
+! constraints.
+!-----------------------------------------------------------------------
   140 CONTINUE
       METHOD = 3
       IP = 0
@@ -211,10 +211,10 @@ C-----------------------------------------------------------------------
          IP = I
   150 CONTINUE
       IF (IP .EQ. 0) GO TO 290
-C
-C Find the pivot column. Use Max A(IP,J) under the condition
-C A(IP,J) > 0.0. Note: do not replace IP by a structural variable!
-C
+!
+! Find the pivot column. Use Max A(IP,J) under the condition
+! A(IP,J) > 0.0. Note: do not replace IP by a structural variable!
+!
       JP = 0
       APIVOT = -1.0D40
       DO 160 J = 1, NC
@@ -226,13 +226,13 @@ C
   160 CONTINUE
       IF (JP .EQ. 0) GO TO 290
       GO TO 200
-C-----------------------------------------------------------------------
-C Satisfy smaller than constraints using the primal method.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Satisfy smaller than constraints using the primal method.
+!-----------------------------------------------------------------------
   170 CONTINUE
-C
-C Get pivot column. Use Minimum C(J). Terminate when CMIN >= 0.0.
-C
+!
+! Get pivot column. Use Minimum C(J). Terminate when CMIN >= 0.0.
+!
       METHOD = 2
       JP = 0
       CPIVOT = 1.0D40
@@ -247,10 +247,10 @@ C
          IRS(3) = NR + NC + 1
          GO TO 290
       END IF
-C
-C Get pivot row. Choose IP as MIN B(I) / A(I,JP) under the condition
-C that A(I,JP) > 0.0.
-C
+!
+! Get pivot row. Choose IP as MIN B(I) / A(I,JP) under the condition
+! that A(I,JP) > 0.0.
+!
       IP = 0
       BPIVOT = 1.0D40
       DO 190 I = 1, NR
@@ -261,25 +261,25 @@ C
          BPIVOT = BI/AIJP
          IP = I
   190 CONTINUE
-C-----------------------------------------------------------------------
-C Start pivot operation. Update A, B and C.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Start pivot operation. Update A, B and C.
+!-----------------------------------------------------------------------
   200 CONTINUE
       ITER = ITER + 1
       ITFLAG = ITFLAG + 1
-C
-C Check the number of iterations. If exceeded, abort.
-C
+!
+! Check the number of iterations. If exceeded, abort.
+!
       IF (ITER .GE. IOPT(1)) THEN
          IER = 100
          IRS(2) = 2
          GO TO 290
       END IF
-C
-C Check the number of operations since the last update of the arrays.
-C If exceeded, reset all small numbers to 0.0D0 to avoid round-off
-C errors becoming to large.
-C
+!
+! Check the number of operations since the last update of the arrays.
+! If exceeded, reset all small numbers to 0.0D0 to avoid round-off
+! errors becoming to large.
+!
       IF (ITFLAG .GE. IOPT(2)) THEN
          ITFLAG = 0
          DO 220 I = 1, NR
@@ -292,31 +292,31 @@ C
             IF (DABS(C(J)) .LT. 1.0D-12) C(J) = 0.0D0
   230    CONTINUE
       END IF
-C
-C Modify pivot and pivot row.
-C
+!
+! Modify pivot and pivot row.
+!
       AP = A (IP,JP)
       A(IP,JP) = 1 / AP
       DO 240 I = 1, NR
          IF (I .EQ. IP) GO TO 240
          A (I,JP) = - A (I,JP) / AP
   240 CONTINUE
-C
-C Update optimum.
-C
+!
+! Update optimum.
+!
       CJPAP = C(JP)/AP
       XOPT = XOPT - B(IP) * CJPAP
-C
-C Update C vector.
-C
+!
+! Update C vector.
+!
       DO 250 J = 1, NC
          IF (J .EQ. JP) GO TO 250
          IF (DABS(A(IP,J)) .LT. 1.0D-12) GO TO 250
          C(J) = C(J) - A(IP,J) * CJPAP
   250 CONTINUE
-C
-C Modify elements not in pivot row or column. Update B vector.
-C
+!
+! Modify elements not in pivot row or column. Update B vector.
+!
       DO 270 I = 1, NR
          IF (I .EQ. IP) GO TO 270
          AIJP =  A(I,JP)
@@ -333,18 +333,18 @@ C
             B(I) = BI
          END IF
   270 CONTINUE
-C
-C Modify pivot column.
-C
+!
+! Modify pivot column.
+!
       B(IP) = B(IP)/AP
       C(JP) = - CJPAP
       DO 280 J = 1, NC
          IF (J .EQ. JP) GO TO 280
          A(IP,J) = A(IP,J)/AP
   280 CONTINUE
-C
-C Update LIB to indicate basic variables.
-C
+!
+! Update LIB to indicate basic variables.
+!
       IHELP1 = LIB (JP + NR)
       IHELP2 = LIB (IP)
       LIB (JP + NR) = IHELP2
@@ -352,17 +352,17 @@ C
       IF (METHOD .EQ. 1) GO TO 100
       IF (METHOD .EQ. 2) GO TO 170
       IF (METHOD .EQ. 3) GO TO 140
-C-----------------------------------------------------------------------
-C Get X-vector and leave subroutine.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Get X-vector and leave subroutine.
+!-----------------------------------------------------------------------
   290 CONTINUE
       DO 300 I=1,NR
          X(LIB(I)) = B(I)
   300 CONTINUE
       X(NR+NC+1) = XOPT
-C
-C Optionally restore the original A, B and C arrays.
-C
+!
+! Optionally restore the original A, B and C arrays.
+!
       IF (IOPT(3) .EQ. 1) GO TO 340
       K = 0
       L = NR*NC

@@ -22,21 +22,21 @@
 !!  rights reserved.
 
       SUBROUTINE DHGARG ( IARG  , LINE  )
-C
-C     Returns the IARG'th argument from the command line
-C
+!
+!     Returns the IARG'th argument from the command line
+!
       USE DHCOMMAND
 
       IMPLICIT NONE
-C
-C     Arguments
-C
+!
+!     Arguments
+!
       INTEGER       NARG
       INTEGER       IARG
       CHARACTER*(*) LINE
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER*2     N, STATUS
       CHARACTER*256 BUFFER
       INTEGER       COUNT
@@ -46,22 +46,22 @@ C
       INTEGER       LUN
       INTEGER       I
 
-C
-C     Any stored arguments?
-C
+!
+!     Any stored arguments?
+!
       STORED = DHSTORED_NUMBER_ARGS()
       IF ( STORED > 0 ) THEN
           LINE = DHSTORED_ARG(IARG)
       ELSE
-C
-C         Call system routine
-C
+!
+!         Call system routine
+!
           NARG = IARGC() + 1
           N = IARG
           CALL GETARG( N     , BUFFER)
-C
-C         Store result
-C
+!
+!         Store result
+!
           LINE = BUFFER
 
           !
@@ -101,6 +101,6 @@ C
               ENDIF
           ENDIF
       ENDIF
-C
+!
       RETURN
       END

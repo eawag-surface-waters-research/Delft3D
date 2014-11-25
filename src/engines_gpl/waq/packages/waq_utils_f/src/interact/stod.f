@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       INTEGER FUNCTION STOD(SOURCE, STPOS, LENGTH, NUMBER)
-C
+!
       IMPLICIT INTEGER (A-Z)
       DOUBLE PRECISION NUMBER, DB, DP, CONVER
       CHARACTER*1 SOURCE(1)
@@ -32,9 +32,9 @@ C
       DATA CCHRZE, CHRA, CCHRB/'0', 0, ' '/,
      X CPLUS,CMINUS,CZERO,CNINE,CDECPT,CE,CD,CBLANK/'+', '-', '0', '9',
      X '.', 'E', 'D', ' '/
-C
-C Convert CHARACTERS to corresponding INTEGERS.
-C
+!
+! Convert CHARACTERS to corresponding INTEGERS.
+!
       CHR0 = ICHAR(CCHRZE)
       CHRB = ICHAR(CCHRB)
       PLUS = ICHAR(CPLUS)
@@ -45,13 +45,13 @@ C
       E = ICHAR(CE)
       D = ICHAR(CD)
       BLANK = ICHAR(CBLANK)
-C
+!
       IF (STPOS.LE.0) GOTO 1001
       IF (LENGTH.LT.STPOS) GOTO 1002
       DO 10 IFND=STPOS,LENGTH
-C *** Convert CHARACTER to INTEGER.
+! *** Convert CHARACTER to INTEGER.
       CHRA = ICHAR(SOURCE(IFND))
-C *** Conversion completed.
+! *** Conversion completed.
       IF (IGN(CHRA+1).EQ.0) GOTO 15
 10    CONTINUE
       GOTO 100
@@ -64,10 +64,10 @@ C *** Conversion completed.
       EFLAG = 0
       EXP = 0
       DO 20 JFND=IFND,LENGTH
-C *** Convert CHARACTER to INTEGER.
+! *** Convert CHARACTER to INTEGER.
       CHRA = ICHAR(SOURCE(JFND))
       CHRB = CHRA
-C *** Conversion completed.
+! *** Conversion completed.
       GOTO (30,40,50,60,70),WFLAG
 30    IF (CHRB.EQ.PLUS) GOTO 32
       IF (CHRB.NE.MINUS) GOTO 33

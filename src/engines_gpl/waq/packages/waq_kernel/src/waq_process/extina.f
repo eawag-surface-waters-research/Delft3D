@@ -27,45 +27,16 @@
 !>\file
 !>       Extinction of light by algae and POC
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Jos van Gils
-C     Date    : 940725             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     981008  Jos van Gils    Protect for inactive species
-C     940725  Jos van Gils    Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                              Units
-C ----    --- -  -    -------------------                      ----
-
-C     Logical Units : -
-
-C     Modules called : -
-
-C     Name     Type   Library
-C     ------   -----  ------------
-
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER  NALG  , ISWFIX, NIPALG, IFLUX , ISEG  ,
      +         IKMRK1, IALG  , IP    , IFIX
       REAL     EXTALG, VOLUME, EXTCF , BIOMAS
-C
+!
       NALG  = NINT(PMSA(IPOINT(1)))
       ISWFIX= NINT(PMSA(IPOINT(2)))
       IF ( ISWFIX .EQ. 1 ) THEN
@@ -82,8 +53,8 @@ C
 
       EXTALG = 0.0
       DEPTH  = PMSA ( IPOINT(3) + (ISEG-1)*INCREM(3) )
-C
-C     Loop over algae
+!
+!     Loop over algae
 
       DO 100 IALG = 1,NALG
 
@@ -119,11 +90,11 @@ C     Loop over algae
       PMSA ( IPOINT(IP) + (ISEG-1)*INCREM(IP) ) = EXTALG
 
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
 
       END

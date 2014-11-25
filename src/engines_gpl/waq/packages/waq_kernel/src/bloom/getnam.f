@@ -21,47 +21,47 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       5 Augustus 1994
-C    Program:    GETNAM.FOR
-C    Version:    0.1
-C    Programmer: Jos van Gils
-C
-C    Get names of types of algae and groups of algae
-C
-C    Called by: PDFBLO
-C    Calls    : -
+!    Date:       5 Augustus 1994
+!    Program:    GETNAM.FOR
+!    Version:    0.1
+!    Programmer: Jos van Gils
+!
+!    Get names of types of algae and groups of algae
+!
+!    Called by: PDFBLO
+!    Calls    : -
 
       SUBROUTINE GETNAM ( NTYPE , NAMTYP , NGROUP , NAMGRO )
-C
-C     Arguments
-C
-C     Name    Type  Length   I/O  Description
-C
-C     NTYPE   I     1        I    Number of species
-C     NGROUP  I     1        I    Number of groups
-C     NAMTYP  C*10  NTYPE    O    Names of species
-C     NAMGRO  C*10  NGROUP   O    Names of groups
-C
+!
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     NTYPE   I     1        I    Number of species
+!     NGROUP  I     1        I    Number of groups
+!     NAMTYP  C*10  NTYPE    O    Names of species
+!     NAMGRO  C*10  NGROUP   O    Names of groups
+!
       INTEGER         NTYPE , NGROUP
       CHARACTER*10    NAMTYP(NTYPE), NAMGRO(NGROUP)
 
-C     Common block variables used
-C
-C     Name    Type  Length   I/O  Inc-file  Description
-C
-C     MT      I     1        I    blmdim    Max. number of species
-C     NUSPEC  I     1        I    phyt2     Actual number of species
-C     SPNAME  C*8   MT       I    phyt1     Species names
-C     MS      I     1        I    blmdim    Max. number of groups
-C     NUECOG  I     1        I    phyt2     Actual number of groups
-C     GRNAME  C*8   MS       I    phyt1     Group names
-C     IT2     I     MS,2     I    phyt2     Administration of groups/types
-C
+!     Common block variables used
+!
+!     Name    Type  Length   I/O  Inc-file  Description
+!
+!     MT      I     1        I    blmdim    Max. number of species
+!     NUSPEC  I     1        I    phyt2     Actual number of species
+!     SPNAME  C*8   MT       I    phyt1     Species names
+!     MS      I     1        I    blmdim    Max. number of groups
+!     NUECOG  I     1        I    phyt2     Actual number of groups
+!     GRNAME  C*8   MS       I    phyt1     Group names
+!     IT2     I     MS,2     I    phyt2     Administration of groups/types
+!
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
 
-C     Local variables
+!     Local variables
 
       INTEGER     I,J,ITEL
 

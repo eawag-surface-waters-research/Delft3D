@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO CALCULATE THE CONCENTRAION OF LIVING AND DEAD    *
-C  *         ALGAE AND THE FLOW OF DEAD ALGAE TO THE BOTTOM            *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO CALCULATE THE CONCENTRAION OF LIVING AND DEAD    *
+!  *         ALGAE AND THE FLOW OF DEAD ALGAE TO THE BOTTOM            *
+!  *********************************************************************
+!
       SUBROUTINE POOLS(CDATE,DEATH,ALIVE,TEMP)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -35,34 +35,34 @@ C
       INCLUDE 'cal1.inc'
       INCLUDE 'ioblck.inc'
       CHARACTER*8 CDATE
-C
-C  Calculate the total concentrations of living and dead algae
-C  at equlibrium.
-C  All values are expressed in carbon-units.
-C  ALIVE-has already been calculated in subroutine PRODUC.
-C  This subroutine writes output on unit IOU(20).
-C
+!
+!  Calculate the total concentrations of living and dead algae
+!  at equlibrium.
+!  All values are expressed in carbon-units.
+!  ALIVE-has already been calculated in subroutine PRODUC.
+!  This subroutine writes output on unit IOU(20).
+!
       IF (NPRODU .GT. 1) GO TO 30
       WRITE (IOU(20),10)
    10 FORMAT (' Estimated concentrations of living and dead algae, and',
      1        /,' sedimentation rate of dead algae.',////)
-C
-C  Print heading for weeks on unit IOU(20).
-C
+!
+!  Print heading for weeks on unit IOU(20).
+!
       WRITE (IOU(20),20)
    20 FORMAT(2X,'Date',5X,'Temp',11X,'Living Algae',21X,'Dead Algae',
      1       20X,'Sedimentation rate',/,27X,'Mg C / m3',24X,
      2       'Mg C / m3',23X,'Mg C / m3 / Day',/)
    30 CONTINUE
-C
-C  Calculate concentrations of dead algae in C-units,
-C  and the sedimentation rate to the bottom.
-C
+!
+!  Calculate concentrations of dead algae in C-units,
+!  and the sedimentation rate to the bottom.
+!
       DEAD=DEATH*AVAILN*ALIVE/(REMIOR*TEMP+SEDRAT+FLUSH)
       SEDEAD=SEDRAT*DEAD
-C
-C  Print results.
-C
+!
+!  Print results.
+!
       WRITE (IOU(20),40) CDATE,TEMP,ALIVE,DEAD,SEDEAD
    40 FORMAT (2X,A4,5X,F4.1,13X,3(F7.1,25X))
       RETURN

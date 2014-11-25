@@ -21,15 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       5 Oct 1992
-C    Time:       22:20
-C    Program:    CECCAL.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       5 Oct 1992
+!    Time:       22:20
+!    Program:    CECCAL.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine ceccal
-c        ceccalc computes pie cec for compartment k
-c        procedure equivalent to phcalc
+!        ceccalc computes pie cec for compartment k
+!        procedure equivalent to phcalc
       include  'char1.inc'
       character*6 cacec,cecc,capl
       DATA CACEC/'CACEC '/

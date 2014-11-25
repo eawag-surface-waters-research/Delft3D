@@ -27,35 +27,20 @@
 !>\file
 !>       Total of transport in sediment for 66 substances
 
-C***********************************************************************
-C
-C     Project : Upgrade DELWAQ-G
-C     Author  : Jos van Gils
-C     Date    : 011224             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     011224  Jos van Gils    Create first version from TRASED
-C     021202  Jos van Gils    Diffusive transports treated as advection!!!
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        Total of TRAnsport processes in the SEDiment
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
+!
+!     Description of the module :
+!
+!        Total of TRAnsport processes in the SEDiment
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -63,7 +48,7 @@ C     ------   -----  ------------
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
-C     from PMSA array
+!     from PMSA array
 
       INTEGER            :: SWEMERSION         ! 3  in  switch indicating submersion(0) or emersion (1)
       INTEGER            :: XTRDIF             ! 4  in  extra diffusion factor in sediment during emersion (-)
@@ -88,7 +73,7 @@ C     from PMSA array
       IP10  = IPOINT(10)
       IP11  = IPOINT(11)
       IP12  = IPOINT(12)
-C
+!
       IN1   = INCREM( 1)
       IN2   = INCREM( 2)
       IN3   = INCREM( 3)
@@ -102,12 +87,12 @@ C
       IN11  = INCREM(11)
       IN12  = INCREM(12)
 
-c.....Segmentloop om op nul te zetten
-c      DO 9000 ISEG = 1,NOSEG
-c 9000 CONTINUE
+!.....Segmentloop om op nul te zetten
+!      DO 9000 ISEG = 1,NOSEG
+! 9000 CONTINUE
 
-c.....Exchangeloop over de horizontale richtingen om 0 te zetten
-c.....en over de vertical richting om te initialiseren
+!.....Exchangeloop over de horizontale richtingen om 0 te zetten
+!.....en over de vertical richting om te initialiseren
       DO 8000 IQ=1,NOQ1+NOQ2+NOQ3
          PMSA(IP11) = 0.0
          PMSA(IP12) = 0.0
@@ -121,14 +106,14 @@ c.....en over de vertical richting om te initialiseren
          IP12 = IP12 + IN12
  8000 CONTINUE
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
 
       DO 7000 IQ = NOQ1+NOQ2+NOQ3+1 , NOQ1+NOQ2+NOQ3+NOQ4
 
          IVAN  = IEXPNT(1,IQ)
          INAAR = IEXPNT(2,IQ)
 
-C        Zoek eerste kenmerk van- en naar-segmenten
+!        Zoek eerste kenmerk van- en naar-segmenten
          IF ( IVAN .GT. 0 ) THEN
              CALL DHKMRK(1,IKNMRK(IVAN ),IKMRKV)
          ELSE
@@ -140,7 +125,7 @@ C        Zoek eerste kenmerk van- en naar-segmenten
              IKMRKN = -1
          ENDIF
 
-C        extra diffusion during emersion
+!        extra diffusion during emersion
 
          XTRDIF = 1.0
          IF ( IVAN .GT. 0 ) THEN
@@ -155,7 +140,7 @@ C        extra diffusion during emersion
          IF ( (IKMRKV.EQ.1 .AND. IKMRKN.EQ.3)  .OR.
      +        (IKMRKV.EQ.0 .AND. IKMRKN.EQ.3) ) THEN
 
-c.....WATER-SEDIMENT INTERFACE
+!.....WATER-SEDIMENT INTERFACE
 
              FRDISD = PMSA(IP1+(INAAR-1)*IN1)
              FRDISU = PMSA(IP1+(IVAN -1)*IN1)
@@ -168,7 +153,7 @@ c.....WATER-SEDIMENT INTERFACE
 
          IF ( (IKMRKV.EQ.3 .AND. IKMRKN.EQ.3) ) THEN
 
-c.....SEDIMENT-SEDIMENT INTERFACE
+!.....SEDIMENT-SEDIMENT INTERFACE
 
              FRDISU = PMSA(IP1+(IVAN -1)*IN1)
              FRDISD = PMSA(IP1+(INAAR-1)*IN1)
@@ -181,7 +166,7 @@ c.....SEDIMENT-SEDIMENT INTERFACE
 
          IF (IKMRKV.EQ.3 .AND. IKMRKN.EQ.-1) THEN
 
-c.....DEEP SEDIMENT BOUNDARY
+!.....DEEP SEDIMENT BOUNDARY
 
              FRDISU = PMSA(IP1+(IVAN -1)*IN1)
              FRDISD = FRDISU
@@ -192,7 +177,7 @@ c.....DEEP SEDIMENT BOUNDARY
 
          ENDIF
 
-c        Delwaq-G exchange?
+!        Delwaq-G exchange?
 
          IF ( NEWBOT ) THEN
 
@@ -205,14 +190,14 @@ c        Delwaq-G exchange?
 
              VBIRR = VBIRR*XTRDIF
 
-c            Upward advection
+!            Upward advection
 
              FRDIS = FRDISD + FRDOCD
              FRPAR = 1.0 - FRDIS
              PMSA(IP11) = (VRESU+MIN(VBTUR,0.0))*FRPAR
      J                  + (MIN(VBIRR,0.0)+MIN(VSEEP,0.0))*FRDIS
 
-c            Downward advection
+!            Downward advection
 
              FRDIS = FRDISU + FRDOCU
              FRPAR = 1.0 - FRDIS

@@ -27,48 +27,35 @@
 !>\file
 !>       Depth-averaged, max and min value per timestep
 
-C***********************************************************************
-C
-C     Project : Delft3D-WAQ
-C     Author  : Arjen Markus
-C     Date    : 8-1-2002           Version : 0.1
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C      9-1-02 Arjen Markus    Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                  Units
-C ----    --- -  -    -------------------                          -----
-C
-C CONC           I    Concentration of the substance              1
-C VOLUME         I    Volume of the computational cells           2
-C
-C DPTAVG         O    Average over depth                          3
-C DPTMAX         O    Maximum over depth                          4
-C DPTMIN         O    Minimum over depth                          5
-C
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                  Units
+! ----    --- -  -    -------------------                          -----
+!
+! CONC           I    Concentration of the substance              1
+! VOLUME         I    Volume of the computational cells           2
+!
+! DPTAVG         O    Average over depth                          3
+! DPTMAX         O    Maximum over depth                          4
+! DPTMIN         O    Minimum over depth                          5
+!
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
      +         IN1   , IN2   , IN3   , IN4   , IN5
       INTEGER  IPP2  , IPP3  , IPP4  , IPP5  , ISEGL , NOSEGL, LUNREP
@@ -88,19 +75,19 @@ C
       IN4 = INCREM(4)
       IN5 = INCREM(5)
 
-C
-C     The averaging is independent of a time interval, as the outcome
-C     is itself time-dependent (there is only a reduction in the
-C     spatial coordinates)
-C
-C     Problem:
-C     DELWAQ does not use explicit layer information. So:
-C     - Assume that the segments are numbered per layer
-C     - Assume that the exchanges are numbered per layer
-C     - Then the number of layers is: NOQ1/(NOQ1-NOQ3)
-C
-C     Also: Simple check to catch obvious errors
-C
+!
+!     The averaging is independent of a time interval, as the outcome
+!     is itself time-dependent (there is only a reduction in the
+!     spatial coordinates)
+!
+!     Problem:
+!     DELWAQ does not use explicit layer information. So:
+!     - Assume that the segments are numbered per layer
+!     - Assume that the exchanges are numbered per layer
+!     - Then the number of layers is: NOQ1/(NOQ1-NOQ3)
+!
+!     Also: Simple check to catch obvious errors
+!
 
       NOSEGL = NOSEG - NOQ3
       NOLAY  = NOSEG / NOSEGL
@@ -120,12 +107,12 @@ C
          CALL SRSTOP( 1 )
       ENDIF
 
-C
-C     Initialise the output arrays
-C     Assumption:
-C     If a segment in the first layer is active, all others are active
-C     as well. This need not be true for the layers below the first.
-C
+!
+!     Initialise the output arrays
+!     Assumption:
+!     If a segment in the first layer is active, all others are active
+!     as well. This need not be true for the layers below the first.
+!
       DO 1000 ISEGL=1,NOSEGL
          CALL DHKMRK( 1, IKNMRK(ISEGL), IKMRK )
          IF ( IKMRK .NE. 0 ) THEN
@@ -141,9 +128,9 @@ C
  1000 CONTINUE
 
       DO 9200 ISEGL=1,NOSEGL
-C
-C        The first layer is already done. So prepare for the next ...
-C
+!
+!        The first layer is already done. So prepare for the next ...
+!
          IP1 = IPOINT(1) + IN1*(ISEGL-1)
          IP2 = IPOINT(2) + IN2*(ISEGL-1)
          IP3 = IPOINT(3) + IN3*(ISEGL-1)
@@ -162,9 +149,9 @@ C
             IP1 = IP1 + IN1*NOSEGL
             IP2 = IP2 + IN2*NOSEGL
 
-C
-C           Only look at active segments
-C
+!
+!           Only look at active segments
+!
             CALL DHKMRK( 1, IKNMRK(ISEGL+(ILAY-1)*NOSEGL), IKMRK )
             IF ( IKMRK .EQ. 0 ) GOTO 9000
 

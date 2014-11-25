@@ -27,45 +27,31 @@
 !>\file
 !>       Sedimentation of oxygen demand
 
-C***********************************************************************
-C
-C     Project : T1235.35
-C     Author  : Pascal Boderie / Marnix van der Vat
-C     Date    : 960411             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     960410  Marnix vd Vat   Create first version
-C     980428  Jos van Gils    Work with f-fluxes i.s.o. d-fluxes
-C     030807  Annette Beems   include third BOD pool
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C ISW     I*4 1 I switch oxygen consumption 0=BOD;1=COD;2=BOD+COD      [-]
-C DBOD5   R*4 1 I sedimentation flux of CBOD5                    [gO/m3/d]
-C DBOD52  R*4 1 I sedimentation flux of CBOD5_2                  [gO/m3/d]
-C DBOD53  R*4 1 I sedimentation flux of CBOD5_3                  [gO/m3/d]
-C DBODU   R*4 1 I sedimentation flux of CBODu                    [gO/m3/d]
-C DBODU2  R*4 1 I sedimentation flux of CBODu_2                  [gO/m3/d]
-C DNBOD5  R*4 1 I sedimentation flux of COD_Cr                   [gO/m3/d]
-C DNBODU  R*4 1 I sedimentation flux of COD_Mn                   [gO/m3/d]
-C DCODCR  R*4 1 I sedimentation flux of NBOD5                    [gO/m3/d]
-C DCODMN  R*4 1 I sedimentation flux of NBODu                    [gO/m3/d]
-C DEPTH   R*4 1 I depth of the segment                                 [m]
-C DSEDOD  R*4 1 O sedimentation of oxygen demand                 [gO/m3/d]
-C FSEDOD  R*4 1 O sedimentation of oxygen demand                 [gO/m2/d]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! ISW     I*4 1 I switch oxygen consumption 0=BOD;1=COD;2=BOD+COD      [-]
+! DBOD5   R*4 1 I sedimentation flux of CBOD5                    [gO/m3/d]
+! DBOD52  R*4 1 I sedimentation flux of CBOD5_2                  [gO/m3/d]
+! DBOD53  R*4 1 I sedimentation flux of CBOD5_3                  [gO/m3/d]
+! DBODU   R*4 1 I sedimentation flux of CBODu                    [gO/m3/d]
+! DBODU2  R*4 1 I sedimentation flux of CBODu_2                  [gO/m3/d]
+! DNBOD5  R*4 1 I sedimentation flux of COD_Cr                   [gO/m3/d]
+! DNBODU  R*4 1 I sedimentation flux of COD_Mn                   [gO/m3/d]
+! DCODCR  R*4 1 I sedimentation flux of NBOD5                    [gO/m3/d]
+! DCODMN  R*4 1 I sedimentation flux of NBODu                    [gO/m3/d]
+! DEPTH   R*4 1 I depth of the segment                                 [m]
+! DSEDOD  R*4 1 O sedimentation of oxygen demand                 [gO/m3/d]
+! FSEDOD  R*4 1 O sedimentation of oxygen demand                 [gO/m2/d]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -85,7 +71,7 @@ C     ------   -----  ------------
       IN10 = INCREM(10)
       IN11 = INCREM(11)
       IN12 = INCREM(12)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -99,13 +85,13 @@ C
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
 
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       ISW    = NINT(PMSA(IP1 ))
       DBOD5  = PMSA(IP2 )
       DBOD52 = PMSA(IP3 )
@@ -118,14 +104,14 @@ C
       DCODMN = PMSA(IP10)
       DEPTH  = PMSA(IP11)
       IF (ISW.EQ.0) THEN
-C       BOD
+!       BOD
         FSEDOD = DBOD5 + DBOD52 + DBOD53 + DBODU + DBODU2 + DNBOD5 +
      1           DNBODU
       ELSEIF (ISW.EQ.1) THEN
-C       COD
+!       COD
         FSEDOD = DCODCR + DCODMN
       ELSEIF (ISW.EQ.2) THEN
-C       BOD + COD
+!       BOD + COD
         FSEDOD = DBOD5 + DBOD52 + DBOD53 + DBODU + DBODU2 + DNBOD5 +
      1           DNBODU + DCODCR + DCODMN
       ELSE
@@ -141,9 +127,9 @@ C       BOD + COD
       PMSA(IP12) = FSEDOD
 
       FL( 1 + IFLUX ) = DSEDOD
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
@@ -157,9 +143,9 @@ C
       IP10  = IP10  + IN10
       IP11  = IP11  + IN11
       IP12  = IP12  + IN12
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

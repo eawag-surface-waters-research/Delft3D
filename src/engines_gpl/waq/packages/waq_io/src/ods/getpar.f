@@ -24,58 +24,58 @@
       SUBROUTINE GETPAR ( FNAME  , ITYPE  , PARDEF , MAXDEF , ITMDEP ,
      *                    LOCDEP , MAXLST , LANG   , PARLST , PARUNI ,
      *                    IPRTYP , IPRCOD , NRLST  , IERROR , OPTION )
-C
-C
-C     Deltares        MARINE & COASTAL MANAGEMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : ODS GETPAR routine for DELWAQ HIS-files
-C
-C     SUBROUTINES CALLED :
-C
-C     LOGICAL UNITS      :
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     FNAME   CHAR*256   3        IN/LOC  Complete file name
-C     ITYPE   INTEGER    1        INPUT   File type
-C     PARDEF  CHAR*20  MAXDEF     INPUT   List with wanted par's
-C     MAXDEF  INTEGER    1        INPUT   Length of PARDEF
-C     ITMDEP  INTEGER    1        INPUT   Time code for dimensions
-C     LOCDEP  INTEGER    1        INPUT   Loc code for dimensions
-C     MAXLST  INTEGER    1        INPUT   Dimension of the output arrays
-C     LANG    INTEGER    1        INPUT   Language code
-C     PARLST  CHAR*20  MAXLST     OUTPUT  List of parameters found
-C     PARUNI  CHAR*20  MAXLST     OUTPUT  List of parameter units found
-C     IPRTYP  INTEGER  MAXLST     OUTPUT  List of parameter types
-C     IPRCOD  INTEGER  MAXLST     OUTPUT  List of parameter codes
-C     NRLST   INTEGER    1        OUTPUT  Nr of parameters found
-C     IERROR  INTEGER    1        OUTPUT  Error code
-C     OPTION  CHAR*256   1        IN/OUT  For future use
-C
-C
+!
+!
+!     Deltares        MARINE & COASTAL MANAGEMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : ODS GETPAR routine for DELWAQ HIS-files
+!
+!     SUBROUTINES CALLED :
+!
+!     LOGICAL UNITS      :
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     FNAME   CHAR*256   3        IN/LOC  Complete file name
+!     ITYPE   INTEGER    1        INPUT   File type
+!     PARDEF  CHAR*20  MAXDEF     INPUT   List with wanted par's
+!     MAXDEF  INTEGER    1        INPUT   Length of PARDEF
+!     ITMDEP  INTEGER    1        INPUT   Time code for dimensions
+!     LOCDEP  INTEGER    1        INPUT   Loc code for dimensions
+!     MAXLST  INTEGER    1        INPUT   Dimension of the output arrays
+!     LANG    INTEGER    1        INPUT   Language code
+!     PARLST  CHAR*20  MAXLST     OUTPUT  List of parameters found
+!     PARUNI  CHAR*20  MAXLST     OUTPUT  List of parameter units found
+!     IPRTYP  INTEGER  MAXLST     OUTPUT  List of parameter types
+!     IPRCOD  INTEGER  MAXLST     OUTPUT  List of parameter codes
+!     NRLST   INTEGER    1        OUTPUT  Nr of parameters found
+!     IERROR  INTEGER    1        OUTPUT  Error code
+!     OPTION  CHAR*256   1        IN/OUT  For future use
+!
+!
       CHARACTER*256 FNAME(3) , OPTION
       CHARACTER*20  PARDEF(MAXDEF) , PARLST(MAXLST) , PARUNI(MAXLST)
       DIMENSION     IPRTYP(MAXLST) , IPRCOD(MAXLST)
       LOGICAL       SETALL
-C
-C         Open the DELWAQ .HIS file
-C
+!
+!         Open the DELWAQ .HIS file
+!
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
-C
-C         Read primary system characteristics
-C
+!
+!         Read primary system characteristics
+!
       READ ( 10 , ERR=100 )   FNAME(3)(1:160)
       READ ( 10 , ERR=110 )   NOTOT, NODUMP
-C
-C         Read parameter names and try to find the wanted subset
-C
+!
+!         Read parameter names and try to find the wanted subset
+!
       NRLST  = 0
       SETALL = .FALSE.
       IF ( PARDEF(1) .EQ. '*' ) SETALL = .TRUE.
@@ -97,25 +97,25 @@ C
    20       CONTINUE
    30    CONTINUE
    40 CONTINUE
-C
-C         Supply the desired statistics
-C
+!
+!         Supply the desired statistics
+!
    50 DO 60 I1 = 1 , NRLST
          PARUNI(I1) = PARLST(I1)(10:20)
          IPRTYP(I1) = 2
    60 CONTINUE
       GOTO 200
-C
-C         Supply the desired statistics
-C
+!
+!         Supply the desired statistics
+!
   100 IERROR = 10
       GOTO 200
   110 IERROR = 11
       GOTO 200
   120 IERROR = 12
-C
-C         Close the unit
-C
+!
+!         Close the unit
+!
   200 CLOSE ( 10 )
       RETURN
       END

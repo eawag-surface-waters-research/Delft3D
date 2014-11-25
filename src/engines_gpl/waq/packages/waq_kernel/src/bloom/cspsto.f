@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *      SUBROUTINE CSPSTO TO MODIFY SPECIES STOCHIOMETRY             *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *      SUBROUTINE CSPSTO TO MODIFY SPECIES STOCHIOMETRY             *
+!  *********************************************************************
+!
       SUBROUTINE CSPSTO (LERR)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -43,13 +43,13 @@ C
       DATA OLD    /'Old'/
       DATA WSPE  /'?       ','END     ','EDIT    ','CARTODRY',
      1            'CHLTOCAR','NUTCOEFF','PRINT   ','SPECEXT '/
-C
-C  General comment: in case an error is detected in this subroutine
-C  -- for instance a missing or misspelled control word --
-C  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
-C  Hence a batch job will be terminated,
-C  but re-entry is possible in an interactive run.
-C
+!
+!  General comment: in case an error is detected in this subroutine
+!  -- for instance a missing or misspelled control word --
+!  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
+!  Hence a batch job will be terminated,
+!  but re-entry is possible in an interactive run.
+!
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       LERR=0
    10 IF (IOFLAG .EQ. 1) CALL BLSELECT (WSPE, NSPE, 1037)
@@ -57,18 +57,18 @@ C
       IF (MATCH(WSPE,NSPE,8,WORD1,LENWRD,0,NUMCA) .NE. 1) NUMCA=NSPE+1
       GO TO (   100,  2000,   400,    500,   500,    500,   300,
      1          500,    20), NUMCA
-C
-C  Error in input.
-C
+!
+!  Error in input.
+!
    20 WRITE (OUUNI,99990) WORD1
       IF (IOFLAG .EQ. 0) GO TO 30
       GO TO 10
    30 WRITE (OUUNI,99980)
       LERR=1
       RETURN
-C
-C  Print characteristics which may be modified.
-C
+!
+!  Print characteristics which may be modified.
+!
   100 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99970)
@@ -82,9 +82,9 @@ C
       WRITE (OUUNI,99950)
       WRITE (OUUNI,99940)
       GO TO 10
-C
-C  Print present set of stochiometric coefficients.
-C
+!
+!  Print present set of stochiometric coefficients.
+!
   300 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99920) (CSTRA(I),I=1,NUNUCO),(WSPE(I),I=5,4,-1)
@@ -99,9 +99,9 @@ C
      1                CHLTOC(I),CTODRY(I)
   320 CONTINUE
       GO TO 10
-C
-C  Make a global change of many characteristics using the system editor.
-C
+!
+!  Make a global change of many characteristics using the system editor.
+!
   400 CONTINUE
       IF (IOFLAG .EQ. 1) GO TO 410
       WRITE (OUUNI,99900)
@@ -127,17 +127,17 @@ C
   430 CONTINUE
       CLOSE (IOU(29), STATUS = 'DELETE')
       GO TO 10
-C
-C  Read species name and find species and type number.
-C
+!
+!  Read species name and find species and type number.
+!
   500 NSGR=0
       NSGR2 = 1
       IF (IOFLAG .EQ. 1) CALL BLSELECT (GRNAME, NUECOG, 1032)
       I=INPTDT(1032,WORD2,LENWRD)
       IF (MATCH(GRNAME,NUECOG,8,WORD2,LENWRD,0,NUMGR) .EQ. 1) GO TO 510
-C
-C  Incorrect species name.
-C
+!
+!  Incorrect species name.
+!
       WRITE (OUUNI,99880) WORD2
       WRITE (OUUNI,99870) (GRNAME(J),J=1,NUECOG)
       IF (IOFLAG .EQ. 0) GO TO 30
@@ -158,9 +158,9 @@ C
   540 CONTINUE
       NUMSP=IT2(NUMGR,1)+NSGR
       GO TO (100,2000,  400, 900,  800, 700, 300, 600), NUMCA
-C
-C  Modify specific extinction coefficient.
-C
+!
+!  Modify specific extinction coefficient.
+!
   600 CONTINUE
       IF (IOFLAG .EQ. 1)
      1    WRITE (OUUNI,99840) OLD,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
@@ -169,9 +169,9 @@ C
       WRITE (OUUNI,99840) NEW,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
      1                    EKX(NUMSP)
       GO TO 10
-C
-C  Modify nutrient coefficients.
-C
+!
+!  Modify nutrient coefficients.
+!
   700 CONTINUE
       IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1035)
       I = INPTDT(1035,WORD3,LENWRD)
@@ -189,9 +189,9 @@ C
       WRITE (OUUNI,99810) NEW,CSTRA(NUMCO),NSGR2,SPNAME(NUMSP),
      1                    AA(NUMCO,NUMSP)
       GO TO 10
-C
-C  Modify chlorophyll to carbon ratio.
-C
+!
+!  Modify chlorophyll to carbon ratio.
+!
   800 CONTINUE
       IF (IOFLAG .EQ. 1)
      1   WRITE (OUUNI,99810) OLD,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
@@ -199,15 +199,15 @@ C
       I=INPTNM(1038,CHLTOC(NUMSP),0,1)
       WRITE (OUUNI,99810) NEW,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
      1                    CHLTOC(NUMSP)
-C
-C  Calculate CHLR--the conversion from chlorophyll to dry weight.
-C
+!
+!  Calculate CHLR--the conversion from chlorophyll to dry weight.
+!
   810 CHLR(NUMSP)=CHLTOC(NUMSP)*CTODRY(NUMSP)
       WRITE (OUUNI,99800) NSGR2,SPNAME(NUMSP),CHLR(NUMSP)
       GO TO 10
-C
-C  Modify carbon to dry weight ratio.
-C
+!
+!  Modify carbon to dry weight ratio.
+!
   900 CONTINUE
       IF (IOFLAG .EQ. 1)
      1 WRITE (OUUNI,99810) OLD,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
@@ -216,13 +216,13 @@ C
       WRITE (OUUNI,99810) NEW,WSPE(NUMCA),NSGR2,SPNAME(NUMSP),
      1                    CTODRY(NUMSP)
       GO TO 810
-C
-C  Exit
-C
+!
+!  Exit
+!
  2000 CONTINUE
-C
-C  Formats for this subroutine.
-C
+!
+!  Formats for this subroutine.
+!
 99990 FORMAT (1X,'Invalid Stochiometry command',2X,A8)
 99980 FORMAT (//,1X,'Excecution terminates after an error in',
      1       ' Subroutine "CSPSTO"',//)

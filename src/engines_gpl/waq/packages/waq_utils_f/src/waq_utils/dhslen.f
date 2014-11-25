@@ -22,37 +22,37 @@
 !!  rights reserved.
 
       SUBROUTINE DHSLEN ( STRING, ILEN  )
-C
-C     Deltares
-C
-C     Created             : November 1998 by Jan van Beek
-C
-C     Function            : Retrun length of trimmed string
-C                           Always >= 1
-C
-C     Parameters          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     STRING  CHAR*(*) 1          IN      String
-C     ILEN    INTEGER  1          OUT     Length of trimmed string
-C
-C     Declaration of arguments
-C
+!
+!     Deltares
+!
+!     Created             : November 1998 by Jan van Beek
+!
+!     Function            : Retrun length of trimmed string
+!                           Always >= 1
+!
+!     Parameters          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     STRING  CHAR*(*) 1          IN      String
+!     ILEN    INTEGER  1          OUT     Length of trimmed string
+!
+!     Declaration of arguments
+!
       INTEGER       ILEN
       CHARACTER*(*) STRING
-C
-C     Local declaration
-C
-C     ISLEN   INTEGER  1          LOCAL   length of variable
-C
+!
+!     Local declaration
+!
+!     ISLEN   INTEGER  1          LOCAL   length of variable
+!
       INTEGER    ISLEN
-C
+!
       ISLEN = LEN(STRING)
       ILEN  = 1
       DO I = 1 , ISLEN
          IF ( STRING(I:I) .NE. ' ' ) ILEN = I
       ENDDO
-C
+!
       RETURN
       END

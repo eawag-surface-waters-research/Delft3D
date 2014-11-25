@@ -23,34 +23,34 @@
 
       SUBROUTINE FLXBAL (NOTOT , NOFLUX, NDMPAR, NOBALT, STOCHI,
      +                   FLXINT, ASMASS, BALINT)
-C
-C     Deltares
-C
-C     CREATED:            : march 1998 by Jan van Beek
-C
-C     FUNCTION            : Makes BALINT from FLXINT and STOCHI
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          : 8
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
-C     NDMPAR  INTEGER       1     INPUT   Nr. of dump areas
-C     NOBALT  INTEGER       1     INPUT   Nr. of balance terms total
-C     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
-C     FLXINT  REAL  NOFLUX*NDMPAR INPUT   Accumulated fluxes
-C     ASMASS  REAL NOTOT*NDMPAR*6 INPUT   Mass balance terms
-C     BALINT  REAL  NOBALT*NDMPAR OUTPUT  Balance terms
-C
-C     Declaration of arguments
-C
+!
+!     Deltares
+!
+!     CREATED:            : march 1998 by Jan van Beek
+!
+!     FUNCTION            : Makes BALINT from FLXINT and STOCHI
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          : 8
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
+!     NDMPAR  INTEGER       1     INPUT   Nr. of dump areas
+!     NOBALT  INTEGER       1     INPUT   Nr. of balance terms total
+!     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
+!     FLXINT  REAL  NOFLUX*NDMPAR INPUT   Accumulated fluxes
+!     ASMASS  REAL NOTOT*NDMPAR*6 INPUT   Mass balance terms
+!     BALINT  REAL  NOBALT*NDMPAR OUTPUT  Balance terms
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER NOTOT , NOFLUX, NDMPAR, NOBALT
@@ -58,9 +58,9 @@ C
      +        ASMASS(NOTOT,NDMPAR,6), BALINT(NOBALT,NDMPAR)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "flxbal", ithandl )
-C
-C     We construeren nu de BALINT's
-C
+!
+!     We construeren nu de BALINT's
+!
       IBALT = 0
       DO ISYS = 1,NOTOT
          DO I = 1 , 4
@@ -91,8 +91,8 @@ C
             ENDIF
          ENDDO
       ENDDO
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
       END

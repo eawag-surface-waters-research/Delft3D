@@ -23,40 +23,40 @@
 
       subroutine dlwsol(lundia    ,noq1      ,noq2      ,noq3      ,
      *                  r1        ,kcs       ,nosys     , notot   )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : August 1996 by E. de Goede
-C
-C     FUNCTION            : Print concentrations at end of simulation
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOQ1    INTEGER     1       INPUT   nr of grid points in y-direction
-C       remark: N0Q1 = nmax in TRISULA
-C     NOQ2    INTEGER     1       INPUT   nr of grid points in x-direction
-C       remark: N0Q2 = mmax in TRISULA
-C     NOQ3    INTEGER     1       INPUT   nr of grid points in z-direction
-C       remark: N0Q3 = kmax in TRISULA
-C     NOSYS   INTEGER     1       INPUT   number of active substances
-C     NOTOT   INTEGER     1       INPUT   number of total substances
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : August 1996 by E. de Goede
+!
+!     FUNCTION            : Print concentrations at end of simulation
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOQ1    INTEGER     1       INPUT   nr of grid points in y-direction
+!       remark: N0Q1 = nmax in TRISULA
+!     NOQ2    INTEGER     1       INPUT   nr of grid points in x-direction
+!       remark: N0Q2 = mmax in TRISULA
+!     NOQ3    INTEGER     1       INPUT   nr of grid points in z-direction
+!       remark: N0Q3 = kmax in TRISULA
+!     NOSYS   INTEGER     1       INPUT   number of active substances
+!     NOTOT   INTEGER     1       INPUT   number of total substances
+!
       use timers
       DIMENSION  r1  (noq1, -1:noq2+2, noq3, notot)
       INTEGER    kcs (noq1, -1:noq2+2)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwsol", ithandl )
-C
-C
+!
+!
       write (lundia,*) '=================================== '
       write (lundia,*) '=================================== '
       write (lundia,*) 'eindwaarden'
       write (lundia,*) noq1,noq2,noq3,nosys,notot
-c
-c     print transport
-c
+!
+!     print transport
+!
       if ( nosys  .gt. 0 ) then
          write (lundia,*) '   '
          write (lundia,*) ' Concentrations'
@@ -72,7 +72,7 @@ c
      *                            (r1(1,1,k,l),k=1,noq3)
  420     continue
       endif
-c
+!
       write (lundia,*) '=================================== '
       write (lundia,*) '=================================== '
       if ( timon ) call timstop ( ithandl )

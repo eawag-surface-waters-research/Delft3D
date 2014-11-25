@@ -27,41 +27,41 @@
      +                      R4_NUMB     , R4_DOC      ,
      +                      R4_SEX      , LUNREP      ,
      +                      IERROR      )
-C
-C     Deltares
-C
-C     CREATED            :  june 1999 by Jan van Beek
-C
-C     FUNCTION           :  Read TABLE_R4 group from NEFIS file
-C
-C     FILES              :  NEFIS file assumed opened
-C
-C     SUBROUTINES CALLED :
-C
-C     ARGUMENTS
-C
-C     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DEFFDS       INT    2993    I/O     Definition file descriptor
-C     DATFDS       INT    999     I/O     Data file descriptor
-C     NO_OUTP_MAX  INT            I       maximum number of rows in table r4
-C     NO_OUTP      INT            O       number of rows in table r4
-C     R4_PID       CHA*10 NO_OUTP O       process identification
-C     R4_IID       CHA*10 NO_OUTP O       item identification
-C     R4_NUMB      INT    NO_OUTP O       serial number
-C     R4_DOC       CHA*1  NO_OUTP O       documneted y/n
-C     R4_SEX       INT    NO_OUTP O       segment or exchange
-C     LUNREP       INT    1       I       Unit number report file
-C     IERROR       INT    1       O       Error
-C
-C     IMPLICIT NONE for extra compiler checks
-C     SAVE to keep the group definition intact
-C
+!
+!     Deltares
+!
+!     CREATED            :  june 1999 by Jan van Beek
+!
+!     FUNCTION           :  Read TABLE_R4 group from NEFIS file
+!
+!     FILES              :  NEFIS file assumed opened
+!
+!     SUBROUTINES CALLED :
+!
+!     ARGUMENTS
+!
+!     NAME    TYPE     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DEFFDS       INT    2993    I/O     Definition file descriptor
+!     DATFDS       INT    999     I/O     Data file descriptor
+!     NO_OUTP_MAX  INT            I       maximum number of rows in table r4
+!     NO_OUTP      INT            O       number of rows in table r4
+!     R4_PID       CHA*10 NO_OUTP O       process identification
+!     R4_IID       CHA*10 NO_OUTP O       item identification
+!     R4_NUMB      INT    NO_OUTP O       serial number
+!     R4_DOC       CHA*1  NO_OUTP O       documneted y/n
+!     R4_SEX       INT    NO_OUTP O       segment or exchange
+!     LUNREP       INT    1       I       Unit number report file
+!     IERROR       INT    1       O       Error
+!
+!     IMPLICIT NONE for extra compiler checks
+!     SAVE to keep the group definition intact
+!
       IMPLICIT NONE
       SAVE
-C
-C     declaration of arguments
-C
+!
+!     declaration of arguments
+!
       INTEGER       NO_OUTP_MAX , NO_OUTP     ,
      +              LUNREP      , IERROR
       INTEGER       DEFFDS
@@ -70,19 +70,19 @@ C
       INTEGER       R4_NUMB(NO_OUTP_MAX)
       CHARACTER*1   R4_DOC (NO_OUTP_MAX)
       INTEGER       R4_SEX (NO_OUTP_MAX)
-C
-C     Local variables
-C
-C     GRPNAM  CHAR*16     1       LOCAL   group name (table)
-C     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
-C     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
-C     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
-C     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
-C     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
-C
+!
+!     Local variables
+!
+!     GRPNAM  CHAR*16     1       LOCAL   group name (table)
+!     NELEMS  INTEGER     1       LOCAL   number of elements in group (=cell)
+!     ELMNMS  CHAR*16  NELEMS     LOCAL   name of elements on file
+!     ELMTPS  CHAR*16  NELEMS     LOCAL   type of elements
+!     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
+!     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
+!
       INTEGER       NELEMS
       PARAMETER   ( NELEMS = 6 )
-C
+!
       INTEGER       I               , IELM          ,
      +              BUFLEN
       INTEGER       ELMDMS(2,NELEMS), NBYTSG(NELEMS),
@@ -90,16 +90,16 @@ C
       CHARACTER*16  GRPNAM
       CHARACTER*16  ELMNMS(NELEMS)  , ELMTPS(NELEMS)
       CHARACTER*64  ELMDES(NELEMS)
-C
-C     External NEFIS Functions
-C
+!
+!     External NEFIS Functions
+!
       INTEGER   GETELS
      +         ,GETELT
       EXTERNAL  GETELS
      +         ,GETELT
-C
-C     element names
-C
+!
+!     element names
+!
       DATA  GRPNAM  /'TABLE_R4'/
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
@@ -110,14 +110,14 @@ C
      + 'R4_NUMB'  ,'INTEGER'  , 4,1,0,'serial number in process'       ,
      + 'R4_DOC'   ,'CHARACTER', 1,1,0,'documented yes/no'              ,
      + 'R4_SEX'   ,'INTEGER'  , 4,1,0,'segment/exchange indication'    /
-C
-C     Read group
-C
-C     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
+!
+!     Read group
+!
+!     WRITE(LUNREP,*) ' reading GROUP:',GRPNAM
       UINDEX(1) = 1
       UINDEX(2) = 1
       UINDEX(3) = 1
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
       BUFLEN = NBYTSG(1)*ELMDMS(2,1)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(1),
@@ -135,13 +135,13 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(1)
          IERROR = 1
          GOTO 900
       ENDIF
-C
-C     Set dimension of table
-C
+!
+!     Set dimension of table
+!
       DO IELM = 2 , NELEMS
          ELMDMS(2,IELM) = NO_OUTP
       ENDDO
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
       BUFLEN = NBYTSG(2)*ELMDMS(2,2)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(2),
@@ -152,7 +152,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(2)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
       BUFLEN = NBYTSG(3)*ELMDMS(2,3)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(3),
@@ -163,7 +163,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
       BUFLEN = NBYTSG(4)*ELMDMS(2,4)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(4),
@@ -174,7 +174,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
       BUFLEN = NBYTSG(5)*ELMDMS(2,5)
       IERROR = GETELS (DEFFDS ,
      +                 GRPNAM , ELMNMS(5),
@@ -185,7 +185,7 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
+!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
       BUFLEN = NBYTSG(6)*ELMDMS(2,6)
       IERROR = GETELT (DEFFDS ,
      +                 GRPNAM , ELMNMS(6),
@@ -196,8 +196,8 @@ C     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
-C
+!
   900 CONTINUE
       RETURN
-C
+!
       END

@@ -23,57 +23,57 @@
 
       SUBROUTINE DLWQ61 ( CONC   , DERIV  , AMASS  , AMAT   , NOSEG  ,
      *                             NOTOT  , ISYS   , NSYS   , JTRACK )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june 1988 by L.Postma
-C
-C     FUNCTION            : zeros the matrix,
-C                           updates first order term on the diagonal
-C                           compresses DERIV for use in DELMAT
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
-C     ----    -----      ------       ------- -----------
-C     CONC    REAL     NOTOT*NOSEG    INPUT   first order term
-C     DERIV   REAL     NOTOT*NOSEG    IN/OUT  right hand side matrix
-C     AMASS   REAL        NOSEG       INPUT   closure error correction
-C     AMAT    REAL (JTRACK*2+1)*NOSEG IN/OUT  matrix to invert
-C     NOSEG   INTEGER       1         INPUT   number of segments
-C     NOTOT   INTEGER       1         INPUT   total number of systems
-C     ISYS    INTEGER       1         INPUT   system considered
-C     NSYS    INTEGER       1         INPUT   number of systems to take
-C     JTRACK  INTEGER       1         INPUT   number of codiagonals
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june 1988 by L.Postma
+!
+!     FUNCTION            : zeros the matrix,
+!                           updates first order term on the diagonal
+!                           compresses DERIV for use in DELMAT
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
+!     ----    -----      ------       ------- -----------
+!     CONC    REAL     NOTOT*NOSEG    INPUT   first order term
+!     DERIV   REAL     NOTOT*NOSEG    IN/OUT  right hand side matrix
+!     AMASS   REAL        NOSEG       INPUT   closure error correction
+!     AMAT    REAL (JTRACK*2+1)*NOSEG IN/OUT  matrix to invert
+!     NOSEG   INTEGER       1         INPUT   number of segments
+!     NOTOT   INTEGER       1         INPUT   total number of systems
+!     ISYS    INTEGER       1         INPUT   system considered
+!     NSYS    INTEGER       1         INPUT   number of systems to take
+!     JTRACK  INTEGER       1         INPUT   number of codiagonals
+!
       use timers
 
       DIMENSION   CONC (NOTOT,*)  ,  DERIV(*)  ,  AMAT(*)  ,
      *            AMASS(      *)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq61", ithandl )
-C
-C         zero the matrix
-C
+!
+!         zero the matrix
+!
       ISTEP = JTRACK*2 + 1
       NTOT  = NOSEG*ISTEP
       DO 10 I = 1 , NTOT
       AMAT(I) = 0.0
    10 CONTINUE
-C
-C         set the diagonal
-C
+!
+!         set the diagonal
+!
       ISET = JTRACK + 1
       DO 20 ISEG = 1 , NOSEG
       AMAT(ISET) = -CONC(ISYS,ISEG)+AMASS(ISEG)
    20 ISET = ISET+ISTEP
-C
-C         set the right hand side
-C
+!
+!         set the right hand side
+!
       ISET = 1
       IOFF = 0
       DO 40 ISEG = 1 , NOSEG
@@ -81,7 +81,7 @@ C
       DERIV(ISET) = DERIV(IOFF+I)
    30 ISET = ISET+1
    40 IOFF = IOFF+NOTOT
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -27,30 +27,18 @@
 !>\file
 !>       Variation of oxygen due to variation in primary production within day
 
-C***********************************************************************
-C
-C     Project : Venetie WQ study, 1997
-C     Author  : Jos van Gils
-C     Date    : 971221             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     971221  Jos van Gils    First Version
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
@@ -80,7 +68,7 @@ C     ------   -----  ------------
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
 
-c     Check whether certain input parameters are independent of X
+!     Check whether certain input parameters are independent of X
 
       IF (FIRST) THEN
           FIRST = .FALSE.
@@ -113,19 +101,19 @@ c     Check whether certain input parameters are independent of X
           TRISE  = 12.0-0.5*DAYLEN
           TSET   = 12.0+0.5*DAYLEN
 
-C         Initialize light variation curve for present cycle
-C         ONLY if fluxes have changed
+!         Initialize light variation curve for present cycle
+!         ONLY if fluxes have changed
 
           IF ( ISEG .EQ. 1 ) THEN
 
               IF ( (ABS(FPPTOT-PPLAST) .GT. 1E-3) .OR.
      J             (ABS(FRESPI-RELAST) .GT. 1E-3) ) THEN
 
-C                 WRITE (*,*) ' INITIALIZE ', TIMSIM
+!                 WRITE (*,*) ' INITIALIZE ', TIMSIM
                   PPLAST = FPPTOT
                   RELAST = FRESPI
 
-C                 Check on conditions for daylength
+!                 Check on conditions for daylength
 
                   IF ( T1MXPP .LT. TRISE .OR.
      J                 T2MXPP .GT. TSET ) THEN
@@ -135,10 +123,10 @@ C                 Check on conditions for daylength
                   ENDIF
 
                   PPMAX = 48.0/(T2MXPP-T1MXPP+DAYLEN)
-C                 PPMAX = 48.0*(FPPTOT+FRESPI)/(T2MXPP-T1MXPP+DAYLEN)
+!                 PPMAX = 48.0*(FPPTOT+FRESPI)/(T2MXPP-T1MXPP+DAYLEN)
 
-C                 Compute normalized integral Flux.dt in of (gC/m2/d)*h
-C                 from t=0 to t=T every 5 minutes
+!                 Compute normalized integral Flux.dt in of (gC/m2/d)*h
+!                 from t=0 to t=T every 5 minutes
 
                   TOTAL = 0.0
                   INTEGR(0) = 0.0
@@ -166,12 +154,12 @@ C                 from t=0 to t=T every 5 minutes
 !!        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!        IF (IKMRK1.EQ.1) THEN
           IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C            Compute FLUX only if SWITCH is 1.0
-C
+!
+!            Compute FLUX only if SWITCH is 1.0
+!
              IF ( PMSA(IP11) .GT. 0.5 ) THEN
 
-C               Compute relative time within day of time step to come
+!               Compute relative time within day of time step to come
 
                 T1 = (TIMSIM-INT(TIMSIM))*24.0 + TIMNUL
                 IF ( T1 .GE. 24.0 ) T1 = T1 - 24.0
@@ -184,26 +172,26 @@ C               Compute relative time within day of time step to come
                 ENDIF
                 PMSA(IP12) = T1
 
-C               Compute flux for interval [T1:T2] by subtracting integrals
-C               for both times and dividing by time interval
+!               Compute flux for interval [T1:T2] by subtracting integrals
+!               for both times and dividing by time interval
 
-C               FL(IFLUX)  = (( INTEGR(NINT(T2*12.0))
-C    J                         -INTEGR(NINT(T1*12.0)) )
-C    J                       / (T2-T1)- FRESPI ) /DEPTHW
+!               FL(IFLUX)  = (( INTEGR(NINT(T2*12.0))
+!    J                         -INTEGR(NINT(T1*12.0)) )
+!    J                       / (T2-T1)- FRESPI ) /DEPTHW
                 FL(IFLUX)  = (( INTEGR(NINT(T2*12.0))
      J                         -INTEGR(NINT(T1*12.0)) )
      J                       / (T2-T1)* (FPPTOT+FRESPI)
      J                       - FRESPI ) / DEPTHW
-C                IF (ISEG.LE.2)
-C    J           WRITE (*,*) ISEG,FL(IFLUX),DEPTHW
+!                IF (ISEG.LE.2)
+!    J           WRITE (*,*) ISEG,FL(IFLUX),DEPTHW
 
              ELSE
                 FL(IFLUX)  = 0.0
              ENDIF
           ENDIF
-C
+!
           IFLUX = IFLUX + NOFLUX
-C
+!
           IP1  = IP1  + INCREM( 1)
           IP2  = IP2  + INCREM( 2)
           IP3  = IP3  + INCREM( 3)
@@ -216,9 +204,9 @@ C
           IP10 = IP10 + INCREM(10)
           IP11 = IP11 + INCREM(11)
           IP12 = IP12 + INCREM(12)
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

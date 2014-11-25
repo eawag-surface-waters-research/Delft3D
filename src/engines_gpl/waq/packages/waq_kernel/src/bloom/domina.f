@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO CALCULATE THE SUM OF BIOMASSES                   *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO CALCULATE THE SUM OF BIOMASSES                   *
+!  *********************************************************************
+!
       SUBROUTINE DOMINA(XDEF,TOTAL,PHYTID,PHYMIN,NPER)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -35,11 +35,11 @@ C
       INCLUDE 'ioblck.inc'
       INCLUDE 'dynam.inc'
       DIMENSION XDEF(*),XAVER(MT),XREL(MT)
-C
-C  If called while computations continue (NPER = 0),
-C  increase XSUM, OBSSUM, NOBS, CHI2 and exit.
-C  Otherwise create final table.
-C
+!
+!  If called while computations continue (NPER = 0),
+!  increase XSUM, OBSSUM, NOBS, CHI2 and exit.
+!  Otherwise create final table.
+!
       IF (NPER .GT. 0) GO TO 20
       CHLSUM = CHLSUM + TOTAL
       DO 10 I=1,NUSPEC
@@ -49,9 +49,9 @@ C
       NOBS = NOBS + 1
       CHI2 = CHI2 + (PHYTID - TOTAL) ** 2
       RETURN
-C
-C  Compute averages.
-C
+!
+!  Compute averages.
+!
    20 CONTINUE
       IF (IOFLAG .EQ. 1) CALL MORESC
       CHLAV = CHLSUM / NPER
@@ -60,14 +60,14 @@ C
       XAVER(I)=XSUM(I)/NPER
    30 TOTSUM=TOTSUM+XAVER(I)
       IF (TOTSUM .LT. 1.0D-6) TOTSUM = 1.0
-C
-C  Compute relative dominance.
-C
+!
+!  Compute relative dominance.
+!
       DO 40 I=1,NUSPEC
    40 XREL(I)=100.0*XAVER(I)/TOTSUM
-C
-C Compute goodness of fit coefficient.
-C
+!
+! Compute goodness of fit coefficient.
+!
       IF (NOBS .GT. 0) THEN
          OBSSUM = OBSSUM / NOBS
          CHI2 = DSQRT (CHI2 / (NOBS * OBSSUM) )
@@ -75,12 +75,12 @@ C
          OBSSUM = -1.0
          CHI2 = 0.0
       END IF
-C
-C  Create and print summary table. In a batch run, write this input
-C  to the standard output unit only (OUUNI in the stand-alone version
-C  of BLOOM II, 22 in the dynamic version of the program. In an
-C  interactive run write a copy to the terminal too.
-C
+!
+!  Create and print summary table. In a batch run, write this input
+!  to the standard output unit only (OUUNI in the stand-alone version
+!  of BLOOM II, 22 in the dynamic version of the program. In an
+!  interactive run write a copy to the terminal too.
+!
       IF (IOFLAG .EQ. 1) THEN
          NOUT = OUUNI
       ELSE

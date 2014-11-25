@@ -22,32 +22,32 @@
 !!  rights reserved.
 
       SUBROUTINE MOVCHR ( CAR    , NSTRT  , NOTOT  )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : May '97    BY L. Postma
-C
-C     FUNCTION           : Shifts an array of characters one location
-C
-C     SUBROUTINES CALLED : none
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     CAR     CHAR*(*) NOMAX      IN/OUT  array to be shifted
-C     NSTRT   INTEGER  1          INPUT   start of shift
-C     NOTOT   INTEGER  1          IN/OUT  stop of shift
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : May '97    BY L. Postma
+!
+!     FUNCTION           : Shifts an array of characters one location
+!
+!     SUBROUTINES CALLED : none
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     CAR     CHAR*(*) NOMAX      IN/OUT  array to be shifted
+!     NSTRT   INTEGER  1          INPUT   start of shift
+!     NOTOT   INTEGER  1          IN/OUT  stop of shift
+!
+!
       CHARACTER*(*) CAR(*)
-C
+!
       DO 10 I=NOTOT,NSTRT,-1
          CAR(I+1) = CAR(I)
    10 CONTINUE
-C
+!
       RETURN
       END

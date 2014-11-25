@@ -22,27 +22,27 @@
 !!  rights reserved.
 
       SUBROUTINE DHSWTR ( ISWITR , NOQ3   , IOK    )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : december 1994 by Jan van Beek
-C
-C     FUNCTION            : utility that evaluates the TRswitch
-C                           for the target model dimension
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ISWITR  INTEGER       1     INPUT   Target dimension indicator
-C     NOQ3    INTEGER       1     INPUT   Number of exchanges in 3 dir.
-C     IOK     LOGICAL       1     OUTPUT  dimension match indicator
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : december 1994 by Jan van Beek
+!
+!     FUNCTION            : utility that evaluates the TRswitch
+!                           for the target model dimension
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ISWITR  INTEGER       1     INPUT   Target dimension indicator
+!     NOQ3    INTEGER       1     INPUT   Number of exchanges in 3 dir.
+!     IOK     LOGICAL       1     OUTPUT  dimension match indicator
+!
       INTEGER ISWITR, NOQ3
       LOGICAL IOK
-C
-C     Local
-C
+!
+!     Local
+!
       IOK = .TRUE.
       IF ( ISWITR .EQ. 3 .AND. NOQ3   .EQ. 0 ) THEN
          IOK = .FALSE.
@@ -50,6 +50,6 @@ C
       IF ( ISWITR .EQ. 12 .AND. NOQ3   .GT. 0 ) THEN
          IOK = .FALSE.
       ENDIF
-C
+!
       RETURN
       END

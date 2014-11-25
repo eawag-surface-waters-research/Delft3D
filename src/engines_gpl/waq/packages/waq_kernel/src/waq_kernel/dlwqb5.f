@@ -26,59 +26,59 @@
      *                    NOTOT  , NOQ1   , NOQ2   , NOQ    , NODISP ,
      *                    NOVELO , IDPNT  , IVPNT  , IOPT   , AMASS2 ,
      *                    ILFLAG , DMPQ   , NDMPQ  , IDT    , IQDMP  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : march 1988 by L.Postma
-C                           may 1992 by J.v.Gils
-C
-C     FUNCTION            : Makes a mass balance final to
-C                           implicit integration methods.
-C                           Identical to DLWQ64, but with dimension
-C                           BOUND(NOSYS,*), with multiplication
-C                           factor IDT on mass balances and with
-C                           loop over active substances only
-c                           (loops 10, 30 and 50).
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DISP    REAL        3       INPUT   dispersion in 3 directions
-C     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
-C     AREA    REAL       NOQ      INPUT   exchange surface area
-C     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
-C     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
-C     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
-C     CONC    REAL   NOTOT*NOSEG  INPUT   concentrations
-C     BOUND   REAL     NOSYS*?    INPUT   boundary concentrations
-C     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
-C     NOSYS   INTEGER     1       INPUT   number  of active substances
-C     NOTOT   INTEGER     1       INPUT   number  of total substances
-C     NOQ1    INTEGER     1       INPUT   nr of exchanges in first dir.
-C     NOQ2    INTEGER     1       INPUT   nr of exchanges in second dir.
-C     NOQ3    INTEGER     1       INPUT   nr of exchanges in third dir.
-C     NOQ     INTEGER     1       INPUT   total number of exchanges
-C     NODISP  INTEGER     1       INPUT   number  of additional dispers.
-C     NOVELO  INTEGER     1       INPUT   number  of additional velos.
-C     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
-C     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
-C     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
-C                                         = 1 or 3 no DISP at zero flow
-C                                         = 0 or 1 DISP over boundary
-C                                         = 2 or 3 no DISP over boundary
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C     DMPQ    REAL  NOTOT*NDMPQ*? IN/OUT  mass balance dumped exchange
-C                                         if INTOPT > 7
-C     NDMPQ   INTEGER     1       INPUT   number of dumped exchanges
-C     IDT     INTEGER     1       INPUT   timestep (or 1 for steady state)
-C     IQDMP   INTEGER     *       INPUT   pointer dumped exchanges
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : march 1988 by L.Postma
+!                           may 1992 by J.v.Gils
+!
+!     FUNCTION            : Makes a mass balance final to
+!                           implicit integration methods.
+!                           Identical to DLWQ64, but with dimension
+!                           BOUND(NOSYS,*), with multiplication
+!                           factor IDT on mass balances and with
+!                           loop over active substances only
+!                           (loops 10, 30 and 50).
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DISP    REAL        3       INPUT   dispersion in 3 directions
+!     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
+!     AREA    REAL       NOQ      INPUT   exchange surface area
+!     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
+!     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
+!     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
+!     CONC    REAL   NOTOT*NOSEG  INPUT   concentrations
+!     BOUND   REAL     NOSYS*?    INPUT   boundary concentrations
+!     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
+!     NOSYS   INTEGER     1       INPUT   number  of active substances
+!     NOTOT   INTEGER     1       INPUT   number  of total substances
+!     NOQ1    INTEGER     1       INPUT   nr of exchanges in first dir.
+!     NOQ2    INTEGER     1       INPUT   nr of exchanges in second dir.
+!     NOQ3    INTEGER     1       INPUT   nr of exchanges in third dir.
+!     NOQ     INTEGER     1       INPUT   total number of exchanges
+!     NODISP  INTEGER     1       INPUT   number  of additional dispers.
+!     NOVELO  INTEGER     1       INPUT   number  of additional velos.
+!     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
+!     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
+!     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
+!                                         = 1 or 3 no DISP at zero flow
+!                                         = 0 or 1 DISP over boundary
+!                                         = 2 or 3 no DISP over boundary
+!     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
+!     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
+!     DMPQ    REAL  NOTOT*NDMPQ*? IN/OUT  mass balance dumped exchange
+!                                         if INTOPT > 7
+!     NDMPQ   INTEGER     1       INPUT   number of dumped exchanges
+!     IDT     INTEGER     1       INPUT   timestep (or 1 for steady state)
+!     IQDMP   INTEGER     *       INPUT   pointer dumped exchanges
+!
       use timers
 
       INTEGER    NDMPQ
@@ -89,9 +89,9 @@ C
      *           DMPQ(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb5", ithandl )
-C
-C         loop accross the number of exchanges
-C
+!
+!         loop accross the number of exchanges
+!
       I4 = 3*NOTOT
       I5 = 4*NOTOT
       I6 = NOSYS*NDMPQ
@@ -101,17 +101,17 @@ C
       ELSE
          IBFLAG = 0
       ENDIF
-C
+!
       DO 60 IQ = 1 , NOQ
-C
-C         initialistations, check for transport anyhow
-C
+!
+!         initialistations, check for transport anyhow
+!
       I    = IPOINT(1,IQ)
       J    = IPOINT(2,IQ)
       IF ( I .EQ. 0 .OR. J .EQ. 0 ) GOTO 60
-C
-C     Check if exchange is dump exchange, set IPB
-C
+!
+!     Check if exchange is dump exchange, set IPB
+!
       IF ( IBFLAG .EQ. 1 ) THEN
          IF ( IQDMP(IQ) .GT. 0 ) THEN
             IPB = IQDMP(IQ)
@@ -146,51 +146,51 @@ C
       E  = E*DL
       IF ( I .LT. 0 ) GOTO 20
       IF ( J .LT. 0 ) GOTO 40
-C
-C         The regular case
-C
+!
+!         The regular case
+!
       K1 = (I-1)*NOTOT
       K2 = (J-1)*NOTOT
       DO 10 I3=1,NOSYS
          IS = MIN ( I3 , NOSYS )
-C
-C        dispersion
-C
+!
+!        dispersion
+!
          IF ( IDPNT(IS) .GT. 0 ) THEN
             D = E + DISPER((IQ-1)*NODISP+IDPNT(IS))*DL
          ELSE
             D = E
          ENDIF
-C
-C        flow
-C
+!
+!        flow
+!
          IF ( IVPNT(IS) .GT. 0 ) THEN
             V = Q + VELO  ((IQ-1)*NOVELO+IVPNT(IS))*A
          ELSE
             V = Q
          ENDIF
-C
-C        transport
-C
+!
+!        transport
+!
          IF ( V .GT. 0.0 ) THEN
             DQ = ((V+D)*CONC(K1+I3) - D*CONC(K2+I3))*IDT
          ELSE
             DQ = ((V-D)*CONC(K2+I3) + D*CONC(K1+I3))*IDT
          ENDIF
-C
-C        mass balance
-C
+!
+!        mass balance
+!
          IF ( DQ .GT. 0.0 ) THEN
             DMPQ(IPQ+I3)=DMPQ(IPQ+I3) + DQ
          ELSE
             DMPQ(IPQ+I3+I6)=DMPQ(IPQ+I3+I6) - DQ
          ENDIF
-C
+!
    10 CONTINUE
       GOTO 60
-C
-C        The 'from' element was a boundary. Note the 2 options.
-C
+!
+!        The 'from' element was a boundary. Note the 2 options.
+!
    20 IF ( J .LT. 0 ) GOTO 60
       K1 = (-I-1)*NOSYS
       K2 = ( J-1)*NOTOT
@@ -222,9 +222,9 @@ C
       ENDIF
    30 CONTINUE
       GOTO 60
-C
-C        The 'to' element was a boundary.
-C
+!
+!        The 'to' element was a boundary.
+!
    40 K1 = ( I-1)*NOTOT
       K2 = (-J-1)*NOSYS
       DO 50 I3=1,NOSYS
@@ -254,11 +254,11 @@ C
          ENDIF
       ENDIF
    50 CONTINUE
-C
-C        end of the loop over exchanges
-C
+!
+!        end of the loop over exchanges
+!
    60 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -21,13 +21,13 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *     SUBROUTINE POPCUR TO POP CURSOR POSITION FROM STACK           *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *     SUBROUTINE POPCUR TO POP CURSOR POSITION FROM STACK           *
+!  *********************************************************************
+!
       SUBROUTINE POPCUR
-C
+!
       WRITE (*,10)
 cjvb  FORMAT ('[u',\)
 10    FORMAT (' ')

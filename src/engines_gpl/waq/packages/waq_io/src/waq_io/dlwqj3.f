@@ -26,72 +26,72 @@
      *                    SCALE  , ODS    , BINFIL , IOPT   , IPRO   ,
      *                    ITFACT , DTFLG1 , DTFLG3 , IFILSZ , JFILSZ ,
      *                    CAR    , STRNG1 , STRNG2 , STRNG3 , IOUTPT )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
 cjvb  ook voor constanten hebben we in delwaq2 initieel werkruimte nodig als deze kleiner is als de werkruimte
-c     voor de tijdsafhankelijke zaken. Maar als er bijvoorbeeld geen tijdsafhankelijke zaken zijn komen we in
-c     delwaq2 in de problemen. Voorlopig tel ik al het werkgeheugen van de contstanten mee.
-C                          March 2000 L. Postma simplified
-C
-C     FUNCTION           : Prints and writes blocks of data
-C
-C     SUBROUTINES CALLED : CONVER - converting times of breakpoints
-C
-C     LOGICAL UNITS      : LUNWR   = unit intermediate file
-C                          LUNUT   = unit formatted output file
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND      LENGTH    FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUNWR   INTEGER     1       INPUT   Unit of binary work file
-C     LUNUT   INTEGER     1       INPUT   Unit of ASCII output file
-C     IWIDTH  INTEGER     1       INPUT   Width of the output file
-C     NOBRK   INTEGER     1       INPUT   number of blocks to write
-C     IAR     INTEGER     *       INPUT   integer   workspace
-C     RAR     REAL        *       INPUT   real      workspace
-C     RMAT    REAL        *       INPUT   matrix of values
-C     NOITM   INTEGER     1       INPUT   number of items to write
-C     NODIM   INTEGER     1       INPUT   number of subs  to write
-C     IORDER  INTEGER     1       INPUT   1 = groups of subs per item
-C     SCALE   LOGICAL     1       INPUT   T = NODIM scale factors present
-C     ODS     LOGICAL     1       INPUT   T = Breakpoints are converted
-C     BINFIL  LOGICAL     1       INPUT   T = Info from binary file
-C     IOPT    INTEGER     1       INPUT   1 is block     2 is linear
-C                                         3 is harmonics 4 is fourier
-C     IPRO    INTEGER     1       INPUT   0 is non permanent memory
-C     ITFACT  INTEGER     1       INPUT   factor between clocks
-C     DTFLG1  LOGICAL     1       INPUT   'date'-format 1st time scale
-C     DTFLG3  LOGICAL     1       INPUT   'date'-format (F;ddmmhhss,T;yydddhh)
-C     IFILSZ  INTEGER     1       IN/OUT  cumulative integer space count
-C     JFILSZ  INTEGER     1       IN/OUT  cumulative real space count
-C     CAR     CHARACTER   *       INPUT   character workspace
-C     STRNG1  CHAR*(*)    1       INPUT   write string 1 (items)
-C     STRNG2  CHAR*(*)    1       INPUT   write string 2 (values/concs)
-C     STRNG3  CHAR*(*)    1       INPUT   write string 3 (brkp/harm)
-C     IOUTPT  INTEGER     1       INPUT   output file option
-C
-C
+!     voor de tijdsafhankelijke zaken. Maar als er bijvoorbeeld geen tijdsafhankelijke zaken zijn komen we in
+!     delwaq2 in de problemen. Voorlopig tel ik al het werkgeheugen van de contstanten mee.
+!                          March 2000 L. Postma simplified
+!
+!     FUNCTION           : Prints and writes blocks of data
+!
+!     SUBROUTINES CALLED : CONVER - converting times of breakpoints
+!
+!     LOGICAL UNITS      : LUNWR   = unit intermediate file
+!                          LUNUT   = unit formatted output file
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND      LENGTH    FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUNWR   INTEGER     1       INPUT   Unit of binary work file
+!     LUNUT   INTEGER     1       INPUT   Unit of ASCII output file
+!     IWIDTH  INTEGER     1       INPUT   Width of the output file
+!     NOBRK   INTEGER     1       INPUT   number of blocks to write
+!     IAR     INTEGER     *       INPUT   integer   workspace
+!     RAR     REAL        *       INPUT   real      workspace
+!     RMAT    REAL        *       INPUT   matrix of values
+!     NOITM   INTEGER     1       INPUT   number of items to write
+!     NODIM   INTEGER     1       INPUT   number of subs  to write
+!     IORDER  INTEGER     1       INPUT   1 = groups of subs per item
+!     SCALE   LOGICAL     1       INPUT   T = NODIM scale factors present
+!     ODS     LOGICAL     1       INPUT   T = Breakpoints are converted
+!     BINFIL  LOGICAL     1       INPUT   T = Info from binary file
+!     IOPT    INTEGER     1       INPUT   1 is block     2 is linear
+!                                         3 is harmonics 4 is fourier
+!     IPRO    INTEGER     1       INPUT   0 is non permanent memory
+!     ITFACT  INTEGER     1       INPUT   factor between clocks
+!     DTFLG1  LOGICAL     1       INPUT   'date'-format 1st time scale
+!     DTFLG3  LOGICAL     1       INPUT   'date'-format (F;ddmmhhss,T;yydddhh)
+!     IFILSZ  INTEGER     1       IN/OUT  cumulative integer space count
+!     JFILSZ  INTEGER     1       IN/OUT  cumulative real space count
+!     CAR     CHARACTER   *       INPUT   character workspace
+!     STRNG1  CHAR*(*)    1       INPUT   write string 1 (items)
+!     STRNG2  CHAR*(*)    1       INPUT   write string 2 (values/concs)
+!     STRNG3  CHAR*(*)    1       INPUT   write string 3 (brkp/harm)
+!     IOUTPT  INTEGER     1       INPUT   output file option
+!
+!
       use timers       !   performance timers
 
       DIMENSION     IAR(*) , RAR(*) , RMAT(*)
       LOGICAL       SCALE  , ODS    , BINFIL , DEFLTS
       LOGICAL       DTFLG1 , DTFLG3
       CHARACTER*(*) STRNG1 , STRNG2 , STRNG3 , CAR(*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       CHARACTER*20  CAR_OF_DUM
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwqj3", ithndl )
-C
-C     Write headers
-C
+!
+!     Write headers
+!
       DEFLTS = .FALSE.
       IF ( NODIM .LT. 0 ) DEFLTS = .TRUE.
       NODI2 = NODIM
@@ -115,18 +115,18 @@ cjvb1 IF ( IOPT .NE. 0 )
 cjvb1*                   IFILSZ = IFILSZ + NOITM + MAX(0,NODIM) + 5
                          IFILSZ = IFILSZ + NOITM + MAX(0,NODIM) + 5
 cjvb1
-C
-C          just declare array space for binary files and return
-C
+!
+!          just declare array space for binary files and return
+!
       IF ( BINFIL ) THEN
          WRITE ( LUNUT , 1130 ) IPRO
          IFILSZ = IFILSZ + 3
          JFILSZ = JFILSZ + MAX(1,NODIM)*MAX(1,NOITM)*3
          GOTO 70
       ENDIF
-C
-C       Initialisation
-C
+!
+!       Initialisation
+!
       IF ( NOBRK .EQ. 0 ) THEN
          SCALE = .FALSE.
          GOTO 70
@@ -144,9 +144,9 @@ C
          ISKIP = NOITM
          ISKP2 = 1
       ENDIF
-C
-C       Scale factors
-C
+!
+!       Scale factors
+!
       ISS = 1
       IF ( SCALE ) THEN
          SCALE = .FALSE.
@@ -169,9 +169,9 @@ C
             ISS = ISS + NOTOT
    30    CONTINUE
       ENDIF
-C
-C       Convert breakpoints
-C
+!
+!       Convert breakpoints
+!
       IF ( NOBRK .GT. 1 ) THEN
          IF ( IOUTPT .GE. 4 ) WRITE ( LUNUT , 1040 ) STRNG3, NOBRK
          IF ( .NOT. ODS )
@@ -184,9 +184,9 @@ C
             IF ( IOUTPT .GE. 4 ) WRITE ( LUNUT , 1060 )
          ENDIF
       ENDIF
-C
-C       Write binary file
-C
+!
+!       Write binary file
+!
       IF ( LUNWR .GT. 0 ) THEN
          I1DUM = 0
          I2DUM = 0
@@ -197,9 +197,9 @@ cjvb1    IF ( IOPT .NE. 0 ) THEN
             JFILSZ = JFILSZ + I2DUM
 cjvb1    ENDIF
       ENDIF
-C
-C       Write formatted output
-C
+!
+!       Write formatted output
+!
       IF ( IOUTPT .GE. 4 ) THEN
          ITELS = 0
          DO 60 I1 = 1,NOBRK
@@ -234,11 +234,11 @@ C
             ITELS = ITELS + NODI2*NOITM
    60    CONTINUE
       ENDIF
-C
+!
    70 WRITE ( LUNUT , 1140 )
       if (timon) call timstop( ithndl )
       RETURN
-C
+!
  1000 FORMAT (/' DATA grouped in',I10,' blocks of',I10,' ',A )
  1010 FORMAT ( ' Scale factors for this block of data: ' )
  1020 FORMAT ( ' Scale    :' ,I6,9I12 )
@@ -256,9 +256,9 @@ C
  1130 FORMAT ( ' Info comes at runtime from binary file at unit: ',I3 )
  1140 FORMAT(/' ====> input item completed <==== '//   )
  1160 FORMAT ( ' All data from this block ignored' )
-C
+!
       END
-C
+!
       CHARACTER*20 FUNCTION CAR_OF_DUM(CAR,I)
       INTEGER       I
       CHARACTER*(*) CAR(*)

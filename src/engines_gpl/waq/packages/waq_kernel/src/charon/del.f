@@ -22,10 +22,10 @@
 !!  rights reserved.
 
       subroutine del(w, q)
-c           4-69
-c           compute for each species j the sum of the products of each
-c        matrix entry for the species times q(i), where i is the row
-c        number.
+!           4-69
+!           compute for each species j the sum of the products of each
+!        matrix entry for the species times q(i), where i is the row
+!        number.
       include  'char1.inc'
       dimension w(1), q(1)
       do 10 j=1,n

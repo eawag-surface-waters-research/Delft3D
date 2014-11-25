@@ -26,52 +26,52 @@
      *                    CCHAR  , CHULP  , NOTOT  , ITTIM  , NOBRK  ,
      *                    IOPT   , DTFLG1 , DTFLG3 , ITFACT , ITYPE  ,
      *                             IHULP  , RHULP  , IERR   , ierr3  )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : May '96  by L. Postma
-C
-C     MODIFIED           :
-C
-C     FUNCTION           : Boundary and waste data new style
-C
-C     SUBROUTINES CALLED : CNVTIM - converting times of breakpoints
-C
-C     LOGICAL UNITS      : LUN(27) = unit stripped DELWAQ input file
-C                          LUN(29) = unit formatted output file
-C                          LUN( 2) = unit intermediate file (system)
-C                          LUN(14) = unit intermediate file (boundaries)
-C                          LUN(15) = unit intermediate file (wastes)
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUNUT   INTEGER    1         INPUT   unit number for ASCII output
-C     IAR     INTEGER  IIMAX       IN/OUT  integer   workspace
-C     RAR     REAL     IRMAX       IN/OUT  real      workspace
-C     IIMAX   INTEGER    1         INPUT   max. int. workspace dimension
-C     IRMAX   INTEGER    1         INPUT   max. real workspace dimension
-C     IPOSR   INTEGER    1         IN/OUT  Start position on input line
-C     NPOS    INTEGER    1         INPUT   nr of significant characters
-C     ILUN    INTEGER   LSTACK     INPUT   unitnumb include stack
-C     LCH     CHAR*(*)  LSTACK     INPUT   file name stack, 4 deep
-C     LSTACK  INTEGER    1         INPUT   include file stack size
-C     CCHAR   CHAR*1     1         INPUT   comment character
-C     CHULP   CHAR*(*)   1         OUTPUT  space for limiting token
-C     NOTOT   INTEGER    1         INPUT   size of the matrix to be read
-C     ITTIM   INTEGER    1         INPUT   0 if steady, 1 if time function
-C     NOBRK   INTEGER    1         OUTPUT  number of records read
-C     IOPT    INTEGER    1         INPUT   3 is harmonics, 4 is fourier
-C     DTFLG1  LOGICAL    1         INPUT   True if time in 'date' format
-C     DTFLG3  LOGICAL    1         INPUT   True if YYetc instead of DDetc
-C     ITFACT  INTEGER    1         INPUT   factor between clocks
-C     ITYPE   INTEGER    1         OUTPUT  type of info at end
-C     IERR    INTEGER    1         OUTPUT  return code
-C     IERR3   INTEGER    1         OUTPUT  actual error indicator
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : May '96  by L. Postma
+!
+!     MODIFIED           :
+!
+!     FUNCTION           : Boundary and waste data new style
+!
+!     SUBROUTINES CALLED : CNVTIM - converting times of breakpoints
+!
+!     LOGICAL UNITS      : LUN(27) = unit stripped DELWAQ input file
+!                          LUN(29) = unit formatted output file
+!                          LUN( 2) = unit intermediate file (system)
+!                          LUN(14) = unit intermediate file (boundaries)
+!                          LUN(15) = unit intermediate file (wastes)
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUNUT   INTEGER    1         INPUT   unit number for ASCII output
+!     IAR     INTEGER  IIMAX       IN/OUT  integer   workspace
+!     RAR     REAL     IRMAX       IN/OUT  real      workspace
+!     IIMAX   INTEGER    1         INPUT   max. int. workspace dimension
+!     IRMAX   INTEGER    1         INPUT   max. real workspace dimension
+!     IPOSR   INTEGER    1         IN/OUT  Start position on input line
+!     NPOS    INTEGER    1         INPUT   nr of significant characters
+!     ILUN    INTEGER   LSTACK     INPUT   unitnumb include stack
+!     LCH     CHAR*(*)  LSTACK     INPUT   file name stack, 4 deep
+!     LSTACK  INTEGER    1         INPUT   include file stack size
+!     CCHAR   CHAR*1     1         INPUT   comment character
+!     CHULP   CHAR*(*)   1         OUTPUT  space for limiting token
+!     NOTOT   INTEGER    1         INPUT   size of the matrix to be read
+!     ITTIM   INTEGER    1         INPUT   0 if steady, 1 if time function
+!     NOBRK   INTEGER    1         OUTPUT  number of records read
+!     IOPT    INTEGER    1         INPUT   3 is harmonics, 4 is fourier
+!     DTFLG1  LOGICAL    1         INPUT   True if time in 'date' format
+!     DTFLG3  LOGICAL    1         INPUT   True if YYetc instead of DDetc
+!     ITFACT  INTEGER    1         INPUT   factor between clocks
+!     ITYPE   INTEGER    1         OUTPUT  type of info at end
+!     IERR    INTEGER    1         OUTPUT  return code
+!     IERR3   INTEGER    1         OUTPUT  actual error indicator
+!
+!
       use timers       !   performance timers
 
       INTEGER       IIMAX  , IRMAX
@@ -82,9 +82,9 @@ C
       integer       ihulp
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq5d", ithndl )
-C
-C     Some initialisation
-C
+!
+!     Some initialisation
+!
       IGNORE = .FALSE.
       NEWREC = .FALSE.
       IF ( ITTIM .EQ. 1 ) NEWREC = .TRUE.                          ! it is a time function
@@ -93,9 +93,9 @@ C
       ITEL2  = 1
       ierr3  = 0
       IF ( ITYPE .NE. 0 ) GOTO 20                                  ! it was called with an argument
-C
-C     Read loop
-C
+!
+!     Read loop
+!
    10 IF ( NEWREC ) THEN
          ITYPE = 0                                                 ! everything is valid
       ELSE
@@ -104,9 +104,9 @@ C
       CALL RDTOK1 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
      *              IPOSR  , NPOS   , CHULP  , IHULP  , RHULP  ,
      *                                         ITYPE  , IERR   )
-C          A read error
+!          A read error
       IF ( IERR  .NE. 0 ) goto 9999
-C          A token has arrived
+!          A token has arrived
       IF ( ITYPE .EQ. 1 ) THEN                                     ! that must be an absolute timer string
          CALL DLWQ0T ( CHULP , IHULP, .FALSE., .FALSE., IERR )    !  2^31 =  2147483648
          IF ( IHULP .EQ. -999 ) THEN                              !       YYYYDDDHHMMSS so 64 bits integer
@@ -128,9 +128,9 @@ C          A token has arrived
       else
          ihulp = 0
       ENDIF
-C          Getting the data of this block (no strings any more)
+!          Getting the data of this block (no strings any more)
    20 IF ( ITTIM .EQ. 1 .AND. NEWREC ) THEN
-C          it was a non-real and characters has been caught
+!          it was a non-real and characters has been caught
          IF ( IHULP .EQ. -999 ) THEN
             IGNORE = .TRUE.
          ELSE                                                      ! a new breakpoint found
@@ -153,23 +153,23 @@ C          it was a non-real and characters has been caught
          NEWREC = .FALSE.
          GOTO 10
       ENDIF
-C
+!
       IF ( .NOT. IGNORE ) RAR(ITEL) = RHULP
-C        are we to expect a new record ?
+!        are we to expect a new record ?
       IF ( MOD(ITEL2,NOTOT) .EQ. 0 ) NEWREC = .TRUE.
-C        it was a constant, so we can now return.
+!        it was a constant, so we can now return.
       IF ( NEWREC .AND. ITTIM .NE. 1 ) THEN
          NOBRK = 1
          IAR(1) =  0
          goto 9999
       ENDIF
-C        increase the counter for the next real and go to input
+!        increase the counter for the next real and go to input
       IF ( .NOT. IGNORE ) ITEL = ITEL + 1
       ITEL2 = ITEL2 + 1
       GOTO 10
  9999 if (timon) call timstop( ithndl )
       return
-C
+!
  1000 FORMAT ( ' ERROR ! Number of breakpoints exceeds system',
      *         ' maximum of: ' , I10 )
  1010 FORMAT ( ' ERROR ! Number of data points exceeds system',
@@ -178,6 +178,6 @@ C
      *         'format: ', A)
  1030 FORMAT (/' ERROR ! Time value ',I10,' not larger than previous time value ',I10 )
  1040 FORMAT (/' WARNING ! There are only ',I2,' breakpoints found for this time series' )
-C
+!
       END
 

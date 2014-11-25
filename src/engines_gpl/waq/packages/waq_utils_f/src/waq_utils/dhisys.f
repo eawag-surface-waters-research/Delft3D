@@ -22,45 +22,45 @@
 !!  rights reserved.
 
       SUBROUTINE DHISYS ( ISYSI , ISYSN )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : march 97 by Jan van Beek
-C
-C     FUNCTION            : Initialise constant array from common block
-C
-C     LOGICAL UNITNUMBERS : -
-C
-C     SUBROUTINES CALLED  : -
-C
-C     PARAMETERS          : -
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ISYSI   INTEGER       *     OUTPUT  copy of the SYSI common block
-C     ISYSN   INTEGER       *     OUTPUT  copy of the SYSI common block
-C
-C     declarations
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : march 97 by Jan van Beek
+!
+!     FUNCTION            : Initialise constant array from common block
+!
+!     LOGICAL UNITNUMBERS : -
+!
+!     SUBROUTINES CALLED  : -
+!
+!     PARAMETERS          : -
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ISYSI   INTEGER       *     OUTPUT  copy of the SYSI common block
+!     ISYSN   INTEGER       *     OUTPUT  copy of the SYSI common block
+!
+!     declarations
+!
       INTEGER       ISYSI(*), ISYSN(*)
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     input structure for boot-file
-C
+!
+!     input structure for boot-file
+!
       INTEGER             IN(INSIZE)       , II(IISIZE)
       EQUIVALENCE       ( IN(1)  , NOSEG ) , ( II(1), ITSTRT  )
-C
-C     Fill the array's
-C
+!
+!     Fill the array's
+!
       CALL DHIMOV( II    , ISYSI , IISIZE )
       CALL DHIMOV( IN    , ISYSN , INSIZE )
-C
+!
       RETURN
       END

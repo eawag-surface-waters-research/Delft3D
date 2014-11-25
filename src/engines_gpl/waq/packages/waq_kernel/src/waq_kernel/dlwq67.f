@@ -22,39 +22,39 @@
 !!  rights reserved.
 
       SUBROUTINE DLWQ67 ( AMAT   , NOSEG  , JTRACK )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june 1988 by L.Postma
-C
-C     FUNCTION            : updates the diagonal if zero
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
-C     ----    -----      ------       ------- -----------
-C     AMAT    REAL (JTRACK*2+1)*NOSEG IN/OUT  matrix to invert
-C     NOSEG   INTEGER       1         INPUT   number of segments
-C     JTRACK  INTEGER       1         INPUT   number of codiagonals
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june 1988 by L.Postma
+!
+!     FUNCTION            : updates the diagonal if zero
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND       LENGTH       FUNCT.  DESCRIPTION
+!     ----    -----      ------       ------- -----------
+!     AMAT    REAL (JTRACK*2+1)*NOSEG IN/OUT  matrix to invert
+!     NOSEG   INTEGER       1         INPUT   number of segments
+!     JTRACK  INTEGER       1         INPUT   number of codiagonals
+!
       use timers
 
       DIMENSION   AMAT(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq67", ithandl )
-C
-C         set the diagonal
-C
+!
+!         set the diagonal
+!
       ISTEP = JTRACK*2 + 1
       ISET  = JTRACK + 1
       DO 10 ISEG = 1 , NOSEG
       IF ( ABS(AMAT(ISET)) .LT. 1.0E-35 ) AMAT(ISET) = 1.0
    10 ISET = ISET+ISTEP
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

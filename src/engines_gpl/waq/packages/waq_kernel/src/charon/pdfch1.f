@@ -37,9 +37,9 @@
       character(len=20)     :: syname(*)           ! substance names
       type(ProcesProp)      :: procha              ! charon process definition
       type(itempropcoll)    :: allitems            ! all items of the proces system
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER         LUPDF , MMAX  , NAIJ2 , NMAX  , NNOTRA,
      J                LUIC  , LUOC  , I     , NALTOX,
      J                NTOX  , NALADS, NALSPE, NALSP2, N1MAX , N2MAX
@@ -70,62 +70,62 @@ C
 
       INCLUDE 'charon.inc'
 
-C     Definitie unitnrs files
+!     Definitie unitnrs files
 
       DATA LUPDF,LUIC,LUOC / 13,11,12 /
 
-C     Aliases toxical substances:
-C          if first name occurs in CHARON component vector
-C          it will be remembered in order to write dissolved
-C          concentrations and quality of solid phase in DELWAQ,
-C          second name is DW4 equivalent,
-C          also used to manipulate species-array
+!     Aliases toxical substances:
+!          if first name occurs in CHARON component vector
+!          it will be remembered in order to write dissolved
+!          concentrations and quality of solid phase in DELWAQ,
+!          second name is DW4 equivalent,
+!          also used to manipulate species-array
 
       DATA ALITOX /'CD++      ','CD        ','CU++      ','CU        ',
      J             'ZN++      ','ZN        ','NI++      ','NI        ',
      J             'CR+++     ','CR        ','HG        ','HG        ',
      J             'PB++      ','PB        '/
 
-C     Aliases for adsorbents:
-C          if first name occurs in TRANSPORTED VECTOR
-C          it will be replaced by the second one for DELWAQ
-C          in order to find masses in TRANSPORTED VECTOR
-c
-c     DATA ALIADS /'CEC   _par','IM1       ','CEC   _tot','IM1       ',
-c    J             'FEADS _par','AdsFer    ','FEADS _par','AdsFer    ',
-c    J             'HHUM  _dis','DOC       ','HHUM  _dis','DOC       '/
-c
-C     Aliases for species
-C          if first name occurs in CHARON species vector
-C          it will be replaced by the second one for DELWAQ
-C          in order to define substances that influence DW4 processes
-C          (species molar mass in CHARON input will be applied!!)
+!     Aliases for adsorbents:
+!          if first name occurs in TRANSPORTED VECTOR
+!          it will be replaced by the second one for DELWAQ
+!          in order to find masses in TRANSPORTED VECTOR
+!
+!     DATA ALIADS /'CEC   _par','IM1       ','CEC   _tot','IM1       ',
+!    J             'FEADS _par','AdsFer    ','FEADS _par','AdsFer    ',
+!    J             'HHUM  _dis','DOC       ','HHUM  _dis','DOC       '/
+!
+!     Aliases for species
+!          if first name occurs in CHARON species vector
+!          it will be replaced by the second one for DELWAQ
+!          in order to define substances that influence DW4 processes
+!          (species molar mass in CHARON input will be applied!!)
 
       DATA ALISPE/ 'O2        ','OXY       ','CL-       ','CL        ',
      J             'NO3-      ','NO3       '/
-C    J             'NO3-      ','NO3       ','PARTP     ','AAP       '/
+!    J             'NO3-      ','NO3       ','PARTP     ','AAP       '/
 
-C     Aliases for species NH4 and PO4
-C          to be used after writing the process definition files
-C          species NH4 and PO4 are explicitly computed by process CHARON
-C          but NH4 and PO4 stoichiometry terms should be recognized!!
-C
-C     DATA ALISP2/ 'NH4+      ','NH4       ','PO4---    ','PO4       '/
+!     Aliases for species NH4 and PO4
+!          to be used after writing the process definition files
+!          species NH4 and PO4 are explicitly computed by process CHARON
+!          but NH4 and PO4 stoichiometry terms should be recognized!!
+!
+!     DATA ALISP2/ 'NH4+      ','NH4       ','PO4---    ','PO4       '/
 
-C
-C     get monitoring level
-C
+!
+!     get monitoring level
+!
       CALL GETMMO(MLEVEL)
       WRITE(LUREP,*)
       WRITE(LUREP,*) ' Determinig the relation between the substances',
      +               ' and the CHEM species'
 
-C     Read input of CHARON (also opening of files)
+!     Read input of CHARON (also opening of files)
 
       CALL CHINP2 (RUNNAM, LUIC  , LUOC  )
-C
-C     Set DELWAQ active substances as transport vector, skip non charon components or species
-C
+!
+!     Set DELWAQ active substances as transport vector, skip non charon components or species
+!
       IF ( NOSYS .GT. MAXN ) THEN
          WRITE(LUREP,*)
      +    'ERROR: number of DELWAQ active substances exceeds maximum:',
@@ -138,12 +138,12 @@ C
       IF (MLEVEL.GE.10) WRITE(LUREP,*) 'TRANSPORTED VECTOR'
       DO I = 1 , NOSYS
          VARNAM(NTRANS+1) = SYNAME(I)
-c        CALL CHALI2 ( 1 , VARNAM(NTRANS+1) , 10 , NALADS , ALIADS )
+!        CALL CHALI2 ( 1 , VARNAM(NTRANS+1) , 10 , NALADS , ALIADS )
          CALL CHALI2 ( 1 , VARNAM(NTRANS+1) , 10 , NALSPE , ALISPE )
          IF ( VARNAM(NTRANS+1)(7:10) .EQ. '    ') THEN
-C
-C           I am unsure of this one, see chmapd
-C
+!
+!           I am unsure of this one, see chmapd
+!
             CALL ZOEK ( VARNAM(NTRANS+1)(1:6),N,KN,6,INDX)
          ELSE
             CALL ZOEK ( VARNAM(NTRANS+1)(1:6),M,NR,6,INDX)
@@ -154,9 +154,9 @@ C
      +         WRITE(LUREP,'(I4,2X,A10)') NTRANS,VARNAM(NTRANS)
          ENDIF
       ENDDO
-C
-C     Write transport vector after charon.inp
-C
+!
+!     Write transport vector after charon.inp
+!
       WRITE ( LUIC , '(A)' ) 'TRANSPORT VECTOR'
       DO I = 1 , NTRANS
          WRITE ( LUIC , '(6X,A10)' ) VARNAM(I)
@@ -164,7 +164,7 @@ C
       WRITE ( LUIC , '(A)' ) 'END'
       CLOSE(LUIC)
 
-C     Check number of components for local arrays
+!     Check number of components for local arrays
 
       IF ( M .GT. MMAX ) THEN
          WRITE(LUREP,*) 'ERROR: M exceeds maximum:',M,'>',MMAX
@@ -180,46 +180,46 @@ C     Check number of components for local arrays
          CALL SRSTOP(1)
       ENDIF
 
-C     Find last index of first phase in arrays with dimension NAIJ
-C     (arrays with all non-zero entries in stoichiometric matrix)
+!     Find last index of first phase in arrays with dimension NAIJ
+!     (arrays with all non-zero entries in stoichiometric matrix)
 
       CALL CHPHAS ( NAIJ2 )
 
-C     Define mapping of Charon-Delwaq systems,
-C     administration arrays used in writing PDF for CHARON
-C     and in coupling CHARON and DELWAQ (see module for definition)
+!     Define mapping of Charon-Delwaq systems,
+!     administration arrays used in writing PDF for CHARON
+!     and in coupling CHARON and DELWAQ (see module for definition)
 
       CALL  CHMAPD ( NAIJ2 , MMAX  , NMAX  , N1MAX , N2MAX ,
      J               NTTOB , ITTTOB, IBTTOB, ABTTOB, RMTTOB,
      J               NCTOT , ICCTOT, ITCTOT, ABCTOT, RMCTOT,
      J               IOUTP , NNOTRA, NALTOX, NTOX  , ICTOX , ALITOX)
 
-C     Replace names of adsorbents by DELWAQ-equivalents
+!     Replace names of adsorbents by DELWAQ-equivalents
 
-c     CALL CHALIA ( NTRANS, VARNAM , 10 , NALADS , ALIADS )
+!     CALL CHALIA ( NTRANS, VARNAM , 10 , NALADS , ALIADS )
 
-C     Put DELWAQ-aliasses in species names insofar as they influence
-C     DW4 processes (exclude NH4 and PO4 because they are output CHARON)
-C     Put DELWAQ-aliasses in TRANSPORTED VECTOR as well
+!     Put DELWAQ-aliasses in species names insofar as they influence
+!     DW4 processes (exclude NH4 and PO4 because they are output CHARON)
+!     Put DELWAQ-aliasses in TRANSPORTED VECTOR as well
 
       CALL  CHALIA ( N      , KN     , 6  , NALSPE , ALISPE )
       CALL  CHALIA ( NTRANS , VARNAM , 10 , NALSPE , ALISPE )
 
-C     Write CHARON process
+!     Write CHARON process
 
       DO 15 I =1,NTOX
    15 NAMTOX(I) = NR(ICTOX(I),1)
-c
-c     test call old routine
-c
-c     CALL WRICHA ( LUPDF , NTRANS, VARNAM, NNOTRA, IOUTP ,
-c    J              N     , KN    , NTOX  , NAMTOX)
-C
-C     Check local maxima with interface maxima
-C
-C
-C     Map local variables to interface variables
-C
+!
+!     test call old routine
+!
+!     CALL WRICHA ( LUPDF , NTRANS, VARNAM, NNOTRA, IOUTP ,
+!    J              N     , KN    , NTOX  , NAMTOX)
+!
+!     Check local maxima with interface maxima
+!
+!
+!     Map local variables to interface variables
+!
       ! Getransporteerde vector
 
       input_item%maxsize  = 0
@@ -353,9 +353,9 @@ C
       procha%FluxStochi   =>FluxStochi%StochiProps
       procha%no_DispStochi= 0
       procha%no_VeloStochi= 0
-C
-C     Report on coupling
-C
+!
+!     Report on coupling
+!
       WRITE ( LUREP , '(/
      J ''Arrays describing composition of CHARON B-vector:''/
      J ''B[mol] = B[mol] + T[g] * A[mol/mol] / RM[g/mol]''/
@@ -376,12 +376,12 @@ C
      J      ABCTOT(I),
      J      RMCTOT(I),              I = 1,NCTOT   )
 
-C     Put DELWAQ-aliasses in species names and transported vector
-C     insofar as they are used to process stoichiometry
-C     Include NH4 and PO4, Yes or No?????
+!     Put DELWAQ-aliasses in species names and transported vector
+!     insofar as they are used to process stoichiometry
+!     Include NH4 and PO4, Yes or No?????
 
       CALL  CHALIA ( N      , KN     , 6  , NALTOX , ALITOX )
       CALL  CHALIA ( NTRANS , VARNAM , 10 , NALTOX , ALITOX )
-C
+!
       RETURN
       END

@@ -27,46 +27,46 @@
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
-C
-C     Deltares
-C
-C     CREATED:            : februari 2002 by Jan van Beek
-C
-C     FUNCTION            : Sets io list for statistical routine STADAY
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C                           ZOEK  , finds string in character array
-C                           DLWQ0T, converts absolute time to system time (seconds)
-C
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND      LENGTH  FUNCT.  DESCRIPTION
-C     ----    -----     ------  ------- -----------
-C     LUNREP  INTEGER        1  INPUT   unit number report file
-C     NOKEY   INTEGER        1  INPUT   number of keywords for this process
-C     KEYNAM  CHAR*20    NOKEY  INPUT   keyword name
-C     KEYVAL  CHAR*20    NOKEY  INPUT   keyword value
-C     aProcesProp               OUTPUT  properties for this proces
-C     AllItems                  INPUT   all items known to the proces system
-C     IERR    INTEGER        1  IN/OUT  cummulative error count
-C     NOWARN  INTEGER        1  IN/OUT  cummulative warning count
-C
+!
+!     Deltares
+!
+!     CREATED:            : februari 2002 by Jan van Beek
+!
+!     FUNCTION            : Sets io list for statistical routine STADAY
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!                           ZOEK  , finds string in character array
+!                           DLWQ0T, converts absolute time to system time (seconds)
+!
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND      LENGTH  FUNCT.  DESCRIPTION
+!     ----    -----     ------  ------- -----------
+!     LUNREP  INTEGER        1  INPUT   unit number report file
+!     NOKEY   INTEGER        1  INPUT   number of keywords for this process
+!     KEYNAM  CHAR*20    NOKEY  INPUT   keyword name
+!     KEYVAL  CHAR*20    NOKEY  INPUT   keyword value
+!     aProcesProp               OUTPUT  properties for this proces
+!     AllItems                  INPUT   all items known to the proces system
+!     IERR    INTEGER        1  IN/OUT  cummulative error count
+!     NOWARN  INTEGER        1  IN/OUT  cummulative warning count
+!
       USE ProcesSet
       use timers       !   performance timers
-C
+!
       IMPLICIT NONE
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , IPROC , IERR  , NOWARN
       LOGICAL       DTFLG1 , DTFLG3
       CHARACTER*20  KEYNAM(NOKEY), KEYVAL(NOKEY)
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER       IERR_ALLOC, IKEY  , ISLEN     , IERR2 , IRET
       integer       istart , iperiod
       INTEGER,      ALLOCATABLE :: ISUSED(:)
@@ -75,9 +75,9 @@ C
       type(ItemProp)        :: aItemProp            ! one item
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "setday", ithndl )
-C
-C     init
-C
+!
+!     init
+!
       ALLOCATE(ISUSED(NOKEY),STAT=IERR_ALLOC)
       IF ( IERR_ALLOC .NE. 0 ) THEN
          WRITE(LUNREP,*) 'ERROR allocating buffer array:',IERR_ALLOC
@@ -91,9 +91,9 @@ C
       IF ( IKEY .GT. 0 ) THEN
          ISUSED(IKEY) = 1
       ENDIF
-C
-C     Fill the Propces Properties
-C
+!
+!     Fill the Propces Properties
+!
       aProcesProp%name       = 'STADAY'
       WRITE(aProcesProp%name(7:10),'(I4.4)') IPROC
       aProcesProp%routine    = 'STADAY'
@@ -115,7 +115,7 @@ C
          WRITE(*,*) 'ERROR allocating array:',IERR_ALLOC
          CALL SRSTOP(1)
       ENDIF
-C
+!
       KEY='SUBSTANCE'
       CALL ZOEK(KEY,NOKEY,KEYNAM,20,IKEY)
       IF ( IKEY .LE. 0 ) THEN
@@ -138,7 +138,7 @@ C
          endif
          aProcesProp%input_item(1)%item=>AllItems%ItemPropPnts(iret)%pnt
       ENDIF
-C
+!
       KEY = 'TINIT'
       CALL ZOEK(KEY,NOKEY,KEYNAM,20,IKEY)
       IF ( IKEY .LE. 0 ) THEN
@@ -168,7 +168,7 @@ C
       aProcesProp%input_item(2)%actdef=istart
       aProcesProp%input_item(2)%indx  = 2
       aProcesProp%input_item(2)%ip_val  = 0
-C
+!
       KEY = 'PERIOD'
       CALL ZOEK(KEY,NOKEY,KEYNAM,20,IKEY)
       IF ( IKEY .LE. 0 ) THEN
@@ -197,7 +197,7 @@ C
       aProcesProp%input_item(3)%actdef=iperiod
       aProcesProp%input_item(3)%indx  = 3
       aProcesProp%input_item(3)%ip_val  = 0
-C
+!
       aItemProp%name    = 'ITIME'
       iret = ItemPropCollFind( AllItems, aItemProp )
       if ( iret .le. 0 ) then
@@ -212,7 +212,7 @@ C
       aProcesProp%input_item(4)%actdef=-999.
       aProcesProp%input_item(4)%indx  = 4
       aProcesProp%input_item(4)%ip_val  = 0
-C
+!
       aItemProp%name    = 'IDT'
       iret = ItemPropCollFind( AllItems, aItemProp )
       if ( iret .le. 0 ) then
@@ -227,7 +227,7 @@ C
       aProcesProp%input_item(5)%actdef=-999.
       aProcesProp%input_item(5)%indx  = 5
       aProcesProp%input_item(5)%ip_val  = 0
-C
+!
       aItemProp%name    = 'TCOUNT    '//aProcesProp%name(1:10)
       aItemProp%default = 0.0
       aItemProp%text    = 'time step counter'
@@ -239,7 +239,7 @@ C
       aProcesProp%input_item(6)%actdef=0.0
       aProcesProp%input_item(6)%indx  = 6
       aProcesProp%input_item(6)%ip_val  = 0
-C
+!
       KEY = 'SUFFIX'
       CALL ZOEK(KEY,NOKEY,KEYNAM,20,IKEY)
       IF ( IKEY .LE. 0 ) THEN
@@ -249,7 +249,7 @@ C
          ISUSED(IKEY) = 1
       ENDIF
       CALL DHSLEN(SUFFIX,ISLEN)
-C
+!
       IF (SUFFIX(1:ISLEN) .NE. ' ' ) THEN
          aItemProp%name    = SUFFIX(1:ISLEN)//'_'//aProcesProp%input_item(1)%name
       ELSE
@@ -266,9 +266,9 @@ C
       aProcesProp%output_item(1)%ip_val= 0
       WRITE(LUNREP,2000) 'Statistical output named [',aItemProp%name,
      +                   '] created with periodic average from [',aProcesProp%input_item(1)%name,']'
-C
-C     work array in input and in output
-C
+!
+!     work array in input and in output
+!
       IF (SUFFIX(1:ISLEN) .NE. ' ' ) THEN
          aItemProp%name    = 'T_'//SUFFIX(1:ISLEN)//'_'//aProcesProp%input_item(1)%name
       ELSE
@@ -289,9 +289,9 @@ C
       aProcesProp%input_item(7)%actdef=-999.
       aProcesProp%input_item(7)%indx  = 7
       aProcesProp%input_item(7)%ip_val  = 0
-C
-C     check the use of the key words
-C
+!
+!     check the use of the key words
+!
       DO IKEY = 1 , NOKEY
          IF ( ISUSED(IKEY) .EQ. 0 ) THEN
             NOWARN = NOWARN + 1
@@ -300,9 +300,9 @@ C
             WRITE(LUNREP,*) 'value :',KEYVAL(IKEY)
          ENDIF
       ENDDO
-C
+!
       DEALLOCATE (ISUSED)
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
  2000 FORMAT(5A)

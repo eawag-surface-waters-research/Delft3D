@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       21:16
-C    Program:    SOLVEX.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       22 Oct 1992
+!    Time:       21:16
+!    Program:    SOLVEX.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine solvex(k1,str6)
       include  'char1.inc'
       logical done,done2
@@ -40,53 +40,53 @@ C
       done2 = .false.
       kk = k1
 1     if(kk.eq.0) then
-c second order wanted
+! second order wanted
         call solve2(kk)
         if(ierror .eq. 3) call solve2(kk)
         if(ierror .eq. 1) go to 999
         if(ierror .eq. 8) then
-c          write(not,1234)kk
-c1234      format(' second order failed ',i4)
-c change to projection
+!          write(not,1234)kk
+!1234      format(' second order failed ',i4)
+! change to projection
           kk  = 1
         endif
       endif
       if(kk .eq. 1)then
-c projection wanted, or second order failed
+! projection wanted, or second order failed
         call solve2(kk)
         if(ierror .eq. 3) call solve2(kk)
         if(ierror .eq. 1) go to 999
         if(ierror .eq. 8) then
           if(done) go to 90
-c          write(not,1235)kk
-c1235      format(' projection failed ',i4)
-c if simplex already done go to sec order
+!          write(not,1235)kk
+!1235      format(' projection failed ',i4)
+! if simplex already done go to sec order
           if(kk .eq. 2) then
             done = .true.
             kk = 0
             go to 1
           endif
-c change to simplex
+! change to simplex
           kk  = 2
         endif
       endif
-c simplex wanted or projection failed
+! simplex wanted or projection failed
       if(kk .eq. 2)then
         call solve2(kk)
         if(ierror .eq. 3) call solve2(kk)
         if(ierror .eq. 1) go to 999
         write(not,1236)kk
 1236    format(' simplex failed ',i4)
-c        write(not,1237)str6
-c1237    format('****warning:  solve could not find a solution in ',a6)
+!        write(not,1237)str6
+!1237    format('****warning:  solve could not find a solution in ',a6)
         if(.not.done) then
-c simplex failed, try once projection
+! simplex failed, try once projection
           done = .true.
           kk = 1
           go to 1
         endif
       endif
-c all failed
+! all failed
 90    if(done2) go to 99
       if(ierror .ne. 8) go to 99
       do 92 i=1,m

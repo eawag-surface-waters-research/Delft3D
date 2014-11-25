@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *      SUBROUTINE CHHELP TO PRINT CURRENT PARAMETER SETTINGS        *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *      SUBROUTINE CHHELP TO PRINT CURRENT PARAMETER SETTINGS        *
+!  *********************************************************************
+!
       SUBROUTINE CHHELP (OUTUNI)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -35,12 +35,12 @@ C
       INCLUDE 'phyt2.inc'
       INCLUDE 'cal1.inc'
       INTEGER OUTUNI
-C
-C  Clear the screen and write a formfeed character to OUTUNI.
-C
-C  Print everything which can be altered in subroutine CHANGE.
-C
-C
+!
+!  Clear the screen and write a formfeed character to OUTUNI.
+!
+!  Print everything which can be altered in subroutine CHANGE.
+!
+!
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       CALL FORMFE (OUTUNI)
       WRITE (OUTUNI,99999) IYEAR,(CASE(I),I=1,9)
@@ -64,7 +64,7 @@ C
       WRITE (OUTUNI,99910) NNRUN
       DO 40 J=1,NRUN
    40 WRITE (OUTUNI,99900) NPER(J,1),NPER(J,2),NPER(J,3)
-C
+!
       IF (LCAL .EQ. 4) THEN
          WRITE (OUTUNI,99870)
       ELSE
@@ -77,9 +77,9 @@ C
       WRITE (OUTUNI,99820) REMILI(1),REMILI(2)
       WRITE (OUTUNI,99810) AVAILN
       IF (IOFLAG .EQ. 1) CALL MORESC
-C
-C  Formats for this subroutine
-C
+!
+!  Formats for this subroutine
+!
 99999 FORMAT (1X,I4,1X,9A8)
 99990 FORMAT (9A8)
 99980 FORMAT (1X,'Temperature calculated as    ',2X,F6.2,2X,

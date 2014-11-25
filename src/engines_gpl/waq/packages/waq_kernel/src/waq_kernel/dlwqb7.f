@@ -26,46 +26,46 @@
      *                    NSYS   , NOQ1   , NOQ2   , NOQ    , NODISP ,
      *                    NOVELO , IDPNT  , IVPNT  , DERIV  , IOPT   ,
      *                                                        ILFLAG )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: august  1992 by L.Postma
-C
-C     FUNCTION            : Fills only derivative for transport
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DISP    REAL        3       INPUT   dispersion in 3 directions
-C     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
-C     AREA    REAL       NOQ      INPUT   exchange surface area
-C     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
-C     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
-C     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
-C     BOUND   REAL     NOTOT*?    INPUT   boundary concentrations
-C     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
-C     NOTOT   INTEGER     1       INPUT   number  of active substances
-C     ISYS    INTEGER     1       INPUT   system number considered
-C     NSYS    INTEGER     1       INPUT   number of systems considered
-C     NOQ1    INTEGER     1       INPUT   nr of exchanges in first dir.
-C     NOQ2    INTEGER     1       INPUT   nr of exchanges in second dir.
-C     NOQ     INTEGER     1       INPUT   total number of exchanges
-C     NODISP  INTEGER     1       INPUT   number of additional dispers.
-C     NOVELO  INTEGER     1       INPUT   number of additional velos.
-C     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
-C     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
-C     DERIV   REAL   NOTOT*NOSEG  OUTPUT  derivatives
-C     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
-C                                         = 1 or 3 no DISP at zero flow
-C                                         = 0 or 1 DISP over boundary
-C                                         = 2 or 3 no DISP over boundary
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: august  1992 by L.Postma
+!
+!     FUNCTION            : Fills only derivative for transport
+!
+!     LOGICAL UNITNUMBERS : none
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DISP    REAL        3       INPUT   dispersion in 3 directions
+!     DISPER  REAL   NODISP*NOQ   INPUT   additional dispersion array
+!     AREA    REAL       NOQ      INPUT   exchange surface area
+!     FLOW    REAL       NOQ      INPUT   flows accross exchange surfs
+!     ALENG   REAL      2*NOQ     INPUT   from- and to lengthes
+!     VELO    REAL   NOVELO*NOQ   INPUT   additional velocity array
+!     BOUND   REAL     NOTOT*?    INPUT   boundary concentrations
+!     IPOINT  INTEGER   4*NOQ     INPUT   exchange pointers
+!     NOTOT   INTEGER     1       INPUT   number  of active substances
+!     ISYS    INTEGER     1       INPUT   system number considered
+!     NSYS    INTEGER     1       INPUT   number of systems considered
+!     NOQ1    INTEGER     1       INPUT   nr of exchanges in first dir.
+!     NOQ2    INTEGER     1       INPUT   nr of exchanges in second dir.
+!     NOQ     INTEGER     1       INPUT   total number of exchanges
+!     NODISP  INTEGER     1       INPUT   number of additional dispers.
+!     NOVELO  INTEGER     1       INPUT   number of additional velos.
+!     IDPNT   INTEGER   NOSYS     INPUT   pointer systems to dispersions
+!     IVPNT   INTEGER   NOSYS     INPUT   pointer systems to velocities
+!     DERIV   REAL   NOTOT*NOSEG  OUTPUT  derivatives
+!     IOPT    INTEGER     1       INPUT   = 0 or 2 DISP at zero flow
+!                                         = 1 or 3 no DISP at zero flow
+!                                         = 0 or 1 DISP over boundary
+!                                         = 2 or 3 no DISP over boundary
+!     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
+!
       use timers
 
       DIMENSION  DISP  (  3) , DISPER(*) , AREA (*) , FLOW (*) ,
@@ -73,12 +73,12 @@ C
      *           IPOINT(4,*) , IDPNT(*)  , IVPNT(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqb7", ithandl )
-C
+!
       NOQ12 = NOQ1 + NOQ2
       DO 40 IQ = 1 , NOQ
-C
-C         initialisations , check for transport anyhow
-C
+!
+!         initialisations , check for transport anyhow
+!
       I    = IPOINT(1,IQ)
       J    = IPOINT(2,IQ)
       IF ( I .GT. 0 .AND. J .GT. 0 ) GOTO 40
@@ -117,9 +117,9 @@ C
            Q2 =   Q
       ENDIF
       IF ( J .LT. 0 ) GOTO 20
-C
-C        The 'from' segment is a boundary
-C
+!
+!        The 'from' segment is a boundary
+!
       IF ( MOD(IOPT,4) .GT. 1 ) E = 0.0
       K1 = (-I-1)*NOTOT
       I4 = ( J-1)*NSYS  + 1
@@ -127,20 +127,20 @@ C
       DERIV(I4) = DERIV(I4) + ( Q1+E) * BOUND(K1+I3)
    10 I4=I4+1
       GOTO 40
-C
-C        The 'to' element was a boundary.
-C
+!
+!        The 'to' element was a boundary.
+!
    20 IF ( MOD(IOPT,4) .GT. 1 ) E = 0.0
       K2 = (-J-1)*NOTOT
       I4 = ( I-1)*NSYS  + 1
       DO 30 I3=ISYS,ISYS+NSYS-1
       DERIV(I4) = DERIV(I4) + (-Q2+E) * BOUND(K2+I3)
    30 I4=I4+1
-C
-C        end of the loop over exchanges
-C
+!
+!        end of the loop over exchanges
+!
    40 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

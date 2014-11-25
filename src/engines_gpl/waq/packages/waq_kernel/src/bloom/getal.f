@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *   REAL FUNCTION TO DETERMINE ROUNDED YMAX VALUES.                 *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *   REAL FUNCTION TO DETERMINE ROUNDED YMAX VALUES.                 *
+!  *********************************************************************
+!
       FUNCTION GETAL (X)
       X=X-1.E-3
       X=X*1.E3

@@ -27,14 +27,14 @@
      *                    LGET   , IERR   )
       use timers
 
-C
+!
       CHARACTER*20 NAME  , CONAME(*), PANAME(*), FUNAME(*), SFNAME(*)
       REAL         VALUE(NOSSS), CONST(NOCONS), PARAM (NOPA ,NOSSS ),
      *                           FUNCS(NOFUN ), SFUNCS(NOSSS,NOSFUN)
       LOGICAL      LGET
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "values", ithandl )
-C
+!
       IERR = 1
       CALL ZOEK20 ( NAME, NOSFUN, SFNAME, 10, INDX )
       IF ( INDX .GT. 0 ) THEN
@@ -72,7 +72,7 @@ C
          endif
          goto 100
       endif
-c
+!
   100 continue
       if ( timon ) call timstop ( ithandl )
       return

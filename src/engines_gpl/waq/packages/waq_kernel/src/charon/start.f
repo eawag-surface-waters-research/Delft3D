@@ -21,15 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       21:17
-C    Program:    START.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       22 Oct 1992
+!    Time:       21:17
+!    Program:    START.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine start
-c        4-69
-c        clears data arrays and sets standard values for parameters.
+!        4-69
+!        clears data arrays and sets standard values for parameters.
       include  'char1.inc'
       equivalence (xx1(1),aij(1)), (nx1(1),irow(1)), (xx2(1),c1(1)),
      2            (ix2(1),ka(1))
@@ -39,8 +39,8 @@ c        clears data arrays and sets standard values for parameters.
       character*6 nhol(4),ix2(1),messag
       DATA NHOL /'END   ','      ','H2O   ','H+    '/
       DATA MESSAG /'MESSAG'/
-c        set all data to zero
-c        real8
+!        set all data to zero
+!        real8
       ipf = 0
       intit2 = intitl
       if(ka(2) .eq. messag)ipf = 1
@@ -52,7 +52,7 @@ c        real8
       num1 = num
       if(ipf .gt. 0)write(not,1234)num
 1234  format(' size common real8 (bytes): ',i5)
-c        hol8
+!        hol8
       num =   maxn +  2*maxp + 2*maxm + 28
       do 61 i=1,num
       ix2(i) = nhol(2)
@@ -61,7 +61,7 @@ c        hol8
       num1 = num1 + num
       if(ipf .gt. 0)write(not,1235)num
 1235  format(' size common hol8         : ',i5)
-c        intgr
+!        intgr
       num = 2*maxn  + maxp + 2*maxaij  + 33
       nitt = nit
       nott = not
@@ -74,7 +74,7 @@ c        intgr
       num1 = num1 + num
       if(ipf .gt. 0)write(not,1236)num
 1236  format(' size common intgr        : ',i5)
-c        water (exept the logicals and undimensioned )
+!        water (exept the logicals and undimensioned )
       num = 6.5*maxn  + 2*maxp
       do 63 i=1,num
       xx2(i) = 0.0d+00
@@ -100,12 +100,12 @@ c        water (exept the logicals and undimensioned )
       tt = 298.18
       temp=25.0
       press = 1.0
-c        clear constants for delete subroutine
+!        clear constants for delete subroutine
       ndelz = 0
       nundel = 0
       ktally = 0
-c     nit = 8
-c     not = 9
+!     nit = 8
+!     not = 9
       bmult(1) = 1.0
       aliter = 55.551
       itmax = 250
@@ -121,7 +121,7 @@ c     not = 9
      4 i5, ' maximum number of phases ',/,
      5 i5, ' maximum number of species ',/,
      6 i5, ' maximum number of stochiometric coefficients ')
-c        set values for slack tolerances
+!        set values for slack tolerances
       barmin = 1.0d-14
       slacks = 2.0*barmin
       xmin = dmin1(5.d-5*slacks,1.d-12)
@@ -137,10 +137,10 @@ c        set values for slack tolerances
      4 e15.5, ' for xstart',/,
      5 e15.5, ' for tol1  ',/,
      6 e15.5, ' for tol2  ')
-c        set values for overflow test in function subprogram divide
-c           anumbr is largest number
-c           aquot represents infinity.  it is the value printed if
-c        a divide overflow will occur.
+!        set values for overflow test in function subprogram divide
+!           anumbr is largest number
+!           aquot represents infinity.  it is the value printed if
+!        a divide overflow will occur.
       if(ipf .gt. 0)write (not,99997)
      2           adt, bdt, bdot
 99997 format(' values of constants debye huckel equation are : ',/,

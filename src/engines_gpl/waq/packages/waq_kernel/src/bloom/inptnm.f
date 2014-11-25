@@ -21,30 +21,30 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       27 Dec 1989
-C    Time:       09:32
-C    Program:    INPTNM.FOR
-C    Version:    1.1
-C    Programmer: Hans Los
-C    Previous version(s):
-C    1.0 -- 12 Dec 1989 -- 11:58 -- Operating System: DOS
-C    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-C
-C  *********************************************************************
-C  *  INTEGER FUNCTION INPTNM TO READ VARIABLES USING INTERACTIVE      *
-C  *              ROUTINES IN "INTERACT TXTLIB"                        *
-C  *********************************************************************
-C
+!    Date:       27 Dec 1989
+!    Time:       09:32
+!    Program:    INPTNM.FOR
+!    Version:    1.1
+!    Programmer: Hans Los
+!    Previous version(s):
+!    1.0 -- 12 Dec 1989 -- 11:58 -- Operating System: DOS
+!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
+!
+!  *********************************************************************
+!  *  INTEGER FUNCTION INPTNM TO READ VARIABLES USING INTERACTIVE      *
+!  *              ROUTINES IN "INTERACT TXTLIB"                        *
+!  *********************************************************************
+!
       INTEGER FUNCTION INPTNM(PRMPT,DNUM,INUM,TYPE)
       INCLUDE 'ioblck.inc'
       REAL*8 DNUM
       INTEGER PRMPT,TYPE,STOI,STOR,STOD,UPRCAS
-C
-C  TYPE INDICATES TYPE OF VARIABLE:
-C    TYPE = 1: DOUBLE PRECISSION REAL
-C    TYPE = 2: INTEGER
-C    TYPE = 3: SINGLE PRECISSION REAL
-C
+!
+!  TYPE INDICATES TYPE OF VARIABLE:
+!    TYPE = 1: DOUBLE PRECISSION REAL
+!    TYPE = 2: INTEGER
+!    TYPE = 3: SINGLE PRECISSION REAL
+!
       INPTNM = 0
 1     CONTINUE
       GO TO (10,20,30), TYPE

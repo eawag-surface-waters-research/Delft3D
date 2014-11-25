@@ -27,50 +27,33 @@
 !>\file
 !>       Calculate chezy coefficient using roughness and depth
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921223             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     9202    Pascal Boderie  Create xxx version for T890 SLIB
-C     9207    Jos van Gils    Create xxx version for Djakarta Bay
-C     920701  Pascal Boderie  Create first version vor T721.72
-C     980702  S.Lambrechtsen  Added switch for Chezytype
-C                             Added 2d or 3d calculation
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        CALCULATE CHEZY COEFFICIENT USING ROUGHNESS AND DEPTH
-C
-C        AVERAGED MODELS
-C
-C Name    T   L I/O  Description                              Units
-C ----    --- -  -   -------------------                      ----
-C CHZ     R   1  L   Chezy coefficient                         [sqrt(m)/s]
-C DEPTH   R   1  I   Water depth                                       [m]
-C ROUGH   R   1  I   Bottom roughness                                  [m]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        CALCULATE CHEZY COEFFICIENT USING ROUGHNESS AND DEPTH
+!
+!        AVERAGED MODELS
+!
+! Name    T   L I/O  Description                              Units
+! ----    --- -  -   -------------------                      ----
+! CHZ     R   1  L   Chezy coefficient                         [sqrt(m)/s]
+! DEPTH   R   1  I   Water depth                                       [m]
+! ROUGH   R   1  I   Bottom roughness                                  [m]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
-C     Local declarations, constants in source
-C
+!     Local declarations, constants in source
+!
       REAL     ROUGH  , DEPTH , TOTDEP,    CHZ, ONESIX,
      +         MANCOF
       INTEGER  IP1    , IP2   , IP3   , IKMRK1, IKMRK2,
@@ -85,17 +68,17 @@ C
       IP6  = IPOINT( 6)
 
       ONESIX = 1.0/6.0
-C you need this for maninng
+! you need this for maninng
 
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C 0-inactive cell  1-active cell
+! 0-inactive cell  1-active cell
        CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
        IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C place in layers   0-depth integerated (2D) 1-top 2-between 3-bottom
-C
+! place in layers   0-depth integerated (2D) 1-top 2-between 3-bottom
+!
 
         ROUGH   =      PMSA(IP1 )
         MANCOF  =      PMSA(IP2 )
@@ -104,26 +87,26 @@ C
         ICHZTP  = NINT(PMSA(IP5 ))
 
         IF (ICHZTP.EQ.1) THEN
-C       Shear stress by flow according to White/Colebrook
+!       Shear stress by flow according to White/Colebrook
          CHZ = 18. * LOG10 ( 12.* TOTDEP / ROUGH  )
         ELSE IF (ICHZTP.EQ.2) THEN
-C       Chezy according to Manning
+!       Chezy according to Manning
          CHZ = ( TOTDEP ** ONESIX) / MANCOF
         END IF
         CHZ = MAX(CHZ,1.0)
 
         PMSA (IP6 ) = CHZ
-C
+!
        ENDIF
       ENDIF
-C
+!
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
       IP3   = IP3   + INCREM (  3 )
       IP4   = IP4   + INCREM (  4 )
       IP5   = IP5   + INCREM (  5 )
       IP6   = IP6   + INCREM (  6 )
-C
+!
  9000 CONTINUE
 
       RETURN

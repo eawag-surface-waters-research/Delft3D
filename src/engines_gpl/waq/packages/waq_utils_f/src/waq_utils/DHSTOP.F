@@ -22,48 +22,48 @@
 !!  rights reserved.
 
       SUBROUTINE DHSTOP ( IEXIT )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : June  '91  BY  Jan van Beek
-C
-C     FUNCTION           : stops execution if possible with return value
-C
-C*********************************************************************
-C     System dependent routine
-C     configuration
-C
-C     UNIX systems
-C*********************************************************************
-C
-C     LOGICAL UNITS      : -
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     IEXIT   INTEGER    1         INPUT   return value
-C     ---------------------------------------------------------
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : June  '91  BY  Jan van Beek
+!
+!     FUNCTION           : stops execution if possible with return value
+!
+!*********************************************************************
+!     System dependent routine
+!     configuration
+!
+!     UNIX systems
+!*********************************************************************
+!
+!     LOGICAL UNITS      : -
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     IEXIT   INTEGER    1         INPUT   return value
+!     ---------------------------------------------------------
+!
       INTEGER   IEXIT
-C
-C     Local
-C
-C     INTEGER*2 IEXI2
-C
-C     Close all files
-C
+!
+!     Local
+!
+!     INTEGER*2 IEXI2
+!
+!     Close all files
+!
       DO 10 ILUN = 10 , 99
          CLOSE ( ILUN )
  10   CONTINUE
-C
-C     Call C routine
-C
+!
+!     Call C routine
+!
       IF ( IEXIT .NE. 0 ) THEN
          WRITE(*,*) ' EXIT LEVEL: ',IEXIT
       ENDIF
       IEXI2 = IEXIT
       CALL STOP ( IEXI2 )
-C
+!
       END

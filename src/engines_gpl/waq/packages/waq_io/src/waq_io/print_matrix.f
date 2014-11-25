@@ -182,12 +182,12 @@
             enddo
          enddo
       endif
-c
+!
    70 continue
 
       if (timon) call timstop( ithndl )
       return
-c
+!
  1000 format (/' data grouped in',i5,' blocks of',i5,' ',a )
  1010 format ( ' scale factors for this block of data: ' )
  1020 format ( ' scale    :' ,i6,9i12 )
@@ -205,7 +205,7 @@ c
  1130 format ( ' info comes at runtime from binary file: ',a)
  1135 format ( ' info comes at runtime from external source: ',a)
  1160 format ( ' all data from this block ignored' )
-c
+!
       end
       character*20 function car_used(i)
       integer       i

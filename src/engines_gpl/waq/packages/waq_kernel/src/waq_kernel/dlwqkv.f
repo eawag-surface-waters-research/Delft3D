@@ -23,84 +23,84 @@
 
       SUBROUTINE DLWQKV ( LUNIN  , LUNOUT , ITIME  , IARRAY , NTOTAL ,
      +                    LUNTXT , ISFLAG , IFFLAG )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : december 1994 by Jan van Beek
-C                           Integer version of DLWQT2 by L. Postma
-C
-C     FUNCTION            : Makes values at ITIME for user supplied
-C                                         binary intermediate files
-C
-C     LOGICAL UNITNUMBERS : LUNIN  - input unit intermediate file
-C                           LUNOUT - monitor file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNIN   INTEGER       1     INPUT   unit number intermediate file
-C     LUNOUT  INTEGER       1     INPUT   unit number monitor file
-C     ITIME   INTEGER       1     INPUT   Model timer
-C     IARRAY  INTEGER  NTOTAL     OUTPUT  result array at time ITIME
-C     NTOTAL  INTEGER       1     INPUT   number of items to be filled
-C     LUNTXT  CHAR*(*)      1     INPUT   text concerning unit numbers
-C     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
-C     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
-C
-C     DECLARATIONS        :
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : december 1994 by Jan van Beek
+!                           Integer version of DLWQT2 by L. Postma
+!
+!     FUNCTION            : Makes values at ITIME for user supplied
+!                                         binary intermediate files
+!
+!     LOGICAL UNITNUMBERS : LUNIN  - input unit intermediate file
+!                           LUNOUT - monitor file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNIN   INTEGER       1     INPUT   unit number intermediate file
+!     LUNOUT  INTEGER       1     INPUT   unit number monitor file
+!     ITIME   INTEGER       1     INPUT   Model timer
+!     IARRAY  INTEGER  NTOTAL     OUTPUT  result array at time ITIME
+!     NTOTAL  INTEGER       1     INPUT   number of items to be filled
+!     LUNTXT  CHAR*(*)      1     INPUT   text concerning unit numbers
+!     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
+!     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
+!
+!     DECLARATIONS        :
+!
       use timers
       INTEGER       LUNIN , LUNOUT, ITIME , NTOTAL, ISFLAG,
      +              IFFLAG
       INTEGER       IARRAY(NTOTAL)
       CHARACTER*(*) LUNTXT
-C
-C     Local
-C
+!
+!     Local
+!
       CHARACTER*10  MSGTXT(3)
       DATA          MSGTXT /' REWIND   ' , ' CONSTANT ' , ' ERROR    '/
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqkv", ithandl )
-C
-C         is this the first time?
-C
+!
+!         is this the first time?
+!
       MESSGE = 0
       IF ( IFFLAG .EQ. 1 ) GOTO 20
-C
-C         normal time varying read
-C
+!
+!         normal time varying read
+!
       READ  ( LUNIN , END=10 , ERR=40 ) ITIME1 , IARRAY
       goto 9999
-C
-C         normal rewind.
-C
+!
+!         normal rewind.
+!
    10 MESSGE = 1
       REWIND  LUNIN
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , IARRAY
       GOTO 50
-C
-C         This is the first time, check only for nr of records.
-C
+!
+!         This is the first time, check only for nr of records.
+!
    20 CONTINUE
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , IARRAY
       READ  ( LUNIN , END=30 , ERR=40 ) ITIME1 , IARRAY
       REWIND  LUNIN
       READ  ( LUNIN , END=30 , ERR=40 ) ITIME1 , IARRAY
       goto 9999
-C
-C         file has only one record, array is constant
-C
+!
+!         file has only one record, array is constant
+!
    30 MESSGE =  2
       REWIND  LUNIN
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , IARRAY
       IFFLAG = -1
       GOTO 50
-C
-C         error, during read
-C
+!
+!         error, during read
+!
    40 MESSGE = 3
    50 IF ( ISFLAG .NE. 1 ) THEN
            WRITE(LUNOUT,2000) MSGTXT(MESSGE), LUNIN, LUNTXT ,
@@ -115,11 +115,11 @@ C
       IF ( MESSGE .LT. 3 ) goto 9999
       CALL SRSTOP ( 1 )
  9999 if ( timon ) call timstop ( ithandl )
-C
+!
  2000 FORMAT (   A10  ,  'ON UNIT:',I10,', READING: ',A20,/
      *         ' SIMULATION TIME :',I10,' !  TIME IN FILE: ',I10,' !')
  2010 FORMAT (   A10  ,  'ON UNIT:',I10,', READING: ',A20,/
      *         ' SIMULATION TIME :',I5,'D ',I2,'H ',I2,'M ',I2,'S ! ',
      *         ' TIME IN FILE    :',I5,'D ',I2,'H ',I2,'M ',I2,'S ! ')
-C
+!
       END

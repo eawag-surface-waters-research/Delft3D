@@ -21,25 +21,25 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       22 Oct 1992
-C    Time:       21:06
-C    Program:    ROWS.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       22 Oct 1992
+!    Time:       21:06
+!    Program:    ROWS.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine rows(kalter)
-c        the following options are available
-c                                kalter      control
-c                                   -3       punchrows
-c                                   -2       printrows
-c                                   -1   (recomputes b vector)
-c                                    0       rows
-c                                   +1       alterb
-c                                   +2       addb
-c                                   +3       b
-c                                   +4       relaxb
-c        rows uses subprogram
-c           leave
+!        the following options are available
+!                                kalter      control
+!                                   -3       punchrows
+!                                   -2       printrows
+!                                   -1   (recomputes b vector)
+!                                    0       rows
+!                                   +1       alterb
+!                                   +2       addb
+!                                   +3       b
+!                                   +4       relaxb
+!        rows uses subprogram
+!           leave
       include  'char1.inc'
       logical nerr
       character*6 nr1, nr2
@@ -47,7 +47,7 @@ c           leave
       if(bmult(5) .eq. 0.0d+00)nmult = 4
       if(bmult(4) .eq. 0.0d+00 .and. nmult .eq. 4)nmult = 3
       if (kalter.ne.(-1)) go to 50
-c        compute b
+!        compute b
    10 do 30 i=1,m
          b(i) = 0.0
          do 20 k=1,5
@@ -55,7 +55,7 @@ c        compute b
    20    continue
    30 continue
       return
-c        printrows
+!        printrows
    50 if (kalter.ge.0) go to 120
       if (kalter.ne.(-2)) go to 60
       write (not,99999) (i,i=1,nmult)
@@ -78,7 +78,7 @@ c        printrows
   110 write(7,99993)
       return
   120 if (kalter.gt.0) go to 210
-c        rows
+!        rows
       write (not,99999) (i,i=1,nmult)
       write (not,99981) (bmult(i),i=1,nmult)
       m = 0
@@ -88,7 +88,7 @@ c        rows
             bbb(i,j) = 0.0
   130    continue
   140 continue
-c        read first card
+!        read first card
       read (nit,99992) nr(1,1), nr(1,2), (bbb(1,k),k=1,5)
       if (nr(1,1).eq.end) return
   150 m = m + 1
@@ -98,10 +98,10 @@ c        read first card
   160 continue
       if (pf.ge.0) write (not,99997) m, nr(m,1), nr(m,2), b(m),
      1 (bbb(m,k),k=1,nmult)
-c        1298 format (1x, i3, 2x, 2a6, 1pe17.7, 4x, 5e16.7)
+!        1298 format (1x, i3, 2x, 2a6, 1pe17.7, 4x, 5e16.7)
       if (ma.gt.maxm) go to 200
   170 read (nit,99992) nr(ma,1), nr(ma,2), (bbb(ma,k),k=1,5)
-c        1099 format (2a6,5f12.3)
+!        1099 format (2a6,5f12.3)
       if (nr(ma,1).eq.end) return
       do 180 i=1,m
          if (nr(ma,1).eq.nr(i,1)) go to 190
@@ -109,13 +109,13 @@ c        1099 format (2a6,5f12.3)
       go to 150
   190 write (not,99991) nr(ma,1), nr(ma,2)
       go to 170
-c        m is maximum, next card should be an end card
+!        m is maximum, next card should be an end card
   200 read (nit,99992) nr1, nr2
-c        1099 format (2a6,5f12.3)
+!        1099 format (2a6,5f12.3)
       if (nr1.eq.end) return
       write (not,99990) nr1, nr2, ma, maxm
       go to 320
-c        kalter greater than zero (alterb, addb, b, relaxb)
+!        kalter greater than zero (alterb, addb, b, relaxb)
   210 lka = nbstar
       if (lka.le.5) go to 230
   220 write (not,99989) ka(2), ka(1)
@@ -151,7 +151,7 @@ c        kalter greater than zero (alterb, addb, b, relaxb)
       write (not,99983) m, maxm
   320 call leave(irows, not)
       return
-c        relaxb
+!        relaxb
   330 if (nbstar.eq.1) go to 220
       if (bmult(1).eq.0.0) go to 350
       zzz = bmult(nbstar)/bmult(1)

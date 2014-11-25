@@ -22,10 +22,10 @@
 !!  rights reserved.
 
       SUBROUTINE DATE(MMYYDD)
-C
+!
       CHARACTER*(*) MMYYDD
-C
+!
       MMYYDD = ' '
-C
+!
       RETURN
       END

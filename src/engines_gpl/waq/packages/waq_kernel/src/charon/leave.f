@@ -24,9 +24,9 @@
       subroutine leave(k, niet)
       implicit none
       integer k, niet
-c        4-69
-c        if toggle is zero, exit
-c        if toggle is non-zero, increase value and return
+!        4-69
+!        if toggle is zero, exit
+!        if toggle is non-zero, increase value and return
       if (k.eq.0) go to 10
       k = k + 1
       return

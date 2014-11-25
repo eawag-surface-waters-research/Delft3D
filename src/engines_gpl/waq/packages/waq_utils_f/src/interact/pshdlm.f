@@ -21,13 +21,13 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
+!
       INTEGER FUNCTION PSHDLM(DLMCHR, NDLM, IGNCHR, NIGN)
-C
+!
       IMPLICIT INTEGER (A-Z)
       CHARACTER*1 DLMCHR(1),IGNCHR(1)
       COMMON /ZDLMTZ/DLM(256), IGN(256), IDLM, IIGN, PUSH(256), PTR
-C
+!
       IF (NDLM.LE.0 .OR. NDLM.GT.256) GOTO 1001
       IF (NIGN.LE.0 .OR. NIGN.GT.256) GOTO 1002
       IF (PTR+IDLM+IIGN+2.GT.256) GOTO 1003

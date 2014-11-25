@@ -21,33 +21,33 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            :
-C
-C     V0.02  230395  Jos van Gils  Modify for hybrid coupling
-C     V0.01  040894  Jos van Gils  First version
-C
-C     FUNCTION            : Utility to manipulate PDF file for
-C                           Delwaq 4.0, prior to use of Charon
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUIC    I        4                  LU INPUT FILE CHARON
-C     LUOC    I        4                  LU OUTPUT FILE CHARON
-C     LUREP   I        4                  LU REPORT FILE
-C     LUPDF   I        4                  LU PDF FILE
-C
-C
-C     Declarations
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            :
+!
+!     V0.02  230395  Jos van Gils  Modify for hybrid coupling
+!     V0.01  040894  Jos van Gils  First version
+!
+!     FUNCTION            : Utility to manipulate PDF file for
+!                           Delwaq 4.0, prior to use of Charon
+!
+!     SUBROUTINES CALLED  :
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUIC    I        4                  LU INPUT FILE CHARON
+!     LUOC    I        4                  LU OUTPUT FILE CHARON
+!     LUREP   I        4                  LU REPORT FILE
+!     LUPDF   I        4                  LU PDF FILE
+!
+!
+!     Declarations
+!
       INTEGER         LUPDF , MMAX  , NAIJ2 , NMAX  , LUREP , NNOTRA,
      J                LUIC  , LUOC  , I     , NALTOX,
      J                NTOX  , NALADS, NALSPE, NALSP2, N1MAX , N2MAX
@@ -66,101 +66,101 @@ C
 
       INCLUDE 'charon.inc'
 
-C     Definition of programme version
+!     Definition of programme version
 
       DATA VERSIO /'V0.02 '/
 
-C     Definition of unitnrs files
+!     Definition of unitnrs files
 
       DATA LUPDF,LUIC,LUOC,LUREP / 13,11,12,14 /
 
-C     Aliases toxical substances:
-C          if first name occurs in CHARON component vector
-C          it will be remembered in order to write dissolved
-C          concentrations and quality of solid phase in DELWAQ,
-C          second name is DW4 equivalent,
-C          also used to manipulate species-array
+!     Aliases toxical substances:
+!          if first name occurs in CHARON component vector
+!          it will be remembered in order to write dissolved
+!          concentrations and quality of solid phase in DELWAQ,
+!          second name is DW4 equivalent,
+!          also used to manipulate species-array
 
       DATA ALITOX /'CD++      ','CD        ','CU++      ','CU        ',
      J             'ZN++      ','ZN        ','NI++      ','NI        ',
      J             'CR+++     ','CR        ','HG        ','HG        ',
      J             'PB++      ','PB        '/
 
-C     Aliases for adsorbents:
-C          if first name occurs in TRANSPORTED VECTOR
-C          it will be replaced by the second one for DELWAQ
-C          in order to find masses in TRANSPORTED VECTOR
+!     Aliases for adsorbents:
+!          if first name occurs in TRANSPORTED VECTOR
+!          it will be replaced by the second one for DELWAQ
+!          in order to find masses in TRANSPORTED VECTOR
 
       DATA ALIADS /'CEC   _par','IM1       ','CEC   _tot','IM1       ',
      J             'FEADS _par','AdsFer    ','FEADS _par','AdsFer    ',
      J             'HHUM  _dis','DOC       ','HHUM  _dis','DOC       '/
 
-C     Aliases for species
-C          if first name occurs in CHARON species vector
-C          it will be replaced by the second one for DELWAQ
-C          in order to define substances that influence DW4 processes
-C          (species molar mass in CHARON input will be applied!!)
+!     Aliases for species
+!          if first name occurs in CHARON species vector
+!          it will be replaced by the second one for DELWAQ
+!          in order to define substances that influence DW4 processes
+!          (species molar mass in CHARON input will be applied!!)
 
       DATA ALISPE/ 'O2        ','OXY       ','CL-       ','CL        ',
      J             'NO3-      ','NO3       ','PARTP     ','AAP       '/
 
-C     Aliases for species NH4 and PO4
-C          to be used after writing the process definition files
-C          species NH4 and PO4 are explicitly computed by process CHARON
-C          but NH4 and PO4 stoichiometry terms should be recognized!!
+!     Aliases for species NH4 and PO4
+!          to be used after writing the process definition files
+!          species NH4 and PO4 are explicitly computed by process CHARON
+!          but NH4 and PO4 stoichiometry terms should be recognized!!
 
       DATA ALISP2/ 'NH4+      ','NH4       ','PO4---    ','PO4       '/
 
-C     List program name and version number
+!     List program name and version number
 
       WRITE (*,1000) VERSIO
 
-C     Request filename of CHARON files (extensions prescribed)
+!     Request filename of CHARON files (extensions prescribed)
 
       RUNNAM(1:8) = 'CHARON  '
 
-C     Read input of CHARON (also opening of files)
+!     Read input of CHARON (also opening of files)
 
       CALL CHINPU (RUNNAM, LUIC  , LUOC  )
 
-C     Check number of components for local arrays
+!     Check number of components for local arrays
 
       IF ( M .GT. MMAX ) GOTO 901
       IF ( N .GT. NMAX ) GOTO 901
 
-C     Find last index of first phase in arrays with dimension NAIJ
-C     (arrays with all non-zero entries in stoichiometric matrix)
+!     Find last index of first phase in arrays with dimension NAIJ
+!     (arrays with all non-zero entries in stoichiometric matrix)
 
       CALL CHPHAS ( NAIJ2 )
 
-C     Define mapping of Charon-Delwaq systems,
-C     administration arrays used in writing PDF for CHARON
-C     and in coupling CHARON and DELWAQ (see module for definition)
+!     Define mapping of Charon-Delwaq systems,
+!     administration arrays used in writing PDF for CHARON
+!     and in coupling CHARON and DELWAQ (see module for definition)
 
       CALL  CHMAPD ( NAIJ2 , MMAX  , NMAX  , N1MAX , N2MAX ,
      J               NTTOB , ITTTOB, IBTTOB, ABTTOB, RMTTOB,
      J               NCTOT , ICCTOT, ITCTOT, ABCTOT, RMCTOT,
      J               IOUTP , NNOTRA, NALTOX, NTOX  , ICTOX , ALITOX)
 
-C     Replace names of adsorbents by DELWAQ-equivalents
+!     Replace names of adsorbents by DELWAQ-equivalents
 
       CALL CHALIA ( NTRANS, VARNAM , 10 , NALADS , ALIADS )
 
-C     Put DELWAQ-aliasses in species names insofar as they influence
-C     DW4 processes (exclude NH4 and PO4 because they are output CHARON)
-C     Put DELWAQ-aliasses in TRANSPORTED VECTOR as well
+!     Put DELWAQ-aliasses in species names insofar as they influence
+!     DW4 processes (exclude NH4 and PO4 because they are output CHARON)
+!     Put DELWAQ-aliasses in TRANSPORTED VECTOR as well
 
       CALL  CHALIA ( N      , KN     , 6  , NALSPE , ALISPE )
       CALL  CHALIA ( NTRANS , VARNAM , 10 , NALSPE , ALISPE )
 
-C     Write CHARON process
+!     Write CHARON process
 
       DO 15 I =1,NTOX
    15 NAMTOX(I) = NR(ICTOX(I),1)
       CALL WRICHA ( LUPDF , NTRANS, VARNAM, NNOTRA, IOUTP ,
      J              N     , KN    , NTOX  , NAMTOX)
 
-C     Write administration arrays, with same aliasses as WRICHA
+!     Write administration arrays, with same aliasses as WRICHA
 
       OPEN ( LUREP , FILE = 'PDFCHA.REP' )
       WRITE ( LUREP , '(/
@@ -183,16 +183,16 @@ C     Write administration arrays, with same aliasses as WRICHA
      J      ABCTOT(I),
      J      RMCTOT(I),              I = 1,NCTOT   )
 
-C     Put DELWAQ-aliasses in species names and transported vector
-C     insofar as they are used to process stoichiometry
-C     Include NH4 and PO4, Yes or No?????
+!     Put DELWAQ-aliasses in species names and transported vector
+!     insofar as they are used to process stoichiometry
+!     Include NH4 and PO4, Yes or No?????
 
       CALL  CHALIA ( N      , KN     , 6  , NALTOX , ALITOX )
       CALL  CHALIA ( NTRANS , VARNAM , 10 , NALTOX , ALITOX )
-C     CALL  CHALIA ( N      , KN     , 6  , NALSP2 , ALISP2 )
-C     CALL  CHALIA ( NTRANS , VARNAM , 10 , NALSP2 , ALISP2 )
+!     CALL  CHALIA ( N      , KN     , 6  , NALSP2 , ALISP2 )
+!     CALL  CHALIA ( NTRANS , VARNAM , 10 , NALSP2 , ALISP2 )
 
-C     Manipulate PDF file
+!     Manipulate PDF file
 
       WRITE ( LUREP , '(/''Report from manipulation .pdf file:'')')
       CALL  CHSTOC ( LUREP , NAIJ2 )

@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *      SUBROUTINE CHANGE TO MODIFY NOMINAL INPUTS TO THE MODEL      *
-C  *********************************************************************
-C
-C  0895 MvdV goto subroutine CCONS instead of CZOOPL if NUGRAZ > 0
+!
+!  *********************************************************************
+!  *      SUBROUTINE CHANGE TO MODIFY NOMINAL INPUTS TO THE MODEL      *
+!  *********************************************************************
+!
+!  0895 MvdV goto subroutine CCONS instead of CZOOPL if NUGRAZ > 0
       SUBROUTINE CHANGE(LCHA)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -55,13 +55,13 @@ C  0895 MvdV goto subroutine CCONS instead of CZOOPL if NUGRAZ > 0
      5             'SOLARRAD','STOCHIOM','TEMPTURE','TITLE   ',
      6             'ZOOPLANK'/
       data indepen /'DEPENDEN','INDEPEND','        '/
-C
-C
-C  General comment: in case an error is detected in this subroutine
-C  -- for instance a missing or misspelled control word --
-C  a batch job will be terminated putting LRUN = 0,
-C  but re-entry is possible during an interactive run
-C
+!
+!
+!  General comment: in case an error is detected in this subroutine
+!  -- for instance a missing or misspelled control word --
+!  a batch job will be terminated putting LRUN = 0,
+!  but re-entry is possible during an interactive run
+!
       IF (LCHA .EQ. 1) GO TO 50
       CALL FORMFE (OUUNI)
    10 POSIT=0
@@ -83,11 +83,11 @@ C
       WRITE(OUUNI,99830)
       WRITE(OUUNI,99850)
       GO TO 10
-C
-C     *******************************
-C     * START CHANGE PARAMETER MODE *
-C     *******************************
-C
+!
+!     *******************************
+!     * START CHANGE PARAMETER MODE *
+!     *******************************
+!
    50 IF (IOFLAG .EQ. 1) CALL CLRSCR
   100 IF (IOFLAG .EQ. 1) CALL BLSELECT (WCHANG, NCHANG, 1002)
       I=INPTDT(1002,WORD,LENWRD)
@@ -98,19 +98,19 @@ C
      2         1850,  1000,   600,   700,  1400,   900,
      3         2300,  1200,   300,  1800,   200,  1900,
      4         2350,  110), NUMWRD
-C
-C  Error detected in input of CHANGE parameter command
-C  Terminate in batch mode.
-C
+!
+!  Error detected in input of CHANGE parameter command
+!  Terminate in batch mode.
+!
   110 CONTINUE
       IF (IOFLAG .EQ. 1) GO TO 120
       WRITE(OUUNI,99820) WORD
       WRITE(OUUNI,99840)
       LRUN=0
       RETURN
-C
-C  In an interactive run, try if a valid CMS command was entered.
-C
+!
+!  In an interactive run, try if a valid CMS command was entered.
+!
   120 IRC = CMS (LINE,80)
       POSIT = 0
       IF (IRC .EQ. 0) GO TO 100
@@ -119,9 +119,9 @@ C
       GO TO 100
   125 WRITE(OUUNI,99820) WORD
       GO TO 100
-C
-C ? was entered.
-C
+!
+! ? was entered.
+!
   130 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE(OUUNI,99810)
@@ -130,9 +130,9 @@ C
       CALL VIDEO (0)
       WRITE(OUUNI,99800)
       GO TO 100
-C
-C  Modify temperature
-C
+!
+!  Modify temperature
+!
   200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99990) OLD,TEMPMU,TEMPAD
       I=INPTNM(1003,TEMPMU,0,1)
@@ -141,9 +141,9 @@ C
       IF (TEMPAD .GT. 20.0) WRITE (OUUNI,99640) TEMPAD,WCHANG(NUMWRD)
       WRITE(OUUNI,99990) NEW,TEMPMU,TEMPAD
       GO TO 100
-C
-C  Modify solar intensity
-C
+!
+!  Modify solar intensity
+!
   300 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99980) OLD,SOLAMU,SOLAAD
       I=INPTNM(1003,SOLAMU,0,1)
@@ -152,9 +152,9 @@ C
       IF (SOLAAD .GT. 5000.0) WRITE (OUUNI,99640) SOLAAD,WCHANG(NUMWRD)
       WRITE(OUUNI,99980) NEW,SOLAMU,SOLAAD
       GO TO 100
-C
-C  Modify background extinction coefficient
-C
+!
+!  Modify background extinction coefficient
+!
   400 CONTINUE
       IF ( IOFLAG .EQ. 1) WRITE(OUUNI,99970) OLD,BACKMU,BACKAD
       I=INPTNM(1003,BACKMU,0,1)
@@ -163,9 +163,9 @@ C
       IF (BACKAD .GT. 5.0) WRITE (OUUNI,99640) BACKAD,WCHANG(NUMWRD)
       WRITE(OUUNI,99970) NEW,BACKMU,BACKAD
       GO TO 100
-C
-C  Modify depth
-C
+!
+!  Modify depth
+!
   500 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99960) OLD,DEPTMU,DEPTAD
       I=INPTNM(1003,DEPTMU,0,1)
@@ -174,9 +174,9 @@ C
       IF (DEPTAD .GT. 5.0) WRITE (OUUNI,99640) DEPTAD,WCHANG(NUMWRD)
       WRITE(OUUNI,99960) NEW, DEPTMU,DEPTAD
       GO TO 100
-C
-C  Modify nutrient concentrations
-C
+!
+!  Modify nutrient concentrations
+!
   600 CONTINUE
       IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1005)
       I = INPTDT(1005,WNUNAM,LENWRD)
@@ -193,9 +193,9 @@ C
       DNUT(NUMNUT)=DNUTI
       WRITE(OUUNI,99940) NEW,CSTRA(NUMNUT),BNUTI,DNUTI
       GO TO 100
-C
-C  Error in nutrient name
-C
+!
+!  Error in nutrient name
+!
   610 CONTINUE
       WRITE(OUUNI,99930) WNUNAM
       IF (IOFLAG .EQ. 0) GO TO 630
@@ -206,9 +206,9 @@ C
   630 WRITE(OUUNI,99840)
       LRUN=0
       RETURN
-C
-C  Modify nutrient mineralization rate constants
-C
+!
+!  Modify nutrient mineralization rate constants
+!
   700 CONTINUE
       IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1005)
       I = INPTDT(1005,WNUNAM,LENWRD)
@@ -249,9 +249,9 @@ C
       WRITE(OUUNI,99920) NEW,CSTRA(NUMNUT),RATE
       RNUT(1,NUMNUT)=RATE
       GO TO 100
-C
-C  Error in nutrient name
-C
+!
+!  Error in nutrient name
+!
   720 CONTINUE
       WRITE(OUUNI,99930) WNUNAM
       IF (IOFLAG .EQ. 0) GO TO 730
@@ -261,9 +261,9 @@ C
   730 WRITE(OUUNI,99840)
       LRUN=0
       RETURN
-C
-C  Execute CMS or CP command
-C
+!
+!  Execute CMS or CP command
+!
   800 CONTINUE
       IF (IOFLAG .EQ. 1) GO TO 805
       WRITE (OUUNI,99620)
@@ -276,10 +276,10 @@ C
       IF(IRC .NE. 0) WRITE (OUUNI,810) IRC
   810 FORMAT (' Return code from CMS: ',I5,'.')
       GO TO 100
-C
-C  Modify period for which blooms are to be calculated
-C  for NRUN successive runs
-C
+!
+!  Modify period for which blooms are to be calculated
+!  for NRUN successive runs
+!
   900 CONTINUE
       DO 910 J=1,NRUN
       DO 910 K=1,3
@@ -312,9 +312,9 @@ C
       DO 980 J=1,NRUN
   980 WRITE(OUUNI,99790) NPER(J,1),NPER(J,2),NPER(J,3)
       GO TO 100
-C
-C  Invalid control word to modify mortality rate constants
-C
+!
+!  Invalid control word to modify mortality rate constants
+!
   990 CONTINUE
       WRITE (OUUNI,99905) WMORT
       IF (IOFLAG .EQ. 1) GO TO 995
@@ -322,9 +322,9 @@ C
       LRUN = 0
       RETURN
   995 WRITE (OUUNI,99904) CONTRO(2),CONTRO(7)
-C
-C  Modify mortality rate constants
-C
+!
+!  Modify mortality rate constants
+!
  1000 CONTINUE
       IF (IOFLAG .EQ. 1) CALL BLSELECT (CONTRO(2)//CONTRO(7), 2, 1012)
       I = INPTDT(1012,WMORT,LENWRD)
@@ -341,9 +341,9 @@ C
       WRITE(OUUNI,99870)
       LCAL=4
       GO TO 100
-C
-C  Modify sedimentation rate constant
-C
+!
+!  Modify sedimentation rate constant
+!
  1200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99770) OLD,SEDRAT
       I = INPTNM(1017,SEDRAT,0,1)
@@ -351,9 +351,9 @@ C
       IF (IOFLAG .EQ. 0) GO TO 100
       WRITE(OUUNI,99770) NEW,SEDRAT
       GO TO 100
-C
-C  Modify flushing rate constant
-C
+!
+!  Modify flushing rate constant
+!
  1300 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99760) OLD,FLUSH
       I = INPTNM(1018,FLUSH,0,1)
@@ -361,27 +361,27 @@ C
       IF (IOFLAG .EQ. 0) GO TO 100
       WRITE(OUUNI,99760) NEW,FLUSH
       GO TO 100
-C
-C  Modify mineralization rate detritus
-C
+!
+!  Modify mineralization rate detritus
+!
  1400 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99750) OLD,REMIOR
       I = INPTNM(1019,REMIOR,0,1)
       IF (REMIOR .GT. 0.05) WRITE (OUUNI,99650) REMIOR,WCHANG(NUMWRD)
       WRITE(OUUNI,99750) NEW,REMIOR
       GO TO 100
-C
-C  Modify disappearance rate light absorption by dead algae
-C
+!
+!  Modify disappearance rate light absorption by dead algae
+!
  1500 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99740) OLD,REMILI(1),REMILI(2)
       I = INPTNM(1020,REMILI(1),0,1)
       I = INPTNM(1021,REMILI(2),0,1)
       WRITE (OUUNI,99740) NEW,REMILI(1),REMILI(2)
       GO TO 100
-C
-C  Modify autolysing fraction
-C
+!
+!  Modify autolysing fraction
+!
  1600 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99730) OLD,1.0-AVAILN
       I = INPTNM(1022,AUTO,0,1)
@@ -390,27 +390,27 @@ C
      1   WRITE (OUUNI,99630) AUTO,WCHANG(NUMWRD)
       WRITE(OUUNI,99730) NEW,AUTO
       GO TO 100
-C
-C  Modify species stochiometric coefficients
-C
+!
+!  Modify species stochiometric coefficients
+!
  1800 CALL CSPSTO(LERR)
       IF (LERR .EQ. 1) GO TO 1810
       GO TO 50
-C
-C  Fatal error in subroutines CSPEC, CSPSTO, CSPGRO, OR CZOOPL.
-C
+!
+!  Fatal error in subroutines CSPEC, CSPSTO, CSPGRO, OR CZOOPL.
+!
  1810 LRUN=0
       RETURN
-C
-C  Modify species growth coefficients.
-C
+!
+!  Modify species growth coefficients.
+!
  1850 CALL CSPGRO(LERR)
       IF (LERR .EQ. 1) GO TO 1810
       GO TO 50
-C
-C  Modify title lines for outputs; in interactive mode, use system
-C  editor, otherwise simply type new title.
-C
+!
+!  Modify title lines for outputs; in interactive mode, use system
+!  editor, otherwise simply type new title.
+!
  1900 CONTINUE
       IF (IOFLAG .EQ. 0) GO TO 1910
       OPEN (IOU(29), FILE = FNAME)
@@ -426,9 +426,9 @@ C
       READ (IOU(29),99710) COM
       CLOSE (IOU(29), STATUS = 'DELETE')
       GO TO 100
-C
-C  Get new title if system editor cannot be used.
-C
+!
+!  Get new title if system editor cannot be used.
+!
  1910 I = INPTNM(1023,0.0D0,ILINE,2)
       IF (ILINE .LT. 1 .OR. ILINE .GT. 2) GO TO 100
       IF (ILINE .EQ. 1) THEN
@@ -441,9 +441,9 @@ C
       READ (INUNI,99710) (COM(I),I=I1,I2)
       WRITE(OUUNI,99705) COM
       GO TO 1910
-C
-C  Use calculator routine
-C
+!
+!  Use calculator routine
+!
  2100 IRC = STOS(LINE,POSIT,80,LINE,LEN)
       IRC=CALC(LINE,1,LEN,3,RESULT)
       POSIT = 0
@@ -454,9 +454,9 @@ C
  2150    FORMAT (' Return code from CALC = ',I4)
       END IF
       GO TO 100
-C
-C     Modify the daylength
-C
+!
+!     Modify the daylength
+!
  2200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE(OUUNI,99610) OLD,DLGTMU,DLGTAD
       I=INPTNM(1003,DLGTMU,0,1)
@@ -465,16 +465,16 @@ C
       IF (DLGTAD .GT. 5.0) WRITE (OUUNI,99640) DLGTAD,WCHANG(NUMWRD)
       WRITE(OUUNI,99610) NEW,DLGTMU,DLGTAD
       GO TO 100
-C
-C  Call subroutine CHHELP to print current parameter settings.
-C
+!
+!  Call subroutine CHHELP to print current parameter settings.
+!
  2300 CALL CHHELP (OUUNI)
       IF (IOFLAG .EQ. 1) CALL CHHELP (IOU(21))
       GO TO 100
-C
-C  Modify zooplankton characteristics
-C  0895 MvdV goto subroutine CCONS if NUGRAZ > 0
-C
+!
+!  Modify zooplankton characteristics
+!  0895 MvdV goto subroutine CCONS if NUGRAZ > 0
+!
  2350 IF (NUGRAZ.EQ.0) THEN
         CALL CZOOPL(LERR)
       ELSE
@@ -482,16 +482,16 @@ C
       ENDIF
       IF (LERR .EQ. 1) GO TO 1810
       GO TO 50
-C
-C  Call subroutine OPTION to (re)set options for this run
-C
+!
+!  Call subroutine OPTION to (re)set options for this run
+!
  2400 CONTINUE
       CALL OPTION(1,LPARAM)
       IF (LPARAM .EQ. 1) GO TO 50
       RETURN
-C
-C  Formats for this subroutine
-C
+!
+!  Formats for this subroutine
+!
 99990 FORMAT (1X,A3,' temperature calculated as',1X,F6.2,1X,
      1        ' * nominal Temp + ',1X,F6.2)
 99980 FORMAT (1X,A3,' solar radiation calculated as',1X,F6.2,1X,

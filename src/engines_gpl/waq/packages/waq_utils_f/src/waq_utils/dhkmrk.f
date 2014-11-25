@@ -22,28 +22,28 @@
 !!  rights reserved.
 
       SUBROUTINE DHKMRK ( IKNMRK , KENMRK , KNMRKI )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june  1994 by Jan van Beek
-C
-C     FUNCTION            : utility that evaluates a feature from
-C                           the "feature" integer
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IKNMRK  INTEGER     1       INPUT   Index of feature
-C     KENMRK  INTEGER     1       INPUT   feature
-C     KNMRKI  INTEGER     1       OUTPUT  evaluated feature
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june  1994 by Jan van Beek
+!
+!     FUNCTION            : utility that evaluates a feature from
+!                           the "feature" integer
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IKNMRK  INTEGER     1       INPUT   Index of feature
+!     KENMRK  INTEGER     1       INPUT   feature
+!     KNMRKI  INTEGER     1       OUTPUT  evaluated feature
+!
       INTEGER IKNMRK, KENMRK, KNMRKI
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER DHIMIS
-C
+!
       IF ( IKNMRK .EQ. 1 ) THEN
          KNMRKI = MOD(KENMRK,10)
       ELSEIF ( IKNMRK .EQ. 2 ) THEN
@@ -60,6 +60,6 @@ C
          KNMRKI = KENMRK / 10**(IKNMRK-1)
          KNMRKI = MOD(KNMRKI,10)
       ENDIF
-C
+!
       RETURN
       END

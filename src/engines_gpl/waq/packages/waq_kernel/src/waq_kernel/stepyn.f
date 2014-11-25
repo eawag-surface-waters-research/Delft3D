@@ -23,43 +23,43 @@
 
       SUBROUTINE STEPYN (ITIME , IDT   , ISTRT , ISTOP , ISTEP ,
      +                   LFLAG , LFIRST)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : march 1993 by Jan van Beek
-C
-C     FUNCTION            : Evaluates if action is necessary
-C                           according to timers
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          : 6
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     IDT     INTEGER       1     INPUT   Simulation timestep
-C     IMSTRT  INTEGER       1     INPUT   start time of timer
-C     IMSTOP  INTEGER       1     INPUT   stop time of timer
-C     IMSTEP  INTEGER       1     INPUT   time step of timer
-C     LFLAG   LOGICAL       1     OUTPUT  If .T. then action else not
-C     LFIRST  LOGICAL       1     OUTPUT  If .T. then first step
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : march 1993 by Jan van Beek
+!
+!     FUNCTION            : Evaluates if action is necessary
+!                           according to timers
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          : 6
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     IDT     INTEGER       1     INPUT   Simulation timestep
+!     IMSTRT  INTEGER       1     INPUT   start time of timer
+!     IMSTOP  INTEGER       1     INPUT   stop time of timer
+!     IMSTEP  INTEGER       1     INPUT   time step of timer
+!     LFLAG   LOGICAL       1     OUTPUT  If .T. then action else not
+!     LFIRST  LOGICAL       1     OUTPUT  If .T. then first step
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER       ITIME , IDT   , ISTRT , ISTOP , ISTEP
       LOGICAL       LFLAG , LFIRST
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "stepyn", ithandl )
-C
-C     Evaluate timer
-C
+!
+!     Evaluate timer
+!
       LFLAG  = .TRUE.
       LFIRST = .FALSE.
       IF ( ISTEP                  .LE. 0         ) THEN
@@ -78,10 +78,10 @@ C
       IF ( LFLAG ) THEN
          IF ( ITIME-ISTRT .LT. ISTEP ) LFIRST = .TRUE.
       ENDIF
-C
+!
   100 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
       END

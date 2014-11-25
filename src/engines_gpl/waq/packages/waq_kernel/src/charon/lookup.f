@@ -22,12 +22,12 @@
 !!  rights reserved.
 
       subroutine lookup(ka, k, l, ll, kb)
-c           4-69
-c
-c           look in the array kb(k) from k equal l to ll for a match
-c        with the word in ka.  if ka is in the array exit with the
-c        value in k.  if ka is not in the array set k equal to ll+1.
-c
+!           4-69
+!
+!           look in the array kb(k) from k equal l to ll for a match
+!        with the word in ka.  if ka is in the array exit with the
+!        value in k.  if ka is not in the array set k equal to ll+1.
+!
       character*6 ka, kb(1)
       do 10 i = l,ll
          if (ka.eq.kb(i)) go to 20

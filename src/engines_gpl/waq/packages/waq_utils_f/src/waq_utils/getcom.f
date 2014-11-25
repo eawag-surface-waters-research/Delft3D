@@ -23,54 +23,54 @@
 
       SUBROUTINE GETCOM ( COMSTR, ARGMOD, FOUND , INTARG, REAARG,
      +                    CHAARG, IERR  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: nov -1992 by Jan van Beek
-C
-C     FUNCTION            : gives command from command line
-C
-C     LOGICAL UNITNUMBERS :
-C
-C     SUBROUTINES CALLED  : DHCARG, gives no. of commandline arguments
-C                           DHGARG, gives argument
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     COMSTR  CHA*(*)       1     INPUT   Command to be looked for
-C     ARGMOD  INTEGER       1     INPUT   Kind of command argument
-C                                         == 0 , no argument asked
-C                                         == 1 , integer argument
-C                                         == 2 , real argument
-C                                         == 3 , character argument
-C     FOUND   LOGICAL       1     OUTPUT  Flag if command is found
-C     INTARG  INTEGER       1     OUTPUT  Integer argument
-C     REAARG  REAL          1     OUTPUT  Real argument
-C     CHAARG  CHA*(*)       1     OUTPUT  Character argument
-C     IERR    INTEGER       1     OUTPUT  Error indicator
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: nov -1992 by Jan van Beek
+!
+!     FUNCTION            : gives command from command line
+!
+!     LOGICAL UNITNUMBERS :
+!
+!     SUBROUTINES CALLED  : DHCARG, gives no. of commandline arguments
+!                           DHGARG, gives argument
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     COMSTR  CHA*(*)       1     INPUT   Command to be looked for
+!     ARGMOD  INTEGER       1     INPUT   Kind of command argument
+!                                         == 0 , no argument asked
+!                                         == 1 , integer argument
+!                                         == 2 , real argument
+!                                         == 3 , character argument
+!     FOUND   LOGICAL       1     OUTPUT  Flag if command is found
+!     INTARG  INTEGER       1     OUTPUT  Integer argument
+!     REAARG  REAL          1     OUTPUT  Real argument
+!     CHAARG  CHA*(*)       1     OUTPUT  Character argument
+!     IERR    INTEGER       1     OUTPUT  Error indicator
+!
+!     Declaration of arguments
+!
       USE Timers
       INTEGER        ARGMOD, INTARG, IERR
       REAL           REAARG
       LOGICAL        FOUND
       CHARACTER*(*)  COMSTR, CHAARG
-C
-C     Local
-C
+!
+!     Local
+!
       INTEGER        DHCARG
       CHARACTER*256  ARGV , ARG , COM
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "getcom", ithndl )
-C
+!
       FOUND = .FALSE.
       IERR  = 0
-C
-C
-C
+!
+!
+!
       I1 = 0
       ILEN = LEN(COMSTR)
       I2 = ILEN
@@ -152,9 +152,9 @@ C
             ENDIF
          ENDIF
       ENDIF
-C
+!
   800 CONTINUE
-C
+!
       if ( timon ) call timstop( ithndl )
       RETURN
       END

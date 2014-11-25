@@ -22,51 +22,51 @@
 !!  rights reserved.
 
       SUBROUTINE DHGWRD ( LINE  , IWRD  , WORD  )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED       : june  1993 BY J.K.L. van Beek
-C
-C     FUNCTION      : Returns the IWRD'th word from line
-C
-C     SUBROUTINE CALLED  : none
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS         :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LINE    CHAR*(*)      1     INPUT   line
-C     IWRD    INT           1     INPUT   number of argument asked
-C     WORD    CHAR*(*)      1     OUTPUT  value of the IWRD'th word
-C
-C     Declaration of arguments
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED       : june  1993 BY J.K.L. van Beek
+!
+!     FUNCTION      : Returns the IWRD'th word from line
+!
+!     SUBROUTINE CALLED  : none
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS         :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LINE    CHAR*(*)      1     INPUT   line
+!     IWRD    INT           1     INPUT   number of argument asked
+!     WORD    CHAR*(*)      1     OUTPUT  value of the IWRD'th word
+!
+!     Declaration of arguments
+!
       INTEGER       IWRD
       CHARACTER*(*) LINE  , WORD
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       LOGICAL       NEW
-C
-C     Test arguments
-C
+!
+!     Test arguments
+!
       IF ( IWRD .EQ. 0 ) THEN
          WORD = ' '
          GOTO 200
       ENDIF
-C
-C     initialize
-C
+!
+!     initialize
+!
       IA = 0
       WORD = ' '
       NEW = .TRUE.
       LENLIN = LEN(LINE)
-C
-C     Skip till iwrd'th word
-C
+!
+!     Skip till iwrd'th word
+!
       DO 100 ICH = 1 , LENLIN
          IF ( LINE(ICH:ICH) .NE. ' ' .AND. NEW ) THEN
             NEW = .FALSE.
@@ -84,8 +84,8 @@ C
       IF ( IA .EQ. IWRD ) THEN
          WORD = LINE(I1:LENLIN)
       ENDIF
-C
+!
   200 CONTINUE
-C
+!
       RETURN
       END

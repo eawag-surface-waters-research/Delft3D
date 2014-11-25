@@ -22,24 +22,24 @@
 !!  rights reserved.
 
       SUBROUTINE ZERO   ( ARRAY  , NOTOT  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june  1988 by L.Postma
-C
-C     FUNCTION            : utility that zeros an array
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ARRAY   REAL      NOTOT     OUTPUT  array to be zeroed
-C     NOTOT   INTEGER     1       INPUT   total number of entries
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june  1988 by L.Postma
+!
+!     FUNCTION            : utility that zeros an array
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ARRAY   REAL      NOTOT     OUTPUT  array to be zeroed
+!     NOTOT   INTEGER     1       INPUT   total number of entries
+!
       DIMENSION   ARRAY(*)
-C
+!
       DO  10 I = 1,NOTOT
    10 ARRAY(I) = 0.0
-C
+!
       RETURN
       END

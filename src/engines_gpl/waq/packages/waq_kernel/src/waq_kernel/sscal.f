@@ -23,33 +23,33 @@
 
       subroutine sscal (n,sa,sx,incx)
       use timers
-c
-c     scales a vector by a constant.
-c     uses unrolled loops for increment equal to 1.
-c     jack dongarra, linpack, 3/11/78.
-c     modified 3/93 to return if incx .le. 0.
-c
+!
+!     scales a vector by a constant.
+!     uses unrolled loops for increment equal to 1.
+!     jack dongarra, linpack, 3/11/78.
+!     modified 3/93 to return if incx .le. 0.
+!
       real(8) sa,sx(1)
       integer i,incx,m,mp1,n,nincx
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "sscal", ithandl )
-c
+!
       if( n.le.0 .or. incx.le.0 ) goto 100  !  return
       if(incx.eq.1)go to 20
-c
-c        code for increment not equal to 1
-c
+!
+!        code for increment not equal to 1
+!
       nincx = n*incx
       do 10 i = 1,nincx,incx
         sx(i) = sa*sx(i)
    10 continue
       return
-c
-c        code for increment equal to 1
-c
-c
-c        clean-up loop
-c
+!
+!        code for increment equal to 1
+!
+!
+!        clean-up loop
+!
    20 m = mod(n,5)
       if( m .eq. 0 ) go to 40
       do 30 i = 1,m

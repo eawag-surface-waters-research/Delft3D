@@ -21,24 +21,24 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       13 Dec 1989
-C    Time:       08:29
-C    Program:    PROMPT.FOR
-C    Version:    1.1
-C    Programmer: ??????
-C    Previous version(s):
-C    1.0 -- 13 Dec 1989 -- 07:49 -- Operating System: DOS
-C    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
-C
-C  *********************************************************************
-C  *SUBROUTINE PROMPT TO REQUEST INPUT FROM THE USER IN AN INTERACTIVE *
-C  *         RUN, INDICATING IN WHICH PART OF THE PROGRAM HE IS.       *
-C  *********************************************************************
-C
-C PC program version for Microsoft fortran.
-C Use escape sequences to position the cursor after the last prompting
-C message.
-C
+!    Date:       13 Dec 1989
+!    Time:       08:29
+!    Program:    PROMPT.FOR
+!    Version:    1.1
+!    Programmer: ??????
+!    Previous version(s):
+!    1.0 -- 13 Dec 1989 -- 07:49 -- Operating System: DOS
+!    0.0 -- 12 Dec 1989 -- 10:19 -- Operating System: DOS
+!
+!  *********************************************************************
+!  *SUBROUTINE PROMPT TO REQUEST INPUT FROM THE USER IN AN INTERACTIVE *
+!  *         RUN, INDICATING IN WHICH PART OF THE PROGRAM HE IS.       *
+!  *********************************************************************
+!
+! PC program version for Microsoft fortran.
+! Use escape sequences to position the cursor after the last prompting
+! message.
+!
       SUBROUTINE BLPROMPT (INDEX, ARG)
       CHARACTER*80 OUTSTR
       CHARACTER*1 OUTST2 (80), ESCAPE, BLANK
@@ -46,7 +46,7 @@ C
       INCLUDE 'ioblck.inc'
       DATA BLANK  /' '/
       DATA IESCAP /27/
-C
+!
       ESCAPE = CHAR (IESCAP)
       CALL PROMES (INDEX, ARG, OUTSTR)
       IF (INDEX .LT. 1000) RETURN
@@ -56,10 +56,10 @@ C
       WRITE (OUUNI,10) (OUTST2(I),I=1,LENOUT),BLANK
 10    FORMAT (80A1)
       CALL VIDEO (0)
-C
-C Position the cursor 2 lines backwards and afterwards shift it right
-C LENOUT positions.
-C
+!
+! Position the cursor 2 lines backwards and afterwards shift it right
+! LENOUT positions.
+!
       WRITE (OUUNI,20) ESCAPE
  20   FORMAT (1X,A1,'[2A')
       IF (LENOUT .LT. 10) THEN

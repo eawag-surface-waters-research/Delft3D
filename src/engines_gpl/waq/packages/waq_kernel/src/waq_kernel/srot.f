@@ -22,23 +22,23 @@
 !!  rights reserved.
 
       subroutine srot (n,sx,incx,sy,incy,c,s)
-c
-c     applies a plane rotation.
-c     jack dongarra, linpack, 3/11/78.
-c
+!
+!     applies a plane rotation.
+!     jack dongarra, linpack, 3/11/78.
+!
       use timers
 
       real(8) sx(1),sy(1),stemp,c,s
       integer i,incx,incy,ix,iy,n
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "srot", ithandl )
-c
+!
       if(n.le.0)return
       if(incx.eq.1.and.incy.eq.1)go to 20
-c
-c       code for unequal increments or equal increments not equal
-c         to 1
-c
+!
+!       code for unequal increments or equal increments not equal
+!         to 1
+!
       ix = 1
       iy = 1
       if(incx.lt.0)ix = (-n+1)*incx + 1
@@ -51,9 +51,9 @@ c
         iy = iy + incy
    10 continue
       goto 9999  !   return
-c
-c       code for both increments equal to 1
-c
+!
+!       code for both increments equal to 1
+!
    20 do 30 i = 1,n
         stemp = c*sx(i) + s*sy(i)
         sy(i) = c*sy(i) - s*sx(i)

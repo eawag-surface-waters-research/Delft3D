@@ -32,78 +32,78 @@
      +                    MAXDST, NDST  , IPDST , GENDST, OUTDST,
      +                    STODST, MAXVST, NVST  , IPVST , GENVST,
      +                    OUTVST, STOVST, ISWITR)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: nov -1992 by Jan van Beek
-C
-C     FUNCTION            : Reads the ascii proces definition file
-C
-C     LOGICAL UNITNUMBERS : LUPDEF  - proces definition file
-C                         : LUREP   - report file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUPDEF  INTEGER       1     INPUT   Porces definition file
-C     LUREP   INTEGER       1     INPUT   Report file
-C     NBPR    INTEGER       1     OUTPUT  Number of processes in def file
-C     NBPRM   INTEGER       1     INPUT   Max number of processes
-C     BPRNAM  CHARACTER*(*) *     OUTPUT  Name of processes
-C     BPRTXT  CHARACTER*(*) *     OUTPUT  Text of processes
-C     MODNAM  CHARACTER*(*) *     OUTPUT  Name of module of processes
-C     NSVAI   INTEGER       *     OUTPUT  No of input vars per proces
-C     VAINAM  CHARACTER*(*) *     OUTPUT  Name of input variable
-C     VAITXT  CHARACTER*(*) *     OUTPUT  Text of input variable
-C     VAIDEF  REAL          *     OUTPUT  Default values input variables
-C     NSVAO   INTEGER       *     OUTPUT  No of output vars per proces
-C     VAONAM  CHARACTER*(*) *     OUTPUT  Name of output variable
-C     VAOTXT  CHARACTER*(*) *     OUTPUT  Text of output variable
-C     NBFL    INTEGER       *     OUTPUT  No of basic fluxes per proces
-C     BFLNAM  CHARACTER*(*) *     OUTPUT  Name of basix fluxe
-C     BFLTXT  CHARACTER*(*) *     OUTPUT  Text of basix fluxe
-C     NBST    INTEGER       *     OUTPUT  No of basic stochis per proces
-C     GENBST  CHARACTER*(*) *     OUTPUT  Name of substance in stochi
-C     FLXBST  CHARACTER*(*) *     OUTPUT  Name of flux in stochi
-C     STOBST  REAL          *     OUTPUT  Stochimetric factor
-C     IPVAI   INTEGER       *     OUTPUT  Pointers for arrays on VAI
-C     IPVAO   INTEGER       *     OUTPUT  Pointers for arrays on VAO
-C     IPBFL   INTEGER       *     OUTPUT  Pointers for arrays on BFL
-C     IPBST   INTEGER       *     OUTPUT  Pointers for arrays on BST
-C     MAXVAI  INTEGER       1     INPUT   Maximum number of input vars
-C     MAXVAO  INTEGER       1     INPUT   Maximum number of output vars
-C     MAXBFL  INTEGER       1     INPUT   Maximum number of fluxes
-C     MAXBST  INTEGER       1     INPUT   Maximum number of stochio's
-C     MAXVXI  INTEGER       1     INPUT   Maximum number of input x vars
-C     NSVXI   INTEGER       *     OUTPUT  No of input vars X per proces
-C     IPVXI   INTEGER       *     OUTPUT  Pointers for arrays on VXI
-C     VXINAM  CHARACTER*(*) *     OUTPUT  Name of input variable X
-C     VXITXT  CHARACTER*(*) *     OUTPUT  Text of input variable X
-C     VXIDEF  REAL          *     OUTPUT  Default values input X variables
-C     MAXVXO  INTEGER       1     INPUT   Maximum number of output x vars
-C     NSVXO   INTEGER       *     OUTPUT  No of output vars X per proces
-C     IPVXO   INTEGER       *     OUTPUT  Pointers for arrays on VXO
-C     VXONAM  CHARACTER*(*) *     OUTPUT  Name of output variable X
-C     VXOTXT  CHARACTER*(*) *     OUTPUT  Text of output variable X
-C     MAXDST  INTEGER       1     INPUT   Max. number of dispersion rules
-C     NSDST   INTEGER       *     OUTPUT  No of dispersion rules p.proces
-C     IPDST   INTEGER       *     OUTPUT  Pointers for arrays on DST
-C     GENDST  CHARACTER*(*) *     OUTPUT  Name of substance in disp rule
-C     OUTDST  CHARACTER*(*) *     OUTPUT  Name of output item in disp rule
-C     STOVST  REAL          *     OUTPUT  factor in dispersion rule
-C     MAXVST  INTEGER       1     INPUT   Max. number of velocity rules
-C     NSVST   INTEGER       *     OUTPUT  No of velocity rules p.proces
-C     IPVST   INTEGER       *     OUTPUT  Pointers for arrays on VST
-C     GENVST  CHARACTER*(*) *     OUTPUT  Name of substance in velo rule
-C     OUTVST  CHARACTER*(*) *     OUTPUT  Name of output item in velo rule
-C     STOVST  REAL          *     OUTPUT  factor in velocity rule
-C     ISWITR  INTEGER       *     OUTPUT  Target dimension indicator
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: nov -1992 by Jan van Beek
+!
+!     FUNCTION            : Reads the ascii proces definition file
+!
+!     LOGICAL UNITNUMBERS : LUPDEF  - proces definition file
+!                         : LUREP   - report file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUPDEF  INTEGER       1     INPUT   Porces definition file
+!     LUREP   INTEGER       1     INPUT   Report file
+!     NBPR    INTEGER       1     OUTPUT  Number of processes in def file
+!     NBPRM   INTEGER       1     INPUT   Max number of processes
+!     BPRNAM  CHARACTER*(*) *     OUTPUT  Name of processes
+!     BPRTXT  CHARACTER*(*) *     OUTPUT  Text of processes
+!     MODNAM  CHARACTER*(*) *     OUTPUT  Name of module of processes
+!     NSVAI   INTEGER       *     OUTPUT  No of input vars per proces
+!     VAINAM  CHARACTER*(*) *     OUTPUT  Name of input variable
+!     VAITXT  CHARACTER*(*) *     OUTPUT  Text of input variable
+!     VAIDEF  REAL          *     OUTPUT  Default values input variables
+!     NSVAO   INTEGER       *     OUTPUT  No of output vars per proces
+!     VAONAM  CHARACTER*(*) *     OUTPUT  Name of output variable
+!     VAOTXT  CHARACTER*(*) *     OUTPUT  Text of output variable
+!     NBFL    INTEGER       *     OUTPUT  No of basic fluxes per proces
+!     BFLNAM  CHARACTER*(*) *     OUTPUT  Name of basix fluxe
+!     BFLTXT  CHARACTER*(*) *     OUTPUT  Text of basix fluxe
+!     NBST    INTEGER       *     OUTPUT  No of basic stochis per proces
+!     GENBST  CHARACTER*(*) *     OUTPUT  Name of substance in stochi
+!     FLXBST  CHARACTER*(*) *     OUTPUT  Name of flux in stochi
+!     STOBST  REAL          *     OUTPUT  Stochimetric factor
+!     IPVAI   INTEGER       *     OUTPUT  Pointers for arrays on VAI
+!     IPVAO   INTEGER       *     OUTPUT  Pointers for arrays on VAO
+!     IPBFL   INTEGER       *     OUTPUT  Pointers for arrays on BFL
+!     IPBST   INTEGER       *     OUTPUT  Pointers for arrays on BST
+!     MAXVAI  INTEGER       1     INPUT   Maximum number of input vars
+!     MAXVAO  INTEGER       1     INPUT   Maximum number of output vars
+!     MAXBFL  INTEGER       1     INPUT   Maximum number of fluxes
+!     MAXBST  INTEGER       1     INPUT   Maximum number of stochio's
+!     MAXVXI  INTEGER       1     INPUT   Maximum number of input x vars
+!     NSVXI   INTEGER       *     OUTPUT  No of input vars X per proces
+!     IPVXI   INTEGER       *     OUTPUT  Pointers for arrays on VXI
+!     VXINAM  CHARACTER*(*) *     OUTPUT  Name of input variable X
+!     VXITXT  CHARACTER*(*) *     OUTPUT  Text of input variable X
+!     VXIDEF  REAL          *     OUTPUT  Default values input X variables
+!     MAXVXO  INTEGER       1     INPUT   Maximum number of output x vars
+!     NSVXO   INTEGER       *     OUTPUT  No of output vars X per proces
+!     IPVXO   INTEGER       *     OUTPUT  Pointers for arrays on VXO
+!     VXONAM  CHARACTER*(*) *     OUTPUT  Name of output variable X
+!     VXOTXT  CHARACTER*(*) *     OUTPUT  Text of output variable X
+!     MAXDST  INTEGER       1     INPUT   Max. number of dispersion rules
+!     NSDST   INTEGER       *     OUTPUT  No of dispersion rules p.proces
+!     IPDST   INTEGER       *     OUTPUT  Pointers for arrays on DST
+!     GENDST  CHARACTER*(*) *     OUTPUT  Name of substance in disp rule
+!     OUTDST  CHARACTER*(*) *     OUTPUT  Name of output item in disp rule
+!     STOVST  REAL          *     OUTPUT  factor in dispersion rule
+!     MAXVST  INTEGER       1     INPUT   Max. number of velocity rules
+!     NSVST   INTEGER       *     OUTPUT  No of velocity rules p.proces
+!     IPVST   INTEGER       *     OUTPUT  Pointers for arrays on VST
+!     GENVST  CHARACTER*(*) *     OUTPUT  Name of substance in velo rule
+!     OUTVST  CHARACTER*(*) *     OUTPUT  Name of output item in velo rule
+!     STOVST  REAL          *     OUTPUT  factor in velocity rule
+!     ISWITR  INTEGER       *     OUTPUT  Target dimension indicator
+!
+!     Declaration of arguments
+!
       INTEGER        LUPDEF          , LUREP           ,
      +               NBPR            , NBPRM           ,
      +               MAXVAI          , MAXVAO          ,
@@ -132,22 +132,22 @@ C
       CHARACTER*(*)  BPRTXT(*)       , VAITXT(*)       ,
      +               VAOTXT(*)       , BFLTXT(*)       ,
      +               VXITXT(*)       , VXOTXT(*)
-C
-C     Local
-C
+!
+!     Local
+!
       CHARACTER*100  REGEL
-C
-C     Read NBPR  number of proces modules
-C
+!
+!     Read NBPR  number of proces modules
+!
       READ ( LUPDEF , * ) NBPR
       IF ( NBPR  .LE. 0 .OR. NBPR  .GT. NBPRM  ) THEN
          WRITE ( LUREP,* ) ' ERROR : Reading proces definition file'
          WRITE ( LUREP,* ) '         wrong number of processes'
          CALL SRSTOP(1)
       ENDIF
-C
-C     Read name , input vars, output vars and fluxes
-C
+!
+!     Read name , input vars, output vars and fluxes
+!
       IIVAI = 1
       IIVXI = 1
       IIVAO = 1
@@ -156,21 +156,21 @@ C
       IIBST = 1
       IIDST = 1
       IIVST = 1
-C
+!
       DO 700 IP = 1 , NBPR
-C
-C        Read proces naam , module name
-C
+!
+!        Read proces naam , module name
+!
          READ ( LUPDEF , '(A10,20X,A50)' ) BPRNAM(IP),BPRTXT(IP)
          WRITE(*,*) 'reading definition of ',BPRNAM(IP)(1:10)
          READ ( LUPDEF , '(A)' ) MODNAM(IP)
-C
-C        Read the xD target dimension indicator
-C
+!
+!        Read the xD target dimension indicator
+!
          READ ( LUPDEF , * ) ISWITR(IP)
-C
-C        Read input variables VAI with defaults
-C
+!
+!        Read input variables VAI with defaults
+!
          READ ( LUPDEF , * ) NSV
          NSVAI(IP) = NSV
          IPVAI(IP) = IIVAI
@@ -187,9 +187,9 @@ C
             READ ( REGEL , '(A10,E18.0,2X,A50)' )
      +           VAINAM(IPV), VAIDEF(IPV),VAITXT(IPV)
   100    CONTINUE
-C
-C        Read input variables VXI with defaults
-C
+!
+!        Read input variables VXI with defaults
+!
          READ ( LUPDEF , * ) NSV
          NSVXI(IP) = NSV
          IPVXI(IP) = IIVXI
@@ -206,9 +206,9 @@ C
             READ ( REGEL , '(A10,E18.0,2X,A50)' )
      +           VXINAM(IPV), VXIDEF(IPV),VXITXT(IPV)
   150    CONTINUE
-C
-C        Read output variables VAO
-C
+!
+!        Read output variables VAO
+!
          READ ( LUPDEF , * ) NSV
          NSVAO(IP) = NSV
          IPVAO(IP) = IIVAO
@@ -225,9 +225,9 @@ C
             READ ( REGEL , '(A10,20X,A50)'  )
      +           VAONAM(IPV),VAOTXT(IPV)
   200    CONTINUE
-C
-C        Read output variables VXO
-C
+!
+!        Read output variables VXO
+!
          READ ( LUPDEF , * ) NSV
          NSVXO(IP) = NSV
          IPVXO(IP) = IIVXO
@@ -244,9 +244,9 @@ C
             READ ( REGEL , '(A10,20X,A50)'  )
      +           VXONAM(IPV),VXOTXT(IPV)
   250    CONTINUE
-C
-C        Read basis fluxes  BFL
-C
+!
+!        Read basis fluxes  BFL
+!
          READ ( LUPDEF , * ) NFL
          NBFL(IP)  = NFL
          IPBFL(IP) = IIBFL
@@ -263,9 +263,9 @@ C
             READ ( REGEL , '(A10,20X,A50)'  )
      +             BFLNAM(IPV),BFLTXT(IPV)
   300    CONTINUE
-C
-C        Read basis stochiometry  BST
-C
+!
+!        Read basis stochiometry  BST
+!
          READ ( LUPDEF , * ) NST
          NBST(IP)  = NST
          IPBST(IP) = IIBST
@@ -283,9 +283,9 @@ C
      +                                              FLXBST(IPV),
      +                                              STOBST(IPV)
   400    CONTINUE
-C
-C        Read dispersion rules
-C
+!
+!        Read dispersion rules
+!
          READ ( LUPDEF , * ) NST
          NDST(IP)  = NST
          IPDST(IP) = IIDST
@@ -303,9 +303,9 @@ C
      +                                              OUTDST(IPV),
      +                                              STODST(IPV)
   500    CONTINUE
-C
-C        Read velocity rules
-C
+!
+!        Read velocity rules
+!
          READ ( LUPDEF , * ) NST
          NVST(IP)  = NST
          IPVST(IP) = IIVST
@@ -323,12 +323,12 @@ C
      +                                              OUTVST(IPV),
      +                                              STOVST(IPV)
   600    CONTINUE
-C
-C        Read end line
-C
+!
+!        Read end line
+!
 
          READ ( LUPDEF , '(A)' ) REGEL
   700 CONTINUE
-C
+!
       RETURN
       END

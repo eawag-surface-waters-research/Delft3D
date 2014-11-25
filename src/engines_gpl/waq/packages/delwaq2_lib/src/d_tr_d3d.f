@@ -29,72 +29,72 @@
      +                    IDT    , SYNAME , NOCONS , NOFUN  , CONAME ,
      +                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG ,
      +                    NPARTp )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:                 by L.Postma
-C     REVISED:    august  1997 by Jan van Beek, Delft3D-WAQ functonality
-C
-C     FUNCTION            : reads SURFACE from coupling
-C                           Sets dispersion length in vertical
-C
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSYS   INTEGER       1     INPUT   number of active substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOQ     INTEGER       1     INPUT   Total number of exchanges
-C     NOQ1    INTEGER       1     INPUT   Nr. of exchanges direction 1
-C     NOQ2    INTEGER       1     INPUT   Nr. of exchanges direction 2
-C     NOQ3    INTEGER       1     INPUT   Nr. of exchanges direction 3
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     NODISP  INTEGER       1     INPUT   Number of user-dispersions
-C     NOVELO  INTEGER       1     INPUT   Number of user-flows
-C     IPOINT  INTEGER   4*NOQ     INPUT   1= "From"   segment pointers
-C                                 INPUT   2= "To"     segment pointers
-C                                 INPUT   3= "From-1" segment pointers
-C                                 INPUT   4= "To+1"   segment pointers
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     AREA    REAL        NOQ     INPUT   Exchange surfaces
-C     FLOW    REAL        NOQ     INPUT   Flows
-C     ALENG a)REAL      2*NOQ     INPUT   1= Length to "From" surface
-C                                         2= Length to "To"   surface
-C           b)REAL        3       INPUT   3 lengthes in the grid
-C     CONC    REAL   NOTOT*NOSEG  INPUT   Model concentrations
-C     DISP    REAL        3       IN/OUT  Dispersion in 3 directions
-C     CONS    REAL          *     IN/OUT  Model constants
-C     PARAM   REAL    NOPA*NOSEG  IN/OUT  Model parameters
-C     FUNC    REAL          *     IN/OUT  Model functions at ITIME
-C     SEGFUN  REAL   NOSEG*NOSFUN IN/OUT  Segment functions at ITIME
-C     DISPER  REAL   NODISP*NOQ   OUTPUT  User defined dispersion
-C     VELO    REAL   NOVELO*NOQ   OUTPUT  User defined flows
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     IDT     INTEGER       1     INPUT   Time step system clock units
-C     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     CONAME  CHAR*20   NOCONS    INPUT   Constant names
-C     PANAME  CHAR*20   NOPA      INPUT   Parameter names
-C     FUNAME  CHAR*20   NOFUN     INPUT   Function names
-C     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
-C     UPDATR  LOGICAL       1     IN/OUT  Flag indicating if the transport
-C                                         matrix is changed. The user should
-C                                         set this flag to .T. if he alters
-C                                         part of the matrix and uses integratio
-C                                         option 10.xx .
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C     NPARTp  INTEGER     1       INPUT   number of subdomains in parallel run
-C
-C     ==================================================================
-C
-C     Save for all the local index pointers and switches
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:                 by L.Postma
+!     REVISED:    august  1997 by Jan van Beek, Delft3D-WAQ functonality
+!
+!     FUNCTION            : reads SURFACE from coupling
+!                           Sets dispersion length in vertical
+!
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOSYS   INTEGER       1     INPUT   number of active substances
+!     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
+!     NOQ     INTEGER       1     INPUT   Total number of exchanges
+!     NOQ1    INTEGER       1     INPUT   Nr. of exchanges direction 1
+!     NOQ2    INTEGER       1     INPUT   Nr. of exchanges direction 2
+!     NOQ3    INTEGER       1     INPUT   Nr. of exchanges direction 3
+!     NOPA    INTEGER       1     INPUT   Number of parameters
+!     NOSFUN  INTEGER       1     INPUT   Number of segment functions
+!     NODISP  INTEGER       1     INPUT   Number of user-dispersions
+!     NOVELO  INTEGER       1     INPUT   Number of user-flows
+!     IPOINT  INTEGER   4*NOQ     INPUT   1= "From"   segment pointers
+!                                 INPUT   2= "To"     segment pointers
+!                                 INPUT   3= "From-1" segment pointers
+!                                 INPUT   4= "To+1"   segment pointers
+!     VOLUME  REAL      NOSEG     INPUT   Segment volumes
+!     AREA    REAL        NOQ     INPUT   Exchange surfaces
+!     FLOW    REAL        NOQ     INPUT   Flows
+!     ALENG a)REAL      2*NOQ     INPUT   1= Length to "From" surface
+!                                         2= Length to "To"   surface
+!           b)REAL        3       INPUT   3 lengthes in the grid
+!     CONC    REAL   NOTOT*NOSEG  INPUT   Model concentrations
+!     DISP    REAL        3       IN/OUT  Dispersion in 3 directions
+!     CONS    REAL          *     IN/OUT  Model constants
+!     PARAM   REAL    NOPA*NOSEG  IN/OUT  Model parameters
+!     FUNC    REAL          *     IN/OUT  Model functions at ITIME
+!     SEGFUN  REAL   NOSEG*NOSFUN IN/OUT  Segment functions at ITIME
+!     DISPER  REAL   NODISP*NOQ   OUTPUT  User defined dispersion
+!     VELO    REAL   NOVELO*NOQ   OUTPUT  User defined flows
+!     ITIME   INTEGER       1     INPUT   Time in system clock units
+!     IDT     INTEGER       1     INPUT   Time step system clock units
+!     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
+!     NOCONS  INTEGER       1     INPUT   Number of constants used
+!     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
+!     CONAME  CHAR*20   NOCONS    INPUT   Constant names
+!     PANAME  CHAR*20   NOPA      INPUT   Parameter names
+!     FUNAME  CHAR*20   NOFUN     INPUT   Function names
+!     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
+!     UPDATR  LOGICAL       1     IN/OUT  Flag indicating if the transport
+!                                         matrix is changed. The user should
+!                                         set this flag to .T. if he alters
+!                                         part of the matrix and uses integratio
+!                                         option 10.xx .
+!     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
+!     NPARTp  INTEGER     1       INPUT   number of subdomains in parallel run
+!
+!     ==================================================================
+!
+!     Save for all the local index pointers and switches
+!
       SAVE
-C
+!
       DIMENSION    IPOINT(4,NOQ)
       DIMENSION    VOLUME(NOSEG)     , AREA(NOQ)         ,
      +             FLOW(NOQ)         , ALENG (2,NOQ)     ,
@@ -106,16 +106,16 @@ C
      +             PANAME (*)        , FUNAME (*)        ,
      +             SFNAME (*)
       LOGICAL      UPDATR
-C
-C     Local
-C
+!
+!     Local
+!
       PARAMETER  ( LCCCO  = 98 )
       LOGICAL    FIRST ,  LINIT , LEXI
       DATA       FIRST / .TRUE. /
       DATA       LINIT / .FALSE. /
-C
-C          check usage w.r.t. parallel computing
-C
+!
+!          check usage w.r.t. parallel computing
+!
 !          AM:
 !          I removed this check, as all the computations set up using
 !          the Delft3D user-interface have the SURF parameter.
@@ -126,24 +126,24 @@ C
 !        WRITE(LUNREP,2060) NPARTp
 !        CALL SRSTOP(1)
 !     ENDIF
-C
-C          check number of parameters
-C
-C     Initialisation set index pointers, read surface areas
-C
+!
+!          check number of parameters
+!
+!     Initialisation set index pointers, read surface areas
+!
       IF ( FIRST ) THEN
          FIRST = .FALSE.
          IER   = 0
          CALL GETMLU(LUNREP)
          WRITE(LUNREP,*)
          WRITE(LUNREP,2000)
-C
-C        Set pointers in param array
-C
+!
+!        Set pointers in param array
+!
          CALL ZOEK ( 'SURF      ', NOPA  , PANAME , 10    , ISURF  )
-C
-C          read surface areas
-C
+!
+!          read surface areas
+!
          IF ( ISURF .GT. 0 ) THEN
             IF ( ILFLAG .EQ. 1 .AND. NOQ3 .GT. 0 ) THEN
                LINIT = .TRUE.
@@ -151,12 +151,12 @@ C
             ENDIF
             INQUIRE  ( FILE='areachar.dat', EXIST = LEXI )
             IF ( .NOT. LEXI ) THEN
-C
-C
-C              It is assumed the SURF parameter has been set in the input
-C
-C              WRITE (LUNREP,2020)
-C              WRITE (  *   ,2020)
+!
+!
+!              It is assumed the SURF parameter has been set in the input
+!
+!              WRITE (LUNREP,2020)
+!              WRITE (  *   ,2020)
             ELSE
                OPEN ( LCCCO, FILE='areachar.dat', FORM  ='UNFORMATTED',
      +                       STATUS='OLD'       , IOSTAT=IER2         )
@@ -186,18 +186,18 @@ C              WRITE (  *   ,2020)
                   CLOSE ( LCCCO )
                ENDIF
             ENDIF
-C
+!
             IF ( IER .NE. 0 ) THEN
                CALL SRSTOP(1)
             ENDIF
          ENDIF
-C
+!
          WRITE(LUNREP,2070)
-C
+!
       ENDIF
-C
-C     adapt the length for the third direction
-C
+!
+!     adapt the length for the third direction
+!
       IF ( LINIT ) THEN
          DO 60 IQ = NOQ1 + NOQ2 + 1, NOQ
               IFROM = IPOINT(1,IQ)
@@ -214,13 +214,13 @@ C
               ENDIF
 60       CONTINUE
       ENDIF
-C
-C     end of the subroutine
-C
+!
+!     end of the subroutine
+!
       RETURN
-C
-C     Output formats
-C
+!
+!     Output formats
+!
  2000 FORMAT (' Extra functionality DLWQTR')
  2010 FORMAT (' ERROR: opening file <areachar.dat> !')
  2020 FORMAT (' WARNING: no <areachar.dat> file!',/,
@@ -235,5 +235,5 @@ C
      +ot be used',/,
      +        '        in parallel runs (NPART=',i3,').')
  2070 FORMAT (' End extra functionality DLWQTR')
-C
+!
       END

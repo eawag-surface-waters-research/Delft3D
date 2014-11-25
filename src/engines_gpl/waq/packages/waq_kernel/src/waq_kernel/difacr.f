@@ -31,171 +31,171 @@
      *                  thick     ,sig       ,dicuv     ,sigdif    ,
      *                  dsdksi    ,dtdksi    ,dsdeta    ,dtdeta    ,
      *                  dfluxx    ,dfluxy                          )
-c-----------------------------------------------------------------------
-c             Module: SUBROUTINE DIFACR
-c           Function: Computes horizontal diffusion along Z-planes.
-c                     Explicit in u-direction, explicit in v-
-c                     direction.
-c                     Horizontal gradients salinity and temperature
-c                     are computed in subroutine dengra.
-c                     Only if KMAX > 1 and Anti Creep
-c        Method used: Reference : On the approximation of horizontal
-c                     gradients in sigma co-ordinates for bathymetry
-c                     with steep bottom slopes (G.S. Stelling and J.
-c                     van Kester - International Journal for Methods
-c                     in Fluids, Vol. 18 1994)
-c               Date: 19-07-2000
-c         Programmer: G.S. Stelling, J. v. Kester, A.J. Mourits
-c         CVS header
-c            $Author: Beek_j $
-c              $Date: 22-09-03 15:46 $
-c            $Source: /u/trisula/cvsroot/trisula/reken/difacr.f,v $
-c          $Revision: 1 $
-c-----------------------------------------------------------------------
-c   Calling routines:              DIFU
-c                                  DIFUEX
-c                                  DIFUIM
-c                                  DIFUVL
-c-----------------------------------------------------------------------
-c   Called  routines:              DIFHOR
-c-----------------------------------------------------------------------
-c  Formal parameters:
-c  ------------------
-c
-c   Var. I/O  Type Dimensions
-c   -------------------------
-c
-c DDKL    --  R*4  J:NMMAXJ,KMAX,LSTSCI
-c                                  Internal work array, diagonal space
-c                                  at (n,m,k,l)
-c DFLUXX  IO  R*4  J:NMMAXJ,KMAX,LSTSCI
-c                                  Work array for horizontal diffusion flux
-c DFLUXY  IO  R*4  J:NMMAXJ,KMAX,LSTSCI
-c                                  Work array for horizontal diffusion flux
-c DICUV   --  R*4  J:NMMAXJ,KMAX   Horizontal diffusion coeff. [m2/s]
-c DPS     I   R*4  J:NMMAXJ        Depth value at zeta points
-c DSDETA  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient salinity,
-c                                  strictly horizontal in eta-direction
-c                                  For Anti Creep: Contribution diffu-
-c                                  sive flux interpolated on Cartesian
-c                                  grid to cell NM
-c DSDKSI  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient salinity,
-c                                  strictly horizontal in ksi-direction
-c                                  For Anti Creep: Contribution diffu-
-c                                  sive flux interpolated on Cartesian
-c                                  grid to cell NM
-c DTDETA  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient temperature,
-c                                  strictly horizontal in eta-direction
-c                                  For Anti Creep: Contribution diffu-
-c                                  sive flux interpolated on Cartesian
-c                                  grid to cell NM
-c DTDKSI  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient temperature,
-c                                  strictly horizontal in ksi-direction
-c                                  For Anti Creep: Contribution diffu-
-c                                  sive flux interpolated on Cartesian
-c                                  grid to cell NM
-c GUU     --  R*4  J:NMMAXJ        Grid distance in the eta-/y-direction
-c                                  at u-velocity point
-c GUV     --  R*4  J:NMMAXJ        Grid distance in the eta-/y-direction
-c                                  at v-velocity point
-c GVU     --  R*4  J:NMMAXJ        Grid distance in the ksi-/x-direction
-c                                  at u-velocity point
-c GVV     --  R*4  J:NMMAXJ        Grid distance in the ksi-/x-direction
-c                                  at v-velocity point
-c ICX     I   I*4                  Increment in the x-dir., if icx= nmax
-c                                  then computation proceeds in the x-
-c                                  dir. if icx=1 then computation pro-
-c                                  ceeds in the y-dir.
-c ICY     I   I*4                  Increment in the y-dir. (see icx)
-c J       I   I*4                  Begin pointer for arrays which have
-c                                  been transformed into 1d arrays.
-c                                  due to the shift in the 2nd (m-)
-c                                  index, j = -2*nmax + 1
-c KADU    --  I*4  J:NMMAXJ,KMAX   Mask array for adv. term adjustment
-c                                  for structures in U-points
-c                                  = 1 no structure (HYD)
-c                                  = 1 no gate (TRA)
-c                                  = 0 structure
-c                                  = 0 gate (KSPU(NM,0)*KSPU(NM,K)=4)
-c KADV    --  I*4  J:NMMAXJ,KMAX   Mask array for adv. term adjustment
-c                                  for structures in V-points
-c                                  = 1 no structure (HYD)
-c                                  = 1 no gate (TRA)
-c                                  = 0 structure
-c                                  = 0 gate (KSPV(NM,0)*KSPV(NM,K)=4)
-c KCS     --  I*4  J:NMMAXJ        Mask array for the zeta points
-c                                  (time independent)
-c                                  =0 inactive point
-c                                  =1 active   point
-c                                  =2 open boundary point
-c KFU     I   I*4  J:NMMAXJ        Mask array for the u-velocity point
-c                                  (time dependent)
-c                                  =0 dry      point
-c                                  =1 active   point
-c KFV     I   I*4  J:NMMAXJ        Mask array for the v-velocity point
-c                                  (time dependent)
-c                                  =0 dry      point
-c                                  =1 active   point
-c KMAX    I   I*4                  Number of layers in the z-dir.
-c LSAL    --  I*4                  Pointer for salinity in array r
-c                                  for constituents (if used, always 1)
-c LSTSCI  I   I*4                  Number of Constituents (Salinity,
-c                                  Temperature, Sediment, Conservative
-c                                  Constituents and Secondary Flow)
-c LTEM    --  I*4                  Pointer for temperature in array r
-c                                  for constituents (lsal+1)
-c NMMAX   --  I*4                  Total number of grid pts. (nmax*mmax)
-c NMMAXJ  I   I*4                  End   pointer for arrays which have
-c                                  been transformed into 1d arrays.
-c                                  due to the shift in the 2nd (m-)
-c                                  index, nmmaxj = nmmax + 2 * nmax
-c R0      --  R*4  J:NMMAXJ,KMAX,LSTSCI
-c                                  Concentrations at old time level
-c S0      I   R*4  J:NMMAXJ        Zeta at old time level
-c SIG     --  R*4  KMAX            Sigma coordinate density points.
-c SIGDIF  --  R*4  LSTSCI          Prandtl/schmidt-numbers for const.
-c THICK   --  R*4  KMAX            Relative layer thickness
-c-----------------------------------------------------------------------
-c    local variables:
-c    ----------------
-c
-c   var.      type dimensions
-c   -------------------------
-c
-c AREA        R*4
-c CL          R*4
-c CR          R*4
-c DIFL        R*4
-c DIFR        R*4
-c FLUX        R*4
-c K           I*4
-c KENU        I*4
-c KENV        I*4
-c L           I*4
-c NM          I*4
-c NMU         I*4
-c NUM         I*4
-c-----------------------------------------------------------------------
-c
-c declaration
-c
-c-----------------------------------------------------------------------
-c     GLOBAL DATA
-c
-c     global data structure definition and access functions
-c     include 'globdat.igd'
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!             Module: SUBROUTINE DIFACR
+!           Function: Computes horizontal diffusion along Z-planes.
+!                     Explicit in u-direction, explicit in v-
+!                     direction.
+!                     Horizontal gradients salinity and temperature
+!                     are computed in subroutine dengra.
+!                     Only if KMAX > 1 and Anti Creep
+!        Method used: Reference : On the approximation of horizontal
+!                     gradients in sigma co-ordinates for bathymetry
+!                     with steep bottom slopes (G.S. Stelling and J.
+!                     van Kester - International Journal for Methods
+!                     in Fluids, Vol. 18 1994)
+!               Date: 19-07-2000
+!         Programmer: G.S. Stelling, J. v. Kester, A.J. Mourits
+!         CVS header
+!            $Author: Beek_j $
+!              $Date: 22-09-03 15:46 $
+!            $Source: /u/trisula/cvsroot/trisula/reken/difacr.f,v $
+!          $Revision: 1 $
+!-----------------------------------------------------------------------
+!   Calling routines:              DIFU
+!                                  DIFUEX
+!                                  DIFUIM
+!                                  DIFUVL
+!-----------------------------------------------------------------------
+!   Called  routines:              DIFHOR
+!-----------------------------------------------------------------------
+!  Formal parameters:
+!  ------------------
+!
+!   Var. I/O  Type Dimensions
+!   -------------------------
+!
+! DDKL    --  R*4  J:NMMAXJ,KMAX,LSTSCI
+!                                  Internal work array, diagonal space
+!                                  at (n,m,k,l)
+! DFLUXX  IO  R*4  J:NMMAXJ,KMAX,LSTSCI
+!                                  Work array for horizontal diffusion flux
+! DFLUXY  IO  R*4  J:NMMAXJ,KMAX,LSTSCI
+!                                  Work array for horizontal diffusion flux
+! DICUV   --  R*4  J:NMMAXJ,KMAX   Horizontal diffusion coeff. [m2/s]
+! DPS     I   R*4  J:NMMAXJ        Depth value at zeta points
+! DSDETA  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient salinity,
+!                                  strictly horizontal in eta-direction
+!                                  For Anti Creep: Contribution diffu-
+!                                  sive flux interpolated on Cartesian
+!                                  grid to cell NM
+! DSDKSI  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient salinity,
+!                                  strictly horizontal in ksi-direction
+!                                  For Anti Creep: Contribution diffu-
+!                                  sive flux interpolated on Cartesian
+!                                  grid to cell NM
+! DTDETA  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient temperature,
+!                                  strictly horizontal in eta-direction
+!                                  For Anti Creep: Contribution diffu-
+!                                  sive flux interpolated on Cartesian
+!                                  grid to cell NM
+! DTDKSI  I   R*4  J:NMMAXJ,KMAX   Horizontal gradient temperature,
+!                                  strictly horizontal in ksi-direction
+!                                  For Anti Creep: Contribution diffu-
+!                                  sive flux interpolated on Cartesian
+!                                  grid to cell NM
+! GUU     --  R*4  J:NMMAXJ        Grid distance in the eta-/y-direction
+!                                  at u-velocity point
+! GUV     --  R*4  J:NMMAXJ        Grid distance in the eta-/y-direction
+!                                  at v-velocity point
+! GVU     --  R*4  J:NMMAXJ        Grid distance in the ksi-/x-direction
+!                                  at u-velocity point
+! GVV     --  R*4  J:NMMAXJ        Grid distance in the ksi-/x-direction
+!                                  at v-velocity point
+! ICX     I   I*4                  Increment in the x-dir., if icx= nmax
+!                                  then computation proceeds in the x-
+!                                  dir. if icx=1 then computation pro-
+!                                  ceeds in the y-dir.
+! ICY     I   I*4                  Increment in the y-dir. (see icx)
+! J       I   I*4                  Begin pointer for arrays which have
+!                                  been transformed into 1d arrays.
+!                                  due to the shift in the 2nd (m-)
+!                                  index, j = -2*nmax + 1
+! KADU    --  I*4  J:NMMAXJ,KMAX   Mask array for adv. term adjustment
+!                                  for structures in U-points
+!                                  = 1 no structure (HYD)
+!                                  = 1 no gate (TRA)
+!                                  = 0 structure
+!                                  = 0 gate (KSPU(NM,0)*KSPU(NM,K)=4)
+! KADV    --  I*4  J:NMMAXJ,KMAX   Mask array for adv. term adjustment
+!                                  for structures in V-points
+!                                  = 1 no structure (HYD)
+!                                  = 1 no gate (TRA)
+!                                  = 0 structure
+!                                  = 0 gate (KSPV(NM,0)*KSPV(NM,K)=4)
+! KCS     --  I*4  J:NMMAXJ        Mask array for the zeta points
+!                                  (time independent)
+!                                  =0 inactive point
+!                                  =1 active   point
+!                                  =2 open boundary point
+! KFU     I   I*4  J:NMMAXJ        Mask array for the u-velocity point
+!                                  (time dependent)
+!                                  =0 dry      point
+!                                  =1 active   point
+! KFV     I   I*4  J:NMMAXJ        Mask array for the v-velocity point
+!                                  (time dependent)
+!                                  =0 dry      point
+!                                  =1 active   point
+! KMAX    I   I*4                  Number of layers in the z-dir.
+! LSAL    --  I*4                  Pointer for salinity in array r
+!                                  for constituents (if used, always 1)
+! LSTSCI  I   I*4                  Number of Constituents (Salinity,
+!                                  Temperature, Sediment, Conservative
+!                                  Constituents and Secondary Flow)
+! LTEM    --  I*4                  Pointer for temperature in array r
+!                                  for constituents (lsal+1)
+! NMMAX   --  I*4                  Total number of grid pts. (nmax*mmax)
+! NMMAXJ  I   I*4                  End   pointer for arrays which have
+!                                  been transformed into 1d arrays.
+!                                  due to the shift in the 2nd (m-)
+!                                  index, nmmaxj = nmmax + 2 * nmax
+! R0      --  R*4  J:NMMAXJ,KMAX,LSTSCI
+!                                  Concentrations at old time level
+! S0      I   R*4  J:NMMAXJ        Zeta at old time level
+! SIG     --  R*4  KMAX            Sigma coordinate density points.
+! SIGDIF  --  R*4  LSTSCI          Prandtl/schmidt-numbers for const.
+! THICK   --  R*4  KMAX            Relative layer thickness
+!-----------------------------------------------------------------------
+!    local variables:
+!    ----------------
+!
+!   var.      type dimensions
+!   -------------------------
+!
+! AREA        R*4
+! CL          R*4
+! CR          R*4
+! DIFL        R*4
+! DIFR        R*4
+! FLUX        R*4
+! K           I*4
+! KENU        I*4
+! KENV        I*4
+! L           I*4
+! NM          I*4
+! NMU         I*4
+! NUM         I*4
+!-----------------------------------------------------------------------
+!
+! declaration
+!
+!-----------------------------------------------------------------------
+!     GLOBAL DATA
+!
+!     global data structure definition and access functions
+!     include 'globdat.igd'
+!-----------------------------------------------------------------------
       use timers
 
       dimension   s0    (j:nmmaxj),dps   (j:nmmaxj),
      *            guu   (j:nmmaxj),gvv   (j:nmmaxj),
      *            guv   (j:nmmaxj),gvu   (j:nmmaxj)
-c
+!
       dimension   kcs   (j:nmmaxj),
      *            kfu   (j:nmmaxj),kfv   (j:nmmaxj),
      *            kadu  (j:nmmaxj,  kmax),
      *            kadv  (j:nmmaxj,  kmax)
-c
+!
       dimension   dicuv (j:nmmaxj,kmax),
      *            r0    (j:nmmaxj,kmax,lstsci),
      *            dsdksi(j:nmmaxj,kmax),dsdeta(j:nmmaxj,kmax  ),
@@ -213,14 +213,14 @@ c
       dfluxx = 0.0
       dfluxy = 0.0
 
-c
-c***horizontal diffusion in both u- and v-diffusion
-c   artificial creep is avoided by use
-c   of a special limiter
-c
-c***calibration for SAL / TEMP in routine DENGRA
-c
-c$dir scalar
+!
+!***horizontal diffusion in both u- and v-diffusion
+!   artificial creep is avoided by use
+!   of a special limiter
+!
+!***calibration for SAL / TEMP in routine DENGRA
+!
+!$dir scalar
       if (lsal   .ne. 0) then
         do 10 nm=1,nmmax
           do 20 k=1,kmax
@@ -237,14 +237,14 @@ c$dir scalar
  60       continue
  50     continue
       endif
-c
+!
       if (lstsci.eq.MAX (lsal,ltem)) goto 1000
-c
-c***calibration for all other constituents
-c   horizontal diffusion in u-diffusion
-c   artificial creep is avoided by use
-c   of a special limiter
-c
+!
+!***calibration for all other constituents
+!   horizontal diffusion in u-diffusion
+!   artificial creep is avoided by use
+!   of a special limiter
+!
       nmu = icx
       do 150 nm=1,nmmax
         nmu =nmu+1
@@ -264,12 +264,12 @@ c
 
         endif
  150  continue
-c
-c***calibration for all other constituents
-c   horizontal diffusion in v-direction
-c   artificial creep is avoided by use
-c   of a special limiter
-c
+!
+!***calibration for all other constituents
+!   horizontal diffusion in v-direction
+!   artificial creep is avoided by use
+!   of a special limiter
+!
       num = icy
       do 250 nm=1,nmmax
         num  =num+1
@@ -289,7 +289,7 @@ c
 
         endif
  250  continue
-c
+!
  1000 continue
       if ( timon ) call timstop ( ithandl )
       return

@@ -24,73 +24,73 @@
       SUBROUTINE DHLIC ( lunrep, verwaq, verd3d, versbk, verrur,
      +                   verrib, nfeat , feat  , usernm, yfeat ,
      +                   l3dmod, nolic)
-c
+!
       USE Timers
       implicit none
-c-----------------------------------------------------------------------
-c
-c     Deltares
-c
-c     Created             : April 19, 2000
-c     Programmer          : Jan Mooiman
-c     Function            : Checks license file
-c
-c-----------------------------------------------------------------------
-c
-c     Subroutines called  : AUTHMD, check license
-c                           AUTHER, error message authorization modue
-c                           AUTCFG, read consome contents of lic. file
-c
-c-----------------------------------------------------------------------
-c
-c     Arguments           :
-c
-c     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-c     ----    -----    ------     ------- -----------
-c     lunrep  integer  1          input   Unit number report file
-c     verwaq  ch*(*)   1          input   Version number DELWAQ
-c     verd3d  ch*(*)   1          input   Version number Delft3D
-c     versbk  ch*(*)   1          input   Version number SOBEK(river)
-c     verrur  ch*(*)   1          input   Version number SOBEK(rural+urban)
-c     verrib  ch*(*)   1          input   Version number RIBASIM
-c     nfeat   integer  1          input   Number of defined features
-c     feat    ch*(*)   1          input   Names of defined features
-c     usernm  ch*(*)   1          output  User name
-c     yfeat   integer  1          output  Licence of defined features
-c     l3dmod  logical  1          input   check 3d features
-c     nolic   logical  1          output  No valid license found
-c                                         (for SOBEK with limited number
-c                                         of segments)
-c
-c-----------------------------------------------------------------------
-c
-c     Declaration of arguments
-c
+!-----------------------------------------------------------------------
+!
+!     Deltares
+!
+!     Created             : April 19, 2000
+!     Programmer          : Jan Mooiman
+!     Function            : Checks license file
+!
+!-----------------------------------------------------------------------
+!
+!     Subroutines called  : AUTHMD, check license
+!                           AUTHER, error message authorization modue
+!                           AUTCFG, read consome contents of lic. file
+!
+!-----------------------------------------------------------------------
+!
+!     Arguments           :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     lunrep  integer  1          input   Unit number report file
+!     verwaq  ch*(*)   1          input   Version number DELWAQ
+!     verd3d  ch*(*)   1          input   Version number Delft3D
+!     versbk  ch*(*)   1          input   Version number SOBEK(river)
+!     verrur  ch*(*)   1          input   Version number SOBEK(rural+urban)
+!     verrib  ch*(*)   1          input   Version number RIBASIM
+!     nfeat   integer  1          input   Number of defined features
+!     feat    ch*(*)   1          input   Names of defined features
+!     usernm  ch*(*)   1          output  User name
+!     yfeat   integer  1          output  Licence of defined features
+!     l3dmod  logical  1          input   check 3d features
+!     nolic   logical  1          output  No valid license found
+!                                         (for SOBEK with limited number
+!                                         of segments)
+!
+!-----------------------------------------------------------------------
+!
+!     Declaration of arguments
+!
       integer       lunrep, nfeat
       character*(*) verwaq, verd3d, versbk, verrur, verrib
       character*(*) usernm
       integer       yfeat(nfeat)
       character*(*) feat (nfeat)
       logical       l3dmod, nolic
-c
-c     Declaration of externals
-c
+!
+!     Declaration of externals
+!
       integer       authmd, auther, autcfg
       external      authmd, auther, autcfg
-c
-c     Declaration of local variables
-c
+!
+!     Declaration of local variables
+!
       integer       i, iusnm, jusnm, ierror,
      +              idummy, ierr   , ilun  ,
      +              lu, i_delft3d, i_sobek,
      +              i_ribasim, ifeat,
      +              length, iend
-c
+!
       real          rdummy
-c
+!
       logical       permit, sbklic, d3dlic, riblic,
      +              lfound, lexist, lopen , permit_3d
-c
+!
       character*256 vendor
       character*256 errmsg
       character*30  featur
@@ -104,9 +104,9 @@ c
       character*1   sbkriv
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "dhlic", ithndl )
-c-----------------------------------------------------------------------
-c     Initialization of local variables
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Initialization of local variables
+!-----------------------------------------------------------------------
       licfil  = ' '
       vendor  = ' '
 
@@ -118,9 +118,9 @@ c-----------------------------------------------------------------------
       nolic  = .false.
       usernm = '(unknown)'
 
-c-----------------------------------------------------------------------
-c     Check license file and context on command line direct or through ini file
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Check license file and context on command line direct or through ini file
+!-----------------------------------------------------------------------
       CALL GETCOM ( '-MODELSUITE', 3    , LFOUND, IDUMMY, RDUMMY,
      +              MODELSUITE   , IERR )
       IF ( LFOUND ) THEN
@@ -194,9 +194,9 @@ c-----------------------------------------------------------------------
             CLOSE(LU)
          ENDIF
       ENDIF
-c-----------------------------------------------------------------------
-c     Check authorisation to use Delft3D program verd3d number, or SOBEK
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+!     Check authorisation to use Delft3D program verd3d number, or SOBEK
+!-----------------------------------------------------------------------
 
       d3dlic = .false.
       sbklic = .false.
@@ -539,7 +539,7 @@ c-----------------------------------------------------------------------
          enddo
 
       endif
-c
+!
       if ( timon ) call timstop( ithndl )
       return
       end

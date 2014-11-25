@@ -22,98 +22,98 @@
 !!  rights reserved.
 
       SUBROUTINE MONSYS(STRING,ILEVEL)
-C
-C     Arguments
-C
+!
+!     Arguments
+!
       INTEGER       ILEVEL
       CHARACTER*(*) STRING
-C
+!
       INTEGER         LUNMON,MONLEV
       COMMON / CMON / LUNMON,MONLEV
       SAVE   / CMON /
-C
-C
+!
+!
       IF ( ILEVEL .LE. MONLEV ) THEN
          WRITE( LUNMON , '(A)' ) STRING
       ENDIF
-C
+!
       RETURN
       END
       SUBROUTINE SETMMO (ILEVEL)
-C
-C     Arguments
-C
+!
+!     Arguments
+!
       INTEGER       ILEVEL
-C
-C     Settings
-C
+!
+!     Settings
+!
       INTEGER         LUNMON,MONLEV
       COMMON / CMON / LUNMON,MONLEV
       SAVE   / CMON /
-C
-C     Set monitoring level
-C
+!
+!     Set monitoring level
+!
       MONLEV = ILEVEL
-C
+!
       RETURN
       END
       SUBROUTINE GETMMO (ILEVEL)
-C
-C     Arguments
-C
+!
+!     Arguments
+!
       INTEGER    ILEVEL
-C
-C     Settings
-C
+!
+!     Settings
+!
       INTEGER         LUNMON,MONLEV
       COMMON / CMON / LUNMON,MONLEV
       SAVE   / CMON /
-C
+!
       ILEVEL = MONLEV
-C
+!
       RETURN
       END
       SUBROUTINE SETMLU (ILUNMO)
-C
-C     Arguments
-C
+!
+!     Arguments
+!
       INTEGER       ILUNMO
-C
-C     Settings
-C
+!
+!     Settings
+!
       INTEGER         LUNMON,MONLEV
       COMMON / CMON / LUNMON,MONLEV
       SAVE   / CMON /
-C
-C     Set monitoring level
-C
+!
+!     Set monitoring level
+!
       LUNMON = ILUNMO
-C
+!
       RETURN
       END
       SUBROUTINE GETMLU (ILUNMO)
-C
-C     Arguments
-C
+!
+!     Arguments
+!
       INTEGER    ILUNMO
-C
-C     Settings
-C
+!
+!     Settings
+!
       INTEGER         LUNMON,MONLEV
       COMMON / CMON / LUNMON,MONLEV
       SAVE   / CMON /
-C
+!
       ILUNMO = LUNMON
-C
+!
       RETURN
       END
       BLOCK DATA BDMON
-C
+!
       INTEGER         LUNMON,MONLEV
       COMMON / CMON / LUNMON,MONLEV
       SAVE   / CMON /
-C
+!
       DATA   LUNMON /   0 /
       DATA   MONLEV /   5 /
-C
+!
       END

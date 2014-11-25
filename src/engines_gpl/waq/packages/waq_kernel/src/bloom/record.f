@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE TO CALCULATE THE INITIAL BIOMASSES FOR NEXT PERIOD  *
-C  *********************************************************************
-C
+!
+!  *********************************************************************
+!  *    SUBROUTINE TO CALCULATE THE INITIAL BIOMASSES FOR NEXT PERIOD  *
+!  *********************************************************************
+!
       SUBROUTINE RECORD(X,XINIT,EXTB,INFEAS)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -37,27 +37,27 @@ C
       INCLUDE 'dynam.inc'
       DIMENSION X(*),XINIT(*)
       DATA BASELV /1.0/
-C
-C  If infeasible, put a baselevel for all groups for the next period.
-C  If constant baselevels are used (LGBASE = 1) these are used.
-C  If fractional baselevels are used (LGBASE = 0)
-C  BASE is taken as 100 * time-step size of the model in weeks.
-C
+!
+!  If infeasible, put a baselevel for all groups for the next period.
+!  If constant baselevels are used (LGBASE = 1) these are used.
+!  If fractional baselevels are used (LGBASE = 0)
+!  BASE is taken as 100 * time-step size of the model in weeks.
+!
       IF (INFEAS .EQ. 0) GO TO 20
       BASE = BIOBAS
       IF (LGBASE .EQ. 0) BASE = 100.0 * TSTEP/7
       DO 10 I=1,NUECOG
    10 XINIT(I)=BASE
       RETURN
-C
-C  Feasibile solution; record calculated bloom level of each group
-C  which is present in the bloom, or use baselevel.
-C
+!
+!  Feasibile solution; record calculated bloom level of each group
+!  which is present in the bloom, or use baselevel.
+!
    20 CONTINUE
       IF (LGBASE .EQ. 1) GO TO 50
-C
-C  Compute the baselevel for groups not present this step.
-C
+!
+!  Compute the baselevel for groups not present this step.
+!
       DO 40 J=1,NUECOG
       L1 = IT2(J,1)
       L2 = IT2(J,2)
@@ -72,9 +72,9 @@ C
       XINIT(J)=DMAX1(BASE,BASELV,X(J))
    40 CONTINUE
       RETURN
-C
-C  Use constant baselevel for species not present this step.
-C
+!
+!  Use constant baselevel for species not present this step.
+!
    50 DO 60 I=1,NUECOG
    60 XINIT(I)=DMAX1(BIOBAS,X(I))
       RETURN

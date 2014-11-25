@@ -27,90 +27,73 @@
 !>\file
 !>       Decay of BOD, COD and NBOD and associated oxygen consumption
 
-C***********************************************************************
-C
-C     Project : T1235.35
-C     Author  : Pascal Boderie / Marnix van der Vat
-C     Date    : 960410             Version : 0.01
-C     Date    : 960620             Version : 0.02
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     960410  Marnix vd Vat   Create first version
-C     960620  Boderie         omdraaien AgeIndx: COD/BOD
-C                             voor AgeIndx > UAgeInx rekenen niet LAgeFun
-C     960630  Boderie         afvangen van RCBOD = 0
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        Decay of BOD, COD and NBOD and associated oxygen consumption
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C ISW     I*4 1 I switch oxygen consumption 0=BOD;1=COD;2=BOD+COD      [-]
-C CBOD5   R*4 1 I carbonaceous BOD (first pool) at 5 days          [gO/m3]
-C CBOD52  R*4 1 I carbonaceous BOD (second pool) at 5 days         [gO/m3]
-C CBODU   R*4 1 I carbonaceous BOD (first pool) ultimate           [gO/m3]
-C CBODU2  R*4 1 I carbonaceous BOD (second pool) ultimate          [gO/m3]
-C CODCR   R*4 1 I COD concentration by the Cr-method               [gO/m3]
-C CODMN   R*4 1 I COD concentration by the Mr-method               [gO/m3]
-C CNBOD5  R*4 1 I nitrogenous BOD at 5 days                        [gO/m3]
-C CNBODU  R*4 1 I nitrogenous BOD ultimate                         [gO/m3]
-C RCBOD   R*4 1 I decay reaction rate BOD (first pool) at 20  C      [1/d]
-C RCBOD2  R*4 1 I decay reaction rate BOD (second pool) at 20  C     [1/d]
-C RCCOD   R*4 1 I decay reaction rate COD at 20  C                   [1/d]
-C RCBODN  R*4 1 I decay reaction rate NBOD at 20  C                  [1/d]
-C TCBOD   R*4 1 I decay temperature coefficient BOD                    [-]
-C TCCOD   R*4 1 I decay temperature coefficient COD                    [-]
-C TCBODN  R*4 1 I decay temperature coefficient NBOD                   [-]
-C TEMP    R*4 1 I ambient temperature                                 [xC]
-C OXY     R*4 1 I oxygen concentration                             [gO/m3]
-C COXBOD  R*4 1 I critical oxygen concentration                    [gO/m3]
-C OOXBOD  R*4 1 I optimal  oxygen concentration                    [gO/m3]
-C CFLBOD  R*4 1 I oxygen function level for OXY below COXBOD           [-]
-C CRVBOD  R*4 1 I curvature oxygen function                            [-]
-C AGEFL   R*4 1 I lower value age function                             [-]
-C AGEFU   R*4 1 I upper value age function                             [-]
-C AGEIL   R*4 1 I lower value age index                                [-]
-C AGEIU   R*4 1 I upper value age index                                [-]
-C PHYT    R*4 1 I algae concentration                              [gC/m3]
-C PHYT5U  R*4 1 I Ratio BOD5/BODinf in algae                           [-]
-C FPHBOD  R*4 1 I fraction algae contributing to BOD-inf               [-]
-C OXCCF   R*4 1 I amount oxygen per carbon in mineralisation       [gO/gC]
-C POC     R*4 1 I POC   concentration                              [gC/m3]
-C POC5U   R*4 1 I Ratio BOD5/BODinf in POC                             [-]
-C FPCBOD  R*4 1 I fraction POC   contributing to BOD-inf               [-]
-C EFFCCR  R*4 1 I efficiency of Cr method for COD                      [-]
-C EFFCMN  R*4 1 I efficiency of Mn method for COD                      [-]
-C O2FBOD  R*4 1 O oxygen function for decay of CBOD                    [-]
-C AGEFUN  R*4 1 O age function for decay rates CBOD and NBOD           [-]
-C BOD5    R*4 1 O calculated carbonaceous BOD at 5 days            [gO/m3]
-C BODU    R*4 1 O calculated carbonaceous BOD at ultimate          [gO/m3]
-C COD     R*4 1 O calculated chemical oxygen demand COD            [gO/m3]
-C BD5POC  R*4 1 O contribution of POC to calculated BOD5           [gO/m3]
-C BDUPOC  R*4 1 O contribution of POC to calculated BODu           [gO/m3]
-C BD5PHY  R*4 1 O contribution of Phyt to calculated BOD5          [gO/m3]
-C BDUPHY  R*4 1 O contribution of Phyt to calculated BODu          [gO/m3]
-C DBOD5   R*4 1 O decay flux of CBOD5                            [gO/m3/d]
-C DBOD52  R*4 1 O decay flux of CBOD5_2                          [gO/m3/d]
-C DBODU   R*4 1 O decay flux of CBODu                            [gO/m3/d]
-C DBODU2  R*4 1 O decay flux of CBODu_2                          [gO/m3/d]
-C DNBOD5  R*4 1 O decay flux of COD_Cr                           [gO/m3/d]
-C DNBODU  R*4 1 O decay flux of COD_Mn                           [gO/m3/d]
-C DCODCR  R*4 1 O decay flux of NBOD5                            [gO/m3/d]
-C DCODMN  R*4 1 O decay flux of NBODu                            [gO/m3/d]
-C OXYDEM  R*4 1 O oxygen consumption flux of BOD and COD         [gO/m3/d]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        Decay of BOD, COD and NBOD and associated oxygen consumption
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! ISW     I*4 1 I switch oxygen consumption 0=BOD;1=COD;2=BOD+COD      [-]
+! CBOD5   R*4 1 I carbonaceous BOD (first pool) at 5 days          [gO/m3]
+! CBOD52  R*4 1 I carbonaceous BOD (second pool) at 5 days         [gO/m3]
+! CBODU   R*4 1 I carbonaceous BOD (first pool) ultimate           [gO/m3]
+! CBODU2  R*4 1 I carbonaceous BOD (second pool) ultimate          [gO/m3]
+! CODCR   R*4 1 I COD concentration by the Cr-method               [gO/m3]
+! CODMN   R*4 1 I COD concentration by the Mr-method               [gO/m3]
+! CNBOD5  R*4 1 I nitrogenous BOD at 5 days                        [gO/m3]
+! CNBODU  R*4 1 I nitrogenous BOD ultimate                         [gO/m3]
+! RCBOD   R*4 1 I decay reaction rate BOD (first pool) at 20  C      [1/d]
+! RCBOD2  R*4 1 I decay reaction rate BOD (second pool) at 20  C     [1/d]
+! RCCOD   R*4 1 I decay reaction rate COD at 20  C                   [1/d]
+! RCBODN  R*4 1 I decay reaction rate NBOD at 20  C                  [1/d]
+! TCBOD   R*4 1 I decay temperature coefficient BOD                    [-]
+! TCCOD   R*4 1 I decay temperature coefficient COD                    [-]
+! TCBODN  R*4 1 I decay temperature coefficient NBOD                   [-]
+! TEMP    R*4 1 I ambient temperature                                 [xC]
+! OXY     R*4 1 I oxygen concentration                             [gO/m3]
+! COXBOD  R*4 1 I critical oxygen concentration                    [gO/m3]
+! OOXBOD  R*4 1 I optimal  oxygen concentration                    [gO/m3]
+! CFLBOD  R*4 1 I oxygen function level for OXY below COXBOD           [-]
+! CRVBOD  R*4 1 I curvature oxygen function                            [-]
+! AGEFL   R*4 1 I lower value age function                             [-]
+! AGEFU   R*4 1 I upper value age function                             [-]
+! AGEIL   R*4 1 I lower value age index                                [-]
+! AGEIU   R*4 1 I upper value age index                                [-]
+! PHYT    R*4 1 I algae concentration                              [gC/m3]
+! PHYT5U  R*4 1 I Ratio BOD5/BODinf in algae                           [-]
+! FPHBOD  R*4 1 I fraction algae contributing to BOD-inf               [-]
+! OXCCF   R*4 1 I amount oxygen per carbon in mineralisation       [gO/gC]
+! POC     R*4 1 I POC   concentration                              [gC/m3]
+! POC5U   R*4 1 I Ratio BOD5/BODinf in POC                             [-]
+! FPCBOD  R*4 1 I fraction POC   contributing to BOD-inf               [-]
+! EFFCCR  R*4 1 I efficiency of Cr method for COD                      [-]
+! EFFCMN  R*4 1 I efficiency of Mn method for COD                      [-]
+! O2FBOD  R*4 1 O oxygen function for decay of CBOD                    [-]
+! AGEFUN  R*4 1 O age function for decay rates CBOD and NBOD           [-]
+! BOD5    R*4 1 O calculated carbonaceous BOD at 5 days            [gO/m3]
+! BODU    R*4 1 O calculated carbonaceous BOD at ultimate          [gO/m3]
+! COD     R*4 1 O calculated chemical oxygen demand COD            [gO/m3]
+! BD5POC  R*4 1 O contribution of POC to calculated BOD5           [gO/m3]
+! BDUPOC  R*4 1 O contribution of POC to calculated BODu           [gO/m3]
+! BD5PHY  R*4 1 O contribution of Phyt to calculated BOD5          [gO/m3]
+! BDUPHY  R*4 1 O contribution of Phyt to calculated BODu          [gO/m3]
+! DBOD5   R*4 1 O decay flux of CBOD5                            [gO/m3/d]
+! DBOD52  R*4 1 O decay flux of CBOD5_2                          [gO/m3/d]
+! DBODU   R*4 1 O decay flux of CBODu                            [gO/m3/d]
+! DBODU2  R*4 1 O decay flux of CBODu_2                          [gO/m3/d]
+! DNBOD5  R*4 1 O decay flux of COD_Cr                           [gO/m3/d]
+! DNBODU  R*4 1 O decay flux of COD_Mn                           [gO/m3/d]
+! DCODCR  R*4 1 O decay flux of NBOD5                            [gO/m3/d]
+! DCODMN  R*4 1 O decay flux of NBODu                            [gO/m3/d]
+! OXYDEM  R*4 1 O oxygen consumption flux of BOD and COD         [gO/m3/d]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -167,7 +150,7 @@ C     ------   -----  ------------
       IN44 = INCREM(44)
       IN45 = INCREM(45)
       IN46 = INCREM(46)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -214,7 +197,7 @@ C
       IP44 = IPOINT(44)
       IP45 = IPOINT(45)
       IP46 = IPOINT(46)
-C
+!
 
       IF (IN14.EQ.0 .AND. IN15.EQ.0 .AND. IN16.EQ.0 .AND.IN17.EQ.0) THEN
         TCBOD = PMSA(IP14)
@@ -242,15 +225,15 @@ C
       ELSE
         AFACT  = .TRUE.
       ENDIF
-C     write(*,*) 'afact:' , afact
+!     write(*,*) 'afact:' , afact
 
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       IF ( TFACT ) THEN
         TCBOD = PMSA(IP14)
         TCCOD = PMSA(IP15)
@@ -263,7 +246,7 @@ C
 
       ENDIF
 
-C
+!
 
       ISW    = NINT(PMSA(IP1 ))
       CBOD5  = MAX(0.,PMSA(IP2 ))
@@ -294,7 +277,7 @@ C
       EFFCMN = PMSA(IP35)
       AMCCF  = PMSA(IP36)
 
-C     CHECK IF RC'S ARE NON ZERO
+!     CHECK IF RC'S ARE NON ZERO
       IF (RCBOD .LT. 1E-10) THEN
         WRITE (*,*) 'RCBOD: Invalid value (zero)!'
         CALL SRSTOP(1)
@@ -305,7 +288,7 @@ C     CHECK IF RC'S ARE NON ZERO
       ENDIF
 
 
-C     SUBSTANCE AGGREGATION
+!     SUBSTANCE AGGREGATION
 
       RAT5U  = 1. - EXP(-5. * RCBOD )
       RAT5U2 = 1. - EXP(-5. * RCBOD2)
@@ -328,12 +311,12 @@ C     SUBSTANCE AGGREGATION
 
       COD    = CODCR / EFFCCR + CODMN / EFFCMN
 
-C     AGE FUNCTION
+!     AGE FUNCTION
 
       IF (AFACT) THEN
 
         AGEFL  = PMSA(IP23)
-C       write(*,*) 'agefl: ', agefl
+!       write(*,*) 'agefl: ', agefl
 
         IF ((COD.LT.1.0E-06).OR.(BOD5.LT.1.0E-6)) THEN
           AGEFUN = AGEFL
@@ -342,31 +325,31 @@ C       write(*,*) 'agefl: ', agefl
           AGEFU  = PMSA(IP24)
           AGEIL  = PMSA(IP25)
           AGEIU  = PMSA(IP26)
-C       write(*,*) 'agefu: ', agefu
-C       write(*,*) 'ageil: ', ageil
-C       write(*,*) 'ageiu: ', ageiu
+!       write(*,*) 'agefu: ', agefu
+!       write(*,*) 'ageil: ', ageil
+!       write(*,*) 'ageiu: ', ageiu
 
-c         AGEIND = BOD5 / COD
+!         AGEIND = BOD5 / COD
           AGEIND = COD / BOD5
-C         write(*,*) 'ageind: ', ageind
+!         write(*,*) 'ageind: ', ageind
 
           IF (AGEIND.LE.AGEIL) THEN
             AGEFUN = AGEFU
-C         write(*,*) 'agefun-1: ', agefun
+!         write(*,*) 'agefun-1: ', agefun
 
-C         ELSEIF (AGEIND.GE.AGEIU) THEN
-C           AGEFUN = AGEFL
-C         write(*,*) 'agefun-2: ', agefun
+!         ELSEIF (AGEIND.GE.AGEIU) THEN
+!           AGEFUN = AGEFL
+!         write(*,*) 'agefun-2: ', agefun
           ELSE
             AGEFUN = AGEFL + (AGEFU - AGEFL) *
      1               EXP(-((AGEIND-AGEIL)/AGEIU)**2)
-C         write(*,*) 'agefun-3: ', agefun
+!         write(*,*) 'agefun-3: ', agefun
 
           ENDIF
         ENDIF
       ENDIF
 
-C     OXYGEN FUNCTION
+!     OXYGEN FUNCTION
 
       IF (OXY.GE.OOXBOD) THEN
         O2FBOD = 1.
@@ -377,7 +360,7 @@ C     OXYGEN FUNCTION
      1           ((OXY - COXBOD) / (OOXBOD - COXBOD)) ** (10 ** CRVBOD)
       ENDIF
 
-C     DECAY RATES
+!     DECAY RATES
       DBOD5  = CBOD5 * RCBOD * TFBOD * O2FBOD * AGEFUN
       DBOD52 = CBOD52* RCBOD2* TFBOD * O2FBOD * AGEFUN
       DBODU  = CBODU * RCBOD * TFBOD * O2FBOD * AGEFUN
@@ -387,16 +370,16 @@ C     DECAY RATES
       DCODCR = CODCR * RCCOD * TFCOD
       DCODMN = CODMN * RCCOD * TFCOD
 
-C     OXYGEN DEMAND
+!     OXYGEN DEMAND
 
       IF (ISW.EQ.0) THEN
-C       BOD
+!       BOD
         OXYDEM = DBOD5 + DBOD52 + DBODU + DBODU2 + DNBOD5 + DNBODU
       ELSEIF (ISW.EQ.1) THEN
-C       COD
+!       COD
         OXYDEM = DCODCR + DCODMN
       ELSEIF (ISW.EQ.2) THEN
-C       BOD + COD
+!       BOD + COD
         OXYDEM = DBOD5 + DBOD52 + DBODU + DBODU2 + DNBOD5 + DNBODU +
      1           DCODCR + DCODMN
       ELSE
@@ -424,9 +407,9 @@ C       BOD + COD
       FL( 7 + IFLUX ) = DCODCR
       FL( 8 + IFLUX ) = DCODMN
       FL( 9 + IFLUX ) = OXYDEM
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
@@ -474,9 +457,9 @@ C
       IP44  = IP44  + IN44
       IP45  = IP45  + IN45
       IP46  = IP46  + IN46
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

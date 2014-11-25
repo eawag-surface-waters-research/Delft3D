@@ -23,32 +23,32 @@
 
       subroutine matrix(iii,ntot1,ntot2,ncomp1,ncomp2,nsl,
      2   mslr,nslxv,nslrow,nslero,slaij)
-c           matrix stores condensed, non-zero elements in aij, component
-c           number in irow and species number in jcol
-c           jcomp contains phase number for each species
-c           if dimensions for the matrix are extended, change the
-c        maximum values for the appropriate variables in subroutine
-c        start.
-c                                   iii         control
-c                                    -1         altera
-c                                     0         matrix
-c                                     1         alterc
-c                                     2         addc
-c           matrix uses subprograms
-c              find, leave, pop, push
+!           matrix stores condensed, non-zero elements in aij, component
+!           number in irow and species number in jcol
+!           jcomp contains phase number for each species
+!           if dimensions for the matrix are extended, change the
+!        maximum values for the appropriate variables in subroutine
+!        start.
+!                                   iii         control
+!                                    -1         altera
+!                                     0         matrix
+!                                     1         alterc
+!                                     2         addc
+!           matrix uses subprograms
+!              find, leave, pop, push
       include  'char1.inc'
       dimension nslxv(mslr),nslrow(mslr),nslero(mslr,12),slaij(mslr,12)
       dimension z(5)
       equivalence (z(1),t(1))
       character*6 kapr
-c           for this subroutine temporarily set toggle so that
-c        subroutine push will return control to matrix
+!           for this subroutine temporarily set toggle so that
+!        subroutine push will return control to matrix
       ipusht = ipush
       ipush = 1
       kerr = 0
       if (iii.le.0) ijfind(1) = -1
       if (iii.ne.0) go to 130
-c        process matrix cards
+!        process matrix cards
       ncomp = 0
       ntot = 0
       naij = 0
@@ -57,7 +57,7 @@ c        process matrix cards
          irow(j) = 0
          jcol(j) = 0
    10 continue
-c        read phases  and species
+!        read phases  and species
    20 read (nit,99999) ka(1), ka(2), z(1), (z(i+1),ka(i+2),i=1,4)
       if (ka(1).eq.end) go to 80
       if (ka(1).eq.blank) go to 30
@@ -69,7 +69,7 @@ c        read phases  and species
       nam(ncomp,1) = ka(1)
       nam(ncomp,2) = ka(2)
       go to 20
-c        read species
+!        read species
    30 if (ka(2).eq.kapr) go to 40
       ntot = ntot + 1
       kapr = ka(2)
@@ -88,8 +88,8 @@ c        read species
    50    continue
          write (not,99997) ka(j+2)
          go to 70
-c        if z(j+1) is not equal to zero
-c        increase matrix count and store entries
+!        if z(j+1) is not equal to zero
+!        increase matrix count and store entries
    60    if (z(j+1).eq.0.0) go to 70
          naij = naij + 1
          if (naij.gt.maxaij) go to 70
@@ -97,10 +97,10 @@ c        increase matrix count and store entries
          irow(naij) = i
          jcol(naij) = ntot
    70 continue
-c        print input card
+!        print input card
       write (not,99996) ntot, ka(2), z(1), (z(i+1),ka(i+2),i=1,jmax)
       go to 20
-c        end card has been read
+!        end card has been read
    80 kl(ncomp+1) = ntot + 1
       ntot1 = ntot
       ncomp1 = ncomp
@@ -115,14 +115,14 @@ c        end card has been read
       if (naij.gt.maxaij) go to 110
       if (kerr.ne.0) go to 120
       go to 330
-c        print message for problem exceeding dimension
+!        print message for problem exceeding dimension
   110 kerr = 1
       write (not,99993) maxm, maxn, maxp, maxaij
       if (kerr.eq.0) go to 330
       write (not,99992)
   120 call leave(imatrx, not)
       go to 330
-c        process alter cards
+!        process alter cards
   130 k = 0
       kerr = 0
   140 read (nit,99999) ka(1), ka(2), z(1), (z(i+1),ka(i+2),i=1,4)
@@ -165,13 +165,13 @@ c        process alter cards
          go to 320
   270    call find(i, jj, ii, iflag)
          if (iflag.eq.0) go to 280
-c        push down matrix entries in order to insert new one
+!        push down matrix entries in order to insert new one
          call push(ii)
          if (ii.gt.maxaij) go to 320
          irow(ii) = i
          jcol(ii) = jj
          aij(ii) = 0.0
-c        test for alter or add entry
+!        test for alter or add entry
   280    if (iii-1) 300, 300, 290
   290    aij(ii) = aij(ii) + z(j+1)
          go to 310
@@ -180,9 +180,9 @@ c        test for alter or add entry
   310    if (aij(ii).ne.0.0) go to 320
          call pop(ii)
          go to 320
-c********
-c        change slow stochiometry
-c********
+!********
+!        change slow stochiometry
+!********
 311      do 312 kk = 1 ,nsl
          if(kn(nslxv(kk)) .eq. ka(2) ) go to 313
 312      continue

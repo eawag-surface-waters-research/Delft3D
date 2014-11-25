@@ -21,15 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *         SUBROUTINE TO CALCULATE GRAZING RATE CONSTANTS            *
-C  *********************************************************************
-C
-C    0895 MvdV  dimension for more than one grazer type added to ZOOD
-C               and ZOOPR
-C               dimension of X changed from MT to MX + 1
-C
+!
+!  *********************************************************************
+!  *         SUBROUTINE TO CALCULATE GRAZING RATE CONSTANTS            *
+!  *********************************************************************
+!
+!    0895 MvdV  dimension for more than one grazer type added to ZOOD
+!               and ZOOPR
+!               dimension of X changed from MT to MX + 1
+!
       SUBROUTINE GRAZIN(X,GRAMOR,ZOOD,ITNUM,LGRAZ)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -38,9 +38,9 @@ C
       INCLUDE 'graas.inc'
       INCLUDE 'ioblck.inc'
       DIMENSION X(MX+1),GRAMOR(MT)
-C
-C  SET INITIAL VALUES
-C
+!
+!  SET INITIAL VALUES
+!
       LGRAZ=0
       TOTGRA=0.
       BITOT=0.
@@ -48,9 +48,9 @@ C
    10 KK=KK+1
       IF (ZOOPR(KK,0) .LT. 1.0D-6 .AND. KK .LT. NUSPEC) GO TO 10
       GRAMOR(KK)=0.
-C
-C  CALCULATE TOTAL BIOMASS EATABLE SPECIES
-C
+!
+!  CALCULATE TOTAL BIOMASS EATABLE SPECIES
+!
       K1 = NUROWS
       DO 20 K=1,NUSPEC
       K1 = K1 + 1
@@ -62,9 +62,9 @@ C
    30 FORMAT(2X,'Total biomass edible species: ',F8.2)
    35 CONTINUE
       IF (BITOT .LT. 1.D-6) GO TO 45
-C
-C  CALCULATE GRAZING DEATHRATE CONSTANT
-C
+!
+!  CALCULATE GRAZING DEATHRATE CONSTANT
+!
       GRACON=ZOOGR*ZOOD*(BITOT-XMIN)/((ZOOK+BITOT-XMIN)*BITOT)
       DO 40 K=1,NUSPEC
       GRAMOR(K)=ZOOPR(K,0)*GRACON

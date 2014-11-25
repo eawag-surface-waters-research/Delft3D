@@ -43,20 +43,20 @@
 !>                             - calls DLWQTD to initialize the water bed layers
 !>                             - imports initial conditions
 
-C     CREATED: may -1988 by L. Postma
-C
-C     LOGICAL UNITNUMBERS : LUN( 2) - system intermediate file
-C                           LUN(19) - monitoring output file
-C
-C     SUBROUTINES CALLED  : SPACE , initialises common blocks
-C                           DLWQI2, initialises fixed conditions
-C                           DLWQIP, initialises proces system
-C                           DLWQIO, initialises output system
-C                           DLWQT0, sets time functions
-C                           DHOPNF, opens files
-C                           MOVE  , copy's arrays
-C                           ZERO  , zeros an real arrays
-C
+!     CREATED: may -1988 by L. Postma
+!
+!     LOGICAL UNITNUMBERS : LUN( 2) - system intermediate file
+!                           LUN(19) - monitoring output file
+!
+!     SUBROUTINES CALLED  : SPACE , initialises common blocks
+!                           DLWQI2, initialises fixed conditions
+!                           DLWQIP, initialises proces system
+!                           DLWQIO, initialises output system
+!                           DLWQT0, sets time functions
+!                           DHOPNF, opens files
+!                           MOVE  , copy's arrays
+!                           ZERO  , zeros an real arrays
+!
       use grids
       use waqmem
       use delwaq2_data
@@ -83,29 +83,29 @@ C
       type(delwaq_data)    , intent(inout) :: dlwqd         !< derived type for persistent storage
       integer              , intent(inout) :: ierr          !< error count
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       REAL          RDUMMY(1)
       LOGICAL       LDUMMY    , UPDATR
       CHARACTER*200 FINAM
@@ -115,11 +115,11 @@ C
 
       logical, save :: init_ixset = .true.
 
-c     Common to define external communications in SOBEK
-c     OLCFWQ             Flag indicating ONLINE running of CF and WQ
-c     SRWACT             Flag indicating active data exchange with SRW
-c     RTCACT             Flag indicating output for RTC
-c     DDWAQ              Flag indicating parallel computation
+!     Common to define external communications in SOBEK
+!     OLCFWQ             Flag indicating ONLINE running of CF and WQ
+!     SRWACT             Flag indicating active data exchange with SRW
+!     RTCACT             Flag indicating output for RTC
+!     DDWAQ              Flag indicating parallel computation
 
       LOGICAL            OLCFWQ, SRWACT, RTCACT, DDWAQ, propor
       COMMON /COMMUN/    OLCFWQ, SRWACT, RTCACT, DDWAQ
@@ -131,12 +131,12 @@ c     DDWAQ              Flag indicating parallel computation
       ftype = filtype
       CALL SPACE  ( LUN(19) , .TRUE.  , A       , J       , C       ,
      +              IMAXA   , IMAXI   , IMAXC   )
-C
-C     copy common to (possible) shared array to share these values with
-C     other processes (domain decomposition)
-C
+!
+!     copy common to (possible) shared array to share these values with
+!     other processes (domain decomposition)
+!
       CALL DHISYS ( J(ISYSI), J(ISYSN) )
-C
+!
       J(ILP  ) = IPAGE
       J(ILP+1) =    10
       J(ILP+4) = IPAGE
@@ -146,9 +146,9 @@ C
 
       nosss = noseg + nseg2                ! nseg2 are bed-volumes
       noqtt = noq + noq4
-C
-C         initialisation of info from the system file
-C
+!
+!         initialisation of info from the system file
+!
       CALL DHOPNF ( LUN(2) , LCHAR(2) , 2    , 2    , IERRD  )
       CALL DLWQI2 ( LUN     , C(IMNAM), C(ISNAM), J(IDUMP), C(IDNAM),
      *              J(IDPNT), J(IVPNT), A(IDISP), J(IBPNT), C(IBNID),
@@ -162,32 +162,32 @@ C
       CLOSE ( LUN(2) )
 
       IF ( OLCFWQ ) THEN
-c     Synchronizing with CF(0) for on-line mode outside SRW only
-c     This step is lacking in the original SRW version of SOBEK-RE
-c     ERRONEOUSLY!!
+!     Synchronizing with CF(0) for on-line mode outside SRW only
+!     This step is lacking in the original SRW version of SOBEK-RE
+!     ERRONEOUSLY!!
 
-c         write (*,*) ' GETPER CFtoWQ'
+!         write (*,*) ' GETPER CFtoWQ'
           call getpcf('CFtoWQ','DataCFtoWQ')
-c         write (*,*) ' DONE '
-c         write (*,*) ' Received permission to Start WQ i=0 '
+!         write (*,*) ' DONE '
+!         write (*,*) ' Received permission to Start WQ i=0 '
       ENDIF
 
       IF ( OLCFWQ .OR. SRWACT ) THEN
-c         Pass the stick to WQInt and wait for it to come back! (0)
-c         write (*,*) ' Start WQI i=0'
-c          read  (*,*)
-c         write (*,*) ' PUTPEV WQtoWQI'
+!         Pass the stick to WQInt and wait for it to come back! (0)
+!         write (*,*) ' Start WQI i=0'
+!          read  (*,*)
+!         write (*,*) ' PUTPEV WQtoWQI'
           call putpev ('WQtoWQI','DataWQtoWQI',0)
-c         write (*,*) ' DONE '
-c         write (*,*) ' GETPER WQItoWQ'
+!         write (*,*) ' DONE '
+!         write (*,*) ' GETPER WQItoWQ'
           call GETPER ('WQItoWQ','DataWQItoWQ')
-c         write (*,*) ' DONE '
-c         write (*,*) ' Stop WQI i=0 '
-c          read  (*,*)
+!         write (*,*) ' DONE '
+!         write (*,*) ' Stop WQI i=0 '
+!          read  (*,*)
       ENDIF
-C
-C     open binary system files for new input processing, if any
-C
+!
+!     open binary system files for new input processing, if any
+!
       CALL DHOPNF ( LUN(41) , LCHAR(41) , 41   ,  1   , IERRD  )
       IF ( IERRD .EQ. 0 ) THEN
          DO I = 1 , NUFIL
@@ -205,9 +205,9 @@ C
          ENDDO
          CLOSE( LUN(41) )
       ENDIF
-C
-C     initialisation of PROCES subsytem
-C
+!
+!     initialisation of PROCES subsytem
+!
       IF ( NPROC .GT. 0 ) THEN
          CALL DHOPNF (LUN(24) , LCHAR(24), 24      , 2        , IERRD   )
          CALL DLWQIP (LUN(24) , LCHAR(24), LUN(19) , NOTOT    , NIPMSA  ,
@@ -221,17 +221,17 @@ C
      +                J(IVAGG), nrref    , J(ipror), j(iprvpt))
          CLOSE ( LUN(24) )
       ENDIF
-C
-C     Set variable "structure"
-C
+!
+!     Set variable "structure"
+!
       CALL DLWQIV ( LUN(19) , NOCONS  , NOPA    , NOFUN   , NOSFUN  ,
      +              NOSYS   , NOTOT   , NODISP  , NOVELO  , NODEF   ,
      +              NOLOC   , NDSPX   , NVELX   , NLOCX   , NFLUX   ,
      +              NOPRED  , NOVAR   , J(IVARR), J(IVIDX), J(IVTDA),
      +              J(IVDAG), J(IVTAG), J(IVAGG), NOGRID  , J(IVSET))
-C
-C     initialisation of OUTPUT subsytem
-C
+!
+!     initialisation of OUTPUT subsytem
+!
 
       IF ( NOUTP .GT. 0 ) THEN
          CALL DHOPNF ( LUN(25) , LCHAR(25), 25      , 2      , IERRD   )
@@ -240,17 +240,17 @@ C
      +                 LCHAR   , MYPART   , IERR    )
          CLOSE ( LUN(25) )
       ENDIF
-C
-C         initialisation of the grid layout
-C
+!
+!         initialisation of the grid layout
+!
       IF ( NX*NY .GT. 0 ) THEN
          CALL DHOPNF ( LUN(6) , LCHAR(6) , 6    , 2    , IERRD  )
          READ  ( LUN( 6) ) (J(K),K=IGRID,IGRID+NX*NY-1)
          CLOSE ( LUN( 6) )
       ENDIF
-C
-C         initialisation of exchange pointers
-C
+!
+!         initialisation of exchange pointers
+!
       CALL DHOPNF ( LUN(8) , LCHAR(8) , 8    , 2+ftype(8), IERRD  )
 
       if ( intsrt .eq. 19 .or. intsrt .eq. 20 .or. nmax*mmax .gt. 0 ) then
@@ -291,9 +291,9 @@ C
          enddo
       ENDIF
       CLOSE ( LUN( 8) )
-C
-C     determine mesh/grid partitioning for parallel computing
-C
+!
+!     determine mesh/grid partitioning for parallel computing
+!
       CALL PARTIT ( LUN(19) , NOSSS   , NOLAY   , NOQTT   , J(IXPNT),
      +              MYPART  , NPARTp  , J(IOWNS), J(IOWNQ), INTSRT  )
 
@@ -309,13 +309,13 @@ C
      +                  J(IQDMP) )
       endif
 
-C
-C     locally/per processor adapt the feature array:
-C        feature 1 == segment is active segment of own subdomain or not
-C        feature 2 == position w.r.t. the vertical direction
-C        feature 3 == segment is active segment of global domain or not
-C        feature 4 == segment belongs to own processor
-C
+!
+!     locally/per processor adapt the feature array:
+!        feature 1 == segment is active segment of own subdomain or not
+!        feature 2 == position w.r.t. the vertical direction
+!        feature 3 == segment is active segment of global domain or not
+!        feature 4 == segment belongs to own processor
+!
 
       CALL CHKNMR ( LUN(19) , MYPART , nosss  , J(IOWNS) , J(IKNMR) )
 
@@ -325,44 +325,44 @@ C
      &            j(ixpnt), j(iknmr), isegcol)
 
       IF ( RTCACT )
-c     Interface to RTC (0)
+!     Interface to RTC (0)
      Jcall RTCSHL (ITSTRT, A, J, C)
 
       IF ( SRWACT )
-C     Interface to SRW (0)
+!     Interface to SRW (0)
      JCALL SRWSHL (ITSTRT, A, J, C)
 
       IF ( OLCFWQ ) THEN
-c     Synchronizing with CF(0) for on-line mode outside SRW only
-c         write (*,*) ' Stop WQ i=0 '
-c          read  (*,*)
-c         write (*,*) ' PUTPER WQtoCF'
+!     Synchronizing with CF(0) for on-line mode outside SRW only
+!         write (*,*) ' Stop WQ i=0 '
+!          read  (*,*)
+!         write (*,*) ' PUTPER WQtoCF'
           call putpcf('WQtoCF','DataWQtoCF')
-c         write (*,*) ' DONE '
-c     Synchronizing with CF(1) for on-line mode outside SRW only
-c         write (*,*) ' GETPER CFtoWQ'
+!         write (*,*) ' DONE '
+!     Synchronizing with CF(1) for on-line mode outside SRW only
+!         write (*,*) ' GETPER CFtoWQ'
           call getpcf('CFtoWQ','DataCFtoWQ')
-c         write (*,*) ' DONE '
-c         write (*,*) ' Start WQ i=1 '
-c          read  (*,*)
+!         write (*,*) ' DONE '
+!         write (*,*) ' Start WQ i=1 '
+!          read  (*,*)
       ENDIF
 
-C         first read of relevant time varying arrays
-C
+!         first read of relevant time varying arrays
+!
       IFFLAG = 1
 
       IF ( SRWACT .OR. OLCFWQ ) THEN
-c     Pass the stick to WQInt and wait for it to come back! (1)
-c         write (*,*) ' Start WQI i=1'
-c          read  (*,*)
-c         write (*,*) ' PUTPEV WQtoWQI'
+!     Pass the stick to WQInt and wait for it to come back! (1)
+!         write (*,*) ' Start WQI i=1'
+!          read  (*,*)
+!         write (*,*) ' PUTPEV WQtoWQI'
           call putpev ('WQtoWQI','DataWQtoWQI',0)
-c         write (*,*) ' DONE '
-c         write (*,*) ' GETPER WQItoWQ'
+!         write (*,*) ' DONE '
+!         write (*,*) ' GETPER WQItoWQ'
           call GETPER ('WQItoWQ','DataWQItoWQ')
-c         write (*,*) ' DONE '
-c         write (*,*) ' Stop WQI i=1 '
-c          read  (*,*)
+!         write (*,*) ' DONE '
+!         write (*,*) ' Stop WQI i=1 '
+!          read  (*,*)
       ENDIF
 
       CALL DLWQT0 ( LUN     , ITSTRT  , ITIMEL  , A(IHARM), A(IFARR),
@@ -381,9 +381,9 @@ c          read  (*,*)
      &                nosfun   , c(isfna) , a(isfun) )
 
       if (mypart .eq.1) then
-C
-C     New bottomlayer processing
-C
+!
+!     New bottomlayer processing
+!
          IF ( NOQ4 .GT. 0 )
      *        CALL DLWQTD ( LUN     , NOSEG   , NSEG2   , NOLAY   , NOGRID  ,
      *                      NOQ     , NOQ4    , J(IGREF), J(IGSEG), NOCONS  ,
@@ -391,7 +391,7 @@ C
      *                      A(IPARM), C(IPNAM), A(IFUNC), C(IFNAM), A(ISFUN),
      *                      C(ISFNA), J(IXPNT), A(IVOL ), A(IAREA), A(IFLOW),
      *                      A(ILENG))
-C
+!
       end if
 
       IF ( INTSRT .EQ. 6 .OR. INTSRT .EQ. 7 ) THEN

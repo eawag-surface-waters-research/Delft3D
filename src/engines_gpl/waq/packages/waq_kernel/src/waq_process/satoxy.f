@@ -27,51 +27,36 @@
 !>\file
 !>       Saturation concentration of oxygen
 
-C***********************************************************************
-C
-C     Project : WESTERSCHELDE
-C     Author  : Jos van Gils
-C     Date    : 950103             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     981222  Jan van Beek    Alternative formulation added
-C     981215  Jos van Gils    Compute saturation concentration
-C                             for all layers
-C     950103  Jos van Gils    Create first version
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        COMPUTATION OF OXYGEN SATURATION CONCENTRATION
-C
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C CL      R*4 1 I concentration of chloride                         [g/m3]
-C OXSAT   R*4 1 O saturation concentration of dissolved oxygen      [g/m3]
-C SAL     R*4 1 I Salinity                                           [ppt]
-C SWITCH  I*4 1 I Switch for formulation options                       [-]
-C TEMP    R*4 1 I ambient temperature                                 [xC]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        COMPUTATION OF OXYGEN SATURATION CONCENTRATION
+!
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! CL      R*4 1 I concentration of chloride                         [g/m3]
+! OXSAT   R*4 1 O saturation concentration of dissolved oxygen      [g/m3]
+! SAL     R*4 1 I Salinity                                           [ppt]
+! SWITCH  I*4 1 I Switch for formulation options                       [-]
+! TEMP    R*4 1 I ambient temperature                                 [xC]
 
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER  SWITCH, LUNREP, IKMRK1, ISEG  , IP1   ,
      +         IP2   , IP3   , IP4   , IP5
       REAL     CL    , TEMP  , SAL   , TEMP2 , PART1 ,
@@ -84,44 +69,44 @@ C
      +            B1 =   -0.033096 ,
      +            B2 =    0.014259 ,
      +            B3 =   -0.0017   )
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
-C
-C     Initial calculations
-C
+!
+!     Initial calculations
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
 !jvb  IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       CL     = PMSA(IP1 )
       TEMP   = PMSA(IP2 )
       SWITCH = NINT(PMSA(IP3 ))
       SAL    = PMSA(IP4 )
 
       IF ( SWITCH .EQ. 1 ) THEN
-C
-C        Weiss volgens Gils (WL)
-C
+!
+!        Weiss volgens Gils (WL)
+!
          OXSAT  = (    14.652
      &              -  (0.41022  * TEMP)
      &              +  (0.089392 * TEMP)**2
      &              -  (0.042685 * TEMP)**3 )
      &              *  (1. - CL/1E+5 )
       ELSEIF ( SWITCH .EQ. 2 ) THEN
-C
-C        Weiss volgen Monteiro (CISR)
-C        1.428571 = 32.*1000./22400.
-C
+!
+!        Weiss volgen Monteiro (CISR)
+!        1.428571 = 32.*1000./22400.
+!
          TEMP2 = (TEMP+273.)/100.
          PART1 = A1 + A2/TEMP2 + A3*LOG(TEMP2) + A4*TEMP2
          PART2 = SAL*(B1+B2*TEMP2+B3*TEMP2*TEMP2)
          OXSAT = EXP(PART1+PART2)*1.428571
-C
+!
       ELSE
           CALL GETMLU(LUNREP)
           WRITE(LUNREP,*) 'ERROR in SATOXY'
@@ -133,20 +118,20 @@ C
           CALL SRSTOP(1)
       ENDIF
 
-C     Output of calculated oxygen saturation
+!     Output of calculated oxygen saturation
 
       PMSA (IP5) = OXSAT
-C
-cjvb  ENDIF
-C
+!
+!jvb  ENDIF
+!
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
       IP3   = IP3   + INCREM (  3 )
       IP4   = IP4   + INCREM (  4 )
       IP5   = IP5   + INCREM (  5 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

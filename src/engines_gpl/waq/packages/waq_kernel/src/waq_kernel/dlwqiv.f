@@ -26,24 +26,24 @@
      +                    NOLOC , NDSPX , NVELX , NLOCX , NFLUX ,
      +                    NOPRED, NOVAR , VARARR, VARIDX, VARTDA,
      +                    VARDAG, VARTAG, VARAGG, NOGRID, VGRSET)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : Jan van Beek
-C
-C     FUNCTION            : Initialisation of Variables structure
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               :
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : Jan van Beek
+!
+!     FUNCTION            : Initialisation of Variables structure
+!
+!     SUBROUTINES CALLED  :
+!
+!     FILES               :
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!
+!     Declaration of arguments
+!
 
       use timers
 
@@ -57,9 +57,9 @@ C
       INTEGER             VGRSET(NOVAR,NOGRID)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqiv", ithandl )
-C
-C     Just take the used array's in the right order
-C
+!
+!     Just take the used array's in the right order
+!
       IIVOL  =  1
       IIAREA =  2
       IIFLOW =  3
@@ -137,7 +137,7 @@ C
       IIBBKL = 75
       IICCKL = 76
       IIDDKL = 77
-C
+!
       IVVOL = 1
       IVARE = IVVOL + 1
       IVFLO = IVARE + 1
@@ -157,262 +157,262 @@ C
       IVVLX = IVDSX + NDSPX
       IVLCX = IVVLX + NVELX
       IVFLX = IVLCX + NLOCX
-C
-C
-C
+!
+!
+!
       CALL DHZERI(VGRSET,NOVAR*NOGRID)
-C
-C     Volume
-C
+!
+!     Volume
+!
       IVAR = 1
-c     VARARR(IVAR) = IIVOL
-c     VARIDX(IVAR) = 1
-c     VARTDA(IVAR) = 0
-c     VARDAG(IVAR) = 0
-c     VARTAG(IVAR) = 1
-c     VARAGG(IVAR) = 0
+!     VARARR(IVAR) = IIVOL
+!     VARIDX(IVAR) = 1
+!     VARTDA(IVAR) = 0
+!     VARDAG(IVAR) = 0
+!     VARTAG(IVAR) = 1
+!     VARAGG(IVAR) = 0
       VGRSET(IVAR,1) = 1
-C
-C     Area
-C
+!
+!     Area
+!
       IVAR = IVAR + 1
-c     VARARR(IVAR) = IIAREA
-c     VARIDX(IVAR) = 1
-c     VARTDA(IVAR) = 0
-c     VARDAG(IVAR) = 0
-c     VARTAG(IVAR) = 0
-c     VARAGG(IVAR) = 0
+!     VARARR(IVAR) = IIAREA
+!     VARIDX(IVAR) = 1
+!     VARTDA(IVAR) = 0
+!     VARDAG(IVAR) = 0
+!     VARTAG(IVAR) = 0
+!     VARAGG(IVAR) = 0
       VGRSET(IVAR,1) = 1
-C
-C     Flow
-C
+!
+!     Flow
+!
       IVAR = IVAR + 1
-c     VARARR(IVAR) = IIFLOW
-c     VARIDX(IVAR) = 1
-c     VARTDA(IVAR) = 0
-c     VARDAG(IVAR) = 0
-c     VARTAG(IVAR) = 0
-c     VARAGG(IVAR) = 0
+!     VARARR(IVAR) = IIFLOW
+!     VARIDX(IVAR) = 1
+!     VARTDA(IVAR) = 0
+!     VARDAG(IVAR) = 0
+!     VARTAG(IVAR) = 0
+!     VARAGG(IVAR) = 0
       VGRSET(IVAR,1) = 1
-C
-C     Length , two length
-C
+!
+!     Length , two length
+!
       IVAR = IVAR + 1
-c     VARARR(IVAR) = IILENG
-c     VARIDX(IVAR) = 1
-c     VARTDA(IVAR) = 0
-c     VARDAG(IVAR) = 0
-c     VARTAG(IVAR) = 0
-c     VARAGG(IVAR) = 0
+!     VARARR(IVAR) = IILENG
+!     VARIDX(IVAR) = 1
+!     VARTDA(IVAR) = 0
+!     VARDAG(IVAR) = 0
+!     VARTAG(IVAR) = 0
+!     VARAGG(IVAR) = 0
       VGRSET(IVAR,1) = 1
       IVAR = IVAR + 1
-c     VARARR(IVAR) = IILENG
-c     VARIDX(IVAR) = 2
-c     VARTDA(IVAR) = 0
-c     VARDAG(IVAR) = 0
-c     VARTAG(IVAR) = 0
-c     VARAGG(IVAR) = 0
+!     VARARR(IVAR) = IILENG
+!     VARIDX(IVAR) = 2
+!     VARTDA(IVAR) = 0
+!     VARDAG(IVAR) = 0
+!     VARTAG(IVAR) = 0
+!     VARAGG(IVAR) = 0
       VGRSET(IVAR,1) = 1
-C
-C     Cons
-C
+!
+!     Cons
+!
       DO ICONS = 1 , NOCONS
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IICONS
-c        VARIDX(IVAR) = ICONS
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IICONS
+!        VARIDX(IVAR) = ICONS
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Param
-C
+!
+!     Param
+!
       DO IPA = 1 , NOPA
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIPARM
-c        VARIDX(IVAR) = IPA
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 3
-c        VARAGG(IVAR) = 1
+!        VARARR(IVAR) = IIPARM
+!        VARIDX(IVAR) = IPA
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 3
+!        VARAGG(IVAR) = 1
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Func
-C
+!
+!     Func
+!
       DO IFUN = 1 , NOFUN
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIFUNC
-c        VARIDX(IVAR) = IFUN
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIFUNC
+!        VARIDX(IVAR) = IFUN
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Seg Func
-C
+!
+!     Seg Func
+!
       DO ISFUN = 1 , NOSFUN
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IISFUN
-c        VARIDX(IVAR) = ISFUN
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 3
-c        VARAGG(IVAR) = 1
+!        VARARR(IVAR) = IISFUN
+!        VARIDX(IVAR) = ISFUN
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 3
+!        VARAGG(IVAR) = 1
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Conc
-C
+!
+!     Conc
+!
       DO ISYS = 1 , NOSYS
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IICONC
-c        VARIDX(IVAR) = ISYS
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 3
-c        VARAGG(IVAR) = 1
+!        VARARR(IVAR) = IICONC
+!        VARIDX(IVAR) = ISYS
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 3
+!        VARAGG(IVAR) = 1
          VGRSET(IVAR,1) = 1
       ENDDO
       DO ISYS = NOSYS + 1 , NOTOT
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IICONC
-c        VARIDX(IVAR) = ISYS
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 1
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IICONC
+!        VARIDX(IVAR) = ISYS
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 1
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Mass
-C
+!
+!     Mass
+!
       DO ISYS = 1 , NOTOT
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIMASS
-c        VARIDX(IVAR) = ISYS
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 1
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIMASS
+!        VARIDX(IVAR) = ISYS
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 1
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Deriv
-C
+!
+!     Deriv
+!
       DO ISYS = 1 , NOTOT
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIDERV
-c        VARIDX(IVAR) = ISYS
-c        VARTDA(IVAR) = 2
-c        VARDAG(IVAR) = IVMAS + ISYS - 1
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIDERV
+!        VARIDX(IVAR) = ISYS
+!        VARTDA(IVAR) = 2
+!        VARDAG(IVAR) = IVMAS + ISYS - 1
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
       ENDDO
-C
-C     Disp
-C
+!
+!     Disp
+!
       DO IDSP = 1 , NODISP
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIDISP
-c        VARIDX(IVAR) = IDSP
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIDISP
+!        VARIDX(IVAR) = IDSP
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Velo
-C
+!
+!     Velo
+!
       DO IVEL = 1 , NOVELO
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIVELO
-c        VARIDX(IVAR) = IVEL
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIVELO
+!        VARIDX(IVAR) = IVEL
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Default
-C
+!
+!     Default
+!
       DO IDEF = 1 , NODEF
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIDEFA
-c        VARIDX(IVAR) = IDEF
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIDEFA
+!        VARIDX(IVAR) = IDEF
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
          VGRSET(IVAR,1) = 1
       ENDDO
-C
-C     Local
-C
+!
+!     Local
+!
       DO ILOC = 1 , NOLOC
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIPLOC
-c        VARIDX(IVAR) = ILOC
-c        VARTDA(IVAR) = 1
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 3
-c        VARAGG(IVAR) = 1
+!        VARARR(IVAR) = IIPLOC
+!        VARIDX(IVAR) = ILOC
+!        VARTDA(IVAR) = 1
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 3
+!        VARAGG(IVAR) = 1
       ENDDO
-C
-C     DSPX
-C
+!
+!     DSPX
+!
       DO IDSX = 1 , NDSPX
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIDSPX
-c        VARIDX(IVAR) = IDSX
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIDSPX
+!        VARIDX(IVAR) = IDSX
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
       ENDDO
-C
-C     VELX
-C
+!
+!     VELX
+!
       DO IVLX = 1 , NVELX
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIVELX
-c        VARIDX(IVAR) = IVLX
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIVELX
+!        VARIDX(IVAR) = IVLX
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
       ENDDO
-C
-C     LOCX
-C
+!
+!     LOCX
+!
       DO ILCX = 1 , NLOCX
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IILOCX
-c        VARIDX(IVAR) = ILCX
-c        VARTDA(IVAR) = 0
-c        VARDAG(IVAR) = 0
-c        VARTAG(IVAR) = 0
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IILOCX
+!        VARIDX(IVAR) = ILCX
+!        VARTDA(IVAR) = 0
+!        VARDAG(IVAR) = 0
+!        VARTAG(IVAR) = 0
+!        VARAGG(IVAR) = 0
       ENDDO
-C
-C     FLUX
-C
+!
+!     FLUX
+!
       DO IFLX = 1 , NFLUX
          IVAR = IVAR + 1
-c        VARARR(IVAR) = IIFLUX
-c        VARIDX(IVAR) = IFLX
-c        VARTDA(IVAR) = 2
-c        VARDAG(IVAR) = IVVOL
-c        VARTAG(IVAR) = 1
-c        VARAGG(IVAR) = 0
+!        VARARR(IVAR) = IIFLUX
+!        VARIDX(IVAR) = IFLX
+!        VARTDA(IVAR) = 2
+!        VARDAG(IVAR) = IVVOL
+!        VARTAG(IVAR) = 1
+!        VARAGG(IVAR) = 0
       ENDDO
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

@@ -23,27 +23,27 @@
 
       SUBROUTINE WRICHA ( LU    , NTRANS, VARNAM, NNOTRA, IOUTP ,
      J                    NSPEC , NAMSPE, NTOX  , NAMTOX)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            :
-C
-C     V0.02  240394  Jos van Gils  Modify for hybrid coupling
-C     V0.01  040894  Jos van Gils  First version
-C
-C     FUNCTION            : Writes PDF for charon call
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C
-C     Declarations
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            :
+!
+!     V0.02  240394  Jos van Gils  Modify for hybrid coupling
+!     V0.01  040894  Jos van Gils  First version
+!
+!     FUNCTION            : Writes PDF for charon call
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!
+!     Declarations
+!
       CHARACTER*12 FILNAM
       CHARACTER*6  MODNAM, PRONAM
       CHARACTER*50 PRODES
@@ -88,75 +88,75 @@ C
      J             'partition coefficient                      (m3/kg)'/
       DATA FLXDES /'derivative of el. transport vector        (g/m3/d)'/
 
-C     Construct filename and open file
+!     Construct filename and open file
 
       WRITE ( FILNAM , '(A6,''.pdf  '')' ) PRONAM
       OPEN ( LU , FILE=FILNAM )
 
-C     PROCESS NAME
+!     PROCESS NAME
 
       WRITE (LU,1000) PRONAM,PRODES
 
-C     Module name
+!     Module name
 
       WRITE (LU,1010) MODNAM
 
-C     Value of TRswitch
+!     Value of TRswitch
 
       WRITE (LU,1011)
 
-C     Input parameters
+!     Input parameters
 
       WRITE (LU,1020) NINPUT-1 + NTRANS
-C     Singular input quantities
+!     Singular input quantities
       DO 10 I = 1,NINPUT-1
    10 WRITE (LU,1030) INPNAM(I), INPVAL(I), INPDES(I)
-C     Transported vector
+!     Transported vector
       DO 11 I = 1,NTRANS
           WRITE (INPNAM(NINPUT),'(A10)') VARNAM(I)
    11 WRITE (LU,1030) INPNAM(NINPUT), INPVAL(NINPUT), INPDES(NINPUT)
       WRITE (LU,1021)
 
-C     Output parameters
+!     Output parameters
 
       WRITE (LU,1040) NOUTPU-4 + NNOTRA + NTOX*3
-C     Singular output quantities
+!     Singular output quantities
       DO 20 I = 1,NOUTPU-4
    20 WRITE (LU,1050) OUTNAM(I), OUTDES(I)
-C     CHARON compounds
+!     CHARON compounds
       DO 21 I = 1,NSPEC
           IF ( IOUTP(I) .GT. 0 ) THEN
               WRITE (OUTNAM(NOUTPU-3)( 1: 6),'(A6)') NAMSPE(I)
               WRITE (LU,1050) OUTNAM(NOUTPU-3), OUTDES(NOUTPU-3)
           ENDIF
    21 CONTINUE
-C     Concentration of solid metals
+!     Concentration of solid metals
       DO 22 I = 1,NTOX
           WRITE (OUTNAM(NOUTPU-2)( 2: 3),'(A2)') NAMTOX(I)(1:2)
    22 WRITE (LU,1050) OUTNAM(NOUTPU-2), OUTDES(NOUTPU-2)
-C     Dissolved fraction of metals
+!     Dissolved fraction of metals
       DO 23 I = 1,NTOX
           WRITE (OUTNAM(NOUTPU-1)( 3: 4),'(A2)') NAMTOX(I)(1:2)
    23 WRITE (LU,1050) OUTNAM(NOUTPU-1), OUTDES(NOUTPU-1)
-C     Kd metals
+!     Kd metals
       DO 24 I = 1,NTOX
           WRITE (OUTNAM(NOUTPU)( 3: 4),'(A2)') NAMTOX(I)(1:2)
    24 WRITE (LU,1050) OUTNAM(NOUTPU), OUTDES(NOUTPU)
       WRITE (LU,1041)
 
-C     Fluxes
+!     Fluxes
 
       WRITE (LU,1060) NTRANS
       DO 31 I = 1,NTRANS
    31 WRITE (LU,1051) VARNAM(I)(1:6),VARNAM(I)(8:10),FLXDES
 
-C     Basic stochiometry
+!     Basic stochiometry
 
       WRITE (LU,1070) NTRANS
       DO 41 I = 1,NTRANS
    41 WRITE (LU,1080) VARNAM(I),VARNAM(I)(1:6),VARNAM(I)(8:10)
 
-C     End lines: close file
+!     End lines: close file
 
       WRITE (LU,1081)
       WRITE (LU,1082)

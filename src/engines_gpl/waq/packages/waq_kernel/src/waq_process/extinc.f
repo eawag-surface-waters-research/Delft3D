@@ -27,48 +27,26 @@
 !>\file
 !>       Calculation total and partial extinction coefficients
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     120925  Johannes Smits  restructed for output of all partial coefficients
-C     120917  Jos van Gils    4 POC fractions included
-C     120127  Jos van Gils    Explicit switch on Uitzicht
-C     000519  Jos van Gils    Flag for Scchi computation added to UIT_ZI
-C     980506  Arno Nolte      Removed contribution of POC to ExtVlPOC
-C     980123  Jos van Gils    Add salinity effect non-UITZICHT mode
-C     951207  Marnix vd Vat   Optional addition of UITZICHT module
-C     940725  Jos van Gils    Remove contribution of algae
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C
-C***********************************************************************
-C
-C     This module calculates the total and partial extinction coeffcients,
-C     optionally with additional module UITZICHT
-c     In input DOC has replaced DisHum for UITZICHT
-C
-C     Logical Units : -
+!
+!     This module calculates the total and partial extinction coeffcients,
+!     optionally with additional module UITZICHT
+!     In input DOC has replaced DisHum for UITZICHT
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT NONE
-C
+!
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT(38) , INCREM(38) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       REAL A1    !  R*4 1 I specific ext. inorganic suspended matter 1  [m2/gDM]
       REAL A2    !  R*4 1 I specific ext. inorganic suspended matter 2  [m2/gDM]
       REAL A3    !  R*4 1 I specific ext. inorganic suspended matter 3  [m2/gDM]
@@ -107,24 +85,24 @@ C
       REAL APOC2   ! R*4 1 I specific extintion POC2                [1/m/(G/M3)]
       REAL APOC3   ! R*4 1 I specific extintion POC3                [1/m/(G/M3)]
       REAL APOC4   ! R*4 1 I specific extintion POC4                [1/m/(G/M3)]
-C
+!
       REAL CHLORP, DETRIC, GLOEIR, AH_380
       REAL SECCHI, D_1   , EXTP_D, EXTDET, EXTGL, EXTHUM
       INTEGER      IFLUX, ISEG
-C
+!
       INTEGER  IPNT(38)
       INTEGER  NR_MES
       SAVE     NR_MES
       DATA     NR_MES / 0 /
-C
+!
       IPNT = IPOINT
       IFLUX = 0
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       A1        = PMSA(IPNT(1))
       A2        = PMSA(IPNT(2))
       A3        = PMSA(IPNT(3))
@@ -158,11 +136,11 @@ C
       APOC4     = PMSA(IPNT(31))
       POC3      = PMSA(IPNT(32))
       POC4      = PMSA(IPNT(33))
-C
+!
       IF (SW_UIT.EQ.0) THEN
-C
-C  calculate extinction coefficients - no UITZICHT
-C
+!
+!  calculate extinction coefficients - no UITZICHT
+!
         EXTIM  =  A1 * AIM1  + A2 * AIM2 + A3 * AIM3
         EXTPOC =  APOC1*POC1 + APOC2*POC2 + APOC3*POC3 + APOC4*POC4
         EXTDOC =  ADOC*DOC
@@ -171,7 +149,7 @@ C
         EXTSAL =  XTSAL0 * (1.0-SALIN/SALMAX)
         EXT    =  EXT0 + EXTIM + EXTPOC + EXTDOC + EXTALG  + EXTMAC
      J            + EXTSAL
-C
+!
         IF ( EXT .LT. 1.0E-20 ) THEN
            IF ( NR_MES .LT. 25 ) THEN
               NR_MES = NR_MES + 1
@@ -195,68 +173,68 @@ C
               EXT = EXT0
            ENDIF
         ENDIF
-C
+!
       ELSE
-C
-C  calculate extinction coefficients - with UITZICHT
-C
+!
+!  calculate extinction coefficients - with UITZICHT
+!
         CHLORP = 0.0
         DETRIC = MAX ( 0.0, DETCDM * (POC1 +POC2 +POC3 + POC4))
         AH_380 = DOC*ADOC
         GLOEIR = AIM1 + AIM2 + AIM3
-C
-C  total extinction coefficient exclusive of algae, macrophytes and background
-C
+!
+!  total extinction coefficient exclusive of algae, macrophytes and background
+!
         CALL UIT_ZI( DIEP1 , DIEP2 , ANGLE , C_GL1 , C_GL2 ,
      1               C_DET , HELHUM, TAU   , CORCHL, CHLORP,
      2               DETRIC, GLOEIR, AH_380, SECCHI, D_1   ,
      3               EXT   , EXTP_D,.FALSE.)
-C
-C  total extinction coefficient of detritus
-C
+!
+!  total extinction coefficient of detritus
+!
         CALL UIT_ZI( DIEP1 , DIEP2 , ANGLE , C_GL1 , C_GL2 ,
      1               C_DET , HELHUM, TAU   , CORCHL, CHLORP,
      2               0.0   , GLOEIR, AH_380, SECCHI, D_1   ,
      3               EXTDET, EXTP_D,.FALSE.)
         EXTDET = EXT - EXTDET
-C
-C  total extinction coefficient of inorganic sediment
-C
+!
+!  total extinction coefficient of inorganic sediment
+!
         CALL UIT_ZI( DIEP1 , DIEP2 , ANGLE , C_GL1 , C_GL2 ,
      1               C_DET , HELHUM, TAU   , CORCHL, CHLORP,
      2               DETRIC, 0.0   , AH_380, SECCHI, D_1   ,
      3               EXTGL , EXTP_D,.FALSE.)
         EXTGL  = EXT - EXTGL
-C
-C  total extinction coefficient of DOC (humic acids)
-C
+!
+!  total extinction coefficient of DOC (humic acids)
+!
         CALL UIT_ZI( DIEP1 , DIEP2 , ANGLE , C_GL1 , C_GL2 ,
      1               C_DET , HELHUM, TAU   , CORCHL, CHLORP,
      2               DETRIC, GLOEIR, 0.0   , SECCHI, D_1   ,
      3               EXTHUM, EXTP_D,.FALSE.)
         EXTHUM = EXT - EXTHUM
-C
+!
         EXTIM  =  EXTGL
         EXTPOC =  EXTDET
         EXTDOC =  EXTHUM
         EXTSAL =  0.0
         EXT    =  EXT0 + EXT + EXTALG + EXTMAC
-C
+!
       ENDIF
-C
+!
       PMSA(IPNT(34)) = EXT
       PMSA(IPNT(35)) = EXTIM
       PMSA(IPNT(36)) = EXTPOC
       PMSA(IPNT(37)) = EXTDOC
       PMSA(IPNT(38)) = EXTSAL
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IPNT  = IPNT  + INCREM
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

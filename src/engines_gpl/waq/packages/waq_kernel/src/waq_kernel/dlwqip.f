@@ -30,63 +30,63 @@
      +                    IVPNW , NLOCX , PROGRD, PRONDT, NOVAR ,
      +                    VARARR, VARIDX, VARTDA, VARDAG, VARTAG,
      +                    VARAGG, nrref , proref, prvpnt)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : april 1993 by Jan van Beek
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : april 1993 by Jan van Beek
 
 !     Modified            : December 2009 by Leo Postma, addition of
 !                           proref array to test resolved input with parallelism
 
-C     FUNCTION            : Initialisation of PROCES system.
-C                           Reads proces work file.
-C
-C     SUBROUTINES CALLED  : PRONRS, gives module number
-C                           PROPOI, computes absolute pointers, increments
-C
-C     FILES               : LUNWRP, Proces work file
-C                           LUREP , Monitoring file
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNWRP  INTEGER       1     INPUT   Proces work file
-C     LCH     CHA*(*)       1     INPUT   Name proces work file
-C     LUREP   INTEGER       1     INPUT   Monitoring file
-C     NOTOT   INTEGER       1     INPUT   Number of substances
-C     NIPMSA  INTEGER       1     INPUT   Length IPMSA
-C     NPROC   INTEGER       1     INPUT   Number of called processes
-C     NOLOC   INTEGER       1     INPUT   Number of local proces params
-C     NFLUX   INTEGER       1     INPUT   total number of fluxes
-C     NODEF   INTEGER       1     INPUT   Number of used defaults
-C     PRVNIO  INTEGER       *     OUTPUT  Number of variables per proces
-C     IFLUX   INTEGER       *     OUTPUT  Pointer in FLUX per proces inst.
-C     IPMSA   INTEGER       *     OUTPUT  Pointer in SSA per proces inst.
-C     IPSSA   INTEGER       *     OUTPUT  Pointer to SSA per proces inst.
-C     DEFAUL  REAL          *     OUTPUT  Default proces parameters
-C     STOCHI  REAL          *     OUTPUT  Proces stochiometry
-C     PRONAM  CHA*(*)       *     OUTPUT  Name of called module
-C     IMODU   INTEGER       *     OUTPUT  Module number proces
-C     IERR    INTEGER       1     IN/OUT  Error count
-C     IPBLOO  INTEGER       1     INPUT   Number of Bloom module (if >0)
-C     IPCHAR  INTEGER       1     INPUT   Number of Charon module (if >0)
-C     IOFFBL  INTEGER       1     INPUT   Offset in IPMSA for Bloom
-C     IOFFCH  INTEGER       1     INPUT   Offset in IPMSA for Charon
-C     NOSYS   INTEGER       1     INPUT   Number of active substances
-C     NDSPX   INTEGER       1     INPUT   Number of extra dispersion array
-C     NVELX   INTEGER       1     INPUT   Number of extra velocity array
-C     DSTO    INTEGER NOSYS,*     OUTPUT  dispersion stochi matrix
-C     VSTO    INTEGER NOSYS,*     OUTPUT  velocity stochi matrix
-C     NDSPN   INTEGER       1     INPUT   Number of new dispersion array
-C     IDPNW   INTEGER   NOSYS     OUTPUT  Pointers to new dispersion array
-C     NVELN   INTEGER       1     INPUT   Number of new velocity array
-C     IVPNW   INTEGER   NOSYS     OUTPUT  Pointers to new velocity array
-C     PROGRD  INTEGER   NPROC     OUTPUT  Grid number for process
-C     PRONDT  INTEGER   NPROC     OUTPUT  Fractional step for process
-C
-C     Declaration of arguments
-C
+!     FUNCTION            : Initialisation of PROCES system.
+!                           Reads proces work file.
+!
+!     SUBROUTINES CALLED  : PRONRS, gives module number
+!                           PROPOI, computes absolute pointers, increments
+!
+!     FILES               : LUNWRP, Proces work file
+!                           LUREP , Monitoring file
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNWRP  INTEGER       1     INPUT   Proces work file
+!     LCH     CHA*(*)       1     INPUT   Name proces work file
+!     LUREP   INTEGER       1     INPUT   Monitoring file
+!     NOTOT   INTEGER       1     INPUT   Number of substances
+!     NIPMSA  INTEGER       1     INPUT   Length IPMSA
+!     NPROC   INTEGER       1     INPUT   Number of called processes
+!     NOLOC   INTEGER       1     INPUT   Number of local proces params
+!     NFLUX   INTEGER       1     INPUT   total number of fluxes
+!     NODEF   INTEGER       1     INPUT   Number of used defaults
+!     PRVNIO  INTEGER       *     OUTPUT  Number of variables per proces
+!     IFLUX   INTEGER       *     OUTPUT  Pointer in FLUX per proces inst.
+!     IPMSA   INTEGER       *     OUTPUT  Pointer in SSA per proces inst.
+!     IPSSA   INTEGER       *     OUTPUT  Pointer to SSA per proces inst.
+!     DEFAUL  REAL          *     OUTPUT  Default proces parameters
+!     STOCHI  REAL          *     OUTPUT  Proces stochiometry
+!     PRONAM  CHA*(*)       *     OUTPUT  Name of called module
+!     IMODU   INTEGER       *     OUTPUT  Module number proces
+!     IERR    INTEGER       1     IN/OUT  Error count
+!     IPBLOO  INTEGER       1     INPUT   Number of Bloom module (if >0)
+!     IPCHAR  INTEGER       1     INPUT   Number of Charon module (if >0)
+!     IOFFBL  INTEGER       1     INPUT   Offset in IPMSA for Bloom
+!     IOFFCH  INTEGER       1     INPUT   Offset in IPMSA for Charon
+!     NOSYS   INTEGER       1     INPUT   Number of active substances
+!     NDSPX   INTEGER       1     INPUT   Number of extra dispersion array
+!     NVELX   INTEGER       1     INPUT   Number of extra velocity array
+!     DSTO    INTEGER NOSYS,*     OUTPUT  dispersion stochi matrix
+!     VSTO    INTEGER NOSYS,*     OUTPUT  velocity stochi matrix
+!     NDSPN   INTEGER       1     INPUT   Number of new dispersion array
+!     IDPNW   INTEGER   NOSYS     OUTPUT  Pointers to new dispersion array
+!     NVELN   INTEGER       1     INPUT   Number of new velocity array
+!     IVPNW   INTEGER   NOSYS     OUTPUT  Pointers to new velocity array
+!     PROGRD  INTEGER   NPROC     OUTPUT  Grid number for process
+!     PRONDT  INTEGER   NPROC     OUTPUT  Fractional step for process
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER       LUNWRP, LUREP , NOTOT , NIPMSA, NPROC ,
@@ -103,40 +103,40 @@ C
      +              VSTO(*)
       CHARACTER*(*) LCH
       CHARACTER*10  PRONAM(*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       PARAMETER   ( VERSI1 = 4.51  , VERSI2 = 5.02 )
       INTEGER       NIPMSD, NPROCD, NOLOCD, NFLUXD, NODEFD,
      +              NOTOTD, IOFF
       REAL          VERSIO
-C
-Cjvb  Store fractional step flag in common CFRACS
-C
+!
+!jvb  Store fractional step flag in common CFRACS
+!
       COMMON /CFRACS/ IFRACS
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqip", ithandl )
-Cjvb
-C
-C     read and check version number
-C
+!jvb
+!
+!     read and check version number
+!
       READ (LUNWRP, ERR=900, END=900) VERSIO
-C
-C     less than lowest supported version, ERROR
-C
+!
+!     less than lowest supported version, ERROR
+!
       IF ( VERSIO .LT. VERSI1 ) THEN
          WRITE ( LUREP, 2000 ) VERSIO , VERSI1
          CALL SRSTOP(1)
       ENDIF
-C
-C     greater than this version, WARNING
-C
+!
+!     greater than this version, WARNING
+!
       IF ( VERSIO .GT. VERSI2 ) THEN
          WRITE ( LUREP, 2010 ) VERSIO , VERSI2
       ENDIF
-C
-C     read and check dimensions
-C
+!
+!     read and check dimensions
+!
       READ (LUNWRP, ERR=900, END=900) NIPMSD, NPROCD, NFLUXD,
      +                                NOLOCD, NODEFD, NOTOTD,
      +                                NOSYSD, NDSPXD, NVELXD,
@@ -199,7 +199,7 @@ C
          IERR = IERR + 1
       ENDIF
       IF ( IERR .GT. 0 ) GOTO 910
-C
+!
       READ (LUNWRP, ERR=900, END=900) ( PRVNIO(K), K = 1 , NPROC )
       READ (LUNWRP, ERR=900, END=900) ( IFLUX(K) , K = 1 , NPROC )
       READ (LUNWRP, ERR=900, END=900) ( PRVVAR(K), K = 1 , NIPMSA)
@@ -229,19 +229,19 @@ C
          prvpnt(iproc) = k
          k = k + prvnio(iproc)
       enddo
-C
-C     Set module numbers
-C
+!
+!     Set module numbers
+!
       DO 20 K = 1,NPROC
          CALL PRONRS ( PRONAM(K), IMODU(K) )
-c        IF ( IMODU(K) .EQ. 0 ) THEN
-c           WRITE ( LUREP, 2080 ) PRONAM(K)
-c           IERR = IERR + 1
-c        ENDIF
+!        IF ( IMODU(K) .EQ. 0 ) THEN
+!           WRITE ( LUREP, 2080 ) PRONAM(K)
+!           IERR = IERR + 1
+!        ENDIF
    20 CONTINUE
-C
-C     Report on process decomposition
-C
+!
+!     Report on process decomposition
+!
       IFRACS = 0
       IPDGRD = 0
       DO K = 1,NPROC
@@ -260,9 +260,9 @@ C
             WRITE(LUREP,3000) PRONAM(K),PROGRD(K),PRONDT(K)
          ENDDO
       ENDIF
-C
-C     Check for Bloom and Charon connection
-C
+!
+!     Check for Bloom and Charon connection
+!
       IPBLOO = 0
       IPCHAR = 0
       IOFFBL = 0
@@ -281,21 +281,21 @@ C
          ENDIF
          IOFF = IOFF + PRVNIO(K)
    30 CONTINUE
-C
+!
       goto 9999  !    RETURN
-C
-C     unsuccessful read
-C
+!
+!     unsuccessful read
+!
   900 CONTINUE
       WRITE ( LUREP   , 2090 ) LCH, LUNWRP
       IERR = IERR + 1
-C
+!
   910 CONTINUE
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
-C
-C     output formats
-C
+!
+!     output formats
+!
  2000 FORMAT ( ' ERROR  : version proces intput ',F5.2,' NOT supported'
      &        /'          by PROCES system version,',F5.2)
  2010 FORMAT ( ' WARNING: version proces input ',F5.2,' greater than'
@@ -351,5 +351,5 @@ C
  3000 FORMAT (/' MODULE :',A,' on grid ',I3,', timestep multiplier:',I3)
  3010 FORMAT (/' No process decomposition active')
  3020 FORMAT (/' Process decomposition active')
-C
+!
       END

@@ -21,16 +21,16 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C Integer function to obtain the length of a character string.
-C The non-significant characters are initially set to a space and
-C a comma, but can be reset by function SETDLM.
-C
+!
+! Integer function to obtain the length of a character string.
+! The non-significant characters are initially set to a space and
+! a comma, but can be reset by function SETDLM.
+!
       INTEGER FUNCTION LENSTR (SOURCE,MAXLEN)
       CHARACTER*1 SOURCE(*)
       CHARACTER*255 RESULT
       INTEGER GETS, POS
-C
+!
       POS = 1
       DO 10 I = 1,MAXLEN
       IF (GETS(SOURCE,POS,MAXLEN,255,RESULT,LENOUT) .NE. 0) GO TO 20

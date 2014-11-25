@@ -24,37 +24,37 @@
       SUBROUTINE DLWQ12 ( IOUT   , IDUMP  , CONC   , ITIME  , IDT    ,
      *                    IHSTRT , IHSTOP , IHSTEP , DNAME  , SNAME  ,
      *                    MNAME  , NODUMP , NOTOT  , IHFLAG )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : june, 1988 by L.Postma
-C
-C     FUNCTION            : Writes history results to IOUT in
-C                                          for postprocessing.
-C
-C     LOGICAL UNITNUMBERS : IOUT = number of history output file
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IOUT    INTEGER     1       INPUT   unit number output file
-C     IDUMP   INTEGER  NODUMP     INPUT   segment numbers for dump
-C     CONC    REAL     NOTOT*?    INPUT   concentration values
-C     ITIME   INTEGER     1       INPUT   present time in clock units
-C     IDT     INTEGER     1       INPUT   time step of simulation
-C     IHSTRT  INTEGER     1       INPUT   start time of history
-C     IHSTOP  INTEGER     1       INPUT   stop time of history
-C     IHSTEP  INTEGER     1       INPUT   time step of history
-C     DNAME   CHAR*20   NODUMP    INPUT   names of monitoring stations
-C     SNAME   CHAR*20   NOTOT     INPUT   names of substances
-C     MNAME   CHAR*40     4       INPUT   model identification
-C     NODUMP  INTEGER     1       INPUT   amount of dump segments
-C     NOTOT   INTEGER     1       INPUT   total number of systems
-C     IHFLAG  LOGICAL     1       OUTPUT  TRUE if history took place
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : june, 1988 by L.Postma
+!
+!     FUNCTION            : Writes history results to IOUT in
+!                                          for postprocessing.
+!
+!     LOGICAL UNITNUMBERS : IOUT = number of history output file
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IOUT    INTEGER     1       INPUT   unit number output file
+!     IDUMP   INTEGER  NODUMP     INPUT   segment numbers for dump
+!     CONC    REAL     NOTOT*?    INPUT   concentration values
+!     ITIME   INTEGER     1       INPUT   present time in clock units
+!     IDT     INTEGER     1       INPUT   time step of simulation
+!     IHSTRT  INTEGER     1       INPUT   start time of history
+!     IHSTOP  INTEGER     1       INPUT   stop time of history
+!     IHSTEP  INTEGER     1       INPUT   time step of history
+!     DNAME   CHAR*20   NODUMP    INPUT   names of monitoring stations
+!     SNAME   CHAR*20   NOTOT     INPUT   names of substances
+!     MNAME   CHAR*40     4       INPUT   model identification
+!     NODUMP  INTEGER     1       INPUT   amount of dump segments
+!     NOTOT   INTEGER     1       INPUT   total number of systems
+!     IHFLAG  LOGICAL     1       OUTPUT  TRUE if history took place
+!
       use timers
       DIMENSION    IDUMP(*) , CONC(NOTOT,*)
       CHARACTER*20 DNAME(*) , SNAME(*)
@@ -68,9 +68,9 @@ C
       IF ( ITIME                    .LT. IHSTRT ) goto 9999
       IF ( ITIME-IDT                .GE. IHSTOP ) goto 9999
       IF ( MOD(ITIME-IHSTRT,IHSTEP) .GE. IDT    ) goto 9999
-C
-C         initialise the history file
-C
+!
+!         initialise the history file
+!
       IF ( ITIME-IHSTRT .LT. IDT ) THEN
            WRITE ( IOUT ) ( MNAME(K) , K = 1,4 )
            WRITE ( IOUT )   NOTOT    , NODUMP
@@ -78,11 +78,11 @@ C
            WRITE ( IOUT ) ( IDUMP(K),DNAME(K), K = 1,NODUMP )
       ENDIF
       IHFLAG = .TRUE.
-C
-C         dump a history
-C
+!
+!         dump a history
+!
       WRITE (IOUT) ITIME , ((CONC(K,IDUMP(J)),K=1,NOTOT),J=1,NODUMP)
-C
+!
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
       END

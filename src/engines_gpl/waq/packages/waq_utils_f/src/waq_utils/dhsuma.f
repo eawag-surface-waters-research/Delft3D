@@ -22,35 +22,35 @@
 !!  rights reserved.
 
       SUBROUTINE DHSUMA ( ARRAY1, ARRAY2, NOVAL  )
-C
-C     Deltares           SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     Created : June 1994 by Jan van Beek
-C
-C     Function            : Summs two real array's in the first one.
-C
-C     Parameters          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ARRAY1  REAL     *          IN/OUT  Summation array
-C     ARRAY2  REAL     *          INPUT   Summation value
-C     NOVAL   INTEGER  1          INPUT   Number of value's to be summed
-C
-C     Declaration of arguments
-C
+!
+!     Deltares           SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     Created : June 1994 by Jan van Beek
+!
+!     Function            : Summs two real array's in the first one.
+!
+!     Parameters          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     ARRAY1  REAL     *          IN/OUT  Summation array
+!     ARRAY2  REAL     *          INPUT   Summation value
+!     NOVAL   INTEGER  1          INPUT   Number of value's to be summed
+!
+!     Declaration of arguments
+!
       INTEGER    NOVAL
       REAL       ARRAY1(*), ARRAY2(*)
-C
-C     Local declaration
-C
-C     IVAL    INTEGER  1          LOCAL   Loop counter on NOVAL
-C
+!
+!     Local declaration
+!
+!     IVAL    INTEGER  1          LOCAL   Loop counter on NOVAL
+!
       INTEGER    IVAL
-C
+!
       DO 100 IVAL = 1 , NOVAL
          ARRAY1(IVAL) = ARRAY1(IVAL) + ARRAY2(IVAL)
   100 CONTINUE
-C
+!
       RETURN
       END

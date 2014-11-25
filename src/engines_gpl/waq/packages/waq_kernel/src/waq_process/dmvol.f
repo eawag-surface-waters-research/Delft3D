@@ -27,36 +27,21 @@
 !>\file
 !>       Volume of dry matter in a segment
 
-C***********************************************************************
-C
-C     Project : GEM T2087
-C     Author  : Rik Sonneveldt
-C     Date    : 02jun97            Version : 0.00
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     02jun97 Rik Sonneveldt  first version, some existing code of WKCOMP
-C                             by PascalBoderie/Jos van Gils has been used.
-C     25sep97 Jos van Gils    Porosity is output variable!
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C Name    T   L I/O   Description                                    Uni
-C ----    --- -  -    -------------------                            ---
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+! Name    T   L I/O   Description                                    Uni
+! ----    --- -  -    -------------------                            ---
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
+!     Name     Type   Library
 
-C     ------   -----  ------------
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -76,7 +61,7 @@ C     ------   -----  ------------
       IP8  = IPOINT( 8)
       IP9  = IPOINT( 9)
       IP10 = IPOINT(10)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
          CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -116,7 +101,7 @@ C
             PMSA(IP9)  =  0.0
             PMSA(IP10) =  0.0
          ENDIF
-C
+!
          IFLUX = IFLUX + NOFLUX
          IP1   = IP1   + INCREM (  1 )
          IP2   = IP2   + INCREM (  2 )
@@ -128,9 +113,9 @@ C
          IP8   = IP8   + INCREM (  8 )
          IP9   = IP9   + INCREM (  9 )
          IP10  = IP10  + INCREM ( 10 )
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

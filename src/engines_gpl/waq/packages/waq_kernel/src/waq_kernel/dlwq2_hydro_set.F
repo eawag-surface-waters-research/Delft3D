@@ -22,43 +22,43 @@
 !!  rights reserved.
 
       module HydroSet
-C
-C          module contains everything for composition of hydrodynamics from multiple files
-C          created 19 July 2002 by Leo Postma
-C
-C     contains the following derived types:
-C          FileProp               ! a set of information with respect to one file. Per file there is only one Prop
-C          FilePropColl           ! a collection of these file properties (can be searched for uniqueness).
-C          FileUseDef             ! a set of information on the use of a file. Several defs can use one file.
-C          FileUseDefColl         ! a collection of these FileUseDefs. For each physical entity a separate Coll
-C          FileUseDefCollColl     ! a collection of these collections, so for all physical entities together.
-C
-C     contains the following functions:
-C          FilePropCollFind       ! to search a file in the FilePropColl  ; returns the index or zero if not found
-C          FilePropCollAdd        ! to add a FileProp   to the collection ; returns the current size
-C          FileUseDefCollAdd      ! to add a FileUseDef to the collection ; returns the current size
-C          FileUseDefCollCollAdd  ! to add a FileUseDefColl to the collection ; returns the current size
-C          FileUseDefCollCollFind ! to search for a FileUseDefColl by the unitnr of this physics
-C          FileUseDefCollFind     ! sees which FileUseDefs are active for the current simulation time
-C                                   it adds there contribution to the output arrays optionally interpolated
-C                                   or transformed logarithmically or both.
-C                                   this is the function with the main functionality of this system
-C
-C     contains the following subroutine:
-C          Flinterpol             ! performs the actual interpolation, routine is for local use.
-C
+!
+!          module contains everything for composition of hydrodynamics from multiple files
+!          created 19 July 2002 by Leo Postma
+!
+!     contains the following derived types:
+!          FileProp               ! a set of information with respect to one file. Per file there is only one Prop
+!          FilePropColl           ! a collection of these file properties (can be searched for uniqueness).
+!          FileUseDef             ! a set of information on the use of a file. Several defs can use one file.
+!          FileUseDefColl         ! a collection of these FileUseDefs. For each physical entity a separate Coll
+!          FileUseDefCollColl     ! a collection of these collections, so for all physical entities together.
+!
+!     contains the following functions:
+!          FilePropCollFind       ! to search a file in the FilePropColl  ; returns the index or zero if not found
+!          FilePropCollAdd        ! to add a FileProp   to the collection ; returns the current size
+!          FileUseDefCollAdd      ! to add a FileUseDef to the collection ; returns the current size
+!          FileUseDefCollCollAdd  ! to add a FileUseDefColl to the collection ; returns the current size
+!          FileUseDefCollCollFind ! to search for a FileUseDefColl by the unitnr of this physics
+!          FileUseDefCollFind     ! sees which FileUseDefs are active for the current simulation time
+!                                   it adds there contribution to the output arrays optionally interpolated
+!                                   or transformed logarithmically or both.
+!                                   this is the function with the main functionality of this system
+!
+!     contains the following subroutine:
+!          Flinterpol             ! performs the actual interpolation, routine is for local use.
+!
       integer, parameter :: FILE_NAME_SIZE = 256             ! max length file path size
       integer, parameter :: MAX_NUM        =   5             ! allocated per bunch
-C
-C          Lock the files by LU-number, so that multiple instances
-C          may use the library
-C
+!
+!          Lock the files by LU-number, so that multiple instances
+!          may use the library
+!
       logical, dimension(100), save :: file_locked
 
 
-C
-C          this is the properties of the file itself
-C
+!
+!          this is the properties of the file itself
+!
       type FileProp
          character(len=FILE_NAME_SIZE)    :: name            ! file path
          integer                          :: ilun            ! unit number
@@ -73,23 +73,23 @@ C
          real, pointer                    :: array1(:)       ! interpolation arrays
          real, pointer                    :: array2(:)       ! interpolation arrays
       end type FileProp
-C
-C          this is the pointer to properties of files
-C
+!
+!          this is the pointer to properties of files
+!
       type FilePropPnt
          type(FileProp), pointer          :: pnt
       end type FilePropPnt
-C
-C          this is the collection of the files
-C
+!
+!          this is the collection of the files
+!
       type FilePropColl
          type(FilePropPnt), pointer       :: FilePropPnts(:) ! array with file properties
          integer                          :: maxsize         ! maximum size of the current array
          integer                          :: cursize         ! filled up to this size
       end type FilePropColl
-C
-C          this is one entry of the table of files
-C
+!
+!          this is one entry of the table of files
+!
       type FileUseDef
          type(FilePropPnt)                :: afilePnt        ! pointer to a file property
          real                             :: weight          ! weight for interpolation
@@ -98,9 +98,9 @@ C
          integer                          :: ioffset         ! time in file for istart
          logical                          :: active          ! time in file for istart
       end type FileUseDef
-C
-C          this is the set of files as defined for this physical entity
-C
+!
+!          this is the set of files as defined for this physical entity
+!
       type FileUseDefColl
          type(FileUseDef), pointer        :: FileUseDefs(:)  ! array with file definitions
          integer                          :: maxsize         ! maximum size of the current array
@@ -115,27 +115,27 @@ C
          real, pointer                    :: array2(:)       ! interpolation arrays
          real, pointer                    :: array3(:)       ! interpolation arrays
       end type FileUseDefColl
-C
-C          this is the collection of sets of files
-C
+!
+!          this is the collection of sets of files
+!
       type FileUseDefCollColl
          type(FileUseDefColl), pointer    :: FileUseDefColls(:) ! array with file definition collections
          integer                          :: maxsize            ! maximum size of the current array
          integer                          :: cursize            ! filled up to this size
       end type FileUseDefCollColl
-C
+!
 
       contains
 
-C
-C          function to find a file prop in a collection of fileproperties
-C
+!
+!          function to find a file prop in a collection of fileproperties
+!
       function FilePropCollFind( aFilePropColl, aFileProp ) result ( iret )
-C
+!
          type(FilePropColl)               :: aFilePropColl
          type(FileProp)                   :: aFileProp
          integer                          :: iret
-C
+!
          iret = 0
          do i = 1 , aFilePropColl%cursize         ! search by name
             if ( aFilePropColl%FilePropPnts(i)%pnt%name .eq. aFileProp%name ) then
@@ -143,19 +143,19 @@ C
                return
             endif
          end do
-C
+!
       end function FilePropCollFind
-C
-C          function to add to a collection of fileproperties
-C
+!
+!          function to add to a collection of fileproperties
+!
       function FilePropCollAdd( aFilePropColl , aFileProp , nrftot ) result ( cursize )
-C
+!
          type(FilePropColl)               :: aFilePropColl
          type(FileProp)                   :: aFileProp
          type(FileProp), pointer          :: aPropPnt           ! should be a pointer to preserve space
          type(FilePropPnt), pointer       :: aFilePropPnts(:)   ! should be a pointer for the resize operation
          integer                          :: nrftot, cursize
-C                                                   ! this is the standard procedure to enlarge collections
+!                                                   ! this is the standard procedure to enlarge collections
          if ( aFilePropColl%cursize .eq. aFilePropColl%maxsize ) then
             allocate ( aFilePropPnts ( aFilePropColl%maxsize + MAX_NUM ) )
             do i = 1 , aFilePropColl%maxsize
@@ -203,18 +203,18 @@ C                                                   ! this is the standard proce
    10    cursize = 0
          aFilePropColl%cursize = aFilePropColl%cursize - 1
          return
-C
+!
       end function FilePropCollAdd
-C
-C          function to add to a collection of file use definitions
-C
+!
+!          function to add to a collection of file use definitions
+!
       function FileUseDefCollAdd( aFileUseDefColl , aFileUseDef ) result ( cursize )
-C
+!
          type(FileUseDefColl)             :: aFileUseDefColl
          type(FileUseDef)                 :: aFileUseDef
          type(FileUseDef), pointer        :: aFileUseDefs(:) ! should be a pointer for the resize operation
          integer                             cursize
-C                                                   ! this is the standard procedure to enlarge collections
+!                                                   ! this is the standard procedure to enlarge collections
          if ( aFileUseDefColl%cursize .eq. aFileUseDefColl%maxsize ) then
             allocate ( aFileUseDefs ( aFileUseDefColl%maxsize + MAX_NUM ) )
             do i = 1 , aFileUseDefColl%maxsize
@@ -224,22 +224,22 @@ C                                                   ! this is the standard proce
             aFileUseDefColl%FileUseDefs => aFileUseDefs
             aFileUseDefColl%maxsize = aFileUseDefColl%maxsize + MAX_NUM
          endif
-C
+!
          aFileUseDefColl%cursize = aFileUseDefColl%cursize + 1
          aFileUseDefColl%FileUseDefs( aFileUseDefColl%cursize ) = aFileUseDef
          cursize = aFileUseDefColl%cursize
-C
+!
       end function FileUseDefCollAdd
-C
-C          function to add to a collection of collections of file use definitions
-C
+!
+!          function to add to a collection of collections of file use definitions
+!
       function FileUseDefCollCollAdd( aFileUseDefCollColl , aFileUseDefColl ) result ( cursize )
-C
+!
          type(FileUseDefCollColl)         :: aFileUseDefCollColl
          type(FileUseDefColl)             :: aFileUseDefColl
          type(FileUseDefColl), pointer    :: aFileUseDefColls(:)  ! should be a pointer for the resize operation
          integer                             cursize
-C                                                   ! this is the standard procedure to enlarge collections
+!                                                   ! this is the standard procedure to enlarge collections
          if ( aFileUseDefCollColl%cursize .eq. aFileUseDefCollColl%maxsize ) then
             allocate ( aFileUseDefColls ( aFileUseDefCollColl%maxsize + MAX_NUM ) )
             do i = 1 , aFileUseDefCollColl%maxsize
@@ -249,23 +249,23 @@ C                                                   ! this is the standard proce
             aFileUseDefCollColl%FileUseDefColls => aFileUseDefColls
             aFileUseDefCollColl%maxsize = aFileUseDefCollColl%maxsize + MAX_NUM
          endif
-C
+!
          aFileUseDefCollColl%cursize = aFileUseDefCollColl%cursize + 1
          allocate ( aFileUseDefColl%array1(aFileUseDefColl%nrftot) ,
      *              aFileUseDefColl%array2(aFileUseDefColl%nrftot) ,
      *              aFileUseDefColl%array3(aFileUseDefColl%nrftot)  )
          aFileUseDefCollColl%FileUseDefColls( aFileUseDefCollColl%cursize ) = aFileUseDefColl
          cursize = aFileUseDefCollColl%cursize
-C
+!
       end function FileUseDefCollCollAdd
-C
-C          function to find a collection in a collection of collections of file use definitions
-C
+!
+!          function to find a collection in a collection of collections of file use definitions
+!
       function FileUseDefCollCollFind( aFileUseDefCollColl , ilun ) result ( found )
-C
+!
          type(FileUseDefCollColl)         :: aFileUseDefCollColl
          integer                             ilun, found
-C
+!
          found = 0
          do i = 1 , aFileUseDefCollColl%cursize          ! search by unitc number for this phisics
             if ( aFileUseDefCollColl%FileUseDefColls( i )%unitnr .eq. ilun ) then
@@ -273,22 +273,22 @@ C
                return
             endif
          enddo
-C
+!
       end function FileUseDefCollCollFind
-C
-C          function to find a file use def in a collection of file use definitions and make the result
-C
+!
+!          function to find a file use def in a collection of file use definitions and make the result
+!
       function FileUseDefCollFind( aUseDefColl, i, itime, UPDATE, LREWIN ) result ( found )
-C
-C          aUseDefColl    I    ! a collection of FileUseDefs in use for this physical entity
-C                              ! also contains the array for return values
-C          i              I    ! sequence number of this file in the UseDefColl for this entity
-C          itime          I    ! time for evaluation
-C          UPDATE         O    ! result has been updated
-C          LREWIN         O    ! file has been rewound
-C          found          R    ! return value ** if -aUseDef%istart then itime is befor start of this definition
-C                                                not clear what happens if aUseDef%istart itself is negative
-C
+!
+!          aUseDefColl    I    ! a collection of FileUseDefs in use for this physical entity
+!                              ! also contains the array for return values
+!          i              I    ! sequence number of this file in the UseDefColl for this entity
+!          itime          I    ! time for evaluation
+!          UPDATE         O    ! result has been updated
+!          LREWIN         O    ! file has been rewound
+!          found          R    ! return value ** if -aUseDef%istart then itime is befor start of this definition
+!                                                not clear what happens if aUseDef%istart itself is negative
+!
          type(FileUseDefColl)             :: aUseDefColl
          type(FileUseDef),pointer         :: aUseDef
          type(FileProp),pointer           :: aProp
@@ -296,12 +296,12 @@ C
          logical                             UPDATE, LREWIN, LrLocal
 
 
-C
+!
          found   = -1                                         ! default reaction
          UPDATE  = .FALSE.                                    ! default reaction
 !jtest   LREWIN  = .FALSE.                                    ! default reaction
          LrLocal = .FALSE.                                    ! local to test rewind
-C
+!
          nrftot  = aUseDefColl%nrftot
          itLocal = itime - aUseDefColl%ioffset                ! time within this collection of file defs
          aUseDef => aUseDefColl%FileUseDefs(i)                ! get the FileUseDef for this call
@@ -309,29 +309,29 @@ C
          itFile = itLocal - aUseDef%istart + aUseDef%ioffset - aProp%ioffset  ! compute time in file
 
          call lock_this_file( aProp%ilun )
-C
+!
          if ( itLocal .lt. aUseDef%istart ) then              ! if earlier than start of this definition
             found = -aUseDef%istart                           !      return minus start of this definition
             aUseDef%active = .false.
             call unlock_this_file( aProp%ilun )
             return
          endif
-C
+!
          if (   aUseDef%istop .eq. 0             .or.         ! if stop of the definition is not defined
      *          itLocal .lt. aUseDef%istop       .or.         ! or local time before stop
      *        ( itLocal .eq. aUseDef%istop .and.              ! or local time is stop,
      *          itLocal .eq. aUseDefColl%istop   )    ) then  !    but also end of collection then
-C
+!
             found = 0                                         ! we are in business
             aUseDef%active = .true.
-C
+!
             if ( itFile .lt. aProp%istart ) then              ! before physical start of file (strange)
                found = -aProp%istart                          !      probably an uncaught error in the input
                aUseDef%active = .false.                       !      it implies that aProp%istart > aProp%istop
                call unlock_this_file( aProp%ilun )
                return
             endif
-C
+!
             if ( itFile .lt. aProp%itime1 ) then              ! aparently a remnant from earlier invokation
                UPDATE = .TRUE.                                ! reset everything in this file property
                rewind ( aProp%ilun )
@@ -345,7 +345,7 @@ C
                aProp%ioffset = 0
                aUseDef%active = .false.
             endif
-C
+!
             if ( aProp%istop .ne. aProp%itime2 .and.          ! if file-stoptime is known (otherwise it increases with itime2)
      *           aProp%istop .lt. itFile ) then               ! and time in the file is after file-stoptime
                idt = ( (itFile-aProp%istop)/(aProp%istop-aProp%istart) + 1 ) * (aProp%istop-aProp%istart)
@@ -353,7 +353,7 @@ C
                itFile        = itFile        - idt            ! the timers at start of simulation, note that idt is always
                aUseDef%active = .false.                       ! a whole number times aProp%istop-aProp%istart
             endif
-C
+!
             do while ( itFile .ge. aProp%itime2 )             ! after or at time of second record ?
                UPDATE = .TRUE.                                ! update takes place
 
@@ -373,7 +373,7 @@ C
                endif
 
                goto 20                                        ! go to the optional detection of end time of the file
-C
+!
    10          if ( itFile .eq. aProp%itime2 ) then        ! only accept timings exactly on breakpoints
                   call Flinterpol ( aProp, aUseDefColl%array1, aUseDefColl%nrftot,
      *                              aUseDefColl%intopt, aUseDef, itLocal, itFile, UPDATE )
@@ -392,19 +392,19 @@ C
                if ( aProp%stream_access ) then
                   inquire( aProp%ilun, pos = aProp%position )
                endif
-C
+!
    20          if ( aProp%istop .eq. aProp%itime1 ) aProp%istop = aProp%itime2  ! update file stop
             end do                                            ! if all is alright, this should be it
-C
+!
             if ( .not. LrLocal .and. .not. LREWIN ) then    ! also sum in the saved system jtest also not when a previous rewind
                call Flinterpol ( aProp, aUseDefColl%array1, aUseDefColl%nrftot,
      *                        aUseDefColl%intopt, aUseDef, itLocal, itFile, UPDATE )
             endif
             call Flinterpol ( aProp, aUseDefColl%array2, aUseDefColl%nrftot,
      *                     aUseDefColl%intopt, aUseDef, itLocal, itFile, UPDATE )
-C
+!
          else                                                 ! we exceeded the stop time of the UseDef
-C
+!
             if ( aUseDef%active ) then                        ! it was apparently previously active
                if ( itFile .le. aProp%itime2 )                ! only accept timings exactly on breakpoints
      *            call Flinterpol ( aProp, aUseDefColl%array1, aUseDefColl%nrftot,
@@ -423,15 +423,15 @@ C
                UPDATE = .true.                                ! update has apparently taken place
                LREWIN = .true.
             endif
-C
+!
          endif
       call unlock_this_file( aProp%ilun )
-C
+!
       end function FileUseDefCollFind
 
-C
-C          subroutine to lock a file identified by the LU-number or wait until it is freed
-C
+!
+!          subroutine to lock a file identified by the LU-number or wait until it is freed
+!
       subroutine lock_this_file( ilun )
 
       integer, intent(in) :: ilun
@@ -445,9 +445,9 @@ C
 
       end subroutine lock_this_file
 
-C
-C          subroutine to unlock a file identified by the LU-number or wait until it is freed
-C
+!
+!          subroutine to unlock a file identified by the LU-number or wait until it is freed
+!
       subroutine unlock_this_file( ilun )
 
       integer, intent(in) :: ilun
@@ -456,10 +456,10 @@ C
 
       end subroutine unlock_this_file
 
-C
-C          subroutine to sleep a while (the argument is used to make the compiler aware of
-C          the fact that the file_locked variable may change outside the routine)
-C
+!
+!          subroutine to sleep a while (the argument is used to make the compiler aware of
+!          the fact that the file_locked variable may change outside the routine)
+!
       subroutine sleep_a_while( ilun )
 
       integer, intent(in) :: ilun
@@ -476,18 +476,18 @@ C
 
       end subroutine sleep_a_while
 
-C
+!
       subroutine Flinterpol ( aProp, array3, nrftot, intopt, aDef, itLocal, itFile, UPDATE )
-C
+!
          type(FileProp)   aProp
          type(FileUseDef) aDef
          real             array3(nrftot), weight
          logical          UPDATE
-C
+!
       weight = aDef%weight
       if ( abs(aDef%weight    ) .lt. 1.0E-30 ) weight = float(( itLocal - aDef%istart )) / ( aDef%istop - aDef%istart )
       if ( abs(aDef%weight+1.0) .lt. 1.0E-30 ) weight = float(( aDef%istop - itLocal  )) / ( aDef%istop - aDef%istart )
-C
+!
       if ( intopt .eq. 0 ) then
          do i = 1 , nrftot
             if ( itLocal .eq. aDef%istart ) UPDATE = .true.
@@ -531,9 +531,9 @@ C
 
       end subroutine Flinterpol
 
-C
-C          subroutine to close all open hydrodynamic files
-C
+!
+!          subroutine to close all open hydrodynamic files
+!
       subroutine CloseHydroFiles( collection )
       type(FileUseDefCollColl)      :: collection
 

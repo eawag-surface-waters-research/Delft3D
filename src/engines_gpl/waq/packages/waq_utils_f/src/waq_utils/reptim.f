@@ -22,32 +22,32 @@
 !!  rights reserved.
 
       SUBROUTINE REPTIM ( LUN , ITIME, ISFLAG, PERCIT )
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED       : August 1993 by Jan van Beek
-C
-C     FUNCTION      : Write time to unit according ISFLAG fromat
-C
-C     LOGICAL UNITS : LUN
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUN     INTEGER  1           INPUT   Unit number output
-C     ITIME   INTEGER  1           INPUT   Time in system clock units
-C     ISFLAG  INTEGER  1           INPUT   Output format indicator
-C                                          0 = integer format
-C                                          1 = dd:hh:mm:ss
-C                                          2 = yy:ddd:hh:mm:ss
-C     PERCIT  REAL     1           INPUT   IF >= 0 then percentage to be printed
-C
-C     Declaration of arguments
-C
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED       : August 1993 by Jan van Beek
+!
+!     FUNCTION      : Write time to unit according ISFLAG fromat
+!
+!     LOGICAL UNITS : LUN
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUN     INTEGER  1           INPUT   Unit number output
+!     ITIME   INTEGER  1           INPUT   Time in system clock units
+!     ISFLAG  INTEGER  1           INPUT   Output format indicator
+!                                          0 = integer format
+!                                          1 = dd:hh:mm:ss
+!                                          2 = yy:ddd:hh:mm:ss
+!     PERCIT  REAL     1           INPUT   IF >= 0 then percentage to be printed
+!
+!     Declaration of arguments
+!
       INTEGER LUN   , ITIME , ISFLAG
       REAL    PERCIT
-C
+!
       IF ( ISFLAG .EQ. 0 ) THEN
          IF ( PERCIT .GE. 0.0 ) THEN
             WRITE (LUN,2030) ITIME,PERCIT
@@ -100,7 +100,7 @@ C
      *                       MOD(ITIME,60)
          ENDIF
       ENDIF
-C
+!
       RETURN
  2000 FORMAT ('  TIME = ',I12,' .')
  2010 FORMAT ('  TIME = ',I3,'D ',I2,'H ',I2,'M ',I2,'S .')

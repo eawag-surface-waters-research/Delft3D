@@ -27,53 +27,40 @@
 !>\file
 !>       Quantiles for a given substance during a given period
 
-C***********************************************************************
-C
-C     Project : Delft3D-WAQ
-C     Author  : Arjen Markus
-C     Date    : 8-1-2002           Version : 0.1
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C      8-1-02 Arjen Markus    Create first version
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                  Units
-C ----    --- -  -    -------------------                          -----
-C
-C CONC           I    Concentration of the substance            1
-C TSTART         I    Start of statistical period               2
-C TSTOP          I    Stop of statistical period                3
-C TIME           I    Time in calculation                       4
-C DELT           I    Timestep                                  5
-C NOBUCK         I    Number of buckets to use                  6
-C CLOBND         I    Expected lower bound                      7
-C CUPBND         I    Expected upper bound                      8
-C CQLEV          I    Quantile (in %) to be reported            9
-C TCOUNT       I/O    Count of times (must be imported!)       10
-C CWRK01       I/O    First work array                    10 +  1
-C    ...
-C CWRKxx       I/O    Last work array (NOBUCK in total)   10 + NOBUCK
-C CQUANT         O    Estimated quantile                  11 + NOBUCK
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                  Units
+! ----    --- -  -    -------------------                          -----
+!
+! CONC           I    Concentration of the substance            1
+! TSTART         I    Start of statistical period               2
+! TSTOP          I    Stop of statistical period                3
+! TIME           I    Time in calculation                       4
+! DELT           I    Timestep                                  5
+! NOBUCK         I    Number of buckets to use                  6
+! CLOBND         I    Expected lower bound                      7
+! CUPBND         I    Expected upper bound                      8
+! CQLEV          I    Quantile (in %) to be reported            9
+! TCOUNT       I/O    Count of times (must be imported!)       10
+! CWRK01       I/O    First work array                    10 +  1
+!    ...
+! CWRKxx       I/O    Last work array (NOBUCK in total)   10 + NOBUCK
+! CQUANT         O    Estimated quantile                  11 + NOBUCK
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
      +         IP6   , IP7   , IP8   , IP9   , IP10  ,
      +         IP11  ,
@@ -104,9 +91,9 @@ C
       IP9 = IPOINT(9)
       IP10= IPOINT(10)
       IP11= IPOINT(11+NOBUCK)
-C
-C     Names for indices that turn up in various places
-C
+!
+!     Names for indices that turn up in various places
+!
       IPTCNT=IP10
       IPBUCK=10
 
@@ -162,33 +149,33 @@ C
          BCKLIM(IB) = BMIN  + REAL(IB-1) * BDIFF
   110 CONTINUE
 
-C
-C     There are five cases, defined by the time:
-C                        TIME <  TSTART-0.5*DELT : do nothing
-C     TSTART-0.5*DELT <= TIME <  TSTART+0.5*DELT : initialise
-C     TSTART          <  TIME <  TSTOP           : accumulate
-C     TSTOP           <= TIME <  TSTOP+0.5*DELT  : finalise
-C     TSTOP+0.5*DELT  <  TIME                    : do nothing
-C
-C     (Use a safe margin)
-C
+!
+!     There are five cases, defined by the time:
+!                        TIME <  TSTART-0.5*DELT : do nothing
+!     TSTART-0.5*DELT <= TIME <  TSTART+0.5*DELT : initialise
+!     TSTART          <  TIME <  TSTOP           : accumulate
+!     TSTOP           <= TIME <  TSTOP+0.5*DELT  : finalise
+!     TSTOP+0.5*DELT  <  TIME                    : do nothing
+!
+!     (Use a safe margin)
+!
       TSTART = PMSA(IP2)
       TSTOP  = PMSA(IP3)
       TIME   = PMSA(IP4)
       DELT   = PMSA(IP5)
       TCOUNT = PMSA(IPTCNT)
 
-C
-C      Start and stop criteria are somewhat involved. Be careful
-C      to avoid spurious calculations (initial and final) when
-C      none is expected.
-C      Notes:
-C      - The initial value for TCOUNT must be 0.0
-C      - Time is expected to be the model time (same time frame
-C        as the start and stop times of course)
-C      - Check that the NEXT timestep will not exceed the stop time,
-C        otherwise this is the last one
-C
+!
+!      Start and stop criteria are somewhat involved. Be careful
+!      to avoid spurious calculations (initial and final) when
+!      none is expected.
+!      Notes:
+!      - The initial value for TCOUNT must be 0.0
+!      - Time is expected to be the model time (same time frame
+!        as the start and stop times of course)
+!      - Check that the NEXT timestep will not exceed the stop time,
+!        otherwise this is the last one
+!
       ITYPE  = 0
       IF ( TIME .GE. TSTART-0.001*DELT ) THEN
          ITYPE = 2
@@ -204,19 +191,19 @@ C
       TCOUNT       = TCOUNT + DELT
       PMSA(IPTCNT) = TCOUNT
 
-C
-C     Determine the length of the period for the quantile
-C     (only used if ITYPE is 3)
-C
+!
+!     Determine the length of the period for the quantile
+!     (only used if ITYPE is 3)
+!
       PQUANT = PMSA(IP9) * 0.01 * TCOUNT
 
       DO 9000 ISEG=1,NOSEG
          IF (BTEST(IKNMRK(ISEG),0)) THEN
 
-C
-C        The first time is special. Initialise the arrays.
-C        The last time requires additional processing.
-C
+!
+!        The first time is special. Initialise the arrays.
+!        The last time requires additional processing.
+!
          IF ( ITYPE .EQ. 1 ) THEN
             DO 2010 IB = 1,NOBUCK
                PMSA(IBUCK(IB)) = 0.0
@@ -233,16 +220,16 @@ C
  2030    CONTINUE
 
          IF ( ITYPE .EQ. 3 .AND. TCOUNT .GT. 0.0 ) THEN
-C
-C           Accumulate the values in the buckets until we add up
-C           to at least the requested percentage of total time.
-C           Then interpolate assuming a uniform distribution
-C           within each bucket.
-C           Special note:
-C           If the ranges have been set wrongly, then the
-C           outer buckets will contain the quantile. In that
-C           case: set to -999.0
-C
+!
+!           Accumulate the values in the buckets until we add up
+!           to at least the requested percentage of total time.
+!           Then interpolate assuming a uniform distribution
+!           within each bucket.
+!           Special note:
+!           If the ranges have been set wrongly, then the
+!           outer buckets will contain the quantile. In that
+!           case: set to -999.0
+!
             PMSA(IP11) = -999.0
             BSUM   = PMSA(IBUCK(1))
             IF ( BSUM .LT. PQUANT ) THEN
@@ -270,10 +257,10 @@ C
 
  9000 CONTINUE
 
-C
-C     Be sure to turn off the statistical procedure, once the end has been
-C     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
-C
+!
+!     Be sure to turn off the statistical procedure, once the end has been
+!     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
+!
       IF ( ITYPE .EQ. 3 ) THEN
          PMSA(IPTCNT) = -TCOUNT
       ENDIF

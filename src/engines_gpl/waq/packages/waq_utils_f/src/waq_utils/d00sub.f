@@ -87,9 +87,9 @@
      +                    StatProcesDef, AllItems ,
      +                    NOINFO       , NOWARN   ,
      +                    IERR         )
-C
+!
       USE ProcesSet
-C
+!
       INTEGER       LUNREP , NPOS   , LSTACK , IOUTPT , NOINFO ,
      +              NOWARN , IERR
       LOGICAL       DTFLG1 , DTFLG3

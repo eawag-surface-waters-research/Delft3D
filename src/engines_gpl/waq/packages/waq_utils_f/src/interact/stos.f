@@ -22,10 +22,10 @@
 !!  rights reserved.
 
       INTEGER FUNCTION STOS (SOURCE, POS, LENGTH, RESULT, LENOUT)
-C
+!
       CHARACTER*1 SOURCE(1), RESULT(1)
       INTEGER POS, LENGTH, LENOUT
-C
+!
       IF (POS .LE. 0) GO TO 30
       IF (LENGTH .LT. POS) GO TO 40
       LENOUT = 0

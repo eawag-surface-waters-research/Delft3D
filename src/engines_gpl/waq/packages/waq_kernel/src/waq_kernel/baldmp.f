@@ -25,41 +25,41 @@
      +                   NDMPS , NTDMPQ, IQDMP , ISDMP , IPDMP ,
      +                   DMPQ  , MASS  , DMPS  , FLXDMP, ASMASS,
      +                   FLXINT)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : march 1995 by Jan van Beek
-C
-C     FUNCTION            : Fills balances for sub-area's
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          : 15
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSYS   INTEGER       1     INPUT   Total number of active substances
-C     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
-C     NDMPAR  INTEGER       1     INPUT   Number of dump areas
-C     NDMPQ   INTEGER       1     INPUT   Number of dump exchanges
-C     NDMPS   INTEGER       1     INPUT   Number of dump segments
-C     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
-C     IQDMP   INTEGER       *     INPUT   Exchange to dumped exchange pointer
-C     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
-C     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
-C     DMPQ    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
-C     DMPS    REAL  NOTOT*NDMPS*? INPUT   mass balance dumped segments
-C     FLXDMP  REAL  NOFLUX*NDMPS  INPUT   Integrated fluxes
-C     ASMASS  REAL NOTOT*NDMPAR*6 OUTPUT  Mass balance terms
-C     FLXINT  REAL  NOFLUX*NDMPAR OUTPUT  Integrated fluxes
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : march 1995 by Jan van Beek
+!
+!     FUNCTION            : Fills balances for sub-area's
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          : 15
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOSYS   INTEGER       1     INPUT   Total number of active substances
+!     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
+!     NDMPAR  INTEGER       1     INPUT   Number of dump areas
+!     NDMPQ   INTEGER       1     INPUT   Number of dump exchanges
+!     NDMPS   INTEGER       1     INPUT   Number of dump segments
+!     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
+!     IQDMP   INTEGER       *     INPUT   Exchange to dumped exchange pointer
+!     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
+!     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
+!     DMPQ    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
+!     DMPS    REAL  NOTOT*NDMPS*? INPUT   mass balance dumped segments
+!     FLXDMP  REAL  NOFLUX*NDMPS  INPUT   Integrated fluxes
+!     ASMASS  REAL NOTOT*NDMPAR*6 OUTPUT  Mass balance terms
+!     FLXINT  REAL  NOFLUX*NDMPAR OUTPUT  Integrated fluxes
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER       NOTOT , NOSYS , NOFLUX, NDMPAR, NDMPQ ,
@@ -69,25 +69,25 @@ C
       REAL          DMPQ(NOSYS,NDMPQ,*)   , MASS(NOTOT,*)   ,
      +              DMPS(NOTOT,NDMPS,*)   , FLXDMP(NOFLUX,*),
      +              ASMASS(NOTOT,NDMPAR,*), FLXINT(NOFLUX,*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER       ITEL1 , ITEL2 , IP1   , IDUMP , NQC   ,
      +              IQC   , IQ    , IPQ   , ISYS  , NSC   ,
      +              ISC   , ISEG  , IPS
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "baldmp", ithandl )
 
-C
-C     Loop over the dump area's
-C
+!
+!     Loop over the dump area's
+!
       ITEL1 = NDMPAR
       IP1   = NDMPAR + NTDMPQ
       ITEL2 = NDMPAR + NTDMPQ + NDMPAR
       DO 100 IDUMP = 1 , NDMPAR
-C
-C        the exchange contributes
-C
+!
+!        the exchange contributes
+!
          NQC = IPDMP(IDUMP)
          DO 30 IQC = 1 , NQC
             ITEL1 = ITEL1 + 1
@@ -110,9 +110,9 @@ C
    20          CONTINUE
             ENDIF
    30    CONTINUE
-C
-C        the segment contributes
-C
+!
+!        the segment contributes
+!
          DO ISYS = 1 , NOTOT
             ASMASS(ISYS,IDUMP,1) = 0.0
          ENDDO
@@ -133,12 +133,12 @@ C
      +                                   DMPS(ISYS,IPS,3)
    40          CONTINUE
             ENDIF
-C
+!
    60    CONTINUE
-C
+!
   100 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
       END

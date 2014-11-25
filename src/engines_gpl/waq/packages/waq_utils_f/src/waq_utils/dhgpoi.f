@@ -24,7 +24,7 @@
       SUBROUTINE DHGPOI( IVAR  , IARRAY, IKIND , IVINDX, IDIM1 ,
      +                   IDIM2 , IP_AR , IGRID , ISYS  , NOTOT ,
      +                   IP_VAR)
-C
+!
       IF ( IKIND .EQ. 2 ) THEN
          ISYS   = IVINDX
          NOTOT  = IDIM1
@@ -34,14 +34,14 @@ C
          NOTOT  = 1
          IP_VAR = IP_AR+(IGRID-1)*IDIM1*IDIM2+(IVINDX-1)*IDIM1
       ELSE
-C
-C        ERROR , undefined kind of array
-C
+!
+!        ERROR , undefined kind of array
+!
          CALL GETMLU(LUREP)
          WRITE(LUREP,2000) IKIND, IARRAY, IVAR
          CALL SRSTOP(1)
       ENDIF
-C
+!
       RETURN
  2000 FORMAT ( ' ERROR: undefined kind of array :',I8,
      +        /'        array number             ',I8,

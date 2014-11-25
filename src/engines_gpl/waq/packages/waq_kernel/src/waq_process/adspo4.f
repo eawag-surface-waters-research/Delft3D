@@ -27,105 +27,76 @@
 !>\file
 !>       P-ad/desorption to particulate inorganic matter. 3 options for sorption formulation.
 
-C***********************************************************************
-C
-C     Project : GEM  (T2087)
-C     Author  : Rik Sonneveldt, Pascal Boderie
-C     Date    : 970512             Version : 0.10
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     930322  Pascal Boderie  Create first version
-C     970512  Rik SOnneveldt  Extension with option for GEM, revision of
-C                             existing code.
-C     970929  Rik Sonneveldt  ikmrk1 loop aangepast voor bodem
-C     990310  Anouk Blauw     formulering Afree aangepast: porositeit
-C                             toegevoegd
-C     020220  Johannes Smits  New version (IVERSN=1) with calculation of
-C                             adsorption capacity for inorganic matter
-C                             fractions IM1-3,
-C                             four errors with respect to porosity and
-C                             pH removed,
-C                             partition coefficient option 1 replaced
-C                             with adsorption constant,
-C                             change of names
-C                             Old version maintained (IVERSN=0)
-C     041108  Johannes Smits  Formulation Cphae for SWAdsP=2 corrected
-C     110308  Johannes Smits  EQAAP maximized on CADST for SWAdsP=2
-C
-C***********************************************************************
-C
-C     Description of the module :
-C     P-adsorption onto particulate inorganic matter. 3 options for
-C     sorption formulation.
-C
-C        ----- old version -----
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C AAP     R*4 1 I AAP concentration                                [gP/m3]
-C SWAdsP  R*4 1 I swithc for adsorption option to use                  [-]
-C DELT    R*4 1 I DELWAQ timestep                                    [scu]
-C EQAAP   R*4 1 L calculated equlibrium AAP concentration          [gP/m3]
-C FL (1)  R*4 1 O adsorption/desorption flux                     [gP/m3/d]
-C TIM     R*4 1 I TIM   concentration                             [gDM/m3]
-C KD      R*4 1 I partition coefficent PO4-AAP             [-] or [m3/gDM]
-C MAXADS  R*4 1 I maximum adsorption (capacity)                   [gP/gDM]
-C PMSA(9) R*4 1 O calculated equlibrium AAP concentration          [gP/m3]
-C PO4     R*4 1 I PO4 concentration                                [gP/m3]
-C RCADS   R*4 1 I first order rate constatnt adsorption              [1/d]
-C
-C        ----- new version -----
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C AAP     R*4 1 I AAP concentration                                [gP/m3]
-C PO4     R*4 1 I PO4 concentration                                [gP/m3]
-C EQAAP   R*4 1 - calculated equlibrium AAP concentration          [gP/m3]
-C KDADS   R*4 1 I distribution coeff. [-], or adsorpt. constant    [m3/gP]
-C KADS20  R*4 1 I molar adsorption constant at 20 oC    [mole(a-1).l(a-1)]
-C KADS    R*4 1 - molar adsorption constant             [mole(a-1).l(a-1)]
-C KSORP   R*4 1 I first order rate constant for adsorption           [1/d]
-C FCAP    R*4 1 I adsorption capacity for Fe                      [gP/gFe]
-C FRA     R*4 1 - correction factor for oxidised iron                  [-]
-C FADS    R*4 1 O adsorption/desorption flux                     [gP/m3/d]
-C CADST   R*4 1 - molar total concentration adsorption sites    [moleFe/l]
-C CADS    R*4 1 - molar concentration free adsorption sites     [moleFe/l]
-C IM1     R*4 1 I IM1 concentration                               [gDM/m3]
-C IM2     R*4 1 I IM2 concentration                               [gDM/m3]
-C IM3     R*4 1 I IM3 concentration                               [gDM/m3]
-C TFE     R*4 1 - total Fe concentration                          [gFe/m3]
-C FRFE1   R*4 1 I fraction of Fe in IM1                          [gFe/gDW]
-C FRFE2   R*4 1 I fraction of Fe in IM2                          [gFe/gDW]
-C FRFE3   R*4 1 I fraction of Fe in IM3                          [gFe/gDW]
-C FRFEOX  R*4 1 I fraction of oxidised Fe                              [-]
-C FIM1    R*4 1 O fraction of adsorbed P in IM1                        [-]
-C FIM2    R*4 1 O fraction of adsorbed P in IM2                        [-]
-C FIM3    R*4 1 O fraction of adsorbed P in IM3                        [-]
-C PH      R*4 1 I pH                                                   [-]
-C OH      R*4 1 - hydroxyl concentration                          [mole/l]
-C AOH     R*4 1 I reaction constant for hydroxyl                       [-]
-C TEMP    R*4 1 I temperature                                         [oC]
-C TC      R*4 1 I temperature coeffcient adsorption constant           [-]
-C OXY     R*4 1 I dissolved oxygen concentration                  [gO2/m3]
-C CROXY   R*4 1 I critical dissolved oxygen concentration         [gO2/m3]
-C POROS   R*4 1 I prorosity                                            [-]
-C DELT    R*4 1 I DELWAQ timestep                                    [scu]
-C SWADSP  R*4 1 I switch for selection of the adsorption option        [-]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!     P-adsorption onto particulate inorganic matter. 3 options for
+!     sorption formulation.
+!
+!        ----- old version -----
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! AAP     R*4 1 I AAP concentration                                [gP/m3]
+! SWAdsP  R*4 1 I swithc for adsorption option to use                  [-]
+! DELT    R*4 1 I DELWAQ timestep                                    [scu]
+! EQAAP   R*4 1 L calculated equlibrium AAP concentration          [gP/m3]
+! FL (1)  R*4 1 O adsorption/desorption flux                     [gP/m3/d]
+! TIM     R*4 1 I TIM   concentration                             [gDM/m3]
+! KD      R*4 1 I partition coefficent PO4-AAP             [-] or [m3/gDM]
+! MAXADS  R*4 1 I maximum adsorption (capacity)                   [gP/gDM]
+! PMSA(9) R*4 1 O calculated equlibrium AAP concentration          [gP/m3]
+! PO4     R*4 1 I PO4 concentration                                [gP/m3]
+! RCADS   R*4 1 I first order rate constatnt adsorption              [1/d]
+!
+!        ----- new version -----
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! AAP     R*4 1 I AAP concentration                                [gP/m3]
+! PO4     R*4 1 I PO4 concentration                                [gP/m3]
+! EQAAP   R*4 1 - calculated equlibrium AAP concentration          [gP/m3]
+! KDADS   R*4 1 I distribution coeff. [-], or adsorpt. constant    [m3/gP]
+! KADS20  R*4 1 I molar adsorption constant at 20 oC    [mole(a-1).l(a-1)]
+! KADS    R*4 1 - molar adsorption constant             [mole(a-1).l(a-1)]
+! KSORP   R*4 1 I first order rate constant for adsorption           [1/d]
+! FCAP    R*4 1 I adsorption capacity for Fe                      [gP/gFe]
+! FRA     R*4 1 - correction factor for oxidised iron                  [-]
+! FADS    R*4 1 O adsorption/desorption flux                     [gP/m3/d]
+! CADST   R*4 1 - molar total concentration adsorption sites    [moleFe/l]
+! CADS    R*4 1 - molar concentration free adsorption sites     [moleFe/l]
+! IM1     R*4 1 I IM1 concentration                               [gDM/m3]
+! IM2     R*4 1 I IM2 concentration                               [gDM/m3]
+! IM3     R*4 1 I IM3 concentration                               [gDM/m3]
+! TFE     R*4 1 - total Fe concentration                          [gFe/m3]
+! FRFE1   R*4 1 I fraction of Fe in IM1                          [gFe/gDW]
+! FRFE2   R*4 1 I fraction of Fe in IM2                          [gFe/gDW]
+! FRFE3   R*4 1 I fraction of Fe in IM3                          [gFe/gDW]
+! FRFEOX  R*4 1 I fraction of oxidised Fe                              [-]
+! FIM1    R*4 1 O fraction of adsorbed P in IM1                        [-]
+! FIM2    R*4 1 O fraction of adsorbed P in IM2                        [-]
+! FIM3    R*4 1 O fraction of adsorbed P in IM3                        [-]
+! PH      R*4 1 I pH                                                   [-]
+! OH      R*4 1 - hydroxyl concentration                          [mole/l]
+! AOH     R*4 1 I reaction constant for hydroxyl                       [-]
+! TEMP    R*4 1 I temperature                                         [oC]
+! TC      R*4 1 I temperature coeffcient adsorption constant           [-]
+! OXY     R*4 1 I dissolved oxygen concentration                  [gO2/m3]
+! CROXY   R*4 1 I critical dissolved oxygen concentration         [gO2/m3]
+! POROS   R*4 1 I prorosity                                            [-]
+! DELT    R*4 1 I DELWAQ timestep                                    [scu]
+! SWADSP  R*4 1 I switch for selection of the adsorption option        [-]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT REAL (A-H,J-Z)
-C
+!
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IVERSN
       REAL     AAP   , PO4   , EQAAP , KDADS , KADS20 , KADS   , KSORP ,
      +         FCAP  , FRA   , FADS  , CADST , CADS   , IM1    , IM2   ,
@@ -136,7 +107,7 @@ C
       INTEGER  NR_MES, ILUMON
       SAVE     NR_MES
       DATA     NR_MES / 0 /
-C
+!
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -172,26 +143,26 @@ C
       IP32 = IPOINT(32)
       IP33 = IPOINT(33)
       IP34 = IPOINT(34)
-C
+!
       IFLUX = 0
-C
+!
       IVERSN = NINT( PMSA( IP23) )
-C
-C     Use the old version when IVERSN=0
-C
+!
+!     Use the old version when IVERSN=0
+!
       DO 9000 ISEG = 1 , NOSEG
 
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1.OR.IKMRK1.EQ.3) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       IF (IVERSN .EQ. 0) THEN
-C
+!
         dPAds = 0.0
         EQAAP = 0.0
         AtotP = 0.0
         Kads  = 0.0
-C
+!
         SWAdsP = PMSA(IP1 )
         PO4    = MAX( PMSA(IP2 ), 0.0)
         AAP    = MAX( PMSA(IP3 ), 0.0)
@@ -202,7 +173,7 @@ C
         KD     = PMSA(IP7 )
         MAXADS = PMSA(IP8 )
         DELT   = PMSA(IP9 )
-C
+!
         TIM    = IM1 + IM2 + IM3
         QIM1 = 0.0
         QIM2 = 0.0
@@ -219,26 +190,26 @@ C
            IF ( IM2 .GT. 1E-10 ) QIM2 = AAP*FIM2/IM2
            IF ( IM3 .GT. 1E-10 ) QIM3 = AAP*FIM3/IM3
         ENDIF
-C
-C------ Error messages
-C
+!
+!------ Error messages
+!
         IF (KD.LT.0.0) CALL ERRSYS ('KD in ADSPO4 lower then zero', 1 )
         IF (((ABS(KD) .LT. 1E-20) .OR. (ABS(PO4).LT.1E-20))
      &      .AND. (ABS(MAXADS) .LT. 1E-20) )
      &     CALL ERRSYS
      &              ('(KD or PO4) and MAXADS equal zero in ADSPO4', 1 )
-C
-C------ (1) Instantanaeous equilibrium partitioning
-C           SWAdsP = 0
-C
+!
+!------ (1) Instantanaeous equilibrium partitioning
+!           SWAdsP = 0
+!
         IF (NINT(SWAdsP) .EQ. 0) THEN
             dPAds =(((AAP + PO4) / (1.+ KD)) - AAP) /  DELT
             EQAAP = -1.0
         ENDIF
-C
-C------ (2) Kinetic Langmuir sorption
-C           SWAdsP = 1
-C
+!
+!------ (2) Kinetic Langmuir sorption
+!           SWAdsP = 1
+!
         IF (NINT(SWAdsP) .EQ. 1) THEN
           IF ( (MAXADS .LT. 1.E-10) .OR. (KD .LT. 1.E-10)) THEN
              EQAAP = 0.0
@@ -248,10 +219,10 @@ C
              dPAds = RCADS * (EQAAP - AAP)
           ENDIF
         ENDIF
-C
-C------ (3) GEM formulation for sorption
-C           SWAdsP = 2
-C
+!
+!------ (3) GEM formulation for sorption
+!           SWAdsP = 2
+!
         IF (NINT(SWAdsP) .EQ. 2) THEN
            KAds20   = PMSA(IP10)
            TCKAds   = PMSA(IP11)
@@ -264,35 +235,35 @@ C
            pH       = PMSA(IP20)
            Temp     = PMSA(IP21)
            poros    = PMSA(IP22)
-C
-C--------- (3a) Eqs 6.38, 6.37 of GEM report
+!
+!--------- (3a) Eqs 6.38, 6.37 of GEM report
            OH = 10.0**(pH-14.0)
            IF (OXY .GE. CrOXY*POROS) THEN
               fOxSor = 1.0
            ELSE
               fOxSor = frFeox
            ENDIF
-C
-C--------- (3b) Eqn 6.36 of GEM report : total sorption capacity (mol/l)
+!
+!--------- (3b) Eqn 6.36 of GEM report : total sorption capacity (mol/l)
            AtotP = fOxSor * fr_Fe * TIM/(56000.0 * poros)
-C
-C--------- (3c) Eqn 6.35 of GEM report : free sorption capacity (mol/l)
+!
+!--------- (3c) Eqn 6.35 of GEM report : free sorption capacity (mol/l)
            Afree = AtotP - (AAP/(31000.0 *poros))
-C
-C--------- (3d) Eqn 6.34 of GEM report : temp.correction of Kads
+!
+!--------- (3d) Eqn 6.34 of GEM report : temp.correction of Kads
            Kads = Kads20 * TCKads**(Temp-20.0)
-C
-C--------- (3e) Eqn 6.33 of GEM report : equilibrium conc of Pads (gP/m3)
+!
+!--------- (3e) Eqn 6.33 of GEM report : equilibrium conc of Pads (gP/m3)
            EQAAP = (AAP + PO4) *
      &             (1.0 - 1.0/(Kads*Afree*(OH**aOHPO4) + 1.0))
-C
-C--------- (3f) Eqn 6.31 of GEM report : the adsorption flux (gP/m3/d)
+!
+!--------- (3f) Eqn 6.31 of GEM report : the adsorption flux (gP/m3/d)
            dPads = RCAdsP * (EQAAP - AAP)
-C
+!
         ENDIF
-C
-C---- Output of module
-C
+!
+!---- Output of module
+!
       FL(1+IFLUX) = dPAds
       PMSA(IP26)  = EQAAP
       PMSA(IP27)  = AtotP
@@ -303,13 +274,13 @@ C
       PMSA(IP32)  = QIM1
       PMSA(IP33)  = QIM2
       PMSA(IP34)  = QIM3
-C
-C---- End active cells block
-C
+!
+!---- End active cells block
+!
       ELSE
-C
-C     Use the new version when IVERSN=1
-C
+!
+!     Use the new version when IVERSN=1
+!
         SWADSP = PMSA(IP1 )
         PO4    = MAX( PMSA(IP2 ) , 0.0)
         AAP    = MAX( PMSA(IP3 ) , 0.0)
@@ -323,11 +294,11 @@ C
         FRFE1  = PMSA(IP14)
         FRFE2  = PMSA(IP15)
         FRFE3  = PMSA(IP16)
-C
-C     Calculation of the total concentration of iron and
-C     the fractions of adsorbed phosphate in the inorganic matter
-C     fractions IM1-3
-C
+!
+!     Calculation of the total concentration of iron and
+!     the fractions of adsorbed phosphate in the inorganic matter
+!     fractions IM1-3
+!
         TFE  = FRFE1 * IM1 + FRFE2 * IM2 + FRFE3 * IM3
         QIM1 = 0.0
         QIM2 = 0.0
@@ -344,33 +315,33 @@ C
            IF ( IM2 .GT. 1E-10 ) QIM2 = AAP*FIM2/IM2
            IF ( IM3 .GT. 1E-10 ) QIM3 = AAP*FIM3/IM3
         ENDIF
-C
-C     Error messages
-C
+!
+!     Error messages
+!
         IF (KDADS .LT. 0.0) CALL ERRSYS ('KDADS in ADSPO4 negative', 1 )
         IF (((ABS(KDADS) .LT. 1E-20) .OR. (ABS(PO4) .LT. 1E-20))
      +     .AND. (ABS(FCAP) .LT. 1E-20) )
      +     CALL ERRSYS
      +     ('(KDADS or PO4) and FCAP equal zero in ADSPO4', 1 )
-C
-C     Start the calculation of the sorption flux
-C     Use one of three options
-C
+!
+!     Start the calculation of the sorption flux
+!     Use one of three options
+!
         CADS  = 0.0
         CADST = 0.0
         EQAAP = 0.0
         FADS  = 0.0
         KADS  = 0.0
-C
-C     SWADSP = 0 : Instantaneous equilibrium partitioning
-C
+!
+!     SWADSP = 0 : Instantaneous equilibrium partitioning
+!
         IF (NINT(SWADSP) .EQ. 0) THEN
             FADS  =(((AAP + PO4) / (1.0 + KDADS)) - AAP) / DELT
             EQAAP = -1.0
         ENDIF
-C
-C     SWADSP = 1 : Langmuir sorption
-C
+!
+!     SWADSP = 1 : Langmuir sorption
+!
         IF (NINT(SWADSP) .EQ. 1) THEN
           IF ( (FCAP .LT. 1E-10) .OR. (KDADS .LT. 1E-10)) THEN
              EQAAP = 0.0
@@ -381,9 +352,9 @@ C
              FADS  = KSORP * (EQAAP - AAP)
           ENDIF
         ENDIF
-C
-C     SWADSP = 2 : pH dependent Langmuir sorption
-C
+!
+!     SWADSP = 2 : pH dependent Langmuir sorption
+!
         IF (NINT(SWADSP) .EQ. 2) THEN
            KADS20   = PMSA(IP10)
            TC       = PMSA(IP11)
@@ -411,51 +382,51 @@ C
                  WRITE(ILUMON,*) ' Further messages on algae surpressed'
               ENDIF
            ENDIF
-C
-C     Calculate pH dependency (hydroxyl) and factor for redox potential
-C
+!
+!     Calculate pH dependency (hydroxyl) and factor for redox potential
+!
            OH = 10.0**(PH-14.0)
            IF (OXY .GE. (CROXY*POROS) ) THEN
               FRA = 1.0
            ELSE
               FRA = FRFEOX
            ENDIF
-C
-C     Calculate total sorption capacity (mol/l)
-C
+!
+!     Calculate total sorption capacity (mol/l)
+!
            CADST = FRA * TFE / (56000.0 * POROS)
-C
-C     Calculate free sorption capacity (mol/l)
-C
+!
+!     Calculate free sorption capacity (mol/l)
+!
            CADS  = CADST - (AAP / (31000.0 * POROS) )
-C
-C     Calculate temperature corrected KADS
-C
+!
+!     Calculate temperature corrected KADS
+!
            KADS  = KADS20 * TC**(TEMP-20.0)
-C
-C     Calculate equilibrium concentration of adsorbed P (gP/m3)
-C
+!
+!     Calculate equilibrium concentration of adsorbed P (gP/m3)
+!
            IF ( ABS(CADS) .LT. 1.E-20 ) THEN
               EQAAP = 0.0
            ELSE
               EQAAP = (AAP + PO4)/(1.0 + OH**AOH/(KADS*CADS))
            ENDIF
-C
-C     Maximize EQAAP on equivalent CADST
-C
+!
+!     Maximize EQAAP on equivalent CADST
+!
            IF ( CADS .LT. 0.0 ) THEN
               EQAAPM = 0.9 * CADST * (31000.0 * POROS)
               EQAAP = EQAAPM
            ENDIF
-C
-C     Calculate the adsorption flux (gP/m3/d)
-C
+!
+!     Calculate the adsorption flux (gP/m3/d)
+!
            FADS  = KSORP * (EQAAP - AAP)
 
         ENDIF
-C
-C     Output of module
-C
+!
+!     Output of module
+!
       FL(1+IFLUX) = FADS
       PMSA(IP26)  = EQAAP
       PMSA(IP27)  = CADST
@@ -466,13 +437,13 @@ C
       PMSA(IP32)  = QIM1
       PMSA(IP33)  = QIM2
       PMSA(IP34)  = QIM3
-C
-C     End active cells block
-C
+!
+!     End active cells block
+!
       ENDIF
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -508,9 +479,9 @@ C
       IP32  = IP32  + INCREM ( 32 )
       IP33  = IP33  + INCREM ( 33 )
       IP34  = IP34  + INCREM ( 34 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

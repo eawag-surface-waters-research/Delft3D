@@ -21,27 +21,27 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C --------------------------------------------------------------------------
-C -- Linux version: completely dummy! --
-C Routine ad hoc:
-C Avoid a nasty problem with underflows on Windows 95/98.
-C
-C Usage:
-C Call this routine once early in the program, for instance just after
-C start-up.
-C
-C Note:
-C It contains statements specific for Digital/Compaq Visual Fortran.
-C This means that under UNIX you will need to comment out most of the
-C code, an empty routine will suffice.
-C
-C Note:
-C It even contains some extensions defined by Digital Visual Fortran
-C --------------------------------------------------------------------------
-C
+! --------------------------------------------------------------------------
+! -- Linux version: completely dummy! --
+! Routine ad hoc:
+! Avoid a nasty problem with underflows on Windows 95/98.
+!
+! Usage:
+! Call this routine once early in the program, for instance just after
+! start-up.
+!
+! Note:
+! It contains statements specific for Digital/Compaq Visual Fortran.
+! This means that under UNIX you will need to comment out most of the
+! code, an empty routine will suffice.
+!
+! Note:
+! It even contains some extensions defined by Digital Visual Fortran
+! --------------------------------------------------------------------------
+!
       SUBROUTINE AVUNDF
-C
-C ---------- That was all. Return
-C
+!
+! ---------- That was all. Return
+!
       RETURN
       END

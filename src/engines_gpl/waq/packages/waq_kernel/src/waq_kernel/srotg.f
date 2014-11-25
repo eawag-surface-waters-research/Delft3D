@@ -22,17 +22,17 @@
 !!  rights reserved.
 
       subroutine srotg (sa,sb,c,s)
-c
-c     construct givens plane rotation.
-c     jack dongarra, linpack, 3/11/78.
-c                    modified 9/27/86.
-c
+!
+!     construct givens plane rotation.
+!     jack dongarra, linpack, 3/11/78.
+!                    modified 9/27/86.
+!
       use timers
 
       real(8) sa,sb,c,s,roe,scale,r,z,one
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "srotg", ithandl )
-c
+!
       roe = sb
       if( abs(sa) .gt. abs(sb) ) roe = sa
       scale = abs(sa) + abs(sb)

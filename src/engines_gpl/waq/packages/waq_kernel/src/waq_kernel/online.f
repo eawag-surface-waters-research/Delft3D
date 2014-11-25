@@ -30,36 +30,36 @@
       integer,          dimension(*) :: j
       character(len=*), dimension(*) :: c
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI   /   System characteristics
-C
+!
+!     COMMON  /  SYSI   /   System characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Dynamical memory allocation
-C
+!
+!     Dynamical memory allocation
+!
       INCLUDE 'fsm-fix.i'
 
       integer    itime
 
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "srwshl", ithandl )
-C
+!
 
       CALL SRWINT ( ITIME   , ITSTRT  , ITSTOP  ,
      j              NOSYS   , NOTOT   , NOSEG   ,
@@ -82,7 +82,7 @@ C
      J              C(IFNAM-1),
      J              C(ISFNA-1),
      J              C(IMNAM-1) )
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
@@ -95,53 +95,53 @@ C
      +                    PANAME, FUNAME, SFNAME, MONAME)
       use timers
 
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     FUNCTION           : Interface for SRW communications
-C
-C                          26-9-2001, WRITE OUTPUT FOR LATERALS
-C                                     USE BOUNDARY STREAMS ONLY
-C
-C     PARAMETERS    :
-C
-C     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
-C     ---------------------------------------------------------
-C     ITIME   INTEGER    1      INPUT  Simulation time (s)
-C     ITSTRT  INTEGER    1      INPUT  Simulation start time (s)
-C     NOSYS   INTEGER    1      INPUT  Nr. of active substances
-C     NOTOT   INTEGER    1      INPUT  Total nr. of substances
-C     NOSEG   INTEGER    1      INPUT  Nr of segments
-C     NOBND   INTEGER    1      INPUT  Nr of boundaries
-C     NOWST   INTEGER    1      INPUT  Nr of waste loads
-C     NOCONS  INTEGER    1      INPUT  Nr of constants
-C     NOPA    INTEGER    1      INPUT  Nr of parameters (f(x))
-C     NOFUN   INTEGER    1      INPUT  Nr of functions (f(t))
-C     NOSFUN  INTEGER    1      INPUT  Nr of segment functions (f(x,t))
-C     NOQ     INTEGER    1      INPUT  Nr of exchanges
-C     IPOINT  INTEGER    ??,*   INPUT  Definition of exchanges
-C     CONS    REAL       *      INPUT  Constants
-C     PARAM   REAL       *      INPUT  Parameters
-C     BNDSET  REAL       *      INPUT  Boundary concentrations
-C     WASTE   REAL       *      INPUT  Wasteloads
-C     FUNC    REAL       *      INPUT  Functions
-C     SEGFUN  REAL       *      INPUT  Segment functions
-C     BNDNAM  CHARACTER  *      INPUT  Boundary names
-C     SYSNAM  CHARACTER  *      INPUT  Substances names
-C     WANAME  CHARACTER  *      INPUT  Wasteload names
-C     CONAME  CHARACTER  *      INPUT  Constant names
-C     PANAME  CHARACTER  *      INPUT  Parameter names
-C     FUNAME  CHARACTER  *      INPUT  Function names
-C     SFNAME  CHARACTER  *      INPUT  Segment function names
-C     MONAME  CHARACTER  *      INPUT  Model identification strings
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     FUNCTION           : Interface for SRW communications
+!
+!                          26-9-2001, WRITE OUTPUT FOR LATERALS
+!                                     USE BOUNDARY STREAMS ONLY
+!
+!     PARAMETERS    :
+!
+!     NAME    KIND     LENGTH   FUNC.  DESCRIPTION
+!     ---------------------------------------------------------
+!     ITIME   INTEGER    1      INPUT  Simulation time (s)
+!     ITSTRT  INTEGER    1      INPUT  Simulation start time (s)
+!     NOSYS   INTEGER    1      INPUT  Nr. of active substances
+!     NOTOT   INTEGER    1      INPUT  Total nr. of substances
+!     NOSEG   INTEGER    1      INPUT  Nr of segments
+!     NOBND   INTEGER    1      INPUT  Nr of boundaries
+!     NOWST   INTEGER    1      INPUT  Nr of waste loads
+!     NOCONS  INTEGER    1      INPUT  Nr of constants
+!     NOPA    INTEGER    1      INPUT  Nr of parameters (f(x))
+!     NOFUN   INTEGER    1      INPUT  Nr of functions (f(t))
+!     NOSFUN  INTEGER    1      INPUT  Nr of segment functions (f(x,t))
+!     NOQ     INTEGER    1      INPUT  Nr of exchanges
+!     IPOINT  INTEGER    ??,*   INPUT  Definition of exchanges
+!     CONS    REAL       *      INPUT  Constants
+!     PARAM   REAL       *      INPUT  Parameters
+!     BNDSET  REAL       *      INPUT  Boundary concentrations
+!     WASTE   REAL       *      INPUT  Wasteloads
+!     FUNC    REAL       *      INPUT  Functions
+!     SEGFUN  REAL       *      INPUT  Segment functions
+!     BNDNAM  CHARACTER  *      INPUT  Boundary names
+!     SYSNAM  CHARACTER  *      INPUT  Substances names
+!     WANAME  CHARACTER  *      INPUT  Wasteload names
+!     CONAME  CHARACTER  *      INPUT  Constant names
+!     PANAME  CHARACTER  *      INPUT  Parameter names
+!     FUNAME  CHARACTER  *      INPUT  Function names
+!     SFNAME  CHARACTER  *      INPUT  Segment function names
+!     MONAME  CHARACTER  *      INPUT  Model identification strings
 
-C     Delft-IO for SRW
-c     use dio_streams
-c     use dio_plt_rw
+!     Delft-IO for SRW
+!     use dio_streams
+!     use dio_plt_rw
       include 'dio-plt.inc'
 
-C     DELWAQ variables from argument list
-C
+!     DELWAQ variables from argument list
+!
       INTEGER      ITIME , ITSTRT, NOSYS , NOTOT , NOSEG ,
      +             NOBND , NOWST , NOCONS, NOPA  , NOFUN ,
      +             NOSFUN, NOQ   , ITSTOP
@@ -156,7 +156,7 @@ C
      +             SFNAME(*)
       CHARACTER*40 MONAME(4)
 
-c     Local variables
+!     Local variables
 
       INTEGER      isys  , iseg  , ibnd  , iwst  , icons ,
      +             ifun  , ipa   , isf   , iloc  , ivar  , ioq
@@ -181,11 +181,11 @@ c     Local variables
       parameter   (misval = -9999.999)
       character*20 start_date, actual_date
 
-c     Variables related to DIO calls
+!     Variables related to DIO calls
 
       integer srwBoundOutSet,    srwBoundInSet
       integer srwBoundInStream, srwBoundOutStream
-cjvb  logical srwStatus
+!jvb  logical srwStatus
       integer srwStatus
 
       save srwBoundOutSet, srwBoundInSet
@@ -194,15 +194,15 @@ cjvb  logical srwStatus
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "online", ithandl )
 
-c     WRITE (*,*) ' SRWSHELL itime = ' , itime
+!     WRITE (*,*) ' SRWSHELL itime = ' , itime
 
-c***********************************************************************
-C     System initialisation
-c***********************************************************************
+!***********************************************************************
+!     System initialisation
+!***********************************************************************
 
       IF ( ITSTRT .EQ. ITIME ) THEN
 
-c         Allocate arrays
+!         Allocate arrays
           allocate (
      j              LocBoundIn(nobnd+nowst), VarBoundIn(nosys),
      j              LocBoundOut(nobnd+nowst), VarBoundOut(nosys),
@@ -211,14 +211,14 @@ c         Allocate arrays
      j              bn2seg(nobnd)
      j             )
 
-c***********************************************************************
-c         Inquire which locations and variables will be input
-c
-c         In the current version ONLY the active state variables
-c         at the model boundaries and at the waste loads are potential
-c         input
+!***********************************************************************
+!         Inquire which locations and variables will be input
+!
+!         In the current version ONLY the active state variables
+!         at the model boundaries and at the waste loads are potential
+!         input
 
-c         Initialise mapping structure to Delwaq
+!         Initialise mapping structure to Delwaq
           do ibnd = 1,nobnd
               do isys = 1,nosys
                   dynbnd(isys,ibnd,1) = 0
@@ -232,27 +232,27 @@ c         Initialise mapping structure to Delwaq
               enddo
           enddo
 
-c         Open Data Stream
+!         Open Data Stream
 
-c         write (*,*) ' Create BoundInStream'
+!         write (*,*) ' Create BoundInStream'
           srwBoundInStream = dioCreateStreamSynched (
      j                       dio_Binary_stream,
      j                       'BoundToDelwaq',
      j                       'r' )
-c         write (*,*) ' Done'
+!         write (*,*) ' Done'
 
-c         Open Data Set and Collect Info
-c         write (*,*) ' Open BoundInDataSet'
+!         Open Data Set and Collect Info
+!         write (*,*) ' Open BoundInDataSet'
           srwBoundInSet = dioGetPltDatasetInfo (
      j                       srwBoundInStream,
      j                       'IncomingBoundaries',
      j                       NrVarBoundIn, VarBoundIn,
      j                       NrLocBoundIn, LocBoundIn,
      +                       Nr_Times, Times )
-c         write (*,*) ' Done'
+!         write (*,*) ' Done'
 
           if ( srwBoundInSet .gt. 0 ) then
-c             SRW run
+!             SRW run
               procid = 1
 
               call map_input (
@@ -264,16 +264,16 @@ c             SRW run
      j                        NrLocBoundIn, LocBoundIn,
      j                        nosys , sysnam, nowst , waname, dynwst )
           else
-c             Not an SRW run
+!             Not an SRW run
               procid = 0
               goto 9999 !   return
           endif
 
-c***********************************************************************
-c         Define which locations and variables will be output
-c
-c         In the current version ONLY the active state variables
-c         at the model boundaries and laterals are output.
+!***********************************************************************
+!         Define which locations and variables will be output
+!
+!         In the current version ONLY the active state variables
+!         at the model boundaries and laterals are output.
 
           NrVarBoundOut = nosys
           NrLocBoundOut = nobnd+nowst
@@ -287,25 +287,25 @@ c         at the model boundaries and laterals are output.
               VarBoundOut(isys) = sysnam(isys)
           enddo
 
-c         Open data stream
-c         write (*,*) ' Create BoundOutStream'
+!         Open data stream
+!         write (*,*) ' Create BoundOutStream'
 
           srwBoundOutStream = dioCreateStreamSynched (
      j                          dio_Binary_stream,
      j                          'BoundFromDelwaq',
      j                          'w')
-c         write (*,*) ' Done'
-c         Create data set
-c         write (*,*) ' Open BoundOutSet'
+!         write (*,*) ' Done'
+!         Create data set
+!         write (*,*) ' Open BoundOutSet'
 
-c          write (*,*) ' Locations'
-c          do iloc=1,NrLocBoundOut
-c              write (*,*) iloc,locBoundOut(iloc)
-c          enddo
-c          write (*,*) ' Variables'
-c          do iloc=1,NrVarBoundOut
-c              write (*,*) ivar,VarBoundOut(ivar)
-c          enddo
+!          write (*,*) ' Locations'
+!          do iloc=1,NrLocBoundOut
+!              write (*,*) iloc,locBoundOut(iloc)
+!          enddo
+!          write (*,*) ' Variables'
+!          do iloc=1,NrVarBoundOut
+!              write (*,*) ivar,VarBoundOut(ivar)
+!          enddo
 
           srwBoundOutSet = dioDefinePltDataset (
      j                          srwBoundOutStream,
@@ -313,12 +313,12 @@ c          enddo
      j                          Dio_Plt_Real,
      j                          NrVarBoundOut,VarBoundOut,
      j                          NrLocBoundOut,LocBoundOut)
-c          do iwst = 1,nowst
-c              write (*,*) ' Lateral ',iwst,' segment',iwaste(iwst)
-c          enddo
-c         write (*,*) ' Done'
+!          do iwst = 1,nowst
+!              write (*,*) ' Lateral ',iwst,' segment',iwaste(iwst)
+!          enddo
+!         write (*,*) ' Done'
 
-C         Map boundaries to segments
+!         Map boundaries to segments
 
           do ioq=1,noq
               if ( ipoint(1,ioq).lt.0 .and. ipoint(2,ioq).gt.0 ) then
@@ -329,61 +329,61 @@ C         Map boundaries to segments
               endif
           enddo
 
-c***********************************************************************
-c         Retrieve start date
+!***********************************************************************
+!         Retrieve start date
           start_date = moname(4)(1:20)
 
-c     End of initialisation
+!     End of initialisation
       ENDIF
 
-c***********************************************************************
-C     Actions within DELWAQ's time loop
-c***********************************************************************
+!***********************************************************************
+!     Actions within DELWAQ's time loop
+!***********************************************************************
 
       if ( procid .le. 0 ) goto 9999  !    return
 
-c***********************************************************************
-c     Fill output array
+!***********************************************************************
+!     Fill output array
 
       do ibnd = 1,nobnd
           iseg = bn2seg(ibnd)
           do isys = 1,nosys
               values(isys,ibnd) = conc(isys,iseg)
-c              write (*,*) ' val(',isys,',',ibnd,')=',conc(isys,iseg)
+!              write (*,*) ' val(',isys,',',ibnd,')=',conc(isys,iseg)
           enddo
       enddo
       do iwst = 1,nowst
           iseg = iwaste(iwst)
           do isys = 1,nosys
               values(isys,nobnd+iwst) = conc(isys,iseg)
-c              write (*,*) ' val(',isys,',',nobnd+iwst,')=',
-c     j                     conc(isys,iseg)
+!              write (*,*) ' val(',isys,',',nobnd+iwst,')=',
+!     j                     conc(isys,iseg)
           enddo
       enddo
 
-c***********************************************************************
-c     What time is it?
-c     actual_date = find_date_from_start (start_date,(itime-itstrt))
+!***********************************************************************
+!     What time is it?
+!     actual_date = find_date_from_start (start_date,(itime-itstrt))
 
-c***********************************************************************
-c     Send output
-c     write (*,*) ' Send output to SRW ...'
+!***********************************************************************
+!     Send output
+!     write (*,*) ' Send output to SRW ...'
       call DioPutPltDataSetReals (srwBoundOutSet,times(1),
      j               NrVarBoundOut, NrLocBoundOut,  values)
-c     write (*,*) ' Done'
+!     write (*,*) ' Done'
 
-c***********************************************************************
-c     Collect Input (and implicitly get permission to proceed)
-C     Jos van Gils, 27-4-2001, NOT FOR LAST TIME STEP!
-c***********************************************************************
-c     Store input in Delwaq structures
+!***********************************************************************
+!     Collect Input (and implicitly get permission to proceed)
+!     Jos van Gils, 27-4-2001, NOT FOR LAST TIME STEP!
+!***********************************************************************
+!     Store input in Delwaq structures
 
       if ( itime .lt. itstop ) then
 
-c     write (*,*) ' Get Boundaries from SRW ...'
+!     write (*,*) ' Get Boundaries from SRW ...'
       srwStatus = dioGetPltDataSetReals (srwBoundInSet,times(1),
      j            NrVarBoundIn,NrLocBoundIn,values)
-c     write (*,*) ' Done'
+!     write (*,*) ' Done'
 
       if ( srwStatus .gt. 0 ) then
           do ibnd = 1,nobnd
@@ -405,7 +405,7 @@ c     write (*,*) ' Done'
                       if ( abs(values(ivar,iloc)-misval) .gt.
      j                     abs(0.001*misval) )
      j                waste(1+isys,iwst) = values(ivar,iloc)
-c     ......... gaat dit goed? praten we niet over g/s ipv g/m3????????
+!     ......... gaat dit goed? praten we niet over g/s ipv g/m3????????
                   endif
               enddo
           enddo
@@ -431,13 +431,13 @@ c     ......... gaat dit goed? praten we niet over g/s ipv g/m3????????
       if ( timon ) call timstrt ( "map_input", ithandl )
 
       do ilocin = 1,nlocin
-c         write ( 11 , * ) ' loc ',Locin(ilocin)
+!         write ( 11 , * ) ' loc ',Locin(ilocin)
           call zoek (Locin(ilocin),nloc,loc,20,iloc)
           do ivarin = 1,nvarin
-c             write ( 11 , * ) ' Var ', varin(ivarin)
+!             write ( 11 , * ) ' Var ', varin(ivarin)
               call zoek (Varin(ivarin),nvar,var,20,ivar)
               if ( iloc .ge. 1 .and. ivar .ge. 1 ) then
-c                 write (*,*) ' BINGO!'
+!                 write (*,*) ' BINGO!'
                   map(ivar,iloc,1) = ilocin
                   map(ivar,iloc,2) = ivarin
               endif
@@ -457,33 +457,33 @@ c                 write (*,*) ' BINGO!'
       integer,          dimension(*) :: j
       character(len=*), dimension(*) :: c
 
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI   /   System characteristics
-C
+!
+!     COMMON  /  SYSI   /   System characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     COMMON  /  SYSJ   /   Pointers in integer array workspace
-C
+!
+!     COMMON  /  SYSJ   /   Pointers in integer array workspace
+!
       INCLUDE 'sysj.inc'
-C
-C     COMMON  /  SYSA   /   Pointers in real array workspace
-C
+!
+!     COMMON  /  SYSA   /   Pointers in real array workspace
+!
       INCLUDE 'sysa.inc'
-C
-C     COMMON  /  SYSC   /   Pointers in character array workspace
-C
+!
+!     COMMON  /  SYSC   /   Pointers in character array workspace
+!
       INCLUDE 'sysc.inc'
-C
-C     Dynamical memory allocation
-C
+!
+!     Dynamical memory allocation
+!
       INCLUDE 'fsm-fix.i'
 
       integer    itime
-C
+!
       REAL PROLOC
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "rtcshl", ithandl )
@@ -516,7 +516,7 @@ C
      J             C(IPNAM),
      J             C(ISFNA),
      J             C(IFNAM) )
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END
@@ -544,15 +544,15 @@ C
       character(len=20), intent(in   ) :: sfname(*) ! segment function names
       character(len=20), intent(in   ) :: funame(*) ! function names
 
-c     Interface to RTC
+!     Interface to RTC
 
-c     Writes concentration values for dump areas
+!     Writes concentration values for dump areas
 
-C     Call to DELWAQ routine from output subsystem
-c     NCOUT  is number of output substances (=0 or NOTOT)
-c     NRVAR  is number of extra output variables
-c     OUTVAL is a buffer of at least (NOTOT+NRVAR)*NDMPAR reals
-c     IOPOIN is not used if NRVAR = 0
+!     Call to DELWAQ routine from output subsystem
+!     NCOUT  is number of output substances (=0 or NOTOT)
+!     NRVAR  is number of extra output variables
+!     OUTVAL is a buffer of at least (NOTOT+NRVAR)*NDMPAR reals
+!     IOPOIN is not used if NRVAR = 0
 
       real, allocatable, save : : outval(:)
       integer iopoin, nrvar, ncout, io_rtc, isys, idmp

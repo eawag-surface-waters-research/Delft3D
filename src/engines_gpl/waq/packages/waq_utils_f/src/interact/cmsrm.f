@@ -28,16 +28,16 @@
       INTEGER LENGTH, GETS, MATCH, IPOS, LPOS, LENTOK
       DATA BLANK /' '/
       DATA CMSHLP /'CMS'/
-C
-C DOS version of CMS (=system) function.
-C If there is a command (CMD), it is stacked (unit 1). A bat program
-C RUNCMS.BAT is invoked, which executes the command and stackes
-C a carriage return to return to Fortran.
-C Note: STACKDRV must be installed! Unit 1 must be assigend to STK!
-C If there is no command, temporarily go to DOS and stay there
-C until a nul line is entered.
-C If first token = "CMS", strip it off.
-C
+!
+! DOS version of CMS (=system) function.
+! If there is a command (CMD), it is stacked (unit 1). A bat program
+! RUNCMS.BAT is invoked, which executes the command and stackes
+! a carriage return to return to Fortran.
+! Note: STACKDRV must be installed! Unit 1 must be assigend to STK!
+! If there is no command, temporarily go to DOS and stay there
+! until a nul line is entered.
+! If first token = "CMS", strip it off.
+!
       IPOS = 1
       IF (GETS(CMD,IPOS,LENGTH,8,TOKEN,LENTOK) . EQ. 0) THEN
          IF (MATCH (CMSHLP,1,3,TOKEN,LENTOK,0,NUM) .NE. 1) IPOS = 1

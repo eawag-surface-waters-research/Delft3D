@@ -29,36 +29,36 @@
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
-C
+!
       USE ProcesSet
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , IPROC , IERR  , NOWARN
       LOGICAL       DTFLG1 , DTFLG3
       CHARACTER*20  KEYNAM(NOKEY), KEYVAL(NOKEY)
-C
+!
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
       END SUBROUTINE
-C
+!
       SUBROUTINE SETDPT ( LUNREP     , NOKEY      ,
      +                    KEYNAM     , KEYVAL     ,
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
       USE ProcesSet
-C
+!
       IMPLICIT NONE
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , IPROC , IERR  , NOWARN
       CHARACTER*20  KEYNAM(NOKEY), KEYVAL(NOKEY)
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
       END SUBROUTINE
-C
+!
       SUBROUTINE SETDSC ( LUNREP     , NOKEY      ,
      +                    KEYNAM     , KEYVAL     ,
      +                    PERNAM     , PERSFX     ,
@@ -66,11 +66,11 @@ C
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
-C
+!
       USE ProcesSet
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , PSTART, PSTOP , IPROC ,
      +              IERR  , NOWARN
       CHARACTER*20  PERNAM, PERSFX
@@ -78,7 +78,7 @@ C
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
       END SUBROUTINE
-C
+!
       SUBROUTINE SETGEO ( LUNREP     , NOKEY      ,
      +                    KEYNAM     , KEYVAL     ,
      +                    PERNAM     , PERSFX     ,
@@ -86,11 +86,11 @@ C
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
-C
+!
       USE ProcesSet
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , PSTART, PSTOP , IPROC ,
      +              IERR  , NOWARN
       CHARACTER*20  PERNAM, PERSFX
@@ -98,7 +98,7 @@ C
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
       END SUBROUTINE
-C
+!
       SUBROUTINE SETPRC ( LUNREP     , NOKEY      ,
      +                    KEYNAM     , KEYVAL     ,
      +                    PERNAM     , PERSFX     ,
@@ -106,11 +106,11 @@ C
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
-C
+!
       USE ProcesSet
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , PSTART, PSTOP , IPROC ,
      +              IERR  , NOWARN
       CHARACTER*20  PERNAM, PERSFX
@@ -118,7 +118,7 @@ C
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
       END SUBROUTINE
-C
+!
       SUBROUTINE SETQTL ( LUNREP     , NOKEY      ,
      +                    KEYNAM     , KEYVAL     ,
      +                    PERNAM     , PERSFX     ,
@@ -126,11 +126,11 @@ C
      +                    IPROC      , aProcesProp,
      +                    AllItems   , IERR       ,
      +                    NOWARN     )
-C
+!
       USE ProcesSet
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       LUNREP, NOKEY , PSTART, PSTOP , IPROC ,
      +              IERR  , NOWARN
       CHARACTER*20  PERNAM, PERSFX
@@ -138,13 +138,13 @@ C
       type(ProcesProp)      :: aProcesProp         ! output statistical proces definition
       type(ItemPropColl)    :: AllItems            ! all items of the proces system
       END SUBROUTINE
-C
+!
       SUBROUTINE RDSTAT ( LUNREP , IPOSR  , NPOS   , CCHAR  , VRSION ,
      +                    ILUN   , LCH    , LSTACK , IOUTPT , DTFLG1 ,
      +                    DTFLG3 , IERR   , NOSTAT , NKEY   , NOKEY  ,
      +                    KEYNAM , KEYVAL , NPERIOD, PERNAM , PERSFX ,
      +                    PSTART , PSTOP  )
-C
+!
       INTEGER       LUNREP , IPOSR  , NPOS   , LSTACK , IOUTPT ,
      +              IERR   , NOSTAT , NKEY
       LOGICAL       DTFLG1 , DTFLG3
@@ -161,7 +161,7 @@ C
       INTEGER     , POINTER :: PSTART(:)
       INTEGER     , POINTER :: PSTOP(:)
       END SUBROUTINE
-C
+!
       END INTERFACE
-C
+!
       END MODULE

@@ -21,10 +21,10 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C-----------------------------------------------------------------------
-C Function to parse full filenames. Split after the final path
-C delimiter. Split after "." for extension.
-C-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+! Function to parse full filenames. Split after the final path
+! delimiter. Split after "." for extension.
+!-----------------------------------------------------------------------
       INTEGER FUNCTION PARSFN (LINEIN,PATH,NAME,EXT,LPATH,LNAM,LEXT)
       CHARACTER LINEIN*(*), PATH*(*), NAME*(*), EXT*(*)
       CHARACTER*80 TOKEN
@@ -35,10 +35,10 @@ C-----------------------------------------------------------------------
       INTEGER LOCATE
       DATA DELIM /' \\'/
       DATA DELIM1/'\\'/
-C
-C Get (maximum) lengths of character variables as declared in the main
-C program.
-C
+!
+! Get (maximum) lengths of character variables as declared in the main
+! program.
+!
       MAXIN = LEN (LINEIN)
       IF (MAXIN .EQ. 1 .OR. MAXIN .GT. 80) THEN
          PARSFN = 1
@@ -55,21 +55,21 @@ C
          GO TO 1000
       END IF
       MAXE  = LEN (EXT)
-C
-C Wipe PATH and NAME (fill with blanks).
-C
+!
+! Wipe PATH and NAME (fill with blanks).
+!
       IRC = WIPE (PATH,1,MAXP)
       IRC = WIPE (NAME,1,MAXN)
       IRC = WIPE (EXT,1,MAXE)
-C
-C Set delimiter to blank and backslash.
-C
+!
+! Set delimiter to blank and backslash.
+!
       IRC = SETDLM (DELIM,2,DELIM,1)
-C
-C Get token from line. Continue until there are no tokens left.
-C Get the location of the delimiter BEFORE the last token: this
-C signals the end of the path name.
-C
+!
+! Get token from line. Continue until there are no tokens left.
+! Get the location of the delimiter BEFORE the last token: this
+! signals the end of the path name.
+!
       POSIT = 1
       LPOS(2) = POSIT
    10 CONTINUE
@@ -84,17 +84,17 @@ C
       ELSE
          LPOS2 = LPOS(1) - 1
       END IF
-C
-C Copy first part of LINEIN to PATH and the remaining part to NAME.
-C Use GETS to remove initial and trailing blanks.
-C
+!
+! Copy first part of LINEIN to PATH and the remaining part to NAME.
+! Use GETS to remove initial and trailing blanks.
+!
       IRC = STOS (LINEIN,1,LPOS2,PATH,LPATH)
       IRC = STOS (LINEIN,LPOS2+1,MAXIN,TOKEN,LNAM)
       IPOS = 1
       IF (GETS (PATH,IPOS,MAXP,MAXP,PATH,LPATH) .NE. 0) LPATH = 0
-C
-C Get name and extension, if there is one. Get the lengths.
-C
+!
+! Get name and extension, if there is one. Get the lengths.
+!
       dot = '.'
       LOC = LOCATE (TOKEN,dot,LNAM,1)
       IF (LOC .EQ. 0) THEN

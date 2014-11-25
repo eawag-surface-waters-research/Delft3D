@@ -21,49 +21,49 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            :
-C
-C     V0.02  230395  Jos van Gils  Modify for hybrid coupling
-C     V0.01  040894  Jos van Gils  First version
-C
-C     MODULE              : CHMAPD
-C
-C     FUNCTION            : Maps Delwaq and Charon administration
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NAIJ2   I        1          I       index last dissolved component
-C     MMAX    I        1          I       max.number of components
-C     NMAX    I        1          I       max.number of species
-C     N1MAX   I        1          I       max.value NTTOB
-C     N2MAX   I        1          I       max.value NCTOT
-C     NTTOB   I        1          O       length of adm.array
-C     ITTTOB  I        NTTOB      O       index in transport vector
-C     IBTTOB  I        NTTOB      O       index in component vector
-C     ABTTOB  R        NTTOB      O       stoch.coefficient
-C     RMTTOB  R        NTTOB      O       molar mass
-C     NCTOT   I        1          O       length of adm.array
-C     ICCTOT  I        NCTOT      O       index in species vector
-C     ITCTOT  I        NCTOT      O       index in transport vector
-C     ABCTOT  R        NCTOT      O       stoch.coefficient
-C     RMCTOT  R        NCTOT      O       molar mass
-C     IOUTP   I        NMAX       O       =0: species in transport vector
-C                                         >0: index in output array
-C     NNOTRA  I        1          O       nr. of species in output vector
-C     NTOX    I        1          O       nr. of identified metals
-C     ICTOX   I        MMAX       O       index: pos. in list id. metals
-C                                         value: pos. in charon comp.vect.
-C     ALITOX  C*10     2,NALTOX   I       aliases heavy metals
-C     NALTOX  I        1          I       length of ALITOX
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            :
+!
+!     V0.02  230395  Jos van Gils  Modify for hybrid coupling
+!     V0.01  040894  Jos van Gils  First version
+!
+!     MODULE              : CHMAPD
+!
+!     FUNCTION            : Maps Delwaq and Charon administration
+!
+!     SUBROUTINES CALLED  :
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NAIJ2   I        1          I       index last dissolved component
+!     MMAX    I        1          I       max.number of components
+!     NMAX    I        1          I       max.number of species
+!     N1MAX   I        1          I       max.value NTTOB
+!     N2MAX   I        1          I       max.value NCTOT
+!     NTTOB   I        1          O       length of adm.array
+!     ITTTOB  I        NTTOB      O       index in transport vector
+!     IBTTOB  I        NTTOB      O       index in component vector
+!     ABTTOB  R        NTTOB      O       stoch.coefficient
+!     RMTTOB  R        NTTOB      O       molar mass
+!     NCTOT   I        1          O       length of adm.array
+!     ICCTOT  I        NCTOT      O       index in species vector
+!     ITCTOT  I        NCTOT      O       index in transport vector
+!     ABCTOT  R        NCTOT      O       stoch.coefficient
+!     RMCTOT  R        NCTOT      O       molar mass
+!     IOUTP   I        NMAX       O       =0: species in transport vector
+!                                         >0: index in output array
+!     NNOTRA  I        1          O       nr. of species in output vector
+!     NTOX    I        1          O       nr. of identified metals
+!     ICTOX   I        MMAX       O       index: pos. in list id. metals
+!                                         value: pos. in charon comp.vect.
+!     ALITOX  C*10     2,NALTOX   I       aliases heavy metals
+!     NALTOX  I        1          I       length of ALITOX
 
       SUBROUTINE  CHMAPD ( NAIJ2 , MMAX  , NMAX  , N1MAX , N2MAX ,
      J                     NTTOB , ITTTOB, IBTTOB, ABTTOB, RMTTOB,
@@ -83,17 +83,17 @@ C     NALTOX  I        1          I       length of ALITOX
 
       INCLUDE 'charon.inc'
 
-C     Check consistency of T
+!     Check consistency of T
 
       DO 50 I = 1,NAIJ
 
-C         Check if species is transported Yes or No
+!         Check if species is transported Yes or No
 
           WRITE ( C10 , '(A6,''    '')' ) KN(JCOL(I))
           CALL ZOEK ( C10,NTRANS,VARNAM,10,INDEX)
           IF ( INDEX .LT. 0 ) THEN
 
-C             Component!! Look for _dis/_par , or _tot
+!             Component!! Look for _dis/_par , or _tot
 
               IF ( I .LE. NAIJ2 ) THEN
                   WRITE ( C10 , '(A6,''_dis'')' ) NR(IROW(I),1)
@@ -114,17 +114,17 @@ C             Component!! Look for _dis/_par , or _tot
           ENDIF
    50 CONTINUE
 
-C     Construct arrays to convert T(ransported vector) to B
-C     Loop over elements in T
+!     Construct arrays to convert T(ransported vector) to B
+!     Loop over elements in T
 
       NTTOB = 0
       DO 100 I = 1,NTRANS
 
-C         Check component or species
+!         Check component or species
 
           IF ( VARNAM(I)(7:10) .EQ. '    ') THEN
 
-C             Species!! Loop to find relevant components
+!             Species!! Loop to find relevant components
 
               GOTCHA = .FALSE.
               DO 10 J = 1,NAIJ
@@ -143,7 +143,7 @@ C             Species!! Loop to find relevant components
 
           ELSE
 
-C             Component!!
+!             Component!!
 
               CALL ZOEK ( VARNAM(I)(1:6),M,NR,6,INDEX)
               IF ( INDEX .LE. 0 ) THEN
@@ -161,7 +161,7 @@ C             Component!!
           ENDIF
   100 CONTINUE
 
-C     Fill array that indicates whether species are output variables
+!     Fill array that indicates whether species are output variables
 
       NNOTRA = 0
       DO 200 I = 1,N
@@ -175,18 +175,18 @@ C     Fill array that indicates whether species are output variables
           ENDIF
   200 CONTINUE
 
-C     Construct arrays to convert X to T
+!     Construct arrays to convert X to T
 
       NCTOT = 0
       DO 300 I = 1,N
 
-C         Check if species is transported Yes or No
+!         Check if species is transported Yes or No
 
           WRITE ( C10 , '(A6,''    '')' ) KN(I)
           CALL ZOEK ( C10,NTRANS,VARNAM,10,INDEX)
           IF ( INDEX .GT. 0 ) THEN
 
-C             Yes!! Add species.
+!             Yes!! Add species.
 
               NCTOT = NCTOT + 1
               IF ( NCTOT .GT. N2MAX ) GOTO 901
@@ -197,7 +197,7 @@ C             Yes!! Add species.
 
           ELSE
 
-C             Add components
+!             Add components
 
               DO 210 J = 1,NAIJ
                   IF ( JCOL(J) .EQ. I ) THEN
@@ -226,7 +226,7 @@ C             Add components
 
   300 CONTINUE
 
-C     Determine actual list of present h.m.'s
+!     Determine actual list of present h.m.'s
 
       NTOX = 0
       DO 400 I = 1,NALTOX

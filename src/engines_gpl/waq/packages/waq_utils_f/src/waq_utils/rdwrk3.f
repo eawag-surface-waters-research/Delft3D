@@ -22,49 +22,49 @@
 !!  rights reserved.
 
       SUBROUTINE RDWRK3 ( LUN   , LCHAR ,ITOTA , ITOTI , ITOTC  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : march 93 by Jan van Beek
-C
-C     FUNCTION            : Reads DELWAQ boot file
-C
-C     LOGICAL UNITNUMBERS : LUN(1)   - DELWAQ boot file
-C
-C     SUBROUTINES CALLED  : DHOPNF, opens files
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUN     INTEGER    *         OUT     Logical unit numbers
-C     LCHAR   CHAR*(*)   *         OUT     File names
-C     ITOTA   INTEGER    1         OUT     Dimension real array
-C     ITOTI   INTEGER    1         OUT     Dimension integer array
-C     ITOTC   INTEGER    1         OUT     Dimension character array
-C
-C     declarations
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED             : march 93 by Jan van Beek
+!
+!     FUNCTION            : Reads DELWAQ boot file
+!
+!     LOGICAL UNITNUMBERS : LUN(1)   - DELWAQ boot file
+!
+!     SUBROUTINES CALLED  : DHOPNF, opens files
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUN     INTEGER    *         OUT     Logical unit numbers
+!     LCHAR   CHAR*(*)   *         OUT     File names
+!     ITOTA   INTEGER    1         OUT     Dimension real array
+!     ITOTI   INTEGER    1         OUT     Dimension integer array
+!     ITOTC   INTEGER    1         OUT     Dimension character array
+!
+!     declarations
+!
       INTEGER       ITOTA , ITOTI , ITOTC
       INTEGER       LUN(*)
       CHARACTER*(*) LCHAR(*)
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
+!
+!     COMMON  /  SYSN   /   System characteristics
+!
       INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
+!
+!     COMMON  /  SYSI  /    Timer characteristics
+!
       INCLUDE 'sysi.inc'
-C
-C     input structure for boot-file
-C
+!
+!     input structure for boot-file
+!
       INTEGER             LUNIN
       DIMENSION           IN(INSIZE)       , II(IISIZE)
       EQUIVALENCE       ( IN(1)  , NOSEG ) , ( II(1), ITSTRT  )
-C
-C         boot the system
-C
+!
+!         boot the system
+!
       LCHMAX = LEN(LCHAR(1))
       CALL DHGNAM(LCHAR(1),' ')
       INDX = INDEX ( LCHAR(1) , ' ' )
@@ -72,14 +72,14 @@ C
       LCHAR(1) = LCHAR(1)(1:INDX-1)//'-delwaq03.wrk'
       LUNIN    = 14
       CALL DHOPNF ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
-C
+!
       READ  ( LUNIN )   IN
       READ  ( LUNIN )   II
       READ  ( LUNIN )  ITOTA  , ITOTI  , ITOTC
       READ  ( LUNIN ) ( LUN(K) , K = 1,NOLUN )
       READ  ( LUNIN ) ( LCHAR(K) , K=1 , NOLUN )
-C
+!
       CLOSE ( LUNIN )
-C
+!
       RETURN
       END

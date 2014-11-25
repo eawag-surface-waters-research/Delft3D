@@ -23,32 +23,32 @@
 
       SUBROUTINE DLWQ13 ( LUN    , LCHAR  , CONC   , ITIME  , MNAME  ,
      &                    SNAME  , NOTOT  , NOSEG  )
-C
-C
-C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED            : june 1988  BY L. Postma
-C
-C     FUNCTION           : gives a complete system dump
-C
-C     LOGICAL UNITS      : IOUT = number of dump file
-C
-C     SUBROUTINES CALLED : none
-C
-C     PARAMETERS         :
-C
-C     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
-C     ---------------------------------------------------------
-C     LUN     INTEGER  *           INPUT   unit numbers output files
-C     LCHAR   CHAR*(*) *           INPUT   names of output files
-C     CONC    REAL     NOTOT*?     INPUT   concentration values
-C     ITIME   INTEGER  1           INPUT   present time in clock units
-C     MNAME   CHAR*40  4           INPUT   model identhification
-C     SNAME   CHAR*20  NOTOT       INPUT   names of substances
-C     NOTOT   INTEGER  1           INPUT   total number of systems
-C     NOSEG   INTEGER  1           INPUT   total number of segments
-C
-C
+!
+!
+!     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED            : june 1988  BY L. Postma
+!
+!     FUNCTION           : gives a complete system dump
+!
+!     LOGICAL UNITS      : IOUT = number of dump file
+!
+!     SUBROUTINES CALLED : none
+!
+!     PARAMETERS         :
+!
+!     NAME    KIND     LENGTH      FUNCT.  DESCRIPTION
+!     ---------------------------------------------------------
+!     LUN     INTEGER  *           INPUT   unit numbers output files
+!     LCHAR   CHAR*(*) *           INPUT   names of output files
+!     CONC    REAL     NOTOT*?     INPUT   concentration values
+!     ITIME   INTEGER  1           INPUT   present time in clock units
+!     MNAME   CHAR*40  4           INPUT   model identhification
+!     SNAME   CHAR*20  NOTOT       INPUT   names of substances
+!     NOTOT   INTEGER  1           INPUT   total number of systems
+!     NOSEG   INTEGER  1           INPUT   total number of segments
+!
+!
       use timers
 
       DIMENSION     CONC  ( NOTOT, NOSEG ) , LUN(*)
@@ -59,9 +59,9 @@ C
       integer    i
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq13", ithandl )
-C
-C      check for NaNs
-C
+!
+!      check for NaNs
+!
       nonan = 0
       do j = 1,noseg
           do i = 1,notot
@@ -79,8 +79,8 @@ C
          write (lun(19),*) ' This may indicate that the computation was unstable'
       endif
 
-C
-C      write standard restart file. Not done any more. CONC of passive
+!
+!      write standard restart file. Not done any more. CONC of passive
 !                                   substances is in mass/m2 now. That
 !                                   is incompatible with the old .res file
 !                                   that is in mass/gridcell. The old file
@@ -90,9 +90,9 @@ C      write standard restart file. Not done any more. CONC of passive
 !     CALL DHOPNF ( LUN(23), LCHAR(23), 23    , 1     , IERR  )
 !     WRITE ( LUN(23) ) ITIME , CONC
 !     CLOSE ( LUN(23) )
-C
-C     write restart file in .map format
-C
+!
+!     write restart file in .map format
+!
       LCHARMAP(1:248) = LCHAR(23)(1:248)
       DO 10 I=248,1,-1
          IF ( LCHARMAP(I:I) .EQ. '.' ) THEN
@@ -112,7 +112,7 @@ C
       WRITE ( LUN(23) ) ( SNAME(K) , K=1,NOTOT )
       WRITE ( LUN(23) ) ITIME , CONC
       CLOSE ( LUN(23) )
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

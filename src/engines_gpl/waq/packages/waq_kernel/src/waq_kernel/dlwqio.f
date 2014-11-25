@@ -24,55 +24,55 @@
       SUBROUTINE DLWQIO ( LUNWRO, LCH   , LUREP , NOUTP , NRVART,
      +                    NBUFMX, IOUTPS, IOPOIN, OUNAM , LUN   ,
      +                    LCHAR , MYPART, IERR  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : may 1993 by Jan van Beek
-C
-C     FUNCTION            : Initialisation of OUTPUT system.
-C                           Reads output work file.
-C
-C     SUBROUTINES CALLED  : DHOPNF, Opens files
-C
-C     FILES               : LUNWRO, Proces work file
-C                           LUREP , Monitoring file
-C
-C     PARAMETERS          : 12
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUNWRO  INTEGER       1     INPUT   Output work file
-C     LCH     CHA*(*)       1     INPUT   Name output work file
-C     LUREP   INTEGER       1     INPUT   Monitoring file
-C     NOUTP   INTEGER       1     INPUT   Number of output files
-C     NRVART  INTEGER       1     INPUT   Number of extra output vars
-C     NBUFMX  INTEGER       1     INPUT   length of output buffer
-C     IOUTPS  INTEGER 7*NOUTP    OUTPUT   Output structure
-C                                            index 1 = start time
-C                                            index 2 = stop time
-C                                            index 3 = time step
-C                                            index 4 = number of vars
-C                                            index 5 = kind of output
-C                                            index 6 = format of output
-C                                            index 7 = initialize flag
-C     IOPOIN  INTEGER  NRVART    OUTPUT   Pointer to DELWAQ array's
-C     OUNAM   CHAR*(*) NRVART    OUTPUT   name of output variable
-C     LUN     INTEGER    *        INPUT   array with unit numbers
-C     LCHAR   CHAR*(*)   *        INPUT   filenames
-C     MYPART  INTEGER       1     INPUT   subdomain number in parallel run
-C     IERR    INTEGER       1    IN/OUT   cummulative error count
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : may 1993 by Jan van Beek
+!
+!     FUNCTION            : Initialisation of OUTPUT system.
+!                           Reads output work file.
+!
+!     SUBROUTINES CALLED  : DHOPNF, Opens files
+!
+!     FILES               : LUNWRO, Proces work file
+!                           LUREP , Monitoring file
+!
+!     PARAMETERS          : 12
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUNWRO  INTEGER       1     INPUT   Output work file
+!     LCH     CHA*(*)       1     INPUT   Name output work file
+!     LUREP   INTEGER       1     INPUT   Monitoring file
+!     NOUTP   INTEGER       1     INPUT   Number of output files
+!     NRVART  INTEGER       1     INPUT   Number of extra output vars
+!     NBUFMX  INTEGER       1     INPUT   length of output buffer
+!     IOUTPS  INTEGER 7*NOUTP    OUTPUT   Output structure
+!                                            index 1 = start time
+!                                            index 2 = stop time
+!                                            index 3 = time step
+!                                            index 4 = number of vars
+!                                            index 5 = kind of output
+!                                            index 6 = format of output
+!                                            index 7 = initialize flag
+!     IOPOIN  INTEGER  NRVART    OUTPUT   Pointer to DELWAQ array's
+!     OUNAM   CHAR*(*) NRVART    OUTPUT   name of output variable
+!     LUN     INTEGER    *        INPUT   array with unit numbers
+!     LCHAR   CHAR*(*)   *        INPUT   filenames
+!     MYPART  INTEGER       1     INPUT   subdomain number in parallel run
+!     IERR    INTEGER       1    IN/OUT   cummulative error count
+!
+!     Declaration of arguments
+!
       use timers
       INTEGER       LUNWRO, LUREP , NOUTP , NRVART, NBUFMX,
      +              IERR
       INTEGER       IOUTPS(7,*)   , IOPOIN(*)     , LUN(*)
       CHARACTER*(*) LCH           , LCHAR(*)
       CHARACTER*20  OUNAM(*)
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       PARAMETER   ( VERSI1 = 0.0 , VERSI2 = 0.1 )
       PARAMETER   ( IMON = 1 , IMO2 = 2 , IDMP = 3 , IDM2 = 4 ,
      +              IHIS = 5 , IHI2 = 6 , IMAP = 7 , IMA2 = 8 ,
@@ -85,26 +85,26 @@ C
       REAL          VERSIO
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqio", ithandl )
-C
-C     read and check version number
-C
+!
+!     read and check version number
+!
       READ (LUNWRO, ERR=900, END=900) VERSIO
-C
-C     less than lowest supported version, ERROR
-C
+!
+!     less than lowest supported version, ERROR
+!
       IF ( VERSIO .LT. VERSI1 ) THEN
          WRITE ( LUREP, 2000 ) VERSIO , VERSI1
          CALL SRSTOP(1)
       ENDIF
-C
-C     greater than this version, WARNING
-C
+!
+!     greater than this version, WARNING
+!
       IF ( VERSIO .GT. VERSI2 ) THEN
          WRITE ( LUREP, 2010 ) VERSIO , VERSI2
       ENDIF
-C
-C     read and check dimensions
-C
+!
+!     read and check dimensions
+!
       READ (LUNWRO, ERR=900, END=900) NOUTPD, NRVARD, NBUFMD
       IF ( NOUTPD .NE. NOUTP  ) THEN
          WRITE ( LUREP, 2020 ) NOUTPD, NOUTP
@@ -119,7 +119,7 @@ C
          IERR = IERR + 1
       ENDIF
       IF ( IERR .GT. 0 ) GOTO 910
-C
+!
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(1,K) , K = 1 , NOUTP )
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(2,K) , K = 1 , NOUTP )
       READ (LUNWRO, ERR=900, END=900) ( IOUTPS(3,K) , K = 1 , NOUTP )
@@ -130,9 +130,9 @@ C
          READ (LUNWRO, ERR=900, END=900) ( IOPOIN(K)   , K = 1 , NRVART)
          READ (LUNWRO, ERR=900, END=900) ( OUNAM (K)   , K = 1 , NRVART)
       ENDIF
-C
-C     Set initialize flag, open files: only on first subdomain
-C
+!
+!     Set initialize flag, open files: only on first subdomain
+!
       IF (MYPART.EQ.1) THEN
          DO 10 K = 1,NOUTP
             ISRTOU = IOUTPS(5,K)
@@ -143,15 +143,15 @@ C
             ELSE
                IFI = K + LUOFF2 - 2
             ENDIF
-C
-C           Open the output-file in the correct way, depending on type of output
-C
+!
+!           Open the output-file in the correct way, depending on type of output
+!
             IOUTPS(7,K) = 1
             IF ( ISRTOU .EQ. IMON .OR. ISRTOU .EQ. IMO2 .OR.
      +           ISRTOU .EQ. IMO3 .OR. ISRTOU .EQ. IMO4 ) THEN
-C
-C              Do not open the normal monitor file
-C
+!
+!              Do not open the normal monitor file
+!
                IF ( K .NE. 1 ) THEN
                   CALL DHOPNF ( LUN(IFI), LCHAR(IFI), 19   , 1    , IDUM )
                ENDIF
@@ -167,22 +167,22 @@ C
             ENDIF
    10    CONTINUE
       ENDIF ! MYPART.EQ.1
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
-C     unsuccessful read
-C
+!
+!     unsuccessful read
+!
   900 CONTINUE
       WRITE ( LUREP   , 2050 ) LCH, LUNWRO
       IERR = IERR + 1
-C
+!
   910 CONTINUE
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
-C     output formats
-C
+!
+!     output formats
+!
  2000 FORMAT ( ' ERROR  : version output intput ',F5.2,' NOT supported'
      &        /'          by OUTPUT sytem version,',F5.2)
  2010 FORMAT ( ' WARNING: version output intput ',F5.2,' greater than'
@@ -198,5 +198,5 @@ C
      &        /'          ',I6,' in output,',I6,' in boot file.')
  2050 FORMAT ( ' ERROR  : Reading output work file;',A,
      &        /'          on unit number ',I3)
-C
+!
       END

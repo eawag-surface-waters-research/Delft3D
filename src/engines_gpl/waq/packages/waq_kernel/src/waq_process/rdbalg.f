@@ -27,39 +27,22 @@
 !>\file
 !>       Light efficiency function DYNAMO algae
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C     921229  Pascal Boderie  Add third algae type, nutrient ratio's
-C                             per species
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Unit
-C ----    --- -  -    -------------------                            ---
-C DEPTH   R*4 1 I depth of the water column                            [
-C EFF     R*4 1 L average light efficiency green-algea                 [
-C ACTRAD  R*4 1 I radiation                                         [W/m
-C SATRAD  R*4 1 I radiation growth saturation green-algea           [W/m
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Unit
+! ----    --- -  -    -------------------                            ---
+! DEPTH   R*4 1 I depth of the water column                            [
+! EFF     R*4 1 L average light efficiency green-algea                 [
+! ACTRAD  R*4 1 I radiation                                         [W/m
+! SATRAD  R*4 1 I radiation growth saturation green-algea           [W/m
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -68,64 +51,64 @@ C     ------   -----  ------------
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
       LOGICAL  LGTOPT
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
       IN4  = INCREM( 4)
       IN5  = INCREM( 5)
       IN6  = INCREM( 6)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
       IP4  = IPOINT( 4)
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
-C
+!
       IF ( IN2 .EQ. 0 .AND. IN3 .EQ. 0 .AND. IN5 .EQ. 0 ) THEN
          ACTRAD = PMSA(IP2 )
          SATRAD = PMSA(IP3 )
          TFGRO  = PMSA(IP5 )
-C
-C        Correct SATRAD for temperature using Temp function for growth
-C
-C        SATRAD = TFGRO * SATRAD
+!
+!        Correct SATRAD for temperature using Temp function for growth
+!
+!        SATRAD = TFGRO * SATRAD
          SATRAD = SATRAD
-C     actuele straling / straling voor groei verzadiging
+!     actuele straling / straling voor groei verzadiging
          FRAD   = ACTRAD / SATRAD
          LGTOPT = .FALSE.
       ELSE
          LGTOPT = .TRUE.
       ENDIF
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.EQ.1) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       IF ( LGTOPT ) THEN
          ACTRAD = PMSA(IP2 )
          SATRAD = PMSA(IP3 )
          TFGRO  = PMSA(IP5 )
-C
-C        Correct SATRAD for temperature using Temp function for growth
-C
-C        SATRAD = TFGRO * SATRAD
+!
+!        Correct SATRAD for temperature using Temp function for growth
+!
+!        SATRAD = TFGRO * SATRAD
          SATRAD = SATRAD
-C     actuele straling / straling voor groei verzadiging
+!     actuele straling / straling voor groei verzadiging
          FRAD   = ACTRAD / SATRAD
       ENDIF
-C
+!
       PMSA(IP6) = MAX(MIN(FRAD,1.0),0.0)
-C
+!
       IF (SATRAD .LT. 1E-20 )  CALL ERRSYS ('SATRAD in RADALG zero', 1 )
 
  8900 CONTINUE
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2 = IP2 + IN2
@@ -133,9 +116,9 @@ C
       IP5 = IP5 + IN5
       IP4   = IP4   + IN4
       IP6   = IP6   + IN6
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
-C
+!
       END

@@ -21,14 +21,14 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE CCONS  TO MODIFY CONSUMER CHARACTERISTICS           *
-C  *********************************************************************
-C
-C  0895 MvdV New subroutine for interactive adapatation of the input
-C            for the new grazing subroutine CONSBL. This subroutine is
-C            called by CHANGE if NUGRAZ > 0.
+!
+!  *********************************************************************
+!  *    SUBROUTINE CCONS  TO MODIFY CONSUMER CHARACTERISTICS           *
+!  *********************************************************************
+!
+!  0895 MvdV New subroutine for interactive adapatation of the input
+!            for the new grazing subroutine CONSBL. This subroutine is
+!            called by CHANGE if NUGRAZ > 0.
 
       SUBROUTINE CCONS (LERR)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -51,13 +51,13 @@ C            called by CHANGE if NUGRAZ > 0.
      3            'STNDRESP','NUTCOEFF','TFILT   ','TMAXGROW',
      4            'TMAXMORT','TROUTRES','TMAXUPT ','TSTNDRES',
      5            'FREXWAT ','CTODRY  ','CONSCONC','PRINT   '/
-C
-C  General comment: in case an error is detected in this subroutine
-C  -- for instance a missing or misspelled control word --
-C  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
-C  Hence a batch job will be terminated,
-C  but re-entry is possible in an interactive run.
-C
+!
+!  General comment: in case an error is detected in this subroutine
+!  -- for instance a missing or misspelled control word --
+!  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
+!  Hence a batch job will be terminated,
+!  but re-entry is possible in an interactive run.
+!
       LERR=0
    10 IF (IOFLAG .EQ. 1) CALL BLSELECT (WZOO, NZOO, 1041)
       LENSTR = 0
@@ -68,18 +68,18 @@ C
      2         3000,  3000,  3000,  3000,  3000,
      3         3000,  3000,  3000,  3000,  3000,
      4         3000,  3000,  3000,  3000,  3000, 2600,    20), NUMCA
-C
-C  Error detected in input of change zooplankton characteristic
-C
+!
+!  Error detected in input of change zooplankton characteristic
+!
    20 WRITE (OUUNI,99999) WORD
       IF (IOFLAG .EQ. 0) GO TO 30
       GO TO 10
    30 WRITE (OUUNI,99990)
       LERR=1
       RETURN
-C
-C  Select number for consumer
-C
+!
+!  Select number for consumer
+!
  3000 CONTINUE
       IF (NUGRAZ .EQ. 0) GO TO 30
       IFILSP = 1
@@ -97,17 +97,17 @@ C
      2         1100,  1200,  1300,  1400,  1500,
      3         1600,  1700,  1800,  1900,  2000,
      4         2100,  2200,  2300,  2400,  2500, 2600,  20), NUMCA
-C
-C  Read species name and find species and type number.
-C
+!
+!  Read species name and find species and type number.
+!
  4000 NSGR=0
       NSGR2 = 1
       IF (IOFLAG .EQ. 1) CALL BLSELECT (GRNAME, NUECOG, 1032)
       I=INPTDT(1032,WORD2,LENWRD)
       IF (MATCH(GRNAME,NUECOG,8,WORD2,LENWRD,0,NUMGR) .EQ. 1) GO TO 4010
-C
-C  Incorrect species name.
-C
+!
+!  Incorrect species name.
+!
       WRITE (OUUNI,99820) WORD2
       WRITE (OUUNI,99810) (GRNAME(J),J=1,NUECOG)
       IF (IOFLAG .EQ. 0) GO TO 30
@@ -132,125 +132,125 @@ C
      2         1100,  1200,  1300,  1400,  1500,
      3         1600,  1700,  1800,  1900,  2000,
      4         2100,  2200,  2300,  2400,  2500, 2600,  20), NUMCA
-C
-C  Modify feacal fractions for phytoplankton types
-C
+!
+!  Modify feacal fractions for phytoplankton types
+!
   100 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                         GFECFR(NUMSP,IFILSP)
       I=INPTNM(1102,GFECFR(NUMSP,IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GFECFR(NUMSP,IFILSP)
       GO TO 10
-C
-C  Modify preferences for phytoplankton types
-C
+!
+!  Modify preferences for phytoplankton types
+!
   200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                          ZOOPR(NUMSP,IFILSP)
       I=INPTNM(1103,ZOOPR(NUMSP,IFILSP) ,0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),ZOOPR(NUMSP,IFILSP)
       GO TO 10
-C
-C  Modify feacal fraction detritus
-C
+!
+!  Modify feacal fraction detritus
+!
   300 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                         GDETFF(IFILSP)
       I=INPTNM(1086,GDETFF(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GDETFF(IFILSP)
       GO TO 10
-C
-C  Modify preference for detritus
-C
+!
+!  Modify preference for detritus
+!
   400 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                          GDETPR(IFILSP)
       I=INPTNM(1087,GDETPR(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GDETPR(IFILSP)
       GO TO 10
-C
-C  Modify initial grazing rate.
-C
+!
+!  Modify initial grazing rate.
+!
   500 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),GRAMO1
       I=INPTNM(1047,GRAMO1,0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRAMO1
       GO TO 10
-C
-C  Modify maximum permissible iteration number.
-C
+!
+!  Modify maximum permissible iteration number.
+!
   600 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99940) OLD,WZOO(NUMCA),IPERM
       I=INPTNM(1048,0.0D0,IPERM,2)
       WRITE (OUUNI,99940) NEW,WZOO(NUMCA),IPERM
       GO TO 10
-C
-C  Modify maximum filtration rate
-C
+!
+!  Modify maximum filtration rate
+!
   700 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                         GRZFM(IFILSP)
       I=INPTNM(1088,GRZFM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZFM(IFILSP)
       GO TO 10
-C
-C  Modify maximum growth rate
-C
+!
+!  Modify maximum growth rate
+!
   800 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                         GRZGM(IFILSP)
       I=INPTNM(1089,GRZGM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZGM(IFILSP)
       GO TO 10
-C
-C  Modify maximum mortality rate
-C
+!
+!  Modify maximum mortality rate
+!
  1100 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                         GRZMM(IFILSP)
       I=INPTNM(1090,GRZMM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZMM(IFILSP)
       GO TO 10
-C
-C  Modify monod half saturation value of food for grazers for the
-C  determination of the grazing rate
-C
+!
+!  Modify monod half saturation value of food for grazers for the
+!  determination of the grazing rate
+!
  1200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GRZMO(IFILSP)
       I=INPTNM(1091,GRZMO(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZMO(IFILSP)
       GO TO 10
-C
-C  Modify routine respiration
-C
+!
+!  Modify routine respiration
+!
  1300 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GRZRE(IFILSP)
       I=INPTNM(1092,GRZRE(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZRE(IFILSP)
       GO TO 10
-C
-C  Modify maximum uptake
-C
+!
+!  Modify maximum uptake
+!
  1400 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GRZRM(IFILSP)
       I=INPTNM(1093,GRZRM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZRM(IFILSP)
       GO TO 10
-C
-C  Modify standard respiration
-C
+!
+!  Modify standard respiration
+!
  1500 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GRZSE(IFILSP)
       I=INPTNM(1094,GRZSE(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRZSE(IFILSP)
       GO TO 10
-C
-C  Modify nutrient coefficients
-C
+!
+!  Modify nutrient coefficients
+!
  1600 CONTINUE
       IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1042)
       I = INPTDT(1042,WORD2,LENWRD)
@@ -266,81 +266,81 @@ C
       I=INPTNM(1043,ZOONUT(NUMCO,IFILSP),0,1)
       WRITE (OUUNI,99960) NEW,CSTRA(NUMCO),ZOONUT(NUMCO,IFILSP)
       GO TO 10
-C
-C  Modify temperature coefficient for filter rate
-C
+!
+!  Modify temperature coefficient for filter rate
+!
  1700 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GTMPFM(IFILSP)
       I=INPTNM(1095,GTMPFM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTMPFM(IFILSP)
       GO TO 10
-C
-C  Modify temperature coefficient for maximum growth
-C
+!
+!  Modify temperature coefficient for maximum growth
+!
  1800 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GTMPGM(IFILSP)
       I=INPTNM(1096,GTMPGM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTMPGM(IFILSP)
       GO TO 10
-C
-C  Modify temperature coefficient for maximum mortality
-C
+!
+!  Modify temperature coefficient for maximum mortality
+!
  1900 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GTMPMM(IFILSP)
       I=INPTNM(1097,GTMPMM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTMPMM(IFILSP)
       GO TO 10
-C
-C  Modify temperature coefficient for routine respiration
-C
+!
+!  Modify temperature coefficient for routine respiration
+!
  2000 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GTMPRE(IFILSP)
       I=INPTNM(1098,GTMPRE(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTMPRE(IFILSP)
       GO TO 10
-C
-C  Modify temperature coefficient for maximum uptake
-C
+!
+!  Modify temperature coefficient for maximum uptake
+!
  2100 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GTMPRM(IFILSP)
       I=INPTNM(1099,GTMPRM(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTMPRM(IFILSP)
       GO TO 10
-C
-C  Modify temperature coefficient for standard respiration
-C
+!
+!  Modify temperature coefficient for standard respiration
+!
  2200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                   GTMPSE(IFILSP)
       I=INPTNM(1100,GTMPSE(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTMPSE(IFILSP)
       GO TO 10
-C
-C  Modify fraction detritus excretion to the water column
-C
+!
+!  Modify fraction detritus excretion to the water column
+!
  2300 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                          GTODET(IFILSP)
       I=INPTNM(1101,GTODET(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GTODET(IFILSP)
       GO TO 10
-C
-C  Modify carbon to dry weight ratio
-C
+!
+!  Modify carbon to dry weight ratio
+!
  2400 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),
      1                          GCTDRY(IFILSP)
       I=INPTNM(1104,GCTDRY(IFILSP),0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GCTDRY(IFILSP)
       GO TO 10
-C
-C  Modify consumer pressure
-C
+!
+!  Modify consumer pressure
+!
  2500 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99790) OLD,IFILSP,
      1                          BZOOD(IFILSP),DZOOD(IFILSP)
@@ -350,9 +350,9 @@ C
       DZOOD(IFILSP)=DZOODI
       WRITE(OUUNI,99790) NEW,IFILSP,BZOODI,DZOODI
       GO TO 10
-C
-C  Print present set of zooplankton characteristics.
-C
+!
+!  Print present set of zooplankton characteristics.
+!
  2600 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99930)
@@ -395,9 +395,9 @@ C
  2650 CONTINUE
 
       GO TO 10
-C
-C  Print characteristics that may be modified
-C
+!
+!  Print characteristics that may be modified
+!
   900 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99850)
@@ -406,13 +406,13 @@ C
       CALL VIDEO (0)
       WRITE (OUUNI,99840)
       GO TO 10
-C
-C  Exit
-C
+!
+!  Exit
+!
  1000 CONTINUE
-C
-C  Formats for this subroutine
-C
+!
+!  Formats for this subroutine
+!
 99999 FORMAT (1X,'Invalid consumer command',2X,A8)
 99990 FORMAT (//,1X,'Excecution terminates following an error in',
      1       ' subroutine "CCONS"',//)

@@ -22,25 +22,25 @@
 !!  rights reserved.
 
       SUBROUTINE DHPFIL(LUNREP,TEKST,FILNAM)
-C
-C     print a filename to file
-C
+!
+!     print a filename to file
+!
       use timers       !   performance timers
 
       INTEGER       LUNREP
       CHARACTER*(*) TEKST , FILNAM
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dhpfil", ithndl )
-C
+!
       ILEN = LEN(FILNAM)
       DO I = ILEN , 1 , -1
          IEND = I
          IF ( FILNAM(I:I) .NE. ' ' ) GOTO 10
       ENDDO
    10 CONTINUE
-C
+!
       WRITE(LUNREP,'(A,A)') TEKST,FILNAM(1:IEND)
-C
+!
       if (timon) call timstop( ithndl )
       RETURN
       END

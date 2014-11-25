@@ -22,21 +22,21 @@
 !!  rights reserved.
 
       function divide(divdnd, divsor)
-c           4-69
-c           check for overflow before dividing.  if result will be
-c        greater than or equal to largest value set result to plus or
-c        minus ''infinity''.  aquot contains the number that represents
-c        infinity.  it was chosen so that it could be recognized on
-c        output.
-c           subprogram start sets the values for anumbr and aquot.
-c        anumlg is the logarithm of anumbr.  iquot is a toggle.  it is
-c        zero if no overflow, one if overflow.
-c           divide uses double precision version of
-c              alog
+!           4-69
+!           check for overflow before dividing.  if result will be
+!        greater than or equal to largest value set result to plus or
+!        minus ''infinity''.  aquot contains the number that represents
+!        infinity.  it was chosen so that it could be recognized on
+!        output.
+!           subprogram start sets the values for anumbr and aquot.
+!        anumlg is the logarithm of anumbr.  iquot is a toggle.  it is
+!        zero if no overflow, one if overflow.
+!           divide uses double precision version of
+!              alog
       implicit real*8 (a-h,o-z)
       common /ovflo/ anumbr, anumlg, aquot, iquot
       iquot = 0
-c        store sign values of dividend and divisor as +1 or -1
+!        store sign values of dividend and divisor as +1 or -1
       sgndnd = 1.0
       sgnsor = 1.0
       if (divdnd.lt.0.0) sgndnd = -1.0
@@ -44,11 +44,11 @@ c        store sign values of dividend and divisor as +1 or -1
       if (divsor.eq.0.0) go to 10
       if (divdnd.eq.0.0) go to 20
       if (dlog(dabs(divdnd)).lt.(dlog(dabs(divsor))+anumlg)) go to 20
-c        set quotient to infinity
+!        set quotient to infinity
    10 divide = sgndnd*sgnsor*aquot
       iquot = 1
       go to 30
-c        compute quotient
+!        compute quotient
    20 divide = divdnd/divsor
    30 return
       end

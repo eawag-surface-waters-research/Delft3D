@@ -27,63 +27,40 @@
 !>\file
 !>       Nett primary production and mortality DYNAMO algae
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C     921229  Pascal Boderie  Add third algae type, nutrient ratio's
-C                             per species
-C     .......
-C     950922  Pascal Boderie  Toevoegen Respiration rate in uitvoer
-C     980428  Jos van Gils    Toevoegen fPPxxx, fMrtxxx
-C     980722  Jos van Gils    Toevoegen saliniteits-afhankelijke sterfte
-C
-C     990421  Jan van Beek    minimale algen hoeveelheid toegevoegd
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Unit
-C ----    --- -  -    -------------------                            ---
-C DL      R*4 1 I daylength for growth saturation green-algae          [
-C EFF     R*4 1 L average light efficiency green-algae                 [
-C FNUT    R*4 1 L nutrient limitation function green-algae             [
-C PPMAX1  R*4 1 I pot. max. pr. prod. rc. green-algae (st.temp)      [1/
-C PMSA    R*4 1 L Gross act. pr. prod. rc. green-algae               [1/
-C TFUNG1  R*4 1 L temp. function for growth processes green            [
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Unit
+! ----    --- -  -    -------------------                            ---
+! DL      R*4 1 I daylength for growth saturation green-algae          [
+! EFF     R*4 1 L average light efficiency green-algae                 [
+! FNUT    R*4 1 L nutrient limitation function green-algae             [
+! PPMAX1  R*4 1 I pot. max. pr. prod. rc. green-algae (st.temp)      [1/
+! PMSA    R*4 1 L Gross act. pr. prod. rc. green-algae               [1/
+! TFUNG1  R*4 1 L temp. function for growth processes green            [
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       REAL     ALGMIN
       INTEGER  NR_MES
       SAVE     NR_MES
       DATA     NR_MES / 0 /
-C
+!
       CALL GETMLU(ILUMON)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -104,13 +81,13 @@ C
       IP18 = IPOINT(18)
       IP19 = IPOINT(19)
       IP20 = IPOINT(20)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.GT.0) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       ALG       = PMSA(IP1 )
       IF ( ALG .LT. 0.0 ) THEN
          IF ( NR_MES .LT. 25 ) THEN
@@ -141,11 +118,11 @@ C
       ALGMIN    = PMSA(IP15)
       ACTMOR    = MORT0
 
-C     Mortality coefficient depends on salinity
-C     Value for low salinity is MORT0
-C     Value for high salinity is MORTS
-C     Linear transition from MORT0 to MORTS
-C        between SAL1 and SAL2
+!     Mortality coefficient depends on salinity
+!     Value for low salinity is MORT0
+!     Value for high salinity is MORTS
+!     Linear transition from MORT0 to MORTS
+!        between SAL1 and SAL2
 
       IF ( SAL1 .GT. 0.0 .AND. SAL2 .GT. SAL1 ) THEN
           IF ( SAL .LE. SAL1 ) THEN
@@ -157,19 +134,19 @@ C        between SAL1 and SAL2
           ENDIF
       ENDIF
 
-C     Gross primary production
+!     Gross primary production
       PPROD =  DL * EFF  * FNUT  * TFUNG  * PPMAX
 
-C     The respiration does not include excretion!!
-C     The proces formulation used here does not release nutrients due
-C     to respiration, but reduces the uptake of nutrients.
-C     Respiration = maintainance part + growth part
+!     The respiration does not include excretion!!
+!     The proces formulation used here does not release nutrients due
+!     to respiration, but reduces the uptake of nutrients.
+!     Respiration = maintainance part + growth part
       RESP    = MRESP  * TFUNM  + GRESP  * (PPROD - MRESP * TFUNM )
 
-C     Nett primary production
+!     Nett primary production
       FL ( 1 + IFLUX ) = ( PPROD - RESP ) * ALG
 
-C     Mortality, including processes as autolysis and zooplankton 'graas
+!     Mortality, including processes as autolysis and zooplankton 'graas
       FL ( 2 + IFLUX ) = ACTMOR * TFUNM * MAX(ALG-ALGMIN,0.0)
 
       PMSA (IP16) = PPROD - RESP
@@ -179,7 +156,7 @@ C     Mortality, including processes as autolysis and zooplankton 'graas
       PMSA (IP20) = ACTMOR * TFUNM * MAX(ALG-ALGMIN,0.0)
 
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -201,8 +178,8 @@ C
       IP18  = IP18  + INCREM ( 18 )
       IP19  = IP19  + INCREM ( 19 )
       IP20  = IP20  + INCREM ( 20 )
-c
+!
  9000 CONTINUE
-c
+!
       RETURN
       END

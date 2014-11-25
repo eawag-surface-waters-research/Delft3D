@@ -27,26 +27,9 @@
 !>\file
 !>       Exchange of excess temperature at the surface (Sweers)
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     941013  Leo Postma      Create first version
-C     941013  Leo Postma      Small changes, units
-C     980626  Jan van Beek    Absolute temperature added
-C     031106  Jan van Beek    Temperature increase on emersed tidal flats added
-C
-C***********************************************************************
-
       IMPLICIT NONE
 
-C     arguments
+!     arguments
 
       REAL               :: PMSA(*)            ! in/out input-output array space to be adressed with IPOINT/INCREM
       REAL               :: FL(*)              ! in/out flux array
@@ -61,7 +44,7 @@ C     arguments
       INTEGER            :: NOQ3               ! in     number of exchanges in third direction
       INTEGER            :: NOQ4               ! in     number of exchanges in fourth direction
 
-C     from PMSA array
+!     from PMSA array
 
       REAL               :: MTEMP              ! 1  in  Modelled temperature                                [oC]
       REAL               :: TMPNAT             ! 2  in  natural temperature of ambient water                [oC]
@@ -86,11 +69,11 @@ C     from PMSA array
       REAL               :: TTEMP              !21  out Total temperature                                   [oC]
       REAL               :: ETEMP              !22  out EXCESS! temperature                                 [oC]
 
-C     fluxes
+!     fluxes
 
       REAL               :: WFLUX              ! 1      excess temperature flux                           [oC/d]
 
-C     local decalrations
+!     local decalrations
 
       REAL, PARAMETER    :: P1 = 0.00158       ! coefficient in heat exchange
       REAL, PARAMETER    :: P2 = 0.018         ! coefficient in heat exchange
@@ -137,7 +120,7 @@ C     local decalrations
       IP21 = IPOINT(21)
       IP22 = IPOINT(22)
       IP23 = IPOINT(23)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 
@@ -145,7 +128,7 @@ C
          TMPNAT = PMSA(IP2)
          ISWTMP = NINT(PMSA(IP7))
 
-C        What is the modelled temperature
+!        What is the modelled temperature
 
          IF ( ISWTMP .EQ. 0 ) THEN
             TTEMP = MTEMP
@@ -159,12 +142,12 @@ C        What is the modelled temperature
          DELTRAD = 0.0
 
          IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
-C           Heat exchange only for top layer segments
-C
+!
+!           Heat exchange only for top layer segments
+!
             CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
             IF (IKMRK2.EQ.0 .OR. IKMRK2.EQ.1) THEN
-C
+!
                DEPTH  = PMSA(IP3)
                VWIND  = PMSA(IP4)
                CP     = PMSA(IP5)
@@ -174,32 +157,32 @@ C
 
                RHOW   = C1 - C2 * TTEMP
                HCAPAC = CP * RHOW
-C
-C                   wind function source E&Z deviates from Sweers
-C
+!
+!                   wind function source E&Z deviates from Sweers
+!
                FWIND  = 0.75 * ( P7 + P6 * VWIND )
-C
-C                   heat exchange coefficient (W/m^2/C) = J/m^2/C/s
-C
+!
+!                   heat exchange coefficient (W/m^2/C) = J/m^2/C/s
+!
                WEXCH  =  P5 + P4 * TTEMP + FWIND *
      &                  (P3 + P2 * TTEMP + P1 * TTEMP * TTEMP )
-C
-C              heat exchange coefficient = 1/d
-C
+!
+!              heat exchange coefficient = 1/d
+!
                WEXCH  = WEXCH / DEPTH / HCAPAC * C3 * FACTRC
-C
+!
                WFLUX  = - WEXCH * ETEMP + ZEROFL
-C
+!
                IF (ETEMP .GT. 0.0) THEN
-C
-C                 Limitation of FL(1) to amount of excess temperature present
-C
+!
+!                 Limitation of FL(1) to amount of excess temperature present
+!
                   WFLUX = MAX (- ETEMP/DELT, WFLUX )
                ENDIF
             ENDIF
          ENDIF
 
-C        Temperature increase due to emersion
+!        Temperature increase due to emersion
 
          SWTEMPDF = NINT(PMSA(IP10))
 
@@ -233,15 +216,15 @@ C        Temperature increase due to emersion
             ENDIF
 
          ENDIF
-C
-C        Output flux, temp, surtemp, heat exchage and temperature increase due to radiation
-C
+!
+!        Output flux, temp, surtemp, heat exchage and temperature increase due to radiation
+!
          FL(1+IFLUX) = WFLUX
          PMSA (IP20) = WEXCH
          PMSA (IP21) = TTEMP
          PMSA (IP22) = ETEMP
          PMSA (IP23) = DELTRAD
-C
+!
          IFLUX = IFLUX + NOFLUX
          IP1   = IP1   + INCREM ( 1  )
          IP2   = IP2   + INCREM ( 2  )
@@ -266,9 +249,9 @@ C
          IP21  = IP21  + INCREM ( 21 )
          IP22  = IP22  + INCREM ( 22 )
          IP23  = IP23  + INCREM ( 23 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

@@ -22,36 +22,36 @@
 !!  rights reserved.
 
       SUBROUTINE ZOEKNX ( NAAM  , NOTOT , SYNAME, NZOEK , IAINDX)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april 1993 by Jan van Beek
-C
-C     FUNCTION            : searches a string in an array
-C                           searches not case sensetive
-C                           Uses ICHAR() and expects ASCII char set
-C                           a t/m z have codes 97 t/m 122
-C                           A t/m Z have codes 65 t/m 90
-C
-C     SUBROUTINES CALLED  : -
-C
-C     PARAMETERS          : 5
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NAAM    CHAR*(*)      1     INPUT   string to be located
-C     NOTOT   INTEGER       1     INPUT   number of elements in SYNAME
-C     SYNAME  CHAR*(*)  NOTOT     INPUT   array to be searched in
-C     NZOEK   INTEGER       1     INPUT   number of characters to be used
-C                                         in the comparison
-C     IAINDX  INTEGER       1     OUTPUT  index in SYNAME if found,
-C                                         -1 if not found
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: april 1993 by Jan van Beek
+!
+!     FUNCTION            : searches a string in an array
+!                           searches not case sensetive
+!                           Uses ICHAR() and expects ASCII char set
+!                           a t/m z have codes 97 t/m 122
+!                           A t/m Z have codes 65 t/m 90
+!
+!     SUBROUTINES CALLED  : -
+!
+!     PARAMETERS          : 5
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NAAM    CHAR*(*)      1     INPUT   string to be located
+!     NOTOT   INTEGER       1     INPUT   number of elements in SYNAME
+!     SYNAME  CHAR*(*)  NOTOT     INPUT   array to be searched in
+!     NZOEK   INTEGER       1     INPUT   number of characters to be used
+!                                         in the comparison
+!     IAINDX  INTEGER       1     OUTPUT  index in SYNAME if found,
+!                                         -1 if not found
+!     Declaration of arguments
+!
       INTEGER       NOTOT , NZOEK , IAINDX
       CHARACTER*(*) NAAM
       CHARACTER*(*) SYNAME(NOTOT)
-C
+!
       IAINDX = -1
       DO 100 I = 1,NOTOT
           DO 50 K = 1,NZOEK

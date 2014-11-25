@@ -27,88 +27,66 @@
 !>\file
 !>       Nitrification of ammonium + decay of CBOD
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     950104  Jos van Gils    Skewness of oxygen function added
-C     921210  Pascal Boderie  Create first version, based on T721.13
-C                             created by Jos van Gils
-C     020220  Johannes Smits  New generic version with MM-kinetics
-C                             for NH4 and OXY (IVERSN = 1)
-C                             Maintained old version with O2FUNC
-C                             (IVERSN = 0)
-C     030807  Annette Beems   expansion with new version for TEWOR
-C                             models with MONOD-kinetics for OXY
-C                             (IVERSN = 2) Q2943
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        NITRIFICATION FORMULA COMPOSED OF A ZERO-ORDER TERM,
-C        AND MICHAELIS-MENTEN TERMS FOR AMMONIUM AND OXYGEN
-C
-C        ----- old version -----
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C CFL     R*4 1 I constant in O2FUNC                                   [-]
-C CONC    R*4 1 I ammonium concentration                            [g/m3]
-C COX     R*4 1 I critical oxygen concentratio for nitrification    [g/m3]
-C CRTEMP  R*4 1 I critical temperature for nitrification              [oC]
-C FL (1)  R*4 1 O nitrification flux                             [gN/m3/d]
-C RC      R*4 1 I first order nitrification rate                     [1/d]
-C O2FUNC  R*4 1 I function for OXY effect on the nitrification rate    [-]
-C OOX     R*4 1 I critical concentr. dissolved oxygen               [g/m3]
-C OXY     R*4 1 I concentration of dissolved oxygen                 [g/m3]
-C POROS   R*4 1 L porosity                                             [-]
-C SKEWN   R*4 1 I constant in O2FUNC                                   [-]
-C TC      R*4 1 I temperature coefficient for nitrification            [-]
-C TEMP    R*4 1 I ambient temperature                                 [oC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
-C ZERO    R*4 1 I zeroth order nitrification rate                [gN/m3/d]
-C
-C        ----- new version -----
-C Name    T   L I/O   Description                                   Units
-C ----    --- -  -    -------------------                            ----
-C AMFUNC  R*4 1 I function for NH4 effect on the nitrification rate    [-]
-C CRTEMP  R*4 1 I critical temperature for nitrification              [oC]
-C CROXY   R*4 1 I critical oxygen concentratio for nitrification    [g/m3]
-C FL (1)  R*4 1 O nitrification flux                             [gN/m3/d]
-C K0NIT   R*4 1 I zeroth order nitrification rate                [gN/m3/d]
-C K0TEMP  R*4 1 I zeroth order nitrification rate below CRTEMP   [gN/m3/d]
-C K0NOX   R*4 1 I zeroth order nitrification rate below CROXY    [gN/m3/d]
-C KNIT    R*4 1 I MM nitrification rate                          [gN/m3/d]
-C KSAM    R*4 1 I half saturation constant for ammonium            [gN/m3]
-C KSOX    R*4 1 I half saturation constant for oxygen               [g/m3]
-C NH4     R*4 1 I ammonium concentration                            [g/m3]
-C OXFUNC  R*4 1 I function for OXY effect on the nitrification rate    [-]
-C OXY     R*4 1 I concentration of dissolved oxygen                 [g/m3]
-C POROS   R*4 1 L porosity                                             [-]
-C TC      R*4 1 I temperature coefficient for nitrification            [-]
-C TEMP    R*4 1 I ambient temperature                                 [oC]
-C TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
-C
-C     Logical Units : -
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        NITRIFICATION FORMULA COMPOSED OF A ZERO-ORDER TERM,
+!        AND MICHAELIS-MENTEN TERMS FOR AMMONIUM AND OXYGEN
+!
+!        ----- old version -----
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! CFL     R*4 1 I constant in O2FUNC                                   [-]
+! CONC    R*4 1 I ammonium concentration                            [g/m3]
+! COX     R*4 1 I critical oxygen concentratio for nitrification    [g/m3]
+! CRTEMP  R*4 1 I critical temperature for nitrification              [oC]
+! FL (1)  R*4 1 O nitrification flux                             [gN/m3/d]
+! RC      R*4 1 I first order nitrification rate                     [1/d]
+! O2FUNC  R*4 1 I function for OXY effect on the nitrification rate    [-]
+! OOX     R*4 1 I critical concentr. dissolved oxygen               [g/m3]
+! OXY     R*4 1 I concentration of dissolved oxygen                 [g/m3]
+! POROS   R*4 1 L porosity                                             [-]
+! SKEWN   R*4 1 I constant in O2FUNC                                   [-]
+! TC      R*4 1 I temperature coefficient for nitrification            [-]
+! TEMP    R*4 1 I ambient temperature                                 [oC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
+! ZERO    R*4 1 I zeroth order nitrification rate                [gN/m3/d]
+!
+!        ----- new version -----
+! Name    T   L I/O   Description                                   Units
+! ----    --- -  -    -------------------                            ----
+! AMFUNC  R*4 1 I function for NH4 effect on the nitrification rate    [-]
+! CRTEMP  R*4 1 I critical temperature for nitrification              [oC]
+! CROXY   R*4 1 I critical oxygen concentratio for nitrification    [g/m3]
+! FL (1)  R*4 1 O nitrification flux                             [gN/m3/d]
+! K0NIT   R*4 1 I zeroth order nitrification rate                [gN/m3/d]
+! K0TEMP  R*4 1 I zeroth order nitrification rate below CRTEMP   [gN/m3/d]
+! K0NOX   R*4 1 I zeroth order nitrification rate below CROXY    [gN/m3/d]
+! KNIT    R*4 1 I MM nitrification rate                          [gN/m3/d]
+! KSAM    R*4 1 I half saturation constant for ammonium            [gN/m3]
+! KSOX    R*4 1 I half saturation constant for oxygen               [g/m3]
+! NH4     R*4 1 I ammonium concentration                            [g/m3]
+! OXFUNC  R*4 1 I function for OXY effect on the nitrification rate    [-]
+! OXY     R*4 1 I concentration of dissolved oxygen                 [g/m3]
+! POROS   R*4 1 L porosity                                             [-]
+! TC      R*4 1 I temperature coefficient for nitrification            [-]
+! TEMP    R*4 1 I ambient temperature                                 [oC]
+! TEMP20  R*4 1 L ambient temperature - stand. temp (20)              [oC]
+!
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
-C
+!     Name     Type   Library
+!     ------   -----  ------------
+!
       IMPLICIT NONE
-C
+!
       REAL     PMSA  ( * ) , FL    (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
-C
+!
       INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10,
      +         IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18, IP19
       INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10,
@@ -123,7 +101,7 @@ C
       REAL     DELT
       REAL     FLNIT
       REAL     NOX_RATIO
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -143,7 +121,7 @@ C
       IN17 = INCREM(17)
       IN18 = INCREM(18)
       IN19 = INCREM(19)
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -163,7 +141,7 @@ C
       IP17 = IPOINT(17)
       IP18 = IPOINT(18)
       IP19 = IPOINT(19)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -171,9 +149,9 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 
       IVERSN = NINT ( PMSA( IP13) )
-C
-C     Use new version when IVERSN = 1.0
-C
+!
+!     Use new version when IVERSN = 1.0
+!
       IF ( IVERSN .EQ. 1 ) THEN
 
             K0TEMP = PMSA(IP1 )
@@ -189,43 +167,43 @@ C
             CROXY  = PMSA(IP11)
             POROS  = PMSA(IP12)
             DELT   = PMSA(IP18)
-C
-C           Set the rates according to CRTEMP and CROXY
-C
+!
+!           Set the rates according to CRTEMP and CROXY
+!
             IF ( TEMP .LT. CRTEMP .OR. OXY .LE. 0.0 ) KNIT = 0.0
-C
+!
                   K0NIT = 0.0
-C
+!
             IF ( TEMP .LT. CRTEMP .AND. OXY .GT. 0.0 ) THEN
                   K0NIT = K0TEMP
             ELSEIF ( TEMP .GE. CRTEMP .AND. OXY .LE. 0.0 ) THEN
                   K0NIT = K0OX
             ENDIF
-C
+!
             IF ( OXY .LE. (CROXY * POROS) ) K0NIT = 0.0
-C
-C           Calculate the nitrification flux
-C
+!
+!           Calculate the nitrification flux
+!
             TEMP20 = TEMP - 20.0
             TEMPC  = TC ** TEMP20
             AMFUNC = NH4 / ( KSAM * POROS + NH4 )
             OXFUNC = OXY / ( KSOX * POROS + OXY )
             FLNIT  = K0NIT + KNIT * TEMPC * AMFUNC * OXFUNC
 
-C           maximise on the availebility of DO and NH4 with safety margin 0.5/0.9
+!           maximise on the availebility of DO and NH4 with safety margin 0.5/0.9
 
             NOX_RATIO = 4.57
             FLNIT     = MIN(FLNIT,0.5*OXY/NOX_RATIO/DELT)
             FLNIT     = MIN(FLNIT,0.9*NH4/DELT)
             FL( 1 + IFLUX ) = FLNIT
-C
-C           Zuurstoffunctie als uitvoer
-C
+!
+!           Zuurstoffunctie als uitvoer
+!
             PMSA(IP19) = OXFUNC
-C
-C
-C     Use TEWOR version when IVERSN = 2.0
-C
+!
+!
+!     Use TEWOR version when IVERSN = 2.0
+!
       ELSEIF ( IVERSN .EQ. 2 ) THEN
 
             NH4    = MAX ( 0.0, PMSA(IP2 ) )
@@ -233,20 +211,20 @@ C
             OXY    = MAX ( 0.0, PMSA(IP5 ) )
             KSOX   = PMSA(IP7 )
             POROS  = PMSA(IP12)
-C
-C           Calculate the nitrification flux
-C
+!
+!           Calculate the nitrification flux
+!
             OXFUNC = OXY / ( KSOX*POROS + OXY )
             FL( 1 + IFLUX ) = KNIT * NH4 * OXFUNC
-C
-C           Zuurstoffunctie als uitvoer
-C
+!
+!           Zuurstoffunctie als uitvoer
+!
             PMSA(IP19) = OXFUNC
-C
-C     Use old version when IVERSN = 0.0
-C
+!
+!     Use old version when IVERSN = 0.0
+!
       ELSE
-C
+!
             ZERO   = PMSA(IP1)
             CONC   = MAX ( 0.0, PMSA(IP2 ) )
             RC     = PMSA(IP14)
@@ -259,9 +237,9 @@ C
             CFL    = PMSA(IP16)
             SKEWN  = PMSA(IP17)
             POROS  = PMSA(IP12)
-C
-C           Calculate oxygen function
-C
+!
+!           Calculate oxygen function
+!
             IF ( (OOX - COX) .LT. 1E-20 )  CALL ERRSYS
      &            ('OOX - COX in NITRIF zero', 1 )
             IF ( OXY .GT. (OOX*POROS) ) THEN
@@ -274,9 +252,9 @@ C
                   O2FUNC = (1.0 - CFL) * ((OXY-COX*POROS)/
      &                     ((OOX-COX)*POROS))**10**SKEWN + CFL
             ENDIF
-C
-C           Calculate flux
-C
+!
+!           Calculate flux
+!
             IF (TEMP .LE. CRTEMP) THEN
                   FL( 1+ IFLUX ) = ZERO
             ELSE
@@ -284,15 +262,15 @@ C
                   TEMPC  = TC ** TEMP20
                   FL( 1 + IFLUX ) = ZERO + RC * CONC* TEMPC * O2FUNC
             ENDIF
-C
-C           Zuurstoffunctie als uitvoer
-C
+!
+!           Zuurstoffunctie als uitvoer
+!
             PMSA(IP19) = O2FUNC
-C
+!
       ENDIF
-C
+!
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + IN1
       IP2   = IP2   + IN2
@@ -313,9 +291,9 @@ C
       IP17  = IP17  + IN17
       IP18  = IP18  + IN18
       IP19  = IP19  + IN19
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

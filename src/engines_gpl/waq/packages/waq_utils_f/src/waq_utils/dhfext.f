@@ -22,54 +22,54 @@
 !!  rights reserved.
 
       SUBROUTINE DHFEXT ( FILNAM, FILEXT, EXTPOS, EXTLEN)
-C
-C
-C     Deltares
-C
-C     CREATED       : june  2002 BY J.K.L. van Beek
-C
-C     FUNCTION      : get file extension and extension dot position an extension length without dot
-C                     if no extension position is last blank
-C
-C     SUBROUTINE CALLED  : none
-C
-C     LOGICAL UNITS      : none
-C
-C     PARAMETERS         :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     FILNAM  CHAR*(*) 1          I       filename
-C     FILEXT  CHAR*(*) 1          O       file extension
-C     EXTPOS  INT      1          O       postion of extension dot, if no extension position is last blank
-C     EXTLEN  INT      1          O       extension length without dot
-C
+!
+!
+!     Deltares
+!
+!     CREATED       : june  2002 BY J.K.L. van Beek
+!
+!     FUNCTION      : get file extension and extension dot position an extension length without dot
+!                     if no extension position is last blank
+!
+!     SUBROUTINE CALLED  : none
+!
+!     LOGICAL UNITS      : none
+!
+!     PARAMETERS         :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     FILNAM  CHAR*(*) 1          I       filename
+!     FILEXT  CHAR*(*) 1          O       file extension
+!     EXTPOS  INT      1          O       postion of extension dot, if no extension position is last blank
+!     EXTLEN  INT      1          O       extension length without dot
+!
       IMPLICIT NONE
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER       EXTPOS, EXTLEN
       CHARACTER*(*) FILNAM, FILEXT
-C
-C     Local declaration
-C
+!
+!     Local declaration
+!
       INTEGER       LENNAM, ICH_LAST, ICH
       CHARACTER     DIRSEP_DOS, DIRSEP_UX
-C
+!
       DIRSEP_DOS = CHAR(92)
       DIRSEP_UX  = CHAR(47)
-C
-C     blank name get out of here
-C
+!
+!     blank name get out of here
+!
       FILEXT = ' '
       EXTPOS = 1
       EXTLEN = 0
       IF ( FILNAM .EQ. ' ' ) RETURN
-C
+!
       LENNAM = LEN(FILNAM)
-C
-C     get last non blank, last point after directory seperator
-C
+!
+!     get last non blank, last point after directory seperator
+!
       EXTPOS = 0
       ICH_LAST  = 0
       DO ICH = LENNAM , 1 , -1
@@ -83,13 +83,13 @@ C
             EXIT
          ENDIF
       ENDDO
-C
+!
       IF ( EXTPOS .GT. 0 ) THEN
          EXTLEN = ICH_LAST-EXTPOS
          IF ( EXTLEN .GT. 0 ) FILEXT = FILNAM(EXTPOS+1:ICH_LAST)
       ELSE
          EXTPOS = MIN(ICH_LAST+1,LENNAM)
       ENDIF
-C
+!
       RETURN
       END

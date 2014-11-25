@@ -27,53 +27,35 @@
 !>\file
 !>       Dispersion/diffusion in the sediment
 
-C***********************************************************************
-C
-C     Project : Impaqt in Delwaq4
-C     Author  : Jos van Gils
-C     Date    : 951020             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     951020  Jos van Gils    Create first version from BIOTUR
-C   20000419  Jan van Beek    Check on dummy exchanges (0->0)
-C   20020502  Jos van Gils    First version, from DIFTRA/TURTRA
-C   20021203  Jos van Gils    Separate in two advective terms
-C                             (necessary to have correct transport
-C                              over interface with inhomogeneous Por)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C        BIOTURBATION/BIO-IRRIGATION BETWEEN SEDIMENT LAYERS
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C Coll Struct 1  O    Structure with collection of bottom collumn info
-C                  Contains:
-C    type(BotColmn), pointer :: set(:)  ! array with info for all bottom collumns
-C    integer                 :: maxsize ! maximum size of the current array
-C    integer                 :: cursize ! filled up to this size
-C BotColm Struct 1   O  Structure with bottom collumn info
-C                  Contains:
-C    integer :: fstwatsed  ! first water sediment exchange number
-C    integer :: lstwatsed  ! last  water sediment exchange number
-C    integer :: topsedsed  ! first within collumn exchange number
-C    integer :: botsedsed  ! last exchange of collumn to deeper bnd
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!        BIOTURBATION/BIO-IRRIGATION BETWEEN SEDIMENT LAYERS
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! Coll Struct 1  O    Structure with collection of bottom collumn info
+!                  Contains:
+!    type(BotColmn), pointer :: set(:)  ! array with info for all bottom collumns
+!    integer                 :: maxsize ! maximum size of the current array
+!    integer                 :: cursize ! filled up to this size
+! BotColm Struct 1   O  Structure with bottom collumn info
+!                  Contains:
+!    integer :: fstwatsed  ! first water sediment exchange number
+!    integer :: lstwatsed  ! last  water sediment exchange number
+!    integer :: topsedsed  ! first within collumn exchange number
+!    integer :: botsedsed  ! last exchange of collumn to deeper bnd
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
       USE BottomSet     !  Module with derived types and add function
 
-c     type ( BotColmnColl ) :: Coll  <= is defined in the module
+!     type ( BotColmnColl ) :: Coll  <= is defined in the module
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -89,9 +71,9 @@ c     type ( BotColmnColl ) :: Coll  <= is defined in the module
      J         DIFLEN, ACTHS1, ACTHS2, POROS1, POROS2,
      J         XFROM , XTO   , VD_DIS, VU_DIS
 
-c     Include column structure
-c     we define a double column structure, one for downward,
-c     and one for upward transport
+!     Include column structure
+!     we define a double column structure, one for downward,
+!     and one for upward transport
 
       CALL MAKKO2 ( IEXPNT , IKNMRK , NOQ1   , NOQ2   , NOQ3   ,
      +              NOQ4   )
@@ -103,7 +85,7 @@ c     and one for upward transport
       IP5  = IPOINT( 5)
       IP6  = IPOINT( 6)
       IP7  = IPOINT( 7)
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -112,14 +94,14 @@ C
       IN6  = INCREM( 6)
       IN7  = INCREM( 7)
 
-c.....Segmentloop om uitvoergrootheden op segmentniveau op 0 te zetten
-c     DO 9000 ISEG=1,NOSEG
-c9000 CONTINUE
-C
-c.....Exchangeloop over de horizontale richtingen om op 0 te zetten
-c.....en om de pointers te zetten
+!.....Segmentloop om uitvoergrootheden op segmentniveau op 0 te zetten
+!     DO 9000 ISEG=1,NOSEG
+!9000 CONTINUE
+!
+!.....Exchangeloop over de horizontale richtingen om op 0 te zetten
+!.....en om de pointers te zetten
       DO 8000 IQ=1,NOQ1+NOQ2
-c         Uitvoeritems op exchange level
+!         Uitvoeritems op exchange level
           PMSA(IP6) = 0.0
           PMSA(IP7) = 0.0
           IP6 = IP6 + IN6
@@ -127,22 +109,22 @@ c         Uitvoeritems op exchange level
  8000 CONTINUE
       IP6  = IPOINT( 6)
       IP7  = IPOINT( 7)
-C
-c.....Loop over kolommen
+!
+!.....Loop over kolommen
       DO 7000 IK = 1 , Coll%cursize
 
-c         Select first column of exchanges for DOWNWARD advection
+!         Select first column of exchanges for DOWNWARD advection
 
           IWA1 = Coll%set(IK)%fstwatsed
           IWA2 = Coll%set(IK)%lstwatsed
           ITOP = Coll%set(IK)%topsedsed
           IBOT = Coll%set(IK)%botsedsed
 
-C        Offset to reach second colum for UPWARD advection
+!        Offset to reach second colum for UPWARD advection
 
          IOFFSE = IBOT - (IWA1-1)
 
-C        Loop over exchanges
+!        Loop over exchanges
 
          DO IQ = IWA1,IBOT
 
@@ -153,7 +135,7 @@ C        Loop over exchanges
 
          IF ( IQ .LE. IWA2 ) THEN
 
-c.....WATER-SEDIMENT INTERFACE
+!.....WATER-SEDIMENT INTERFACE
 
              DIFLEN = PMSA(IP2+(IVAN -1)*IN2)
              ACTHS2 = PMSA(IP1+(INAAR-1)*IN1)
@@ -168,7 +150,7 @@ c.....WATER-SEDIMENT INTERFACE
 
          ELSEIF ( IQ .EQ. IBOT ) THEN
 
-c.....DEEP SEDIMENT BOUNDARY
+!.....DEEP SEDIMENT BOUNDARY
 
              ACTHS1 = PMSA(IP1+(IVAN -1)*IN1)
              POROS1 = PMSA(IP3+(IVAN -1)*IN3)
@@ -184,7 +166,7 @@ c.....DEEP SEDIMENT BOUNDARY
 
          ELSE
 
-c.....SEDIMENT-SEDIMENT INTERFACE
+!.....SEDIMENT-SEDIMENT INTERFACE
 
              ACTHS1 = PMSA(IP1+(IVAN -1)*IN1)
              ACTHS2 = PMSA(IP1+(INAAR-1)*IN1)

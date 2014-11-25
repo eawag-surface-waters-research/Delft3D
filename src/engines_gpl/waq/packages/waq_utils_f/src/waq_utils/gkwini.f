@@ -22,39 +22,39 @@
 !!  rights reserved.
 
       subroutine gkwini ( lu , group , keywrd , value )
-c=======================================================================
-c            Rijkswaterstaat/RIZA and Deltares
-c                One Dimensional Modelling System
-c                           S O B E K
-c-----------------------------------------------------------------------
-c Subsystem:          Parse New Model Database (V2.0)
-c
-c Programmer:         J.A.G. van Gils
-c
-c Module:             Get keyword from ini file
-c
-c Module description: Reads a keyword from a "windows" type ini file
-c
-c-----------------------------------------------------------------------
-c Subprogram calls:
-c NAME    DESCRIPTION
-c=======================================================================
-c
-c***********************************************************************
-c CVS log information:
-c
-c $Id$
-c
-c History:
-c $Log: /delft3d/modules/d3d-waq/waq/libsrc/dh/gkwini.f $
-C
-C1     12-09-00 16:28 Beek_j
+!=======================================================================
+!            Rijkswaterstaat/RIZA and Deltares
+!                One Dimensional Modelling System
+!                           S O B E K
+!-----------------------------------------------------------------------
+! Subsystem:          Parse New Model Database (V2.0)
+!
+! Programmer:         J.A.G. van Gils
+!
+! Module:             Get keyword from ini file
+!
+! Module description: Reads a keyword from a "windows" type ini file
+!
+!-----------------------------------------------------------------------
+! Subprogram calls:
+! NAME    DESCRIPTION
+!=======================================================================
+!
+!***********************************************************************
+! CVS log information:
+!
+! $Id$
+!
+! History:
+! $Log: /delft3d/modules/d3d-waq/waq/libsrc/dh/gkwini.f $
+!
+!1     12-09-00 16:28 Beek_j
 CHaal keyword uit ini file
-c Revision 1.1  1998/02/13  13:23:41  kuipe_j
-c Adapt to CMT
-c
-c
-c***********************************************************************
+! Revision 1.1  1998/02/13  13:23:41  kuipe_j
+! Adapt to CMT
+!
+!
+!***********************************************************************
       USE Timers
       integer       lu
       character*(*) group, keywrd, value
@@ -74,58 +74,58 @@ c***********************************************************************
       lvalin = len(value)
       value  = ' '
 
-c     Read line
+!     Read line
 
    10 continue
       lline = ' '
       read ( lu , '(a)' , end = 90 , err = 90 ) lline
 
-c     Check for group separator
+!     Check for group separator
 
       call gettko ( lline , 256 , '[' , ']' , groupl , il , ierr )
       if ( ierr .eq. 0 .and. il .gt. 0 ) then
 
-c         Group separator found
+!         Group separator found
 
           lcomp = min ( il , lgrpin )
           call zoek (groupl(1:lcomp), 1, group(1:lcomp), lcomp, index)
           if ( index .eq. 1 ) then
 
-c             Group name equals requested group
+!             Group name equals requested group
 
               gropen = .true.
           else
 
-c             Group name does not equal requested group
+!             Group name does not equal requested group
 
               if ( gropen ) grclos = .true.
           endif
 
-c         If requested group is passed, finish looking
+!         If requested group is passed, finish looking
 
           if ( grclos ) goto 90
       else
 
-c         Check for keyword if Group is open
+!         Check for keyword if Group is open
 
           if ( gropen ) then
               call gettko (lline,256,'*','=',keywrl,il,ierr)
               if ( ierr .eq. 0 .and. il .gt. 0 ) then
 
-c                 Keyword found
+!                 Keyword found
 
                   lcomp = min ( il , lkeyin )
                   call zoek
      j            (keywrl(1:lcomp),1,keywrd(1:lcomp),lcomp,index)
                   if ( index .eq. 1 ) then
 
-c                     Keyword equals requested keyword
+!                     Keyword equals requested keyword
 
                       call gettko
      j                ( lline , 256 , '=' , '*' , valuel, il , ierr )
                       if ( ierr .eq. 0 .and. il .gt. 0 ) then
 
-c                         Value succesfully read
+!                         Value succesfully read
 
                           value = ' '
                           lcomp = min ( il , lvalin )
@@ -137,7 +137,7 @@ c                         Value succesfully read
           endif
       endif
 
-c     Go for next line
+!     Go for next line
 
       goto 10
 
@@ -147,13 +147,13 @@ c     Go for next line
       end
 
       SUBROUTINE GETTKO ( LINE , IN , CL , CT , TOKEN , IL , IERR )
-C
-C     LINE      INPUT STRING
-C     IN        LENGTH OF INPUT STRING
-C     CL        LEADING SEPARATOR ( '*' IS FROM BEGIN OF STRING)
-C     CT        TRAILING SEPARATOR ( '*' IS TILL END OF STRING)
-C     TOKEN     STRING BETWEEN SEPARATORS
-C     IL        LENGTH OF STRING BETWEEN SEPARATORS
+!
+!     LINE      INPUT STRING
+!     IN        LENGTH OF INPUT STRING
+!     CL        LEADING SEPARATOR ( '*' IS FROM BEGIN OF STRING)
+!     CT        TRAILING SEPARATOR ( '*' IS TILL END OF STRING)
+!     TOKEN     STRING BETWEEN SEPARATORS
+!     IL        LENGTH OF STRING BETWEEN SEPARATORS
 
       USE Timers
       CHARACTER*(*) LINE
@@ -169,7 +169,7 @@ C     IL        LENGTH OF STRING BETWEEN SEPARATORS
       TOKEN = ' '
       IERR = 0
 
-C     If necessary find leading separator
+!     If necessary find leading separator
 
       I1 = 1
 
@@ -185,7 +185,7 @@ C     If necessary find leading separator
     2     CONTINUE
       ENDIF
 
-C     Skip leading blanks
+!     Skip leading blanks
 
     3 IF ( LINE(I1:I1) .NE. ' ' ) GOTO 4
       I1 = I1+1
@@ -196,7 +196,7 @@ C     Skip leading blanks
       GOTO 3
     4 CONTINUE
 
-C     If necessary find trailing seperator
+!     If necessary find trailing seperator
 
       I2 = IN
 
@@ -212,7 +212,7 @@ C     If necessary find trailing seperator
     6     CONTINUE
       ENDIF
 
-C     Skip trailing blanks
+!     Skip trailing blanks
 
     7 IF ( LINE(I2:I2) .NE. ' ' ) GOTO 8
       I2 = I2-1

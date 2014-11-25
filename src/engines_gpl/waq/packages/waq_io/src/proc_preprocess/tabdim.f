@@ -26,52 +26,52 @@
      +                    ACTUSE, NBPR  , NO_INS, NO_INE, NO_OUS,
      +                    NO_OUE, NO_FLU, NO_STO, NO_DIS, NO_VEL,
      +                    NOINFO, NOWARN, IERROR)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: nov -1992 by Jan van Beek
-C
-C     FUNCTION            : Reads the binary proces definition file
-C
-C     LOGICAL UNITNUMBERS : LUREP   - report file
-C
-C     SUBROUTINES CALLED  : SRSTOP, stops execution
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUREP   INTEGER       1     INPUT   Report file
-C     NSVICH  INTEGER       1     INPUT   No of extra input variables for charon
-C     NSVOCH  INTEGER       1     INPUT   No of extra output variables for charon
-C     NFLCH   INTEGER       1     INPUT   No of fluxes for charon
-C     NSTCH   INTEGER       1     INPUT   No of stochiometric terms for charon
-C     LASWI   LOGICAL       1     INPUT   Active processes only switch
-C     ICONF   INTEGER       1     INPUT   Requested configuration index
-C     NO_ACT  INTEGER       1     INPUT   Number of activated processes
-C     ACTLST  CHARACTER     *     INPUT   List of activated processes
-C     ACTUSE  INTEGER       *     INPUT   activated processes status indicator
-C     NBPR    INTEGER       1     OUTPUT  number of active processes
-C     NO_INS  INTEGER       1     OUTPUT  Number of input var on segment
-C     NO_INE  INTEGER       1     OUTPUT  Number of input var on exchange
-C     NO_OUS  INTEGER       1     OUTPUT  Number of output var on segment
-C     NO_OUE  INTEGER       1     OUTPUT  Number of output var on exchange
-C     NO_FLU  INTEGER       1     OUTPUT  Number of fluxes
-C     NO_STO  INTEGER       1     OUTPUT  Number of stochis
-C     NO_DIS  INTEGER       1     OUTPUT  Number of dispersions
-C     NO_VEL  INTEGER       1     OUTPUT  Number of velocities
-C     NOINFO  INTEGER       1     IN/OUT  Cummulative information count
-C     NOWARN  INTEGER       1     IN/OUT  Cummulative warning count
-C     IERROR  INTEGER       1     OUTPUT  Error indicatior
-C
-C     IMPLICIT NONE for extra compiler checks
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: nov -1992 by Jan van Beek
+!
+!     FUNCTION            : Reads the binary proces definition file
+!
+!     LOGICAL UNITNUMBERS : LUREP   - report file
+!
+!     SUBROUTINES CALLED  : SRSTOP, stops execution
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUREP   INTEGER       1     INPUT   Report file
+!     NSVICH  INTEGER       1     INPUT   No of extra input variables for charon
+!     NSVOCH  INTEGER       1     INPUT   No of extra output variables for charon
+!     NFLCH   INTEGER       1     INPUT   No of fluxes for charon
+!     NSTCH   INTEGER       1     INPUT   No of stochiometric terms for charon
+!     LASWI   LOGICAL       1     INPUT   Active processes only switch
+!     ICONF   INTEGER       1     INPUT   Requested configuration index
+!     NO_ACT  INTEGER       1     INPUT   Number of activated processes
+!     ACTLST  CHARACTER     *     INPUT   List of activated processes
+!     ACTUSE  INTEGER       *     INPUT   activated processes status indicator
+!     NBPR    INTEGER       1     OUTPUT  number of active processes
+!     NO_INS  INTEGER       1     OUTPUT  Number of input var on segment
+!     NO_INE  INTEGER       1     OUTPUT  Number of input var on exchange
+!     NO_OUS  INTEGER       1     OUTPUT  Number of output var on segment
+!     NO_OUE  INTEGER       1     OUTPUT  Number of output var on exchange
+!     NO_FLU  INTEGER       1     OUTPUT  Number of fluxes
+!     NO_STO  INTEGER       1     OUTPUT  Number of stochis
+!     NO_DIS  INTEGER       1     OUTPUT  Number of dispersions
+!     NO_VEL  INTEGER       1     OUTPUT  Number of velocities
+!     NOINFO  INTEGER       1     IN/OUT  Cummulative information count
+!     NOWARN  INTEGER       1     IN/OUT  Cummulative warning count
+!     IERROR  INTEGER       1     OUTPUT  Error indicatior
+!
+!     IMPLICIT NONE for extra compiler checks
+!
       use timers       !   performance timers
 
       IMPLICIT NONE
-C
-C     Declaration of arguments
-C
+!
+!     Declaration of arguments
+!
       INTEGER        LUREP           , NSVICH          ,
      +               NSVOCH          , NFLCH           ,
      +               NSTCH           , ICONF           ,
@@ -85,13 +85,13 @@ C
       INTEGER        ACTUSE(*)
       LOGICAL        LASWI
       CHARACTER*(*)          :: ACTLST(*)
-C
-C     Common declarations
-C
+!
+!     Common declarations
+!
       INCLUDE 'data.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       INTEGER        INS   , INE   , OUS   , OUE   , FLU   ,
      +               STO   , DIS   , VEL   , IPROC , IOFFSE,
      +               NAANTA, IINPU , IITEM , JNDEX , IOUTP ,
@@ -101,14 +101,14 @@ C
       LOGICAL        SWIT2D
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "tabdim", ithndl )
-C
-C     Some init
-C
+!
+!     Some init
+!
       SWIT2D = .FALSE.
 
-c
-c     first loop, determine maximal dimensions
-c
+!
+!     first loop, determine maximal dimensions
+!
       NO_INS = 0
       NO_INE = 0
       NO_OUS = 0
@@ -119,9 +119,9 @@ c
       NO_VEL = 0
       NBPR = 0
       do iproc=1,nproc
-C
-C        Check if process is requested and licensed
-C
+!
+!        Check if process is requested and licensed
+!
          IF ( .NOT. LASWI ) THEN
             IPRCNF = (IPROC-1)*NCONF + ICONF
             IGET   = ICNPRO(IPRCNF)
@@ -158,18 +158,18 @@ C
             vel = 0
             NBPR = NBPR+1
 
-C           write (LUREP,'(''Process: '',a10)') procid(iproc)
-C           write (*,'(''+Process: '',a10)') procid(iproc)
+!           write (LUREP,'(''Process: '',a10)') procid(iproc)
+!           write (*,'(''+Process: '',a10)') procid(iproc)
 
-c------------------------------------------------------------------------c
-c           CONSTRUCT PROCESS
-c------------------------------------------------------------------------c
+!------------------------------------------------------------------------c
+!           CONSTRUCT PROCESS
+!------------------------------------------------------------------------c
 
-c           Fill PDF structure, only dimensions
+!           Fill PDF structure, only dimensions
 
-C           INPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
+!           INPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
 
-c           scan input items table for FIRST occurence of proces
+!           scan input items table for FIRST occurence of proces
 
             do iinpu = 1 , ninpu
                call zoek ( procid(iproc), 1, inpupr(iinpu), 10, jndex)
@@ -184,7 +184,7 @@ c           scan input items table for FIRST occurence of proces
                endif
             enddo
 
-C           OUTPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
+!           OUTPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
 
             do ioutp = 1 , noutp
                call zoek ( procid(iproc), 1, outppr(ioutp),10 , jndex)
@@ -192,7 +192,7 @@ C           OUTPUT ITEMS ON SEGMENT LEVEL/EXCHANGE LEVEL
                   call zoek ( outpit(ioutp), nitem, itemid, 10, iitem)
                   if ( iitem .le. 0 ) stop 'unknown ITEM'
 
-c                 Find item properties and store in PDF structure
+!                 Find item properties and store in PDF structure
 
                   if ( outpsx(ioutp) .eq. 1 ) then
 !                     ous = ous + 1
@@ -201,7 +201,7 @@ c                 Find item properties and store in PDF structure
 !                     oue = oue + 1
                       oue = max(oue,outpnm(ioutp)) ! this is incorrect, because ous and oue are mixed, resulting in overestimation of almost a factor 2
 
-c                     SCAN VELO and DISP TABLES FOR LINES ASSOCIATED WITH CURRENT OUTPUT ITEM ON EXCHANGE LEVEL
+!                     SCAN VELO and DISP TABLES FOR LINES ASSOCIATED WITH CURRENT OUTPUT ITEM ON EXCHANGE LEVEL
 
                       if ( .not. swit2d ) then
                          do idisp = 1 , ndisp
@@ -212,7 +212,7 @@ c                     SCAN VELO and DISP TABLES FOR LINES ASSOCIATED WITH CURREN
                          enddo
                       endif
 
-c                     scan velocity lines table
+!                     scan velocity lines table
 
                       if ( .not. swit2d ) then
                          do ivelo = 1 , nvelo
@@ -223,7 +223,7 @@ c                     scan velocity lines table
                          enddo
                       endif
 
-c                     END of processing output item on exchange level!
+!                     END of processing output item on exchange level!
 
                   endif
 
@@ -231,7 +231,7 @@ c                     END of processing output item on exchange level!
 
             enddo
 
-C           FLUXES
+!           FLUXES
 
             do ioutf = 1 , noutf
                call zoek ( procid(iproc), 1, outfpr(ioutf), 10, jndex)
@@ -240,9 +240,9 @@ C           FLUXES
 !                 flu = flu + 1
                   flu = max(flu,outfnm(ioutf))
 
-c                 Process current row
+!                 Process current row
 
-c                 Lookup flux in item  table
+!                 Lookup flux in item  table
 
                   call zoek ( outffl(ioutf), nitem, itemid, 10, iflux)
                   if ( iflux .le. 0 ) THEN
@@ -263,7 +263,7 @@ c                 Lookup flux in item  table
                endif
             enddo
 
-c           reserve for extra input/output if process is charon
+!           reserve for extra input/output if process is charon
 
             if ( procfo(iproc) .eq. 'D40CHA' ) then
                ins = ins + nsvich
@@ -282,12 +282,12 @@ c           reserve for extra input/output if process is charon
             NO_VEL = NO_VEL + VEL
 
          ENDIF
-C
+!
       enddo
-C
+!
   900 CONTINUE
-C
-C
+!
+!
       if (timon) call timstop( ithndl )
       RETURN
       END

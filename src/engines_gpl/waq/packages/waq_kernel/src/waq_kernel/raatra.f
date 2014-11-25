@@ -23,36 +23,36 @@
 
       SUBROUTINE RAATRA (NOSYS , NDMPQ , NORAAI, NTRAAQ, IORAAI,
      +                   NQRAAI, IQRAAI, IQDMP , DMPQ  , TRRAAI)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : march 1995 by Jan van Beek
-C
-C     FUNCTION            : Fills transport terms for raaien
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOSYS   INTEGER       1     INPUT   Total number of active substances
-C     NDMPQ   INTEGER       1     INPUT   Number of dump exchanges
-C     NORAAI  INTEGER       1     INPUT   Number of raaien
-C     NTRAAQ  INTEGER       1     INPUT   Total number of exch. in raaien
-C     IORAAI  INTEGER       *     INPUT   Output option for raai
-C     NQRAAI  INTEGER       *     INPUT   Number of exchanges in raai
-C     IQRAAI  INTEGER       *     INPUT   Exchanges in raai
-C     IQDMP   INTEGER       *     INPUT   Exchange to dumped exchange pointer
-C     DMPQ    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
-C     TRRAAI  REAL NOTOT*NDMPAR*6 IN/OUT  Cummulative transport over raai
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : march 1995 by Jan van Beek
+!
+!     FUNCTION            : Fills transport terms for raaien
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     NOSYS   INTEGER       1     INPUT   Total number of active substances
+!     NDMPQ   INTEGER       1     INPUT   Number of dump exchanges
+!     NORAAI  INTEGER       1     INPUT   Number of raaien
+!     NTRAAQ  INTEGER       1     INPUT   Total number of exch. in raaien
+!     IORAAI  INTEGER       *     INPUT   Output option for raai
+!     NQRAAI  INTEGER       *     INPUT   Number of exchanges in raai
+!     IQRAAI  INTEGER       *     INPUT   Exchanges in raai
+!     IQDMP   INTEGER       *     INPUT   Exchange to dumped exchange pointer
+!     DMPQ    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
+!     TRRAAI  REAL NOTOT*NDMPAR*6 IN/OUT  Cummulative transport over raai
+!
+!     Declaration of arguments
+!
       use timers
 
       INTEGER       NOSYS , NDMPQ , NORAAI, NTRAAQ
@@ -61,17 +61,17 @@ C
       REAL          DMPQ(NOSYS,NDMPQ,*)   , TRRAAI(NOSYS,*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "raatra", ithandl )
-C
-C     Local declarations
-C
-C
-C     Loop over the raaien
-C
+!
+!     Local declarations
+!
+!
+!     Loop over the raaien
+!
       ITEL1 = 0
       DO 100 IRAAI = 1 , NORAAI
-C
-C        the exchange contributes
-C
+!
+!        the exchange contributes
+!
          NQC  = NQRAAI(IRAAI)
          IOPT = IORAAI(IRAAI)
          DO 30 IQC = 1 , NQC
@@ -109,10 +109,10 @@ C
    20          CONTINUE
             ENDIF
    30    CONTINUE
-C
+!
   100 CONTINUE
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
       END

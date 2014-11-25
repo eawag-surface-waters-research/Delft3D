@@ -27,33 +27,20 @@
 !>\file
 !>       Partitioning switch in WC, S1 and S2 based on actual and critical oxygen concentration
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES IMPAQT M4.70
-C     Author  :
-C     Date    : 960501             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     000519  Jos van Gils    Set switches oxic/sulfidic based on OXY
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C OXY     R*4 1 I     oxygen concentration                           [gO/m3]
-C CROXY   R*4 1 I     critical oxygen concentration                  [gO/m3]
-C SWITCH  R*4 1 O     switch for partitioning                        [-]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! OXY     R*4 1 I     oxygen concentration                           [gO/m3]
+! CROXY   R*4 1 I     critical oxygen concentration                  [gO/m3]
+! SWITCH  R*4 1 O     switch for partitioning                        [-]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
@@ -81,21 +68,21 @@ C     ------   -----  ------------
       IN4 = INCREM(4)
       IN5 = INCREM(5)
       IN6 = INCREM(6)
-C
+!
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 !!    IF (IKMRK1.GT.0) THEN
       IF (BTEST(IKNMRK(ISEG),0)) THEN
-C
+!
       OXY   = PMSA(IP1)
       CROXY = PMSA(IP2)
       POROS = PMSA(IP3)
 
-C*******************************************************************************
-C**** if OXY > CROXY ISWOXY = 1  in Water Column and S1 (poriewater)
-C****           else ISWOXY = 0  in Water Column and S1 (poriewater)
-C****                ISWOXY = 0  always in S2
-C***********************************************************************
+!*******************************************************************************
+!**** if OXY > CROXY ISWOXY = 1  in Water Column and S1 (poriewater)
+!****           else ISWOXY = 0  in Water Column and S1 (poriewater)
+!****                ISWOXY = 0  always in S2
+!***********************************************************************
 
       IF (OXY/POROS.LE.CROXY) THEN
         ISWWK = 0
@@ -112,16 +99,16 @@ C***********************************************************************
       PMSA(IP6) = ISWS2
 
       ENDIF
-C
+!
       IP1 = IP1 + IN1
       IP2 = IP2 + IN2
       IP3 = IP3 + IN3
       IP4 = IP4 + IN4
       IP5 = IP5 + IN5
       IP6 = IP6 + IN6
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
-C
+!
       END

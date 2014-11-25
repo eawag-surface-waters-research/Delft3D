@@ -21,15 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C    Date:       5 Oct 1992
-C    Time:       22:20
-C    Program:    EHCALC.FOR
-C    Version:    6.00.00
-C    Programmer: Nicolaas M de Rooij
-C
+!    Date:       5 Oct 1992
+!    Time:       22:20
+!    Program:    EHCALC.FOR
+!    Version:    6.00.00
+!    Programmer: Nicolaas M de Rooij
+!
       subroutine ehcalc
-c        ehcalc computes eh from pie of the electron
-c        procedure equivalent to phcalc
+!        ehcalc computes eh from pie of the electron
+!        procedure equivalent to phcalc
       include  'char1.inc'
       character*6 el,oh,o2
       DATA EL/'EL-   '/

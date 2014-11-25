@@ -22,26 +22,26 @@
 !!  rights reserved.
 
       SUBROUTINE DHZERC(C,LENC)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: june  1997 by Jan van Beek
-C
-C     FUNCTION            : Utility that spaces character*1 array
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     C       CHAR*1      *       OUTPUT  array to be spaced
-C     LENC    INTEGER     1       INPUT   Number of chars to be spaced
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: june  1997 by Jan van Beek
+!
+!     FUNCTION            : Utility that spaces character*1 array
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     C       CHAR*1      *       OUTPUT  array to be spaced
+!     LENC    INTEGER     1       INPUT   Number of chars to be spaced
+!
       INTEGER     LENC
       CHARACTER*1 C(*)
-C
+!
       DO 100 I = 1 , LENC
          C(I) = ' '
   100 CONTINUE
-C
+!
       RETURN
       END

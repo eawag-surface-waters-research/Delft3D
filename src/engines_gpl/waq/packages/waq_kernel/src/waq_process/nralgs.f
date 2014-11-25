@@ -27,47 +27,32 @@
 !>\file
 !>       Nutrient release of algae in S1 and S2
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     930730  Pascal Boderie  Mortality of algae in sediment
-C     073107  Jos van Gils    Expanded with optional autolysis to Switch
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                   Unit
-C ----    --- -  -    -------------------                            ---
-C FALGx   R*4 1 I mortality flux of algea-type x in sediment  [gC/m3/d]
-C FL(1)   R*4 1 O autolysis of NN4                            [gN/m3/d]
-C FL(2)   R*4 1 O production of N-det                         [gN/m3/d]
-C FL(3)   R*4 1 O autolysis of P                              [gP/m3/d]
-C FL(4)   R*4 1 O production of P-det                         [gP/m3/d]
-C FL(5)   R*4 1 O autolysis of Si                            [gSi/m3/d]
-C FL(6)   R*4 1 O production of Si-det                      [gSiC/m3/d]
-C FRMRT1  R*4 1 I fraction of mortality dissolved as nutrients      [-]
-C FRMRT2  R*4 1 I fraction of mortality dissolved as nutrients      [-]
-C NCRAT1  R*4 1 I Nitrogen-Carbon ratio in green-algea          [gN/gC]
-C NCRAT2  R*4 1 I Nitrogen-Carbon ratio in diatoms              [gN/gC]
-C PCRAT1  R*4 1 I Phosphorus-Carbon ratio in green-algea        [gP/gC]
-C PCRAT2  R*4 1 I Phosphorus-Carbon ratio in diatoms            [gP/gC]
-C SICRAT  R*4 1 I Silicate-Carbon ratio in diatoms             [gSi/gC]
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                   Unit
+! ----    --- -  -    -------------------                            ---
+! FALGx   R*4 1 I mortality flux of algea-type x in sediment  [gC/m3/d]
+! FL(1)   R*4 1 O autolysis of NN4                            [gN/m3/d]
+! FL(2)   R*4 1 O production of N-det                         [gN/m3/d]
+! FL(3)   R*4 1 O autolysis of P                              [gP/m3/d]
+! FL(4)   R*4 1 O production of P-det                         [gP/m3/d]
+! FL(5)   R*4 1 O autolysis of Si                            [gSi/m3/d]
+! FL(6)   R*4 1 O production of Si-det                      [gSiC/m3/d]
+! FRMRT1  R*4 1 I fraction of mortality dissolved as nutrients      [-]
+! FRMRT2  R*4 1 I fraction of mortality dissolved as nutrients      [-]
+! NCRAT1  R*4 1 I Nitrogen-Carbon ratio in green-algea          [gN/gC]
+! NCRAT2  R*4 1 I Nitrogen-Carbon ratio in diatoms              [gN/gC]
+! PCRAT1  R*4 1 I Phosphorus-Carbon ratio in green-algea        [gP/gC]
+! PCRAT2  R*4 1 I Phosphorus-Carbon ratio in diatoms            [gP/gC]
+! SICRAT  R*4 1 I Silicate-Carbon ratio in diatoms             [gSi/gC]
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT NONE
 
@@ -80,7 +65,7 @@ C     ------   -----  ------------
       real     FALG1,NCRAT1,PCRAT1,AUT1,DET1,FALG2,NCRAT2,PCRAT2,
      j         SICRAT,AUT2,DET2,DEPTH,SWITCH,AA,DC1,DC2
 
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -94,7 +79,7 @@ C
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
       IP13 = IPOINT(13)
-C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -102,7 +87,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
       IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-C
+!
       FALG1     = PMSA(IP1)
       NCRAT1    = PMSA(IP2)
       PCRAT1    = PMSA(IP3)
@@ -117,26 +102,26 @@ C
       DEPTH     = PMSA(IP12)
       switch    = PMSA(IP13)
 
-C***********************************************************************
-C**** Processes connected to the ALGEA model
-C***********************************************************************
+!***********************************************************************
+!**** Processes connected to the ALGEA model
+!***********************************************************************
 
-C     Calculate fractions for carbon (different from nutrient fractions)
-C     no part of carbon to autolyse!
+!     Calculate fractions for carbon (different from nutrient fractions)
+!     no part of carbon to autolyse!
        DC1 = 0.0
        DC2 = 0.0
        IF (AUT1 .LT. 1.0) DC1 = DET1 / (1-AUT1)
        IF (AUT2 .LT. 1.0) DC2 = DET2 / (1-AUT2)
 
-C@    Production of DETC
+!@    Production of DETC
       FL ( 1 + IFLUX ) = ( FALG1 * DC1+
      &            FALG2 * DC2 ) / DEPTH
 
-C@    Production of OOC
+!@    Production of OOC
       FL ( 2 + IFLUX ) = ( FALG1 * ( 1.0 - DC1 ) +
      &            FALG2 * ( 1.0 - DC2 ) ) / DEPTH
 
-C@    Autolysis of NN4
+!@    Autolysis of NN4
       AA = ( FALG1 * NCRAT1 * AUT1 +
      &            FALG2 * NCRAT2 * AUT2 ) / DEPTH
       if ( abs(switch) .lt. 0.5 ) then
@@ -147,15 +132,15 @@ C@    Autolysis of NN4
           FL ( 3 + IFLUX ) = 0.0
       endif
 
-C@    Production of N-det
+!@    Production of N-det
       FL ( 4 + IFLUX ) = ( FALG1 * NCRAT1 * DET1 +
      &            FALG2 * NCRAT2 * DET2 ) / DEPTH
 
-C@    Production of OON
+!@    Production of OON
       FL ( 5 + IFLUX ) = ( FALG1 * NCRAT1 * ( 1.0 - AUT1 - DET1 ) +
      &            FALG2 * NCRAT2 * ( 1.0 - AUT2 - DET2 ) ) / DEPTH
 
-C@    Autolysis of P
+!@    Autolysis of P
       AA = ( FALG1 * PCRAT1 * AUT1 +
      &            FALG2 * PCRAT2 * AUT2 ) / DEPTH
       if ( abs(switch) .lt. 0.5 ) then
@@ -166,27 +151,27 @@ C@    Autolysis of P
           FL ( 6 + IFLUX ) = 0.0
       endif
 
-C@    Production of P-det
+!@    Production of P-det
       FL ( 7 + IFLUX ) = ( FALG1 * PCRAT1 * DET1 +
      &            FALG2 * PCRAT2 * DET2 ) / DEPTH
 
-C@    Production of OOP
+!@    Production of OOP
       FL ( 8 + IFLUX ) = ( FALG1 * PCRAT1 * ( 1.0 - AUT1 - DET1 ) +
      &            FALG2 * PCRAT2 * ( 1.0 - AUT2 - DET2 ) ) / DEPTH
 
-C@    Autolysis of Si
+!@    Autolysis of Si
       FL ( 9 + IFLUX ) = ( FALG2 * SICRAT  * AUT2 ) / DEPTH
 
-C@    Production of Si-det
+!@    Production of Si-det
       FL (10 + IFLUX ) = ( FALG2 * SICRAT *  DET2 ) / DEPTH
 
-C@    Production of OOSi
+!@    Production of OOSi
       FL (11 + IFLUX ) = ( FALG2 * SICRAT * (1.0 - AUT2 -  DET2) ) /
      &                   DEPTH
-C
+!
       ENDIF
       ENDIF
-C
+!
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
       IP2   = IP2   + INCREM (  2 )
@@ -201,8 +186,8 @@ C
       IP11  = IP11  + INCREM ( 11 )
       IP12  = IP12  + INCREM ( 12 )
       IP13  = IP13  + INCREM ( 13 )
-C
+!
  9000 CONTINUE
-C
+!
       RETURN
       END

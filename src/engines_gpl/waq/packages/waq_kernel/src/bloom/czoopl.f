@@ -21,12 +21,12 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C
-C  *********************************************************************
-C  *    SUBROUTINE CZOOPL TO MODIFY ZOOPLANKTON CHARACTERISTICS        *
-C  *********************************************************************
-C
-C    0895 MvdV  dimension for more than one grazer typoe added to ZOONUT
+!
+!  *********************************************************************
+!  *    SUBROUTINE CZOOPL TO MODIFY ZOOPLANKTON CHARACTERISTICS        *
+!  *********************************************************************
+!
+!    0895 MvdV  dimension for more than one grazer typoe added to ZOONUT
       SUBROUTINE CZOOPL(LERR)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
@@ -42,31 +42,31 @@ C    0895 MvdV  dimension for more than one grazer typoe added to ZOONUT
       DATA WZOO  /'?       ','END     ','ESCAPE  ','GRAZINIT',
      1            'GRAZRATE','HALFSAT ','MAXITER ','NUTCOEFF',
      2            'PRINT   '/
-C
-C  General comment: in case an error is detected in this subroutine
-C  -- for instance a missing or misspelled control word --
-C  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
-C  Hence a batch job will be terminated,
-C  but re-entry is possible in an interactive run.
-C
+!
+!  General comment: in case an error is detected in this subroutine
+!  -- for instance a missing or misspelled control word --
+!  LERR will be put to 1 and subroutine CHANGE will set LRUN = 0.
+!  Hence a batch job will be terminated,
+!  but re-entry is possible in an interactive run.
+!
       LERR=0
    10 IF (IOFLAG .EQ. 1) CALL BLSELECT (WZOO, NZOO, 1041)
       I=INPTDT(1041,WORD,LENWRD)
       IF (MATCH(WZOO,NZOO,8,WORD,LENWRD,0,NUMCA) .NE. 1) NUMCA=NZOO+1
       GO TO (   900,  1000,   300,   500,   400,
      1          200,   600,   100,   700,    20), NUMCA
-C
-C  Error detected in input of change zooplankton characteristic
-C
+!
+!  Error detected in input of change zooplankton characteristic
+!
    20 WRITE (OUUNI,99999) WORD
       IF (IOFLAG .EQ. 0) GO TO 30
       GO TO 10
    30 WRITE (OUUNI,99990)
       LERR=1
       RETURN
-C
-C  Nutrient coefficients.
-C
+!
+!  Nutrient coefficients.
+!
   100 CONTINUE
       IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1042)
       I = INPTDT(1042,WORD2,LENWRD)
@@ -82,49 +82,49 @@ C
       I=INPTNM(1043,ZOONUT(NUMCO,0),0,1)
       WRITE (OUUNI,99960) NEW,CSTRA(NUMCO),ZOONUT(NUMCO,0)
       GO TO 10
-C
-C  Modify half-saturation constant.
-C
+!
+!  Modify half-saturation constant.
+!
   200 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),ZOOK
       I=INPTNM(1044,ZOOK,0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),ZOOK
       GO TO 10
-C
-C  Modify phytoplankton fraction escaping grazing.
-C
+!
+!  Modify phytoplankton fraction escaping grazing.
+!
   300 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),XMIN
       I=INPTNM(1045,XMIN,0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),XMIN
       GO TO 10
-C
-C  Modify grazing rate constant.
-C
+!
+!  Modify grazing rate constant.
+!
   400 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),ZOOGR
       I=INPTNM(1046,ZOOGR,0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),ZOOGR
       GO TO 10
-C
-C  Modify initial grazing rate.
-C
+!
+!  Modify initial grazing rate.
+!
   500 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99950) OLD,WZOO(NUMCA),GRAMO1
       I=INPTNM(1047,GRAMO1,0,1)
       WRITE (OUUNI,99950) NEW,WZOO(NUMCA),GRAMO1
       GO TO 10
-C
-C  Modify maximum permissible iteration number.
-C
+!
+!  Modify maximum permissible iteration number.
+!
   600 CONTINUE
       IF (IOFLAG .EQ. 1) WRITE (OUUNI,99940) OLD,WZOO(NUMCA),IPERM
       I=INPTNM(1048,0.0D0,IPERM,2)
       WRITE (OUUNI,99940) NEW,WZOO(NUMCA),IPERM
       GO TO 10
-C
-C  Print present set of zooplankton characteristics.
-C
+!
+!  Print present set of zooplankton characteristics.
+!
   700 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99930)
@@ -136,9 +136,9 @@ C
       WRITE (OUUNI,99880) GRAMO1
       WRITE (OUUNI,99870) IPERM
       GO TO 10
-C
-C  Print characteristics that may be modified
-C
+!
+!  Print characteristics that may be modified
+!
   900 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99850)
@@ -147,13 +147,13 @@ C
       CALL VIDEO (0)
       WRITE (OUUNI,99840)
       GO TO 10
-C
-C  Exit
-C
+!
+!  Exit
+!
  1000 CONTINUE
-C
-C  Formats for this subroutine
-C
+!
+!  Formats for this subroutine
+!
 99999 FORMAT (1X,'Invalid zooplankton command',2X,A8)
 99990 FORMAT (//,1X,'Excecution terminates following an error in',
      1       ' subroutine "CZOOPL"',//)

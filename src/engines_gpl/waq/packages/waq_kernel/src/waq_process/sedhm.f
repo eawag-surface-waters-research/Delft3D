@@ -27,36 +27,20 @@
 !>\file
 !>       Sedimentation flux and velocity of adsorbed heavy metals
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Pascal Boderie
-C     Date    : 921210             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     921210  Pascal Boderie  Create first version, based on T890 SLIB
-C     930210  Pascal Boderie  Version with adaptions for T692 (Delsta study)
-C     950216  M. Bokhorst     Add calculation sedimentation velocity
-C   20000419  Jan van Beek    Check on dummy exchanges (0->0)
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C Name    T   L I/O   Description                                    Units
-C ----    --- -  -    -------------------                            -----
-C FL1-5   R*4 1 I  flux from a layer                               [gX/m2/d]
-C Q1-5    R*4 1 I  fraction substance the layer                    [gOMV/gX]
-C DEPTH   R*4 1 I  depth                                                 [m]
-C     Logical Units : -
+!
+!     Description of the module :
+!
+! Name    T   L I/O   Description                                    Units
+! ----    --- -  -    -------------------                            -----
+! FL1-5   R*4 1 I  flux from a layer                               [gX/m2/d]
+! Q1-5    R*4 1 I  fraction substance the layer                    [gOMV/gX]
+! DEPTH   R*4 1 I  depth                                                 [m]
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -132,18 +116,18 @@ C     ------   -----  ------------
       Q5     = PMSA(IP10)
       DEPTH  = PMSA(IP11)
 
-C*******************************************************************************
-C**** Processes connected to the BURIAL and DIGGING
-C***********************************************************************
+!*******************************************************************************
+!**** Processes connected to the BURIAL and DIGGING
+!***********************************************************************
 
-C.....SEDIMENTATION
+!.....SEDIMENTATION
       FL( 1 + IFLUX) =  ( FL1 * Q1 +
      &            FL2 * Q2 +
      &            FL3 * Q3 +
      &            FL4 * Q4 +
      &            FL5 * Q5 ) / DEPTH
 
-C.....SEDIMENTATION SCALED
+!.....SEDIMENTATION SCALED
       PMSA(IP22) =  FL (1+IFLUX) * DEPTH
 
       ENDIF
@@ -165,24 +149,24 @@ C.....SEDIMENTATION SCALED
 
  9000 CONTINUE
 
-c.....Exchangeloop over de horizontale richting
+!.....Exchangeloop over de horizontale richting
       DO 8000 IQ=1,NOQ1+NOQ2
 
-c........VxSedHM op nul
+!........VxSedHM op nul
          PMSA(IP23) = 0.0
 
          IP23 = IP23 + IN23
 
  8000 CONTINUE
 
-c.....Startwaarden VxSedIM1, 2 en 3, VxSedPOC en VxSedPhyt
+!.....Startwaarden VxSedIM1, 2 en 3, VxSedPOC en VxSedPhyt
       IP17 = IP17 + ( NOQ1+NOQ2 ) * IN17
       IP18 = IP18 + ( NOQ1+NOQ2 ) * IN18
       IP19 = IP19 + ( NOQ1+NOQ2 ) * IN19
       IP20 = IP20 + ( NOQ1+NOQ2 ) * IN20
       IP21 = IP21 + ( NOQ1+NOQ2 ) * IN21
 
-c.....Exchangeloop over de verticale richting
+!.....Exchangeloop over de verticale richting
       DO 7000 IQ=NOQ1+NOQ2+1,NOQ1+NOQ2+NOQ3
 
          IVAN  = IEXPNT(1,IQ)
@@ -200,18 +184,18 @@ c.....Exchangeloop over de verticale richting
             VSPOC = PMSA(IP20)
             VSPHY = PMSA(IP21)
 
-c...........Berekenen VxSedHM
+!...........Berekenen VxSedHM
             VSHM = FHMIM1*VSIM1 +
      &             FHMIM2*VSIM2 +
      &             FHMIM3*VSIM3 +
      &             FHMPOC*VSPOC +
      &             FHMPHY*VSPHY
 
-c...........VxSedHM toekennen aan de PMSA
+!...........VxSedHM toekennen aan de PMSA
             PMSA(IP23) = VSHM
          ENDIF
 
-c........Exchangepointers ophogen
+!........Exchangepointers ophogen
          IP17 = IP17 + IN17
          IP18 = IP18 + IN18
          IP19 = IP19 + IN19

@@ -22,43 +22,43 @@
 !!  rights reserved.
 
       SUBROUTINE PROPOI ( IPMSA  , IPSSA  , NSVAR  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : januari 1994 by Leo Postma
-C
-C     FUNCTION            : Fills direct pointer and increments in DELWAQ
-C                           arrays
-C
-C     SUBROUTINES CALLED  : none
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          : 3
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     IPMSA   INTEGER       *     IN/OUT  IN input pointers OUT ABS pointers
-C     IPMSA   INTEGER       *     IN/OUT  IN output pointers , OUT increments
-C     NSVAR   INTEGER       *     INPUT   Nr. of state variables per proces
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            : januari 1994 by Leo Postma
+!
+!     FUNCTION            : Fills direct pointer and increments in DELWAQ
+!                           arrays
+!
+!     SUBROUTINES CALLED  : none
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          : 3
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     IPMSA   INTEGER       *     IN/OUT  IN input pointers OUT ABS pointers
+!     IPMSA   INTEGER       *     IN/OUT  IN output pointers , OUT increments
+!     NSVAR   INTEGER       *     INPUT   Nr. of state variables per proces
+!
+!     Declaration of arguments
+!
       use timers
       INTEGER   IPMSA(*)      , IPSSA(*)      , NSVAR(*)
-C
+!
       INCLUDE 'sysa.inc'
-C
+!
       INCLUDE 'sysn.inc'
-C
-C     Local declarations
-C
+!
+!     Local declarations
+!
       PARAMETER ( NOPRED = 6 )
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "propoi", ithandl )
-C
+!
       K3    = 0
       DO 70 IPROC = 1 , NPROC
          DO 60 I = 1 , NSVAR(IPROC)
@@ -193,7 +193,7 @@ C
    60    CONTINUE
    70 CONTINUE
 
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
       END

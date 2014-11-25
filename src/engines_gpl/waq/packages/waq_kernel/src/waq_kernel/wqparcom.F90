@@ -47,7 +47,7 @@ integer, parameter :: WQParMaxLen       = 100 ! Max len of domain / comm.block
 !
 ! Domain identification for current domain
 !
-character(Len=WQParMaxLen) :: WQParCurrDomName = 'NotDefinedYet'
+!haracter(Len=WQParMaxLen) :: WQParCurrDomName = 'NotDefinedYet'
 
 
 !

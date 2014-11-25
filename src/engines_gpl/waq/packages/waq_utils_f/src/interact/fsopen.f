@@ -21,53 +21,53 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-C Integer function to open a series of files whose names are stored
-C in a file caled FSOPEN.FIL. The current program version can handle
-C only three tokens:
-C 1. The unit number,
-C 2. The file name,
-C 3. The format of the file (optional).
-C
+! Integer function to open a series of files whose names are stored
+! in a file caled FSOPEN.FIL. The current program version can handle
+! only three tokens:
+! 1. The unit number,
+! 2. The file name,
+! 3. The format of the file (optional).
+!
       INTEGER FUNCTION FSOPEN ()
       CHARACTER*80  LINE
       CHARACTER*40  NAME, OPTIONS
       INTEGER FSUNIT, STOI, GETS, POSIT
       LOGICAL LEXIST
-C
-C Check if the file with the filedef information exists.
-C
+!
+! Check if the file with the filedef information exists.
+!
       FSOPEN = 0
       INQUIRE (FILE = 'FSOPEN.FIL', EXIST = LEXIST)
       IF ( .NOT. LEXIST) THEN
          FSOPEN = 1
          GO TO 100
       END IF
-C
-C Read a record form the filedefinition file. Tokenize it.
-C
+!
+! Read a record form the filedefinition file. Tokenize it.
+!
       OPEN (99, FILE = 'FSOPEN.FIL')
 5     CONTINUE
       POSIT = 1
       READ (99, 10, END=100) LINE
 10    FORMAT (A80)
-C
-C Get unit number.
-C
+!
+! Get unit number.
+!
       IF (STOI (LINE,POSIT,80,FSUNIT) .NE. 0) THEN
          FSOPEN = 2
          GO TO 100
       END IF
-C
-C Get file name.
-C
+!
+! Get file name.
+!
       IF (GETS (LINE,POSIT,80,40,NAME,LENNAM) .NE. 0) THEN
          FSOPEN = 3
          GO TO 100
       END IF
-C
-C Get format (optional)
-C Open the file.
-C
+!
+! Get format (optional)
+! Open the file.
+!
       IF (GETS (LINE,POSIT,80,40,OPTIONS,LENOP) .EQ. 0) THEN
          OPEN (UNIT=FSUNIT, FILE= NAME, FORM=OPTIONS)
       ELSE

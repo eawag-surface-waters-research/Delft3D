@@ -24,38 +24,38 @@
       SUBROUTINE PRODR2 (DERIV , NOTOT , NOFLUX, STOCHI, NFLUX1,
      +                   NFLUXP, FLUX  , NOSEG , VOLUME, NDT   ,
      +                   OWNERS, MYPART)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            :
-C
-C     FUNCTION            :
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DERIV   REAL     NOTOT,*    OUTPUT  Model derivatives
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
-C     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
-C     NFLUX1  INTEGER       1     INPUT   first flux to construct deriv
-C     NFLUXP  INTEGER       1     INPUT   number of fluxes to construct deriv
-C     FLUX    REAL          *     INPUT   fluxes at all segments
-C     NOSEG   INTEGER       1     INPUT   number of segments
-C     VOLUME  REAL          *     INPUT   Segment volumes
-C     NDT     INTEGER       1     INPUT   nuber of timesteps in fractional step
-C     OWNERS  INTEGER     NOSEG   INPUT   Ownership array for segments
-C     MYPART  INTEGER       1     INPUT   Number of current part/subdomain
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED:            :
+!
+!     FUNCTION            :
+!
+!     SUBROUTINES CALLED  : -
+!
+!     FILES               : -
+!
+!     COMMON BLOCKS       : -
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     DERIV   REAL     NOTOT,*    OUTPUT  Model derivatives
+!     NOTOT   INTEGER       1     INPUT   Total number of substances
+!     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
+!     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
+!     NFLUX1  INTEGER       1     INPUT   first flux to construct deriv
+!     NFLUXP  INTEGER       1     INPUT   number of fluxes to construct deriv
+!     FLUX    REAL          *     INPUT   fluxes at all segments
+!     NOSEG   INTEGER       1     INPUT   number of segments
+!     VOLUME  REAL          *     INPUT   Segment volumes
+!     NDT     INTEGER       1     INPUT   nuber of timesteps in fractional step
+!     OWNERS  INTEGER     NOSEG   INPUT   Ownership array for segments
+!     MYPART  INTEGER       1     INPUT   Number of current part/subdomain
+!
+!     Declaration of arguments
+!
       use timers
       INTEGER NOTOT , NOFLUX, NFLUX1, NFLUXP, NOSEG, MYPART
       INTEGER OWNERS(NOSEG)
@@ -63,9 +63,9 @@ C
      +        FLUX(NOFLUX,NOSEG) , VOLUME(NOSEG)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "prodr2", ithandl )
-C
-C     We construeren nu de DERIV's
-C
+!
+!     We construeren nu de DERIV's
+!
       FDT = NDT
       DO ISYS = 1,NOTOT
          DO IFLUX = NFLUX1 , NFLUX1 + NFLUXP - 1
@@ -88,8 +88,8 @@ C
             ENDIF
          ENDDO
       ENDDO
-C
+!
       if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
       END

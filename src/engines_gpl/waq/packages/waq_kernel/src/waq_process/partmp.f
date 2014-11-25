@@ -27,81 +27,52 @@
 !>\file
 !>       Partitioning of micropollutants
 
-C***********************************************************************
-C
-C     Project : STANDAARDISATIE PROCES FORMULES T721.72
-C     Author  : Jos van Gils
-C     Date    : 970815             Version : 0.02
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     ......  ..............  ..............................
-C     950614  Jos van Gils    Create first version
-C     970815  Rik Sonneveldt  ophogen pointers buiten actieve segmenten
-C                             if gehaald.
-C     980717  Jos van Gils    Evaluation total vs. dis-par corrected
-C     980718  Jos van Gils    Initial evaluation of FFFOPT ... corrected
-C     000518  Jos van Gils    Correct treatment of different metal groups
-C                             including explcit definition of metal groups
-C                             Integrate with sediment version
-C                             Add check on second KENMERK
-C                             Add output quantities from MPQUAL
-C                             Bug desorption flux sediment corrected!
-C     000519  Jos van Gils    Added a 4-th substances group (OMP's)
-C     000913  Jan van Beek    IAP moet een real zijn
-C     010716  Johannes Smits  Correction for porosity in CDIS,
-C                             change of all names HM into MP,
-C                             change routine name from PWHM in PARTMP
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General water quality module for DELWAQ:
-C
-C        PARTITIONING OF MICROPOLLUTANTS: FREE DISSOLVED AND ADSORBED TO
-C        INORGANIC MATTER (THREE FRACTIONS), ORGANIC MATTER (SUM OF DETC
-C        OOC) AND ALGAE (3 GROUPS). NON-EQUILIBRIUM PARTITIONING
-C
-C Name    T   L I/O   Description                              Units
-C ----    --- -  -    -------------------                      ----
-C AIMi    R*4 1 I  mass of inorganic SS                           [g/m3]
-C CDIS    R*4 1 O  concentration free dissolved MP                [g/m3]
-C CDOC    R*4 1 O  concentration adsorbed to DOC                  [g/m3]
-C DELT    R*4 1 I  DELWAQ timestep                                   [d]
-C DOC     R*4 1 I  dissolved organic Carbon                      [gC/m3]
-C FACi    R*4 1 L  product of conc. sorbent and Kd                   [-]
-C FDIS    R*4 1 L  fraction free dissolved in equilibrium            [-]
-C FDIS2   R*4 1 O  fraction free dissolved                           [-]
-C FDCOR   R*4 1 L  factor actual/eq. for free dissolved and DOC fr.  [-]
-C FDOC    R*4 1 O  fraction sorbed to DOC                            [-]
-C FIMi    R*4 1 O  fraction sorbed to IMi                            [-]
-C FPARTE  R*4 1 L  fraction particulate in equilibrium               [-]
-C FPARTO  R*4 1 L  fraction particulate begin of present time step   [-]
-C FPART   R*4 1 L  fraction particulate end of present time step     [-]
-C FPCOR   R*4 1 L  factor actual/eq. for POC-PHYT-IMx fractions      [-]
-C FPHYT   R*4 1 O  fraction sorbed to PHYT                           [-]
-C FPOC    R*4 1 O  fraction sorbed to POC                            [-]
-C MP      R*4 1 L  concentration MP waterphase                    [g/m3]
-C MPDIS   R*4 1 I  concentration MP waterphase [free+DOC]         [g/m3]
-C MPPAR   R*4 1 I  concentration MP waterphase [IMx+POC+PHYT]     [g/m3]
-C MPHUM   R*4 1 I  concentration MP waterphase [IMx+DOC+POC+PHYT] [g/m3]
-C HVTADS  R*4 1 I  half life time kinetic adsorption                 [d]
-C HVTDES  R*4 1 I  half life time kinetic adsorption                 [d]
-C KDIMi   R*4 1 I  partition coefficient inorganic matter       [m3/gDM]
-C KDOC    R*4 1 L  partition coefficient organic carbon          [m3/gC]
-C KPHYT   R*4 1 I  partition coefficient phytoplankton           [m3/gC]
-C KPOC    R*4 1 I  partition coefficient organic carbon          [m3/gC]
-C PHYT    R*4 1 I  phytoplankton                                 [gC/m3]
-C POC     R*4 1 I  particulate organic Carbon                    [gC/m3]
-C POR     R*4 1 I  porosity waterphase                           [m3/m3]
-C RATE    R*4 1 L  actual rate constant kinetic sorption           [1/d]
-C Qy      R*4 1 O  quality of MP in adsorbens y                    [g/g]
-C XDOC    R*4 1 I  KdDOC/KdPOC                                       [-]
+!
+!     Description of the module :
+!
+!        General water quality module for DELWAQ:
+!
+!        PARTITIONING OF MICROPOLLUTANTS: FREE DISSOLVED AND ADSORBED TO
+!        INORGANIC MATTER (THREE FRACTIONS), ORGANIC MATTER (SUM OF DETC
+!        OOC) AND ALGAE (3 GROUPS). NON-EQUILIBRIUM PARTITIONING
+!
+! Name    T   L I/O   Description                              Units
+! ----    --- -  -    -------------------                      ----
+! AIMi    R*4 1 I  mass of inorganic SS                           [g/m3]
+! CDIS    R*4 1 O  concentration free dissolved MP                [g/m3]
+! CDOC    R*4 1 O  concentration adsorbed to DOC                  [g/m3]
+! DELT    R*4 1 I  DELWAQ timestep                                   [d]
+! DOC     R*4 1 I  dissolved organic Carbon                      [gC/m3]
+! FACi    R*4 1 L  product of conc. sorbent and Kd                   [-]
+! FDIS    R*4 1 L  fraction free dissolved in equilibrium            [-]
+! FDIS2   R*4 1 O  fraction free dissolved                           [-]
+! FDCOR   R*4 1 L  factor actual/eq. for free dissolved and DOC fr.  [-]
+! FDOC    R*4 1 O  fraction sorbed to DOC                            [-]
+! FIMi    R*4 1 O  fraction sorbed to IMi                            [-]
+! FPARTE  R*4 1 L  fraction particulate in equilibrium               [-]
+! FPARTO  R*4 1 L  fraction particulate begin of present time step   [-]
+! FPART   R*4 1 L  fraction particulate end of present time step     [-]
+! FPCOR   R*4 1 L  factor actual/eq. for POC-PHYT-IMx fractions      [-]
+! FPHYT   R*4 1 O  fraction sorbed to PHYT                           [-]
+! FPOC    R*4 1 O  fraction sorbed to POC                            [-]
+! MP      R*4 1 L  concentration MP waterphase                    [g/m3]
+! MPDIS   R*4 1 I  concentration MP waterphase [free+DOC]         [g/m3]
+! MPPAR   R*4 1 I  concentration MP waterphase [IMx+POC+PHYT]     [g/m3]
+! MPHUM   R*4 1 I  concentration MP waterphase [IMx+DOC+POC+PHYT] [g/m3]
+! HVTADS  R*4 1 I  half life time kinetic adsorption                 [d]
+! HVTDES  R*4 1 I  half life time kinetic adsorption                 [d]
+! KDIMi   R*4 1 I  partition coefficient inorganic matter       [m3/gDM]
+! KDOC    R*4 1 L  partition coefficient organic carbon          [m3/gC]
+! KPHYT   R*4 1 I  partition coefficient phytoplankton           [m3/gC]
+! KPOC    R*4 1 I  partition coefficient organic carbon          [m3/gC]
+! PHYT    R*4 1 I  phytoplankton                                 [gC/m3]
+! POC     R*4 1 I  particulate organic Carbon                    [gC/m3]
+! POR     R*4 1 I  porosity waterphase                           [m3/m3]
+! RATE    R*4 1 L  actual rate constant kinetic sorption           [1/d]
+! Qy      R*4 1 O  quality of MP in adsorbens y                    [g/g]
+! XDOC    R*4 1 I  KdDOC/KdPOC                                       [-]
 
-C     Logical Units : -
+!     Logical Units : -
 
       IMPLICIT REAL (A-H,J-Z)
 
@@ -136,7 +107,7 @@ C     Logical Units : -
      J         FAC6C
       INTEGER  IFLUX , ISEG  , IKMRK1, ISWOX , IGROUP
       LOGICAL  SEDIME
-C
+!
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -187,7 +158,7 @@ C
       IP48 = IPOINT(48)
       IP49 = IPOINT(49)
       IP50 = IPOINT(50)
-C
+!
       IN1  = INCREM( 1)
       IN2  = INCREM( 2)
       IN3  = INCREM( 3)
@@ -238,24 +209,24 @@ C
       IN48 = INCREM(48)
       IN49 = INCREM(49)
       IN50 = INCREM(50)
-C
-C     Check sediment switch for first segment
-C
+!
+!     Check sediment switch for first segment
+!
       SEDIME = .FALSE.
       IF ( PMSA(IP30) .GT. 0.5 ) SEDIME = .TRUE.
-C
-C     Find metal group for first segment
-C     1 = GENERAL (ZN, CU, CD, PB, HG, NI)
-C     2 = CR
-C     3 = VA, AS
-C     4 = OMP's
-C
+!
+!     Find metal group for first segment
+!     1 = GENERAL (ZN, CU, CD, PB, HG, NI)
+!     2 = CR
+!     3 = VA, AS
+!     4 = OMP's
+!
       IGROUP = NINT(PMSA(IP31))
-C
-C     OPTIMALISATION PART OUTSIDE SEGMENT LOOP
-C
-C        inorganic matter 1
-C
+!
+!     OPTIMALISATION PART OUTSIDE SEGMENT LOOP
+!
+!        inorganic matter 1
+!
       IF ( IN4 .EQ. 0 .AND. IN11 .EQ. 0 ) THEN
          AIM1   = PMSA( IP4 )
          KDIM1  = PMSA( IP11 ) / 1000.
@@ -264,7 +235,7 @@ C
       ELSE
          IM1OPT = .FALSE.
       ENDIF
-C        inorganic matter 2
+!        inorganic matter 2
       IF ( IN5 .EQ. 0 .AND. IN12 .EQ. 0 ) THEN
          AIM2   = PMSA( IP5 )
          KDIM2  = PMSA( IP12 ) / 1000.
@@ -273,7 +244,7 @@ C        inorganic matter 2
       ELSE
          IM2OPT = .FALSE.
       ENDIF
-C        inorganic matter 3
+!        inorganic matter 3
       IF ( IN6 .EQ. 0 .AND. IN13 .EQ. 0 ) THEN
          AIM3   = PMSA( IP6 )
          KDIM3  = PMSA( IP13 ) / 1000.
@@ -282,7 +253,7 @@ C        inorganic matter 3
       ELSE
          IM3OPT = .FALSE.
       ENDIF
-C        POC
+!        POC
       IF ( IN9 .EQ. 0 .AND. IN14 .EQ. 0 ) THEN
          POC    = PMSA( IP9 )
          IF ( IGROUP .EQ. 4 ) THEN
@@ -295,7 +266,7 @@ C        POC
       ELSE
          IM4OPT = .FALSE.
       ENDIF
-C        Phytoplankton
+!        Phytoplankton
       IF ( IN10.EQ. 0 .AND. IN15 .EQ. 0 ) THEN
          PHYT   = PMSA( IP10)
          IF ( IGROUP .EQ. 4 ) THEN
@@ -308,7 +279,7 @@ C        Phytoplankton
       ELSE
          IM5OPT = .FALSE.
       ENDIF
-C        DOC and XDOC
+!        DOC and XDOC
       IF ( IN7 .EQ. 0 .AND. IN8 .EQ. 0 .AND.
      *     IN14 .EQ. 0                               ) THEN
          DOC    = PMSA( IP7 )
@@ -323,9 +294,9 @@ C        DOC and XDOC
       ELSE
          IM6OPT = .FALSE.
       ENDIF
-C
-C        Kinetic sorption
-C
+!
+!        Kinetic sorption
+!
       IF ( IN20 .EQ. 0 .AND. IN21 .EQ. 0 ) THEN
          HVTADS = PMSA( IP20 )
          HVTDES = PMSA( IP21 )
@@ -333,9 +304,9 @@ C
       ELSE
          HVTOPT = .FALSE.
       ENDIF
-C
-C     Check for modelling of total or dis/par
-C
+!
+!     Check for modelling of total or dis/par
+!
       IF (IN2.EQ.0.AND.IN3.EQ.0) THEN
         TWOFRC = .FALSE.
       ELSE
@@ -361,7 +332,7 @@ C
           CALL SRSTOP(1)
         ENDIF
       ENDIF
-C        Compute F-values or not
+!        Compute F-values or not
       IF ( IN34 .EQ. 0 .AND. IN35 .EQ. 0 .AND.
      *     IN36 .EQ. 0 .AND. IN37 .EQ. 0 .AND.
      *     IN38 .EQ. 0 .AND. IN39 .EQ. 0 .AND.
@@ -370,7 +341,7 @@ C        Compute F-values or not
       ELSE
          FFFOPT = .FALSE.
       ENDIF
-C        Compute Q-values or not
+!        Compute Q-values or not
       IF ( IN43 .EQ. 0 .AND. IN44 .EQ. 0 .AND.
      *     IN45 .EQ. 0 .AND. IN46 .EQ. 0 .AND.
      *     IN47 .EQ. 0                         ) THEN
@@ -378,7 +349,7 @@ C        Compute Q-values or not
       ELSE
          QQQOPT = .FALSE.
       ENDIF
-C        Compute Waterphase-values or not
+!        Compute Waterphase-values or not
       IF ( IN33 .EQ. 0 .AND. IN41 .EQ. 0 .AND.
      *     IN42 .EQ. 0 .AND. IN49 .EQ. 0 .AND.
      *     IN50 .EQ. 0                         ) THEN
@@ -386,7 +357,7 @@ C        Compute Waterphase-values or not
       ELSE
          WATOPT = .FALSE.
       ENDIF
-C        Compute qual or not
+!        Compute qual or not
       IF ( IN49 .EQ. 0 .AND. IN50 .EQ. 0       ) THEN
          QUALOPT = .TRUE.
       ELSE
@@ -394,11 +365,11 @@ C        Compute qual or not
       ENDIF
       DELT = PMSA(IP22)
       IF (DELT  .LT. 1E-20 )  CALL ERRSYS ('DELT in PARTMP zero', 1 )
-C
-C----------------------------------------------------------------------C
-C     SEGMENT LOOP
-C----------------------------------------------------------------------C
-C
+!
+!----------------------------------------------------------------------C
+!     SEGMENT LOOP
+!----------------------------------------------------------------------C
+!
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
 !!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
@@ -428,35 +399,35 @@ C
       VOLUME = PMSA(IP32)
 
       FL(1+IFLUX) = 0.0
-C
-C     OXIC (ISWOX = 1) PARTITIONING FOR GENERAL METALS (GROUP 1)
-C     OR CR (GROUP 2) OR VA/AS (GROUP 3) or OMP's (GROUP 4)
-C
+!
+!     OXIC (ISWOX = 1) PARTITIONING FOR GENERAL METALS (GROUP 1)
+!     OR CR (GROUP 2) OR VA/AS (GROUP 3) or OMP's (GROUP 4)
+!
       IF ( ( ISWOX.EQ.1 .AND. IGROUP .EQ. 1 ) .OR.
      J                        IGROUP .EQ. 2   .OR.
      J                        IGROUP .EQ. 3   .OR.
      J                        IGROUP .EQ. 4         ) THEN
         FPREC = 0.0
 
-C          inorganic matter 1
+!          inorganic matter 1
         IF ( .NOT. IM1OPT ) THEN
            AIM1  = PMSA( IP4 )
            KDIM1 = PMSA( IP11 ) / 1000.
            FAC1  = AIM1*KDIM1
         ENDIF
-C          inorganic matter 2
+!          inorganic matter 2
         IF ( .NOT. IM2OPT ) THEN
            AIM2  = PMSA( IP5  )
            KDIM2 = PMSA( IP12 ) / 1000.
            FAC2  = AIM2*KDIM2
         ENDIF
-C          inorganic matter 3
+!          inorganic matter 3
         IF ( .NOT. IM3OPT ) THEN
            AIM3  = PMSA( IP6  )
            KDIM3 = PMSA( IP13 ) / 1000.
            FAC3  = AIM3*KDIM3
         ENDIF
-C          POC
+!          POC
         IF ( .NOT. IM4OPT ) THEN
            POC   = PMSA( IP9  )
            IF ( IGROUP .EQ. 4 ) THEN
@@ -466,7 +437,7 @@ C          POC
            ENDIF
            FAC4  = POC *KPOC
         ENDIF
-C          Phytoplankton
+!          Phytoplankton
         IF ( .NOT. IM5OPT ) THEN
            PHYT  = PMSA( IP10 )
            IF ( IGROUP .EQ. 4 ) THEN
@@ -476,7 +447,7 @@ C          Phytoplankton
            ENDIF
            FAC5  = PHYT*KPHYT
         ENDIF
-C          DOC and XDOC
+!          DOC and XDOC
         IF ( .NOT. IM6OPT ) THEN
            DOC   = PMSA( IP7  )
            XDOC  = PMSA( IP8  )
@@ -487,21 +458,21 @@ C          DOC and XDOC
            ENDIF
            FAC6  = DOC *XDOC *KDOC
         ENDIF
-C
+!
         IF (.NOT.SEDIME .AND. POR.LT.1E-20 )
      J        CALL ERRSYS ('POR in PARTMP zero', 1 )
-C
-C***********************************************************************
-C**** Processes connected to the HEAVY METAL PARTITIONING
-C***********************************************************************
-C
-C       Convert DOC (g/m3) to (g/m2) FOR SEDIMENT
-C
+!
+!***********************************************************************
+!**** Processes connected to the HEAVY METAL PARTITIONING
+!***********************************************************************
+!
+!       Convert DOC (g/m3) to (g/m2) FOR SEDIMENT
+!
         FAC6C = FAC6
         IF (SEDIME) FAC6C = FAC6 * POR * THICK
-C
-C       Partitioning (free dissolved and adsorbed)
-C
+!
+!       Partitioning (free dissolved and adsorbed)
+!
         SUMKD = FAC1 + FAC2 + FAC3 + FAC4 + FAC5 + FAC6C
 
         IF ( SUMKD .GT. 1.E-20) THEN
@@ -521,13 +492,13 @@ C
         ENDIF
 
         MPHUM = AFACT * MP
-C
-C       Equilibrium fraction PART (excluding DOC!!!)
-C
+!
+!       Equilibrium fraction PART (excluding DOC!!!)
+!
         FPARTE = AFACT * (FAC1 + FAC2 + FAC3 + FAC4 + FAC5)
-C
-C       Kinetic sorption
-C
+!
+!       Kinetic sorption
+!
         IF ( .NOT. HVTOPT ) THEN
            HVTADS = PMSA( IP20 )
            HVTDES = PMSA( IP21 )
@@ -540,8 +511,8 @@ C
               WRITE(*,*) 'or set HLTAdsMP and HLTDesMP to zero'
               CALL SRSTOP(1)
             ENDIF
-C           Let op: PART is in dit verband POC + IMx + PHYT !!!
-C           Actual fraction PART
+!           Let op: PART is in dit verband POC + IMx + PHYT !!!
+!           Actual fraction PART
             IF ( MP .GT. 1E-20 ) THEN
                 FPARTO = MPPAR / MP
             ELSE
@@ -552,7 +523,7 @@ C           Actual fraction PART
      J      RATE = LOG(2.) / HVTDES
             IF ( FPARTO .LT. FPARTE .AND. HVTADS .GT. 1E-20 )
      J      RATE = LOG(2.) / HVTADS
-C           Fraction part at end of present time step
+!           Fraction part at end of present time step
             IF ( RATE .GT. 0.0 .AND. FPARTE .GT. 1E-20
      J                         .AND. FPARTE .LT. 1.0 ) THEN
                 FPART = FPARTE - ( FPARTE - FPARTO ) * EXP (-RATE*DELT)
@@ -568,9 +539,9 @@ C           Fraction part at end of present time step
             FPCOR = 1.0
             FDCOR = 1.0
         ENDIF
-C
-C       Flux from particulate to dissolved fraction
-C
+!
+!       Flux from particulate to dissolved fraction
+!
         IF (TWOFRC) THEN
           IF ( SEDIME ) THEN
             FL(1+IFLUX) = ( FPART * MP - MPPAR ) / DELT / VOLUME
@@ -580,9 +551,9 @@ C
         ELSE
           FL(1+IFLUX) = 0.0
         ENDIF
-C
-C       CHROMIUM
-C
+!
+!       CHROMIUM
+!
         IF (IGROUP.EQ.2) THEN
           PH     = PMSA(IP24)
           KCROHS = PMSA(IP25)
@@ -592,17 +563,17 @@ C
           KCROH3 = PMSA(IP29)
 
           OH = 10.0**(-(14-PH))
-C
-C-- 1.4 Determine solubility product (as a dissociation K !!).
-C
+!
+!-- 1.4 Determine solubility product (as a dissociation K !!).
+!
           KSOL = 10**(- KCROHS)
-C
-C-- 2.2 Determine concentration of free Cr3+ ,using fdis as calculated
-C       under (2.1), and calculate IAP of Cr(OH)3s.
-C
-C       CDIS (mg/m3) corresponds with CRTOT (mol/l).
-C       conversion = ug/l * 1.e-6 g/ug / (M  g/mol)
-C
+!
+!-- 2.2 Determine concentration of free Cr3+ ,using fdis as calculated
+!       under (2.1), and calculate IAP of Cr(OH)3s.
+!
+!       CDIS (mg/m3) corresponds with CRTOT (mol/l).
+!       conversion = ug/l * 1.e-6 g/ug / (M  g/mol)
+!
           IF (POR .LE. 1E-10 ) THEN
               CDIS = 0.0
           ELSE
@@ -617,36 +588,36 @@ C
               ENDIF
           ENDIF
           CRTOT = CDIS * 1.0E-3 / MOLWT
-C
-C--   Crtot = Cr3+ + (CrOH 2+) + (Cr(OH)2 +) + (Cr(OH)3 0+)
-C     Cr3+ = Crtot / (1 + K1*OH + K2*(OH)^2 + K3*(OH)^3)
-C     (mol/l), K's of the association reaction.
-C
+!
+!--   Crtot = Cr3+ + (CrOH 2+) + (Cr(OH)2 +) + (Cr(OH)3 0+)
+!     Cr3+ = Crtot / (1 + K1*OH + K2*(OH)^2 + K3*(OH)^3)
+!     (mol/l), K's of the association reaction.
+!
           CRFREE =  CRTOT / ( 1 +
      &                      10**(KCROH1) * OH    +
      &                      10**(KCROH2) * OH**2 +
      &                      10**(KCROH3) * OH**3  )
-C
+!
           IAP = CRFREE * OH**3
-C
-C-- 2.3 If IAP > Ksol Cr(OH)3s precipitation will take place. In this
-C       case fdis must be recalculated.
-C       If IAP < Ksol no precipitation will take place and the under
-C       (2.1) calculated fdis is correct.
-C
+!
+!-- 2.3 If IAP > Ksol Cr(OH)3s precipitation will take place. In this
+!       case fdis must be recalculated.
+!       If IAP < Ksol no precipitation will take place and the under
+!       (2.1) calculated fdis is correct.
+!
           IF (IAP .GE. KSOL) THEN
-C
-C------ 2.3a Calculate Cr3+ and Crtot at present OH- concentration,
-C            (mol/l) and convert to concentration in mg/m3 (= ug/l).
-C
+!
+!------ 2.3a Calculate Cr3+ and Crtot at present OH- concentration,
+!            (mol/l) and convert to concentration in mg/m3 (= ug/l).
+!
             CRFREE = KSOL / (OH**3)
             CRTOT  = CRFREE * ( 1 +
      &                         10**(KCROH1) * OH    +
      &                         10**(KCROH2) * OH**2 +
      &                         10**(KCROH3) * OH**3  )
-C
-C------    Conversion = mol/l * M g/mol * 1.0e+6 ug/g
-C
+!
+!------    Conversion = mol/l * M g/mol * 1.0e+6 ug/g
+!
             CRTOT= CRTOT * MOLWT * 1.0E+3
             IF (SEDIME ) THEN
                 FPREC = 1. - (CRTOT * POR * THICK / (FDIS*MP))
@@ -655,7 +626,7 @@ C
             ENDIF
           ENDIF
         ENDIF
-C
+!
         PMSA(IP40) = FPREC
 
         IF ( .NOT. FFFOPT ) THEN
@@ -672,7 +643,7 @@ C
            PMSA(IP38) = FPOC
            PMSA(IP39) = FPHYT
         ENDIF
-C
+!
         IF ( .NOT. QQQOPT ) THEN
            QIM1  = 0.0
            QIM2  = 0.0
@@ -694,7 +665,7 @@ C
         ENDIF
 
         IF ( .NOT. WATOPT ) THEN
-C@      Concentration free dissolved MP and DOC waterphase
+!@      Concentration free dissolved MP and DOC waterphase
            FDIS  = FDIS * (1.-FPREC)
            FDIS2 = FDIS * FDCOR
            IF (POR .LE. 1.E-10) THEN
@@ -715,15 +686,15 @@ C@      Concentration free dissolved MP and DOC waterphase
                CDOC  = (1.0 - FPREC) * AFACT * FAC6C * MP * FDCOR / POR
              ENDIF
            ENDIF
-C@      Quality of MP adsorbens waterphase
+!@      Quality of MP adsorbens waterphase
            FDIS       = FDIS2
            PMSA(IP33) = FDIS
            PMSA(IP41) = CDIS
            PMSA(IP42) = CDOC
         ENDIF
-C
-C     SULFIDIC PARTITIONING (ISWOX = 0) FOR GENERAL METALS
-C
+!
+!     SULFIDIC PARTITIONING (ISWOX = 0) FOR GENERAL METALS
+!
       ELSEIF (  ISWOX.EQ.0 .AND. IGROUP .EQ. 1   ) THEN
         PMSA(IP34) = 0.0
         PMSA(IP35) = 0.0
@@ -791,43 +762,43 @@ C
         WRITE(*,*) 'Group = ',IGROUP,' 1- General, 2-Cr, 3-As/Va, 4-OMP'
         CALL SRSTOP(1)
       ENDIF
-C
-C     Addition of former process MPQUAL
-C
+!
+!     Addition of former process MPQUAL
+!
       QUAL  = 0.0
       KDALL = 0.0
       IF ( .NOT. QUALOPT ) THEN
          IF ( DMS1 .GE. 1E-20 )  THEN
-C
-C           Compute in g/g
-C
+!
+!           Compute in g/g
+!
             QUAL = MP * (1.0 - FDIS - FDOC) / DMS1
-C
-C           Overall partitioning coefficient
-C
+!
+!           Overall partitioning coefficient
+!
             IF ( (CDIS + CDOC) .GE. 1E-20 ) THEN
-C                        g/g     g/m3         = m3/g
+!                        g/g     g/m3         = m3/g
                KDALL = QUAL / (CDIS + CDOC)
             ELSE
                KDALL = 0.0
             ENDIF
-C
-C           Convert to mg/kg (QUAL) or to l/kg (KDALL)
-C
+!
+!           Convert to mg/kg (QUAL) or to l/kg (KDALL)
+!
             QUAL  = QUAL * 1.E6
             KDALL = KDALL * 1.E6
 
          ENDIF
       ENDIF
-C
-C     Output
-C
+!
+!     Output
+!
       PMSA (IP49) = QUAL
       PMSA (IP50) = KDALL
 
       ENDIF
       ENDIF
-C
+!
       IP1   = IP1  + IN1
       IP2   = IP2  + IN2
       IP3   = IP3  + IN3
@@ -879,9 +850,9 @@ C
       IP49  = IP49 + IN49
       IP50  = IP50 + IN50
       IFLUX = IFLUX + NOFLUX
-C
-C
+!
+!
  9000 CONTINUE
-c
+!
       RETURN
       END

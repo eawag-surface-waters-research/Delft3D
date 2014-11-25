@@ -23,90 +23,90 @@
 
       SUBROUTINE DLWQIB ( LUN    , LUNUT  , A      , J      , MODE   ,
      *                                      IISP   , IRSP   , IERR   )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april 1996 by L. Postma
-C
-C     FUNCTION            : Initialises the complete boundary subsystem
-C
-C     LOGICAL UNITNUMBERS : LUN   - binary boundary system file
-C                           LUNUT - monitoring file
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUN     INTEGER    1        INPUT   unit number input file
-C     A       REAL       ?        IN/OUT  Real      boundary workspace
-C     J       INTEGER    ?        IN/OUT  Integer   boundary workspace
-C     MODE    INTEGER    1        INPUT   File number involved
-C     IISP    INTEGER    1        IN/OUT  Integer array space pointer
-C     IRSP    INTEGER    1        IN/OUT  Real array space pointer
-C     IERR    INTEGER    1        IN/OUT  error count
-C
-C     Declaration of arguments
-C
+!
+!     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
+!
+!     CREATED: april 1996 by L. Postma
+!
+!     FUNCTION            : Initialises the complete boundary subsystem
+!
+!     LOGICAL UNITNUMBERS : LUN   - binary boundary system file
+!                           LUNUT - monitoring file
+!
+!     SUBROUTINES CALLED  : none
+!
+!     PARAMETERS          :
+!
+!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+!     ----    -----    ------     ------- -----------
+!     LUN     INTEGER    1        INPUT   unit number input file
+!     A       REAL       ?        IN/OUT  Real      boundary workspace
+!     J       INTEGER    ?        IN/OUT  Integer   boundary workspace
+!     MODE    INTEGER    1        INPUT   File number involved
+!     IISP    INTEGER    1        IN/OUT  Integer array space pointer
+!     IRSP    INTEGER    1        IN/OUT  Real array space pointer
+!     IERR    INTEGER    1        IN/OUT  error count
+!
+!     Declaration of arguments
+!
       use timers
 
       DIMENSION       A(*)   , J(*)
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqib", ithandl )
-C
-C         initialise the system
-C
+!
+!         initialise the system
+!
       IA = 1
       IJ = 1
-C
-C       Read the system dimensions
-C
+!
+!       Read the system dimensions
+!
       READ ( LUN , END=40 , ERR=110 )  J(IJ), J(IJ+1)
       NOITM = J(IJ)
       NOSYS = J(IJ+1)
       IJ = 3
-C
-C       Read the pointers for this block of data
-C
+!
+!       Read the pointers for this block of data
+!
    10 READ ( LUN , END=40 , ERR=110 )  J(IJ),
      *                NPNT, ( J(IJ+K) , K=2,NPNT+1 )  ,
      *                NDIM, ( J(IJ+NPNT+2+K) , K = 1, NDIM+2 )
       J(IJ     +1) = NPNT
       J(IJ+NPNT+2) = NDIM
       IJ = IJ + NPNT + NDIM + 5
-C        default for all items
+!        default for all items
       IF ( NPNT .EQ. 0 ) NPNT = 1
-C
-C       3 and 4 are harmonics
-C
+!
+!       3 and 4 are harmonics
+!
       IOPT = J(IJ-2)
       NTAL = 0
       IF ( IOPT .EQ. 3 .OR. IOPT .EQ. 4 ) NTAL = 1
-C
-C       Nr of breakpoints or harmonics
-C
+!
+!       Nr of breakpoints or harmonics
+!
       READ ( LUN , END=100 , ERR=110 ) NOBRK
       J(IJ) = NOBRK
       IJ = IJ + 1
-C
+!
       DO 20 I=1,NOBRK
          READ ( LUN , END=100 , ERR=110 ) J(IJ) ,
      *               ( A(IA+K) , K=0,NPNT*NDIM-1+NTAL )
          IJ = IJ + 1
          IA = IA + NPNT*NDIM + NTAL
    20 CONTINUE
-C
-C       Return until finished
-C
+!
+!       Return until finished
+!
       GOTO 10
-C
-C       Update linear pointers in array
-C
+!
+!       Update linear pointers in array
+!
    40 IISP = IISP + IJ-1
       IRSP = IRSP + IA-1
       goto 9999  !   RETURN
-C
+!
   100 WRITE ( LUNUT , '(A,I3)' ) ' END-OF-FILE mode:',MODE
       IERR = IERR + 1
       goto 9999  !   RETURN
@@ -114,5 +114,5 @@ C
       IERR = IERR + 1
  9999 if ( timon ) call timstop ( ithandl )
       RETURN
-C
+!
       END
