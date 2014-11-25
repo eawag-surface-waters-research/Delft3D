@@ -346,10 +346,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        call prop_get_integer(sed_ptr, 'SedimentOverall', 'IopSus', iopsus)
        !
        call prop_get_string(sed_ptr, 'SedimentOverall', 'MudCnt', flsmdc)
-       
+       !
        sedpar%flnrd(0) = ' '
        call prop_get_string(sed_ptr, 'SedimentOverall', 'NodeRelations', sedpar%flnrd(0))
-       
+       !
        !
        ! Intel 7.0 crashes on an inquire statement when file = ' '
        !
@@ -446,8 +446,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              parname = tree_get_name( sedblock_ptr )
              call str_lower(parname)
              if ( trim(parname) /= 'sediment') cycle
+             !
              parname = ' '
-
              call prop_get_string(sedblock_ptr, '*', 'Name', parname)
              if (.not. strcmpi(parname, sedname)) cycle
              !
@@ -455,7 +455,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              !
              sedpar%flnrd(l) = ' '
              call prop_get_string(sedblock_ptr, '*', 'NodeRelations', sedpar%flnrd(l))
-             
+             !
              exit
           enddo
           sedpar%sedblock(l) = sedblock_ptr
@@ -748,7 +748,6 @@ subroutine rdsed01(lsed      ,luninp    ,lundia    ,csoil     ,iopsus    , &
     integer        , dimension(:)  , intent(out):: sedtyp !  sediment type: 0=total/1=noncoh/2=coh
     character(256) , dimension(:)  , intent(out):: flsdbd
     type(tree_data), dimension(:)  , intent(out):: sedblock
-
 !
 ! Local variables
 !
@@ -1622,7 +1621,6 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
              !
              ! Determine sediment type
              !
-             
              sedtyptmp = ' '
              call prop_get_string(asedblock_ptr, '*', 'SedTyp', sedtyptmp)
              call small(sedtyptmp, 999)
@@ -1645,7 +1643,6 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
              !
              namsedim(j) = parname
              typsedim(j) = sedtypnr
-             
           endif
        enddo
     else
