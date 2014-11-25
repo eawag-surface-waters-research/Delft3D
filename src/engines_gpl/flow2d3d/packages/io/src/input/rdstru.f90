@@ -86,7 +86,7 @@ subroutine rdstru(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     logical                                                                   , intent(out) :: struct !  Description and declaration in procs.igs
     real(fp)                                                                                :: riglid !!  Rigid lid factor to reduce horizontal
                                                                                                       !!  wet area (incompressible)
-    real(fp)     , dimension(9, nsluv)                                                      :: cbuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(4, nsluv)                                                      :: cbuv   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwlsu
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwlsv
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwzbu

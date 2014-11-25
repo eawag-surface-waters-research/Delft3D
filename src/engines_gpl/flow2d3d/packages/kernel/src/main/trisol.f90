@@ -1600,7 +1600,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
                     & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
-                    & r(sig)    ,r(zwork)  ,timsec    ,gdp       )
+                    & r(sig)    ,r(zwork)  ,gdp       )
           call timer_stop(timer_updbar, gdp)
        endif
        !
@@ -2619,7 +2619,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
                     & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
-                    & r(sig)    ,r(zwork)  ,timsec    ,gdp       )
+                    & r(sig)    ,r(zwork)  ,gdp       )
           call timer_stop(timer_updbar, gdp)
        endif
        !

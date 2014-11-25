@@ -55,7 +55,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
 !
 ! Local parameters
 ! 
-    integer, parameter :: MAXFLD = 12 
+    integer, parameter :: MAXFLD = 10 
 !
 ! Global variables
 !
@@ -69,7 +69,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspv   !  Description and declaration in esm_alloc_int.f90
     logical                                                                                 :: error  !!  Flag=TRUE if an error is encountered 
-    real(fp)     , dimension(9, nsluv)                                        , intent(out) :: cbuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(4, nsluv)                                        , intent(out) :: cbuv   !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                            :: filbar !!  File name for Barriers/contr.gates
     character(20), dimension(nsluv)                                                         :: nambar !  Description and declaration in esm_alloc_char.f90
 !
@@ -85,7 +85,6 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     integer                          :: inc                  ! loop counter 
     integer                          :: incx                 ! Increment between M1,M2 
     integer                          :: incy                 ! Increment between N1,N2 
-    integer                          :: ipar                 ! Parameter index for additional parameters
     integer                          :: iocond               ! IO status for reading 
     integer                          :: lenc                 ! Number of char. to read in string 
     integer                          :: lfile                ! Number of non blank characters of file name 
@@ -115,7 +114,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     character(1)                     :: direct               ! Help string for reading direction 
     character(132)                   :: rec132               ! Standard rec. length in an attribute file (132) 
     character(20)                    :: btype                ! Barrier type
-    character(200)                   :: errmsg               ! Text string error messages
+    character(40)                    :: errmsg               ! Text string error messages
     character(300)                   :: msg
 !
 !
@@ -430,68 +429,6 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
              npar = 9
           end select
        endif
-       !
-       ! Parameter npar+1: barrier velocity for lowering/raising
-       ! Not of type char (itype<3)
-       ! Positive value (-1.0 when not specified)
-       !
-       ipar = npar+1
-       if (nrflds>=ipar .and. itype(ipar)<3) then
-          cbuv(5,ibar) = rfield(ipar)
-          !
-          ! Value for barrier velocity permitted ?
-          !
-          if (comparereal(cbuv(5,ibar),0.0_fp) /= 1) then
-             write(errmsg,'(3a,f20.15)') 'Barrier "', trim(nambar(ibar)), '" has a negative or zero velocity:',cbuv(5,ibar) 
-             call prterr(lundia, 'P004', trim(errmsg), gdp)
-             error = .true.
-          endif
-          write(errmsg,'(3a,f20.15,a)') 'Barrier "', trim(nambar(ibar)), '" velocity:', cbuv(5,ibar), ' m/s'
-          call prterr(lundia, 'G051', trim(errmsg), gdp)
-       else
-          !
-          ! not specified:
-          ! velocity = -1.0
-          !
-          cbuv(5,ibar) = -1.0_fp 
-       endif
-       !
-       ! Parameter npar+2/npar+3: minimum/maximum gate height
-       ! Not of type char (itype<3)
-       ! Minimum height must be smaller than maximum height (equal and 0.0 when not specified)
-       !
-       ipar = npar+2
-       if (nrflds>=ipar+1 .and. itype(ipar)<3 .and. itype(ipar+1)<3) then
-          cbuv(6,ibar) = rfield(ipar)
-          cbuv(7,ibar) = rfield(ipar+1)
-          !
-          ! Value for min/max height permitted ?
-          !
-          if (comparereal(cbuv(6,ibar),cbuv(7,ibar)) /= -1) then
-             write(errmsg,'(3a,f15.10,a,f15.10,a)') 'Barrier "', trim(nambar(ibar)), '" gate height: minimum (',cbuv(6,ibar), ') is above (or equal to) maximum (',cbuv(7,ibar), ')'
-             call prterr(lundia, 'P004', trim(errmsg), gdp)
-             error = .true.
-          endif
-          write(errmsg,'(3a,f15.10,a)') 'Barrier "', trim(nambar(ibar)), '" minimum gate height:', cbuv(6,ibar), ' m'
-          call prterr(lundia, 'G051', trim(errmsg), gdp)
-          write(errmsg,'(3a,f15.10,a)') 'Barrier "', trim(nambar(ibar)), '" maximum gate height:', cbuv(7,ibar), ' m'
-          call prterr(lundia, 'G051', trim(errmsg), gdp)
-       else
-          !
-          ! not specified:
-          ! minimum gate height = maximum gate height = 0.0
-          !
-          cbuv(6,ibar) = 0.0_fp 
-          cbuv(7,ibar) = 0.0_fp
-       endif
-       !
-       ! mode is rtc
-       !
-       cbuv(8,ibar) = 0.0_fp
-       !
-       ! previous gate height is undefined
-       !
-       cbuv(9,ibar) = -999.0_fp
        !
        ! process next line from the input file
        !

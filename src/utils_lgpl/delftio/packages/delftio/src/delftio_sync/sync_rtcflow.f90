@@ -96,10 +96,10 @@ contains
 !!!
 
 ! Initialise communication between RTC and Flow
-subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
+subroutine SyncRtcFlow_Init(n2steps, error, flagFLOWtoRTC, idate, rdt)
 
   integer :: n2steps
-  logical :: lerror
+  logical :: error
   logical :: flagFLOWtoRTC
 
   integer :: nRpar, nRLoc
@@ -116,8 +116,8 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
   character(len=DioMaxLocLen), pointer, dimension(:) :: DummyLocs
 
 
-  ! Initialise lerror
-  lerror = .false.
+  ! Initialise error
+  error = .false.
 
   ! Init DelftIO
   call DioInit
@@ -143,7 +143,7 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
     ! Problem with DelftIO coupling. Stop immediately.
     !
     n2steps = -2
-    lerror  = .true.
+    error   = .true.
     return
   endif
 
@@ -165,7 +165,7 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
       SignalXValues(1,1) = -1
       ! Send bad status
       call DioPltPut(SignalRtcToFlow, SignalXValues)
-      lerror = .true.
+      error = .true.
       return
     endif
 
@@ -184,7 +184,7 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
       call DioPltPut(SignalRtcToFlow, SignalXValues)
       ! Cleanup Info-stream did its work however we are not satisfied
       call DioPltDestroy(InfoFlowToRtc)
-      lerror = .true.
+      error = .true.
       return
     endif
 
@@ -214,13 +214,13 @@ subroutine SyncRtcFlow_Init(n2steps, lerror, flagFLOWtoRTC, idate, rdt)
     endif
 
     if (FlowStatus < 0) then
-      lerror = .true.
+      error = .true.
     endif
   elseif (n2steps <= 0) then
     !
     ! Would like to say "stop" to Delft3D-FLOW, but I don't know how.
     !
-    lerror = .true.
+    error = .true.
     return  
   endif
   
@@ -300,7 +300,7 @@ end subroutine syncflowrtc_quit
 !
 !
 !==============================================================================
-subroutine syncflowrtc_init(fout, nambar, nsluv, charlen, nsteps, &
+subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, &
                           & flagFLOWtoRTC, flagRTCtoFLOW, idate, dt)
     use precision
 ! Initialise communication between Flow and RTC
@@ -316,7 +316,7 @@ subroutine syncflowrtc_init(fout, nambar, nsluv, charlen, nsteps, &
     integer                        ,intent (in)  :: nsteps
     logical                        ,intent (in)  :: flagFLOWtoRTC
     logical                        ,intent (in)  :: flagRTCtoFLOW
-    logical                        ,intent (out) :: fout
+    logical                        ,intent (out) :: error
     character(charlen), dimension(nsluv)         :: nambar ! WARNING: both charlen and nsluv must be passed via parameter list for Intel 9.0
 !
 ! Local variables
@@ -375,7 +375,7 @@ subroutine syncflowrtc_init(fout, nambar, nsluv, charlen, nsteps, &
        endif
        !
        if (rtcstatus<0) then
-          fout = .true.
+          error = .true.
           return
        endif
        !
@@ -393,7 +393,7 @@ subroutine syncflowrtc_init(fout, nambar, nsluv, charlen, nsteps, &
        call diopltdestroy(infoflowtortc)
        !
        if (rtcstatus<0) then
-          fout = .true.
+          error = .true.
           return
        endif
        ! Get the actual data-stream to Flow
@@ -401,10 +401,10 @@ subroutine syncflowrtc_init(fout, nambar, nsluv, charlen, nsteps, &
        ndatapars = diopltgetnpar(datartctoflow)
        ! Check on right number of parameters
        if (ndatapars==nsluv) then
-          fout = .false.
+          error = .false.
           signalxvalues(1, 1) = 1
        else
-          fout = .true.
+          error = .true.
           signalxvalues(1, 1) = -1
        endif
        ! Send status to RTC
