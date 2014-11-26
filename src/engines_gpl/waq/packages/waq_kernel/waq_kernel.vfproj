@@ -423,6 +423,7 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
+		<File RelativePath=".\src\waq_kernel\dlwqn0.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqn1.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqn2.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqn3.f"/>

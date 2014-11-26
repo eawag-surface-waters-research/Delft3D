@@ -1963,6 +1963,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqm5.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqm6.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqm7.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqm8.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqn0.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqn1.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqn2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqn3.f -text

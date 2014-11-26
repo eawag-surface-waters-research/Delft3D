@@ -403,6 +403,11 @@
 
       select case ( intsrt )
 
+         case (  0 )     !      not transport, just processes
+            call timer_start(timer_offs_intsrt+0)
+            call dlwqn0 ( a , j , c , lun , lchar, action, dlwqd, gridps )
+            call timer_stop(timer_offs_intsrt+0)
+
          case (  1 )     !      backward in space and time
             call timer_start(timer_offs_intsrt+1)
             call dlwqn1 ( a , j , c , lun , lchar, action, dlwqd, gridps )

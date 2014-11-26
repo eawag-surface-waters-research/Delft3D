@@ -54,7 +54,7 @@
       logical, external       :: SetFlowData
       logical, external       :: SetBoundaryConditions
       
-      integer, parameter      :: integration_method = 1
+      integer, parameter      :: integration_method = 0
       
       integer, dimension(1,4) :: pointers = reshape((/ 0, 0, 0, 0  /), (/ 1,4 /))
       integer, dimension(4)   :: number_exchanges = (/ 0, 0, 0, 0 /)
