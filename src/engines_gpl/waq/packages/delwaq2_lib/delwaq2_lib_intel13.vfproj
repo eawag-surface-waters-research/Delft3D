@@ -53,6 +53,7 @@
 		<File RelativePath=".\src\delwaq2_global_data.f90"/>
 		<File RelativePath=".\src\dlwqmain.f"/>
 		<File RelativePath=".\src\getidentification.f"/>
+		<File RelativePath=".\src\waq_mt3d_api.f90"/>
 		<File RelativePath=".\src\waq_omi_api.f90">
 			<FileConfiguration Name="Release|x64" ExcludedFromBuild="true"/>
 			<FileConfiguration Name="Debug|x64" ExcludedFromBuild="true"/></File>

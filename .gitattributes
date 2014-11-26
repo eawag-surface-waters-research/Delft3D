@@ -1533,6 +1533,7 @@ src/engines_gpl/waq/packages/delwaq2_lib/src/d_tr_d3d.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/delwaq2_global_data.f90 -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/dlwqmain.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/getidentification.f -text
+src/engines_gpl/waq/packages/delwaq2_lib/src/waq_mt3d_api.f90 -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/waq_omi_api.f90 -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/waq_omi_lib.f90 -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/waq_omi_substances.f90 -text
