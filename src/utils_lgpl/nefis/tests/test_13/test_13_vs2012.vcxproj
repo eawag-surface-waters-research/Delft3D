@@ -256,7 +256,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\packages\nefis\nefis.vcxproj">
+    <ProjectReference Include="..\..\packages\nefis\nefis_vs2012.vcxproj">
       <Project>{a7bafe5d-1301-48f8-878b-9becb3dde241}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
