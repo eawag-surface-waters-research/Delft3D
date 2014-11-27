@@ -143,6 +143,7 @@ libWaqKernel_la_SOURCES = \
        dlwqm6.f \
        dlwqm7.f \
        dlwqm8.f \
+       dlwqn0.f \
        dlwqn1.f \
        dlwqn2.f \
        dlwqn3.f \
