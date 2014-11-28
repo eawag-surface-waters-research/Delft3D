@@ -4659,7 +4659,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/tba_plotellipses.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tdelft3d.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tekal.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tekal2tba.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/tekal_map.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/thindam.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tick.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/topodescription.m -text
