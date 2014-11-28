@@ -4561,7 +4561,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/readtim.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/realset.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/recolor.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints.c -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints.mexa64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r13_6p5.dll -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r13_6p5.m -text
@@ -4649,6 +4648,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/qpread.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsa.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsi.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/reducepoints.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/samples.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/setzcoord.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/shape.m -text
