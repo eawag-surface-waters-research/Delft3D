@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
+subroutine dfreduce ( iptr, ilen, itype, ityprd, error, msgstr )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2014.
@@ -42,57 +42,78 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
+    use precision
 #ifdef HAVE_MPI
     use mpi
 #endif
-    use flow2d3d_timers
     use dfparall
-    use globaldata
     !
     implicit none
-    !
-    type(globdat), target    :: gdp
 !
 ! Global variables
 !
-    integer             :: iptr   ! pointer to first element of array to be collect
-    integer, intent(in) :: ilen   ! length of array to be collect
-    integer, intent(in) :: itype  ! type of data
-    integer, intent(in) :: ityprd ! type of reduction
+    integer     , intent(inout) :: iptr   ! pointer to first element of array to be reduced
+    integer     , intent(in)    :: ilen   ! length of array to be reduced
+    integer     , intent(in)    :: itype  ! type of data
+    integer     , intent(in)    :: ityprd ! type of reduction operator
+    logical     , intent(out)   :: error  ! error flag
+    character(*), intent(out)   :: msgstr ! string to pass message
 !
 ! Local variables
 !
-    integer, pointer :: lundia
     integer       :: ierr   ! error value of MPI call
-    integer       :: ioptr  ! pointer to first element of output array
-    character(80) :: msgstr ! string to pass message
+    integer       :: istat  ! error value of memory (de)allocation
+    !
+    integer , dimension(:), allocatable :: ibuff
+    real(sp), dimension(:), allocatable :: sbuff
+    real(hp), dimension(:), allocatable :: dbuff
 !
 !! executable statements -------------------------------------------------------
 !
+    msgstr = ' '
+    error  = .false.
+    !
     ! if not parallel, return
     !
     if (.not.parll) return
     !
-    call timer_start(timer_dfreduce, gdp)
-    !
-    lundia => gdp%gdinout%lundia
-    ioptr = 0
-    !
 #ifdef HAVE_MPI
-    call mpi_allreduce ( iptr, ioptr, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+    if ( itype == dfint ) then
+        allocate(ibuff(ilen), stat = istat)
+        if (istat /= 0) goto 999
+        ibuff = 0
+        call mpi_allreduce ( iptr, ibuff, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+    else if ( itype == dfreal ) then
+        allocate(sbuff(ilen), stat = istat)
+        if (istat /= 0) goto 999
+        sbuff = 0.0_sp
+        call mpi_allreduce ( iptr, sbuff, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+    else if ( itype == dfdble ) then
+        allocate(dbuff(ilen), stat = istat)
+        if (istat /= 0) goto 999
+        dbuff = 0.0_hp
+        call mpi_allreduce ( iptr, dbuff, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+    endif
+    !
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-       call prterr(lundia, 'U021', trim(msgstr))
-       call d3stop(1, gdp)
+       error = .true.
+       return
     endif
-#endif
     !
     if ( itype == dfint ) then
-       call cparri ( ioptr, iptr, ilen, gdp )
+       call cparri ( ibuff, iptr, ilen )
+       deallocate(ibuff, stat = istat)
     else if ( itype == dfreal ) then
-       call cparrr ( ioptr, iptr, ilen, gdp )
+       call cparrr ( sbuff, iptr, ilen )
+       deallocate(sbuff, stat = istat)
     else if ( itype == dfdble ) then
-       call cparrd ( ioptr, iptr, ilen, gdp )
+       call cparrd ( dbuff, iptr, ilen )
+       deallocate(dbuff, stat = istat)
     endif
-    call timer_stop(timer_dfreduce, gdp)
+    if (istat /= 0) goto 999
+    !
+    return
+999 write (msgstr,'(a,i5)') 'Memory (de)allocation problem in DFREDUCE - return code is ',istat
+#endif
 end subroutine dfreduce

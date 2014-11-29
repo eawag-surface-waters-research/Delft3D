@@ -198,7 +198,7 @@ DredgeMerge_Function (
 
 extern "C" {
 void STDCALL
-DREDGESTARTCOMMUNICATE (
+START_DD_DREDGECOMMUNICATION (
     int     * domainnumber,
     int     * numdomains
     ) {
@@ -207,11 +207,11 @@ DREDGESTARTCOMMUNICATE (
 
     Iterator * self = IteratorSelf ();
     if (self == NULL)
-        throw new Exception (true, "Cannot get iterator self in DredgeCommunicate");
+        throw new Exception (true, "Cannot get iterator self in DD_DredgeCommunicate");
 
     SubdomGlobals * subdomglobals = NULL;
     if ((subdomglobals = (SubdomGlobals *) self->GetValue ()) == NULL)
-        throw new Exception (true, "Cannot get subdomain globals pointer in DredgeCommunicate");
+        throw new Exception (true, "Cannot get subdomain globals pointer in DD_DredgeCommunicate");
 
     subdomglobals->dredgefirst = false;
 
@@ -247,7 +247,7 @@ DREDGESTARTCOMMUNICATE (
 
 extern "C" {
 void STDCALL
-DREDGECOMMUNICATE (
+DD_DREDGECOMMUNICATE (
     REAL_FP * voldred,
     int     * numelements
     ) {
@@ -256,11 +256,11 @@ DREDGECOMMUNICATE (
 
     Iterator * self = IteratorSelf ();
     if (self == NULL)
-        throw new Exception (true, "Cannot get iterator self in DredgeCommunicate");
+        throw new Exception (true, "Cannot get iterator self in DD_DredgeCommunicate");
 
     SubdomGlobals * subdomglobals = NULL;
     if ((subdomglobals = (SubdomGlobals *) self->GetValue ()) == NULL)
-        throw new Exception (true, "Cannot get subdomain globals pointer in DredgeCommunicate");
+        throw new Exception (true, "Cannot get subdomain globals pointer in DD_DredgeCommunicate");
 
     // Return immediately unless we're enabled
 
@@ -305,7 +305,7 @@ DREDGECOMMUNICATE (
 
 extern "C" {
 void STDCALL
-DREDGENOCOMMUNICATION (
+NO_DD_DREDGECOMMUNICATION (
     void
     ) {
 

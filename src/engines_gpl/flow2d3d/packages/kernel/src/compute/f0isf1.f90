@@ -253,7 +253,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
        ! stop routine for DELFT3D,
        !    if in any subdomain s01max >= smax
        !
-       call dfreduce(ierror, 1, dfint, dfmax, gdp)
+       call dfreduce_gdp(ierror, 1, dfint, dfmax, gdp)
        if (ierror > 0) then
           iexit = 4
           call d3stop(iexit, gdp)

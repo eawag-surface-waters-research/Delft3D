@@ -322,17 +322,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
               & nflmod    ,soort     ,gdp       )
     if (error) goto 9999
     !
-    ! Combination of parallel and dredge is not yet possible
-    !
-    if (parll .and. dredge) then
-       error = .true.
-       call prterr(lundia, 'P004', 'The combination of dredge and parallel is not available')
-       goto 9999
-    endif
-
-    !
     ! read MMAX, NMAX, KMAX
-    !
     !
     ! locate 'MNKmax' record for mmax, nmax and kmax
     ! read MMAX, NMAX, KMAX from record

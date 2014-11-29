@@ -1,6 +1,6 @@
 subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                   & mmax      ,nmax      ,nmaxus    ,nmmax     ,lsedtot   , &
-                  & gdp       )
+                  & kcs       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -95,11 +95,12 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     integer                                     , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xcor   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: ycor   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xcor    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: ycor    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xz      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: yz      !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -1647,11 +1648,11 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (dredge_prop(i)%itype == DREDGETYPE_NOURISHMENT) cycle
        cntdred        = dredge_prop(i)%idx_type
        !
-       imask(1:nmmax) = 0
+       imask(:)       = 0
        npnt           = 0
        ia             = ipdr(cntdred)
        do nm = 1, nmmax
-          if (gsqs(nm) > 0.0_fp) then
+          if (gsqs(nm) > 0.0_fp .and. kcs(nm)==1) then
              select case (dredge_prop(i)%ichkloc)
              case (CHKLOC_ALLCORNER)
                 nmcor = nm
@@ -1746,12 +1747,12 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     enddo
     !
     do i = 1, nadump
-       imask(1:nmmax) = 0
+       imask(:)       = 0
        npnt           = 0
        if (npdu(i) /= 0) then
           ia = ipdu(i)
           do nm = 1, nmmax
-             if (gsqs(nm) > 0.0_fp) then
+             if (gsqs(nm) > 0.0_fp .and. kcs(nm)==1) then
                 select case (dump_prop(i)%ichkloc)
                 case (CHKLOC_ALLCORNER)
                    nmcor = nm

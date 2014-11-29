@@ -1506,7 +1506,7 @@ subroutine z_difu_solv_impl( )
     ! Determine global maximum of 'itr' over all nodes
     ! Note: this enables to synchronize the iteration process
     !
-    call dfreduce( itr, 1, dfint, dfmax, gdp )
+    call dfreduce_gdp( itr, 1, dfint, dfmax, gdp )
     !
     if (itr>0 .and. iter<50) goto 333
     !

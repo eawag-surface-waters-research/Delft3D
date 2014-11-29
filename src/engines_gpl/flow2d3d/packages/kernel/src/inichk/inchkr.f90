@@ -742,7 +742,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                  & i(kcs)    ,r(xyzsrc) ,r(sig)    ,r(sig)    ,d(dps)    , &
                  & r(s1)     ,r(xz)     ,r(yz)     ,gdp       )
        if (error) ierror = 1
-       call dfreduce( ierror, 1, dfint, dfmax, gdp )
+       call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
        error = ierror==1
        if (error) goto 9999
     endif

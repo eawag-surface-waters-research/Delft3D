@@ -1,4 +1,4 @@
-subroutine cparrr ( iarr1, iarr2, length, gdp )
+subroutine cparrd ( iarr1, iarr2, length )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -29,25 +29,21 @@ subroutine cparrr ( iarr1, iarr2, length, gdp )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!   Copies real array IARR1 to IARR2
+!   Copies double precision array IARR1 to IARR2
 !
 !!--pseudo code and references--------------------------------------------------
 !
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use globaldata
     !
     implicit none
-    !
-    type(globdat), target    :: gdp
 !
 ! Global variables
 !
-    integer, pointer                          :: lundia
     integer                      , intent(in)  :: length ! array length
-    real(fp), dimension(1:length), intent(in)  :: iarr1  ! source array
-    real(fp), dimension(1:length), intent(out) :: iarr2  ! target array
+    real(hp), dimension(1:length), intent(in)  :: iarr1  ! source array
+    real(hp), dimension(1:length), intent(out) :: iarr2  ! target array
 !
 ! Local variables
 !
@@ -55,18 +51,7 @@ subroutine cparrr ( iarr1, iarr2, length, gdp )
 !
 !! executable statements -------------------------------------------------------
 !
-    lundia => gdp%gdinout%lundia
-    !
-    ! check array length
-    !
-    if ( length <= 0 ) then
-       call prterr(lundia, 'U021', 'Array length should be positive')
-    endif
-    !
-    ! copy elements of array IARR1 to IARR2
-    !
     do i = 1, length
        iarr2(i) = iarr1(i)
     enddo
-
-end subroutine cparrr
+end subroutine cparrd

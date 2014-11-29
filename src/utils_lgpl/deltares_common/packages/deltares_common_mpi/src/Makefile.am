@@ -26,7 +26,11 @@ libDeltaresCommonMpi_la_SOURCES = \
 	quickin_dep_file.f90 \
 	depfil.f90 \
 	depfil_double.f90 \
-	dfbroadc.F90
+	dfbroadc.F90 \
+	cparrd.f90 \
+	cparri.f90 \
+	cparrr.f90 \
+	dfreduce.F90
 
 #-------------------------------------------------------------------------------
 #Libraries

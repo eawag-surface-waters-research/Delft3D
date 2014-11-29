@@ -152,7 +152,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     ! Determine global maximum of 'idry' over all nodes
     ! Note: this enables to synchronize the repeating computation of SUD
     !
-    call dfreduce( idry, 1, dfint, dfmax, gdp )
+    call dfreduce_gdp( idry, 1, dfint, dfmax, gdp )
     !
     ! CHECK FOR FOUR DRY VELOCITY POINTS
     !

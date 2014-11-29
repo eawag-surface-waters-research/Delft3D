@@ -323,7 +323,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
           ! is not interested in dredge volumes
           ! If numdomains=1, there is no dredge merge iterator
           !
-          call dredgenocommunication ()
+          call no_dd_dredgecommunication ()
        endif
     endif
     !

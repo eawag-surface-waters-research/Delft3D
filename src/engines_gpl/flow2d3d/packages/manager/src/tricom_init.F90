@@ -1104,7 +1104,7 @@ subroutine tricom_init(olv_handle, gdp)
           !
           call rddredge(r(xcor)   ,r(ycor)   ,r(xz)     ,r(yz)     ,r(gsqs)   , &
                       & mmax      ,nmax      ,nmaxus    ,nmmax     ,lsedtot   , &
-                      & gdp       )
+                      & i(kcs)    ,gdp       )
        endif
        if (multi) then
           !

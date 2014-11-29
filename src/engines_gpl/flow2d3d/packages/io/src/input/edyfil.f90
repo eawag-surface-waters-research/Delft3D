@@ -110,7 +110,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
        ! 
        allocate(tmp(nmaxgl,mmaxgl), stat = istat)
        istat = abs(istat)
-       call dfreduce( istat, 1, dfint, dfmax, gdp )
+       call dfreduce_gdp( istat, 1, dfint, dfmax, gdp )
        if (istat /= 0) then
           call prterr(lundia, 'G020', 'vicuv/dicuv')
           error = .true.

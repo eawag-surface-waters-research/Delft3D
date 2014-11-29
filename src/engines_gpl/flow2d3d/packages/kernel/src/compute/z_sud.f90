@@ -823,7 +823,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        ! determine global maximum of 'itr' over all nodes
        ! Note: this enables to synchronize the repeating computation
        !
-       call dfreduce( itr, 1, dfint, dfmax, gdp )
+       call dfreduce_gdp( itr, 1, dfint, dfmax, gdp )
        !
        ! REPEAT COMPUTATION IF POINT IS SET DRY
        !       FIRST RESET HU
@@ -959,7 +959,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        enddo
        ierror = 0
        if (error) ierror = 1
-       call dfreduce( ierror, 1, dfint, dfmax, gdp )
+       call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
        error = ierror==1
        if (error) then
           write (errtxt, '(a,e12.3,a,i0,a)') 'Mass closure error exceeds ', &

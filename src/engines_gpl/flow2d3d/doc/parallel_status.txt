@@ -44,7 +44,6 @@ Not supported functionality and limitations
 - max(mmax,nmax)/npart <= 4 (is checked)
 - fourier output
 - roller model
-- dredge and dump
 - mormerge
 - mass balance polygons
 - writing dune output
@@ -268,13 +267,14 @@ group               testcase
 16_culvert          01-culvert_type_d      ERROR: Culvert
                     02-culvert_type_e      ERROR: Culvert
                     03-culvert_opb         ERROR: Culvert
-17_dred_dump        01-insidedump          ERROR: Dredge and dump
-                    02-outsidedump         ERROR: Dredge and dump
-                    03-2dred1dump          ERROR: Dredge and dump
-                    04-dump_is_dred        ERROR: Dredge and dump
-                    05-dad_dd              ERROR: Dredge and dump
-                    06-sandmining          ERROR: Dredge and dump
-                    07-layered_bed         ERROR: Dredge and dump
+17_dred_dump        01-insidedump          OK
+                    02-outsidedump         OK
+                    03-2dred1dump          OK
+                    04-dump_is_dred        OK
+                    05-dad_dd              ERROR: DD
+                    06-sandmining          OK
+                    07-layered_bed         ERROR: DD
+                    08-poly_across_dd      ERROR: DD
 18_fls-advection    01-dambreak_dry        OK
                     02-dambreak_wet        OK
                     03-damput              ERROR: To be investigated

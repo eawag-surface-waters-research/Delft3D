@@ -858,7 +858,7 @@ subroutine tricom_step(olv_handle, gdp)
              else
                 ierror = 0
              endif
-             call dfreduce( ierror, 1, dfint, dfmax, gdp )
+             call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
              call timer_stop(timer_wait, gdp)
              if (ierror /= 0) then
                 txtput = 'Delftio command to waves failed'

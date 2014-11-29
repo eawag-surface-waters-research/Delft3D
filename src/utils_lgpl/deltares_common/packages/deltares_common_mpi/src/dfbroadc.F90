@@ -50,11 +50,11 @@ subroutine dfbroadc ( iptr, ilen, itype, error, msgstr )
 !
 ! Global variables
 !
-    integer, intent(inout) :: iptr  ! pointer to first element of array to be sent
-    integer                :: ilen  ! length of array to be sent
-    integer, intent(inout) :: itype ! type of data
-    logical, intent(out)   :: error ! error flag
-    character(*), intent(out) :: msgstr ! string to pass message
+    integer     , intent(inout) :: iptr   ! pointer to first element of array to be sent/received
+    integer     , intent(in)    :: ilen   ! length of array to be sent/received
+    integer     , intent(inout) :: itype  ! type of data
+    logical     , intent(out)   :: error  ! error flag
+    character(*), intent(out)   :: msgstr ! string to pass message
 !
 ! Local variables
 !

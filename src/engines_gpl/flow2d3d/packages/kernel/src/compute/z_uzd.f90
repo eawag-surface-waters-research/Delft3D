@@ -1303,7 +1303,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! determine global maximum of 'itr' over all nodes
           ! Note: this enables to synchronize the iteration process
           !
-          call dfreduce( itr, 1, dfint, dfmax, gdp )
+          call dfreduce_gdp( itr, 1, dfint, dfmax, gdp )
        enddo loop_iteration
        !
        if (gdp%gdflwpar%flwoutput%iteroutputsteps >= gdp%gdinttim%ntstep) then
