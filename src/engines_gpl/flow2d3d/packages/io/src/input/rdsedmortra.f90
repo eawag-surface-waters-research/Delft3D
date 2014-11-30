@@ -1,7 +1,8 @@
 subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                      & lsedtot   ,lstsci    ,ltur      ,namcon    , &
                      & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
-                     & nmmax     ,nto       ,nambnd    ,lsec      ,gdp       )
+                     & nmmax     ,nto       ,nambnd    ,lsec      ,tstart    , &
+                     & tunit     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                     
@@ -47,8 +48,10 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     implicit none
     !
-    type(globdat),target :: gdp
+    type(globdat)             ,target        :: gdp
     integer                   , parameter    :: NPARDEF = 20
+    real(hp)                  , pointer      :: morft
+    real(hp)                  , pointer      :: morft0
 !
 ! Global variables
 !
@@ -69,6 +72,8 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                                  , intent(in)  :: nmmax
     integer                                  , intent(in)  :: nto
     integer                                  , intent(in)  :: lsec
+    real(fp)                                 , intent(in)  :: tstart
+    real(fp)                                 , intent(in)  :: tunit
     character(20) , dimension(nto)                         :: nambnd  !  Description and declaration in ckdim.f90
 !
 ! Local variables
@@ -86,6 +91,18 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    morft               => gdp%gdmorpar%morft
+    morft0              => gdp%gdmorpar%morft0
+    !
+    if (morft == 0.0_hp) then
+        !
+        ! if the morphological start time is not set to some positive value due
+        ! to restart from trim-file, then make sure that the morphological start
+        ! time corresponds to the hydrodynamic start time. This includes TStart!
+        !
+        morft  = real(tstart*tunit,hp)/86400.0_hp
+        morft0 = morft
+    endif
     !
     ! Read name of default transport formula
     !

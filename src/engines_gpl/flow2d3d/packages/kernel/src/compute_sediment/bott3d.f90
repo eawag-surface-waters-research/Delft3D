@@ -600,7 +600,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        ! Increment morphological time
        ! Note: dtmor in seconds, morft in days!
        !
-       morft = morft + dtmor/86400.0_fp
+       morft = morft + real(dtmor,hp)/86400.0_hp
        !
        ! Bed boundary conditions: transport condition
        !

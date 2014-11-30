@@ -852,7 +852,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
        call rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                       & lsedtot   ,lstsci    ,ltur      ,ch(namcon), &
                       & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
-                      & nmmax     ,nto       ,ch(nambnd),lsec      ,gdp       )
+                      & nmmax     ,nto       ,ch(nambnd),lsec      ,tstart    , &
+                      & tunit     ,gdp       )
        if (error) goto 9999
     endif
     !
