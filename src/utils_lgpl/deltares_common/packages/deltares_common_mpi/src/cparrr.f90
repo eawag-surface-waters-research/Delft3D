@@ -29,7 +29,7 @@ subroutine cparrr ( iarr1, iarr2, length )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!   Copies real array IARR1 to IARR2
+!   Copies single precision real array IARR1 to IARR2
 !
 !!--pseudo code and references--------------------------------------------------
 !
@@ -42,8 +42,8 @@ subroutine cparrr ( iarr1, iarr2, length )
 ! Global variables
 !
     integer                      , intent(in)  :: length ! array length
-    real(fp), dimension(1:length), intent(in)  :: iarr1  ! source array
-    real(fp), dimension(1:length), intent(out) :: iarr2  ! target array
+    real(sp), dimension(1:length), intent(in)  :: iarr1  ! source array
+    real(sp), dimension(1:length), intent(out) :: iarr2  ! target array
 !
 ! Local variables
 !

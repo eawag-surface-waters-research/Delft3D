@@ -105,71 +105,64 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
 !
 ! Local variables
 !
-    logical       :: error
-    character(80) :: msgstr
-    integer,dimension(4) :: paract
-    integer  :: i
-    integer  :: i2
-    integer  :: ia
-    integer  :: ib
-    integer  :: ib2
-    integer  :: id
-    integer  :: il
-    integer  :: imax
-    integer  :: imaxdunes
-    integer  :: imin
-    integer  :: imindunes
-    integer  :: inm
-    integer  :: irock
-    integer  :: istat
-    integer  :: j
-    integer  :: jnm
-    integer  :: lsed
-    integer  :: nm
-    integer  :: np
-    integer  :: in_ndomains
-    integer  :: globalnpnt
-    integer  :: localoffset
-    real(fp) :: areatim
-    real(fp) :: availvolume ! volume available for dredging
-    real(fp) :: avg_alphadune
-    real(fp) :: avg_depth
-    real(fp) :: avg_trigdepth
-    real(fp) :: clr
-    real(fp) :: ddp
-    real(fp) :: div2h
-    real(fp) :: dmax
-    real(fp) :: dpadd
-    real(fp) :: dredge_area
-    real(fp) :: dump_area
-    real(fp) :: dz
-    real(fp) :: dzdump
-    real(fp) :: dzl        ! depth change due to one sediment fraction
-    real(fp) :: extravolume
-    real(fp) :: factor
-    real(fp) :: fracdumped
-    real(fp) :: fracoutlet
-    real(fp) :: lin_dz
-    real(fp) :: ltimhr
-    real(fp) :: maxdumpvol ! (maximum) volume to be dumped in current time step
-    real(fp) :: maxvol     ! maximum volume to be dredged in current time step
-    real(fp) :: plough_fac ! fraction of dune height that remains after ploughing
-    real(fp) :: qua_dz
-    real(fp) :: requiredvolume
-    real(fp) :: voltim     ! local volume variable, various meanings
-    real(fp), dimension(1) :: values
-    real(fp) :: voldredged
-    real(fp) :: voldumped
-    real(fp) :: voltot
-    real(fp) :: z_dredge
-    real(fp) :: z_dump
-    real(fp) :: zmin
-    real(fp) :: zmax
-    logical  :: local_cap
-    logical  :: dredged
-    logical  :: ploughed
-    type(dredtype), pointer :: pdredge
-    type(dumptype), pointer :: pdump
+    integer                         :: i
+    integer                         :: i2
+    integer                         :: ia
+    integer                         :: ib
+    integer                         :: ib2
+    integer                         :: id
+    integer                         :: il
+    integer                         :: imax
+    integer                         :: imaxdunes
+    integer                         :: imin
+    integer                         :: imindunes
+    integer                         :: inm
+    integer                         :: irock
+    integer                         :: istat
+    integer                         :: j
+    integer                         :: jnm
+    integer                         :: lsed
+    integer                         :: nm
+    integer                         :: np
+    integer                         :: in_ndomains
+    integer                         :: globalnpnt
+    integer                         :: localoffset
+    integer ,dimension(4)           :: paract
+    real(fp)                        :: areatim
+    real(fp)                        :: availvolume ! volume available for dredging
+    real(fp)                        :: avg_alphadune
+    real(fp)                        :: avg_depth
+    real(fp)                        :: avg_trigdepth
+    real(fp)                        :: clr
+    real(fp)                        :: ddp
+    real(fp)                        :: div2h
+    real(fp)                        :: dmax
+    real(fp)                        :: dpadd
+    real(fp)                        :: dredge_area
+    real(fp)                        :: dump_area
+    real(fp)                        :: dz
+    real(fp)                        :: dzdump
+    real(fp)                        :: dzl        ! depth change due to one sediment fraction
+    real(fp)                        :: extravolume
+    real(fp)                        :: factor
+    real(fp)                        :: fracdumped
+    real(fp)                        :: fracoutlet
+    real(fp)                        :: lin_dz
+    real(fp)                        :: ltimhr
+    real(fp)                        :: maxdumpvol ! (maximum) volume to be dumped in current time step
+    real(fp)                        :: maxvol     ! maximum volume to be dredged in current time step
+    real(fp)                        :: plough_fac ! fraction of dune height that remains after ploughing
+    real(fp)                        :: qua_dz
+    real(fp)                        :: requiredvolume
+    real(fp)                        :: voltim     ! local volume variable, various meanings
+    real(fp), dimension(1)          :: values
+    real(fp)                        :: voldredged
+    real(fp)                        :: voldumped
+    real(fp)                        :: voltot
+    real(fp)                        :: z_dredge
+    real(fp)                        :: z_dump
+    real(fp)                        :: zmin
+    real(fp)                        :: zmax
     real(fp), dimension(:), pointer :: numpoints
     real(fp), dimension(:), pointer :: dz_dredge
     real(fp), dimension(:), pointer :: area
@@ -181,8 +174,15 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp), dimension(:), pointer :: dz_dump
     real(fp), dimension(:), pointer :: troughlevel
     real(fp), dimension(:), pointer :: sedimentdepth
-    logical , dimension(:), pointer :: triggered
     real(fp), dimension(:), pointer :: dz_dummy
+    logical                         :: dredged
+    logical                         :: error
+    logical                         :: local_cap
+    logical                         :: ploughed
+    logical , dimension(:), pointer :: triggered
+    character(80)                   :: msgstr
+    type(dredtype),         pointer :: pdredge
+    type(dumptype),         pointer :: pdump
 !
 !! executable statements -------------------------------------------------------
 !
