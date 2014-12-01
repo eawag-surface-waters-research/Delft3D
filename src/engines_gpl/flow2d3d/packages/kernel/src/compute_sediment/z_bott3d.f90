@@ -395,7 +395,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
                          aksu = aks(nmu, l)
                       else
-                         aksu = (aks(nm, l) + aks(nmu, l))/2.0
+                         aksu = (aks(nm, l) + aks(nmu, l)) / 2.0_fp
                       endif
                       !
                       ! work up through layers integrating transport
@@ -404,12 +404,12 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       htdif = aksu / hu(nm)                                          
                       zusum = 0.0_fp
                       do k = kfumin(nm), kfumax(nm)
+                         zusum = zusum + dzu1(nm,k)
                          !
                          ! if layer containing aksu
                          !
-                         zusum = zusum + dzu1(nm,k)
                          if (htdif <= zusum/hu(nm)) then
-                            cumflux = cumflux + fluxu(nm, k, ll)*htdif/(dzu1(nm,k)/hu(nm)) !thick(k)
+                            cumflux = cumflux + fluxu(nm, k, ll)*htdif/(dzu1(nm,k)/hu(nm))
                             cellht  = htdif * hu(nm)
                             exit
                          else
@@ -428,7 +428,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       ! Layer below kmaxsd layer:
                       k = kmxsed(nm,l) - 1
                       if (k < kfumax(nm)) then
-                         if (kcs(nmu) == 3) then
+                         if (kcs(nmu) == 3 .or. kcs(nmu) == -1) then
                             !
                             ! correction for domain decomposition:
                             !
@@ -438,7 +438,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                          else
                             ceavg = (rca(nm, l) + rca(nmu, l))/2.0_fp
                          endif
-                         r1avg = (r1(nm, k + 1, ll) + r1(nmu, k + 1, ll))/2.0
+                         r1avg = (r1(nm, k+1, ll) + r1(nmu, k+1, ll)) / 2.0_fp
                          if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
                             z = 0.0_fp
                             do kk = kfumin(nm), k
@@ -498,9 +498,13 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       zusum = 0.0_fp
                       do k = kfvmin(nm), kfvmax(nm)
                          zusum = zusum + dzv1(nm,k)
+                         !
+                         ! if layer containing aksu
+                         !
                          if (htdif <= zusum/hv(nm)) then
                             cumflux = cumflux + fluxv(nm,k,ll)*htdif/(dzv1(nm,k)/hv(nm))
                             cellht  = htdif * hv(nm)
+                            exit
                          else
                             cumflux = cumflux + fluxv(nm,k,ll)
                          endif
@@ -516,17 +520,17 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       !
                       k = kmxsed(nm,l) - 1
                       if (k < kfvmax(nm)) then
-                         if (kcs(num) == 3) then
+                         if (kcs(num) == 3 .or. kcs(num) == -1) then
                             !
                             ! correction for domain decomposition:
                             !
                             ceavg = rca(nm,l)
-                         elseif (kcs(nm) == 3) then
+                         elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
                             ceavg = rca(num,l)
                          else
                             ceavg = (rca(nm,l)+rca(num,l)) / 2.0_fp
                          endif
-                         r1avg = (r1(nm, k + 1, ll) + r1(num, k + 1, ll))/2.0_fp
+                         r1avg = (r1(nm, k+1, ll) + r1(num, k+1, ll)) / 2.0_fp
                          if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
                             z = 0.0_fp
                             do kk = kfvmin(nm), k
@@ -593,17 +597,11 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                    cumflux = 0.0_fp
                    do k = kfumin(nm),kfumax(nm)
                       cumflux = cumflux + fluxu(nm, k, ll)
-                      cellht  = dzu1(nm,k)
                    enddo
                    !
                    ! total suspended transport
                    !
                    ssuu(nm, l) = cumflux/guu(nm) + sucor(nm, l)
-                   if ((ssuu(nm,l) > 0.0_fp .and. kcs(nm)==1) .or. kcs(nmu)/=1) then
-                      ssuu(nm,l) = ssuu(nm,l) * fixfac(nm,l)
-                   else
-                      ssuu(nm,l) = ssuu(nm,l) * fixfac(nmu,l)
-                   endif
                 endif
                 !
                 ! v component
@@ -612,17 +610,11 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                    cumflux = 0.0_fp
                    do k = kfvmin(nm),kfvmax(nm)
                       cumflux = cumflux + fluxv(nm, k, ll)
-                      cellht  = dzv1(nm,k)
                    enddo
                    !
                    ! total suspended transport
                    !
                    ssvv(nm, l) = cumflux/gvv(nm) + svcor(nm, l)
-                   if ((ssvv(nm,l) > 0.0_fp .and. kcs(nm)==1) .or. kcs(num)/=1) then
-                      ssvv(nm, l) = ssvv(nm,l) * fixfac(nm,l)
-                   else
-                      ssvv(nm, l) = ssvv(nm,l) * fixfac(num,l)
-                   endif
                 endif
              enddo  ! nm
           enddo     ! l
@@ -775,11 +767,11 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                      ! Only cross-shore component
                      !
                      trndiv = trndiv + gsqsinv &
-                            &          *(ssuu(nmd,l)*guu(nmd) - ssuu(nm,l)*guu(nm))
+                            & *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm))
                    else
                      trndiv = trndiv + gsqsinv                                   &
-                            &          *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm)    &
-                            &            + ssvv(ndm, l)*gvv(ndm) - ssvv(nm, l)*gvv(nm))
+                            & *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm)    &
+                            &   + ssvv(ndm, l)*gvv(ndm) - ssvv(nm, l)*gvv(nm))
                    endif
                 else
                    !

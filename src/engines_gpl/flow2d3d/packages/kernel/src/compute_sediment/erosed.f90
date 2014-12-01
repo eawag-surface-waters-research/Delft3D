@@ -373,7 +373,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax)       :: concin3d
     real(fp), dimension(kmax2d)     :: concin2d
     character(256)                  :: errmsg
-
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -1045,12 +1044,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              kmaxsd = kmax ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
              thick0        = thick(kmaxsd) * h0
              thick1        = thick(kmaxsd) * h1
-             call erosilt(thick       ,kmax        ,wslc        ,lundia      , &
-                        & thick0      ,thick1      ,fixfac(nm,l),srcmax(nm, l),&
-                        & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
-                        & localpar    ,max_integers,max_reals   ,max_strings , &
+             call erosilt(thick       ,kmax        ,wslc        ,lundia       , &
+                        & thick0      ,thick1      ,fixfac(nm,l),srcmax(nm, l), &
+                        & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)     , &
+                        & localpar    ,max_integers,max_reals   ,max_strings  , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
-                        & dll_strings  ,iflufflyr ,mfltot ,fracf    , &
+                        & dll_strings ,iflufflyr ,mfltot ,fracf               , &
                         & maxslope    ,wetslope  , &
                         & error ,wstau(nm) ,sinktot ,sourse(nm,l), sourfluff)
              if (error) call d3stop(1, gdp)

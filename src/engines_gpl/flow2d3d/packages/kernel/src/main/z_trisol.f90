@@ -131,6 +131,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer                              , pointer :: lstsci
     integer                              , pointer :: lsal
     integer                              , pointer :: lsed
+    integer                              , pointer :: lsedtot
     integer                              , pointer :: ltem
     integer                              , pointer :: lsecfl
     integer                              , pointer :: lsec
@@ -186,7 +187,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     logical                              , pointer :: roller
     logical                              , pointer :: sbkol
     logical                              , pointer :: bubble
-    integer                              , pointer :: lsedtot
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: seddif
@@ -600,6 +600,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     lstsci              => gdp%d%lstsci
     lsal                => gdp%d%lsal
     lsed                => gdp%d%lsed
+    lsedtot             => gdp%d%lsedtot
     ltem                => gdp%d%ltem
     lsecfl              => gdp%d%lsecfl
     lsec                => gdp%d%lsec
@@ -942,7 +943,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     depchg              => gdp%gdr_i_ch%depchg
     ssuu                => gdp%gdr_i_ch%ssuu
     ssvv                => gdp%gdr_i_ch%ssvv
-    lsedtot             => gdp%d%lsedtot
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     seddif              => gdp%gdr_i_ch%seddif
@@ -1569,12 +1569,14 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
        call timer_stop(timer_trakad, gdp)
        !
-       ! Transport turbulence
+       ! Call sediment transport routines
        !
-       if (lstsci>0 .and. nst<itdiag) then
+       if (lsedtot>0) then
+          call timer_start(timer_3dmor, gdp)
+          icx = nmaxddb
+          icy = 1
+          !
           if (lsed > 0) then
-             icx = nmaxddb
-             icy = 1
              call timer_start(timer_fallve, gdp)
              call fallve(kmax    ,nmmax     ,lsal      ,ltem      ,lsed      , &
                      & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
@@ -1585,28 +1587,37 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
                      & gdp       )
              call timer_stop(timer_fallve, gdp)
-             icx = nmaxddb
-             icy = 1
-             call timer_start(timer_erosed, gdp)
-             call z_erosed(nmmax ,kmax      ,icx       ,icy       ,lundia    , &
-                     & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
-                     & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(dzs1)   , &
-                     & r(r0)     ,r(u1)     ,r(v1)     ,r(s0)     ,d(dps)    , &
-                     & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                     & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
-                     & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
-                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
-                     & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                     & r(teta)   ,r(rlabda) ,saleqs    , &
-                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                     & r(hv)     ,r(ubot)   ,r(rtur0)  , &
-                     & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
-                     & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,hdt       ,1         , &
-                     & gdp       )
-             call timer_stop(timer_erosed, gdp)
           endif
+          !
+          ! Suspended sediment source and sink terms
+          ! Bed load sediment transport vector components
+          ! Vertical sediment diffusion coefficient
+          !
+          call timer_start(timer_erosed, gdp)
+          call z_erosed(nmmax ,kmax      ,icx       ,icy       ,lundia    , &
+                  & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
+                  & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(dzs1)   , &
+                  & r(r0)     ,r(u1)     ,r(v1)     ,r(s0)     ,d(dps)    , &
+                  & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
+                  & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                  & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
+                  & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
+                  & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
+                  & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
+                  & r(teta)   ,r(rlabda) ,saleqs    , &
+                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
+                  & r(hv)     ,r(ubot)   ,r(rtur0)  , &
+                  & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
+                  & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
+                  & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,hdt       ,1         , &
+                  & gdp       )
+          call timer_stop(timer_erosed, gdp)
+          call timer_stop(timer_3dmor, gdp)
+       endif
+       !
+       ! Transport of constituents (excl. turbulence)
+       !
+       if (lstsci>0 .and. nst<itdiag) then
           call timer_start(timer_difu, gdp)
           icx = nmaxddb
           icy = 1
@@ -1717,11 +1728,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        ! except when run parallel to fluid mud
        ! Suspended transport correction vector
        ! Suspended transport vector for output
-       ! The velocities from previous half timestep are corrected for
-       ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6 (V0EUL)
-       ! these are used in BOTT3D
        !
        if ((lsedtot>0) .and. (.not.flmd2l)) then
+          call timer_start(timer_3dmor, gdp)
           !
           ! don't compute suspended transport vector in middle of timestep
           ! note: IWRK1 used as local work array
@@ -1730,12 +1739,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           icx = nmaxddb
           icy = 1
           call timer_start(timer_bott3d, gdp)
-          !
-          ! bott3d renamed to z_bott3d
-          !
-          call z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
-                      & lsal      ,ltem      ,i(kfs)    ,i(kfu)    ,i(kfv)    , &
-                      & r(r1)     ,r(s0)     ,i(kcs)    , &
+          call z_bott3d(nmmax     ,kmax      ,lsed      , &
+                      & lsedtot   ,lsal      ,ltem      ,i(kfs)    ,i(kfu)    , &
+                      & i(kfv)    ,r(r1)     ,r(s0)     ,i(kcs)    , &
                       & d(dps)    ,r(gsqs)   ,r(guu)    , &
                       & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
@@ -1818,6 +1824,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                                         & r(vmean),r(dzs0)    ,ztbml_upd_r1 ,gdp          )
              endif
           endif
+          call timer_stop(timer_3dmor, gdp)
        endif
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
@@ -2348,12 +2355,14 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
        call timer_stop(timer_trakad, gdp)
        !
-       ! Transport turbulence
+       ! Call sediment transport routines
        !
-       if (lstsci>0 .and. nst<itdiag) then
+       if (lsedtot>0) then
+          call timer_start(timer_3dmor, gdp)
+          icx = nmaxddb
+          icy = 1
+          !
           if (lsed > 0) then
-             icx = nmaxddb
-             icy = 1
              call timer_start(timer_fallve, gdp)
              call fallve(kmax    ,nmmax     ,lsal      ,ltem      ,lsed      , &
                      & i(kcs)    ,i(kfs)    ,r(wrkb1)  ,r(u0)     ,r(v0)     , &
@@ -2364,37 +2373,44 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
                      & gdp       )
              call timer_stop(timer_fallve, gdp)
-             icx = nmaxddb
-             icy = 1
-             call timer_start(timer_erosed, gdp)
-             !
-             ! sig = dzs1
-             !
-             call z_erosed(nmmax ,kmax      ,icx       ,icy       ,lundia    , &
-                     & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
-                     & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(dzs1)   , &
-                     & r(r0)     ,r(u1)     ,r(v1)     ,r(s0)     ,d(dps)    , &
-                     & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                     & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
-                     & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
-                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
-                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
-                     & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
-                     & r(teta)   ,r(rlabda) ,saleqs    , &
-                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                     & r(hv)     ,r(ubot)   ,r(rtur0)  , &
-                     & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
-                     & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                     & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,hdt       ,2         , &
-                     & gdp       )
-             call timer_stop(timer_erosed, gdp)
           endif
-          call timer_start(timer_difu, gdp)
           !
-          ! Hydra:    difuiter = 0
+          ! Erosed should not be called when run as fluid mud
           !
+
+             !
+             ! Suspended sediment source and sink terms
+             ! Bed load sediment transport vector components
+             ! Vertical sediment diffusion coefficient
+             !
+          call timer_start(timer_erosed, gdp)
+          call z_erosed(nmmax ,kmax      ,icx       ,icy       ,lundia    , &
+                  & nst       ,lsed      ,lsedtot   ,lsal      ,ltem      , &
+                  & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(dzs1)   , &
+                  & r(r0)     ,r(u1)     ,r(v1)     ,r(s0)     ,d(dps)    , &
+                  & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
+                  & r(ws)     ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
+                  & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
+                  & lstsci    ,r(thick)  ,r(dicww)  ,i(kcs)    , &
+                  & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
+                  & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
+                  & r(teta)   ,r(rlabda) ,saleqs    , &
+                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
+                  & r(hv)     ,r(ubot)   ,r(rtur0)  , &
+                  & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,i(kfsmin) , &
+                  & i(kfsmax) ,r(dzs0)   ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
+                  & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,hdt       ,2         , &
+                  & gdp       )
+          call timer_stop(timer_erosed, gdp)
+          call timer_stop(timer_3dmor, gdp)
+       endif
+       !
+       ! Transport of constituents (excl. turbulence)
+       !
+       if (lstsci>0 .and. nst<itdiag) then
           icx = 1
           icy = nmaxddb
+          call timer_start(timer_difu, gdp)
           call timer_start(timer_tritra, gdp)
           call timer_start(timer_2nddifu, gdp)
           call z_difu(lundia    ,nst       ,icx       ,icy       ,jstart    , &
@@ -2633,27 +2649,22 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        !
        ! Compute change in bottom sediment and bottom elevation
        ! except when run parallel to fluid mud
-       ! Suspended transport correction vector
-       ! Suspended transport vector for output
-       ! The velocities from previous half timestep are corrected for
-       ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6 (V0EUL)
-       ! these are used in BOTT3D
        !
        if ((lsedtot>0) .and. (.not.flmd2l)) then
+          call timer_start(timer_3dmor, gdp)
           !
-          ! don't compute suspended transport vector in middle of timestep
+          ! compute suspended sediment transport vector at the end of each
+          ! dt. Would be better to just calculate it when required for
+          ! output.
           ! note: IWRK1 used as local work array
           !
           sscomp = .true.
           icx = nmaxddb
           icy = 1
           call timer_start(timer_bott3d, gdp)
-          !
-          ! bott3d renamed to z_bott3d
-          !
-          call z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
-                      & lsal      ,ltem      ,i(kfs)    ,i(kfu)    ,i(kfv)    , &
-                      & r(r1)     ,r(s0)     ,i(kcs)    , &
+          call z_bott3d(nmmax     ,kmax      ,lsed      , &
+                      & lsedtot   ,lsal      ,ltem      ,i(kfs)    ,i(kfu)    , &
+                      & i(kfv)    ,r(r1)     ,r(s0)     ,i(kcs)    , &
                       & d(dps)    ,r(gsqs)   ,r(guu)    , &
                       & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
@@ -2757,7 +2768,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
                      &  r(thick)  ,gdp       )
           endif
+          call timer_stop(timer_3dmor, gdp)
        endif
+       !
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )

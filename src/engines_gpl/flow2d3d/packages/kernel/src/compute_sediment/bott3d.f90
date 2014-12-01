@@ -380,7 +380,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
                          aksu = aks(nmu, l)
                       else
-                         aksu = (aks(nm, l) + aks(nmu, l))/2.0
+                         aksu = (aks(nm, l) + aks(nmu, l)) / 2.0_fp
                       endif
                       !
                       ! work up through layers integrating transport
@@ -388,7 +388,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       !
                       do k = kmax, 1, -1
                          kvalue = k
-                         htdif  = aksu/hu(nm) - (1.0 + sig(k) - thick(k)/2.0)
+                         htdif  = aksu/hu(nm) - (1.0_fp + sig(k) - thick(k) / 2.0_fp)
                          !
                          ! if layer containing aksu
                          !
@@ -420,23 +420,23 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                          else
                             ceavg = (rca(nm, l) + rca(nmu, l))/2.0_fp
                          endif
-                         r1avg = (r1(nm, k - 1, ll) + r1(nmu, k - 1, ll))/2.0
-                       if (ceavg>r1avg*1.1 .and. ceavg>0.05) then
-                            z      = (1.0 + sig(k - 1))*hu(nm)
-                            apower = log(max(r1avg/ceavg,1.0e-5_fp))/log(z/aksu)
-                            z      = (1.0 + sig(k - 1) - 0.5*thick(k - 1))*hu(nm)
-                            dz     = (thick(k)-htdif)*hu(nm)
-                            if (apower>-1.05 .and. apower<=-1.0) then
-                               apower = -1.05
-                            elseif (apower>=-1.0 .and. apower<-0.95) then
-                               apower = -0.95
+                         r1avg = (r1(nm, k-1, ll) + r1(nmu, k-1, ll)) / 2.0_fp
+                       if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
+                            z      = (1.0_fp + sig(k-1)) * hu(nm)
+                            apower = log(max(r1avg/ceavg,1.0e-5_fp)) / log(z/aksu)
+                            z      = (1.0_fp + sig(k-1) - 0.5_fp*thick(k-1)) * hu(nm)
+                            dz     = (thick(k)-htdif) * hu(nm)
+                            if (apower>-1.05_fp .and. apower<=-1.0_fp) then
+                               apower = -1.05_fp
+                            elseif (apower>=-1.0_fp .and. apower<-0.95_fp) then
+                               apower = -0.95_fp
                             else
                             endif
-                            apower = max(-10.0_fp , apower)
-                            cavg1  = (ceavg/(apower+1.0)) * (1.0/aksu)**apower
-                            cavg2  = z**(apower+1.0) - aksu**(apower+1.0)
-                            cavg   = cavg1 * cavg2 / dz
-                            cumflux= cumflux - u1(nm,k)*(cavg-r1avg)*dz
+                            apower  = min(max(-10.0_fp , apower), 10.0_fp)
+                            cavg1   = (ceavg/(apower+1.0_fp)) * (1.0_fp/aksu)**apower
+                            cavg2   = z**(apower+1.0_fp) - aksu**(apower+1.0_fp)
+                            cavg    = cavg1 * cavg2 / dz
+                            cumflux = cumflux - u1(nm,k)*(cavg-r1avg)*dz
                          endif
                       endif
                       sucor(nm,l) = -cumflux
@@ -470,7 +470,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       !
                       do k = kmax, 1, -1
                          kvalue = k
-                         htdif  = aksu/hv(nm) - (1.0 + sig(k) - thick(k)/2.0)
+                         htdif  = aksu/hv(nm) - (1.0_fp + sig(k) - thick(k)/2.0_fp)
                          !
                          ! if layer containing aksu
                          !
@@ -500,25 +500,25 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                          elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
                             ceavg = rca(num,l)
                          else
-                            ceavg = (rca(nm,l)+rca(num,l)) / 2.0
+                            ceavg = (rca(nm,l)+rca(num,l)) / 2.0_fp
                          endif
-                         r1avg = (r1(nm,k-1,ll)+r1(num,k-1,ll)) / 2.0
-                         if (ceavg>r1avg*1.1 .and. ceavg>0.05) then
-                            z      = (1.0+sig(k-1)) * hv(nm)
-                            apower = log(max(r1avg/ceavg,1.0e-5_fp))/log(z/aksu)
-                            z      = (1.0+sig(k-1)-0.5*thick(k-1)) * hv(nm)
+                         r1avg = (r1(nm, k-1, ll) + r1(num, k-1, ll)) / 2.0_fp
+                         if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
+                            z      = (1.0_fp + sig(k-1)) * hv(nm)
+                            apower = log(max(r1avg/ceavg,1.0e-5_fp)) / log(z/aksu)
+                            z      = (1.0_fp + sig(k-1) - 0.5_fp*thick(k-1)) * hv(nm)
                             dz     = (thick(k)-htdif) * hv(nm)
-                            if (apower>-1.05 .and. apower<=-1.0) then
-                               apower = -1.05
-                            elseif (apower>=-1.0 .and. apower<-0.95) then
-                               apower = -0.95
+                            if (apower>-1.05_fp .and. apower<=-1.0_fp) then
+                               apower = -1.05_fp
+                            elseif (apower>=-1.0_fp .and. apower<-0.95_fp) then
+                               apower = -0.95_fp
                             else
                             endif
-                            apower = max(-10.0_fp , apower)
-                            cavg1  = (ceavg/(apower+1.0)) * (1/aksu)**apower
-                            cavg2  = z**(apower+1.0) - aksu**(apower+1.0)
-                            cavg   = cavg1 * cavg2 / dz
-                            cumflux= cumflux - v1(nm,k)*(cavg-r1avg)*dz
+                            apower  = min(max(-10.0_fp , apower), 10.0_fp)
+                            cavg1   = (ceavg/(apower+1.0_fp)) * (1.0_fp/aksu)**apower
+                            cavg2   = z**(apower+1.0_fp) - aksu**(apower+1.0_fp)
+                            cavg    = cavg1 * cavg2 / dz
+                            cumflux = cumflux - v1(nm,k)*(cavg-r1avg)*dz
                          endif
                       endif
                       svcor(nm, l) = -cumflux

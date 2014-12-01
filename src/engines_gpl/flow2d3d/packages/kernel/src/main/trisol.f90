@@ -2131,8 +2131,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        !
        if ((lsedtot>0) .and. (.not.flmd2l)) then
           call timer_start(timer_3dmor, gdp)
-          icx = nmaxddb
-          icy = 1
           !
           ! don't compute suspended transport vector in middle of timestep
           ! note: IWRK1 used as local work array
@@ -2169,6 +2167,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(guv)    ,r(gvu)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,hdt       , gdp       )
+          call timer_stop(timer_bott3d, gdp)
           if (bedupd) then
                 !
                 ! Recalculate DPU/DPV (depth at velocity points)
@@ -2181,7 +2180,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                         &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
                         &  r(thick)  ,gdp       )
           endif
-          call timer_stop(timer_bott3d, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
        !
@@ -2948,9 +2946,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
        call timer_stop(timer_trakad, gdp)
        !
-       ! Transport of constituents (excl. turbulence)
-       !
-       !
        ! Call sediment transport routines
        !
        if (lsedtot>0) then
@@ -3195,13 +3190,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! Compute change in bottom sediment and bottom elevation
        ! except when run parallel to fluidmud
        ! The velocities from previous half timestep are corrected for
-       ! mass flux and temporary set in WRKB3 (U0EUL) and WRKB4 (V0EUL)
+       ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6 (V0EUL)
        ! these are used in BOTT3D
        !
        if ((lsedtot>0) .and. (.not.flmd2l)) then
           call timer_start(timer_3dmor, gdp)
-          icx = nmaxddb
-          icy = 1
           !
           ! compute suspended sediment transport vector at the end of each
           ! dt. Would be better to just calculate it when required for
@@ -3240,6 +3233,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(guv)    ,r(gvu)    ,i(kcu)    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,hdt       ,gdp       )
+          call timer_stop(timer_bott3d, gdp)
           if (bedupd) then
                 !
                 ! Recalculate DPU/DPV (depth at velocity points)
@@ -3252,7 +3246,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                         &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
                         &  r(thick)  ,gdp       )
           endif
-          call timer_stop(timer_bott3d, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
        !
