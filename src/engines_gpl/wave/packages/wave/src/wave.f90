@@ -40,6 +40,12 @@ program waves_main
    use wave_data
    use meteo
    !
+   ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
+   ! Activate the following line
+   ! See also statements below
+   !
+   ! use ifcore
+   ! 
    implicit none
 !
 ! Global variables
@@ -68,9 +74,21 @@ program waves_main
    character(256), dimension(:), pointer        :: meteotypes
    character(500)                               :: message
    type(wave_data_type),target                  :: wavedata
+   !
+   ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
+   ! Activate the following line
+   ! See also statements below
+   !
+   ! INTEGER*4 OLD_FPE_FLAGS, NEW_FPE_FLAGS
 !
 !! executable statements -----------------------------------------------
 !
+   ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
+   ! Activate the following two lines
+   ! See also use statement above
+   !
+   ! NEW_FPE_FLAGS = FPE_M_TRAP_OVF + FPE_M_TRAP_DIV0 + FPE_M_TRAP_INV
+   ! OLD_FPE_FLAGS = FOR_SET_FPE (NEW_FPE_FLAGS)
    !
    ! ====================================================================================
    ! INIT
