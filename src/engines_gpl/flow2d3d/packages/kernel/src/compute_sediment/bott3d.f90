@@ -421,7 +421,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             ceavg = (rca(nm, l) + rca(nmu, l))/2.0_fp
                          endif
                          r1avg = (r1(nm, k-1, ll) + r1(nmu, k-1, ll)) / 2.0_fp
-                       if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
+                         if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
                             z      = (1.0_fp + sig(k-1)) * hu(nm)
                             apower = log(max(r1avg/ceavg,1.0e-5_fp)) / log(z/aksu)
                             z      = (1.0_fp + sig(k-1) - 0.5_fp*thick(k-1)) * hu(nm)
