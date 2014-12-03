@@ -117,7 +117,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     do nm = 1, nmmax
        nmd = nm - icx
        ndm = nm - icy
-       if ( kcs(nm)/=0 ) then
+       if ( (kcs(nm)==1 .or. kcs(nm)==2) ) then
           !
           ! Check on kfs(nm) == 1 is necessary, because when the last active cell edge of a cell
           ! was set dry in Z_SUD, all KFU/KFV are zero and this check would not be performed
