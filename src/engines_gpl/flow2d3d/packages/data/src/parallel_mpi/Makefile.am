@@ -55,7 +55,7 @@ libDataParallelMPI_la_SOURCES = \
 	 dfwaitr_nm_pos2.F90 \
 	 dfsendnb.F90 \
 	 dfrecvnb.F90 \
-	 dfreduce_gpl.f90 \
+	 dfreduce_gdp.f90 \
 	 dfexchg.F90 \
 	 dfdecomp.F90 \
 	 dfpartit.F90 \
