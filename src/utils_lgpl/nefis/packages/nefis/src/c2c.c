@@ -82,6 +82,7 @@
 #define CREATE_NEFIS            Crenef
 #define DEFINE_CELL             Defcel
 #define DEFINE_CELL2            Defcel2
+#define DEFINE_CELL3            Defcel3
 #define DEFINE_DATA             Credat
 #define DEFINE_ELEMENT          Defelm
 #define DEFINE_GROUP            Defgrp
@@ -97,10 +98,12 @@
 #define GET_NEFIS_VERSION       Getnfv
 #define INQUIRE_CELL            Inqcel
 #define INQUIRE_CELL2           Inqcel2
+#define INQUIRE_CELL3           Inqcel3
 #define INQUIRE_ELEMENT         Inqelm
 #define INQUIRE_FIRST_ELEMENT   Inqfel
 #define INQUIRE_FIRST_CELL      Inqfcl
 #define INQUIRE_FIRST_CELL2     Inqfcl2
+#define INQUIRE_FIRST_CELL3     Inqfcl3
 #define INQUIRE_FIRST_DEF_GROUP Inqfgr
 #define INQUIRE_FIRST_DAT_GROUP Inqfst
 #define INQUIRE_FIRST_INTEGER   Inqfia
@@ -112,6 +115,7 @@
 #define INQUIRE_NEXT_ELEMENT    Inqnel
 #define INQUIRE_NEXT_CELL       Inqncl
 #define INQUIRE_NEXT_CELL2      Inqncl2
+#define INQUIRE_NEXT_CELL3      Inqncl3
 #define INQUIRE_NEXT_DEF_GROUP  Inqngr
 #define INQUIRE_NEXT_DAT_GROUP  Inqnxt
 #define INQUIRE_NEXT_INTEGER    Inqnia
@@ -344,6 +348,53 @@ DLLEXPORT BInt4 DEFINE_CELL2 ( BInt4 * fd             ,
     {
         max_copy = min( MAX_NAME, (BInt4) strlen(el_names[i]) );
         strncpy( &elm_names[i*(MAX_NAME+1)],  el_names [i], max_copy );
+    }
+    for ( i=0; i<cl_num_dim; i++ )
+    {
+        elm_names[i*(MAX_NAME+1)+MAX_NAME] = '\0';
+    }
+
+    cel_num_dim = cl_num_dim;
+
+    nefis_errno = Define_cel ( *fd, cel_name, cel_num_dim, elm_names);
+
+    return nefis_errno;
+}
+/*==========================================================================*/
+/*
+ * Define cel on definition file
+ * Input : * fd                 Nefis file set descriptor
+ *           cl_name            Cel name
+ *           cl_num_dim         Number of dimensions (1 <= N <= 5)
+ *           el_names           Array containing element names witin cel
+ * Output:   -
+ * Return:   0                  No error occured
+ *           !=0                Error occured
+ */
+DLLEXPORT BInt4 DEFINE_CELL3 ( BInt4 * fd             ,
+                    BText   cl_name        ,
+                    BInt4   cl_num_dim     ,
+                    BText   el_names       )
+{
+    BChar   cel_name [ MAX_NAME + 1           ];
+    BInt4   cel_num_dim;
+    BInt4   i        ;
+    BInt4   max_copy ;
+
+    char * elm_names = (char *) malloc(cl_num_dim * (MAX_NAME+1));
+
+    nefis_errno = 0;
+
+    C_Copy_text( cel_name    , cl_name    , MAX_NAME);
+
+    for ( i=0; i<((MAX_NAME+1)*cl_num_dim); i++ )
+    {
+        elm_names[i]=' ';
+    }
+    for ( i=0; i<cl_num_dim; i++ )
+    {
+        max_copy = min( MAX_NAME, (BInt4) strlen(el_names+(MAX_NAME+1)*i) );
+        strncpy( &elm_names[i*(MAX_NAME+1)],  el_names+(MAX_NAME+1)*i, max_copy );
     }
     for ( i=0; i<cl_num_dim; i++ )
     {
@@ -991,6 +1042,66 @@ DLLEXPORT BInt4 INQUIRE_CELL2( BInt4 * fd             ,
 }
 /*==========================================================================*/
 /*
+ * Read cel definition from defintion file
+ * Input : * fd                 Nefis file set descriptor
+ *           cl_name            Group name on data file
+ *           cl_num_dim         Number of dimensions
+ * Output:   el_names
+ * Return:    0                 No error occured
+ *            !=0               Error occured
+ */
+
+DLLEXPORT BInt4 INQUIRE_CELL3( BInt4 * fd             ,
+                            BText    cl_name        ,
+                            BInt4 *  cl_num_dim     ,
+                            BText    el_names       )
+{
+    BUInt8  cel_num_bytes = 0;
+    BUInt4  cel_num_dim   = 0;
+    BChar   cel_name [  MAX_NAME+1  ];
+    BInt4   i        ;
+    BText   elm_names;
+
+    nefis_errno = 0;
+    elm_names = (BText) malloc((MAX_NAME+1) * *cl_num_dim);
+
+    C_Copy_text( cel_name    , cl_name    , MAX_NAME);
+
+    for ( i=0; i<(MAX_NAME+1)* *cl_num_dim; i++ )
+    {
+        elm_names   [i]= 'j';
+    }
+    for ( i=0; i<*cl_num_dim; i++ )
+    {
+        elm_names[i*(MAX_NAME+1)+MAX_NAME] = '\0';
+    }
+
+    nefis_errno = GP_inquire_cel(*fd       , cel_name     ,&cel_num_dim,
+                               &elm_names,&cel_num_bytes);
+
+    if ( nefis_errno == 0 )
+    {
+        if ( cel_num_dim > (BUInt4) *cl_num_dim )
+        {
+            nefis_errcnt += 1;
+            nefis_errno   = 1011;
+            sprintf(error_text,
+            "Inqcel: User supplied array too small to contain Cell properties: \'%s\' %ld>%ld \n",
+                        cel_name, cel_num_dim, *cl_num_dim);
+            return nefis_errno;
+        }
+
+        for ( i=0; i<cel_num_dim; i++ )
+        {
+            strcpy( el_names+i*(MAX_NAME+1), &elm_names[i*(MAX_NAME+1)] );
+        }
+        *cl_num_dim = cel_num_dim;
+    }
+
+  return nefis_errno;
+}
+/*==========================================================================*/
+/*
  * Read group name from data file
  * Input : * fd                 Nefis file set descriptor
  *           gr_name            Group name on data file
@@ -1488,6 +1599,58 @@ DLLEXPORT BInt4 INQUIRE_FIRST_CELL2 (BInt4 *  fd          , /* I */
 }
 /*==========================================================================*/
 /*
+ * Get first cell on definition file
+ * input:      fd        : NEFIS file set descriptor
+ *
+ * output:
+ *
+ *
+ *
+ * return:   0    No error occured
+ *           !=0  Error occured
+ */
+DLLEXPORT BInt4 INQUIRE_FIRST_CELL3 (BInt4 *  fd          , /* I */
+                                    BText    cl_name     , /* O */
+                                    BInt4 *  cl_num_dim  , /* O */
+                                    BInt4 *  cl_num_bytes, /* O */
+                                    BText *   el_names    ) /* O */
+{
+    BUInt8   cel_num_bytes = 0;
+    BUInt4   cel_num_dim = 0           ;
+    BChar    cel_name    [MAX_NAME + 1];
+    BUInt4   i                         ;
+    BText    elm_names;
+
+    elm_names = NULL;
+
+    nefis_errno = 0;
+
+/*
+ * Initialize variables
+ */
+
+    nefis_errno = GP_get_next_cell(*fd              , 0              ,
+                                    cel_name        ,&elm_names      ,
+                                   &cel_num_dim     ,&cel_num_bytes  );
+    if ( nefis_errno == 0 )
+    {
+        *cl_num_dim   = (BUInt4) cel_num_dim;
+        *cl_num_bytes = (BUInt4) cel_num_bytes   ;
+
+        strncpy(cl_name    , cel_name    , MAX_NAME);
+        cl_name    [MAX_NAME] = '\0';
+
+        *el_names = (char  *) malloc( cel_num_dim * (MAX_NAME+1) * sizeof(char) );
+        for ( i=0; i<cel_num_dim; i++ )
+        {
+			strcpy( *el_names+i*(MAX_NAME+1), &elm_names[i*(MAX_NAME+1)] );
+        }
+    }
+
+    return nefis_errno;
+}
+/*==========================================================================*/
+/*
  * Get next cell on definition file
  * input:      fd        : NEFIS file set descriptor
  *
@@ -1534,7 +1697,7 @@ DLLEXPORT BInt4 INQUIRE_NEXT_CELL   ( BInt4 * fd             ,/* I */
             nefis_errcnt += 1;
             nefis_errno   = 1013;
             sprintf(error_text,
-            "Inqfcl: User supplied array too small to contain Cell properties: \'%s\' %ld>%ld \n",
+            "Inqncl: User supplied array too small to contain Cell properties: \'%s\' %ld>%ld \n",
                         cel_name, cel_num_dim, *cl_num_dim);
             return nefis_errno;
         }
@@ -1614,6 +1777,63 @@ DLLEXPORT BInt4 INQUIRE_NEXT_CELL2  (BInt4 *  fd          , /* I */
                 (*el_names)[i][MAX_NAME] = '\0';
             }
             //*el_names = a;
+        }
+    }
+
+    return nefis_errno;
+}
+/*==========================================================================*/
+/*
+ * Get next cell on definition file
+ * input:      fd        : NEFIS file set descriptor
+ *
+ * output:
+ *
+ *
+ *
+ * return:   0    No error occured
+ *           !=0  Error occured
+ */
+DLLEXPORT BInt4 INQUIRE_NEXT_CELL3  (BInt4 *  fd          , /* I */
+                                   BText    cl_name     , /* O */
+                                   BInt4 *  cl_num_dim  , /* O */
+                                   BInt4 *  cl_num_bytes, /* O */
+                                   BText *  el_names    ) /* O */
+{
+    BUInt8   cel_num_bytes = 0;
+    BUInt4   cel_num_dim = 0           ;
+    BChar    cel_name    [MAX_NAME + 1];
+    BUInt4   i                         ;
+    BText    elm_names;
+
+    elm_names = (BText) malloc((MAX_NAME+1) * *cl_num_dim);
+    nefis_errno = 0;
+/*
+ * Initialize variables
+ */
+    for ( i=0; i<MAX_NAME; i++ )
+    {
+        cel_name    [i]= ' ';
+    }
+    cel_name    [MAX_NAME]='\0';
+
+    elm_names= NULL;
+
+    nefis_errno = GP_get_next_cell(*fd              , 1              ,
+                                  cel_name        ,&elm_names      ,
+                                 &cel_num_dim     ,&cel_num_bytes  );
+    if ( nefis_errno == 0 )
+    {
+        *cl_num_dim   = (BUInt4) cel_num_dim;
+        *cl_num_bytes = (BUInt4) cel_num_bytes   ;
+
+        strncpy(cl_name    , cel_name    , MAX_NAME);
+        cl_name    [MAX_NAME] = '\0';
+
+        *el_names = (char  *) malloc( cel_num_dim * (MAX_NAME+1) * sizeof(char) );
+        for ( i=0; i<cel_num_dim; i++ )
+        {
+			strcpy( *el_names+i*(MAX_NAME+1), &elm_names[i*(MAX_NAME+1)] );
         }
     }
 
@@ -2326,7 +2546,7 @@ DLLEXPORT BInt4 PUT_INT_ATTRIBUTE    ( BInt4 * fd            ,
   strcpy(att_type, "INTEGER");
   att_value = (BData) at_value;
 
-  nefis_errno = GP_put_attribute( fd, grp_name, att_name, att_value, att_type);
+  nefis_errno = GP_put_attribute(*fd, grp_name, att_name, att_value, att_type);
 
   return nefis_errno;
 }
@@ -2370,7 +2590,7 @@ DLLEXPORT BInt4 PUT_REAL_ATTRIBUTE   ( BInt4 * fd            ,
   strcpy(att_type, "REAL");
   att_value = (BData) at_value;
 
-  nefis_errno = GP_put_attribute( fd, grp_name, att_name, att_value, att_type);
+  nefis_errno = GP_put_attribute(*fd, grp_name, att_name, att_value, att_type);
 
   return nefis_errno;
 }
@@ -2414,7 +2634,7 @@ DLLEXPORT BInt4 PUT_STRING_ATTRIBUTE ( BInt4 * fd            ,
 
   strcpy(att_type, "CHARACTE");
 
-  nefis_errno = GP_put_attribute( fd, grp_name, att_name, (BData) att_value, att_type);
+  nefis_errno = GP_put_attribute(*fd, grp_name, att_name, (BData) att_value, att_type);
 
   return nefis_errno;
 }

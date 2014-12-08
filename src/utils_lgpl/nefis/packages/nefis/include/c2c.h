@@ -67,7 +67,7 @@ extern BInt4 GP_inquire_grp_def   ( BInt4   , BText   , BText   ,
                                     BUInt4 *, BUInt4 *, BUInt4 *);
 extern BInt4 GP_inquire_max       ( BInt4  , BText  , BUInt4 *);
 extern BUInt8 GP_read_file        ( BInt4  , BText  , BUInt8  , BUInt8  );
-extern BInt4 GP_put_attribute     ( BInt4 *, BText  , BText  , BData  , BText  );
+extern BInt4 GP_put_attribute     ( BInt4  , BText  , BText  , BData  , BText  );
 extern BInt4 nefis_error          ( BInt4  , BText  );
 extern BInt4 Put_element          ( BInt4  , BText  , BText  , BInt4 *, BInt4 *,
                                     BData  );

@@ -60,6 +60,7 @@ extern DLLEXPORT BInt4 Crenef ( BInt4 *, BText,  BText,
 extern DLLEXPORT BInt4 Credat ( BInt4 *, BText  , BText);
 extern DLLEXPORT BInt4 Defcel ( BInt4 *, BText  , BInt4  , BChar [][MAX_NAME+1]);
 extern DLLEXPORT BInt4 Defcel2( BInt4 *, BText  , BInt4  , BText *);
+extern DLLEXPORT BInt4 Defcel3( BInt4 *, BText  , BInt4  , BText  );
 extern DLLEXPORT BInt4 Defelm ( BInt4 *, BText  , BText  ,
                                 BInt4  , BText  , BText  ,
                                 BText  , BInt4  , BInt4 *);
@@ -73,13 +74,16 @@ extern DLLEXPORT BInt4 Gethdt ( BInt4 *, BText  );
 extern DLLEXPORT BInt4 Gethdf ( BInt4 *, BText  );
 extern DLLEXPORT BInt4 Inqcel ( BInt4 *, BText  , BInt4 *, BChar [][MAX_NAME+1]);
 extern DLLEXPORT BInt4 Inqcel2( BInt4 *, BText  , BInt4 *, BText **);
+extern DLLEXPORT BInt4 Inqcel3( BInt4 *, BText  , BInt4 *, BText   );
 extern DLLEXPORT BInt4 Inqdat ( BInt4 *, BText  , BText  );
 extern DLLEXPORT BInt4 Inqelm ( BInt4 *, BText  , BText  , BInt4 *, BText  , BText  ,
                                 BText  , BInt4 *, BInt4 *);
 extern DLLEXPORT BInt4 Inqfcl ( BInt4 *, BText  , BInt4 *, BInt4 *, BChar [][MAX_NAME+1]);
 extern DLLEXPORT BInt4 Inqfcl2( BInt4 *, BText  , BInt4 *, BInt4 *, BText **);
+extern DLLEXPORT BInt4 Inqfcl3( BInt4 *, BText  , BInt4 *, BInt4 *, BText * );
 extern DLLEXPORT BInt4 Inqncl ( BInt4 *, BText  , BInt4 *, BInt4 *, BChar [][MAX_NAME+1]);
 extern DLLEXPORT BInt4 Inqncl2( BInt4 *, BText  , BInt4 *, BInt4 *, BText **);
+extern DLLEXPORT BInt4 Inqncl3( BInt4 *, BText  , BInt4 *, BInt4 *, BText * );
 extern DLLEXPORT BInt4 Inqfel ( BInt4 *, BText  , BText  , BText  , BText  ,
                                 BText  , BInt4 *, BInt4 *, BInt4 *, BInt4 *);
 extern DLLEXPORT BInt4 Inqnel ( BInt4 *, BText  , BText  , BText  , BText  ,
