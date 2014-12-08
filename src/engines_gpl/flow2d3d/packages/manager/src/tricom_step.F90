@@ -257,8 +257,6 @@ subroutine tricom_step(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: sbuu
     integer(pntrsize)                   , pointer :: sbvv
     integer(pntrsize)                   , pointer :: sig
-    integer(pntrsize)                   , pointer :: ssuu
-    integer(pntrsize)                   , pointer :: ssvv
     integer(pntrsize)                   , pointer :: teta
     integer(pntrsize)                   , pointer :: thetbc
     integer(pntrsize)                   , pointer :: thick
@@ -612,8 +610,6 @@ subroutine tricom_step(olv_handle, gdp)
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     sig                 => gdp%gdr_i_ch%sig
-    ssuu                => gdp%gdr_i_ch%ssuu
-    ssvv                => gdp%gdr_i_ch%ssvv
     teta                => gdp%gdr_i_ch%teta
     thetbc              => gdp%gdr_i_ch%thetbc
     thick               => gdp%gdr_i_ch%thick

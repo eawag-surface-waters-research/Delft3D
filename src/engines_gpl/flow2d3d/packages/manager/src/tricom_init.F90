@@ -253,8 +253,6 @@ subroutine tricom_init(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: sbuu
     integer(pntrsize)                   , pointer :: sbvv
     integer(pntrsize)                   , pointer :: sig
-    integer(pntrsize)                   , pointer :: ssuu
-    integer(pntrsize)                   , pointer :: ssvv
     integer(pntrsize)                   , pointer :: teta
     integer(pntrsize)                   , pointer :: thetbc
     integer(pntrsize)                   , pointer :: thick

@@ -156,6 +156,9 @@ integer, parameter, public :: WS_SP_RUNID =  1
 integer, parameter, public :: WS_SP_USRFL =  2
 integer, parameter, public :: WS_MAX_SP   =  2
 
+integer, parameter, public :: CODE_DEFAULT = 0
+integer, parameter, public :: CODE_DELFT3D = 1
+
 ! collection of morphology output options
 !
 type moroutputtype
@@ -546,10 +549,14 @@ type sedtra_type
     real(fp)         , dimension(:,:)    , pointer :: e_scrn   !(nu1:nu2,lsedtot) sucor in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: e_scrt   !(nu1:nu2,lsedtot) svcor in structured Delft3D-FLOW
     !
+    real(fp)         , dimension(:,:)    , pointer :: e_sbn    !(nu1:nu2,lsed)    equivalent sbuu allocated via esm/fsm in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sbt    !(nu1:nu2,lsed)    equivalent sbvv allocated via esm/fsm in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: e_sbnc   !(nu1:nu2,lsedtot) sbuuc in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: e_sbtc   !(nu1:nu2,lsedtot) sbvvc in structured Delft3D-FLOW
-    real(fp)         , dimension(:,:)    , pointer :: e_ssnc   !(nu1:nu2,lsedtot) ssuuc in structured Delft3D-FLOW
-    real(fp)         , dimension(:,:)    , pointer :: e_sstc   !(nu1:nu2,lsedtot) ssvvc in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_ssn    !(nu1:nu2,lsed)    ssuu  in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sst    !(nu1:nu2,lsed)    ssvv  in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_ssnc   !(nu1:nu2,lsed)    ssuuc in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: e_sstc   !(nu1:nu2,lsed)    ssvvc in structured Delft3D-FLOW
     !
     real(fp)         , dimension(:,:)    , pointer :: frac     !(nu1:nu2,lsedtot) effective fraction of sediment in bed available for transport
     real(fp)         , dimension(:)      , pointer :: mudfrac  !(nu1:nu2)         effective mud fraction in the part of the bed exposed to transport
@@ -638,8 +645,12 @@ subroutine nullsedtra(sedtra)
     nullify(sedtra%e_scrn)
     nullify(sedtra%e_scrt)
     !
+    nullify(sedtra%e_sbn)
+    nullify(sedtra%e_sbt)
     nullify(sedtra%e_sbnc)
     nullify(sedtra%e_sbtc)
+    nullify(sedtra%e_ssn)
+    nullify(sedtra%e_sst)
     nullify(sedtra%e_ssnc)
     nullify(sedtra%e_sstc)
     !
@@ -684,7 +695,7 @@ end subroutine nullsedtra
 !
 !
 !============================================================================== 
-subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
+subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, iopt)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Allocate the arrays of sedtra_type data structure.
@@ -705,13 +716,18 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     integer                                    , intent(in)  :: nu1
     integer                                    , intent(in)  :: nu2
     integer                                    , intent(in)  :: nxx
+    integer                         , optional , intent(in)  :: iopt
     !
     ! Local variables
     !
     integer                                                  :: istat
+    integer                                                  :: ioptloc
 !
 !! executable statements -------------------------------------------------------
 !
+    ioptloc = CODE_DEFAULT
+    if (present(iopt)) ioptloc=iopt
+    !
                   allocate(sedtra%kfsed   (nc1:nc2)     , STAT = istat)
     if (istat==0) allocate(sedtra%kmxsed  (nc1:nc2,lsed), STAT = istat)
     !
@@ -736,10 +752,19 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     if (istat==0) allocate(sedtra%e_scrn  (nu1:nu2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%e_scrt  (nu1:nu2,lsedtot), STAT = istat)
     !
+    if (ioptloc==CODE_DEFAULT) then
+       if (istat==0) allocate(sedtra%e_sbn   (nu1:nu2,lsedtot), STAT = istat)
+       if (istat==0) allocate(sedtra%e_sbt   (nu1:nu2,lsedtot), STAT = istat)
+    else
+       if (istat==0) allocate(sedtra%e_sbn   (1,1), STAT = istat) ! not used in structured Delft3D-FLOW
+       if (istat==0) allocate(sedtra%e_sbt   (1,1), STAT = istat) ! not used in structured Delft3D-FLOW
+    endif
     if (istat==0) allocate(sedtra%e_sbnc  (nu1:nu2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%e_sbtc  (nu1:nu2,lsedtot), STAT = istat)
-    if (istat==0) allocate(sedtra%e_ssnc  (nu1:nu2,lsedtot), STAT = istat)
-    if (istat==0) allocate(sedtra%e_sstc  (nu1:nu2,lsedtot), STAT = istat)
+    if (istat==0) allocate(sedtra%e_ssn   (nu1:nu2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sst   (nu1:nu2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%e_ssnc  (nu1:nu2,lsed), STAT = istat)
+    if (istat==0) allocate(sedtra%e_sstc  (nu1:nu2,lsed), STAT = istat)
     !
     if (istat==0) allocate(sedtra%frac    (nu1:nu2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%mudfrac (nu1:nu2), STAT = istat)
@@ -802,8 +827,12 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx)
     sedtra%e_scrn   = 0.0_fp
     sedtra%e_scrt   = 0.0_fp
     !
+    sedtra%e_sbn    = 0.0_fp
+    sedtra%e_sbt    = 0.0_fp
     sedtra%e_sbnc   = 0.0_fp
     sedtra%e_sbtc   = 0.0_fp
+    sedtra%e_ssn    = 0.0_fp
+    sedtra%e_sst    = 0.0_fp
     sedtra%e_ssnc   = 0.0_fp
     sedtra%e_sstc   = 0.0_fp
     !
@@ -894,8 +923,12 @@ subroutine clrsedtra(istat, sedtra)
     if (associated(sedtra%e_scrn  ))   deallocate(sedtra%e_scrn  , STAT = istat)
     if (associated(sedtra%e_scrt  ))   deallocate(sedtra%e_scrt  , STAT = istat)
     !
+    if (associated(sedtra%e_sbn   ))   deallocate(sedtra%e_sbn   , STAT = istat)
+    if (associated(sedtra%e_sbt   ))   deallocate(sedtra%e_sbt   , STAT = istat)
     if (associated(sedtra%e_sbnc  ))   deallocate(sedtra%e_sbnc  , STAT = istat)
     if (associated(sedtra%e_sbtc  ))   deallocate(sedtra%e_sbtc  , STAT = istat)
+    if (associated(sedtra%e_ssn   ))   deallocate(sedtra%e_ssn   , STAT = istat)
+    if (associated(sedtra%e_sst   ))   deallocate(sedtra%e_sst   , STAT = istat)
     if (associated(sedtra%e_ssnc  ))   deallocate(sedtra%e_ssnc  , STAT = istat)
     if (associated(sedtra%e_sstc  ))   deallocate(sedtra%e_sstc  , STAT = istat)
     !

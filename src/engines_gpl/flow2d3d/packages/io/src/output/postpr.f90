@@ -228,8 +228,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: sig
     integer(pntrsize)                    , pointer :: sstr
     integer(pntrsize)                    , pointer :: sstrc
-    integer(pntrsize)                    , pointer :: ssuu
-    integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: taubmx
     integer(pntrsize)                    , pointer :: taubpu
     integer(pntrsize)                    , pointer :: taubpv
@@ -579,8 +577,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     sig                 => gdp%gdr_i_ch%sig
     sstr                => gdp%gdr_i_ch%sstr
     sstrc               => gdp%gdr_i_ch%sstrc
-    ssuu                => gdp%gdr_i_ch%ssuu
-    ssvv                => gdp%gdr_i_ch%ssvv
     taubmx              => gdp%gdr_i_ch%taubmx
     taubpu              => gdp%gdr_i_ch%taubpu
     taubpv              => gdp%gdr_i_ch%taubpv
@@ -918,7 +914,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                     & r(gvu)    ,r(thick)  ,r(r1)     ,r(qxk)    ,r(qyk)    , &
                     & r(hu)     ,r(hv)     ,r(dicuv)  ,lsed      ,lsedtot   , &
                     & r(sbtr)   ,r(sstr)   ,r(sbtrc)  ,r(sstrc)  ,r(sbuu)   , &
-                    & r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,gdp       )
+                    & r(sbvv)   ,gdp       )
           ftcros = .true.
        endif
        !
@@ -953,7 +949,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    & r(zrho)   ,r(zbdsed) ,r(zrsdeq) ,r(zdpsed) ,r(zdps)   , &
                    & r(zws)    ,r(hydprs) ,r(p1)     ,r(vortic) ,r(enstro) , &
                    & r(zvort)  ,r(zenst)  ,r(zsbu)   ,r(zsbv)   ,r(zssu)   , &
-                   & r(zssv)   ,r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                   & r(zssv)   ,r(sbuu)   ,r(sbvv)   , &
                    & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
                    & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
                    & wave      ,r(zrca)   ,r(windu)  ,r(windv)  , &
@@ -1148,8 +1144,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 else
                    call dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                                & mmax      ,kmax      ,nmaxus    ,lsed      ,lsedtot   , &
-                               & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                               & d(dps)    ,gdp       )
+                               & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    ,gdp       )
                 endif
                 if (error) goto 9999
              endif

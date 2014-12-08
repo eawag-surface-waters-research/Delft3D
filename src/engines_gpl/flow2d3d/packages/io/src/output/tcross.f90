@@ -5,7 +5,7 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
                 & gvu       ,thick     ,r1        ,qxk       ,qyk       , &
                 & hu        ,hv        ,dicuv     ,lsed      ,lsedtot   , &
                 & sbtr      ,sstr      ,sbtrc     ,sstrc     ,sbuu      , &
-                & sbvv      ,ssuu      ,ssvv      ,gdp       )
+                & sbvv      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -57,14 +57,15 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer       , dimension(:, :) , pointer :: mnit
-    integer                         , pointer :: mfg
-    integer                         , pointer :: mlg
-    integer                         , pointer :: nfg
-    integer                         , pointer :: nlg
-    integer                         , pointer :: mmaxgl
-    integer                         , pointer :: nmaxgl
-    
+    integer , dimension(:, :)            , pointer :: mnit
+    integer                              , pointer :: mfg
+    integer                              , pointer :: mlg
+    integer                              , pointer :: nfg
+    integer                              , pointer :: nlg
+    integer                              , pointer :: mmaxgl
+    integer                              , pointer :: nmaxgl
+    real(fp), dimension(:,:)             , pointer :: ssuu
+    real(fp), dimension(:,:)             , pointer :: ssvv
 !
 ! Global variables
 !
@@ -92,8 +93,6 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) , intent(in) :: r1      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)      , intent(in) :: sbuu    !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)      , intent(in) :: sbvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)         , intent(in) :: ssuu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)         , intent(in) :: ssvv    !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(kmax)                                                   , intent(in) :: thick   !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(ntruv)                                                               :: ctr     !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(ntruv)                                                               :: fltr    !  Description and declaration in esm_alloc_real.f90
@@ -122,6 +121,7 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
     integer  :: nend   ! Y-/N-Coordinate of the last  point in the cross section 
     integer  :: nnm    ! Help var. minimum of nsta and nend 
     integer  :: nnx    ! Help var. maximum of nsta and nend 
+    integer  :: nm     ! Help var.
     integer  :: nsta   ! Y-/N-Coordinate of the first point in the cross section 
     integer  :: nu     ! N+1 
     real(fp) :: dfcatu ! Help var. to determine the local Diffusion coeff. defined at u-point 
@@ -133,13 +133,15 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    mnit    => gdp%gdstations%mnit
-    mfg     => gdp%gdparall%mfg
-    mlg     => gdp%gdparall%mlg
-    nfg     => gdp%gdparall%nfg
-    nlg     => gdp%gdparall%nlg
-    mmaxgl  => gdp%gdparall%mmaxgl
-    nmaxgl  => gdp%gdparall%nmaxgl
+    mnit                => gdp%gdstations%mnit
+    mfg                 => gdp%gdparall%mfg
+    mlg                 => gdp%gdparall%mlg
+    nfg                 => gdp%gdparall%nfg
+    nlg                 => gdp%gdparall%nlg
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl
+    ssuu                => gdp%gderosed%e_ssn
+    ssvv                => gdp%gderosed%e_sst
     !
     ! Flows flux
     !
@@ -292,11 +294,12 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
                    ! - units of sbtr and sstr are KG/S
                    ! - units of sbtrc and sstrc are KG
                    !
+                   call n_and_m_to_nm(n, m, nm, gdp)
                    do ls = 1, lsedtot
                       sbtr(i, ls) = sbtr(i, ls) + sbuu(n, m, ls)*guu(n, m)
                    enddo
                    do ls = 1, lsed
-                      sstr(i, ls) = sstr(i, ls) + ssuu(n, m, ls)*guu(n, m)
+                      sstr(i, ls) = sstr(i, ls) + ssuu(nm, ls)*guu(n, m)
                    enddo
                 endif
              enddo
@@ -369,11 +372,12 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
                    ! - units of sbtr and sstr are KG/S
                    ! - note: units of sbtrc and sstrc are KG
                    !
+                   call n_and_m_to_nm(n, m, nm, gdp)
                    do ls = 1, lsedtot
                       sbtr(i, ls) = sbtr(i, ls) + sbvv(n, m, ls)*gvv(n, m)
                    enddo
                    do ls = 1, lsed
-                      sstr(i, ls) = sstr(i, ls) + ssvv(n, m, ls)*gvv(n, m)
+                      sstr(i, ls) = sstr(i, ls) + ssvv(nm, ls)*gvv(n, m)
                    enddo
                 endif
              enddo

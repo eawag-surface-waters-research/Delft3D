@@ -250,8 +250,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: sourw
     integer(pntrsize), pointer :: sstr
     integer(pntrsize), pointer :: sstrc
-    integer(pntrsize), pointer :: ssuu
-    integer(pntrsize), pointer :: ssvv
     integer(pntrsize), pointer :: stbf
     integer(pntrsize), pointer :: stbl
     integer(pntrsize), pointer :: stif
@@ -725,8 +723,6 @@ subroutine gtptrs(gdp)
     sourw      => gdp%gdr_i_ch%sourw
     sstr       => gdp%gdr_i_ch%sstr
     sstrc      => gdp%gdr_i_ch%sstrc
-    ssuu       => gdp%gdr_i_ch%ssuu
-    ssvv       => gdp%gdr_i_ch%ssvv
     stbf       => gdp%gdr_i_ch%stbf
     stbl       => gdp%gdr_i_ch%stbl
     stif       => gdp%gdr_i_ch%stif
@@ -1275,8 +1271,6 @@ subroutine gtptrs(gdp)
     sourw      = gtrpnt('sourw' , gdp)
     sstr       = gtrpnt('sstr'  , gdp)
     sstrc      = gtrpnt('sstrc' , gdp)
-    ssuu       = gtrpnt('ssuu'  , gdp)
-    ssvv       = gtrpnt('ssvv'  , gdp)
     stbf       = gtrpnt('stbf'  , gdp)
     stbl       = gtrpnt('stbl'  , gdp)
     stif       = gtrpnt('stif'  , gdp)

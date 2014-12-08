@@ -14,7 +14,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & zrho      ,zbdsed    ,zrsdeq    ,zdpsed    ,zdps      , &
                & zws       ,hydprs    ,p1        ,vortic    ,enstro    , &
                & zvort     ,zenst     ,zsbu      ,zsbv      ,zssu      , &
-               & zssv      ,sbuu      ,sbvv      ,ssuu      ,ssvv      , &
+               & zssv      ,sbuu      ,sbvv      , &
                & zhs       ,ztp       ,zdir      ,zrlabd    ,zuorb     , &
                & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
                & wave      ,zrca      ,windu     ,windv     , &
@@ -68,11 +68,12 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer      , dimension(:,:)   , pointer :: mnstat
-    type (flwoutputtype)            , pointer :: flwoutput
-    real(fp)     , dimension(:,:)   , pointer :: rca
-    real(fp)     , dimension(:,:)   , pointer :: rsedeq
-
+    integer , dimension(:,:)             , pointer :: mnstat
+    type (flwoutputtype)                 , pointer :: flwoutput
+    real(fp), dimension(:,:)             , pointer :: rca
+    real(fp), dimension(:,:)             , pointer :: rsedeq
+    real(fp), dimension(:,:)             , pointer :: ssuu
+    real(fp), dimension(:,:)             , pointer :: ssvv
 !
 ! Global variables
 !
@@ -133,8 +134,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssuu   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssvv   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windu  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windv  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
@@ -193,7 +192,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     integer :: md    ! M-1
     integer :: n     ! Help var. counter for array index in the Y-/N-direction
     integer :: nd    ! N-1
+    integer :: ndm
     integer :: nm
+    integer :: nmd
     real(fp):: sqrt2
 !
 !! executable statements -------------------------------------------------------
@@ -202,10 +203,12 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     ! When n,m is in the halo, kcs is -1
     ! => always use the ABSOLUTE value of kcs
     !
-    mnstat         => gdp%gdstations%mnstat
-    flwoutput      => gdp%gdflwpar%flwoutput
-    rca            => gdp%gderosed%rca
-    rsedeq         => gdp%gderosed%rsedeq
+    mnstat              => gdp%gdstations%mnstat
+    flwoutput           => gdp%gdflwpar%flwoutput
+    rca                 => gdp%gderosed%rca
+    rsedeq              => gdp%gderosed%rsedeq
+    ssuu                => gdp%gderosed%e_ssn
+    ssvv                => gdp%gderosed%e_sst
     !
     ! Store water-levels and concentrations in defined stations
     ! and calculated discharges to zeta points
@@ -615,7 +618,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           md = max(1, m - 1)
           nd = max(1, n - 1)
           !
-          call n_and_m_to_nm(n, m, nm, gdp)
+          call n_and_m_to_nm(n , m , nm , gdp)
+          call n_and_m_to_nm(n , md, nmd, gdp)
+          call n_and_m_to_nm(nd, m , ndm, gdp)
           !
           zdps(ii)   = real(dps(n, m),fp)
           do l = 1, lsed
@@ -628,11 +633,11 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                          & * (         kfv(n ,m)*sbvv(n ,m,l)     &
                          &    + (n-nd)*kfv(nd,m)*sbvv(nd,m,l) )/2.0_fp
              zssu(ii, l) = abs(kcs(n,m))                          &
-                         & * (         kfu(n,m )*ssuu(n,m ,l)     &
-                         &    + (m-md)*kfu(n,md)*ssuu(n,md,l) )/2.0_fp
+                         & * (         kfu(n,m )*ssuu(nm ,l)      &
+                         &    + (m-md)*kfu(n,md)*ssuu(nmd,l) )/2.0_fp
              zssv(ii, l) = abs(kcs(n,m))                          &
-                         & * (         kfv(n ,m)*ssvv(n ,m,l)     &
-                         &    + (n-nd)*kfv(nd,m)*ssvv(nd,m,l) )/2.0_fp
+                         & * (         kfv(n ,m)*ssvv(nm ,l)      &
+                         &    + (n-nd)*kfv(nd,m)*ssvv(ndm,l) )/2.0_fp
              do k = 0, kmax
                 zws(ii, k, l) = ws(n, m, k, l)
              enddo

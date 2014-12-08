@@ -4,7 +4,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                   & dps       ,gsqs      ,guu       , &
                   & gvv       ,s1        ,thick     ,dp        , &
                   & umean     ,vmean     ,sbuu      ,sbvv      , &
-                  & depchg    ,ssuu      ,ssvv      ,nst       ,hu        , &
+                  & depchg    ,nst       ,hu        , &
                   & hv        ,sig       ,u1        ,v1        , &
                   & sscomp    ,kcsbot    , &
                   & guv       ,gvu       ,kcu       , &
@@ -115,6 +115,8 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     real(fp), dimension(:)               , pointer :: mudfrac
     real(fp), dimension(:,:)             , pointer :: sbuuc
     real(fp), dimension(:,:)             , pointer :: sbvvc
+    real(fp), dimension(:,:)             , pointer :: ssuu
+    real(fp), dimension(:,:)             , pointer :: ssvv
     real(fp), dimension(:,:)             , pointer :: ssuuc
     real(fp), dimension(:,:)             , pointer :: ssvvc
     real(fp), dimension(:,:)             , pointer :: sucor
@@ -190,8 +192,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)              :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)              :: sbvv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                 :: ssuu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                 :: ssvv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                        , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                          , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in)  :: dzs1   !  Description and declaration in rjdim.f90
@@ -304,6 +304,8 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     mudfrac             => gdp%gderosed%mudfrac
     sbuuc               => gdp%gderosed%e_sbnc
     sbvvc               => gdp%gderosed%e_sbtc
+    ssuu                => gdp%gderosed%e_ssn
+    ssvv                => gdp%gderosed%e_sst
     ssuuc               => gdp%gderosed%e_ssnc
     ssvvc               => gdp%gderosed%e_sstc
     sucor               => gdp%gderosed%e_scrn

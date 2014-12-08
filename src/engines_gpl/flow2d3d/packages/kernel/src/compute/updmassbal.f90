@@ -1,5 +1,5 @@
 subroutine updmassbal(newvol    ,qxk       ,qyk       ,kcs       ,r1        , &
-                    & volum1    ,sbuu      ,sbvv      ,ssuu      ,ssvv      , &
+                    & volum1    ,sbuu      ,sbvv      , &
                     & gsqs      ,guu       ,gvv       ,dps       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -70,6 +70,8 @@ subroutine updmassbal(newvol    ,qxk       ,qyk       ,kcs       ,r1        , &
     real(fp)                       , pointer :: morfac
     real(fp)     , dimension(:,:,:), pointer :: fluxu
     real(fp)     , dimension(:,:,:), pointer :: fluxv
+    real(fp)     , dimension(:,:)  , pointer :: ssuu
+    real(fp)     , dimension(:,:)  , pointer :: ssvv
 !
 ! Global variables
 !
@@ -81,8 +83,6 @@ subroutine updmassbal(newvol    ,qxk       ,qyk       ,kcs       ,r1        , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,1:gdp%d%kmax)   :: qyk
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,gdp%d%lsedtot)  :: sbuu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,gdp%d%lsedtot)  :: sbvv
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,gdp%d%lsed)     :: ssuu
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,gdp%d%lsed)     :: ssvv
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                :: gsqs
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                :: guu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                :: gvv
@@ -132,6 +132,8 @@ subroutine updmassbal(newvol    ,qxk       ,qyk       ,kcs       ,r1        , &
     morfac         => gdp%gdmorpar%morfac
     fluxu          => gdp%gdflwpar%fluxu
     fluxv          => gdp%gdflwpar%fluxv
+    ssuu           => gdp%gderosed%e_ssn
+    ssvv           => gdp%gderosed%e_sst
     !
     ibnd = nbalpol+1
     nmaxddb = gdp%d%nmax + 2*gdp%d%ddbound

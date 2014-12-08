@@ -53,8 +53,6 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     include 'tri-dyn.igd'
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
-    integer(pntrsize)                    , pointer :: ssuu
-    integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: ws
     integer(pntrsize)                    , pointer :: dps
     logical                              , pointer :: lfbedfrmout
@@ -107,8 +105,6 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     lfbedfrmout         => gdp%gdbedformpar%lfbedfrmout
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
-    ssuu                => gdp%gdr_i_ch%ssuu
-    ssvv                => gdp%gdr_i_ch%ssvv
     ws                  => gdp%gdr_i_ch%ws
     dps                 => gdp%gdr_i_ch%dps
     !
@@ -150,8 +146,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
        if (lsedtot > 0) then
           call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                     & lsed      ,lsedtot   ,1         ,0         ,grnam5    , &
-                    & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                    & d(dps)    ,gdp       )
+                    & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    ,gdp       )
        endif
        !
        ! Add bedform fields
@@ -216,8 +211,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     if (lsedtot > 0) then
        call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                  & lsed      ,lsedtot   ,2         ,fds       ,grnam5    , &
-                 & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                 & d(dps)    ,gdp       )
+                 & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    ,gdp       )
        if (error) goto 9999
     endif
     !

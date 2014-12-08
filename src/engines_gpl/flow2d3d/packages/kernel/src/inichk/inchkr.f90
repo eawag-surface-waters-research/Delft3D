@@ -243,8 +243,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: sig
-    integer(pntrsize)                    , pointer :: ssuu
-    integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: sumrho
     integer(pntrsize)                    , pointer :: taubmx
     integer(pntrsize)                    , pointer :: taubpu
@@ -601,8 +599,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     sig                 => gdp%gdr_i_ch%sig
-    ssuu                => gdp%gdr_i_ch%ssuu
-    ssvv                => gdp%gdr_i_ch%ssvv
     sumrho              => gdp%gdr_i_ch%sumrho
     taubmx              => gdp%gdr_i_ch%taubmx
     taubpu              => gdp%gdr_i_ch%taubpu
@@ -1000,7 +996,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
               & r(hu)     ,r(hv)     ,r(dzs1)   ,r(dzu1)   ,r(dzv1)   , &
               & r(volum1) ,r(porosu) ,r(porosv) ,r(areau)  ,r(areav)  ,gdp       )
     call updmassbal(.true.   ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
-                  & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                  & r(volum1),r(sbuu)   ,r(sbvv)   ,&
                   & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
     !
     ! F0ISF1: copy old (1) in new arrays (0)

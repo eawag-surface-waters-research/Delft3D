@@ -1419,8 +1419,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           epswav(0:kmax)
     !                          sbuu  (nmaxddb  ,mmaxddb,lsedtot)
     !                          sbvv  (nmaxddb  ,mmaxddb,lsedtot)
-    !                          ssuu  (nmaxddb  ,mmaxddb,lsed)
-    !                          ssvv  (nmaxddb  ,mmaxddb,lsed)
     !
     pntnam = 'ws'            !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*lsed, gdp)
@@ -1476,17 +1474,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsedtot, gdp)
                              !  no description (yet)
     if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'ssuu'          !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'ssvv'          !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    !
     !
     !     Arrays for: fluid mud; driving forces for fluid mud layer
     !                   usus, vsus, czusus, czvsus, wssus, entr, rsed

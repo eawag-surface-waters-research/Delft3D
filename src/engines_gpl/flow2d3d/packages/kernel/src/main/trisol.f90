@@ -367,8 +367,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: sournf
     integer(pntrsize)                    , pointer :: sourr
     integer(pntrsize)                    , pointer :: sourw
-    integer(pntrsize)                    , pointer :: ssuu
-    integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: stbf
     integer(pntrsize)                    , pointer :: stbl
     integer(pntrsize)                    , pointer :: stif
@@ -909,8 +907,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     sournf              => gdp%gdr_i_ch%sournf
     sourr               => gdp%gdr_i_ch%sourr
     sourw               => gdp%gdr_i_ch%sourw
-    ssuu                => gdp%gdr_i_ch%ssuu
-    ssvv                => gdp%gdr_i_ch%ssvv
     stbf                => gdp%gdr_i_ch%stbf
     stbl                => gdp%gdr_i_ch%stbl
     stif                => gdp%gdr_i_ch%stif
@@ -2161,7 +2157,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & d(dps)    ,r(gsqs)   ,r(guu)    , &
                     & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                     & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
-                    & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
+                    & r(depchg) ,nst       ,r(hu)     , &
                     & r(hv)     ,r(sig)    ,r(umor)   ,r(vmor)   , &
                     & sscomp    ,i(iwrk1)  , &
                     & r(guv)    ,r(gvu)    ,i(kcu)    , &
@@ -2187,7 +2183,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
        call updmassbal(.false.  ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
-                    & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                    & r(volum1),r(sbuu)   ,r(sbvv)   , &
                     & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
@@ -3227,7 +3223,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & d(dps)    ,r(gsqs)   ,r(guu)    , &
                     & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                     & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
-                    & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
+                    & r(depchg) ,nst       ,r(hu)     , &
                     & r(hv)     ,r(sig)    ,r(umor)   ,r(vmor)   , &
                     & sscomp    ,i(iwrk1)  , &
                     & r(guv)    ,r(gvu)    ,i(kcu)    , &
@@ -3253,7 +3249,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
        call updmassbal(nst+1 == ithisc,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
-                     & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                     & r(volum1),r(sbuu)   ,r(sbvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &

@@ -193,8 +193,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: entr
     integer(pntrsize)                    , pointer :: wstau
     logical                              , pointer :: flmd2l
-    integer(pntrsize)                    , pointer :: ssuu
-    integer(pntrsize)                    , pointer :: ssvv
     integer(pntrsize)                    , pointer :: depchg
     logical                              , pointer :: bedupd
     logical                              , pointer :: eqmbcsand
@@ -941,8 +939,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     ztbml_upd_r1        => gdp%gdzmodel%ztbml_upd_r1
     flmd2l              => gdp%gdprocs%flmd2l
     depchg              => gdp%gdr_i_ch%depchg
-    ssuu                => gdp%gdr_i_ch%ssuu
-    ssvv                => gdp%gdr_i_ch%ssvv
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     seddif              => gdp%gdr_i_ch%seddif
@@ -1745,7 +1741,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & d(dps)    ,r(gsqs)   ,r(guu)    , &
                       & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
-                      & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
+                      & r(depchg) ,nst       ,r(hu)     , &
                       & r(hv)     ,r(sig)    ,r(u1)     ,r(v1)     , &
                       & sscomp    ,i(iwrk1)  , &
                       & r(guv)    ,r(gvu)    ,i(kcu)    , &
@@ -2668,7 +2664,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & d(dps)    ,r(gsqs)   ,r(guu)    , &
                       & r(gvv)    ,r(s1)     ,r(thick)  ,r(dp)     , &
                       & r(umean)  ,r(vmean)  ,r(sbuu)   ,r(sbvv)   , &
-                      & r(depchg) ,r(ssuu)   ,r(ssvv)   ,nst       ,r(hu)     , &
+                      & r(depchg) ,nst       ,r(hu)     , &
                       & r(hv)     ,r(sig)    ,r(u1)     ,r(v1)     , &
                       & sscomp    ,i(iwrk1)  , &
                       & r(guv)    ,r(gvu)    ,i(kcu)    , &

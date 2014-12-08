@@ -1,7 +1,6 @@
 subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                 & mmax      ,kmax      ,nmaxus    ,lsed      ,lsedtot   , &
-                & sbuu      ,sbvv      ,ssuu      ,ssvv      ,ws        , &
-                & dps       ,gdp       )
+                & sbuu      ,sbvv      ,ws        ,dps       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -87,6 +86,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     real(fp), dimension(:,:)             , pointer :: sbwv
     real(fp), dimension(:,:)             , pointer :: sbwuu
     real(fp), dimension(:,:)             , pointer :: sbwvv
+    real(fp), dimension(:,:)             , pointer :: ssuu
+    real(fp), dimension(:,:)             , pointer :: ssvv
     real(fp), dimension(:,:)             , pointer :: sswu
     real(fp), dimension(:,:)             , pointer :: sswv
     real(fp), dimension(:,:)             , pointer :: sswuu
@@ -126,8 +127,6 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssuu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssvv   !  Description and declaration in esm_alloc_real.f90
     character(60)                                                              , intent(in)  :: trifil !!  File name for FLOW NEFIS output
                                                                                                        !!  files (tri"h/m"-"casl""labl".dat/def)
 !
@@ -212,6 +211,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     sbwv                => gdp%gderosed%sbwy
     sbwuu               => gdp%gderosed%e_sbwn
     sbwvv               => gdp%gderosed%e_sbwt
+    ssuu                => gdp%gderosed%e_ssn
+    ssvv                => gdp%gderosed%e_sst
     sswu                => gdp%gderosed%sswx
     sswv                => gdp%gderosed%sswy
     sswuu               => gdp%gderosed%e_sswn
@@ -1200,7 +1201,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           end select
           do m = 1, mmax
              do n = 1, nmaxus
-                rbuff4(n, m, l, 1) = ssuu(n, m, l)/rhol
+                call n_and_m_to_nm(n, m, nm, gdp)
+                rbuff4(n, m, l, 1) = ssuu(nm, l)/rhol
              enddo
           enddo
        enddo
@@ -1225,7 +1227,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           end select
           do m = 1, mmax
              do n = 1, nmaxus
-                rbuff4(n, m, l, 1) = ssvv(n, m, l)/rhol
+                call n_and_m_to_nm(n, m, nm, gdp)
+                rbuff4(n, m, l, 1) = ssvv(nm, l)/rhol
              enddo
           enddo
        enddo

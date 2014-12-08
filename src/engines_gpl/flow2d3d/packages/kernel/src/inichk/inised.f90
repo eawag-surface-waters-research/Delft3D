@@ -41,7 +41,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     use globaldata
     use bedcomposition_module
-    use morphology_data_module, only: allocsedtra
+    use morphology_data_module, only: allocsedtra, CODE_DELFT3D
     use sediment_basics_module
     !
     implicit none
@@ -93,7 +93,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     nmub    = gdp%d%nmub
     !
     call allocsedtra(gdp%gderosed, gdp%d%kmax, lsed, lsedtot, &
-                   & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx)
+                   & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx, CODE_DELFT3D)
     !
     !
     !-------- read some more input data
