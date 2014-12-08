@@ -126,6 +126,13 @@
                   if ( gettoken( aGrid%nolay, ierr2 ) .gt. 0 ) goto 1000
                   write ( lunut , 2010 ) aGrid%nolay
 
+               case ( 'NOAGGREGATION' )
+                  allocate ( aGrid%iarray(noseg) )
+                  do iseg=1,noseg
+                     aGrid%iarray(iseg) = iseg
+                  end do
+                  exit                                         ! input for the grid is ready
+                  
                case ( 'AGGREGATIONFILE' )                      ! it is the filename keyword
                   if ( gettoken( ctoken, ierr2 ) .gt. 0 ) goto 1000
                   call dhopnf ( lun(33), ctoken, 33, 1, ierr2 )
