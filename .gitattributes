@@ -4828,6 +4828,7 @@ src/utils_lgpl/d_hydro_lib/packages/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcxproj -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib_vs2013.vcxproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/d_hydro_lib_version.h.svn -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/version_number.ini -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile.am -text
@@ -4927,6 +4928,7 @@ src/utils_lgpl/delftio/packages/delftio_dll/resource.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcxproj -text
+src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm_vs2013.vcxproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/checkDiff -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/dio-sync-ux.h -text
@@ -5274,6 +5276,7 @@ src/utils_lgpl/delftonline/src/delftonline/delftonline.vcproj -text
 src/utils_lgpl/delftonline/src/delftonline/delftonline.vcxproj -text
 src/utils_lgpl/delftonline/src/delftonline/delftonline_version.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/delftonline_version.h.svn -text
+src/utils_lgpl/delftonline/src/delftonline/delftonline_vs2013.vcxproj -text
 src/utils_lgpl/delftonline/src/delftonline/dictionary.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/dictionary.h -text
 src/utils_lgpl/delftonline/src/delftonline/directory.cpp -text
@@ -5350,6 +5353,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcxproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_2012.vcxproj -text
+src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_vs2013.vcxproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/cpuinfo.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/getputarray.h -text
@@ -5398,12 +5402,14 @@ src/utils_lgpl/deltares_common/tests/01_getenv_test/testcase/run01test -text
 src/utils_lgpl/deltares_common/tests/01_getenv_test/testcase/run01test.bat -text
 src/utils_lgpl/deltares_common/tests/02_streams_smalltest/01-smalltest.vcproj -text
 src/utils_lgpl/deltares_common/tests/02_streams_smalltest/01-smalltest.vcxproj -text
+src/utils_lgpl/deltares_common/tests/02_streams_smalltest/01-smalltest_vs2013.vcxproj -text
 src/utils_lgpl/deltares_common/tests/02_streams_smalltest/Makefile.am -text
 src/utils_lgpl/deltares_common/tests/02_streams_smalltest/runsmalltest.bat -text
 src/utils_lgpl/deltares_common/tests/02_streams_smalltest/runsmalltest.sh -text
 src/utils_lgpl/deltares_common/tests/02_streams_smalltest/smalltest.cpp -text
 src/utils_lgpl/deltares_common/tests/03_streams_test/02-streamtest.vcproj -text
 src/utils_lgpl/deltares_common/tests/03_streams_test/02-streamtest.vcxproj -text
+src/utils_lgpl/deltares_common/tests/03_streams_test/02-streamtest_vs2013.vcxproj -text
 src/utils_lgpl/deltares_common/tests/03_streams_test/Makefile.am -text
 src/utils_lgpl/deltares_common/tests/03_streams_test/streamtest.cpp -text
 src/utils_lgpl/deltares_common/tests/03_streams_test/tcpstream.sh -text
@@ -5510,6 +5516,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/fortapi.f90 -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcxproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c_vs2013.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-esm.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-fsm.h -text
@@ -5524,6 +5531,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/fsm.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcxproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number_vs2013.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/resource.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/version_number.h.svn -text
@@ -5623,7 +5631,9 @@ src/utils_lgpl/nefis/packages/nefis/nefis5.dsp -text
 src/utils_lgpl/nefis/packages/nefis/nefis_dll.vcproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis_dll.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis_dll_vs2012.vcxproj -text
+src/utils_lgpl/nefis/packages/nefis/nefis_dll_vs2013.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis_vs2012.vcxproj -text
+src/utils_lgpl/nefis/packages/nefis/nefis_vs2013.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/src/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/src/c2c.c -text
 src/utils_lgpl/nefis/packages/nefis/src/df.c -text
