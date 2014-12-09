@@ -4785,6 +4785,7 @@ src/utils_gpl/morphology/packages/morphology_plugins_c/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c.vcproj -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c.vcxproj -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c_2012.vcxproj -text
+src/utils_gpl/morphology/packages/morphology_plugins_c/morphology_plugins_c_vs2013.vcxproj -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/src/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/src/shared_lib_fallve.c -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/src/shared_lib_trafrm.c -text
