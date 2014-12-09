@@ -285,6 +285,7 @@ src/engines_gpl/d_hydro/packages/Makefile.am -text
 src/engines_gpl/d_hydro/packages/d_hydro/Makefile.am -text
 src/engines_gpl/d_hydro/packages/d_hydro/d_hydro.vcproj -text
 src/engines_gpl/d_hydro/packages/d_hydro/d_hydro.vcxproj -text
+src/engines_gpl/d_hydro/packages/d_hydro/d_hydro_vs2013.vcxproj -text
 src/engines_gpl/d_hydro/packages/d_hydro/include/d_hydro_version.h.svn -text
 src/engines_gpl/d_hydro/packages/d_hydro/include/version_number.ini -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile.am -text
@@ -536,6 +537,7 @@ src/engines_gpl/flow2d3d/packages/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vcproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d_intel13.vcxproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d_vs2013.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/blob.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/category.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/context-flowside.h -text
@@ -614,6 +616,7 @@ src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda.vcproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda_intel13.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda_lib.vfproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda_vs2013.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/include/flow2d3d_openda_version.h.svn -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/include/version_number.ini -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/src/Makefile.am -text
@@ -1250,6 +1253,7 @@ src/engines_gpl/flow2d3d/packages/manager/src/trisim_mod.F90 -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/plugin_culvert_c.vcproj -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/plugin_culvert_c.vcxproj -text
+src/engines_gpl/flow2d3d/packages/plugin_culvert_c/plugin_culvert_c_vs2013.vcxproj -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/f902c.c -text
 src/engines_gpl/flow2d3d/packages/plugin_user/Makefile.am -text
@@ -1293,6 +1297,7 @@ src/engines_gpl/part/packages/data_f/src/typos_mod.f90 -text
 src/engines_gpl/part/packages/delpar/Makefile.am -text
 src/engines_gpl/part/packages/delpar/delpar.vcproj -text
 src/engines_gpl/part/packages/delpar/delpar.vcxproj -text
+src/engines_gpl/part/packages/delpar/delpar_vs2013.vcxproj -text
 src/engines_gpl/part/packages/delpar/src/Makefile.am -text
 src/engines_gpl/part/packages/delpar/src/main.cpp -text
 src/engines_gpl/part/packages/io_f/Makefile.am -text
@@ -1334,6 +1339,7 @@ src/engines_gpl/part/packages/io_f/src/wrttrk.f90 -text
 src/engines_gpl/part/packages/kernel_c/Makefile.am -text
 src/engines_gpl/part/packages/kernel_c/part_kernel_c.vcproj -text
 src/engines_gpl/part/packages/kernel_c/part_kernel_c.vcxproj -text
+src/engines_gpl/part/packages/kernel_c/part_kernel_c_vs2013.vcxproj -text
 src/engines_gpl/part/packages/kernel_c/src/Makefile.am -text
 src/engines_gpl/part/packages/kernel_c/src/cstop.c -text
 src/engines_gpl/part/packages/kernel_f/Makefile.am -text
@@ -1400,6 +1406,7 @@ src/engines_gpl/part/packages/version_number/include/version_number.ini -text
 src/engines_gpl/part/packages/version_number/include/version_number.rc.svn -text
 src/engines_gpl/part/packages/version_number/part_version_number.vcproj -text
 src/engines_gpl/part/packages/version_number/part_version_number.vcxproj -text
+src/engines_gpl/part/packages/version_number/part_version_number_vs2013.vcxproj -text
 src/engines_gpl/part/packages/version_number/src/Makefile.am -text
 src/engines_gpl/part/packages/version_number/src/c2c.c -text
 src/engines_gpl/part/packages/version_number/src/f2c.c -text
@@ -1503,6 +1510,7 @@ src/engines_gpl/waq/packages/delwaq1_lib/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq1_version_number/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1_version_number/delwaq1_version_number.vcproj -text
 src/engines_gpl/waq/packages/delwaq1_version_number/delwaq1_version_number.vcxproj -text
+src/engines_gpl/waq/packages/delwaq1_version_number/delwaq1_version_number_vs2013.vcxproj -text
 src/engines_gpl/waq/packages/delwaq1_version_number/include/resource.h -text
 src/engines_gpl/waq/packages/delwaq1_version_number/include/version_number.h.svn -text
 src/engines_gpl/waq/packages/delwaq1_version_number/include/version_number.ini -text
@@ -1542,6 +1550,7 @@ src/engines_gpl/waq/packages/delwaq2_openda_lib/src/waq_multi_instance.f90 -text
 src/engines_gpl/waq/packages/delwaq2_version_number/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq2_version_number/delwaq2_version_number.vcproj -text
 src/engines_gpl/waq/packages/delwaq2_version_number/delwaq2_version_number.vcxproj -text
+src/engines_gpl/waq/packages/delwaq2_version_number/delwaq2_version_number_vs2013.vcxproj -text
 src/engines_gpl/waq/packages/delwaq2_version_number/include/resource.h -text
 src/engines_gpl/waq/packages/delwaq2_version_number/include/version_number.h.svn -text
 src/engines_gpl/waq/packages/delwaq2_version_number/include/version_number.ini -text
@@ -2247,6 +2256,7 @@ src/engines_gpl/waq/packages/waq_utils_c/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_c/src/f902c.cpp -text
 src/engines_gpl/waq/packages/waq_utils_c/waq_utils_c.vcproj -text
 src/engines_gpl/waq/packages/waq_utils_c/waq_utils_c.vcxproj -text
+src/engines_gpl/waq/packages/waq_utils_c/waq_utils_c_vs2013.vcxproj -text
 src/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/opl_utils_f/opl_utils_f.vfproj -text
 src/engines_gpl/waq/packages/waq_utils_f/src/Makefile.am -text
