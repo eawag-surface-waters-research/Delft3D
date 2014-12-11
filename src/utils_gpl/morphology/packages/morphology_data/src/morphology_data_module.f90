@@ -159,6 +159,10 @@ integer, parameter, public :: WS_MAX_SP   =  2
 integer, parameter, public :: CODE_DEFAULT = 0
 integer, parameter, public :: CODE_DELFT3D = 1
 
+integer,parameter, public  :: FLUX_LIMITER_NONE   = 0
+integer,parameter, public  :: FLUX_LIMITER_MINMOD = 1
+integer,parameter, public  :: FLUX_LIMITER_MC     = 2
+
 ! collection of morphology output options
 !
 type moroutputtype
@@ -200,6 +204,7 @@ type mornumericstype
     logical :: laterallyaveragedbedload ! bedload transport laterally averaged in UPWBED
     logical :: maximumwaterdepth        ! water depth at zeta point in DWNVEL given by
                                         ! at least water depth at active velocity points
+    integer :: fluxlim                  ! flux limiter choice
 end type mornumericstype
 
 !

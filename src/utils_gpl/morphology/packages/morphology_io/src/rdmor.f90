@@ -184,6 +184,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     logical                                                           :: ex       ! Logical flag for file existence
     logical                                                           :: found
     character(10)                                                     :: versionstring
+    character(20)                                                     :: fluxlimstring
     character(80)                                                     :: bndname
     character(256)                                                    :: errmsg
     character(256)                                                    :: pxxstr
@@ -667,6 +668,17 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Numerics', 'UpwindBedload', mornum%upwindbedload)
        call prop_get_logical(mor_ptr, 'Numerics', 'LaterallyAveragedBedload', mornum%laterallyaveragedbedload)
        call prop_get_logical(mor_ptr, 'Numerics', 'MaximumWaterdepth', mornum%maximumwaterdepth)
+       fluxlimstring = ' '
+       call prop_get_string(mor_ptr, 'Numerics', 'FluxLimiter', fluxlimstring)       
+       call str_lower(fluxlimstring)
+       select case(fluxlimstring)
+           case('minmod')
+               mornum%fluxlim = FLUX_LIMITER_MINMOD  
+           case('mc')     
+               mornum%fluxlim = FLUX_LIMITER_MC  
+           case default 
+               mornum%fluxlim = FLUX_LIMITER_NONE  
+       end select
        !
        ! Output options
        !
