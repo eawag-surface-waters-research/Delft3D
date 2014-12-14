@@ -182,6 +182,10 @@ end type waqsimtype
 !   module procedure waqsim_setfld
 !end interface waqsim_set
 
+interface dealloc
+    module procedure dealloc_waqsim
+end interface dealloc
+
 contains
 
 function poi_read(waqsim, filename) result (success)
@@ -1062,6 +1066,30 @@ subroutine waqsim_allocate(waqsim)
     allocate(waqsim%segatr(waqsim%nsegments, waqsim%nsegatr), stat = istat)
     allocate(waqsim%tmpval(waqsim%nsegments)                , stat = istat)
 end subroutine waqsim_allocate
+
+
+subroutine dealloc_waqsim(waqsim)
+    ! modules
+
+    implicit none
+    ! variables
+    type (waqsimtype)                 :: waqsim
+
+    ! local variables
+
+	! program code
+    
+    if (allocated(waqsim%poi))      deallocate(waqsim%poi)
+    if (allocated(waqsim%lng))      deallocate(waqsim%lng)
+    if (allocated(waqsim%vol))      deallocate(waqsim%vol)
+    if (allocated(waqsim%qag))      deallocate(waqsim%qag)
+    if (allocated(waqsim%area))     deallocate(waqsim%area)
+    if (allocated(waqsim%segatrnr)) deallocate(waqsim%segatrnr)
+    if (allocated(waqsim%segatr))   deallocate(waqsim%segatr)
+    if (allocated(waqsim%tmpval))   deallocate(waqsim%tmpval)
+         
+end subroutine dealloc_waqsim
+
 
 subroutine srf2par(srffile, parfile, nsegments, nvertexchanges, geometry)
     character(*), intent(in)      :: srffile
