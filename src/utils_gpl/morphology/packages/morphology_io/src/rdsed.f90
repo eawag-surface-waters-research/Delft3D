@@ -349,6 +349,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        sedpar%flnrd(0) = ' '
        call prop_get_string(sed_ptr, 'SedimentOverall', 'NodeRelations', sedpar%flnrd(0))
+       if (sedpar%flnrd(0) .ne. ' ') then
+          call combinepaths(filsed, sedpar%flnrd(0))
+       endif
        !
        !
        ! Intel 7.0 crashes on an inquire statement when file = ' '
@@ -455,6 +458,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              !
              sedpar%flnrd(l) = ' '
              call prop_get_string(sedblock_ptr, '*', 'NodeRelations', sedpar%flnrd(l))
+             if (sedpar%flnrd(l) .ne. ' ') then
+                call combinepaths(filsed, sedpar%flnrd(l))
+             endif
              !
              exit
           enddo
