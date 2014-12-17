@@ -616,7 +616,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        bcmfilnam = ' '
        call prop_get_string(mor_ptr, 'Morphology', 'BcFil', bcmfilnam)
        if (bcmfilnam /= ' ') then
-          !txtput1 = 'Boundary conditions file'
+          call combinepaths(filmor, bcmfilnam)
           !write (lundia, '(3a)') txtput1, ': ', trim(bcmfilnam)
           call readtable(bcmfile, bcmfilnam, julday, errmsg)
           if (errmsg /= ' ') then
