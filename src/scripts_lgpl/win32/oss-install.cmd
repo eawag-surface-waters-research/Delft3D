@@ -127,12 +127,13 @@ rem ===============
     call :d_hydro
     call :flow2d3d
     call :flow2d3d_openda
-	call :delwaq1
-	call :delwaq1_lib
-	call :delwaq2
-	call :delwaq2_lib
-	call :delwaq2_openda_lib
-	call :waq_plugin_wasteload
+    call :delwaq1
+    call :delwaq1_lib
+    call :delwaq2
+    call :delwaq2_lib
+    call :delwaq2_openda_lib
+    call :waq_plugin_wasteload
+    call :part
     call :wave
     call :plugin_culvert
     call :plugin_delftflow_traform

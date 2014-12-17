@@ -12,14 +12,16 @@ MYC_INCLUDES=$(top_srcdir)/include
 
 bin_PROGRAMS= delpar
 
+AM_FCFLAGS += $(OPENMP_FCFLAGS)
+AM_FFLAGS += $(OPENMP_FFLAGS)
+
 delpar_SOURCES= \
-	main.cpp
+	main.f
 
 # some libraries are loaded twice to find all undefined symbols
 
 delpar_LDADD =\
 	$(top_srcdir)/engines_gpl/part/packages/kernel_f/src/libkernel_f.la \
-	$(top_srcdir)/engines_gpl/part/packages/kernel_c/src/libkernel_c.a \
 	$(top_srcdir)/engines_gpl/part/packages/io_f/src/libio_f.la \
 	$(top_srcdir)/engines_gpl/part/packages/utils_f/src/libutils_f.la \
 	$(top_srcdir)/engines_gpl/part/packages/data_f/src/libdata_f.la \

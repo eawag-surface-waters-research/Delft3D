@@ -10,6 +10,9 @@
 include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libutils_f.la
 
+AM_FCFLAGS += $(OPENMP_FCFLAGS)
+AM_FFLAGS += $(OPENMP_FFLAGS)
+
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \

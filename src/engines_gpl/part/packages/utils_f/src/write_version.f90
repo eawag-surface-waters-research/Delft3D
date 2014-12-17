@@ -114,6 +114,28 @@
 !     local scalars
 !
       integer(kind=4) ::   icom,   iend,   il,  ir,   iver,   iwl,   lun
+
+      character*120 idstr
+      character*3   os
+      integer (4)   i, j
+
+      character*75  opkom(13)
+      
+      data   opkom  / &
+        'ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»', &
+        'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº', &
+        'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ   D e l f t 3 D - P A R T   ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº', &
+        'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº', &
+        'ºÛÛ  D-Particle Tracking    Water quality simulation in 2D/3D models  ÛÛº', &
+        'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº', &
+        'º Version xx.xxxx  xx-xx-xxxx                                           º', &
+        'º Deltares, P.O. Box 177, 2600 MH Delft, The Netherlands                º', &
+        'º Sales          : sales@deltaressystems.nl     tel: +31 (0)88 335 8188 º', &
+        'º Support options: support@deltaressystems.nl   tel: +31 (0)88 335 8100 º', &
+        'º Open source website and forum: http://oss.delft3d.nl/                 º', &
+        'º Copyright (c) 1993-2014 Deltares                                      º', &
+        'ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼'/
+      
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
       if ( timon ) call timstrt( "write_version", ithndl )
@@ -123,17 +145,27 @@
 !
       call getfullversionstring_PART(cident)
 !
+      call getenv('OS',os)
+      
       if (lun==0) then
 !        scherm uitvoer
-         write(*  ,'(//13x,a)')   'PART - Particle tracking'
-         write(*  ,'(   6x,a)')   ' Water quality simulation in 2D/3D models      '
-         write(*  ,'(    a//)')   cident(5:)
+         do i = 1 , size(opkom)
+            if ( opkom(i)(3:15) .eq. 'Version xx.xx' ) then
+               write(opkom(i)(3:72),'(a)') cident(5:74)
+            end if
+            if ( os .ne. 'WIN' .and. os .ne. 'Win' .and. os .ne. 'win' ) then
+               do j = 1,len(opkom(i))
+                  if ( ichar(opkom(i)(j:j)) > 127 ) opkom(i)(j:j) = '-'
+               enddo
+            endif
+            write( * , * ) opkom(i)
+         enddo
       else
 !        print uitvoer
          write(lun,'(//13x,a)')   'PART - Particle tracking'
          write(lun,'(   6x,a)')   ' Water quality simulation in 2D/3D models      '
          write(lun,'(    a//)')   cident(5:)
-      endif
+      end if
 !
 !     end of routine
 !

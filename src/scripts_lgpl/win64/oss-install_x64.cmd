@@ -130,12 +130,13 @@ rem ===============
     call :d_hydro
     call :flow2d3d
     call :flow2d3d_openda
-	call :delwaq1
-	call :delwaq1_lib
-	call :delwaq2
-	call :delwaq2_lib
-	call :delwaq2_openda_lib
-	call :waq_plugin_wasteload
+    call :delwaq1
+    call :delwaq1_lib
+    call :delwaq2
+    call :delwaq2_lib
+    call :delwaq2_openda_lib
+    call :waq_plugin_wasteload
+    call :part
     call :wave
     call :plugin_culvert
     call :plugin_delftflow_traform
@@ -415,6 +416,35 @@ rem ================================
 goto :endproc
 
 
+
+
+
+rem ================
+rem === INSTALL PART
+rem ================
+:part
+    echo "installing part . . ."
+
+    set dest="!dest_main!\win64\part\bin"
+
+    call :makeDir !dest!
+
+    call :copyFile engines_gpl\part\bin\x64\release\delpar.exe !dest!
+
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        rem Note the awkward usage of !-characters
+        set localstring="!compiler_dir!libiomp5md.dll"
+        call :copyFile !localstring! !dest!
+    )
+	
+goto :endproc
 rem ================
 rem === INSTALL_WAVE
 rem ================

@@ -397,8 +397,10 @@ contains
 !
 !     local scalars
 !
+      include "omp_lib.h"
+
       integer(ip)         :: ierror  , itime   , lunpr
-      integer(ip)         :: nosubud
+      integer(ip)         :: nosubud , noth
       integer(ip)         :: ilp
       real(sp)            :: dtstep
       logical             :: update
@@ -426,6 +428,10 @@ contains
       lunpr = lun(2)
 
       call report_date_time ( lunpr   )
+      
+      noth = OMP_GET_MAX_THREADS()
+      write ( lunpr  , 2020 ) noth
+      write (    *   , 2030 ) noth
 
 !     rdlgri also calculates tcktot ! Data is put in the partmem module
 
@@ -869,6 +875,9 @@ contains
               '  Stop   time :', i4.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'// )
  1020 format( '  Time ', i4.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.',' Stop time ',     &
                 i4.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.', i11,' part. (of',i11,')')
+
+ 2020 format (/'  Parallel processing with ',i3,' processor(s)'/)
+ 2030 format (/'  Parallel processing with ',i3,' processor(s)'/)
 
       end subroutine delpar
 end module

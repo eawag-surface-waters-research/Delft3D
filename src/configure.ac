@@ -384,8 +384,6 @@ engines_gpl/part/packages/delpar/Makefile
 engines_gpl/part/packages/delpar/src/Makefile
 engines_gpl/part/packages/io_f/Makefile
 engines_gpl/part/packages/io_f/src/Makefile
-engines_gpl/part/packages/kernel_c/Makefile
-engines_gpl/part/packages/kernel_c/src/Makefile
 engines_gpl/part/packages/kernel_f/Makefile
 engines_gpl/part/packages/kernel_f/src/Makefile
 engines_gpl/part/packages/utils_f/Makefile

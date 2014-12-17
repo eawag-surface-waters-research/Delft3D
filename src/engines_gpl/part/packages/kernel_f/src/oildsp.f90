@@ -239,7 +239,7 @@ module oildsp_mod
       real   (rp), pointer     :: totfe     (:,:)        ! cumulative evaporated part, per fraction and particle
       real   (rp), pointer     :: c1         (:)         ! emulsification parameter
       real   (rp), pointer     :: c2         (:)         ! maximum water content c2 [0,1] ( constant nr. 7 )
-      integer(ip), pointer     :: isurf      (:)         ! number of surface particles per fraction at the surface
+      integer(ip)              :: isurf      (nfract)    ! number of surface particles per fraction at the surface
       real   (rp), pointer     :: d180       (:)         ! percentage evaporated at 180degC
       real   (rp), pointer     :: rhotmp     (:)
       real   (rp), pointer     :: rhooil     (:)         !oil density
@@ -358,7 +358,6 @@ module oildsp_mod
          call alloc ( "totfe"       , totfe       , nfract, npmax )
          call alloc ( "c1"          , c1          , nfract )
          call alloc ( "c2"          , c2          , nfract )
-         call alloc ( "isurf"       , isurf       , nfract )
          call alloc ( "d180"        , d180        , nfract )
          call alloc ( "rhotmp"      , rhotmp      , nfract )
          call alloc ( "rhooil"      , rhooil      , nfract )
