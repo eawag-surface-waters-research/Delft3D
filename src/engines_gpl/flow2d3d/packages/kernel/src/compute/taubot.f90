@@ -68,6 +68,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)               , pointer :: fmud
     real(fp)               , pointer :: taubng
     real(fp)               , pointer :: fwfac
+    real(fp)               , pointer :: ftauw
     logical                , pointer :: cstbnd
     logical                , pointer :: chz_k2d
     logical                , pointer :: v2dwbl
@@ -283,6 +284,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     fmud       => gdp%gdmudcoe%fmud
     taubng     => gdp%gdmudcoe%taubng
     fwfac      => gdp%gdnumeco%fwfac
+    ftauw      => gdp%gdnumeco%ftauw
     cstbnd     => gdp%gdnumeco%cstbnd
     v2dwbl     => gdp%gdnumeco%v2dwbl
     chz_k2d    => gdp%gdrivpro%chz_k2d
@@ -578,7 +580,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! magnitude of bottom friction due to waves alone
           ! and due to current alone
           !
-          tauwav = 0.5*rhow*fw*uorbu**2
+          tauwav = 0.5*rhow*fw*ftauw*uorbu**2
           if (kmax>1) then
              !
              ! depth-averaged current for current and waves

@@ -233,6 +233,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     real(fp)                                            :: dx 
     real(fp)                                            :: dy 
     real(fp)                                            :: fwfac 
+    real(fp)                                            :: ftauw 
     real(fp)                                            :: gammax 
     real(fp)                                            :: grdang
     real(fp)                                            :: nudvic
@@ -573,7 +574,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & dgcuni    ,forfuv    ,forfww    ,ktemp     ,temint    , & 
                  & keva      ,evaint    ,old_corio , & 
                  & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , & 
-                 & nudge     ,nudvic    ,v2dwbl    ,gdp       ) 
+                 & nudge     ,nudvic    ,v2dwbl    ,ftauw     ,gdp       ) 
         ! 
         ! Read boundary definition. If specified in a separate file, 
         ! then check if TRIANA file is specified. If so, start tidals, the 

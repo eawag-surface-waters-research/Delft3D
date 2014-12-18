@@ -160,6 +160,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                      , pointer :: drycrt
     real(fp)                      , pointer :: dryflc
     real(fp)                      , pointer :: fwfac
+    real(fp)                      , pointer :: ftauw
     real(fp)                      , pointer :: gammax
     real(fp)                      , pointer :: rmincf
     real(fp)                      , pointer :: thetqh
@@ -420,6 +421,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     drycrt              => gdp%gdnumeco%drycrt
     dryflc              => gdp%gdnumeco%dryflc
     fwfac               => gdp%gdnumeco%fwfac
+    ftauw               => gdp%gdnumeco%ftauw
     gammax              => gdp%gdnumeco%gammax
     rmincf              => gdp%gdnumeco%rmincf
     thetqh              => gdp%gdnumeco%thetqh
@@ -754,7 +756,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
              & forfuv    ,forfww    ,ktemp     ,temint    , &
              & keva      ,evaint    ,old_corio , &
              & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , &
-             & nudge     ,nudvic    ,v2dwbl    ,gdp       )
+             & nudge     ,nudvic    ,v2dwbl    ,ftauw     ,gdp       )
     !
     ! Space varying coriolis field or
     ! calculate for SFERIC = .true. depending on ANGLAT and DY or
@@ -950,6 +952,17 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     if (comparereal(fwfac,1.0_fp) /= 0) then
        write (message, '(a,f8.4)') 'Tuning parameter for wave streaming (fwfac) :', fwfac
+       call prterr(lundia, 'G051', trim(message))
+    endif
+    !
+    ! ftauw limiter on tauwav in taubot.f90
+    !
+    ftauw = max(0.0_fp, ftauw)
+    !
+    ! Echo ftauw when it is not the default value (1.0)
+    !
+    if (comparereal(ftauw,1.0_fp) /= 0) then
+       write (message, '(a,f8.4)') 'Tuning parameter for wave-induced friction (ftauw) :', ftauw
        call prterr(lundia, 'G051', trim(message))
     endif
     !

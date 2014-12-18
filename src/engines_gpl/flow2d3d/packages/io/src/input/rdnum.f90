@@ -4,7 +4,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
                & dgcuni    ,forfuv    ,forfww    ,ktemp     ,temint    , &
                & keva      ,evaint    ,old_corio ,dpsopt    ,dpuopt    , &
                & zmodel    ,gammax    ,fwfac     , &
-               & nudge     ,nudvic    ,v2dwbl    ,gdp       )
+               & nudge     ,nudvic    ,v2dwbl    ,ftauw     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2014.                                
@@ -81,6 +81,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     real(fp)                   :: drycrt    !  Description and declaration in numeco.igs
     real(fp)                   :: dryflc    !  Description and declaration in numeco.igs
     real(fp)                   :: fwfac     !  Description and declaration in numeco.igs
+    real(fp)                   :: ftauw     !  Description and declaration in numeco.igs
     real(fp)                   :: gammax    !  Description and declaration in numeco.igs
     real(fp)                   :: nudvic    !  Description and declaration in numeco.igs
     character(*)               :: mdfrec    !  Standard rec. length in MD-file (300)
@@ -141,6 +142,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     gammax = 1.0_fp
     fwfac  = 1.0_fp
     nudvic = -1.0_fp
+    ftauw  = 1.0_fp
     !
     icreep = 999
     ibaroc = 1
@@ -739,6 +741,10 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     ! See also rdmor
     !
     call prop_get(gdp%mdfile_ptr, '*', 'FWFac' , fwfac)
+    !
+    ! FTauW
+    !
+    call prop_get(gdp%mdfile_ptr, '*', 'FTauW' , ftauw)
     !
     ! Flag to switch on slope limiter to avoid high velocities along steep slopes
     ! (used in cucnp/z_cucnp and uzd/z_uzd)
