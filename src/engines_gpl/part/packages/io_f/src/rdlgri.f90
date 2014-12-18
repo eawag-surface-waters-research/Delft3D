@@ -155,9 +155,17 @@
          enddo
       enddo
       if ( noseglp .eq. nmax2*mmax2 ) then            ! map file on full matrix
-         lgrid3 = lgrid2
-      else
-         lgrid3 = lgrid                              ! map file on condensed noseg volumes
+         do j = 1,mmaxp
+            do i = 1,nmaxp
+               lgrid3 ( i, j ) = lgrid2 ( i, j )
+            enddo
+         enddo
+      else                                            ! map file on condensed noseg volumes
+         do j = 1,mmaxp
+            do i = 1,nmaxp
+               lgrid3 ( i, j ) = lgrid ( i, j )
+            enddo
+         enddo
       endif
       mnmaxk = mnmax2*layt
       nflow  = 2*mnmaxk + (layt-1)*nmaxp*mmaxp
