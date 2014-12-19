@@ -46,16 +46,16 @@
 #if HAVE_CONFIG_H
 #   include "config.h"
 #   define STDCALL  /* nothing */
-#   define DREDGESTARTCOMMUNICATE  FC_FUNC(dredgestartcommunicate,DREDGESTARTCOMMUNICATE)
-#   define DREDGECOMMUNICATE       FC_FUNC(dredgecommunicate,DREDGECOMMUNICATE)
-#   define DREDGENOCOMMUNICATION   FC_FUNC(dredgenocommunication,DREDGENOCOMMUNICATION)
+#   define START_DD_DREDGECOMMUNICATION  FC_FUNC(start_dd_dredgecommunication,START_DD_DREDGECOMMUNICATION)
+#   define DD_DREDGECOMMUNICATE          FC_FUNC(dd_dredgecommunicate,DD_DREDGECOMMUNICATE)
+#   define NO_DD_DREDGECOMMUNICATION     FC_FUNC(no_dd_dredgecommunication,NO_DD_DREDGECOMMUNICATION)
 
 #else
 // WIN32
 #   define STDCALL  /* nothing */
-#   define DREDGESTARTCOMMUNICATE  DREDGESTARTCOMMUNICATE
-#   define DREDGECOMMUNICATE       DREDGECOMMUNICATE
-#   define DREDGENOCOMMUNICATION   DREDGENOCOMMUNICATION
+#   define START_DD_DREDGECOMMUNICATION  START_DD_DREDGECOMMUNICATION
+#   define DD_DREDGECOMMUNICATE          DD_DREDGECOMMUNICATE
+#   define NO_DD_DREDGECOMMUNICATION     NO_DD_DREDGECOMMUNICATION
 #endif
 
 
@@ -85,19 +85,19 @@ DredgeMerge_Function (
 
 extern "C" {
     void STDCALL
-    DREDGESTARTCOMMUNICATE (
+    START_DD_DREDGECOMMUNICATION (
         int     * domainnumber,
         int     * numdomains
         );
 
     void STDCALL
-    DREDGECOMMUNICATE (
+    DD_DREDGECOMMUNICATE (
         REAL_FP * voldred,
         int     * numelements
         );
 
     void STDCALL
-    DREDGENOCOMMUNICATION (
+    NO_DD_DREDGECOMMUNICATION (
         void
         );
     }
