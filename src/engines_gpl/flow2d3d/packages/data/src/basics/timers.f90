@@ -655,7 +655,13 @@ subroutine timers_finish (gdp)
          &       usedcp(timer_total,sumtime)    , usedcp(timer_total,starttime)    , &
          &       usedcp(timer_total,sumtime_cpu), usedcp(timer_total,starttime_cpu)
     write(lundia,'(a)') '|---------------------------------------------|-----------------------|'
-    do i = 5, 11
+    do i = 5, 9
+       write(lundia,111) names(i), &
+            &       usedcp(i,sumtime)    , usedcp(i,starttime)    , &
+            &       usedcp(i,sumtime_cpu), usedcp(i,starttime_cpu)
+    enddo
+    write(lundia,'(a)') '|---------------------------------------------|-----------------------|'
+    do i = 10, 11
        write(lundia,111) names(i), &
             &       usedcp(i,sumtime)    , usedcp(i,starttime)    , &
             &       usedcp(i,sumtime_cpu), usedcp(i,starttime_cpu)
