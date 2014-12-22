@@ -87,7 +87,7 @@
       real     ( sp), allocatable :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
-      
+
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
 
@@ -849,7 +849,7 @@
                   end do
 !     read dispersant polygon file
                   if ( gettoken( fidisp(i), ierr2 ) .ne. 0 ) goto 6010
-!     determine maximum no. of rows for polygons (nrowsmax)                     
+!     determine maximum no. of rows for polygons (nrowsmax)
                   open ( 50, file=fidisp(i), status='old', iostat=ierr2 )
                   if ( ierr2 .ne. 0 ) go to 1700
                   call getdim_dis ( 50, fidisp(i), nrowsmax, lun2 )
@@ -906,7 +906,7 @@
                      end if
                   end do
                   if ( gettoken( fiboom(i), ierr2 ) .ne. 0 ) goto 6010
-!     determine maximum no. of rows for polygones (nrowsmax)                     
+!     determine maximum no. of rows for polygones (nrowsmax)
                   open ( 50, file=fiboom(i), status='old', iostat=ierr2 )
                   if ( ierr2 .ne. 0 ) go to 1701
                   call getdim_dis ( 50, fiboom(i), nrowsmax, lun2 )
@@ -947,7 +947,7 @@
             call alloc ( "nrowsdis", nrowsdis, ndisapp )
             xpoldis = 999.999
             ypoldis = 999.999
-               
+
             do i = 1 , ndisapp
                call polpart(fidisp(i), nrowsmax, xpoltmp, ypoltmp, nrowstmp, lun2)
                xpoldis(1:nrowstmp, i) = xpoltmp(1:nrowstmp)
@@ -963,7 +963,7 @@
             call alloc ( "nrowsboom", nrowsboom, nboomint )
             xpolboom = 999.999
             ypolboom = 999.999
-               
+
             do i = 1 , nboomint
                call polpart(fiboom(i), nrowsmax, xpoltmp, ypoltmp, nrowstmp, lun2)
                xpolboom(1:nrowstmp, i) = xpoltmp(1:nrowstmp)
@@ -1818,7 +1818,7 @@
              /,'  Chezy value                        = ',f12.5,'(m^1/2 s-1) ')
  3132 format(/,'  Total number of sticking substances = ',i3          )
  3133 format(  '     Sticking number for substance ',i3,' = ',i3      )
- 3300 format(/,'  Number of disperdant applications     :',i3 )
+ 3300 format(/,'  Number of dispersant applications     :',i3 )
  3301 format(/,'  Number of boom introductions     :',i3 )
  3310 format(5x,i4,'D-',i2.2,'H-',i2.2,'M-',i2.2,'S.', '  Type: ',i2, &
              ' Fraction: ',a20,' Parameter: ',f10.5,'  Polygon file: ', a)
