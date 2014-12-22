@@ -156,10 +156,10 @@
 
   100 if ( messge .ne. 0 ) then
          if ( isflag .ne. 1 ) then
-              write( lunout, 2000 ) msgtxt(messge), lunin, luntxt,           &
+              write( lunout, 2000 ) msgtxt(messge), lunin, trim(luntxt),     &
                                     itime, itime1
          else
-              write( lunout, 2010 ) msgtxt(messge), lunin, luntxt,           &
+              write( lunout, 2010 ) msgtxt(messge), lunin, trim(luntxt),     &
                                     itime /86400, mod(itime ,86400)/3600 ,   &
                                     mod(itime ,3600)/60, mod(itime ,60)  ,   &
                                     itime1/86400, mod(itime1,86400)/3600 ,   &

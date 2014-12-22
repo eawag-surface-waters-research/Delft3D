@@ -428,8 +428,9 @@ contains
       lunpr = lun(2)
 
       call report_date_time ( lunpr   )
-      
-      noth = OMP_GET_MAX_THREADS()
+
+!AM      noth = OMP_GET_MAX_THREADS()
+      noth = 1
       write ( lunpr  , 2020 ) noth
       write (    *   , 2030 ) noth
 
@@ -807,7 +808,7 @@ contains
                        modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,    &
                        npart    , mpart    , kpart    , nosegp   , noseglp  ,    &
                        rhopart  , rhowatc  , sizep    , const    , rhow     )
-         
+
 
 !         calculate actual decaycoefficient
 
@@ -871,10 +872,10 @@ contains
 
 !     formats
 
- 1010 format( '  Start  time :', i4.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'/          &
-              '  Stop   time :', i4.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'// )
- 1020 format( '  Time ', i4.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.',' Stop time ',     &
-                i4.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.', i11,' part. (of',i11,')')
+ 1010 format( '  Start  time :', i6.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'/          &
+              '  Stop   time :', i6.4 ,'D-', i2.2 ,'H-', i2.2 , 'M-', i2.2 ,'S.'// )
+ 1020 format( '  Time ', i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.',' Stop time ',     &
+                i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.', i11,' part. (of',i11,')')
 
  2020 format (/'  Parallel processing with ',i3,' processor(s)'/)
  2030 format (/'  Parallel processing with ',i3,' processor(s)'/)
