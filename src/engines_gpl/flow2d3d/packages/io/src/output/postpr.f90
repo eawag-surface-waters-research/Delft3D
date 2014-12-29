@@ -145,7 +145,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical                              , pointer :: wind
     logical                              , pointer :: culvert
     logical                              , pointer :: dredge
-    logical                              , pointer :: dadsmonly
     logical                              , pointer :: drogue
     logical                              , pointer :: wave
     logical                              , pointer :: waveol
@@ -495,7 +494,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     wind                => gdp%gdprocs%wind
     culvert             => gdp%gdprocs%culvert
     dredge              => gdp%gdprocs%dredge
-    dadsmonly           => gdp%gdprocs%dadsmonly
     drogue              => gdp%gdprocs%drogue
     wave                => gdp%gdprocs%wave
     waveol              => gdp%gdprocs%waveol
@@ -1004,7 +1002,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                        & r(zwndsp) ,r(zwnddr) ,r(zairp)  ,wind      ,sferic    , &
                        & r(zprecp),r(zevap)  ,gdp       )
           if (error) goto 9999
-          if (dredge .and. .not. dadsmonly) then
+          if (dredge) then
              call wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
                           & lsedtot   ,gdp       )
              if (error) goto 9999

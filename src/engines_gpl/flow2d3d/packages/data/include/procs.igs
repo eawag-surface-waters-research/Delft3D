@@ -34,7 +34,6 @@ type gd_procs
    logical :: const                = .false. !  Constituent(s)
    logical :: culvert              = .false. !  Culvert(s)
    logical :: dredge               = .false. ! Dredge and Dump
-   logical :: dadsmonly            = .false. ! Dredge and Dump; sand mining specified without dredge/dump
    logical :: drogue               = .false. ! Drogue(s)
    logical :: wave                 = .false. ! Waves
    logical :: waveol               = .false. ! Waves computed by Delft3D-WAVES online

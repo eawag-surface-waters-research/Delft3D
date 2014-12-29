@@ -90,7 +90,6 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     logical                          , pointer :: wind 
     logical                          , pointer :: culvert 
     logical                          , pointer :: dredge 
-    logical                          , pointer :: dadsmonly 
     logical                          , pointer :: drogue 
     logical                          , pointer :: zmodel 
     integer(pntrsize)                , pointer :: alfas 
@@ -218,7 +217,6 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     wind        => gdp%gdprocs%wind 
     culvert     => gdp%gdprocs%culvert 
     dredge      => gdp%gdprocs%dredge 
-    dadsmonly   => gdp%gdprocs%dadsmonly 
     drogue      => gdp%gdprocs%drogue 
     zmodel      => gdp%gdprocs%zmodel 
     alfas       => gdp%gdr_i_ch%alfas 
@@ -349,7 +347,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
                        & commrd    ,gdp       ) 
           endif 
           if (error) goto 9999 
-          if (dredge .and. .not. dadsmonly) then 
+          if (dredge) then 
              call wrihisdad(lundia    ,error     ,trifil    , & 
                           & itdate    ,tunit     ,dt        ,lsedtot   , & 
                           & gdp       ) 
