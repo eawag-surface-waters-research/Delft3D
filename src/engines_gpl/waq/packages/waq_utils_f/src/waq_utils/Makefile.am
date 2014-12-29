@@ -58,7 +58,6 @@ libwaq_utils_la_SOURCES = \
        dhisys.f \
        dhkmrk.f \
        dhkmst.f \
-       dhlic.f \
        partition_arrays.f90 \
        dhmmar.f \
        dhmmca.f \

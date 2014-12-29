@@ -230,7 +230,6 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhkmst.f"/>
-		<File RelativePath=".\src\waq_utils\dhlic.f"/>
 		<File RelativePath=".\src\waq_utils\dhltim.f"/>
 		<File RelativePath=".\src\waq_utils\dhmmar.f"/>
 		<File RelativePath=".\src\waq_utils\dhmmca.f"/>

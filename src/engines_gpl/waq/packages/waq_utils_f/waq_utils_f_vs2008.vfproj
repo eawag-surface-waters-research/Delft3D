@@ -222,7 +222,6 @@
 		<File RelativePath=".\src\waq_utils\dhisys.f"/>
 		<File RelativePath=".\src\waq_utils\dhkmrk.f"/>
 		<File RelativePath=".\src\waq_utils\dhkmst.f"/>
-		<File RelativePath=".\src\waq_utils\dhlic.f"/>
 		<File RelativePath=".\src\waq_utils\dhltim.f"/>
 		<File RelativePath=".\src\waq_utils\dhmmar.f"/>
 		<File RelativePath=".\src\waq_utils\dhmmca.f"/>
