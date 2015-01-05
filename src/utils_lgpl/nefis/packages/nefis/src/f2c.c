@@ -749,7 +749,8 @@ DLLEXPORT BInt4 FTN_CALL GET_DAT_HEADER( BInt4 * set          ,
   {
     nefis_errno   = 2004;
     sprintf( error_text,
-      "Gethdt: Supplied character string too small for header");
+      "Gethdt: Supplied character string too small for header: %ld<%ld\n",
+      header_length, LHDRDT);
     return nefis_errno;
   }
 
@@ -786,7 +787,8 @@ DLLEXPORT BInt4 FTN_CALL GET_DEF_HEADER( BInt4 * set          ,
   {
     nefis_errno   = 2007;
       sprintf( error_text,
-        "Gethdf: Supplied character string too small for header");
+        "Gethdf: Supplied character string too small for header %ld<%ld\n",
+        header_length, LHDRDF);
     return nefis_errno;
   }
 
@@ -1040,7 +1042,8 @@ DLLEXPORT BInt4 FTN_CALL GET_STRING_ATTRIBUTE ( BInt4 * fd             ,
     nefis_errcnt += 1;
     nefis_errno   = 2011;
     sprintf( error_text,
-      "Getsat: User supplied attribute string too small");
+      "Getsat: User supplied attribute string too small %ld<%ld\n",
+      at_value_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -1093,7 +1096,7 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_CEL         ( BInt4 * fd              ,
     nefis_errcnt += 1;
     nefis_errno   = 2012;
     sprintf(error_text,
-      "Inqcel: Supplied array too small to contain all element names: \'%s\' %ld>%d\n",
+      "Inqcel: Supplied array too small to contain all element names: \'%s\' %ld<%d\n",
                     cel_name, el_names_length, MAX_NAME);
     return nefis_errno;
   }
@@ -1102,13 +1105,13 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_CEL         ( BInt4 * fd              ,
                                &elm_names,&cel_num_bytes);
   if ( nefis_errno == 0 )
   {
-    if ( cel_num_dim > (BUInt4) *cl_num_dim )
+    if ( (BUInt4) *cl_num_dim < cel_num_dim )
     {
     nefis_errcnt += 1;
       nefis_errno   = 2013;
       sprintf(error_text,
-      "Inqcel: User supplied array too small to contain Cell properties: \'%s\' %ld>%ld \n",
-                    cel_name, cel_num_dim, *cl_num_dim);
+      "Inqcel: User supplied array too small to contain Cell properties: \'%s\' %ld<%ld \n",
+                    cel_name, *cl_num_dim, cel_num_dim);
       return nefis_errno;
     }
 
@@ -1151,7 +1154,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_DATA_GROUP  ( BInt4 * fd               ,
     nefis_errcnt += 1;
     nefis_errno   = 2014;
     sprintf(error_text,
-    "Inqdat: User supplied array to store group definition too small");
+        "Inqdat: User supplied array to store group definition too small: %ld<%ld \n",
+                     gr_defined_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -1226,7 +1230,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_ELEMENT     ( BInt4 * fd             ,   /* I *
     nefis_errcnt += 1;
     nefis_errno   = 2015;
     sprintf(error_text,
-    "Inqelm: User supplied array's to store element definition too small: %s, %ld, %ld, %ld, %ld,%ld\n",el_name, el_name_length, el_type_length, el_quantity_length, el_unity_length, el_desc_length);
+        "Inqelm: User supplied array's to store element definition too small: %s, %ld, %ld<%ld, %ld<%ld, %ld<%ld, %ld<%ld\n",
+        el_name, el_name_length, el_type_length, MAX_TYPE, el_quantity_length, MAX_NAME, el_unity_length, MAX_NAME, el_desc_length, MAX_DESC);
     return nefis_errno;
   }
   if ( el_name_length   > MAX_NAME    )
@@ -1267,8 +1272,9 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_ELEMENT     ( BInt4 * fd             ,   /* I *
       nefis_errcnt += 1;
       nefis_errno   = 2017;
       sprintf(error_text,
-        "Inqelm: User supplied array to contain element names too small");
-      return nefis_errno;
+        "Inqelm: User supplied array to contain element dimensions too small (check value of elmndm): %ld<%ld \n",
+                    *el_num_dim, elm_num_dim);
+        return nefis_errno;
     }
 
     *el_single_bytes = elm_single_bytes;
@@ -1320,7 +1326,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_DAT_GROUP  ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2018;
     sprintf(error_text,
-      "Inqfst: User supplied array to contain names too small");
+      "Inqfst: User supplied array to contain names too small: %ld<%ld, %ld<%ld\n",
+       gr_name_length, MAX_NAME, gr_defined_length, MAX_NAME );
     return nefis_errno;
   }
 
@@ -1417,7 +1424,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_ELEMENT( BInt4 * fd                 ,/* I
     nefis_errcnt += 1;
     nefis_errno   = 2019;
     sprintf(error_text,
-    "Inqelm: User supplied array's to store element definition too small");
+        "Inqelm: User supplied array's to store element definition too small: %ld<%ld, %ld<%ld, %ld<%ld, %ld<%ld, %ld<%ld \n",
+            el_name_length,MAX_NAME, el_type_length, MAX_TYPE, el_quantity_length, MAX_NAME, el_unity_length, MAX_NAME, el_desc_length, MAX_DESC);
     return nefis_errno;
   }
 /*
@@ -1470,7 +1478,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_ELEMENT( BInt4 * fd                 ,/* I
       nefis_errcnt += 1;
       nefis_errno   = 2020;
       sprintf(error_text,
-        "Inqfel: User supplied array to contain element names too small");
+        "Inqfel: User supplied array to contain element names too small: %ld<%ld \n",
+            *el_num_dim, elm_num_dim);
       return nefis_errno;
     }
 
@@ -1554,7 +1563,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_ELEMENT ( BInt4 * fd                 ,/* I
     nefis_errcnt += 1;
     nefis_errno   = 2021;
     sprintf(error_text,
-    "Inqelm: User supplied array's to store element definition too small");
+        "Inqelm: User supplied array's to store element definition too small: %ld<%ld, %ld<%ld, %ld<%ld, %ld<%ld, %ld<%ld \n",
+        el_name_length,MAX_NAME, el_type_length, MAX_TYPE, el_quantity_length, MAX_NAME, el_unity_length, MAX_NAME, el_desc_length, MAX_DESC);
     return nefis_errno;
   }
 /*
@@ -1604,11 +1614,12 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_ELEMENT ( BInt4 * fd                 ,/* I
 
     if ( *el_num_dim < elm_num_dim)
     {
-      nefis_errcnt += 1;
-      nefis_errno   = 2022;
-      sprintf(error_text,
-        "Inqfel: User supplied array to contain element names too small");
-      return nefis_errno;
+        nefis_errcnt += 1;
+        nefis_errno   = 2022;
+        sprintf(error_text,
+            "Inqfel: User supplied array to contain element names too small: %ld<%ld \n",
+            *el_num_dim, elm_num_dim);
+        return nefis_errno;
     }
 
     *el_single_bytes = elm_single_bytes;
@@ -1849,7 +1860,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_DEF_GROUP ( BInt4 * fd             ,/* I 
     nefis_errcnt += 1;
     nefis_errno   = 2027;
     sprintf(error_text,
-      "Inqfgr: User supplied array to contain names too small");
+        "Inqfgr: User supplied array to contain names too small: %ld<%ld, %ld<%ld \n",
+         gr_name_length, MAX_NAME, cl_name_length, MAX_NAME);
     return nefis_errno;
   }
 /*
@@ -1942,7 +1954,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_DEF_GROUP  ( BInt4 * fd             ,/* I 
     nefis_errcnt += 1;
     nefis_errno   = 2029;
     sprintf(error_text,
-      "Inqfgr: User supplied array to contain names too small");
+      "Inqfgr: User supplied array to contain names too small: %ld<%ld, %ld<%ld \n",
+        gr_name_length, MAX_NAME, cl_name_length, MAX_NAME);
     return nefis_errno;
   }
 /*
@@ -2029,7 +2042,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_INTEGER( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2031;
     sprintf(error_text,
-      "Inqfia: User supplied array to contain integer attribute names too small");
+      "Inqfia: User supplied array to contain integer attribute names too small: %ld<%ld\n",
+      at_name_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -2094,7 +2108,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_REAL   ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2032;
     sprintf(error_text,
-      "Inqfra: User supplied array to contain real attribute names too small");
+      "Inqfra: User supplied array to contain real attribute names too small: %ld<%ld\n",
+      at_name_length, MAX_NAME);
     return nefis_errno;
   }
   F_Copy_text (grp_name    , gr_name    , gr_name_length    , MAX_NAME);
@@ -2162,7 +2177,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_FIRST_STRING ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2033;
     sprintf(error_text,
-      "Inqfsa: User supplied array to contain string attribute names too small");
+      "Inqfsa: User supplied array to contain string attribute names too small: %ld<%ld, %ld<%ld\n",
+      at_name_length, MAX_NAME, at_value_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -2253,7 +2269,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_GROUP       ( BInt4 * fd              ,
       nefis_errcnt += 1;
       nefis_errno   = 2035;
       sprintf(error_text,
-        "Inqgrp: User supplied array to contain group dimensions too small");
+        "Inqgrp: User supplied array to contain group dimensions too small: %ld<%ld\n",
+        *gr_num_dim, grp_num_dim);
       return nefis_errno;
     }
     *gr_num_dim = grp_num_dim;
@@ -2329,7 +2346,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_DAT_GROUP   ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2037;
     sprintf(error_text,
-      "Inqnxt: User supplied array to contain names too small");
+        "Inqnxt: User supplied array to contain names too small: %ld<%ld, %ld<%ld\n",
+        gr_name_length, MAX_NAME, gr_defined_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -2389,7 +2407,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_INTEGER ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2038;
     sprintf(error_text,
-      "Inqnia: User supplied array to contain integer attribute names too small");
+        "Inqnia: User supplied array to contain integer attribute names too small: %ld<%ld\n",
+        at_name_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -2445,7 +2464,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_REAL    ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2039;
     sprintf(error_text,
-      "Inqnra: User supplied array to contain real attribute names too small");
+      "Inqnra: User supplied array to contain real attribute names too small: %ld<%ld\n",
+        at_name_length, MAX_NAME);
     return nefis_errno;
   }
 
@@ -2505,7 +2525,8 @@ DLLEXPORT BInt4 FTN_CALL INQUIRE_NEXT_STRING  ( BInt4 * fd            ,
     nefis_errcnt += 1;
     nefis_errno   = 2040;
     sprintf(error_text,
-      "Inqnra: User supplied array to contain string attributes (name/value) too small");
+      "Inqnra: User supplied array to contain string attributes (name/value) too small: %ld<%ld,  %ld<%ld\n",
+        at_name_length, MAX_NAME, at_value_length, MAX_NAME);
     return nefis_errno;
   }
 

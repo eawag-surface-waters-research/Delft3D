@@ -678,7 +678,9 @@ DLLEXPORT BInt4 GET_DAT_HEADER( BInt4 * fd           ,
     nefis_errcnt += 1;
     nefis_errno   = 1004;
     sprintf( error_text,
-      "Gethdt: Supplied character string too small for header");
+      "Gethdt: Supplied character string too small for header: %ld<%ld\n",
+      strlen(header), LHDRDT);
+    return nefis_errno;
   }
 
   if ( nefis_errno == 0 )
@@ -724,8 +726,9 @@ DLLEXPORT BInt4 GET_DEF_HEADER( BInt4 * fd           ,
     nefis_errcnt += 1;
     nefis_errno   = 1007;
     sprintf( error_text,
-      "Gethdf: Supplied character string too small for header");
-  }
+        "Gethdf: Supplied character string too small for header %ld<%ld\n",
+        strlen(header), LHDRDF);
+      return nefis_errno;}
 
   if ( nefis_errno == 0 )
   {
