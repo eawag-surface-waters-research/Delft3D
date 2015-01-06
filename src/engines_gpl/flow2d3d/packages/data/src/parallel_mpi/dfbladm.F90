@@ -120,8 +120,8 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
     integer                              :: nsiz           ! size of present subdomain in y-direction
     integer, dimension(:,:), allocatable :: partition_dims
     logical                              :: ex
-    character(12)                        :: date
-    character(12)                        :: time
+    character(8)                         :: date
+    character(10)                        :: time
     character(300)                       :: message        ! string to pass message
     character(256)                       :: ddbfile
 !
