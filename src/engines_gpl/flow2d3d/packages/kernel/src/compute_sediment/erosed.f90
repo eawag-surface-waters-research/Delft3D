@@ -590,7 +590,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sutot = 0.0_fp
     svtot = 0.0_fp
     !
-    call dfexchg( dps,1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( dps,1, 1, dfprec, nm_pos, gdp)
     !
     do nm = 1, nmmax
        if ((s1(nm) + real(dps(nm),fp))*kfs(nm) > sedthr) then
