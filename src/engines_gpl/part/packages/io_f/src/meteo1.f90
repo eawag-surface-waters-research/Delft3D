@@ -90,9 +90,12 @@ function reaarctim(minp,d,mx,nx,tread,dmiss) result(success)
       success = .false.
       return
    enddo
-   l = index(rec, ')') + 1
-   read(rec(l:),*) tread
-   if (index(rec, 'HRS') .gt. 0 .or. index(rec, 'hrs') .gt. 0) then
+   l = index(rec, ')')
+   if ( l == 0 ) then
+      l = index(rec, '=')
+   endif
+   read(rec(l+1:),*) tread
+   if (index(rec, 'HRS') .gt. 0 .or. index(rec, 'hrs') .gt. 0 .or. index(rec, 'hours') .gt. 0) then
       tread = tread*60d0
    endif
    success = readarcinfoblock(minp,d,mx,nx,dmiss)
@@ -176,9 +179,12 @@ function reacurtim(minp, d, mfirst, mlast, nfirst, nlast, mrow, tread, dmiss) re
       success = .false.
       return
    enddo
-   l = index(rec, ')') + 1
-   read(rec(l:),*) tread
-   if (index(rec, 'HRS') .gt. 0 .or. index(rec, 'hrs') .gt. 0) then
+   l = index(rec, ')')
+   if (l == 0) then
+      l = index(rec, '=')
+   endif
+   read(rec(l:+1),*) tread
+   if (index(rec, 'HRS') .gt. 0 .or. index(rec, 'hrs') .gt. 0 .or. index(rec, 'hours') .gt. 0) then
       tread = tread*60d0
    endif
    success = readcurviblock(minp, d, mfirst, mlast, nfirst, nlast, mrow, dmiss)
@@ -452,38 +458,73 @@ function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0       
     integer        :: l
 !    integer        :: numbersonline
     character(132) :: rec
+    character(30)  :: keyword
+    character(1)   :: dummy
+    integer        :: i
+    integer        :: linecount
 !
 !! executable statements -------------------------------------------------------
 !
-   10 continue
-    read (minp, '(A)', end = 100) rec
-    if (rec(1:1)=='*' .or. rec(2:2)=='*') goto 10
-    read (rec(13:), *, err = 101) mmax
-    read (minp, '(A)', end = 100) rec
-    read (rec(13:), *, err = 102) nmax
-    !
-    read (minp, '(A)', end = 100) rec
-    read (rec(13:), *, err = 103) x0
-    jacornerx = 0
-    if (index(rec, 'corner')/=0) jacornerx = 1
-    !
-    read (minp, '(A)', end = 100) rec
-    read (rec(13:), *, err = 104) y0
-    jacornery = 0
-    if (index(rec, 'corner')/=0) jacornery = 1
-    !
-    read (minp, '(A)', end = 100) rec
-    l = index(rec, 'cellsize') + 8
-    k = numbersonline(rec(l:))
-    if (k==1) then
-       read (rec(13:), *, err = 105) dxa
-       dya = dxa
-       jacornery = jacornerx
-    else
-       read (rec(13:), *, err = 105) dxa, dya
-    endif
-    read (minp, '(A)', end = 100) rec
-    read (rec(13:), *, err = 106) dmiss
+    mmax       = -1
+    nmax       = -1
+    jacornerx  = -1
+    jacornery  = -1
+    dxa        = -1.0
+    dya        = -1.0
+
+    linecount  = 0
+    do
+       read (minp, '(A)', end = 100) rec
+       linecount = linecount + 1
+
+       read( rec, * ) keyword
+       select case ( keyword )
+          case( 'n_cols' )
+             read ( rec, *, err = 101) dummy, dummy, mmax
+          case( 'n_rows' )
+             read ( rec, *, err = 101) dummy, dummy, nmax
+          case( 'x_llcenter' )
+             read ( rec, *, err = 101) dummy, dummy, x0
+             jacornerx = 0
+          case( 'y_llcenter' )
+             read ( rec, *, err = 101) dummy, dummy, y0
+             jacornery = 0
+          case( 'x_llcorner' )
+             read ( rec, *, err = 101) dummy, dummy, x0
+             jacornerx = 1
+          case( 'y_llcorner' )
+             read ( rec, *, err = 101) dummy, dummy, y0
+             jacornery = 1
+          case( 'dx' )
+             read ( rec, *, err = 101) dummy, dummy, dxa
+          case( 'dy' )
+             read ( rec, *, err = 101) dummy, dummy, dya
+          case( 'cellsize' )
+             k = numbersonline(rec)
+             if ( k == 2 ) then
+                read (rec, *, err = 101) dummy, dxa
+                dya = dxa
+                jacornery = jacornerx
+             else
+                read (rec, *, err = 101) dummy, dxa, dya
+             endif
+          case( 'NODATA_value' )
+             read (rec, *, err = 101) dummy, dummy, dmiss
+          case( 'missing' )
+             read (rec, *, err = 101) dummy, dmiss
+          case( 'TIME' )
+             linecount = linecount - 1
+             exit ! We found the start of a data block
+          case default
+             if ( index(rec,"END OF HEADER") > 0 ) then
+                 exit ! End of the header lines
+             endif
+             if ( rec(1:1)=='*' .or. rec(2:2)=='*' .or. rec(1:1)=='#' .or. rec(2:2)=='#' ) then
+                cycle
+             endif
+             ! Ignore any other keyword
+       end select
+    enddo
     !
     ! Data in an arcinfo grid file is always defined in the cell centres.
     ! Data is assumed to be given at the points x0+i*dx,y0+j*dy
@@ -494,6 +535,20 @@ function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0       
     if (jacornerx .eq. 1) x0 = x0 + dxa/2
     if (jacornery .eq. 1) y0 = y0 + dya/2
     !
+    ! Reposition the file
+    !
+    rewind(minp)
+    do i = 1,linecount
+       read(minp, '(a)' ) dummy
+    enddo
+
+    !
+    ! Check if all relevant data were present
+    !
+    if ( mmax < 0 .or. nmax < 0 .or. jacornerx < 0 .or. jacornery < 0 .or. dxa < 0.0 .or. dya < 0.0 ) then
+        goto 102
+    endif
+
     success = .true.
     return
     !
@@ -503,22 +558,10 @@ function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0       
    errormessage = 'Unexpected end of file while reading header of arcinfo wind file'
    goto 999
   101 continue
-   write(errormessage,'(2a)') 'Looking for ncols (arc-info), but getting',trim(rec)
+   write(errormessage,'(2a)') 'Reading data for keyword '//trim(keyword) //' failed - record:',trim(rec)
    goto 999
   102 continue
-   write(errormessage,'(2a)') 'Looking for nrows (arc-info), but getting',trim(rec)
-   goto 999
-  103 continue
-   write(errormessage,'(2a)') 'Looking for xll (arc-info), but getting',trim(rec)
-   goto 999
-  104 continue
-   write(errormessage,'(2a)') 'Looking for yll (arc-info), but getting',trim(rec)
-   goto 999
-  105 continue
-   write(errormessage,'(2a)') 'Looking for cellsize (dx, dy) (arc-info), but getting',trim(rec)
-   goto 999
-  106 continue
-   write(errormessage,'(2a)') 'Looking for missing value (arc-info), but getting',trim(rec)
+   write(errormessage,'(2a)') 'Header does not contain all relevant information'
    goto 999
   999 continue
    success = .false.
