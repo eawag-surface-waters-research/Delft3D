@@ -4641,7 +4641,7 @@ subroutine HiaWriteFile(plt)
             enddo    
             write(lun, *)                                 ! empty line
 
-            ! write long parameters (not for WQMap file)
+            ! write long locations (not for WQMap file)
             if ( .not. plt % ds % outStream % streamType == Dio_WQMap_stream ) then
                 call DioIniWritegroupLine(lun, LongLocGroup) 
                 do i = 1, nLongLocs
