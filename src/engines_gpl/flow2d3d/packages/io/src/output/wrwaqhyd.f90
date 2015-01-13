@@ -100,7 +100,11 @@
       filstring = trim(filnam)//'hyd'
       open  ( lunout , file=trim(filstring) )
       write ( lunout , '(A      )' ) 'task      full-coupling'
-      write ( lunout , '(A      )' ) 'geometry  curvilinear-grid'
+      if (zmodel) then
+         write ( lunout , '(A      )' ) 'geometry  curvilinear-grid  z-layers'
+      else
+         write ( lunout , '(A      )' ) 'geometry  curvilinear-grid'
+      end if
       if ( aggre .lt. 0 )                                                &
      &   write ( lunout , '(A,A    )' ) 'horizontal-aggregation       ','no'
       if ( aggre .eq. 0 )                                                &
