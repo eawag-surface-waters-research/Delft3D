@@ -135,7 +135,7 @@ subroutine SyncRtcFlow_Init(n2steps, error, flagFLOWtoRTC, idate, rdt)
     rdt     = transfer(SignalRValues(1,3:4),rdt)
     commFLOWtoRTC = btest(SignalRValues(1,5),0)
     commRTCtoFLOW = btest(SignalRValues(1,5),1)
-    if (commFLOWtoRTC /= flagFLOWtoRTC) then
+    if (commFLOWtoRTC .neqv. flagFLOWtoRTC) then
        n2steps = -3
     endif
   else
