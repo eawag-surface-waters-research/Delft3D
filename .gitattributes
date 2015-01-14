@@ -4251,6 +4251,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/d3d_qp.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/default.fig -text
 src/tools_lgpl/matlab/quickplot/progsrc/degstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/delwaq.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/delwaq2raster.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/dimprint.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/drawgrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/dxf.m -text
