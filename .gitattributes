@@ -4138,6 +4138,7 @@ src/tools_lgpl/matlab/quickplot/fstrrep.m -text
 src/tools_lgpl/matlab/quickplot/make_all.m -text
 src/tools_lgpl/matlab/quickplot/make_colormaps.m -text
 src/tools_lgpl/matlab/quickplot/make_d3dmatlab.m -text
+src/tools_lgpl/matlab/quickplot/make_delwaq2raster.m -text
 src/tools_lgpl/matlab/quickplot/make_ecoplot.m -text
 src/tools_lgpl/matlab/quickplot/make_quickplot.m -text
 src/tools_lgpl/matlab/quickplot/matlabversionnumber.m -text
