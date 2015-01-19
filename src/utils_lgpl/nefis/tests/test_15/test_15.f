@@ -42,6 +42,7 @@
      *        Defcel,
      *        Defelm,
      *        Defgrp,
+     *        getnfv,
      *        Crenef,
      *        Putelt,
      *        Neferr
@@ -64,6 +65,12 @@
       integer      grpdms(5), grpord(5)
 
       CHARACTER*1024 errstr
+      CHARACTER*255  version
+
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
 c
 c Test to check cells with different element types
 c (cell according dwqtim on comm. file)

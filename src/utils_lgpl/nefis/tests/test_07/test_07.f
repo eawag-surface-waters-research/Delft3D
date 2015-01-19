@@ -30,6 +30,7 @@
       INTEGER*4 fds
       INTEGER clsdat,
      *        clsdef,
+     *        getnfv,
      *        getiat,
      *        getrat
       INTEGER getsat,
@@ -43,6 +44,12 @@
       CHARACTER attrib*16, attval*16, coding*1
       REAL    rval
       CHARACTER ERRSTR*1024
+      CHARACTER*255  version
+
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
 
       coding = ' '
       error= Opndef( fds, 'nefis_ex.def', coding)

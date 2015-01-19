@@ -38,9 +38,16 @@ C tegelijk open kunnen zijn.
      *          fds_c
       INTEGER clsdat,
      *        clsdef,
+     *        getnfv,
      *        NEFERR
       INTEGER error
       CHARACTER ERRSTR*1024
+      CHARACTER*255  version
+
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
 
       CALL WriteFile( 'data_c12a', fds_a, 33 )
       CALL WriteFile( 'data_c12b', fds_b, 39 )

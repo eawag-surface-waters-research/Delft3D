@@ -48,6 +48,7 @@ c
      *        defelm,
      *        defcel,
      *        defgrp,
+     *        getnfv,
      *        getelt
       INTEGER crenef,
      *        putelt,
@@ -65,6 +66,12 @@ c
       character*16 dat_name, def_name
       REAL  cpu1, cpu2
       real  elap_r, elap_w
+      CHARACTER*255  version
+
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
 
       elap_w=0
       elap_r=0

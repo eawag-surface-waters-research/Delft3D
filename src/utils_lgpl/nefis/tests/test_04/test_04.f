@@ -35,6 +35,7 @@
      *        Defcel,
      *        Defelm,
      *        Defgrp,
+     *        Getnfv,
      *        Opndat,
      *        Opndef,
      *        Putelt,
@@ -51,6 +52,7 @@
      *        cpu2
       CHARACTER coding*1
       CHARACTER*1024 errstr
+      CHARACTER*255  version
 c
       cpu1   = 0.0
       cpu2   = 0.0
@@ -60,6 +62,11 @@ c
       start  = 1
 c
       call clock(cpu1)
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
+      
       error= Opndef( fds, 'nefis_ex.def', coding)
       if (error .ne. 0) goto 9999
 c

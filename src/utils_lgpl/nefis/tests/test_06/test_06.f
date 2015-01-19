@@ -36,6 +36,7 @@
      *        defcel,
      *        defgrp,
      *        getelt,
+     *        getnfv,
      *        neferr
       INTEGER opndat,
      *        opndef,
@@ -50,6 +51,12 @@
       CHARACTER names(2)*14, coding*1
       CHARACTER ERRSTR*1024
       REAL  cpu1, cpu2, elap_w, elap_r
+      CHARACTER*255  version
+c
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
 
       call clock(cpu1)
       coding=' '

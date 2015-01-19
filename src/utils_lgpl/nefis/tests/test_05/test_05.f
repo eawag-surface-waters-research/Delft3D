@@ -37,6 +37,7 @@
      *        defgrp,
      *        flsdat,
      *        flsdef,
+     *        getnfv,
      *        getelt
       INTEGER neferr,
      *        opndat,
@@ -51,7 +52,13 @@
       REAL buffer(748)
       CHARACTER names(3)*14, coding*1
       CHARACTER ERRSTR*1024
+      CHARACTER*255  version
 c
+      error = getnfv(version)
+      write(*,*)
+      write(*,*) trim(version(5:))
+      write(*,*)
+
       coding=' '
       error= Opndef( fds, 'nefis_ex.def', coding)
       IF (ERROR.NE.0) ERROR = NEFERR( 1, ERRSTR)
