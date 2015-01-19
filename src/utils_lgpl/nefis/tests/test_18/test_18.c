@@ -57,7 +57,7 @@ int main()
   BText   elm_desc    ;
   BInt4 * elm_dimens  ;
   BText   elm_name    ;
-  BChar   elm_names[MAX_CEL_DIM][MAX_NAME+1];
+  BText * elm_names   ;
   BInt4   elm_num_dim =-1 ;
   BText   elm_quantity;
   BInt4   elm_single_byte;
@@ -85,6 +85,13 @@ int main()
   BInt4 * usr_order   ;
   BRea4 * zeta ;
   BRea4 * zetaa;
+  BText nef_version;
+
+  error = Getnfv(&nef_version);
+
+  printf(" -----------------------------------------------\n");
+  printf(" Version: %s\n", nef_version+4);
+  printf(" -----------------------------------------------\n");
 
   getal        = (BInt4 * ) malloc( sizeof( BInt4   ) * 24 );
   getallen     = (BInt4 * ) malloc( sizeof( BInt4   ) * 24 );
@@ -105,6 +112,11 @@ int main()
   grp_dimens   = (BInt4 *) malloc( sizeof(BInt4 ) * MAX_DIM  );
   grp_order    = (BInt4 *) malloc( sizeof(BInt4 ) * MAX_DIM  );
   usr_order    = (BInt4 *) malloc( sizeof(BInt4 ) * MAX_DIM  );
+
+  elm_names    = (char **) malloc( sizeof( char *) * MAX_CEL_DIM);
+  for (i=0; i<MAX_NAME+1; i++) {
+	  elm_names[i] = (char *) malloc( sizeof(char) * (MAX_NAME +1));
+  }
 
   rdwr = 'C';
   coding = 'B';  /* Big    endian */
@@ -209,7 +221,7 @@ int main()
   strcpy( elm_names[0],"aa"  );
   if (error == 0 ) {
     printf(" Define first cel     \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   cel_num_dim = 2;
@@ -219,7 +231,7 @@ int main()
 
   if (error == 0 ) {
     printf(" Define next cel      \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   cel_num_dim = 1;
@@ -228,7 +240,7 @@ int main()
 
   if (error == 0 ) {
     printf(" Define next cel      \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   cel_num_dim = 1;
@@ -237,7 +249,7 @@ int main()
 
   if (error == 0 ) {
     printf(" Define next cel      \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
 /*-------------------------------------------------------------------------*/
@@ -765,6 +777,7 @@ int main()
   free( (BData) grp_dimens  );
   free( (BData) grp_order   );
   free( (BData) usr_order   );
+  free( (BData) nef_version );
 
   printf("\nEnd program\n\n");
 

@@ -40,11 +40,17 @@ int main()
   BChar rdwr    ;
   BText dat_file;
   BText def_file;
-  BInt4  error = 0;
-  BInt4  fd_nefis;
+  BInt4 error = 0;
+  BInt4 fd_nefis;
+  BText nef_version;
+
+  error = Getnfv(&nef_version);
 
   dat_file = (BText) malloc ( sizeof(BChar) * (20+1) );
   def_file = (BText) malloc ( sizeof(BChar) * (20+1) );
+
+  printf(" -----------------------------------------------\n");
+  printf(" Version: %s\n", nef_version+4);
 
   printf(" -----------------------------------------------\n");
   printf(" Test open/close some files w.r.t read and write\n");
@@ -228,6 +234,7 @@ int main()
 
   free ( (BData) dat_file );
   free ( (BData) def_file );
+  free ( (BData) nef_version );
 
   printf("\nEnd program\n\n");
 

@@ -53,7 +53,7 @@ int main(){
   BText   elm_desc    ;
   BInt4 * elm_dimens  ;
   BText   elm_name    ;
-  BChar   elm_names[MAX_CEL_DIM][MAX_NAME+1];
+  BText * elm_names;
   BInt4   elm_num_dim = -1;
   BText   elm_quantity;
   BInt4   elm_single_bytes;
@@ -71,6 +71,9 @@ int main(){
   BInt4   i               ;
   BInt4   j               ;
   BChar   rdwr            ;
+  BText   nef_version     ;
+
+  error = Getnfv(&nef_version);
 
   elm_name     = (BText   ) malloc( sizeof(BChar) * (MAX_NAME + 1) );
   elm_type     = (BText   ) malloc( sizeof(BChar) * (MAX_TYPE + 1) );
@@ -85,6 +88,14 @@ int main(){
   elm_dimens   = (BInt4  *) malloc( sizeof(BInt4) *  MAX_DIM  );
   grp_dimens   = (BInt4  *) malloc( sizeof(BInt4) *  MAX_DIM  );
   grp_order    = (BInt4  *) malloc( sizeof(BInt4) *  MAX_DIM  );
+
+  elm_names    = (char **) malloc( sizeof( char *) * MAX_CEL_DIM);
+  for (i=0; i<MAX_NAME+1; i++) {
+	  elm_names[i] = (char *) malloc( sizeof(char) * (MAX_NAME +1));
+  }
+  
+  printf(" -----------------------------------------------\n");
+  printf(" Version: %s\n", nef_version+4);
 
   printf(" -----------------------------------------------\n");
   printf(" Test: initialisation of nefis files            \n");
@@ -234,7 +245,7 @@ int main(){
   strcpy( elm_names[0],"aa");
   if (error == 0) {
     printf("\n Define first cel                    \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   strcpy( cel_name    ,"cel2");;
@@ -244,7 +255,7 @@ int main(){
 
   if (error == 0) {
     printf("\n Define next cel (2)                 \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   strcpy( cel_name    ,"cel3");
@@ -253,7 +264,7 @@ int main(){
 
   if (error == 0) {
     printf("\n Define next cel (3)                 \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   strcpy( cel_name    ,"cel4");
@@ -262,7 +273,7 @@ int main(){
 
   if (error == 0) {
     printf("\n Define next cel (4)                 \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   strcpy( cel_name    ,"cel5");;
@@ -274,7 +285,7 @@ int main(){
 
   if (error == 0) {
     printf("\n Define next cel (5)                 \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   strcpy( cel_name    ,"aaaabbbb");
@@ -284,7 +295,7 @@ int main(){
 
   if (error == 0) {
     printf("\n Define next cel (6)                 \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
   strcpy( cel_name    ,"bbbbaaaa");
@@ -294,7 +305,7 @@ int main(){
 
   if (error == 0) {
     printf("\n Define next cel (7)                 \n");
-    error  = Defcel( &fd_nefis, cel_name, cel_num_dim , elm_names);
+    error  = Defcel2( &fd_nefis, cel_name, cel_num_dim , elm_names);
   }
 
 /*-------------------------------------------------------------------------*/
@@ -509,9 +520,9 @@ int main(){
   printf("\n");
   cel_num_dim = 100;
   if (error == 0) {
-    error  = Inqfcl( &fd_nefis       ,  cel_name    ,
+    error  = Inqfcl2( &fd_nefis       ,  cel_name    ,
                      &cel_num_dim    , &cel_num_bytes,
-                      elm_names      );
+                     &elm_names      );
       printf(" 1 Cell    name   : <%s> %d %d \n",
              cel_name, cel_num_dim, cel_num_bytes);
     for ( i=0; i<cel_num_dim; i++ )
@@ -524,9 +535,9 @@ int main(){
   {
     i++;
     cel_num_dim = 100;
-    error  = Inqncl( &fd_nefis       ,  cel_name    ,
+    error  = Inqncl2( &fd_nefis       ,  cel_name    ,
                      &cel_num_dim    , &cel_num_bytes,
-                      elm_names      );
+                     &elm_names      );
     if (error == 0)
     {
       printf(" %d Cell    name   : <%s> %d %d \n",
@@ -599,6 +610,7 @@ int main(){
   free( (BData) elm_dimens  );
   free( (BData) grp_dimens  );
   free( (BData) grp_order   );
+  free( (BData) nef_version );
 
   printf("\nEnd program\n\n");
 

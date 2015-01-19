@@ -155,7 +155,7 @@ retrieve * free_retrieve_ptrs( retrieve * p )
     {
         p->right = free_retrieve_ptrs( p->right );
     }
-    free(p);
+    free((BData)p);
     p = NULL;
 
     return p;

@@ -51,7 +51,14 @@ int main(){
   BInt4   usr_index [5][3];
   BInt4   usr_order [5];
   BText   result;
+  BText   nef_version;
 
+  error = Getnfv(&nef_version);
+
+  printf(" -----------------------------------------------\n");
+  printf(" Version: %s\n", nef_version+4);
+  printf(" -----------------------------------------------\n");
+  
   elm_name     = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
   grp_name     = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
 
@@ -224,7 +231,8 @@ int main(){
   free(elm_name); elm_name=NULL;
   free(grp_name); grp_name=NULL;
   free(result  ); result=NULL;
-
+  free((BData) nef_version);nef_version=NULL;
+  
   printf("\nEnd program\n\n");
 
   return 0;
