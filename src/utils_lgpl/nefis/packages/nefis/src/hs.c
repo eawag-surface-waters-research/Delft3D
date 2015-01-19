@@ -46,7 +46,6 @@
 #include <limits.h>
 
 #if defined(WIN64) || defined(GNU_PC)
-#  include <wtypes.h>
 #  include <io.h>
 #elif defined(salford32)
 #  include <io.h>

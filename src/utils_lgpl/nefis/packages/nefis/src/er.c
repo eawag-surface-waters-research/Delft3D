@@ -47,7 +47,6 @@
 
 #if defined(WIN32) || defined(WIN64) || defined(GNU_PC)
 #  include <io.h>
-#  include <wtypes.h>
 #elif defined(salford32)
 #  include <io.h>
 #  include <windows.h>

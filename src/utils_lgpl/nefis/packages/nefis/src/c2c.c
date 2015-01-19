@@ -58,7 +58,6 @@
 
 #if defined(WIN32) || defined(WIN64)
 #  include <io.h>
-#  include <wtypes.h>
 #  include <sys\stat.h>
 #  define strdup _strdup
 #elif defined(salford32)

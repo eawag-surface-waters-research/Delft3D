@@ -51,7 +51,6 @@
 
 #if defined(WIN32) || defined(WIN64) || defined(salford32)
 #  include <io.h>
-#  include <wtypes.h>
 #  include <sys\stat.h>
 #elif defined(HAVE_CONFIG_H)
 #  include <sys/types.h>
@@ -156,7 +155,10 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
   }
 
   /* Make sure we can read/write LONG_MAX bytes at once */
-  assert( ULONG_MAX == (size_t)ULONG_MAX );
+  if (ULONG_MAX != (size_t)ULONG_MAX) {
+      fprintf(stderr, "Incompatible ULONG_MAX:\n\tSize : %d /= %d\n", sizeof(ULONG_MAX), sizeof((size_t)ULONG_MAX));
+      exit(1);
+  }
 
 #if !defined(WIN32)
     assert( sizeof( off_t ) >= sizeof( long ) );
