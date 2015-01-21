@@ -1,7 +1,7 @@
 /*
  *  samples.h -  ODS function prototypes for samples files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Arjen Markus
  */

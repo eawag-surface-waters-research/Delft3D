@@ -3,7 +3,7 @@
  *
  *  Note: extra macro, USE_STDCALL, to control use of __stdcall
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Marc Kool
  */

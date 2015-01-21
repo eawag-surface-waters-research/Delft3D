@@ -1,7 +1,7 @@
 /*
  *  dlwnef.c  -  ODS: DELWAQ/DELPAR NEFIS files (functions)
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Derived from code by Eric Verschuur
  *  Arjen Markus
@@ -12,7 +12,7 @@
 /*   Program:    ODS2NEF.C                                            */
 /*   Version:    1.00                                                 */
 /*   Programmer: Eric Verschuur                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   Project:    Open Data Structuur                                  */
 /*   Module:                                                          */

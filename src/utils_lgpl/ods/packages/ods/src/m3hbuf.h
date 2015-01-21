@@ -1,7 +1,7 @@
 /*
  *  m3hbuf.h  -  ODS function prototypes for TRISULA NEFIS files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Pleun Koole
  */

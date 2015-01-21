@@ -1,7 +1,7 @@
 /*
  *  dbasewse.c  -  ODS functions for Dbase WISE format files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Bart Adriaanse
  */
@@ -20,7 +20,7 @@
 /*   Program:    LOKETJES.C                                           */
 /*   Version:    1.03                                                 */
 /*   Programmer: Andr  Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   1.02 -- 6 Dec 1993 -- 13:00 -- Operating System: DOS            */
 /*   0.00 -- 21 Jun 1993 -- 11:19 -- Operating System: DOS            */

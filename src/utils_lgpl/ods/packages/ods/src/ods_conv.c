@@ -2,7 +2,7 @@
  *  ods_conv.c -  Routines for converting data in ODS (especially for
  *                the generic NEFIS files)
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Arjen Markus
  */

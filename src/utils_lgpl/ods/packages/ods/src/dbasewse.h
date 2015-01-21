@@ -1,7 +1,7 @@
 /*
  *  dbasewse.h  -  ODS function prototypes for DBase (WISE format) files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Bart Adriaanse
  */

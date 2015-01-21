@@ -1,7 +1,7 @@
 /*
  *  opnclose.h  -  ODS file open and close function prototypes
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Eric Verschuur
  */

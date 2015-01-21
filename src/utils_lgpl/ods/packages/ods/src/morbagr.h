@@ -1,7 +1,7 @@
 /*
  *  morbagr.h  -  ODS: MORSYS "bagger" files (prototypes)
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Derived from code by Cor ten Napel (mor_sys.f)
  *  Arjen Markus

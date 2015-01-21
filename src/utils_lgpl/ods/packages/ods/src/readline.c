@@ -2,7 +2,7 @@
 
    Routine(s) to facilitate reading text files
 
-   Copyright (C)  Stichting Deltares, 2011-2014.
+   Copyright (C)  Stichting Deltares, 2011-2015.
 
    Arjen Markus
 */

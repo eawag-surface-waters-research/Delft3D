@@ -2,7 +2,7 @@
 /*
  *  odserr.c -  ODS routine to return error text
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Arjen Markus
  */

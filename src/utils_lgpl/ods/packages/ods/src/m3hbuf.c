@@ -2,7 +2,7 @@
  *   m3hbuf.c  - allocate buffer for ODS_TRISULA_HIS_NEFIS_hismat
  *                           and for ODS_TRISULA_MAP_NEFIS_mapmat
  *
- *   Copyright (C)  Stichting Deltares, 2011-2014.
+ *   Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Eric Verschuur
  */

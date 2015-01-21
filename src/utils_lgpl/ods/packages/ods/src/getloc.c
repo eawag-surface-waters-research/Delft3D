@@ -1,7 +1,7 @@
 /*
  *  getloc.c  -  ODS Get list of locations from file
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Marc Kool
  */
@@ -18,7 +18,7 @@
 /*   Program:    GETLOC.C                                             */
 /*   Version:    1.03                                                 */
 /*   Programmer: Andre Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   1.02 -- 6 Dec 1993 -- 13:00 -- Operating System: DOS             */
 /*   1.01 -- 5 Aug 1993 -- 16:31 -- Operating System: DOS             */

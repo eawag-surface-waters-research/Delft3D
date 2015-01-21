@@ -1,6 +1,6 @@
 /*  ods_gnf.h - Define the data structures for the generic NEFIS routines
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Arjen Markus
  */

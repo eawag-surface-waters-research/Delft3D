@@ -1,7 +1,7 @@
 /*
  *  odsmodel.h  -  ODS low level function prototypes
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Eric Verschuur
  */

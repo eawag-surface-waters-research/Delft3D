@@ -3,7 +3,7 @@
 /*   Program:    GX_DB3.C                                             */
 /*   Version:    1.02                                                 */
 /*   Programmer: Andr‚ Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   1.01 -- 7 Jul 1993 -- 13:52 -- Operating System: DOS             */
 /*   1.00 -- 7 Jul 1993 -- 13:48 -- Operating System: DOS             */

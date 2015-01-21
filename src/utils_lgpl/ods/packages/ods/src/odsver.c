@@ -1,7 +1,7 @@
 /*
  *  odsver.c  -  return ODS library version number
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Bart Adriaanse
  */

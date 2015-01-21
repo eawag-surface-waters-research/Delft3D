@@ -3,7 +3,7 @@
  *
  *  Note: extra macro, USE_STDCALL, to control use of __stdcall
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Marc Kool
  */
@@ -127,7 +127,7 @@
 /*   Program:    odstypes.h                                           */
 /*   Version:    1.01                                                 */
 /*   Programmer: Andre Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2012.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   1.00 -- 4 Aug 1993 -- 07:44 -- Operating System: DOS              */
 /*   Project:    Open Data Structuur                                  */
@@ -331,7 +331,7 @@
 /*   Program:    odserr.h                                             */
 /*   Version:    1.00                                                 */
 /*   Programmer: Andre Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2012.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   0.0 -- 4 Aug 1993 -- 07:44 -- Operating System: DOS              */
 /*   Project:    Open Data Structuur                                  */

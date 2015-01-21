@@ -1,7 +1,7 @@
 /*
  *  shyfem.c  -  ODS functions for SHYFEM grid files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Arjen Markus
  */
@@ -20,7 +20,7 @@
 /*   Program:    SHYFEM.C                                             */
 /*   Version:    1.00                                                 */
 /*   Programmer: Arjen Markus                                         */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   Project:     Open Data Structuur                                 */
 /*   Module:      GetParameter/GetDimensions                          */

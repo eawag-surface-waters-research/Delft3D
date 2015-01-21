@@ -1,7 +1,7 @@
 /*
  *  tridro.c  -  ODS: TRISULA drogues files (functions)
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Derived from code by Eric Verschuur
  *  Arjen Markus

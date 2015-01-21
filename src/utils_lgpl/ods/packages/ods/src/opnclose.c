@@ -1,7 +1,7 @@
 /*
  *  opnclose.c  -  ODS functions for opening and closing files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Eric Verschuur
  */
@@ -11,7 +11,7 @@
 /*   Program:    OPNCLOSE.C                                           */
 /*   Version:    1.02                                                 */
 /*   Programmer: Eric Verschuur                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   1.01 -- 24 Jan 1996 -- 09:13 -- Operating System: DOS            */
 /*   1.00 -- 29 Juni 1994 -- 15:55 -- Operating System: DOS           */

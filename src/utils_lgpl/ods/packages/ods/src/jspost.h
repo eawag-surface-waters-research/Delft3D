@@ -1,7 +1,7 @@
 /*
  *  jspost.h  -  ODS function prototypes for JSPOST files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Peter van den Bosch
  */

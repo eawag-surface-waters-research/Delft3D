@@ -4,7 +4,7 @@
  *
  *  copied from getdim.c AAM
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Arjen Markus
  */
@@ -15,7 +15,7 @@
 /*   Program:    GETGRD.C                                             */
 /*   Version:    1.00                                                 */
 /*   Programmer: Arjen Markus s                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   Project:    Open Data Structuur                                  */
 /*   Module:     GetGrid                                              */

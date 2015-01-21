@@ -2,7 +2,7 @@
  *  ods_spcf.c -  Routines that are more or less specific to particular
  *                file types
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Arjen Markus
  */

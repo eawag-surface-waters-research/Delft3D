@@ -1,7 +1,7 @@
 /*
  *  equal.c  -  ODS prototype for equal.c
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Bart Adriaanse
  */

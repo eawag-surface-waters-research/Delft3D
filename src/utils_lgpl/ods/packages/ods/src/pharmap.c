@@ -1,7 +1,7 @@
 /*
  *  pharmap.c -  ODS functions for PHAROS nefis files (map functions)
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Peter van den Bosch
  */
@@ -24,7 +24,7 @@
 /*   Program:    PHARMAP.C                                            */
 /*   Version:    1.00                                                 */
 /*   Programmer: Peter van den Bosch                                  */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   Project:     PHAROS koppeling GPP                                */
 /*   Module:      GetParameter/GetDimensions                          */

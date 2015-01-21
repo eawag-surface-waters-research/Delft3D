@@ -1,7 +1,7 @@
 /*
  *  ods2nef.h  -  ODS to NEFIS interface function prototypes
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Eric Verschuur
  */

@@ -1,7 +1,7 @@
 /*
  *  morbagr.c  -  ODS: MORSYS "bagger" files (functions)
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Derived from code by Cor ten Napel (mor_sys.f)
  *  Arjen Markus
@@ -12,7 +12,7 @@
 /*   Program:    morbagr.c                                            */
 /*   Version:    1.00                                                 */
 /*   Programmer: Arjen Markus                                         */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   Project:    Open Data Structuur                                  */
 /*   Module:                                                          */

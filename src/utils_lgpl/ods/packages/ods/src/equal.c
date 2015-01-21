@@ -1,7 +1,7 @@
 /*
  *  equal.c  -  ODS string comparison supporting wildcards
  *
- *  Copyright (C)  Stichting Deltares, 2011-2014.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *  Marc Kool
  */
@@ -18,7 +18,7 @@
 /*   Program:    strequal.c                                           */
 /*   Version:    1.00                                                 */
 /*   Programmer: Andr‚ Hendriks                                       */
-/*   Copyright (C)  Stichting Deltares, 2011-2014.                    */
+/*   Copyright (C)  Stichting Deltares, 2011-2015.                    */
 /*   Previous version(s):                                             */
 /*   0.00 -- 11 Jul 1993 -- 14:07 -- Operating System: DOS            */
 /*   Project:    Open Data Structuur                                  */

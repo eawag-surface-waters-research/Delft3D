@@ -2,7 +2,7 @@
  *  dlwbin.h  -  ODS function prototypes for DELWAQ/DELPAR MAP/HIS files
  *               and GRID files
  *
- *  Copyright (C)  Stichting Deltares, 2011-2012.
+ *  Copyright (C)  Stichting Deltares, 2011-2015.
  *
  *   Eric Verschuur
  */
