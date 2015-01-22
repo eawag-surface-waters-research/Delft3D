@@ -23,7 +23,7 @@
 
       subroutine read_items( lunrep    , inpfil   , ioutpt   , chkflg   , callr ,
      +                       waq_item  , data_item, name_item, type_item, noits ,
-     +                       ierr      )
+     +                       ierr      , iwar)
 
 !     Deltares Software Centre
 
@@ -34,6 +34,8 @@
       use dlwq_data
       use rd_token
       use timers       !   performance timers
+
+      implicit none
 
 !     declaration of the arguments
 
@@ -48,6 +50,7 @@
       type(t_dlwq_item)     , intent(in)    :: type_item    ! delwaq (item-) type list
       integer               , intent(out)   :: noits        ! number of scale factors to be read
       integer               , intent(inout) :: ierr         ! cummulative error count
+      integer               , intent(inout) :: iwar         ! cummulative warning count
 
 !     local declarations
 
@@ -57,7 +60,11 @@
       integer                               :: noitm        ! number of items read
       integer                               :: t_asked      ! type of token asked
       integer                               :: itype        ! type of token read
+      integer                               :: itoken       ! real token
       character(len=256)                    :: ctoken       ! character token
+      real                                  :: rtoken       ! real token
+      integer       itmnr, ioffc, ioffi, nconst, ierr2, i, i2, ifound, namset
+
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "read_items", ithndl )
 
@@ -388,6 +395,7 @@
 
             if ( usefor ) setnam = .true.
             write ( lunut , 1040 ) callr, itmnr, trim(ctoken)
+            iwar = iwar + 1
             goto 10
          else
 

@@ -258,7 +258,7 @@
             chkflg = 1
             call read_items( lunut      , inpfil    , ioutpt    , chkflg   , callr ,
      +                       waq_param  , data_param, substances, types    , noits ,
-     +                       ierr2     )
+     +                       ierr2      , iwar)
 
             if ( ierr2 .ne. 0 ) then
                write ( lunut , 2120 )
@@ -281,7 +281,7 @@
 !
             call read_items( lunut      , inpfil    , ioutpt    , chkflg   , callr ,
      +                       waq_param  , data_param, constants , types    , noits ,
-     +                       ierr2     )
+     +                       ierr2      , iwar)
 
 
             if ( ierr2 .ne. 0 ) then
@@ -309,7 +309,7 @@
 
             call read_items( lunut      , inpfil    , ioutpt    , chkflg   , callr ,
      +                       waq_param  , data_param, functions , types    , noits ,
-     +                       ierr2     )
+     +                       ierr2      , iwar)
 
 
             if ( ierr2 .ne. 0 ) then
@@ -328,7 +328,7 @@
 
             call read_items( lunut      , inpfil    , ioutpt    , chkflg   , strng1,
      +                       waq_param  , data_param, parameters, types    , noits ,
-     +                       ierr2     )
+     +                       ierr2      , iwar)
 
 
             if ( ierr2 .ne. 0 ) then
@@ -348,7 +348,7 @@
 
             call read_items( lunut      , inpfil    , ioutpt    , chkflg   , strng1,
      +                       waq_param  , data_param, segfuncs  , types    , noits ,
-     +                       ierr2     )
+     +                       ierr2      , iwar)
 
 
             if ( ierr2 .ne. 0 ) then
@@ -398,7 +398,7 @@
 
                call read_items( lunut    , inpfil  , ioutpt  , chkflg, callr    ,
      +                          waq_loc  , data_loc, segments, types , noits_loc,
-     +                          ierr2    )
+     +                          ierr2    , iwar)
 
                if ( ierr2 .ne. 0 ) then
                   write ( lunut , 2180 )
