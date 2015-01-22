@@ -253,6 +253,8 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
          rtcact = .true.
       endif
     else
+      anyRTCtoFLOW = .false.
+      anyFLOWtoRTC = .false.
       if (numdomains > 1) then
          !
          ! Notify the rtc iterator that this subdomain
