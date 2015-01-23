@@ -30,7 +30,6 @@
 type gd_r_i_ch
 !
 ! real:
-       integer(pntrsize) :: aks        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: alfas      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: alpha      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: ampbc      !  Description and declaration in esm_alloc_real.f90
@@ -187,7 +186,6 @@ type gd_r_i_ch
        integer(pntrsize) :: r1         !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rbnd       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rbuff      !  Help arrays for writing NEFIS files
-       integer(pntrsize) :: rca        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rettim     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rho        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rhowat     !  Description and declaration in esm_alloc_real.f90
@@ -198,7 +196,6 @@ type gd_r_i_ch
        integer(pntrsize) :: rnpl       !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rob        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rsed       !  Description and declaration in esm_alloc_real.f90
-       integer(pntrsize) :: rsedeq     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rthbnd     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rtu2d0     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: rtu2d1     !  Description and declaration in esm_alloc_real.f90
