@@ -245,7 +245,8 @@
 		<File RelativePath="src\gdp\nefisio_alloc.f90"/>
 		<File RelativePath="src\gdp\nefisio_dealloc.f90"/></Filter>
 		<Filter Name="general">
-		<File RelativePath="src\general\griddims.f90"/></Filter>
+		<File RelativePath="src\general\griddims.f90"/>
+		<File RelativePath=".\src\general\griddims_admin.f90"/></Filter>
 		<Filter Name="parallel_mpi">
 		<File RelativePath=".\src\parallel_mpi\adjlin.F90">
 			<FileConfiguration Name="Debug|Win32">

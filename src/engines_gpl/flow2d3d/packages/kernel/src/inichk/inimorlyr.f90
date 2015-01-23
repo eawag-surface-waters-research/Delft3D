@@ -1,6 +1,5 @@
-subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
-                   & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
-                   & lundia    ,error     ,kcs       ,gdp  )
+subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
+                   & nmmax     ,lsed      ,lsedtot   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2015.
@@ -35,7 +34,6 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use sediment_basics_module, only: SEDTYP_COHESIVE
     use bedcomposition_module
     use globaldata
     !
@@ -45,32 +43,20 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)         , dimension(:)     , pointer :: dpsed
-    real(fp)         , dimension(:)     , pointer :: dzi
-    real(fp)         , dimension(:)     , pointer :: thexlyr
-    real(fp)         , dimension(:)     , pointer :: thtrlyr
-    real(fp)         , dimension(:)     , pointer :: rhosol
-    integer          , dimension(:)     , pointer :: sedtyp
-    logical                             , pointer :: exchlyr
-    character(256)                      , pointer :: flcomp
     integer                             , pointer :: i_restart
     character(256)                      , pointer :: restid
+    real(fp)         , dimension(:)     , pointer :: cdryb
 !
 ! Global variables
 !
     integer                                         , intent(in)  :: lsed
     integer                                         , intent(in)  :: lsedtot
-    integer                                                       :: lundia     !  Description and declaration in inout.igs
+    integer                                         , intent(in)  :: lundia     !  Description and declaration in inout.igs
     integer                                         , intent(in)  :: mmax       !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in)  :: nmax       !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in)  :: nmaxus     !  Description and declaration in esm_alloc_int.f90
-    integer                                                       :: nmmax      !  Description and declaration in esm_alloc_int.f90
-    integer       , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs        !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: nmmax      !  Description and declaration in esm_alloc_int.f90
     logical                                                       :: error      !  Flag=TRUE if an error is encountered
-    real(fp)      , dimension(lsedtot)              , intent(in)  :: cdryb      !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(lsedtot)              , intent(in)  :: sdbuni     !  Description and declaration in esm_alloc_real.f90
-    character(10) , dimension(lsedtot)              , intent(in)  :: inisedunit !  Description and declaration in esm_alloc_char.f90
-    character(256), dimension(lsedtot)              , intent(in)  :: flsdbd     !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -88,7 +74,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
     integer                                       :: nmaxddb
     logical                                       :: err
     logical                                       :: ex
-    logical                                       :: success
+    logical                                       :: rst_fluff
+    logical                                       :: rst_bedcmp
     character(11)                                 :: fmttmp   ! Format file ('formatted  ')
     character(300)                                :: message
     real(fp)         , dimension(lsedtot)         :: mfrac
@@ -100,16 +87,12 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
     real(fp)         , dimension(:,:)   , pointer :: svfrac
-    real(fp)         , dimension(:)     , pointer :: mfluni
-    character(256)   , dimension(:)     , pointer :: mflfil
 !
 !! executable statements -------------------------------------------------------
 !
     i_restart          => gdp%gdrestart%i_restart
     restid             => gdp%gdrestart%restid
-    flcomp             => gdp%gdmorpar%flcomp
-    rhosol             => gdp%gdsedpar%rhosol
-    sedtyp             => gdp%gdsedpar%sedtyp
+    cdryb              => gdp%gdsedpar%cdryb
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iunderlyr', iunderlyr)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
@@ -133,252 +116,47 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
     icy = nmaxddb
     !
     istat   = 0
-    success = .false.
-    ! 
-    ! Fluff layer
+    rst_fluff  = .false.
+    rst_bedcmp = .false.
     !
-    if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
-       mfluff => gdp%gdmorpar%flufflyr%mfluff
-       mfluni => gdp%gdmorpar%flufflyr%mfluni
-       mflfil => gdp%gdmorpar%flufflyr%mflfil
-       !
-       ! Try restart
-       !
-       if (restid /= ' ') then
+    ! Try restart
+    !
+    error = .false.
+    if (restid /= ' ') then
+       if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
+           mfluff => gdp%gdmorpar%flufflyr%mfluff
+           !
            call restart_bodsed ( &
                   & error     ,restid    ,i_restart ,mfluff    , &
-                  & lsedtot   ,nmaxus    ,mmax      ,success   , &
+                  & lsedtot   ,nmaxus    ,mmax      ,rst_fluff , &
                   & 'MFLUFF'  ,gdp       )
        endif
        !
-       ! Otherwise initialization to values specified in input file
-       !
-       if (.not.success) then
-            mfluff = 0.0_fp
-            !
-            do ised = 1, lsed
-                if (gdp%gdsedpar%sedtyp(ised) /= SEDTYP_COHESIVE) continue
-                inquire (file = mflfil(ised), exist = ex)
-                if (ex) then
-                    call depfil(lundia    ,error     ,mflfil(ised)         , &
-                              & fmttmp    ,mfluff    ,lsed      ,ised      , &
-                              & gdp%griddim)
-                    if (error) goto 9999
-                else
-                    mfluff(ised,:) = mfluni(ised)
-                endif
-            enddo
-       endif
-    endif 
-    !
-    ! Bed layers
-    !
-    select case(iunderlyr)
-    case(2)
-       !
-       ! initialise bookkeeping system
-       !
-       if (restid /= ' ') then
-          !
-          ! Try restart
-          !
+       if (iunderlyr==2) then
           call restart_lyrs ( &
                  & error     ,restid    ,i_restart ,msed      , &
                  & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
-                 & mmax      ,nlyr      ,success   ,svfrac    , &
+                 & mmax      ,nlyr      ,rst_bedcmp,svfrac    , &
                  & iporosity ,gdp       )
-          if (success) goto 9999
-       endif
-    case default
-       !
-       ! nothing to do, using bodsed as uniformly mixed sediment
-       !
-    endselect
-    !
-    ! Start filling array BODSED
-    !
-    if (restid /= ' ') then
-       !
-       ! Try restart
-       !
-       call restart_bodsed ( &
-              & error     ,restid    ,i_restart ,bodsed    , &
-              & lsedtot   ,nmaxus    ,mmax      ,success   , &
-              & 'BODSED'  ,gdp       )
-    endif
-    if (.not.success) then
-       !
-       ! Try to fill BODSED with input values
-       ! flag error must be set to false
-       !
-       error = .false.
-       do ised = 1, lsedtot
-          if (flsdbd(ised) == ' ') then
-             !
-             ! Uniform data has been specified
-             !
-             do nm = 1, nmmax
-                bodsed(ised, nm) = real(sdbuni(ised),prec)
-             enddo
-          else
-             !
-             ! Space varying data has been specified
-             ! Use routine that also read the depth file to read the data
-             !
-             if (prec == hp) then
-                call depfil_double(lundia    ,error     ,flsdbd(ised)         , &
-                                 & fmttmp    ,bodsed    ,lsedtot   ,ised      , &
-                                 & gdp%griddim)
-             else
-                call depfil(lundia    ,error     ,flsdbd(ised)         , &
-                          & fmttmp    ,bodsed    ,lsedtot   ,ised      , &
-                          & gdp%griddim)
-             endif
-             if (error) goto 9999
-          endif
-       enddo
-       if (iporosity == 0) then
-          do ised = 1, lsedtot
-             if (inisedunit(ised) == 'm') then
-                do nm = 1, nmmax
-                   bodsed(ised, nm) = bodsed(ised, nm) * cdryb(ised)
-                enddo
-             else
-                !
-                ! inisedunit(ised) = kg/m2
-                ! no conversion needed
-                !
-             endif
-          enddo
-       else
-          do ised = 2, lsedtot
-             if (inisedunit(ised) /= inisedunit(1)) then
-                call prterr(lundia, 'U021', 'All sediment fields in the same layer should have unit.')
-                call d3stop(1, gdp)
-                error = .true.
-                goto 9999
-             endif
-          enddo
-          if (inisedunit(1) == 'm') then
-             !
-             ! all input specified as thickness
-             !
-             do nm = 1, nmmax
-                mfracsum = 0.0_fp
-                do ised = 1, lsedtot
-                   mfrac(ised) = bodsed(ised, nm) * rhosol(ised)
-                   mfracsum = mfracsum + mfrac(ised)
-                enddo
-                if (mfracsum > 0.0_fp) then
-                   do ised = 1, lsedtot
-                      mfrac(ised) = mfrac(ised) / mfracsum
-                   enddo
-                   !
-                   call getporosity(gdp%gdmorlyr, mfrac, poros)
-                   svf = 1.0_fp - poros
-                else
-                   svf = 1.0_fp
-                endif
-                !
-                do ised = 1, lsedtot
-                   bodsed(ised, nm) = bodsed(ised, nm) * svf * rhosol(ised)
-                enddo
-             enddo
-          else
-             !
-             ! inisedunit(1) = kg/m2
-             ! no conversion needed
-             !
-          endif
        endif
        !
-       ! Check validity of input data
-       !
-       do nm = 1, nmmax
-          if (kcs(nm) == 1) then
-             !
-             ! At an internal point the composition is important.
-             ! Check the values carefully before continuing.
-             !
-             do ised = 1, lsedtot
-                if (bodsed(ised, nm) < 0.0) then
-                   write (message,'(a,i2,a,a,a,i0)')  &
-                       & 'Negative sediment thickness ',ised,' in file ', &
-                       & trim(flsdbd(ised)),' at nm=',nm
-                   call prterr(lundia, 'U021',trim(message))
-                   call d3stop(1, gdp)
-                endif
-             enddo
-          elseif (kcs(nm) == 2) then
-             !
-             ! At an open boundary the composition is also important
-             ! but if the input is not valid, mark the data as dummy data:
-             ! the data will be overwritten with data coming from the
-             ! neighbouring internal point.
-             !
-             err = .false.
-             do ised = 1, lsedtot
-                if (bodsed(ised, nm)<0.0) err=.true.
-             enddo
-             if (err) then
-                !
-                ! set dummy flag
-                !
-                bodsed(1, nm) = -1.0
-             endif
-          else
-             !
-             ! Point that will never be used: don't care about the values.
-             ! Just replace whatever was read by something valid.
-             !
-             do ised = 1, lsedtot
-                bodsed(ised, nm) = 0.0
-             enddo
-          endif
-       enddo
-       !
-       ! Copy BODSED data to open boundary points that have not
-       ! yet been assigned valid data.
-       !
-       do nm = 1, nmmax
-          if (kcs(nm)==2 .and. bodsed(1, nm)<0.0) then
-             if (kcs(nm-icx) == 1) then
-                ! ndm
-                nm2 = nm-icx
-             elseif (kcs(nm+icx) == 1) then
-                ! num
-                nm2 = nm+icx
-             elseif (kcs(nm-icy) == 1) then
-                ! nmd
-                nm2 = nm-icy
-             else
-                ! nmu
-                nm2 = nm+icy
-             endif
-             do ised = 1,lsedtot
-                bodsed(ised, nm) = bodsed(ised, nm2)
-             enddo
-          endif
-       enddo
+       if (.not.rst_bedcmp) then
+          call restart_bodsed ( &
+                 & error     ,restid    ,i_restart ,bodsed    , &
+                 & lsedtot   ,nmaxus    ,mmax      ,rst_bedcmp, &
+                 & 'BODSED'  ,gdp       )
+          !
+          if (iunderlyr==2) call bedcomp_use_bodsed(gdp%gdmorlyr)
+       endif
     endif
     !
-    ! Use BODSED: compute DPSED and as needed transfer information from BODSED to other arrays
+    ! Any parameters not obtained from restart file will be initialized using
+    ! values specified in input file.
     !
-    call bedcomp_use_bodsed(gdp%gdmorlyr)
+    call rdinimorlyr(lsedtot, lsed, lundia, error, &
+                   & gdp%griddim, gdp%gdmorlyr, gdp%gdmorpar, gdp%gdsedpar, &
+                   & rst_fluff, rst_bedcmp)
     !
-    select case(iunderlyr)
-    case(2)
-       if (flcomp /= ' ') then
-          !
-          ! Read the data from the initial composition file.
-          !
-          call rdinimorlyr(flcomp    ,msed      ,thlyr     ,cdryb     , &
-                         & lsedtot   ,nlyr      ,lundia    ,kcs       , &
-                         & icx       ,icy       ,svfrac    ,iporosity , &
-                         & gdp%gdsedpar%rhosol  ,gdp%gdmorlyr  ,gdp%griddim   ,gdp%gdsedpar%namsed, &
-                         & error     )
-          if (error) call d3stop(1, gdp)
-       endif
-    endselect
- 9999 continue
+    ! We're done
+    !
 end subroutine inimorlyr

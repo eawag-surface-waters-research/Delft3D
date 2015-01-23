@@ -891,7 +891,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     !
     if (sedim .and. initia/=3) then
        call inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
-                 & nmmax     ,lsed      ,lsedtot   ,i(kcs)    ,gdp       )
+                 & nmmax     ,lsed      ,lsedtot   ,gdp       )
        if (error) goto 9999
     endif
     !

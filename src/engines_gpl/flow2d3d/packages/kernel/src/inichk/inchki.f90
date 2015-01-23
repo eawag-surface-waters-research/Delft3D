@@ -390,6 +390,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
              & i(kcu)    ,i(kcv)    ,i(kcs)    ,gdp       )
     if (error) goto 9999
     !
+    call griddims_admin( i(kcs), gdp )
+    !
     ! check important geometry parameters and
     ! redefine THICK array and initialize SIG
     !

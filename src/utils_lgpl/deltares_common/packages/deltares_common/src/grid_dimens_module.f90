@@ -148,7 +148,9 @@ type griddimtype
     integer :: nlg    ! global n index corresponding to local n index nmaxus
     integer :: nmaxgl ! global maximum n index as known to user
     !
-    integer, dimension(:,:), pointer :: aggrtable => null()
+    integer, dimension(:,:), pointer :: aggrtable => null() ! aggrtable(i,j) = 0 no cell, nm = cell index (>0)
+    integer, dimension(:)  , pointer :: celltype => null()  ! 0 = inactive, 1 = active (internal), 2 = boundary, -1 = ghost
+    integer, dimension(:,:), pointer :: nmbnd => null()     ! (1,nb) = nm boundary, (2,nb) = nm internal
 end type griddimtype
 
 contains
@@ -170,7 +172,7 @@ subroutine simplegrid_dimens(griddim,nmax,mmax,aggrtable)
 !
 ! Local variables
 !
-!   NONE
+    integer                   :: istat
 !
 !! executable statements -------------------------------------------------------
 !
@@ -199,6 +201,10 @@ subroutine simplegrid_dimens(griddim,nmax,mmax,aggrtable)
     else
        griddim%aggrtable => null()
     endif
+    !
+    allocate(griddim%celltype(griddim%nmmax), stat=istat)
+    if (istat==0) griddim%celltype = 1
+    griddim%nmbnd => null()
 end subroutine simplegrid_dimens
 
 end module grid_dimens_module

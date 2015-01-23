@@ -1,5 +1,5 @@
 subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
-                & nmmax     ,lsed      ,lsedtot   ,kcs       ,gdp       )
+                & nmmax     ,lsed      ,lsedtot   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -55,10 +55,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)                             , pointer :: vicmol
     !
     integer                              , pointer :: nxx
-    real(fp)      , dimension(:)         , pointer :: cdryb
-    real(fp)      , dimension(:)         , pointer :: sdbuni
-    character(10) , dimension(:)         , pointer :: inisedunit
-    character(256), dimension(:)         , pointer :: flsdbd
 !
 ! Global variables
 !
@@ -69,7 +65,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     integer                                            , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
     integer                                            , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
     integer                                            , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
     logical                                                          :: error   !  Flag=TRUE if an error is encountered
 !
 ! Local variables
@@ -84,10 +79,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     vicmol              => gdp%gdphysco%vicmol
     !
     nxx                 => gdp%gdmorpar%nxx
-    cdryb               => gdp%gdsedpar%cdryb
-    sdbuni              => gdp%gdsedpar%sdbuni
-    inisedunit          => gdp%gdsedpar%inisedunit
-    flsdbd              => gdp%gdsedpar%flsdbd
     !
     nmlb    = gdp%d%nmlb
     nmub    = gdp%d%nmub
@@ -95,16 +86,12 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     call allocsedtra(gdp%gderosed, gdp%d%kmax, lsed, lsedtot, &
                    & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx, CODE_DELFT3D)
     !
-    !
-    !-------- read some more input data
-    !
     ! Initialise morphology layers
     !
-    call inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     ,lsed      , &
-                 & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
-                 & lundia    ,error     ,kcs       ,gdp       )
+    call inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
+                 & nmmax     ,lsed      ,lsedtot   ,gdp       )
     !
-    !-------- compute derived quantities
+    ! Compute derived quantities
     !
     call initsedtra(gdp%gderosed, gdp%gdsedpar, gdp%gdtrapar, gdp%gdmorpar, gdp%gdmorlyr, &
                   & rhow, ag, vicmol, nmlb, nmub, nmmax, lsed, lsedtot)

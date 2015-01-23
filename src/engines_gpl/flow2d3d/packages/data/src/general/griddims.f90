@@ -64,11 +64,11 @@ subroutine griddims( gdp )
 !
 ! Global variables
 !
-!
+!   NONE
 !
 ! Local variables
 !
-!
+    integer                :: istat
 !
 !! executable statements -------------------------------------------------------
 !
@@ -135,4 +135,9 @@ subroutine griddims( gdp )
     gdp%griddim%nmaxgl = gdp%gdparall%nmaxgl
     !
     gdp%griddim%aggrtable => null()
+    !
+    allocate(gdp%griddim%celltype(gdp%d%nmlb:gdp%d%nmub), stat=istat)
+    gdp%griddim%celltype(:) = 1
+    !
+    allocate(gdp%griddim%nmbnd(0,2), stat=istat)
 end subroutine griddims
