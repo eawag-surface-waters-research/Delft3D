@@ -1,11 +1,35 @@
-c 
+! ---- LGPL --------------------------------------------------------------------
+!
+! Copyright (C)  Stichting Deltares, 2011-2015.
+!
+! This library is free software; you can redistribute it and/or
+! modify it under the terms of the GNU Lesser General Public
+! License as published by the Free Software Foundation version 2.1.
+!
+! This library is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+! Lesser General Public License for more details.
+!
+! You should have received a copy of the GNU Lesser General Public
+! License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+! contact: delft3d.support@deltares.nl
+! Stichting Deltares
+! P.O. Box 177
+! 2600 MH Delft, The Netherlands
+!
+! All indications and logos of, and references to, "Delft3D" and "Deltares"
+! are registered trademarks of Stichting Deltares, and remain the property of
+! Stichting Deltares. All rights reserved.
+!
+!------------------------------------------------------------------------------
+c
 c   ods.inc  -  ODS Fortran interface
-c 
-c   Copyright (C)  Stichting Deltares, 2011-2015.
-c 
+c
 c   Marc Kool
-c 
-c 
+c
+c
 c   $Author: Markus $
 c   $Date: 19-11-03 11:33 $
 c   $Source: /u/cvsroot/gpp/include/ods.inc,v $
@@ -153,9 +177,9 @@ C     IEBUFF  Buffer space too small (warn WL technical support)
 C     IEDISK  No space left on device
 C     IEFNNW  File exists already
 C     IERUNI  RunId not equal
-C     IEPARI  Par.  not equal     
-C     IELOCI  Loc.  not equal    
-C     IETIMI  Time  not equal   
+C     IEPARI  Par.  not equal
+C     IELOCI  Loc.  not equal
+C     IETIMI  Time  not equal
 C     IESTEP  Timestep too small (time can not be represented accurately)
 C     IEOTHR  Other error
 C
