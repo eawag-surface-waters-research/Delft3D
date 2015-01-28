@@ -4126,6 +4126,7 @@ src/tools_lgpl/matlab/quickplot/SplashScreen/resource/SplashScreenStarter.ico -t
 src/tools_lgpl/matlab/quickplot/SplashScreen/resource/SplashScreenStarter.rc -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/resource/small.ico -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/resource/startuppic.png -text
+src/tools_lgpl/matlab/quickplot/SplashScreen/resource/startuppic_notext.png -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/src/FileImageLoader.cpp -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/src/ImageLoader.cpp -text
 src/tools_lgpl/matlab/quickplot/SplashScreen/src/ResourceImageLoader.cpp -text
