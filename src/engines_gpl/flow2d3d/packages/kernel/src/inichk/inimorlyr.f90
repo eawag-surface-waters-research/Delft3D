@@ -146,7 +146,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                  & lsedtot   ,nmaxus    ,mmax      ,rst_bedcmp, &
                  & 'BODSED'  ,gdp       )
           !
-          if (iunderlyr==2) call bedcomp_use_bodsed(gdp%gdmorlyr)
+          if (rst_bedcmp) call bedcomp_use_bodsed(gdp%gdmorlyr)
        endif
     endif
     !
