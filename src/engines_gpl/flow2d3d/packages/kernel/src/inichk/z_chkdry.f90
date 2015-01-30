@@ -424,10 +424,10 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        !
        call dfexchg ( kfu   , 1, 1   , dfint, nm_pos, gdp )
        call dfexchg ( kfv   , 1, 1   , dfint, nm_pos, gdp )
-       call dfexchg ( kfumax, 1, 1   , dfint, nm_pos, gdp )
-       call dfexchg ( kfvmax, 1, 1   , dfint, nm_pos, gdp )
-       call dfexchg ( kfuz1 , 1, kmax, dfint, nm_pos, gdp )
-       call dfexchg ( kfvz1 , 1, kmax, dfint, nm_pos, gdp )
+       !call dfexchg ( kfumax, 1, 1   , dfint, nm_pos, gdp )
+       !call dfexchg ( kfvmax, 1, 1   , dfint, nm_pos, gdp )
+       !call dfexchg ( kfuz1 , 1, kmax, dfint, nm_pos, gdp )
+       !call dfexchg ( kfvz1 , 1, kmax, dfint, nm_pos, gdp )
     endif
     !
     ! set KFS to 0 if the surrounding velocity points are dry

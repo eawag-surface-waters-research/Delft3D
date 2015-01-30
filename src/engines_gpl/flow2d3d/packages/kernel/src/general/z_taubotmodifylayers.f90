@@ -117,7 +117,7 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci       ,icx     ,icy    
           ! 
           if (kfs(nm)==1 .and. kfsmax(nm)>kfsmin(nm)) then
              k = kfsmin(nm)
-             if (ztbml_upd_r1) then
+             if (ztbml_upd_r1 .or. dzs1(nm,k)+dzs1(nm,k+1)/=dzs0(nm,k)+dzs0(nm,k+1)) then
                 if (dzs1(nm,k) < dzs1(nm,k+1)) then
                    do l = 1, lstsci
                       r0(nm,k,l) = (        r0(nm,k+1,l)*(dzs1(nm,k+1)-dzs1(nm,k)) +     &
