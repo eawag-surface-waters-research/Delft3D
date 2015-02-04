@@ -1,4 +1,5 @@
-subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
+subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
+                   & fds       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -29,15 +30,17 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! Writes the time varying mass balance data to the NEFIS HIS-DAT file
+! Writes the time varying mass balance data to the FLOW HIS file
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    !
+    use datagroups
     use globaldata
+    use netcdf, only: nf90_unlimited
+    use dfparall, only: inode, master
+    use wrtarray, only: wrtvar
     !
     implicit none
     !
@@ -45,9 +48,8 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical                        , pointer :: first
     integer                        , pointer :: celidt
-    type (nefiselement)            , pointer :: nefiselem
+    type (datagroup)               , pointer :: group
     !
     logical                        , pointer :: massbal
     integer                        , pointer :: nbalpol
@@ -66,40 +68,42 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
 !
 ! Global variables
 !
-    integer                           , intent(in)  :: ithisc      !!  Current time counter for the HIS data file
-    integer                           , intent(in)  :: lundia      !  Description and declaration in inout.igs
-    character(*)                      , intent(in)  :: trifil      !!  File name for FLOW NEFIS output
-    logical                           , intent(out) :: error       !!  Flag=TRUE if an error is encountered
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                             , intent(in)  :: ithisc   !!  Current time counter for the HIS data file
+    integer                                                             , intent(in)  :: lundia   !  Description and declaration in inout.igs
+    character(*)                                                        , intent(in)  :: filename !  File name
+    logical                                                             , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
 !
 ! Local variables
 !
-    integer                           , external    :: putelt
-    integer                           , external    :: inqmxi
-    integer                           , external    :: clsnef
-    integer                           , external    :: open_datdef
-    integer                           , external    :: neferr
-!
-    integer                                         :: fds          ! NEFIS file handle
-    integer                                         :: i
-    integer         , dimension(1)                  :: idummy       ! Help array to read/write Nefis files 
-    integer                                         :: ierror       ! Local error flag for NEFIS files 
-    integer                                         :: l
-    integer                                         :: n
-    integer         , dimension(3,5)                :: uindex
-    character(16)                                   :: grpnam       ! Data-group name for the NEFIS-file
-    character(256)                                  :: filnam       ! Help var. for FLOW file name 
-    character(256)                                  :: errmsg       ! Character var. containing the error message to be written to file. The message depends on the error. 
-    character(1024)                                 :: error_string
+    integer                                           :: iddim_time
+    integer                                           :: iddim_nbalpol
+    integer                                           :: iddim_nneighb
+    integer                                           :: iddim_lsedtot
+    integer                                           :: iddim_lstsci
+    integer                                           :: iddim_2
+    !
+    integer                                           :: idatt_coord
+    !
+    real(fp)        , dimension(:)    , allocatable   :: rbuff1
+    real(fp)        , dimension(:,:)  , allocatable   :: rbuff2
+    integer                                           :: filetype
+    integer                                           :: istat
+    integer                                           :: ierror       ! Local error flag
+    integer                                           :: l
+    integer                                           :: n
+    character(16)                                     :: grpnam       ! Data-group name for the NEFIS-file
 !
 !! executable statements -------------------------------------------------------
 !
     massbal        => gdp%gdmassbal%massbal
-    !
     if (.not. massbal) return
     !
-    nefiselem      => gdp%nefisio%nefiselem(nefiswrthisbal)
-    first          => nefiselem%first
-    celidt         => nefiselem%celidt
+    grpnam = 'his-bal-series'
+    call getdatagroup(gdp, FILOUT_HIS, grpnam, group)
+    celidt         => group%celidt
+    filetype = getfiletype(gdp, FILOUT_HIS)
     !
     nbalpol        => gdp%gdmassbal%nbalpol
     nneighb        => gdp%gdmassbal%nneighb
@@ -115,151 +119,92 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
     lstsci         => gdp%d%lstsci
     lsedtot        => gdp%d%lsedtot
     !
-    ! Initialize local variables
-    !
-    filnam = trifil(1:3) // 'h' // trifil(5:)
-    errmsg = ' '
-    grpnam = 'his-bal-series'
-    !
-    if (first) then
-       call wrihisbal(trifil    ,lundia    ,error     ,gdp       )
+    ierror = 0
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
        ! Set up the element chracteristics
        !
-       call addelm(nefiswrthisbal,'ITHISC',' ','[   -   ]','INTEGER',4    , &
-          & 'timestep number (ITHISC*DT*TUNIT := time in sec from ITDATE)', &
-          & 1         ,1         ,0         ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrthisbal,'BALVOLUME',' ','[  M3   ]','REAL',4    , &
-          & 'Volume within polygon                                       ', &
-          & 1         ,nbalpol   ,0         ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrthisbal,'BALFLUX',' ','[  M3   ]','REAL',4      , &
-          & 'Accumulated flux between polygons                           ', &
-          & 2         ,2         ,nneighb   ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
+       iddim_time    = adddim(gdp, lundia, FILOUT_HIS, 'time', nf90_unlimited)
+       iddim_nbalpol = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygons', nbalpol)
+       iddim_nneighb = adddim(gdp, lundia, FILOUT_HIS, 'nbalneighbrs', nneighb)
+       iddim_lsedtot = adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT', lsedtot)
+       iddim_lstsci  = adddim(gdp, lundia, FILOUT_HIS, 'LSTSCI', lstsci)
+       iddim_2       = adddim(gdp, lundia, FILOUT_HIS, 'length_2', 2)
+       !
+       idatt_coord    = addatt(gdp, lundia, FILOUT_HIS, 'coordinates', 'BALVOLNAMES')
+       !
+       if (filetype /= FTYPE_NETCDF) then ! don't store duplicate times
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'ITHISC', ' ', IO_INT4       , 0, longname='timestep number (ITHISC*DT*TUNIT := time in sec from ITDATE)')
+       endif
+       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALVOLUME', ' ', IO_REAL4   , 1, dimids=(/iddim_nbalpol/), longname='Volume within polygon', unit='m3', attribs=(/idatt_coord/) )
+       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALFLUX', ' ', IO_REAL4     , 2, dimids=(/iddim_2, iddim_nneighb/), longname='Accumulated flux between polygons', unit='m3')
        if (lstsci>0) then
-          call addelm(nefiswrthisbal,'BALR1CONC',' ','[   -   ]','REAL',4    , &
-             & 'Average concentration within polygon                        ', &
-             & 2         ,nbalpol   ,lstsci    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrthisbal,'BALR1FLUX',' ','[   -   ]','REAL',4    , &
-             & 'Accumulated constituent flux between polygons               ', &
-             & 3         ,2         ,nneighb   ,lstsci    ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALR1CONC', ' ', IO_REAL4, 2, dimids=(/iddim_nbalpol, iddim_lstsci/), longname='Average concentration within polygon', attribs=(/idatt_coord/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALR1FLUX', ' ', IO_REAL4, 3, dimids=(/iddim_2, iddim_nneighb, iddim_lstsci/), longname='Accumulated constituent flux between polygons')
        endif
        if (lsedtot>0) then
-          call addelm(nefiswrthisbal,'BALDPS',' ','[   -   ]','REAL',4       , &
-             & 'Average bottom depth within polygon                         ', &
-             & 1         ,nbalpol   ,0         ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrthisbal,'BALSDFLUX',' ','[   -   ]','REAL',4    , &
-             & 'Accumulated sediment flux between polygons                  ', &
-             & 3         ,2         ,nneighb   ,lsedtot   ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALDPS', ' ', IO_REAL4   , 1, dimids=(/iddim_nbalpol/), longname='Average bottom depth within polygon', unit='m', attribs=(/idatt_coord/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALSDFLUX', ' ', IO_REAL4, 3, dimids=(/iddim_2, iddim_nneighb, iddim_lsedtot/), longname='Accumulated sediment flux between polygons')
        endif
        !
-       call defnewgrp(nefiswrthisbal ,filnam    ,grpnam   ,gdp)
-    endif
-    !
-    nefiselem      => gdp%nefisio%nefiselem(nefiswrthisbal)
-    first          => nefiselem%first
-    celidt         => nefiselem%celidt
-    !
-    ierror = open_datdef(filnam   ,fds      )
-    if (ierror/= 0) goto 9999
-    if (first) then
+       group%grp_dim = iddim_time
+       celidt = 0
        !
-       ! end of initialization, don't come here again
+    case (REQUESTTYPE_WRITE)
        !
-       ierror = inqmxi(fds, grpnam, celidt)
-       first = .false.
-    endif
-    !
-    celidt = celidt + 1
-    !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = celidt ! start index
-    uindex (2,1) = celidt ! end index
-    uindex (3,1) = 1      ! increment in time
-    !
-    idummy(1)   = ithisc
-    ierror = putelt(fds, grpnam, 'ITHISC', uindex, 1, idummy)
-    if (ierror/=0) goto 9999
-    !
-    call sbuff_checksize(nbalpol)
-    do n = 1,nbalpol
-       sbuff(n) = real(volumes(n),sp)
-    enddo
-    ierror = putelt(fds, grpnam, 'BALVOLUME', uindex, 1, sbuff)
-    if (ierror/= 0) goto 9999
-    !
-    call sbuff_checksize(2*nneighb)
-    i = 0
-    do n = 1,nneighb
-       sbuff(i+1) = real(fluxes(1,n),sp)
-       sbuff(i+2) = real(fluxes(2,n),sp)
-       i = i+2
-    enddo
-    ierror = putelt(fds, grpnam, 'BALFLUX', uindex, 1, sbuff)
-    if (ierror/= 0) goto 9999
-    !
-    if (lstsci>0) then
-       call sbuff_checksize(nbalpol*lstsci)
-       i = 0
-       do l = 1,lstsci
-          do n = 1,nbalpol
-             i = i+1
-             sbuff(i) = real(mass_r1(n,l)/volumes(n),sp)
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'BALR1CONC', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+       celidt = celidt + 1
        !
-       call sbuff_checksize(2*nneighb*lstsci)
-       i = 0
-       do l = 1,lstsci
-          do n = 1,nneighb
-             sbuff(i+1) = real(fluxes_r1(1,n,l),sp)
-             sbuff(i+2) = real(fluxes_r1(2,n,l),sp)
-             i = i+2
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'BALR1FLUX', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-    endif
-    !
-    if (lsedtot>0) then
-       !call sbuff_checksize(nbalpol) !already checked for volumes
-       do n = 1,nbalpol
-          sbuff(n) = real(accdps(n)/horareas(n),sp)
-       enddo
-       ierror = putelt(fds, grpnam, 'BALDPS', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+       if (inode == master) then
+          if (filetype /= FTYPE_NETCDF) then ! don't store duplicate times
+             call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                       & gdp, ierror, lundia, ithisc, 'ITHISC')
+             if (ierror/=0) goto 9999
+          endif
+          !
+          call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                    & gdp, ierror, lundia, volumes, 'BALVOLUME')
+          if (ierror/= 0) goto 9999
+          !
+          call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                    & gdp, ierror, lundia, fluxes, 'BALFLUX')
+          !
+          if (lstsci>0) then
+             allocate(rbuff2(nbalpol,lstsci), stat=istat)
+             do l = 1,lstsci
+                do n = 1,nbalpol
+                   rbuff2(n,l) = mass_r1(n,l)/volumes(n)
+                enddo
+             enddo
+             call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                       & gdp, ierror, lundia, rbuff2, 'BALR1CONC')
+             deallocate(rbuff2)
+             if (ierror/= 0) goto 9999
+             !
+             call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                       & gdp, ierror, lundia, fluxes_r1, 'BALR1FLUX')
+          endif
+          !
+          if (lsedtot>0) then
+             allocate(rbuff1(nbalpol), stat=istat)
+             do n = 1,nbalpol
+                rbuff1(n) = accdps(n)/horareas(n)
+             enddo
+             call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                       & gdp, ierror, lundia, rbuff1, 'BALDPS')
+             deallocate(rbuff1)
+             if (ierror/= 0) goto 9999
+             !
+             call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                       & gdp, ierror, lundia, fluxes_sd, 'BALSDFLUX')
+             if (ierror/= 0) goto 9999
+          endif
+       endif
        !
-       call sbuff_checksize(2*nneighb*lsedtot)
-       i = 0
-       do l = 1,lsedtot
-          do n = 1,nneighb
-             sbuff(i+1) = real(fluxes_sd(1,n,l),sp)
-             sbuff(i+2) = real(fluxes_sd(2,n,l),sp)
-             i = i+2
-          enddo
-       enddo
-       ierror = putelt(fds, grpnam, 'BALSDFLUX', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-    endif
+    end select
     !
-    ierror = clsnef(fds)
+    ! write error message if error occured and set error = .true.
     !
-    ! write error message if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
- 9999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrthisbal

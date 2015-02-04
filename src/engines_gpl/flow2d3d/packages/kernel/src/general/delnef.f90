@@ -29,8 +29,7 @@ subroutine delnef(filnam, gdp)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Delete DELFT3D-NEFIS files if exists
-! Method used:
+!    Function: Delete NEFIS and NetCDF output files if they exist
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -43,6 +42,10 @@ subroutine delnef(filnam, gdp)
     implicit none
     !
     type(globdat),target :: gdp
+    !
+    ! The following list of pointer parameters is used to point inside the gdp structure
+    !
+    integer                             , pointer :: lundia
 !
 ! Global variables
 !
@@ -60,25 +63,39 @@ subroutine delnef(filnam, gdp)
 !
     if (parll .and. (inode /= master)) return
     !
+    lundia              => gdp%gdinout%lundia
+    !
     locfnm = ' '
     locfnm = filnam
     call remove_leading_spaces(locfnm    ,ind       )
     !
-    ! test files existence
+    ! test files existence - NEFIS DAT file
+    !
+    inquire (file = locfnm(:ind) // '.dat', exist = exists)
+    if (exists) then
+       call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.dat')
+       luntmp = newlun(gdp)
+       open (luntmp, file = locfnm(:ind) // '.dat')
+       close (luntmp, status = 'delete')
+    endif
+    !
+    ! test files existence - NEFIS DEF file
     !
     inquire (file = locfnm(:ind) // '.def', exist = exists)
     if (exists) then
+       call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.def')
        luntmp = newlun(gdp)
        open (luntmp, file = locfnm(:ind) // '.def')
        close (luntmp, status = 'delete')
     endif
     !
-    ! test files existence
+    ! test files existence - NetCDF version
     !
-    inquire (file = locfnm(:ind) // '.dat', exist = exists)
+    inquire (file = locfnm(:ind) // '.nc', exist = exists)
     if (exists) then
+       call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.nc')
        luntmp = newlun(gdp)
-       open (luntmp, file = locfnm(:ind) // '.dat')
+       open (luntmp, file = locfnm(:ind) // '.nc')
        close (luntmp, status = 'delete')
     endif
 end subroutine delnef

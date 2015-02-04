@@ -38,7 +38,8 @@ subroutine wrparm(comfil    ,lundia    ,error     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use sp_buffer
+    use datagroups
     use globaldata
     !
     implicit none
@@ -48,15 +49,9 @@ subroutine wrparm(comfil    ,lundia    ,error     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
+    type (datagroup)         , pointer :: group
     real(fp)                 , pointer :: rhow
     real(fp)                 , pointer :: ag
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 9
 !
 ! Global variables
 !
@@ -73,175 +68,124 @@ subroutine wrparm(comfil    ,lundia    ,error     , &
 !
 ! Local variables
 !
-    integer                         :: i       ! Help variable
-    integer                         :: ierr    ! Flag for error when writing to Communication file 
-    integer      , dimension(1)     :: idummy  ! Help array to read/write Nefis files 
-    integer      , dimension(nelmx) :: nbytsg  ! Array containing the number of by- tes of each single ELMTPS 
-    integer, external               :: neferr
-    logical                         :: wrswch  ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    real(fp)     , dimension(1)     :: rdummy  ! Help array to read/write Nefis files 
-    character(10), dimension(nelmx) :: elmunt  ! Array with element physical unit 
-    character(16)                   :: grpnam  ! Data-group name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmnms  ! Element name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmqty  ! Array with element quantity 
-    character(16), dimension(nelmx) :: elmtps  ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                  :: errmsg  ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64), dimension(nelmx) :: elmdes  ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: i       ! Help variable
+    integer                                       :: ierror  ! Flag for error when writing to Communication file 
+    integer    , dimension(1)                     :: idummy  ! Help array to write integers
+    integer    , dimension(3,5)                   :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grpnam  ! Data-group name defined for the COM-files 
+    character(256)                                :: errmsg  ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grpnam/'PARAMS'/
-    data elmnms/'AG', 'RHOW', 'DT', 'NFLTYP', 'TSCALE', 'IT01', 'IT02', 'TZONE', 'ITLEN' /
-    data elmqty/nelmx*' '/
-    data elmunt/'[  M/S2 ]', '[ KG/M3 ]', '[ TUNIT ]', '[   -   ]', '[   S   ]', &
-              & '[YYYYMMDD]', '[ HHMMSS]', '[ HOUR  ]', '[ TSCALE]'/
-    data elmtps/3*'REAL', 'INTEGER', 'REAL', 2*'INTEGER', 'REAL', 'INTEGER'/
-    data nbytsg/nelmx*4/
-    data elmdes/'Acceleration of gravity                                       ', &
-            &   'Density of water                                              ', &
-            &   'Timestep FLOW                                              ', &
-            &   'Dry point proc. 0 = NO  1 = MEAN  2 = MAX  3 = MIN            ', &
-            &   'Basic unit of time, expressed in seconds                      ', &
-            &   'Reference date                                                ', &
-            &   'Reference time                                                ', &
-            &   'Local time zone                                               ', &
-            &   'Length of tide cycle ; stand alone and no wave 0              '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrparm)
-    first    => nefiselem%first
-    celidt   => nefiselem%celidt
-    elmdms   => nefiselem%elmdms
+    call getdatagroup(gdp, FILOUT_COM, grpnam, group)
+    first    => group%first
     rhow     => gdp%gdphysco%rhow
     ag       => gdp%gdphysco%ag
-    !
-    ! Initialize local variables
-    !
-    ierr   = 0
-    wrswch = .true.
     !
     ! Set up the element dimensions
     !
     if (first) then
-       first = .false.
-       i = 1   ! 'AG'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'RHOW'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'DT'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'NFLTYP'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'TSCALE'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'IT01'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'IT02'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'TZONE'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       i = i+1 ! 'ITLEN'
-       call filldm(elmdms    ,i         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'AG', ' ', IO_REAL4, 1, (/1/), ' ', 'Acceleration of gravity', '[  M/S2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'RHOW', ' ', IO_REAL4, 1, (/1/), ' ', 'Density of water', '[ KG/M3 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DT', ' ', IO_REAL4, 1, (/1/), ' ', 'Timestep FLOW', '[ TUNIT ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NFLTYP', ' ', IO_INT4, 1, (/1/), ' ', 'Dry point proc. 0 = NO  1 = MEAN  2 = MAX  3 = MIN', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'TSCALE', ' ', IO_REAL4, 1, (/1/), ' ', 'Basic unit of time, expressed in seconds', '[   S   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'IT01', ' ', IO_INT4, 1, (/1/), ' ', 'Reference date', '[YYYYMMDD]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'IT02', ' ', IO_INT4, 1, (/1/), ' ', 'Reference time', '[ HHMMSS]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'TZONE', ' ', IO_REAL4, 1, (/1/), ' ', 'Local time zone', '[ HOUR  ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'ITLEN', ' ', IO_INT4, 1, (/1/), ' ', 'Length of tide cycle ; stand alone and no wave 0', '[ TSCALE]')
     endif
     !
-    ! Write all elements to file; all definition and creation of files,
-    !     data groups, cells and elements is handled by PUTGET.
+    ierror = open_datdef(comfil   ,fds      , .false.)
+    if (ierror /= 0) goto 9999
     !
-    ! element AG
+    if (first) then
+       call defnewgrp(fds, FILOUT_COM, grpnam, gdp, comfil, errlog=ERRLOG_NONE)
+       first = .false.
+    endif
     !
-    i = 1
-    rdummy(1) = ag
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,rdummy    )
-    if (ierr/=0) goto 9999
+    ! initialize group index
     !
-    ! element RHOW
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'AG'
+    !
+    call sbuff_checksize(1)
+    sbuff(1) = ag
+    ierror = putelt(fds, grpnam, 'AG', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
+    !
+    ! element 'RHOW'
     ! 
-    i = i+1
-    rdummy(1) = rhow
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,rdummy    )
-    if (ierr/=0) goto 9999
+    sbuff(1) = rhow
+    ierror = putelt(fds, grpnam, 'RHOW', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element DT
+    ! element 'DT'
     !
-    i = i+1
-    rdummy(1) = dt
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,rdummy    )
-    if (ierr/=0) goto 9999
+    sbuff(1) = dt
+    ierror = putelt(fds, grpnam, 'DT', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element NFLTYP
+    ! element 'NFLTYP'
     !
-    i = i+1
     idummy(1) = nfltyp
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'NFLTYP', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element TSCALE
+    ! element 'TSCALE'
     !
-    i = i+1
-    rdummy(1) = tscale
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,rdummy    )
-    if (ierr/=0) goto 9999
+    sbuff(1) = tscale
+    ierror = putelt(fds, grpnam, 'TSCALE', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element IT01
+    ! element 'IT01'
     !
-    i = i+1
     idummy(1) = it01
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'IT01', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element IT02
+    ! element 'IT02'
     !
-    i = i+1
     idummy(1) = it02
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'IT02', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element TZONE
+    ! element 'TZONE'
     !
-    i = i+1
-    rdummy(1) = tzone
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,rdummy    )
-    if (ierr/=0) goto 9999
+    sbuff(1) = tzone
+    ierror = putelt(fds, grpnam, 'TZONE', uindex, 1, sbuff)
+    if (ierror==9002) ierror=0 ! TZONE didn't exist on old files. Accept error for backward compatibility.
+    if (ierror/= 0) goto 9999
     !
-    ! element ITLEN
+    ! element 'ITLEN'
     !
-    i = i+1
     idummy(1) = itlen
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(i) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'ITLEN', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ierror = clsnef(fds)
+    !
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wrparm

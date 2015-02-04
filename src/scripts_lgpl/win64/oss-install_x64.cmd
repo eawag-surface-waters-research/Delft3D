@@ -119,6 +119,19 @@ rem =============================================================
     call :handle_error
 goto :endproc
 
+rem =============================================================
+rem === copyNetcdf copy the appropriate netcdf.dll            ===
+rem =============================================================
+:copyNetcdf
+    if defined ifort_compiler12 (
+        call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\ifort12\netcdf.dll" !dest_bin!
+    ) else if defined ifort_compiler13 (
+        call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\ifort13\netcdf.dll" !dest_bin!
+    ) else if defined ifort_compiler14 (
+        call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\ifort14\netcdf.dll" !dest_bin!
+    )
+goto :endproc
+
 
 
 rem ===============
@@ -233,6 +246,7 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\default\*"                                 !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
+    call :copyNetcdf
     
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -269,6 +283,7 @@ rem    )
 rem    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
 rem    set ErrorLevel=0
 rem    call :copyFile "third_party_open\openda\core\native\lib\win64\*.dll"      !dest_bin!
+rem    call :copyNetcdf
 goto :endproc
 
 

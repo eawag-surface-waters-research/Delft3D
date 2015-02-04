@@ -46,7 +46,8 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    !
+    use flow2d3d_timers
+    use datagroups
     use globaldata
     use string_module
     !
@@ -58,8 +59,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     !
     real(fp)                 , pointer :: eps
     logical                  , pointer :: first
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
+    type (datagroup)         , pointer :: group
     real(fp)                 , pointer :: gammax
     real(fp)                 , pointer :: rhow
     real(fp)                 , pointer :: ag
@@ -68,10 +68,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     logical                  , pointer :: ubot_from_com
     logical                  , pointer :: wlen_from_com
     logical                  , pointer :: only_distot_from_com
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 17
 !
 ! Global variables
 !
@@ -158,7 +154,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     integer                         :: ntimwb               ! Time index of second function 
     integer                         :: tact                 ! Actual time step number 
     integer      , dimension(3)     :: uindex               !  Lowest allowed reference number
-    integer      , dimension(nelmx) :: nbytsg               ! Array containing the number of bytes of each single ELMTPS 
     integer      , external         :: clsnef
     integer      , external         :: crenef
     integer      , external         :: getels
@@ -178,53 +173,20 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     character(16), dimension(1)     :: cdum16               ! Help array to read/write Nefis files 
     character(256)                  :: datnam
     character(256)                  :: defnam
-    character(16), dimension(nelmx) :: elmunt               ! Array with element physical unit 
     character(16)                   :: funam                ! Name of element which has to be read 
     character(16)                   :: grpnam               ! Data-group name defined for the COM-files (WAVTIM) 
-    character(16), dimension(nelmx) :: elmnms               ! Element name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmqty               ! Array with element quantity 
-    character(16), dimension(nelmx) :: elmtps               ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(64), dimension(nelmx) :: elmdes               ! Array with element description 
     character(80)                   :: message              ! Message to diagnostic file
 !
 ! Data statements
 !
     data grpnam/'WAVTIM'/
-    data elmnms/'TIMWAV' , 'HRMS'  , 'TP' , 'DIR' , 'DISTOT', 'DISSURF', &
-              & 'DISWCAP', 'DISBOT', 'FX' , 'FY'  , 'WSBU'  , 'WSBV'   , &
-              & 'MX'     , 'MY'    , 'TPS', 'UBOT', 'WLEN'/
-    data elmqty/nelmx*' '/
-    data elmunt/'[ TSCALE]', '[   M   ]', '[   S   ]', '[  DEG  ]', '[  W/M2 ]', &
-              & '[  W/M2 ]', '[  W/M2 ]', '[  W/M2 ]', '[  N/M2 ]', '[  N/M2 ]', &
-              & '[  N/M2 ]', '[  N/M2 ]', '[ M3/SM ]', '[ M3/SM ]', '[   S   ]', &
-              & '[  M/S  ]', '[   M   ]'/
-    data elmtps/'INTEGER', 16*'REAL'/
-    data nbytsg/nelmx*4/
-    data elmdes/'Time of wave field rel. to reference date/time                ', &
-        & 'Root mean square wave height                                  ', &
-        & 'Peak wave period                                              ', &
-        & 'Mean direction of wave propagation relative to east ccw       ', &
-        & 'Wave energy dissipation rate (total)                          ', &
-        & 'Wave energy dissipation rate at the free surface              ', &
-        & 'Wave energy dissipation rate due to white capping             ', &
-        & 'Wave energy dissipation rate at the bottom                    ', &
-        & 'Wave forcing term at surface level in u-point                 ', &
-        & 'Wave forcing term at surface level in v-point                 ', &
-        & 'Wave forcing term in water body in u-point                    ', &
-        & 'Wave forcing term in water body in v-point                    ', &
-        & 'Wave-induced volume flux in u-point                           ', &
-        & 'Wave-induced volume flux in v-point                           ', &
-        & 'Smoothed peak wave period                                     ', &
-        & 'Orbital motion near the bottom                                ', &
-        & 'Mean wave length                                              '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefissetwav)
+    call getdatagroup(gdp, FILOUT_COM, grpnam, group)
     !
     eps                  => gdp%gdconst%eps
-    first                => nefiselem%first
-    elmdms               => nefiselem%elmdms
+    first                => group%first
     gammax               => gdp%gdnumeco%gammax
     rhow                 => gdp%gdphysco%rhow
     ag                   => gdp%gdphysco%ag
@@ -241,42 +203,29 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     ! Set up the element dimensions
     !
     if (first) then
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'TIMWAV', ' ', IO_INT4, 2, (/nmaxus, mmax/), ' ', 'Time of wave field rel. to reference date/time', '[ TSCALE]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'HRMS', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Root mean square wave height', '[   M   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'TP', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Peak wave period', '[   S   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DIR', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Mean direction of wave propagation relative to east ccw', '[  DEG  ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DISTOT', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave energy dissipation rate (total)', '[  W/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DISSURF', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave energy dissipation rate at the free surface', '[  W/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DISWCAP', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave energy dissipation rate due to white capping', '[  W/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DISBOT', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave energy dissipation rate at the bottom', '[  W/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'FX', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave forcing term at surface level in u-point', '[  N/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'FY', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave forcing term at surface level in v-point', '[  N/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'WSBU', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave forcing term in water body in u-point', '[  N/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'WSBV', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave forcing term in water body in v-point', '[  N/M2 ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'MX', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave-induced volume flux in u-point', '[ M3/SM ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'MY', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wave-induced volume flux in v-point', '[ M3/SM ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'TPS', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Smoothed peak wave period', '[   S   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'UBOT', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Orbital motion near the bottom', '[  M/S  ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'WLEN', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Mean wave length', '[   M   ]')
+       !
        ! in case of roller: first will be set to .false. later in this routine
        if (.not. roller) first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,5         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,6         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,7         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,8         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,9         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,10        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,11        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,12        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,13        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,14        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,15        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,16        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,17        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
        !
        ! Set the latest COM-file version
        !
@@ -402,97 +351,89 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     ! The wave height hrms is necessary for computing the orbital
     ! velocity uorb and for breaking wave induced turbulence
     !
+!          call timer_start(timer_tricom_rest, gdp)
     funam = 'HRMS'
     call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-              & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-              & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-              & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+              & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+              & funam     ,ntimwa    ,ntimwb    , &
               & atimw     ,btimw     ,hrms      ,hrmcom    ,gdp       )
+!          call timer_stop(timer_tricom_rest, gdp)
     if (error) goto 9999
     !
-    if (tps_from_com) then
-       !
-       ! Read TPS from the com-file instead of TP
-       ! Put it in array tp
-       !
-       funam = 'TPS'
-       call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
-                 & atimw     ,btimw     ,tp        ,tpcom     ,gdp       )
-    else
+    !if (tps_from_com) then
+    !   !
+    !   ! Read TPS from the com-file instead of TP
+    !   ! Put it in array tp
+    !   !
+    !   funam = 'TPS'
+    !   call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
+    !             & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+    !             & funam     ,ntimwa    ,ntimwb    , &
+    !             & atimw     ,btimw     ,tp        ,tpcom     ,gdp       )
+    !else
        funam = 'TP'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                 & funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,tp        ,tpcom     ,gdp       )
-    endif
+    !endif
     if (error) goto 9999
     !
     ! Read the direction and interpolate by calling dirint
     !
     funam = 'DIR'
     call dirint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-              & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-              & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-              & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+              & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+              & funam     ,ntimwa    ,ntimwb    , &
               & atimw     ,btimw     ,teta      ,dircom    ,dircos    , &
               & dirsin    ,hrmcom    ,gdp       )
     if (error) goto 9999
     !
-    if (.not. roller) then
-       if (.not. only_distot_from_com) then
-          !
-          ! Read parameter DISTOT from the COM-file
-          !
-          funam = 'DISTOT'
-          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
-                    & atimw     ,btimw     ,dis(:,:,1),discom  ,gdp       )
-          if (error) goto 9999
-          !
-          ! Parameters DISSURF, DISWCAP and DISBOT will also be on the COM-file
-          ! when DISTOT is there
-          !
-          funam = 'DISSURF'
-          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
-                    & atimw     ,btimw     ,dis(:,:,2),discom  ,gdp       )
-          if (error) goto 9999
-          !
-          funam = 'DISWCAP'
-          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
-                    & atimw     ,btimw     ,dis(:,:,3),discom  ,gdp       )
-          if (error) goto 9999
-          !
-          funam = 'DISBOT'
-          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
-                    & atimw     ,btimw     ,dis(:,:,4),discom  ,gdp       )
-          if (error) goto 9999
-
-       else
+    !if (.not. roller) then
+       !if (.not. only_distot_from_com) then
+       !   !
+       !   ! Read parameter DISTOT from the COM-file
+       !   !
+       !   funam = 'DISTOT'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam  , &
+       !             & funam     ,ntimwa  ,ntimwb    , &
+       !             & atimw     ,btimw     ,dis(:,:,1),discom  ,gdp       )
+       !   if (error) goto 9999
+       !   !
+       !   ! Parameters DISSURF, DISWCAP and DISBOT will also be on the COM-file
+       !   ! when DISTOT is there
+       !   !
+       !   funam = 'DISSURF'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam  , &
+       !             & funam     ,ntimwa  ,ntimwb    , &
+       !             & atimw     ,btimw     ,dis(:,:,2),discom  ,gdp       )
+       !   if (error) goto 9999
+       !   !
+       !   funam = 'DISWCAP'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam  , &
+       !             & funam     ,ntimwa  ,ntimwb    , &
+       !             & atimw     ,btimw     ,dis(:,:,3),discom  ,gdp       )
+       !   if (error) goto 9999
+       !   !
+       !   funam = 'DISBOT'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam  , &
+       !             & funam     ,ntimwa  ,ntimwb    , &
+       !             & atimw     ,btimw     ,dis(:,:,4),discom  ,gdp       )
+       !   if (error) goto 9999
+       !
+       !else
           ! 
           ! Only read DISS (total wave dissipation) from the COM-file in case of old COM-file.
           !
           error     = .false.
           funam     = 'DISS'
-          elmnms(5) = 'DISS'
-          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+          call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                    & funam     ,ntimwa    ,ntimwb    , &
                     & atimw     ,btimw     ,dis(:,:,1),discom    ,gdp       )
           if (error) goto 9999
           !
@@ -502,85 +443,77 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
           dis(:,:,2) = dis(:,:,1)
           dis(:,:,3) = 0.0_fp
           dis(:,:,4) = 0.0_fp
-       endif
+       !endif
        !
        funam = 'FX'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                 & funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,wsu       ,wsucom    ,gdp       )
        if (error) goto 9999
        !
        funam = 'FY'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                 & funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,wsv       ,wsvcom    ,gdp       )
        if (error) goto 9999
        !
-       if (.not. only_distot_from_com) then
-          !
-          ! Parameters WSBU and WSBV will only be on the COM-file when DISTOT
-          ! is there
-          !
-          funam = 'WSBU'
-          call frdint(comfil    ,lundia    ,error     ,ifcore     ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam     ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt     ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa     ,ntimwb    , &
-                    & atimw     ,btimw     ,wsbodyu   ,wsbodyucom ,gdp       )
-          if (error) goto 9999
-          !
-          funam = 'WSBV'
-          call frdint(comfil    ,lundia    ,error     ,ifcore     ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam     ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt     ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa     ,ntimwb    , &
-                    & atimw     ,btimw     ,wsbodyv   ,wsbodyvcom ,gdp       )
-          if (error) goto 9999
-       else
+       !if (.not. only_distot_from_com) then
+       !   !
+       !   ! Parameters WSBU and WSBV will only be on the COM-file when DISTOT
+       !   ! is there
+       !   !
+       !   funam = 'WSBU'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore     ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam     , &
+       !             & funam     ,ntimwa     ,ntimwb    , &
+       !             & atimw     ,btimw     ,wsbodyu   ,wsbodyucom ,gdp       )
+       !   if (error) goto 9999
+       !   !
+       !   funam = 'WSBV'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore     ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam     , &
+       !             & funam     ,ntimwa     ,ntimwb    , &
+       !             & atimw     ,btimw     ,wsbodyv   ,wsbodyvcom ,gdp       )
+       !   if (error) goto 9999
+       !else
           wsbodyu = 0.0_fp
           wsbodyv = 0.0_fp
-       endif
+       !endif
        !
        funam = 'MX'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                 & funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,grmasu    ,msucom    ,gdp       )
        if (error) goto 9999
        !
        funam = 'MY'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                 & funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,grmasv    ,msvcom    ,gdp       )
        if (error) goto 9999
        !
-       if (ubot_from_com) then
-          funam = 'UBOT'
-          call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
-                    & atimw     ,btimw     ,ubot      ,ubcom     ,gdp       )
-          if (error) goto 9999
-       endif
+       !if (ubot_from_com) then
+       !   funam = 'UBOT'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+       !             & funam     ,ntimwa    ,ntimwb    , &
+       !             & atimw     ,btimw     ,ubot      ,ubcom     ,gdp       )
+       !   if (error) goto 9999
+       !endif
        !
-       if (wlen_from_com) then
-          funam = 'WLEN'
-          call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
-                    & atimw     ,btimw     ,wlen      ,wlcom     ,gdp       )
-          if (error) goto 9999
-       endif
-    endif
+       !if (wlen_from_com) then
+       !   funam = 'WLEN'
+       !   call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
+       !             & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+       !             & funam     ,ntimwa    ,ntimwb    , &
+       !             & atimw     ,btimw     ,wlen      ,wlcom     ,gdp       )
+       !   if (error) goto 9999
+       !endif
+    !endif
     !
     ! Store the time index nrs which are in core now.
     !

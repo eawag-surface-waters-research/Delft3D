@@ -1,5 +1,7 @@
-subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
-                   & kmax      ,nmaxus    ,lsed      ,lsedtot   ,gdp       )
+subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
+                   & kmax      ,nmaxus    ,lsed      ,lsedtot   , & 
+                   & kfsmin    ,kfsmax    ,irequest  ,fds       ,iarrc     , &
+                   & mf        ,ml        ,nf        ,nl        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -31,7 +33,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for bedforms, sediment transport
-!              and morphology to the NEFIS FLOW MAP file
+!              and morphology to the FLOW MAP file
 !
 ! Method used:
 !
@@ -39,9 +41,11 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    !
+    use dfparall, only: inode, nproc, master
+    use datagroups
     use globaldata
+    use wrtarray, only: wrtvar
+    use netcdf
     !
     implicit none
     !
@@ -51,187 +55,139 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer(pntrsize)                    , pointer :: sbuu
-    integer(pntrsize)                    , pointer :: sbvv
-    integer(pntrsize)                    , pointer :: ws
-    integer(pntrsize)                    , pointer :: dps
-    logical                              , pointer :: lfbedfrmout
-    logical                              , pointer :: first
-    integer                              , pointer :: celidt
-    type (nefiselement)                  , pointer :: nefiselem
-    real(hp)                             , pointer :: morft
-    real(fp)                             , pointer :: morfac
+    integer(pntrsize)               , pointer :: sbuu
+    integer(pntrsize)               , pointer :: sbvv
+    integer(pntrsize)               , pointer :: ws
+    integer(pntrsize)               , pointer :: dps
+    logical                         , pointer :: lfbedfrmout
+    integer                         , pointer :: celidt
+    type (datagroup)                , pointer :: group4
+    type (datagroup)                , pointer :: group5
+    real(hp)                        , pointer :: morft
+    real(fp)                        , pointer :: morfac
+    integer                         , pointer :: nmaxgl
+    integer                         , pointer :: mmaxgl
 !
 ! Global variables
 !
-    integer       , intent(in)  :: itmapc !!  Current time counter for the MAP data file
-    integer                     :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                     :: lsed   !  Description and declaration in esm_alloc_int.f90
-    integer                     :: lsedtot!  Description and declaration in esm_alloc_int.f90
-    integer                     :: lundia !  Description and declaration in inout.igs
-    integer                     :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    logical       , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    character(60) , intent(in)  :: trifil !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
+    integer                                                                           , intent(in)  :: itmapc  !!  Current time counter for the MAP data file
+    integer                                                                                         :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                         :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                         :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                         :: lundia  !  Description and declaration in inout.igs
+    integer                                                                                         :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                         :: nmaxus  !  Description and declaration in esm_alloc_int.f90
+    logical                                                                           , intent(out) :: error   !!  Flag=TRUE if an error is encountered
+    character(*)                                                                      , intent(in)  :: filename    !  File name
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfsmax      !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfsmin      !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           , intent(in)  :: irequest    !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                                           , intent(in)  :: fds         !  File handle of output NEFIS/NetCDF file
+    !
+    integer    , dimension(4,0:nproc-1)                                               , intent(in)  :: iarrc       ! array containing collected grid indices
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: mf          ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: ml          ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: nf          ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: nl          ! last index w.r.t. global grid in y-direction
 !
 ! Local variables
 !
-    integer                 :: ierror     ! Local errorflag for NEFIS files 
-    integer                 :: fds
-    integer, dimension(1)   :: idummy     ! Help array to read/write Nefis files 
-    integer, dimension(3,5) :: uindex
-    integer, external       :: getelt
-    integer, external       :: putelt
-    integer, external       :: inqmxi
-    integer, external       :: clsnef
-    integer, external       :: open_datdef
-    integer, external       :: neferr
-    real(sp)                :: sdummy
-    character(16)           :: grnam4
-    character(16)           :: grnam5
-    character(256)          :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(60)           :: filnam      ! Help var. for FLOW file name 
-!
+    integer                                       :: ierror     ! Local error flag
+    integer                                       :: filetype
+    character(16)                                 :: grnam4
+    character(16)                                 :: grnam5
+    !
+    integer                                       :: iddim_time
+    !
     data grnam4/'map-infsed-serie'/
     data grnam5/'map-sed-series'/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem           => gdp%nefisio%nefiselem(nefiswrsedminf)
-    first               => nefiselem%first
-    celidt              => nefiselem%celidt
-    morft               => gdp%gdmorpar%morft
-    morfac              => gdp%gdmorpar%morfac
-    lfbedfrmout         => gdp%gdbedformpar%lfbedfrmout
-    sbuu                => gdp%gdr_i_ch%sbuu
-    sbvv                => gdp%gdr_i_ch%sbvv
-    ws                  => gdp%gdr_i_ch%ws
-    dps                 => gdp%gdr_i_ch%dps
+    call getdatagroup(gdp, FILOUT_MAP, grnam4, group4)
+    call getdatagroup(gdp, FILOUT_MAP, grnam5, group5)
+    celidt         => group4%celidt
     !
-    ! Initialize local variables
+    mmaxgl         => gdp%gdparall%mmaxgl
+    nmaxgl         => gdp%gdparall%nmaxgl
+    morft          => gdp%gdmorpar%morft
+    morfac         => gdp%gdmorpar%morfac
+    lfbedfrmout    => gdp%gdbedformpar%lfbedfrmout
+    sbuu           => gdp%gdr_i_ch%sbuu
+    sbvv           => gdp%gdr_i_ch%sbvv
+    ws             => gdp%gdr_i_ch%ws
+    dps            => gdp%gdr_i_ch%dps
     !
-    filnam = trifil(1:3) // 'm' // trifil(5:)
-    errmsg = ' '
+    filetype = getfiletype(gdp, FILOUT_MAP)
     !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
-    !
-    if (first) then
+    ierror = 0
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
-       ! Define elements of map-infsed-serie
+       ! Define dimensions
        !
-       call addelm(nefiswrsedminf,'ITMAPS',' ','[   -   ]','INTEGER',4    , &
-          & 'timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)', &
-          & 1         ,1         ,0         ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
+       iddim_time    = adddim(gdp, lundia, FILOUT_MAP, 'time'   , nf90_unlimited)
+       !
+       ! map-infsed-serie
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'ITMAPS', ' ', IO_INT4    , 0, longname='timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)')
+       endif
        if (lsedtot > 0) then
-          call addelm(nefiswrsedminf,'MORFAC',' ','[   -   ]','REAL',4       , &
-             & 'morphological acceleration factor (MORFAC)                  ', &
-             & 1         ,1         ,0         ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrsedminf,'MORFT', ' ','[  DAYS ]','REAL',8       , &
-             & 'morphological time (days since start of simulation)         ', &
-             & 1         ,1         ,0         ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'MORFAC', ' ', IO_REAL4, 0, longname='morphological acceleration factor (MORFAC)')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'MORFT' , ' ', IO_REAL8, 0, longname='morphological time (days since start of simulation)', unit='days')
        endif
-       call defnewgrp(nefiswrsedminf ,filnam    ,grnam4   ,gdp)
        !
-       ! Define elements of map-sed-series
+       group4%grp_dim = iddim_time
+       group5%grp_dim = iddim_time
+       celidt = 0
        !
-       ! Add sediment transport and morphology fields
+    case (REQUESTTYPE_WRITE)
+       !
+       celidt = celidt + 1
+       group5%celidt = celidt
+       !
+       ! Writing of output on every itmapc
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, itmapc, 'ITMAPS')
+          if (ierror/=0) goto 9999
+       endif
        !
        if (lsedtot > 0) then
-          call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
-                    & lsed      ,lsedtot   ,1         ,0         ,grnam5    , &
-                    & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    ,gdp       )
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, morfac, 'MORFAC')
+          if (ierror/=0) goto 9999
+          !
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, morft, 'MORFT')
+          if (ierror/=0) goto 9999
        endif
        !
-       ! Add bedform fields
-       !
-       if (lfbedfrmout) then
-          call wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,1         , &
-                    & 0         ,grnam5    ,gdp       )
-       endif
-       !
-       call defnewgrp(nefiswrsedm ,filnam    ,grnam5   ,gdp)
-       !
-       ! Get start celidt for writing
-       !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrsedminf)
-       first     => nefiselem%first
-       celidt    => nefiselem%celidt
-    endif
-    !
-    ierror = open_datdef(filnam   ,fds      )
-    if (ierror/= 0) goto 9999
-    if (first) then
-       !
-       ! end of initialization, don't come here again
-       !
-       ierror = inqmxi(fds, grnam4, celidt)
-       first = .false.
-    endif
-    !
-    ! Writing of output on every itmapc
-    !
-    celidt = celidt + 1
-    !
-    idummy(1)   = itmapc
-    uindex(1,1) = celidt
-    uindex(2,1) = celidt
-    !
-    ! Group map-sed-series, identified with nefiswrsedm, must use the same
-    ! value for celidt.
-    ! Easy solution:
-    gdp%nefisio%nefiselem(nefiswrsedm)%celidt = celidt
-    ! Neat solution in pseudo code:
-    ! subroutine wrsedm
-    !    integer :: celidt
-    !    call wrsedminfsed(celidt)
-    !    call wrsedmsed(celidt)
-    ! end subroutine
-    !
-    ierror     = putelt(fds, grnam4, 'ITMAPS', uindex, 1, idummy)
-    if (ierror/=0) goto 9999
-    !
-    if (lsedtot > 0) then
-       sdummy      = real(morfac,sp)
-       ierror     = putelt(fds, grnam4, 'MORFAC', uindex, 1, sdummy)
-       if (ierror/=0) goto 9999
-       !
-       ierror     = putelt(fds, grnam4, 'MORFT',  uindex, 1, morft)
-       if (ierror/=0) goto 9999
-    endif
+    end select
     !
     ! Add sediment transport and morphology fields
     !
     if (lsedtot > 0) then
-       call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
-                 & lsed      ,lsedtot   ,2         ,fds       ,grnam5    , &
-                 & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    ,gdp       )
-       if (error) goto 9999
+        call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
+                  & lsed      ,lsedtot   ,irequest  ,fds       ,grnam5    , &
+                  & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    , &
+                  & filename  ,gdp       ,filetype  , &
+                  & mf        ,ml        ,nf        ,nl        , &
+                  & iarrc     ,kfsmin    ,kfsmax    )
     endif
     !
     ! Add bedform fields
     !
     if (lfbedfrmout) then
-       call wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,2         , &
-                 & fds       ,grnam5    ,gdp       )
+       call wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
+                 & fds       ,grnam5    ,filename  ,gdp       ,filetype  , &
+                 & mf        ,ml        ,nf        ,nl        ,iarrc     )
     endif
-    if (error) goto 9999
     !
-    ierror = clsnef(fds)
+    ! write error message if error occured and set error = .true.
     !
-    ! write errormessage if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
- 9999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrsedmgrp

@@ -38,7 +38,8 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use sp_buffer
+    use datagroups
     use globaldata
     !
     implicit none
@@ -51,12 +52,7 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     logical                  , pointer :: zmodel
     logical                  , pointer :: first
     integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 10
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -94,212 +90,203 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
 !
 ! Local variables
 !
-    integer                                    :: ierr   ! Flag for error when writing to Communication file 
-    integer                                    :: k
-    integer                                    :: m
-    integer                                    :: n
-    integer                                    :: nelmx1
-    integer                                    :: nelmx2
-    integer       , dimension(1)               :: idummy ! Help array to read/write Nefis files 
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(256)                             :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grnam1 ! Data-group name defined for the COM-files (CURNT) 
-    character(16)                              :: grnam2 ! Data-group name defined for the COM-files (CURTIM) 
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: i
+    integer                                       :: ierror ! Flag for error when writing to Communication file 
+    integer                                       :: k
+    integer                                       :: m
+    integer                                       :: n
+    integer                                       :: nelmx1
+    integer                                       :: nelmx2
+    integer      , dimension(1)                   :: idummy ! Help array to read/write Nefis files 
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
+    character(16)                                 :: grnam1 ! Data-group name defined for the COM-files (CURNT) 
+    character(16)                                 :: grnam2 ! Data-group name defined for the COM-files (CURTIM) 
 !
 ! Data statements
 !
     data grnam1/'CURNT'/
     data grnam2/'CURTIM'/
-    data elmnms/'NTCUR', 'TIMCUR', 'QU', 'QV', 'S1', 'U1', 'V1', 'RSP', 'DZU1', 'DZV1'/
-    data elmqty/10*' '/
-    data elmunt/'[   -   ]', '[ TSCALE]', '[ M3/S  ]', '[ M3/S  ]', '[   M   ]', &
-              & '[  M/S  ]', '[  M/S  ]', '[  M/S  ]', '[   M   ]', '[   M   ]'/
-    data elmtps/2*'INTEGER', 8*'REAL'/
-    data nbytsg/10*4/
-    data elmdes/'Number of current fields in groups CURTIM and KENMTIM         ', &
-              & 'Time of current field rel.to reference date/time              ', &
-              & 'Time-average over latest interval of discharge in u-point     ', &
-              & 'Time-average over latest interval of discharge in v-point     ', &
-              & 'Water level in zeta point at end of time interval             ', &
-              & 'Velocity in u-point at end of time interval                   ', &
-              & 'Velocity in v-point at end of time interval                   ', &
-              & 'Spiral flow intensity                                         ', &
-              & 'Layer thickness in u-point at end of time interval            ', &
-              & 'Layer thickness in v-point at end of time interval            '/
 !
 !! executable statements -------------------------------------------------------
 !
     only_distot_from_com => gdp%gdprocs%only_distot_from_com
     zmodel               => gdp%gdprocs%zmodel
-    nefiselem            => gdp%nefisio%nefiselem(nefiswrcurt)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    ! Initialize local variables
-    !
-    ierr   = 0
-    wrswch = .true.
-    nelmx1 = 1
-    nelmx2 = nelmx - nelmx1
+    call getdatagroup(gdp, FILOUT_COM, grnam1, group)
+    first   => group%first
+    celidt  => group%celidt
     !
     ! Set up the element dimensions
     ! different element dimensions for 2d and 3d applications
     ! if kmax =1 (2d) then only 2 dimensions
     !
     if (first) then
-       first = .false.
-       call filldm(elmdms, 1, 1, 1, 0, 0, 0, 0)
-       call filldm(elmdms, 2, 1, 1, 0, 0, 0, 0)
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam1, 'NTCUR', ' ', IO_INT4, 1, (/1/), ' ', 'Number of current fields in groups CURTIM and KENMTIM', '[   -   ]')
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'TIMCUR', ' ', IO_REAL4, 1, (/1/), ' ', 'Time of current field rel.to reference date/time', '[ TSCALE]')
        if (kmax>1) then
-          call filldm(elmdms, 3, 3, nmaxus, mmax, kmax, 0, 0)
-          call filldm(elmdms, 4, 3, nmaxus, mmax, kmax, 0, 0)
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QU', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Time-average over latest interval of discharge in u-point', '[ M3/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QV', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Time-average over latest interval of discharge in v-point', '[ M3/S  ]')
        else
-          call filldm(elmdms, 3, 2, nmaxus, mmax, 0   , 0, 0)
-          call filldm(elmdms, 4, 2, nmaxus, mmax, 0   , 0, 0)
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QU', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Time-average over latest interval of discharge in u-point', '[ M3/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QV', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Time-average over latest interval of discharge in v-point', '[ M3/S  ]')
        endif
-       call filldm(elmdms, 5, 2, nmaxus, mmax, 0, 0, 0)
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'S1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Water level in zeta point at end of time interval', '[   M   ]')
        if (kmax>1) then
-          call filldm(elmdms, 6, 3, nmaxus, mmax, kmax, 0, 0)
-          call filldm(elmdms, 7, 3, nmaxus, mmax, kmax, 0, 0)
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'U1', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Velocity in u-point at end of time interval', '[  M/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'V1', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Velocity in v-point at end of time interval', '[  M/S  ]')
        else
-          call filldm(elmdms, 6, 2, nmaxus, mmax, 0   , 0, 0)
-          call filldm(elmdms, 7, 2, nmaxus, mmax, 0   , 0, 0)
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'U1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Velocity in u-point at end of time interval', '[  M/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'V1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Velocity in v-point at end of time interval', '[  M/S  ]')
        endif
-       call filldm(elmdms,  8, 2, nmaxus, mmax, 0, 0, 0)
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'RSP', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Spiral flow intensity', '[  M/S  ]')
        if (kmax>1) then
-          call filldm(elmdms, 9 , 3, nmaxus, mmax, kmax, 0, 0)
-          call filldm(elmdms, 10, 3, nmaxus, mmax, kmax, 0, 0)
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'DZU1', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Layer thickness in u-point at end of time interval', '[   M   ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'DZV1', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Layer thickness in v-point at end of time interval', '[   M   ]')
        else
-          call filldm(elmdms, 9 , 2, nmaxus, mmax, 0   , 0, 0)
-          call filldm(elmdms, 10, 2, nmaxus, mmax, 0   , 0, 0)
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'DZU1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Layer thickness in u-point at end of time interval', '[   M   ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'DZV1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Layer thickness in v-point at end of time interval', '[   M   ]')
        endif
-
     endif
     !
-    ! Write all elements to file; all definition and creation of files,
-    ! data groups, cells and elements is handled by PUTGET.
+    ierror = open_datdef(comfil, fds, .false.)
+    if (ierror /= 0) goto 9999
     !
-    ! element  1 NTCUR for group CURNT
+    if (first) then
+       call defnewgrp(fds, FILOUT_COM, grnam1, gdp, comfil, errlog=ERRLOG_NONE)
+       call defnewgrp(fds, FILOUT_COM, grnam2, gdp, comfil, errlog=ERRLOG_NONE)
+       first = .false.
+    endif
     !
-    celidt = 1
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'NTCUR'
+    !
     idummy(1) = ntcur
-    call putgti(comfil    ,grnam1    ,nelmx1    ,elmnms(1) ,elmdms(1, 1) , &
-              & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1)    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy       )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam1, 'NTCUR', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  1 ITIMC for group CURTIM (cel number ITCUR)
+    uindex (1,1) = itcur ! start index
+    uindex (2,1) = itcur ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'TIMCUR'
     !
     celidt    = itcur
     idummy(1) = itimc
-    call putgti(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierr      ,idummy       )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'TIMCUR', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  2 QU  for group CURTIM (cel number ITCUR)
+    ! element 'QU'
     !
+    call sbuff_checksize(nmaxus*mmax*kmax)
+    i = 0
     do k = 1, kmax
        do m = 1, mmax
           do n = 1, nmaxus
-             rbuff(n, m, k) = qu(n, m, k)
+             i = i+1
+             sbuff(i) = qu(n, m, k)
           enddo
        enddo
     enddo
-    call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'QU', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element  3 QV  for group CURTIM (cel number ITCUR)
+    ! element 'QV'
     !
+    i = 0
     do k = 1, kmax
        do m = 1, mmax
           do n = 1, nmaxus
-             rbuff(n, m, k) = qv(n, m, k)
+             i = i+1
+             sbuff(i) = qv(n, m, k)
           enddo
        enddo
     enddo
-    call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'QV', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element  4 S1  for group CURTIM (cel number ITCUR)
+    ! element 'S1'
     !
+    i = 0
     do m = 1, mmax
        do n = 1, nmaxus
-          rbuff(n, m, 1) = s1(n, m)
+          i = i+1
+          sbuff(i) = s1(n, m)
        enddo
     enddo
-    call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(5) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'S1', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element  5 U1  for group CURTIM (cel number ITCUR)
+    ! element 'U1'
     !
+    i = 0
     do k = 1, kmax
        do m = 1, mmax
           do n = 1, nmaxus
-             rbuff(n, m, k) = u1(n, m, k)
+             i = i+1
+             sbuff(i) = u1(n, m, k)
           enddo
        enddo
     enddo
-    call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(6) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'U1', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element  6 V1  for group CURTIM (cel number ITCUR)
+    ! element 'V1'
     !
+    i = 0
     do k = 1, kmax
        do m = 1, mmax
           do n = 1, nmaxus
-             rbuff(n, m, k) = v1(n, m, k)
+             i = i+1
+             sbuff(i) = v1(n, m, k)
           enddo
        enddo
     enddo
-    call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(7) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'V1', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    ! element  7 RSP for group CURTIM (cel number ITCUR)
+    ! element 'RSP'
     ! if secondary flow is defined then r1(n,m,1,lsecfl) else 0.
     !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          if (lsecfl/=0) then
-             rbuff(n, m, 1) = r1(n, m, 1, lsecfl)
-          else
-             rbuff(n, m, 1) = 0.0
-          endif
+    i = 0
+    if (lsecfl/=0) then
+       do m = 1, mmax
+          do n = 1, nmaxus
+             i = i+1
+             sbuff(i) = r1(n, m, 1, lsecfl)
+          enddo
        enddo
-    enddo
-    call putgtr(comfil     ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-              & elmqty(2)  ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-              & elmnms(8)  ,celidt    ,wrswch    ,ierr      ,rbuff        )
-    if (ierr/=0) then
+    else
+       sbuff = 0.0_sp
     endif
+    ierror = putelt(fds, grnam2, 'RSP', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
+    !
     if (.not. only_distot_from_com) then
        !
-       ! element  8 DZU1  for group CURTIM (cel number ITCUR)
+       ! element 'DZU1'
        !
-       rbuff = 0.0_fp
+       i = 0
+       sbuff = 0.0_fp
        if (zmodel) then
           do k = 1, kmax
              do m = 1, mmax
                 do n = 1, nmaxus
-                   rbuff(n, m, k) = dzu1(n, m, k)
+                   i = i+1
+                   sbuff(i) = dzu1(n, m, k)
                 enddo
              enddo
           enddo
@@ -307,24 +294,25 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
           do k = 1, kmax
              do m = 1, mmax
                 do n = 1, nmaxus
-                   rbuff(n, m, k) = hu(n, m)*thick(k)
+                   i = i+1
+                   sbuff(i) = hu(n, m)*thick(k)
                 enddo
              enddo
           enddo
        endif
-       call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-                 & elmnms(9) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-       if (ierr/=0) goto 9999
+       ierror = putelt(fds, grnam2, 'DZU1', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
        !
-       ! element  9 DZV1  for group CURTIM (cel number ITCUR)
+       ! element 'DZV1'
        !
+       i = 0
        rbuff = 0.0_fp
        if (zmodel) then
           do k = 1, kmax
              do m = 1, mmax
                 do n = 1, nmaxus
-                   rbuff(n, m, k) = dzv1(n, m, k)
+                   i = i+1
+                   sbuff(i) = dzv1(n, m, k)
                 enddo
              enddo
           enddo
@@ -332,21 +320,24 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
           do k = 1, kmax
              do m = 1, mmax
                 do n = 1, nmaxus
-                   rbuff(n, m, k) = hv(n, m)*thick(k)
+                   i = i+1
+                   sbuff(i) = hv(n, m)*thick(k)
                 enddo
              enddo
           enddo
        endif
-       call putgtr(comfil     ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
-                 & elmqty(2)  ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
-                 & elmnms(10) ,celidt    ,wrswch    ,ierr      ,rbuff        )
-       if (ierr/=0) goto 9999
+       ierror = putelt(fds, grnam2, 'DZV1', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
     endif
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ierror = clsnef(fds)
+    !
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wrcurt

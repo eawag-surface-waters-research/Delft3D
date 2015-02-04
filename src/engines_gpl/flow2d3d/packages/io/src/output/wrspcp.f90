@@ -37,6 +37,8 @@ subroutine wrspcp(comfil    ,lundia    ,error     ,nsrc      ,namsrc    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sp_buffer
+    use datagroups
     use globaldata
     !
     implicit none
@@ -46,13 +48,7 @@ subroutine wrspcp(comfil    ,lundia    ,error     ,nsrc      ,namsrc    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 4
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -64,102 +60,95 @@ subroutine wrspcp(comfil    ,lundia    ,error     ,nsrc      ,namsrc    , &
     character(*)                                   :: comfil !!  Name for communication file com-<case><label>
     character(20), dimension(nsrc)                 :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
-!
 ! Local variables
 !
-    integer                                    :: ierr   ! Flag for error when writing to Communication file 
-    integer       , dimension(1)               :: idummy ! Help array to read/write Nefis files 
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of bytes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grpnam ! Data-group name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                             :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: i
+    integer                                       :: isrc
+    integer                                       :: ierror ! Flag for error when writing to Communication file 
+    integer    , dimension(1)                     :: idummy ! Help array to write integers
+    integer    , dimension(3,5)                   :: uindex
+    integer                        , external     :: putels
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grpnam ! Data-group name defined for the COM-files 
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grpnam/'SPECPOINTS'/
-    data elmnms/'NSRC', 'NAMSRC', 'MNKSRC', 'XYZSRC'/
-    data elmqty/4*' '/
-    data elmunt/3*'[   -   ]', '[   M   ]'/
-    data elmtps/'INTEGER', 'CHARACTER', 'INTEGER', 'REAL'/
-    data nbytsg/4, 20, 4, 4/
-    data elmdes/'Number of sources                                             '&
-       & , 'Name of discharge sources                                     ',    &
-        & '(M,N,K) indices of discharge sources and time dep. location   ',      &
-        & 'Exact X,Y,Z-position                                          '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrspcp)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    !-----Initialize local variables
-    !
-    ierr = 0
-    wrswch = .true.
-    !
-    !-----Set up the element dimensions
+    call getdatagroup(gdp, FILOUT_COM, grpnam, group)
+    first   => group%first
     !
     if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NSRC', ' ', IO_INT4, 1, (/1/), ' ', 'Number of sources', '[   -   ]')
        if (nsrc>0) then
-          call filldm(elmdms    ,2         ,1         ,nsrc      ,0         , &
-                    & 0         ,0         ,0         )
-          call filldm(elmdms    ,3         ,2         ,7         ,nsrc      , &
-                    & 0         ,0         ,0         )
-          call filldm(elmdms    ,4         ,2         ,3         ,nsrc      , &
-                    & 0         ,0         ,0         )
+          call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NAMSRC', ' ', 20, 1, (/nsrc/), ' ', 'Name of discharge sources', '[   -   ]') !CHARACTER
+          call addelm(gdp, lundia, FILOUT_COM, grpnam, 'MNKSRC', ' ', IO_INT4, 2, (/7, nsrc/), ' ', '(M,N,K) indices of discharge sources and time dep. location', '[   -   ]')
+          call addelm(gdp, lundia, FILOUT_COM, grpnam, 'XYZSRC', ' ', IO_INT4, 2, (/3, nsrc/), ' ', 'Exact X,Y,Z-position', '[   M   ]')
        endif
     endif
     !
-    !-----Write all elements to file; all definition and creation of files,
-    !     data groups, cells and elements is handled by PUTGET.
+    ierror = open_datdef(comfil   ,fds      , .false.)
+    if (ierror /= 0) goto 9999
     !
-    !-----element  1 NSRC
+    if (first) then
+       call defnewgrp(fds, FILOUT_COM, grpnam, gdp, comfil, errlog=ERRLOG_NONE)
+       first = .false.
+    endif
+    !
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'NSRC'
     !
     idummy(1) = nsrc
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
-    !
-    !-----element  2 NAMSRC (only if NSRC > 0)
+    ierror = putelt(fds, grpnam, 'NSRC', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
     if (nsrc>0) then
-       call putgtc(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(2) ,celidt    ,wrswch    ,ierr      ,namsrc    )
-       if (ierr/=0) goto 9999
        !
-       !--------element  3 MNKSRC (only if NSRC > 0)
+       ! element 'NAMSRC'
        !
-       call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(3) ,celidt    ,wrswch    ,ierr      ,mnksrc    )
-       if (ierr/=0) goto 9999
+       ierror = putels(fds, grpnam, 'NAMSRC', uindex, 1, namsrc)
+       if (ierror/= 0) goto 9999
        !
-       !--------element  4 XYZSRC (only if NSRC > 0)
+       ! element 'MNKSRC'
        !
-       call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(4) ,celidt    ,wrswch    ,ierr      ,xyzsrc    )
-       if (ierr/=0) then
-       endif
+       ierror = putelt(fds, grpnam, 'MNKSRC', uindex, 1, mnksrc)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'XYZSRC'
+       !
+       call sbuff_checksize(3*nsrc)
+       do isrc = 1, nsrc
+          do i = 1, 3
+             sbuff(i+(isrc-1)*3) = xyzsrc(i,isrc)
+          enddo
+       enddo
+       ierror = putelt(fds, grpnam, 'XYZSRC', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
     endif
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ierror = clsnef(fds)
+    !
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wrspcp

@@ -20,6 +20,7 @@ FINCLUDES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
+        -I${NETCDFROOT}/include \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
@@ -34,15 +35,14 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libIOOutput_la_SOURCES = \
-         addelm.f90 \
+         wrtarray.f90 \
          calbed.f90 \
-         defnewgrp.f90 \
          dirint.f90 \
          dp999.f90 \
-         filldm.f90 \
          fouana.f90 \
          fouvecmax.f90 \
          frdint.f90 \
+         getfield.f90 \
          getfpt.f90 \
          inippr.f90 \
          findnm_kcs.f90 \
@@ -57,10 +57,6 @@ libIOOutput_la_SOURCES = \
          prihis.f90 \
          prthis.f90 \
          prtmap.f90 \
-         putgtc.f90 \
-         putgti.f90 \
-         putgtl.f90 \
-         putgtr.f90 \
          rdtimc.f90 \
          rdtimw.f90 \
          realfileversion.f90 \
@@ -87,6 +83,9 @@ libIOOutput_la_SOURCES = \
          wrgrid.f90 \
          wrhfluff.f90 \
          wribot.f90 \
+         wrd_main.f90 \
+         wrh_main.f90 \
+         wrm_main.f90 \
          wridoc.f90 \
          wridro.f90 \
          wrihis.f90 \
@@ -117,12 +116,7 @@ libIOOutput_la_SOURCES = \
          wrthisbal.f90 \
          wrthisdad.f90 \
          wrthisdis.f90 \
-         wrtmap_pointer.f90 \
          wrtmap.f90 \
-         wrtmap_int_nm.f90 \
-         wrtmap_nm.f90 \
-         wrtmap_nmk.f90 \
-         wrtmap_nmkl.f90 \
          wrwaqapnt.f90 \
          wrwaqbal.f90 \
          wrwaqcco.F90 \

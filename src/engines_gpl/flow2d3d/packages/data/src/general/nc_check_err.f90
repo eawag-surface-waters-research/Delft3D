@@ -1,7 +1,7 @@
-subroutine nefisio_dealloc(gdp)
+subroutine nc_check_err(lundia, ierror, description, filename)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -28,42 +28,28 @@ subroutine nefisio_dealloc(gdp)
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-!
 ! NONE
-!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
-    use globaldata
+    use netcdf
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
 !
 ! Global variables
 !
+    integer     , intent(in) :: lundia  !  Description and declaration in inout.igs
+    integer     , intent(in) :: ierror
+    character(*), intent(in) :: description
+    character(*), intent(in) :: filename
 !
 ! Local variables
 !
-    integer                        :: i
-    integer                        :: istat
-    type (nefiselement) , pointer  :: nefiselem
 !
 !! executable statements -------------------------------------------------------
 !
-    do i = 1, nrnefisfiles
-       nefiselem => gdp%nefisio%nefiselem(i)
-       if (associated(nefiselem%elmdms)) deallocate (nefiselem%elmdms, stat=istat)
-       if (associated(nefiselem%nbytsg)) deallocate (nefiselem%nbytsg, stat=istat)
-       if (associated(nefiselem%elmunt)) deallocate (nefiselem%elmunt, stat=istat)
-       if (associated(nefiselem%elmnms)) deallocate (nefiselem%elmnms, stat=istat)
-       if (associated(nefiselem%elmqty)) deallocate (nefiselem%elmqty, stat=istat)
-       if (associated(nefiselem%elmtps)) deallocate (nefiselem%elmtps, stat=istat)
-       if (associated(nefiselem%elmdes)) deallocate (nefiselem%elmdes, stat=istat)
-    enddo
-    deallocate (gdp%nefisio, stat=istat)
-end subroutine nefisio_dealloc
+    if (ierror /= nf90_noerr) then
+        write (*,'(6a)') 'ERROR ', trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
+        write (lundia,'(6a)') 'ERROR ', trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
+    endif
+end subroutine nc_check_err

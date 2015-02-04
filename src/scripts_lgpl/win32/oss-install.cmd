@@ -116,6 +116,21 @@ rem =============================================================
     call :handle_error
 goto :endproc
 
+rem =============================================================
+rem === copyNetcdf copy the appropriate netcdf.dll            ===
+rem =============================================================
+:copyNetcdf
+    if defined ifort_compiler10 (
+        call :copyFile "third_party_open\netcdf\lib\win32\Release\ifort10\netcdf.dll" !dest_bin!
+    ) else if defined ifort_compiler12 (
+        call :copyFile "third_party_open\netcdf\lib\win32\Release\ifort12\netcdf.dll" !dest_bin!
+    ) else if defined ifort_compiler13 (
+        call :copyFile "third_party_open\netcdf\lib\win32\Release\ifort13\netcdf.dll" !dest_bin!
+    ) else if defined ifort_compiler14 (
+        call :copyFile "third_party_open\netcdf\lib\win32\Release\ifort14\netcdf.dll" !dest_bin!
+    )
+goto :endproc
+
 
 
 rem ===============
@@ -230,6 +245,7 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\default\*"                             !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_plugins!
+    call :copyNetcdf
     
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -287,6 +303,8 @@ rem ===========================
     call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_plugins!
+    call :copyNetcdf
+
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.

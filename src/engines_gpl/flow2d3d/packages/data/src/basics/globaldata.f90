@@ -137,7 +137,7 @@ module globaldata
     include 'wrirst.igs'
     include 'wrline.igs'
     include 'z_initcg.igs'
-    include 'nefisio.igs'
+    include 'iofiles.igs'
     include 'dddata.igs'
     include 'dfparall.igs'
     !
@@ -227,7 +227,7 @@ module globaldata
        type (sv_wrirst)   , pointer :: gdwrirst
        type (sv_wrline)   , pointer :: gdwrline
        type (sv_z_initcg) , pointer :: gdz_initcg
-       type (nefisio)     , pointer :: nefisio
+       type (iofile), dimension(:), pointer :: iofiles
        !
        ! DD data fields
        !

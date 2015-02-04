@@ -1,8 +1,7 @@
-subroutine wrtmap_nm(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, var, varnam_in)
+function nc_def_var(idfile, lundia, name, datatype, ndims, dims, standardname, longname, unit, xycoordinates, filename) result(idvar)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -29,51 +28,45 @@ subroutine wrtmap_nm(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, &
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-!
-! Method used:
-!
+! NONE
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
-    use globaldata
+    use netcdf
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    integer                                                            :: ierr
-    integer                                                            :: fds
-    integer      , dimension(0:nproc-1)                                :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                              :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(3,5)                                      :: uindex
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: var
-    character(*)                                                       :: varnam_in
-    character(*)                                                       :: grpnam_in
-    !
-    ! local
-    integer                                       :: namlen
-    character(16)                                 :: varnam
-    character(16)                                 :: grpnam
-    integer                        , external     :: putelt
-    !
-    ! body
-    namlen = min (16,len(varnam_in))
-    varnam = varnam_in(1:namlen)
-    namlen = min (16,len(grpnam_in))
-    grpnam = grpnam_in(1:namlen)
-    !
-    if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
-    else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif       
-    if (inode == master) then
-       ierr = putelt(fds, grpnam, varnam, uindex, 1, glbarr2)
+    ! return value
+    integer :: idvar
+!
+! Global variables
+!
+    integer                  , intent(in) :: idfile
+    integer                  , intent(in) :: lundia  !  Description and declaration in inout.igs
+    character(*)             , intent(in) :: name
+    integer                  , intent(in) :: datatype
+    integer                  , intent(in) :: ndims
+    integer, dimension(ndims), intent(in) :: dims
+    character(*)             , intent(in) :: standardname
+    character(*)             , intent(in) :: longname
+    character(*)             , intent(in) :: unit
+    logical                  , intent(in) :: xycoordinates
+    character(*)             , intent(in) :: filename
+!
+! Local variables
+!
+    integer :: ierror
+    integer :: returnvalue
+!
+!! executable statements -------------------------------------------------------
+!
+    ierror = nf90_def_var(idfile, name, datatype, dims, returnvalue)
+    call nc_check_err(lundia, ierror, "def_var "//name, trim(filename))
+    if (xycoordinates) then
+       ierror = nf90_put_att(idfile, returnvalue,  'coordinates'  , 'x y'); call nc_check_err(lundia, ierror, "put_att "//name//" coordinates", trim(filename))
     endif
-end subroutine wrtmap_nm
+    ierror = nf90_put_att(idfile, returnvalue,  'standard_name', standardname); call nc_check_err(lundia, ierror, "put_att "//name//" standard_name", trim(filename))
+    ierror = nf90_put_att(idfile, returnvalue,  'long_name'    , longname); call nc_check_err(lundia, ierror, "put_att "//name//" longname", trim(filename))
+    ierror = nf90_put_att(idfile, returnvalue,  'units'        , unit); call nc_check_err(lundia, ierror, "put_att "//name//" units", trim(filename))
+    idvar = returnvalue
+end function nc_def_var

@@ -31,17 +31,14 @@ subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     ,
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Write dp array to communication file if initi=1
-!              - Read dp array from communication file if
-!                initi=2 or 3
-! Method used:
-!
-! Array dp is in double precision
+!    Function: - Write dp array to communication file
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sp_buffer
+    use datagroups
     use globaldata
     !
     implicit none
@@ -52,12 +49,7 @@ subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     ,
     !
     logical                  , pointer :: first
     integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 3
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -82,164 +74,106 @@ subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     ,
 !
 ! Local variables
 !
-    integer                         :: ierr
-    integer                         :: m
-    integer                         :: n
-    integer                         :: nrcel  ! Number of cells written in group BOTTIM (for initi=1 NRCEL=1) 
-    integer, dimension(1)           :: idummy ! Help array to read/write Nefis files 
-    integer, dimension(nelmx)       :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer, external               :: neferr
-    logical                         :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10), dimension(nelmx) :: elmunt ! Array with element physical unit 
-    character(16)                   :: grnam1
-    character(16)                   :: grnam2
-    character(16), dimension(nelmx) :: elmnms ! Element name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmqty ! Array with element quantity 
-    character(16), dimension(nelmx) :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                  :: errmsg
-    character(64), dimension(nelmx) :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: ierror
+    integer                                       :: m
+    integer                                       :: n
+    integer      , dimension(1)                   :: idummy ! Help array to write integers
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grnam1
+    character(16)                                 :: grnam2
+    character(256)                                :: errmsg
 !
 ! Data statements
 !
     data grnam1/'BOTNT'/
     data grnam2/'BOTTIM'/
-    data elmnms/'NTBOT', 'TIMBOT', 'DP'/
-    data elmqty/3*' '/
-    data elmunt/'[   -   ]', '[ TSCALE]', '[   M   ]'/
-    data elmtps/'INTEGER', 'INTEGER', 'REAL'/
-    data nbytsg/3*4/
-    data elmdes/'Number of bottom fields in group BOTTIM                       '&
-       & , 'Communication times bottom fields rel. to reference date/time ',    &
-        & 'Bottom depth in bottom points, positive downwards             '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefisrwbotc)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
+    call getdatagroup(gdp, FILOUT_COM, grnam1, group)
+    first   => group%first
+    celidt  => group%celidt
     !
-    ! Define data structure of group with grid information
-    !
-    !
-    ! Initialize local variables
-    !
-    ierr = 0
-    !
-    ! Set up the element dimensions
-    !
+    ierror = 0
     if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam1, 'NTBOT', ' ', IO_INT4, 1, (/1/), ' ', 'Number of bottom fields in group BOTTIM', '[   -   ]')
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'TIMBOT', ' ', IO_INT4, 1, (/1/), ' ', 'Communication times bottom fields rel. to reference date/time', '[ TSCALE]')
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'DP', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Bottom depth in bottom points, positive downwards', '[   M   ]')
+       !
+       first  = .false.
+       celidt = 1
+    else
+       celidt = celidt + 1
     endif
-    !
-    ! Initialize local parameter
-    !
-    celidt = 1
-    nrcel = 1
     !
     ! write nrcel, dp and itstrt to communication file for initi=1
     ! if itcomi > 0
     !
     if (initi==1 .and. itcomi>0) then
-       wrswch = .true.
-       idummy(1) = nrcel
-       call putgti(comfil    ,grnam1    ,1         ,elmnms(1) ,elmdms(1, 1)         , &
-                 & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-       if (ierr /= 0) goto 9999
+       ierror = open_datdef(comfil, fds, .false.)
+       if (ierror /= 0) goto 9999
+       !
+       if (celidt==1) then
+          call defnewgrp(fds, FILOUT_COM, grnam1, gdp, comfil, errlog=ERRLOG_NONE)
+          call defnewgrp(fds, FILOUT_COM, grnam2, gdp, comfil, errlog=ERRLOG_NONE)
+       endif
+       !
+       ! initialize group index
+       !
+       uindex (1,1) = 1 ! start index
+       uindex (2,1) = 1 ! end index
+       uindex (3,1) = 1 ! increment in time
+       !
+       idummy(1) = celidt
+       ierror = putelt(fds, grnam1, 'NTBOT', uindex, 1, idummy)
+       if (ierror/= 0) goto 9999
+       !
+       uindex (1,1) = celidt ! start index
+       uindex (2,1) = celidt ! end index
+       uindex (3,1) = 1 ! increment in time
        !
        idummy(1) = itima
-       call putgti(comfil    ,grnam2    ,2         ,elmnms(2) ,elmdms(1, 2)         , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-                 & elmnms(2) ,celidt    ,wrswch    ,ierr      ,idummy    )
-       if (ierr /= 0) goto 9999
+       ierror = putelt(fds, grnam2, 'TIMBOT', uindex, 1, idummy)
+       if (ierror/= 0) goto 9999
        !
-       do n = 1, nmaxus
-          do m = 1, mmax
-             rbuff(n, m) = real(dp(n, m),fp)
+       call sbuff_checksize(nmaxus*mmax)
+       do m = 1, mmax
+          do n = 1, nmaxus
+             sbuff(n + (m-1)*nmaxus) = real(dp(n, m),sp)
           enddo
        enddo
+       ierror = putelt(fds, grnam2, 'DP', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
        !
-       call putgtr(comfil    ,grnam2    ,2         ,elmnms(2) ,elmdms(1, 2)         , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-                 & elmnms(3) ,celidt    ,.true.    ,ierr      ,rbuff     )
-       if (ierr /= 0) goto 9999
+       ierror = clsnef(fds)
+       if (ierror/= 0) goto 9999
     endif
     !
-    ! Read nrcel from communication file for initi=2 or 3
+    !-----Read nrcel from communication file for initi=2 or 3
     !
     if (initi==2 .or. initi==3) then
-       wrswch = .false.
-       call putgti(comfil    ,grnam1    ,1         ,elmnms(1) ,elmdms(1, 1)         , &
-                 & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-       if (ierr /= 0) goto 9999
-       nrcel = idummy(1)
-       !
-       ! read dp from communication file
-       !
-       celidt = nrcel
-       call putgtr(comfil    ,grnam2    ,2         ,elmnms(2) ,elmdms(1, 2)         , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-                 & elmnms(3) ,celidt    ,wrswch    ,ierr      ,rbuff     )
-       if (ierr /= 0) goto 9999
-       !
-       do n = 1, nmaxus
-          do m = 1, mmax
-             dp(n, m) = real(rbuff(n, m),hp)
-          enddo
-       enddo
     endif
     !
-    ! Read nrcel from communication file for initi.ge.4
+    !-----Read nrcel from communication file for initi.ge.4
     !
     if (initi>=4 .and. itcomi>0) then
-       wrswch = .false.
-       call putgti(comfil    ,grnam1    ,1         ,elmnms(1) ,elmdms(1, 1)         , &
-                 & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-       if (ierr /= 0) goto 9999
-       nrcel = idummy(1)
-       !
-       ! write nrcel, dp and itstrt to communication file for initi.ge.4
-       !
-       celidt = nrcel
-       wrswch = .true.
-       idummy(1) = nrcel
-       !
-       call putgti(comfil    ,grnam1    ,1         ,elmnms(1) ,elmdms(1, 1)         , &
-                 & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-       if (ierr /= 0) goto 9999
-       !
-       idummy(1) = ite
-       call putgti(comfil    ,grnam2    ,2         ,elmnms(2) ,elmdms(1, 2)         , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-                 & elmnms(2) ,celidt    ,wrswch    ,ierr      ,idummy    )
-       if (ierr /= 0) goto 9999
-       !
-       do n = 1, nmaxus
-          do m = 1, mmax
-             rbuff(n, m) = real(dp(n, m),fp)
-          enddo
-       enddo
-       !
-       call putgtr(comfil    ,grnam2    ,2         ,elmnms(2) ,elmdms(1, 2)         , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-                 & elmnms(3) ,celidt    ,.true.    ,ierr      ,rbuff     )
-       if (ierr /= 0) goto 9999
     endif
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine rwbotc_double

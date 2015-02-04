@@ -334,16 +334,6 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itfinish  , &
           !
           call prterr(lundia    ,'V011'    ,' '       )
        endif
-       if (nostat<=1 .and. .not. parll) then
-          !
-          ! parallel: dfwrihis and dfwrthis can handle 1 obs
-          ! not parallel: wrihis and wrthis must be adapted: if 0 do not write
-          !
-          write (message,'(a,a)') 'At least 2 observation points must be defined ', &
-                                & 'when writing to history file'
-          call prterr(lundia, 'U021', message)
-          error = .true.
-       endif
     endif
     !
     ! If no character in SELHIS = 'Y' re-define ITHISI = 0

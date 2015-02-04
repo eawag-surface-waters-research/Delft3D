@@ -1,6 +1,8 @@
-subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
+subroutine wrwavh(lundia    ,error     ,filename  ,ithisc    , &
                 & nostat    ,zhs       ,ztp       , &
-                & zdir      ,zrlabd    ,zuwb      ,gdp       )
+                & zdir      ,zrlabd    ,zuwb      ,irequest  , &
+                & fds       ,nostatto  ,nostatgl  ,order_sta , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -40,9 +42,11 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    !
+    use datagroups
     use globaldata
+    use netcdf, only: nf90_unlimited
+    use dfparall, only: inode, master
+    use wrtarray, only: wrtvar, wrtarray_n, station
     !
     implicit none
     !
@@ -50,39 +54,41 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical              , pointer :: first
     integer              , pointer :: celidt
-    type (nefiselement)  , pointer :: nefiselem
+    type (datagroup)     , pointer :: group4
+    type (datagroup)     , pointer :: group5
 !
 ! Global variables
 !
-    integer                    , intent(in)  :: ithisc
-    integer                                  :: ithisi !  Description and declaration in inttim.igs
-    integer                                  :: itstrt !  Description and declaration in inttim.igs
-    integer                                  :: lundia !  Description and declaration in inout.igs
-    integer                                  :: nostat !  Description and declaration in dimens.igs
-    integer                                  :: ntruv  !  Description and declaration in dimens.igs
-    logical                    , intent(out) :: error
-    real(fp), dimension(nostat)              :: zdir
-    real(fp), dimension(nostat)              :: zhs
-    real(fp), dimension(nostat)              :: zrlabd
-    real(fp), dimension(nostat)              :: ztp
-    real(fp), dimension(nostat)              :: zuwb
-    character(60)              , intent(in)  :: trifil
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                             , intent(in)  :: ithisc
+    integer                                                                           :: ithisi   !  Description and declaration in inttim.igs
+    integer                                                                           :: itstrt   !  Description and declaration in inttim.igs
+    integer                                                                           :: lundia   !  Description and declaration in inout.igs
+    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
+    logical                                                             , intent(out) :: error
+    real(fp), dimension(nostat)                                                       :: zdir
+    real(fp), dimension(nostat)                                                       :: zhs
+    real(fp), dimension(nostat)                                                       :: zrlabd
+    real(fp), dimension(nostat)                                                       :: ztp
+    real(fp), dimension(nostat)                                                       :: zuwb
+    character(*)                                                        , intent(in)  :: filename !  File name
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
+    integer                                                             , intent(in)  :: nostatgl ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: nostatto ! total number of stations (including "duplicate" stations located in halo regions)
+    integer       , dimension(nostat)                                   , intent(in)  :: order_sta
 !
 ! Local variables
 !
-    integer                 :: fds
-    integer                 :: ierror        ! Local error flag for NEFIS files 
-    integer                 :: n 
-    integer, dimension(1)   :: idummy
-    integer, dimension(3,5) :: uindex
-    integer, external       :: getelt
-    integer, external       :: putelt
-    integer, external       :: inqmxi
-    integer, external       :: clsnef
-    integer, external       :: open_datdef
-    integer, external       :: neferr
+    integer                                           :: filetype
+    integer                                           :: ierror        ! Local error flag for NEFIS files 
+    integer                                           :: n 
+    !
+    integer                                           :: iddim_time
+    integer                                           :: iddim_nostat
+    !
+    integer                                           :: idatt_sta
+    !
     character(16)           :: grnam4
     character(16)           :: grnam5
     character(256)          :: errmsg
@@ -96,162 +102,98 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    call getdatagroup(gdp, FILOUT_HIS, grnam4, group4)
+    call getdatagroup(gdp, FILOUT_HIS, grnam5, group5)
+    celidt  => group4%celidt
+    filetype = getfiletype(gdp, FILOUT_HIS)
     !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrwavhinf)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    !
-    filnam = trifil(1:3) // 'h' // trifil(5:)
-    errmsg = ' '
-    !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
-    !
-    if (first) then
+    ierror = 0
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
        ! Set up the element characteristics
        !
+       iddim_time    = adddim(gdp, lundia, FILOUT_HIS, 'time', nf90_unlimited)
+       iddim_nostat  = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT', nostatgl)
+       !
+       idatt_sta = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMST XSTAT YSTAT')
        !
        ! his-infwav-serie
        !
-       call addelm(nefiswrwavhinf,'ITHISW',' ','[   -   ]','INTEGER',4     , &
-         & 'timestep number (ITHISW*DT*TUNIT := time in sec from ITDATE)  ', &
-         &  1         ,1         ,0         ,0         ,0         ,0       , &
-         &  lundia    ,gdp       )
-       call defnewgrp(nefiswrwavhinf ,filnam    ,grnam4   ,gdp)
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'ITHISW', ' ', IO_INT4, 0, longname='timestep number (ITHISW*DT*TUNIT := time in sec from ITDATE)')
+       endif
        !
        ! his-sed-series: stations
        !
        if (nostat>0) then
-         call addelm(nefiswrwavh,'ZHS',' ','[   M   ]','REAL',4              , &
-           & 'Significant wave height at station                            ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrwavh,'ZTP',' ','[   S   ]','REAL',4              , &
-           & 'Peak wave period at station                                   ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrwavh,'ZDIR',' ','[  DEG  ]','REAL',4             , &
-           & 'Direction waves are coming from at station (CW from North)    ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrwavh,'ZRLABD',' ','[   M   ]','REAL',4           , &
-           & 'Wave length at station                                        ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrwavh,'ZUWB',' ','[  M/S  ]','REAL',4             , &
-           & 'Peak near-bed orbital speed at station (Hs, linear theory)    ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZHS', ' ', IO_REAL4   , 1, dimids=(/iddim_nostat/), longname='Significant wave height at station', unit='m', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZTP', ' ', IO_REAL4   , 1, dimids=(/iddim_nostat/), longname='Peak wave period at station', unit='s', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDIR', ' ', IO_REAL4  , 1, dimids=(/iddim_nostat/), longname='Direction waves are coming from at station (CW from North)', unit='arc_degrees', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRLABD', ' ', IO_REAL4, 1, dimids=(/iddim_nostat/), longname='Wave length at station', unit='m', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZUWB', ' ', IO_REAL4  , 1, dimids=(/iddim_nostat/), longname='Peak near-bed orbital speed at station (Hs, linear theory)', unit='m/s', attribs=(/idatt_sta/) )
        endif
        !
-       call defnewgrp(nefiswrwavh ,filnam    ,grnam5   ,gdp)
+       group4%grp_dim = iddim_time
+       group5%grp_dim = iddim_time
+       celidt = 0
        !
-       ! Get start celidt for writing
+    case (REQUESTTYPE_WRITE)
        !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrwavhinf)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    endif
+       celidt = celidt + 1
+       group5%celidt = celidt
+       !
+       if (filetype == FTYPE_NEFIS) then
+          !
+          ! element 'ITHISW'
+          !
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, ithisc, 'ITHISW')
+          if (ierror/= 0) goto 9999
+       endif
+       !
+       if (nostat > 0) then
+          !
+          ! element 'ZHS'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, zhs, 'ZHS', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZTP'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, ztp, 'ZTP', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZDIR'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, zdir, 'ZDIR', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZRLABD'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, zrlabd, 'ZRLABD', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZUWB'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, zuwb, 'ZUWB', station)
+          if (ierror/= 0) goto 9999
+       endif
+       !
+    end select
     !
-    ierror = open_datdef(filnam   ,fds      )
-    if (ierror/= 0) goto 9999
-    if (first) then
-       !
-       ! end of initialization, don't come here again
-       !
-       ierror = inqmxi(fds, grnam4, celidt)
-       first = .false.
-    endif
+    ! write error message if error occured and set error = .true.
     !
-    ! Writing of output on every ithisw
-    !
-    celidt = celidt + 1
-    !
-    ! group 4: element 'ITHISW'
-    !
-    idummy(1)   = ithisc
-    uindex(1,1) = celidt
-    uindex(2,1) = celidt
-    !
-    ! celidt is obtained by investigating group his-infwav-serie, identified
-    ! with nefiswrwavhinf.
-    ! Group his-wav-series, identified with nefiswrwavh, must use the same
-    ! value for celidt.
-    ! Easy solution:
-    gdp%nefisio%nefiselem(nefiswrwavh)%celidt = celidt
-    ! Neat solution in pseudo code:
-    ! subroutine wrwavh
-    !    integer :: celidt
-    !    call wrwavhinf(celidt)
-    !    call wrwavhdat(celidt)
-    ! end subroutine
-    !
-    ierror     = putelt(fds, grnam4, 'ITHISW', uindex, 1, idummy)
-    if (ierror/= 0) goto 9999
-    !
-    ! his-wav-series: stations
-    !
-    if (nostat > 0) then
-       !
-       ! group 5: element 'ZHS'
-       !
-       call sbuff_checksize(nostat)
-       do n = 1, nostat
-          sbuff(n) = real(zhs(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZHS', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZTP'
-       !
-       call sbuff_checksize(nostat)
-       do n = 1, nostat
-          sbuff(n) = real(ztp(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZTP', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZDIR'
-       !
-       call sbuff_checksize(nostat)
-       do n = 1, nostat
-          sbuff(n) = real(zdir(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZDIR', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZRLABD'
-       !
-       call sbuff_checksize(nostat)
-       do n = 1, nostat
-          sbuff(n) = real(zrlabd(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZRLABD', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZUWB'
-       !
-       call sbuff_checksize(nostat)
-       do n = 1, nostat
-          sbuff(n) = real(zuwb(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZUWB', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-    endif
-    !
-    ierror = clsnef(fds)
-    !
-    ! write error message if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
- 9999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrwavh

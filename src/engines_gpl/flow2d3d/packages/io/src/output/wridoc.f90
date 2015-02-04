@@ -37,6 +37,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use datagroups
     use globaldata
     use string_module
     !
@@ -47,17 +48,11 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                    , pointer :: first
-    integer                    , pointer :: celidt
-    integer, dimension(:, :)   , pointer :: elmdms
     integer                    , pointer :: lundia    !  Description and declaration in inout.igs
     integer                    , pointer :: lunprt    !  Description and declaration in inout.igs
     character*131, dimension(:), pointer :: header    !  Description and declaration in postpr.igs
     logical                              :: commrd
-    type (nefiselement)        , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 4
+    type (datagroup)           , pointer :: group
 !
 ! Global variables
 !
@@ -75,61 +70,33 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
 !
 ! Local variables
 !
-    integer                            :: datlen
-    integer                            :: deflen
-    integer                            :: fd_nef
-    integer                            :: i            ! Help var. 
-                                                       ! and last 2 char. (\n) from SYSTXT lines Help var.
-    integer                            :: ierror       ! Local errorflag for NEFIS files 
-    integer                            :: iheader      ! Loop counter for writing header
-    integer                            :: ind
-    integer                            :: lrid         ! Help var. to determine the actual length of RUNID 
-    integer                            :: lridmx       ! Help var. for lunprt: LRID < 47 
-    integer                            :: n
-    integer                            :: na
-    integer, dimension(nelmx)          :: nbytsg       ! Array containing the number of by- tes of each single ELMTPS 
-    integer, dimension(3)              :: uindex
-    integer, external                  :: clsnef
-    integer, external                  :: crenef
-    integer, external                  :: getels
-    integer, external                  :: neferr
-    logical                            :: wrswch       ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10)                      :: date         ! Date to be filled in the header 
-    character(256)                     :: datnam
-    character(256)                     :: defnam
-    character(10), dimension(nelmx)    :: elmunt       ! Array with element physical unit 
-    character(16), dimension(1)        :: cdum16       ! Help array to read/write Nefis files 
-    character(16), dimension(nelmx)    :: elmnms       ! Element name defined for the NEFIS-files 
-    character(16), dimension(nelmx)    :: elmqty       ! Array with element quantity 
-    character(16), dimension(nelmx)    :: elmtps       ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(16)                      :: grnam4       ! Data-group name defined for the NEFIS-files 
-    character(256)                     :: filnam       ! Help var. for FLOW file name 
-    character(4)                       :: errnr        ! Character var. containing the errormessage number corresponding to errormessage in ERRFIL 
-    character(256)                     :: errmsg       ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64), dimension(nelmx)    :: elmdes       ! Array with element description 
-    character(20)                      :: rundat       ! Current date and time containing a combination of DATE and TIME 
-    character(256)                     :: version_full ! Version nr. of the module of the current package
-    character(256), dimension(1)       :: cdumcident   ! Help array to read/write Nefis files 
-!
-! Data statements
-!
-    data elmnms/'FLOW-SIMDAT', 'FLOW-SYSTXT', 'FLOW-RUNTXT', 'FILE-VERSION'/
-    data elmqty/4*' '/
-    data elmunt/4*'[   -   ]'/
-    data elmtps/4*'CHARACTER'/
-    data nbytsg/16, 256, 30, 16/
-    data (elmdes(i), i = 1, nelmx)                                              &
-         & /'FLOW Simulation date and time [YYYYMMDD  HHMMSS]              ',    &
-         & 'FLOW System description                                       ',     &
-         & 'FLOW User defined Model description                           ',     &
-         & 'Version number of file                                        '/
+    integer                                       :: fds
+    integer                                       :: IO_FIL
+    integer                                       :: i            ! Help var. 
+    integer                                       :: ierror       ! Local errorflag for NEFIS files 
+    integer                                       :: iheader      ! Loop counter for writing header
+    integer                                       :: lrid         ! Help var. to determine the actual length of RUNID 
+    integer                                       :: lridmx       ! Help var. for lunprt: LRID < 47 
+    integer                                       :: na
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putels
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(10)                                 :: date         ! Date to be filled in the header 
+    character(256)                                :: datnam
+    character(256)                                :: defnam
+    character(16), dimension(1)                   :: cdum16       ! Help array to read/write Nefis files 
+    character(16)                                 :: grnam4       ! Data-group name defined for the NEFIS-files 
+    character(256)                                :: filnam       ! Help var. for FLOW file name 
+    character(4)                                  :: errnr        ! Character var. containing the errormessage number corresponding to errormessage in ERRFIL 
+    character(256)                                :: errmsg       ! Character var. containing the errormessage to be written to file. The message depends on the error. 
+    character(20)                                 :: rundat       ! Current date and time containing a combination of DATE and TIME 
+    character(256)                                :: version_full ! Version nr. of the module of the current package
+    character(256), dimension(1)                  :: cdumcident   ! Help array to read/write Nefis files 
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswridoc)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
     lundia  => gdp%gdinout%lundia
     lunprt  => gdp%gdinout%lunprt
     header  => gdp%gdpostpr%header
@@ -138,28 +105,11 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
     ! Initialize local variables
     !
     ierror = 0
-    celidt = 1
     !
     filnam = neffil
     if (soort(1:3)/='com') filnam = neffil(1:3) // soort(1:1) // neffil(5:)
     grnam4 = soort(1:3) // '-version'
     errmsg = ' '
-    wrswch = .true.
-    !
-    ! Set up the element dimensions
-    ! Remove first 4 and last 2 characters from string SYSTXT
-    !
-    if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,1         ,10        ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-    endif
     !
     ! Write system definition to diagnostic file for SOORT = 'dia'
     ! and skip rest of routine
@@ -188,7 +138,6 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
        !
        ! Version info
        !
-       !
        write (header(1 ), '(131a1)'    ) ('*', na = 1, 131)
        write (header(2 ), '(a,a,a,a,a,a,a,a,a,t129,a)') &
            & '*** Print of ', 'Delft3D-FLOW', ' for Run ', gdp%runid(:lridmx) , ' - Simulation date: ',  &
@@ -203,32 +152,62 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
           write (lunprt, '(a)') header(iheader)
        enddo
     else
+       select case (soort(1:3))
+       case ('his')
+           IO_FIL = FILOUT_HIS
+       case ('map')
+           IO_FIL = FILOUT_MAP
+       case ('dro')
+           IO_FIL = FILOUT_DRO
+       case ('com')
+           IO_FIL = FILOUT_COM
+       end select
        !
-       ! Write to NEFIS files
-       ! group 4, element 'SIMDAT'
+       call getdatagroup(gdp, IO_FIL, grnam4, group)
+       first   => group%first
+       !
+       if (first) then
+          !
+          ! Set up the element chracteristics
+          !
+          call addelm(gdp, lundia, IO_FIL, grnam4, 'FLOW-SIMDAT', ' ', 16, 1, (/1/), ' ', 'FLOW Simulation date and time [YYYYMMDD  HHMMSS]', '[   -   ]') !CHARACTER
+          call addelm(gdp, lundia, IO_FIL, grnam4, 'FLOW-SYSTXT', ' ', 256, 1, (/1/), ' ', 'FLOW System description', '[   -   ]') !CHARACTER
+          call addelm(gdp, lundia, IO_FIL, grnam4, 'FLOW-RUNTXT', ' ', 30, 1, (/10/), ' ', 'FLOW User defined Model description', '[   -   ]') !CHARACTER
+          call addelm(gdp, lundia, IO_FIL, grnam4, 'FILE-VERSION', ' ', 16, 1, (/1/), ' ', 'Version number of file', '[   -   ]') !CHARACTER
+       endif
+       !
+       ierror = open_datdef(filnam, fds, .false.)
+       if (ierror /= 0) goto 9999
+       !
+       if (first) then
+          call defnewgrp(fds, IO_FIL, grnam4, gdp, filnam, errlog=ERRLOG_NONE)
+          first = .false.
+       endif
+       !
+       ! initialize group index
+       !
+       uindex (1,1) = 1 ! start index
+       uindex (2,1) = 1 ! end index
+       uindex (3,1) = 1 ! increment in time
+       !
+       ! element 'FLOW-SIMDAT'
        !
        cdum16(1) = simdat
-       call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierror    ,cdum16    )
-       if (ierror/=0) goto 999
+       ierror = putels(fds, grnam4, 'FLOW-SIMDAT', uindex, 1, cdum16)
+       if (ierror/= 0) goto 9999
        !
-       ! group 4, element 'FLOW-SYSTXT'
+       ! element 'FLOW-SYSTXT'
        !
        cdumcident(1) = trim(version_full)
-       call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(2) ,celidt    ,wrswch    ,ierror    ,cdumcident)
-       if (ierror/=0) goto 999
+       ierror = putels(fds, grnam4, 'FLOW-SYSTXT', uindex, 1, cdumcident)
+       if (ierror/= 0) goto 9999
        !
-       ! group 4, element 'RUNTXT'
+       ! element 'FLOW-RUNTXT'
        !
-       call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(3) ,celidt    ,wrswch    ,ierror    ,runtxt    )
-       if (ierror/=0) goto 999
+       ierror = putels(fds, grnam4, 'FLOW-RUNTXT', uindex, 1, runtxt)
+       if (ierror/= 0) goto 9999
        !
-       ! group 5, element 'FILE-VERSION'
+       ! element 'FILE-VERSION'
        ! drogues file  'd'
        ! history file  'h'
        ! map     file  'f'
@@ -251,53 +230,25 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
           !
           if (.not. commrd) then
              !
-             ! COM-file has been newly generated and
-             ! does not have a version number
-             ! So write it to the COM-file
+             ! COM-file has been newly generated
              !
-!          ! First aggregate file names
-!          !
-!          ind                 = len_trim(filnam)+1
-!          datnam              = filnam
-!          datnam(ind:ind + 3) = '.dat'
-!          call remove_leading_spaces(datnam, datlen)
-!          !
-!          defnam              = filnam
-!          defnam(ind:ind + 3) = '.def'
-!          call remove_leading_spaces(defnam, deflen)
-!          !
-!          fd_nef      = 0
-!          ierror      = 0
-!          ierror      = crenef(fd_nef, datnam(1:datlen), defnam(1:deflen), ' ', 'r')
-!          uindex(1:3) = 1
-!          cdum16(1)   = ' '
-!          ierror      = getels(fd_nef, 'com-version', 'FILE-VERSION', uindex, 1, 16, cdum16(1) )
-!          ierror      = clsnef(fd_nef)
-!          if (cdum16(1) == ' ') then
-!             !
-!             ! No version number information on COM-file yet: newly written COM-file
-!             ! Write current version number to file
-!             !
-             call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
-                       & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                       & elmnms(4) ,celidt    ,wrswch    ,ierror    ,cdum16    )
+             ierror = putels(fds, grnam4, 'FILE-VERSION', uindex, 1, cdum16)
+             if (ierror/= 0) goto 9999
           endif
        else
-          call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
-                    & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                    & elmnms(4) ,celidt    ,wrswch    ,ierror    ,cdum16    )
+          ierror = putels(fds, grnam4, 'FILE-VERSION', uindex, 1, cdum16)
+          if (ierror/= 0) goto 9999
        endif
-       if (ierror/=0) then
-       endif
+       !
+       ierror = clsnef(fds)
     endif
     !
-    ! write errormessage if error occurred and set error = .TRUE.
-    ! For all but Comm. file
+    ! write error message if error occured and set error= .true.
     !
-  999 continue
-    if (ierror/= 0) then
+9999   continue
+    if (ierror /= 0) then
        ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wridoc

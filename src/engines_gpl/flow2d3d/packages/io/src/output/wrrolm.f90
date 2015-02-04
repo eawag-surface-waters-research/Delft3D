@@ -1,8 +1,9 @@
-subroutine wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &
+subroutine wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
                 & mmax      ,nmaxus    ,ewave1    ,eroll1    ,qxkr      , &
                 & qykr      ,qxkw      ,qykw      ,fxw       ,fyw       , &
                 & wsu       ,wsv       ,guu       ,gvv       ,rbuff1    , &
-                & hrms      ,gdp       )
+                & hrms      ,irequest  ,fds       ,iarrc     ,mf        , &
+                & ml        ,nf        ,nl        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -33,16 +34,18 @@ subroutine wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! Writes the time varying data for roller effect
-! to the NEFIS MAP-DAT file
-! Output is performed conform the times of the map
-! file and only in case roller = true
+! Writes the time varying data for roller model
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use datagroups
     use globaldata
+    use dfparall, only: inode, master, nproc
+    use wrtarray, only: wrtarray_nm, wrtvar
+    use dffunctionals, only: dfcleanup_glbarrs
+    use netcdf
     !
     implicit none
     !
@@ -50,295 +53,247 @@ subroutine wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 12
+    integer                         , pointer :: celidt
+    type (datagroup)                , pointer :: group1
+    type (datagroup)                , pointer :: group2
+    integer                         , pointer :: nmaxgl
+    integer                         , pointer :: mmaxgl
 !
 ! Global variables
 !
-    integer                                                      , intent(in)  :: itmapc
-    integer                                                                    :: lundia !  Description and declaration in inout.igs
-    integer                                                                    :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                      , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                    :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    logical                                                      , intent(out) :: error
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: eroll1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ewave1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: fxw    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: fyw    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: hrms   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: qxkr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: qxkw   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: qykr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: qykw   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: wsu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: wsv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nmaxus, mmax)                                          :: rbuff1
-    character(60)                                                , intent(in)  :: trifil
+    integer                                                                           , intent(in)  :: itmapc
+    integer                                                                                         :: lundia      !  Description and declaration in inout.igs
+    integer                                                                                         :: mmax        !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           , intent(in)  :: nmax        !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                         :: nmaxus      !  Description and declaration in esm_alloc_int.f90
+    logical                                                                           , intent(out) :: error       
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: eroll1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: ewave1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: fxw         !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: fyw         !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: guu         !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: gvv         !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: hrms        !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: qxkr        !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: qxkw        !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: qykr        !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: qykw        !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: wsu         !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: wsv         !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                                   :: rbuff1
+    character(60)                                                                     , intent(in)  :: filename    !  File name
+    integer                                                                           , intent(in)  :: irequest    !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                                           , intent(in)  :: fds         !  File handle of output NEFIS/NetCDF file
+    !
+    integer    , dimension(4,0:nproc-1)                                               , intent(in)  :: iarrc       ! array containing collected grid indices
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: mf          ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: ml          ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: nf          ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: nl          ! last index w.r.t. global grid in y-direction
 !
 ! Local variables
 !
-    integer                         :: i
-    integer                         :: ierror
-    integer                         :: m
-    integer                         :: n
-    integer                         :: nelmx1
-    integer                         :: nelmx2
-    integer      , dimension(1)     :: idummy
-    integer      , dimension(nelmx) :: nbytsg
-    integer, external               :: neferr
-    logical                         :: wrswch
-    character(10), dimension(nelmx) :: elmunt
-    character(16)                   :: grnam1
-    character(16)                   :: grnam2
-    character(16), dimension(nelmx) :: elmnms
-    character(16), dimension(nelmx) :: elmqty
-    character(16), dimension(nelmx) :: elmtps
-    character(256)                  :: errmsg
-    character(60)                   :: filnam
-    character(64), dimension(nelmx) :: elmdes
+    integer                                       :: filetype
+    integer                                       :: i
+    integer                                       :: ierror
+    integer                                       :: m
+    integer                                       :: n
+    integer    , dimension(1)                     :: idummy
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    character(16)                                 :: grnam1
+    character(16)                                 :: grnam2
+    character(256)                                :: errmsg
+    character(1024)                               :: error_string
+    
+    integer                                       :: iddim_time
+    integer                                       :: iddim_n
+    integer                                       :: iddim_nc
+    integer                                       :: iddim_m
+    integer                                       :: iddim_mc
 !
-! Data statements
-!
+! Data statements        
+!        
     data grnam1/'map-infrol-serie'/
     data grnam2/'map-rol-series'/
-    data elmnms/'ITMAPS', 'HS', 'EWAVE1', 'EROLL1', 'QXKR', 'QYKR', 'QXKW', 'QYKW', &
-              & 'FXW', 'FYW', 'WSU', 'WSV'/
-    data elmqty/12*' '/
-    data elmunt/'[   -   ]', '[  M    ]', '[ J/M2  ]', '[ J/M2  ]', '[  M/S  ]', '[  M/S  ]', &
-              & '[  M/S  ]', '[  M/S  ]', '[ N/M2  ]', '[ N/M2  ]', '[ N/M2  ]', &
-              & '[ N/M2  ]'/
-    data elmtps/'INTEGER', 11*'REAL'/
-    data nbytsg/12*4/
-    data (elmdes(i), i = 1, 12)                                                 &
-         & /'timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)  ',   &
-         &  'Significant wave height                                       ',   &
-         &  'Short-wave energy                                             ',   &
-         &  'Roller energy                                                 ',   &
-         &  'Transport velocity of roller energy in ksi direction          ',   &
-         &  'Transport velocity of roller energy in eta direction          ',   &
-         &  'Transport velocity of wave energy in ksi direction            ',   &
-         &  'Transport velocity of wave energy in eta direction            ',   &
-         &  'Component of wave force in ksi direction                      ',   &
-         &  'Component of wave force in eta direction                      ',   &
-         &  'Component of roller force in ksi direction                    ',   &
-         &  'Component of roller force in eta direction                    '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrrolm)
-    first     => nefiselem%first
-    celidt    => nefiselem%celidt
-    elmdms    => nefiselem%elmdms
+    call getdatagroup(gdp, FILOUT_MAP, grnam1, group1)
+    call getdatagroup(gdp, FILOUT_MAP, grnam2, group2)
+    celidt         => group1%celidt
     !
-    ! Initialize local variables
-    ! Default is append mode: celidt = last cell + 1
+    mmaxgl         => gdp%gdparall%mmaxgl
+    nmaxgl         => gdp%gdparall%nmaxgl
+    !
+    filetype = getfiletype(gdp, FILOUT_MAP)
     !
     ierror = 0
-    nelmx1 = 1
-    nelmx2 = 11
-    !
-    filnam = trifil(1:3) // 'm' // trifil(5:)
-    errmsg = ' '
-    !
-    wrswch = .false.
-    if (first) then
-       call getcel(filnam    ,grnam1    ,nelmx1    ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierror   )
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
-       ! Set up the element dimensions
+       ! Define dimensions
        !
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,5         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,6         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,7         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,8         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,9         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,10        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,11        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,12        ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-    endif
-    !
-    ! Writing of output on every itmapc
-    !
-    celidt = celidt + 1
-    !
-    wrswch = .true.
-    idummy(1) = itmapc
-    call putgti(filnam    ,grnam1    ,nelmx1    ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierror   ,idummy    )
-    if (ierror/=0) goto 9999    
-    !
-    ! group 2: element 'HS'.  hs = sqrt(2)*hrms
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = sqrt(2.0_fp)*hrms(n,m)
+       iddim_time    = adddim(gdp, lundia, FILOUT_MAP, 'time'   , nf90_unlimited)
+       iddim_n       = adddim(gdp, lundia, FILOUT_MAP, 'N'      , nmaxgl        ) ! Number of N-grid points (cell centres)
+       iddim_nc      = adddim(gdp, lundia, FILOUT_MAP, 'NC'     , nmaxgl        ) ! Number of N-grid points (corner points)
+       iddim_m       = adddim(gdp, lundia, FILOUT_MAP, 'M'      , mmaxgl        ) ! Number of M-grid points (cell centres)
+       iddim_mc      = adddim(gdp, lundia, FILOUT_MAP, 'MC'     , mmaxgl        ) ! Number of M-grid points (corner points)
+       !
+       ! Define elements
+       !
+       ! map-infrol-serie
+       ! 
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_MAP, grnam1, 'ITMAPS', ' ', IO_INT4 , 0, longname='timestep number (ITMAPS*DT*TUNIT := time in sec from ITDATE)')
+       endif
+       !
+       ! map-rol-series
+       !
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'HS', ' ', IO_REAL4    , 2, dimids=(/iddim_n, iddim_m/), longname='Significant wave height', unit='m', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'EWAVE1', ' ', IO_REAL4, 2, dimids=(/iddim_n, iddim_m/), longname='Short-wave energy', unit='J/m2', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'EROLL1', ' ', IO_REAL4, 2, dimids=(/iddim_n, iddim_m/), longname='Roller energy', unit='J/m2', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QXKR', ' ', IO_REAL4  , 2, dimids=(/iddim_n, iddim_mc/), longname='Transport velocity of roller energy in ksi direction', unit='m/s', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QYKR', ' ', IO_REAL4  , 2, dimids=(/iddim_nc, iddim_m/), longname='Transport velocity of roller energy in eta direction', unit='m/s', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QXKW', ' ', IO_REAL4  , 2, dimids=(/iddim_n, iddim_mc/), longname='Transport velocity of wave energy in ksi direction', unit='m/s', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QYKW', ' ', IO_REAL4  , 2, dimids=(/iddim_nc, iddim_m/), longname='Transport velocity of wave energy in eta direction', unit='m/s', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'FXW', ' ', IO_REAL4   , 2, dimids=(/iddim_n, iddim_mc/), longname='Component of wave force in ksi direction', unit='N/m2', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'FYW', ' ', IO_REAL4   , 2, dimids=(/iddim_nc, iddim_m/), longname='Component of wave force in eta direction', unit='N/m2', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'WSU', ' ', IO_REAL4   , 2, dimids=(/iddim_n, iddim_mc/), longname='Component of roller force in ksi direction', unit='N/m2', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'WSV', ' ', IO_REAL4   , 2, dimids=(/iddim_nc, iddim_m/), longname='Component of roller force in eta direction', unit='N/m2', acl='v')
+       !
+       group1%grp_dim = iddim_time
+       group2%grp_dim = iddim_time
+       celidt = 0
+       !
+    case (REQUESTTYPE_WRITE)
+       !
+       celidt = celidt + 1
+       group2%celidt = celidt
+       !
+       ! Writing of output on every itmapc
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call wrtvar(fds, filename, filetype, grnam1, celidt, &
+                    & gdp, ierror, lundia, itmapc, 'ITMAPS')
+          if (ierror/=0) goto 9999
+       endif
+       !
+       ! element 'HS'.  hs = sqrt(2)*hrms
+       !
+       rbuff1(:,:) = -999.0_fp
+       do m = 1, mmax
+          do n = 1, nmaxus
+             rbuff1(n, m) = sqrt(2.0_fp)*hrms(n,m)
+          enddo
        enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'EWAVE1'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = ewave1(n, m)
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, rbuff1, 'HS')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'EWAVE1'
+       !
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, ewave1, 'EWAVE1')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'EROLL1'
+       !
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, eroll1, 'EROLL1')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'QXKR'
+       !
+       do m = 1, mmax
+          do n = 1, nmaxus
+             if (abs(guu(n, m))>0.) then
+                rbuff1(n, m) = qxkr(n, m)/guu(n, m)
+             endif
+          enddo
        enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'EROLL1'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = eroll1(n, m)
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, rbuff1, 'QXKR')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'QYKR'
+       !
+       do m = 1, mmax
+          do n = 1, nmaxus
+             if (abs(gvv(n, m))>0.) then
+                rbuff1(n, m) = qykr(n, m)/gvv(n, m)
+             endif
+          enddo
        enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'QXKR'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          if (abs(guu(n, m))>0.) then
-             rbuff1(n, m) = qxkr(n, m)/guu(n, m)
-          endif
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, rbuff1, 'QYKR')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'QXKW'
+       !
+       do m = 1, mmax
+          do n = 1, nmaxus
+             if (abs(guu(n, m))>0.) then
+                rbuff1(n, m) = qxkw(n, m)/guu(n, m)
+             endif
+          enddo
        enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(5) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'QYKR'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          if (abs(gvv(n, m))>0.) then
-             rbuff1(n, m) = qykr(n, m)/gvv(n, m)
-          endif
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, rbuff1, 'QXKW')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'QYKW'
+       !
+       do m = 1, mmax
+          do n = 1, nmaxus
+             if (abs(gvv(n, m))>0.) then
+                rbuff1(n, m) = qykw(n, m)/gvv(n, m)
+             endif
+          enddo
        enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(6) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, rbuff1, 'QYKW')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'FXW'
+       !
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, fxw, 'FXW')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'FYW'
+       !
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, fyw, 'FYW')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'WSU'
+       !
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, wsu, 'WSU')
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'WSV'
+       !
+       call wrtarray_nm(fds, filename, filetype, grnam2, celidt, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, wsv, 'WSV')
+       if (ierror /= 0) goto 9999
+       !
+    end select
     !
-    ! group 2: element 'QXKW'
+    ! write error message if error occured and set error = .true.
     !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          if (abs(guu(n, m))>0.) then
-             rbuff1(n, m) = qxkw(n, m)/guu(n, m)
-          endif
-       enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(7) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'QYKW'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          if (abs(gvv(n, m))>0.) then
-             rbuff1(n, m) = qykw(n, m)/gvv(n, m)
-          endif
-       enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(8) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'FXW'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = fxw(n, m)
-       enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(9) ,celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'FYW'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = fyw(n, m)
-       enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(10),celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'WSU'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = wsu(n, m)
-       enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(11),celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) goto 9999
-    !
-    ! group 2: element 'WSV'
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff1(n, m) = wsv(n, m)
-       enddo
-    enddo
-    call putgtr(filnam    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(12),celidt    ,wrswch    ,ierror   ,rbuff1    )
-    if (ierror/=0) then
-    endif
-    !
- 9999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrrolm

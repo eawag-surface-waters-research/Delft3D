@@ -85,8 +85,8 @@ libDataGDP_la_SOURCES = \
          initwrline.f90 \
          initz_initcg.f90 \
          initzmodel.f90 \
-         nefisio_alloc.f90 \
-         nefisio_dealloc.f90
+         iofiles_alloc.f90 \
+         iofiles_dealloc.f90
 
 
 # flow2d3dinclude_HEADERS=*.mod

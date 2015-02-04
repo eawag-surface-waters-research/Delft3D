@@ -55,7 +55,7 @@ subroutine gdp_alloc(gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    call nefisio_alloc(gdp)
+    call iofiles_alloc(gdp)
     !
     allocate (gdp%gdadv2d)
     allocate (gdp%gdaddress)

@@ -1,8 +1,7 @@
-subroutine wrtmap_int_nm(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, var, varnam_in)
+subroutine iofiles_dealloc(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -30,50 +29,57 @@ subroutine wrtmap_int_nm(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! Method used:
+! NONE
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbari2, dfgather, dfgather_seq
     use globaldata
     !
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    integer                                                            :: ierr
-    integer                                                            :: fds
-    integer      , dimension(0:nproc-1)                                :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                              :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(3,5)                                      :: uindex
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: var
-    character(*)                                                       :: varnam_in
-    character(*)                                                       :: grpnam_in
-    !
-    ! local
-    integer                                       :: namlen
-    character(16)                                 :: varnam
-    character(16)                                 :: grpnam
-    integer                        , external     :: putelt
-    !
-    ! body
-    namlen = min (16,len(varnam_in))
-    varnam = varnam_in(1:namlen)
-    namlen = min (16,len(grpnam_in))
-    grpnam = grpnam_in(1:namlen)
-    !
-    if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
-    else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif       
-    if (inode == master) then
-       ierr = putelt(fds, grpnam, varnam, uindex, 1, glbari2)
-    endif
-end subroutine wrtmap_int_nm
+!
+! Global variables
+!
+!
+! Local variables
+!
+    integer                        :: i
+    integer                        :: ig
+    integer                        :: istat
+    type(datagroup), pointer       :: group
+!
+!! executable statements -------------------------------------------------------
+!
+    do i = 1, FILOUT_CNT
+       do ig = 1, MAXNR_GROUP
+          group => gdp%iofiles(i)%group(ig)
+          if (associated(group%elm_ndims )) deallocate (group%elm_ndims , stat=istat)
+          if (associated(group%elm_dims  )) deallocate (group%elm_dims  , stat=istat)
+          if (associated(group%elm_size  )) deallocate (group%elm_size  , stat=istat)
+          if (associated(group%elm_type  )) deallocate (group%elm_type  , stat=istat)
+          if (associated(group%elm_unit  )) deallocate (group%elm_unit  , stat=istat)
+          if (associated(group%elm_name  )) deallocate (group%elm_name  , stat=istat)
+          if (associated(group%elm_qty   )) deallocate (group%elm_qty   , stat=istat)
+          if (associated(group%elm_lname )) deallocate (group%elm_lname , stat=istat)
+          if (associated(group%elm_sname )) deallocate (group%elm_sname , stat=istat)
+          if (associated(group%elm_attrib)) deallocate (group%elm_attrib, stat=istat)
+       enddo
+       deallocate (gdp%iofiles(i)%group, stat=istat)
+       !
+       deallocate (gdp%iofiles(i)%dim_name, stat=istat)
+       deallocate (gdp%iofiles(i)%dim_id, stat=istat)
+       deallocate (gdp%iofiles(i)%dim_length, stat=istat)
+       !
+       deallocate (gdp%iofiles(i)%att_name, stat=istat)
+       deallocate (gdp%iofiles(i)%att_vtype, stat=istat)
+       deallocate (gdp%iofiles(i)%att_ival, stat=istat)
+       deallocate (gdp%iofiles(i)%att_rval, stat=istat)
+       deallocate (gdp%iofiles(i)%att_cval, stat=istat)
+       !
+       deallocate (gdp%iofiles(i)%acl_label, stat=istat)
+       deallocate (gdp%iofiles(i)%acl_attrib, stat=istat)
+    enddo
+    deallocate (gdp%iofiles, stat=istat)
+end subroutine iofiles_dealloc

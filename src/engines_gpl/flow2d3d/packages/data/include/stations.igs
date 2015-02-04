@@ -40,7 +40,8 @@ type gd_stations
     !
     ! pointers
     !
-    integer       , dimension(:)    , pointer   :: line_orig   ! number of transect in input file 
+    integer       , dimension(:)    , pointer   :: sta_orgline ! number of station in input file 
+    integer       , dimension(:)    , pointer   :: tra_orgline ! number of transect in input file 
     integer       , dimension(:, :) , pointer   :: mnit        ! mn indicates of transect 
     integer       , dimension(:, :) , pointer   :: mnstat      ! mn indices of station
     integer       , dimension(:)    , pointer   :: stat_type   ! station type

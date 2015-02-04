@@ -32,8 +32,8 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for sediment (4 & 5)
-!              to the NEFIS MAP-DAT file
-!              SOutput is performed conform the times of the map
+!              to the FLOW MAP file
+!              Output is performed conform the times of the map
 !              file and only in case waqol == .true.
 ! Method used:
 !
@@ -42,7 +42,7 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use sp_buffer
-    !
+    use datagroups
     use globaldata
     !
     implicit none
@@ -53,7 +53,8 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     !
     logical              , pointer :: first
     integer              , pointer :: celidt
-    type (nefiselement)  , pointer :: nefiselem
+    type (datagroup)     , pointer :: group4
+    type (datagroup)     , pointer :: group5
 !
 ! Global variables
 !
@@ -63,20 +64,19 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     integer                                                                            :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                              , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(prec)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
-    character(60)                                                        , intent(in)  :: trifil !!  File name for NEFIS output
+    character(60)                                                        , intent(in)  :: trifil !!  File name for FLOW output
                                                                                                  !!  files (tri"h/m"-"casl""labl".dat/def)
 !
 ! Local variables
 !
-    integer                 :: ierror     ! Local errorflag for NEFIS files 
+    integer                 :: ierror     ! Local error flag
     integer                 :: fds
     integer                 :: i
     integer                 :: m          ! Help var. 
     integer                 :: n          ! Help var. 
-    integer, dimension(1)   :: idummy     ! Help array to read/write Nefis files 
+    integer, dimension(1)   :: idummy     ! Help array to write integers
     integer, dimension(3,5) :: uindex
     integer, external       :: clsnef
-    integer, external       :: getelt
     integer, external       :: putelt
     integer, external       :: inqmxi
     integer, external       :: open_datdef
@@ -94,9 +94,9 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrsedminf)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
+    call getdatagroup(gdp, FILOUT_MAP, grnam4, group4)
+    first   => group4%first
+    celidt  => group4%celidt
     !
     !
     ! Initialize local variables
@@ -114,31 +114,16 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
        !
        ! map-infsed-serie
        !
-       call addelm(nefiswrsedminf,'ITMAPS',' ','[   -   ]','INTEGER',4    , &
-          & 'timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)', &
-          & 1         ,1         ,0         ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call defnewgrp(nefiswrsedminf ,filnam    ,grnam4   ,gdp)
+       call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'ITMAPS', ' ', IO_INT4, 1, (/1/), ' ', 'timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)', '[   -   ]')
+       call defnewgrp(filnam, FILOUT_MAP, grnam4, gdp)
        !
        ! map-sed-series
        !
-       call addelm(nefiswrsedm,'DPS',' ','[   M   ]','REAL',4            , &
-          & 'Bottom depth (zeta point)'                                  , &
-          & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
-          & lundia    ,gdp       )
-       !
-       ! Add mor fields
-       !
-       call defnewgrp(nefiswrsedm ,filnam    ,grnam5   ,gdp)
-       !
-       ! Get start celidt for writing
-       !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrsedminf)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
+       call addelm(gdp, lundia, FILOUT_MAP, grnam5, 'DPS', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Bottom depth (zeta point)', '[   M   ]')
+       call defnewgrp(filnam, FILOUT_MAP, grnam5, gdp)
     endif
     !
-    ierror = open_datdef(filnam   ,fds      )
+    ierror = open_datdef(filnam   ,fds      , .false.)
     if (ierror/= 0) goto 9999
     if (first) then
        !
@@ -152,16 +137,17 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     !
     celidt = celidt + 1
     !
-    ! group 4: element 'ITMAPS'
+    ! element 'ITMAPS'
     !
     idummy(1)   = itmapc
     uindex(1,1) = celidt
     uindex(2,1) = celidt
     !
-    ! Group map-sed-series, identified with nefiswrsedm, must use the same
+    ! Group map-sed-series, identified with grnam5, must use the same
     ! value for celidt.
     ! Easy solution:
-    gdp%nefisio%nefiselem(nefiswrsedm)%celidt = celidt
+    call getdatagroup(gdp, FILOUT_MAP, grnam5, group5)
+    group5%celidt = celidt
     ! Neat solution in pseudo code:
     ! subroutine wrsedwaqm
     !    integer :: celidt
@@ -172,7 +158,7 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     ierror     = putelt(fds, grnam4, 'ITMAPS', uindex, 1, idummy)
     if (ierror/=0) goto 9999
     !
-    ! group 5: element 'DPS'
+    ! element 'DPS'
     !
     call sbuff_checksize(mmax*nmaxus)
     i = 0
@@ -188,7 +174,6 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     ierror = clsnef(fds)
     !
     ! write errormessage if erroroccurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
     !
  9999 continue
     if (ierror/= 0) then

@@ -1086,7 +1086,7 @@ subroutine tricom_init(olv_handle, gdp)
        !
        call rdmassbal(r(xz)     ,r(yz)     ,i(kcs)    ,r(gsqs)   , &
                     & mmax      ,nmax      ,nmaxus    ,nmmax     , &
-                    & gdp       )
+                    & lsedtot   ,gdp       )
        !
        ! Read the file with wave components
        !
@@ -1419,6 +1419,9 @@ subroutine tricom_init(olv_handle, gdp)
        endif
        if (drogue) then
           call delnef(fixtri(1:3) // 'd' // fixtri(5:trilen)     ,gdp       )
+       endif
+       if (gdp%d%nofou > 0) then
+          call delnef(fixtri(1:3) // 'f' // fixtri(5:trilen)     ,gdp       )
        endif
        !
        ! The following files may be generated for "debug" purpose

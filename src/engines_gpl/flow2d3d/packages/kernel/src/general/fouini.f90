@@ -45,6 +45,7 @@ subroutine fouini(lundia    ,lunfou    ,error     ,nofou     ,gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer, pointer :: nofouvar
 !
 ! Local parameters
 !
@@ -64,64 +65,104 @@ subroutine fouini(lundia    ,lunfou    ,error     ,nofou     ,gdp       )
     integer        , dimension(maxvld) :: ir     ! Used for format free reading 
     character(300)                     :: record ! Used for format free reading 300 = 256 + a bit (field, =, ##, etc.) 
 !
-!
 !! executable statements -------------------------------------------------------
 !
-!
+    nofouvar => gdp%gdfourier%nofouvar
+    ! initialisation
     !
-    !-----initialisation
+    nofou    = 0
+    nofouvar = 0
     !
-    nofou = 0
-    !
-    !-----cycle through file, while reading records
+    ! cycle through file, while reading records
     !
     ! -->
     !
    10 continue
     read (lunfou, '(a)', end = 999) record
     !
-    !--------reset record in smaller case characters and define contents
+    ! reset record in smaller case characters and define contents
     !
     call small(record    ,300       )
     call regel(record    ,il        ,ir        ,maxvld    ,nveld     , &
              & error     )
     if (error) goto 999
     !
-    !--------test for continuation record
+    ! test for continuation record
     !
     if (record(il(1):il(1))=='*' .or. nveld==0) goto 10
     !
-    !--------requested fourier analysis water-level
+    ! requested fourier analysis water-level
     !
     if (record(il(1):il(1) + 1)=='wl') then
        nofou = nofou + 1
+       if (index(record,'min')>0) then
+          nofouvar = nofouvar + 1
+       else
+          !
+          ! max: also write max depth
+          !
+          nofouvar = nofouvar + 2
+       endif
     !
-    !--------requested fourier analysis velocity
+    ! requested fourier analysis energy head
+    !
+    elseif (record(il(1):il(1) + 1)=='eh') then
+       nofou = nofou + 1
+       nofouvar = nofouvar + 1
+    !
+    ! requested fourier analysis velocity
     !
     elseif (record(il(1):il(1) + 1)=='uv') then
        nofou = nofou + 2
+       if (index(record,'max')>0 .or. index(record,'min')>0) then
+          nofouvar = nofouvar + 3
+       elseif (index(record,'y')>0) then
+          nofouvar = nofouvar + 8
+       else
+          nofouvar = nofouvar + 4
+       endif
     !
-    !--------requested fourier analysis discharge
+    ! requested fourier analysis discharge
     !
     elseif (record(il(1):il(1) + 1)=='qf') then
        nofou = nofou + 2
+       if (index(record,'max')>0 .or. index(record,'min')>0) then
+          nofouvar = nofouvar + 3
+       else
+          nofouvar = nofouvar + 4
+       endif
     !
-    !--------requested fourier analysis bedstress
+    ! requested fourier analysis bedstress
     !
     elseif (record(il(1):il(1) + 1)=='bs') then
        nofou = nofou + 2
+       if (index(record,'max')>0 .or. index(record,'min')>0) then
+          nofouvar = nofouvar + 3
+       else
+          nofouvar = nofouvar + 4
+       endif
     !
-    !--------requested fourier analysis temperature
+    ! requested fourier analysis temperature
     !
     elseif (record(il(1):il(1) + 1)=='ct') then
        nofou = nofou + 1
+       if (index(record,'max')>0 .or. index(record,'min')>0) then
+          nofouvar = nofouvar + 1
+       else
+          nofouvar = nofouvar + 2
+       endif
     !
-    !--------requested fourier analysis salinity
+    ! requested fourier analysis salinity
     !
     elseif (record(il(1):il(1) + 1)=='cs') then
        nofou = nofou + 1
+       if (index(record,'max')>0 .or. index(record,'min')>0) then
+          nofouvar = nofouvar + 1
+       else
+          nofouvar = nofouvar + 2
+       endif
     !
-    !--------requested fourier analysis constituent
+    ! requested fourier analysis constituent
     !
     elseif ((record(il(1):il(1))=='c') .and.                                    &
           & (record(il(1) + 1:il(1) + 1)=='1' .or. record(il(1) + 1:il(1) + 1)  &
@@ -129,9 +170,14 @@ subroutine fouini(lundia    ,lunfou    ,error     ,nofou     ,gdp       )
           & record(il(1) + 1:il(1) + 1)=='4' .or. record(il(1) + 1:il(1) + 1)   &
            & =='5')) then
        nofou = nofou + 1
+       if (index(record,'max')>0 .or. index(record,'min')>0) then
+          nofouvar = nofouvar + 1
+       else
+          nofouvar = nofouvar + 2
+       endif
     else
        !
-       !--------requested fourier analysis undefined
+       ! requested fourier analysis undefined
        !
        call prterr(lundia    ,'F001'    ,record(il(1):ir(1))  )
        !

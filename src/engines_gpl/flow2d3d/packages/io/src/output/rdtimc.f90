@@ -39,23 +39,13 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sp_buffer
     use globaldata
     use string_module
     !
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 8
 !
 ! Global variables
 !
@@ -69,124 +59,64 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
 !
 ! Local variables
 !
-    integer                                    :: ierr   ! errorflag when closing the NEFIS files 
-    integer                                    :: lfil   ! Actual length of name file COMFIL 
-    integer                                    :: luntmp
-    integer                                    :: newlun
-    integer       , dimension(1)               :: idummy ! Help array to read/write Nefis files 
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    real(fp)      , dimension(1)               :: rdummy ! Help array to read/write Nefis files 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grpnam ! Data-group name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                             :: fixcom ! fixed size version of comfil, needed for character concatenation 
-    character(5)                               :: cdummy ! Character string containing text "dummy" 
-    character(256)                             :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: ierror ! error flag
+    integer                                       :: lfil   ! Actual length of name file COMFIL 
+    integer                                       :: luntmp
+    integer                                       :: newlun
+    integer       , dimension(1)                  :: idummy ! Help array to write integers
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: clsnef
+    integer                        , external     :: getelt
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grpnam ! Data-group name defined for the COM-files 
+    character(256)                                :: fixcom ! fixed size version of comfil, needed for character concatenation 
+    character(5)                                  :: cdummy ! Character string containing text "dummy" 
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grpnam/'PARAMS'/
-    data elmnms/'AG', 'RHOW', 'DT', 'NFLTYP', 'TSCALE', 'IT01', 'IT02', 'ITLEN'/
-    data elmqty/8*' '/
-    data elmunt/'[  M/S2 ]', '[ KG/M3 ]', '[ TUNIT ]', '[   -   ]', '[   S   ]',&
-        & '[ YYMMDD]', '[ HHMMSS]', '[ TSCALE]'/
-    data elmtps/3*'REAL', 'INTEGER', 'REAL', 3*'INTEGER'/
-    data nbytsg/8*4/
-    data elmdes/'Acceleration of gravity                                       '&
-       & , 'Density of water                                              ',    &
-        & 'Timestep FLOW                                                 ',      &
-        & 'Dry point proc. 0 = NO  1 = MEAN  2 = MAX  3 = MIN            ',      &
-        & 'Basic unit of time, expressed in seconds                      ',      &
-        & 'Reference date                                                ',      &
-        & 'Reference time                                                ',      &
-        & 'Length of tide cycle ; stand alone and no wave 0              '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefisrdtimc)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    !-----Set up the element dimensions
-    !
-    if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,5         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,6         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,7         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,8         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
+    ierror = open_datdef(comfil, fds, .true.)
+    if (ierror /= 0) then
+       error  = .false.
+       commrd = .false.
+       return
     endif
+    !
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
     !
     !-----Read TSCALE and ITLEN from communication file
-    !     read in dummy variables because in case ierr <> 0, the original
+    !     read in dummy variables because in case ierror <> 0, the original
     !     values still exist
     !
-    wrswch = .false.
-    rdummy(1) = 0.
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(5) ,celidt    ,wrswch    ,ierr      ,rdummy    )
-    if (ierr/=0) then
-       if (ierr== - 211) then
-          error  = .false.
-          commrd = .false.
-       elseif (ierr== - 20011) then
-          luntmp = newlun(gdp)
-          call remove_leading_spaces(comfil    ,lfil      )
-          fixcom(1:lfil) = comfil(1:lfil)
-          open (luntmp, file = fixcom(1:lfil) // '.def')
-          read (luntmp, '(a)') cdummy
-          call small(cdummy    ,5         )
-          if (cdummy=='dummy') then
-             close (luntmp, status = 'delete')
-             open (luntmp, file = fixcom(1:lfil) // '.dat')
-             close (luntmp, status = 'delete')
-             error  = .false.
-             commrd = .false.
-          else
-             ierr = neferr(0, errmsg)
-             call prterr(lundia, 'P004', errmsg)
-             error = .true.
-          endif
-       else
-          ierr = neferr(0, errmsg)
-          call prterr(lundia, 'P004', errmsg)
-          error = .true.
-       endif
-       goto 9999
-    endif
+    call sbuff_checksize(1)
+    sbuff(1) = 0.
+    ierror = getelt(fds, grpnam, 'TSCALE', uindex, 1, 4, sbuff)
+    if (ierror/=0) goto 9999
     !
     idummy(1) = 0
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(8) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) then
-       ierr = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-       goto 9999
-    endif
+    ierror = getelt(fds, grpnam, 'ITLEN', uindex, 1, 4, idummy)
+    if (ierror/=0) goto 9999
     !
-    tscale = rdummy(1)
+    ierror = clsnef(fds)
+    if (ierror/= 0) goto 9999
+    !
+    tscale = sbuff(1)
     itlen = idummy(1)
     !
  9999 continue
+    if (ierror/=0) then
+       ierror = neferr(0, errmsg)
+       call prterr(lundia, 'P004', errmsg)
+       error = .true.
+    endif
 end subroutine rdtimc

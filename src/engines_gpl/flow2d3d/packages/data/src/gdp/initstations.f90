@@ -41,7 +41,8 @@
 !
 !! executable statements -------------------------------------------------------
 !
-    nullify(gdp%gdstations%line_orig)
+    nullify(gdp%gdstations%sta_orgline)
+    nullify(gdp%gdstations%tra_orgline)
     nullify(gdp%gdstations%stat_type)
     nullify(gdp%gdstations%stat_drogue)
     nullify(gdp%gdstations%mnit)

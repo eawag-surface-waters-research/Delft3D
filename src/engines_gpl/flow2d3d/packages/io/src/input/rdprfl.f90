@@ -54,6 +54,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     use precision
     use properties
     use globaldata
+    use netcdf
     !
     implicit none
     !
@@ -65,6 +66,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     integer, dimension(:), pointer :: smlay
     integer, dimension(:), pointer :: shlay
     logical,               pointer :: htur2d
+    integer,               pointer :: nc_prec
 !
 ! Global variables
 !
@@ -106,12 +108,14 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     character(10)                      :: cdef   ! Default value when CVAR not found 
     character(10)                      :: chulp  ! Help var. 
     character(6)                       :: keyw   ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM)
+    character(256)                     :: inputstring
     character(256)                     :: message
 !
 !! executable statements -------------------------------------------------------
 !
     htur2d     => gdp%gdprocs%htur2d
     itis       => gdp%gdrdpara%itis
+    nc_prec    => gdp%gdpostpr%nc_prec
     newkw = .true.
     cdef  = 'YYYYYYYYYY'
     !
@@ -122,6 +126,36 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     selhis = 'YYYYYYYYYYYYYYYYYYYYYYY'
     selmap = 'YYYYYYYYYYYYYYYYYYYYN'
     tstprt = .false.
+    nc_prec= nf90_float
+    !
+    ! locate 'FLNcdf' record for print flag of output in NETCDF format
+    !
+    inputstring = ' '
+    call prop_get(gdp%mdfile_ptr, '*', 'FLNcdf', inputstring)
+    if (index(inputstring,'map') > 0) then
+       gdp%iofiles(FILOUT_MAP)%filetype = FTYPE_NETCDF
+       write (lundia, '(a)') '*** MESSAGE map-file format is NetCDF'
+    endif
+    if (index(inputstring,'fou') > 0) then
+       gdp%iofiles(FILOUT_FOU)%filetype = FTYPE_NETCDF
+       write (lundia, '(a)') '*** MESSAGE fourier-file format is NetCDF'
+    endif
+    if (index(inputstring,'his') > 0) then
+       gdp%iofiles(FILOUT_HIS)%filetype = FTYPE_NETCDF
+       write (lundia, '(a)') '*** MESSAGE history-file format is NetCDF'
+    endif
+    if (index(inputstring,'dro') > 0) then
+       gdp%iofiles(FILOUT_DRO)%filetype = FTYPE_NETCDF
+       write (lundia, '(a)') '*** MESSAGE drogue-file format is NetCDF'
+    endif
+    if (index(inputstring,'com') > 0) then
+       call prterr(lundia, 'U021', "Com-file in NetCDF format is currently not supported.")
+       call d3stop(1, gdp)
+    endif
+    if (index(inputstring,'all') > 0) then
+       call prterr(lundia, 'U021', "All files in NetCDF format is currently not supported.")
+       call d3stop(1, gdp)
+    endif
     !
     ! locate 'PHhydr' record for print flag History hydrodynamic
     !

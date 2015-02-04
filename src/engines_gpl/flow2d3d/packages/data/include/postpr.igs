@@ -35,16 +35,17 @@ type sv_postpr
     !
     ! integers
     !
-    integer :: nuprpg !  Current page number print file
-    integer :: nuprln !  Current line number in print page
+    integer :: nuprpg  !  Current page number print file
+    integer :: nuprln  !  Current line number in print page
+    integer :: nc_prec !  NetCDF precision identifier (nf90_float or nf90_double)
     !
     ! pointers
     !
     integer, dimension(:)  , pointer :: smlay   !  layers to be written to map output (default all layers)
     integer, dimension(:)  , pointer :: shlay   !  layers to be written to his output (default all layers)
+    integer, dimension(:)  , pointer :: kfst0   !  kfs at the start of the simulation
     ! 
     ! logicals
-    !
     !
     ! characters
     character*131 :: header(10) !  Print file header

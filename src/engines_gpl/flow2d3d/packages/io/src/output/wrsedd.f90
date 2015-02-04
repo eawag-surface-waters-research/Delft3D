@@ -1,5 +1,6 @@
 subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
-                & fds       ,grpnam    ,gdp       )
+                & fds       ,grpnam    ,filename  ,gdp       ,filetype  , &
+                & mf        ,ml        ,nf        ,nl        ,iarrc     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -31,7 +32,7 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for the bedforms to the sediment
-!              group on the NEFIS FLOW MAP file
+!              group on the FLOW MAP file
 !
 ! Method used:
 !
@@ -39,9 +40,10 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    !
+    use datagroups
     use globaldata
+    use dfparall, only: nproc
+    use wrtarray, only: wrtarray_nm_2d
     !
     implicit none
     !
@@ -50,7 +52,7 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                              , pointer :: celidt
-    type (nefiselement)                  , pointer :: nefiselem
+    type (datagroup)                     , pointer :: group
     real(fp) , dimension(:)              , pointer :: duneheight
     real(fp) , dimension(:)              , pointer :: dunelength
     real(fp) , dimension(:)              , pointer :: rksr
@@ -58,113 +60,96 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
     real(fp) , dimension(:)              , pointer :: rksd
     logical                              , pointer :: lfbedfrm
     logical                              , pointer :: lfbedfrmrou
+    integer                              , pointer :: nmaxgl
+    integer                              , pointer :: mmaxgl
 !
 ! Global variables
 !
-    integer        , intent(in)  :: irequest !! Action flag: 1 = define, 2 = write
-    character(16)  , intent(in)  :: grpnam   !!  Group name
-    integer                      :: lundia   !  Description and declaration in inout.igs
-    integer                      :: mmax     !  Description and declaration in esm_alloc_int.f90
-    integer                      :: nmaxus   !  Description and declaration in esm_alloc_int.f90
-    logical        , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+    integer                                                                    , intent(in)  :: irequest !! Action flag: REQUESTTYPE_DEFINE = define, REQUESTTYPE_WRITE = write
+    character(16)                                                              , intent(in)  :: grpnam   !!  Group name
+    integer                                                                                  :: lundia   !  Description and declaration in inout.igs
+    integer                                                                    , intent(in)  :: mmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in)  :: nmaxus   !  Description and declaration in esm_alloc_int.f90
+    character(*)                                                               , intent(in)  :: filename ! Output file name
+    logical                                                                    , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+
+    integer                                                                    , intent(in)  :: filetype ! file type
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: mf       ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: ml       ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: nf       ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: nl       ! last index w.r.t. global grid in y-direction
+    integer    , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc    ! array containing collected grid indices
 !
 ! Local variables
 !
-    integer                 :: ierror     ! Local errorflag for NEFIS files 
+
+    integer                 :: ierror     ! Local error flag
     integer                 :: fds
     integer                 :: i
     integer                 :: m          ! Help var. 
     integer                 :: n          ! Help var. 
     integer                 :: nm         ! Help var.
-    integer, dimension(3,5) :: uindex
-    integer, external       :: putelt
     integer, external       :: neferr
     character(256)          :: errmsg     ! Character var. containing the errormessage to be written to file. The message depends on the error. 
+    !
+    integer                 :: iddim_n
+    integer                 :: iddim_m
+    !
+    real(fp) , dimension(:)              , pointer   :: rks
+    !
+    character(256)          :: string
+    
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem   => gdp%nefisio%nefiselem(nefiswrsedminf)
-    celidt      => nefiselem%celidt
-    duneheight  => gdp%gdbedformpar%duneheight
-    dunelength  => gdp%gdbedformpar%dunelength
-    rksr        => gdp%gdbedformpar%rksr
-    rksmr       => gdp%gdbedformpar%rksmr
-    rksd        => gdp%gdbedformpar%rksd
-    lfbedfrm    => gdp%gdbedformpar%lfbedfrm
-    lfbedfrmrou => gdp%gdbedformpar%lfbedfrmrou
+    call getdatagroup(gdp, FILOUT_MAP, grpnam, group)
+    celidt         => group%celidt
+    duneheight     => gdp%gdbedformpar%duneheight
+    dunelength     => gdp%gdbedformpar%dunelength
+    rksr           => gdp%gdbedformpar%rksr
+    rksmr          => gdp%gdbedformpar%rksmr
+    rksd           => gdp%gdbedformpar%rksd
+    lfbedfrm       => gdp%gdbedformpar%lfbedfrm
+    lfbedfrmrou    => gdp%gdbedformpar%lfbedfrmrou
+    mmaxgl         => gdp%gdparall%mmaxgl
+    nmaxgl         => gdp%gdparall%nmaxgl
     !
     ierror = 0
     select case (irequest)
-    case (1)
+    case (REQUESTTYPE_DEFINE)
+       !
+       ! Define dimensions
+       !
+       iddim_n       = adddim(gdp, lundia, FILOUT_MAP, 'N'      , nmaxgl        ) ! Number of N-grid points (cell centres)
+       iddim_m       = adddim(gdp, lundia, FILOUT_MAP, 'M'      , mmaxgl        ) ! Number of M-grid points (cell centres)
        !
        ! Define elements
        !
        if (lfbedfrm) then
-          call addelm(nefiswrsedm,'DUNEHEIGHT',' ','[   M   ]','REAL',4     , &
-             & 'Dune height (zeta point)                                    ', &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrsedm,'DUNELENGTH',' ','[   M   ]','REAL',4     , &
-             & 'Dune length (zeta point)                                    ', &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DUNEHEIGHT', ' ', IO_REAL4, 2, dimids=(/iddim_n, iddim_m/), longname='Dune height (zeta point)', unit='m', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DUNELENGTH', ' ', IO_REAL4, 2, dimids=(/iddim_n, iddim_m/), longname='Dune length (zeta point)', unit='m', acl='z')
        endif
        if (lfbedfrmrou) then
-          call addelm(nefiswrsedm,'KSR',' ','[   M   ]','REAL',4            , &
-             & 'Ripple roughness height'                                 , &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrsedm,'KSMR',' ','[   M   ]','REAL',4           , &
-             & 'Mega-ripple roughness height'                            , &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrsedm,'KSD',' ','[   M   ]','REAL',4            , &
-             & 'Dune roughness height'                                   , &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrsedm,'KS',' ','[   M   ]','REAL',4             , &
-             & 'Combined bedform roughness height'                       , &
-             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'KSR', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Ripple roughness height', unit='m', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'KSMR', ' ', IO_REAL4      , 2, dimids=(/iddim_n, iddim_m/), longname='Mega-ripple roughness height', unit='m', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'KSD', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Dune roughness height', unit='m', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'KS', ' ', IO_REAL4        , 2, dimids=(/iddim_n, iddim_m/), longname='Combined bedform roughness height', unit='m', acl='z')
        endif
-    case (2)
-       !
-       ! Write data to file
-       !
-       uindex (1,1) = celidt
-       uindex (2,1) = celidt
-       uindex (3,1) = 1 ! increment in time
-       !
+    case (REQUESTTYPE_WRITE)
        if (lfbedfrm) then
           !
           ! element 'DUNEHEIGHT'
           !
-          call sbuff_checksize(mmax*nmaxus)
-          i = 0
-          do m = 1, mmax
-             do n = 1, nmaxus
-                 i        = i+1
-                call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(duneheight(nm) , sp)
-             enddo
-          enddo
-          !
-          ierror = putelt(fds, grpnam, 'DUNEHEIGHT', uindex, 1, sbuff)
+          call wrtarray_nm_2d(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, duneheight, 'DUNEHEIGHT')
           if (ierror/= 0) goto 9999
           !
           ! element 'DUNELENGTH'
           !
-          call sbuff_checksize(mmax*nmaxus)
-          i = 0
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(dunelength(nm) , sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grpnam, 'DUNELENGTH', uindex, 1, sbuff)
-          !
+          call wrtarray_nm_2d(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, dunelength, 'DUNELENGTH')
           if (ierror/= 0) goto 9999
        endif
        !
@@ -172,63 +157,39 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
           !
           ! element 'KSR'
           !
-          call sbuff_checksize(mmax*nmaxus)
-          i = 0
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(rksr(nm), sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grpnam, 'KSR', uindex, 1, sbuff)
+          call wrtarray_nm_2d(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rksr, 'KSR')
           if (ierror/=0) goto 9999
           !
           ! element 'KSMR'
           !
-          call sbuff_checksize(mmax*nmaxus)
-          i = 0
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(rksmr(nm), sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grpnam, 'KSMR', uindex, 1, sbuff)
+          call wrtarray_nm_2d(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rksmr, 'KSMR')
           if (ierror/=0) goto 9999
           !
           ! element 'KSD'
           !
-          call sbuff_checksize(mmax*nmaxus)
-          i = 0
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(rksd(nm), sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grpnam, 'KSD', uindex, 1, sbuff)
+          call wrtarray_nm_2d(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rksd, 'KSD')
           if (ierror/=0) goto 9999
           !
           ! element 'KS'
           !
-          call sbuff_checksize(mmax*nmaxus)
-          i = 0
-          do m = 1, mmax
-             do n = 1, nmaxus
-                i        = i+1
-                call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(sqrt(rksr(nm)**2 + rksmr(nm)**2 + rksd(nm)**2),sp)
-             enddo
+          allocate(rks(gdp%d%nmlb:gdp%d%nmub))
+          do nm = gdp%d%nmlb, gdp%d%nmub
+             rks(nm) = sqrt(rksr(nm)**2 + rksmr(nm)**2 + rksd(nm)**2)
           enddo
-          ierror = putelt(fds, grpnam, 'KS', uindex, 1, sbuff)
+          call wrtarray_nm_2d(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rks, 'KS')
+          deallocate(rks)
           if (ierror/=0) goto 9999
        endif
        !
        ! write errormessage if error occurred and set error = .true.
-       ! the files will be closed in clsnef (called in triend)
        !
  9999  continue
        if (ierror/= 0) then

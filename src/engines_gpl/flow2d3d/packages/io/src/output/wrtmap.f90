@@ -1,18 +1,19 @@
-subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
-                  & rhow      ,mmax      , &
-                  & kmax      ,nmaxus    ,lstsci    ,ltur      , &
-                  & nsrc      ,zmodel    ,kcs       ,kfs       ,kfu       , &
-                  & kfv       ,kfumin    ,kfvmin    ,kfumax    ,kfvmax    , &
-                  & kfsmin    ,kfsmax    ,mnksrc    ,ibuff     ,s1        , &
-                  & dps       ,dzs1      ,thick     , &
-                  & u1        ,v1        ,w1        ,wphy      ,r1        , &
-                  & rtur1     ,taubpu    ,taubpv    ,taubsu    ,taubsv    , &
-                  & vicww     ,dicww     ,rich      ,rho       ,p1        , &
-                  & vortic    ,enstro    ,umnldf    ,vmnldf    ,vicuv     , &
-                  & taubmx    ,windu     ,windv     ,velt      ,cvalu0    , &
-                  & cvalv0    ,cfurou    ,cfvrou    ,rouflo    ,patm      , &
-                  & z0ucur    ,z0vcur    ,z0urou    ,z0vrou    ,ktemp     , &
-                  & precip    ,evap      ,gdp       )
+subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
+                & rhow      ,mmax      ,itdate    ,dtsec     , &
+                & kmax      ,nmaxus    ,lstsci    ,ltur      , &
+                & nsrc      ,zmodel    ,kcs       ,kfs       ,kfu       , &
+                & kfv       ,kfumin    ,kfvmin    ,kfumax    ,kfvmax    , &
+                & kfsmin    ,kfsmax    ,mnksrc    ,s1        , &
+                & dps       ,dzs1      ,thick     , &
+                & u1        ,v1        ,w1        ,wphy      ,r1        , &
+                & rtur1     ,taubpu    ,taubpv    ,taubsu    ,taubsv    , &
+                & vicww     ,dicww     ,rich      ,rho       ,p1        , &
+                & vortic    ,enstro    ,umnldf    ,vmnldf    ,vicuv     , &
+                & taubmx    ,windu     ,windv     ,velt      ,cvalu0    , &
+                & cvalv0    ,cfurou    ,cfvrou    ,rouflo    ,patm      , &
+                & z0ucur    ,z0vcur    ,z0urou    ,z0vrou    ,ktemp     , &
+                & precip    ,evap      ,irequest  ,fds       ,iarrc     , &
+                & mf        ,ml        ,nf        ,nl        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -44,7 +45,7 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying groups (1 & 3) to the
-!              NEFIS MAP-DAT file
+!              FLOW MAP file
 !              Selection is done using SELMAP. For elements like
 !              WPHY where KMAX must be > 1 this coupling between
 !              KMAX and SELMAP is done in subroutine RDPRFL
@@ -54,13 +55,12 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
     use dfparall
+    use datagroups
     use globaldata
-    use array_module
-    use wrtmap_pointer
-    !
-    use dffunctionals
+    use wrtarray, only: wrtarray_nm, wrtarray_nm_2d, wrtarray_nmk, wrtarray_nmkl, wrtarray_nmkl_ptr, wrtvar
+    use dffunctionals, only: dfcleanup_glbarrs
+    use netcdf
     !
     implicit none
     !
@@ -69,9 +69,7 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                         , pointer :: mfg
-    integer                         , pointer :: mlg
     integer                         , pointer :: nfg
-    integer                         , pointer :: nlg
     integer                         , pointer :: nmaxgl
     integer                         , pointer :: mmaxgl
     integer                         , pointer :: nmmax
@@ -96,20 +94,19 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp) , dimension(:)         , pointer :: rhumarr
     real(fp) , dimension(:)         , pointer :: tairarr
     real(fp) , dimension(:)         , pointer :: clouarr
-    real(fp) , dimension(:)         , pointer :: swrfarr
     real(fp) , dimension(:)         , pointer :: qmis_out
-    logical                         , pointer :: first
     logical                         , pointer :: rhum_file
     logical                         , pointer :: tair_file
     logical                         , pointer :: clou_file
     logical                         , pointer :: prcp_file
-    logical                         , pointer :: swrf_file
     logical                         , pointer :: free_convec    
-    type (nefiselement)             , pointer :: nefiselem
+    type (datagroup)                , pointer :: group1
+    type (datagroup)                , pointer :: group3
     type (flwoutputtype)            , pointer :: flwoutput
 !
 ! Global variables
 !
+    integer                                                                           , intent(in)  :: itdate      !  Description and declaration in exttim.igs
     integer                                                                           , intent(in)  :: itmapc      !!  Current time counter for the MAP data file
     integer                                                                                         :: kmax        !  Description and declaration in esm_alloc_int.f90
     integer                                                                           , intent(in)  :: ktemp       !  Description and declaration in tricom.f90
@@ -130,7 +127,6 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfv         !  Description and declaration in esm_alloc_int.f90
     integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfvmax      !  Description and declaration in esm_alloc_int.f90
     integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfvmin      !  Description and declaration in esm_alloc_int.f90
-    integer       , dimension(nmaxus, mmax)                                                         :: ibuff       !  Description and declaration in esm_alloc_int.f90
     logical                                                                           , intent(out) :: error       !!  Flag=TRUE if an error is encountered
     logical                                                                           , intent(in)  :: zmodel      !  Description and declaration in procs.igs
     real(fp)                                                                          , intent(in)  :: rhow        !  Description and declaration in esm_alloc_real.f90
@@ -172,52 +168,67 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0vcur      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0urou      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0vrou      !  Description and declaration in esm_alloc_real.f90
-    character(*)                                                                      , intent(in)  :: trifil      !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
+    real(fp)                                                                          , intent(in)  :: dtsec       !  Integration time step [in seconds]
+    character(*)                                                                      , intent(in)  :: filename    !  File name
     character(4)                                                                      , intent(in)  :: rouflo      !  Description and declaration in esm_alloc_char.f90
     character(21)                                                                     , intent(in)  :: selmap      !  Description and declaration in tricom.igs
     character(10)                                                                     , intent(in)  :: velt        !! Velocity type 'eulerian' or 'GLM'
+    integer                                                                           , intent(in)  :: irequest    !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                                           , intent(in)  :: fds         !  File handle of output NEFIS/NetCDF file
+    !
+    integer    , dimension(4,0:nproc-1)                                               , intent(in)  :: iarrc       ! array containing collected grid indices
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: mf          ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: ml          ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: nf          ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)                                                 , intent(in)  :: nl          ! last index w.r.t. global grid in y-direction
 !
 ! Local variables
 !
-    integer                                       :: fds
+    integer                                       :: filetype
     integer                                       :: i             ! Help var.
-    integer                                       :: ierror        ! Local error flag for NEFIS files
+    integer                                       :: ierror        ! Local error flag
     integer                                       :: istat
-    integer                                       :: k             ! Help var.
     integer                                       :: km
     integer                                       :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
     integer                                       :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
-    integer                                       :: l             ! Help var.
     integer                                       :: m             ! Help var.
     integer                                       :: n             ! Help var.
     integer                                       :: nm
-    integer    , dimension(1)                     :: idummy        ! Help array to read/write Nefis files
-    integer    , dimension(3,5)                   :: uindex
-    integer                        , external     :: putelt
-    integer                        , external     :: inqmxi
+    integer    , dimension(1)                     :: idummy        ! Help array to write integers
     integer                        , external     :: clsnef
     integer                        , external     :: open_datdef
     integer                        , external     :: neferr
-    integer    , dimension(4,0:nproc-1)           :: iarrc         ! array containing collected grid indices 
-    integer                                       :: lenlo         ! length of field of current subdomain
-    integer                                       :: lengl         ! length of field containing collected data
-    integer    , dimension(0:nproc-1)             :: mf            ! first index w.r.t. global grid in x-direction
-    integer    , dimension(0:nproc-1)             :: ml            ! last index w.r.t. global grid in x-direction
-    integer    , dimension(0:nproc-1)             :: nf            ! first index w.r.t. global grid in y-direction
-    integer    , dimension(0:nproc-1)             :: nl            ! last index w.r.t. global grid in y-direction
     integer    , dimension(:,:)    , allocatable  :: ibuff2
-    integer    , dimension(:)      , allocatable  :: smlay_restr   ! copy of shlay, excluding layer zero
+    integer    , dimension(:)      , allocatable  :: smlay_restr   ! copy of smlay, excluding layer zero
+    !
+    integer                                       :: year
+    integer                                       :: month
+    integer                                       :: day
+    !
+    integer                                       :: iddim_time
+    integer                                       :: iddim_n
+    integer                                       :: iddim_nc
+    integer                                       :: iddim_m
+    integer                                       :: iddim_mc
+    integer                                       :: iddim_kmax
+    integer                                       :: iddim_kmax1
+    integer                                       :: iddim_kmaxout
+    integer                                       :: iddim_kmaxout_restr
+    integer                                       :: iddim_lstsci
+    integer                                       :: iddim_ltur
+    integer                                       :: iddim_nsrc
+    integer                                       :: iddim_7
+    !
+    integer                                       :: idatt_cal
+    !
     real(fp)   , dimension(:,:)    , allocatable  :: rbuff2
-    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
-    real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
     real(fp)   , dimension(:,:,:)  , allocatable  :: zkt           ! Vertical coordinates of layering interfaces
-    real(sp)   , dimension(:,:,:)  , allocatable  :: rsbuff3       ! work array
     character(10)                                 :: runit
     character(16)                                 :: grnam1        ! Data-group name defined for the NEFIS-files group 1
     character(16)                                 :: grnam3        ! Data-group name defined for the NEFIS-files group 3
     character(64)                                 :: rdesc
-    character(256)                                :: filnam        ! Help var. for FLOW file name
-    character(6)                                  :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
+    character(256)                                :: string
+    character(1024)                               :: error_string
 !
 ! Data statements
 !
@@ -226,15 +237,14 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem      => gdp%nefisio%nefiselem(nefiswrtmapinf)
+    call getdatagroup(gdp, FILOUT_MAP, grnam1, group1)
+    call getdatagroup(gdp, FILOUT_MAP, grnam3, group3)
+    celidt         => group1%celidt
     mfg            => gdp%gdparall%mfg
-    mlg            => gdp%gdparall%mlg
     nfg            => gdp%gdparall%nfg
-    nlg            => gdp%gdparall%nlg
     mmaxgl         => gdp%gdparall%mmaxgl
     nmaxgl         => gdp%gdparall%nmaxgl
     nmmax          => gdp%d%nmmax
-    celidt         => nefiselem%celidt
     keva           => gdp%gdtricom%keva
     smlay          => gdp%gdpostpr%smlay
     fluxu          => gdp%gdflwpar%fluxu
@@ -256,7 +266,6 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     rhumarr        => gdp%gdheat%rhumarr
     tairarr        => gdp%gdheat%tairarr
     clouarr        => gdp%gdheat%clouarr
-    first          => nefiselem%first
     rhum_file      => gdp%gdheat%rhum_file
     tair_file      => gdp%gdheat%tair_file
     clou_file      => gdp%gdheat%clou_file
@@ -275,1459 +284,1218 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
        allocate(smlay_restr(kmaxout_restr))
        smlay_restr   = smlay
     endif
-    filnam  = trifil(1:3) // 'm' // trifil(5:)
-    errmsg  = ' '
+    filetype = getfiletype(gdp, FILOUT_MAP)
     !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
-    !
-    if (first .and. inode == master) then
+    ierror = 0
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
-       ! Set up the element chracteristics
+       ! Define dimensions
+       !
+       iddim_time    = adddim(gdp, lundia, FILOUT_MAP, 'time'   , nf90_unlimited)
+       iddim_n       = adddim(gdp, lundia, FILOUT_MAP, 'N'      , nmaxgl        ) ! Number of N-grid points (cell centes)
+       iddim_nc      = adddim(gdp, lundia, FILOUT_MAP, 'NC'     , nmaxgl        ) ! Number of N-grid points (corner points)
+       iddim_m       = adddim(gdp, lundia, FILOUT_MAP, 'M'      , mmaxgl        ) ! Number of M-grid points (cell centes)
+       iddim_mc      = adddim(gdp, lundia, FILOUT_MAP, 'MC'     , mmaxgl        ) ! Number of M-grid points (corner points)
+       if (zmodel) then
+          iddim_kmax    = adddim(gdp, lundia, FILOUT_MAP, 'K_LYR'  , kmax          ) ! Number of layers
+          iddim_kmax1   = adddim(gdp, lundia, FILOUT_MAP, 'K_INTF' , kmax+1        ) ! Number of layer interfaces
+       else
+          iddim_kmax    = adddim(gdp, lundia, FILOUT_MAP, 'SIG_LYR'  , kmax) ! Number of layers
+          iddim_kmax1   = adddim(gdp, lundia, FILOUT_MAP, 'SIG_INTF' , kmax+1) ! Number of layer interfaces
+       endif
+       iddim_kmaxout = adddim(gdp, lundia, FILOUT_MAP, 'KMAXOUT', kmaxout       ) ! Number of layer interfaces written
+       iddim_kmaxout_restr = adddim(gdp, lundia, FILOUT_MAP, 'KMAXOUT_RESTR', kmaxout_restr ) ! Number of layers written
+       !
+       if (lstsci  >0) iddim_lstsci = adddim(gdp, lundia, FILOUT_MAP, 'LSTSCI'            , lstsci  ) !'Number of constituents             '
+       if (ltur    >0) iddim_ltur   = adddim(gdp, lundia, FILOUT_MAP, 'LTUR'              , ltur    ) !'Number of turbulence quantities    '
+       if (nsrc    >0) iddim_nsrc   = adddim(gdp, lundia, FILOUT_MAP, 'NSRC'              , nsrc    ) !'Number of discharge                '
+                       iddim_7      = adddim(gdp, lundia, FILOUT_MAP, 'length_7'          , 7       )
+       !
+       idatt_cal = addatt(gdp, lundia, FILOUT_MAP, 'calendar','proleptic_gregorian')
        !
        ! map-info-series
        !
-       call addelm(nefiswrtmapinf,'ITMAPC',' ','[   -   ]','INTEGER',4    , &
-          & 'timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)', &
-          & 1         ,1         ,0         ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call defnewgrp(nefiswrtmapinf ,filnam    ,grnam1   ,gdp)
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_MAP, grnam1, 'ITMAPC', ' ', IO_INT4   , 0, longname='timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)')
+       else
+          year  = itdate / 10000
+          month = (itdate - year*10000) / 100
+          day   = itdate - year*10000 - month*100
+          write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
+          call addelm(gdp, lundia, FILOUT_MAP, grnam1, 'time'  , 'time', IO_REAL4, 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
+       endif
        !
-       ! map-sed-series
+       ! map-series
        !
        if (selmap(1:1) == 'Y') then
-          call addelm(nefiswrtmap,'S1',' ','[   M   ]','REAL',4              , &
-             & 'Water-level in zeta point                                   ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'S1', ' ', IO_REAL4      , 2, dimids=(/iddim_n, iddim_m/), longname='Water-level in zeta point', unit='m', acl='z')
+!             ierror   = nf90_put_att(fds, idvar_s1, 'grid_mapping', 'projected_coordinate_system'); call nc_check_err(lundia, ierror, "put_att waterlevel projection", filename)
        endif
-       call addelm(nefiswrtmap,'KFU',' ','[   -   ]','INTEGER',4          , &
-          & 'Non-active/active in U-point                                ', &
-          & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrtmap,'KFV',' ','[   -   ]','INTEGER',4          , &
-          & 'Non-active/active in V-point                                ', &
-          & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
+       call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFU', ' ', IO_INT4         , 2, dimids=(/iddim_n , iddim_mc/), longname='Non-active/active in U-point', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFV', ' ', IO_INT4         , 2, dimids=(/iddim_nc, iddim_m /), longname='Non-active/active in V-point', acl='v')
        if (zmodel .and. flwoutput%kf_minmax) then
-          call addelm(nefiswrtmap,'KFSMIN',' ','[   -   ]','INTEGER',4          , &
-             & 'Bottom-most active layer at water level point               ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'KFSMAX',' ','[   -   ]','INTEGER',4          , &
-             & 'Top-most active layer at water level point                  ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'KFUMIN',' ','[   -   ]','INTEGER',4          , &
-             & 'Bottom-most active layer at U-point                         ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'KFUMAX',' ','[   -   ]','INTEGER',4          , &
-             & 'Top-most active layer at U-point                            ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'KFVMIN',' ','[   -   ]','INTEGER',4          , &
-             & 'Bottom-most active layer at V-point                         ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'KFVMAX',' ','[   -   ]','INTEGER',4          , &
-             & 'Top-most active layer at V-point                            ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFSMIN', ' ', IO_INT4   , 2, dimids=(/iddim_n , iddim_m /), longname='Bottom-most active layer at water level point', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFSMAX', ' ', IO_INT4   , 2, dimids=(/iddim_n , iddim_m /), longname='Top-most active layer at water level point', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFUMIN', ' ', IO_INT4   , 2, dimids=(/iddim_n , iddim_mc/), longname='Bottom-most active layer at U-point', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFUMAX', ' ', IO_INT4   , 2, dimids=(/iddim_n , iddim_mc/), longname='Top-most active layer at U-point', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFVMIN', ' ', IO_INT4   , 2, dimids=(/iddim_nc, iddim_m /), longname='Bottom-most active layer at V-point', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'KFVMAX', ' ', IO_INT4   , 2, dimids=(/iddim_nc, iddim_m /), longname='Top-most active layer at V-point', acl='v')
        endif
        if (index(selmap(2:3), 'Y') > 0) then
-          call addelm(nefiswrtmap,'U1',' ','[  M/S  ]','REAL',4              , &
-             & 'U-velocity per layer in U-point ('//trim(velt)//')', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'V1',' ','[  M/S  ]','REAL',4              , &
-             & 'V-velocity per layer in V-point ('//trim(velt)//')', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'U1', ' ', IO_REAL4      , 3, dimids=(/iddim_n , iddim_mc, iddim_kmaxout_restr/), longname='U-velocity per layer in U-point ('//trim(velt)//')', unit='m/s', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'V1', ' ', IO_REAL4      , 3, dimids=(/iddim_nc, iddim_m , iddim_kmaxout_restr/), longname='V-velocity per layer in V-point ('//trim(velt)//')', unit='m/s', acl='v')
        endif
        if (selmap(4:4) == 'Y') then
-          call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
-             & 'W-omega per layer in zeta point                             ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'W', ' ', IO_REAL4       , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout/), longname='W-omega per layer in zeta point', unit='m/s', acl='z')
        endif
        if (selmap(5:5) == 'Y') then
-          call addelm(nefiswrtmap,'WPHY',' ','[  M/S  ]','REAL',4            , &
-             & 'W-velocity per layer in zeta point                          ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'WPHY', ' ', IO_REAL4    , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout_restr/), longname='W-velocity per layer in zeta point', unit='m/s', acl='z')
        endif
        if (index(selmap(6:13), 'Y') /= 0) then
-          call addelm(nefiswrtmap,'R1',' ','[   -   ]','REAL',4              , &
-             & 'Concentrations per layer in zeta point                      ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'R1', ' ', IO_REAL4      , 4, dimids=(/iddim_n, iddim_m, iddim_kmaxout_restr, iddim_lstsci/), longname='Concentrations per layer in zeta point', acl='z')
        endif
        if (flwoutput%difuflux) then
-          call addelm(nefiswrtmap,'R1FLX_UU',' ','[   -   ]','REAL',4        , &
-             & 'Constituent flux in u-direction (u point)                   ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'R1FLX_VV',' ','[   -   ]','REAL',4        , &
-             & 'Constituent flux in v-direction (v point)                   ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'R1FLX_UU', ' ', IO_REAL4, 4, dimids=(/iddim_n , iddim_mc, iddim_kmaxout_restr, iddim_lstsci/), longname='Constituent flux in u-direction (u point)', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'R1FLX_VV', ' ', IO_REAL4, 4, dimids=(/iddim_nc, iddim_m , iddim_kmaxout_restr, iddim_lstsci/), longname='Constituent flux in v-direction (v point)', acl='v')
        endif
        if (flwoutput%cumdifuflux) then
-          call addelm(nefiswrtmap,'R1FLX_UUC',' ','[   -   ]','REAL',4       , &
-             & 'Cumulative constituent flux in u-direction (u point)        ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'R1FLX_VVC',' ','[   -   ]','REAL',4       , &
-             & 'Cumulative constituent flux in v-direction (v point)        ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'R1FLX_UUC', ' ', IO_REAL4, 4, dimids=(/iddim_n , iddim_mc, iddim_kmaxout_restr, iddim_lstsci/), longname='Cumulative constituent flux in u-direction (u point)', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'R1FLX_VVC', ' ', IO_REAL4, 4, dimids=(/iddim_nc, iddim_m , iddim_kmaxout_restr, iddim_lstsci/), longname='Cumulative constituent flux in v-direction (v point)', acl='v')
        endif
        if (flwoutput%momentum) then
-          call addelm(nefiswrtmap,'MOM_DUDT        ',' ','[ M/S2  ]','REAL',4, &
-             & 'Acceleration in GLM coordinate (u point)                    ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UDENSITY    ',' ','[ M/S2  ]','REAL',4, &
-             & 'Density term (u point)                                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_URESISTANCE ',' ','[ M/S2  ]','REAL',4, &
-             & 'Flow resistance term (u point)                              ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UCORIOLIS   ',' ','[ M/S2  ]','REAL',4, &
-             & 'Coriolis term (u point)                                     ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UVISCO      ',' ','[ M/S2  ]','REAL',4, &
-             & 'Viscosity term (u point)                                    ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UPRESSURE   ',' ','[ M/S2  ]','REAL',4, &
-             & 'Pressure term (u point)                                     ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UTIDEGEN    ',' ','[ M/S2  ]','REAL',4, &
-             & 'Tide generating forces term (u point)                       ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UWINDFORCE  ',' ','[ M/S2  ]','REAL',4, &
-             & 'Wind forcing term (u point)                                 ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UBEDSHEAR   ',' ','[ M/S2  ]','REAL',4, &
-             & 'Bed shear term (u point)                                    ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UWAVES      ',' ','[ M/S2  ]','REAL',4, &
-             & 'Wave forces term (u point)                                  ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UDUDX       ',' ','[ M/S2  ]','REAL',4, &
-             & 'Convection term (u point)                                   ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VDUDY       ',' ','[ M/S2  ]','REAL',4, &
-             & 'Cross advection term (u point)                              ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_DUDT ', ' ', IO_REAL4       , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Acceleration in GLM coordinate (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UDENSITY ', ' ', IO_REAL4   , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Density term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_URESISTANCE ', ' ', IO_REAL4, 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Flow resistance term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UCORIOLIS ', ' ', IO_REAL4  , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Coriolis term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UVISCO ', ' ', IO_REAL4     , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Viscosity term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UPRESSURE ', ' ', IO_REAL4  , 2, dimids=(/iddim_n , iddim_mc/), longname='Pressure term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UTIDEGEN ', ' ', IO_REAL4   , 2, dimids=(/iddim_n , iddim_mc/), longname='Tide generating forces term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UWINDFORCE ', ' ', IO_REAL4 , 2, dimids=(/iddim_n , iddim_mc/), longname='Wind forcing term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UBEDSHEAR ', ' ', IO_REAL4  , 2, dimids=(/iddim_n , iddim_mc/), longname='Bed shear term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UWAVES ', ' ', IO_REAL4     , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Wave forces term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UDUDX ', ' ', IO_REAL4      , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Convection term (u point)', unit='m/s2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VDUDY ', ' ', IO_REAL4      , 3, dimids=(/iddim_n , iddim_mc, iddim_kmax/), longname='Cross advection term (u point)', unit='m/s2', acl='u')
           !
-          call addelm(nefiswrtmap,'MOM_DVDT        ',' ','[ M/S2  ]','REAL',4, &
-             & 'Acceleration in GLM coordinates (v point)                   ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VDENSITY    ',' ','[ M/S2  ]','REAL',4, &
-             & 'Density term (v point)                                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VRESISTANCE ',' ','[ M/S2  ]','REAL',4, &
-             & 'Flow resistance term (v point)                              ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VCORIOLIS   ',' ','[ M/S2  ]','REAL',4, &
-             & 'Coriolis term (v point)                                     ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VVISCO      ',' ','[ M/S2  ]','REAL',4, &
-             & 'Viscosity term (v point)                                    ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VPRESSURE   ',' ','[ M/S2  ]','REAL',4, &
-             & 'Pressure term (v point)                                     ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VTIDEGEN    ',' ','[ M/S2  ]','REAL',4, &
-             & 'Tide generating forces term (v point)                       ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VWINDFORCE  ',' ','[ M/S2  ]','REAL',4, &
-             & 'Wind forcing term (v point)                                 ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VBEDSHEAR   ',' ','[ M/S2  ]','REAL',4, &
-             & 'Bed shear term (v point)                                    ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VWAVES      ',' ','[ M/S2  ]','REAL',4, &
-             & 'Wave forces term (v point)                                  ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_VDVDY       ',' ','[ M/S2  ]','REAL',4, &
-             & 'Convection term (v point)                                   ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'MOM_UDVDX       ',' ','[ M/S2  ]','REAL',4, &
-             & 'Cross advection term (v point)                              ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_DVDT ', ' ', IO_REAL4       , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Acceleration in GLM coordinates (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VDENSITY ', ' ', IO_REAL4   , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Density term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VRESISTANCE ', ' ', IO_REAL4, 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Flow resistance term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VCORIOLIS ', ' ', IO_REAL4  , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Coriolis term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VVISCO ', ' ', IO_REAL4     , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Viscosity term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VPRESSURE ', ' ', IO_REAL4  , 2, dimids=(/iddim_nc, iddim_m /), longname='Pressure term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VTIDEGEN ', ' ', IO_REAL4   , 2, dimids=(/iddim_nc, iddim_m /), longname='Tide generating forces term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VWINDFORCE ', ' ', IO_REAL4 , 2, dimids=(/iddim_nc, iddim_m /), longname='Wind forcing term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VBEDSHEAR ', ' ', IO_REAL4  , 2, dimids=(/iddim_nc, iddim_m /), longname='Bed shear term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VWAVES ', ' ', IO_REAL4     , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Wave forces term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_VDVDY ', ' ', IO_REAL4      , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Convection term (v point)', unit='m/s2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MOM_UDVDX ', ' ', IO_REAL4      , 3, dimids=(/iddim_nc, iddim_m , iddim_kmax/), longname='Cross advection term (v point)', unit='m/s2', acl='v')
        endif
        if (index(selmap(14:15),'Y') /= 0) then
-          call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
-             & 'Turbulent quantity per layer in zeta point                  ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,ltur      ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'RTUR1', ' ', IO_REAL4           , 4, dimids=(/iddim_n, iddim_m, iddim_kmaxout, iddim_ltur/), longname='Turbulent quantity per layer in zeta point', acl='z')
        endif
        if (index(selmap(16:17), 'Y') > 0) then
-          call addelm(nefiswrtmap,'TAUKSI',' ','[  N/M2 ]','REAL',4          , &
-             & 'Bottom stress in U-point                                    ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'TAUETA',' ','[  N/M2 ]','REAL',4          , &
-             & 'Bottom stress in V-point                                    ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'TAUMAX',' ','[  N/M2 ]','REAL',4          , &
-             & 'Tau_max in zeta points (scalar)                             ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'TAUKSI', ' ', IO_REAL4          , 2, dimids=(/iddim_n , iddim_mc/), longname='Bottom stress in U-point', unit='N/m2', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'TAUETA', ' ', IO_REAL4          , 2, dimids=(/iddim_nc, iddim_m /), longname='Bottom stress in V-point', unit='N/m2', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'TAUMAX', ' ', IO_REAL4          , 2, dimids=(/iddim_n , iddim_m /), longname='Tau_max in zeta points (scalar)', unit='N/m2', acl='z')
        endif
        if (selmap(18:18) == 'Y') then
-          call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
-             & 'Vertical eddy viscosity-3D in zeta point                    ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'VICWW', ' ', IO_REAL4           , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout/), longname='Vertical eddy viscosity-3D in zeta point', unit='m2/s', acl='z')
        endif
        if (selmap(19:19) == 'Y') then
-          call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
-             & 'Vertical eddy diffusivity-3D in zeta point                  ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'DICWW', ' ', IO_REAL4           , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout/), longname='Vertical eddy diffusivity-3D in zeta point', unit='m2/s', acl='z')
        endif
        if (index(selmap(18:19),'Y') > 0) then
-          call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
-             & 'Richardson number                                           ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'RICH', ' ', IO_REAL4            , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout/), longname='Richardson number', acl='z')
        endif
        if (selmap(20:20) == 'Y') then
-          call addelm(nefiswrtmap,'RHO',' ','[ KG/M3 ]','REAL',4             , &
-             & 'Density per layer in zeta point                             ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'RHO', ' ', IO_REAL4             , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout_restr/), longname='Density per layer in zeta point', unit='kg/m3', acl='z')
        endif
        if (selmap(21:21) == 'Y') then
-          call addelm(nefiswrtmap,'UMNLDF',' ','[  M/S  ]','REAL',4          , &
-             & 'Filtered U-velocity                                         ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'VMNLDF',' ','[  M/S  ]','REAL',4          , &
-             & 'Filtered V-velocity                                         ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'VICUV',' ','[ M2/S  ]','REAL',4           , &
-             & 'Horizontal eddy viscosity in zeta point                     ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'UMNLDF', ' ', IO_REAL4          , 2, dimids=(/iddim_n , iddim_mc/), longname='Filtered U-velocity', unit='m/s', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'VMNLDF', ' ', IO_REAL4          , 2, dimids=(/iddim_nc, iddim_m /), longname='Filtered V-velocity', unit='m/s', acl='v')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'VICUV', ' ', IO_REAL4           , 3, dimids=(/iddim_n , iddim_m , iddim_kmaxout_restr/), longname='Horizontal eddy viscosity in zeta point', unit='m2/s', acl='z')
        endif
        if (nsrc > 0) then
-          call addelm(nefiswrtmap,'MNKSRC',' ','[   -   ]','INTEGER',4       , &
-             & '(M,N,K) indices of discharge sources and time dep. location ', &
-             & 2         ,7         ,nsrc      ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'MNKSRC', ' ', IO_INT4           , 2, dimids=(/iddim_7, iddim_nsrc/), longname='(M,N,K) indices of discharge sources and time dep. location')
        endif
        if (flwoutput%vortic) then
-          call addelm(nefiswrtmap,'VORTIC',' ','[  1/S  ]','REAL',4          , &
-             & 'Vorticity at each layer in depth point                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'ENSTRO',' ','[  1/S2 ]','REAL',4          , &
-             & 'Enstrophy at each layer in depth point                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'VORTIC', ' ', IO_REAL4          , 3, dimids=(/iddim_nc, iddim_mc, iddim_kmaxout_restr/), longname='Vorticity at each layer in depth point', unit='1/s', acl='d')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'ENSTRO', ' ', IO_REAL4          , 3, dimids=(/iddim_nc, iddim_mc, iddim_kmaxout_restr/), longname='Enstrophy at each layer in depth point', unit='1/s2', acl='d')
        endif
        if (index(selmap(2:2), 'Y')>0 .and. zmodel) then
-          call addelm(nefiswrtmap,'HYDPRES',' ','[  N/M2 ]','REAL',4         , &
-             & 'Non-hydrostatic pressure at each layer in zeta point        ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'HYDPRES', ' ', IO_REAL4         , 3, dimids=(/iddim_n, iddim_m, iddim_kmaxout_restr/), longname='Non-hydrostatic pressure at each layer in zeta point', unit='N/m2', acl='z')
        endif
        if (flwoutput%air) then
-          call addelm(nefiswrtmap,'WINDU',' ','[  M/S  ]','REAL',4           , &
-             & 'Wind speed in x-direction (zeta point)                      ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'WINDV',' ','[  M/S  ]','REAL',4           , &
-             & 'Wind speed in y-direction (zeta point)                      ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'PATM',' ','[  N/M2  ]','REAL',4           , &
-             & 'Air pressure (zeta point)                                   ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'WINDU', ' ', IO_REAL4           , 2, dimids=(/iddim_n, iddim_m/), longname='Wind speed in x-direction (zeta point)', unit='m/s', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'WINDV', ' ', IO_REAL4           , 2, dimids=(/iddim_n, iddim_m/), longname='Wind speed in y-direction (zeta point)', unit='m/s', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'PATM', ' ', IO_REAL4            , 2, dimids=(/iddim_n, iddim_m/), longname='Air pressure (zeta point)', unit='N/m2', acl='z')
           if (clou_file) then
-             call addelm(nefiswrtmap,'CLOUDS',' ','[   %   ]','REAL',4          , &
-                & 'Cloud coverage percentage (zeta point)                      ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'CLOUDS', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Cloud coverage percentage (zeta point)', unit='percent', acl='z')
           endif
           if (rhum_file) then
-             call addelm(nefiswrtmap,'AIRHUM',' ','[   %   ]','REAL',4          , &
-                & 'Relative air humidity (zeta point)                          ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'AIRHUM', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Relative air humidity (zeta point)', unit='percent', acl='z')
           endif
           if (tair_file) then
-             call addelm(nefiswrtmap,'AIRTEM',' ','[ DEG C ]','REAL',4          , &
-                & 'Air temperature (zeta point)                                ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'AIRTEM', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Air temperature (zeta point)', unit='degrees_Celsius', acl='z')
           endif
           if (prcp_file) then
-             call addelm(nefiswrtmap,'PRECIP',' ','[  MM/H ]','REAL',4          , &
-                & 'Precipitation rate (zeta point)                     ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'PRECIP', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Precipitation rate (zeta point)', unit='mm/h', acl='z')
           endif
-          if (keva < 2) then ! if keva < 2 then evaporation is calculated by the model
-             call addelm(nefiswrtmap,'EVAP',' ','[  MM/H ]','REAL',4          , &
-                & 'Evaporation rate (zeta point)                          ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+          if (keva < 2) then 
+             !
+             ! evaporation is calculated by the model
+             !
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'EVAP', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Evaporation rate (zeta point)', unit='mm/h', acl='z')
           endif
        endif
-       if (flwoutput%temperature) then
+       if(flwoutput%temperature) then
           if (ktemp == 3) then
              !
              ! Different output for Excess Temperature model
              !
-             call addelm(nefiswrtmap,'HLC', ' ' , '[W/M2K ]','REAL',4           , &
-                & 'Exchange coefficient in Excess temperature model            ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-             call addelm(nefiswrtmap,'QNET', ' ' , '[W/M2 ]','REAL',4           , &
-                & 'Total nett heat flux in zeta point                          ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )          
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'HLC', ' ', IO_REAL4          , 2, dimids=(/iddim_n, iddim_m/), longname='Exchange coefficient in Excess temperature model', unit='W/(m2 K)', acl='z')
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QNET', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Total nett heat flux in zeta point', unit='W/m2', acl='z')
           elseif (ktemp > 0) then
-             call addelm(nefiswrtmap,'QEVA', ' ' , '[W/M2 ]','REAL',4           , &
-                & 'Evaporation heat flux in zeta point                         ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-             call addelm(nefiswrtmap,'QCO',  ' ' , '[W/M2 ]','REAL',4           , &
-                & 'Heat flux of forced convection in zeta point                ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-             call addelm(nefiswrtmap,'QBL',  ' ' , '[W/M2 ]','REAL',4           , &
-                & 'Nett back radiation in zeta point                           ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-             call addelm(nefiswrtmap,'QIN',  ' ' , '[W/M2 ]','REAL',4           , &
-                & 'Nett solar radiation in zeta point                          ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-             call addelm(nefiswrtmap,'QNET', ' ' , '[W/M2 ]','REAL',4           , &
-                & 'Total nett heat flux in zeta point                          ', &
-                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-             if (free_convec) then 
-                call addelm(nefiswrtmap,'HFREE',' ' , '[W/M2 ]','REAL',4           , &
-                   & 'Free convection of sensible heat in zeta point              ', &
-                   & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                   & lundia    ,gdp       )
-                call addelm(nefiswrtmap,'EFREE',' ' , '[W/M2 ]','REAL',4           , &
-                   & 'Free convection of latent heat in zeta point                ', &
-                   & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                   & lundia    ,gdp       )
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QEVA', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Evaporation heat flux in zeta point', unit='W/m2', acl='z')
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QCO', ' ', IO_REAL4          , 2, dimids=(/iddim_n, iddim_m/), longname='Heat flux of forced convection in zeta point', unit='W/m2', acl='z')
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QBL', ' ', IO_REAL4          , 2, dimids=(/iddim_n, iddim_m/), longname='Nett back radiation in zeta point', unit='W/m2', acl='z')
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QIN', ' ', IO_REAL4          , 2, dimids=(/iddim_n, iddim_m/), longname='Nett solar radiation in zeta point', unit='W/m2', acl='z')
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QNET', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Total nett heat flux in zeta point', unit='W/m2', acl='z')
+             if (free_convec) then
+                call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'HFREE', ' ', IO_REAL4     , 2, dimids=(/iddim_n, iddim_m/), longname='Free convection of sensible heat in zeta point', unit='W/m2', acl='z')
+                call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'EFREE', ' ', IO_REAL4     , 2, dimids=(/iddim_n, iddim_m/), longname='Free convection of latent heat in zeta point', unit='W/m2', acl='z')
              endif
-             if (keva == 3) then
-                call addelm(nefiswrtmap,'QMIS', ' ' , '[W/M2 ]','REAL',4           , &
-                   & 'Computed minus derived heat flux in zeta point              ', &
-                   & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                   & lundia    ,gdp       )
-             endif
-          else
+          endif
+          if (keva == 3) then
+             call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'QMIS', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Computed minus derived heat flux in zeta point', unit='W/m2', acl='z')
           endif
        endif
        if (flwoutput%chezy) then
-          call addelm(nefiswrtmap,'CFUROU',' ','[M0.5/S ]','REAL',4          , &
-             & 'Chezy roughness parameter in U-point                        ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'CFVROU',' ','[M0.5/S ]','REAL',4          , &
-             & 'Chezy roughness parameter in V-point                        ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'CFUROU', ' ', IO_REAL4          , 2, dimids=(/iddim_n , iddim_mc/), longname='Chezy roughness parameter in U-point', unit='m0.5/s', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'CFVROU', ' ', IO_REAL4          , 2, dimids=(/iddim_nc, iddim_m /), longname='Chezy roughness parameter in V-point', unit='m0.5/s', acl='v')
        endif
        if (flwoutput%roughness) then
           select case (rouflo)
           case ('CHEZ')
-             runit = '[ M0.5/S ]'
+             runit = 'm0.5/s'
              rdesc = 'Chezy roughness parameter'
           case ('WHIT')
-             runit = '[   M    ]'
+             runit = 'm'
              rdesc = 'Nikuradse roughness parameter'
           case ('MANN')
-             runit = '[S/M{1/3}]'
-             rdesc = 'Manning roughness parameter'
-          case ('Z   ')
-             runit = '[   M    ]'
+             runit = 's/m{1/3}'
+          rdesc = 'Manning roughness parameter'
+          case ('Z ')
+             runit = 'm'
              rdesc = 'Z0 roughness parameter'
           end select
-          call addelm(nefiswrtmap,'ROUMETU',' ',runit      ,'REAL',4         , &
-             & trim(rdesc) // ' in U-point'                                  , &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'ROUMETV',' ',runit      ,'REAL',4         , &
-             & trim(rdesc) // ' in V-point'                                  , &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'ROUMETU', ' ', IO_REAL4         , 2, dimids=(/iddim_n , iddim_mc/), longname=trim(rdesc)//' in U-point', unit=runit, acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'ROUMETV', ' ', IO_REAL4         , 2, dimids=(/iddim_nc, iddim_m /), longname=trim(rdesc)//' in V-point', unit=runit, acl='v')
        endif
        if (flwoutput%z0cur) then
-          call addelm(nefiswrtmap,'Z0UCUR',' ','[   M   ]','REAL',4          , &
-             & 'Current only z0 bed roughness in U-point                    ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'Z0VCUR',' ','[   M   ]','REAL',4          , &
-             & 'Current only z0 bed roughness in V-point                    ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'Z0UCUR', ' ', IO_REAL4          , 2, dimids=(/iddim_n , iddim_mc/), longname='Current only z0 bed roughness in U-point', unit='m', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'Z0VCUR', ' ', IO_REAL4          , 2, dimids=(/iddim_nc, iddim_m /), longname='Current only z0 bed roughness in V-point', unit='m', acl='v')
        endif
        if (flwoutput%z0rou) then
-          call addelm(nefiswrtmap,'Z0UROU',' ','[   M   ]','REAL',4          , &
-             & 'Wave enhanced z0 bed roughness in U-point                   ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
-          call addelm(nefiswrtmap,'Z0VROU',' ','[   M   ]','REAL',4          , &
-             & 'Wave enhanced z0 bed roughness in V-point                   ', &
-             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'Z0UROU', ' ', IO_REAL4          , 2, dimids=(/iddim_n , iddim_mc/), longname='Wave enhanced z0 bed roughness in U-point', unit='m', acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'Z0VROU', ' ', IO_REAL4          , 2, dimids=(/iddim_nc, iddim_m /), longname='Wave enhanced z0 bed roughness in V-point', unit='m', acl='v')
        endif
        if (flwoutput%layering) then
-          call addelm(nefiswrtmap,'LAYER_INTERFACE',' ','[  M  ]','REAL',4   , &
-             & 'Vertical coordinate of layer interface                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-             & lundia    ,gdp       )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'LAYER_INTERFACE', ' ', IO_REAL4 , 3, dimids=(/iddim_n, iddim_m, iddim_kmax1/), longname='Vertical coordinate of layer interface', unit='m', acl='z')
        endif
        !
-       call defnewgrp(nefiswrtmap ,filnam    ,grnam3   ,gdp)
+       group1%grp_dim = iddim_time
+       group3%grp_dim = iddim_time
+       celidt = 0
        !
-       ! Get start celidt for writing
-       !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrtmapinf)
-       first     => nefiselem%first
-       celidt    => nefiselem%celidt
-    endif
-    !
-    if (parll) then
-       !
-       ! allocate data arrays for collection data 
-       !
-       ! gather LOCAL grid indices of all partitions
-       !
-       call dfsync(gdp)
-       call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
-          &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-       !
-       ! broadcast LOCAL grid indices to ALL partitions
-       ! so every partition knows the dimensions and positions
-       ! of the other partitions in the global domain
-       !
-       call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
-       call dfbroadc_gdp ( nf, nproc, dfint, gdp )
-       call dfbroadc_gdp ( nl, nproc, dfint, gdp )
-       call dfbroadc_gdp ( mf, nproc, dfint, gdp )
-       call dfbroadc_gdp ( ml, nproc, dfint, gdp )
-    endif
-    !
-    ierror = 0
-    if (inode == master) ierror = open_datdef(filnam   ,fds      )
-    if (ierror /= 0) goto 999
-    if (inode == master) then
-       if (first) then
-          !
-          ! end of initialization, don't come here again
-          !
-          ierror = inqmxi(fds, grnam1, celidt)
-          first = .false.
-       endif
-       !
-       ! Writing of output on every itmapc
+    case (REQUESTTYPE_WRITE)
        !
        celidt = celidt + 1
+       group3%celidt = celidt
        !
-       idummy(1)   = itmapc
-       uindex(1,1) = celidt
-       uindex(2,1) = celidt
+       ! Writing of output on every itmapc/time
        !
-       ! Group map-series, identified with nefiswrtmap, must use the same
-       ! value for celidt.
-       ! Easy solution:
-       gdp%nefisio%nefiselem(nefiswrtmap)%celidt = celidt
-       ! Neat solution in pseudo code:
-       ! subroutine wrtmap
-       ! integer :: celidt
-       ! call wrtmapinf(celidt)
-       ! call wrtmapdat(celidt)
-       ! end subroutine
-       !
-       ierror      = putelt(fds, grnam1, 'ITMAPC', uindex, 1, idummy)
-    endif
-    if (ierror/=0) goto 999
-    !
-    ! group 3, element 'S1' only if SELMAP( 1: 1) = 'Y'
-    !
-    if (selmap(1:1) == 'Y') then
-       if (parll) then
-          call dfgather(s1,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(s1,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif      
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'S1', uindex, 1, glbarr2)
+       if (filetype == FTYPE_NEFIS) then
+          call wrtvar(fds, filename, filetype, grnam1, celidt, &
+                    & gdp, ierror, lundia, itmapc, 'ITMAPC')
+       elseif (filetype == FTYPE_NETCDF) then
+          call wrtvar(fds, filename, filetype, grnam1, celidt, &
+                    & gdp, ierror, lundia, itmapc*dtsec, 'time')
        endif
-       ! ad hoc double precision output of S1
-       ! allocate(rbuff2(maxgl,mmaxgl)
-       ! rbuff2(1:nmaxgl,1:mmaxgl)  = s1(1:nmaxgl,1:mmaxgl)
-       ! ierror = putelt(fds, grnam3, 'S1', uindex, 1, rbuff2)
-       ! deallocate(rbuff2)  
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'KFU'
-    !
-    call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, kfu, 'KFU')
-    if (ierror /= 0) goto 999
-    !
-    ! group 3: element 'KFV'
-    !
-    call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                 & ierror, kfv, 'KFV')
-    if (ierror /= 0) goto 999
-    !
-    if (zmodel .and. flwoutput%kf_minmax) then
+       if (ierror/=0) goto 9999
        !
-       ! group 3: element 'KFSMIN'
+       ! element 'S1' only if SELMAP( 1: 1) = 'Y'
        !
-       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfsmin, 'KFSMIN')
-       if (ierror /= 0) goto 999
+       if (selmap(1:1) == 'Y') then
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, s1, 'S1')
+          if (ierror /= 0) goto 9999
+       endif
        !
-       ! group 3: element 'KFSMAX'
+       ! element 'KFU'
        !
-       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfsmax, 'KFSMAX')
-       if (ierror /= 0) goto 999
+       call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                     & nf, nl, mf, ml, iarrc, gdp, &
+                     & ierror, lundia, kfu, 'KFU')
+       if (ierror /= 0) goto 9999
        !
-       ! group 3: element 'KFUMIN'
+       ! element 'KFV'
        !
-       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfumin, 'KFUMIN')
-       if (ierror /= 0) goto 999
+       call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                     & nf, nl, mf, ml, iarrc, gdp, &
+                     & ierror, lundia, kfv, 'KFV')
+       if (ierror /= 0) goto 9999
        !
-       ! group 3: element 'KFUMAX'
-       !
-       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfumax, 'KFUMAX')
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'KFVMIN'
-       !
-       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfvmin, 'KFVMIN')
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'KFVMAX'
-       !
-       call wrtmap_int_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, kfvmax, 'KFVMAX')
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'U1' & 'V1' only if SELMAP( 2: 3) <> 'NN'
-    !
-    if (index(selmap(2:3),'Y') > 0) then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, u1, 'U1', kfumin, kfumax)
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'V1'
-       !
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, v1, 'V1', kfvmin, kfvmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'W' only if kmax > 1 (:=  SELMAP( 4: 4) = 'Y')
-    !
-    if (selmap(4:4) == 'Y') then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ierror, w1, 'W', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'WPHY' only if KMAX > 1 (:=  SELMAP( 5: 5) = 'Y')
-    !
-    if (selmap(5:5) == 'Y') then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, wphy, 'WPHY', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'R1', only if LSTSCI > 0
-    ! (:= SELMAP( 6:13) <> 'NNNNNNNN')
-    !
-    if (index(selmap(6:13),'Y') /= 0) then
-       call wrtmap_nmkl(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, lstsci, ierror, r1, 'R1', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-       if (flwoutput%difuflux) then
+       if (zmodel .and. flwoutput%kf_minmax) then
           !
-          ! element 'R1FLX_UU'
+          ! element 'KFSMIN'
           !
-          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxu, 'R1FLX_UU', kfumin, kfumax)
-          if (ierror /= 0) goto 999
-
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, kfsmin, 'KFSMIN')
+          if (ierror /= 0) goto 9999
           !
-          ! element 'R1FLX_VV'
+          ! element 'KFSMAX'
           !
-          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxv, 'R1FLX_VV', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       if (flwoutput%cumdifuflux) then
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, kfsmax, 'KFSMAX')
+          if (ierror /= 0) goto 9999
           !
-          ! element 'R1FLX_UUC'
+          ! element 'KFUMIN'
           !
-          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxuc, 'R1FLX_UUC', kfumin, kfumax)
-          if (ierror /= 0) goto 999
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, kfumin, 'KFUMIN')
+          if (ierror /= 0) goto 9999
           !
-          ! element 'R1FLX_VVC'
+          ! element 'KFUMAX'
           !
-          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxvc, 'R1FLX_VVC', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-    endif
-    if (flwoutput%momentum) then
-       mom_accum => gdp%gdflwpar%mom_accum
-       !
-       ! element 'MOM_DUDT'
-       !
-       if (associated(gdp%gdflwpar%mom_m_velchange)) then
-          call array_div_const(gdp%gdflwpar%mom_m_velchange, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', kfumin, kfumax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_UDENSITY'
-       !
-       if (associated(gdp%gdflwpar%mom_m_densforce)) then
-          call array_div_const(gdp%gdflwpar%mom_m_densforce, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', kfumin, kfumax)
-          if (ierror /= 0) goto 999
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, kfumax, 'KFUMAX')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'KFVMIN'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, kfvmin, 'KFVMIN')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'KFVMAX'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & ierror, lundia, kfvmax, 'KFVMAX')
+          if (ierror /= 0) goto 9999
        endif
        !
-       ! element 'MOM_URESISTANCE'
+       ! element 'U1' & 'V1' only if SELMAP( 2: 3) <> 'NN'
        !
-       if (associated(gdp%gdflwpar%mom_m_flowresist)) then
-          call array_div_const(gdp%gdflwpar%mom_m_flowresist, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', kfumin, kfumax)
-          if (ierror /= 0) goto 999
+       if (index(selmap(2:3),'Y') > 0) then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, u1, 'U1', kfumin, kfumax)
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'V1'
+          !
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, v1, 'V1', kfvmin, kfvmax)
+          if (ierror /= 0) goto 9999
        endif
        !
-       ! element 'MOM_UCORIOLIS'
+       ! element 'W' only if kmax > 1 (:=  SELMAP( 4: 4) = 'Y')
        !
-       if (associated(gdp%gdflwpar%mom_m_corioforce)) then
-          call array_div_const(gdp%gdflwpar%mom_m_corioforce, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', kfumin, kfumax)
-          if (ierror /= 0) goto 999
+       if (selmap(4:4) == 'Y') then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
+                        & kmaxout, 0, kmax, ierror, lundia, w1, 'W', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
        !
-       ! element 'MOM_UVISCO'
+       ! element 'WPHY' only if KMAX > 1 (:=  SELMAP( 5: 5) = 'Y')
        !
-       if (associated(gdp%gdflwpar%mom_m_visco)) then
-          call array_div_const(gdp%gdflwpar%mom_m_visco, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', kfumin, kfumax)
-          if (ierror /= 0) goto 999
+       if (selmap(5:5) == 'Y') then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, wphy, 'WPHY', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
        !
-       ! element 'MOM_UPRESSURE'
+       ! element 'R1', only if LSTSCI > 0
+       ! (:= SELMAP( 6:13) <> 'NNNNNNNN')
        !
-       if (associated(gdp%gdflwpar%mom_m_pressure)) then
-          call array_div_const(gdp%gdflwpar%mom_m_pressure, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_m_pressure, 'MOM_UPRESSURE')
-          if (ierror /= 0) goto 999
+       if (index(selmap(6:13),'Y') /= 0) then
+          call wrtarray_nmkl(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, r1, 'R1', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
+          if (flwoutput%difuflux) then
+             !
+             ! element 'R1FLX_UU'
+             !
+             call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxu, 'R1FLX_UU', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+       
+             !
+             ! element 'R1FLX_VV'
+             !
+             call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxv, 'R1FLX_VV', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          if (flwoutput%cumdifuflux) then
+             !
+             ! element 'R1FLX_UUC'
+             !
+             call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxuc, 'R1FLX_UUC', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+             !
+             ! element 'R1FLX_VVC'
+             !
+             call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxvc, 'R1FLX_VVC', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+       endif
+       if (flwoutput%momentum) then
+          mom_accum => gdp%gdflwpar%mom_accum
+          !
+          ! element 'MOM_DUDT'
+          !
+          if (associated(gdp%gdflwpar%mom_m_velchange)) then
+             gdp%gdflwpar%mom_m_velchange = gdp%gdflwpar%mom_m_velchange / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UDENSITY'
+          !
+          if (associated(gdp%gdflwpar%mom_m_densforce)) then
+             gdp%gdflwpar%mom_m_densforce = gdp%gdflwpar%mom_m_densforce / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_URESISTANCE'
+          !
+          if (associated(gdp%gdflwpar%mom_m_flowresist)) then
+             gdp%gdflwpar%mom_m_flowresist = gdp%gdflwpar%mom_m_flowresist / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UCORIOLIS'
+          !
+          if (associated(gdp%gdflwpar%mom_m_corioforce)) then
+             gdp%gdflwpar%mom_m_corioforce = gdp%gdflwpar%mom_m_corioforce / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UVISCO'
+          !
+          if (associated(gdp%gdflwpar%mom_m_visco)) then
+             gdp%gdflwpar%mom_m_visco = gdp%gdflwpar%mom_m_visco / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UPRESSURE'
+          !
+          if (associated(gdp%gdflwpar%mom_m_pressure)) then
+             gdp%gdflwpar%mom_m_pressure = gdp%gdflwpar%mom_m_pressure / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_m_pressure, 'MOM_UPRESSURE')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UTIDEGEN'
+          !
+          if (associated(gdp%gdflwpar%mom_m_tidegforce)) then
+             gdp%gdflwpar%mom_m_tidegforce = gdp%gdflwpar%mom_m_tidegforce / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_m_tidegforce, 'MOM_UTIDEGEN')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UWINDFORCE'
+          !
+          if (associated(gdp%gdflwpar%mom_m_windforce)) then
+             gdp%gdflwpar%mom_m_windforce = gdp%gdflwpar%mom_m_windforce / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_m_windforce, 'MOM_UWINDFORCE')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UBEDSHEAR'
+          !
+          if (associated(gdp%gdflwpar%mom_m_bedforce)) then
+             gdp%gdflwpar%mom_m_bedforce = gdp%gdflwpar%mom_m_bedforce / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_m_bedforce, 'MOM_UBEDSHEAR')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UWAVES'
+          !
+          if (associated(gdp%gdflwpar%mom_m_waveforce)) then
+             gdp%gdflwpar%mom_m_waveforce = gdp%gdflwpar%mom_m_waveforce / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UDUDX'
+          !
+          if (associated(gdp%gdflwpar%mom_m_convec)) then
+             gdp%gdflwpar%mom_m_convec = gdp%gdflwpar%mom_m_convec / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VDUDY'
+          !
+          if (associated(gdp%gdflwpar%mom_m_xadvec)) then
+             gdp%gdflwpar%mom_m_xadvec = gdp%gdflwpar%mom_m_xadvec / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', kfumin, kfumax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! NOW ALL QUANTITIES IN V/N DIRECTION
+          !
+          ! element 'MOM_DVDT'
+          !
+          if (associated(gdp%gdflwpar%mom_n_velchange)) then
+             gdp%gdflwpar%mom_n_velchange = gdp%gdflwpar%mom_n_velchange / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VDENSITY'
+          !
+          if (associated(gdp%gdflwpar%mom_n_densforce)) then
+             gdp%gdflwpar%mom_n_densforce = gdp%gdflwpar%mom_n_densforce / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VRESISTANCE'
+          !
+          if (associated(gdp%gdflwpar%mom_n_flowresist)) then
+             gdp%gdflwpar%mom_n_flowresist = gdp%gdflwpar%mom_n_flowresist / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VCORIOLIS'
+          !
+          if (associated(gdp%gdflwpar%mom_n_corioforce)) then
+             gdp%gdflwpar%mom_n_corioforce = gdp%gdflwpar%mom_n_corioforce / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VVISCO'
+          !
+          if (associated(gdp%gdflwpar%mom_n_visco)) then
+             gdp%gdflwpar%mom_n_visco = gdp%gdflwpar%mom_n_visco / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VPRESSURE'
+          !
+          if (associated(gdp%gdflwpar%mom_n_pressure)) then
+             gdp%gdflwpar%mom_n_pressure = gdp%gdflwpar%mom_n_pressure / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_n_pressure, 'MOM_VPRESSURE')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VTIDEGEN'
+          !
+          if (associated(gdp%gdflwpar%mom_n_tidegforce)) then
+             gdp%gdflwpar%mom_n_tidegforce = gdp%gdflwpar%mom_n_tidegforce / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_n_tidegforce, 'MOM_VTIDEGEN')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VWINDFORCE'
+          !
+          if (associated(gdp%gdflwpar%mom_n_windforce)) then
+             gdp%gdflwpar%mom_n_windforce = gdp%gdflwpar%mom_n_windforce / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_n_windforce, 'MOM_VWINDFORCE')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VBEDSHEAR'
+          !
+          if (associated(gdp%gdflwpar%mom_n_bedforce)) then
+             gdp%gdflwpar%mom_n_bedforce = gdp%gdflwpar%mom_n_bedforce / mom_accum
+             call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, gdp%gdflwpar%mom_n_bedforce, 'MOM_VBEDSHEAR')
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VWAVES'
+          !
+          if (associated(gdp%gdflwpar%mom_n_waveforce)) then
+             gdp%gdflwpar%mom_n_waveforce = gdp%gdflwpar%mom_n_waveforce / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_VDVDY'
+          !
+          if (associated(gdp%gdflwpar%mom_n_convec)) then
+             gdp%gdflwpar%mom_n_convec = gdp%gdflwpar%mom_n_convec / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          ! element 'MOM_UDVDX'
+          !
+          if (associated(gdp%gdflwpar%mom_n_xadvec)) then
+             gdp%gdflwpar%mom_n_xadvec = gdp%gdflwpar%mom_n_xadvec / mom_accum
+             call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', kfvmin, kfvmax)
+             if (ierror /= 0) goto 9999
+          endif
+       endif
+       
+       !
+       ! element 'RTUR1', only if LTUR > 0
+       ! (:= SELMAP(14:15) <> 'NN')
+       !
+       if (index(selmap(14:15),'Y') /= 0) then
+          call wrtarray_nmkl(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
+                        & kmaxout, 0, kmax, ltur, ierror, lundia, rtur1, 'RTUR1', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
        !
-       ! element 'MOM_UTIDEGEN'
+       ! element 'TAUKSI' & 'TAUETA' only if SELMAP(16:17) <> 'NN'
        !
-       if (associated(gdp%gdflwpar%mom_m_tidegforce)) then
-          call array_div_const(gdp%gdflwpar%mom_m_tidegforce, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_m_tidegforce, 'MOM_UTIDEGEN')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_UWINDFORCE'
-       !
-       if (associated(gdp%gdflwpar%mom_m_windforce)) then
-          call array_div_const(gdp%gdflwpar%mom_m_windforce, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_m_windforce, 'MOM_UWINDFORCE')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_UBEDSHEAR'
-       !
-       if (associated(gdp%gdflwpar%mom_m_bedforce)) then
-          call array_div_const(gdp%gdflwpar%mom_m_bedforce, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_m_bedforce, 'MOM_UBEDSHEAR')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_UWAVES'
-       !
-       if (associated(gdp%gdflwpar%mom_m_waveforce)) then
-          call array_div_const(gdp%gdflwpar%mom_m_waveforce, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', kfumin, kfumax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_UDUDX'
-       !
-       if (associated(gdp%gdflwpar%mom_m_convec)) then
-          call array_div_const(gdp%gdflwpar%mom_m_convec, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', kfumin, kfumax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VDUDY'
-       !
-       if (associated(gdp%gdflwpar%mom_m_xadvec)) then
-          call array_div_const(gdp%gdflwpar%mom_m_xadvec, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', kfumin, kfumax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! NOW ALL QUANTITIES IN V/N DIRECTION
-       !
-       ! element 'MOM_DVDT'
-       !
-       if (associated(gdp%gdflwpar%mom_n_velchange)) then
-          call array_div_const(gdp%gdflwpar%mom_n_velchange, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VDENSITY'
-       !
-       if (associated(gdp%gdflwpar%mom_n_densforce)) then
-          call array_div_const(gdp%gdflwpar%mom_n_densforce, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VRESISTANCE'
-       !
-       if (associated(gdp%gdflwpar%mom_n_flowresist)) then
-          call array_div_const(gdp%gdflwpar%mom_n_flowresist, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VCORIOLIS'
-       !
-       if (associated(gdp%gdflwpar%mom_n_corioforce)) then
-          call array_div_const(gdp%gdflwpar%mom_n_corioforce, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VVISCO'
-       !
-       if (associated(gdp%gdflwpar%mom_n_visco)) then
-          call array_div_const(gdp%gdflwpar%mom_n_visco, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VPRESSURE'
-       !
-       if (associated(gdp%gdflwpar%mom_n_pressure)) then
-          call array_div_const(gdp%gdflwpar%mom_n_pressure, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_n_pressure, 'MOM_VPRESSURE')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VTIDEGEN'
-       !
-       if (associated(gdp%gdflwpar%mom_n_tidegforce)) then
-          call array_div_const(gdp%gdflwpar%mom_n_tidegforce, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_n_tidegforce, 'MOM_VTIDEGEN')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VWINDFORCE'
-       !
-       if (associated(gdp%gdflwpar%mom_n_windforce)) then
-          call array_div_const(gdp%gdflwpar%mom_n_windforce, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_n_windforce, 'MOM_VWINDFORCE')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VBEDSHEAR'
-       !
-       if (associated(gdp%gdflwpar%mom_n_bedforce)) then
-          call array_div_const(gdp%gdflwpar%mom_n_bedforce, mom_accum)
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, gdp%gdflwpar%mom_n_bedforce, 'MOM_VBEDSHEAR')
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VWAVES'
-       !
-       if (associated(gdp%gdflwpar%mom_n_waveforce)) then
-          call array_div_const(gdp%gdflwpar%mom_n_waveforce, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_VDVDY'
-       !
-       if (associated(gdp%gdflwpar%mom_n_convec)) then
-          call array_div_const(gdp%gdflwpar%mom_n_convec, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-       !
-       ! element 'MOM_UDVDX'
-       !
-       if (associated(gdp%gdflwpar%mom_n_xadvec)) then
-          call array_div_const(gdp%gdflwpar%mom_n_xadvec, mom_accum)
-          call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', kfvmin, kfvmax)
-          if (ierror /= 0) goto 999
-       endif
-    endif
-
-    !
-    ! group 3: element 'RTUR1', only if LTUR > 0
-    ! (:= SELMAP(14:15) <> 'NN')
-    !
-    if (index(selmap(14:15),'Y') /= 0) then
-       call wrtmap_nmkl(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ltur, ierror, rtur1, 'RTUR1', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'TAUKSI' & 'TAUETA' only if SELMAP(16:17) <> 'NN'
-    !
-    if (index(selmap(16:17),'Y') > 0) then
-       allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-       rbuff2(:, :) = -999.0_fp
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                km = kfumin(n, m)
-                if (1<=km .and. km<=kmax) then
+       if (index(selmap(16:17),'Y') > 0) then
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2(:, :) = -9999.0_fp
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   km = kfumin(n, m)
+                   if (1<=km .and. km<=kmax) then
+                      rbuff2(n, m) = ( taubpu(n, m)*u1(n, m, km) + taubsu(n, m) ) * rhow
+                   endif
+                enddo
+             enddo
+          else
+             km = kmax
+             do m = 1, mmax
+                do n = 1, nmaxus
                    rbuff2(n, m) = ( taubpu(n, m)*u1(n, m, km) + taubsu(n, m) ) * rhow
-                endif
+                enddo
              enddo
-          enddo
-       else
-          km = kmax
-          do m = 1, mmax
-             do n = 1, nmaxus
-                rbuff2(n, m) = ( taubpu(n, m)*u1(n, m, km) + taubsu(n, m) ) * rhow
+          endif
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rbuff2, 'TAUKSI')
+          deallocate(rbuff2)
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'TAUETA'
+          !
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2(:, :) = -9999.0_fp
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   km = kfvmin(n, m)
+                   if (1<=km .and. km<=kmax) then
+                      rbuff2(n, m) = ( taubpv(n, m)*v1(n, m, km) + taubsv(n, m) ) * rhow
+                   endif
+                enddo
              enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif   
-       deallocate(rbuff2)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'TAUKSI', uindex, 1, glbarr2)
-       endif
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'TAUETA'
-       !
-       allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-       rbuff2(:, :) = -999.0_fp
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                km = kfvmin(n, m)
-                if (1<=km .and. km<=kmax) then
+          else
+             km = kmax
+             do m = 1, mmax
+                do n = 1, nmaxus
                    rbuff2(n, m) = ( taubpv(n, m)*v1(n, m, km) + taubsv(n, m) ) * rhow
-                endif   
+                enddo
              enddo
-          enddo
-       else
-          km = kmax
-          do m = 1, mmax
-             do n = 1, nmaxus
-                rbuff2(n, m) = ( taubpv(n, m)*v1(n, m, km) + taubsv(n, m) ) * rhow
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif      
-       deallocate(rbuff2)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'TAUETA', uindex, 1, glbarr2)
-       endif
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'TAUMAX'
-       !
-       if (parll) then
-          call dfgather(taubmx,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(taubmx,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'TAUMAX', uindex, 1, glbarr2)
-       endif
-       if (ierror /= 0) goto 999
-       !
-    endif
-    !
-    ! group 3: element 'VICWW' if KMAX > 1 (:= SELMAP(18:18) = 'Y')
-    ! vicww is defined on cell boundary planes
-    !
-    if (selmap(18:18) == 'Y') then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ierror, vicww, 'VICWW', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'DICWW' if KMAX > 1 (:= SELMAP(19:19) = 'Y')
-    ! dicww is defined on cell boundary planes
-    !
-    if (selmap(19:19) == 'Y') then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ierror, dicww, 'DICWW', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'RICH' if KMAX > 1 and DICWW or VICWW written to file
-    ! (:= SELMAP(18:19) <> 'NN')
-    !
-    if (index(selmap(18:19),'Y') > 0) then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ierror, rich, 'RICH', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'RHO' if LSAL > 0 or LTEM > 0
-    ! (:= SELMAP(20:20) = 'Y')
-    !
-    if (selmap(20:20) == 'Y') then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, rho, 'RHO', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: elements 'UMNLDF', 'VMNLDF' and 'VICUV' if htur2d = true
-    ! (:= SELMAP(21:21) = 'Y')
-    !
-    if (selmap(21:21) == 'Y') then
-       !
-       ! group 3: element 'UMNLDF'
-       !
-       if (parll) then
-          call dfgather(umnldf,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(umnldf,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif      
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'UMNLDF', uindex, 1, glbarr2)
-       endif
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'VMNLDF'
-       !
-       !
-       if (parll) then
-          call dfgather(vmnldf,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(vmnldf, 1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif      
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'VMNLDF', uindex, 1, glbarr2)
-       endif
-       if (ierror /= 0) goto 999
-       !
-       ! group 3: element 'VICUV'
-       ! kmax+1 contains initial values and should not be written
-       !
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax+1, ierror, vicuv, 'VICUV', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    if (nsrc>0 .and. inode==master) then
-       !
-       ! group 3, element 'MNKSRC' when discharges are present
-       !
-       allocate(ibuff2(7,nsrc))
-       do i=1,nsrc
-          !
-          ! mnksrc contains indices with respect to this partion
-          ! transfer into global indices
-          !
-          ibuff2(1,i) = mnksrc(1,i) + mfg - 1
-          ibuff2(2,i) = mnksrc(2,i) + nfg - 1
-          ibuff2(3,i) = mnksrc(3,i)
-          ibuff2(4,i) = mnksrc(4,i) + mfg - 1
-          ibuff2(5,i) = mnksrc(5,i) + nfg - 1
-          ibuff2(6,i) = mnksrc(6,i)
-          ibuff2(7,i) = mnksrc(7,i)
-       enddo
-       ierror = putelt(fds, grnam3, 'MNKSRC', uindex, 1, ibuff2)
-       deallocate(ibuff2)
-       if (ierror/=0) goto 999
-    endif
-    !
-    ! group 3: element 'VORTIC' & 'ENSTRO' only if SELMAP( 2: 3) <> 'NN'
-    ! First VORTIC
-    !
-    if (flwoutput%vortic) then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, vortic, 'VORTIC', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-       !
-       ! Next ENSTRO
-       !
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, enstro, 'ENSTRO', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! group 3: element 'HYDPRES'
-    !
-    if (index(selmap(4:4),'Y')>0 .and. zmodel) then
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & kmaxout_restr, 1, kmax, ierror, p1, 'HYDPRES', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-    endif
-    !
-    if (flwoutput%chezy) then
-       !
-       ! element 'CFUROU'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, cvalu0, 'CFUROU')
-       if (ierror /= 0) goto 999
-       !
-       ! element 'CFVROU'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, cvalv0, 'CFVROU')
-       if (ierror /= 0) goto 999
-    endif
-    if (flwoutput%roughness) then
-       !
-       ! element 'ROUMETU'
-       !
-       allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-       rbuff2(:,:) = cfurou(:,:,2)
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, rbuff2, 'ROUMETU')
-       deallocate(rbuff2)
-       if (ierror /= 0) goto 999
-       !
-       ! element 'ROUMETV'
-       !
-       allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-       rbuff2(:,:) = cfvrou(:,:,2)
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, rbuff2, 'ROUMETV')
-       deallocate(rbuff2)
-       if (ierror /= 0) goto 999
-    endif
-    if (flwoutput%z0cur) then
-       !
-       ! element 'Z0UCUR'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, z0ucur, 'Z0UCUR')
-       if (ierror /= 0) goto 999
-       !
-       ! element 'Z0VCUR'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, z0vcur, 'Z0VCUR')
-       if (ierror /= 0) goto 999
-    endif
-    if (flwoutput%z0rou) then
-       !
-       ! element 'Z0UROU'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, z0urou, 'Z0UROU')
-       if (ierror /= 0) goto 999
-       !
-       ! element 'Z0VROU'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, z0vrou, 'Z0VROU')
-       if (ierror /= 0) goto 999
-    endif
-    !
-    ! Output of vertical coordinates of the layer interfaces (both for Sigma- and Z-model)
-    ! Note: this will NOT work in parallel (yet) !
-    !
-    if (flwoutput%layering) then
-       !
-       ! element 'LAYER_INTERFACE'
-       !
-       allocate (zkt(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), stat=istat)
-       if (istat /= 0) then
-          write(lundia, '(''ERROR: Memory allocation error in routine WRTMAP'')')
-       endif
-       !
-       ! Vertical coordinates of layer interfaces requested for output?
-       ! Calculate time dependent z-coordinate z(nm,k,t) of layer interfaces
-       ! Both for Sigma- and Z-model
-       !
-       call layer_interfaces(zmodel     ,kmax      ,mmax     ,nmaxus   ,s1      , &
-                           & dps        ,thick     ,dzs1     ,kcs      ,kfs     , &
-                           & kfsmin     ,kfsmax    ,zkt      ,gdp      )
-       call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ierror, zkt, 'LAYER_INTERFACE', kfsmin, kfsmax)
-       if (ierror /= 0) goto 999
-       !
-       ! Deallocate the array with vertical layer coordinates
-       !
-       deallocate (zkt)
-    endif
-    !
-    ! Output of air parameters: wind, pressure, cloudiness, relative humidity, temperature, precipitation, and evaporation
-    !
-    if (flwoutput%air) then
-       !
-       ! element 'WINDU'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, windu, 'WINDU')
-       if (ierror /= 0) goto 999
-       !
-       ! element 'WINDV'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, windv, 'WINDV')
-       if (ierror /= 0) goto 999
-       !
-       ! element 'PATM'
-       !
-       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                    & ierror, patm, 'PATM')
-       if (ierror /= 0) goto 999
-       !
-       if (prcp_file) then
-          !
-          ! element 'PRECIP'
-          !
-          ! Convert to mm/h
-          !
-          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-          rbuff2 = precip * 3600000.0_fp
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, rbuff2, 'PRECIP')
+          endif
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rbuff2, 'TAUETA')
           deallocate(rbuff2)
-          if (ierror /= 0) goto 999
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'TAUMAX'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, taubmx, 'TAUMAX')
+          if (ierror /= 0) goto 9999
+          !
        endif
        !
-       if (keva < 2) then
-          !
-          ! element 'EVAP'
-          !
-          ! Convert from [kg m-2 s-1] to [mm h-1]
-          !
-          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-          rbuff2 = evap * 3600000.0_fp / rhow
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, rbuff2, 'EVAP')
-          deallocate(rbuff2)
-          if (ierror /= 0) goto 999
+       ! element 'VICWW' if KMAX > 1 (:= SELMAP(18:18) = 'Y')
+       ! vicww is defined on cell boundary planes
+       !
+       if (selmap(18:18) == 'Y') then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
+                        & kmaxout, 0, kmax, ierror, lundia, vicww, 'VICWW', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
        !
-       if (clou_file) then
-          !
-          ! element 'CLOUDS'
-          !
-          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-          rbuff2(:, :) = -999.0_fp
-          do nm = 1, nmmax
-             call nm_to_n_and_m(nm, n, m, gdp)
-             rbuff2(n,m) = clouarr(nm)
-          enddo
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, rbuff2, 'CLOUDS')
-          deallocate(rbuff2)
-          if (ierror /= 0) goto 999
+       ! element 'DICWW' if KMAX > 1 (:= SELMAP(19:19) = 'Y')
+       ! dicww is defined on cell boundary planes
+       !
+       if (selmap(19:19) == 'Y') then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
+                        & kmaxout, 0, kmax, ierror, lundia, dicww, 'DICWW', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
-
-       if (rhum_file) then
-          !
-          ! element 'AIRHUM'
-          !
-          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-          rbuff2(:, :) = -999.0_fp
-          do nm = 1, nmmax
-             call nm_to_n_and_m(nm, n, m, gdp)
-             rbuff2(n,m) = rhumarr(nm)
-          enddo
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, rbuff2, 'AIRHUM')
-          deallocate(rbuff2)
-          if (ierror /= 0) goto 999
+       !
+       ! element 'RICH' if KMAX > 1 and DICWW or VICWW written to file
+       ! (:= SELMAP(18:19) <> 'NN')
+       !
+       if (index(selmap(18:19),'Y') > 0) then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
+                        & kmaxout, 0, kmax, ierror, lundia, rich, 'RICH', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
-
-
-       if (tair_file) then
-          !
-          ! element 'AIRTEM'
-          !
-          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-          rbuff2(:, :) = -999.0_fp
-          do nm = 1, nmmax
-             call nm_to_n_and_m(nm, n, m, gdp)
-             rbuff2(n,m) = tairarr(nm)
-          enddo
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                       & ierror, rbuff2, 'AIRTEM')
-          deallocate(rbuff2)
-          if (ierror /= 0) goto 999
+       !
+       ! element 'RHO' if LSAL > 0 or LTEM > 0
+       ! (:= SELMAP(20:20) = 'Y')
+       !
+       if (selmap(20:20) == 'Y') then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, rho, 'RHO', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
        endif
-    endif
-    !
-    !
-    ! Output of heat fluxes from temperature model
-    !
-    if (flwoutput%temperature) then
-       if (ktemp == 3) then
+       !
+       ! elements 'UMNLDF', 'VMNLDF' and 'VICUV' if htur2d = true
+       ! (:= SELMAP(21:21) = 'Y')
+       !
+       if (selmap(21:21) == 'Y') then
           !
-          ! element 'HLC'
+          ! element 'UMNLDF'
           !
-          if (associated(hlc_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = hlc_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'HLC')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, umnldf, 'UMNLDF')
+          if (ierror /= 0) goto 9999
           !
-          ! element 'QNET'
+          ! element 'VMNLDF'
           !
-          if (associated(qnet_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = qnet_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'QNET')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
-       elseif (ktemp > 0) then
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, vmnldf, 'VMNLDF')
+          if (ierror /= 0) goto 9999
           !
-          ! element 'QEVA'
+          ! element 'VICUV'
+          ! kmax+1 contains initial values and should not be written
           !
-          if (associated(qeva_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = qeva_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'QEVA')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax+1, ierror, lundia, vicuv, 'VICUV', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
+       endif
+       if (nsrc>0 .and. inode==master) then
           !
-          ! element 'QCO'
+          ! element 'MNKSRC' when discharges are present
           !
-          if (associated(qco_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = qco_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'QCO')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
-          !
-          ! element 'QBL'
-          !
-          if (associated(qbl_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = qbl_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'QBL')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
-          !
-          ! element 'QIN'
-          !
-          if (associated(qin_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = qin_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'QIN')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
-          !
-          ! element 'QNET'
-          !
-          if (associated(qnet_out)) then
-             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-             rbuff2(:, :) = -999.0_fp
-             do nm = 1, nmmax
-                call nm_to_n_and_m(nm, n, m, gdp)
-                rbuff2(n,m) = qnet_out(nm)
-             enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                          & ierror, rbuff2, 'QNET')
-             deallocate(rbuff2)
-             if (ierror /= 0) goto 999
-          endif
-          !
-          if (free_convec) then
+          allocate(ibuff2(7,nsrc))
+          do i=1,nsrc
              !
-             ! element 'HFREE'
+             ! mnksrc contains indices with respect to this partion
+             ! transfer into global indices
              !
-             if (associated(hfree_out)) then
+             ibuff2(1,i) = mnksrc(1,i) + mfg - 1
+             ibuff2(2,i) = mnksrc(2,i) + nfg - 1
+             ibuff2(3,i) = mnksrc(3,i)
+             ibuff2(4,i) = mnksrc(4,i) + mfg - 1
+             ibuff2(5,i) = mnksrc(5,i) + nfg - 1
+             ibuff2(6,i) = mnksrc(6,i)
+             ibuff2(7,i) = mnksrc(7,i)
+          enddo
+          call wrtvar(fds, filename, filetype, grnam3, celidt, &
+                    & gdp, ierror, lundia, ibuff2, 'MNKSRC')
+          deallocate(ibuff2)
+          if (ierror/=0) goto 9999
+       endif
+       !
+       ! element 'VORTIC' & 'ENSTRO' only if SELMAP( 2: 3) <> 'NN'
+       ! First VORTIC
+       !
+       if (flwoutput%vortic) then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, vortic, 'VORTIC', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
+          !
+          ! Next ENSTRO
+          !
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, enstro, 'ENSTRO', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
+       endif
+       !
+       ! element 'HYDPRES'
+       !
+       if (index(selmap(4:4),'Y')>0 .and. zmodel) then
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                        & kmaxout_restr, 1, kmax, ierror, lundia, p1, 'HYDPRES', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
+       endif
+       !
+       if (flwoutput%chezy) then
+          !
+          ! element 'CFUROU'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, cvalu0, 'CFUROU')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'CFVROU'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, cvalv0, 'CFVROU')
+          if (ierror /= 0) goto 9999
+       endif
+       if (flwoutput%roughness) then
+          !
+          ! element 'ROUMETU'
+          !
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2(:,:) = cfurou(:,:,2)
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rbuff2, 'ROUMETU')
+          deallocate(rbuff2)
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'ROUMETV'
+          !
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2(:,:) = cfvrou(:,:,2)
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rbuff2, 'ROUMETV')
+          deallocate(rbuff2)
+          if (ierror /= 0) goto 9999
+       endif
+       if (flwoutput%z0cur) then
+          !
+          ! element 'Z0UCUR'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, z0ucur, 'Z0UCUR')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'Z0VCUR'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, z0vcur, 'Z0VCUR')
+          if (ierror /= 0) goto 9999
+       endif
+       if (flwoutput%z0rou) then
+          !
+          ! element 'Z0UROU'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, z0urou, 'Z0UROU')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'Z0VROU'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, z0vrou, 'Z0VROU')
+          if (ierror /= 0) goto 9999
+       endif
+       !
+       ! Output of vertical coordinates of the layer interfaces (both for Sigma- and Z-model)
+       ! Note: this will NOT work in parallel (yet) !
+       !
+       if (flwoutput%layering) then
+          !
+          ! element 'LAYER_INTERFACE'
+          !
+          allocate (zkt(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), stat=istat)
+          if (istat /= 0) then
+             write(lundia, '(''ERROR: Memory allocation error in routine WRTMAP'')')
+          endif
+          !
+          ! Vertical coordinates of layer interfaces requested for output?
+          ! Calculate time dependent z-coordinate z(nm,k,t) of layer interfaces
+          ! Both for Sigma- and Z-model
+          !
+          call layer_interfaces(zmodel     ,kmax      ,mmax     ,nmaxus   ,s1      , &
+                              & dps        ,thick     ,dzs1     ,kcs      ,kfs     , &
+                              & kfsmin     ,kfsmax    ,zkt      ,gdp      )
+          call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
+                        & kmaxout, 0, kmax, ierror, lundia, zkt, 'LAYER_INTERFACE', kfsmin, kfsmax)
+          if (ierror /= 0) goto 9999
+          !
+          ! Deallocate the array with vertical layer coordinates
+          !
+          deallocate (zkt)
+       endif
+       !
+       ! Output of air parameters: wind, pressure, cloudiness, relative humidity, temperature, precipitation, and evaporation
+       !
+       if (flwoutput%air) then
+          !
+          ! element 'WINDU'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, windu, 'WINDU')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'WINDV'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, windv, 'WINDV')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'PATM'
+          !
+          call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, patm, 'PATM')
+          if (ierror /= 0) goto 9999
+          !
+          if (prcp_file) then
+             !
+             ! element 'PRECIP'
+             !
+             ! Convert to mm/h
+             !
+             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+             rbuff2 = precip * 3600000.0_fp
+             call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, rbuff2, 'PRECIP')
+             deallocate(rbuff2)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          if (keva < 2) then
+             !
+             ! element 'EVAP'
+             !
+             ! Convert from [kg m-2 s-1] to [mm h-1]
+             !
+             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+             rbuff2 = evap * 3600000.0_fp / rhow
+             call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, rbuff2, 'EVAP')
+             deallocate(rbuff2)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          if (clou_file) then
+             !
+             ! element 'CLOUDS'
+             !
+             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+             rbuff2(:, :) = -9999.0_fp
+             do nm = 1, nmmax
+                call nm_to_n_and_m(nm, n, m, gdp)
+                rbuff2(n,m) = clouarr(nm)
+             enddo
+             call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, rbuff2, 'CLOUDS')
+             deallocate(rbuff2)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          if (rhum_file) then
+             !
+             ! element 'AIRHUM'
+             !
+             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+             rbuff2(:, :) = -9999.0_fp
+             do nm = 1, nmmax
+                call nm_to_n_and_m(nm, n, m, gdp)
+                rbuff2(n,m) = rhumarr(nm)
+             enddo
+             call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, rbuff2, 'AIRHUM')
+             deallocate(rbuff2)
+             if (ierror /= 0) goto 9999
+          endif
+          !
+          if (tair_file) then
+             !
+             ! element 'AIRTEM'
+             !
+             allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+             rbuff2(:, :) = -9999.0_fp
+             do nm = 1, nmmax
+                call nm_to_n_and_m(nm, n, m, gdp)
+                rbuff2(n,m) = tairarr(nm)
+             enddo
+             call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & ierror, lundia, rbuff2, 'AIRTEM')
+             deallocate(rbuff2)
+             if (ierror /= 0) goto 9999
+          endif
+       endif
+       !
+       ! Output of heat fluxes from temperature model
+       !
+       if (flwoutput%temperature) then
+          if (ktemp == 3) then
+             !
+             ! element 'HLC'
+             !
+             if (associated(hlc_out)) then
                 allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-                rbuff2(:, :) = -999.0_fp
+                rbuff2(:, :) = -9999.0_fp
                 do nm = 1, nmmax
                    call nm_to_n_and_m(nm, n, m, gdp)
-                   rbuff2(n,m) = hfree_out(nm)
+                   rbuff2(n,m) = hlc_out(nm)
                 enddo
-                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                             & ierror, rbuff2, 'HFREE')
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'HLC')
                 deallocate(rbuff2)
-                if (ierror /= 0) goto 999
+                if (ierror /= 0) goto 9999
              endif
              !
-             ! element 'EFREE'
+             ! element 'QNET'
              !
-             if (associated(efree_out)) then
+             if (associated(qnet_out)) then
                 allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-                rbuff2(:, :) = -999.0_fp
+                rbuff2(:, :) = -9999.0_fp
                 do nm = 1, nmmax
                    call nm_to_n_and_m(nm, n, m, gdp)
-                   rbuff2(n,m) = efree_out(nm)
+                   rbuff2(n,m) = qnet_out(nm)
                 enddo
-                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                             & ierror, rbuff2, 'EFREE')
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'QNET')
                 deallocate(rbuff2)
-                if (ierror /= 0) goto 999
+                if (ierror /= 0) goto 9999
              endif
-          endif
-
-          !
-          ! element 'QMIS'
-          !
-          if (keva == 3) then
-             if (associated(qmis_out)) then
+          elseif (ktemp > 0) then
+             !
+             ! element 'QEVA'
+             !
+             if (associated(qeva_out)) then
                 allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
-                rbuff2(:, :) = -999.0_fp
+                rbuff2(:, :) = -9999.0_fp
                 do nm = 1, nmmax
                    call nm_to_n_and_m(nm, n, m, gdp)
-                   rbuff2(n,m) = qmis_out(nm)
+                   rbuff2(n,m) = qeva_out(nm)
                 enddo
-                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                             & ierror, rbuff2, 'QMIS')
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'QEVA')
                 deallocate(rbuff2)
-                if (ierror /= 0) goto 999
+                if (ierror /= 0) goto 9999
              endif
+             !
+             ! element 'QCO'
+             !
+             if (associated(qco_out)) then
+                allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                rbuff2(:, :) = -9999.0_fp
+                do nm = 1, nmmax
+                   call nm_to_n_and_m(nm, n, m, gdp)
+                   rbuff2(n,m) = qco_out(nm)
+                enddo
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'QCO')
+                deallocate(rbuff2)
+                if (ierror /= 0) goto 9999
+             endif
+             !
+             ! element 'QBL'
+             !
+             if (associated(qbl_out)) then
+                allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                rbuff2(:, :) = -9999.0_fp
+                do nm = 1, nmmax
+                   call nm_to_n_and_m(nm, n, m, gdp)
+                   rbuff2(n,m) = qbl_out(nm)
+                enddo
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'QBL')
+                deallocate(rbuff2)
+                if (ierror /= 0) goto 9999
+             endif
+             !
+             ! element 'QIN'
+             !
+             if (associated(qin_out)) then
+                allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                rbuff2(:, :) = -9999.0_fp
+                do nm = 1, nmmax
+                   call nm_to_n_and_m(nm, n, m, gdp)
+                   rbuff2(n,m) = qin_out(nm)
+                enddo
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'QIN')
+                deallocate(rbuff2)
+                if (ierror /= 0) goto 9999
+             endif
+             !
+             ! element 'QNET'
+             !
+             if (associated(qnet_out)) then
+                allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                rbuff2(:, :) = -9999.0_fp
+                do nm = 1, nmmax
+                   call nm_to_n_and_m(nm, n, m, gdp)
+                   rbuff2(n,m) = qnet_out(nm)
+                enddo
+                call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                             & nf, nl, mf, ml, iarrc, gdp, &
+                             & ierror, lundia, rbuff2, 'QNET')
+                deallocate(rbuff2)
+                if (ierror /= 0) goto 9999
+             endif
+             !
+             if (free_convec) then
+                !
+                ! element 'HFREE'
+                !
+                if (associated(hfree_out)) then
+                   allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                   rbuff2(:, :) = -9999.0_fp
+                   do nm = 1, nmmax
+                      call nm_to_n_and_m(nm, n, m, gdp)
+                      rbuff2(n,m) = hfree_out(nm)
+                   enddo
+                   call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                                & nf, nl, mf, ml, iarrc, gdp, &
+                                & ierror, lundia, rbuff2, 'HFREE')
+                   deallocate(rbuff2)
+                   if (ierror /= 0) goto 9999
+                endif
+                !
+                ! element 'EFREE'
+                !
+                if (associated(efree_out)) then
+                   allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                   rbuff2(:, :) = -9999.0_fp
+                   do nm = 1, nmmax
+                      call nm_to_n_and_m(nm, n, m, gdp)
+                      rbuff2(n,m) = efree_out(nm)
+                   enddo
+                   call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                                & nf, nl, mf, ml, iarrc, gdp, &
+                                & ierror, lundia, rbuff2, 'EFREE')
+                   deallocate(rbuff2)
+                   if (ierror /= 0) goto 9999
+                endif
+             endif
+             !
+             ! element 'QMIS'
+             !
+             if (keva == 3) then
+                if (associated(qmis_out)) then
+                   allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+                   rbuff2(:, :) = -9999.0_fp
+                   do nm = 1, nmmax
+                      call nm_to_n_and_m(nm, n, m, gdp)
+                      rbuff2(n,m) = qmis_out(nm)
+                   enddo
+                   call wrtarray_nm(fds, filename, filetype, grnam3, celidt, &
+                                & nf, nl, mf, ml, iarrc, gdp, &
+                                & ierror, lundia, rbuff2, 'QMIS')
+                   deallocate(rbuff2)
+                   if (ierror /= 0) goto 9999
+                endif
+             endif
+          else
+             !
+             ! ktemp = 0, no additional output
+             !
           endif
-       else
-          !
-          ! ktemp = 0, no additional output
        endif
-    endif
+       !
+    end select
+    deallocate(smlay_restr)
     !
-    if (inode == master) ierror = clsnef(fds)
+    ! write error message if error occured and set error = .true.
     !
-    ! write error message if error occured and set error= .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
- 999 continue
-    if (inode == master) then
-       call dfcleanup_glbarrs
-    endif
-    call dfsync(gdp)
-    if (ierror /= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error= .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrtmap

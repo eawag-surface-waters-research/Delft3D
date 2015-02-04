@@ -1728,8 +1728,8 @@ subroutine dredgecommunicate(a, n, error, msgstr)
     use dfparall, only: parll, dfloat, dfsum
     implicit none
     !
-    real(fp), dimension(n), intent(inout) :: a      ! real array to be accumulated
     integer               , intent(in)    :: n      ! length of real array
+    real(fp), dimension(n), intent(inout) :: a      ! real array to be accumulated
     logical               , intent(out)   :: error  ! error flag
     character(*)          , intent(out)   :: msgstr ! string to pass message
     !

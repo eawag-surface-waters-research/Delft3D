@@ -1,6 +1,6 @@
 subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
                    & mmax      ,nmax      ,nmaxus    ,nmmax     , &
-                   & gdp       )
+                   & lsedtot   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -72,6 +72,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     integer                                     , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                     , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kcs     !  Description and declaration in ijdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: xz      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: yz      !  Description and declaration in esm_alloc_real.f90
@@ -285,6 +286,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     !
     ! Store NEIGHB array in GDP for output purposes.
     !
+    call reallocP(neighb, (/2,nneighb/) )
     gdp%gdmassbal%neighb => neighb
     !
     ! Now convert NEIGHB array to EXCHNR array
@@ -337,7 +339,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     if (istat==0) allocate(gdp%gdmassbal%mass_r1(nbalpol,lstsci), stat=istat)
     if (istat==0) allocate(gdp%gdmassbal%fluxes(2,nneighb), stat=istat)
     if (istat==0) allocate(gdp%gdmassbal%fluxes_r1(2,nneighb,lstsci), stat=istat)
-    if (istat==0) allocate(gdp%gdmassbal%fluxes_sd(2,nneighb,lstsci), stat=istat)
+    if (istat==0) allocate(gdp%gdmassbal%fluxes_sd(2,nneighb,lsedtot), stat=istat)
     !
     if (istat /= 0) then
        call prterr(lundia, 'U021', 'RdMassBal: memory alloc error')

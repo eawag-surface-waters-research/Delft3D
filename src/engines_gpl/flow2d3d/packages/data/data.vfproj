@@ -5,7 +5,7 @@
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="lib/$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="include;..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(ConfigurationName)\static;..\..\..\..\utils_gpl\morphology\lib\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="include;..\..\..\..\third_party_open\netcdf\lib\$(PlatformName)\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(ConfigurationName)\static;..\..\..\..\utils_gpl\morphology\lib\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -15,7 +15,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="lib/$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="include;..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(ConfigurationName)\static;..\..\..\..\utils_gpl\morphology\lib\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="include;..\..\..\..\third_party_open\netcdf\lib\$(PlatformName)\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(ConfigurationName)\static;..\..\..\..\utils_gpl\morphology\lib\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="lib\$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="include;..\..\..\..\utils_lgpl\delftio\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\inifiles\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\x64\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="include;..\..\..\..\third_party_open\netcdf\lib\win32\$(PlatformName)\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\inifiles\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\x64\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -35,7 +35,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="lib\$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="include;..\..\..\..\utils_lgpl\delftio\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\inifiles\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\x64\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="include;..\..\..\..\third_party_open\netcdf\lib\win32\$(PlatformName)\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\inifiles\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\delftio\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\ec_module\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\third_party_open\mpich2\x64\include" PreprocessorDefinitions="HAVE_MPI" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -84,6 +84,7 @@
 		<File RelativePath="include\inout.igs"/>
 		<File RelativePath="include\inspec.inc"/>
 		<File RelativePath="include\inttim.igs"/>
+		<File RelativePath="include\iofiles.igs"/>
 		<File RelativePath="include\ipon.igs"/>
 		<File RelativePath="include\iwearr.igs"/>
 		<File RelativePath="include\iwepar.igs"/>
@@ -92,7 +93,6 @@
 		<File RelativePath="include\massbal.igs"/>
 		<File RelativePath="include\morpar.igs"/>
 		<File RelativePath="include\mudcoe.igs"/>
-		<File RelativePath="include\nefisio.igs"/>
 		<File RelativePath="include\nfl.igs"/>
 		<File RelativePath="include\nonhyd.igs"/>
 		<File RelativePath="include\numeco.igs"/>
@@ -182,6 +182,7 @@
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\allocation\rnull.f90"/></Filter>
 		<Filter Name="basics">
+		<File RelativePath="src\basics\datagroups.f90"/>
 		<File RelativePath="src\basics\flow_tables.f90"/>
 		<File RelativePath="src\basics\globaldata.f90"/>
 		<File RelativePath="src\basics\sp_buffer.f90"/>
@@ -242,11 +243,13 @@
 		<File RelativePath="src\gdp\initwrline.f90"/>
 		<File RelativePath="src\gdp\initz_initcg.f90"/>
 		<File RelativePath="src\gdp\initzmodel.f90"/>
-		<File RelativePath="src\gdp\nefisio_alloc.f90"/>
-		<File RelativePath="src\gdp\nefisio_dealloc.f90"/></Filter>
+		<File RelativePath="src\gdp\iofiles_alloc.f90"/>
+		<File RelativePath="src\gdp\iofiles_dealloc.f90"/></Filter>
 		<Filter Name="general">
 		<File RelativePath="src\general\griddims.f90"/>
-		<File RelativePath=".\src\general\griddims_admin.f90"/></Filter>
+		<File RelativePath="src\general\griddims_admin.f90"/>
+		<File RelativePath="src\general\nc_check_err.f90"/>
+		<File RelativePath="src\general\nc_def_var.f90"/></Filter>
 		<Filter Name="parallel_mpi">
 		<File RelativePath=".\src\parallel_mpi\adjlin.F90">
 			<FileConfiguration Name="Debug|Win32">
@@ -503,44 +506,6 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\parallel_mpi\dfwrirst.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwrmfluff.f90"/>
-		<File RelativePath=".\src\parallel_mpi\dfwrmorm1.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwrmorm2.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwrsedh.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwrsedm.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwrsedmavg.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">

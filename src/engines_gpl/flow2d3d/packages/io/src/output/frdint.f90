@@ -1,7 +1,6 @@
 subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                & nmax      ,kmaxk     ,nmaxus    ,grpnam    , &
+                & funam     ,ntimwa    ,ntimwb    , &
                 & atimw     ,btimw     ,func      ,fcom      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -39,7 +38,7 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use sp_buffer
     use globaldata
     !
     implicit none
@@ -56,16 +55,12 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
                                                                                                 !!  dimension, else 1
     integer                                                                           :: lundia !  Description and declaration in inout.igs
     integer                                                             , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: nelmx  !!  Number of elements for this group
     integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                             , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: ntimwa !!  Time index of first function
     integer                                                                           :: ntimwb !!  Time index of second function
     integer, dimension(2)                                               , intent(in)  :: ifcore !!  Time indices (cell id's) of the wave
                                                                                                 !!  functions which are in core available
-    integer, dimension(6, nelmx)                                                      :: elmdms !  Description and declaration in nefisio.igs
-    integer, dimension(nelmx)                                                         :: nbytsg !!  Array containing the number of by-
-                                                                                                !!  tes of each single ELMTPS
     logical                                                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                                            , intent(in)  :: atimw  !!  Interpolation factor for first
                                                                                                 !!  function
@@ -76,42 +71,29 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
                                                                                                 !!  of the function
     character(*)                                                                      :: comfil !!  Name for communication file
                                                                                                 !!  com-<case><label>
-    character(16), dimension(nelmx)                                                   :: elmunt !!  Array with element physical unit
     character(16)                                                                     :: funam  !!  Name of element which has to be read
     character(16)                                                                     :: grpnam !!  Data-group name defined for the
                                                                                                 !!  COM-files (CURTIM)
-    character(16), dimension(nelmx)                                                   :: elmnms !!  Element name defined for the COM-files
-    character(16), dimension(nelmx)                                                   :: elmqty !!  Array with element quantity
-    character(16), dimension(nelmx)                                                   :: elmtps !!  Array containing the types of the
-                                                                                                !!  elements (real, ch. , etc. etc.)
-    character(64), dimension(nelmx)                                                   :: elmdes !!  Array with element description
 !
 ! Local variables
 !
-    integer           :: ierr   ! Flag for error when writing to Communication file 
-    integer           :: k
-    integer           :: m
-    integer           :: n
-    integer, external :: neferr
-    logical           :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(256)    :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
+    integer                                       :: i
+    integer                                       :: ierr   ! Flag for error when writing to Communication file 
+    integer                                       :: k
+    integer                                       :: m
+    integer                                       :: n
+    integer                        , external     :: neferr
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 !! executable statements -------------------------------------------------------
 !
-    ! Initialize local variables
-    !
-    ierr = 0
-    wrswch = .false.
     if (ntimwb==0) then
        !
        ! Only one time step on com-file
        !
-       ! Read the first timestep from file; all definition and creation
-       ! of files, data groups, cells and elements is handled by PUTGTR
+       ! Read the first timestep from file.
        !
-       call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & funam     ,ntimwa    ,wrswch    ,ierr      ,fcom(1, 1, 1, 1)     )
+       call getfield(ntimwa, comfil, grpnam, funam, ierr, fcom, nmaxus, mmax, kmaxk, 2, 1)
        if (ierr/=0) goto 9999
     else
        !
@@ -119,12 +101,9 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
        !
        if (ntimwa/=ifcore(1) .and. ntimwa/=ifcore(2)) then
           !
-          ! Read the first timestep from file; all definition and creation
-          ! of files, data groups, cells and elements is handled by PUTGTR
+          ! Read the first timestep from file.
           !
-          call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                    & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                    & funam     ,ntimwa    ,wrswch    ,ierr      ,fcom(1, 1, 1, 1)     )
+          call getfield(ntimwa, comfil, grpnam, funam, ierr, fcom, nmaxus, mmax, kmaxk, 2, 1)
           if (ierr/=0) goto 9999
        elseif (ntimwa/=ifcore(1) .and. ntimwa==ifcore(2)) then
           !
@@ -145,13 +124,9 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
        !
        if (ntimwb/=ifcore(2)) then
           !
-          ! Read the second timestep from file; all definition and
-          ! creation of files, data groups, cells and elements is handled
-          ! by PUTGTR.
+          ! Read the second timestep from file.
           !
-          call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                    & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                    & funam     ,ntimwb    ,wrswch    ,ierr      ,fcom(1, 1, 1, 2)     )
+          call getfield(ntimwb, comfil, grpnam, funam, ierr, fcom, nmaxus, mmax, kmaxk, 2, 2)
           if (ierr/=0) goto 9999
        endif
     endif

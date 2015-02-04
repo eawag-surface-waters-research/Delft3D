@@ -38,6 +38,7 @@ subroutine wrkent(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use datagroups
     use globaldata
     !
     implicit none
@@ -48,12 +49,7 @@ subroutine wrkent(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     !
     logical                  , pointer :: first
     integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 4
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -74,121 +70,107 @@ subroutine wrkent(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
 !
 ! Local variables
 !
-    integer                                    :: ierr   ! Flag for error when writing to Communication file 
-    integer                                    :: m
-    integer                                    :: n
-    integer                                    :: nelmx1
-    integer                                    :: nelmx2
-    integer       , dimension(1)               :: idummy ! Help array to read/write Nefis files 
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grnam1 ! Data-group name defined for the COM-files (KENMNT) 
-    character(16)                              :: grnam2 ! Data-group name defined for the COM-files (KENMTIM) 
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                             :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: ierror ! Flag for error when writing to Communication file 
+    integer                                       :: m
+    integer                                       :: n
+    integer      , dimension(1)                   :: idummy ! Help array to read/write Nefis files 
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grnam1 ! Data-group name defined for the COM-files (KENMNT) 
+    character(16)                                 :: grnam2 ! Data-group name defined for the COM-files (KENMTIM) 
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grnam1/'KENMNT'/
     data grnam2/'KENMTIM'/
-    data elmnms/'NTCUR', 'TIMCUR', 'KFU', 'KFV'/
-    data elmqty/4*' '/
-    data elmunt/'[   -   ]', '[ TSCALE]', 2*'[   -   ]'/
-    data elmtps/4*'INTEGER'/
-    data nbytsg/4*4/
-    data elmdes/'Number of current fields in groups CURTIM and KENMTIM         '&
-       & , 'Time of current field rel.to reference date/time              ',    &
-        & '0/1 Non-active/Active u-point                                 ',      &
-        & '0/1 Non-active/Active v-point                                 '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrkent)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    !-----Initialize local variables
-    !
-    ierr   = 0
-    wrswch = .true.
-    nelmx1 = 1
-    nelmx2 = nelmx - nelmx1
+    call getdatagroup(gdp, FILOUT_COM, grnam1, group)
+    first   => group%first
+    celidt  => group%celidt
     !
     !-----Set up the element dimensions
     !
     if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam1, 'NTCUR', ' ', IO_INT4, 1, (/1/), ' ', 'Number of current fields in groups CURTIM and KENMTIM', '[   -   ]')
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'TIMCUR', ' ', IO_INT4, 1, (/1/), ' ', 'Time of current field rel.to reference date/time', '[ TSCALE]')
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'KFU', ' ', IO_INT4, 2, (/nmaxus, mmax/), ' ', '0/1 Non-active/Active u-point', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'KFV', ' ', IO_INT4, 2, (/nmaxus, mmax/), ' ', '0/1 Non-active/Active v-point', '[   -   ]')
     endif
     !
-    !-----Write all elements to file; all definition and creation of files,
-    !     data groups, cells and elements is handled by PUTGET.
+    ierror = open_datdef(comfil   ,fds      , .false.)
+    if (ierror /= 0) goto 9999
     !
-    !-----element  1 NTCUR for group KENMNT
+    if (first) then
+       call defnewgrp(fds, FILOUT_COM, grnam1, gdp, comfil, errlog=ERRLOG_NONE)
+       call defnewgrp(fds, FILOUT_COM, grnam2, gdp, comfil, errlog=ERRLOG_NONE)
+       first = .false.
+    endif
     !
-    celidt = 1
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'NTCUR'
+    !
     idummy(1) = ntcur
-    call putgti(comfil    ,grnam1    ,nelmx1    ,elmnms(1) ,elmdms(1, 1)         , &
-              & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam1, 'NTCUR', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    !-----element  1 ITIMC for group KENMTIM (cel number ITCUR)
+    ! initialize group index
     !
     celidt = itcur
+    !
+    uindex (1,1) = celidt ! start index
+    uindex (2,1) = celidt ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'TIMCUR'
+    !
     idummy(1) = itimc
-    call putgti(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grnam2, 'TIMCUR', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    !-----For all array the values are buffered in RBUFF, to be sure that
-    !     the correct array element are written to data file
-    !
-    !-----element  2 KFU for group KENMTIM (cel number ITCUR)
+    ! element 'KFU'
     !
     do m = 1, mmax
        do n = 1, nmaxus
           ibuff(n, m) = kfu(n, m)
        enddo
     enddo
+    ierror = putelt(fds, grnam2, 'KFU', uindex, 1, ibuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgti(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierr      ,ibuff     )
-    if (ierr/=0) goto 9999
-    !
-    !-----element  2 KFV for group KENMTIM (cel number ITCUR)
+    ! element 'KFV'
     !
     do m = 1, mmax
        do n = 1, nmaxus
           ibuff(n, m) = kfv(n, m)
        enddo
     enddo
+    ierror = putelt(fds, grnam2, 'KFV', uindex, 1, ibuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgti(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierr      ,ibuff     )
-    if (ierr/=0) then
-    endif
+    ierror = clsnef(fds)
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wrkent

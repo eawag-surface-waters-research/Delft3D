@@ -1,5 +1,6 @@
-subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
-                & itdroi    ,ndro      ,xydro     ,sferic    ,gdp       )
+subroutine wrtdro(lundia    ,error     ,filename  ,itdroc    ,itdrof    , &
+                & itdroi    ,ndro      ,xydro     ,sferic    ,irequest  , &
+                & fds       ,itdate    ,dtsec     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -38,7 +39,10 @@ subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use datagroups
     use globaldata
+    use netcdf, only: nf90_unlimited
+    use wrtarray, only: wrtvar
     !
     implicit none
     !
@@ -46,117 +50,151 @@ subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 2
+    integer                         , pointer :: celidt
+    type (datagroup)                , pointer :: group2
+    type (datagroup)                , pointer :: group3
 !
 ! Global variables
 !
-    integer                          , intent(in)  :: itdroc !!  Current time counter for the history data file
-    integer                          , intent(in)  :: itdrof !  Description and declaration in inttim.igs
-    integer                          , intent(in)  :: itdroi !  Description and declaration in inttim.igs
-    integer                                        :: lundia !  Description and declaration in inout.igs
-    integer                                        :: ndro   !  Description and declaration in dimens.igs
-    logical                          , intent(in)  :: sferic !  Description and declaration in tricom.igs
-    logical                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)    , dimension(2, ndro)               :: xydro  !  Description and declaration in esm_alloc_real.f90
-    character(*)                     , intent(in)  :: trifil !!  File name for FLOW NEFIS output
-                                                             !!  files (tri"h/m/d"-"casl""labl".dat/def)
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    character(*)                                                        , intent(in)  :: filename !  File name
+    integer                                                             , intent(in)  :: itdate   !  Description and declaration in exttim.igs
+    integer                                                             , intent(in)  :: itdroc !!  Current time counter for the history data file
+    integer                                                             , intent(in)  :: itdrof !  Description and declaration in inttim.igs
+    integer                                                             , intent(in)  :: itdroi !  Description and declaration in inttim.igs
+    integer                                                                           :: lundia !  Description and declaration in inout.igs
+    integer                                                                           :: ndro   !  Description and declaration in dimens.igs
+    logical                                                             , intent(in)  :: sferic !  Description and declaration in tricom.igs
+    logical                                                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
+    real(fp)                                                            , intent(in)  :: dtsec    !  Integration time step [in seconds]
+    real(fp)    , dimension(2, ndro)                                                  :: xydro  !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables
 !
-    integer                                    :: ierror ! Local errorflag for NEFIS files 
-    integer                                    :: nelmx2
-    integer                                    :: nelmx3
-    integer       , dimension(1)               :: idummy ! Help array to read/write Nefis files 
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of bytes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grnam2
-    character(16)                              :: grnam3
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the NEFIS-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                             :: filnam ! Help var. for FLOW file name 
-    character(256)                             :: errmsg ! Character var. containing the error message to be written to file. The message depends on the error. 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                           :: filetype
+    integer                                           :: i
+    integer                                           :: id
+    integer                                           :: istat
+    !
+    integer                                           :: year
+    integer                                           :: month
+    integer                                           :: day
+    !
+    integer                                           :: iddim_ndro
+    integer                                           :: iddim_time
+    integer                                           :: iddim_2
+    !
+    integer                                           :: idatt_cal
+    !
+    integer                                           :: ierror      ! Local errorflag for NEFIS files 
+    real(fp)       , dimension(:)      , allocatable  :: rbuff1
+    character(16)                                     :: xcoordunit  ! Unit of X coordinate: M or DEGREES_EAST
+    character(16)                                     :: ycoordunit  ! Unit of Y coordinate: M or DEGREES_NORTH
+    character(16)                                     :: grnam2
+    character(16)                                     :: grnam3
+    character(256)                                    :: string
 !
 ! Data statements
 !
     data grnam2/'dro-info-series'/
     data grnam3/'dro-series'/
-    data elmnms/'ITDROC', 'XYDRO'/
-    data elmqty/2*' '/
-    data elmunt/'[   -   ]', '[   M   ]'/
-    data elmtps/'INTEGER', 'REAL'/
-    data nbytsg/2*4/
-    data elmdes/'timestep number (ITDROC*DT*TUNIT := time in sec from ITDATE)  '&
-       & , 'x- and y-coordinates of drogue tracks                         '/
 !
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrtdro)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
+    call getdatagroup(gdp, FILOUT_DRO, grnam2, group2)
+    call getdatagroup(gdp, FILOUT_DRO, grnam3, group3)
+    celidt     => group2%celidt
     !
-    !-----initialisation
-    !
-    nelmx2 = 1
-    nelmx3 = nelmx - 1
+    filetype = getfiletype(gdp, FILOUT_DRO)
     ierror = 0
-    celidt = int((itdroc - itdrof + 1.01*itdroi)/itdroi)
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
+       !
+       if (sferic) then
+          xcoordunit = 'degrees_east'
+          ycoordunit = 'degrees_north'
+       else
+          xcoordunit = 'm'
+          ycoordunit = 'm'
+       endif
+       !
+       ! Set up the element chracteristics
+       !
+       iddim_time    = adddim(gdp, lundia, FILOUT_DRO, 'time'    , nf90_unlimited)
+       iddim_ndro    = adddim(gdp, lundia, FILOUT_DRO, 'NDRO'    , ndro)
+       iddim_2       = adddim(gdp, lundia, FILOUT_DRO, 'length_2', 2)
+       !
+       idatt_cal = addatt(gdp, lundia, FILOUT_DRO, 'calendar','proleptic_gregorian')
+       !
+       ! dro-info-series
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_DRO, grnam2, 'ITDROC', ' ', IO_INT4, 0, longname='timestep number (ITDROC*DT*TUNIT := time in sec from ITDATE)')
+       else
+          year  = itdate / 10000
+          month = (itdate - year*10000) / 100
+          day   = itdate - year*10000 - month*100
+          write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
+          call addelm(gdp, lundia, FILOUT_DRO, grnam2, 'time'  , 'time', IO_REAL4 , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
+       endif
+       !
+       ! dro-series
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'XYDRO', ' ', IO_REAL4, 2, dimids=(/iddim_2, iddim_ndro/), longname='x- and y-coordinates of drogue tracks', unit=xcoordunit)
+       else
+          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'XDRO', ' ', IO_REAL4, 1, dimids=(/iddim_ndro/), longname='x-coordinates of drogue tracks', unit=xcoordunit)
+          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'YDRO', ' ', IO_REAL4, 1, dimids=(/iddim_ndro/), longname='y-coordinates of drogue tracks', unit=ycoordunit)
+       endif
+       !
+       group2%grp_dim = iddim_time
+       group3%grp_dim = iddim_time
+       celidt = 0
+       !
+    case (REQUESTTYPE_WRITE)
+       !
+       celidt = celidt + 1
+       group3%celidt = celidt
+       !
+       ! element 'ITDROC' / time
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call wrtvar(fds, filename, filetype, grnam2, celidt, &
+                    & gdp, ierror, lundia, itdroc, 'ITDROC')
+       else
+          call wrtvar(fds, filename, filetype, grnam2, celidt, &
+                    & gdp, ierror, lundia, itdroc*dtsec, 'time')
+       endif
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'XYDRO'
+       !
+       if (filetype == FTYPE_NEFIS) then
+          call wrtvar(fds, filename, filetype, grnam3, celidt, &
+                    & gdp, ierror, lundia, xydro, 'XYDRO')
+       else
+          allocate(rbuff1(ndro), stat=istat)
+          do i = 1,ndro
+             rbuff1(i) = xydro(1,i)
+          enddo
+          call wrtvar(fds, filename, filetype, grnam3, celidt, &
+                    & gdp, ierror, lundia, rbuff1, 'XDRO')
+          do i = 1,ndro
+             rbuff1(i) = xydro(2,i)
+          enddo
+          call wrtvar(fds, filename, filetype, grnam3, celidt, &
+                    & gdp, ierror, lundia, rbuff1, 'YDRO')
+          deallocate(rbuff1, stat=istat)
+       endif
+       if (ierror/= 0) goto 9999
+       !
+    end select
     !
-    if (sferic) then
-       elmunt(2) = '[  DEG  ]'
-    endif
+    ! write error message if error occured and set error = .true.
     !
-    filnam = trifil(1:3) // 'd' // trifil(5:)
-    errmsg = ' '
-    wrswch = .true.
-    !
-    !-----Set up the element dimension
-    !
-    if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,2         ,2         ,ndro      , &
-                 & 0         ,0         ,0         )
-    endif
-    !
-    !-----group 2, element 1 'ITDROC'
-    !
-    idummy(1) = itdroc
-    call putgti(filnam    ,grnam2    ,nelmx2    ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierror   ,idummy    )
-    if (ierror/=0) goto 999
-    !
-    !-----group 3: element 1 'XYDRO'
-    !
-    call putgtr(filnam    ,grnam3    ,nelmx3    ,elmnms(2) ,elmdms(1, 2)         , &
-              & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierror   ,xydro     )
-    if (ierror/=0) then
-    endif
-    !
-    !-----write error message if error occurred and set error = .true.
-    !     the files will be closed in clsnef (called in triend)
-    !
-    !
-  999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrtdro

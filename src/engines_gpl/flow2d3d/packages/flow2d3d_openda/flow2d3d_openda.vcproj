@@ -62,10 +62,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(ConfigurationName)\flow2d3d_openda_dll.obj libcta.lib pthreadVCE2.lib libexpat.lib mpi.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
+				AdditionalDependencies="$(ConfigurationName)\flow2d3d_openda_dll.obj libcta.lib pthreadVCE2.lib libexpat.lib mpi.lib fmpich2.lib netcdf.lib f77_netcdf.lib f90_netcdf.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
 				OutputFile="$(OutDir)\flow2d3d_openda.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
+				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;&quot;..\..\..\..\third_party_open\netcdf\lib\$(PlatformName)\Release\ifort10&quot;;..\..\..\..\third_party_open\openda\core\native\lib\win32;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
 				IgnoreDefaultLibraryNames="LIBCMTD.lib;LIBCMT.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -143,10 +143,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(ConfigurationName)\flow2d3d_openda_dll.obj libcta.lib pthreadVCE2.lib libexpat.lib mpi.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
+				AdditionalDependencies="$(ConfigurationName)\flow2d3d_openda_dll.obj libcta.lib pthreadVCE2.lib libexpat.lib mpi.lib fmpich2.lib netcdf.lib f77_netcdf.lib f90_netcdf.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
 				OutputFile="$(OutDir)\flow2d3d_openda.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
+				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;&quot;..\..\..\..\third_party_open\netcdf\lib\$(PlatformName)\Release\ifort10&quot;;..\..\..\..\third_party_open\openda\core\native\lib\win32;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
 				IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib;libmmt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"

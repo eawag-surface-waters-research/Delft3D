@@ -37,7 +37,8 @@ subroutine wribot(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use sp_buffer
+    use datagroups
     use globaldata
     !
     implicit none
@@ -47,13 +48,7 @@ subroutine wribot(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 4
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -68,96 +63,94 @@ subroutine wribot(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     character(*)                                                                   :: comfil !!  Name for communication file
                                                                                              !!  com-<case><label>
 !
-!
 ! Local variables
 !
-    integer                                    :: ierr   ! Flag for error when writing to Communication file 
-    integer                                    :: m
-    integer                                    :: n
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grpnam ! Data-group name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                             :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: i
+    integer                                       :: ierror ! Flag for error when writing to Communication file 
+    integer                                       :: m
+    integer                                       :: n
+    integer      , dimension(1)                   :: idummy ! Help array to write integers
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grpnam ! Data-group name defined for the COM-files 
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grpnam/'INITBOT'/
-    data elmnms/'DP0', 'DPFIX', 'DPS', 'NVASTI'/
-    data elmqty/4*' '/
-    data elmunt/3*'[   M   ]', '[   -   ]'/
-    data elmtps/3*'REAL', 'INTEGER'/
-    data nbytsg/4*4/
-    data elmdes/'Initial bottom depth in bottom points (positive down)         '&
-       & , 'Depth of fixed layer (positive down )                         ',    &
-        & 'Initial bottom depth in zeta points (positive down)           ',      &
-        & 'Fixed layer present (1) or fixed layer absent (0)             '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswribot)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    !-----Initialize local variables
-    !
-    ierr = 0
-    wrswch = .true.
-    !
-    !-----Set up the element dimensions
+    call getdatagroup(gdp, FILOUT_COM, grpnam, group)
+    first   => group%first
     !
     if (first) then
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DP0', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Initial bottom depth in bottom points (positive down)', '[   M   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DPFIX', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Depth of fixed layer (positive down)', '[   M   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'DPS', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Initial bottom depth in zeta points (positive down)', '[   M   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NVASTI', ' ', IO_INT4, 1, (/1/), ' ', 'Fixed layer present (1) or fixed layer absent (0)', '[   -   ]')
+    endif
+    !
+    ierror = open_datdef(comfil, fds, .false.)
+    if (ierror /= 0) goto 9999
+    !
+    if (first) then
+       call defnewgrp(fds, FILOUT_COM, grpnam, gdp, comfil, errlog=ERRLOG_NONE)
        first = .false.
-       call filldm(elmdms    ,1         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
     endif
     !
-    !-----Write all elements to file; all definition and creation of files,
-    !     data groups, cells and elements is handled by PUTGET.
+    ! initialize group index
     !
-    !-----element  1 DP0 (DP)
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
     !
+    ! element  'DP0'
+    !
+    call sbuff_checksize(nmaxus*mmax)
+    i = 0
     do m = 1, mmax
        do n = 1, nmaxus
-          rbuff(n, m) = dp(n, m)
+          i = i+1
+          sbuff(i) = real(dp(n, m),sp)
        enddo
     enddo
+    ierror = putelt(fds, grpnam, 'DP0', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,rbuff     )
-    if (ierr/=0) goto 9999
+    ! element 'DPS'
     !
-    !-----element  3 DPS
-    !
+    i = 0
     do m = 1, mmax
        do n = 1, nmaxus
-          rbuff(n, m) = real(dps(n, m),fp)
+          i = i+1
+          sbuff(i) = real(dps(n, m),sp)
        enddo
     enddo
+    ierror = putelt(fds, grpnam, 'DPS', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgtr(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierr      ,rbuff     )
-    if (ierr/=0) then
-    endif
+    ! element 'NVASTI'
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    idummy(1) = 0
+    ierror = putelt(fds, grpnam, 'NVASTI', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
+    !
+    ierror = clsnef(fds)
+    !
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wribot

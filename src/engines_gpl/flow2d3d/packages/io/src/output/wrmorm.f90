@@ -1,5 +1,7 @@
 subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                & irequest  ,fds       ,grpnam    ,gdp       )
+                & irequest  ,fds       ,grpnam    , &
+                & filename  ,gdp       ,filetype  , &
+                & mf        ,ml        ,nf        ,nl        ,iarrc     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -49,14 +51,22 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !
 ! Global variables
 !
-    integer       :: fds
-    integer       :: lsedtot
-    integer       :: lundia
-    integer       :: mmax
-    integer       :: nmaxus
-    integer       :: irequest
-    logical       :: error
-    character(16) :: grpnam
+    integer      , intent(in)  :: fds
+    integer      , intent(in)  :: lsedtot
+    integer                    :: lundia
+    integer      , intent(in)  :: mmax
+    integer      , intent(in)  :: nmaxus
+    integer      , intent(in)  :: irequest
+    logical                    :: error
+    character(16), intent(in)  :: grpnam
+    character(*) , intent(in)  :: filename
+
+    integer                                                                    , intent(in)  :: filetype
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: mf      ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: ml      ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: nf      ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: nl      ! last index w.r.t. global grid in y-direction
+    integer    , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc   ! array containing collected grid indices
 !
 ! Local variables
 !
@@ -91,36 +101,25 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
           call prterr(lundia, 'U021', 'Memory problem in WRMORM')
           call d3stop(1, gdp)
        endif
-       if (.not. parll) then
-          call wrmorm1 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                      & irequest  ,fds       ,grpnam    ,bodsed    ,dpsed     , &
-                      & gdp       )
-       else
-          call dfwrmorm1 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                        & irequest  ,fds       ,grpnam    ,bodsed    ,dpsed     , &
-                        & gdp       )
-       endif
+       call wrmorm1   (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                     & irequest  ,fds       ,grpnam    ,bodsed    ,dpsed     , &
+                     & filename  ,gdp       ,filetype  , &
+                     & mf        ,ml        ,nf        ,nl        ,iarrc     )
     case (2)
        istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'nlyr',nlyr)
        if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iporosity',iporos)
-       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'svfrac',svfrac)
-       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'msed',msed)
-       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'thlyr',thlyr)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr,'svfrac',svfrac)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr,'msed',msed)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr,'thlyr',thlyr)
        if (istat/=0) then
           call prterr(lundia, 'U021', 'Memory problem in WRMORM')
           call d3stop(1, gdp)
        endif
-       if (.not. parll) then
-          call wrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                      & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                      & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
-                      & gdp       )
-       else
-          call dfwrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                        & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                        & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
-                        & gdp       )
-       endif
+       call wrmorm2   (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                     & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
+                     & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
+                     & filename  ,gdp       ,filetype  , &
+                     & mf        ,ml        ,nf        ,nl        ,iarrc     )
     case default
     end select
 end subroutine wrmorm

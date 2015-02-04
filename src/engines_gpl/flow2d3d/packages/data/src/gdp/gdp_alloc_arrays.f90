@@ -59,18 +59,21 @@ subroutine gdp_alloc_arrays(gdp)
     nofou               => gdp%d%nofou
     lundia              => gdp%gdinout%lundia
     !
-    ! Allocation of all arrays from GDP structure
+    istat = 0
     !
     ! Arrays for Fourier analysis (fourier.igs)
     !
     if (nofou > 0) then
-                       allocate (gdp%gdfourier%fconno (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdp%gdfourier%flayno (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdp%gdfourier%fnumcy (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdp%gdfourier%ftmsto (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdp%gdfourier%ftmstr (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdp%gdfourier%ifoupt (1:nofou), STAT = istat)
-       if (istat == 0) allocate (gdp%gdfourier%iofset (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%fconno  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%flayno  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%fnumcy  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%ftmsto  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%ftmstr  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%ifoupt  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%iofset  (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%foumask (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%idvar   (1:gdp%gdfourier%nofouvar), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%fouref  (1:nofou,2), STAT = istat)
        !
        if (istat == 0) allocate (gdp%gdfourier%fknfac (                                          1:nofou), STAT = istat)
        if (istat == 0) allocate (gdp%gdfourier%foucomp(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:nofou), STAT = istat)
@@ -82,12 +85,16 @@ subroutine gdp_alloc_arrays(gdp)
        !
        if (istat == 0) allocate (gdp%gdfourier%fouelp (1:nofou), STAT = istat)
        if (istat == 0) allocate (gdp%gdfourier%founam (1:nofou), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%fouvarnam     (1:gdp%gdfourier%nofouvar), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%fouvarnamlong (1:gdp%gdfourier%nofouvar), STAT = istat)
+       if (istat == 0) allocate (gdp%gdfourier%fouvarunit    (1:gdp%gdfourier%nofouvar), STAT = istat)
        if (istat == 0) allocate (gdp%gdfourier%foutyp (1:nofou), STAT = istat)
        !
-       if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in gdp_alloc_arrays for FOURIER parameters ')
-          call d3stop(1, gdp)
-       endif
+       if (istat == 0) allocate (gdp%gdpostpr%kfst0 (gdp%d%nmlb:gdp%d%nmub), STAT = istat)
     endif
     !
+    if (istat /= 0) then
+       call prterr(lundia, 'P004', 'memory alloc error in gdp_alloc_arrays for FOURIER parameters ')
+       call d3stop(1, gdp)
+    endif
 end subroutine gdp_alloc_arrays

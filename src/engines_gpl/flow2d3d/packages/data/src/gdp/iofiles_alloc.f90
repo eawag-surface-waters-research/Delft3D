@@ -1,8 +1,7 @@
-subroutine filldm(elmdms    ,ielem     ,dm1       ,dm2       ,dm3       , &
-                & dm4       ,dm5       ,dm6       )
+subroutine iofiles_alloc(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -30,45 +29,73 @@ subroutine filldm(elmdms    ,ielem     ,dm1       ,dm2       ,dm3       , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Write element dimensions in array elmdms
-! Method used:
-!
-!!--pseudo code and references--------------------------------------------------
 ! NONE
+!
 !!--declarations----------------------------------------------------------------
-    use precision
+    use globaldata
+    !
     implicit none
+    !
+    type(globdat),target :: gdp
 !
 ! Global variables
 !
-    integer, intent(in)            :: dm1
-                                   !!  Number of dimensions
-    integer, intent(in)            :: dm2
-                                   !!  Size of first dimension
-    integer, intent(in)            :: dm3
-                                   !!  Size of second dimension
-    integer, intent(in)            :: dm4
-                                   !!  Size of third dimension
-    integer, intent(in)            :: dm5
-                                   !!  Size of fourth dimension
-    integer, intent(in)            :: dm6
-                                   !!  Size of fifth dimension
-    integer, intent(in)            :: ielem
-                                   !!  Index number of element in group
-    integer, dimension(6, *), intent(out) :: elmdms !  Description and declaration in nefisio.igs
 !
+! Local variables
+!
+    integer                          :: i
+    integer                          :: ig
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !
-    !-----define element dimensions
-    !
-    elmdms(1, ielem) = dm1
-    elmdms(2, ielem) = dm2
-    elmdms(3, ielem) = dm3
-    elmdms(4, ielem) = dm4
-    elmdms(5, ielem) = dm5
-    elmdms(6, ielem) = dm6
-end subroutine filldm
+    allocate (gdp%iofiles(FILOUT_CNT))
+    do i = 1, FILOUT_CNT
+       select case (i)
+       case (FILOUT_DIA)
+         gdp%iofiles(i)%filetype = FTYPE_ASCII
+       case (FILOUT_HIS)
+         gdp%iofiles(i)%filetype = FTYPE_NEFIS
+       case (FILOUT_MAP)
+         gdp%iofiles(i)%filetype = FTYPE_NEFIS
+       case (FILOUT_COM)
+         gdp%iofiles(i)%filetype = FTYPE_NEFIS
+       case (FILOUT_FOU)
+         gdp%iofiles(i)%filetype = FTYPE_ASCII
+       case (FILOUT_DRO)
+         gdp%iofiles(i)%filetype = FTYPE_NEFIS
+       end select
+       gdp%iofiles(i)%filename = ' '
+       !
+       allocate (gdp%iofiles(i)%dim_name(0))
+       allocate (gdp%iofiles(i)%dim_id(0))
+       allocate (gdp%iofiles(i)%dim_length(0))
+       !
+       allocate (gdp%iofiles(i)%att_name(0))
+       allocate (gdp%iofiles(i)%att_vtype(0))
+       allocate (gdp%iofiles(i)%att_ival(0))
+       allocate (gdp%iofiles(i)%att_rval(0))
+       allocate (gdp%iofiles(i)%att_cval(0))
+       !
+       allocate (gdp%iofiles(i)%acl_label(0))
+       allocate (gdp%iofiles(i)%acl_attrib(0,0))
+       !
+       allocate (gdp%iofiles(i)%group(MAXNR_GROUP))
+       do ig = 1, MAXNR_GROUP
+          gdp%iofiles(i)%group(ig)%first   = .true.
+          gdp%iofiles(i)%group(ig)%name    = ' '
+          gdp%iofiles(i)%group(ig)%celidt  = 1
+          gdp%iofiles(i)%group(ig)%grp_dim = 0
+          gdp%iofiles(i)%group(ig)%nelmx   = 0
+          nullify(gdp%iofiles(i)%group(ig)%elm_ndims )
+          nullify(gdp%iofiles(i)%group(ig)%elm_dims  )
+          nullify(gdp%iofiles(i)%group(ig)%elm_size  )
+          nullify(gdp%iofiles(i)%group(ig)%elm_type  )
+          nullify(gdp%iofiles(i)%group(ig)%elm_unit  )
+          nullify(gdp%iofiles(i)%group(ig)%elm_name  )
+          nullify(gdp%iofiles(i)%group(ig)%elm_qty   )
+          nullify(gdp%iofiles(i)%group(ig)%elm_lname )
+          nullify(gdp%iofiles(i)%group(ig)%elm_sname )
+          nullify(gdp%iofiles(i)%group(ig)%elm_attrib)
+       enddo
+    enddo
+end subroutine iofiles_alloc

@@ -1,4 +1,4 @@
-function open_datdef(filnam    ,fds       )
+function open_datdef(filnam    ,fds       ,readonly)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -42,14 +42,16 @@ function open_datdef(filnam    ,fds       )
 !
 ! Global variables
 !
-    integer              :: open_datdef
-    integer, intent(out) :: fds
-    character(*)         :: filnam
+    integer                   :: open_datdef
+    integer     , intent(out) :: fds
+    character(*), intent(in)  :: filnam
+    logical     , intent(in)  :: readonly
 !
 ! Local variables
 !
     integer           :: len_fn
     integer, external :: crenef
+    character(1)      :: access
     character(1)      :: coding
     character(256)    :: dat_file
     character(256)    :: def_file
@@ -60,6 +62,8 @@ function open_datdef(filnam    ,fds       )
     dat_file = filnam(1:len_fn)//'.dat'
     def_file = filnam(1:len_fn)//'.def'
     !
+    access = 'u'
+    if (readonly) access = 'r'
     coding = 'N'
-    open_datdef = crenef(fds, dat_file, def_file, coding, 'u')
+    open_datdef = crenef(fds, dat_file, def_file, coding, access)
 end function open_datdef

@@ -86,7 +86,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     integer, parameter :: start_pivot  = 1
     integer, parameter ::   end_pivot  = 2
-    logical, parameter :: sum_elements = .true.
     !
     type(globdat),target :: gdp
     !
@@ -417,7 +416,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        ! exchange cwidth data
        !
        qtfrct_global = 0.0_fp
-       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, cwidth, qtfrct_global, gdp, sum_elements)
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, cwidth, qtfrct_global, gdp, filter_op=FILTER_SUM)
        call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
           if(typbnd(n1) == 'T') then
@@ -428,7 +427,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        ! exchange qtfrct data
        !
        qtfrct_global = 0.0_fp
-       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, filter_op=FILTER_SUM)
        call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
           if(typbnd(n1) == 'T') then
@@ -596,7 +595,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           call d3stop(1, gdp)
        endif
        qtfrct_global = 0.0_fp
-       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, filter_op=FILTER_SUM)
        call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
           if(typbnd(n1)=='T' .or. ((n1>ntof) .and. (n1<=ntof + ntoq))) then  ! total discharge or QH boundary

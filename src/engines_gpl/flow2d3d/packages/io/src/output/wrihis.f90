@@ -1,10 +1,12 @@
-subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
+subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
                 & itdate    ,tzone     ,tunit     ,dt        ,nostat    , &
                 & ntruv     ,nmax      ,mmax      ,kmax      ,lmax      , &
                 & lstsci    ,ltur      ,grdang    ,sferic    ,lsed      , &
-                & lsedtot   ,zbot      ,zmodel    ,namcon    ,namsed    , &
-                & xz        ,yz        ,alfas     ,dps       ,thick     , &
-                & zk        ,rbuff     ,rbuffc    ,rbuffz    ,gdp       )
+                & lsedtot   ,zmodel    ,namcon    ,namsed    ,xz        , &
+                & yz        ,alfas     ,dps       ,thick     ,sig       , &
+                & zk        ,irequest  ,fds       ,nostatto  ,nostatgl  , &
+                & order_sta ,ntruvto   ,ntruvgl   ,order_tra ,xcor      , &
+                & ycor      ,kcs       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -49,11 +51,11 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
+    use datagroups
     use globaldata
-    use dfparall
-    !
-    use dffunctionals
+    use netcdf, only: nf90_unlimited
+    use dfparall, only: inode, master, parll
+    use wrtarray, only: wrtvar, wrtarray_n, station, transec
     !
     implicit none
     !
@@ -61,73 +63,70 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    type (nefiselement)             , pointer :: nefiselem
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
-    integer                         , pointer :: celidt
     integer       , dimension(:, :) , pointer :: elmdms
-    integer       , dimension(:)    , pointer :: order_sta
-    integer       , dimension(:)    , pointer :: order_tra
-    integer       , dimension(:)    , pointer :: line_orig
     integer       , dimension(:)    , pointer :: shlay
     real(fp)      , dimension(:, :) , pointer :: xystat
-    logical                         , pointer :: first
     character(20) , dimension(:)    , pointer :: namst
     character(20) , dimension(:)    , pointer :: namtra
     logical                         , pointer :: ztbml
 !
-! Local parameters
-!
-    integer, parameter :: nelmx = 29
-!
 ! Global variables
 !
-    integer                                                             , intent(in)  :: itdate !  Description and declaration in exttim.igs
-    integer                                                                           :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                             , intent(in)  :: lmax   !  Description and declaration in dimens.igs
-    integer                                                             , intent(in)  :: lsed   !  Description and declaration in esm_alloc_int.f90
-    integer                                                             , intent(in)  :: lsedtot!  Description and declaration in esm_alloc_int.f90
-    integer                                                             , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
-    integer                                                             , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: lundia !  Description and declaration in inout.igs
-    integer                                                                           :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: nostat !  Description and declaration in dimens.igs
-    integer                                                                           :: ntruv  !  Description and declaration in dimens.igs
-    logical                                                             , intent(out) :: error  !  Flag=TRUE if an error is encountered
-    logical                                                             , intent(in)  :: sferic !  Description and declaration in tricom.igs
-    logical                                                             , intent(in)  :: zmodel !  Description and declaration in procs.igs
-    real(fp)                                                            , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                                                            , intent(in)  :: grdang !  Description and declaration in tricom.igs
-    real(fp)                                                            , intent(in)  :: tunit  !  Description and declaration in exttim.igs
-    real(fp)                                                            , intent(in)  :: tzone  !  Description and declaration in exttim.igs
-    real(fp)                                                            , intent(in)  :: zbot   !  Description and declaration in zmodel.igs
-    real(fp)      , dimension(4, ntruv)                                               :: rbuffc !!  Help arrays for writing NEFIS files
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: alfas  !  Description and declaration in esm_alloc_real.f90
-    real(prec)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(kmax + 1)                                               :: rbuffz
-    real(fp)      , dimension(kmax)                                                   :: thick  !  Description and declaration in esm_alloc_real.f90
-    real(fp)      , dimension(0:kmax)                                   , intent(in)  :: zk     !  Vertical coordinates of cell interfaces
-                                                                                                !  Flag for activation of Z-MODEL
-    real(fp)      , dimension(nostat)                                                 :: rbuff  !  Description and declaration in r-i-ch.igs
-    character(*)                                                        , intent(in)  :: trifil !  File name for FLOW NEFIS output
-                                                                                                !  files (tri"h/m"-"casl""labl".dat/def)
-    character(16)                                                       , intent(in)  :: simdat !  Simulation date representing the flow condition at this date
-    character(20) , dimension(lmax)                                     , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
-    character(20) , dimension(lsedtot)                                  , intent(in)  :: namsed !  Description and declaration in esm_alloc_char.f90
-    character(23)                                                       , intent(in)  :: selhis !  Description and declaration in tricom.igs
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                             , intent(in)  :: itdate   !  Description and declaration in exttim.igs
+    integer                                                                           :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: lmax     !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: lsed     !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: lsedtot  !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: lstsci   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: ltur     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: lundia   !  Description and declaration in inout.igs
+    integer                                                                           :: mmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
+    integer                                                                           :: ntruv    !  Description and declaration in dimens.igs
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs      !  Description and declaration in esm_alloc_int.f90
+    logical                                                             , intent(out) :: error    !  Flag=TRUE if an error is encountered
+    logical                                                             , intent(in)  :: sferic   !  Description and declaration in tricom.igs
+    logical                                                             , intent(in)  :: zmodel   !  Description and declaration in procs.igs
+    real(fp)                                                            , intent(in)  :: dt       !  Description and declaration in esm_alloc_real.f90
+    real(fp)                                                            , intent(in)  :: grdang   !  Description and declaration in tricom.igs
+    real(fp)                                                            , intent(in)  :: tunit    !  Description and declaration in exttim.igs
+    real(fp)                                                            , intent(in)  :: tzone    !  Description and declaration in exttim.igs
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: alfas    !  Description and declaration in esm_alloc_real.f90
+    real(prec)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: dps      !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: xcor     !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: xz       !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: ycor     !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: yz       !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(kmax)                                                   :: thick    !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(kmax)                                     , intent(in)  :: sig      !  Vertical coordinates of cell interfaces (SIGMA-MODEL)
+    real(fp)      , dimension(0:kmax)                                   , intent(in)  :: zk       !  Vertical coordinates of cell interfaces (Z-MODEL)
+    character(*)                                                        , intent(in)  :: filename !  File name
+    character(16)                                                       , intent(in)  :: simdat   !  Simulation date representing the flow condition at this date
+    character(20) , dimension(lmax)                                     , intent(in)  :: namcon   !  Description and declaration in esm_alloc_char.f90
+    character(20) , dimension(lsedtot)                                  , intent(in)  :: namsed   !  Description and declaration in esm_alloc_char.f90
+    character(23)                                                       , intent(in)  :: selhis   !  Description and declaration in tricom.igs
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
+    integer                                                             , intent(in)  :: nostatgl ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: nostatto ! total number of stations (including "duplicate" stations located in halo regions)
+    integer       , dimension(nostat)                                   , intent(in)  :: order_sta
+    integer                                                             , intent(in)  :: ntruvgl  ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: ntruvto  ! total number of tracks (including "duplicate" stations located in halo regions)
+    integer       , dimension(ntruv)                                    , intent(in)  :: order_tra
 !
 ! Local variables
 !
-    integer                                           :: fds
+    integer                                           :: filetype
     integer                                           :: ierror      ! Local errorflag for NEFIS files
     integer                                           :: istat
     integer                                           :: k
-    integer                                           :: kmaxout
+    integer                                           :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
+    integer                                           :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
     integer                                           :: l      
     integer                                           :: lhlp        ! Help var. for teller constituents and turbulent quantities 
     integer                                           :: lsedbl      ! Number of bed load fractions: lsedtot-lsed
@@ -137,44 +136,42 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     integer                                           :: n           ! Help var. 
     integer                                           :: n1     
     integer                                           :: n2     
-    integer        , dimension(:,:)     , allocatable :: ibuff       ! Help array for (n,m)-coordinates of cross section locations
+    integer        , dimension(:)       , allocatable :: ibuff1      ! Help array for layer selection
+    integer        , dimension(:,:)     , allocatable :: ibuff2      ! Help array for (n,m)-coordinates of cross section locations
     integer        , dimension(1)                     :: idummy      ! Help array to read/write Nefis files 
     integer        , dimension(2)                     :: ival        ! Local array for writing ITDATE and time (:= 00:00:00) 
-    integer        , dimension(nelmx)                 :: nbytsg      ! Array containing the number of by- tes of each single ELMTPS 
-    integer        , dimension(:)       , allocatable :: norig
-    integer        , dimension(3,5)                   :: uindex
-    integer                            , external     :: getelt
-    integer                            , external     :: putelt
-    integer                            , external     :: inqmxi
     integer                            , external     :: clsnef
     integer                            , external     :: open_datdef
     integer                            , external     :: neferr
-    logical                                           :: wrswch      ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    real(sp)       , dimension(1)                     :: rdummy      ! Help array to read/write Nefis files 
-    character(10)  , dimension(nelmx)                 :: elmunt      ! Array with element physical unit 
+    !
+    integer                                           :: iddim_time
+    integer                                           :: iddim_kmax
+    integer                                           :: iddim_kmaxout
+    integer                                           :: iddim_kmaxout_restr
+    integer                                           :: iddim_kmax1
+    integer                                           :: iddim_nostat
+    integer                                           :: iddim_ntruv
+    integer                                           :: iddim_lsed
+    integer                                           :: iddim_lsedtot
+    integer                                           :: iddim_2
+    integer                                           :: iddim_4
+    integer                                           :: iddim_x
+    !
+    integer                                           :: idatt_cmpintf
+    integer                                           :: idatt_cmplyr
+    integer                                           :: idatt_sigfc
+    integer                                           :: idatt_sigfi
+    integer                                           :: idatt_up
+    !
+    character(16)                                     :: xcoordunit  ! Unit of X coordinate: M or DEGREES_EAST
+    character(16)                                     :: ycoordunit  ! Unit of Y coordinate: M or DEGREES_NORTH
     character(16)                                     :: grnam2      ! Data-group name defined for the NEFIS-files 
     character(16)  , dimension(1)                     :: cdum16      ! Help array to read/write Nefis files 
-    character(16)  , dimension(nelmx)                 :: elmnms      ! Element name defined for the NEFIS-files 
-    character(16)  , dimension(nelmx)                 :: elmqty      ! Array with element quantity 
-    character(16)  , dimension(nelmx)                 :: elmtps      ! Array containing the types of the elements (real, ch. , etc. etc.) 
     character(20)  , dimension(:)       , allocatable :: namhlp      ! Help array for name constituents and turbulent quantities 
     character(23)  , dimension(1)                     :: cdum23      ! Help array to read/write Nefis files 
-    character(256)                                    :: filnam      ! Help var. for FLOW file name 
-    character(256)                                    :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64)  , dimension(nelmx)                 :: elmdes      ! Array with element description 
-    integer                                           :: nostatgl    ! global number of stations (i.e. original number
-                                                                     ! excluding duplicate stations located in the halo regions)
-    integer                                           :: nostatto    ! total number of stations (including "duplicate" stations located in halo regions)
-    integer        , dimension(:)       , allocatable :: nostatarr   ! number of stations per partition
-    integer        , dimension(:,:)     , allocatable :: mnstatgl    ! mn indices per partition (excluding duplicates)
-    integer                                           :: ntruvgl     ! global number of tracks (i.e. original number
-                                                                     ! excluding duplicate stations located in the halo regions)
-    integer                                           :: ntruvto     ! total number of tracks (including "duplicate" stations located in halo regions)
-    integer        , dimension(:)       , allocatable :: ntruvarr    ! number of tracks per partition
-    real(sp)       , dimension(:)       , allocatable :: rsbuff      ! work array for gathering reals (1 dim)
-    real(sp)       , dimension(:,:)     , allocatable :: rsbuff2     ! work array for gathering reals (2 dim)
-    real(sp)       , dimension(:,:)     , allocatable :: rsbuff2b    ! work array for gathering reals (2 dim)
-    character(20)  , dimension(:)       , allocatable :: cbuff1      ! work array for gathering names of stations/cross sections
+    integer        , dimension(:)       , allocatable :: shlay_restr   ! copy of shlay, excluding layer zero
+    real(fp)       , dimension(:)       , allocatable :: rbuff1      ! local work array for gathering reals (1 dim)
+    real(fp)       , dimension(:,:)     , allocatable :: rbuff2      ! local work array for gathering reals (2 dim)
 !
 ! Data statements
 !
@@ -182,636 +179,532 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem  => gdp%nefisio%nefiselem(nefiswrihis)
-    mfg        => gdp%gdparall%mfg
-    nfg        => gdp%gdparall%nfg
-    mnit       => gdp%gdstations%mnit
-    mnstat     => gdp%gdstations%mnstat
-    celidt     => nefiselem%celidt
-    elmdms     => nefiselem%elmdms
-    order_sta  => gdp%gdparall%order_sta
-    order_tra  => gdp%gdparall%order_tra
-    shlay      => gdp%gdpostpr%shlay
-    xystat     => gdp%gdstations%xystat
-    first      => nefiselem%first
-    namst      => gdp%gdstations%namst
-    namtra     => gdp%gdstations%namtra
-    line_orig  => gdp%gdstations%line_orig
-    ztbml      => gdp%gdzmodel%ztbml
-    !
-    ! LSTSCI var. name in HIS FILE must remain LSTCI for GPP to work
-    ! properly
-    !
+    mfg         => gdp%gdparall%mfg
+    nfg         => gdp%gdparall%nfg
+    mnit        => gdp%gdstations%mnit
+    mnstat      => gdp%gdstations%mnstat
+    shlay       => gdp%gdpostpr%shlay
+    xystat      => gdp%gdstations%xystat
+    namst       => gdp%gdstations%namst
+    namtra      => gdp%gdstations%namtra
+    ztbml       => gdp%gdzmodel%ztbml
     !
     ! Initialize local variables
     !
-    kmaxout = size(shlay)
-    ierror  = 0
-    celidt  = 1
-    lsedbl  = lsedtot - lsed
-    !
-    filnam  = trifil(1:3) // 'h' // trifil(5:)
-    errmsg  = ' '
-    !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
-    !
-    ! Redefine elmunt for sferic coordinates
-    !
-    if (sferic) then
-       elmunt(12) = '[  DEG  ]'
-       elmunt(19) = '[  DEG  ]'
-    endif
-    if (parll) then
-       !
-       ! Recalculates the effective number of stations, filtering out duplicates affected to more
-       ! than one partition (i.e. located in halos)
-       !
-       call dfsync(gdp)
-       call dffind_duplicate(lundia, nostat, nostatto, nostatgl, order_sta, gdp)
-       !
-       ! Recalculates the effective global number of cross sections
-       !
-       call dfsync(gdp)
-       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
-       !
-       ! When order_tra points to line_orig, both partition-related and re-ordering-related stuff is taken care of
-       !
-       order_tra => gdp%gdstations%line_orig
+    filetype = getfiletype(gdp, FILOUT_HIS)
+    kmaxout  = size(shlay)
+    if (shlay(1) == 0) then
+       kmaxout_restr = kmaxout - 1
+       allocate(shlay_restr(kmaxout_restr))
+       shlay_restr   = shlay(2:)
     else
-       nostatto = nostat
-       nostatgl = nostat
-       ntruvto  = ntruv
-       ntruvgl  = ntruv
+       kmaxout_restr = kmaxout
+       allocate(shlay_restr(kmaxout_restr))
+       shlay_restr   = shlay
     endif
+    ierror   = 0
+    lsedbl   = lsedtot - lsed
     !
-    ! Set up the element dimensions
-    !
-    if (first .and. inode == master) then
-       call addelm(nefiswrihis, 'ITDATE', ' ', '[YYYYMMDD]', 'INTEGER', 4, &
-          & 'Initial date (input) & time (default 00:00:00)                ', &
-          & 1         ,2         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'TZONE', ' ', '[ HOUR  ]', 'REAL', 4, &
-          & 'Local time zone                                               ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'TUNIT', ' ', '[   S   ]', 'REAL', 4, &
-          & 'Time scale related to seconds                                 ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'DT', ' ', '[   -   ]', 'REAL', 4, &
-          & 'Time step (DT*TUNIT sec)                                      ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'SIMDAT', ' ', '[   -   ]', 'CHARACTER', 16, &
-          & 'Simulation date and time [YYYYMMDD  HHMMSS]                   ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'SELHIS', ' ', '[   -   ]', 'CHARACTER', 23, &
-          & 'Selection flag for time histories                             ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'NOSTAT', ' ', '[   -   ]', 'INTEGER', 4, &
-          & 'Number of monitoring stations                                 ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'NTRUV', ' ', '[   -   ]', 'INTEGER', 4, &
-          & 'Number of monitoring cross-sections                           ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'LSTCI', ' ', '[   -   ]', 'INTEGER', 4, &
-          & 'Number of constituents                                        ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'LTUR', ' ', '[   -   ]', 'INTEGER', 4, &
-          & 'Number of turbulence quantities                               ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'KMAX', ' ', '[   -   ]', 'INTEGER', 4, &
-          & 'Number of layers                                             ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       if (nostatgl > 0) then
-          call addelm(nefiswrihis, 'MNSTAT', ' ', '[   -   ]', 'INTEGER', 4, &
-             & '(M,N) indices of monitoring stations                          ', &
-             & 2         ,2         ,nostatgl  ,0         ,0         ,0         , lundia, gdp)
-          call addelm(nefiswrihis, 'XYSTAT', ' ', '[   M   ]', 'REAL', 4, &
-             & '(X,Y) coordinates of monitoring stations                      ', &
-             & 2         ,2         ,nostatgl  ,0         ,0         ,0         , lundia, gdp)
-          call addelm(nefiswrihis, 'NAMST', ' ', '[   -   ]', 'CHARACTER', 20, &
-             & 'Name of monitoring station                                    ', &
-             & 1         ,nostatgl  ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       call addelm(nefiswrihis, 'GRDANG', ' ', '[  DEG  ]', 'REAL', 4, &
-          & 'Edge between y-axis and real north                            ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       if (nostatgl > 0) then
-          call addelm(nefiswrihis, 'ALFAS', ' ', '[  DEG  ]', 'REAL', 4, &
-             & 'Orientation ksi-axis w.r.t. pos.x-axis at water level point   ', &
-             & 1         ,nostatgl  ,0         ,0         ,0         ,0         , lundia, gdp)
-          call addelm(nefiswrihis, 'DPS', ' ', '[   M   ]', 'REAL', 4, &
-             & 'Depth in station                                              ', &
-             & 1         ,nostatgl  ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       call addelm(nefiswrihis, 'THICK', ' ', '[ .01*% ]', 'REAL', 4, &
-          & 'Fraction part of layer thickness of total water-height        ', &
-          & 1         ,kmax      ,0         ,0         ,0         ,0         , lundia, gdp)
-       if (ntruvgl > 0) then
-          call addelm(nefiswrihis, 'MNTRA', ' ', '[   -   ]', 'INTEGER', 4, &
-             & '(M1,N1)-(M2,N2) indices of monitoring cross-sections          ', &
-             & 2         ,4         ,ntruvgl   ,0         ,0         ,0         , lundia, gdp)
-          call addelm(nefiswrihis, 'XYTRA', ' ', '[   M   ]', 'REAL', 4, &
-             & '(X1,Y1)-(X2,Y2) coordinates of monitoring cross-sections      ', &
-             & 2         ,4         ,ntruvgl   ,0         ,0         ,0         , lundia, gdp)
-          call addelm(nefiswrihis, 'NAMTRA', ' ', '[   -   ]', 'CHARACTER', 20, &
-             & 'Name of monitoring cross-section                             ', &
-             & 1         ,ntruvgl   ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       lhlp = 0
-       if (index(selhis(5:12), 'Y')/=0 .or. index(selhis(22:23), 'Y')/=0) &
-        & lhlp = lhlp + lstsci
-       if (index(selhis(13:14), 'Y')/=0) lhlp = lhlp + ltur
-       lhlp = max(1, lhlp)
-       call addelm(nefiswrihis, 'NAMCON', ' ', '[   -   ]', 'CHARACTER', 20, &
-          & 'Name of constituents / turbulent quantities                   ', &
-          & 1         ,lhlp      ,0         ,0         ,0         ,0         , lundia, gdp)
-       if (lsed>0) then
-          call addelm(nefiswrihis, 'LSED', ' ', '[   -   ]', 'INTEGER', 4, &
-             & 'Number of sediment constituents                               ', &
-             & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       if (lsedbl>0) then
-          call addelm(nefiswrihis, 'LSEDBL', ' ', '[   -   ]', 'INTEGER', 4, &
-             & 'Number of bedload sediment fractions                          ', &
-             & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       if (lsedtot>0) then
-          call addelm(nefiswrihis, 'NAMSED', ' ', '[   -   ]', 'CHARACTER', 20, &
-             & 'Name of sediment fraction                                     ', &
-             & 1         ,lsedtot   ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       if (zmodel) then
-          call addelm(nefiswrihis, 'ZK', ' ', '[   M   ]', 'REAL', 4, &
-             & 'Vertical coordinates of cell interfaces                       ', &
-             & 1         ,kmax + 1  ,0         ,0         ,0         ,0         , lundia, gdp)
-       endif
-       call addelm(nefiswrihis, 'COORDINATES', ' ', '[   -   ]', 'CHARACTER', 16, &
-          & 'Cartesian or Spherical coordinates                            ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'LAYER_MODEL', ' ', '[   -   ]', 'CHARACTER', 16, &
-          & 'Sigma-model or Z-model                                        ', &
-          & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
-       call addelm(nefiswrihis, 'OUTPUT_LAYERS', ' ', '[   -   ]', 'INTEGER', 4, &
-          & 'User selected output layers                                   ', &
-          & 1         ,kmaxout   ,0         ,0         ,0         ,0         , lundia, gdp)
-       call defnewgrp(nefiswrihis ,filnam    ,grnam2   ,gdp)
-       !
-       ! Get start celidt for writing
-       !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrihis)
-       first     => nefiselem%first
-       celidt    => nefiselem%celidt
-    endif
-    ierror = 0
-    if (inode == master) ierror = open_datdef(filnam   ,fds      )
-    if (ierror/= 0) goto 999
-    if (inode == master) then
-       if (first) then
-          !
-          ! end of initialization, don't come here again
-          !
-          ierror = inqmxi(fds, grnam2, celidt)
-          first = .false.
-       endif
-    endif
-    !
-    if (inode == master) then
-       !
-       ! group 2, element 'ITDATE'
-       !
-       ival(1) = itdate
-       ival(2) = 000000
-       ierror = putelt(fds, grnam2, 'ITDATE', uindex, 1, ival)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'TZONE'
-       !
-       rdummy(1) = tzone
-       ierror = putelt(fds, grnam2, 'TZONE', uindex, 1, rdummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'TUNIT'
-       !
-       rdummy(1) = tunit
-       ierror = putelt(fds, grnam2, 'TUNIT', uindex, 1, rdummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'DT'
-       !
-       rdummy(1) = dt
-       ierror = putelt(fds, grnam2, 'DT', uindex, 1, rdummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'SIMDAT'
-       !
-       cdum16(1) = simdat
-       ierror = putelt(fds, grnam2, 'SIMDAT', uindex, 1, cdum16)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'SELHIS'
-       !
-       cdum23(1) = selhis
-       ierror = putelt(fds, grnam2, 'SELHIS', uindex, 1, cdum23)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'NOSTAT'
-       !
-       idummy(1) = nostatgl
-       ierror = putelt(fds, grnam2, 'NOSTAT', uindex, 1, idummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'NTRUV'
-       !
-       idummy(1) = ntruvgl
-       ierror = putelt(fds, grnam2, 'NTRUV', uindex, 1, idummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'LSTCI' Variable is now LSTSCI
-       !
-       idummy(1) = 0
-       if ((index(selhis(5:12), 'Y')/=0 .or. index(selhis(22:23), 'Y')/=0) .and.   &
-         & lstsci>0) idummy(1) = lstsci
-       ierror = putelt(fds, grnam2, 'LSTCI', uindex, 1, idummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'LTUR'
-       !
-       idummy(1) = 0
-       if (index(selhis(13:14), 'Y')/=0 .and. ltur>0) idummy(1) = ltur
-       ierror = putelt(fds, grnam2, 'LTUR', uindex, 1, idummy)
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'KMAX'
-       !
-       idummy(1) = kmax
-       ierror = putelt(fds, grnam2, 'KMAX', uindex, 1, idummy)
-       if (ierror/=0) goto 999
-    endif ! inode==master
-    !
-    ! only if nostat > 0 (next 3 elements)
-    !
-    call dfsync(gdp)
-    !
-    if (nostatgl > 0) then
-       !
-       ! group 2, element 'MNSTAT'
-       !
-       if (inode == master) allocate(mnstatgl(2,nostatgl), stat=istat)
-       if (parll) then
-          allocate(ibuff(2,nostat), stat=istat)
-          do k=1,nostat
-             !
-             ! mnstat contains indices with respect to this partition
-             ! transfer into global indices
-             !
-             ibuff(1,k) = mnstat(1,k) + mfg - 1
-             ibuff(2,k) = mnstat(2,k) + nfg - 1
-          enddo
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, ibuff, mnstatgl, gdp)
-          deallocate(ibuff, stat=istat)
-       else
-          mnstatgl = mnstat   
-       endif 
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'MNSTAT', uindex, 1, mnstatgl)
-          deallocate(mnstatgl, stat=istat)
-       endif
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'XYSTAT'
-       !
-       allocate(rsbuff2(nostat,2), stat=istat)
-       do k = 1, nostat
-          m              = mnstat(1,k)
-          n              = mnstat(2,k)
-          xystat(1,k)    = xz(n,m)
-          xystat(2,k)    = yz(n,m)
-          rsbuff2(k,1:2) = real((/xz(n,m), yz(n,m)/),sp)
-       enddo
-       !
-       ! Gather location from other nodes (and swap arrays from dimension (nostat,2) to dimension (2,nostat))
-       !
-       if (inode == master) then
-          allocate(rsbuff2b(nostatgl,2), stat=istat)
-       endif
-       if (parll) then
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, rsbuff2, rsbuff2b, gdp)
-       else
-          if (inode == master) then
-             rsbuff2b = rsbuff2   ! not parallel, so it is on the master node
-          endif
-       endif
-       deallocate(rsbuff2, stat=istat)
-       if (inode == master) then
-          allocate(rsbuff2(2,nostatgl), stat=istat)
-          do k=1,nostatgl
-             rsbuff2(:,k) = rsbuff2b(k,:)
-          enddo
-          deallocate(rsbuff2b, stat=istat)
-          ierror = putelt(fds, grnam2, 'XYSTAT', uindex, 1, rsbuff2)
-          deallocate(rsbuff2, stat=istat)
-       endif
-       
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element  'NAMST'
-       !
-       ! Filtering out duplicates from names list
-       !
-       call dfsync(gdp)
-       if (inode == master) allocate(cbuff1(nostatgl), stat=istat)
-       if (parll) then 
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, namst, cbuff1, gdp)
-       else
-          cbuff1 = namst
-       endif     
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'NAMST', uindex, 1, cbuff1)
-          deallocate(cbuff1, stat=istat)
-       endif
-       if (ierror/=0) goto 999
-    endif  ! nostatgl > 0 
-    if (inode == master) then
-       !
-       ! group 2, element 'GRDANG'
-       !
-       rdummy(1) = grdang
-       ierror = putelt(fds, grnam2, 'GRDANG', uindex, 1, rdummy)
-       if (ierror/=0) goto 999
-    endif
-    !
-    ! only if nostat > 0 (next 2 elements)
-    !
-    if (nostatgl > 0) then
-       !
-       ! group 2, element 'ALFAS'
-       !
-       do k = 1, nostat
-          m = mnstat(1, k)
-          n = mnstat(2, k)
-          rbuff(k) = alfas(n, m)
-       enddo
-       if (inode == master) allocate(rsbuff(nostatgl), stat=istat)
-       if (parll) then
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, rbuff, rsbuff, gdp)
-       else
-         rsbuff = real(rbuff, sp)
-       endif
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'ALFAS', uindex, 1, rsbuff)
-          deallocate(rsbuff, stat=istat)
-       endif
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'DPS'
-       !
-       do k = 1, nostat
-          m = mnstat(1, k)
-          n = mnstat(2, k)
-          rbuff(k) = real(dps(n, m),fp)
-       enddo
-       if (inode == master) allocate(rsbuff(nostatgl), stat=istat)
-
-       if (parll) then
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, rbuff, rsbuff, gdp)
-       else
-          rsbuff = rbuff
-       endif   
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'DPS', uindex, 1, rsbuff)
-          deallocate(rsbuff, stat=istat)
-       endif
-       if (ierror/=0) goto 999
-    endif
-    if (inode == master) then
-       !
-       ! group 2, element 'THICK'
-       !
-       allocate(rsbuff(kmax), stat=istat)
-       rsbuff=real(thick,sp)
-       ierror = putelt(fds, grnam2, 'THICK', uindex, 1, rsbuff)
-       deallocate(rsbuff, stat=istat)
-    endif
-    if (ierror/=0) goto 999
-    !
-    ! only if ntruv  > 0
-    ! the next element of group 3 will be written
-    !
-    if (ntruvgl > 0) then
-       if (.not.parll) then
-          !
-          ! Re-arrange the order with the inverse of line_orig
-          ! Parallel: order_tra points to line_orig and solves the re-ordering
-          !
-          allocate(norig(ntruvgl), stat=istat)
-          if (istat /= 0) then
-             call prterr(lundia, 'U021', 'wrihis: memory alloc error')
-             call d3stop(1, gdp)
-          endif
-          do n = 1, ntruv
-              norig( line_orig(n) ) = n
-          enddo
-       endif
-       !
-       ! group 2, element 'MNTRA'
-       !
-       if (inode == master) then
-          allocate(ibuff(4,ntruvgl), stat=istat)
-          ibuff = 0
-          if (parll) then
-             do k = 1, ntruvgl
-                !
-                ! mnit_global contains the global mn indices of all partitions, before local re-ordering
-                ! so don't use gather_filter
-                !
-                ibuff(:,k) = gdp%gdparall%mnit_global(:,k)
-             enddo
-          else
-             do k = 1, ntruv
-                !
-                ! mnit is re-ordered; use norig to get the original order
-                !
-                ibuff(:,k) = mnit(:,norig(k))
-             enddo
-          endif
-             ierror = putelt(fds, grnam2, 'MNTRA', uindex, 1, ibuff)
-          deallocate(ibuff, stat=istat)
-       endif
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'XYTRA'
-       !
-       ! WARNING
-       ! When one of the two points of a cross section is outside this partition, it is not possible
-       ! to obtain the correct x and y coordinate. The output values are rubbish
-       ! This must be solved in a new subroutine called dfgather_filter_combine, using information
-       ! of multiple partitions.
-       !
-       allocate(rsbuff2(ntruv,4), stat=istat)
-       do k = 1, ntruv
-          m1           = mnit(1,k)
-          n1           = mnit(2,k)
-          m2           = mnit(3,k)
-          n2           = mnit(4,k)
-          rsbuff2(k,1) = real(xz(n1,m1),sp)
-          rsbuff2(k,2) = real(yz(n1,m1),sp)
-          rsbuff2(k,3) = real(xz(n2,m2),sp)
-          rsbuff2(k,4) = real(yz(n2,m2),sp)
-       enddo
-       if (inode == master) then
-          allocate(rsbuff2b(ntruvgl,4), stat=istat)
-       endif
-       if (parll) then
-          !
-          ! combine all local values (re-ordered) into global values (original global order)
-          !
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, order_tra, rsbuff2, rsbuff2b, gdp)
-       else
-          !
-          ! xytra is re-ordered; use norig to get the original order
-          !
-          do k = 1, ntruv
-             rsbuff2b(k,:) = rsbuff2(norig(k),:)
-          enddo
-       endif
-       deallocate(rsbuff2, stat=istat)
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'XYTRA', uindex, 1, rsbuff2b)
-          deallocate(rsbuff2b, stat=istat)
-       endif
-       if (ierror/=0) goto 999
-       !
-       ! group 2, element 'NAMTRA'
-       !
-       if (inode == master) allocate(cbuff1(ntruvgl), stat=istat)
-       if (parll) then
-          !
-          ! combine all local values (re-ordered) into global values (original global order)
-          !
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, order_tra, namtra, cbuff1, gdp)
-       else
-          !
-          ! namtra is re-ordered; use norig to get the original order
-          !
-          do k = 1, ntruv
-             cbuff1(k) = namtra(norig(k))
-          enddo
-       endif
-       if (inode == master) then
-          ierror = putelt(fds, grnam2, 'NAMTRA', uindex, 1, cbuff1)
-          deallocate(cbuff1, stat=istat)
-       endif
-       deallocate(norig, stat=istat)
-       if (ierror/=0) goto 999
-    endif  ! (ntruvgl > 0)
-    !
-    if (inode == master) then
-       !
-       ! group 2, only if lmax   > 0 (:= selhis( 5:14) <> 'NNNNNNNNNN')
-       !
-       if (index(selhis(5:14), 'Y')>0 .or. index(selhis(22:23), 'Y')>0) then
-          allocate(namhlp(lstsci+ltur), stat=istat)
-          lhlp = 0
-          if (index(selhis(5:12), 'Y')>0 .or. index(selhis(22:23), 'Y')/=0) then
-             do l = 1, lstsci
-                namhlp(l) = namcon(l)
-             enddo
-             lhlp = lhlp + lstsci
-          endif
-          if (index(selhis(13:14), 'Y')>0) then
-             do l = 1, ltur
-                namhlp(lhlp + l) = namcon(lstsci + l)
-             enddo
-          endif
-          !
-          ! group 2, element 'NAMCON'
-          !
-          ierror = putelt(fds, grnam2, 'NAMCON', uindex, 1, namhlp)
-          if (ierror/=0) goto 999
-          deallocate(namhlp, stat=istat)
-       endif
-       !
-       ! group 2, element 'LSED'
-       !
-       if (lsed>0) then
-          idummy(1) = lsed
-          ierror = putelt(fds, grnam2, 'LSED', uindex, 1, idummy)
-          if (ierror/=0) goto 999
-       endif
-       !
-       ! group 2, element 'LSEDBL'
-       !
-       if (lsedbl>0) then
-          idummy(1) = lsedbl
-          ierror = putelt(fds, grnam2, 'LSEDBL', uindex, 1, idummy)
-          if (ierror/=0) goto 999
-       endif
-       !
-       ! group 2, element 'NAMSED'
-       !
-       if (lsedtot>0) then
-          ierror = putelt(fds, grnam2, 'NAMSED', uindex, 1, namsed)
-          if (ierror/=0) goto 999
-       endif
-       !
-       ! group 2, element 'ZK'
-       !
-       if (zmodel) then
-          allocate(rsbuff(kmax+1), stat=istat)
-          do k = 1, kmax
-             rsbuff(k + 1) = zk(k)
-          enddo
-          rsbuff(1) = zbot
-          ierror = putelt(fds, grnam2, 'ZK', uindex, 1, rsbuff)
-          if (ierror/=0) goto 999
-          deallocate(rsbuff, stat=istat)
-       endif
-       !
-       ! group 2, element 'COORDINATES'
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
        if (sferic) then
-          cdum16(1) = 'SPHERICAL'
+          xcoordunit = 'degrees_east'
+          ycoordunit = 'degrees_north'
        else
-          cdum16(1) = 'CARTESIAN'
+          xcoordunit = 'm'
+          ycoordunit = 'm'
        endif
-       ierror = putelt(fds, grnam2, 'COORDINATES', uindex, 1, cdum16)
-       if (ierror/=0) goto 999
        !
-       ! group 2, element 'LAYER_MODEL'
+       ! Define dimensions
+       !
+       iddim_time    = adddim(gdp, lundia, FILOUT_HIS, 'time'   , nf90_unlimited)
+       if (zmodel) then
+          iddim_kmax    = adddim(gdp, lundia, FILOUT_HIS, 'K_LYR'  , kmax) ! Number of layers
+          iddim_kmax1   = adddim(gdp, lundia, FILOUT_HIS, 'K_INTF' , kmax+1) ! Number of layer interfaces
+          idatt_cmpintf = addatt(gdp, lundia, FILOUT_HIS, 'compress','ZK')
+          idatt_cmplyr  = addatt(gdp, lundia, FILOUT_HIS, 'compress','ZK_LYR')
+       else
+          iddim_kmax    = adddim(gdp, lundia, FILOUT_HIS, 'SIG_LYR'  , kmax) ! Number of layers
+          iddim_kmax1   = adddim(gdp, lundia, FILOUT_HIS, 'SIG_INTF' , kmax+1) ! Number of layer interfaces
+          idatt_cmpintf = addatt(gdp, lundia, FILOUT_HIS, 'compress','SIG_INTF')
+          idatt_cmplyr  = addatt(gdp, lundia, FILOUT_HIS, 'compress','SIG_LYR')
+       endif
+       iddim_kmaxout = adddim(gdp, lundia, FILOUT_HIS, 'KMAXOUT', kmaxout) ! Number of layer interfaces written
+       iddim_kmaxout_restr = adddim(gdp, lundia, FILOUT_HIS, 'KMAXOUT_RESTR', kmaxout_restr) ! Number of layers written
+       !
+       if (nostat  >0) iddim_nostat = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT'            , nostatgl) ! Number of monitoring stations
+       if (ntruv   >0) iddim_ntruv  = adddim(gdp, lundia, FILOUT_HIS, 'NTRUV'             , ntruvgl ) ! Number of monitoring cross-sections
+       if (lsed    >0) iddim_lsed   = adddim(gdp, lundia, FILOUT_HIS, 'LSED'              , lsed    ) ! Number of sediment constituents
+       if (lsedtot >0) iddim_lsedtot= adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT'           , lsedtot ) ! Number of total sediment fractions
+                       iddim_2      = adddim(gdp, lundia, FILOUT_HIS, 'length_2'          , 2       )
+                       iddim_4      = adddim(gdp, lundia, FILOUT_HIS, 'length_4'          , 4       )
+       !
+       lhlp = 0
+       if (index(selhis(5:12), 'Y')/=0 .or. index(selhis(22:23), 'Y')/=0) lhlp = lhlp + lstsci
+       if (index(selhis(13:14), 'Y')/=0) lhlp = lhlp + ltur
+       lhlp = max(1, lhlp)
+                       iddim_x      = adddim(gdp, lundia, FILOUT_HIS, 'length_x'          , lhlp    )
+       !
+       idatt_sigfc   = addatt(gdp, lundia, FILOUT_HIS, 'formula_terms', 'sigma: SIG_LYR eta: ZWL depth: DPS')
+       idatt_sigfi   = addatt(gdp, lundia, FILOUT_HIS, 'formula_terms', 'sigma: SIG_INTF eta: ZWL depth: DPS')
+       idatt_up      = addatt(gdp, lundia, FILOUT_HIS, 'positive','up')
+       !
+       ! his-const
+       !
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ITDATE', ' ', IO_INT4       , 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TZONE', ' ', IO_REAL4       , 0, longname='Local time zone', unit='h')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TUNIT', ' ', IO_REAL4       , 0, longname='Time scale related to seconds', unit='s')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DT', ' ', IO_REAL4          , 0, longname='Time step (DT*TUNIT sec)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIMDAT', ' ', 16            , 0, longname='Simulation date and time [YYYYMMDD  HHMMSS]') !CHARACTER
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SELHIS', ' ', 23            , 0, longname='Selection flag for time histories') !CHARACTER
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NOSTAT', ' ', IO_INT4       , 0, longname='Number of monitoring stations')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NTRUV', ' ', IO_INT4        , 0, longname='Number of monitoring cross-sections')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'LSTCI', ' ', IO_INT4        , 0, longname='Number of constituents')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'LTUR', ' ', IO_INT4         , 0, longname='Number of turbulence quantities')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAX', ' ', IO_INT4         , 0, longname='Number of layers')
+          if (nostatgl > 0) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'MNSTAT', ' ', IO_INT4    , 2, dimids=(/iddim_2, iddim_nostat/), longname='(M,N) indices of monitoring stations')
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYSTAT', ' ', IO_REAL4   , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit)
+          endif
+       endif
+       if (nostatgl > 0) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMST', ' ', 20          , 1, dimids=(/iddim_nostat/), longname='Name of monitoring station') !CHARACTER
+       endif
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'GRDANG', ' ', IO_REAL4      , 0, longname='Edge between y-axis and real north', unit='arc_degrees')
+       endif
+       if (nostatgl > 0) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ALFAS', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Orientation ksi-axis w.r.t. pos.x-axis at water level point', unit='arc_degrees')
+          if (filetype /= FTYPE_NETCDF) then ! for NetCDF just store the time-dependent version
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DPS', ' ', IO_REAL4      , 1, dimids=(/iddim_nostat/), longname='Depth in station', unit='m')
+          endif
+       endif
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'THICK', ' ', IO_REAL4       , 1, dimids=(/iddim_kmax/), longname='Fraction part of layer thickness of total water-height', unit='[ .01*% ]')
+       endif
+       if (ntruvgl > 0) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'MNTRA', ' ', IO_INT4     , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(M1,N1)-(M2,N2) indices of monitoring cross-sections')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYTRA', ' ', IO_REAL4    , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(X1,Y1)-(X2,Y2) coordinates of monitoring cross-sections', unit=xcoordunit)
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMTRA', ' ', 20         , 1, dimids=(/iddim_ntruv/), longname='Name of monitoring cross-section') !CHARACTER
+       endif
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMCON', ' ', 20            , 1, dimids=(/iddim_x/), longname='Name of constituents / turbulent quantities') !CHARACTER
+          if (lsed>0) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'LSED', ' ', IO_INT4      , 0, longname='Number of sediment constituents')
+          endif
+          if (lsedbl>0) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'LSEDBL', ' ', IO_INT4    , 0, longname='Number of bedload sediment fractions')
+          endif
+          if (lsedtot>0) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMSED', ' ', 20         , 1, dimids=(/iddim_lsedtot/), longname='Name of sediment fraction') !CHARACTER
+          endif
+       endif
+       if (zmodel) then
+          if (filetype /= FTYPE_NEFIS) then
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ZK_LYR', ' ', IO_REAL4   , 1, dimids=(/iddim_kmax/) , longname='Vertical coordinates of layer centres'   , unit='m', attribs=(/idatt_up/) )
+          endif
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ZK', ' ', IO_REAL4          , 1, dimids=(/iddim_kmax1/), longname='Vertical coordinates of layer interfaces', unit='m', attribs=(/idatt_up/) )
+       elseif (filetype /= FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIG_LYR' , 'ocean_sigma_coordinate', IO_REAL4       , 1, dimids=(/iddim_kmax/) , longname='Sigma coordinates of layer centres'   , attribs=(/idatt_sigfc/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIG_INTF', 'ocean_sigma_coordinate', IO_REAL4       , 1, dimids=(/iddim_kmax1/), longname='Sigma coordinates of layer interfaces', attribs=(/idatt_sigfi/) )
+       endif
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'COORDINATES', ' ', 16       , 0, longname='Cartesian or Spherical coordinates') !CHARACTER
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'LAYER_MODEL', ' ', 16       , 0, longname='Sigma-model or Z-model') !CHARACTER
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'OUTPUT_LAYERS', ' ', IO_INT4, 1, dimids=(/iddim_kmaxout/), longname='User selected output layers')
+       else
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAXOUT', ' ', IO_INT4, 1, dimids=(/iddim_kmaxout/), longname='User selected output layer interfaces', attribs=(/idatt_cmpintf/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAXOUT_RESTR', ' ', IO_INT4, 1, dimids=(/iddim_kmaxout_restr/), longname='User selected output layer centres', attribs=(/idatt_cmplyr/) )
+       endif
+       !
+    case (REQUESTTYPE_WRITE)
+       !
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          !
+          ! element 'ITDATE'
+          !
+          ival(1) = itdate
+          ival(2) = 000000
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, ival, 'ITDATE')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'TZONE'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, tzone, 'TZONE')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'TUNIT'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, tunit, 'TUNIT')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'DT'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, dt, 'DT')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'SIMDAT'
+          !
+          cdum16(1) = simdat
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, cdum16, 'SIMDAT')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'SELHIS'
+          !
+          cdum23(1) = selhis
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, cdum23, 'SELHIS')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'NOSTAT'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, nostatgl, 'NOSTAT')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'NTRUV'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, ntruvgl, 'NTRUV')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'LSTCI' Variable is now LSTSCI
+          !
+          idummy(1) = 0
+          if ((index(selhis(5:12), 'Y')/=0 .or. index(selhis(22:23), 'Y')/=0) .and. lstsci>0) idummy(1) = lstsci
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, idummy, 'LSTCI')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'LTUR'
+          !
+          idummy(1) = 0
+          if (index(selhis(13:14), 'Y')/=0 .and. ltur>0) idummy(1) = ltur
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, idummy, 'LTUR')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'KMAX'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, kmax, 'KMAX')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'GRDANG'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, grdang, 'GRDANG')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'THICK'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, thick, 'THICK')
+          if (ierror/=0) goto 9999
+       endif ! for NEFIS only
+       !
+       ! only if nostat > 0 (next 3 elements)
+       !
+       if (nostatgl > 0) then
+          !
+          ! element 'MNSTAT'
+          !
+          if (filetype == FTYPE_NEFIS) then ! for NetCDF just store the time-dependent version
+             allocate(ibuff2(2,nostat), stat=istat)
+             do k=1,nostat
+                !
+                ! mnstat contains indices with respect to this partition
+                ! transfer into global indices
+                !
+                ibuff2(1,k) = mnstat(1,k) + mfg - 1
+                ibuff2(2,k) = mnstat(2,k) + nfg - 1
+             enddo
+             call wrtarray_n(fds, filename, filetype, grnam2, &
+                    & 1, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & 2, &
+                    & ierror, lundia, ibuff2, 'MNSTAT', station, mergedim=2)
+             deallocate(ibuff2, stat=istat)
+             if (ierror/=0) goto 9999
+             !
+             ! element 'XYSTAT'
+             !
+             allocate(rbuff2(2, nostat), stat=istat)
+             do k = 1, nostat
+                m              = mnstat(1,k)
+                n              = mnstat(2,k)
+                xystat(1,k)    = xz(n,m)
+                xystat(2,k)    = yz(n,m)
+                rbuff2(1:2,k)  = (/xz(n,m), yz(n,m)/)
+             enddo
+             call wrtarray_n(fds, filename, filetype, grnam2, &
+                    & 1, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & 2, &
+                    & ierror, lundia, rbuff2, 'XYSTAT', station, mergedim=2)
+             deallocate(rbuff2, stat=istat)
+             if (ierror/=0) goto 9999
+          endif
+          !
+          ! element  'NAMST'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam2, &
+                 & 1, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, namst, 'NAMST')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'ALFAS'
+          !
+          allocate(rbuff1(nostat), stat=istat)
+          do k = 1, nostat
+             m = mnstat(1, k)
+             n = mnstat(2, k)
+             rbuff1(k) = alfas(n, m)
+          enddo
+          call wrtarray_n(fds, filename, filetype, grnam2, &
+                 & 1, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, rbuff1, 'ALFAS', station)
+          deallocate(rbuff1, stat=istat)
+          if (ierror/=0) goto 9999
+          !
+          ! element 'DPS'
+          !
+          if (filetype /= FTYPE_NETCDF) then ! for NetCDF just store the time-dependent version
+             allocate(rbuff1(nostat), stat=istat)
+             do k = 1, nostat
+                m = mnstat(1, k)
+                n = mnstat(2, k)
+                rbuff1(k) = real(dps(n, m),fp)
+             enddo
+             call wrtarray_n(fds, filename, filetype, grnam2, &
+                    & 1, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & ierror, lundia, rbuff1, 'DPS', station)
+             deallocate(rbuff1, stat=istat)
+             if (ierror/=0) goto 9999
+          endif
+       endif
+       !
+       ! only if ntruv  > 0
+       ! the next element of group 3 will be written
+       !
+       if (ntruvgl > 0) then
+          !
+          ! element 'MNTRA'
+          !
+          if (inode == master) then
+             allocate(ibuff2(4,ntruvgl), stat=istat)
+             ibuff2 = 0
+             if (parll) then
+                do k = 1, ntruvgl
+                   !
+                   ! mnit_global contains the global mn indices of all partitions, before local re-ordering
+                   ! so don't use gather_filter
+                   !
+                   ibuff2(:,k) = gdp%gdparall%mnit_global(:,k)
+                enddo
+             else
+                do k = 1, ntruv
+                   !
+                   ! mnit is re-ordered; use order_tra to get the original order
+                   !
+                   ibuff2(:,order_tra(k)) = mnit(:,k)
+                enddo
+             endif
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, ibuff2, 'MNTRA')
+             deallocate(ibuff2, stat=istat)
+          endif
+          if (ierror/=0) goto 9999
+          !
+          ! element 'XYTRA'
+          !
+          allocate(rbuff2(4,ntruv), stat=istat)
+          rbuff2 = 0.0_fp
+          do k = 1, ntruv
+             m1           = mnit(1,k)
+             n1           = mnit(2,k)
+             m2           = mnit(3,k)
+             n2           = mnit(4,k)
+             if (kcs(n1,m1)>=0) then
+                if (m1 == m2) then ! n1 /= n2
+                   if (n1 < n2) n1 = n1-1
+                else ! m1 /= m2
+                   if (m1 < m2) m1 = m1-1
+                endif
+                rbuff2(1,k) = xcor(n1,m1)
+                rbuff2(2,k) = ycor(n1,m1)
+             endif
+             if (kcs(n2,m2)>=0) then
+                if (m1 == m2) then ! n1 /= n2
+                   if (n2 < n1) n2 = n2-1
+                else ! m1 /= m2
+                   if (m2 < m1) m2 = m2-1
+                endif
+                rbuff2(3,k) = xcor(n2,m2)
+                rbuff2(4,k) = ycor(n2,m2)
+             endif
+          enddo
+          call wrtarray_n(fds, filename, filetype, grnam2, &
+                 & 1, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                 & 4, &
+                 & ierror, lundia, rbuff2, 'XYTRA', transec, mergedim=2)
+          deallocate(rbuff2, stat=istat)
+          if (ierror/=0) goto 9999
+          !
+          ! element 'NAMTRA'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam2, &
+                 & 1, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                 & ierror, lundia, namtra, 'NAMTRA')
+          if (ierror/=0) goto 9999
+       endif  ! (ntruvgl > 0)
+       !
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          !
+          ! only if lmax   > 0 (:= selhis( 5:14) <> 'NNNNNNNNNN')
+          !
+          if (index(selhis(5:14), 'Y')>0 .or. index(selhis(22:23), 'Y')>0) then
+             allocate(namhlp(lstsci+ltur), stat=istat)
+             lhlp = 0
+             if (index(selhis(5:12), 'Y')>0 .or. index(selhis(22:23), 'Y')/=0) then
+                do l = 1, lstsci
+                   namhlp(l) = namcon(l)
+                enddo
+                lhlp = lhlp + lstsci
+             endif
+             if (index(selhis(13:14), 'Y')>0) then
+                do l = 1, ltur
+                   namhlp(lhlp + l) = namcon(lstsci + l)
+                enddo
+             endif
+             !
+             ! element 'NAMCON'
+             !
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, namhlp, 'NAMCON')
+             if (ierror/=0) goto 9999
+             deallocate(namhlp, stat=istat)
+          endif
+          !
+          ! element 'LSED'
+          !
+          if (lsed>0) then
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, lsed, 'LSED')
+             if (ierror/=0) goto 9999
+          endif
+          !
+          ! element 'LSEDBL'
+          !
+          if (lsedbl>0) then
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, lsedbl, 'LSEDBL')
+             if (ierror/=0) goto 9999
+          endif
+          !
+          ! element 'NAMSED'
+          !
+          if (lsedtot>0) then
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, namsed, 'NAMSED')
+             if (ierror/=0) goto 9999
+          endif
+       endif
+       !
+       ! element 'ZK'
        !
        if (zmodel) then
-          if (ztbml) then
-             cdum16(1) = 'Z-MODEL, ZTBML'
-          else
-             cdum16(1) = 'Z-MODEL'
+          if (filetype /= FTYPE_NEFIS) then
+             allocate(rbuff1(kmax), stat=istat)
+             do k = 1, kmax
+                rbuff1(k) = (zk(k-1)+zk(k))/2.0_fp
+             enddo
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, rbuff1, 'ZK_LYR')
+             if (ierror/=0) goto 9999
+             deallocate(rbuff1, stat=istat)
           endif
-       else
-          cdum16(1) = 'SIGMA-MODEL'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, zk, 'ZK')
+          if (ierror/=0) goto 9999
+       elseif (filetype /= FTYPE_NEFIS) then
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, sig, 'SIG_LYR')
+          if (ierror/=0) goto 9999
+          !
+          allocate(rbuff1(0:kmax), stat=istat)
+          rbuff1(0) = 0.0_fp
+          do k = 1, kmax
+             rbuff1(k) = rbuff1(k-1) - thick(k)
+          enddo
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, rbuff1, 'SIG_INTF')
+          if (ierror/=0) goto 9999
+          deallocate(rbuff1, stat=istat)
        endif
-       ierror = putelt(fds, grnam2, 'LAYER_MODEL', uindex, 1, cdum16)
-       if (ierror/=0) goto 999
-    endif ! inode==master
-    if (inode == master) then
        !
-       ! group 2, element 'OUTPUT_LAYERS'
+       if (filetype == FTYPE_NEFIS) then ! for NEFIS only
+          !
+          ! element 'COORDINATES'
+          !
+          if (sferic) then
+             cdum16(1) = 'SPHERICAL'
+          else
+             cdum16(1) = 'CARTESIAN'
+          endif
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, cdum16, 'COORDINATES')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'LAYER_MODEL'
+          !
+          if (zmodel) then
+             if (ztbml) then
+                cdum16(1) = 'Z-MODEL, ZTBML'
+             else
+                cdum16(1) = 'Z-MODEL'
+             endif
+          else
+             cdum16(1) = 'SIGMA-MODEL'
+          endif
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, cdum16, 'LAYER_MODEL')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'OUTPUT_LAYERS'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, shlay, 'OUTPUT_LAYERS')
+          if (ierror/=0) goto 9999
+       else
+          !
+          ! element 'KMAXOUT'
+          !
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, shlay, 'KMAXOUT')
+          if (ierror/=0) goto 9999
+          !
+          ! element 'KMAXOUT_RESTR'
+          !
+          allocate(ibuff1(kmaxout_restr), stat=istat)
+          ibuff1 = shlay_restr-1 ! the compress attribute unfortunately requires starting index equal to 0 like C
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                    & gdp, ierror, lundia, ibuff1, 'KMAXOUT_RESTR')
+          deallocate(ibuff1, stat=istat)
+          if (ierror/=0) goto 9999
+       endif
        !
-       ierror = putelt(fds, grnam2, 'OUTPUT_LAYERS', uindex, 1, shlay)
-    endif
-    if (ierror/=0) goto 999
+    end select
+    deallocate(shlay_restr)
     !
-    if (inode == master) ierror = clsnef(fds)
+    ! write error message if error occured and set error = .true.
     !
-    ! write errormessage if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
-    !
-  999 continue
-    if (ierror/=0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrihis

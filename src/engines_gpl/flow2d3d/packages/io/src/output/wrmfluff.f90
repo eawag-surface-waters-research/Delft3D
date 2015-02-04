@@ -1,5 +1,7 @@
 subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                  & irequest  ,fds       ,grpnam    ,gdp       )
+                  & irequest  ,fds       ,grpnam    , &
+                  & filename  ,gdp       ,filetype  , &
+                  & mf        ,ml        ,nf        ,nl        ,iarrc     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -31,13 +33,15 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for the fluff layer
-!              to the sediment group on the NEFIS FLOW MAP file
+!              to the sediment group on the FLOW MAP file
 !
 ! Method used:
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
+    use dfparall, only: nproc
+    use wrtarray, only: wrtarray_nml
+    use datagroups
     use globaldata
     !
     implicit none
@@ -46,84 +50,93 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer                 , pointer :: celidt
-    type (nefiselement)     , pointer :: nefiselem
-    real(fp), dimension(:,:), pointer :: mfluff
+    integer                              , pointer :: celidt
+    type (datagroup)                     , pointer :: group
+    real(fp)        , dimension(:,:)     , pointer :: mfluff
+    integer                              , pointer :: nmaxgl
+    integer                              , pointer :: mmaxgl
 !
 ! Global variables
 !
-    integer                                                         :: fds
-    integer                                                         :: irequest
-    integer                                                         :: lsed
-    integer                                                         :: lundia
-    integer                                                         :: mmax
-    integer                                                         :: nmaxus
-    logical                                                         :: error
-    character(16)                                                   :: grpnam
+    integer                    :: fds
+    integer      , intent(in)  :: irequest
+    integer      , intent(in)  :: lsed
+    integer                    :: lundia
+    integer      , intent(in)  :: mmax
+    integer      , intent(in)  :: nmaxus
+    logical                    :: error
+    character(16), intent(in)  :: grpnam
+    character(*) , intent(in)  :: filename
+
+    integer                                                                    , intent(in)  :: filetype
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: mf      ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: ml      ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: nf      ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)                                          , intent(in)  :: nl      ! last index w.r.t. global grid in y-direction
+    integer    , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc   ! array containing collected grid indices
 !
 ! Local variables
 !
-    integer                 :: ierror    ! Local errorflag for NEFIS files
+    integer                 :: ierror    ! Local error flag
     integer                 :: i
     integer                 :: l
     integer                 :: m
     integer                 :: n
     integer                 :: nm
-    integer, external       :: neferr
-    integer, external       :: putelt
-    integer, dimension(3,5) :: uindex
+    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
     character(256)          :: errmsg
+    !
+    integer                 :: iddim_n
+    integer                 :: iddim_m
+    integer                 :: iddim_lsed
 !
 !! executable statements -------------------------------------------------------
 !
     if (gdp%gdmorpar%flufflyr%iflufflyr==0) return
     if (lsed == 0) return
     !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrsedm)
-    celidt  => nefiselem%celidt
+    call getdatagroup(gdp, FILOUT_MAP, grpnam, group)
+    celidt    => group%celidt
+    mmaxgl         => gdp%gdparall%mmaxgl
+    nmaxgl         => gdp%gdparall%nmaxgl
     !
     select case (irequest)
-    case (1)
+    case (REQUESTTYPE_DEFINE)
+       !
+       ! Define dimensions
+       !
+       iddim_n       = adddim(gdp, lundia, FILOUT_MAP, 'N'      , nmaxgl        ) ! Number of N-grid points (cell centres)
+       iddim_m       = adddim(gdp, lundia, FILOUT_MAP, 'M'      , mmaxgl        ) ! Number of M-grid points (cell centres)
+       iddim_lsed    = adddim(gdp, lundia, FILOUT_MAP, 'LSED'   , lsed          ) ! Number of sediment constituents
        !
        ! Define elements
        !
-       call addelm(nefiswrsedm,'MFLUFF',' ','[ KG/M2 ]','REAL',4, &
-           & 'Sediment mass in fluff layer (kg/m2)'             , &
-           & 3         ,nmaxus ,mmax     ,lsed     ,0       ,0  , &
-           & lundia    ,gdp    )
-    case (2)
+       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MFLUFF', ' ', IO_REAL4, 3, (/iddim_n, iddim_m, iddim_lsed/), longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', acl='z')
+    case (REQUESTTYPE_WRITE)
        !
        ! Write data to file
-       !
-       uindex (1,1) = celidt
-       uindex (2,1) = celidt
-       uindex (3,1) = 1 ! increment in time
        !
        ! element 'MFLUFF'
        !
        mfluff => gdp%gdmorpar%flufflyr%mfluff
-       call sbuff_checksize(lsed*mmax*nmaxus)
-       i = 0
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed) )
+       rbuff3(:, :, :) = -999.0_fp
        do l = 1, lsed
           do m = 1, mmax
              do n = 1, nmaxus
-                i        = i+1
                 call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(mfluff(l, nm),sp)
+                rbuff3(n, m, l) = mfluff(l, nm)
              enddo
           enddo
        enddo
-       ierror = putelt(fds, grpnam, 'MFLUFF', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+       call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
+                     & nf, nl, mf, ml, iarrc, gdp, lsed, &
+                     & ierror, lundia, rbuff3, 'MFLUFF')
+       deallocate(rbuff3)
+       if (ierror /= 0) goto 9999
        !
-       ! write errormessage if error occurred and set error = .true.
-       ! the files will be closed in clsnef (called in triend)
-       !
- 9999  continue
-       if (ierror/= 0) then
-          ierror = neferr(0, errmsg)
-          call prterr(lundia, 'P004', errmsg)
-          error = .true.
-       endif
     endselect
+    !
+9999 continue
+    if (ierror/= 0) error = .true.
 end subroutine wrmfluff

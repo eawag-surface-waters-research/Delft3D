@@ -58,12 +58,15 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer        , pointer :: lundia
-    real(fp)       , pointer :: dryflc
-    logical        , pointer :: temp
-    logical        , pointer :: zmodel
-    logical        , pointer :: kfuv_from_restart
-    character(256) , pointer :: restid
+    integer              , pointer :: lundia
+    integer, dimension(:), pointer :: kfst0
+    real(fp)             , pointer :: dryflc
+    logical              , pointer :: temp
+    logical              , pointer :: zmodel
+    logical              , pointer :: kfuv_from_restart
+    character(256)       , pointer :: restid
+    integer              , pointer :: nofou
+    integer, dimension(:), pointer :: foumask
 !
 ! Global variables
 !
@@ -123,11 +126,14 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
 !! executable statements -------------------------------------------------------
 !
     lundia             => gdp%gdinout%lundia
+    kfst0              => gdp%gdpostpr%kfst0
     temp               => gdp%gdprocs%temp
     zmodel             => gdp%gdprocs%zmodel
     dryflc             => gdp%gdnumeco%dryflc
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     restid             => gdp%gdrestart%restid
+    nofou              => gdp%d%nofou
+    foumask            => gdp%gdfourier%foumask
     !
     nm_pos             =  1
     !
@@ -383,6 +389,11 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
           nmd = nm - icx
           ndm = nm - icy
           kfs(nm) = max(kfu(nm), kfu(nmd), kfv(nm), kfv(ndm))
+          if (nofou > 0) then
+             if (maxval(foumask) == 1) then
+                kfst0(nm) = kfs(nm)
+             endif
+          endif
        endif
     enddo
     !

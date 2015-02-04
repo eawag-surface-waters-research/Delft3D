@@ -46,6 +46,7 @@ subroutine rmdel(filnam    ,gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                             , pointer :: lundia
 !
 ! Global variables
 !
@@ -61,6 +62,8 @@ subroutine rmdel(filnam    ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
+    lundia              => gdp%gdinout%lundia
+    !
     call remove_leading_spaces(filnam    ,lfil      )
     inquire (file = filnam(:lfil), exist = ex)
     if (ex) then
@@ -71,6 +74,7 @@ subroutine rmdel(filnam    ,gdp       )
           luntmp = newlun(gdp)
           open (luntmp, file = filnam(:lfil), iostat = ierr)
        endif
+       call prterr(lundia,'G051','Removing file: '//filnam(:lfil))
        close (luntmp, status = 'delete', iostat = ierr)
     endif
 end subroutine rmdel

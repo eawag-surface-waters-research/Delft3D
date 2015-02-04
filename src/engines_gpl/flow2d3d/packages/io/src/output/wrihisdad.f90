@@ -1,5 +1,6 @@
-subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
-                   & tunit     ,dt        ,lsedtot   ,gdp       )
+subroutine wrihisdad(lundia    ,error     ,filename  ,itdate    , &
+                   & tunit     ,dt        ,lsedtot   ,irequest  , &
+                   & fds       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -36,9 +37,10 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    use dfparall
+    use datagroups
     use globaldata
+    use dfparall, only: inode, master
+    use wrtarray, only: wrtvar
     !
     implicit none
     !
@@ -55,36 +57,35 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
     integer       , dimension(:,:) , pointer :: link_def
     character( 80), dimension(:)   , pointer :: dredge_areas
     character( 80), dimension(:)   , pointer :: dump_areas
-    logical                        , pointer :: first
-    type (nefiselement)            , pointer :: nefiselem
 !
 ! Global variables
 !
-    integer     , intent(in)  :: itdate  !  Description and declaration in exttim.igs
-    integer     , intent(in)  :: lsedtot !  Description and declaration in exttim.igs
-    integer                   :: lundia  !  Description and declaration in inout.igs
-    logical     , intent(out) :: error
-    real(fp)    , intent(in)  :: dt      !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , intent(in)  :: tunit   !  Description and declaration in exttim.igs
-    character(*), intent(in)  :: trifil
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                             , intent(in)  :: itdate   !  Description and declaration in exttim.igs
+    integer                                                             , intent(in)  :: lsedtot  !  Description and declaration in exttim.igs
+    integer                                                                           :: lundia   !  Description and declaration in inout.igs
+    logical                                                             , intent(out) :: error    
+    real(fp)                                                            , intent(in)  :: dt       !  Description and declaration in esm_alloc_real.f90
+    real(fp)                                                            , intent(in)  :: tunit    !  Description and declaration in exttim.igs
+    character(*)                                                        , intent(in)  :: filename !  File name
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
 !
 ! Local variables
 !
-    integer                                       :: fds
-    integer                                       :: i
-    integer                                       :: l
-    integer                                       :: j
-    integer                                       :: k
-    integer                                       :: ierror ! Local errorflag for NEFIS files
-    integer       , dimension(2)                  :: ival   ! Local array for writing ITDATE and
-    character(16)                                 :: grnam
-    character(256)                                :: filnam
-    character(256)                                :: errmsg
-    integer    , dimension(3,5)                   :: uindex
-    integer                        , external     :: clsnef
-    integer                        , external     :: open_datdef
-    integer                        , external     :: putelt
-    integer                        , external     :: neferr
+    integer                                           :: filetype
+    integer                                           :: l
+    integer                                           :: k
+    integer                                           :: ierror ! Local errorflag for NEFIS files
+    integer       , dimension(2)                      :: ival   ! Local array for writing ITDATE and
+    character(16)                                     :: grnam
+    !
+    integer                                           :: iddim_lsedtot
+    integer                                           :: iddim_nalink
+    integer                                           :: iddim_nsource
+    integer                                           :: iddim_ndump
+    integer                                           :: iddim_1
+    integer                                           :: iddim_2
+    !
 !
 ! Data statements
 !
@@ -92,6 +93,8 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    filetype = getfiletype(gdp, FILOUT_HIS)
+    !
     link_percentage   => gdp%gddredge%link_percentage
     link_distance     => gdp%gddredge%link_distance
     nadred            => gdp%gddredge%nadred
@@ -101,124 +104,93 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
     link_def          => gdp%gddredge%link_def
     dredge_areas      => gdp%gddredge%dredge_areas
     dump_areas        => gdp%gddredge%dump_areas
-    nefiselem => gdp%nefisio%nefiselem(nefiswrihisdad)
-    first             => nefiselem%first
     !
     ! Initialize local variables
     !
     ierror = 0
-    filnam = trifil(1:3) // 'h' // trifil(5:)
-    errmsg = ' '
-    !
-    if (first .and. inode == master) then
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
        ! Set up the element chracteristics
        !
-       call addelm(nefiswrihisdad,'ITDATE',' ','[YYYYMMDD]','INTEGER',4     , &
-          & 'Initial date (input) & time (default 00:00:00)                ', &
-          & 1, 2, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'TUNIT',' ','[   S   ]','REAL',4          , &
-          & 'Time scale related to seconds                                 ', &
-          & 1, 1, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'DT',' ','[   -   ]','REAL',4             , &
-          & 'Time step (DT*TUNIT sec)                                      ', &
-          & 1, 1, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'DREDGE_AREAS',' ','[   -   ]','CHARACTER',80, &
-          & 'Names identifying dredge areas/dredge polygons                ', &
-          & 1, nadred+nasupl, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'DUMP_AREAS',' ','[   -   ]','CHARACTER',80, &
-          & 'Names identifying dump areas/dump polygons                    ', &
-          & 1, nadump, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'LINK_DEF',' ','[   -   ]','INTEGER',4    , &
-          & 'Actual transports from dredge(1st col) to dump(2nd col) areas ', &
-          & 2, nalink, 2, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'LINK_PERCENTAGES',' ','[   %   ]','REAL',4, &
-          & 'Distribution of dredged material from dredge to dump areas    ', &
-          & 2, nalink, lsedtot, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'LINK_DISTANCE',' ','[   M   ]','REAL',4  , &
-          & 'Link Distance between dredge and dump areas                   ', &
-          & 2, nalink, 1, 0, 0, 0, lundia, gdp)
+       iddim_nalink  = adddim(gdp, lundia, FILOUT_HIS, 'ndredge_links', nalink)
+       iddim_lsedtot = adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT', lsedtot)
+       iddim_nsource = adddim(gdp, lundia, FILOUT_HIS, 'ndredge_src', nadred+nasupl)
+       iddim_ndump   = adddim(gdp, lundia, FILOUT_HIS, 'ndredge_dmp', nadump)
+       iddim_1       = adddim(gdp, lundia, FILOUT_HIS, 'length_1', 1)
+       iddim_2       = adddim(gdp, lundia, FILOUT_HIS, 'length_2', 2)
        !
-       call defnewgrp(nefiswrihisdad ,filnam    ,grnam   ,gdp)
-       first = .false.
-    endif
-    !
-    ! initialize group index
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
-    !
-    if (inode == master) then
-       ierror = open_datdef(filnam   ,fds      )
-       if (ierror /= 0) goto 9999
-       !
-       ! element 'ITDATE'
-       !
-       ival(1) = itdate
-       ival(2) = 000000
-       ierror = putelt(fds, grnam, 'ITDATE', uindex, 1, ival)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'TUNIT'
-       !
-       call sbuff_checksize(1)
-       sbuff(1) = tunit
-       ierror = putelt(fds, grnam, 'TUNIT', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'DT'
-       !
-       call sbuff_checksize(1)
-       sbuff(1) = dt
-       ierror = putelt(fds, grnam, 'DT', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'DREDGE_AREAS'
-       !
-       ierror = putelt(fds, grnam, 'DREDGE_AREAS', uindex, 1, dredge_areas)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'DUMP_AREAS'
-       !
-       ierror = putelt(fds, grnam, 'DUMP_AREAS', uindex, 1, dump_areas)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'LINK_DEF'
-       !
-       ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, link_def)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'LINK_PERCENTAGES'
-       !
-       call sbuff_checksize(nalink*lsedtot)
-       do l = 1, lsedtot
-          do i = 1, nalink
-             sbuff(i+(l-1)*nalink) = link_percentage(i,l)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam, 'LINK_PERCENTAGES', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'LINK_DISTANCE'
-       !
-       call sbuff_checksize(nalink)
-       do i = 1, nalink
-          sbuff(i) = link_distance(i)
-       enddo
-       ierror = putelt(fds, grnam, 'LINK_DISTANCE', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ierror = clsnef(fds)
-       !
-       ! write error message if error occured and set error= .true.
-       ! the files will be closed in clsnef (called in triend)
-       !
-9999   continue
-       if (ierror /= 0) then
-          ierror = neferr(0, errmsg)
-          call prterr(lundia, 'P004', errmsg)
-          error= .true.
+       if (filetype /= FTYPE_NETCDF) then ! don't store duplicates for NetCDF       
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'ITDATE', ' ', IO_INT4           , 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'TUNIT', ' ', IO_REAL4           , 0, longname='Time scale related to seconds', unit='s')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DT', ' ', IO_REAL4              , 0, longname='Time step (DT*TUNIT sec)')
        endif
-    endif
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DREDGE_AREAS', ' ', 80          , 1, dimids=(/iddim_nsource/), longname='Names identifying dredge areas/dredge polygons') !CHARACTER
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DUMP_AREAS', ' ', 80            , 1, dimids=(/iddim_ndump/), longname='Names identifying dump areas/dump polygons') !CHARACTER
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_DEF', ' ', IO_INT4         , 2, dimids=(/iddim_nalink, iddim_2/), longname='Actual transports from dredge(1st col) to dump(2nd col) areas')
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_PERCENTAGES', ' ', IO_REAL4, 2, dimids=(/iddim_nalink, iddim_lsedtot/), longname='Distribution of dredged material from dredge to dump areas', unit='percent')
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_DISTANCE', ' ', IO_REAL4   , 2, dimids=(/iddim_nalink, iddim_1/), longname='Link Distance between dredge and dump areas', unit='m')
+       !
+    case (REQUESTTYPE_WRITE)
+       !
+       if (inode == master) then
+          if (filetype /= FTYPE_NETCDF) then ! don't store duplicates for NetCDF       
+             !
+             ! element 'ITDATE'
+             !
+             ival(1) = itdate
+             ival(2) = 000000
+             call wrtvar(fds, filename, filetype, grnam, 1, &
+                       & gdp, ierror, lundia, ival, 'ITDATE')
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'TUNIT'
+             !
+             call wrtvar(fds, filename, filetype, grnam, 1, &
+                       & gdp, ierror, lundia, tunit, 'TUNIT')
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'DT'
+             !
+             call wrtvar(fds, filename, filetype, grnam, 1, &
+                       & gdp, ierror, lundia, dt, 'DT')
+          endif
+          !
+          ! element 'DREDGE_AREAS'
+          !
+          call wrtvar(fds, filename, filetype, grnam, 1, &
+                    & gdp, ierror, lundia, dredge_areas, 'DREDGE_AREAS')
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'DUMP_AREAS'
+          !
+          call wrtvar(fds, filename, filetype, grnam, 1, &
+                    & gdp, ierror, lundia, dump_areas, 'DUMP_AREAS')
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'LINK_DEF'
+          !
+          call wrtvar(fds, filename, filetype, grnam, 1, &
+                    & gdp, ierror, lundia, link_def, 'LINK_DEF')
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'LINK_PERCENTAGES'
+          !
+          call wrtvar(fds, filename, filetype, grnam, 1, &
+                    & gdp, ierror, lundia, link_percentage, 'LINK_PERCENTAGES')
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'LINK_DISTANCE'
+          !
+          call wrtvar(fds, filename, filetype, grnam, 1, &
+                    & gdp, ierror, lundia, link_distance, 'LINK_DISTANCE')
+          if (ierror/= 0) goto 9999
+          !
+       endif
+    end select
+    !
+    ! write error message if error occured and set error = .true.
+    !
+9999 continue
+    if (ierror /= 0) error = .true.
 end subroutine wrihisdad

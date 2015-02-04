@@ -73,7 +73,7 @@ module time_module
           !
           !! executable statements ---------------------------------------------------
           !
-          call addmessage(messages,'$Id $')
+          call addmessage(messages,'$Id$')
           call addmessage(messages,'$URL$')
       end subroutine time_module_info
       

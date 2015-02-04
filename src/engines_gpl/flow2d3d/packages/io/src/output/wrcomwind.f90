@@ -37,7 +37,7 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
 !!--declarations----------------------------------------------------------------
     use precision
     use sp_buffer
-    !
+    use datagroups
     use globaldata
     !
     implicit none
@@ -48,7 +48,7 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
     !
     logical              , pointer :: first
     integer              , pointer :: celidt
-    type (nefiselement)  , pointer :: nefiselem
+    type (datagroup)     , pointer :: group
     integer              , pointer :: lundia
 !
 ! Global variables
@@ -64,12 +64,12 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
 !
 ! Local variables
 !
-    integer                 :: ierror       ! Local errorflag for NEFIS files 
+    integer                 :: ierror       ! Local error flag
     integer                 :: fds
     integer                 :: i
     integer                 :: m            ! Help var. 
     integer                 :: n            ! Help var. 
-    integer, dimension(1)   :: idummy       ! Help array to read/write Nefis files 
+    integer, dimension(1)   :: idummy       ! Help array to write integers
     integer, dimension(3,5) :: uindex
     integer, external       :: putelt
     integer, external       :: clsnef
@@ -77,7 +77,6 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
     integer, external       :: neferr
     character(16)           :: grnam
     character(256)          :: errmsg       ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(60)           :: filnam       ! Help var. for FLOW file name 
     character(1024)         :: error_string
 !
 ! Data statements
@@ -86,14 +85,13 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrcomwind)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
+    call getdatagroup(gdp, FILOUT_COM, grnam, group)
+    first   => group%first
+    celidt  => group%celidt
     lundia  => gdp%gdinout%lundia
     !
     ! Initialize local variables
     !
-    filnam = comfil
     errmsg = ' '
     !
     ! initialize group index time dependent data
@@ -102,31 +100,17 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
     uindex (2,1) = 1 ! end index
     uindex (3,1) = 1 ! increment in time
     !
+    ierror = open_datdef(comfil, fds, .false.)
+    if (ierror/= 0) goto 9999
+    !
     if (first) then
-       call addelm(nefiswrcomwind,'TIMCUR',' ','[ TSCALE]','INTEGER',4    , &
-          & 'Time of current field rel.to reference date/time              ', &
-          & 1         ,1         ,0         ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrcomwind,'WINDU',' ','[  M/S  ]','REAL',4    , &
-          & 'Wind-velocity in zeta-point in x-direction at end of time interval', &
-          & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call addelm(nefiswrcomwind,'WINDV',' ','[  M/S  ]','REAL',4    , &
-          & 'Wind-velocity in zeta-point in y-direction at end of time interval', &
-          & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
-          & lundia    ,gdp       )
-       call defnewgrp(nefiswrcomwind, filnam, grnam, gdp)
+       call addelm(gdp, lundia, FILOUT_COM, grnam, 'TIMCUR', ' ', IO_INT4, 1, (/1/), ' ', 'Time of current field rel.to reference date/time', '[ TSCALE]')
+       call addelm(gdp, lundia, FILOUT_COM, grnam, 'WINDU', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wind-velocity in zeta-point in x-direction at end of time interval', '[  M/S  ]')
+       call addelm(gdp, lundia, FILOUT_COM, grnam, 'WINDV', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Wind-velocity in zeta-point in y-direction at end of time interval', '[  M/S  ]')
        !
-       ! Get start celidt for writing
-       !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrcomwind)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
+       call defnewgrp(fds, FILOUT_COM, grnam, gdp, comfil, errlog=ERRLOG_NONE)
        first = .false.
     endif
-    !
-    ierror = open_datdef(filnam, fds)
-    if (ierror/= 0) goto 9999
     !
     ! Writing of output on every itcur
     !
@@ -169,7 +153,6 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
     ierror = clsnef(fds)
     !
     ! write errormessage if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
     !
  9999 continue
     if (ierror/= 0) then

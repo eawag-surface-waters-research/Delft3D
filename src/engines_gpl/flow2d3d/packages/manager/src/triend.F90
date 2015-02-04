@@ -63,6 +63,7 @@ subroutine triend(runid, gdp)
 ! Local variables
 !
     integer        :: icount  ! help var.; counter 
+    integer        :: iocond  ! IO condition
     integer        :: itis
     integer        :: lkw     ! Length of char. str (usually the KEYWRD or RECNAM) 
     integer        :: lrid    ! Lenght of runid 
@@ -270,5 +271,14 @@ subroutine triend(runid, gdp)
        !
        call dfsendnb(itrig,1,dfint,inode+1,itag,gdp)
     endif
+    !
+    ! read until end of tri-diag file such that the final messages written to
+    ! that file (about deleting TMP files) are written at the end and do not
+    ! overwrite the file
+    !
+    iocond = 0
+    do while (iocond == 0)
+       read (lundia, '(a300)', iostat = iocond) recdia
+    enddo
  9999 continue
 end subroutine triend

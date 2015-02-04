@@ -1,5 +1,6 @@
-subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed      , &
-                  & irequest  ,fds       ,grpnam    ,gdp       )
+subroutine wrhfluff(lundia    ,error     ,filename  ,grpnam    , &
+                  & nostat    ,lsed      ,irequest  , &
+                  & fds       ,nostatto  ,nostatgl  ,order_sta ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -37,9 +38,8 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    use datagroups
+    use wrtarray, only: wrtarray_n, station
     !
     use globaldata
     !
@@ -49,76 +49,72 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer                             , pointer :: celidt
-    type (nefiselement)                 , pointer :: nefiselem
-    real(fp)         , dimension(:,:)   , pointer :: mfluff
-    integer          , dimension(:,:)   , pointer :: mnstat
-    integer          , dimension(:)     , pointer :: order_sta
+    integer                              , pointer :: celidt
+    type (datagroup)                     , pointer :: group
+    real(fp)        , dimension(:,:)     , pointer :: mfluff
+    integer         , dimension(:, :)    , pointer :: mnstat
 !
 ! Global variables
 !
-    integer         , intent(in)  :: fds         ! Nefis file pointer to write to
-    integer         , intent(in)  :: irequest    ! 1: define elements, 2: write data
-    integer         , intent(in)  :: lsed        ! Number of sediment constituents
-    integer         , intent(in)  :: lundia      ! File pointer to diagnosis file
-    integer         , intent(in)  :: nostat      ! local  number of stations
-    integer         , intent(in)  :: nostatgl    ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
-    integer         , intent(in)  :: nostatto    ! total  number of stations (including "duplicate" stations located in halo regions)
-    logical         , intent(out) :: error
-    character(16)   , intent(in)  :: grpnam
+    character(16)                                                       , intent(in)  :: grpnam
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                                           :: lsed     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: lundia   !  Description and declaration in inout.igs
+    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
+    logical                                                             , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+    character(*)                                                        , intent(in)  :: filename !  File name
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
+    integer                                                             , intent(in)  :: nostatgl ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: nostatto ! total number of stations (including "duplicate" stations located in halo regions)
+    integer       , dimension(nostat)                                   , intent(in)  :: order_sta
+
 !
 ! Local variables
 !
-    integer                               :: ierror    ! Local errorflag for NEFIS files
-    integer                               :: i
-    integer                               :: ii
-    integer                               :: istat
-    integer                               :: l
-    integer                               :: n
-    integer                               :: nm
-    integer                               :: m
-    integer , external                    :: neferr
-    integer , external                    :: putelt
-    integer , dimension(3,5)              :: uindex
-    real(fp), dimension(:,:), allocatable :: rfbuff    ! work array
-    real(sp), dimension(:,:), allocatable :: rsbuff    ! work array
-    character(256)                        :: errmsg
+    integer                                           :: filetype
+    real(fp)        , dimension(:,:)  , allocatable   :: rbuff2
+    integer                                           :: ierror         ! Local error flag
+    integer                                           :: ii
+    integer                                           :: istat
+    integer                                           :: l
+    integer                                           :: n
+    integer                                           :: nm
+    integer                                           :: m    
+    !
+    integer                                           :: iddim_nostat
+    integer                                           :: iddim_lsed
+    !
+    integer                                           :: idatt_sta
 !
 !! executable statements -------------------------------------------------------
 !
-    error = .false.
-    if (gdp%gdmorpar%flufflyr%iflufflyr==0) return
-    if (lsed == 0) return
+    call getdatagroup(gdp, FILOUT_HIS, grpnam, group)
+    celidt     => group%celidt
+    filetype = getfiletype(gdp, FILOUT_HIS)
     !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrsedh)
-    celidt    => nefiselem%celidt
-    mnstat    => gdp%gdstations%mnstat
-    order_sta => gdp%gdparall%order_sta
+    mnstat      => gdp%gdstations%mnstat
     !
     select case (irequest)
-    case (1)
+    case (REQUESTTYPE_DEFINE)
+       !
+       ! Define dimensions
+       !
+       iddim_nostat  = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT', nostatgl)
+       iddim_lsed    = adddim(gdp, lundia, FILOUT_HIS, 'LSED', lsed)
+       idatt_sta = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMST XSTAT YSTAT')
        !
        ! Define elements
        !
-       if (inode /= master) return
-       !
-       call addelm(nefiswrsedh,'MFLUFF',' ','[ KG/M2 ]','REAL',4, &
-           & 'Sediment mass in fluff layer (kg/m2)'             , &
-           & 2         ,nostatgl,lsed    ,0        ,0       ,0  , &
-           & lundia    ,gdp    )
-    case (2)
+       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'MFLUFF', ' ', IO_REAL4, 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', attribs=(/idatt_sta/) )
+    case (REQUESTTYPE_WRITE)
        !
        ! Write data to file
-       !
-       uindex (1,1) = celidt
-       uindex (2,1) = celidt
-       uindex (3,1) = 1 ! increment in time
        !
        ! element 'MFLUFF'
        !
        mfluff => gdp%gdmorpar%flufflyr%mfluff
-       allocate (rfbuff(1:nostat,1:lsed), stat=istat)
-       rfbuff = 0.0_fp
+       allocate (rbuff2(1:nostat,1:lsed), stat=istat)
+       rbuff2 = 0.0_fp
        do l = 1, lsed
           do ii = 1, nostat
              m  = mnstat(1,ii)
@@ -128,43 +124,18 @@ subroutine wrhfluff(lundia    ,error     ,nostat    ,nostatto  ,nostatgl  ,lsed 
              !
              call n_and_m_to_nm(n, m, nm, gdp)
              !
-             rfbuff(ii,l) = mfluff(l,nm)
+             rbuff2(ii,l) = mfluff(l,nm)
           enddo
        enddo
+       call wrtarray_n(fds, filename, filetype, grpnam, &
+              & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+              & lsed, &
+              & ierror, lundia, rbuff2, 'MFLUFF', station)
+       deallocate(rbuff2)
+       if (ierror /= 0) goto 9999
        !
-       if (inode == master) allocate(rsbuff(1:nostatgl, 1:lsed), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'P004', 'wrhfluff: memory allocation error')
-       endif
-       if (parll) then
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsed, order_sta, rfbuff, rsbuff, gdp)
-       else
-          rsbuff = real(rfbuff,sp)
-       endif
-       deallocate(rfbuff, stat=istat)
-       !
-       if (inode == master) then
-          call sbuff_checksize(nostatgl*lsed)
-          i = 0
-          do l = 1, lsed
-             do ii = 1, nostatgl
-                i = i+1
-                sbuff(i) = rsbuff(ii,l)
-             enddo
-          enddo
-          deallocate(rsbuff, stat=istat)
-          ierror = putelt(fds, grpnam, 'MFLUFF', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
-       endif !inode==master
-       !
-       ! write errormessage if error occurred and set error = .true.
-       ! the files will be closed in clsnef (called in triend)
-       !
- 9999  continue
-       if (ierror /= 0) then
-          ierror = neferr(0, errmsg)
-          call prterr(lundia, 'P004', errmsg)
-          error = .true.
-       endif
     endselect
+    !
+9999 continue
+    if (ierror/= 0) error = .true.
 end subroutine wrhfluff

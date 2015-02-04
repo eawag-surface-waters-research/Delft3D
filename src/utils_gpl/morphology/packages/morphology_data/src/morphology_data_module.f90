@@ -289,6 +289,8 @@ type morpar_type
     !
     ! doubles (hp)
     !
+    real(hp):: hydrt      !  hydraulic time (only used to compute the average morphological factor)
+    real(hp):: hydrt0     !  initial hydraulic time (only used to compute the average morphological factor)
     real(hp):: morft      !  morphological time
     real(hp):: morft0     !  initial morphological time
     !
@@ -1116,6 +1118,8 @@ subroutine nullmorpar(morpar)
     integer                              , pointer :: subiw
     integer                              , pointer :: ttlform
     integer                              , pointer :: telform
+    real(hp)                             , pointer :: hydrt
+    real(hp)                             , pointer :: hydrt0
     real(hp)                             , pointer :: morft
     real(hp)                             , pointer :: morft0
     real(fp)                             , pointer :: morfac
@@ -1186,6 +1190,8 @@ subroutine nullmorpar(morpar)
 !
 !! executable statements -------------------------------------------------------
 !
+    hydrt               => morpar%hydrt
+    hydrt0              => morpar%hydrt0
     morft               => morpar%morft
     morft0              => morpar%morft0
     morfac              => morpar%morfac
@@ -1305,6 +1311,8 @@ subroutine nullmorpar(morpar)
     rmissval           = -999.0_fp
     imissval           = -999
     !
+    hydrt              = 0.0_hp
+    hydrt0             = 0.0_hp
     morft              = 0.0_hp
     morft0             = 0.0_hp
     !

@@ -39,6 +39,7 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use datagroups
     use globaldata
     !
     implicit none
@@ -48,13 +49,7 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 8
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -84,112 +79,87 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 !
 ! Local variables
 !
-    integer                         :: i      ! Hulp var. 
-    integer                         :: ierr
-    integer                         :: kmaxk
-    integer                         :: nelmx2
-    integer                         :: nhulp  ! Hulp var. 
-    integer                         :: nready ! Flag for determination of inter- polation coefficient 
-    integer                         :: ntcurr ! Total number of timesteps on com- munication file (to read from) 
-    integer                         :: ntimwa ! Time index of first function 
-    integer                         :: ntimwb ! Time index of second function 
-    integer                         :: tact   ! Actual time step number 
-    integer, dimension(1)           :: idummy ! Help array to read/write Nefis files 
-    integer, dimension(2)           :: ifcore ! Time indices (cell id's) of the wave functions which are in core available 
-    integer, dimension(nelmx)       :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer, external               :: neferr
-    logical                         :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    real(fp)                        :: atimw  ! Interpolation factor for first function 
-    real(fp)                        :: btimw  ! Interpolation factor for second function 
-    character(10), dimension(nelmx) :: elmunt ! Array with element physical unit 
-    character(16)                   :: funam  ! Name of element which has to be read 
-    character(16)                   :: grnam1 ! Data-group name defined for the COM-files (CURNT) 
-    character(16)                   :: grnam2 ! Data-group name defined for the COM-files (CURTIM) 
-    character(16), dimension(nelmx) :: elmnms ! Element name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmqty ! Array with element quantity 
-    character(16), dimension(nelmx) :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                  :: errmsg
-    character(64), dimension(nelmx) :: elmdes ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: i      ! Hulp var. 
+    integer                                       :: ierror
+    integer                                       :: kmaxk
+    integer                                       :: nhulp  ! Hulp var. 
+    integer                                       :: nready ! Flag for determination of inter- polation coefficient 
+    integer                                       :: ntcurr ! Total number of timesteps on com- munication file (to read from) 
+    integer                                       :: ntimwa ! Time index of first function 
+    integer                                       :: ntimwb ! Time index of second function 
+    integer                                       :: tact   ! Actual time step number 
+    integer      , dimension(1)                   :: idummy ! Help array to write integer
+    integer      , dimension(2)                   :: ifcore ! Time indices (cell id's) of the wave functions which are in core available 
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: getelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    real(fp)                                      :: atimw  ! Interpolation factor for first function 
+    real(fp)                                      :: btimw  ! Interpolation factor for second function 
+    character(16)                                 :: funam  ! Name of element which has to be read 
+    character(16)                                 :: grnam1 ! Data-group name defined for the COM-files (CURNT) 
+    character(16)                                 :: grnam2 ! Data-group name defined for the COM-files (CURTIM) 
+    character(256)                                :: errmsg
 !
 ! Data statements
 !
     data grnam1/'CURNT'/
     data grnam2/'CURTIM'/
-    data elmnms/'NTCUR', 'TIMCUR', 'QU', 'QV', 'S1', 'U1', 'V1', 'RSP'/
-    data elmqty/8*' '/
-    data elmunt/'[   -   ]', '[ TSCALE]', '[ M3/S  ]', '[ M3/S  ]', '[   M   ]',&
-        & '[  M/S  ]', '[  M/S  ]', '[   -   ]'/
-    data elmtps/2*'INTEGER', 6*'REAL'/
-    data nbytsg/8*4/
-    data elmdes/'Number of current fields in group CURTIM                      '&
-       & , 'Time of current field rel.to reference date/time              ',    &
-        & 'Time-average over latest interval of discharge in u-point     ',      &
-        & 'Time-average over latest interval of discharge in v-point     ',      &
-        & 'Water level in zeta point at end of time interval             ',      &
-        & 'Velocity in u-point at end of time interval                   ',      &
-        & 'Velocity in v-point at end of time interval                   ',      &
-        & 'Spiral flow intensity                                         '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefisrstcom)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
+    call getdatagroup(gdp, FILOUT_COM, grnam1, group)
+    first   => group%first
     !
-    ! Initialize local variables
-    !
-    nelmx2    = nelmx - 1
-    ierr      = 0
-    wrswch    = .false.
     ifcore(1) = 0
     ifcore(2) = 0
     !
-    ! Set up the element dimensions
-    ! different element dimensions for 2d and 3d applications
-    ! if kmax =1 (2d) then only 2 dimensions
-    !
     if (first) then
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam1, 'NTCUR', ' ', IO_INT4, 1, (/1/), ' ', 'Number of current fields in group CURTIM', '[   -   ]')
+       !
+       !call defnewgrp(comfil, grnam1, gdp)
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'TIMCUR', ' ', IO_INT4, 1, (/1/), ' ', 'Time of current field rel.to reference date/time', '[ TSCALE]')
+       if (kmax > 1) then
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QU', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Time-average over latest interval of discharge in u-point', '[ M3/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QV', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Time-average over latest interval of discharge in v-point', '[ M3/S  ]')
+       else
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QU', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Time-average over latest interval of discharge in u-point', '[ M3/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'QV', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Time-average over latest interval of discharge in v-point', '[ M3/S  ]')
+       endif
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'S1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Water level in zeta point at end of time interval', '[   M   ]')
+       if (kmax>1) then
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'U1', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Velocity in u-point at end of time interval', '[  M/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'V1', ' ', IO_REAL4, 3, (/nmaxus, mmax, kmax/), ' ', 'Velocity in v-point at end of time interval', '[  M/S  ]')
+       else
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'U1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Velocity in u-point at end of time interval', '[  M/S  ]')
+          call addelm(gdp, lundia, FILOUT_COM, grnam2, 'V1', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Velocity in v-point at end of time interval', '[  M/S  ]')
+       endif
+       call addelm(gdp, lundia, FILOUT_COM, grnam2, 'RSP', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Spiral flow intensity', '[   -   ]')
+       !
+       !call defnewgrp(comfil, grnam2, gdp)
        first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       if (kmax > 1) then
-          call filldm(elmdms    ,3         ,3         ,nmaxus    ,mmax      , &
-                    & kmax      ,0         ,0         )
-          call filldm(elmdms    ,4         ,3         ,nmaxus    ,mmax      , &
-                    & kmax      ,0         ,0         )
-       else
-          call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                    & 0         ,0         ,0         )
-          call filldm(elmdms    ,4         ,2         ,nmaxus    ,mmax      , &
-                    & 0         ,0         ,0         )
-       endif
-       call filldm(elmdms    ,5         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       if (kmax > 1) then
-          call filldm(elmdms    ,6         ,3         ,nmaxus    ,mmax      , &
-                    & kmax      ,0         ,0         )
-          call filldm(elmdms    ,7         ,3         ,nmaxus    ,mmax      , &
-                    & kmax      ,0         ,0         )
-       else
-          call filldm(elmdms    ,6         ,2         ,nmaxus    ,mmax      , &
-                    & 0         ,0         ,0         )
-          call filldm(elmdms    ,7         ,2         ,nmaxus    ,mmax      , &
-                    & 0         ,0         ,0         )
-       endif
-       call filldm(elmdms    ,8         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
     endif
     !
-    ! Read the number of timesteps available at the file.
+    ierror = open_datdef(comfil, fds, .false.)
+    if (ierror /= 0) goto 9999
     !
-    celidt = 1
-    call putgti(comfil    ,grnam1    ,1         ,elmnms(1) ,elmdms(1, 1)         , &
-              & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'NTCUR'
+    !
+    idummy(1) = 0
+    ierror = getelt(fds, grnam1, 'NTCUR', uindex, 1, 4, idummy)
+    if (ierror/= 0) goto 9999
     ntcurr = idummy(1)
     !
     ! Test if number of time steps on file are inside defined array
@@ -204,11 +174,9 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     !
     ! Read the array with time information.
     !
-    do celidt = 1, ntcurr
-       call putgti(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2)         , &
-                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2) , &
-                 & elmnms(2) ,celidt    ,wrswch    ,ierr      ,timcur(celidt)       )
-       if (ierr/=0) goto 9999
+    do i = 1, ntcurr
+       ierror = getelt(fds, grnam2, 'TIMCUR', uindex, 1, 4, timcur(i))
+       if (ierror/= 0) goto 9999
     enddo
     !
     ! Determination of reduced time and extrapolation coefficient
@@ -282,27 +250,24 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     funam = 'S1'
     kmaxk = 1
     call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-              & nmax      ,kmaxk     ,nmaxus    ,grnam2    ,nelmx2    , &
-              & elmnms(2) ,elmdms(1, 2)         ,elmqty(2) ,elmunt(2) ,elmdes(2) , &
-              & elmtps(2) ,nbytsg(2) ,funam     ,ntimwa    ,ntimwb    , &
+              & nmax      ,kmaxk     ,nmaxus    ,grnam2    , &
+              & funam     ,ntimwa    ,ntimwb    , &
               & atimw     ,btimw     ,s1        ,rbuff     ,gdp       )
     if (error) goto 9999
     !
     funam = 'U1'
     kmaxk = kmax
     call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-              & nmax      ,kmaxk     ,nmaxus    ,grnam2    ,nelmx2    , &
-              & elmnms(2) ,elmdms(1, 2)         ,elmqty(2) ,elmunt(2) ,elmdes(2) , &
-              & elmtps(2) ,nbytsg(2) ,funam     ,ntimwa    ,ntimwb    , &
+              & nmax      ,kmaxk     ,nmaxus    ,grnam2    , &
+              & funam     ,ntimwa    ,ntimwb    , &
               & atimw     ,btimw     ,u1        ,rbuff     ,gdp       )
     if (error) goto 9999
     !
     funam = 'V1'
     kmaxk = kmax
     call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-              & nmax      ,kmaxk     ,nmaxus    ,grnam2    ,nelmx2    , &
-              & elmnms(2) ,elmdms(1, 2)         ,elmqty(2) ,elmunt(2) ,elmdes(2) , &
-              & elmtps(2) ,nbytsg(2) ,funam     ,ntimwa    ,ntimwb    , &
+              & nmax      ,kmaxk     ,nmaxus    ,grnam2    , &
+              & funam     ,ntimwa    ,ntimwb    , &
               & atimw     ,btimw     ,v1        ,rbuff     ,gdp       )
     if (error) goto 9999
     !
@@ -310,16 +275,15 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
        funam = 'RSP'
        kmaxk = 1
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grnam2    ,nelmx2    , &
-                 & elmnms(2) ,elmdms(1, 2)         ,elmqty(2) ,elmunt(2) ,elmdes(2) , &
-                 & elmtps(2) ,nbytsg(2) ,funam     ,ntimwa    ,ntimwb    , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grnam2    , &
+                 & funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,r1(1, -1, 1, lsecfl) ,rbuff     ,gdp       )
        if (error) then
        endif
     endif
  9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif

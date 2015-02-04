@@ -30,7 +30,8 @@ libDataBasics_la_SOURCES = \
          globaldata.f90 \
          sp_buffer.f90 \
          flow_tables.f90 \
-         timers.f90
+         timers.f90 \
+         datagroups.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

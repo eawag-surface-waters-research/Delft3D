@@ -38,7 +38,7 @@ subroutine wrboun(comfil    ,lundia    ,error     ,norow     ,nocol     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use datagroups
     use globaldata
     !
     implicit none
@@ -48,13 +48,7 @@ subroutine wrboun(comfil    ,lundia    ,error     ,norow     ,nocol     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 8
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -73,147 +67,111 @@ subroutine wrboun(comfil    ,lundia    ,error     ,norow     ,nocol     , &
 !
 ! Local variables
 !
-    integer                         :: ierr    ! Flag for error when writing to Communication file 
-    integer, dimension(1)           :: idummy  ! Help array to read/write Nefis files 
-    integer, dimension(nelmx)       :: nbytsg  ! Array containing the number of by- tes of each single ELMTPS 
-    integer, external               :: neferr
-    logical                         :: wrswch  ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10), dimension(nelmx) :: elmunt  ! Array with element physical unit 
-    character(16)                   :: grpnam  ! Data-group name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmnms  ! Element name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmqty  ! Array with element quantity 
-    character(16), dimension(nelmx) :: elmtps  ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                  :: errmsg  ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64), dimension(nelmx) :: elmdes  ! Array with element description 
+    integer                                       :: fds
+    integer                                       :: ierror  ! Flag for error when writing to Communication file 
+    integer      , dimension(1)                   :: idummy  ! Help array to read/write Nefis files 
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(16)                                 :: grpnam  ! Data-group name defined for the COM-files 
+    character(256)                                :: errmsg  ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grpnam/'BOUNDCNST'/
-    data elmnms/'NOROW', 'NOCOL', 'NOROCO', 'IROCOL', 'NTO', 'MNBND', 'NROB', 'NOB'/
-    data elmqty/8*' '/
-    data elmunt/8*'[   -   ]'/
-    data elmtps/8*'INTEGER'/
-    data nbytsg/8*4/
-    data elmdes/'Number of computational grid rows in IROCOL table             ',  &
-              & 'Number of computational grid columns in IROCOL table          ',  &
-              & 'NOROW+NOCOL                                                   ',  &
-              & 'Administration of zeta-points, IROCOL-table                   ',  &
-              & 'Number of open boundaries                                     ',  &
-              & 'Open boundary begin and end points (ml, mh, nl, nh, kl, kh)   ',  &
-              & 'Number of open boundary points                                ',  &
-              & 'Administration of open boundary points                        '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrboun)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    ! Initialize local variables
-    !
-    ierr = 0
-    wrswch = .true.
-    !
-    ! Set up the element dimensions
+    call getdatagroup(gdp, FILOUT_COM, grpnam, group)
+    first   => group%first
     !
     if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,2         ,5         ,noroco    , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,5         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       if (nto>0) then
-          call filldm(elmdms    ,6         ,2         ,6         ,nto       , &
-                    & 0         ,0         ,0         )
-       endif
-       call filldm(elmdms    ,7         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       if (nrob>0) then
-          call filldm(elmdms    ,8         ,2         ,8         ,nrob      , &
-                    & 0         ,0         ,0         )
-       endif
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NOROW', ' ', IO_INT4, 1, (/1/), ' ', 'Number of computational grid rows in IROCOL table', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NOCOL', ' ', IO_INT4, 1, (/1/), ' ', 'Number of computational grid columns in IROCOL table', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NOROCO', ' ', IO_INT4, 1, (/1/), ' ', 'NOROW+NOCOL', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'IROCOL', ' ', IO_INT4, 2, (/5, noroco/), ' ', 'Administration of zeta-points, IROCOL-table', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NTO', ' ', IO_INT4, 1, (/1/), ' ', 'Number of open boundaries', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'MNBND', ' ', IO_INT4, 2, (/6, nto/), ' ', 'Open boundary begin and end points (ml, mh, nl, nh, kl, kh)', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NROB', ' ', IO_INT4, 1, (/1/), ' ', 'Number of open boundary points', '[   -   ]')
+       call addelm(gdp, lundia, FILOUT_COM, grpnam, 'NOB', ' ', IO_INT4, 2, (/8, nrob/), ' ', 'Administration of open boundary points', '[   -   ]')
     endif
     !
-    ! Write all elements to file; all definition and creation of files,
-    ! data groups, cells and elements is handled by PUTGTI.
+    ierror = open_datdef(comfil, fds, .false.)
+    if (ierror /= 0) goto 9999
     !
-    ! element  1 NOROW
+    if (first) then
+       call defnewgrp(fds, FILOUT_COM, grpnam, gdp, comfil, errlog=ERRLOG_NONE)
+       first = .false.
+    endif
+    !
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'NOROW'
     !
     idummy(1) = norow
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'NOROW', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  2 NOCOL
+    ! element 'NOCOL'
     !
     idummy(1) = nocol
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'NOCOL', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  3 NOROCO
+    ! element 'NOROCO'
     !
     idummy(1) = noroco
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'NOROCO', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  4 IROCOL
+    ! element 'IROCOL'
     !
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierr      ,irocol    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'IROCOL', uindex, 1, irocol)
+    if (ierror/= 0) goto 9999
     !
-    ! element  5 NTO
+    ! element 'NTO'
     !
     idummy(1) = nto
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(5) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'NTO', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  6 MNBND (only if NTO > 0)
+    ! element 'MNBND'
     !
     if (nto>0) then
-       call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(6) ,celidt    ,wrswch    ,ierr      ,mnbnd(1:6,:) )
-       if (ierr/=0) goto 9999
+       ierror = putelt(fds, grpnam, 'MNBND', uindex, 1, mnbnd(1:6,:))
+       if (ierror/= 0) goto 9999
     endif
     !
-    ! element  7 NROB
+    ! element 'NROB'
     !
     idummy(1) = nrob
-    call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(7) ,celidt    ,wrswch    ,ierr      ,idummy    )
-    if (ierr/=0) goto 9999
+    ierror = putelt(fds, grpnam, 'NROB', uindex, 1, idummy)
+    if (ierror/= 0) goto 9999
     !
-    ! element  8 NOB (only if NROB > 0)
+    ! element 'NOB'
     !
     if (nrob>0) then
-       call putgti(comfil    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(8) ,celidt    ,wrswch    ,ierr      ,nob       )
-       if (ierr/=0) then
-       endif
+       ierror = putelt(fds, grpnam, 'NOB', uindex, 1, nob)
+       if (ierror/= 0) goto 9999
     endif
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ierror = clsnef(fds)
+    !
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wrboun

@@ -200,7 +200,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
         if (found) then
            call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
                      & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lundia    ,gdp       )
+                     & ntrec     ,lunout    ,gdp       )
            if (lerror) then
               lerror = .false.
               filrd = fildef

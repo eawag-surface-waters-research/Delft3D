@@ -1,9 +1,11 @@
-subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
+subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                 & nostat    ,kmax      ,lsed      ,lsedtot   , &
                 & zws       ,zrsdeq    ,zbdsed    ,zdpsed    ,zdps      , &
-                & ntruv     , &
+                & ntruv     ,zmodel    , &
                 & zsbu      ,zsbv      ,zssu      ,zssv      ,sbtr      , &
-                & sstr      ,sbtrc     ,sstrc     ,zrca      ,gdp       )
+                & sstr      ,sbtrc     ,sstrc     ,zrca      ,irequest  , &
+                & fds       ,nostatto  ,nostatgl  ,order_sta ,ntruvto   , &
+                & ntruvgl   ,order_tra ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -35,7 +37,7 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for sediment (4 & 5)
-!              to the NEFIS HIS-DAT file.
+!              to the FLOW HIS file.
 !              Output is performed conform the times of history
 !              file and only in case lsed > 0.
 ! Method used:
@@ -44,9 +46,11 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    !
+    use datagroups
     use globaldata
+    use netcdf, only: nf90_unlimited
+    use dfparall, only: inode, master
+    use wrtarray, only: wrtvar, wrtarray_n, station
     !
     implicit none
     !
@@ -55,7 +59,6 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                              , pointer :: celidt
-    integer       , dimension(:)         , pointer :: line_orig
     integer       , dimension(:)         , pointer :: shlay
     real(hp)                             , pointer :: morft
     real(fp)                             , pointer :: morfac
@@ -63,67 +66,75 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     real(fp)                             , pointer :: bed
     real(fp)      , dimension(:)         , pointer :: rhosol
     real(fp)      , dimension(:)         , pointer :: cdryb
-    logical                              , pointer :: first
     type (moroutputtype)                 , pointer :: moroutput
-    type (nefiselement)                  , pointer :: nefiselem
+    type (datagroup)                     , pointer :: group4
+    type (datagroup)                     , pointer :: group5
 !
 ! Global variables
 !
-    integer                             , intent(in)  :: ithisc !!  Current time counter for the history data file
-    integer                                           :: ithisi !  Description and declaration in inttim.igs
-    integer                                           :: itstrt !  Description and declaration in inttim.igs
-    integer                                           :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                           :: lsed   !  Description and declaration in esm_alloc_int.f90
-    integer                                           :: lsedtot!  Description and declaration in esm_alloc_int.f90
-    integer                                           :: lundia !  Description and declaration in inout.igs
-    integer                                           :: nostat !  Description and declaration in dimens.igs
-    integer                                           :: ntruv  !  Description and declaration in dimens.igs
-    logical                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(nostat)                       :: zdps   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat)                       :: zdpsed !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, 0:kmax, lsed)         :: zws    !  Description and declaration in esm_alloc_real.f90
+    integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
+    integer                                                             , intent(in)  :: ithisc   !!  Current time counter for the history data file
+    integer                                                                           :: ithisi   !  Description and declaration in inttim.igs
+    integer                                                                           :: itstrt   !  Description and declaration in inttim.igs
+    integer                                                                           :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: lsed     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: lsedtot  !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: lundia   !  Description and declaration in inout.igs
+    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
+    integer                                                                           :: ntruv    !  Description and declaration in dimens.igs
+    logical                                                             , intent(in)  :: zmodel   !  Description and declaration in procs.igs
+    logical                                                             , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+    real(fp), dimension(nostat)                                                       :: zdps     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat)                                                       :: zdpsed   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, 0:kmax, lsed)                                         :: zws      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nostat, lsed)                 :: zrsdeq !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot)              :: zbdsed !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)                 :: zrca   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtrc  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstrc  !  Description and declaration in esm_alloc_real.f90
-    character(60)                       , intent(in)  :: trifil !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
+    real(fp), dimension(nostat, lsedtot)                                              :: zbdsed   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                                                 :: zrca     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zsbu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot)                                , intent(in)  :: zsbv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zssu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                                   , intent(in)  :: zssv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsedtot)                                 , intent(in)  :: sbtr     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsedtot)                                 , intent(in)  :: sbtrc    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsed)                                    , intent(in)  :: sstr     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsed)                                    , intent(in)  :: sstrc    !  Description and declaration in esm_alloc_real.f90
+    character(*)                                                        , intent(in)  :: filename !  File name
+    integer                                                             , intent(in)  :: fds      !  File handle of output NEFIS/NetCDF file
+    integer                                                             , intent(in)  :: nostatgl ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: nostatto ! total number of stations (including "duplicate" stations located in halo regions)
+    integer       , dimension(nostat)                                   , intent(in)  :: order_sta
+    integer                                                             , intent(in)  :: ntruvgl  ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                                             , intent(in)  :: ntruvto  ! total number of tracks (including "duplicate" stations located in halo regions)
+    integer       , dimension(ntruv)                                    , intent(in)  :: order_tra
 !
 ! Local variables
 !
-    real(sp)                           :: sdummy
-    real(fp)                           :: rhol
-    integer                            :: fds
-    integer                            :: i              ! Help var. 
-    integer                            :: ierror         ! Local errorflag for NEFIS files
-    integer                            :: istat
-    integer                            :: k
-    integer                            :: kmaxout        ! number of layers to be written to the (history) output files, 0 (possibly) included
-    integer                            :: kmaxout_restr  ! number of layers to be written to the (history) output files, 0 excluded
-    integer                            :: l
-    integer                            :: n
-    integer, dimension(:), allocatable :: norig
-    integer, dimension(1)              :: idummy         ! Help array to read/write Nefis files
-    integer, dimension(3,5)            :: uindex
-    integer, dimension(:), allocatable :: shlay_restr    ! work array
-    integer, external                  :: getelt
-    integer, external                  :: putelt
-    integer, external                  :: inqmxi
-    integer, external                  :: clsnef
-    integer, external                  :: open_datdef
-    integer, external                  :: neferr
-    character(2)                       :: sedunit
-    character(10)                      :: transpunit
-    character(16)                      :: grnam4
-    character(16)                      :: grnam5
-    character(256)                     :: errmsg         ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(60)                      :: filnam         ! Help var. for FLOW file name 
+    integer                                           :: filetype
+    real(fp)        , dimension(:,:)  , allocatable   :: rbuff2
+    real(fp)        , dimension(:,:,:), allocatable   :: rbuff3
+    real(fp)                                          :: rhol
+    integer                                           :: ierror         ! Local error flag
+    integer                                           :: istat
+    integer                                           :: k
+    integer                                           :: kmaxout        ! number of layers to be written to the (history) output files, 0 (possibly) included
+    integer                                           :: l
+    integer                                           :: n
+    !
+    integer                                           :: iddim_time
+    integer                                           :: iddim_nostat
+    integer                                           :: iddim_ntruv
+    integer                                           :: iddim_lsed
+    integer                                           :: iddim_lsedtot
+    integer                                           :: iddim_kmax
+    integer                                           :: iddim_kmaxout
+    !
+    integer                                           :: idatt_sta
+    integer                                           :: idatt_tra
+    !
+    character(2)                                      :: sedunit
+    character(10)                                     :: transpunit
+    character(16)                                     :: grnam4
+    character(16)                                     :: grnam5
 !
 ! Data statements
 !
@@ -132,418 +143,284 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem  => gdp%nefisio%nefiselem(nefiswrsedhinf)
-    line_orig  => gdp%gdstations%line_orig
-    shlay      => gdp%gdpostpr%shlay
-    celidt     => nefiselem%celidt
-    morft      => gdp%gdmorpar%morft
-    morfac     => gdp%gdmorpar%morfac
-    sus        => gdp%gdmorpar%sus
-    bed        => gdp%gdmorpar%bed
-    rhosol     => gdp%gdsedpar%rhosol
-    cdryb      => gdp%gdsedpar%cdryb
-    first      => nefiselem%first
-    moroutput  => gdp%gdmorpar%moroutput
+    call getdatagroup(gdp, FILOUT_HIS, grnam4, group4)
+    call getdatagroup(gdp, FILOUT_HIS, grnam5, group5)
+    celidt     => group4%celidt
+    filetype = getfiletype(gdp, FILOUT_HIS)
+    !
+    shlay       => gdp%gdpostpr%shlay
+    morft       => gdp%gdmorpar%morft
+    morfac      => gdp%gdmorpar%morfac
+    sus         => gdp%gdmorpar%sus
+    bed         => gdp%gdmorpar%bed
+    rhosol      => gdp%gdsedpar%rhosol
+    cdryb       => gdp%gdsedpar%cdryb
+    moroutput   => gdp%gdmorpar%moroutput
     !
     kmaxout = size(shlay)
-    if (shlay(1) == 0) then
-       kmaxout_restr = kmaxout - 1
-       allocate(shlay_restr(kmaxout_restr))
-       shlay_restr   = shlay(2:)
-    else
-       kmaxout_restr = kmaxout
-       allocate(shlay_restr(kmaxout_restr))
-       shlay_restr   = shlay
-    endif
-    filnam  = trifil(1:3) // 'h' // trifil(5:)
-    errmsg  = ' '
     !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
-    !
-    if (first) then
+    ierror = 0
+    select case (irequest)
+    case (REQUESTTYPE_DEFINE)
        !
        ! Set up the element characteristics
        !
+       iddim_time    = adddim(gdp, lundia, FILOUT_HIS, 'time', nf90_unlimited)
+       iddim_nostat  = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT', nostatgl)
+       iddim_ntruv   = adddim(gdp, lundia, FILOUT_HIS, 'NTRUV', ntruvgl)
+       iddim_lsed    = adddim(gdp, lundia, FILOUT_HIS, 'LSED', lsed)
+       iddim_lsedtot = adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT', lsedtot)
+       if (zmodel) then
+          iddim_kmax    = adddim(gdp, lundia, FILOUT_HIS, 'K_LYR'  , kmax) ! Number of layers
+       else
+          iddim_kmax    = adddim(gdp, lundia, FILOUT_HIS, 'SIG_LYR'  , kmax) ! Number of layers
+       endif
+       iddim_kmaxout = adddim(gdp, lundia, FILOUT_HIS, 'KMAXOUT', kmaxout)
+       !
+       idatt_sta = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMST XSTAT YSTAT')
+       idatt_tra = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMTRA')
+       !
        select case(moroutput%transptype)
        case (0)
-          sedunit = 'KG'
+          sedunit = 'kg'
        case (1)
-          sedunit = 'M3'
+          sedunit = 'm3'
        case (2)
-          sedunit = 'M3'
+          sedunit = 'm3'
        end select
        !
        ! his-infsed-serie
        !
-       call addelm(nefiswrsedhinf,'ITHISS',' ','[   -   ]','INTEGER',4     , &
-         & 'timestep number (ITHISS*DT*TUNIT := time in sec from ITDATE)  ', &
-         &  1         ,1         ,0         ,0         ,0         ,0       , &
-         &  lundia    ,gdp       )
-       call addelm(nefiswrsedhinf,'MORFAC',' ','[   -   ]','REAL',4        , &
-         & 'morphological acceleration factor (MORFAC)                    ', &
-         &  1         ,1         ,0         ,0         ,0         ,0       , &
-         &  lundia    ,gdp       )
-       call addelm(nefiswrsedhinf,'MORFT',' ','[ DAYS  ]','REAL',8         , &
-         & 'morphological time (days since start of simulation)           ', &
-         &  1         ,1         ,0         ,0         ,0         ,0       , &
-         &  lundia    ,gdp       )
-       call defnewgrp(nefiswrsedhinf ,filnam    ,grnam4   ,gdp)
+       if (filetype == FTYPE_NEFIS) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'ITHISS', ' ', IO_INT4       , 0, longname='timestep number (ITHISS*DT*TUNIT := time in sec from ITDATE)')
+       endif
+       call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFAC', ' ', IO_REAL4      , 0, longname='morphological acceleration factor (MORFAC)')
+       call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFT', ' ', IO_REAL8       , 0, longname='morphological time (days since start of simulation)', unit='days')
        !
        ! his-sed-series: stations
        !
        if (nostat > 0) then
          if (lsed > 0) then
-           call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
-             & 'Settling velocity in station                                  ', &
-             &  3         ,nostat    ,kmaxout   ,lsed      ,0         ,0       , &
-             &  lundia    ,gdp       )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZWS', ' ', IO_REAL4     , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_lsed/), longname='Settling velocity in station', unit='m/s', attribs=(/idatt_sta/) )
            if (kmax == 1) then
-             !
-             ! We keep the second dimension (previously "kmax") in NEFIS files
-             ! of structured Delft3D for backward compatibility reasons:
-             ! post-processing tools don't need to be updated.
-             !
-             call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
-               & 'Equilibrium concentration of sediment at station (2D only)    ', &
-               &  3         ,nostat    ,1     ,lsed      ,0         ,0       , &
-               &  lundia    ,gdp       )
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRSDEQ', ' ', IO_REAL4, 3, dimids=(/iddim_nostat, iddim_kmax, iddim_lsed/), longname='Equilibrium concentration of sediment at station (2D only)', unit='kg/m3', attribs=(/idatt_sta/) )
            endif
          endif
-         call addelm(nefiswrsedh,'ZBDSED',' ','[ KG/M2 ]','REAL',4           , &
-           & 'Available mass of sediment at bed at station                  ', &
-           &  2         ,nostat    ,lsedtot   ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrsedh,'ZDPSED',' ','[   M   ]','REAL',4           , &
-           & 'Sediment thickness at bed at station (zeta point)             ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrsedh,'ZDPS',' ','[   M   ]','REAL',4             , &
-           & 'Morphological depth at station (zeta point)                   ', &
-           &  1         ,nostat    ,0         ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         transpunit = '[ ' // sedunit // '/S/M]'
-         call addelm(nefiswrsedh,'ZSBU',' ',transpunit ,'REAL',4             , &
-           & 'Bed load transport in u-direction at station (zeta point)     ', &
-           &  2         ,nostat    ,lsedtot   ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
-         call addelm(nefiswrsedh,'ZSBV',' ',transpunit ,'REAL',4             , &
-           & 'Bed load transport in v-direction at station (zeta point)     ', &
-           &  2         ,nostat    ,lsedtot   ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZBDSED', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Available mass of sediment at bed at station', unit='kg/m2', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPSED', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Sediment thickness at bed at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPS', ' ', IO_REAL4      , 1, dimids=(/iddim_nostat/), longname='Morphological depth at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+         transpunit = sedunit // '/(s m)'
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBU', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBV', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
          if (lsed > 0) then
-           call addelm(nefiswrsedh,'ZSSU',' ',transpunit ,'REAL',4             , &
-             & 'Susp. load transport in u-direction at station (zeta point)   ', &
-             &  2         ,nostat    ,lsed      ,0         ,0         ,0       , &
-             &  lundia    ,gdp       )
-           call addelm(nefiswrsedh,'ZSSV',' ',transpunit ,'REAL',4             , &
-             & 'Susp. load transport in v-direction at station (zeta point)   ', &
-             &  2         ,nostat    ,lsed      ,0         ,0         ,0       , &
-             &  lundia    ,gdp       )
-           call addelm(nefiswrsedh,'ZRCA',' ','[ KG/M3 ]','REAL',4             , &
-             & 'Near-bed reference concentration of sediment at station       ', &
-             &  2         ,nostat    ,lsed      ,0         ,0         ,0       , &
-             &  lundia    ,gdp       )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSU', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSV', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRCA', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Near-bed reference concentration of sediment at station', unit='kg/m3', attribs=(/idatt_sta/) )
          endif
        endif
        !
        ! his-sed-series: cross-sections
        !
        if (ntruv > 0) then
-         transpunit = '[ ' // sedunit // '/S  ]'
-         call addelm(nefiswrsedh,'SBTR',' ',transpunit ,'REAL',4             , &
-           & 'Instantaneous bed load transport through section              ', &
-           &  2         ,ntruv     ,lsedtot   ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
+         transpunit = sedunit // '/s'
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTR', ' ', IO_REAL4      , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Instantaneous bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          if (lsed > 0) then         
-           call addelm(nefiswrsedh,'SSTR',' ',transpunit ,'REAL',4             , &
-             & 'Instantaneous susp. load transport through section            ', &
-             &  2         ,ntruv     ,lsed      ,0         ,0         ,0       , &
-             &  lundia    ,gdp       )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTR', ' ', IO_REAL4    , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Instantaneous susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
-         transpunit = '[  ' // sedunit // '   ]'
-         call addelm(nefiswrsedh,'SBTRC',' ',transpunit ,'REAL',4            , &
-           & 'Cumulative bed load transport through section                 ', &
-           &  2         ,ntruv     ,lsedtot   ,0         ,0         ,0       , &
-           &  lundia    ,gdp       )
+         transpunit = sedunit
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTRC', ' ', IO_REAL4     , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Cumulative bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          if (lsed > 0) then
-           call addelm(nefiswrsedh,'SSTRC',' ',transpunit ,'REAL',4            , &
-             & 'Cumulative susp. load transport through section               ', &
-             &  2         ,ntruv     ,lsed      ,0         ,0         ,0       , &
-             &  lundia    ,gdp       )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTRC', ' ', IO_REAL4   , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Cumulative susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
        endif
        !
-       ! Add fluff fields
+       group4%grp_dim = iddim_time
+       group5%grp_dim = iddim_time
+       celidt = 0
        !
-       call wrhfluff(lundia    ,error     ,nostat    ,nostat    ,nostat    ,lsed      , &
-                   & 1         ,0         ,grnam5    ,gdp       )
+    case (REQUESTTYPE_WRITE)
        !
-       call defnewgrp(nefiswrsedh ,filnam    ,grnam5   ,gdp)
+       celidt = celidt + 1
+       group5%celidt = celidt
        !
-       ! Get start celidt for writing
-       !
-       nefiselem => gdp%nefisio%nefiselem(nefiswrsedhinf)
-    first               => nefiselem%first
-    celidt              => nefiselem%celidt
-    endif
-    !
-    ierror = open_datdef(filnam   ,fds      )
-    if (ierror/= 0) goto 9999
-    if (first) then
-       !
-       ! end of initialization, don't come here again
-       !
-       ierror = inqmxi(fds, grnam4, celidt)
-       first = .false.
-    endif
-    !
-    ! Writing of output on every ithisc
-    !
-    celidt = celidt + 1
-    !
-    idummy(1)   = ithisc
-    uindex(1,1) = celidt
-    uindex(2,1) = celidt
-    !
-    ! Group his-sed-series, identified with nefiswrsedh, must use the same
-    ! value for celidt.
-    ! Easy solution:
-    gdp%nefisio%nefiselem(nefiswrsedh)%celidt = celidt
-    ! Neat solution in pseudo code:
-    ! subroutine wrsedh
-    !    integer :: celidt
-    !    call wrsedhinf(celidt)
-    !    call wrsedhdat(celidt)
-    ! end subroutine
-    !
-    ierror     = putelt(fds, grnam4, 'ITHISS', uindex, 1, idummy)
-    if (ierror/= 0) goto 9999
-    !
-    sdummy      = real(morfac,sp)
-    ierror     = putelt(fds, grnam4, 'MORFAC', uindex, 1, sdummy)
-    if (ierror/= 0) goto 9999
-    !
-    ! MORFT is a double!
-    !
-    ierror     = putelt(fds, grnam4, 'MORFT', uindex, 1, morft)
-    if (ierror/= 0) goto 9999
-    !
-    ! his-sed-series: stations
-    !
-    if (nostat > 0) then
-       if (lsed > 0) then     
+       if (filetype == FTYPE_NEFIS) then
           !
-          ! group 5: element 'ZWS'
+          ! element 'ITHISS'
           !
-          call sbuff_checksize(nostat*(kmaxout)*lsed)
-          i = 0
-          do l = 1, lsed
-             do k = 1, kmaxout
-                do n = 1, nostat
-                   i        = i+1
-                   sbuff(i) = real(zws(n, shlay(k), l),sp)
-                enddo
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, ithisc, 'ITHISS')
+          if (ierror/= 0) goto 9999
+       endif
+       !
+       ! element 'MORFAC'
+       !
+       call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                 & gdp, ierror, lundia, morfac, 'MORFAC')
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'MORFT'
+       !
+       call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                 & gdp, ierror, lundia, morft, 'MORFT')
+       if (ierror/= 0) goto 9999
+       !
+       if (nostat > 0) then
+          if (lsed > 0) then     
+             !
+             ! element 'ZWS'
+             !
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & shlay, kmaxout, 0, kmax, lsed, &
+                    & ierror, lundia, zws, 'ZWS', station)
+             if (ierror/= 0) goto 9999
+             !
+             if (kmax == 1) then
+                !
+                ! element 'ZRSDEQ'
+                ! kmax=1: don't use kmaxout/shlay
+                !
+                allocate(rbuff3(nostat,1,kmax), stat=istat)
+                rbuff3(:,1,:) = zrsdeq
+                call wrtarray_n(fds, filename, filetype, grnam5, &
+                       & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                       & (/1/), 1, 1, kmax, lsed, &
+                       & ierror, lundia, rbuff3, 'ZRSDEQ', station)
+                deallocate(rbuff3, stat=istat)
+                if (ierror/= 0) goto 9999
+             endif
+          endif
+          !
+          ! element 'ZBDSED'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & lsedtot, &
+                 & ierror, lundia, zbdsed, 'ZBDSED', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZDPSED'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, zdpsed, 'ZDPSED', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZDPS'
+          !
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & ierror, lundia, zdps, 'ZDPS', station)
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'ZSBU'
+          !
+          allocate(rbuff2(nostat,lsedtot), stat=istat)
+          do l = 1, lsedtot
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do n = 1, nostat
+                rbuff2(n, l) = zsbu(n, l)/rhol
              enddo
           enddo
-          ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & lsedtot, &
+                 & ierror, lundia, rbuff2, 'ZSBU', station)
           if (ierror/= 0) goto 9999
-          if (kmax == 1) then
+          !
+          ! element 'ZSBV'
+          !
+          do l = 1, lsedtot
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do n = 1, nostat
+                rbuff2(n, l) = zsbv(n, l)/rhol
+             enddo
+          enddo
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                 & lsedtot, &
+                 & ierror, lundia, rbuff2, 'ZSBV', station)
+          deallocate(rbuff2)
+          if (ierror/= 0) goto 9999
+          !
+          if (lsed > 0) then     
              !
-             ! group 5: element 'ZRSDEQ'
-             ! kmax=1: don't use kmaxout/shlay
+             ! element 'ZSSU'
              !
-             call sbuff_checksize(nostat*lsed)
-             i = 0
+             allocate(rbuff2(nostat, lsed), stat=istat)
              do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
                 do n = 1, nostat
-                   i        = i+1
-                   sbuff(i) = real(zrsdeq(n, l),sp)
+                   rbuff2(n, l) = zssu(n, l)/rhol
                 enddo
              enddo
-             ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & lsed, &
+                    & ierror, lundia, rbuff2, 'ZSSU', station)
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'ZSSV'
+             !
+             do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, nostat
+                   rbuff2(n, l) = zssv(n, l)/rhol
+                enddo
+             enddo
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & lsed, &
+                    & ierror, lundia, rbuff2, 'ZSSV', station)
+             deallocate(rbuff2)
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'ZRCA'
+             !
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & lsed, &
+                    & ierror, lundia, zrca, 'ZRCA', station)
              if (ierror/= 0) goto 9999
           endif
        endif
        !
-       ! group 5: element 'ZBDSED'
+       ! his-sed-series: cross-sections
        !
-       call sbuff_checksize(nostat*lsedtot)
-       i = 0
-       do l = 1, lsedtot
-          do n = 1, nostat
-             i        = i+1
-             sbuff(i) = real(zbdsed(n, l),sp)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam5, 'ZBDSED', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZDPSED'
-       !
-       call sbuff_checksize(nostat)
-       i = 0
-       do n = 1, nostat
-          i        = i+1
-          sbuff(i) = real(zdpsed(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZDPSED', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZDPS'
-       !
-       call sbuff_checksize(nostat)
-       i = 0
-       do n = 1, nostat
-          i        = i+1
-          sbuff(i) = real(zdps(n),sp)
-       enddo
-       ierror = putelt(fds, grnam5, 'ZDPS', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZSBU'
-       !
-       call sbuff_checksize(nostat*lsedtot)
-       i = 0
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do n = 1, nostat
-             i        = i+1
-             sbuff(i) = real(zsbu(n, l)/rhol,sp)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam5, 'ZSBU', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       !
-       ! group 5: element 'ZSBV'
-       !
-       call sbuff_checksize(nostat*lsedtot)
-       i = 0
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do n = 1, nostat
-             i        = i+1
-             sbuff(i) = real(zsbv(n, l)/rhol,sp)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam5, 'ZSBV', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       if (lsed > 0) then     
+       if (ntruv>0) then
           !
-          ! group 5: element 'ZSSU'
+          ! element 'SBTR'
           !
-          call sbuff_checksize(nostat*lsed)
-          i = 0
-          do l = 1, lsed
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, nostat
-                i        = i+1
-                sbuff(i) = real(zssu(n, l)/rhol,sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grnam5, 'ZSSU', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
-          !
-          ! group 5: element 'ZSSV'
-          !
-          call sbuff_checksize(nostat*lsed)
-          i = 0
-          do l = 1, lsed
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, nostat
-                i        = i+1
-                sbuff(i) = real(zssv(n, l)/rhol,sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grnam5, 'ZSSV', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
-          !
-          ! group 5: element 'ZRCA'
-          !
-          call sbuff_checksize(nostat*lsed)
-          i = 0
-          do l = 1, lsed
-             do n = 1, nostat
-                i        = i+1
-                sbuff(i) = real(zrca(n, l),sp)
-             enddo
-          enddo
-          ierror = putelt(fds, grnam5, 'ZRCA', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
-       endif
-    endif
-    !
-    ! his-sed-series: cross-sections
-    !
-    if (ntruv>0) then
-       allocate (norig(ntruv), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'U021', 'wrsedh: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       do n = 1, ntruv
-           norig( line_orig(n) ) = n
-       enddo
-       !
-       !
-       ! group 5: element 'SBTR'
-       !
-       call sbuff_checksize(ntruv*lsedtot)
-       i = 0
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do n = 1, ntruv
-             i        = i+1
-             sbuff(i) = real(sbtr(norig(n), l)/rhol,sp)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam5, 'SBTR', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       if (lsed > 0) then     
-          !
-          ! group 5: element 'SSTR'
-          !
-          call sbuff_checksize(ntruv*lsed)
-          i = 0
-          do l = 1, lsed
+          allocate(rbuff2(ntruv, lsedtot), stat=istat)
+          do l = 1, lsedtot
              select case(moroutput%transptype)
              case (0)
                 rhol = 1.0_fp
@@ -553,41 +430,18 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
                 rhol = rhosol(l)
              end select
              do n = 1, ntruv
-                i        = i+1
-                sbuff(i) = real(sstr(norig(n), l)/rhol,sp)
+                rbuff2(n, l) = sbtr(n, l)/rhol
              enddo
           enddo
-          ierror = putelt(fds, grnam5, 'SSTR', uindex, 1, sbuff)
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                 & lsedtot, &
+                 & ierror, lundia, rbuff2, 'SBTR', station)
           if (ierror/= 0) goto 9999
-       endif
-       !
-       ! group 5: element 'SBTRC'
-       !
-       call sbuff_checksize(ntruv*lsedtot)
-       i = 0
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do n = 1, ntruv
-             i        = i+1
-             sbuff(i) = real(sbtrc(norig(n), l)/rhol,sp)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam5, 'SBTRC', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
-       if (lsed > 0) then     
           !
-          ! group 5: element 'SSTRC'
+          ! element 'SBTRC'
           !
-          call sbuff_checksize(ntruv*lsed)
-          i = 0
-          do l = 1, lsed
+          do l = 1, lsedtot
              select case(moroutput%transptype)
              case (0)
                 rhol = 1.0_fp
@@ -597,32 +451,67 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
                 rhol = rhosol(l)
              end select
              do n = 1, ntruv
-                i        = i+1
-                sbuff(i) = real(sstrc(norig(n), l)/rhol,sp)
+                rbuff2(n, l) = sbtrc(n, l)/rhol
              enddo
           enddo
-          ierror = putelt(fds, grnam5, 'SSTRC', uindex, 1, sbuff)
+          call wrtarray_n(fds, filename, filetype, grnam5, &
+                 & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                 & lsedtot, &
+                 & ierror, lundia, rbuff2, 'SBTRC', station)
+          deallocate(rbuff2)
           if (ierror/= 0) goto 9999
+          !
+          if (lsed > 0) then     
+             !
+             ! element 'SSTR'
+             !
+             allocate(rbuff2(ntruv, lsed), stat=istat)
+             do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, ntruv
+                   rbuff2(n, l) = sstr(n, l)/rhol
+                enddo
+             enddo
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                    & lsed, &
+                    & ierror, lundia, rbuff2, 'SSTR', station)
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'SSTRC'
+             !
+             do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, ntruv
+                   rbuff2(n, l) = sstrc(n, l)/rhol
+                enddo
+             enddo
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                    & lsed, &
+                    & ierror, lundia, rbuff2, 'SSTRC', station)
+             deallocate(rbuff2)
+             if (ierror/= 0) goto 9999
+          endif
        endif
-       deallocate (norig, stat=istat)
-    endif
+    end select
     !
-    ! Add fluff fields
+    ! write error message if error occured and set error = .true.
     !
-    call wrhfluff(lundia    ,error     ,nostat    ,nostat    ,nostat    ,lsed      , &
-                & 2         ,fds       ,grnam5    ,gdp       )
-    if (error) goto 9999
-    !
-    ierror = clsnef(fds)
-    !
-    ! write errormessage if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
- 9999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
-    endif
-    deallocate(shlay_restr)
+9999   continue
+    if (ierror /= 0) error = .true.
 end subroutine wrsedh

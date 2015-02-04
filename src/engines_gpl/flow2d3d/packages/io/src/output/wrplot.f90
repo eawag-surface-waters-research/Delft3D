@@ -1,6 +1,6 @@
 subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
                 & nmaxus    ,kcs       ,ibuff     ,xz        ,yz        , &
-                & rbuff     ,sferic    ,gdp       )
+                & sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -38,6 +38,8 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sp_buffer
+    use datagroups
     use globaldata
     !
     implicit none
@@ -47,13 +49,7 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical                  , pointer :: first
-    integer                  , pointer :: celidt
-    integer, dimension(:, :) , pointer :: elmdms
-    type (nefiselement)      , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 4
+    type (datagroup)         , pointer :: group
 !
 ! Global variables
 !
@@ -67,105 +63,90 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
     logical                                                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(nmaxus, mmax)                                          :: rbuff  !  Description and declaration in r-i-ch.igs
     character(*)                                                                   :: filnam !!  Name for output file
                                                                                              !!  Comm. file: com-<case><label>
                                                                                              !!  Map file: trim-<case><label>
 !
-!
 ! Local variables
 !
-    integer                                    :: ierr   ! Flag for error when writing to Communication file 
-    integer                                    :: m
-    integer                                    :: md
-    integer                                    :: n
-    integer                                    :: nd
-    integer       , dimension(nelmx)           :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    integer                         , external :: neferr
-    logical                                    :: wrswch ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10) , dimension(nelmx)           :: elmunt ! Array with element physical unit 
-    character(16)                              :: grpnam ! Data-group name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmnms ! Element name defined for the COM-files 
-    character(16) , dimension(nelmx)           :: elmqty ! Array with element quantity 
-    character(16) , dimension(nelmx)           :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(256)                             :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(64) , dimension(nelmx)           :: elmdes ! Array with element description 
+    integer                                       :: IO_FIL
+    integer                                       :: fds
+    integer                                       :: ierror ! Flag for error when writing to Communication file 
+    integer                                       :: m
+    integer                                       :: md
+    integer                                       :: n
+    integer                                       :: nd
+    integer      , dimension(3,5)                 :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    character(9)                                  :: spunit ! spatial unit m or deg
+    character(16)                                 :: grpnam ! Data-group name defined for the COM-files 
+    character(256)                                :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
 !
 ! Data statements
 !
     data grpnam/'TEMPOUT'/
-    data elmnms/'XWAT', 'YWAT', 'CODB', 'CODW'/
-    data elmqty/4*' '/
-    data elmunt/2*'[   M   ]', 2*'[   -   ]'/
-    data elmtps/2*'REAL', 2*'INTEGER'/
-    data nbytsg/4*4/
-    data elmdes/'X-coord. water level point in local system                    '&
-       & , 'Y-coord. water level point in local system                    ',    &
-        & '1/-1 Active/Non-active bottom point ( w.r.t. coordinates )    ',      &
-        & '1/-1 Active/Non-active water level point (w.r.t. coordinates )'/
-!
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrplot)
-    first   => nefiselem%first
-    celidt  => nefiselem%celidt
-    elmdms  => nefiselem%elmdms
-    !
-    !-----Initialize local variables
-    !
-    ierr = 0
-    wrswch = .true.
-    !
-    if (sferic) then
-       elmunt(1) = '[  DEG  ]'
-       elmunt(2) = '[  DEG  ]'
+    if (filnam(1:3) == 'com') then
+       IO_FIL = FILOUT_COM
+    else
+       IO_FIL = FILOUT_MAP
     endif
-    !
-    !-----Set up the element dimensions
+    call getdatagroup(gdp, IO_FIL, grpnam, group)
+    first   => group%first
     !
     if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,2         ,nmaxus    ,mmax      , &
-                 & 0         ,0         ,0         )
+       !
+       ! Set up the element chracteristics
+       !
+       spunit = '[   M   ]'
+       if (sferic) spunit = '[  DEG ]'
+       call addelm(gdp, lundia, IO_FIL, grpnam, 'XWAT', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'X-coord. water level point in local system', spunit)
+       call addelm(gdp, lundia, IO_FIL, grpnam, 'YWAT', ' ', IO_REAL4, 2, (/nmaxus, mmax/), ' ', 'Y-coord. water level point in local system', spunit)
+       call addelm(gdp, lundia, IO_FIL, grpnam, 'CODB', ' ', IO_INT4, 2, (/nmaxus, mmax/), ' ', '1/-1 Active/Non-active bottom point ( w.r.t. coordinates )', '[   -   ]')
+       call addelm(gdp, lundia, IO_FIL, grpnam, 'CODW', ' ', IO_INT4, 2, (/nmaxus, mmax/), ' ', '1/-1 Active/Non-active water level point (w.r.t. coordinates )', '[   -   ]')
     endif
     !
-    !-----Write all elements to file; all definition and creation of files,
-    !     data groups, cells and elements is handled by PUTGET.
+    ierror = open_datdef(filnam, fds, .false.)
+    if (ierror /= 0) goto 9999
     !
-    !-----element  1 XZ
+    if (first) then
+       call defnewgrp(fds, IO_FIL, grpnam, gdp, filnam, errlog=ERRLOG_NONE)
+       first = .false.
+    endif
+    !
+    ! initialize group index
+    !
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
+    !
+    ! element 'XWAT'
+    !
+    call sbuff_checksize(nmaxus*mmax)
+    do m = 1, mmax
+       do n = 1, nmaxus
+          sbuff(n + (m-1)*nmaxus) = xz(n, m)
+       enddo
+    enddo
+    ierror = putelt(fds, grpnam, 'XWAT', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
+    !
+    ! element 'YWAT'
     !
     do m = 1, mmax
        do n = 1, nmaxus
-          rbuff(n, m) = xz(n, m)
+          sbuff(n + (m-1)*nmaxus) = yz(n, m)
        enddo
     enddo
+    ierror = putelt(fds, grpnam, 'YWAT', uindex, 1, sbuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgtr(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierr      ,rbuff     )
-    if (ierr/=0) goto 9999
-    !
-    !-----element  2 YZ
-    !
-    do m = 1, mmax
-       do n = 1, nmaxus
-          rbuff(n, m) = yz(n, m)
-       enddo
-    enddo
-    !
-    call putgtr(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierr      ,rbuff     )
-    if (ierr/=0) goto 9999
-    !
-    !-----element  3 CODB
+    ! element 'CODB'
     !
     do m = 1, mmax
        ibuff(1, m) = -1
@@ -187,13 +168,10 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
           endif
        enddo
     enddo
+    ierror = putelt(fds, grpnam, 'CODB', uindex, 1, ibuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgti(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierr      ,ibuff     )
-    if (ierr/=0) goto 9999
-    !
-    !-----element  4 CODW
+    ! element 'CODW'
     !
     do m = 1, mmax
        do n = 1, nmaxus
@@ -201,17 +179,17 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
           if (kcs(n, m)==1) ibuff(n, m) = 1
        enddo
     enddo
+    ierror = putelt(fds, grpnam, 'CODW', uindex, 1, ibuff)
+    if (ierror/= 0) goto 9999
     !
-    call putgti(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierr      ,ibuff     )
-    if (ierr/=0) then
-    endif
+    ierror = clsnef(fds)
     !
- 9999 continue
-    if (ierr /= 0) then
-       ierr = neferr(0, errmsg)
+    ! write error message if error occured and set error= .true.
+    !
+9999   continue
+    if (ierror /= 0) then
+       ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       error = .true.
+       error= .true.
     endif
 end subroutine wrplot

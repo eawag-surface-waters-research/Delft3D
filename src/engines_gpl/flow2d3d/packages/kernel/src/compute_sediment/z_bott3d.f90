@@ -77,6 +77,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     !
     include 'flow_steps_f.inc'
     integer                              , pointer :: lundia
+    real(hp)                             , pointer :: hydrt
     real(hp)                             , pointer :: morft
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: sus
@@ -266,6 +267,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
 !! executable statements -------------------------------------------------------
 !
     lundia              => gdp%gdinout%lundia
+    hydrt               => gdp%gdmorpar%hydrt
     morft               => gdp%gdmorpar%morft
     morfac              => gdp%gdmorpar%morfac
     sus                 => gdp%gdmorpar%sus
@@ -633,9 +635,13 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     if (nst >= itmor) then
        !
        ! Increment morphological time
-       ! Note: dtmor in seconds, morft in days!
+       ! Note: dtmor in seconds, hydrt and morft in days!
        !
        morft = morft + real(dtmor,hp)/86400.0_hp
+       !
+       ! Increment hydraulic time if morfac>0; don't include morfac=0 periods while computing average morfac.
+       !
+       if (morfac > 0.0_fp) hydrt = hydrt + real(dt,hp)/86400.0_hp
        !
        ! Bed boundary conditions: transport condition
        !
