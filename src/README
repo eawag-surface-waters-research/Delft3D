@@ -51,7 +51,6 @@ Compiling on Linux
        The examples will not run "out of the box". The runscripts must be adapted to point to the --prefix location
        
 
-
 Compiling on OSX
 ================
 The OSX version is only tested with Macports gcc45 + openmpi compilers. Make sure you also get libtool, autoconf, automake, gnu make from macports. The OSX version is very alpha (not tested) so please don't use it for anything serious and report any problems to the general forum. The steps to get it working are first install DelftOnline:
@@ -64,8 +63,37 @@ The OSX version is only tested with Macports gcc45 + openmpi compilers. Make sur
 ** Set DYLD_LIBRARY_PATH to the directory containing DelftOnline if it's not in your default path
 
 
+Running examples without GUI
+============================
+In directory "examples\01_standard":
+Windows:
+- Execute script "run_flow2d3d.bat"
+  Parallel:
+  This model is very small and can only be run using 2 or 3 partitions:
+  - Open script "run_flow2d3d_parallel.bat" in a text editor:
+    - Read the comments about "When using mpich2 for the first time on a machine" very carefully
+    - Replace at the end of the file the text
+      %NUMBER_OF_PROCESSORS%
+      with
+      2
+    - Save the script
+  - Execute "run_flow2d3d_parallel.bat"
+Linux:
+- Execute script "run_flow2d3d.sh"
+  Parallel:
+  - Depending on your system settings, you might need to change the script "run_flow2d3d_parallel.sh"
+  - Execute script "run_flow2d3d_parallel.sh"
+
+
+Running your model
+==================
+Start with using the GUI, see http://oss.deltares.nl/web/delft3d/source-code#Run a calculation
+
+
 Debugging in Microsoft Visual Studio
 ====================================
+Debugging is not needed for daily computations, only for tracing the source code and solving problems.
+You must have some experience with Microsoft Visual Studio and Running Deft3D calculations using scripts.
 - Be sure to have compiled the "Debug configuration" (Build -> Configuration Manager...).
   All resulting binaries are copied automatically to directory "...\src\engines_gpl\d_hydro\bin\Debug".
 - In your model input directory: put a copy of file "...\oss\src\engines_gpl\d_hydro\scripts\config_d_hydro.xml",
@@ -97,6 +125,6 @@ common.am
 build.sh
 
 
-28 Nov 2013
+04 Feb 2015
 adri.mourits@deltares.nl
 
