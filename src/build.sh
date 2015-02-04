@@ -13,10 +13,19 @@
 #   keep up with every new compiler update.  This script should be ultra-low
 #   maintanence.
 #
-#   Irv.Elshoff@Deltares.NL
-#   2 jul 12
+#   irv.elshoff@deltares.nl
+#   adri.mourits@deltares.nl
+#   04 Feb 2015
 #
 #   Copyright (C)  Stichting Deltares, 2011-2013.
+#-------------------------------------------------------------------------------
+#
+#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#
+#   This script contains references to Deltares specific systems.
+#   Use this script as an example and modify it to fit to your system.
+#   See file README for compiling without using this script.
+#
 #-------------------------------------------------------------------------------
 
 # This script must be executed in the directory where it resides
