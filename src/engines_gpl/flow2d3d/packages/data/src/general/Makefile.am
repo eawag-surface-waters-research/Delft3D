@@ -26,6 +26,7 @@ FMODULES += \
 #Sources
 libDataGeneral_la_SOURCES = \
          griddims.f90 \
+         griddims_admin.f90 \
          nc_check_err.f90 \
          nc_def_var.f90
 
