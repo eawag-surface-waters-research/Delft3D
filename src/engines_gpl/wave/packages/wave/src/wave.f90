@@ -201,6 +201,17 @@ program waves_main
          success  = initmeteo(swan_grids(i_swan)%grid_name)
          call checkmeteoresult_wave(success)
          !
+         ! Read the meteo files
+         !
+         do i_meteo = 1, swan_run%dom(i_swan)%n_meteofiles_dom
+            success = addmeteoitem(swan_grids(i_swan)%grid_name               , &
+                                 & swan_run%dom(i_swan)%meteofile_dom(i_meteo), &
+                                 & swan_grids(i_swan)%sferic                  , &
+                                 & swan_grids(i_swan)%mmax                    , &
+                                 & swan_grids(i_swan)%nmax                    )
+            call checkmeteoresult_wave(success)
+         enddo
+         !
          ! Allocate local copies of coordinate arrays
          ! Must be in flexible precision for the meteo module
          !
@@ -218,17 +229,6 @@ program waves_main
                               &    x_fp                        , &
                               &    y_fp                        )
          call checkmeteoresult_wave(success)
-         !
-         ! Read the meteo files
-         !
-         do i_meteo = 1, swan_run%dom(i_swan)%n_meteofiles_dom
-            success = addmeteoitem(swan_grids(i_swan)%grid_name               , &
-                                 & swan_run%dom(i_swan)%meteofile_dom(i_meteo), &
-                                 & swan_grids(i_swan)%sferic                  , &
-                                 & swan_grids(i_swan)%mmax                    , &
-                                 & swan_grids(i_swan)%nmax                    )
-            call checkmeteoresult_wave(success)
-         enddo
          !
          ! Deallocate local copies of coordinate arrays
          !
