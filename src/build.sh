@@ -294,11 +294,11 @@ else
     export LDFLAGSMT_ADDITIONAL="-lifcoremt"
 fi
 
-
 #---------------------
 # netcdf
-# export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
+ export NETCDFROOT=/p/delft3d/opt/netcdf-4.1.3/intel11.1
+ export PKG_CONFIG_PATH=/$NETCDFROOT/lib/pkgconfig:$PKG_CONFIG_PATH
+ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NETCDFROOT/lib
 
 
 #===============================================================================
