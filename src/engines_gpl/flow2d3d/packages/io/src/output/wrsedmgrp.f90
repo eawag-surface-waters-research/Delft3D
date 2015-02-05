@@ -169,14 +169,12 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
     !
     ! Add sediment transport and morphology fields
     !
-    if (lsedtot > 0) then
-        call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
-                  & lsed      ,lsedtot   ,irequest  ,fds       ,grnam5    , &
-                  & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    , &
-                  & filename  ,gdp       ,filetype  , &
-                  & mf        ,ml        ,nf        ,nl        , &
-                  & iarrc     ,kfsmin    ,kfsmax    )
-    endif
+    call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
+              & lsed      ,lsedtot   ,irequest  ,fds       ,grnam5    , &
+              & r(sbuu)   ,r(sbvv)   ,r(ws)     ,d(dps)    , &
+              & filename  ,gdp       ,filetype  , &
+              & mf        ,ml        ,nf        ,nl        , &
+              & iarrc     ,kfsmin    ,kfsmax    )
     !
     ! Add bedform fields
     !

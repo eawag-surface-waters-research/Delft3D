@@ -36,6 +36,7 @@ libKernelTimedep_la_SOURCES = \
          inceva.f90 \
          incmeteo.f90 \
          incrbc.f90 \
+         incsdu.f90 \
          inctem.f90 \
          incwav.f90 \
          rtc_comm_get.f90 \

@@ -62,6 +62,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     integer  , dimension(:)              , pointer :: smlay
     type (moroutputtype)                 , pointer :: moroutput
     logical                              , pointer :: scour
+    logical                              , pointer :: lfsdu
     real(fp), dimension(:)               , pointer :: xx
     real(fp), dimension(:)               , pointer :: rhosol
     real(fp), dimension(:)               , pointer :: cdryb
@@ -73,6 +74,8 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     real(fp), dimension(:)               , pointer :: dzdvv
     real(fp), dimension(:,:)             , pointer :: fixfac
     real(fp), dimension(:,:)             , pointer :: frac
+    real(fp), dimension(:)               , pointer :: sdu_t0
+    real(fp), dimension(:)               , pointer :: sdu_tn
     real(fp), dimension(:)               , pointer :: mudfrac
     real(fp), dimension(:)               , pointer :: sandfrac
     real(fp), dimension(:,:)             , pointer :: hidexp
@@ -218,6 +221,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     zumod          => gdp%gderosed%zumod
     mmaxgl         => gdp%gdparall%mmaxgl
     nmaxgl         => gdp%gdparall%nmaxgl
+    lfsdu          => gdp%gdprocs%lfsdu
+    sdu_t0         => gdp%gdsdu%sdu_t0
+    sdu_tn         => gdp%gdsdu%sdu_tn
     !
     kmaxout = size(smlay)
     if (smlay(1) == 0) then
@@ -297,8 +303,10 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SSWUU', ' ', IO_REAL4    , 3, dimids=(/iddim_n , iddim_mc, iddim_lsedtot/), longname='Suspended transport u-direction due to waves (u point)', unit=transpunit, acl='u')
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SSWVV', ' ', IO_REAL4    , 3, dimids=(/iddim_nc, iddim_m , iddim_lsedtot/), longname='Suspended transport v-direction due to waves (v point)', unit=transpunit, acl='v')
        endif
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SBUU', ' ', IO_REAL4        , 3, dimids=(/iddim_n , iddim_mc, iddim_lsedtot/), longname='Bed-load transport u-direction (u point)', unit=transpunit, acl='u')
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SBVV', ' ', IO_REAL4        , 3, dimids=(/iddim_nc, iddim_m , iddim_lsedtot/), longname='Bed-load transport v-direction (v point)', unit=transpunit, acl='v')
+       if (lsedtot > 0) then
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SBUU', ' ', IO_REAL4        , 3, dimids=(/iddim_n , iddim_mc, iddim_lsedtot/), longname='Bed-load transport u-direction (u point)', unit=transpunit, acl='u')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SBVV', ' ', IO_REAL4        , 3, dimids=(/iddim_nc, iddim_m , iddim_lsedtot/), longname='Bed-load transport v-direction (v point)', unit=transpunit, acl='v')
+       endif
        if (lsed > 0) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SSUU', ' ', IO_REAL4     , 3, dimids=(/iddim_n , iddim_mc, iddim_lsed/), longname='Suspended-load transport u-direction (u point)', unit=transpunit, acl='u')
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SSVV', ' ', IO_REAL4     , 3, dimids=(/iddim_nc, iddim_m , iddim_lsed/), longname='Suspended-load transport v-direction (v point)', unit=transpunit, acl='v')
@@ -316,6 +324,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'RCA', ' ', IO_REAL4      , 3, dimids=(/iddim_n, iddim_m, iddim_lsed/), longname='Near-bed reference concentration of sediment', unit='kg/m3', acl='z')
        endif
        call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DPS', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Bottom depth (zeta point)', unit='m', acl='z')
+       if (lfsdu) then       
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SDU', ' ', IO_REAL4         , 2, dimids=(/iddim_n, iddim_m/), longname='Cumulative bed level change due to subsidence/uplift', unit='m', acl='z')
+       endif    
        if (moroutput%dzduuvv) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DZDUU', ' ', IO_REAL4    , 2, dimids=(/iddim_n , iddim_mc/), longname='Bed slope in u-direction (u point)', acl='u')
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DZDVV', ' ', IO_REAL4    , 2, dimids=(/iddim_nc, iddim_m /), longname='Bed slope in v-direction (v point)', acl='v')
@@ -361,17 +372,21 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        ! Add mor fields  ! this is the same for nefis and netcdf... being moved out of the if-statement
        !
-       call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                 & 1         ,fds       ,grpnam    , &
-                 & filename  ,gdp       ,filetype  , &
-                 & mf        ,ml        ,nf        ,nl        ,iarrc     )
+       if (lsedtot > 0) then
+          call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                    & 1         ,fds       ,grpnam    , &
+                    & filename  ,gdp       ,filetype  , &
+                    & mf        ,ml        ,nf        ,nl        ,iarrc     )
+       endif
        !
        ! Add fluff fields  
        !
-       call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                   & 1         ,fds       ,grpnam    , &
-                   & filename  ,gdp       ,filetype  , &
-                   & mf        ,ml        ,nf        ,nl        ,iarrc     )
+       if (lsed > 0) then
+          call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                      & 1         ,fds       ,grpnam    , &
+                      & filename  ,gdp       ,filetype  , &
+                      & mf        ,ml        ,nf        ,nl        ,iarrc     )
+       endif
     case (REQUESTTYPE_WRITE)
        !
        ! Write data to file
@@ -798,53 +813,56 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           if (ierror /= 0) goto 9999
        endif
        !
-       ! element 'SBUU'
-       !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot) )
-       rbuff3(:, :, :) = -999.0_fp
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do m = 1, mmax
-             do n = 1, nmaxus
-                rbuff3(n, m, l) = sbuu(n, m, l)/rhol
+       if (lsedtot > 0) then
+          !
+          ! element 'SBUU'
+          !
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot) )
+          rbuff3(:, :, :) = -999.0_fp
+          do l = 1, lsedtot
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   rbuff3(n, m, l) = sbuu(n, m, l)/rhol
+                enddo
              enddo
           enddo
-       enddo
-       call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
-                     & nf, nl, mf, ml, iarrc, gdp, lsedtot, &
-                     & ierror, lundia, rbuff3, 'SBUU')
-       if (ierror /= 0) goto 9999
-       !
-       ! element 'SBVV'
-       !
-       rbuff3(:, :, :) = -999.0_fp
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do m = 1, mmax
-             do n = 1, nmaxus
-                rbuff3(n, m, l) = sbvv(n, m, l)/rhol
+          call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, lsedtot, &
+                        & ierror, lundia, rbuff3, 'SBUU')
+          if (ierror /= 0) goto 9999
+          !
+          ! element 'SBVV'
+          !
+          rbuff3(:, :, :) = -999.0_fp
+          do l = 1, lsedtot
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   rbuff3(n, m, l) = sbvv(n, m, l)/rhol
+                enddo
              enddo
           enddo
-       enddo
-       call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
-                     & nf, nl, mf, ml, iarrc, gdp, lsedtot, &
-                     & ierror, lundia, rbuff3, 'SBVV')
-       deallocate(rbuff3)
-       if (ierror /= 0) goto 9999
+          call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, lsedtot, &
+                        & ierror, lundia, rbuff3, 'SBVV')
+          deallocate(rbuff3)
+          if (ierror /= 0) goto 9999
+       endif
        !
        if (lsed > 0) then
           !
@@ -994,6 +1012,24 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                     & ierror, lundia, dps, 'DPS')
        if (ierror /= 0) goto 9999
        !
+       ! element 'SDU' (subsidence/uplift)
+       !
+       if (lfsdu) then       
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2(:, :) = -999.0_fp
+          do m = 1, mmax
+             do n = 1, nmaxus
+                call n_and_m_to_nm(n, m, nm, gdp)
+                rbuff2(n, m) = sdu_tn(nm) - sdu_t0(nm)
+             enddo
+          enddo
+          call wrtarray_nm(fds, filename, filetype, grpnam, celidt, &
+                       & nf, nl, mf, ml, iarrc, gdp, &
+                       & ierror, lundia, rbuff2, 'SDU')
+          deallocate(rbuff2)
+          if (ierror/=0) goto 9999
+       endif          
+       !
        if (moroutput%dzduuvv) then
           !
           ! element 'DZDUU'
@@ -1139,19 +1175,23 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        ! Add mor fields
        !
-       call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                 & 2         ,fds       ,grpnam    , &
-                 & filename  ,gdp       ,filetype  , &
-                 & mf        ,ml        ,nf        ,nl        ,iarrc     )
-       if (error) goto 9999
+       if (lsedtot > 0) then
+          call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                    & 2         ,fds       ,grpnam    , &
+                    & filename  ,gdp       ,filetype  , &
+                    & mf        ,ml        ,nf        ,nl        ,iarrc     )
+          if (error) goto 9999
+       endif
        !
        ! Add fluff fields
        !
-       call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                   & 2         ,fds       ,grpnam    , &
-                   & filename  ,gdp       ,filetype  , &
-                   & mf        ,ml        ,nf        ,nl        ,iarrc     )
-       if (error) goto 9999
+       if (lsed > 0) then
+          call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
+                      & 2         ,fds       ,grpnam    , &
+                      & filename  ,gdp       ,filetype  , &
+                      & mf        ,ml        ,nf        ,nl        ,iarrc     )
+          if (error) goto 9999
+       endif
        !
 9999   continue
        if (ierror/= 0) error = .true.

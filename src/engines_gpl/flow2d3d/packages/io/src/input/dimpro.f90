@@ -6,7 +6,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 & wavcmp    ,ncmax     ,culvert   ,dredge    ,filbar    , &
                 & filcdw    ,snelli    ,cnstwv    ,veg3d     ,waveol    , &
                 & filbub    ,lrdamp    ,sbkol     ,bubble    ,nfl       , &
-                & nflmod    ,soort     ,gdp       )
+                & nflmod    ,soort     ,lfsdu     ,lfsdus1   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -90,6 +90,8 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     logical        , intent(out) :: drogue  !  Description and declaration in procs.igs
     logical                      :: error   !! Flag=TRUE if an error is encountered
     logical                      :: mudlay  !  Description and declaration in procs.igs
+    logical        , intent(out) :: lfsdu   !  Description and declaration in procs.igs
+    logical        , intent(out) :: lfsdus1 !  Description and declaration in procs.igs
     logical        , intent(out) :: lrdamp  !  Description and declaration in procs.igs
     logical        , intent(in)  :: noui    !! Flag true if program calling routine is not User Interface
     logical        , intent(out) :: nfl     !! Flag true if Near field computations are requested
@@ -110,10 +112,12 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     character(256)               :: filbub
     character(256)               :: filcdw
     character(256)               :: nflmod
+    character(256)               :: filsdu  ! Temporary file name for the subsidence/uplift option   
 !
 ! Local variables
 !
     integer                   :: istof  ! Flag to detect if any constituent has been specified 
+    integer                   :: isdu   ! Flag to detect if subsidence/uplift should affect water level 
     integer                   :: lconst ! number of constituents, including sediments
     integer                   :: lenc   ! Help variable 
     integer        , external :: newlun
@@ -385,5 +389,22 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     if (sbkConfigFile /= ' ') then
        sbkol = .true.
     endif
+    !
+    ! Subsidence/Uplift 
+    !
+    filsdu = ' '
+    lfsdu = .false.
+    call prop_get_string(gdp%mdfile_ptr, '*', 'Filsdu', filsdu)
+    if (filsdu /= ' ') then
+       lfsdu = .true.
+    endif
+    !    
+    lfsdus1 = .false.
+    call prop_get_string(gdp%mdfile_ptr, '*', 'SduS1', chulp)
+    isdu = max(index(chulp(:1), 'Y') , index(chulp(:1), 'y'))
+    if (isdu /= 0) then
+        lfsdus1 = .true. 
+    end if 
+    !
  9999 continue
 end subroutine dimpro

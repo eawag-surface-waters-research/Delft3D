@@ -194,8 +194,10 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        if (filetype == FTYPE_NEFIS) then
           call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'ITHISS', ' ', IO_INT4       , 0, longname='timestep number (ITHISS*DT*TUNIT := time in sec from ITDATE)')
        endif
-       call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFAC', ' ', IO_REAL4      , 0, longname='morphological acceleration factor (MORFAC)')
-       call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFT', ' ', IO_REAL8       , 0, longname='morphological time (days since start of simulation)', unit='days')
+       if (lsedtot > 0) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFAC', ' ', IO_REAL4      , 0, longname='morphological acceleration factor (MORFAC)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFT', ' ', IO_REAL8       , 0, longname='morphological time (days since start of simulation)', unit='days')
+       endif
        !
        ! his-sed-series: stations
        !
@@ -206,12 +208,16 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRSDEQ', ' ', IO_REAL4, 3, dimids=(/iddim_nostat, iddim_kmax, iddim_lsed/), longname='Equilibrium concentration of sediment at station (2D only)', unit='kg/m3', attribs=(/idatt_sta/) )
            endif
          endif
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZBDSED', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Available mass of sediment at bed at station', unit='kg/m2', attribs=(/idatt_sta/) )
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPSED', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Sediment thickness at bed at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+         if (lsedtot > 0) then
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZBDSED', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Available mass of sediment at bed at station', unit='kg/m2', attribs=(/idatt_sta/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPSED', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Sediment thickness at bed at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+         endif
          call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPS', ' ', IO_REAL4      , 1, dimids=(/iddim_nostat/), longname='Morphological depth at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
-         transpunit = sedunit // '/(s m)'
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBU', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBV', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+         if (lsedtot > 0) then
+            transpunit = sedunit // '/(s m)'
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBU', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBV', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+         endif
          if (lsed > 0) then
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSU', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSV', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
@@ -223,12 +229,16 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        !
        if (ntruv > 0) then
          transpunit = sedunit // '/s'
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTR', ' ', IO_REAL4      , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Instantaneous bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+         if (lsedtot > 0) then
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTR', ' ', IO_REAL4      , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Instantaneous bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+         endif
          if (lsed > 0) then         
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTR', ' ', IO_REAL4    , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Instantaneous susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
          transpunit = sedunit
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTRC', ' ', IO_REAL4     , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Cumulative bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+         if (lsedtot > 0) then
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTRC', ' ', IO_REAL4     , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Cumulative bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+         endif
          if (lsed > 0) then
            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTRC', ' ', IO_REAL4   , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Cumulative susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
@@ -252,17 +262,20 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
           if (ierror/= 0) goto 9999
        endif
        !
-       ! element 'MORFAC'
-       !
-       call wrtvar(fds, filename, filetype, grnam4, celidt, &
-                 & gdp, ierror, lundia, morfac, 'MORFAC')
-       if (ierror/= 0) goto 9999
-       !
-       ! element 'MORFT'
-       !
-       call wrtvar(fds, filename, filetype, grnam4, celidt, &
-                 & gdp, ierror, lundia, morft, 'MORFT')
-       if (ierror/= 0) goto 9999
+       if (lsedtot > 0) then
+          !
+          ! element 'MORFAC'
+          !
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, morfac, 'MORFAC')
+          if (ierror/= 0) goto 9999
+          !
+          ! element 'MORFT'
+          !
+          call wrtvar(fds, filename, filetype, grnam4, celidt, &
+                    & gdp, ierror, lundia, morft, 'MORFT')
+          if (ierror/= 0) goto 9999
+       endif
        !
        if (nostat > 0) then
           if (lsed > 0) then     
@@ -291,20 +304,23 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              endif
           endif
           !
-          ! element 'ZBDSED'
-          !
-          call wrtarray_n(fds, filename, filetype, grnam5, &
-                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
-                 & lsedtot, &
-                 & ierror, lundia, zbdsed, 'ZBDSED', station)
-          if (ierror/= 0) goto 9999
-          !
-          ! element 'ZDPSED'
-          !
-          call wrtarray_n(fds, filename, filetype, grnam5, &
-                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
-                 & ierror, lundia, zdpsed, 'ZDPSED', station)
-          if (ierror/= 0) goto 9999
+          if (lsedtot > 0) then
+             !
+             ! element 'ZBDSED'
+             !
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & lsedtot, &
+                    & ierror, lundia, zbdsed, 'ZBDSED', station)
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'ZDPSED'
+             !
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & ierror, lundia, zdpsed, 'ZDPSED', station)
+             if (ierror/= 0) goto 9999
+          endif
           !
           ! element 'ZDPS'
           !
@@ -313,49 +329,52 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                  & ierror, lundia, zdps, 'ZDPS', station)
           if (ierror/= 0) goto 9999
           !
-          ! element 'ZSBU'
-          !
-          allocate(rbuff2(nostat,lsedtot), stat=istat)
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, nostat
-                rbuff2(n, l) = zsbu(n, l)/rhol
+          if (lsedtot > 0) then
+             !
+             ! element 'ZSBU'
+             !
+             allocate(rbuff2(nostat,lsedtot), stat=istat)
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, nostat
+                   rbuff2(n, l) = zsbu(n, l)/rhol
+                enddo
              enddo
-          enddo
-          call wrtarray_n(fds, filename, filetype, grnam5, &
-                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
-                 & lsedtot, &
-                 & ierror, lundia, rbuff2, 'ZSBU', station)
-          if (ierror/= 0) goto 9999
-          !
-          ! element 'ZSBV'
-          !
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, nostat
-                rbuff2(n, l) = zsbv(n, l)/rhol
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & lsedtot, &
+                    & ierror, lundia, rbuff2, 'ZSBU', station)
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'ZSBV'
+             !
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, nostat
+                   rbuff2(n, l) = zsbv(n, l)/rhol
+                enddo
              enddo
-          enddo
-          call wrtarray_n(fds, filename, filetype, grnam5, &
-                 & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
-                 & lsedtot, &
-                 & ierror, lundia, rbuff2, 'ZSBV', station)
-          deallocate(rbuff2)
-          if (ierror/= 0) goto 9999
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
+                    & lsedtot, &
+                    & ierror, lundia, rbuff2, 'ZSBV', station)
+             deallocate(rbuff2)
+             if (ierror/= 0) goto 9999
+          endif
           !
           if (lsed > 0) then     
              !
@@ -417,49 +436,52 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        !
        if (ntruv>0) then
           !
-          ! element 'SBTR'
-          !
-          allocate(rbuff2(ntruv, lsedtot), stat=istat)
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, ntruv
-                rbuff2(n, l) = sbtr(n, l)/rhol
+          if (lsedtot > 0) then
+             !
+             ! element 'SBTR'
+             !
+             allocate(rbuff2(ntruv, lsedtot), stat=istat)
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, ntruv
+                   rbuff2(n, l) = sbtr(n, l)/rhol
+                enddo
              enddo
-          enddo
-          call wrtarray_n(fds, filename, filetype, grnam5, &
-                 & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
-                 & lsedtot, &
-                 & ierror, lundia, rbuff2, 'SBTR', station)
-          if (ierror/= 0) goto 9999
-          !
-          ! element 'SBTRC'
-          !
-          do l = 1, lsedtot
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, ntruv
-                rbuff2(n, l) = sbtrc(n, l)/rhol
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                    & lsedtot, &
+                    & ierror, lundia, rbuff2, 'SBTR', station)
+             if (ierror/= 0) goto 9999
+             !
+             ! element 'SBTRC'
+             !
+             do l = 1, lsedtot
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, ntruv
+                   rbuff2(n, l) = sbtrc(n, l)/rhol
+                enddo
              enddo
-          enddo
-          call wrtarray_n(fds, filename, filetype, grnam5, &
-                 & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
-                 & lsedtot, &
-                 & ierror, lundia, rbuff2, 'SBTRC', station)
-          deallocate(rbuff2)
-          if (ierror/= 0) goto 9999
+             call wrtarray_n(fds, filename, filetype, grnam5, &
+                    & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
+                    & lsedtot, &
+                    & ierror, lundia, rbuff2, 'SBTRC', station)
+             deallocate(rbuff2)
+             if (ierror/= 0) goto 9999
+          endif
           !
           if (lsed > 0) then     
              !

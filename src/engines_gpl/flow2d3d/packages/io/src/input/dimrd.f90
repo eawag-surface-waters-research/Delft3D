@@ -5,7 +5,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
                & flmd2d    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , &
                & culvert   ,dredge    ,cdwstruct ,snelli    ,cnstwv    , &
                & veg3d     ,waveol    ,lrdamp    ,sbkol     ,bubble    , &
-               & nfl       ,nflmod    ,gdp       )
+               & nfl       ,nflmod    ,lfsdu     ,lfsdus1   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -126,6 +126,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     logical        , intent(out) :: htur2d    !  Description and declaration in procs.igs
     logical                      :: iweflg    !  Description and declaration in procs.igs
     logical        , intent(out) :: lrdamp
+    logical        , intent(out) :: lfsdu
+    logical        , intent(out) :: lfsdus1
     logical                      :: mudlay    !  Description and declaration in procs.igs
     logical        , intent(out) :: nonhyd
     logical                      :: roller
@@ -295,6 +297,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     veg3d   = .false.
     dredge  = .false.
     drogue  = .false.
+    lfsdu   = .false.
+    lfsdus1 = .false.
     lrdamp  = .false.
     nonhyd  = .false.
     roller  = .false.
@@ -319,7 +323,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
               & wavcmp    ,ncmax     ,culvert   ,dredge    ,filbar    , &
               & filcdw    ,snelli    ,cnstwv    ,veg3d     ,waveol    , &
               & filbub    ,lrdamp    ,sbkol     ,bubble    ,nfl       , &
-              & nflmod    ,soort     ,gdp       )
+              & nflmod    ,soort     ,lfsdu     ,lfsdus1   ,gdp       )
     if (error) goto 9999
     !
     ! read MMAX, NMAX, KMAX

@@ -70,6 +70,7 @@ libDataGDP_la_SOURCES = \
          initrtc.f90 \
          initsafe.f90 \
          initscour.f90 \
+         initsdu.f90 \
          initsnel.f90 \
          initsobek.f90 \
          initstations.f90 \

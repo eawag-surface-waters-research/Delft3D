@@ -67,6 +67,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     integer                              , pointer :: nsrc
     integer                              , pointer :: nostat
     integer                              , pointer :: ntruv
+    logical                              , pointer :: lfsdu
     logical                              , pointer :: zmodel
     integer(pntrsize)                    , pointer :: ibuff
     integer(pntrsize)                    , pointer :: irocol
@@ -341,6 +342,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     nmaxgl              => gdp%gdparall%nmaxgl
     order_tra           => gdp%gdparall%order_tra
     order_sta           => gdp%gdparall%order_sta
+    lfsdu               => gdp%gdprocs%lfsdu
     !
     if (wrifou) then
        ifile = FILOUT_FOU
@@ -506,7 +508,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
                     & mf        ,ml        ,nf        ,nl        ,gdp       )
           if (error) goto 9999
           !
-          if (lsedtot>0 .or. lfbedfrm) then
+          if (lsedtot>0 .or. lfbedfrm .or. lfsdu) then
              call wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
                           & kmax      ,nmaxus    ,lsed      ,lsedtot   , &
                           & i(kfsmin) ,i(kfsmax) ,irequest  ,fds       ,iarrc     , &

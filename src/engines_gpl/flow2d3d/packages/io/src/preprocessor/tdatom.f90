@@ -124,6 +124,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     logical                         , pointer :: bubble 
     logical                         , pointer :: nfl 
     logical                         , pointer :: v2dwbl
+    logical                         , pointer :: lfsdu
+    logical                         , pointer :: lfsdus1
     integer                         , pointer :: rtcmod 
     logical                         , pointer :: reusetmp !!  TRUE when temporary files will be reused 
                                                           !!  if possible 
@@ -367,6 +369,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     veg3d       => gdp%gdprocs%veg3d 
     snelli      => gdp%gdprocs%snelli 
     lrdamp      => gdp%gdprocs%lrdamp 
+    lfsdu       => gdp%gdprocs%lfsdu
+    lfsdus1     => gdp%gdprocs%lfsdus1
     sbkol       => gdp%gdprocs%sbkol 
     bubble      => gdp%gdprocs%bubble 
     nfl         => gdp%gdprocs%nfl 
@@ -396,6 +400,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     drogue      = .false. 
     htur2d      = .false. 
     iweflg      = .false. 
+    lfsdu       = .false. 
+    lfsdus1     = .false. 
     lrdamp      = .false. 
     roller      = .false. 
     rtcmod      =  noRTC 
@@ -472,7 +478,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & flmd2l    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , & 
                  & culvert   ,dredge    ,cdwstruct ,snelli    ,cnstwv    , & 
                  & veg3d     ,waveol    ,lrdamp    ,sbkol     ,bubble    , & 
-                 & nfl       ,nflmod    ,gdp       ) 
+                 & nfl       ,nflmod    ,lfsdu     ,lfsdus1   ,gdp       ) 
         if (error) goto 9990 
         !
         istat = 0

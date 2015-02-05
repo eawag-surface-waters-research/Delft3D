@@ -96,28 +96,50 @@ function checkmeteoheader(meteoitem) result(success)
        !
        ! Check quantity names
        !
-       if (meteoitem%quantities(1) /= 'x_wind' ) then
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting x_wind, but getting ', &
-              & trim(meteoitem%quantities(1))
+       if (meteoitem%n_quantity == 1) then 
+          if (meteoitem%quantities(1) /= 'bedrock_surface_elevation') then
+             write(meteomessage, '(2a)') 'Field input: Incorrect quantity given, expecting bedrock_surface_elevation, but getting ', &
+                 & trim(meteoitem%quantities(1))
+             success = .false.
+             return
+          endif
+       elseif (meteoitem%n_quantity == 3) then 
+          if (meteoitem%quantities(1) /= 'x_wind') then
+             write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting x_wind, but getting ', &
+                 & trim(meteoitem%quantities(1))
+             success = .false.
+             return
+          endif
+          if (meteoitem%quantities(2) /= 'y_wind' ) then
+             write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting y_wind, but getting ', &
+                 & trim(meteoitem%quantities(2))
+             success = .false.
+             return
+          endif
+          if (meteoitem%quantities(3) /= 'air_pressure' ) then
+             write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting air_pressure, but getting ', &
+                 & trim(meteoitem%quantities(3))
+             success = .false.
+             return
+          endif
+       else
+          write(meteomessage, '(a)') 'Meteo input: Incorrect number of quantities, expecting 1 or 3.'
           success = .false.
           return
-       endif
-       if (meteoitem%quantities(2) /= 'y_wind' ) then
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting y_wind, but getting ', &
-              & trim(meteoitem%quantities(2))
+       endif 
+       !
+       ! Check units for bedrock_surface_elevation
+       !
+       if (meteoitem%quantities(1) == 'bedrock_surface_elevation' .and. meteoitem%units(1) /= 'm' ) then
+          write(meteomessage, '(2a)') 'Field input: Incorrect unit given for bedrock_surface_elevation, expecting m, but getting ', &
+              & trim(meteoitem%units(1))
           success = .false.
           return
-       endif
-       if (meteoitem%quantities(3) /= 'air_pressure' ) then
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting air_pressure, but getting ', &
-              & trim(meteoitem%quantities(3))
-          success = .false.
-          return
-       endif
+       endif       
        !
        ! Check units for x_wind
        !
-       if (meteoitem%units(1) /= 'm s-1' ) then
+       if (meteoitem%quantities(1) == 'x_wind' .and. meteoitem%units(1) /= 'm s-1' ) then
           write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for x_wind, expecting m s-1, but getting ', &
               & trim(meteoitem%units(1))
           success = .false.
@@ -126,25 +148,29 @@ function checkmeteoheader(meteoitem) result(success)
        !
        ! Check units for y_wind
        !
-       if (meteoitem%units(2) /= 'm s-1') then
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for y_wind, expecting degree, but getting ', &
-              & trim(meteoitem%units(2))
-          success = .false.
-          return
-       endif
+       if (meteoitem%n_quantity == 3) then 
+          if (meteoitem%units(2) /= 'm s-1') then
+              write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for y_wind, expecting degree, but getting ', &
+                 & trim(meteoitem%units(2))
+              success = .false.
+              return
+           endif
+       endif    
        !
        ! Check units for air_pressure
        !
-       if     (meteoitem%units(3) == 'Pa'  ) then
-          meteoitem%p_conv = 1.0_hp
-       elseif (meteoitem%units(3) == 'mbar') then
-          meteoitem%p_conv = 100.0_hp
-       else
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for air_pressure, expecting Pa or mbar, but getting ', &
-              & trim(meteoitem%units(3))
-          success = .false.
-          return
-       endif
+       if (meteoitem%n_quantity == 3) then 
+          if     (meteoitem%units(3) == 'Pa'  ) then
+             meteoitem%p_conv = 1.0_hp
+          elseif (meteoitem%units(3) == 'mbar') then
+             meteoitem%p_conv = 100.0_hp
+          else
+             write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for air_pressure, expecting Pa or mbar, but getting ', &
+             & trim(meteoitem%units(3))
+             success = .false.
+             return
+          endif
+       endif   
     elseif (meteoitem%meteotype == 'meteo_on_equidistant_grid') then
        !
        ! Wind on a separate equidistant grid. If the FLOW grid is spherical, the meteo grid must be as well.
@@ -465,8 +491,19 @@ function checkmeteoheader(meteoitem) result(success)
           meteoitem%mrow   = .false.
        endif
        !
+    else if (meteoitem%meteotype == 'field_on_computational_grid') then
+       if ( meteoitem%quantities(1) == 'uplift_rate_reference_elevation' ) then
+          !
+          ! Correct quantity specified
+          !
+       else   
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting uplift_rate_reference_elevation, but getting ', &
+              & trim(meteoitem%quantities(1))
+          success = .false.
+          return    
+       end if   
     else
-       write(meteomessage, '(2a)') 'Meteo input: Inconsistent filetype, expecting uniuvp, meteo_on_computational_grid, meteo_on_equidistant_grid, meteo_on_curvilinear_grid or meteo_on_spiderweb_grid, but getting ', &
+       write(meteomessage, '(2a)') 'Meteo input: Inconsistent filetype, expecting uniuvp, meteo_on_computational_grid, field_on_computational_grid, meteo_on_equidistant_grid, meteo_on_curvilinear_grid or meteo_on_spiderweb_grid, but getting ', &
            & trim(meteoitem%meteotype)
        success = .false.
        return
@@ -491,6 +528,8 @@ function checkmeteoheader(meteoitem) result(success)
        meteoitem%quantities(1) = 'precip'
     elseif (   meteoitem%quantities(1) == 'sw_radiation_flux'      ) then
        meteoitem%quantities(1) = 'swrf'
+    elseif (   meteoitem%quantities(1) == 'bedrock_surface_elevation'    ) then
+       meteoitem%quantities(1) = 'sdu'
     endif
     !
     if (       meteoitem%quantities(2) == 'wind_from_direction' &

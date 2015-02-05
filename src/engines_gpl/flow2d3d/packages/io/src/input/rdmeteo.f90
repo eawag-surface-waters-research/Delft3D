@@ -81,6 +81,8 @@ subroutine rdmeteo(gdp, ecwind)
    type (gd_heat)           , pointer :: gdheat
    integer                  , pointer :: lundia
    real(fp)                 , pointer :: paver
+   logical                  , pointer :: lfsdu
+   logical                  , pointer :: lfsdus1
    logical                  , pointer :: pcorr
    logical                  , pointer :: wind
    logical                  , pointer :: temp
@@ -142,6 +144,8 @@ subroutine rdmeteo(gdp, ecwind)
    swrf_file     => gdp%gdheat%swrf_file
    solrad_read   => gdp%gdheat%solrad_read
    gdheat        => gdp%gdheat
+   lfsdu         => gdp%gdprocs%lfsdu 
+   lfsdus1       => gdp%gdprocs%lfsdus1
    lundia        => gdp%gdinout%lundia
    paver         => gdp%gdnumeco%paver
    pcorr         => gdp%gdnumeco%pcorr
@@ -490,6 +494,27 @@ subroutine rdmeteo(gdp, ecwind)
       endif
    else
       swrf_file = .false.
+   endif
+   !
+   !  Subsidence/Uplift 
+   !
+   filename = ' '
+   call prop_get_string(gdp%mdfile_ptr,'*','Filsdu',filename)
+   if (filename /= ' ') then
+      if (.not.associated(gdp%gdsdu%sdu_t0)) then 
+          allocate (gdp%gdsdu%sdu_t0(gdp%d%nmlb:gdp%d%nmub), stat = istat)
+          if (istat == 0) allocate(gdp%gdsdu%sdu_tp(gdp%d%nmlb:gdp%d%nmub), stat=istat)
+          if (istat == 0) allocate(gdp%gdsdu%sdu_tn(gdp%d%nmlb:gdp%d%nmub), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'P004', 'memory alloc error for subsidence/uplift')
+             call d3stop(1, gdp)
+          endif    
+      endif          
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
+      call prterr(lundia, 'G051', 'Reading subsidence/uplift input on computational grid')
+      if (lfsdus1) then 
+         call prterr(lundia, 'G051', '   Subsidence/uplift effect on water level included.')
+      endif    
    endif
    !
    ! If block 'interpolation', notify meteo module

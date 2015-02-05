@@ -90,6 +90,8 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     logical          , pointer :: sbkol
     logical          , pointer :: bubble
     logical          , pointer :: nfl
+    logical          , pointer :: lfsdu
+    logical          , pointer :: lfsdus1
 !
 ! Global variables
 !
@@ -120,6 +122,8 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     culvert    => gdp%gdprocs%culvert
     dredge     => gdp%gdprocs%dredge
     drogue     => gdp%gdprocs%drogue
+    lfsdu      => gdp%gdprocs%lfsdu
+    lfsdus1    => gdp%gdprocs%lfsdus1
     wave       => gdp%gdprocs%wave
     waveol     => gdp%gdprocs%waveol
     threed     => gdp%gdprocs%threed
@@ -183,6 +187,8 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     sbkol     = .false.
     bubble    = .false.
     nfl       = .false.
+    lfsdu     = .false.    
+    lfsdus1   = .false.    
     !
     ! read dimensions out of md-file
     !
@@ -193,7 +199,7 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
              & flmd2l    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , &
              & culvert   ,dredge    ,cdwstruct ,snelli    ,cnstwv    , &
              & veg3d     ,waveol    ,lrdamp    ,sbkol     ,bubble    , &
-             & nfl       ,nflmod    ,gdp       )
+             & nfl       ,nflmod    ,lfsdu     ,lfsdus1   ,gdp       )
     if (error) goto 9999
     !
     ! carry out domain decomposition based on load balancing

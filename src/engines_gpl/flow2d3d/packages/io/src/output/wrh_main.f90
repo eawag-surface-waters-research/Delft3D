@@ -72,6 +72,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
     integer                              , pointer :: ntruv
     integer                              , pointer :: itstrt
     integer                              , pointer :: ithisi
+    logical                              , pointer :: lfsdu
     logical                              , pointer :: wind
     logical                              , pointer :: culvert
     logical                              , pointer :: dredge
@@ -280,6 +281,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
     zbot                => gdp%gdzmodel%zbot
     order_sta           => gdp%gdparall%order_sta
     order_tra           => gdp%gdparall%order_tra
+    lfsdu               => gdp%gdprocs%lfsdu
     !
     call getdatagroup(gdp, FILOUT_HIS, 'his-const', group)
     first               => group%first
@@ -436,7 +438,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
           call wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
                        & fds       ,gdp       )
           !
-          if (lsedtot>0) then
+          if (lsedtot>0 .or. lfsdu) then
              call wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                        & nostat    ,kmax      ,lsed      ,lsedtot   , &
                        & r(zws)    ,r(zrsdeq) ,r(zbdsed) ,r(zdpsed) ,r(zdps)   , &

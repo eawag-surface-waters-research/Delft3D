@@ -73,4 +73,6 @@ type gd_procs
    logical :: bubble               = .false. ! Bubble screen
    logical :: nfl                  = .false. ! Near field computations   
    logical :: xbeach               = .false. ! XBeach wave driver is used   
+   logical :: lfsdu                = .false. ! Subsidence and Uplift included  
+   logical :: lfsdus1              = .false. ! Subsidence and Uplift effects waterlevel  
 end type gd_procs

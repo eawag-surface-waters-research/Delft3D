@@ -191,6 +191,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     logical                              , pointer :: sbkol
     logical                              , pointer :: nfl
     logical                              , pointer :: bubble
+    logical                              , pointer :: lfsdu
     logical , dimension(:)               , pointer :: flbub
     logical                              , pointer :: rtcact
     integer(pntrsize)                    , pointer :: alfas
@@ -731,6 +732,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     sbkol               => gdp%gdprocs%sbkol
     nfl                 => gdp%gdprocs%nfl
     bubble              => gdp%gdprocs%bubble
+    lfsdu               => gdp%gdprocs%lfsdu
     flbub               => gdp%gdbubble%flbub
     rtcact              => gdp%gdrtc%rtcact
     alfas               => gdp%gdr_i_ch%alfas
@@ -3189,8 +3191,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! mass flux and temporary set in WRKB5 (U0EUL) and WRKB6 (V0EUL)
        ! these are used in BOTT3D
        !
+       call timer_start(timer_3dmor, gdp)
        if ((lsedtot>0) .and. (.not.flmd2l)) then
-          call timer_start(timer_3dmor, gdp)
           !
           ! compute suspended sediment transport vector at the end of each
           ! dt. Would be better to just calculate it when required for
@@ -3230,20 +3232,27 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & i(kcv)    ,icx       ,icy       ,timhr     , &
                     & nto       ,r(volum0) ,r(volum1) ,hdt       ,gdp       )
           call timer_stop(timer_bott3d, gdp)
-          if (bedupd) then
-                !
-                ! Recalculate DPU/DPV (depth at velocity points)
-                !
-                call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
-                        &  zmodel    , &
-                        &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
-                        &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
-                        &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
-                        &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
-                        &  r(thick)  ,gdp       )
-          endif
-          call timer_stop(timer_3dmor, gdp)
        endif
+       !
+       ! Subsidence/Uplift
+       !
+       if (lfsdu) then 
+          call incsdu(timhr  ,d(dps)   ,r(s1)   ,i(kcs)  ,i(kfs) ,gdp    )
+       endif
+       !
+       if (((lsedtot>0) .and. (.not.flmd2l) .and. bedupd) .or. lfsdu) then
+          !
+          ! Recalculate DPU/DPV (depth at velocity points)
+          !
+          call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
+                  &  zmodel    , &
+                  &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
+                  &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
+                  &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
+                  &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
+                  &  r(thick)  ,gdp       )
+       endif
+       call timer_stop(timer_3dmor, gdp)
        !
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &

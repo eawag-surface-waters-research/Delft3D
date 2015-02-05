@@ -148,6 +148,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     logical                              , pointer :: lftrto
     logical                              , pointer :: veg3d
     logical                              , pointer :: bubble
+    logical                              , pointer :: lfsdu
     integer(pntrsize)                    , pointer :: alfas
     integer(pntrsize)                    , pointer :: areau
     integer(pntrsize)                    , pointer :: areav
@@ -505,6 +506,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     lftrto              => gdp%gdprocs%lftrto
     veg3d               => gdp%gdprocs%veg3d
     bubble              => gdp%gdprocs%bubble
+    lfsdu               => gdp%gdprocs%lfsdu
     alfas               => gdp%gdr_i_ch%alfas
     areau               => gdp%gdr_i_ch%areau
     areav               => gdp%gdr_i_ch%areav
@@ -834,7 +836,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! before the first call to postpr.
     ! - windu, windv, patm
     ! - rhumarr, tairarr, clouarr, swrfarr
-    !
+    ! - sdu_t0 (subsidence/uplift) 
+    ! 
     if (wind) then
        call incmeteo(timhr     , grdang   , &
                    & r (windu ),r (windv ),r (patm  ), &
@@ -866,6 +869,10 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                            &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, swrfarr , 0)
        call checkmeteoresult(success, gdp)
     endif
+    if (lfsdu) then 
+       call incsdu(timhr  ,d(dps)   ,r(s1)   ,i(kcs)  ,i(kfs) ,gdp    )
+    endif                  
+
     !
     ! INIEVA: read initial arrays values for time dependent data for
     ! rainfall / evaporation model

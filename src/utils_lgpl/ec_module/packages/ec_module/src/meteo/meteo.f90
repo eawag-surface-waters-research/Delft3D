@@ -33,6 +33,7 @@ module meteo
 ! uniform                     : Delft3D-FLOW format: time, uniform windspeed, direction and pressure
 ! meteo_on_computational_grid : Space varying wind and pressure on the computational grid: time and fields of patm, windu, windv
 !                               on the computational (m,n) grid
+! field_on_computational_grid : same as meteo_on_computational_grid but more general
 ! meteo_on_equidistant_grid   : time and fields on on equidistant grid
 ! meteo_on_spiderweb_grid     : time and fields of patm, windspeed, wind_from_direction op spiderweb grid
 ! meteo_on_curvilinear_grid   : time and fields on own curvilinear grid
@@ -221,6 +222,9 @@ function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
            meteoitem%filetype = 4
         case ('meteo_on_curvilinear_grid')
            meteoitem%filetype = 5
+        case ('field_on_computational_grid')
+           meteoitem%meteotype = 'meteo_on_computational_grid'
+           meteoitem%filetype = 2
     end select
     !
     kxr = 3
@@ -233,7 +237,7 @@ function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
     case ( meteo_on_computational_grid )
        mxr     = nmax
        nxr     = mmax
-       kxr     = 3
+       kxr     = meteoitem%n_quantity
     case ( meteo_on_equidistant_grid )
        mxr = meteoitem%n_cols
        nxr = meteoitem%n_rows
@@ -403,9 +407,12 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
    !
    ! locals
    !
+   integer                             :: m
    integer                             :: mx
+   integer                             :: n
    integer                             :: nx
    integer                             :: kx
+   integer                             :: k
    integer                             :: minp
    integer                             :: it1
    real(fp)                            :: tread
@@ -481,6 +488,20 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
             !
             wz      => meteoitem%field(it1)%arr3d
             success =  read_spv_block(minp, meteoitem, wz, mx, nx, kx)
+            ! 
+            do k = 1,kx
+               !
+               ! Conversion of pressure to Pa (N/m2). If already Pa, p_conv = 1.0_hp 
+               !
+               if (meteoitem%quantities(k) == 'air_pressure') then
+                  do m = 1, size(wz,2)
+                     do n = 1, size(wz,1)
+                        wz(n,m,k) = wz(n,m,k) * meteoitem%p_conv
+                     enddo
+                  enddo
+               endif 
+            end do    
+            !
             if (.not. success) then
                return
             endif
@@ -851,8 +872,10 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                   k = 2
                case ( 'patm'  )
                   k = 3
+               case ( 'sdu' )
+                  k = 1
                case default
-                  meteomessage = 'meteo_on_computational_grid can only be used for windu, windv and patm'
+                  meteomessage = 'field_on_computational_grid can only be used for windu, windv and patm or uplift_rate_reference_elevation'
                   success = .false.
                   return
                end select

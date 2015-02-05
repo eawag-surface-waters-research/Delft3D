@@ -187,6 +187,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     logical                              , pointer :: roller
     logical                              , pointer :: sbkol
     logical                              , pointer :: bubble
+    logical                              , pointer :: lfsdu
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: seddif
@@ -653,6 +654,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     roller              => gdp%gdprocs%roller
     sbkol               => gdp%gdprocs%sbkol
     bubble              => gdp%gdprocs%bubble
+    lfsdu               => gdp%gdprocs%lfsdu
     alfas               => gdp%gdr_i_ch%alfas
     alpha               => gdp%gdr_i_ch%alpha
     areau               => gdp%gdr_i_ch%areau
@@ -2646,8 +2648,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        ! Compute change in bottom sediment and bottom elevation
        ! except when run parallel to fluid mud
        !
+       call timer_start(timer_3dmor, gdp)
        if ((lsedtot>0) .and. (.not.flmd2l)) then
-          call timer_start(timer_3dmor, gdp)
           !
           ! compute suspended sediment transport vector at the end of each
           ! dt. Would be better to just calculate it when required for
@@ -2673,99 +2675,106 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & r(dzv1)   ,i(kfsmin) ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
                       & i(kfvmax) ,hdt       ,gdp       )
           call timer_stop(timer_bott3d, gdp)
-          if (bedupd) then
-             !icx = nmaxddb
-             !icy = 1
-             !call z_updzm(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-             !           & icy       ,fout      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
-             !           & i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfsz1)  ,i(kfuz1)  , &
-             !           & i(kfvz1)  ,i(kfsmin) ,i(kfsmax) ,i(kfumin) ,i(kfumax) , &
-             !           & i(kfvmin) ,i(kfvmax) ,i(kspu)   ,i(kspv)   ,i(kcshyd) , &
-             !           & d(dps)    ,r(dpu)    ,r(dpv)    ,r(s1)     ,r(thick)  , &
-             !           & r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzu0)   ,r(dzv1)   , &
-             !           & r(dzv0)   ,r(dzs1)   ,r(dzs0)   ,r(sig)    ,'update'  ,gdp       )
-             !
-             ! Check for drying in waterlevel points in the X-direction
-             ! NOTE: Z_DRYCHK is called with arrays KFUZ0, KFVZ0 and KFSZ1. 
-             !       KFUZ0 and KFVZ0 are the arrays corresponding to the original geometry (S0)
-             !       KFSZ1 is to be determined, corresponding to the new geometry (S1)
-             !
-             itemp = 0
-             icx   = nmaxddb
-             icy   = 1
-             call timer_start(timer_drychk, gdp)
-             call z_drychk(itemp     ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
-                         & nfltyp    ,icx       ,icy       ,i(kfu)    ,i(kfv)    , &
-                         & i(kfs)    ,i(kcs)    ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
-                         & i(kfsmin) ,i(kfsmn0) ,i(kfsmax) ,i(kfsmx0) ,r(s1)     , &
-                         & r(r1)     ,d(dps)    ,r(qxk)    ,r(qyk)    ,r(w1)     , &
-                         & lstsci    ,r(dzs1)   ,r(sig)    ,nst       ,gdp       )
-             call timer_stop(timer_drychk, gdp)
-             !
-             ! Update the layer geometry in U-velocity points based on the new water levels S1
-             ! NOTE: Z_DRYCHKU is called with arrays KFUZ1, KFVZ1 and KFSZ1. 
-             !       KFSZ1 has just been determined, corresponding to the new geometry (S1)
-             !       KFUZ1 is to be determined, corresponding to the new geometry (S1)
-             !       KFVZ1 is updated to the new geomety in the second call to Z_DRYCHKU
-             !
-             icx   = nmaxddb
-             icy   = 1
-             call z_drychku(jstart    ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
-                          & i(kcs)    ,i(kfu)    ,i(kcu)    ,i(kspu)   ,i(kfsmax) , &
-                          & i(kfsmin) ,i(kfsz1)  ,i(kfuz1)  ,i(kfumin) ,i(kfumn0) ,i(kfumax) , &
-                          & i(kfumx0) ,r(hu)     ,r(s1)     ,r(dpu)    ,d(dps)    , &
-                          & r(umean)  ,r(u0)     ,r(u1)     ,r(dzu0)   ,r(dzu1)   , &
-                          & r(dzs1)   ,r(sig)    ,i(kfsmx0) ,r(guu)    ,r(qxk)    , &
-                          & gdp       )
-             !
-             ! Update the layer geometry in V-velocity points based on the new water levels S1
-             ! NOTE: Z_DRYCHKU is called with arrays KFUZ1, KFVZ1 and KFSZ1. 
-             !       KFSZ1 has just been determined, corresponding to the new geometry (S1)
-             !       KFVZ1 is to be determined, corresponding to the new geometry (S1)
-             !       KFUZ1 was updated to the new geomety after the first half time step
-             !
-             icx = 1
-             icy = nmaxddb
-             call z_drychku(jstart    ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
-                          & i(kcs)    ,i(kfv)    ,i(kcv)    ,i(kspv)   ,i(kfsmax) , &
-                          & i(kfsmin) ,i(kfsz1)  ,i(kfvz1)  ,i(kfvmin) ,i(kfvmn0) ,i(kfvmax) , &
-                          & i(kfvmx0) ,r(hv)     ,r(s1)     ,r(dpv)    ,d(dps)    , &
-                          & r(vmean)  ,r(v0)     ,r(v1)     ,r(dzv0)   ,r(dzv1)   , &
-                          & r(dzs1)   ,r(sig)    ,i(kfsmx0) ,r(gvv)    ,r(qyk)    , &
-                          & gdp       )
-             !
-             ! If requested by keyword ZTBML 
-             ! (Z-model TauBottom Modified Layering)
-             ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
-             !
-             if (ztbml) then
-                !
-                ! Call with modify_dzsuv set to 1 for all components, to modify dzs1, dzu1, dzv1
-                ! (and possibly R1 and qzk)
-                !
-                modify_dzsuv(1:3) = 1
-                ztbml_upd_r1      = .true.
-                call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci       ,icx      ,icy          , & 
-                                        & i(kfs)  ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
-                                        & i(kfu)  ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
-                                        & i(kfv)  ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
-                                        & r(r1)   ,r(s00)     ,r(s1)        ,r(sig)   ,modify_dzsuv , &
-                                        & hdt     ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
-                                        & r(vmean),r(dzs0)    ,ztbml_upd_r1 ,gdp          )
-             endif
-             !
-             ! Recalculate DPU/DPV (depth at velocity points)
-             !
-             call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
-                     &  zmodel    , &
-                     &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
-                     &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
-                     &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
-                     &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
-                     &  r(thick)  ,gdp       )
-          endif
-          call timer_stop(timer_3dmor, gdp)
        endif
+       !
+       ! Subsidence/Uplift
+       !
+       if (lfsdu) then 
+          call incsdu(timhr  ,d(dps)   ,r(s1)   ,i(kcs)  ,i(kfs) ,gdp    )
+       endif
+       !
+       if (((lsedtot>0) .and. (.not.flmd2l) .and. bedupd) .or. lfsdu) then
+          !icx = nmaxddb
+          !icy = 1
+          !call z_updzm(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+          !           & icy       ,fout      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+          !           & i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfsz1)  ,i(kfuz1)  , &
+          !           & i(kfvz1)  ,i(kfsmin) ,i(kfsmax) ,i(kfumin) ,i(kfumax) , &
+          !           & i(kfvmin) ,i(kfvmax) ,i(kspu)   ,i(kspv)   ,i(kcshyd) , &
+          !           & d(dps)    ,r(dpu)    ,r(dpv)    ,r(s1)     ,r(thick)  , &
+          !           & r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzu0)   ,r(dzv1)   , &
+          !           & r(dzv0)   ,r(dzs1)   ,r(dzs0)   ,r(sig)    ,'update'  ,gdp       )
+          !
+          ! Check for drying in waterlevel points in the X-direction
+          ! NOTE: Z_DRYCHK is called with arrays KFUZ0, KFVZ0 and KFSZ1. 
+          !       KFUZ0 and KFVZ0 are the arrays corresponding to the original geometry (S0)
+          !       KFSZ1 is to be determined, corresponding to the new geometry (S1)
+          !
+          itemp = 0
+          icx   = nmaxddb
+          icy   = 1
+          call timer_start(timer_drychk, gdp)
+          call z_drychk(itemp     ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
+                      & nfltyp    ,icx       ,icy       ,i(kfu)    ,i(kfv)    , &
+                      & i(kfs)    ,i(kcs)    ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
+                      & i(kfsmin) ,i(kfsmn0) ,i(kfsmax) ,i(kfsmx0) ,r(s1)     , &
+                      & r(r1)     ,d(dps)    ,r(qxk)    ,r(qyk)    ,r(w1)     , &
+                      & lstsci    ,r(dzs1)   ,r(sig)    ,nst       ,gdp       )
+          call timer_stop(timer_drychk, gdp)
+          !
+          ! Update the layer geometry in U-velocity points based on the new water levels S1
+          ! NOTE: Z_DRYCHKU is called with arrays KFUZ1, KFVZ1 and KFSZ1. 
+          !       KFSZ1 has just been determined, corresponding to the new geometry (S1)
+          !       KFUZ1 is to be determined, corresponding to the new geometry (S1)
+          !       KFVZ1 is updated to the new geomety in the second call to Z_DRYCHKU
+          !
+          icx   = nmaxddb
+          icy   = 1
+          call z_drychku(jstart    ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
+                       & i(kcs)    ,i(kfu)    ,i(kcu)    ,i(kspu)   ,i(kfsmax) , &
+                       & i(kfsmin) ,i(kfsz1)  ,i(kfuz1)  ,i(kfumin) ,i(kfumn0) ,i(kfumax) , &
+                       & i(kfumx0) ,r(hu)     ,r(s1)     ,r(dpu)    ,d(dps)    , &
+                       & r(umean)  ,r(u0)     ,r(u1)     ,r(dzu0)   ,r(dzu1)   , &
+                       & r(dzs1)   ,r(sig)    ,i(kfsmx0) ,r(guu)    ,r(qxk)    , &
+                       & gdp       )
+          !
+          ! Update the layer geometry in V-velocity points based on the new water levels S1
+          ! NOTE: Z_DRYCHKU is called with arrays KFUZ1, KFVZ1 and KFSZ1. 
+          !       KFSZ1 has just been determined, corresponding to the new geometry (S1)
+          !       KFVZ1 is to be determined, corresponding to the new geometry (S1)
+          !       KFUZ1 was updated to the new geomety after the first half time step
+          !
+          icx = 1
+          icy = nmaxddb
+          call z_drychku(jstart    ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
+                       & i(kcs)    ,i(kfv)    ,i(kcv)    ,i(kspv)   ,i(kfsmax) , &
+                       & i(kfsmin) ,i(kfsz1)  ,i(kfvz1)  ,i(kfvmin) ,i(kfvmn0) ,i(kfvmax) , &
+                       & i(kfvmx0) ,r(hv)     ,r(s1)     ,r(dpv)    ,d(dps)    , &
+                       & r(vmean)  ,r(v0)     ,r(v1)     ,r(dzv0)   ,r(dzv1)   , &
+                       & r(dzs1)   ,r(sig)    ,i(kfsmx0) ,r(gvv)    ,r(qyk)    , &
+                       & gdp       )
+          !
+          ! If requested by keyword ZTBML 
+          ! (Z-model TauBottom Modified Layering)
+          ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+          !
+          if (ztbml) then
+             !
+             ! Call with modify_dzsuv set to 1 for all components, to modify dzs1, dzu1, dzv1
+             ! (and possibly R1 and qzk)
+             !
+             modify_dzsuv(1:3) = 1
+             ztbml_upd_r1      = .true.
+             call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci       ,icx      ,icy          , & 
+                                     & i(kfs)  ,i(kfsmin)  ,i(kfsmax)    ,d(dps)   ,r(dzs1)      , &
+                                     & i(kfu)  ,i(kfumin)  ,i(kfumax)    ,r(dpu)   ,r(dzu1)      , &
+                                     & i(kfv)  ,i(kfvmin)  ,i(kfvmax)    ,r(dpv)   ,r(dzv1)      , &
+                                     & r(r1)   ,r(s00)     ,r(s1)        ,r(sig)   ,modify_dzsuv , &
+                                     & hdt     ,r(gsqs)    ,i(kfsmx0)    ,r(qzk)   ,r(umean)     , &
+                                     & r(vmean),r(dzs0)    ,ztbml_upd_r1 ,gdp          )
+          endif
+          !
+          ! Recalculate DPU/DPV (depth at velocity points)
+          !
+          call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
+                  &  zmodel    , &
+                  &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
+                  &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
+                  &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
+                  &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
+                  &  r(thick)  ,gdp       )
+       endif
+       call timer_stop(timer_3dmor, gdp)
        !
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &

@@ -101,6 +101,7 @@ module globaldata
     include 'rdpara.igs'
     include 'rivpro.igs'
     include 'scour.igs'
+    include 'sdu.igs' 
     include 'sobek.igs'
     include 'stations.igs'
     include 'tfzeta.igs'
@@ -188,6 +189,7 @@ module globaldata
        type (gd_rivpro)   , pointer :: gdrivpro
        type (gd_scour)    , pointer :: gdscour
        type (sedpar_type) , pointer :: gdsedpar
+       type (gd_sdu)      , pointer :: gdsdu
        type (gd_sobek)    , pointer :: gdsobek
        type (gd_stations) , pointer :: gdstations
        type (gd_tfzeta)   , pointer :: gdtfzeta

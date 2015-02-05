@@ -367,6 +367,7 @@ src/engines_gpl/flow2d3d/packages/data/include/restart.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/rivpro.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/rtc.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/scour.igs -text
+src/engines_gpl/flow2d3d/packages/data/include/sdu.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/snel.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/sobek.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/stations.igs -text
@@ -462,6 +463,7 @@ src/engines_gpl/flow2d3d/packages/data/src/gdp/initrestart.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initrtc.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initsafe.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initscour.f90 -text
+src/engines_gpl/flow2d3d/packages/data/src/gdp/initsdu.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initsnel.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initsobek.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/gdp/initstations.f90 -text
@@ -1210,6 +1212,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/timedep/incdis.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/inceva.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/incmeteo.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/incrbc.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/timedep/incsdu.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/inctem.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/incwav.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/timedep/rtc_comm_get.f90 -text

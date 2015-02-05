@@ -429,7 +429,8 @@
 		<File RelativePath="src\timedep\incbc.f90"/>
 		<File RelativePath="src\timedep\incbcc.f90"/>
 		<File RelativePath="src\timedep\incdis.f90"/>
-		<File RelativePath="src\timedep\inceva.f90"/>
+		<File RelativePath=".\src\timedep\inceva.f90"/>
+		<File RelativePath=".\src\timedep\incsdu.f90"/>
 		<File RelativePath="src\timedep\incmeteo.f90"/>
 		<File RelativePath="src\timedep\incrbc.f90"/>
 		<File RelativePath="src\timedep\inctem.f90"/>

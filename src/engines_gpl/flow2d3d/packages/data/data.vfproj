@@ -108,6 +108,7 @@
 		<File RelativePath="include\rivpro.igs"/>
 		<File RelativePath=".\include\rtc.igs"/>
 		<File RelativePath="include\scour.igs"/>
+		<File RelativePath=".\include\sdu.igs"/>
 		<File RelativePath="include\snel.igs"/>
 		<File RelativePath="include\stations.igs"/>
 		<File RelativePath="include\tablefile.igs"/>
@@ -227,6 +228,7 @@
 		<File RelativePath="src\gdp\initrtc.f90"/>
 		<File RelativePath="src\gdp\initsafe.f90"/>
 		<File RelativePath="src\gdp\initscour.f90"/>
+		<File RelativePath=".\src\gdp\initsdu.f90"/>
 		<File RelativePath="src\gdp\initsnel.f90"/>
 		<File RelativePath="src\gdp\initsobek.f90"/>
 		<File RelativePath="src\gdp\initstations.f90"/>

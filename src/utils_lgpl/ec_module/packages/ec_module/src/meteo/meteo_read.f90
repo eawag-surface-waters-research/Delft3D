@@ -458,6 +458,7 @@ function read_spv_block(minp, meteoitem, d, mx, nx, kx) result(success)
    !
    integer                    :: i
    integer                    :: j
+   integer                    :: k
    character(132)             :: rec
    !
    if ( size(d,1) .ne. mx .or. size(d,2) .ne. nx .or. size(d,3) .ne. kx ) then
@@ -466,59 +467,29 @@ function read_spv_block(minp, meteoitem, d, mx, nx, kx) result(success)
       return
    endif
    !
-   ! Loop over the first dimension in flow
+   ! Loop over the third dimension kx 
    !
-   do j = 1, mx
-      read(minp,*,end = 100, err=101) ( d(j,i,1), i = 1, nx )
-      do i = 1, nx
-         if (isnan(d(j,i,1))) goto 201
+   do k = 1, kx
+      do j = 1, mx
+         read(minp,*,end = 100, err=101) ( d(j,i,k), i = 1, nx )
+         do i = 1, nx
+            if (isnan(d(j,i,k))) goto 201
+         enddo
       enddo
-   enddo
-   do j = 1, mx
-      read(minp,*,end = 100, err=102) ( d(j,i,2), i = 1, nx )
-      do i = 1, nx
-         if (isnan(d(j,i,2))) goto 202
-      enddo
-   enddo
-   do j = 1, mx
-      read(minp,*,end = 100, err=103) ( d(j,i,3), i = 1, nx )
-      do i = 1, nx
-         if (isnan(d(j,i,3))) goto 203
-      enddo
-   enddo
-   !
-   ! Conversion of pressure to Pa (N/m2). If already Pa, p_conv = 1.0_hp
-   !
-   d(:,:,3) = d(:,:,3) * meteoitem%p_conv
+   enddo   
    !
    success = .true.
    return
 100 continue
-   meteomessage = 'Unexpected end of file in meteo_on_computational_grid file'
+   write(meteomessage,'(2a)') 'Unexpected end of file in field_on_computational_grid file ', trim(meteoitem%FILENAME)
    success = .false.
    return
 101 continue
-   meteomessage = 'Error reading wind u-field'
-   success = .false.
-   return
-102 continue
-   meteomessage = 'Error reading wind v-field'
-   success = .false.
-   return
-103 continue
-   meteomessage = 'Error reading pressure field'
+   write(meteomessage,'(3a,i0)') 'Error reading ', trim(meteoitem%FILENAME), 'for quanitity', k
    success = .false.
    return
 201 continue
-   meteomessage = 'NaN found in wind-u field'
-   success = .false.
-   return
-202 continue
-   meteomessage = 'NaN found in wind-v field'
-   success = .false.
-   return
-203 continue
-   meteomessage = 'NaN found in pressure drop field'
+   write(meteomessage,'(3a,i0)') 'NaN found in ', trim(meteoitem%FILENAME), 'for quanitity', k
    success = .false.
    return
 end function read_spv_block
