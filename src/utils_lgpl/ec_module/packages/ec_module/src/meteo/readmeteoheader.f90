@@ -96,8 +96,9 @@ function readmeteoheader(minp, meteoitem) result(success)
              ! File has no header 
              ! Contains only a time series for uniform (in space) wind
              !
+             meteoitem%n_quantity    = 3
              meteoitem%meteotype     = 'uniuvp'
-             meteoitem%filetype      = 1
+             meteoitem%filetype      = uniuvp
              meteoitem%quantities(1) = 'x_wind'
              meteoitem%quantities(2) = 'y_wind'
              meteoitem%quantities(3) = 'air_pressure'
