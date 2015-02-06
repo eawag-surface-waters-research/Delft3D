@@ -510,8 +510,9 @@ subroutine rdmeteo(gdp, ecwind)
              call d3stop(1, gdp)
           endif    
       endif          
-      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
       call prterr(lundia, 'G051', 'Reading subsidence/uplift input on computational grid')
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
+      call checkmeteoresult(success, gdp)
       if (lfsdus1) then 
          call prterr(lundia, 'G051', '   Subsidence/uplift effect on water level included.')
       endif    

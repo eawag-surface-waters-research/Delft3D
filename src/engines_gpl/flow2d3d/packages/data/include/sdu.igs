@@ -46,8 +46,8 @@ type gd_sdu
     ! 
     ! logicals
     !
-    logical                             :: sdufirst  = .true.    ! Is it the first time that the .sdu is read? 
-    logical                             :: sdumorfac = .false.   ! Is the time in the .sdu file the morphological time? 
+    logical                             :: sdufirst  ! Is it the first time that the .sdu is read? 
+    logical                             :: sdumorfac ! Is the time in the .sdu file the morphological time? 
     !
     ! characters
     !

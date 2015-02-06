@@ -400,11 +400,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     endif
     !    
     lfsdus1 = .false.
-    call prop_get_string(gdp%mdfile_ptr, '*', 'SduS1', chulp)
-    isdu = max(index(chulp(:1), 'Y') , index(chulp(:1), 'y'))
-    if (isdu /= 0) then
-        lfsdus1 = .true. 
-    end if 
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'SduS1', lfsdus1)
     !
  9999 continue
 end subroutine dimpro

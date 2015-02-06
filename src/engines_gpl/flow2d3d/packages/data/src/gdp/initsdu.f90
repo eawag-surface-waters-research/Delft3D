@@ -56,12 +56,10 @@ subroutine initsdu(gdp       )
     !
     !-----Initialize statics for incbc
     !
-    sdumorfac  => gdp%gdsdu%sdumorfac
-    sdufirst   => gdp%gdsdu%sdufirst
     nullify(gdp%gdsdu%sdu_t0)
     nullify(gdp%gdsdu%sdu_tp)
     nullify(gdp%gdsdu%sdu_tn)
     !
-    sdumorfac = .false.
-    sdufirst  = .true.
+    gdp%gdsdu%sdumorfac = .false.
+    gdp%gdsdu%sdufirst  = .true.
 end subroutine initsdu
