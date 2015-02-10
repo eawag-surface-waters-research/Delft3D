@@ -215,7 +215,12 @@ function poi_read(waqsim, filename) result (success)
 !
    success = .false.
    lun = newunit()
-   open(lun, file = filename, form = 'binary')
+#ifdef HAVE_FC_FORM_BINARY
+   open  ( lun , file=filename , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+   open  ( lun , file=filename , form = 'unformatted' , access='stream' )
+#endif
    read(lun) waqsim%poi
    close(lun)
    success = .true.
@@ -860,7 +865,12 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
       open(lunatr, file=hyd%attributes_file, action='read', status='old')
       read(lunatr,'(A)') line
       close(lunatr)
-      open(lunatr, file=hyd%attributes_file, form = 'binary', action='read', status='old')
+#ifdef HAVE_FC_FORM_BINARY
+      open  ( lunatr , file=hyd%attributes_file , action='read', status='old' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+      open  ( lunatr , file=hyd%attributes_file , action='read', status='old' , form = 'unformatted' , access='stream'  )
+#endif
       read(lunatr) iattr
       close(lunatr)
       if (index(line,'DELWAQ_COMPLETE_ATTRIBUTES')>0) then
@@ -1115,14 +1125,24 @@ subroutine srf2par(srffile, parfile, nsegments, nvertexchanges, geometry)
     if (geometry == WAQSIM_GEOMETRY_TELEMAC) then
        open(lun, file = srffile, form = 'unformatted', convert='big_endian', status = 'old')
     else
-       open(lun, file = srffile, form = 'binary', status = 'old')
+#ifdef HAVE_FC_FORM_BINARY
+       open  ( lun , file = srffile , status='old' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+       open  ( lun , file = srffile , status='old' , form = 'unformatted' , access='stream'  )
+#endif
     endif
     read(lun) idummy
     read(lun) srf
     close(lun)
     !
     itime = 0
-    open(lun, file = parfile, form = 'binary', status = 'replace')
+#ifdef HAVE_FC_FORM_BINARY
+       open  ( lun , file = parfile , status='replace' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+       open  ( lun , file = parfile , status='replace' , form = 'unformatted' , access='stream'  )
+#endif
     write(lun) itime
     do k = 1, nlayers
        write(lun) srf
@@ -1152,13 +1172,23 @@ subroutine chz2par(chzfile, parfile, nsegments, nvertexchanges)
     allocate(chz(nsegments2D))
     !
     lun = newunit()
-    open(lun, file = chzfile, form = 'binary', status = 'old')
+#ifdef HAVE_FC_FORM_BINARY
+       open  ( lun , file = chzfile , status='old' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+       open  ( lun , file = chzfile , status='old' , form = 'unformatted' , access='stream'  )
+#endif
     read(lun) idummy
     read(lun) chz
     close(lun)
     !
     itime = 0
-    open(lun, file = parfile, form = 'binary', status = 'replace')
+#ifdef HAVE_FC_FORM_BINARY
+       open  ( lun , file = parfile , status='replace' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+       open  ( lun , file = parfile , status='replace' , form = 'unformatted' , access='stream'  )
+#endif
     write(lun) itime
     do k = 1, nlayers
        write(lun) chz
@@ -1178,7 +1208,12 @@ subroutine write2par(parfile, par)
     !
     lun = newunit()
     itime = 0
-    open(lun, file = parfile, form = 'binary', status = 'replace')
+#ifdef HAVE_FC_FORM_BINARY
+       open  ( lun , file = parfile , status='replace' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+       open  ( lun , file = parfile , status='replace' , form = 'unformatted' , access='stream'  )
+#endif
     write(lun) itime
     write(lun) par
     close(lun)
@@ -1194,7 +1229,12 @@ subroutine writeveloc(velfile, addvel)
     !
     lun = newunit()
     itime = 0
-    open(lun, file = velfile, form = 'binary', status = 'replace')
+#ifdef HAVE_FC_FORM_BINARY
+       open  ( lun , file = velfile , status='replace' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+       open  ( lun , file = velfile , status='replace' , form = 'unformatted' , access='stream'  )
+#endif
     write(lun) itime
     write(lun) addvel
     close(lun)
@@ -1283,13 +1323,23 @@ subroutine gridpropcurv(hyd, poi, array)
 !! executable statements -------------------------------------------------------
 !
     lun = newunit()
-    open(lun, file = hyd%grid_indices_file, form = 'binary', status = 'old')
+#ifdef HAVE_FC_FORM_BINARY
+      open  ( lun , file=hyd%grid_indices_file , action='read', status='old' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+      open  ( lun , file=hyd%grid_indices_file , action='read', status='old' , form = 'unformatted' , access='stream'  )
+#endif
     read(lun) mmax, nmax, noseg2D, kmax, noq1, noq2, noq3
     allocate(aggrtable(mmax, nmax))
     read(lun) aggrtable
     close(lun)
     !
-    open(lun, file = hyd%grid_coordinates_file, form = 'binary', status = 'old')
+#ifdef HAVE_FC_FORM_BINARY
+      open  ( lun , file=hyd%grid_coordinates_file , action='read', status='old' , form = 'binary' , SHARED )
+#else
+! standardized way if binary is not available
+      open  ( lun , file=hyd%grid_coordinates_file , action='read', status='old' , form = 'unformatted' , access='stream'  )
+#endif
     read(lun) nmax, mmax, x0, y0, dum1, dum2, kmax
     do i = 1, 9
        read(lun) dum1
