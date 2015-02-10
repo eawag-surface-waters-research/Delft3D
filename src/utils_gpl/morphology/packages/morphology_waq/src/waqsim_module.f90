@@ -319,15 +319,15 @@ function hyd_read(hyd_file, hyd) result (success)
             call str_token(line,token,'''')
             call token2time(token,hyd%conversion_timestep)
          case ('grid-cells-first-direction')
-            read(line,'(I)') hyd%grid_cells_first_direction
+            read(line,'(I100)') hyd%grid_cells_first_direction
          case ('grid-cells-second-direction')
-            read(line,'(I)') hyd%grid_cells_second_direction
+            read(line,'(I100)') hyd%grid_cells_second_direction
          case ('number-horizontal-exchanges')
-            read(line,'(I)') hyd%number_horizontal_exchanges
+            read(line,'(I100)') hyd%number_horizontal_exchanges
          case ('number-hydrodynamic-layers')
-            read(line,'(I)') hyd%number_hydrodynamic_layers
+            read(line,'(I100)') hyd%number_hydrodynamic_layers
          case ('number-water-quality-layers')
-            read(line,'(I)') hyd%number_water_quality_layers    
+            read(line,'(I100)') hyd%number_water_quality_layers    
          case ('hydrodynamic-file')
             call str_token(line,file,'''')
             if (file == 'none') file = ' ' 
@@ -421,7 +421,7 @@ function hyd_read(hyd_file, hyd) result (success)
             call str_token(line,token)
             i = 1
             do while (token /= 'end-minimum-vert-diffusion')
-               read(line,'(F)') hyd%minimum_vert_diffusion(i)
+               read(line,'(F100)') hyd%minimum_vert_diffusion(i)
                i = i+1
                read(lun,'(A)', end=10) line
                call str_token(line,token)
@@ -431,7 +431,7 @@ function hyd_read(hyd_file, hyd) result (success)
             call str_token(line,token)
             i = 1
             do while (token /= 'end-constant-dispersion')
-               read(line,'(F)') hyd%constant_dispersion(i)
+               read(line,'(F100)') hyd%constant_dispersion(i)
                i = i+1
                read(lun,'(A)', end=10) line
                call str_token(line,token)
@@ -440,14 +440,14 @@ function hyd_read(hyd_file, hyd) result (success)
             allocate(hyd%hydrodynamic_layers(hyd%number_hydrodynamic_layers))
             do i = 1,hyd%number_hydrodynamic_layers
                read(lun,'(A)', end=10) line
-               read(line,'(F)') hyd%hydrodynamic_layers(i)
+               read(line,'(F100)') hyd%hydrodynamic_layers(i)
             enddo
             read(lun,'(A)', end=10) line ! end-hydrodynamic-layers
          case ('water-quality-layers')
             allocate(hyd%water_quality_layers(hyd%number_water_quality_layers))
             do i = 1,hyd%number_water_quality_layers
                read(lun,'(A)', end=10) line
-               read(line,'(F)') hyd%water_quality_layers(i)
+               read(line,'(F100)') hyd%water_quality_layers(i)
             enddo
             read(lun,'(A)', end=10) line ! end-water-quality-layers
          case ('discharges')
