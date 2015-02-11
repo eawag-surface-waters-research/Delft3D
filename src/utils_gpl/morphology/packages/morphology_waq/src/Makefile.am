@@ -24,7 +24,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libMorphologyWaq_la_SOURCES = \
-         waqsim_module.f90 \
+         waqsim_module.F90 \
          waqmor_module.f90 \
          wrwaq.F90
 
