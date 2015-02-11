@@ -4800,7 +4800,7 @@ src/utils_gpl/morphology/packages/morphology_waq/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_waq/morphology_waq.vfproj -text
 src/utils_gpl/morphology/packages/morphology_waq/src/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_waq/src/waqmor_module.f90 -text
-src/utils_gpl/morphology/packages/morphology_waq/src/waqsim_module.f90 -text
+src/utils_gpl/morphology/packages/morphology_waq/src/waqsim_module.F90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/wrwaq.F90 -text
 src/utils_lgpl/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/Makefile.am -text
