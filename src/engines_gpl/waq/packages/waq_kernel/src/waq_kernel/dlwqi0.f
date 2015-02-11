@@ -324,6 +324,55 @@
       call segcol(nosss   , noq1    , noq2   , noq3  , noq4  ,
      &            j(ixpnt), j(iknmr), isegcol)
 
+!         initial conditions
+
+      propor = .false.
+      call dhopnf ( lun(18) , lchar(18) , 18    , 2    , ierrd  )
+      ig = scan ( lchar(18), '.', back = .true. )                ! look fo rthe file type
+      if ( lchar(18)(ig:ig+3) .eq. '.map' ) then                 ! if .map, it is a map-file
+         read ( lun(18), iostat=ierrio ) finam(1:160)            ! read title of simulation
+         if ( ierrio .ne. 0 ) goto 50
+         if ( finam(114:120) .eq. 'mass/m2' ) propor = .true.    !  at end of third line ...
+         read ( lun(18) ) idummy                                 ! should be nr. of substance
+         if ( idummy .ne. notot ) then
+            write ( lun(19), '(a,a,/,a,i10)' )
+     &        ' ERROR reading initial conditions - filename: ', lchar(18),
+     &        ' Number of substances does not match : ', idummy
+            call srstop(1)
+         endif
+         read ( lun(18) ) idummy                                 ! should be nr. of comp. volumes
+         if ( idummy .ne. nosss ) then
+            write ( lun(19), '(a,a,/,a,i10)' )
+     &        ' ERROR reading initial conditions - filename: ', lchar(18),
+     &        ' Number of computational volumes does not match : ', idummy
+            call srstop(1)
+         endif
+         do i = 1, notot
+            read ( lun(18) ) finam(1:20)
+         enddo
+      endif
+      read  ( lun(18) , iostat = ierrio )                  ! like the .ini, the .res and .wrk file
+     *       idummy , ( a(k) , k=iconc,iconc+notot*nosss-1 )
+   50 if ( ierrio .ne. 0 ) then
+          write ( lun(19) , '(a,a)' )
+     *        ' ERROR reading initial conditions - filename: ',
+     *        lchar(18),
+     *        ' Too few data - file contents does not match current '//
+     *        'model'
+          call srstop(1)
+      else
+          read  ( lun(18) , iostat = ierrio ) idummy
+          if ( ierrio .eq. 0 ) then
+              write ( lun(19) , '(a,a)' )
+     *            ' ERROR reading initial conditions - filename: ',
+     *            lchar(18),
+     *            ' Too many data - file contents does not match ' //
+     *            'current model'
+              call srstop(1)
+          endif
+      endif
+      close ( lun(18) )
+
       IF ( RTCACT )
 !     Interface to RTC (0)
      Jcall RTCSHL (ITSTRT, A, J, C)
@@ -412,55 +461,6 @@
          CALL ZERO( A(IFLXD), NDMPS*NFLUX    )
          CALL ZERO( A(ITRRA), NOSYS*NORAAI   )
       ENDIF
-
-!         initial conditions
-
-      propor = .false.
-      call dhopnf ( lun(18) , lchar(18) , 18    , 2    , ierrd  )
-      ig = scan ( lchar(18), '.', back = .true. )                ! look fo rthe file type
-      if ( lchar(18)(ig:ig+3) .eq. '.map' ) then                 ! if .map, it is a map-file
-         read ( lun(18), iostat=ierrio ) finam(1:160)            ! read title of simulation
-         if ( ierrio .ne. 0 ) goto 50
-         if ( finam(114:120) .eq. 'mass/m2' ) propor = .true.    !  at end of third line ...
-         read ( lun(18) ) idummy                                 ! should be nr. of substance
-         if ( idummy .ne. notot ) then
-            write ( lun(19), '(a,a,/,a,i10)' )
-     &        ' ERROR reading initial conditions - filename: ', lchar(18),
-     &        ' Number of substances does not match : ', idummy
-            call srstop(1)
-         endif
-         read ( lun(18) ) idummy                                 ! should be nr. of comp. volumes
-         if ( idummy .ne. nosss ) then
-            write ( lun(19), '(a,a,/,a,i10)' )
-     &        ' ERROR reading initial conditions - filename: ', lchar(18),
-     &        ' Number of computational volumes does not match : ', idummy
-            call srstop(1)
-         endif
-         do i = 1, notot
-            read ( lun(18) ) finam(1:20)
-         enddo
-      endif
-      read  ( lun(18) , iostat = ierrio )                  ! like the .ini, the .res and .wrk file
-     *       idummy , ( a(k) , k=iconc,iconc+notot*nosss-1 )
-   50 if ( ierrio .ne. 0 ) then
-          write ( lun(19) , '(a,a)' )
-     *        ' ERROR reading initial conditions - filename: ',
-     *        lchar(18),
-     *        ' Too few data - file contents does not match current '//
-     *        'model'
-          call srstop(1)
-      else
-          read  ( lun(18) , iostat = ierrio ) idummy
-          if ( ierrio .eq. 0 ) then
-              write ( lun(19) , '(a,a)' )
-     *            ' ERROR reading initial conditions - filename: ',
-     *            lchar(18),
-     *            ' Too many data - file contents does not match ' //
-     *            'current model'
-              call srstop(1)
-          endif
-      endif
-      close ( lun(18) )
 
 !         make start masses for dynamic and iterative computation
 
