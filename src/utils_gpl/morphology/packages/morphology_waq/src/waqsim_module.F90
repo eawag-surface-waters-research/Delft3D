@@ -843,23 +843,23 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
    write(lun,'(A)') '#2;'
    write(lun,'(A)') ';###############################################################################'
    write(lun,'(A)') '; Third input block: segments, volumes'
-   write(lun,'(I,A)') waqsim%nsegments, ' ; Number of segments'
-   write(lun,'(I,A)') 2, ' ; Option ''grid layout not used'''
+   write(lun,'(I0,A)') waqsim%nsegments, ' ; Number of segments'
+   write(lun,'(I0,A)') 2, ' ; Option ''grid layout not used'''
    if (hyd%attributes_file == ' ') then
-      write(lun,'(I,A)') 1, ' ; One time-independent contribution'
-      write(lun,'(I,A)') 1, ' ; Number of items'
-      write(lun,'(I,A)') 2, ' ; Only feature 2 is specified'
-      write(lun,'(I,A)') 1, ' ; Input on this file'
-      write(lun,'(I,A)') 1, ' ; Input option without default'
+      write(lun,'(I0,A)') 1, ' ; One time-independent contribution'
+      write(lun,'(I0,A)') 1, ' ; Number of items'
+      write(lun,'(I0,A)') 2, ' ; Only feature 2 is specified'
+      write(lun,'(I0,A)') 1, ' ; Input on this file'
+      write(lun,'(I0,A)') 1, ' ; Input option without default'
       if (hyd%number_water_quality_layers == 1) then
-         write(lun,'(I,A)') waqsim%nsegments, '*0 ; Segments extend from surface to bed'
+         write(lun,'(I0,A)') waqsim%nsegments, '*0 ; Segments extend from surface to bed'
       else
          nseg2D = waqsim%nsegments - waqsim%nexchange(3)
-         write(lun,'(I,A)') nseg2D, '*1 ; Surface segments'
-         write(lun,'(I,A)') nseg2D*(hyd%number_water_quality_layers-2), '*2 ; Mid column segments'
-         write(lun,'(I,A)') nseg2D, '*3 ; Bottom segments'
+         write(lun,'(I0,A)') nseg2D, '*1 ; Surface segments'
+         write(lun,'(I0,A)') nseg2D*(hyd%number_water_quality_layers-2), '*2 ; Mid column segments'
+         write(lun,'(I0,A)') nseg2D, '*3 ; Bottom segments'
       endif
-      write(lun,'(I,A)') 0, ' ; no time-dependent contributions'
+      write(lun,'(I0,A)') 0, ' ; no time-dependent contributions'
    else
       lunatr = newunit()
       open(lunatr, file=hyd%attributes_file, action='read', status='old')
@@ -876,30 +876,30 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
       if (index(line,'DELWAQ_COMPLETE_ATTRIBUTES')>0) then
          write(lun,'(3A)') 'INCLUDE ''',trim(hyd%attributes_file),''' ; attributes specified in separate file'
       elseif (iattr==0 .or. iattr==1 .or. iattr==11) then ! 21 or 31 shouldn't be on top since delwaq counts segments from top to bottom
-         write(lun,'(I,A)') 1, ' ; One time-independent contribution'
-         write(lun,'(I,A)') 2, ' ; Number of items'
-         write(lun,'(I,I,A)') 1,2, ' ; Features 1 and 2 specified'
-         write(lun,'(I,A)') 0, ' ; From binary file'
+         write(lun,'(I0,A)') 1, ' ; One time-independent contribution'
+         write(lun,'(I0,A)') 2, ' ; Number of items'
+         write(lun,'(I0,A,I0,A)') 1,' ',2, ' ; Features 1 and 2 specified'
+         write(lun,'(I0,A)') 0, ' ; From binary file'
          write(lun,'(3A)') '''',trim(hyd%attributes_file),''' ; name of attribute file'
-         write(lun,'(I,A)') 0, ' ; no time-dependent contributions'
+         write(lun,'(I0,A)') 0, ' ; no time-dependent contributions'
       else
-         write(lun,'(I,A)') 1, ' ; One time-independent contribution'
-         write(lun,'(I,A)') 1, ' ; Number of items'
-         write(lun,'(I,A)') 2, ' ; Only feature 2 is specified'
-         write(lun,'(I,A)') -1, ' ; From ASCII file'
+         write(lun,'(I0,A)') 1, ' ; One time-independent contribution'
+         write(lun,'(I0,A)') 1, ' ; Number of items'
+         write(lun,'(I0,A)') 2, ' ; Only feature 2 is specified'
+         write(lun,'(I0,A)') -1, ' ; From ASCII file'
          write(lun,'(3A)') '''',trim(hyd%attributes_file),''' ; name of attribute file'
-         write(lun,'(I,A)') 0, ' ; no time-dependent contributions'
+         write(lun,'(I0,A)') 0, ' ; no time-dependent contributions'
       endif
    endif
-   write(lun,'(I,A)') -2, ' ; volumes from unformatted intermediate file'
+   write(lun,'(I0,A)') -2, ' ; volumes from unformatted intermediate file'
    write(lun,'(3A)') '''',trim(hyd%volumes_file),''' ; name of volumes file'
 
    write(lun,'(A)') '#3;'
    write(lun,'(A)') ';###############################################################################'
    write(lun,'(A)') '; Fourth input block: exchanges, pointer table, flows, lengths'
-   write(lun,'(3I,A)') waqsim%nexchange(1), waqsim%nexchange(2), waqsim%nexchange(3), ' ; Number of exchanges'
-   write(lun,'(I,A)') 0,' ; number of additional dispersions'
-   write(lun,'(I,A)') waqsim%nfldex,' ; number of additional velocities'
+   write(lun,'(I0,A,I0,A,I0,A)') waqsim%nexchange(1), ' ', waqsim%nexchange(2), ' ', waqsim%nexchange(3), ' ; Number of exchanges'
+   write(lun,'(I0,A)') 0,' ; number of additional dispersions'
+   write(lun,'(I0,A)') waqsim%nfldex,' ; number of additional velocities'
    if (waqsim%nfldex>0) then
       do i = 1, waqsim%nfldex
          write(lun,'(3A)') '   ''',trim(waqsim%fldexname(i)),''''
@@ -912,33 +912,33 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
       enddo
       write(lun,'(2A)') trim(filestr),' ; the additional velocities are not actually used as velocities'
    endif
-   write(lun,'(I,A)') 1,' ; input format 1'
-   write(lun,'(I,A)') 0,' ; exchange pointers in unformatted file'
+   write(lun,'(I0,A)') 1,' ; input format 1'
+   write(lun,'(I0,A)') 0,' ; exchange pointers in unformatted file'
    write(lun,'(3A)') '''',trim(hyd%pointers_file),''' ; name of exchange pointer file'
-   write(lun,'(I,A)') 1,' ; dispersions in this file'
+   write(lun,'(I0,A)') 1,' ; dispersions in this file'
    write(lun,'(A)') '1.0      1.0      1.0   ; scale factors in three directions'
    write(lun,'(A)') '0.0      0.0      0.0   ; values in m2/s in three directions'
-   write(lun,'(I,A)') -2,' ; exchange surfaces in unformatted file'
+   write(lun,'(I0,A)') -2,' ; exchange surfaces in unformatted file'
    write(lun,'(3A)') '''',trim(hyd%areas_file),''' ; name of areas file'
-   write(lun,'(I,A)') -2,' ; flows in unformatted file'
+   write(lun,'(I0,A)') -2,' ; flows in unformatted file'
    write(lun,'(3A)') '''',trim(hyd%flows_file),''' ; name of flows file'
    if (waqsim%nfldex>0) then
-      write(lun,'(I,A)') 0,' ; additional velocities in unformatted file'
+      write(lun,'(I0,A)') 0,' ; additional velocities in unformatted file'
       filestr = trim(filename)//'-additional.vel'
       call writeveloc(filestr, waqsim%fldexval)
       write(lun,'(3A)') '''',trim(filestr),''''
    endif
-   write(lun,'(I,A)') 1,' ; lengths vary over the area'
-   write(lun,'(I,A)') 0,' ; in unformatted file'
+   write(lun,'(I0,A)') 1,' ; lengths vary over the area'
+   write(lun,'(I0,A)') 0,' ; in unformatted file'
    write(lun,'(3A)') '''',trim(hyd%lengths_file),''' ; name of length file'
 
    write(lun,'(A)') '#4;'
    write(lun,'(A)') ';###############################################################################'
    write(lun,'(A)') '; Fifth input block: boundary conditions'
-   write(lun,'(I,A)') 3*waqsim%nbnd,'*'' '''                                                                     
-   write(lun,'(I,A)') 1,'; time lags at the boundaries'
+   write(lun,'(I0,A)') 3*waqsim%nbnd,'*'' '''                                                                     
+   write(lun,'(I0,A)') 1,'; time lags at the boundaries'
    write(lun,'(A)') '; nr. ddhhmmss'
-   write(lun,'(I,A)') waqsim%nbnd,'*00010000               ; nr of boundaries times 1 hour'
+   write(lun,'(I0,A)') waqsim%nbnd,'*00010000               ; nr of boundaries times 1 hour'
    write(lun,'(A)') 'ITEM ''Boundary type 1'''
    do i = 1,waqsim%nsubs
       if (waqsim%subsname(i) == 'ISS') then
@@ -959,7 +959,7 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
    write(lun,'(A)') '#5;'
    write(lun,'(A)') ';###############################################################################'
    write(lun,'(A)') '; Sixth input block: dry waste loads block'
-   write(lun,'(I,A)') 0, ' ; No dry waste loads'
+   write(lun,'(I0,A)') 0, ' ; No dry waste loads'
 
    write(lun,'(A)') '#6;'
    write(lun,'(A)') ';###############################################################################'
@@ -1011,34 +1011,34 @@ subroutine waqsim_writeinp(waqsim, filename, hyd)
             endif
             write(lun,'(A)') 'INPUTGRID ''Base grid'''
             write(lun,'(A)') 'DATA'
-            write(lun,'(I,A)') waqsim%nsegments,'*0.0'
+            write(lun,'(I0,A)') waqsim%nsegments,'*0.0'
          enddo
       else
          write(lun,'(A)') 'INITIALS'
          write(lun,'(2A)') '    ',trim(waqsim%subsname(i))
          write(lun,'(A)') 'INPUTGRID ''Base grid'''
          write(lun,'(A)') 'DATA'
-         write(lun,'(I,A)') waqsim%nsegments,'*0.0'
+         write(lun,'(I0,A)') waqsim%nsegments,'*0.0'
       endif
    enddo
 
    write(lun,'(A)') '#8;'
    write(lun,'(A)') ';###############################################################################'
    write(lun,'(A)') '; Ninth input block: model output'
-   write(lun,'(I,A)') 1, '; output information in this file'
-   write(lun,'(I,A)') 0, '; no output for monitoring file'
-   write(lun,'(I,A)') 0, '; no output for dump file'
-   write(lun,'(I,A)') 0, '; no output for history file'
-   !write(lun,'(I,A)') 1, '; default simulated quantities on map file'
-   write(lun,'(I,A)') 2, '; default simulated quantities plus following quantities on map file'
-   write(lun,'(I,A)') waqsim%noutput, '; number of additional quantities'
+   write(lun,'(I0,A)') 1, '; output information in this file'
+   write(lun,'(I0,A)') 0, '; no output for monitoring file'
+   write(lun,'(I0,A)') 0, '; no output for dump file'
+   write(lun,'(I0,A)') 0, '; no output for history file'
+   !write(lun,'(I0,A)') 1, '; default simulated quantities on map file'
+   write(lun,'(I0,A)') 2, '; default simulated quantities plus following quantities on map file'
+   write(lun,'(I0,A)') waqsim%noutput, '; number of additional quantities'
    do i = 1,waqsim%noutput
       write(lun,'(3A)') '   ''',trim(waqsim%output(i)),''''
    enddo
-   write(lun,'(I,A)') 1, '; binary history file'
-   write(lun,'(I,A)') 1, '; binary map file'
-   write(lun,'(I,A)') 0, '; nefis history file'
-   write(lun,'(I,A)') 0, '; nefis map file'
+   write(lun,'(I0,A)') 1, '; binary history file'
+   write(lun,'(I0,A)') 1, '; binary map file'
+   write(lun,'(I0,A)') 0, '; nefis history file'
+   write(lun,'(I0,A)') 0, '; nefis map file'
 
    write(lun,'(A)') '#9;'
    close(lun)
