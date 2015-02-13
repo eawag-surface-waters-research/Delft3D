@@ -429,8 +429,8 @@ contains
 
       call report_date_time ( lunpr   )
 
-!AM      noth = OMP_GET_MAX_THREADS()
-      noth = 1
+      noth = OMP_GET_MAX_THREADS()
+
       write ( lunpr  , 2020 ) noth
       write (    *   , 2030 ) noth
 
