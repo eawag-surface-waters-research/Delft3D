@@ -63,5 +63,17 @@ cd 09_part-oil
 cd ..
 
 
+echo "Running testcase 10_delwaq-part-tracer ..."
+cd 10_delwaq-part-tracer
+call run_delwaq_part.sh >screen.log 2>&1
+cd ..
+
+
+echo "Running testcase 11_standard_netcdf ..."
+cd 11_standard_netcdf
+call run_flow2d3d.sh >screen.log 2>&1
+cd ..
+
+
 echo ...finished
 

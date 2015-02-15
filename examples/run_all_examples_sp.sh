@@ -53,7 +53,16 @@ cd ../input
 ../../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
 cd ../..
 
-echo "06_delwaq, 07_wave, 08_part-tracer and 09_part-oil (no sp variant)"
+
+echo "Skipping testcases 06_delwaq, 07_wave, 08_part-tracer, 09_part-oil, and 10_delwaq-part-tracer (no sp variant)"
+
+
+echo "Running testcase 11_standard_netcdf (sp) ..."
+cd 11_standard_netcdf
+../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
+./run_flow2d3d.sh >screen.log 2>&1
+../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
+cd ..
 
 
 echo ...finished
