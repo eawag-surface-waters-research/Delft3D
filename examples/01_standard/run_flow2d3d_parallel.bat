@@ -56,7 +56,9 @@ set MPIPATH=%exedir%
     rem Run
     rem start computation on all your local cores (2 for dual core; 4 for quad core etc.)
     rem note the flag "-localonly" which may be needed to avoid "Aborting: unable to connect to machinename.local"
-"%MPIPATH%\mpiexec" -n %NUMBER_OF_PROCESSORS% -localonly "%exedir%\d_hydro.exe" %argfile%
+set NPROC=%NUMBER_OF_PROCESSORS%
+if %NPROC% gtr 5 set NPROC=5
+"%MPIPATH%\mpiexec" -n %NPROC% -localonly "%exedir%\d_hydro.exe" %argfile%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
