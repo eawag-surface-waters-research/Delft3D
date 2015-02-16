@@ -131,7 +131,7 @@
       INTEGER       IORDER   , NOITM , NODIM , IFLAG  , ITYPE ,
      +              ITTIM    , CHKFLG
       CHARACTER     CHULP*255
-      LOGICAL       NEWREC   , SCALE , ODS   , BINFIL , FIRST , TDELAY
+      LOGICAL       NEWREC   , SCALE , ODS   , BINFIL , TDELAY
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq5a", ithndl )
 !
@@ -141,7 +141,6 @@
       LUNWR2 = LUN(IU)
       IFILSZ = 0
       JFILSZ = 0
-      FIRST  = .TRUE.
       CALLR  = 'CONCENTR. '
       STRNG2 = 'Substance'
       IPRO   = 0
@@ -180,6 +179,27 @@
       BINFIL = .FALSE.
       NEWREC = .FALSE.
 !
+!     Open the binary work file and privide a zero overall default
+!
+      CALL DHOPNF ( LUN(IU) , LCHAR(IU) , IU    , 1     , IOERR )
+      IF ( IU .EQ. 14 ) THEN
+         WRITE ( LUNWR2 ) ' 4.900BOUND '
+         CALIT  = 'BOUNDARIES'
+         STRNG1 = 'boundary'
+         IBLOCK = 5
+      ELSE
+         WRITE ( LUNWR2 ) ' 4.900WASTE '
+         CALIT  = 'WASTELOADS'
+         STRNG1 = 'wasteload'
+         IBLOCK = 6
+      ENDIF
+      WRITE ( LUNWR2 ) NTITM, NTDIM
+      WRITE ( LUNWR2 ) 1, 0, NTDIM, (K,K=1,NTDIM), 1, 0
+      WRITE ( LUNWR2 ) 1
+      WRITE ( LUNWR2 ) 0, ( 0.0 , I=1,NTDIM )
+      IFILSZ = IFILSZ + 2 + 3 + NTDIM + 3 + 1
+      JFILSZ = JFILSZ + NTDIM
+!
 !          Get a token string (and return if something else was found)
 !
    10 IF ( IFLAG .EQ. 0 ) ITYPE = 0
@@ -204,36 +224,11 @@
 !
 !          All the following has the old file structure
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. FIRST .AND.
-     *                     CHULP .EQ. 'OLD-FILE-STRUCTURE' ) THEN
+      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'OLD-FILE-STRUCTURE' ) THEN
          WRITE ( LUNUT , 1000 )
          iwar = iwar + 1
          IERR2 = -1
          goto 540
-      ENDIF
-      IF ( FIRST ) THEN
-!
-!     Open the binary work file and privide a zero overall default
-!
-         CALL DHOPNF ( LUN(IU) , LCHAR(IU) , IU    , 1     , IOERR )
-         IF ( IU .EQ. 14 ) THEN
-            WRITE ( LUNWR2 ) ' 4.900BOUND '
-            CALIT  = 'BOUNDARIES'
-            STRNG1 = 'boundary'
-            IBLOCK = 5
-         ELSE
-            WRITE ( LUNWR2 ) ' 4.900WASTE '
-            CALIT  = 'WASTELOADS'
-            STRNG1 = 'wasteload'
-            IBLOCK = 6
-         ENDIF
-         WRITE ( LUNWR2 ) NTITM, NTDIM
-         WRITE ( LUNWR2 ) 1, 0, NTDIM, (K,K=1,NTDIM), 1, 0
-         WRITE ( LUNWR2 ) 1
-         WRITE ( LUNWR2 ) 0, ( 0.0 , I=1,NTDIM )
-         IFILSZ = IFILSZ + 2 + 3 + NTDIM + 3 + 1
-         JFILSZ = JFILSZ + NTDIM
-         FIRST = .FALSE.
       ENDIF
 !
 !          A local redirection of the name of an item or substance
