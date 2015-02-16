@@ -329,7 +329,7 @@
                   write ( lunout , '(3(I0,3X),A)' ) n, m, ilay, trim(filstring)
                enddo
             else
-               nl = ilaggr(kmax-max(kfmin,mnksrc(3,i))+1)
+               nl = ilaggr(kmax-max(kfmin,mnksrc(6,i))+1)
                write ( lunout , '(3(I0,3X),A)' ) n, m, nl, trim(filstring)
             endif
          else 
