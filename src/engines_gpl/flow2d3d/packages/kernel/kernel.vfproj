@@ -15,7 +15,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="lib/$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/include;../io_dol_f/lib/$(ConfigurationName);../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/deltares_common/packages/deltares_common/include;../../../../utils_lgpl/deltares_common/lib/$(ConfigurationName)/static;..\..\..\..\utils_gpl\morphology\lib\$(ConfigurationName)\static" PreprocessorDefinitions="w32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/include;../io_dol_f/lib/$(ConfigurationName);../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/deltares_common/packages/deltares_common/include;../../../../utils_lgpl/deltares_common/lib/$(ConfigurationName)/static;..\..\..\..\utils_gpl\morphology\lib\$(ConfigurationName)\static" PreprocessorDefinitions="w32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -430,9 +430,9 @@
 		<File RelativePath="src\timedep\incbcc.f90"/>
 		<File RelativePath="src\timedep\incdis.f90"/>
 		<File RelativePath=".\src\timedep\inceva.f90"/>
-		<File RelativePath=".\src\timedep\incsdu.f90"/>
 		<File RelativePath="src\timedep\incmeteo.f90"/>
 		<File RelativePath="src\timedep\incrbc.f90"/>
+		<File RelativePath=".\src\timedep\incsdu.f90"/>
 		<File RelativePath="src\timedep\inctem.f90"/>
 		<File RelativePath="src\timedep\incwav.f90"/>
 		<File RelativePath="src\timedep\rtc_comm_get.f90"/>
