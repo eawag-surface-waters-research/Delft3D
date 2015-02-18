@@ -56,6 +56,7 @@ program waves_main
    integer                                      :: i
    integer                                      :: ierr
    integer                                      :: mode_in
+   integer                                      :: mtdim
    integer                                      :: n_swan_grids ! number of SWAN grids
    integer                                      :: n_flow_grids ! number of FLOW grids
    integer                                      :: i_flow       ! counter
@@ -235,7 +236,8 @@ program waves_main
          deallocate(x_fp)
          deallocate(y_fp)
          nullify(meteotypes)
-         success = getmeteotypes(swan_grids(i_swan)%grid_name, meteotypes)
+         mtdim = 0
+         success = getmeteotypes(swan_grids(i_swan)%grid_name, meteotypes,mtdim)
          call checkmeteoresult_wave(success)
          do i_meteo = 1, size(meteotypes)
             if (meteotypes(i_meteo) == "meteo_on_computational_grid") then
