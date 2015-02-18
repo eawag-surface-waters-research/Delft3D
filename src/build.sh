@@ -296,7 +296,7 @@ fi
 
 #---------------------
 # netcdf
- export NETCDFROOT=/p/delft3d/opt/netcdf-4.1.3/intel11.1
+ export NETCDFROOT=/p/delft3d/opt/netcdf-4.1.3mt/intel11.1
  export PKG_CONFIG_PATH=/$NETCDFROOT/lib/pkgconfig:$PKG_CONFIG_PATH
  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NETCDFROOT/lib
 
@@ -371,23 +371,16 @@ fi
 # More information here:
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
-if [ "$platform" = 'intel64' ]; then
-    command=" \
-        CFLAGS='$flags $CFLAGS' \
-        CXXFLAGS='$flags $CXXFLAGS' \
-        FFLAGS='$flags $fflags $FFLAGS' \
-        FCFLAGS='$flags $fflags $FCFLAGS' \
-            ./configure --prefix=`pwd` $configureArgs &> $log \
-        "
-else
-    command=" \
-        CFLAGS='$flags $CFLAGS' \
-        CXXFLAGS='$flags $CXXFLAGS' \
-        FFLAGS='$flags $fflags $FFLAGS' \
-        FCFLAGS='$flags $fflags $FCFLAGS' \
-            ./configure --prefix=`pwd` $configureArgs &> $log \
-        "
-fi
+command=" \
+    CFLAGS='$flags $CFLAGS' \
+    CXXFLAGS='$flags $CXXFLAGS' \
+    AM_FFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FFLAGS' \
+    FFLAGS='$flags $fflags $FFLAGS' \
+    AM_FCFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FCFLAGS' \
+    FCFLAGS='$flags $fflags $FCFLAGS' \
+    AM_LDFLAGS='$LDFLAGSMT_ADDITIONAL $AM_LDFLAGS' \
+        ./configure --prefix=`pwd` $configureArgs &> $log \
+    "
 
 log "Running `echo $command | sed 's/ +/ /g'`"
 eval $command
