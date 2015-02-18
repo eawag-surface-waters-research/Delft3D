@@ -592,7 +592,7 @@ end function setmeteodefault
 !
 !
 !===============================================================================
-function getmeteotypes(runid, meteotypes) result(success)
+function getmeteotypes(runid, meteotypes, mtdim) result(success)
    use m_alloc
    implicit none
 !
@@ -602,8 +602,9 @@ function getmeteotypes(runid, meteotypes) result(success)
 !
 ! Global variables
 !
-   character(*) , intent(in)  :: runid
+   character(*)                         , intent(in)   :: runid
    character(256), dimension(:), pointer, intent(out)  :: meteotypes
+   integer, optional                                   :: mtdim
 !
 ! Local variables
 !
@@ -624,15 +625,19 @@ function getmeteotypes(runid, meteotypes) result(success)
       success = .false.
       return
    endif
-   ierr = 0
-   do i = 1, meteo%nummeteoitems
-      curtype = meteo%item(i)%ptr%meteotype
-      newtype = .true.
+   if (present(mtdim)) then
+      dimmeteotypes = mtdim
+   else
       if (associated(meteotypes)) then
          dimmeteotypes = size(meteotypes)
       else
          dimmeteotypes = 0
       endif
+   endif
+   ierr = 0
+   do i = 1, meteo%nummeteoitems
+      curtype = meteo%item(i)%ptr%meteotype
+      newtype = .true.
       do j = 1, dimmeteotypes
          if (meteotypes(j) == curtype) then
             newtype = .false.
@@ -640,12 +645,16 @@ function getmeteotypes(runid, meteotypes) result(success)
          endif
       enddo
       if (newtype) then
-         call reallocP(meteotypes, size(meteotypes)+1, stat=ierr, keepExisting=.true.)
-         meteotypes(size(meteotypes)) = curtype
+         dimmeteotypes = dimmeteotypes + 1
+         call reallocP(meteotypes, dimmeteotypes, stat=ierr, keepExisting=.true.)
+         meteotypes(dimmeteotypes) = curtype
       endif
    enddo
    if (ierr /= 0) then
       success = .false.
+   endif
+   if (present(mtdim)) then
+      mtdim = dimmeteotypes
    endif
 end function getmeteotypes
 !
