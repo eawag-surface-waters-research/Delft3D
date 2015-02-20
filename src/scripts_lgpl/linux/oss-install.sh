@@ -8,7 +8,7 @@ gatherScript=scripts_lgpl/linux/gatherlibraries.rb
 # - system dependent libraries in the directories /lib and /lib64
 # - libraries generated in the oss tree itself
 gatherExcludeFilter="-e '^/lib/' -e '^/lib64/' -e 'flow2d3d' -e 'DelftOnline'"
-gatherIncludeFilter="-e 'expat'"
+gatherIncludeFilter="-e 'expat' -e 'libssl' -e 'libcrypto'"
 
 # ===============================
 # === copyFile: handles error ===
