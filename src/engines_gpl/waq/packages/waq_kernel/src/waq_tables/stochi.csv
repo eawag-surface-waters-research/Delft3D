@@ -80,6 +80,10 @@ stocfl,stocsu,stocsc
 "dProdAlg  ","UlvaS     ",   1.00000
 "dProdAlg  ","NODULA    ",   1.00000
 "dProdAlg  ","ANABAENA  ",   1.00000
+"dProdAlg  ","CYLINFIX  ",   1.00000
+"dProdAlg  ","ARTHROSP  ",   1.00000
+"dProdAlg  ","PLANKTOL  ",   1.00000
+"dProdAlg  ","PSEUDOAN  ",   1.00000
 "dProdAlg01","BLOOMALG01",   1.00000
 "dProdAlg02","BLOOMALG02",   1.00000
 "dProdAlg03","BLOOMALG03",   1.00000
@@ -157,6 +161,10 @@ stocfl,stocsu,stocsc
 "dDumphyblo","UlvaS     ",   1.00000
 "dDumphyblo","NODULA    ",   1.00000
 "dDumphyblo","ANABAENA  ",   1.00000
+"dDumphyblo","CYLINFIX  ",   1.00000
+"dDumphyblo","ARTHROSP  ",   1.00000
+"dDumphyblo","PLANKTOL  ",   1.00000
+"dDumphyblo","PSEUDOAN  ",   1.00000
 "dDumMak   ","IM1       ",   0.00000
 "dDumMak   ","IM2       ",   0.00000
 "dDumMak   ","IM3       ",   0.00000
@@ -686,6 +694,10 @@ stocfl,stocsu,stocsc
 "dSedAlg   ","UlvaS     ",  -1.00000
 "dSedAlg   ","NODULA    ",  -1.00000
 "dSedAlg   ","ANABAENA  ",  -1.00000
+"dSedAlg   ","CYLINFIX  ",  -1.00000
+"dSedAlg   ","ARTHROSP  ",  -1.00000
+"dSedAlg   ","PLANKTOL  ",  -1.00000
+"dSedAlg   ","PSEUDOAN  ",  -1.00000
 "dSedAlg01 ","BLOOMALG01",  -1.00000
 "dSedAlg02 ","BLOOMALG02",  -1.00000
 "dSedAlg03 ","BLOOMALG03",  -1.00000
