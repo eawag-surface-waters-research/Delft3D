@@ -85,7 +85,7 @@ extern void free();
  *             triangle. Nr. of filled elements equals numtr*3.
  * \param[out] xs3 Only when jatri==2. Coordinates of all points/nodes
  *             in the triangular grid.
- * \param[out] ns3 Number of generated points in grid.
+ * \param[inout] ns3 out: number of generated points in grid, in: if >0 used to check array size of xs3 and ys3 (not used if jatri=1)
  * \param[in]  trisize Only used when generating points (jatri==2).
  *             Maximum area for generated triangles.
  */
@@ -233,15 +233,21 @@ void STDCALL TRICALL(int *jatri, REAL *xs, REAL *ys, int *ns, int *indx, int *nu
 
       triangulate(opties, &in, &mid, &vorout);
 
-	  for (i=0; i< mid.numberofpoints; i++)     {
-          if (i <= mid.numberofpoints) {
-              xs3[i] = mid.pointlist[2*i] ;
-              ys3[i] = mid.pointlist[2*i+1];
-	  	  }
+//    check size of xs3, ys3 if *ns3>0
+	  if ( *ns3 > 0 & mid.numberofpoints > *ns3 )	{
+		 printf("tricall: unsufficient mem for nodes in xs3, ys3 (%d > %d)\n", mid.numberofpoints, *ns3);
+	     *numtri = -*numtri; // serves as error indicator
+		 *ns3 = -mid.numberofpoints; // serves as error indicator
 	  }
-      *ns3 = mid.numberofpoints;
-
-        
+	  else	{
+		 for (i=0; i< mid.numberofpoints; i++)     {
+	  	 if (i <= mid.numberofpoints) {
+	  		xs3[i] = mid.pointlist[2*i] ;
+	  		ys3[i] = mid.pointlist[2*i+1];
+	    	}
+		 }
+		 *ns3 = mid.numberofpoints;
+	  }
 
   }
 
