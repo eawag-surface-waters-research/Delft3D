@@ -61,7 +61,7 @@ function openexistingfile(minp, filename) result(success)
        success = .false.
        return
     endif
-    do i = 1, 100
+    do i = 1, 200
        inquire (unit = i, opened = unitused) 
        if (.not. unitused) exit
     enddo
