@@ -100,24 +100,27 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
     if (nfltyp/=0) then
        do nm = 1, nmmax
           if ( (kcs(nm)==1 .or. kcs(nm)==2) ) then
-          nmd = nm - icx
-          ndm = nm - icy
-             if (       ( kfu(nm)==1 .or. kfu(nmd)==1 ) &
-                 & .or. ( kfv(nm)==1 .or. kfv(ndm)==1 )  ) then
-             if ( s1(nm) <= -real(dps(nm),fp) ) then
-                kfu(nm) = 0
-                kfu(nmd) = 0
-                kfv(nm) = 0
-                kfv(ndm) = 0
-                idry = 1
-                do k = 1, kmax
-                  qxk(nm, k) = 0.0
-                  qxk(nm - icx, k) = 0.0
-                  qyk(nm, k) = 0.0
-                  qyk(nm - icy, k) = 0.0
-                enddo
+             nmd = nm - icx
+             ndm = nm - icy
+             !
+             ! Check on kfs(nm) == 1 is necessary, because when the last active cell edge of a cell
+             ! was set dry in SUD, all KFU/KFV are zero and this check would not be performed
+             !
+             if ( kfu(nm)==1 .or. kfu(nmd)==1  .or.  kfv(nm)==1 .or. kfv(ndm)==1  .or. kfs(nm)==1 ) then
+                if ( s1(nm) <= -real(dps(nm),fp) ) then
+                   kfu(nm) = 0
+                   kfu(nmd) = 0
+                   kfv(nm) = 0
+                   kfv(ndm) = 0
+                   idry = 1
+                   do k = 1, kmax
+                     qxk(nm, k) = 0.0_fp
+                     qxk(nm - icx, k) = 0.0_fp
+                     qyk(nm, k) = 0.0_fp
+                     qyk(nm - icy, k) = 0.0_fp
+                   enddo
+                endif
              endif
-          endif
           endif
        enddo
        !

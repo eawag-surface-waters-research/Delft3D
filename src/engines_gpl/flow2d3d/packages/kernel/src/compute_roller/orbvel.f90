@@ -91,7 +91,7 @@ subroutine orbvel(nmmax     ,kfs       ,dps       ,ubot      , &
              !
              ! Wave height          
              !          
-             hrms(nm) = sqrt(8.0*e/rhow/ag)
+             hrms(nm) = sqrt(8.0_fp*e/rhow/ag)
              !
              ! Wave length          
              !          
@@ -114,17 +114,17 @@ subroutine orbvel(nmmax     ,kfs       ,dps       ,ubot      , &
              if (ubot_from_com) then
                 uorb(nm) = ubot(nm)
              else
-                hk = 2.0*pi/rlabda(nm)*h
+                hk = 2.0_fp*pi/rlabda(nm)*h
                 hk = min(100.0_fp, hk)
                 uorb(nm) = pi*hrms(nm)/tp(nm)/sinh(hk)
              endif
           else
-             uorb(nm) = 0.0
-             hrms(nm) = 0.0
+             uorb(nm) = 0.0_fp
+             hrms(nm) = 0.0_fp
           endif
        else
-          uorb(nm) = 0.0
-          hrms(nm) = 0.0
+          uorb(nm) = 0.0_fp
+          hrms(nm) = 0.0_fp
        endif
     enddo
 end subroutine orbvel
