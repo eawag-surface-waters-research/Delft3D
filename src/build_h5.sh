@@ -289,8 +289,9 @@ fi
 
 #---------------------
 # netcdf
-# export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
+ export NETCDFROOT=/opt/netcdf/v4.3.2_v4.4.0_intel_14.0.3/
+ export PKG_CONFIG_PATH=/$NETCDFROOT/lib/pkgconfig:$PKG_CONFIG_PATH
+ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NETCDFROOT/lib
 
 
 #===============================================================================
