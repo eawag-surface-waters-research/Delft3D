@@ -159,17 +159,20 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
           fracnonmud = 0.0_fp
           dm(nm)     = 0.0_fp
           dg(nm)     = 1.0_fp
+          dgsd(nm)   = 0.0_fp
+          !
           do l = 1, lsedtot
              if (sedtyp(l) /= SEDTYP_COHESIVE) then
-                dm(nm)     = dm(nm) + frac(nm,l) * seddm(l)
-                dg(nm)     = dg(nm) * (sedd50(l)**frac(nm,l))
                 fracnonmud = fracnonmud + frac(nm,l)
              endif
           enddo
-          dgsd(nm) = 0.0_fp
           if (fracnonmud > 0.0_fp) then
-             dm(nm) = dm(nm) / fracnonmud
-             dg(nm) = dg(nm)**(1.0/fracnonmud)
+             do l = 1, lsedtot
+                if (sedtyp(l) /= SEDTYP_COHESIVE) then
+                   dm(nm)     = dm(nm) + (frac(nm,l) / fracnonmud) * seddm(l)
+                   dg(nm)     = dg(nm) * (sedd50(l)**(frac(nm,l)/fracnonmud))
+                endif
+             enddo
              !
              ! Compute dgsd (geometric standard deviation of grain size distribution)
              ! note that this is true geometric standard deviation of grain size as there is an error in
@@ -179,10 +182,10 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
              !
              do l = 1, lsedtot
                 if (sedtyp(l) /= SEDTYP_COHESIVE) then
-                   dgsd(nm) = dgsd(nm) + frac(nm,l)*(log(sedd50(l))-log(dg(nm)))**2
+                   dgsd(nm) = dgsd(nm) + (frac(nm,l)/fracnonmud)*(log(sedd50(l))-log(dg(nm)))**2
                 endif
              enddo
-             dgsd(nm) = exp(sqrt(dgsd(nm)/fracnonmud))
+             dgsd(nm) = exp(sqrt(dgsd(nm)))
           else
              dg(nm) = 0.0_fp
           endif
@@ -205,7 +208,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
           logdprev = 0.0_fp
           fraccum  = 0.0_fp
           i        = 1
-          fracreq  = xx(1) * fracnonmud
+          fracreq  = xx(1)
           !
           outerfracloop: do while (fracreq > fraccum)
              !
@@ -219,7 +222,8 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                 s = stage(l)
                 if (s<nseddia(l)) then
                    if (s>0) then
-                      dens = dens + frac(nm,l) * (logseddia(1,s+1,l) - logseddia(1,s,l)) &
+                      dens = dens + (frac(nm,l)/fracnonmud) &
+                                             & * (logseddia(1,s+1,l) - logseddia(1,s,l)) &
                                              & / (logseddia(2,s+1,l) - logseddia(2,s,l))
                    endif
                    if (logseddia(2,s+1,l)<logdiam) then
@@ -237,7 +241,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
              !
              if (ltrigger < 0) then
                 do while (i <= nxx)
-                   dxx(nm,i) = logdprev
+                   dxx(nm,i) = exp(logdprev)
                    i = i+1
                 enddo
                 exit outerfracloop
@@ -258,7 +262,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                 fracinterval = dens * (logdiam-logdprev)
                 if (i < nxx) then
                    i = i+1
-                   fracreq = xx(i) * fracnonmud
+                   fracreq = xx(i)
                 else
                    !
                    ! Diameter of last fraction determined, jump out
@@ -301,7 +305,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                       dxx(nm,i) = exp(logdiam)
                       if (i < nxx) then
                          i = i+1
-                         fracreq = xx(i) * fracnonmud
+                         fracreq = xx(i)
                       else
                          !
                          ! Diameter of last fraction determined, jump out
