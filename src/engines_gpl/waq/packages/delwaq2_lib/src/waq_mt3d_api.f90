@@ -4,7 +4,7 @@
 
    logical function MT3D_set_debug_status (set_MT3D_debug)
       !DEC$ ATTRIBUTES DLLEXPORT::MT3D_set_debug_status
-      !DEC$ ATTRIBUTES ALIAS : '_MT3D_SET_DEBUG_STATUS' :: MT3D_set_debug_status
+      !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_SET_DEBUG_STATUS' :: MT3D_set_debug_status
       
       use MT3D
 
@@ -21,7 +21,7 @@
                                          number_parameters, process_parameters, process_parameter_values, &
                                          number_processes, processes, deltt_in)
       !DEC$ ATTRIBUTES DLLEXPORT::MT3D_processes_init
-      !DEC$ ATTRIBUTES ALIAS : '_MT3D_PROCESSES_INIT' :: MT3D_processes_init
+      !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_INIT' :: MT3D_processes_init
       
       use waq_omi_priv
       use MT3D
@@ -163,7 +163,7 @@
 
    logical function MT3D_processes_setpar (number_parameters, number_segments, process_parameters, process_parameter_values)
       !DEC$ ATTRIBUTES DLLEXPORT::MT3D_processes_setpar
-      !DEC$ ATTRIBUTES ALIAS : '_MT3D_PROCESSES_SETPAR' :: MT3D_processes_setpar
+      !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_SETPAR' :: MT3D_processes_setpar
       
 !      use MT3D_PL
 
@@ -191,7 +191,7 @@
    
    logical function MT3D_processes_step (number_segments, number_substances, substance_concentrations, deltt_in )
       !DEC$ ATTRIBUTES DLLEXPORT::MT3D_processes_step
-      !DEC$ ATTRIBUTES ALIAS : '_MT3D_PROCESSES_STEP' :: MT3D_processes_step
+      !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_STEP' :: MT3D_processes_step
 
 !      use MT3D_PL
       use waq_omi_priv
@@ -239,7 +239,7 @@
    
    logical function MT3D_processes_fin ()
       !DEC$ ATTRIBUTES DLLEXPORT::MT3D_processes_fin
-      !DEC$ ATTRIBUTES ALIAS : '_MT3D_PROCESSES_FIN' :: MT3D_processes_fin
+      !DEC$ ATTRIBUTES DECORATE, ALIAS : 'MT3D_PROCESSES_FIN' :: MT3D_processes_fin
    
       implicit none
 

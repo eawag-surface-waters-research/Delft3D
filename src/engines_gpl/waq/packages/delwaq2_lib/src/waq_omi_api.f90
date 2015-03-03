@@ -648,7 +648,7 @@ end module waq_omi_priv
 
 integer function Count_Values(partype, parid, loctype, locid)
     !DEC$ ATTRIBUTES DLLEXPORT::Count_Values
-    !DEC$ ATTRIBUTES ALIAS : '_COUNT_VALUES' :: Count_Values
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'COUNT_VALUES' :: Count_Values
 
     use waq_omi_priv
     use waq_omi_constants
@@ -705,7 +705,7 @@ end function Count_Values
 integer function Set_Values(partype, parid, loctype, locid, operation, number, values)
 
     !DEC$ ATTRIBUTES DLLEXPORT::Set_Values
-    !DEC$ ATTRIBUTES ALIAS : '_SET_VALUES' :: Set_Values
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SET_VALUES' :: Set_Values
 
     use waq_omi_priv
     use waq_omi_constants
@@ -780,7 +780,7 @@ end function Set_Values
 integer function Set_Values_General(dlwqtype, parid, locid, operation, number, values)
 
     !DEC$ ATTRIBUTES DLLEXPORT::Set_Values_General
-    !DEC$ ATTRIBUTES ALIAS : '_SET_VALUES_GENERAL' :: Set_Values_General
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SET_VALUES_GENERAL' :: Set_Values_General
 
     use waq_omi_priv
     use waq_omi_constants
@@ -816,7 +816,7 @@ end function Set_Values_General
 integer function Get_Values(partype, parid, loctype, locid, number, values)
 
     !DEC$ ATTRIBUTES DLLEXPORT::Get_Values
-    !DEC$ ATTRIBUTES ALIAS : '_GET_VALUES' :: Get_Values
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GET_VALUES' :: Get_Values
 
     use waq_omi_priv
     use waq_omi_constants
@@ -860,7 +860,7 @@ end function Get_Values
 subroutine CheckParameterId(type, parid, success)
 
     !DEC$ ATTRIBUTES DLLEXPORT::CheckParameterId
-    !DEC$ ATTRIBUTES ALIAS : '_CHECKPARAMETERID' :: CheckParameterId
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'CHECKPARAMETERID' :: CheckParameterId
 
     use waq_omi_priv, TestCheckParameterId => CheckParameterId
 
@@ -879,7 +879,7 @@ end subroutine CheckParameterId
 subroutine SetNewValue(value, new_value, operation)
 
     !DEC$ ATTRIBUTES DLLEXPORT::SetNewValue
-    !DEC$ ATTRIBUTES ALIAS : '_SETNEWVALUE' :: SetNewValue
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETNEWVALUE' :: SetNewValue
 
     use waq_omi_priv, TestSetNewValue => SetNewValue
 
@@ -899,7 +899,7 @@ subroutine GetDlwqd( dlwqd_copy )
     use delwaq2_global_data
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetDlwqd
-    !DEC$ ATTRIBUTES ALIAS : '_GETDLWQD' :: GetDlwqd
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETDLWQD' :: GetDlwqd
 
     type(delwaq_data) :: dlwqd_copy
 
@@ -913,7 +913,7 @@ subroutine SetDlwqd( dlwqd_copy )
     use delwaq2_global_data
 
     !DEC$ ATTRIBUTES DLLEXPORT::SetDlwqd
-    !DEC$ ATTRIBUTES ALIAS : '_SETDLWQD' :: SetDlwqd
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETDLWQD' :: SetDlwqd
 
     type(delwaq_data) :: dlwqd_copy
 
@@ -928,7 +928,7 @@ end subroutine SetDlwqd
 subroutine SetCommonVars( icons_, iparm_, iconc_, ibset_, iwste_, nosys_, notot_, nocons_, nopa_, noseg_, nowst_, nobnd_ )
 
     !DEC$ ATTRIBUTES DLLEXPORT::SetCommonVars
-    !DEC$ ATTRIBUTES ALIAS : '_SETCOMMONVARS' :: SetCommonVars
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'SETCOMMONVARS' :: SetCommonVars
 
     implicit none
 
@@ -957,7 +957,7 @@ end subroutine SetCommonVars
 subroutine StoreOperation( index, number, new_value, operation )
 
     !DEC$ ATTRIBUTES DLLEXPORT::StoreOperation
-    !DEC$ ATTRIBUTES ALIAS : '_STOREOPERATION' :: StoreOperation
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'STOREOPERATION' :: StoreOperation
 
     use waq_omi_priv, TestStoreOperation => StoreOperation
 
@@ -976,7 +976,7 @@ end subroutine StoreOperation
 subroutine test_apply_operations( dlwqd )
 
     !DEC$ ATTRIBUTES DLLEXPORT::test_apply_operations
-    !DEC$ ATTRIBUTES ALIAS : '_TEST_APPLY_OPERATIONS' :: test_apply_operations
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'TEST_APPLY_OPERATIONS' :: test_apply_operations
 
     use delwaq2_data
 
@@ -993,7 +993,7 @@ end subroutine test_apply_operations
 integer function GetLocationCount( odatype )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetLocationCount
-    !DEC$ ATTRIBUTES ALIAS : '_GETLOCATIONCOUNT' :: GetLocationCount
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETLOCATIONCOUNT' :: GetLocationCount
 
     use waq_omi_priv
 
@@ -1012,7 +1012,7 @@ end function GetLocationCount
 integer function GetItemCount( type )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetItemCount
-    !DEC$ ATTRIBUTES ALIAS : '_GETITEMCOUNT' :: GetItemCount
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETITEMCOUNT' :: GetItemCount
 
     use waq_omi_priv
 
@@ -1028,7 +1028,7 @@ end function GetItemCount
 integer function GetLocationId( type, name )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetLocationId
-    !DEC$ ATTRIBUTES ALIAS : '_GETLOCATIONID' :: GetLocationId
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETLOCATIONID' :: GetLocationId
 
     use waq_omi_priv
 
@@ -1045,7 +1045,7 @@ end function GetLocationId
 integer function GetLocationIds( type, idsSize, ids )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetLocationIds
-    !DEC$ ATTRIBUTES ALIAS : '_GETLOCATIONIDS' :: GetLocationIds
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETLOCATIONIDS' :: GetLocationIds
 
     use waq_omi_priv
 
@@ -1063,7 +1063,7 @@ end function GetLocationIds
 integer function GetItemIndex( type, name )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetItemIndex
-    !DEC$ ATTRIBUTES ALIAS : '_GETITEMINDEX' :: GetItemIndex
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETITEMINDEX' :: GetItemIndex
 
     use waq_omi_priv
 
@@ -1080,7 +1080,7 @@ end function GetItemIndex
 integer function GetLocationName( type, idx, name )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetLocationName
-    !DEC$ ATTRIBUTES ALIAS : '_GETLOCATIONNAME' :: GetLocationName
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETLOCATIONNAME' :: GetLocationName
 
     use waq_omi_priv
 
@@ -1100,7 +1100,7 @@ end function GetLocationName
 integer function GetItemName( type, idx, name )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetItemName
-    !DEC$ ATTRIBUTES ALIAS : '_GETITEMNAME' :: GetItemName
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETITEMNAME' :: GetItemName
 
     use waq_omi_priv
 
@@ -1118,7 +1118,7 @@ end function GetItemName
 integer function GetActiveSubstancesCount( )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetActiveSubstancesCount
-    !DEC$ ATTRIBUTES ALIAS : '_GETACTIVESUBSTANCESCOUNT' :: GetActiveSubstancesCount
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETACTIVESUBSTANCESCOUNT' :: GetActiveSubstancesCount
 
     use waq_omi_priv
 
@@ -1132,7 +1132,7 @@ end function GetActiveSubstancesCount
 integer function GetTotalSubstancesCount( )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetTotalSubstancesCount
-    !DEC$ ATTRIBUTES ALIAS : '_GETTOTALSUBSTANCESCOUNT' :: GetTotalSubstancesCount
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETTOTALSUBSTANCESCOUNT' :: GetTotalSubstancesCount
 
     use waq_omi_priv
 
@@ -1146,7 +1146,7 @@ end function GetTotalSubstancesCount
 integer function GetSubstanceName( subid, name )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetSubstanceName
-    !DEC$ ATTRIBUTES ALIAS : '_GETSUBSTANCENAME' :: GetSubstanceName
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETSUBSTANCENAME' :: GetSubstanceName
 
     use waq_omi_priv
 
@@ -1163,7 +1163,7 @@ end function GetSubstanceName
 integer function GetSubstanceId( name )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetSubstanceId
-    !DEC$ ATTRIBUTES ALIAS : '_GETSUBSTANCEID' :: GetSubstanceId
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETSUBSTANCEID' :: GetSubstanceId
 
     use waq_omi_priv
 
@@ -1179,7 +1179,7 @@ end function GetSubstanceId
 integer function GetTimeHorizon( startTime, stopTime )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetTimeHorizon
-    !DEC$ ATTRIBUTES ALIAS : '_GETTIMEHORIZON' :: GetTimeHorizon
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETTIMEHORIZON' :: GetTimeHorizon
 
     use waq_omi_priv
 
@@ -1201,7 +1201,7 @@ end function GetTimeHorizon
 integer function GetWQCurrentTime( currentTime )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetWQCurrentTime
-    !DEC$ ATTRIBUTES ALIAS : '_GETWQCURRENTTIME' :: GetWQCurrentTime
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETWQCURRENTTIME' :: GetWQCurrentTime
 
     use waq_omi_priv
 
@@ -1222,7 +1222,7 @@ end function GetWQCurrentTime
 integer function GetWQNextTime( nextTime )
 
     !DEC$ ATTRIBUTES DLLEXPORT::GetWQNextTime
-    !DEC$ ATTRIBUTES ALIAS : '_GETWQNEXTTIME' :: GetWQNextTime
+    !DEC$ ATTRIBUTES DECORATE, ALIAS : 'GETWQNEXTTIME' :: GetWQNextTime
 
     use waq_omi_priv
 
