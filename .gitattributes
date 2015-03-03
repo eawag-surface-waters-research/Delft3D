@@ -4736,7 +4736,6 @@ src/utils_gpl/morphology/packages/morphology_data/src/sediment_basics_module.f90
 src/utils_gpl/morphology/packages/morphology_io/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_io/morphology_io.vfproj -text
 src/utils_gpl/morphology/packages/morphology_io/src/Makefile.am -text
-src/utils_gpl/morphology/packages/morphology_io/src/rdinimorlyr.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdmor.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdmorlyr.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdsed.f90 -text

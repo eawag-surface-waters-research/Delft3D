@@ -957,4 +957,924 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
     !
 end subroutine rdinidiff
 
+subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
+                     & dims      ,morlyr    ,morpar    ,sedpar    , &
+                     & rst_fluff ,rst_bedcmp)
+!!--description-----------------------------------------------------------------
+!
+! Reads attribute file for 3D morphology computation
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    use bedcomposition_module
+    use properties
+    use string_module, only: remove_leading_spaces
+    use grid_dimens_module, only: griddimtype
+    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use sediment_basics_module, only: SEDTYP_COHESIVE
+    use morphology_data_module, only: sedpar_type, morpar_type
+    !
+    implicit none
+!
+! Global variables
+!
+    type(griddimtype), target                              , intent(in)  :: dims    !  grid dimensions
+    integer                                                , intent(in)  :: lsedtot
+    integer                                                , intent(in)  :: lsed
+    integer                                                              :: lundia
+    logical                                                , intent(out) :: error
+    type (morpar_type)                          , target   , intent(in)  :: morpar
+    type (sedpar_type)                          , target   , intent(in)  :: sedpar
+    type(bedcomp_data)                                                   :: morlyr
+    logical                                                , intent(in)  :: rst_fluff
+    logical                                                , intent(in)  :: rst_bedcmp
+!
+! Local variables
+!
+    integer                               :: i
+    integer                               :: ibnd
+    integer                               :: ilyr
+    integer                               :: ised
+    integer                               :: istat
+    integer                               :: length
+    integer                               :: nm
+    integer                               :: nm2
+    integer                               :: nmlb
+    integer                               :: nmmax
+    integer                               :: nmub
+    real(fp)                              :: cdrybavg
+    real(fp)                              :: fraction
+    real(fp), dimension(lsedtot)          :: mfrac
+    real(fp)                              :: mfracsum
+    real(fp)                              :: poros
+    real(fp)                              :: rmissval
+    real(fp)                              :: sedbed
+    real(fp)                              :: sedmass
+    real(fp)                              :: svf
+    real(fp)                              :: thick
+    real(fp)                              :: totfrac
+    real(fp), dimension(:,:), allocatable :: rtemp
+    real(fp), dimension(:), allocatable   :: thtemp
+    real(fp)                              :: vfracsum
+    logical                               :: anyfrac
+    logical                               :: anysedbed
+    logical                               :: err
+    logical                               :: ex
+    character(10)                         :: lstr
+    character(10)                         :: versionstring
+    character(11)                         :: fmttmp   ! Format file ('formatted  ') 
+    character(80)                         :: parname
+    character(80)                         :: layertype
+    character(256)                        :: filename
+    character(300)                        :: message
+    type(tree_data)                     , pointer :: mor_ptr
+    type(tree_data)                     , pointer :: layer_ptr
+    !
+    integer                             , pointer :: iporosity
+    integer                             , pointer :: iunderlyr
+    integer                             , pointer :: nlyr
+    real(fp)         , dimension(:)     , pointer :: cdryb
+    real(fp)         , dimension(:)     , pointer :: rhosol
+    real(fp)         , dimension(:)     , pointer :: sdbuni
+    character(10)    , dimension(:)     , pointer :: inisedunit
+    character(256)   , dimension(:)     , pointer :: flsdbd
+    character(256)                      , pointer :: flcomp
+    real(prec)       , dimension(:,:)   , pointer :: bodsed
+    real(fp)         , dimension(:,:)   , pointer :: mfluff
+    real(fp)         , dimension(:,:,:) , pointer :: msed
+    real(fp)         , dimension(:,:)   , pointer :: thlyr
+    real(fp)         , dimension(:,:)   , pointer :: svfrac
+    real(fp)         , dimension(:)     , pointer :: mfluni
+    character(20)    , dimension(:)     , pointer :: namsed
+    character(256)   , dimension(:)     , pointer :: mflfil
+!
+!! executable statements -------------------------------------------------------
+!
+    cdryb              => sedpar%cdryb
+    rhosol             => sedpar%rhosol
+    sdbuni             => sedpar%sdbuni
+    inisedunit         => sedpar%inisedunit
+    flsdbd             => sedpar%flsdbd
+    flcomp             => morpar%flcomp
+    namsed             => sedpar%namsed
+    !
+    rmissval      = -999.0_fp
+    fmttmp        = 'formatted'
+    nmmax         = dims%nmmax
+    nmlb          = dims%nmlb
+    nmub          = dims%nmub
+    error         = .false.
+    !
+    ! Fluff layer
+    !
+    if (morpar%flufflyr%iflufflyr>0 .and. .not.rst_fluff) then
+       !
+       ! If not restart then initialize using values specified in input file
+       !
+       mfluff => morpar%flufflyr%mfluff
+       mfluni => morpar%flufflyr%mfluni
+       mflfil => morpar%flufflyr%mflfil
+       !
+       mfluff = 0.0_fp
+       !
+       do ised = 1, lsed
+           if (sedpar%sedtyp(ised) /= SEDTYP_COHESIVE) continue
+           inquire (file = mflfil(ised), exist = ex)
+           if (ex) then
+               call depfil(lundia    ,error     ,mflfil(ised)         , &
+                         & fmttmp    ,mfluff    ,lsed      ,ised      , &
+                         & dims      )
+               if (error) return
+           else
+               mfluff(ised,:) = mfluni(ised)
+           endif
+       enddo
+    endif 
+    !
+    ! Bed layers
+    !
+    if (.not.rst_bedcmp) then
+       istat = bedcomp_getpointer_integer(morlyr, 'iunderlyr', iunderlyr)
+       if (istat==0) istat = bedcomp_getpointer_integer(morlyr, 'nlyr'   , nlyr)
+       if (istat==0) istat = bedcomp_getpointer_realprec(morlyr, 'bodsed', bodsed)
+       if (istat==0) istat = bedcomp_getpointer_integer(morlyr, 'iporosity', iporosity)
+       if (iunderlyr==2) then
+          if (istat==0) istat = bedcomp_getpointer_realfp (morlyr, 'msed'     , msed)
+          if (istat==0) istat = bedcomp_getpointer_realfp (morlyr, 'thlyr'    , thlyr)
+          if (istat==0) istat = bedcomp_getpointer_realfp (morlyr, 'svfrac'   , svfrac)
+       endif
+       if (istat/=0) then
+          call write_error('Memory problem in RDINIMORLYR', unit=lundia)
+          error = .true.
+          return          
+       endif
+       !
+       if (iunderlyr==1 .or. flcomp == ' ') then
+          !
+          ! If not restart and no layer administration, then use the bed composition specified in the sed file.
+          !
+          error = .false.
+          do ised = 1, lsedtot
+             if (flsdbd(ised) == ' ') then
+                !
+                ! Uniform data has been specified
+                !
+                do nm = 1, nmmax
+                   bodsed(ised, nm) = real(sdbuni(ised),prec)
+                enddo
+             else
+                !
+                ! Space varying data has been specified
+                ! Use routine that also read the depth file to read the data
+                !
+                if (prec == hp) then
+                   call depfil_double(lundia    ,error     ,flsdbd(ised) , &
+                                    & fmttmp    ,bodsed    ,lsedtot      , &
+                                    & ised      ,dims      )
+                else
+                   call depfil(lundia    ,error     ,flsdbd(ised) , &
+                             & fmttmp    ,bodsed    ,lsedtot      , &
+                             & ised      ,dims      )
+                endif
+                if (error) return
+             endif
+          enddo
+          if (iporosity == 0) then
+             do ised = 1, lsedtot
+                if (inisedunit(ised) == 'm') then
+                   do nm = 1, nmmax
+                      bodsed(ised, nm) = bodsed(ised, nm) * cdryb(ised)
+                   enddo
+                else
+                   !
+                   ! inisedunit(ised) = kg/m2
+                   ! no conversion needed
+                   !
+                endif
+             enddo
+          else
+             do ised = 2, lsedtot
+                if (inisedunit(ised) /= inisedunit(1)) then
+                   call write_error('All sediment fields in the same layer should have unit.', unit=lundia)
+                   error = .true.
+                   return
+                endif
+             enddo
+             if (inisedunit(1) == 'm') then
+                !
+                ! all input specified as thickness
+                !
+                do nm = 1, nmmax
+                   mfracsum = 0.0_fp
+                   do ised = 1, lsedtot
+                      mfrac(ised) = bodsed(ised, nm) * rhosol(ised)
+                      mfracsum = mfracsum + mfrac(ised)
+                   enddo
+                   if (mfracsum > 0.0_fp) then
+                      do ised = 1, lsedtot
+                         mfrac(ised) = mfrac(ised) / mfracsum
+                      enddo
+                      !
+                      call getporosity(morlyr, mfrac, poros)
+                      svf = 1.0_fp - poros
+                   else
+                      svf = 1.0_fp
+                   endif
+                   !
+                   do ised = 1, lsedtot
+                      bodsed(ised, nm) = bodsed(ised, nm) * svf * rhosol(ised)
+                   enddo
+                enddo
+             else
+                !
+                ! inisedunit(1) = kg/m2
+                ! no conversion needed
+                !
+             endif
+          endif
+          !
+          ! Check validity of input data
+          !
+          do nm = 1, nmmax
+             if (dims%celltype(nm) == 1) then
+                !
+                ! At an internal point the composition is important.
+                ! Check the values carefully before continuing.
+                !
+                do ised = 1, lsedtot
+                   if (bodsed(ised, nm) < 0.0) then
+                      write (message,'(a,i2,a,a,a,i0)')  &
+                          & 'Negative sediment thickness ',ised,' in file ', &
+                          & trim(flsdbd(ised)),' at nm=',nm
+                      call write_error(trim(message), unit=lundia)
+                      error = .true.
+                      return
+                   endif
+                enddo
+             elseif (dims%celltype(nm) == 2) then
+                !
+                ! At an open boundary the composition is also important
+                ! but if the input is not valid, mark the data as dummy data:
+                ! the data will be overwritten with data coming from the
+                ! neighbouring internal point.
+                !
+                err = .false.
+                do ised = 1, lsedtot
+                   if (bodsed(ised, nm)<0.0) err=.true.
+                enddo
+                if (err) then
+                   !
+                   ! set dummy flag
+                   !
+                   bodsed(1, nm) = -1.0
+                endif
+             else
+                !
+                ! Point that will never be used: don't care about the values.
+                ! Just replace whatever was read by something valid.
+                !
+                do ised = 1, lsedtot
+                   bodsed(ised, nm) = 0.0
+                enddo
+             endif
+          enddo
+          !
+          ! Copy BODSED data to open boundary points that have not
+          ! yet been assigned valid data.
+          !
+          do ibnd = 1, size(dims%nmbnd,1)
+             nm  = dims%nmbnd(ibnd,1)
+             nm2 = dims%nmbnd(ibnd,2)
+             do ised = 1,lsedtot
+                bodsed(ised, nm) = bodsed(ised, nm2)
+             enddo
+          enddo
+          !
+          ! Use BODSED: compute DPSED and as needed transfer information from BODSED to other arrays
+          !
+          call bedcomp_use_bodsed(morlyr)
+       else
+          !
+          ! Create Initial Morphology branch in input tree
+          !
+          call tree_create  ( "Initial Morphology", mor_ptr )
+          !
+          ! Put mor-file in input tree
+          !
+          call prop_file('ini', trim(flcomp), mor_ptr, istat)
+          if (istat /= 0) then
+             select case (istat)
+             case(1)
+                call write_error(FILE_NOT_FOUND//trim(flcomp), unit=lundia)
+             case(3)
+                call write_error(PREMATURE_EOF//trim(flcomp), unit=lundia)
+             case default
+                call write_error(FILE_READ_ERROR//trim(flcomp), unit=lundia)
+             endselect
+             error = .true.
+             return
+          endif    
+          !
+          ! Check version number of mor input file
+          !
+          versionstring = 'n.a.'
+          call prop_get_string(mor_ptr, 'BedCompositionFileInformation', 'FileVersion', versionstring)
+          if (trim(versionstring) == '01.00' .or. trim(versionstring) == '02.00') then
+             !
+             ! reset mass of sediment per fraction to zero
+             !
+             msed = 0.0_fp
+             thlyr = 0.0_fp
+             !
+             ! allocate temporary array
+             !
+             ilyr = 0
+             allocate(rtemp(nmlb:nmub,lsedtot), stat = istat)
+             if (istat == 0) allocate(thtemp(nmlb:nmub), stat = istat)
+             if (istat /= 0) then
+                call write_error( 'RdIniMorLyr: memory alloc error', unit=lundia)
+                error = .true.
+                return
+             endif
+             !
+             do i = 1, size(mor_ptr%child_nodes)
+                !
+                ! Does mor_ptr contain a child with name 'Layer' (converted to lower case)?
+                !
+                layer_ptr => mor_ptr%child_nodes(i)%node_ptr
+                parname = tree_get_name( layer_ptr )
+                call small(parname, len(parname))
+                if ( trim(parname) /= 'layer') cycle
+                !
+                ! Increment ilyr, but do not exceed nlyr
+                !
+                ilyr = min(nlyr, ilyr+1)
+                !
+                ! Initialize/reset the temporary array
+                !
+                rtemp  = 0.0_fp
+                thtemp = 0.0_fp
+                !
+                ! Layer group found, scan it for the layer composition
+                !
+                layertype = ' '
+                call prop_get_string(layer_ptr, '*', 'Type', layertype)
+                call small(layertype, len(layertype))
+                if (layertype == ' ') then
+                   !
+                   ! no Type field found
+                   !
+                   write (message,'(a,i2,2a)') 'No type specified for layer ', ilyr, &
+                                             & ' in file ', trim(flcomp)
+                   call write_error(message, unit=lundia)
+                   error = .true.
+                   return
+                elseif (layertype == 'mass fraction' .or. &
+                      & layertype == 'volume fraction') then
+                   !
+                   ! mass or volume fraction and layer thickness specified
+                   !
+                   parname  = 'Thick'
+                   filename = ' '
+                   call prop_get_string(layer_ptr, '*', parname, filename)
+                   !
+                   ! Intel 7.0 crashes on an inquire statement when file = ' '
+                   !
+                   if (filename == ' ') filename = 'dummyname'
+                   inquire (file = filename, exist = ex)
+                   if (.not. ex) then
+                      !
+                      ! Constant thickness
+                      !
+                      sedbed = rmissval
+                      call prop_get(layer_ptr, '*', parname, sedbed)
+                      if (comparereal(sedbed,rmissval) == 0) then
+                         write (message,'(a,i2,2a)')  &
+                             & 'Missing Thick keyword for layer ', ilyr, &
+                             & ' in file ', trim(flcomp)
+                         call write_error(message, unit=lundia)
+                         error = .true.
+                         return
+                      endif
+                      do nm = 1, nmmax
+                         thtemp(nm) = sedbed
+                      enddo
+                   else
+                      !
+                      ! Spatially varying thickness
+                      !
+                      call depfil(lundia    ,error     ,filename  ,fmttmp    , &
+                                & thtemp    ,1         ,1         ,dims)
+                      if (error) then
+                         write (message,'(3a,i2,2a)')  &
+                             & 'Error reading thickness from ', trim(filename), &
+                             & ' for layer ', ilyr, ' in file ', trim(flcomp)
+                         call write_error(message, unit=lundia)
+                         return          
+                      endif
+                   endif
+                   !
+                   anyfrac = .false.
+                   totfrac = 0.0_fp
+                   do ised = 1, lsedtot
+                      !
+                      ! Scan file for fractions
+                      !
+                      if (trim(versionstring) == '01.00') then
+                         write(lstr,'(i10)') ised
+                         length = 10
+                         call remove_leading_spaces(lstr, length)
+                         !
+                         ! Keyword SedBed<i> may not be used when layertype is fraction
+                         !
+                         parname  = 'SedBed' // trim(lstr)
+                         filename = ' '
+                         call prop_get_string(layer_ptr, '*', parname, filename)
+                         if (filename /= ' ') then
+                            write (message,'(7a,i2,2a)')  &
+                                & 'Use Fraction' ,trim(lstr), ' instead of SedBed', &
+                                & trim(lstr), ' for ', trim(layertype), ' layer ', &
+                                & ilyr, ' in file ', trim(flcomp)
+                            call write_error(message, unit=lundia)
+                            error = .true.
+                            return
+                         endif
+                         !
+                         parname  = 'Fraction' // trim(lstr)
+                      else
+                         parname = namsed(ised)
+                      endif
+                      filename = ' '
+                      call prop_get_string(layer_ptr, '*', parname, filename)
+                      !
+                      ! Intel 7.0 crashes on an inquire statement when file = ' '
+                      !
+                      if (filename == ' ') filename = 'dummyname'
+                      inquire (file = filename, exist = ex)
+                      if (.not. ex) then
+                         !
+                         ! Constant fraction
+                         !
+                         fraction = rmissval
+                         call prop_get(layer_ptr, '*', parname, fraction)
+                         if (comparereal(fraction,rmissval) == 0) then
+                            fraction = 0.0_fp
+                         elseif (fraction<0.0_fp .or. fraction>1.0_fp) then
+                            write (message,'(a,e12.4,5a,i2,3a)')  &
+                                & 'Invalid value ',fraction,' for ', trim(parname), &
+                                & ' of ', trim(layertype), ' layer ', &
+                                & ilyr, ' in file ', trim(flcomp), &
+                                & ' Value between 0 and 1 required.'
+                            call write_error(message, unit=lundia)
+                            error = .true.
+                            return
+                         else
+                            anyfrac = .true.
+                         endif
+                         do nm = 1, nmmax
+                            rtemp(nm, ised) = fraction
+                         enddo
+                      else
+                         !
+                         ! Spatially varying fraction
+                         !
+                         anyfrac = .true.
+                         call depfil(lundia    ,error     ,filename  , fmttmp    , &
+                                   & rtemp(nmlb,ised)        ,1   ,1    ,dims)
+                         if (error) then
+                            write (message,'(a,i2,3a,i2,2a)')  &
+                                & 'Error reading fraction ', ised, 'from ', &
+                                & trim(filename), ' for layer ', ilyr, ' in file ', &
+                                & trim(flcomp)
+                            call write_error(message, unit=lundia)
+                            return
+                         endif
+                      endif
+                   enddo
+                   !
+                   ! Check if we have found any information that makes sense.
+                   !
+                   if (.not. anyfrac) then
+                      write (message,'(a,i2,2a)')  &
+                          & 'No data found for any sediment fraction in the data block of layer ' ,ilyr, &
+                          & ' in file ', trim(flcomp)
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   endif
+                   !
+                   ! Check validity of input data.
+                   !
+                   do nm = 1, nmmax
+                      if (dims%celltype(nm) == 1) then
+                         !
+                         ! At an internal point the composition of all layers is important.
+                         ! Check the values carefully before continuing.
+                         !
+                         if (thtemp(nm) < 0.0_fp) then
+                            write (message,'(a,i2,3a,i0)')  &
+                                & 'Negative sediment thickness specified for layer ', &
+                                & ilyr, ' in file ', trim(flcomp), ' at nm=', nm
+                            call write_error(message, unit=lundia)
+                            error = .true.
+                            return
+                         endif
+                         totfrac = 0.0_fp
+                         do ised = 1, lsedtot
+                            if (rtemp(nm, ised) < 0.0_fp) then
+                               write (message,'(2a,i2,a,i2,3a,i0)')  &
+                                   & 'Negative ', trim(layertype), ised, ' in layer ', &
+                                   & ilyr, ' in file ', trim(flcomp), ' at nm=', nm
+                               call write_error(message, unit=lundia)
+                               error = .true.
+                               return
+                            elseif (rtemp(nm, ised) > 1.0_fp) then
+                               write (message,'(a,i2,a,i2,3a,i0)')  &
+                                   & trim(layertype), ised, ' bigger than 1 in layer ', &
+                                   & ilyr, ' in file ', trim(flcomp), ' at nm=', nm
+                               call write_error(message, unit=lundia)
+                               error = .true.
+                               return
+                            endif
+                            totfrac = totfrac + rtemp(nm,ised)
+                         enddo
+                         if (abs(totfrac-1.0_fp) > 1e-4_fp) then
+                            write (message,'(3a,i2,3a,i0)')  &
+                                & 'Sum of ', trim(layertype), ' not equal to 1 in layer ', &
+                                & ilyr, ' in file ', trim(flcomp), ' at nm=', nm
+                            call write_error(message, unit=lundia)
+                            error = .true.
+                            return
+                         else
+                            totfrac = 0.0_fp
+                            do ised = 1, lsedtot-1
+                               totfrac = totfrac + rtemp(nm, ised)
+                            enddo
+                            rtemp(nm, lsedtot) = 1.0_fp - totfrac
+                         endif
+                      elseif (dims%celltype(nm) == 2 .and. ilyr == 1) then
+                         !
+                         ! At an open boundary only the composition of the transport layer
+                         ! is important. If it is not valid, mark the data as dummy data:
+                         ! the data will be overwritten with data coming from the neighbouring
+                         ! internal point.
+                         !
+                         totfrac = 0.0_fp
+                         err     = .false.
+                         do ised = 1, lsedtot
+                            if (rtemp(nm, ised) < 0.0_fp .or. rtemp(nm, ised) > 1.0_fp) err=.true.
+                            totfrac = totfrac + rtemp(nm,ised)
+                         enddo
+                         if (comparereal(totfrac,1.0_fp) /= 0) err=.true.
+                         if (thtemp(nm)<0.0_fp) err=.true.
+                         if (err) then
+                            !
+                            ! dummy
+                            !
+                            rtemp(nm, 1) = -1.0_fp
+                         endif
+                      else
+                         !
+                         ! Point/layer that will never be used: don't care about the
+                         ! values. Just replace whatever was read by something valid.
+                         !
+                         do ised = 1, lsedtot
+                            rtemp(nm, ised) = 0.0_fp
+                         enddo
+                         thtemp(nm) = 0.0_fp
+                      endif
+                   enddo
+                   !
+                   ! Copy RTEMP data to open boundary points that have not
+                   ! yet been assigned valid data.
+                   !
+                   do ibnd = 1, size(dims%nmbnd,1)
+                      nm  = dims%nmbnd(ibnd,1)
+                      nm2 = dims%nmbnd(ibnd,2)
+                      do ised = 1, lsedtot
+                         rtemp(nm, ised) = rtemp(nm2, ised)
+                      enddo
+                      thtemp(nm) = thtemp(nm2)
+                   enddo
+                   !
+                   ! convert mass fractions into volume fractions
+                   !
+                   if (iporosity == 0) then
+                      if (layertype == 'mass fraction') then
+                         do nm = 1, nmmax
+                            cdrybavg = 0.0_fp
+                            do ised = 1, lsedtot
+                               cdrybavg = cdrybavg + rtemp(nm, ised)/cdryb(ised)
+                            enddo
+                            if (cdrybavg > 0.0_fp) then
+                               cdrybavg = max(cdrybavg, 1.0e-8_fp)
+                               cdrybavg = 1.0_fp / cdrybavg
+                               do ised = 1, lsedtot
+                                  rtemp(nm, ised) = rtemp(nm, ised) * cdrybavg / cdryb(ised)
+                               enddo
+                            endif
+                         enddo
+                      endif
+                      !
+                      ! add thicknesses in lyrfrac
+                      !
+                      do nm = 1, nmmax
+                         do ised = 1, lsedtot
+                            msed(ised, ilyr, nm) = msed(ised, ilyr, nm) + rtemp(nm, ised)*thtemp(nm)*cdryb(ised)
+                         enddo
+                         thlyr(ilyr, nm) = thlyr(ilyr, nm) + thtemp(nm)
+                      enddo
+                   else
+                      if (layertype == 'volume fraction') then
+                         do nm = 1, nmmax
+                            mfracsum = 0.0_fp
+                            do ised = 1, lsedtot
+                               mfrac(ised) = rtemp(nm, ised) * rhosol(ised)
+                               mfracsum = mfracsum + mfrac(ised)
+                            enddo
+                            do ised = 1, lsedtot
+                               mfrac(ised) = mfrac(ised) / mfracsum
+                            enddo
+                            !
+                            call getporosity(morlyr, mfrac, poros)
+                            svf = 1.0_fp - poros
+                            !
+                            do ised = 1, lsedtot
+                               msed(ised, ilyr, nm) = msed(ised, ilyr, nm) + rtemp(nm, ised)*thtemp(nm)*rhosol(ised)*svf
+                            enddo
+                            thick = thlyr(ilyr, nm) + thtemp(nm)
+                            svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                            thlyr(ilyr, nm)  = thick
+                         enddo
+                      else ! layertype == 'mass fraction'
+                         do nm = 1, nmmax
+                            vfracsum = 0.0_fp
+                            do ised = 1, lsedtot
+                               mfrac(ised) = rtemp(nm, ised)
+                               rtemp(nm, ised) = rtemp(nm, ised) / rhosol(ised)
+                               vfracsum = vfracsum + rtemp(nm, ised)
+                            enddo
+                            do ised = 1, lsedtot
+                               rtemp(nm, ised) = rtemp(nm, ised) / vfracsum
+                            enddo
+                            !
+                            call getporosity(morlyr, mfrac, poros)
+                            svf = 1.0_fp - poros
+                            !
+                            do ised = 1, lsedtot
+                               msed(ised, ilyr, nm) = msed(ised, ilyr, nm) + rtemp(nm, ised)*thtemp(nm)*rhosol(ised)*svf
+                            enddo
+                            thick = thlyr(ilyr, nm) + thtemp(nm)
+                            svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                            thlyr(ilyr, nm)  = thick
+                         enddo
+                      endif
+                   endif
+                   !
+                elseif (layertype == 'sediment mass' .or. &
+                      & layertype == 'sediment thickness') then
+                   !
+                   ! sediment mass as specified in sediment input file
+                   !
+                   anysedbed = .false.
+                   do ised = 1, lsedtot
+                      !
+                      ! Scan file for sediment masses
+                      !
+                      if (trim(versionstring) == '01.00') then
+                         write(lstr,'(i10)') ised
+                         length = 10
+                         call remove_leading_spaces(lstr, length)
+                         !
+                         ! Keyword Fraction<i> may not be used when layertype is sediment
+                         !
+                         parname  = 'Fraction' // trim(lstr)
+                         filename = ' '
+                         call prop_get_string(layer_ptr, '*', parname, filename)
+                         if (filename /= ' ') then
+                            write (message,'(7a,i2,2a)')  &
+                                & 'Use SedBed', trim(lstr), ' instead of Fraction', &
+                                & trim(lstr), ' for ', trim(layertype), ' layer ', &
+                                & ilyr, ' in file ', trim(flcomp)
+                            call write_error(message, unit=lundia)
+                            error = .true.
+                            return
+                         endif
+                         !
+                         parname  = 'SedBed' // trim(lstr)
+                      else
+                         parname = namsed(ised)
+                      endif
+                      filename = ' '
+                      call prop_get_string(layer_ptr, '*', parname, filename)
+                      !
+                      ! Intel 7.0 crashes on an inquire statement when file = ' '
+                      !
+                      if (filename == ' ') filename = 'dummyname'
+                      inquire (file = filename, exist = ex)
+                      if (.not. ex) then
+                         !
+                         ! Constant thickness or mass
+                         !
+                         sedbed = rmissval
+                         call prop_get(layer_ptr, '*', parname, sedbed)
+                         if (comparereal(sedbed,rmissval) == 0) then
+                            sedbed = 0.0_fp
+                         elseif (sedbed<0.0_fp) then
+                            write (message,'(a,e12.4,5a,i2,3a)')  &
+                                & 'Invalid value ',sedbed,' for ', trim(parname), &
+                                & ' of ', trim(layertype), ' layer ', &
+                                & ilyr, ' in file ', trim(flcomp), &
+                                & ' Positive value required.'
+                            call write_error(message, unit=lundia)
+                            error = .true.
+                            return
+                         else
+                            anysedbed = .true.
+                         endif
+                         do nm = 1, nmmax
+                            rtemp(nm, ised) = sedbed
+                         enddo
+                      else
+                         !
+                         ! Spatially varying thickness or mass
+                         !
+                         anysedbed = .true.
+                         call depfil(lundia    ,error     ,filename  , fmttmp    , &
+                                   & rtemp(nmlb,ised)     ,1   ,1    ,dims)
+                         if (error) then
+                            write (message,'(5a,i2,2a)')  &
+                                & 'Error reading ', layertype, '  from ', trim(filename), &
+                                & ' for layer ', ilyr, ' in file ', trim(flcomp)
+                            call write_error(message, unit=lundia)
+                            return
+                         endif
+                      endif
+                   enddo
+                   !
+                   ! Check if we have found any information that makes sense.
+                   !
+                   if (.not. anysedbed) then
+                      write (message,'(a,i2,2a)')  &
+                          & 'No data found for any sediment fraction in the data block of layer ' ,ilyr, &
+                          & ' in file ' ,trim(flcomp)
+                      call write_error(message, unit=lundia)
+                      error = .true.
+                      return
+                   endif
+                   !
+                   ! Check validity of input data.
+                   !
+                   do nm = 1, nmmax
+                      if (dims%celltype(nm) == 1) then
+                         !
+                         ! At an internal point the composition of all layers is important.
+                         ! Check the values carefully before continuing.
+                         !
+                         do ised = 1, lsedtot
+                            if (rtemp(nm, ised) < 0.0_fp) then
+                               write (message,'(2a,i2,a,i2,3a,i0)')  &
+                                   & 'Negative ', trim(layertype), ised, ' in layer ', &
+                                   & ilyr, ' in file ', trim(flcomp), ' at nm=', nm
+                               call write_error(message, unit=lundia)
+                               error = .true.
+                               return
+                            endif
+                         enddo
+                      elseif (dims%celltype(nm) == 2 .and. ilyr == 1) then
+                         !
+                         ! At an open boundary only the composition of the transport layer
+                         ! is important. If it is not valid, mark the data as dummy data:
+                         ! the data will be overwritten with data coming from the neighbouring
+                         ! internal point.
+                         !
+                         err = .false.
+                         do ised = 1, lsedtot
+                            if (rtemp(nm, ised) < 0.0_fp) err=.true.
+                         enddo
+                         if (err) then
+                            !
+                            ! dummy
+                            !
+                            rtemp(nm, 1) = -1.0_fp
+                         endif
+                      else
+                         !
+                         ! Point/layer that will never be used: don't care about the
+                         ! values. Just replace whatever was read by something valid.
+                         !
+                         do ised = 1, lsedtot
+                            rtemp(nm, ised) = 0.0_fp
+                         enddo
+                      endif
+                   enddo
+                   !
+                   ! Copy RTEMP data to open boundary points that have not
+                   ! yet been assigned valid data.
+                   !
+                   do ibnd = 1, size(dims%nmbnd,1)
+                      nm  = dims%nmbnd(ibnd,1)
+                      nm2 = dims%nmbnd(ibnd,2)
+                      do ised = 1, lsedtot
+                         rtemp(nm, ised) = rtemp(nm2, ised)
+                      enddo
+                   enddo
+                   !
+                   ! convert sediment mass to sediment thickness
+                   !
+                   if (iporosity == 0) then
+                      if (layertype == 'sediment thickness') then
+                         do ised = 1, lsedtot
+                            do nm = 1, nmmax
+                               rtemp(nm, ised) = rtemp(nm, ised) * cdryb(ised)
+                            enddo
+                         enddo
+                      endif
+                      !
+                      ! add masses in msed and thicknesses in thlyr
+                      !
+                      do ised = 1, lsedtot
+                         do nm = 1, nmmax
+                            msed(ised, ilyr, nm) = msed(ised, ilyr, nm) + rtemp(nm, ised)
+                            thlyr(ilyr, nm)   = thlyr(ilyr, nm)    + rtemp(nm, ised)/cdryb(ised)
+                         enddo
+                      enddo
+                   else
+                      if (layertype == 'sediment thickness') then
+                         do nm = 1, nmmax
+                            mfracsum = 0.0_fp
+                            do ised = 1, lsedtot
+                               mfrac(ised) = rtemp(nm, ised) * rhosol(ised)
+                               mfracsum = mfracsum + mfrac(ised)
+                            enddo
+                            if (mfracsum>0.0_fp) then
+                               do ised = 1, lsedtot
+                                  mfrac(ised) = mfrac(ised) / mfracsum
+                               enddo
+                               !
+                               call getporosity(morlyr, mfrac, poros)
+                               svf = 1.0_fp - poros
+                            else
+                               svf = 1.0_fp
+                            endif
+                            !
+                            thtemp(nm) = 0.0_fp
+                            do ised = 1, lsedtot
+                               msed(ised, ilyr, nm) = msed(ised, ilyr, nm) + rtemp(nm, ised) * rhosol(ised) * svf
+                               thtemp(nm)        = thtemp(nm)        + rtemp(nm, ised)
+                            enddo
+                            thick = thlyr(ilyr, nm) + thtemp(nm)
+                            svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                            thlyr(ilyr, nm)  = thick
+                         enddo
+                      else ! layertype == 'sediment mass'
+                         !
+                         ! add masses in msed and thicknesses in thlyr
+                         !
+                         do nm = 1, nmmax
+                            vfracsum = 0.0_fp
+                            do ised = 1, lsedtot
+                               mfrac(ised) = rtemp(nm, ised)
+                               rtemp(nm, ised) = rtemp(nm, ised) / rhosol(ised)
+                               vfracsum = vfracsum + rtemp(nm, ised)
+                            enddo
+                            do ised = 1, lsedtot
+                               rtemp(nm, ised) = rtemp(nm, ised) / vfracsum
+                            enddo
+                            !
+                            thtemp(nm) = 0.0_fp
+                            do ised = 1, lsedtot
+                               msed(ised, ilyr, nm) = msed(ised, ilyr, nm) + rtemp(nm, ised) * rhosol(ised) * svf
+                               thtemp(nm)        = thtemp(nm)        + rtemp(nm, ised)
+                            enddo
+                            thick = thlyr(ilyr, nm) + thtemp(nm)
+                            svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                            thlyr(ilyr, nm)  = thick
+                         enddo
+                      endif
+                   endif
+                else
+                   write (message,'(3a,i2,2a)') 'Unknown layer type ''', &
+                    & trim(layertype), ''' specified for layer ', ilyr, &
+                    & ' in file ', trim(flcomp)
+                   call write_error(message, unit=lundia)
+                   error = .true.
+                   return
+                endif
+                !
+             enddo
+             !
+             deallocate(rtemp , stat = istat)
+             deallocate(thtemp, stat = istat)
+             !
+          else
+             write (message,'(2a)') 'Invalid file version of ', trim(flcomp)
+             call write_error(message, unit=lundia)
+             error = .true.
+             return          
+          endif
+       endif
+    endif
+end subroutine rdinimorlyr
+                     
 end module m_rdmorlyr

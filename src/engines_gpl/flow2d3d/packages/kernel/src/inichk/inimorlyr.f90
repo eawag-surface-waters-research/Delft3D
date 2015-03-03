@@ -35,6 +35,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use bedcomposition_module
+    use m_rdmorlyr, only: rdinimorlyr
     use globaldata
     !
     implicit none
