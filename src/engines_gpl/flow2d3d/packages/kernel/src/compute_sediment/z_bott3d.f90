@@ -380,197 +380,20 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                    nmu = nm + icx
                    num = nm + icy
                    !
-                   ! try new approach - should be smoother
-                   ! don't worry about direction of the flow
-                   ! use concentration at velocity point=average of the
-                   ! two adjacent concentrations
-                   ! use aks height at velocity point = average of the
-                   ! two adjacent aks values
-                   !
                    ! note correction vector only computed for velocity
                    ! points with active sediment cells on both sides
                    !
                    ! u direction
                    !
-                   if ((kfu(nm)*kfsed(nm)*kfsed(nmu)) /= 0) then
-                      cumflux = 0.0_fp
-                      if (kcs(nmu) == 3 .or. kcs(nmu) == -1) then
-                         aksu = aks(nm, l)
-                      elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
-                         aksu = aks(nmu, l)
-                      else
-                         aksu = (aks(nm, l) + aks(nmu, l)) / 2.0_fp
-                      endif
-                      !
-                      ! work up through layers integrating transport
-                      ! below aksu
-                      !
-                      htdif = aksu / hu(nm)                                          
-                      zusum = 0.0_fp
-                      do k = kfumin(nm), kfumax(nm)
-                         zusum = zusum + dzu1(nm,k)
-                         !
-                         ! if layer containing aksu
-                         !
-                         if (htdif <= zusum/hu(nm)) then
-                            cumflux = cumflux + fluxu(nm, k, ll)*htdif/(dzu1(nm,k)/hu(nm))
-                            cellht  = htdif * hu(nm)
-                            exit
-                         else
-                            cumflux = cumflux + fluxu(nm, k, ll)
-                         endif
-                      enddo
-                      cumflux = cumflux / guu(nm)
-                      !
-                      ! integration finished
-                      ! suspended transport correction = opposite of the
-                      ! transport below aksu
-                      !
-                      ! Approximation of the additional transport between bottom of
-                      ! kmaxsd layer and za has been included in the correction vector
-                      !
-                      ! Layer below kmaxsd layer:
-                      k = kmxsed(nm,l) - 1
-                      if (k < kfumax(nm)) then
-                         if (kcs(nmu) == 3 .or. kcs(nmu) == -1) then
-                            !
-                            ! correction for domain decomposition:
-                            !
-                            ceavg = rca(nm, l)
-                         elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
-                            ceavg = rca(nmu, l)
-                         else
-                            ceavg = (rca(nm, l) + rca(nmu, l))/2.0_fp
-                         endif
-                         r1avg = (r1(nm, k+1, ll) + r1(nmu, k+1, ll)) / 2.0_fp
-                         if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
-                            z = 0.0_fp
-                            do kk = kfumin(nm), k
-                               z = z + dzu1(nm,k)
-                            enddo
-                            z      = max(z, dzmin)
-                            apower = log(max(r1avg/ceavg,1.0e-5_fp)) / log(z/aksu)
-                            z      = z - 0.5_fp*dzu1(nm,k)
-                            z      = max(z, dzmin)
-                            dz     = dzu1(nm,k) - cellht
-                            if (apower>-1.05_fp .and. apower<=-1.0_fp) then
-                               apower = -1.05_fp
-                            elseif (apower>=-1.0_fp .and. apower<-0.95_fp) then
-                               apower = -0.95_fp
-                            else
-                            endif
-                            apower  = min(max(-10.0_fp , apower), 10.0_fp)
-                            cavg1   = (ceavg/(apower+1.0_fp)) * (1.0_fp/aksu)**apower
-                            cavg2   = z**(apower+1.0_fp) - aksu**(apower+1.0_fp)
-                            cavg    = cavg1 * cavg2 / dz
-                            !
-                            ! Average u needed?
-                            !
-                            cumflux = cumflux - u1(nm,k)*(cavg-r1avg)*dz
-                         endif
-                      endif
-                      sucor(nm,l) = -cumflux
-                      !
-                      ! bedload will be reduced in case of sediment transport
-                      ! over a non-erodible layer (no sediment in bed) in such
-                      ! a case, the suspended sediment transport vector must
-                      ! also be reduced.
-                      !
-                      if ((sucor(nm,l)>0.0_fp .and. kcs(nm)==1) .or. kcs(nmu)/=1) then
-                         sucor(nm,l) = sucor(nm,l) * fixfac(nm,l)
-                      else
-                         sucor(nm,l) = sucor(nm,l) * fixfac(nmu,l)
-                      endif
-                   endif
+                   call bedsuscor(kfu, hu, fluxu, guu, u1, dzu1, &
+                                & kcs, kfsed, aks, rca, r1, fixfac, thick, sig, &
+                                & nm, nmu, l, ll, kmax, kfumin(nm), kfumax(nm), 1, sucor(nm,l), gdp)
                    !
                    ! v direction
                    !
-                   if ((kfv(nm)*kfsed(nm)*kfsed(num)) /= 0) then
-                      cumflux = 0.0_fp
-                      if (kcs(num) == 3 .or. kcs(num) == -1) then
-                         aksu = aks(nm, l)
-                      elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
-                         aksu = aks(num, l)
-                      else
-                         aksu = (aks(nm, l)+aks(num, l)) / 2.0_fp
-                      endif
-                      !
-                      ! work up through layers integrating transport
-                      ! below aksu
-                      !
-                      htdif = aksu / hv(nm)
-                      zusum = 0.0_fp
-                      do k = kfvmin(nm), kfvmax(nm)
-                         zusum = zusum + dzv1(nm,k)
-                         !
-                         ! if layer containing aksu
-                         !
-                         if (htdif <= zusum/hv(nm)) then
-                            cumflux = cumflux + fluxv(nm,k,ll)*htdif/(dzv1(nm,k)/hv(nm))
-                            cellht  = htdif * hv(nm)
-                            exit
-                         else
-                            cumflux = cumflux + fluxv(nm,k,ll)
-                         endif
-                      enddo
-                      cumflux = cumflux / gvv(nm)
-                      !
-                      ! integration finished
-                      ! suspended transport correction = opposite of the
-                      ! transport below aksu
-                      !
-                      ! Approximation of the additional transport between bottom of
-                      ! kmaxsd layer and za has been included in the correction vector
-                      !
-                      k = kmxsed(nm,l) - 1
-                      if (k < kfvmax(nm)) then
-                         if (kcs(num) == 3 .or. kcs(num) == -1) then
-                            !
-                            ! correction for domain decomposition:
-                            !
-                            ceavg = rca(nm,l)
-                         elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
-                            ceavg = rca(num,l)
-                         else
-                            ceavg = (rca(nm,l)+rca(num,l)) / 2.0_fp
-                         endif
-                         r1avg = (r1(nm, k+1, ll) + r1(num, k+1, ll)) / 2.0_fp
-                         if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
-                            z = 0.0_fp
-                            do kk = kfvmin(nm), k
-                               z = z + dzv1(nm,k)
-                            enddo
-                            z      = max(z, dzmin)
-                            apower = log(max(r1avg/ceavg,1.0e-5_fp)) / log(z/aksu)
-                            z      = z - 0.5_fp*dzv1(nm,k)
-                            z      = max(z, dzmin)
-                            dz     = dzv1(nm,k) - cellht
-                            if (apower>-1.05_fp .and. apower<=-1.0_fp) then
-                               apower = -1.05_fp
-                            elseif (apower>=-1.0_fp .and. apower<-0.95_fp) then
-                               apower = -0.95_fp
-                            else
-                            endif
-                            apower  = min(max(-10.0_fp , apower), 10.0_fp)
-                            cavg1   = (ceavg/(apower+1.0_fp)) * (1.0_fp/aksu)**apower
-                            cavg2   = z**(apower+1.0_fp) - aksu**(apower+1.0_fp)
-                            cavg    = cavg1 * cavg2 / dz
-                            cumflux = cumflux - v1(nm,k)*(cavg-r1avg)*dz
-                         endif
-                      endif
-                      svcor(nm, l) = -cumflux
-                      !
-                      ! bedload will be reduced in case of sediment transport
-                      ! over a non-erodible layer (no sediment in bed) in such
-                      ! a case, the suspended sediment transport vector must
-                      ! also be reduced.
-                      !
-                      if ((svcor(nm,l) > 0.0_fp .and. kcs(nm)==1) .or. kcs(num)/=1) then
-                         svcor(nm, l) = svcor(nm, l)*fixfac(nm, l)
-                      else
-                         svcor(nm, l) = svcor(nm, l)*fixfac(num, l)
-                      endif
-                   endif
+                   call bedsuscor(kfv, hv, fluxv, gvv, v1, dzv1, &
+                                & kcs, kfsed, aks, rca, r1, fixfac, thick, sig, &
+                                & nm, nmu, l, ll, kmax, kfvmin(nm), kfvmax(nm), 1, svcor(nm,l), gdp)
                 enddo ! nm
              endif    ! sedtyp = SEDTYP_NONCOHESIVE_SUSPENDED
           enddo       ! l

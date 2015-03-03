@@ -1038,6 +1038,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/wnr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/adjust_bedload.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/avalan.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bedsuscor.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bndmorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bott3d.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compthick.f90 -text

@@ -34,6 +34,7 @@ libKernelComputeSediment_la_SOURCES = \
          adjust_bedload.f90 \
          avalan.f90 \
          dredge.f90 \
+         bedsuscor.f90 \
          bndmorlyr.f90 \
          bott3d.f90 \
          compthick.f90 \

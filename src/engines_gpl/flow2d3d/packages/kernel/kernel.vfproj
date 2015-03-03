@@ -203,6 +203,7 @@
 		<Filter Name="compute_sediment">
 		<File RelativePath="src\compute_sediment\adjust_bedload.f90"/>
 		<File RelativePath="src\compute_sediment\avalan.f90"/>
+		<File RelativePath=".\src\compute_sediment\bedsuscor.f90"/>
 		<File RelativePath="src\compute_sediment\bndmorlyr.f90"/>
 		<File RelativePath="src\compute_sediment\bott3d.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
