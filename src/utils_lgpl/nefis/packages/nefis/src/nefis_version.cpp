@@ -29,8 +29,16 @@
 //#include <stdio.h>
 #include "nefis_version.h"
 
-static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build};
-static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build", "__DATE__", "__TIME__""};
+#if defined(WIN32)
+static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win32)"};
+static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win32), "__DATE__", "__TIME__""};
+#elif defined(WIN64)
+static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64)"};
+static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64), "__DATE__", "__TIME__""};
+#else
+static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Unknown)"};
+static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Unknown), "__DATE__", "__TIME__""};
+#endif
 static char nefis_file_version [] = {"5.00.00"};
 static char nefis_company_name [] = {"Deltares"};
 
