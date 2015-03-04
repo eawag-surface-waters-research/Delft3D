@@ -131,6 +131,7 @@ contains
       use p10cor_mod
       use grid_search_mod
       use stop_exit_mod
+      use spec_feat_par    ! special feature parameters
 !
       implicit none             ! force explicit typing
 
@@ -868,8 +869,11 @@ contains
                      endif
                      goto 50
                   else
-                     znew = 2.0 - znew                !  now it bounces
-!                     znew = 0.9990                    !  now it stays near the bottom (no bounce)
+                     if (vertical_bounce) then
+                         znew = 2.0 - znew             !  now it bounces
+                     else
+                         znew = 0.9990                 !  now it stays near the bottom (no bounce)
+                     endif
                   endif
                endif
             elseif ( znew .lt. 0.0 ) then
@@ -894,8 +898,11 @@ contains
                   depthl = volume(n03d)/area(n0)
                   znew   = znew / depthl + 1.0
                else
-                  znew   = -znew                      !  now it bounces
-!                  znew   = 0.0001                     !  now it stays near the surface (no bounce)
+                  if (vertical_bounce) then
+                     znew   = -znew                      !  now it bounces
+                  else
+                     znew   = 0.0001                     !  now it stays near the surface (no bounce)
+                  endif
                endif
             endif
          enddo

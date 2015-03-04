@@ -47,6 +47,8 @@
       use alloc_mod       ! to allocate arrays
       use fileinfo        ! file information for all input/output files
       use openfl_mod      ! explicit interface
+      use string_module   ! string conversion tools
+      use spec_feat_par   ! special feature parameters
 
       implicit none
 
@@ -631,10 +633,37 @@
          endif
       endif
 
-!     read the simulation timers
-!     simulation start time
+! read special features
+! add defaults when special features are not used first
+      vertical_bounce = .true.
 
-      if ( gettoken( id  , ierr2 ) .ne. 0 ) goto 4021
+      if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) then
+         if (ierr2 .eq. 2) then
+            write ( lun2, '(a)' ) ' ERROR REMARK: It appears that optional special features include file was not found.'
+            write ( lun2, '(a)' ) '               If you do not use any special features, this "ERROR" can be be ignored.'
+            if ( gettoken( id  , ierr2 ) .ne. 0 ) goto 4021
+         else
+         end if
+      else
+         if (itype .eq. 1) then
+            do while (itype .eq. 1)
+               call str_lower(cbuffer, len(cbuffer))
+               select case (trim(cbuffer))
+               case ('no_vertical_bounce')
+                  write ( lun2, '(/a)' ) ' Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
+                  vertical_bounce = .false.
+               case default
+                  write ( lun2, '(/a,a)' ) ' Unrecognised keyword: ', trim(cbuffer)
+                  goto 9000
+               end select
+               if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) goto 4021
+            end do
+         end if
+      end if
+      
+!     read the simulation timers
+!     simulation start time (the value of id is read above in the special features section)
+
       if ( gettoken( ih  , ierr2 ) .ne. 0 ) goto 4021
       if ( gettoken( im  , ierr2 ) .ne. 0 ) goto 4021
       if ( gettoken( is  , ierr2 ) .ne. 0 ) goto 4021
@@ -2112,6 +2141,9 @@
 1701  write(*,*) ' Error: could not open boom-file ',fiboom(i)
       call srstop(1)
 1710  write(*,*) ' Error: could not open ini-file ',ini_file
+      call srstop(1)
+
+9000  write(*,*) ' Error: reading special features ',ini_file
       call srstop(1)
       end
 

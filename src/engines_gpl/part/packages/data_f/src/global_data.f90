@@ -235,4 +235,9 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:,:,: ) :: amap
       real          (sp       ) ,  pointer, dimension(:,:,:,: ) :: amapsett
 
-end module global_pointers
+   end module global_pointers
+
+!     special feature parameters
+module spec_feat_par
+      logical                                                   :: vertical_bounce
+end module
