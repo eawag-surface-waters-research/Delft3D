@@ -124,7 +124,8 @@
 
       if ( gettoken( cdummy, icopt1, itype, ierr2 ) .gt. 0 ) goto 10
       if ( itype .eq. STRING ) then
-         if ( cdummy .eq. 'MASS/M2' ) then
+         if ( cdummy .eq. 'mass/m2' .or.
+     &        cdummy .eq. 'MASS/M2' ) then
             masspm2 = .true.
             write ( lunut, 2030 )
             if ( gettoken( cdummy, icopt1, itype, ierr2 ) .gt. 0 ) goto 10
@@ -164,11 +165,13 @@
       if ( ierr2  .gt. 0 ) goto 10
       if ( icopt1 .eq. BINARY ) then
          ip = scan ( lchar(18), '.', back = .true. )              ! look for the file type
-         if ( lchar(18)(ip:ip+3) .eq. '.map' ) then               ! if .map, it is a map-file
+         if ( lchar(18)(ip:ip+3) .eq. '.map' .or.
+     &        lchar(18)(ip:ip+3) .eq. '.MAP' ) then               ! if .map, it is a map-file
             call dhopnf  ( lun(18) , lchar(18) , 18    , 2     , ierr2 )
             read ( lun(18) ) cdummy(1:160)                        ! read title of simulation
             close ( lun(18) )
-            if ( cdummy(114:120) .eq. 'mass/m2' ) then            !  at end of third line ...
+            if ( cdummy(114:120) .eq. 'mass/m2' .or.
+     &           cdummy(114:120) .eq. 'MASS/M2' ) then            !  at end of third line ...
                write ( lunut , 2070 )
             else if ( masspm2 ) then
                write ( lunut , 2080 )

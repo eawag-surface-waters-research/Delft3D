@@ -329,10 +329,12 @@
       propor = .false.
       call dhopnf ( lun(18) , lchar(18) , 18    , 2    , ierrd  )
       ig = scan ( lchar(18), '.', back = .true. )                ! look fo rthe file type
-      if ( lchar(18)(ig:ig+3) .eq. '.map' ) then                 ! if .map, it is a map-file
+      if ( lchar(18)(ig:ig+3) .eq. '.map' .or.
+     &     lchar(18)(ig:ig+3) .eq. '.MAP' ) then                 ! if .map, it is a map-file
          read ( lun(18), iostat=ierrio ) finam(1:160)            ! read title of simulation
          if ( ierrio .ne. 0 ) goto 50
-         if ( finam(114:120) .eq. 'mass/m2' ) propor = .true.    !  at end of third line ...
+         if ( finam(114:120) .eq. 'mass/m2' .or.
+     &        finam(114:120) .eq. 'MASS/M2' ) propor = .true.    !  at end of third line ...
          read ( lun(18) ) idummy                                 ! should be nr. of substance
          if ( idummy .ne. notot ) then
             write ( lun(19), '(a,a,/,a,i10)' )
