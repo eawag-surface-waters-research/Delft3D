@@ -255,7 +255,8 @@ contains
 
 
       integer(ip)   :: icounz                  ! count the number of vertical bounces
-      integer(ip)   :: icvis                   ! strange construct to avoid endless operation
+      integer(ip)   :: icvis                   ! strange construct to avoid endless operation, cyclic counter
+      integer(ip)   :: icvist                  ! strange construct to avoid endless operation, total counter
       integer(ip)   :: idep                    ! layer offset in the hydrodynamic arrays
       integer(ip)   :: idepm1                  ! layer offset - one layer in the hydrodynamic arrays
       integer(ip)   :: idx                     ! boolean x direction of transport -1, 0, +1
@@ -522,8 +523,8 @@ contains
 
       timon = .false.
 !$OMP PARALLEL DO PRIVATE ( np, mp, kp, kpp, n0, a, n03d, xp, yp, zp, tp,          &
-!$OMP                       itdelt, ddfac, dran1, abuac, deltt, dred, kd,          &
-!$OMP                       icvis, ivisit, lstick, wsum, isub, jsub, ifract,       &
+!$OMP                       itdelt, ddfac, dran1, abuac, deltt, dred, kd, icvis,   &
+!$OMP                       icvist, ivisit, lstick, wsum, isub, jsub, ifract,      &
 !$OMP                       pstick, wstick, ldispo, trp, t0, dax, day,             &
 !$OMP                       n1, n2, dxp, dyp, depth1, idep, vol, vy0, vy1,         &
 !$OMP                       vx0, vx1, vvx, vvy, vx, vy, vxr, vyr, ubstar, ubstar_b,&
@@ -594,9 +595,10 @@ contains
             endif
          endif
 
-!**      strange construction to avoid infinit calculation
+!**      strange construction to avoid infinite calculation
 
          icvis     = 1
+         icvist    = 1
          ivisit(1) = n03d
          ivisit(2) = 0
          ivisit(3) = 0
@@ -1257,15 +1259,16 @@ contains
             yp = amax1( amin1(yp,1.0), 0.0 )
             zp = amax1( amin1(zp,1.0), 0.0 )
 
-!**         strange construction to avoid infinit computation
+!**         strange construction to avoid infinite computation
 
-            icvis  = icvis + 1
+            icvis  = icvis  + 1
+            icvist = icvist + 1
             if ( icvis .eq. 5 ) icvis = 1
                                                       !  this is all not so clear
             kpp = kp
             if ( twolay ) kpp = 1
             n03d = n0 + (kpp - 1)*nmax*mmax
-            if ( ivisit(icvis) .ne. n03d ) then
+            if ( ivisit(icvis) .ne. n03d .and. icvist .lt. 10000 ) then
                ivisit(icvis) = n03d
                goto 10
             endif
