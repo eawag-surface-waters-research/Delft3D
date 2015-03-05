@@ -144,6 +144,9 @@ character(len(inbuff)), dimension(:), allocatable  :: rbuff
     if (inode == master) then
        allocate( rbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
+    else
+       allocate( rbuff(1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, len(inbuff)*nbtotal, inbuff, len(inbuff)*nblocal, dfchar, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -153,9 +156,9 @@ character(len(inbuff)), dimension(:), allocatable  :: rbuff
        do n = 1, nbtotal
           if (ibuff(n) /= 0) oubuff(ibuff(n)) = rbuff(n)
        enddo
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_C
 !
@@ -208,6 +211,9 @@ integer                                   :: operation
        allocate( rbuff(1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
        rbuff = 0
+    else
+       allocate( rbuff(1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff   , nbtotal, inbuff, nblocal, dfint, gdp )
     call dfgather_lowlevel ( ibuff   , nbtotal, order , nblocal, dfint, gdp )
@@ -247,9 +253,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_I1D
 !
@@ -305,6 +311,9 @@ integer                                   :: operation
     if (inode == master) then
        allocate( rbuff(jf:jl, 1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
+    else
+       allocate( rbuff(1, 1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, (jl-jf+1)*nbtotal, inbuff, (jl-jf+1)*nblocal, dfint, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -352,9 +361,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_I2D
 !
@@ -422,7 +431,11 @@ integer                                   :: gather_dim
              tbuff_in(m, n) = inbuff(n, m)
           enddo
        enddo
-       if (inode==master) allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       if (inode==master) then
+          allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       else
+          allocate( tbuff_ou(1, 1) )
+       endif
        ! do the gather filter operation
        call dfgather_filter_I2D(lundia, nblocal, nbtotal, nbglobal, jf, jl, order, &
                               & tbuff_in, tbuff_ou, gdp, operation )
@@ -433,8 +446,8 @@ integer                                   :: gather_dim
                 oubuff(n, m) = tbuff_ou(m, n)
              enddo
           enddo
-          deallocate( tbuff_ou )
        endif
+       deallocate( tbuff_ou )
        deallocate( tbuff_in )
        call dfsync(gdp)
     elseif (gather_dim == 2) then
@@ -496,6 +509,9 @@ integer                                   :: operation
        allocate( rbuff(1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
        rbuff = 0.0_sp
+    else
+       allocate( rbuff(1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, nbtotal, inbuff, nblocal, dfreal, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -535,9 +551,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_R1D_sp2sp
 !
@@ -640,6 +656,9 @@ integer                                   :: operation
        allocate( rbuff(1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
        rbuff = 0.0_hp
+    else
+       allocate( rbuff(1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, nbtotal, inbuff, nblocal, dfdble, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -679,9 +698,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_R1D_hp2hp
 !
@@ -737,6 +756,9 @@ integer                                   :: operation
     if (inode == master) then
        allocate( rbuff(jf:jl, 1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
+    else
+       allocate( rbuff(1, 1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, (jl-jf+1)*nbtotal, inbuff, (jl-jf+1)*nblocal, dfreal, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -784,9 +806,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_R2D_sp2sp
 !
@@ -854,7 +876,11 @@ integer                                   :: gather_dim
              tbuff_in(m, n) = inbuff(n, m)
           enddo
        enddo
-       if (inode==master) allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       if (inode==master) then
+          allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       else
+          allocate( tbuff_ou(1, 1) )
+       endif
        ! do the gather filter operation
        call dfgather_filter_R2D_sp2sp(lundia, nblocal, nbtotal, nbglobal, jf, jl, order, &
                                     & tbuff_in, tbuff_ou, gdp, operation )
@@ -865,8 +891,8 @@ integer                                   :: gather_dim
                 oubuff(n, m) = tbuff_ou(m, n)
              enddo
           enddo
-          deallocate( tbuff_ou )
        endif
+       deallocate( tbuff_ou )
        deallocate( tbuff_in )
        call dfsync(gdp)
     elseif (gather_dim == 2) then
@@ -943,7 +969,11 @@ integer                                   :: gather_dim
              tbuff_in(m, n) = inbuff(n, m)
           enddo
        enddo
-       if (inode==master) allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       if (inode==master) then
+          allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       else
+          allocate( tbuff_ou(1, 1) )
+       endif
        ! do the gather filter operation
        call dfgather_filter_R2D_sp2sp(lundia, nblocal, nbtotal, nbglobal, jf, jl, order, &
                                     & tbuff_in, tbuff_ou, gdp, operation )
@@ -954,8 +984,8 @@ integer                                   :: gather_dim
                 oubuff(n, m) = tbuff_ou(m, n)
              enddo
           enddo
-          deallocate( tbuff_ou )
        endif
+       deallocate( tbuff_ou )
        deallocate( tbuff_in )
        call dfsync(gdp)
     elseif (gather_dim == 2) then
@@ -1024,6 +1054,9 @@ integer                                   :: operation
     if (inode == master) then
        allocate( rbuff(jf:jl, 1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
+    else
+       allocate( rbuff(1, 1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, (jl-jf+1)*nbtotal, inbuff, (jl-jf+1)*nblocal, dfdble, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -1071,9 +1104,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( ibuff )
-       deallocate( rbuff )
     endif
+    deallocate( ibuff )
+    deallocate( rbuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_R2D_hp2hp
 !
@@ -1141,7 +1174,11 @@ integer                                   :: gather_dim
              tbuff_in(m, n) = inbuff(n, m)
           enddo
        enddo
-       if (inode==master) allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       if (inode==master) then
+          allocate( tbuff_ou(1:jl-jf+1, 1:nbglobal) )
+       else
+          allocate( tbuff_ou(1, 1) )
+       endif
        ! do the gather filter operation
        call dfgather_filter_R2D_hp2hp(lundia, nblocal, nbtotal, nbglobal, jf, jl, order, &
                                     & tbuff_in, tbuff_ou, gdp, operation )
@@ -1152,8 +1189,8 @@ integer                                   :: gather_dim
                 oubuff(n, m) = tbuff_ou(m, n)
              enddo
           enddo
-          deallocate( tbuff_ou )
        endif
+       deallocate( tbuff_ou )
        deallocate( tbuff_in )
        call dfsync(gdp)
     elseif (gather_dim == 2) then
@@ -1230,6 +1267,9 @@ integer                                   :: operation
     if (inode == master) then
        allocate( rbuff(jf:jl, kf:kl, 1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
+    else
+       allocate( rbuff(1, 1, 1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, (jl-jf+1)*(kl-kf+1)*nbtotal, tbuff, (jl-jf+1)*(kl-kf+1)*nblocal, dfreal, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -1286,9 +1326,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( rbuff )
-       deallocate( ibuff )
     endif
+    deallocate( rbuff )
+    deallocate( ibuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_R3D_sp2sp
 !
@@ -1408,6 +1448,9 @@ integer                                   :: operation
     if (inode == master) then
        allocate( rbuff(jf:jl, kf:kl, 1:nbtotal) )
        allocate( ibuff(1:nbtotal) )
+    else
+       allocate( rbuff(1, 1, 1) )
+       allocate( ibuff(1) )
     endif
     call dfgather_lowlevel ( rbuff, (jl-jf+1)*(kl-kf+1)*nbtotal, tbuff, (jl-jf+1)*(kl-kf+1)*nblocal, dfdble, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -1464,9 +1507,9 @@ integer                                   :: operation
              endif
           enddo
        end select
-       deallocate( rbuff )
-       deallocate( ibuff )
     endif
+    deallocate( rbuff )
+    deallocate( ibuff )
     call dfsync(gdp)
 end subroutine dfgather_filter_R3D_hp2hp
 !
@@ -1545,6 +1588,8 @@ integer, dimension(:,:), allocatable      :: inparr_slice
           lengl = lengl + msiz*nsiz
        enddo
        allocate(tmp(lengl))
+    else
+       allocate(tmp(1))
     endif
     nfg => gdp%gdparall%nfg
     nlg => gdp%gdparall%nlg
@@ -1585,8 +1630,8 @@ integer, dimension(:,:), allocatable      :: inparr_slice
           enddo
           is = is + msiz*nsiz
        enddo
-       deallocate(tmp)
     endif
+    deallocate(tmp)
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
@@ -1666,6 +1711,8 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
           lengl = lengl + msiz*nsiz
        enddo
        allocate(tmp(lengl))
+    else
+       allocate(tmp(1))
     endif
     nfg => gdp%gdparall%nfg
     nlg => gdp%gdparall%nlg
@@ -1710,8 +1757,8 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
           is = is + msiz*nsiz
           !
        enddo
-       deallocate(tmp)
     endif
+    deallocate(tmp)
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
@@ -1837,6 +1884,8 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
        enddo
        lengl = lengl*(kl-kf+1)
        allocate(tmp(lengl))
+    else
+       allocate(tmp(1))
     endif
     nfg => gdp%gdparall%nfg
     nlg => gdp%gdparall%nlg
@@ -1881,8 +1930,8 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
           enddo
           is = is + msiz*nsiz*(kl-kf+1)
        enddo
-       deallocate(tmp)
     endif
+    deallocate(tmp)
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
@@ -2014,8 +2063,10 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
        enddo
        lengl = lengl*(kl-kf+1)*(ll-lf+1)
        allocate(tmp(lengl), stat=istat)
-       if (istat /= 0) write(gdp%gdinout%lundia,*)'dffunctionals.f90-gather_R4e allocation problem for tmp array'
+    else
+       allocate(tmp(1), stat=istat)
     endif
+    if (istat /= 0) write(gdp%gdinout%lundia,*)'dffunctionals.f90-gather_R4e allocation problem for tmp array'
     nfg => gdp%gdparall%nfg
     nlg => gdp%gdparall%nlg
     mfg => gdp%gdparall%mfg
@@ -2060,8 +2111,8 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
           enddo
           is = is + msiz*nsiz*(kl-kf+1)*(ll-lf+1)
        enddo
-       deallocate(tmp)
     endif
+    deallocate(tmp)
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
@@ -2146,11 +2197,17 @@ character(20), dimension(:), allocatable    :: namto
 !
 !! executable statements -------------------------------------------------------
 !
-    if (inode == master) allocate( nbarr( nproc ) )
+    if (inode == master) then
+       allocate( nbarr( nproc ) )
+    else
+       allocate( nbarr( 1 ) )
+    endif
     call dfgather_lowlevel ( nbarr, nproc, nb, 1, dfint, gdp )
     if (inode == master) then
        nbto = SUM(nbarr)
        allocate( namto(1:nbto) )
+    else
+       allocate( namto(1) )
     endif
     call dfgather_lowlevel ( namto, 20*nbto, nam, 20*nb, dfchar, gdp )
     if (inode == master) then
@@ -2170,9 +2227,9 @@ character(20), dimension(:), allocatable    :: namto
           endif
        enddo
        nbgl = count(duplicate == 0)
-       deallocate( namto )
-       deallocate( nbarr )
     endif
+    deallocate( namto )
+    deallocate( nbarr )
     call dfbroadc_gdp( nbgl, 1, dfint, gdp)
     call dfbroadc_gdp( nbto, 1, dfint, gdp)
 end subroutine dffind_duplicate_C
@@ -2212,7 +2269,11 @@ integer, dimension(:), allocatable          :: nbarr
 !
 !! executable statements -------------------------------------------------------
 !
-    if (inode == master) allocate( nbarr( nproc ) )
+    if (inode == master) then
+       allocate( nbarr( nproc ) )
+    else
+       allocate( nbarr( 1 ) )
+    endif
     call dfgather_lowlevel ( nbarr, nproc, nb, 1, dfint, gdp )
     if (inode == master) then
        nbto = SUM(nbarr)
@@ -2235,8 +2296,8 @@ integer, dimension(:), allocatable          :: nbarr
           enddo search_loop
           if (.not.found) nbgl = nbgl + 1
        enddo
-       deallocate( nbarr )
     endif
+    deallocate( nbarr )
     call dfbroadc_gdp( nbgl, 1, dfint, gdp)
     call dfbroadc_gdp( nbto, 1, dfint, gdp)
 end subroutine dffind_duplicate_I

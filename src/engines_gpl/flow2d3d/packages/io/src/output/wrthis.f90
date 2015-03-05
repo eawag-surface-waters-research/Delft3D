@@ -382,6 +382,8 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
              if (inode == master) then
                 allocate( ibuff1(1:nostatgl) )
                 ibuff1 = 0
+             else
+                allocate( ibuff1(1) )
              endif
              if (parll) then    
                 call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, zkfs, ibuff1, gdp )
@@ -391,8 +393,8 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
              if (inode == master) then
                 call wrtvar(fds, filename, filetype, grnam3, celidt, &
                           & gdp, ierror, lundia, ibuff1, 'ZKFS')
-                deallocate( ibuff1 )
              endif
+             deallocate( ibuff1 )
              if (ierror/=0) goto 9999
           endif
           !
@@ -603,7 +605,11 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
              ibuff2b(1,i) = mnstat(1,i) + mfg - 1
              ibuff2b(2,i) = mnstat(2,i) + nfg - 1
           enddo
-          if (inode == master) allocate( ibuff2(2,nostatgl) )
+          if (inode == master) then
+             allocate( ibuff2(2,nostatgl) )
+          else
+             allocate( ibuff2(1,1) )
+          endif
           if (parll) then
              call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, ibuff2b, ibuff2, gdp)
           else
@@ -613,8 +619,8 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
           if (inode == master) then
              call wrtvar(fds, filename, filetype, grnam3, celidt, &
                        & gdp, ierror, lundia, ibuff2, 'MNSTAT')
-             deallocate( ibuff2 )
           endif
+          deallocate( ibuff2 )
           if (ierror/=0) goto 9999
           !
           ! element 'DPS'

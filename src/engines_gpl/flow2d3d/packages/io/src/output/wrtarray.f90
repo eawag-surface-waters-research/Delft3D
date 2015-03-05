@@ -1270,7 +1270,11 @@ subroutine wrtarray_n_char(fds, filename, filetype, grpnam, &
     integer                                         :: i
     character(len(var)) , dimension(:)       , allocatable :: rbuff1gl   ! work array
     ! body
-    if (inode == master) allocate( rbuff1gl(ub1global) )
+    if (inode == master) then
+       allocate( rbuff1gl(ub1global) )
+    else
+       allocate( rbuff1gl(1) )
+    endif
     if (parll) then
        call dfgather_filter(lundia, ub1, ub1sum, ub1global, order, var, rbuff1gl, gdp)
     else
@@ -1281,8 +1285,8 @@ subroutine wrtarray_n_char(fds, filename, filetype, grpnam, &
     if (inode == master) then
        call wrtvar(fds, filename, filetype, grpnam, itime, &
                  & gdp, ierr, lundia, rbuff1gl, varnam)
-       deallocate(rbuff1gl)
     endif
+    deallocate(rbuff1gl)
 end subroutine wrtarray_n_char
 
 
@@ -1316,7 +1320,11 @@ subroutine wrtarray_n_fp(fds, filename, filetype, grpnam, &
     integer                                           :: i
     real(fp)       , dimension(:)       , allocatable :: rbuff1gl      ! work array
     ! body
-    if (inode == master) allocate( rbuff1gl(ub1global) )
+    if (inode == master) then
+       allocate( rbuff1gl(ub1global) )
+    else
+       allocate( rbuff1gl(1) )
+    endif
     if (parll) then
        call dfgather_filter(lundia, ub1, ub1sum, ub1global, order, var, rbuff1gl, gdp, filter_op=operation)
     else
@@ -1327,8 +1335,8 @@ subroutine wrtarray_n_fp(fds, filename, filetype, grpnam, &
     if (inode == master) then
        call wrtvar(fds, filename, filetype, grpnam, itime, &
                  & gdp, ierr, lundia, rbuff1gl, varnam)
-       deallocate(rbuff1gl)
     endif
+    deallocate(rbuff1gl)
 end subroutine wrtarray_n_fp
 
 
@@ -1376,7 +1384,11 @@ subroutine wrtarray_nk_fp(fds, filename, filetype, grpnam, &
        rbuff2(:,i) = var(:,shlay(i))
     enddo
     !
-    if (inode == master) allocate( rbuff2gl(ub1global, 1:kmaxout) )
+    if (inode == master) then
+       allocate( rbuff2gl(ub1global, 1:kmaxout) )
+    else
+       allocate( rbuff2gl(1, 1) )
+    endif
     if (parll) then
        call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, kmaxout, order, rbuff2, rbuff2gl, gdp, filter_op=operation)
     else
@@ -1387,8 +1399,8 @@ subroutine wrtarray_nk_fp(fds, filename, filetype, grpnam, &
     if (inode == master) then
        call wrtvar(fds, filename, filetype, grpnam, itime, &
                  & gdp, ierr, lundia, rbuff2gl, varnam)
-       deallocate(rbuff2gl)
     endif
+    deallocate(rbuff2gl)
     deallocate(rbuff2)
 end subroutine wrtarray_nk_fp
 
@@ -1427,6 +1439,7 @@ subroutine wrtarray_nl_int(fds, filename, filetype, grpnam, &
     integer      , dimension(:,:)     , allocatable :: ibuff2gl      ! work array
     integer                                         :: dim1
     ! body
+    if (inode /= master) allocate( ibuff2gl(1, 1) )
     if (present(mergedim)) then
        dim1 = mergedim
     else
@@ -1454,8 +1467,8 @@ subroutine wrtarray_nl_int(fds, filename, filetype, grpnam, &
     if (inode == master) then
        call wrtvar(fds, filename, filetype, grpnam, itime, &
                  & gdp, ierr, lundia, ibuff2gl, varnam)
-       deallocate(ibuff2gl)
     endif
+    deallocate(ibuff2gl)
 end subroutine wrtarray_nl_int
 
 
@@ -1493,6 +1506,7 @@ subroutine wrtarray_nl_fp(fds, filename, filetype, grpnam, &
     real(fp)     , dimension(:,:)     , allocatable :: rbuff2gl      ! work array
     integer                                         :: dim1
     ! body
+    if (inode /= master) allocate( rbuff2gl(1, 1) )
     if (present(mergedim)) then
        dim1 = mergedim
     else
@@ -1520,8 +1534,8 @@ subroutine wrtarray_nl_fp(fds, filename, filetype, grpnam, &
     if (inode == master) then
        call wrtvar(fds, filename, filetype, grpnam, itime, &
                  & gdp, ierr, lundia, rbuff2gl, varnam)
-       deallocate(rbuff2gl)
     endif
+    deallocate(rbuff2gl)
 end subroutine wrtarray_nl_fp
 
     
@@ -1570,7 +1584,11 @@ subroutine wrtarray_nkl_fp(fds, filename, filetype, grpnam, &
        rbuff3(:,i,:) = var(:,shlay(i),:)
     enddo
     !
-    if (inode == master) allocate( rbuff3gl(ub1global, 1:kmaxout, 1:ub3) )
+    if (inode == master) then
+       allocate( rbuff3gl(ub1global, 1:kmaxout, 1:ub3) )
+    else
+       allocate( rbuff3gl(1, 1, 1) )
+    endif
     if (parll) then
        call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, kmaxout, 1, ub3, order, rbuff3, rbuff3gl, gdp, filter_op=operation)
     else
@@ -1581,8 +1599,8 @@ subroutine wrtarray_nkl_fp(fds, filename, filetype, grpnam, &
     if (inode == master) then
        call wrtvar(fds, filename, filetype, grpnam, itime, &
                  & gdp, ierr, lundia, rbuff3gl, varnam)
-       deallocate(rbuff3gl)
     endif
+    deallocate(rbuff3gl)
     deallocate(rbuff3)
 end subroutine wrtarray_nkl_fp
 
