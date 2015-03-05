@@ -63,7 +63,7 @@
          kw_found = .true.
       endif
 
-      l = index(rec,'missing value')
+      l = index(rec,'Missing Value')
       if (l .ne. 0) then
          kw_found = .true.
       endif
