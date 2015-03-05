@@ -7,8 +7,9 @@ c     Input items at the segment level
       character*1  ins_do(insmax)
       character*10 ins_id(insmax)
       character*50 ins_nm(insmax)
+      character*20 ins_un(insmax)
       real         ins_va(insmax)
-      common /comins/ ins   , ins_id, ins_nm, ins_va, ins_do
+      common /comins/ ins   , ins_id, ins_nm, ins_va, ins_do, ins_un
 
 c     Input items at the exchange level
 
@@ -17,8 +18,9 @@ c     Input items at the exchange level
       character*1  ine_do(inemax)
       character*10 ine_id(inemax)
       character*50 ine_nm(inemax)
+      character*20 ine_un(inemax)
       real         ine_va(inemax)
-      common /comine/ ine   , ine_id, ine_nm, ine_va, ine_do
+      common /comine/ ine   , ine_id, ine_nm, ine_va, ine_do, ine_un
 
 c     Output items at the segment level
 
@@ -27,7 +29,8 @@ c     Output items at the segment level
       character*1  ous_do(ousmax)
       character*10 ous_id(ousmax)
       character*50 ous_nm(ousmax)
-      common /comous/ ous   , ous_id, ous_nm, ous_do
+      character*20 ous_un(ousmax)
+      common /comous/ ous   , ous_id, ous_nm, ous_do, ous_un
 
 c     Output items at the exchange level
 
@@ -36,7 +39,8 @@ c     Output items at the exchange level
       character*1  oue_do(ouemax)
       character*10 oue_id(ouemax)
       character*50 oue_nm(ouemax)
-      common /comoue/ oue   , oue_id, oue_nm, oue_do
+      character*20 oue_un(ouemax)
+      common /comoue/ oue   , oue_id, oue_nm, oue_do, oue_un
 
 c     Fluxes
 
@@ -45,7 +49,8 @@ c     Fluxes
       character*1  flu_do(flumax)
       character*10 flu_id(flumax)
       character*50 flu_nm(flumax)
-      common /comflu/ flu   , flu_id, flu_nm, flu_do
+      character*20 flu_un(flumax)
+      common /comflu/ flu   , flu_id, flu_nm, flu_do, flu_un
 
 c     Stochi lines
 

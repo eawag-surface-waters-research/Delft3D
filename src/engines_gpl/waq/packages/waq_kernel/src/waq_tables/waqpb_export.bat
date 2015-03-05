@@ -9,7 +9,7 @@ if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_e
     echo Run waqpb_help.bat for more information
     echo.	
     pause
-    ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe < UpdateNEF.ini
+    ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe -version5.03 -serial2015022401
     copy proc_def.* ..\..\..\..\default
     echo.
     pause

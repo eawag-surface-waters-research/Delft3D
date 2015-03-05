@@ -3,30 +3,23 @@ c     Program to decompose a PROCES.ASC file into tables
 c     28-2-2000: Start upgrade om PDF's in te checken
 c     04-8-2000: Finish
 c     13-01-2011: Jos van Gils, update to import asci files produced by the DUPROL parser
+c     27-12-2012: Modify for Open Source, table P5 and R1/R2/R9 are no longer relevant
 c
-c                 USAGE: first argument is pdf file name (new feature)
-c                        next  argument is configuration ID
-c                        next  argument nonewtab (default) or newtab
-c                        next  argument optional nonewfrm (default) or newfrm
-c                        next  argument optional noduprol (default) or duprol
-
       include 'data.inc'
       character*1  c1
-      character*10 c10, c10b, proces, c10a
+      character*10 c10, c10b, c10a
       character*20 c20
-      character*8  duprolstring
-      character*8  newtabstring
-      character*8  newfrmstring
       character*30 grp
       character*50 c50
-      character*80 pdffil, procesnaam
       character*10 initialConfgId
       character*50 initialConfgName
+      character*80 pdffil, procesnaam
+      character*255 ArgumentString
       real         value
       integer      jndex , naanta, iaanta, iproc , i     , ihulp ,
-     j             j     , noffse, ihulp2, ihulp3, ihulp4, nprocl,
-     j             iconf , noffsf, iitem
-      integer      action, delete, replac, insert, abort , none
+     j             noffse, ihulp2, ihulp3, ihulp4, nprocl,
+     j             noffsf, iitem
+      integer      delete, replac, insert, abort , none
       parameter   (delete = 1, replac = 2, insert = 3, abort  = 0,
      j             none   = 4)
       logical      newtab, duprol, newfrm
@@ -34,41 +27,46 @@ c                        next  argument optional noduprol (default) or duprol
       data         io_mes /11/
       data         io_asc /14/
       data         io_inp /15/
+      data         grp /'DummyGroup                          '/
+      data         initialConfgId /'DummyConfg'/
+      
+c     Command line arguments
 
-      call getarg (1,pdffil)
-      if (pdffil.eq.' ') pdffil = 'proces.asc'
-
-      call getarg (2,initialConfgId)
-      if (initialConfgId.eq.' ') initialConfgId = 'DummyConfg'
-      initialConfgName = initialConfgId
-
-      call getarg (3,newtabstring)
       newtab = .false.
-      if (newtabstring(1:6).eq.'newtab') newtab = .true.
-
-      call getarg (4,newfrmstring)
       newfrm = .false.
-      if (newfrmstring(1:6).eq.'newfrm') newfrm = .true.
-
-      call getarg (5,duprolstring)
       duprol = .false.
-      if (duprolstring(1:6).eq.'duprol') duprol = .true.
+      pdffil = 'proces.asc'
+      do i=1,9999
+            call getarg (i,ArgumentString)
+            if (ArgumentString.eq.'') exit
+            if (index(ArgumentString,'-pdf').gt.0) then
+            pdffil = trim(ArgumentString(5:))
+            endif
+            if (index(ArgumentString,'-duprol').gt.0) duprol = .true.
+            if (index(ArgumentString,'-newtab').gt.0) newtab = .true.
+            if (index(ArgumentString,'-newfrm').gt.0) newfrm = .true.
+      enddo
 
-      open ( io_mes , file = 'import.log' )
-
-      if (newtab) then
-          write (io_mes,'(''Creating new tables'')')
-      else
-          write (io_mes,'(''Updating existing tables'')')
-      endif
-      if (newfrm) then
-          write (io_mes,'(''Using NEW format'')')
-      else
-          write (io_mes,'(''Using OLD format'')')
-      endif
-      if (duprol) then
+      open ( io_mes , file = 'waqpb_import.log' )
+	if (duprol) then
           write (io_mes,'(''DUPROL import'')')
+          newtab = .true.
+          write (io_mes,'('' (obligatory to create new tables'')')
+          newfrm = .true.
+          write (io_mes,'('' (obligatory to use new format'')')
+      else
+	  if (newtab) then
+          write (io_mes,'(''Creating new tables'')')
+	  else
+          write (io_mes,'(''Updating existing tables'')')
+	  endif
+	  if (newfrm) then
+          write (io_mes,'(''Using NEW format'')')
+	  else
+          write (io_mes,'(''Using OLD format'')')
+	  endif
       endif
+      initialConfgName = initialConfgId
 
       nitem = 0
       nfort = 0
@@ -79,21 +77,6 @@ c                        next  argument optional noduprol (default) or duprol
       nstoc = 0 
       ndisp = 0
       nvelo = 0
-
-c----------------------------------------------------------------------c
-c     Find out if new tables need to be created from PROCES.ASC
-c                 or existing tables be updated
-c----------------------------------------------------------------------c
-
-c      newtab = .true.
-c      write (*,*) 'Create new primary tables?? (0/1)'
-c      read (*,*) ihulp
-c      if ( ihulp .ne. 1 ) then
-c          newtab = .false.
-c          write (io_mes,'(''Updating existing tables'')')
-c      else
-c          write (io_mes,'(''Creating new tables'')')
-c      endif
 
       if (.not.newtab) then
           write (*,'('' Loading database......'')')
@@ -141,11 +124,7 @@ c         proces name and description
           read ( io_asc , '(a10,20x,a50)' ) c10,c50
           write ( io_mes , '(''Process '',a10)' ) c10
           write (*,'(''Process: '',a10)') c10
-          if (duprol) then
-              grp = c10
-          else
-              grp = 'DummyGroup                    '
-          end if
+	    if (duprol) grp = c10
 
 c         fortran code
           read ( io_asc , '(a10)' ) c10a
@@ -171,7 +150,7 @@ c         input items on segment level
                   read ( io_asc , 3001) c10,value,c1,c50,c20
               else
                   read ( io_asc , 2001) c10,value,c1,c50
-                  c20 = ' '
+	            c20 = ' '
               endif
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
@@ -202,8 +181,6 @@ c         input items on segment level
 c             Switch to decide segment/exchange!
               inpusx(ninpu) = 1
 
-c              call upd_r3 ( procid(nproc), itemid(iitem), iaanta,
-c     j                      c1, value, 1 )
    15     continue
 
 c         input items on exchange level
@@ -214,7 +191,7 @@ c         input items on exchange level
                   read ( io_asc , 3001) c10,value,c1,c50,c20
               else
                   read ( io_asc , 2001) c10,value,c1,c50
-                  c20 = ' '
+	            c20 = ' '
               endif
               call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
@@ -243,8 +220,6 @@ c         input items on exchange level
               endif
 c             Switch to decide segment/exchange!
               inpusx(ninpu) = 0
-c              call upd_r3 ( procid(nproc), itemid(iitem), iaanta+ihulp,
-c     j                      c1, value, 0 )
    20     continue
 
 c         output items on segment level
@@ -256,7 +231,7 @@ c         output items on segment level
                   read ( io_asc , 3002) c10,c1,c50,c20
               else
                   read ( io_asc , 2002) c10,c1,c50
-                  c20 = ' '
+	            c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
@@ -280,7 +255,7 @@ c         output items on exchange level
                   read ( io_asc , 3002) c10,c1,c50,c20
               else
                   read ( io_asc , 2002) c10,c1,c50
-                  c20 = ' '
+	            c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 2, newtab, grp, io_mes ,
@@ -305,7 +280,7 @@ c         fluxes
                   read ( io_asc , 3002) c10,c1,c50,c20
               else
                   read ( io_asc , 2002) c10,c1,c50
-                  c20 = ' '
+	            c20 = ' '
               endif
               value = -999.
               call upd_p2 ( c10, c50, value, 1, newtab, grp, io_mes ,
@@ -341,7 +316,7 @@ c             check presence of current flux in fluxes under current process
 
               value = -999.
               c50 = ' '
-              c20 = ' '
+	        c20 = ' '
               call upd_p2 ( c10, c50, value, 0, newtab, grp, io_mes ,
      j                      iitem, c20, newfrm, .false. )
    60     continue
@@ -426,7 +401,7 @@ c     Clear tables
 
 c----------------------------------------------------------------------c
 c     Adhoc correction on default values
-c     BLOOMAlg02 t/m BLOOMAlg15 must be -101
+c     BLOOMAlgii must be -101
 c     Only -dis and -par quantities may have default value -11
 c----------------------------------------------------------------------c
 
@@ -437,12 +412,8 @@ c----------------------------------------------------------------------c
           if ( ihulp .gt. 0 ) then
               if ( itemid(i)(9:10) .eq. '01' ) then
                   itemde(i) = -999.
-c                 write (*,'(1x,a20,'' : '',f10.1)' )
-c    j            itemid(i),itemde(i)
               else
                   itemde(i) = -101.
-c                 write (*,'(1x,a20,'' : '',f10.1)' )
-c    j            itemid(i),itemde(i)
               endif
           endif
           if ( abs(itemde(i)+11.0).lt.1e-10 ) then
@@ -453,11 +424,8 @@ c    j            itemid(i),itemde(i)
               if ( ihulp  .le. 0 .and. ihulp2 .le. 0 .and.
      j             ihulp3 .le. 0 .and. ihulp4 .le. 0 ) then
                   itemde(i) = -999.
-c                 write (*,'(1x,a20,'' : '',f10.1)' )
-c    j            itemid(i),itemde(i)
               endif
           endif
-
           call zoek (itemid(i)(1:5),1,'depth',5,ihulp)
           if ( ihulp .eq. 1 ) itemde(i) = -999.
           call zoek (itemid(i)(1:4),1,'delt',4,ihulp)
@@ -479,6 +447,7 @@ c         Remove defaults for DUFLOW hydro parameters, so that conversion proces
               call zoek (itemid(i)(1:5),1,'dx   ',5,ihulp)
               if ( ihulp .eq. 1 ) itemde(i) = -999.
               call zoek (itemid(i)(1:5),1,'V    ',5,ihulp)
+
               if ( ihulp .eq. 1 ) itemde(i) = -999.
               call zoek (itemid(i)(1:5),1,'Wf   ',5,ihulp)
               if ( ihulp .eq. 1 ) itemde(i) = -999.
@@ -505,24 +474,27 @@ c----------------------------------------------------------------------c
 
       if (duprol) then
           i = index (pdffil,'.')
-          if (i.le.1) stop 'Bug 097'
-          procesnaam = pdffil(1:i-1)
+	    if (i.le.1) then
+            procesnaam = pdffil
+          else
+            procesnaam = pdffil(1:i-1)
+          endif
           pdffil = trim(procesnaam)//'.0'
-          open (15,file=pdffil)
-          write (15,1000) trim(initialConfgId)
-          write (15,'(''this file is not available for a DUFLOW model '')')
+	    open (15,file=pdffil)
+	    write (15,1000) 
+      	write (15,'(''this file is not available for a DUFLOW model '')')
           close (15)
           pdffil = trim(procesnaam)//'.des'
-          open (15,file=pdffil)
-          write (15,'(''DUFLOW model '',a)') trim(procesnaam)
-          close (15)
+	    open (15,file=pdffil)
+	    write (15,'(''DUFLOW model '',a)') trim(procesnaam)
+	    close (15)
           pdffil = trim(procesnaam)//'.sub'
-          open (15,file=pdffil)
-          call wrisub(15)
-          close (15)
+	    open (15,file=pdffil)
+	    call wrisub(15)
+	    close (15)
       endif
 
- 1000 format ('configuration ''',a,''' serial 2011010101') 
+ 1000 format ('configuration ''DUPROL'' serial 2011010101') 
  1010 format ('2011010101') 
 
       close (io_mes)

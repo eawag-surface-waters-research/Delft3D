@@ -2229,7 +2229,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/vtrans.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/watage.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/wkcomp.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/zerome.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/waq_tables/UpdateNEF.ini -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_tables/bloom.spe -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_tables/con_pro.csv -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_tables/con_sub.csv -text

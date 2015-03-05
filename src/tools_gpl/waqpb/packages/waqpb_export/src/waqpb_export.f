@@ -1,37 +1,59 @@
 c
 c     Program to compose a PROCES.ASC file from tables
 c
-c     This program cocnsists of the following parts:
+c     This program consists of the following parts:
 c     - Reading of tables holding PROCLIB data structure
-c     - Finding out which processes need to be included
 c     - Loop over the processes:
 c       - Empty PDF structure
 c       - Construct and write PDF structure
 c       - Dump structure to PROCES.ASC
-c     JvG optionally txt file used for update NAlg
 
 c     Include data structures for tables and PDF-file
       include 'data.inc'
       include 'pdf.inc'
       integer      jndex , iproc , iinpu , iitem , ioutp , idisp ,
      j             ioutf , isubs , naanta, ioffse, ioffs2, ivelo ,
-     j             istoc , iconf , npdf  , iflag , naant2, serial,
+     j             istoc , iconf , naant2, serial,
      j             ierror, icnsb , imodv , i
-      integer      nalgnew, nalgold
-      logical      switui, swit2d, proswi(nprocm), itmswi(nitemm),
-     j             repeat
-      character*10 c10   , locid
-      character*50 adduni, locnam
+      logical      itmswi(nitemm)
+      logical      newfrm
+      character*10 c10   
+      character*20 c20
+      character*50 adduni
+      character*255 ArgumentString
       real         actdef, versio
-      integer      lu_inp, lu_mes
+      integer      lu_inp, lu_mes, status
       data         lu_inp /14/
       data         lu_mes /11/
+      
+c     Defaults for command line arguments
 
-      do iitem = 1,nitemm
-          itmswi(iitem) = .false.
+      versio = 5.00
+      serial = 20130101
+      newfrm = .false.
+
+      do i=1,9999
+            call getarg (i,ArgumentString)
+            if (ArgumentString.eq.'') exit
+            if (index(ArgumentString,'-version').gt.0) then
+                c20 = ArgumentString(9:28)
+                read (c20,'(f20.0)',iostat=status) versio
+            endif
+            if (index(ArgumentString,'-serial').gt.0) then
+                c20 = ArgumentString(8:27)
+                read (c20,'(i20)',iostat=status) serial
+            endif
+            if (index(ArgumentString,'-newfrm').gt.0) newfrm = .true.
       enddo
 
+
+      itmswi = .false.
       open ( lu_mes , file = 'waqpb_export.log' )
+      if (newfrm) then
+        write (lu_mes,'(''Using NEW format'')')
+	else
+        write (lu_mes,'(''Using OLD format'')')
+	endif
 
       write (*,'('' Reading data......'')')
 
@@ -45,16 +67,19 @@ c     Check validity of table R9
 
       do 10 imodv = 1,nmodv
           call zoek (modvci(imodv),nconf,confid,10,iconf)
+          if ( iconf .le. 0 )
+     j        write ( lu_mes , '(''Unknown config in TABLE5: '',a10,1x,
+     j                            a10)') modvci(imodv),modvit(imodv)
           call zoek (modvit(imodv),nitem,itemid,10,iitem)
-          if ( iconf .le. 0 .or. iitem .le. 0 )
-     j        write ( lu_mes , '(''Undefined item in TABLE5: '',a10,1x,
+          if ( iitem .le. 0 )
+     j        write ( lu_mes , '(''Unknown item in TABLE5: '',a10,1x,
      j                            a10)') modvci(imodv),modvit(imodv)
    10 continue
 
 c     Create auxiliary table of substances
 
       nsubs = 0
-      do 30 icnsb = 1,ncnsb
+      do icnsb = 1,ncnsb
           c10 = r2_sid(icnsb)
 
 c         Lookup substance in item array
@@ -71,157 +96,38 @@ c         Add to substances array
               nsubs = nsubs+1
               subsid(nsubs) = c10
           endif
-   30 continue
-
-c     TEMPORARY CHECK on multiple processes producing ONE ITEM
-
-      call ch1to1 (lu_mes)
-
-c     Temporary dump of FIRST configuration TO AVOID BUG
-c     which I DO NOT UNDERSTAND
-      write (11,'(''Processes in FIRST configuration:'')')
-      write (11,'(''Process '',a10,1x,l10)')
-     j      (procid(iproc),conpro(1,iproc),iproc=1,nproc)
+      enddo
 
 c     Dump TRM tables
 
-      write (*,*) 'Do you want TRM tables?? (0/1)'
-      read (*,*) iflag
-      if ( iflag .eq. 1 ) then
-          write (*,'('' Writing TRM tables......'')')
-          call writrm
-      endif
+c      write (*,'('' Writing TRM tables......'')')
+c      call writrm
       write (*,'('' Writing TRM tables for LaTeX......'')')
       call writex
+      
 c----------------------------------------------------------------------c
 c     SET VERSION, SERIAL AND WRITE NEFIS FILE
 c----------------------------------------------------------------------c
 
-      write (*,'('' Configuring......'')')
-      write (11,'(/''Configuring......'')')
-      do 200 iproc=1,nproc
-  200 proswi(iproc) = .false.
-
-      write (*,*) 'Version number ProcLib?? (real)'
-      read (*,*) versio
-
-      write (*,*) 'Serial number ProcLib?? (integer)'
-      read (*,*) serial
-
-      write (*,*) 'Make NEFIS process definition file?? (0/1)'
-      read (*,*) iflag
-      if ( iflag .eq. 1 ) then
-          write (11,'(''Writing NEFIS process definition file'')')
-          call makind()
-          call pdfnef(11    , serial, versio, ierror)
-          if ( ierror .ne. 0 ) then
-             write (11,'(''ERROR writing NEFIS file'')')
-             write (*,'(''ERROR writing NEFIS file, see report file'')')
-          endif
+      write (11,'(''Writing NEFIS process definition file'')')
+      call makind()
+      call pdfnef(11    , serial, versio, ierror)
+      if ( ierror .ne. 0 ) then
+         write (11,'(''ERROR writing NEFIS file'')')
+         write (*,'(''ERROR writing NEFIS file, see report file'')')
       endif
-
-c----------------------------------------------------------------------c
-c     INTERACTIVE PART TO FIND OUT WHICH PROCESSES ARE REQUIRED
-c----------------------------------------------------------------------c
-
-      switui = .false.
-c     write (*,*) 'Make files for ProcEdit version 1.07?? (0/1)'
-c     read (*,*) iflag
-c     if ( iflag .eq. 1 ) then
-c         switui = .true.
-c         write (11,'(''ProcEdit V1.07 mode'')')
-c     endif
-
-      swit2d = .false.
-c     write (*,*) 'Make files for 2D use only?? (0/1)'
-c     read (*,*) iflag
-c     if ( iflag .eq. 1 ) then
-c         swit2d = .true.
-c         write (11,'(''2D mode'')')
-c     endif
-
-c     Back for next assignment
-
-  210 write (*,*) 'Requested process or configuration ?? (ALL/STOP)'
-      read (*,'(a)') c10
-
-c     Check for STOP
-      call zoek (c10,1,'stop',4,jndex)
-      if (jndex .eq. 1) then
-          write (11,'(''STOP command received'')')
-          goto 220
-      endif
-
-c     Check for ALL
-      call zoek (c10,1,'all',3,jndex)
-      if (jndex .eq. 1) then
-          do 212 iproc=1,nproc
-  212     proswi(iproc) = .true.
-          write (11,'(''ALL command received'')')
-          goto 220
-      endif
-
-c     Check for Configuration
-      call zoek (c10,nconf,confid,10,iconf)
-      if (iconf .gt. 0) then
-          write (11,'(''Configuration '',a10,'' activated'')') c10
-          do 214 iproc=1,nproc
-              if ( conpro(iconf,iproc) ) then
-                  proswi(iproc) = .true.
-                  write (11,'(''Process '',a10,'' switched on'')')
-     j                                     procid(iproc)
-              endif
-  214     continue
-          goto 210
-      endif
-
-c     Check for Process
-      call zoek (c10,nproc,procid,10,iproc)
-      if (iproc .gt. 0) then
-          proswi(iproc) = .true.
-          write (11,'(''Process       '',a10,'' activated'')') c10
-          goto 210
-      endif
-
-      write (11,'(''UNKNOWN!!!    '',a10)') c10
-      goto 210
-
-  220 continue
 
 c----------------------------------------------------------------------c
 c     LOOP OVER PROCESSES
 c----------------------------------------------------------------------c
 
-      npdf = 0
-      do 300 iproc=1,nproc
-          if ( proswi(iproc) ) npdf = npdf + 1
-  300 continue
-      if ( npdf .eq. 0 ) goto 900
-
       write (*,'('' Making PROCES.ASC......'')')
       write (*,*)
       open ( 15 , file = 'procesm.asc' )
-      open ( 16 , file = 'proclib.txt' )
-
-      write ( 15 , '(i10,50x,f8.2,2x,i10)' ) npdf,versio,serial
-
-      nalgold = 0
-      open (789,file='expand_algae',status='old',err=987)
-      read (789,*) nalgold,nalgnew
-      if (nalgnew.lt.nalgold) stop 'Option not implemented'
-  987 continue
-
-      if (nalgold.gt.0) then
-      write ( 16 , '(i10,50x,f8.2,2x,i10)' ) npdf,versio,serial
-      else
-      write ( 16 , '(/''HELP FILE FOR DELWAQ PROCESSES LIBRARY''/
-     j                ''version:  '',f10.2/
-     j                ''serialnr: '',i10///)' ) versio,serial
-      endif
+      write ( 15 , '(i10,50x,f8.2,2x,i10)' ) nproc,versio,serial
 
       do 800 iproc=1,nproc
 
-          if ( proswi(iproc) ) then
           write (*,'(''+Process: '',a10)') procid(iproc)
 
 c----------------------------------------------------------------------c
@@ -281,23 +187,25 @@ c             Find item properties and store in PDF structure
                   ins = ins + 1
                   if ( ins .gt. insmax ) stop 'DIMENSION insmax'
                   ins_id(ins) = itemid(iitem)
-                  ins_nm(ins) = adduni(itemnm(iitem),itemun(iitem))
-                  if ( switui ) then
-                      ins_va(ins) = itemde(iitem)
+                  if (newfrm) then
+                  ins_nm(ins) = itemnm(iitem)
+                  ins_un(ins) = itemun(iitem)
                   else
-                      ins_va(ins) = actdef
+                  ins_nm(ins) = adduni(itemnm(iitem),itemun(iitem))
                   endif
+                  ins_va(ins) = actdef
                   ins_do(ins) = inpudo(iinpu)
               else
                   ine = ine + 1
                   if ( ine .gt. inemax ) stop 'DIMENSION inemax'
                   ine_id(ine) = itemid(iitem)
-                  ine_nm(ine) = adduni(itemnm(iitem),itemun(iitem))
-                  if ( switui ) then
-                      ine_va(ine) = itemde(iitem)
+                  if (newfrm) then
+                  ine_nm(ine) = itemnm(iitem)
+                  ine_un(ine) = itemun(iitem)
                   else
-                      ine_va(ine) = actdef
+                  ine_nm(ine) = adduni(itemnm(iitem),itemun(iitem))
                   endif
+                  ine_va(ine) = actdef
                   ine_do(ine) = inpudo(iinpu)
               endif
 
@@ -335,13 +243,23 @@ c             Find item properties and store in PDF structure
                   ous = ous + 1
                   if ( ous .gt. ousmax ) stop 'DIMENSION ousmax'
                   ous_id(ous) = itemid(iitem)
+                  if (newfrm) then
+                  ous_nm(ous) = itemnm(iitem)
+                  ous_un(ous) = itemun(iitem)
+                  else
                   ous_nm(ous) = adduni(itemnm(iitem),itemun(iitem))
+                  endif
                   ous_do(ous) = outpdo(ioutp)
               else
                   oue = oue + 1
                   if ( oue .gt. ouemax ) stop 'DIMENSION ouemax'
                   oue_id(oue) = itemid(iitem)
+                  if (newfrm) then
+                  oue_nm(oue) = itemnm(iitem)
+                  oue_un(oue) = itemun(iitem)
+                  else
                   oue_nm(oue) = adduni(itemnm(iitem),itemun(iitem))
+                  endif
                   oue_do(oue) = outpdo(ioutp)
 
 c                 SCAN VELO and DISP TABLES FOR LINES ASSOCIATED WITH
@@ -350,7 +268,7 @@ c                 CURRENT OUTPUT ITEM ON EXCHANGE LEVEL
 c                 scan dispersion lines table for FIRST occurence of item
                   call zoek ( itemid(iitem), ndisp, dispit, 10, ioffs2)
                   naant2 = 0
-                  if ( ioffs2 .gt. 0 .and. .not.swit2d ) then
+                  if ( ioffs2 .gt. 0 ) then
 
 c                     loop over all DISP rows related to this item
 
@@ -379,7 +297,7 @@ c                     if it still matches current item
 c                 scan velocity lines table for FIRST occurence of item
                   call zoek ( itemid(iitem), nvelo, veloit, 10, ioffs2)
                   naant2 = 0
-                  if ( ioffs2 .gt. 0 .and. .not.swit2d ) then
+                  if ( ioffs2 .gt. 0 ) then
 
 c                     loop over all VELO rows related to this item
 
@@ -441,7 +359,12 @@ c             write (11,*) ' flu ',flu,' ioutf ', ioutf
 
 c             Find and store flux properties
               flu_id(flu) = itemid(iitem)
+              if (newfrm) then
+              flu_nm(flu) = itemnm(iitem)
+              flu_un(flu) = itemun(iitem)
+              else
               flu_nm(flu) = adduni(itemnm(iitem),itemun(iitem))
+              endif
               flu_do(flu) = outfdo(ioutf)
 
 c             SCAN STOCHI TABLE FOR LINES ASSOCIATED WITH PRESENT FLUX
@@ -461,7 +384,6 @@ c                 loop over all STOC rows related to this flux
 c                 Process current row
 
                   istoc = ioffs2 + naant2-1
-c             write (11,*) ' sto ',sto,' istoc ', istoc
                   sto_su(sto) = stocsu(istoc)
                   sto_fl(sto) = stocfl(istoc)
                   sto_sc(sto) = stocsc(istoc)
@@ -492,39 +414,17 @@ c----------------------------------------------------------------------c
 
 c         Write PDF file (formats as in HARMONIZE to allow comparison)
 
+          if (newfrm) then
+          call wripdn ( procid(iproc), procnm(iproc), procco(iproc),
+     j                  procfo(iproc), 15 )
+          else
           call wripdf ( procid(iproc), procnm(iproc), procco(iproc),
      j                  procfo(iproc), 15 )
-
-          if ( nalgold.gt.0 ) then
-          call exppdfnalg ( nalgold, nalgnew )
-          call wripdf ( procid(iproc), procnm(iproc), procco(iproc),
-     j                  procfo(iproc), 16 )
-          repeat = .true.
-          do while (repeat)
-            call reppdfnalg ( nalgold, nalgnew,
-     j                    procid(iproc), locid,
-     j          procnm(iproc), locnam, repeat )
-            if (repeat)
-     j      call wripdf ( locid, locnam, procco(iproc),
-     j                    procfo(iproc), 16 )
-          enddo
-          else
-c         Write documentation
-
-          call wridoc ( procid(iproc), procnm(iproc), procco(iproc),
-     j                  procfo(iproc), 16 )
           endif
-
-c         End if Proswi
-
-          endif
-
   800 continue
       close (15)
-      close (16)
 
-c     Write all active coefficients to COEFEDIT.DAT
-c     in the Sobek-format
+c     Write all active coefficients to COEFEDIT.DAT in the Sobek-format
       call coefed(serial,itmswi)
 
   900 continue
@@ -536,7 +436,7 @@ c     in the Sobek-format
       character*50 adduni, name
       character*20 unit
 
-      integer      lennam, lenuni, i, ihulp
+      integer      lennam, lenuni, i
 
 c     find length of name and unit
 
@@ -573,9 +473,6 @@ c     find length of name and unit
 
       if ( lennam + lenuni .gt. 50 ) then
           lennam = 50-lenuni
-c          write (*,'('' '',a50,1x,i2)') name,lennam
-c          write (*,'('' '',a20,1x,i2)') unit,lenuni
-c          stop 'ADDUNI Fatal Error 2'
       endif
 
       write ( adduni(1          :lennam) , '(a)' ) name(1:lennam)
