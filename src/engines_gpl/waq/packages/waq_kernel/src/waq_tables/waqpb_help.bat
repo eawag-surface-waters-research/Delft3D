@@ -1,3 +1,4 @@
+@echo off
 echo.
 echo About the DELWAQ proces library tools
 echo.
@@ -12,7 +13,7 @@ echo     for the manuals.
 echo   - copy procesm.asc to proces.asc, modify the latter to include
 echo     the midifications you want
 echo   - run waqpb_import.bat to import changes into the csv-files
-echo   - modify version information in UpdateNEF.ini
+echo   - modify version information in waqpb_export.bat
 echo   - run waq_pb_export.bat again to create a new proc_def, new 
 echo     tables, and a new procesm.asc to see if proces.asc was
 echo     imported correctly

@@ -1,6 +1,8 @@
 @echo off
+set version=5.03
+set serial=2015022401
 if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe (
-    echo This will execute: waqpb_export.exe < UpdateNEF.ini
+    echo This will execute: waqpb_export.exe -version%version% -serial%serial%
     echo.
     echo This command will 'export' the data in the csv-tables to a proc_def,
 	echo a procesm.asc and latex files for the manuals. The proc_def files
@@ -9,7 +11,7 @@ if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_e
     echo Run waqpb_help.bat for more information
     echo.	
     pause
-    ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe -version5.03 -serial2015022401
+    ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe -version%version% -serial%serial%
     copy proc_def.* ..\..\..\..\default
     echo.
     pause
