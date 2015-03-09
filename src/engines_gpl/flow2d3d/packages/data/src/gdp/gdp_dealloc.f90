@@ -61,7 +61,6 @@ subroutine gdp_dealloc(gdp)
     integer :: i
     integer :: istat
     !
-    integer :: locallsedtot
     integer :: localnofou
     logical :: localrhum_file
     logical :: localtair_file
@@ -79,16 +78,9 @@ subroutine gdp_dealloc(gdp)
 !! executable statements -------------------------------------------------------
 !
     !
-    ! copy 
-    !    lsedtot
-    !    maxpolyp 
-    !    scour
-    !    lftrto
-    !    etc.
-    ! to local parameters, because their gdp entries will be deallocated
-    ! before they are used to deallocate their related structures
+    ! copy a number of logical flags to local parameters, because their gdp entries
+    ! will be deallocated before they are used to deallocate their related structures
     !
-    locallsedtot     = gdp%d%lsedtot
     localnofou       = gdp%d%nofou
     localrhum_file   = gdp%gdheat%rhum_file
     localtair_file   = gdp%gdheat%tair_file
@@ -276,8 +268,7 @@ subroutine gdp_dealloc(gdp)
     call clrtrapar(istat, gdp%gdtrapar)
     istat = clrmorlyr(gdp%gdmorlyr)
     deallocate (gdp%gdmorlyr , STAT = istat)
-    call clrdredge(istat, gdp)
-    call cleartable(gdp%gddredge%tseriesfile)
+    call clrdredge(istat, gdp%gddredge)
     deallocate (gdp%gddredge , STAT = istat)
     deallocate (gdp%gdtrapar , STAT = istat)
     deallocate (gdp%gderosed , STAT = istat)

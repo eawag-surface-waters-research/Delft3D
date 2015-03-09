@@ -1,4 +1,4 @@
-subroutine initdredge(gdp       )
+subroutine initdredge(gddredge)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -33,115 +33,51 @@ subroutine initdredge(gdp       )
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use globaldata
+    use globaldata, only: sv_dredge
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)      , dimension(:,:) , pointer :: link_percentage
-    real(fp)      , dimension(:)   , pointer :: link_distance
-    real(fp)      , dimension(:,:) , pointer :: link_sum
-    real(fp)      , dimension(:)   , pointer :: dzdred
-    real(fp)      , dimension(:)   , pointer :: refplane
-    real(fp)      , dimension(:,:) , pointer :: voldred
-    real(fp)      , dimension(:)   , pointer :: voldune
-    real(fp)      , dimension(:)   , pointer :: totvoldred
-    real(fp)      , dimension(:)   , pointer :: globalareadred
-    real(fp)      , dimension(:,:) , pointer :: voldump
-    real(fp)      , dimension(:,:) , pointer :: percsupl
-    real(fp)      , dimension(:)   , pointer :: totvoldump
-    real(fp)      , dimension(:)   , pointer :: localareadump
-    real(fp)      , dimension(:)   , pointer :: globalareadump
-    real(fp)      , dimension(:)   , pointer :: globaldumpcap
-    integer                        , pointer :: dredge_domainnr
-    integer                        , pointer :: dredge_ndomains
-    integer                        , pointer :: nadred
-    integer                        , pointer :: nadump
-    integer                        , pointer :: nasupl
-    integer                        , pointer :: nalink
-    integer                        , pointer :: ntimaccum
-    integer       , dimension(:,:) , pointer :: link_def
-    logical                        , pointer :: tsmortime
-    logical                        , pointer :: firstdredge
-    character(256)                 , pointer :: dredgefile
-    character( 80), dimension(:)   , pointer :: dredge_areas
-    character( 80), dimension(:)   , pointer :: dump_areas
-    type (dredtype), dimension(:)  , pointer :: dredge_prop
-    type (dumptype), dimension(:)  , pointer :: dump_prop
+    type(sv_dredge) :: gddredge
     !
     integer :: istat
 !
 !! executable statements -------------------------------------------------------
 !
-    link_percentage   => gdp%gddredge%link_percentage
-    link_distance     => gdp%gddredge%link_distance
-    link_sum          => gdp%gddredge%link_sum
-    dzdred            => gdp%gddredge%dzdred
-    refplane          => gdp%gddredge%refplane
-    voldred           => gdp%gddredge%voldred
-    voldune           => gdp%gddredge%voldune
-    totvoldred        => gdp%gddredge%totvoldred
-    globalareadred    => gdp%gddredge%globalareadred
-    voldump           => gdp%gddredge%voldump
-    percsupl          => gdp%gddredge%percsupl
-    totvoldump        => gdp%gddredge%totvoldump
-    localareadump     => gdp%gddredge%localareadump
-    globalareadump    => gdp%gddredge%globalareadump
-    globaldumpcap     => gdp%gddredge%globaldumpcap
-    dredge_domainnr   => gdp%gddredge%dredge_domainnr
-    dredge_ndomains   => gdp%gddredge%dredge_ndomains
-    nadred            => gdp%gddredge%nadred
-    nadump            => gdp%gddredge%nadump
-    nasupl            => gdp%gddredge%nasupl
-    nalink            => gdp%gddredge%nalink
-    ntimaccum         => gdp%gddredge%ntimaccum
-    link_def          => gdp%gddredge%link_def
-    tsmortime         => gdp%gddredge%tsmortime
-    firstdredge       => gdp%gddredge%firstdredge
-    dredgefile        => gdp%gddredge%dredgefile
-    dredge_areas      => gdp%gddredge%dredge_areas
-    dump_areas        => gdp%gddredge%dump_areas
-    dredge_prop       => gdp%gddredge%dredge_prop
-    dump_prop         => gdp%gddredge%dump_prop
+    nullify(gddredge%link_percentage)
+    nullify(gddredge%link_distance)
+    nullify(gddredge%link_sum)
+    nullify(gddredge%dzdred)
+    nullify(gddredge%refplane)
+    nullify(gddredge%voldred)
+    nullify(gddredge%totvoldred)
+    nullify(gddredge%globalareadred)
+    nullify(gddredge%voldune)
+    nullify(gddredge%percsupl)
+    nullify(gddredge%totvoldump)
+    nullify(gddredge%localareadump)
+    nullify(gddredge%globalareadump)
+    nullify(gddredge%globaldumpcap)
+    nullify(gddredge%voldump)
     !
-    nullify(gdp%gddredge%link_percentage)
-    nullify(gdp%gddredge%link_distance)
-    nullify(gdp%gddredge%link_sum)
-    nullify(gdp%gddredge%dzdred)
-    nullify(gdp%gddredge%refplane)
-    nullify(gdp%gddredge%voldred)
-    nullify(gdp%gddredge%totvoldred)
-    nullify(gdp%gddredge%globalareadred)
-    nullify(gdp%gddredge%voldune)
-    nullify(gdp%gddredge%percsupl)
-    nullify(gdp%gddredge%totvoldump)
-    nullify(gdp%gddredge%localareadump)
-    nullify(gdp%gddredge%globalareadump)
-    nullify(gdp%gddredge%globaldumpcap)
-    nullify(gdp%gddredge%voldump)
+    gddredge%dredge_domainnr = 0
+    gddredge%dredge_ndomains = 0
+    gddredge%nadred          = 0
+    gddredge%nadump          = 0
+    gddredge%nasupl          = 0
+    gddredge%nalink          = 0
+    gddredge%ntimaccum       = 0
     !
-    dredge_domainnr = 0
-    dredge_ndomains = 0
-    nadred    = 0
-    nadump    = 0
-    nasupl    = 0
-    nalink    = 0
-    ntimaccum = 0
+    nullify(gddredge%link_def)
+    nullify(gddredge%ndredged)
+    nullify(gddredge%nploughed)
     !
-    nullify(gdp%gddredge%link_def)
-    nullify(gdp%gddredge%ndredged)
-    nullify(gdp%gddredge%nploughed)
+    gddredge%tsmortime       = .false.
+    gddredge%firstdredge     = .true.
     !
-    tsmortime = .false.
-    firstdredge = .true.
+    nullify(gddredge%dredge_areas)
+    nullify(gddredge%dump_areas)
+    gddredge%dredgefile      = ' '
     !
-    nullify(gdp%gddredge%dredge_areas)
-    nullify(gdp%gddredge%dump_areas)
-    dredgefile   = ' '
-    !
-    nullify(gdp%gddredge%dredge_prop)
-    nullify(gdp%gddredge%dump_prop)
+    nullify(gddredge%dredge_prop)
+    nullify(gddredge%dump_prop)
 end subroutine initdredge
