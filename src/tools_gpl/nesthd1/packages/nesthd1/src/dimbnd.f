@@ -1,4 +1,5 @@
       subroutine dimbnd(lunbnd,nobnd )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -27,26 +28,17 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
+!
+      integer lunbnd
+      integer nobnd
+      
       character*1   char
       character*80  rec
 
       nobnd = 0
 
   100 read (lunbnd,'(a80)',end = 999) rec
-
-      ip = 20
-  110 ip = ip + 1
-      read (rec(ip:ip),'(a1)') char
-      if (char .eq. ' ') goto 110
-
-  120 ip = ip + 1
-      read (rec(ip:ip),'(a1)') char
-      if (char .eq. ' ') goto 120
-
-      call small (char,1)
-
-      if (char .eq. 't') nobnd = nobnd + 1
-
+      nobnd = nobnd + 1
       goto 100
 
   999 continue

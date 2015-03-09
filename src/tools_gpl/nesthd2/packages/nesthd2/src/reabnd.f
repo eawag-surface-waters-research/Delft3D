@@ -51,7 +51,7 @@
       character*  1 char
       character*  1 time
       character*  1 typbnd (nobnd)
-      character* 20 nambnd (nobnd)
+      character* (*) nambnd (nobnd)
       character* 20 nmbnd
       character* 80 record
 !
