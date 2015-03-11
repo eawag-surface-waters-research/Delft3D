@@ -68,6 +68,7 @@
       use dlwq_data      ! for definition and storage of data
       use rd_token
       use timers         ! performance timers
+      use string_module  ! string manipulation tools
       implicit none
 
 !     Arguments           :
@@ -99,6 +100,7 @@
       integer  (  4)  ierr2                         ! local error indicator
       integer  (  4)  itype                         ! 0 = all, 1 = string, 2 = integer, 3 = real
       character(255)  cdummy                        ! workspace for reading
+      character(  4)  cext                          ! inital conditions file extention
       integer  (  4)  icopt1                        ! first file option (ASCII/Binary/external etc)
       integer  (  4)  icopt2                        ! constants with or without defaults
       logical         ldummy                        ! dummy variable
@@ -165,8 +167,10 @@
       if ( ierr2  .gt. 0 ) goto 10
       if ( icopt1 .eq. BINARY ) then
          ip = scan ( lchar(18), '.', back = .true. )              ! look for the file type
-         if ( lchar(18)(ip:ip+3) .eq. '.map' .or.
-     &        lchar(18)(ip:ip+3) .eq. '.MAP' ) then               ! if .map, it is a map-file
+         cext = lchar(18)(ip:ip+3)
+         call str_lower(cext)
+         if ( cext .eq. '.map' .or. cext .eq. '.rmp' .or.
+     &        cext .eq. '.rm2' ) then                             ! if .rmp or .rm2 (Sobek) or .map, it is a map-file
             call dhopnf  ( lun(18) , lchar(18) , 18    , 2     , ierr2 )
             read ( lun(18) ) cdummy(1:160)                        ! read title of simulation
             close ( lun(18) )

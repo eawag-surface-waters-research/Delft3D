@@ -63,6 +63,7 @@
       use timers
       use m_couplib
       use workspace
+      use string_module  ! string manipulation tools
 
 !     Parameters          :
 
@@ -110,6 +111,7 @@
       LOGICAL       LDUMMY    , UPDATR
       CHARACTER*200 FINAM
       INTEGER       SENDBUF(3)
+      CHARACTER*4   cext                          ! inital conditions file extention
 
       INTEGER       IERRIO
 
@@ -328,9 +330,11 @@
 
       propor = .false.
       call dhopnf ( lun(18) , lchar(18) , 18    , 2    , ierrd  )
-      ig = scan ( lchar(18), '.', back = .true. )                ! look fo rthe file type
-      if ( lchar(18)(ig:ig+3) .eq. '.map' .or.
-     &     lchar(18)(ig:ig+3) .eq. '.MAP' ) then                 ! if .map, it is a map-file
+      ig = scan ( lchar(18), '.', back = .true. )                ! look for the file type
+      cext = lchar(18)(ig:ig+3)
+      call str_lower(cext)
+      if ( cext .eq. '.map' .or. cext .eq. '.rmp' .or.
+     &     cext .eq. '.rm2' ) then                               ! if .rmp or .rm2 (Sobek) or .map, it is a map-file
          read ( lun(18), iostat=ierrio ) finam(1:160)            ! read title of simulation
          if ( ierrio .ne. 0 ) goto 50
          if ( finam(114:120) .eq. 'mass/m2' .or.
