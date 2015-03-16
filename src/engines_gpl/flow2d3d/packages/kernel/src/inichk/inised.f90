@@ -1,5 +1,5 @@
 subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
-                & nmmax     ,lsed      ,lsedtot   ,gdp       )
+                & nmmax     ,lsed      ,lsedtot   ,kcs       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -65,10 +65,12 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     integer                                            , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
     integer                                            , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
     integer                                            , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
     logical                                                          :: error   !  Flag=TRUE if an error is encountered
 !
 ! Local variables
 !
+    integer           :: nmaxddb
     integer           :: nmlb
     integer           :: nmub
 !
@@ -82,6 +84,12 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     nmlb    = gdp%d%nmlb
     nmub    = gdp%d%nmub
+    nmaxddb = gdp%d%nub - gdp%d%nlb + 1
+    !
+    if (lsedtot==1 .and. gdp%gdsedpar%flsdia/=' ') then
+       call mirror_bnd(1         ,nmaxddb   ,nmmax     ,kcs       , &
+                     & gdp%gdsedpar%sedd50fld,nmlb     ,nmub      )
+    endif
     !
     call allocsedtra(gdp%gderosed, gdp%d%kmax, lsed, lsedtot, &
                    & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx, CODE_DELFT3D)
