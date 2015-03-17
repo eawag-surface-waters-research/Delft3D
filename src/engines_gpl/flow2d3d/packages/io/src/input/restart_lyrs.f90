@@ -191,14 +191,17 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
        ierror     = neferr(0,errmsg)
     endif
     rst_lsedtot = rst_lsed + rst_lsedbl
-    if (rst_lsedtot /= lsedtot) goto 9999
+    if (rst_lsedtot /= lsedtot) then
+       ierror = 1
+       goto 50
+    endif
     !
     elmndm = 5
     ierror = inqelm(fds , 'MSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
     if (ierror /= 0) then
         ierror  = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
         layerfrac = 1
-        if (ierror /= 0) goto 9999
+        if (ierror /= 0) goto 50
     endif
     rst_nlyr = elmdms(3)
     !
@@ -210,16 +213,16 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     if (layerfrac==1) then
         ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )       
-        if (ierror /= 0) goto 9999
+        if (ierror /= 0) goto 50
     else
         ierror = getelt(fds , 'map-sed-series', 'MSED', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )
-        if (ierror /= 0) goto 9999
+        if (ierror /= 0) goto 50
     endif
     !
     ierror = getelt(fds , 'map-sed-series', 'THLYR', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
-    if (ierror/= 0) goto 9999
+    if (ierror/= 0) goto 50
     if (nlyr>=rst_nlyr) then
        !
        ! more layers in simulation than in restart file (or same number)
@@ -270,11 +273,14 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     ! since the arrays are 'fp'! Otherwise, intractable memory errors will occur. 
     ! 
     call dfsync ( gdp) 
+    call dfbroadc_gdp ( ierror, 1, dfint, gdp )
+    if (ierror/=0) goto 9999
+    !
     call dfbroadc_gdp ( thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
     call dfbroadc_gdp ( msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
     call dfbroadc_gdp (layerfrac, 1, dfint, gdp)
     ! 
-    ! put copies of parts of msed, thlyr, etc for each subdomain 
+    ! extract relevant parts of msed, thlyr, etc for each subdomain 
     ! 
     call dfsync ( gdp ) 
     do j = mfg, mlg 

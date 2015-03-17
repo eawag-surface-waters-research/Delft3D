@@ -39,6 +39,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     use precision 
     use globaldata
     use string_module
+    use dfparall
     !
     implicit none
     !
@@ -61,29 +62,41 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
 !
 ! Local variables
 !
-    integer                                :: l
-    integer                                :: m
-    integer                                :: n
-    integer                                :: lrid        ! character variables for files Help var., length of restid
-    integer                     , external :: crenef
-    integer                     , external :: getelt
-    integer                     , external :: clsnef
-    integer                     , external :: neferr
-    integer                                :: rst_lsed
-    integer                                :: rst_lsedbl
-    integer                                :: rst_lsedtot
-    integer                                :: ierror
-    integer                                :: fds
-    integer , dimension(3,5)               :: cuindex
-    integer , dimension(3,5)               :: uindex
-    real(sp), dimension(:,:,:,:), pointer  :: sbuff
-    character(len=256)                     :: dat_file
-    character(len=256)                     :: def_file
-    character(len=1024)                    :: errmsg
+    integer                                   :: i
+    integer                                   :: j
+    integer                                   :: l
+    integer                                   :: lrid        ! character variables for files Help var., length of restid
+    integer                      , external   :: crenef
+    integer                      , external   :: getelt
+    integer                      , external   :: clsnef
+    integer                      , external   :: neferr
+    integer                                   :: rst_lsed
+    integer                                   :: rst_lsedbl
+    integer                                   :: rst_lsedtot
+    integer                                   :: ierror
+    integer                                   :: fds
+    integer                      , pointer    :: mfg
+    integer                      , pointer    :: mlg
+    integer                      , pointer    :: nfg
+    integer                      , pointer    :: nlg
+    integer                      , pointer    :: nmaxgl
+    integer                      , pointer    :: mmaxgl
+    integer , dimension(3,5)                  :: cuindex
+    integer , dimension(3,5)                  :: uindex
+    real(sp), dimension(:,:,:)   , pointer    :: rst_bodsed
+    character(len=256)                        :: dat_file
+    character(len=256)                        :: def_file
+    character(len=1024)                       :: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
-    nullify(sbuff)
+    mfg                 => gdp%gdparall%mfg
+    mlg                 => gdp%gdparall%mlg
+    nfg                 => gdp%gdparall%nfg
+    nlg                 => gdp%gdparall%nlg
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl 
+    nullify(rst_bodsed)
     error        = .false.
     success      = .false.
     call remove_leading_spaces(restid    ,lrid      )
@@ -92,7 +105,10 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     !
     dat_file = restid(1:lrid)//'.dat'
     def_file = restid(1:lrid)//'.def'
-    ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
+    if (inode == master) then    
+       ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
+    endif
+    call dfbroadc_gdp ( ierror, 1, dfint, gdp )
     if (ierror/= 0) then
        error = .true.
        goto 9999
@@ -109,6 +125,14 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     uindex (3,1) = 1 ! increment in time
     uindex (1,1) = i_restart
     uindex (2,1) = i_restart
+    !
+    ! allocate global versions of msed and thlyr
+    !
+    allocate(rst_bodsed(nmaxgl, mmaxgl, lsedtot), stat=ierror)
+    !   
+    ! the master opens and reads the file 
+    ! 
+    if ( inode /= master ) goto 50 
     !
     ! determine number of suspended sediment fractions
     !
@@ -134,22 +158,43 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
        ierror     = neferr(0,errmsg)
     endif
     rst_lsedtot = rst_lsed + rst_lsedbl
-    if (rst_lsedtot /= lsedtot) goto 9999
+    if (rst_lsedtot /= lsedtot) then
+       ierror = 1
+       goto 50
+    endif
     !
-    allocate(sbuff(nmaxus, mmax, rst_lsedtot, 1))
+    ierror = getelt(fds , 'map-sed-series', 'BODSED', uindex, 1, &
+                 & mmaxgl*nmaxgl*rst_lsedtot*4, rst_bodsed )
+    if (ierror/= 0) goto 50
+    !    end of master part
+    ! 
+    ! scatter information to all nodes     
+ 50 continue     
+    ! 
+    ! scatter array bodsed to all nodes.
+    ! Note: the broadc must use 'dfreal' since the array is 'sp'
+    ! 
+    call dfsync ( gdp) 
+    call dfbroadc_gdp ( ierror, 1, dfint, gdp )
+    if (ierror/=0) goto 9999
     !
-    ierror = getelt(fds , 'map-sed-series', elmnam, uindex, 1, &
-                 & mmax*nmaxus*rst_lsedtot*4, sbuff )
-    if (ierror/= 0) goto 9999
-    do l = 1, lsedtot
-       do m = 1, mmax
-          do n = 1, nmaxus
-             bodsed(l,n,m) = real(sbuff(n,m,l,1),prec)
+    call dfbroadc_gdp ( rst_bodsed, nmaxgl*mmaxgl*lsedtot, dfreal, gdp ) 
+    ! 
+    ! extract relevant part of bodsed for each subdomain 
+    ! 
+    call dfsync ( gdp ) 
+    do j = mfg, mlg 
+       do i = nfg, nlg
+          do l = 1, lsedtot
+             bodsed(l,i-nfg+1,j-mfg+1) = rst_bodsed(i,j,l)
           enddo
-       enddo
-    enddo
+       enddo 
+    enddo 
+    deallocate(rst_bodsed)
     success = .true.
+    !
 9999 continue
-    if (associated(sbuff)) deallocate (sbuff)
-    ierror = clsnef(fds) 
+    if (inode == master) then
+       ierror = clsnef(fds)
+    endif
 end subroutine restart_bodsed
