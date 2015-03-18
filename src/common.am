@@ -43,7 +43,7 @@ STANDARD_C_INCLUDES = \
 FINCLUDES =
 
 FMODULES = \
-    -I$(top_builddir)/utils_lgpl/precision/packages/precision/src
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 flow2d3dincludedir = $(includedir)/flow2d3d
 
