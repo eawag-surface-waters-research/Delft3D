@@ -57,9 +57,20 @@
 
 !     Local
 
-      integer        ilun
-      integer        ioerr
-      character*(93) check
+      integer         ilun
+      integer         ioerr
+      character*(93)  check
+      logical         specout
+      integer         idummy
+      real            rdummy
+      character*(256) outputpath
+      character*(256) outputpath2
+      character*(256) runidpath
+      integer         pathlen
+      integer         outpathlen
+      character*(256) outid
+      integer         ierr2
+      
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "uniset", ithndl )
 
@@ -68,10 +79,33 @@
       check = lchar(29)
       call dhgnam(runid,check)
 
-!        Pad the model name in the file names
+!        Specific output dir?
+      call getcom ( '-output', 3, specout, idummy, rdummy, outputpath, ierr2)
+      if (ierr2.eq.0) then 
+         write (*,'(A)') 'Found -output switch with the following path:'
+         write (*,'(/A)') trim(outputpath)
+         write (*,'(/A/)') 'Make sure this path exists, or DELWAQ will not run!'
+         call dhpath ( runid, runidpath, pathlen)
+         call dhpath ( outputpath, outputpath2, outpathlen)
+         if (outpathlen == 0 .or. outputpath(1:1) == '.') then
+!       No dir indicators found or it starts with a dot, asume it is a local subdir
+            outputpath = trim(runidpath)//trim(outputpath)
+         endif
+         if (pathlen == 0 ) then
+            outid = trim(outputpath)//'/'//runid
+         else
+            outid = trim(outputpath)//'/'//trim(runid(pathlen+1:))
+         endif
+      endif
 
+!        Pad the model name in the file names   
       do ilun = 1 , nolun
-         lchar(ilun) = trim(runid)//lchar(ilun)
+         if ( specout .and. index( lchar(ilun), '.wrk' ) .eq. 0 .and. 
+     &        index( lchar(ilun), '.inp' ) .eq. 0 ) then
+            lchar(ilun) = trim(outid)//lchar(ilun)
+         else
+            lchar(ilun) = trim(runid)//lchar(ilun)
+         endif
       enddo
 
 !        Remove any existing work files
