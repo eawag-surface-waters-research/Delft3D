@@ -14,9 +14,9 @@ noinst_LTLIBRARIES = libDHydroLib.la
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = \
-        -I../include \
-        -I../../../include
+AM_CPPFLAGS = \
+        -I$(srcdir)/../include \
+        -I$(srcdir)/../../../include
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -30,14 +30,9 @@ libDHydroLib_la_SOURCES = \
     stringutils.cpp \
     xmltree.cpp
 
-BUILT_SOURCES = ./always \
-	../include/d_hydro_lib_version.h
+BUILT_SOURCES = \
+	$(srcdir)/../include/d_hydro_lib_version.h
 
-./always:
-	rm -rf ../include/d_hydro_lib_version.h
-
-../include/d_hydro_lib_version.h:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/d_hydro_lib_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
 
 #-------------------------------------------------------------------------------
 #Libraries

@@ -53,6 +53,41 @@ class Component {
             void
             );
 
+        virtual void
+        Init (
+            void
+            );
+
+        virtual void
+        Step (
+            double stepSize
+            );
+
+        virtual void
+        Finish (
+            void
+            );
+
+        virtual double
+        GetStartTime (
+            void
+            );
+
+        virtual double
+        GetEndTime (
+            void
+            );
+
+        virtual double
+        GetCurrentTime (
+            void
+            );
+
+        virtual double
+        GetTimeStep (
+            void
+            );
+
     public:
         DeltaresHydro * DH;        // DeltaresHydro instance
 

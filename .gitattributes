@@ -4836,6 +4836,7 @@ src/utils_gpl/morphology/packages/morphology_waq/src/waqsim_module.F90 -text
 src/utils_gpl/morphology/packages/morphology_waq/src/wrwaq.F90 -text
 src/utils_lgpl/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/Makefile.am -text
+src/utils_lgpl/d_hydro_lib/include/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/include/clock.h -text
 src/utils_lgpl/d_hydro_lib/include/component.h -text
 src/utils_lgpl/d_hydro_lib/include/d_hydro.h -text
@@ -4848,7 +4849,9 @@ src/utils_lgpl/d_hydro_lib/packages/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib.vcxproj -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib_2012.vcxproj -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/d_hydro_lib_vs2013.vcxproj -text
+src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/Makefile.am -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/d_hydro_lib_version.h.svn -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/version_number.ini -text
 src/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile.am -text

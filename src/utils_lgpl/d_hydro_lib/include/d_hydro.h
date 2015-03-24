@@ -79,6 +79,35 @@ class Log;
 #include "stringutils.h"
 #include "xmltree.h"
 
+#undef max
+#undef min
+#define max(A,B) (((A) >= (B)) ? (A) : (B))
+#define min(A,B) (((A) <= (B)) ? (A) : (B))
+
+// TO DO: remove this hardcoded maximum number of units in the control block
+enum {
+   MAXCONTROLUNITS = 10
+   };
+
+typedef struct DH_UNIT {
+    char    *   name;           // unit name: must be unique in the config.xml file (e.g. myNameFlow)
+    int         sequence;       // denotes the order to run the units
+    XmlTree *   start;          // points to the xml block specifying myNameFlow
+	char    *   library;        // points to the name of the library (without extension)
+	char    *   workingDir;     // working directory
+	char    *   type;           // flow2D3D, DFlowFM or wave unit
+	char    *   data;           // optional data (WAVE:0.0 600.0 2.592e5)
+    Component * startComponent; // points to the entries in the dll
+    }
+    dh_unit;
+
+typedef struct DH_CONTROL {
+    int     minSeq;                     // minimum of all unit-sequences: these units run first
+    int     maxSeq;                     // maximum of all unit-sequences: these units run last
+	int     numUnits;                   // total number of units in the control block
+    dh_unit  *  units[MAXCONTROLUNITS]; // pointers to all units
+    }
+    dh_control;
 
 //------------------------------------------------------------------------------
 
@@ -103,6 +132,41 @@ class DeltaresHydro {
             void
             );
 
+        void
+        Init (
+            void
+            );
+
+        void
+        Step (
+            double stepSize
+            );
+
+        void
+        Finish (
+            void
+            );
+
+        double
+        GetStartTime (
+            void
+            );
+
+        double
+        GetEndTime (
+            void
+            );
+
+        double
+        GetCurrentTime (
+            void
+            );
+
+        double
+        GetTimeStep (
+            void
+            );
+
     public:
         bool        ready;      // true means constructor succeeded and DH ready to run
         char *      exePath;    // name of running d_hydro executable (argv[0])
@@ -110,9 +174,10 @@ class DeltaresHydro {
         Clock *     clock;      // timing facility
         Log *       log;        // logging facility
         XmlTree *   config;     // top of entire XML configuration tree
-        XmlTree *   start;      // root of subtree for the start module
+	    XmlTree *   start;      // contains a copy of unit->start before calling the component constructor
         char *      mainArgs;   // reassembled command-line arguments (argv[1...])
         char *      slaveArg;   // command-line argument for slave mode
+		dh_control * control;   // structure containing all information in the control block in the xml file
 
         enum {
             MAXSTRING = 1000    // max string length in bytes
@@ -121,7 +186,7 @@ class DeltaresHydro {
         // String constants; initialized below, outside class definition
 
         static const char startEntry [];    // name of function in start component to invoke after loading
-        Component * startComponent;
+        Component * startComponent;         // contains the resulting pointer to the dll entries after calling the component constructor
 
     private:
         char *      configfile;             // name of configuration file
