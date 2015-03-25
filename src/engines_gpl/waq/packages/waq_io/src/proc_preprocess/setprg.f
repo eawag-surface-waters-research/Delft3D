@@ -77,8 +77,15 @@
       allocate(grdwrk(maxwrk))
 
       ! read list processes not to be aggragated
-
-      nmnoag = 0
+      monoag(1) = 'TOTDEPTH'
+      monoag(2) = 'STADAY'
+      monoag(3) = 'STADPT'
+      monoag(4) = 'STADSC'
+      monoag(5) = 'STAGEO'
+      monoag(6) = 'STAPRC'
+      monoag(7) = 'STAQTL'
+      nmnoag = 7
+      
       inquire ( file='procnoag.dat' , exist = lexi )
       if ( lexi ) then
          open(67, file='procnoag.dat')
@@ -89,10 +96,8 @@
    10    continue
          nmnoag = nmnoag - 1
          close (67)
-      else
-         nmnoag = 1
-         monoag(1) = 'TOTDEPTH'
       endif
+      write(1972,'(A/)') monoag(1:nmnoag)
 
       ! first step, processes with fluxes set to the grid set for the
       ! substances. for processes with exchange io or in the list with
