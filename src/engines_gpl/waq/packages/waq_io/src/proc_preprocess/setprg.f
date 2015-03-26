@@ -97,7 +97,6 @@
          nmnoag = nmnoag - 1
          close (67)
       endif
-      write(1972,'(A/)') monoag(1:nmnoag)
 
       ! first step, processes with fluxes set to the grid set for the
       ! substances. for processes with exchange io or in the list with
