@@ -5785,10 +5785,8 @@ function addtimespacerelation(idom, qid, kx, x, y, kcs, filename, filetype, meth
   else
      success = addquantity( idom, qid, kx, x, y, kcs, numq, ielsetq)
   endif
-  write(*,*) 'AM: addquantity ', success
 
   success = addprovider( idom, qid, kx, filename, filetype, method, operand, nump, ielsetq )
-  write(*,*) 'AM: addprovider ', success
 
 end function addtimespacerelation
 
