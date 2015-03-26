@@ -50,7 +50,7 @@ function readwindseriesfiles(minp) result(success)
    implicit none
    logical                  :: success
    integer                  :: minp
-   integer, external :: numuni
+   integer, external        :: numuni
 
    success = .false.
    minp = numuni()
@@ -58,7 +58,7 @@ function readwindseriesfiles(minp) result(success)
 end function readwindseriesfiles
 
 
-function reaarctim(minp,d,mx,nx,tread,dmiss) result(success)
+function reaarctim(minp,d,mx,nx,tread,dmiss,start_upleft) result(success)
    !
    ! read arcinfo time and field
    !
@@ -73,7 +73,7 @@ function reaarctim(minp,d,mx,nx,tread,dmiss) result(success)
    double precision, dimension(:,:):: d
    character(132)           :: rec
    character(4)             :: keywrd
-   logical                  :: success
+   logical                  :: success, start_upleft
    !
    if ( size(d,1) .ne. mx .or. size(d,2) .ne. nx ) then
         errormessage = 'REAARCTIM: wrong sizes'
@@ -98,11 +98,58 @@ function reaarctim(minp,d,mx,nx,tread,dmiss) result(success)
    if (index(rec, 'HRS') .gt. 0 .or. index(rec, 'hrs') .gt. 0 .or. index(rec, 'hours') .gt. 0) then
       tread = tread*60d0
    endif
-   success = readarcinfoblock(minp,d,mx,nx,dmiss)
+   success = readarcinfoblock(minp,d,mx,nx,dmiss,start_upleft)
 end function reaarctim
 
 
-function readarcinfoblock(minp,d,mx,nx,dmiss) result(success)
+! Routine ad hoc to read a grid file - assumes a fixed structure
+!
+subroutine readgrid( gridfile, mmax, nmax, x, y )
+    character(len=*)     :: gridfile
+    integer, intent(out) :: mmax, nmax
+    double precision, dimension(:), allocatable :: x, y
+
+    integer              :: lugrd, ierror, i
+    character(len=10)    :: header
+    character(len=1)     :: dummy
+    integer, external    :: numuni
+
+
+    lugrd = numuni()
+    open( lugrd, file = gridfile, status = 'old' )
+
+    do
+        read( lugrd, '(a)', iostat = ierror ) header
+        if ( header == 'Coordinate' ) then
+            exit
+        endif
+        if ( ierror /= 0 ) then
+            goto 101
+        endif
+    enddo
+
+    read( lugrd, * ) mmax, nmax
+    read( lugrd, * ) header
+
+    allocate( x(mmax*nmax), y(mmax*nmax) )
+
+    do i = 1,nmax
+        read( lugrd, * ) dummy, dummy, x((i-1)*mmax+1:i*mmax)
+    enddo
+
+    do i = 1,nmax
+        read( lugrd, * ) dummy, dummy, y((i-1)*mmax+1:i*mmax)
+    enddo
+
+    return
+
+    101 continue
+    write(*,*) 'ERROR: Premature end of grid file ',trim(gridfile)
+    call srstop( 1 )
+
+end subroutine readgrid
+
+function readarcinfoblock(minp,d,mx,nx,dmiss,start_upleft) result(success)
    !
    ! read arcinfoveld
    !
@@ -115,7 +162,7 @@ function readarcinfoblock(minp,d,mx,nx,dmiss) result(success)
    integer                  :: i
    double precision         :: dmiss
    double precision, dimension(:,:):: d
-   logical                  :: success
+   logical                  :: success, start_upleft
    character(16)            :: tex
    character(4000)          :: rec
    !
@@ -124,10 +171,17 @@ function readarcinfoblock(minp,d,mx,nx,dmiss) result(success)
         success = .false.
         return
    endif
-   do j = nx,1,-1
-      read(minp,'(a)',end=100) rec
-      read(rec,*,err=101) (d(i,j),i = 1,mx)
-   enddo
+   if ( start_upleft ) then
+      do j = nx,1,-1
+         read(minp,'(a)',end=100) rec
+         read(rec,*,err=101) (d(i,j),i = 1,mx)
+      enddo
+   else
+      do j = 1,nx,1
+         read(minp,'(a)',end=100) rec
+         read(rec,*,err=101) (d(i,j),i = 1,mx)
+      enddo
+   endif
    do i = 1,mx
       do j = 1,nx
          if (d(i,j) .eq. dmiss) d(i,j) = dmiss_default
@@ -568,6 +622,143 @@ function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0       
    return
 end function readarcinfoheader
 
+function readarcinfoheader_d3d(minp      ,mmax      ,nmax      ,x         ,y         , &
+                             & kcs       ,dmiss      ) result(success)
+
+    use precision
+    !
+    implicit none
+!
+! Global variables
+!
+    integer               :: minp
+    integer , intent(out) :: mmax
+    integer , intent(out) :: nmax
+    double precision, intent(out) :: dmiss
+    double precision, dimension(:), allocatable, intent(out) :: x
+    double precision, dimension(:), allocatable, intent(out) :: y
+    integer, dimension(:), allocatable, intent(out)          :: kcs
+    logical               :: success
+!
+! Local variables
+!
+    integer        :: jacornerx
+    integer        :: jacornery
+    integer        :: k
+    integer        :: l
+!    integer        :: numbersonline
+    character(132) :: rec
+    character(30)  :: keyword
+    character(1)   :: dummy
+    integer        :: i
+    integer        :: linecount
+
+    integer        :: n_quantity
+
+    character(len=4)   :: fileversion
+    character(len=40)  :: filetype
+    character(len=40)  :: first_data_value
+    character(len=40)  :: data_row
+    character(len=40)  :: quantity1
+    character(len=40)  :: unit1
+    character(len=200) :: gridfile
+!
+!! executable statements -------------------------------------------------------
+!
+    mmax       = -1
+    nmax       = -1
+
+    linecount  = 0
+    do
+       read (minp, '(A)', end = 100) rec
+       linecount = linecount + 1
+
+       read( rec, * ) keyword
+       select case ( keyword )
+          case( 'FileVersion' )
+             read ( rec, *, err = 101) dummy, dummy, fileversion  ! Must be "1.03"
+             if ( fileversion /= '1.03' ) then
+                 write(*,*) 'ERROR: FileVersion must be ''1.03'''
+                 goto 101
+             endif
+          case( 'FileType' )
+             read ( rec, *, err = 101) dummy, dummy, filetype     ! Ignored
+          case( 'NODATA_value' )
+             read ( rec, *, err = 101) dummy, dummy, dmiss
+          case( 'grid_file' )
+             read ( rec, *, err = 101) dummy, dummy, gridfile
+             call readgrid( gridfile, mmax, nmax, x, y )
+             allocate( kcs(mmax*nmax) )
+             kcs = 1
+          case( 'first_data_value' )
+             read ( rec, *, err = 101) dummy, dummy, first_data_value
+             if ( first_data_value /= 'grid_llcorner' ) then
+                 write(*,*) 'ERROR: first_data_value must be ''grid_llcorner'''
+                 goto 101
+             endif
+          case( 'data_row' )
+             read ( rec, *, err = 101) dummy, dummy, data_row
+             if ( data_row /= 'grid_row' ) then
+                 write(*,*) 'ERROR: data_row must be ''grid_row'''
+                 goto 101
+             endif
+          case( 'n_quantity' )
+             read ( rec, *, err = 101) dummy, dummy, n_quantity
+             if ( n_quantity /= 1 ) then
+                 write(*,*) 'ERROR: only one quantity supported per meteo file'
+                 goto 101
+             endif
+          case( 'quantity1' )
+             read ( rec, *, err = 101) dummy, dummy, quantity1 ! Ignored
+          case( 'unit1' )
+             read ( rec, *, err = 101) dummy, dummy, unit1 ! Ignored
+          case( 'TIME' )
+             linecount = linecount - 1
+             exit ! We found the start of a data block
+          case default
+             if ( index(rec,"END OF HEADER") > 0 ) then
+                 exit ! End of the header lines
+             endif
+             if ( rec(1:1)=='*' .or. rec(2:2)=='*' .or. rec(1:1)=='#' .or. rec(2:2)=='#' ) then
+                cycle
+             endif
+             ! Ignore any other keyword
+       end select
+    enddo
+    !
+    ! Reposition the file
+    !
+    rewind(minp)
+    do i = 1,linecount
+       read(minp, '(a)' ) dummy
+    enddo
+
+    !
+    ! Check if all relevant data were present
+    !
+    if ( mmax < 0 .or. nmax < 0 ) then
+        goto 102
+    endif
+
+    success = .true.
+    return
+    !
+    ! error handling
+    !
+  100 continue
+   errormessage = 'Unexpected end of file while reading header of arcinfo wind file'
+   goto 999
+  101 continue
+   write(errormessage,'(2a)') 'Reading data for keyword '//trim(keyword) //' failed - record:',trim(rec)
+   goto 999
+  102 continue
+   write(errormessage,'(2a)') 'Header does not contain all relevant information'
+   goto 999
+  999 continue
+   success = .false.
+   return
+end function readarcinfoheader_d3d
+
 
 function reaspwheader(minp      ,mx        ,nx        ,dxa        ,dya        , &
                       & mncoor    ) result(success)
@@ -807,8 +998,9 @@ module timespace_data
   integer, parameter :: fourier                        = 10  ! period(hrs), ampl(m), phas(deg)
 
   integer, parameter :: multiple_uni                   = 11  ! multiple time series, no spatial relation
+  integer, parameter :: d3d_flow_arcinfo               = 12  ! "same" file as Delft3D-FLOW
 
-  integer, parameter :: max_file_types                 = 11  !  max nr of supported types
+  integer, parameter :: max_file_types                 = 12  !  max nr of supported types
 
 
 
@@ -1298,6 +1490,11 @@ function addprovider(idom, qid, kx, filename, filetype, method, operand, nump, i
 
      success = readarcinfoheader(minp,mx,nx,x0,y0,dxa,dya,dmiss)
      xe(1) = x0 ; ye(1) = y0 ; xe(2) = dxa ; ye(2) = dya
+
+  case ( d3d_flow_arcinfo )
+
+     deallocate( xe, ye, kcse )
+     success = readarcinfoheader_d3d(minp,mx,nx,xe,ye,kcse,dmiss)
   case ( curvi )
 
   case ( triangulationmagdir )
@@ -5588,8 +5785,10 @@ function addtimespacerelation(idom, qid, kx, x, y, kcs, filename, filetype, meth
   else
      success = addquantity( idom, qid, kx, x, y, kcs, numq, ielsetq)
   endif
+  write(*,*) 'AM: addquantity ', success
 
   success = addprovider( idom, qid, kx, filename, filetype, method, operand, nump, ielsetq )
+  write(*,*) 'AM: addprovider ', success
 
 end function addtimespacerelation
 
@@ -5715,9 +5914,9 @@ subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg,
 
      deallocate(xp,yp)
 
- endif
+  endif
 
- end subroutine selectelset_internal_links
+end subroutine selectelset_internal_links
 
 function updatetimespaceproviders(idom, qid, time) result(success) ! nb, doet enkel qid, niet allen
   implicit none
@@ -5873,7 +6072,14 @@ function updateprovider(dataprovider, tim, elementsets) result(success)
            case ( arcinfo )
 
               vz     => dataprovider%field(it1)%arr2d
-              success = reaarctim(minp,vz,mx,nx,tread,dmiss)
+              success = reaarctim(minp,vz,mx,nx,tread,dmiss,.true.)
+
+              if (.not. success) return
+
+           case ( d3d_flow_arcinfo )
+
+              vz     => dataprovider%field(it1)%arr2d
+              success = reaarctim(minp,vz,mx,nx,tread,dmiss,.false.)
 
               if (.not. success) return
 
@@ -6761,10 +6967,4 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
     d12 = d128
 end subroutine distance2
 
-
-
-
 end module timespace
-
-
-
