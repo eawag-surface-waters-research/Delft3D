@@ -109,10 +109,11 @@ subroutine readgrid( gridfile, mmax, nmax, x, y )
     integer, intent(out) :: mmax, nmax
     double precision, dimension(:), allocatable :: x, y
 
-    integer              :: lugrd, ierror, i
+    integer              :: lugrd, ierror, i, j
     character(len=10)    :: header
     character(len=1)     :: dummy
     integer, external    :: numuni
+    double precision, dimension(:,:), allocatable :: xc, yc
 
 
     lugrd = numuni()
@@ -128,18 +129,36 @@ subroutine readgrid( gridfile, mmax, nmax, x, y )
         endif
     enddo
 
-    read( lugrd, * ) mmax, nmax
+    read( lugrd, * ) nmax, mmax
     read( lugrd, * ) header
 
-    allocate( x(mmax*nmax), y(mmax*nmax) )
+!!  allocate( x((mmax-1)*(nmax-1)), y((mmax-1)*(nmax-1)) )
+    allocate( x(2), y(2) ) ! Terrible hack: assume a rectilinear grid!
+    allocate( xc(nmax,mmax), yc(nmax,mmax) )
 
-    do i = 1,nmax
-        read( lugrd, * ) dummy, dummy, x((i-1)*mmax+1:i*mmax)
+    do i = 1,mmax
+        read( lugrd, * ) dummy, dummy, xc(:,i)
     enddo
 
-    do i = 1,nmax
-        read( lugrd, * ) dummy, dummy, y((i-1)*mmax+1:i*mmax)
+    do i = 1,mmax
+        read( lugrd, * ) dummy, dummy, yc(:,i)
     enddo
+
+!!  do j = 1,nmax-1
+!!      do i = 1,mmax-1
+!!          x(i+(j-1)*(mmax-1)) = 0.25 * (xc(j,i) + xc(j+1,i) + xc(j,i+1) + xc(j+1,i+1))
+!!          y(i+(j-1)*(mmax-1)) = 0.25 * (yc(j,i) + yc(j+1,i) + yc(j,i+1) + yc(j+1,i+1))
+!!      enddo
+!!  enddo
+    x(1) = xc(1,1)
+    y(1) = yc(1,1)
+    x(2) = xc(2,1) - xc(1,1)
+    y(2) = yc(1,2) - yc(1,1)
+
+    nmax = nmax - 1
+    mmax = mmax - 1
+
+    deallocate( xc, yc )
 
     return
 
@@ -687,9 +706,11 @@ function readarcinfoheader_d3d(minp      ,mmax      ,nmax      ,x         ,y    
              read ( rec, *, err = 101) dummy, dummy, dmiss
           case( 'grid_file' )
              read ( rec, *, err = 101) dummy, dummy, gridfile
-             call readgrid( gridfile, mmax, nmax, x, y )
-             allocate( kcs(mmax*nmax) )
-             kcs = 1
+             if ( .not. allocated(x) ) then
+                 call readgrid( gridfile, mmax, nmax, x, y )
+                 allocate( kcs(mmax*nmax) )
+                 kcs = 1
+             endif
           case( 'first_data_value' )
              read ( rec, *, err = 101) dummy, dummy, first_data_value
              if ( first_data_value /= 'grid_llcorner' ) then
@@ -6545,7 +6566,7 @@ implicit none
                endif
             enddo
 
-        case ( arcinfo )
+        case ( arcinfo, d3d_flow_arcinfo )
 
             v1  => dataprovider%field(it1)%arr2d
             v0  => dataprovider%field(it0)%arr2d
