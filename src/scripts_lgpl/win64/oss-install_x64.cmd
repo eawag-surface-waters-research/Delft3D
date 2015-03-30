@@ -124,7 +124,8 @@ rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
     if defined ifort_compiler12 (
-        call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\ifort12\netcdf.dll" !dest_bin!
+        call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\netcdf.dll" !dest_bin!
+        rem call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\ifort12\netcdf.dll" !dest_bin!
     ) else if defined ifort_compiler13 (
         call :copyFile "third_party_open\netcdf\lib\win32\x64\Release\ifort13\netcdf.dll" !dest_bin!
     ) else if defined ifort_compiler14 (
