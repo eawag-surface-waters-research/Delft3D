@@ -129,19 +129,19 @@ subroutine readgrid( gridfile, mmax, nmax, x, y )
         endif
     enddo
 
-    read( lugrd, * ) nmax, mmax
+    read( lugrd, * ) mmax, nmax
     read( lugrd, * ) header
 
 !!  allocate( x((mmax-1)*(nmax-1)), y((mmax-1)*(nmax-1)) )
     allocate( x(2), y(2) ) ! Terrible hack: assume a rectilinear grid!
-    allocate( xc(nmax,mmax), yc(nmax,mmax) )
+    allocate( xc(mmax,nmax), yc(mmax,nmax) )
 
-    do i = 1,mmax
-        read( lugrd, * ) dummy, dummy, xc(:,i)
+    do j = 1,nmax
+        read( lugrd, * ) dummy, dummy, xc(:,j)
     enddo
 
-    do i = 1,mmax
-        read( lugrd, * ) dummy, dummy, yc(:,i)
+    do j = 1,nmax
+        read( lugrd, * ) dummy, dummy, yc(:,j)
     enddo
 
 !!  do j = 1,nmax-1
@@ -154,9 +154,6 @@ subroutine readgrid( gridfile, mmax, nmax, x, y )
     y(1) = yc(1,1)
     x(2) = xc(2,1) - xc(1,1)
     y(2) = yc(1,2) - yc(1,1)
-
-    nmax = nmax - 1
-    mmax = mmax - 1
 
     deallocate( xc, yc )
 
