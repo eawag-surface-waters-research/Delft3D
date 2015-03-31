@@ -24,7 +24,7 @@
       subroutine rdfnam ( lun    , ifnam    , fnam   , nfil   , iout   ,            &
      &                    ipri   , alone    )
 !
-      use precision             ! single and double precision
+      use precision_part             ! single and double precision
       use timers
       use rd_token        ! tokenized reading like in DELWAQ
 !

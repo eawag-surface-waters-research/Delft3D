@@ -37,7 +37,7 @@ module grid_search_mod
 !
 !  data definition module(s)
 !
-use precision               ! single/double precision
+use precision_part               ! single/double precision
 use timers
 !
 !  module procedure(s)
@@ -705,7 +705,7 @@ subroutine bilin5(xa        ,ya        ,x0        ,y0        ,w         , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
+    use precision_part
     implicit none
 !
 ! Global variables

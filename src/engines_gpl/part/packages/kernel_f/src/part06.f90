@@ -44,7 +44,7 @@
 
 !     subroutines called    : part07 - searches for cell and coordinates
 
-      use precision
+      use precision_part
       use timers
       use grid_search_mod
 

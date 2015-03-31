@@ -28,7 +28,7 @@ module rdhydr_mod
 !
 !  data definition module(s)
 !
-      use precision      ! single and double precision
+      use precision_part      ! single and double precision
       use timers
 !
 !  module procedure(s)

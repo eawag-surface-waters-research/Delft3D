@@ -27,7 +27,7 @@ module p10cor_mod
 !
 !  data definition module(s)
 !
-use precision               ! single/double precision
+use precision_part               ! single/double precision
       use timers
 !
 !  module procedure(s)

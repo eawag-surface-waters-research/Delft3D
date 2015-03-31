@@ -27,7 +27,7 @@ module mudrel_mod
 !
 !  data definition module(s)
 !
-use precision             ! single/double precision
+use precision_part             ! single/double precision
       use timers
 use fileinfo              ! file information for all input/output files
 !

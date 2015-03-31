@@ -48,7 +48,7 @@
 
 !     functions   called    : none.
 
-      use precision      ! single and double precision
+      use precision_part      ! single and double precision
       use timers
       use openfl_mod
 

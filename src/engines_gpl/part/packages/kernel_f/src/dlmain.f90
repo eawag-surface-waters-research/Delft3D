@@ -79,7 +79,7 @@
 !            dynamic memory: aconc = mkgtrp('aconc',nosubx*nwmax)
 !            (mkgtrp = make and get real pointer for fmm)
 !
-      use precision                     ! single/double precision
+      use precision_part                     ! single/double precision
       use delpar_mod                    ! explicit interface
       implicit none                     ! force explicit typing
 

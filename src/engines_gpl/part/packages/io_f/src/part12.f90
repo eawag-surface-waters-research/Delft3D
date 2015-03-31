@@ -81,7 +81,7 @@ contains
 
 !     functions   called    : none.
 
-      use precision          ! single and double precision
+      use precision_part          ! single and double precision
       use timers
       use filldm_mod         ! explicit interface
       use genfil_mod         ! explicit interface

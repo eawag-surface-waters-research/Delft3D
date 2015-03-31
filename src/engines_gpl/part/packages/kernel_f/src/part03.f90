@@ -58,7 +58,7 @@
 !     vx      real        1       local   velocity in x direction
 !     vy      real        1       local   velocity in y direction
 !
-      use precision    ! single/double precision
+      use precision_part    ! single/double precision
       use timers
       implicit none    ! force explicit typing
 

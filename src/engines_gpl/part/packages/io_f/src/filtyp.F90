@@ -28,7 +28,7 @@ module filtyp_mod
 !
 !  data definition module(s)
 !
-use precision   ! single and double precision
+use precision_part   ! single and double precision
       use timers
 use fileinfo    ! file information for all input/output files
 !

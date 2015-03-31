@@ -25,7 +25,7 @@ module rdhyd_mod
    interface
       subroutine rdhyd  ( nfiles , lunit  , fnam   , nolay  , ihdel  ,      &
      &                    tcktot , ndoms  , nbnds  , doms   , bnds   )
-      use precision       ! flexible size definition
+      use precision_part       ! flexible size definition
       use typos           ! the derived types
       use openfl_mod
       integer  ( ip), intent(in   ) :: nfiles            !< nr. of files
@@ -60,7 +60,7 @@ end module
 
 !       Logical units     : lun1 = the hydrodynamic .hyd file
 
-      use precision       ! flexible size definition
+      use precision_part       ! flexible size definition
       use typos           ! the derived types
       use timers          ! performance timers
 

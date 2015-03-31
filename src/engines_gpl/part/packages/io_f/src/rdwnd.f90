@@ -40,7 +40,7 @@
 !     Routines called : ReadProvider         - to link a variable to a file
 !                       AddTimeSpaceRelation - to link a geometry to interpolate on
 
-      use precision       ! data definitions
+      use precision_part       ! data definitions
       use timers          ! to time this routine
       use alloc_mod       ! to allocate arrays
       use timespace       ! meteo module ?

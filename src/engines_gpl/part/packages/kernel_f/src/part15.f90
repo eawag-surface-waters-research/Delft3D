@@ -45,7 +45,7 @@
 
 !     functions   called    :
 
-      use precision    ! single/double precision
+      use precision_part    ! single/double precision
       use timers
       use timespace    ! meteo module ?
 

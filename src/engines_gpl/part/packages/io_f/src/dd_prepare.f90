@@ -26,7 +26,7 @@ module dd_prepare_mod
       subroutine dd_prepare ( lunut   , nmax    , mmax    , lgrid   , nbmax   ,      &
      &                        ndoms   , nbnds   , nconn   , doms    , bnds    ,      &
      &                        conn    )
-      use precision       ! single and double precision
+      use precision_part       ! single and double precision
       use typos           ! the derived types
       integer  ( ip), intent(in   ) :: lunut             !< output report file
       integer  ( ip), intent(in   ) :: nmax              !< first dimension of the grid
@@ -78,7 +78,7 @@ end module
 
 !     logical unit numbers  : lunut, the output report file
 
-      use precision       ! single and double precision
+      use precision_part       ! single and double precision
       use typos           ! the derived types
       use timers          ! performance timers
 

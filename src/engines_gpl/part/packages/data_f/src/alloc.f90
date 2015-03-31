@@ -29,7 +29,7 @@ module alloc_mod
 !
 !  data definition module(s)
 !
-      use precision               ! single and double precision
+      use precision_part               ! single and double precision
       implicit none   ! force explicit typing
 
       integer(ip), private :: lunmem        ! output unit memory allocation

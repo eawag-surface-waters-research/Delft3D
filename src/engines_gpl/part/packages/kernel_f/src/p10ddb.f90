@@ -44,7 +44,7 @@
 
 !     logical unit numbers  :
 
-      use precision       ! single and double precision
+      use precision_part       ! single and double precision
       use typos           ! the derived types
       use timers          ! performance timers
 

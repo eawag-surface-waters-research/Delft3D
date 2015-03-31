@@ -25,7 +25,7 @@ module global_pointers
 
 !     Declarations for global pointer arrays
 
-      use precision      ! single and double precision
+      use precision_part      ! single and double precision
 
 !     Global character arrays
 

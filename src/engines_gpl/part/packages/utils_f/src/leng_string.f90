@@ -23,7 +23,7 @@
 
       function lenstr(line,maxlen)
 
-      use precision   ! single and double precision
+      use precision_part   ! single and double precision
       use timers
 
       implicit none   ! force explicit typing

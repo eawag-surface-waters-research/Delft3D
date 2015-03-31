@@ -23,7 +23,7 @@
 
       module typos
 
-      use precision
+      use precision_part
 
 !     These types are used to support Domain decomposition
 

@@ -111,7 +111,7 @@
 !-----------------------------------------------------------------------
 !
 !
-      use precision       ! single and double precision
+      use precision_part       ! single and double precision
       use timers
       use putget_mod      ! explicit interface
       use filldm_mod      ! explicit interface

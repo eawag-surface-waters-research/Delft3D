@@ -31,7 +31,7 @@
 !
 !     method     : read a single polygon from a tekal formated file (only the first is used!)
 !
-      use precision ! single/double precision
+      use precision_part ! single/double precision
       use timers
       use wait_mod
 

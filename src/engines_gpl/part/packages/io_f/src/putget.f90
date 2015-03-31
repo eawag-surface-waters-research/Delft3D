@@ -30,7 +30,7 @@ module putget_mod
 !
 !  data definition module(s)
 !
-use precision          ! single and double precisionv
+use precision_part          ! single and double precisionv
       use timers
 !
 !  module procedure(s)

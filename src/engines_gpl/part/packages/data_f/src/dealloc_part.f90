@@ -29,7 +29,7 @@ use global_pointers  ! global data pointers
 !
 !  data definition module(s)
 !
-use precision        ! single and double precision
+use precision_part        ! single and double precision
       use timers
 
 use dealloc_mod      ! generic module for memory de-allocation, including error handling

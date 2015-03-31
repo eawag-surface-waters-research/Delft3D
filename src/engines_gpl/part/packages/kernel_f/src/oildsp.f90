@@ -142,7 +142,7 @@ module oildsp_mod
 
 !     Subroutines called    : part11 - make concentrations on a detailed plot grid
 
-      use precision         ! single/double precision
+      use precision_part         ! single/double precision
       use timers            ! to time the performance
       use grid_search_mod   ! explicit interface
       use alloc_mod         ! to allocate arrays

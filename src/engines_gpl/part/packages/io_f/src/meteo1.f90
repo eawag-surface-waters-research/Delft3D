@@ -30,7 +30,7 @@ module m_itdate
 end module m_itdate
 
 module timespace_read
-   use precision
+   use precision_part
    implicit none
 
   integer,  parameter    :: maxnamelen     = 256
@@ -504,7 +504,7 @@ end function reaspwtim
 function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0        , &
                          & dxa       ,dya       ,dmiss      ) result(success)
 
-    use precision
+    use precision_part
     !
     implicit none
 !
@@ -641,7 +641,7 @@ end function readarcinfoheader
 function readarcinfoheader_d3d(minp      ,mmax      ,nmax      ,x         ,y         , &
                              & kcs       ,dmiss      ) result(success)
 
-    use precision
+    use precision_part
     !
     implicit none
 !
@@ -781,7 +781,7 @@ end function readarcinfoheader_d3d
 function reaspwheader(minp      ,mx        ,nx        ,dxa        ,dya        , &
                       & mncoor    ) result(success)
 
-    use precision
+    use precision_part
     implicit none
 !
 ! Global variables
@@ -845,7 +845,7 @@ end function reaspwheader
 
 function readcurviheader(minp, gridfilnam, mfirst, mlast, nfirst, nlast, mrow, dmiss ) result(success)
 
-    use precision
+    use precision_part
     implicit none
 !
 ! Global variables
@@ -989,7 +989,7 @@ end function numbersonline
 end module timespace_read
 
 module timespace_data
-  use precision
+  use precision_part
   use timespace_read
   implicit none
 
@@ -2273,7 +2273,7 @@ function getmeteoerror( ) result(retval)
 end function getmeteoerror
 
 subroutine asc(omeg, ampl, phas, inaam, itdate, ierrs)
-    use precision
+    use precision_part
     implicit none
 !    include 'globdat.igd'
 !    include 'pardef.igd'
@@ -2366,7 +2366,7 @@ subroutine asc(omeg, ampl, phas, inaam, itdate, ierrs)
 !    phas = phas*d2r + v0u(1)
 end subroutine asc
 subroutine datumi(jaar      ,jdatum    ,t         )
-    use precision
+    use precision_part
     !
     implicit none
 !
@@ -2431,7 +2431,7 @@ subroutine datumi(jaar      ,jdatum    ,t         )
     endif
 end subroutine datumi
 subroutine hulpgr(jaar      ,tm1       ,v         ,f         )
-    use precision
+    use precision_part
     !
     implicit none
 !
@@ -2557,7 +2557,7 @@ subroutine hulpgr(jaar      ,tm1       ,v         ,f         )
     f(22) = 1.0924d0*ci4*sqrt(1d0 + f(22))
 end subroutine hulpgr
 function cmpnum(num       )
-    use precision
+    use precision_part
     implicit none
 !
 ! Local parameters
@@ -2825,7 +2825,7 @@ function cmpnum(num       )
     endif
 end function cmpnum
 subroutine kompbs(l         )
-    use precision
+    use precision_part
     implicit none
 !
 ! Global variables
@@ -3078,7 +3078,7 @@ end subroutine kompbs
 subroutine bewvuf(ierrs     ,kcmp      ,mxkc      ,inaam     ,knaam     , &
                 & jnaam     ,w         ,v0u       ,fr        ,v         , &
                 & f         )
-    use precision
+    use precision_part
     !
     implicit none
 !
@@ -4448,7 +4448,7 @@ End module M_arcuv
 
 module timespace_triangle
 
-    use precision
+    use precision_part
     use timespace_data
  use m_alloc
 
@@ -5204,7 +5204,7 @@ end subroutine linweight
 
 subroutine linear(x         ,y         ,z         ,xp        ,yp        , &
                 & zp        ,jslo      ,slo       )
-    use precision
+    use precision_part
     implicit none
     !
     !
@@ -5297,7 +5297,7 @@ subroutine linear(x         ,y         ,z         ,xp        ,yp        , &
 end subroutine linear
 
 subroutine minmax_h(x, n, xmin, xmax )  !   BEPAAL MINIMUM EN MAXIMUM VAN EEN EENDIMENSIONALE ARRAY
-    use precision
+    use precision_part
     implicit none
 
 ! Global variables
@@ -5426,7 +5426,7 @@ end subroutine extrapolate
 
 subroutine find_nearest2D(n, m, x, y, kcs, x_a, y_a, n_min, m_min, dist_min)
 
-    use precision
+    use precision_part
 
     integer                 :: n
     integer                 :: m
@@ -5450,7 +5450,7 @@ end subroutine find_nearest2D
 
 subroutine find_nearest2D_missing_value(n, m, x, y, z, kcs, x_a, y_a, n_min, m_min, dist_min)
 
-    use precision
+    use precision_part
 
     integer                 :: n
     integer                 :: m
@@ -5475,7 +5475,7 @@ end subroutine find_nearest2D_missing_value
 
 subroutine find_nearest1D(n, x, y, kcs, x_a, y_a, i_min, dist_min)
 
-    use precision
+    use precision_part
 
     integer                 :: n
     double precision, dimension(n)  :: x
@@ -5507,7 +5507,7 @@ end subroutine find_nearest1D
 
 subroutine find_nearest1D_missing_value(n, x, y, z, kcs, x_a, y_a, i_min, dist_min)
 
-    use precision
+    use precision_part
 
     integer                 :: n
     double precision, dimension(n)  :: x
@@ -5733,7 +5733,7 @@ end subroutine polyindexweight
 
 end module timespace_triangle                           ! met leading dimensions 3 of 4
 module timespace
-   use precision
+   use precision_part
 
    use timespace_data
    use timespace_triangle
@@ -6706,7 +6706,7 @@ end function deallocsubdoms
 
 
 subroutine operate(a,b,iop)
-use precision
+use precision_part
 implicit none
 double precision :: a,b
 integer  :: iop
@@ -6805,7 +6805,7 @@ end subroutine regdir
 
 subroutine bilin5(xa        ,ya        ,x0        ,y0        ,w         , &
                 & ier       )
-    use precision
+    use precision_part
     implicit none
 !
 ! Global variables
@@ -6939,7 +6939,7 @@ end subroutine bilin5
 
 subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
                    & d12       )
-    use precision
+    use precision_part
     implicit none
 !
 ! Global variables

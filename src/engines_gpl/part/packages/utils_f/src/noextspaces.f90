@@ -22,7 +22,7 @@
 !!  rights reserved.
 
 module noextspaces_mod
-use precision
+use precision_part
       use timers
 !
 !  module declarations

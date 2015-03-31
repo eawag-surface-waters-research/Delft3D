@@ -60,7 +60,7 @@
 !     denssv  real        1       local   save-value density
 !     first   logical     1       local   switch
 !
-      use precision     ! single/double precision
+      use precision_part     ! single/double precision
       use timers
 !
       implicit none     ! force explicit typing

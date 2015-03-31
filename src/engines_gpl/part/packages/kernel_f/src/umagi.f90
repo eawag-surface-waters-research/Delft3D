@@ -102,7 +102,7 @@
 !     ypold   real        1       input   initial   y-coordinate
 !     zpold   real        1       input   initial   z-coordinate
 !
-      use precision    ! single/double precision
+      use precision_part    ! single/double precision
       use timers
 !
       implicit none    ! force explicit typing

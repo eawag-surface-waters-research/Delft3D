@@ -33,7 +33,7 @@ module partmem
 
 !     Created             : July    2011 by Leo Postma
 
-      use precision       ! single/double precision
+      use precision_part       ! single/double precision
       use typos           ! the derived types
 
       integer(ip)  , parameter          :: nfilesp =  100

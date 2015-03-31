@@ -47,7 +47,7 @@
 
 !     Logical units         : none
 
-      use precision    ! single/double precision
+      use precision_part    ! single/double precision
       use timers       ! to time the performance
       implicit none    ! explicit typing
 

@@ -29,7 +29,7 @@ module fileinfo
 !     The 19th file is the .poi from-to pointer file
 !     The 20th file is the .vdf vertical diffusion file.
 !
-      use precision                                       ! single and double precision
+      use precision_part                                       ! single and double precision
 
       integer(ip)  , parameter          :: nfiles =  100
       integer(ip)                       :: lunit(nfiles) = 0    ! logical unit numbers for in-/output files

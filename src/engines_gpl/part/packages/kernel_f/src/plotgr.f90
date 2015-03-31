@@ -43,7 +43,7 @@
 
 !     Logical units     : * standard output
 
-      use precision        ! single/double precision
+      use precision_part        ! single/double precision
       use timers
       use grid_search_mod
       use typos

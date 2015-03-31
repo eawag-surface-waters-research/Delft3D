@@ -26,7 +26,7 @@ module modeldim
 ! module including all parameters required
 ! for dimensioning global arrays
 !
-use precision   ! single and double precision
+use precision_part   ! single and double precision
 implicit none
 save
 !

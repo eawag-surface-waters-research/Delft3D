@@ -51,7 +51,7 @@
 !     functions   called    : none.
 !
 !
-      use precision       ! single/double precision
+      use precision_part       ! single/double precision
       use timers
       implicit none       ! force explicit typing
 

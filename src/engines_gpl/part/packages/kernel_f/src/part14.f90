@@ -82,7 +82,7 @@ module part14_mod
 
 !     functions   called    : rnd  - random number generator
 
-      use precision          ! single/double precision
+      use precision_part          ! single/double precision
       use timers
       use grid_search_mod
       implicit none

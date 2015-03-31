@@ -125,7 +125,7 @@ contains
 !
 !  data definition module(s)
 !
-      use precision        ! single/double precision
+      use precision_part        ! single/double precision
       use timers           ! performance timer
       use typos
       use p10cor_mod

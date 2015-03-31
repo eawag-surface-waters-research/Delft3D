@@ -53,7 +53,7 @@
 !                  the oil patch is supposed to be floating oil, so located
 !                  at z=0.0 of the top layer (k=1)
 !
-      use precision ! single/double precision
+      use precision_part ! single/double precision
       use timers
       use get_key_mod
       use grid_search_mod

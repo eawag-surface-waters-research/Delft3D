@@ -33,7 +33,7 @@ module dealloc_mod
 !
 !  data definition module(s)
 !
-use precision              ! single and double precision
+use precision_part              ! single and double precision
 use fileinfo , lun=>lunit  ! file information for input/output files
 !
 implicit none   ! force explicit typing
