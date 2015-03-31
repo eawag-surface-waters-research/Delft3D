@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -75,7 +75,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.r
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;_DEBUG;_LIB;FTN_CAPITAL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>W32;PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <PrecompiledHeader>
@@ -98,7 +98,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.r
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;_DEBUG;_LIB;FTN_CAPITAL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>W64;PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -120,7 +120,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.r
     </PreBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;NDEBUG;_LIB;FTN_CAPITAL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>W32;PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -141,8 +141,8 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.r
     </PreBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;NDEBUG;_LIB;FTN_CAPITAL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>
+      <PreprocessorDefinitions>W64;PTR8;WIN64;_WIN64;_IA64_;_WINDOWS;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>

@@ -29,10 +29,10 @@
 //#include <stdio.h>
 #include "nefis_version.h"
 
-#if defined(WIN32)
+#if defined(W32)
 static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win32)"};
 static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win32), "__DATE__", "__TIME__""};
-#elif defined(WIN64)
+#elif defined(W64)
 static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64)"};
 static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64), "__DATE__", "__TIME__""};
 #else
