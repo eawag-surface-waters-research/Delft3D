@@ -271,7 +271,7 @@
             case ( 1 )
                write (lunut,3000) ' NEFIS map file switched on'
                if ( mapsrt .eq. imap ) isrtou(7) = imnf
-               if ( hissrt .eq. ima2 ) isrtou(7) = imn2
+               if ( mapsrt .eq. ima2 ) isrtou(7) = imn2
                nrvar(7)  = mapnrv
                do ivar = 1 , nrvar(7)
                   ounam(ivar,7) = ounam(ivar,4)
