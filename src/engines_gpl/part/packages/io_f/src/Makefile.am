@@ -48,7 +48,6 @@ libio_f_la_SOURCES = \
          rdhyd.f90 \
          rdhydr.f90 \
          rdlgri.f90 \
-         rdparm.f90 \
          rdpart.f90 \
          report.f90 \
          report_date_time.f90 \

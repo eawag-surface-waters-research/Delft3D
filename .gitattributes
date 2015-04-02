@@ -1299,7 +1299,6 @@ src/engines_gpl/part/packages/data_f/Makefile.am -text
 src/engines_gpl/part/packages/data_f/part_data_f.vfproj -text
 src/engines_gpl/part/packages/data_f/src/Makefile.am -text
 src/engines_gpl/part/packages/data_f/src/alloc.f90 -text
-src/engines_gpl/part/packages/data_f/src/alloc_part.f90 -text
 src/engines_gpl/part/packages/data_f/src/dealloc.f90 -text
 src/engines_gpl/part/packages/data_f/src/dealloc_part.f90 -text
 src/engines_gpl/part/packages/data_f/src/file_info.f90 -text
@@ -1342,7 +1341,6 @@ src/engines_gpl/part/packages/io_f/src/rdfnam.f90 -text
 src/engines_gpl/part/packages/io_f/src/rdhyd.f90 -text
 src/engines_gpl/part/packages/io_f/src/rdhydr.f90 -text
 src/engines_gpl/part/packages/io_f/src/rdlgri.f90 -text
-src/engines_gpl/part/packages/io_f/src/rdparm.f90 -text
 src/engines_gpl/part/packages/io_f/src/rdpart.f90 -text
 src/engines_gpl/part/packages/io_f/src/rdwnd.f90 -text
 src/engines_gpl/part/packages/io_f/src/report.f90 -text
