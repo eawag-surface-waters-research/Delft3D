@@ -42,8 +42,7 @@ STANDARD_C_INCLUDES = \
 
 FINCLUDES =
 
-FMODULES = \
-    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+FMODULES =
 
 flow2d3dincludedir = $(includedir)/flow2d3d
 
