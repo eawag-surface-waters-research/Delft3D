@@ -239,6 +239,7 @@ dispit,dispsu,dispsc
 "HorzDisp  ","SO4       ",   1.00000
 "HorzDisp  ","SUD       ",   1.00000
 "HorzDisp  ","SUP       ",   1.00000
+"HorzDisp  ","Alka      ",   1.00000
 "HorzDisp  ","FeIIIpa   ",   1.00000
 "HorzDisp  ","FeIIIpc   ",   1.00000
 "HorzDisp  ","FeIIId    ",   1.00000
@@ -356,6 +357,7 @@ dispit,dispsu,dispsc
 "HorzDispV ","SO4       ",   1.00000
 "HorzDispV ","SUD       ",   1.00000
 "HorzDispV ","SUP       ",   1.00000
+"HorzDispV ","Alka      ",   1.00000
 "HorzDispV ","FeIIIpa   ",   1.00000
 "HorzDispV ","FeIIIpc   ",   1.00000
 "HorzDispV ","FeIIId    ",   1.00000
