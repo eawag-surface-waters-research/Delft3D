@@ -103,7 +103,7 @@
       real     (  8), allocatable :: drar        (:) !  double precission workspace (very large !lp)
       logical                         :: no_id_check            ! command line argument to skip double ID check
       real                            :: rdummy                 ! dummy real in argument list
-      real                            :: idummy                 ! dummy integer in argument list
+      integer                         :: idummy                 ! dummy integer in argument list
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq05", ithndl )
 !
@@ -120,7 +120,16 @@
 !
       IF ( NOBND .EQ. 0 ) THEN
          WRITE ( LUNUT , 2000 )
-         GOTO 170
+         IFOUND = GETTOKEN ( CHULP, IDUMMY, ITYPE, IERR2 )
+         IF (IERR2 .EQ. 2) THEN 
+            GOTO 175
+         ELSE IF (ITYPE.EQ.2 .AND. IDUMMY.EQ.0) THEN
+            WRITE ( LUNUT , 2120 )
+            GOTO 170
+         ENDIF
+         WRITE ( LUNUT , 2001 )
+         IERR = IERR + 1
+         GOTO 175
       ENDIF
 !
 !     read boundary names, from version 4.9 on names are ID's
@@ -454,13 +463,14 @@
       IF ( ALLOCATED(BNDTYPE) ) DEALLOCATE(BNDTYPE)
       IF ( IERR2 .GT. 0 ) IERR = IERR + 1
       IF ( IERR2 .EQ. 3 ) CALL SRSTOP(1)
-      call check  ( chulp  , iwidth , 5      , ierr2  , ierr   )
+  175 call check  ( chulp  , iwidth , 5      , ierr2  , ierr   )
   180 if ( timon ) call timstop( ithndl )
       RETURN
 !
 !       Output formats
 !
  2000 FORMAT ( //,' No boundary conditions' )
+ 2001 FORMAT ( //,' ERROR: Without boundary conditions only optional specification of zero time lags allowed!' )
  2005 FORMAT (  /,' Names of open boundaries are printed for',
      *            ' output option 3 and higher !' )
  2010 FORMAT (  /,' Boundary-IDs:       boundary-names:    ',20X,
