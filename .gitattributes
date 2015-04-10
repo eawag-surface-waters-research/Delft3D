@@ -2515,6 +2515,7 @@ src/engines_gpl/wave/packages/wave/wave_vs2010.vfproj -text
 src/engines_gpl/wave/packages/wave/wave_vs2010_intel13.vfproj -text
 src/install.cmd -text
 src/install.sh -text
+src/logs/VS2010_Intel12_Release_Win32_Output.txt -text
 src/logs/autogen_gnu4.6.2.log -text
 src/logs/autogen_intel11.1.log -text
 src/logs/configure_gnu4.6.2.log -text
