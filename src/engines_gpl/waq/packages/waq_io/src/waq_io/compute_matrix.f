@@ -135,7 +135,7 @@
                   accum = 0.0
                   maxiem = .true.
                   if ( ip .eq. 0 ) then
-                     amaxv = fdata%values(ipar,iloc,ibrk)
+                     amaxv = fdata%values(ip2,iloc,ibrk)
                   endif
                   if ( ip .lt. 0 ) amaxv = data_param%constant(ipar)
                   if ( ip .gt. 0 ) amaxv = wdata%values(ip,iloc,ibrk)
@@ -153,7 +153,7 @@
                   accum = 0.0
                   miniem = .true.
                   if ( ip .eq. 0 ) then
-                     aminv = fdata%values(ipar,iloc,ibrk)
+                     aminv = fdata%values(ip2,iloc,ibrk)
                   endif
                   if ( ip .lt. 0 ) aminv = data_param%constant(ipar)
                   if ( ip .gt. 0 ) aminv = wdata%values(ip,iloc,ibrk)
@@ -169,7 +169,7 @@
                      wdata%values(ipar_out,iloc,ibrk) = amiss
                   endif
                   if ( ip .eq. 0 ) then
-                     accum = -fdata%values(ipar,iloc,ibrk)
+                     accum = -fdata%values(ip2,iloc,ibrk)
                   endif
                   if ( ip .lt. 0 ) accum = -data_param%constant(ipar)
                   if ( ip .gt. 0 ) accum = -wdata%values(ip,iloc,ibrk)
@@ -186,7 +186,7 @@
                      wdata%values(ipar_out,iloc,ibrk) = amiss
                   endif
                   if ( ip .eq. 0 ) then
-                     accum =  fdata%values(ipar,iloc,ibrk)
+                     accum =  fdata%values(ip2,iloc,ibrk)
                   endif
                   if ( ip .lt. 0 ) accum =  data_param%constant(ipar)
                   if ( ip .gt. 0 ) accum =  wdata%values(ip,iloc,ibrk)
@@ -198,7 +198,7 @@
                   ip = ip + 10000000
                   if ( ip .eq. 0 ) then
                      if ( fdata%values(ipar,iloc,ibrk) .ne. amiss .and. accum .ne. amiss ) then
-                        accum = accum / fdata%values(ipar,iloc,ibrk)
+                        accum = accum / fdata%values(ip2,iloc,ibrk)
                      else
                         accum = amiss
                      endif
@@ -225,7 +225,7 @@
                   ip = ip + 1000000
                   if ( ip .eq. 0 ) then
                      if ( fdata%values(ipar,iloc,ibrk) .ne. amiss .and. accum .ne. amiss ) then
-                        accum = accum * fdata%values(ipar,iloc,ibrk)
+                        accum = accum * fdata%values(ip2,iloc,ibrk)
                      else
                         accum = amiss
                      endif
