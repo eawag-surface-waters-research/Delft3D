@@ -140,6 +140,15 @@
          integer                          :: maxsize            ! allocated up to this size
       end type t_dlwq_item
 
+!     this is a collection of data_items
+      
+      type t_dlwq_data_items
+         type(t_dlwq_item), pointer       :: dlwq_foritem(:) ! pointer
+         character(LEN=NAME_SIZE),pointer :: name(:)         ! names of item
+         logical, pointer                 :: used(:)         ! flag
+         integer                          :: maxsize         ! maximum size of the current array
+         integer                          :: cursize         ! filled up to this size
+      end type t_dlwq_data_items
 
       integer, parameter :: TYPE_CHAR   =  1                 ! character
       integer, parameter :: TYPE_INT    =  2                 ! integer
@@ -802,6 +811,67 @@
          endif
 
       end function dlwq_resize_item
+
+      function dlwq_init_data_items( dlwq_data_items ) result ( iret )
+
+!        function to initialise an data_items structure
+
+         type(t_dlwq_data_items)          :: dlwq_data_items
+         integer                          :: iret
+
+         dlwq_data_items%dlwq_foritem  => null()
+         dlwq_data_items%name          => null()
+         dlwq_data_items%used          => null()
+         dlwq_data_items%cursize       = 0
+         dlwq_data_items%maxsize       = 0
+         iret = 0
+
+      end function dlwq_init_data_items
+
+      function dlwq_data_itemsAdd( dlwq_data_items, data_item_name, dlwq_foritem ) result ( cursize )
+!
+         type(t_dlwq_data_items)            :: dlwq_data_items
+         character(LEN=NAME_SIZE)           :: data_item_name         ! name of item to add
+         type(t_dlwq_item)                  :: dlwq_foritem
+         integer                            :: cursize
+
+!        local
+
+         type(t_dlwq_item), pointer         :: dlwq_foritems(:)         ! should be a pointer for the resize operation
+         character(LEN=NAME_SIZE), pointer  :: data_item_names(:)       ! names of data_items
+         logical, pointer                   :: data_item_used(:)       ! use status of data_items
+         integer                            :: ierr_alloc1
+         integer                            :: ierr_alloc2
+         integer                            :: ierr_alloc3
+         integer                            :: i
+!
+         if ( dlwq_data_items%cursize .eq. dlwq_data_items%maxsize ) then
+            allocate ( dlwq_foritems ( dlwq_data_items%maxsize + MAX_NUM ) , stat = ierr_alloc1)
+            allocate ( data_item_names ( dlwq_data_items%maxsize + MAX_NUM ) , stat = ierr_alloc2)
+            allocate ( data_item_used ( dlwq_data_items%maxsize + MAX_NUM ) , stat = ierr_alloc3)
+            if ( ierr_alloc1 .ne. 0 .or. ierr_alloc2 .ne. 0 .or. ierr_alloc3 .ne. 0 ) then
+               write(*,*) 'ERROR : ALLOCATING WORK ARRAY'
+               call srstop(1)
+            endif
+            do i = 1 , dlwq_data_items%maxsize
+               dlwq_foritems(i) = dlwq_data_items%dlwq_foritem(i)                ! copies the contents
+               data_item_names(i) = dlwq_data_items%name(i)                      ! copies the contents
+               data_item_used(i) = dlwq_data_items%used(i)                       ! copies the contents
+            enddo
+            if ( dlwq_data_items%maxsize .ne. 0 ) deallocate ( dlwq_data_items%dlwq_foritem )
+            dlwq_data_items%dlwq_foritem => dlwq_foritems                        ! attaches this new array of pointers
+            dlwq_data_items%name => data_item_names                              ! attaches this new array of pointers
+            dlwq_data_items%used => data_item_used                              ! attaches this new array of pointers
+            dlwq_data_items%maxsize = dlwq_data_items%maxsize + MAX_NUM
+         endif
+         dlwq_data_items%cursize = dlwq_data_items%cursize + 1
+         dlwq_data_items%dlwq_foritem( dlwq_data_items%cursize ) = dlwq_foritem
+         dlwq_data_items%name( dlwq_data_items%cursize ) = data_item_name
+         dlwq_data_items%used( dlwq_data_items%cursize ) = .false.
+         cursize = dlwq_data_items%cursize
+         return
+!
+      end function dlwq_data_itemsAdd
 
       function dlwqdataReadExtern(lunrep,dlwqdata) result ( ierror )
 

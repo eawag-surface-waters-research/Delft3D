@@ -114,6 +114,10 @@
      *         (  CHULP(1: 5) .EQ. 'BLOCK'        .OR.
      *            CHULP(1: 6) .EQ. 'LINEAR'       .OR.
      *            CHULP(1: 4) .EQ. 'ITEM'         .OR.
+     *            CHULP(1:13) .EQ. 'IDENTICALITEM'.OR.
+     *            CHULP(1:12) .EQ. 'USEDATA_ITEM' .OR.
+     *            CHULP(1: 7) .EQ. 'FORITEM'      .OR.
+     *            CHULP(1: 9) .EQ. 'DATA_ITEM'    .OR.
      *            CHULP(1: 6) .EQ. 'CONCEN'       .OR.
      *            CHULP(1: 6) .EQ. 'DATA'         .OR.
      *            CHULP(1:10) .EQ. 'TIME_DELAY'   .OR.

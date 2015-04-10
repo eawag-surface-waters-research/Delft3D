@@ -78,7 +78,10 @@
 
       use rd_token
       use timers       !   performance timers
+      use dlwq_data
 
+      implicit none
+      
       integer  ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
       character( *), intent(inout) :: lchar(*)      !< filenames
       integer  ( 4), intent(in   ) :: iu            !< index in LUN array of workfile
@@ -126,27 +129,47 @@
 
 !     Local declarations
 
-      CHARACTER     CALLR*10, CALIT*10, STRNG1*10, STRNG2*10,
-     *              STRNG3*10
-      INTEGER       IORDER   , NOITM , NODIM , IFLAG  , ITYPE ,
-     +              ITTIM    , CHKFLG
-      CHARACTER     CHULP*255
-      LOGICAL       NEWREC   , SCALE , ODS   , BINFIL , TDELAY
+      character     callr*10, calit*10, caldit*10, strng1*10, strng2*10,
+     *              strng3*10
+      integer       iorder   , noitm , nodim , iflag  , itype ,
+     +              ittim    , chkflg, ident , nottc  , lunwr2,
+     +              ifilsz   , jfilsz, ipro  , itfacw , iopt  ,
+     +              nobrk    , itel  , ioerr , iblock , k     ,
+     +              i        , ihulp , ioff  , icm    , iim   ,
+     +              noits    , nconst, itmnr, iitm   , nocol , 
+     +              idmnr    , nodis , nitm , nti    , nti2  ,
+     +              ntr      , irm   , nottt, ierr3  , nr2   ,
+     +              nts      , ntc   , ntd
+      real          amiss    , rhulp
+      character     chulp*255
+      logical       newrec   , scale , ods   , binfil , tdelay
       integer(4) :: ithndl = 0
+      
+      type(t_dlwq_data_items)          :: dlwq_data_items
+      type(t_dlwq_item)                :: dlwq_foritem
+      character(20)                    :: data_item_name
+      integer                          :: idata_item
+      integer                          :: ndata_items
+      integer                          :: iitem
+      integer                          :: nitems
+      
+      
       if (timon) call timstrt( "dlwq5a", ithndl )
 !
 !     Initialise a number of variables
 !
-      LUNUT  = LUN(29)
-      LUNWR2 = LUN(IU)
-      IFILSZ = 0
-      JFILSZ = 0
-      CALLR  = 'CONCENTR. '
-      STRNG2 = 'Substance'
-      IPRO   = 0
-      ITFACW = 1
-      DELTIM = OTIME
-      AMISS  = -999.0
+      lunut  = lun(29)
+      lunwr2 = lun(iu)
+      ifilsz = 0
+      jfilsz = 0
+      callr  = 'CONCENTR. '
+      strng2 = 'Substance'
+      ipro   = 0
+      itfacw = 1
+      deltim = otime
+      amiss  = -999.0
+      ierr2 = dlwq_init_data_items(dlwq_data_items)
+      ierr2 = dlwq_init_item(dlwq_foritem)
 !
 !          Initialise new data block
 !
@@ -166,233 +189,383 @@
 !                           3 = harmonics     , 4 = fourier
 !     IOFF   is offset in the array of integers and strings
 !
-      IF ( IOUTPT .LT. 3 ) WRITE ( LUNUT , 1340 )
-      IF ( IOUTPT .LT. 4 ) WRITE ( LUNUT , 1350 )
-      IORDER = 0
-      IFLAG  = 0
-      IOPT   = 1
-      ITTIM  = 0
-      NOBRK  = 0
-      ITEL   = 0
-      SCALE  = .FALSE.
-      ODS    = .FALSE.
-      BINFIL = .FALSE.
-      NEWREC = .FALSE.
+      if ( ioutpt .lt. 3 ) write ( lunut , 1340 )
+      if ( ioutpt .lt. 4 ) write ( lunut , 1350 )
+      iorder = 0
+      iflag  = 0
+      iopt   = 1
+      ittim  = 0
+      nobrk  = 0
+      itel   = 0
+      scale  = .false.
+      ods    = .false.
+      binfil = .false.
+      newrec = .false.
 !
 !     Open the binary work file and privide a zero overall default
 !
-      CALL DHOPNF ( LUN(IU) , LCHAR(IU) , IU    , 1     , IOERR )
-      IF ( IU .EQ. 14 ) THEN
-         WRITE ( LUNWR2 ) ' 4.900BOUND '
-         CALIT  = 'BOUNDARIES'
-         STRNG1 = 'boundary'
-         IBLOCK = 5
-      ELSE
-         WRITE ( LUNWR2 ) ' 4.900WASTE '
-         CALIT  = 'WASTELOADS'
-         STRNG1 = 'wasteload'
-         IBLOCK = 6
-      ENDIF
-      WRITE ( LUNWR2 ) NTITM, NTDIM
-      WRITE ( LUNWR2 ) 1, 0, NTDIM, (K,K=1,NTDIM), 1, 0
-      WRITE ( LUNWR2 ) 1
-      WRITE ( LUNWR2 ) 0, ( 0.0 , I=1,NTDIM )
-      IFILSZ = IFILSZ + 2 + 3 + NTDIM + 3 + 1
-      JFILSZ = JFILSZ + NTDIM
+      call dhopnf ( lun(iu) , lchar(iu) , iu    , 1     , ioerr )
+      if ( iu .eq. 14 ) then
+         write ( lunwr2 ) ' 4.900BOUND '
+         calit  = 'BOUNDARIES'
+         caldit  = 'BDATA_ITEM'
+         strng1 = 'boundary'
+         iblock = 5
+      else
+         write ( lunwr2 ) ' 4.900WASTE '
+         calit  = 'WASTELOADS'
+         caldit  = 'WDATA_ITEM'
+         strng1 = 'wasteload'
+         iblock = 6
+      endif
+      write ( lunwr2 ) ntitm, ntdim
+      write ( lunwr2 ) 1, 0, ntdim, (k,k=1,ntdim), 1, 0
+      write ( lunwr2 ) 1
+      write ( lunwr2 ) 0, ( 0.0 , i=1,ntdim )
+      ifilsz = ifilsz + 2 + 3 + ntdim + 3 + 1
+      jfilsz = jfilsz + ntdim
 !
 !          Get a token string (and return if something else was found)
 !
-   10 IF ( IFLAG .EQ. 0 ) ITYPE = 0
-      IF ( IFLAG .EQ. 1 .OR. IFLAG .EQ. 2 ) ITYPE = -3
-      IF ( IFLAG .EQ. 3 ) THEN
-         IF ( NEWREC ) THEN
-            ITYPE = -3
-         ELSE
-            ITYPE = 3
-         ENDIF
-      ENDIF
-      IF ( IFLAG .EQ. 4 ) ITYPE = 3
-   20 CALL RDTOK1 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
-     *              IPOSR  , NPOS   , CHULP  , IHULP  , RHULP  ,
-     *                                         ITYPE  , IERR2  )
+   10 if ( iflag .eq. 0 ) itype = 0
+      if ( iflag .eq. 1 .or. iflag .eq. 2 ) itype = -3
+      if ( iflag .eq. 3 ) then
+         if ( newrec ) then
+            itype = -3
+         else
+            itype = 3
+         endif
+      endif
+      if ( iflag .eq. 4 ) itype = 3
+   20 call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,
+     *              iposr  , npos   , chulp  , ihulp  , rhulp  ,
+     *                                         itype  , ierr2  )
 !        End of block detected
-      IF ( IERR2 .EQ. 2 ) THEN
-         IF( ITYPE .GT. 0 ) IERR = IERR + 1
-         GOTO 530
-      ENDIF
-      IF ( IERR2 .NE. 0 ) GOTO 510
+      if ( ierr2 .eq. 2 ) then
+         if( itype .gt. 0 ) ierr = ierr + 1
+         goto 530
+      endif
+      if ( ierr2 .ne. 0 ) goto 510
 !
 !          All the following has the old file structure
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'OLD-FILE-STRUCTURE' ) THEN
-         WRITE ( LUNUT , 1000 )
+      if ( iabs(itype) .eq. 1 .and. chulp .eq. 'OLD-FILE-STRUCTURE' ) then
+         write ( lunut , 1000 )
          iwar = iwar + 1
-         IERR2 = -1
+         ierr2 = -1
          goto 540
-      ENDIF
+      endif
 !
 !          A local redirection of the name of an item or substance
 !                                                   is not valid here
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'USEFOR') THEN
-         WRITE ( LUNUT , 1010 )
-         IERR2 = 1
-         GOTO 510
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp .eq. 'USEFOR') then
+         write ( lunut , 1010 )
+         ierr2 = 1
+         goto 510
+      endif
 !
 !          Time delay for ODS files
 !
-   30 IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:10) .EQ. 'TIME_DELAY' ) THEN
+   30 if ( iabs(itype) .eq. 1 .and. chulp(1:10) .eq. 'TIME_DELAY' ) then
          call read_time_delay ( ierr2 )
-         IF ( IERR2 .NE. 0 ) GOTO 510
-         GOTO 10
-      ENDIF
+         if ( ierr2 .ne. 0 ) goto 510
+         goto 10
+      endif
 !
 !          Time interpolation instead of block function
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:6) .EQ. 'LINEAR' ) THEN
-         IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1005 )
-         IOPT  = 2
-         GOTO 10
-      ENDIF
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:5) .EQ. 'BLOCK'  ) THEN
-         IOPT  = 1
-         GOTO 10
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp(1:6) .eq. 'LINEAR' ) then
+         if ( ioutpt .ge. 3 ) write ( lunut , 1005 )
+         iopt  = 2
+         goto 10
+      endif
+      if ( iabs(itype) .eq. 1 .and. chulp(1:5) .eq. 'BLOCK'  ) then
+         iopt  = 1
+         goto 10
+      endif
+!
+!          Usedata_item
+!
+      if ( iabs(itype) .eq. 1 .and. (chulp .eq. 'USEDATA_ITEM') ) then
+         if ( iorder .eq. 1 .or. iorder .eq. 2) then
+            write ( lunut , 1011 )
+            ierr2 = 1
+            goto 510
+         endif
+!          Next token must be a name
+         call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,
+     *              iposr  , npos   , chulp  , ihulp  , rhulp  ,
+     *                                         itype  , ierr2  )
+         if (chulp .eq. ' ') then
+            write ( lunut , 1012 )
+            ierr2 = 1
+            goto 510
+         endif
+         data_item_name = chulp
+         if ( ioutpt .ge. 3 ) write ( lunut , 1015 ) data_item_name
+!          Next token must be 'FORITEM'
+         call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,
+     *              iposr  , npos   , chulp  , ihulp  , rhulp  ,
+     *                                         itype  , ierr2  )
+         if ( chulp .ne. 'FORITEM') then
+            write (lunut, 1012 )
+            ierr2 = 1
+            goto 510
+         endif
+! Now get the list of locations to apply the DATA_ITEM
+         ioff   = 1
+         chkflg = 1
+         icm    = icmax - ioff
+         iim    = iimax - ioff
+         call dlwq5b ( lunut    , iposr , npos  , cchar , car(ioff),
+     *                 iar(ioff), icm   , iim   , aname , atype    ,
+     *                 ntitm    , nttype, noitm , noits , chkflg   ,
+     *                 calit    , ilun  , lch   , lstack, vrsion   ,
+     *                 itype    , rar   , nconst, itmnr , chulp    ,
+     *                                    ioutpt, ierr2 , iwar     )
+! Check if data_item already exists
+         
+         if (dlwq_data_items%cursize .gt. 0) then
+            call zoek ( data_item_name,dlwq_data_items%cursize,dlwq_data_items%name(1:dlwq_data_items%cursize),20,idata_item)
+         else
+            idata_item = 0
+         end if
+         if (idata_item.le.0) then
+            ndata_items = dlwq_data_itemsAdd(dlwq_data_items, data_item_name, dlwq_foritem)
+            idata_item = ndata_items
+         endif
+         if(dlwq_data_items%used(idata_item)) then
+            write( lunut, 1016)
+            iwar = iwar + 1
+         end if
+         do iitm = 1, noitm
+!          Already on the list?
+            nitems = dlwq_data_items%dlwq_foritem(idata_item)%no_item
+            if (nitems .gt. 0) then
+               call zoek ( car(ioff+iitm-1),nitems,dlwq_data_items%dlwq_foritem(idata_item)%name(1:nitems),20,iitem)
+            else
+               iitem = -1
+            end if
+            if (iitem.le.0 .and. iar(ioff + iitm - 1).ne.-1300000000) then
+               nitems = nitems + 1
+               ierr2 = dlwq_resize_item( dlwq_data_items%dlwq_foritem(idata_item), nitems )
+               dlwq_data_items%dlwq_foritem(idata_item)%name(nitems) = car(ioff + iitm - 1)
+               dlwq_data_items%dlwq_foritem(idata_item)%ipnt(nitems) = iar(ioff + iitm - 1)
+               dlwq_data_items%dlwq_foritem(idata_item)%sequence(nitems) = nitems
+               dlwq_data_items%dlwq_foritem(idata_item)%no_item = nitems
+            end if
+         end do
+         if ( ierr2 .ne. 0 ) goto 510
+         goto 30
+      endif
 !
 !          Items
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'ITEM' ) THEN
-         IF ( IORDER .EQ. 0 ) THEN
-            IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1020 )
-            IORDER = 1
-            IOFF   = 1
-         ELSEIF ( IORDER .EQ. 1 ) THEN
-            WRITE ( LUNUT , 1030 )
-            IERR2 = 1
-            GOTO 510
-         ELSE
-            IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1040 )
-            IOFF  = NODIM + IDMNR + 1
-         ENDIF
-         CHKFLG = 1
-         ICM    = ICMAX - IOFF
-         IIM    = IIMAX - IOFF
-         CALL DLWQ5B ( LUNUT    , IPOSR , NPOS  , CCHAR , CAR(IOFF),
-     *                 IAR(IOFF), ICM   , IIM   , ANAME , ATYPE    ,
-     *                 NTITM    , NTTYPE, NOITM , NOITS , CHKFLG   ,
-     *                 CALIT    , ILUN  , LCH   , LSTACK, VRSION   ,
-     *                 ITYPE    , RAR   , NCONST, ITMNR , CHULP    ,
-     *                                    IOUTPT, IERR2 , iwar     )
-         NOCOL = NOITS
-         IF ( IERR2 .NE. 0 ) GOTO 510
-         GOTO 30
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. (chulp .eq. 'ITEM' .or. chulp .eq. 'IDENTICALITEM' .or.
+     &                               chulp .eq. 'DATA_ITEM') ) then
+         if ( iorder .eq. 0 ) then
+            iorder = 1
+            ioff   = 1
+            if ( chulp .eq. 'IDENTICALITEM') then
+               if ( ioutpt .ge. 3 ) write ( lunut , 1021 )
+               ident = 1
+            else if (chulp .eq. 'DATA_ITEM') then
+               if ( ioutpt .ge. 3 ) write ( lunut , 1022 )
+               ident = 2
+            else
+               if ( ioutpt .ge. 3 ) write ( lunut , 1020 )
+               ident = 0
+            endif
+         elseif ( iorder .eq. 1 ) then
+            write ( lunut , 1030 )
+            ierr2 = 1
+            goto 510
+         else
+            if ( ioutpt .ge. 3 ) write ( lunut , 1040 )
+            ioff  = nodim + idmnr + 1
+            ident = 0
+         endif
+         chkflg = 1
+         icm    = icmax - ioff
+         iim    = iimax - ioff
+         if ( ident .le. 1) then
+            call dlwq5b ( lunut    , iposr , npos  , cchar , car(ioff),
+     *                    iar(ioff), icm   , iim   , aname , atype    ,
+     *                    ntitm    , nttype, noitm , noits , chkflg   ,
+     *                    calit    , ilun  , lch   , lstack, vrsion   ,
+     *                    itype    , rar   , nconst, itmnr , chulp    ,
+     *                                       ioutpt, ierr2 , iwar     )
+         else
+            call dlwq5b ( lunut    , iposr , npos  , cchar , car(ioff),
+     *                    iar(ioff), icm   , iim   , dlwq_data_items%name(1:ndata_items) ,
+     *                    dlwq_data_items%name(1:ndata_items) , ndata_items,
+     *                    ndata_items      , noitm , noits , chkflg   ,
+     *                    caldit   , ilun  , lch   , lstack, vrsion   ,
+     *                    itype    , rar   , nconst, itmnr , chulp    ,
+     *                                       ioutpt, ierr2 , iwar     )
+            if (noitm.ne.1) then
+               write ( lunut , 1045 )
+               ierr2 = 1
+               goto 510
+            end if
+            idata_item = iar(ioff)
+            if (idata_item .gt. 0) then
+!          Replace result of dlwq5b with usedata_item list
+               dlwq_data_items%used(idata_item) = .true.
+               noitm = dlwq_data_items%dlwq_foritem(idata_item)%no_item
+               if (noitm .ne. 0) then
+                  itmnr = noitm
+                  noits = noitm
+                  do iitem = 1, noitm
+                     car(ioff+iitem-1) = dlwq_data_items%dlwq_foritem(idata_item)%name(iitem)
+                     car(ioff+iitem-1+noitm) = dlwq_data_items%dlwq_foritem(idata_item)%name(iitem)
+                     iar(ioff+iitem-1) = dlwq_data_items%dlwq_foritem(idata_item)%ipnt(iitem)
+                     iar(ioff+iitem-1+noitm) = dlwq_data_items%dlwq_foritem(idata_item)%sequence(iitem) 
+                     if (iar(ioff+iitem-1) .gt. 0) then
+                        write ( lunut, 1023) car(ioff), idata_item, calit, iar(ioff+iitem-1), 
+     &                                       dlwq_data_items%dlwq_foritem(idata_item)%name(iitem)
+                     else
+                        write ( lunut, 1024) car(ioff), idata_item, calit, iar(ioff+iitem-1), 
+     &                                       dlwq_data_items%dlwq_foritem(idata_item)%name(iitem)
+                     end if
+                  end do
+               else
+                  write ( lunut , 1046 )
+                  !data ignored
+                  noitm = 1
+                  itmnr = 1
+                  noits = 1
+                  iar(ioff) = -1300000000
+                  iar(ioff+1) = 1
+               end if   
+            else
+               write ( lunut , 1047 )
+               !data ignored
+               noitm = 1
+               itmnr = 1
+               noits = 1
+               iar(ioff) = -1300000000
+               iar(ioff+1) = 1
+            end if
+         endif
+         
+         
+         nocol = noits
+         if ( ierr2 .ne. 0 ) goto 510
+         goto 30
+      endif
 !
 !          Concentrations
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:6) .EQ. 'CONCEN' ) THEN
-         IF ( IORDER .EQ. 0 ) THEN
-            IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1050 )
-            IORDER = 2
-            IOFF   = 1
-         ELSEIF ( IORDER .EQ. 1 ) THEN
-            IF ( IOUTPT .GE. 3 ) WRITE ( LUNUT , 1060 )
-            IOFF  = NOITM + ITMNR + 1
-         ELSE
-            WRITE ( LUNUT , 1070 )
-            IERR2 = 1
-            GOTO 510
-         ENDIF
-         CHKFLG = 1
-         ICM    = ICMAX - IOFF
-         IIM    = IIMAX - IOFF
-         CALL DLWQ5B ( LUNUT    , IPOSR , NPOS  , CCHAR , CAR(IOFF),
-     *                 IAR(IOFF), ICM   , IIM   , SNAME , ATYPE    ,
-     *                 NTDIM    ,   0   , NODIM , NODIS , CHKFLG   ,
-     *                 CALLR    , ILUN  , LCH   , LSTACK, VRSION   ,
-     *                 ITYPE    , RAR   , NCONST, IDMNR , CHULP    ,
-     *                                    IOUTPT, IERR2 , iwar     )
-         NOCOL = NODIS
-         IF ( IERR2 .NE. 0 ) GOTO 510
-         GOTO 30
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp(1:6) .eq. 'CONCEN' ) then
+         if ( iorder .eq. 0 ) then
+            if ( ioutpt .ge. 3 ) write ( lunut , 1050 )
+            iorder = 2
+            ioff   = 1
+         elseif ( iorder .eq. 1 ) then
+            if ( ioutpt .ge. 3 ) write ( lunut , 1060 )
+            ioff  = noitm + itmnr + 1
+         else
+            write ( lunut , 1070 )
+            ierr2 = 1
+            goto 510
+         endif
+         chkflg = 1
+         icm    = icmax - ioff
+         iim    = iimax - ioff
+         call dlwq5b ( lunut    , iposr , npos  , cchar , car(ioff),
+     *                 iar(ioff), icm   , iim   , sname , atype    ,
+     *                 ntdim    ,   0   , nodim , nodis , chkflg   ,
+     *                 callr    , ilun  , lch   , lstack, vrsion   ,
+     *                 itype    , rar   , nconst, idmnr , chulp    ,
+     *                                    ioutpt, ierr2 , iwar     )
+         nocol = nodis
+         if ( ierr2 .ne. 0 ) goto 510
+         goto 30
+      endif
 !
 !          Data
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:6) .EQ. 'DATA' ) THEN
-         IF ( NOITM*NODIM .EQ. 0 ) THEN
-            WRITE ( LUNUT , 1080 ) NOITM, NODIM
-            IERR2 = 1
-            GOTO 510
-         ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp(1:6) .eq. 'DATA' ) then
+         if ( noitm*nodim .eq. 0 ) then
+            write ( lunut , 1080 ) noitm, nodim
+            ierr2 = 1
+            goto 510
+         endif
 !          Checks if an inner loop collumn header exists for the data matrix
-         CALL DLWQ5G ( LUNUT  , IAR    , ITMNR  , NOITM  , IDMNR  ,
-     *                 NODIM  , IORDER , IIMAX  , CAR    , IPOSR  ,
-     *                 NPOS   , ILUN   , LCH    , LSTACK , CCHAR  ,
-     *                 CHULP  , NOCOL  , DTFLG1 , DTFLG3 , ITFACW ,
-     *                 ITYPE  , IHULP  , RHULP  , IERR2  , iwar   )
-         IF ( IERR2 .GT. 1 ) GOTO 510
+         call dlwq5g ( lunut  , iar    , itmnr  , noitm  , idmnr  ,
+     *                 nodim  , iorder , iimax  , car    , iposr  ,
+     *                 npos   , ilun   , lch    , lstack , cchar  ,
+     *                 chulp  , nocol  , dtflg1 , dtflg3 , itfacw ,
+     *                 itype  , ihulp  , rhulp  , ierr2  , iwar   )
+         if ( ierr2 .gt. 1 ) goto 510
 !          Reads blocks of data
-         IF ( IORDER .EQ. 2 ) THEN
-            NITM  = NOITM
-         ELSE
-            NITM  = NODIM
-         ENDIF
-         NTI   = NOITM + NODIM + ITMNR + IDMNR + 1
-         NTI2  = NTI + NITM
-         IIM   = IIMAX - NTI2
-         NTR   = NCONST + ITEL + 1
-         IIM   = IIMAX - NTI2
-         IRM   = IRMAX - NTR
-         IF ( IORDER .EQ. 2 ) THEN
-            NOTTT = NODIM*NOCOL
-         ELSE
-            NOTTT = NOITM*NOCOL
-         ENDIF
-         IF ( IOPT .EQ. 3 .OR. IOPT .EQ. 4 ) NOTTT = NOTTT + 1
-         CALL DLWQ5D ( LUNUT  , IAR(NTI2), RAR(NTR), IIM   , IRM    ,
-     *                 IPOSR  , NPOS     , ILUN    , LCH   , LSTACK ,
-     *                 CCHAR  , CHULP    , NOTTT   , ITTIM , NOBRK  ,
-     *                 IOPT   , DTFLG1   , DTFLG3  , ITFACW, ITYPE  ,
-     *                          IHULP    , RHULP   , IERR2 , ierr3  )
+         if ( iorder .eq. 2 ) then
+            nitm  = noitm
+         else
+            nitm  = nodim
+         endif
+         nti   = noitm + nodim + itmnr + idmnr + 1
+         nti2  = nti + nitm
+         iim   = iimax - nti2
+         ntr   = nconst + itel + 1
+         iim   = iimax - nti2
+         irm   = irmax - ntr
+         if ( iorder .eq. 2 ) then
+            nottt = nodim*nocol
+            nottc = nottt
+         else
+            nottt = noitm*nocol
+            if (ident.ge.1) then
+               nottc = nocol
+            else
+               nottc = nottt
+            endif
+         endif
+         if ( iopt .eq. 3 .or. iopt .eq. 4 ) nottt = nottt + 1
+         call dlwq5d ( lunut  , iar(nti2), rar(ntr), iim   , irm    ,
+     *                 iposr  , npos     , ilun    , lch   , lstack ,
+     *                 cchar  , chulp    , nottt   , nottc , ittim , nobrk  ,
+     *                 iopt   , dtflg1   , dtflg3  , itfacw, itype  ,
+     *                          ihulp    , rhulp   , ierr2 , ierr3  )
          ierr = ierr + ierr3
-         IF ( IERR2 .EQ. 1 .OR. IERR2 .EQ. 4 ) GOTO 510
-         IF ( NOBRK .EQ. 0 .and. ittim .eq. 0 ) THEN
-            WRITE(LUNUT,1360)
-            IERR = IERR + 1
-         ENDIF
+         if ( ierr2 .eq. 1 .or. ierr2 .eq. 4 ) goto 510
+         if ( nobrk .eq. 0 .and. ittim .eq. 0 ) then
+            write(lunut,1360)
+            ierr = ierr + 1
+         endif
 !          Assigns according to computational rules
-         NR2 = NTR + NOTTT*NOBRK
-         CALL DLWQ5E ( LUNUT, IAR   , NOITM, ITMNR   , NODIM   ,
-     *                 IDMNR, IORDER, RAR  , IOPT    , RAR(NTR),
-     *                 NOCOL, NOBRK , AMISS, IAR(NTI), RAR(NR2))
-         STRNG3 = 'breakpoint'
+         nr2 = ntr + nottt*nobrk
+         call dlwq5e ( lunut, iar   , noitm, itmnr   , nodim   ,
+     *                 idmnr, iorder, rar  , iopt    , rar(ntr),
+     *                 nocol, nobrk , amiss, iar(nti), rar(nr2))
+         strng3 = 'breakpoint'
 !          Writes to the binary intermediate file
-         NTS   = NCONST + 1
-         NTC   = NTI
-         ICM   = ICMAX - NTC
-         CALL DLWQJ3 ( LUNWR2 , LUNUT   , IWIDTH , NOBRK  , IAR    ,
-     *                 RAR(NTS),RAR(NR2), ITMNR  , IDMNR  , IORDER ,
-     *                 SCALE  , .TRUE.  , BINFIL , IOPT   , IPRO   ,
-     *                 ITFACW , DTFLG1  , DTFLG3 , IFILSZ , JFILSZ ,
-     *                 SNAME  , STRNG1  , STRNG2 , STRNG3 , IOUTPT )
-         IF ( IERR2 .EQ. 2 ) GOTO 530
-         IF ( IERR2 .EQ. 3 ) GOTO 510
-         IORDER = 0
-         IFLAG  = 0
-         IOPT   = 1
-         AMISS  = -999.0
-         ITTIM  = 0
-         NOBRK  = 0
-         ITEL   = 0
-         SCALE  = .FALSE.
-         ODS    = .FALSE.
-         BINFIL = .FALSE.
-         NEWREC = .FALSE.
-         IF ( ITYPE .EQ. 1 ) GOTO  30
-         GOTO 10
-      ENDIF
+         nts   = nconst + 1
+         ntc   = nti
+         icm   = icmax - ntc
+         call dlwqj3 ( lunwr2 , lunut   , iwidth , nobrk  , iar    ,
+     *                 rar(nts),rar(nr2), itmnr  , idmnr  , iorder ,
+     *                 scale  , .true.  , binfil , iopt   , ipro   ,
+     *                 itfacw , dtflg1  , dtflg3 , ifilsz , jfilsz ,
+     *                 sname  , strng1  , strng2 , strng3 , ioutpt )
+         if ( ierr2 .eq. 2 ) goto 530
+         if ( ierr2 .eq. 3 ) goto 510
+         iorder = 0
+         iflag  = 0
+         iopt   = 1
+         amiss  = -999.0
+         ittim  = 0
+         nobrk  = 0
+         itel   = 0
+         scale  = .false.
+         ods    = .false.
+         binfil = .false.
+         newrec = .false.
+         if ( itype .eq. 1 ) goto  30
+         goto 10
+      endif
 
 !          binary-file option selected
 
@@ -408,157 +581,170 @@
 !
 !          ODS-file option selected
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:8) .EQ. 'ODS_FILE' ) THEN
-         IF ( NOITM*NODIM .EQ. 0 ) THEN
-            WRITE ( LUNUT , 1080 ) NOITM, NODIM
-            IERR2 = 1
-            GOTO 510
-         ENDIF
-         ODS   = .TRUE.
-         ITYPE = 1
-         GOTO 20
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp(1:8) .eq. 'ODS_FILE' ) then
+         if ( noitm*nodim .eq. 0 ) then
+            write ( lunut , 1080 ) noitm, nodim
+            ierr2 = 1
+            goto 510
+         endif
+         ods   = .true.
+         itype = 1
+         goto 20
+      endif
 !
 !          ODS-file-data retrieval
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. ODS ) THEN
-         NTI  = NOITM + NODIM + ITMNR + IDMNR + 1
-         NTR  = ITEL  + NCONST + 1
-         NTD  = (NTR+1)/2 + 1
-         NTS  = NCONST + 1
-         IIM  = IIMAX - NTI
-         IRM  = IRMAX - NTR
-         CALL DLWQ5C ( CHULP , LUNUT  , CAR   , IAR      , RAR(NTR),
-     *                 ICMAX , IIMAX  , IRMAX , DRAR     , NOITM   ,
-     *                 NODIM , IORDER , SCALE , ITMNR    , IDMNR   ,
-     *                         AMISS  , NOBRK , IERR2    , iwar    )
-         IF ( IERR2 .NE. 0 ) GOTO 510
-         NR2 = NTR + NOITM*NODIM*NOBRK
-         CALL DLWQ5E ( LUNUT , IAR    , NOITM , ITMNR    , NODIM   ,
-     *                 IDMNR , IORDER , RAR   , IOPT     , RAR(NTR),
-     *                 NODIM , NOBRK  , AMISS , IAR(NTI) , RAR(NR2))
-         STRNG3 = 'breakpoint'
-         CALL DLWQJ3 ( LUNWR2 , LUNUT   , IWIDTH , NOBRK  , IAR    ,
-     *                 RAR(NTS),RAR(NR2), ITMNR  , IDMNR  , IORDER ,
-     *                 SCALE  , ODS     , BINFIL , IOPT   , IPRO   ,
-     *                 ITFACW , DTFLG1  , DTFLG3 , IFILSZ , JFILSZ ,
-     *                 SNAME  , STRNG1  , STRNG2 , STRNG3 , IOUTPT )
-         IF ( IERR2 .EQ. 2 ) THEN
-            IERR2 = -2
-            GOTO 530
-         ENDIF
-         IF ( IERR2 .EQ. 3 ) GOTO 510
-         IORDER = 0
-         IFLAG  = 0
-         IOFF   = 0
-         IOPT   = 1
-         AMISS  = -999.0
-         ITTIM  = 0
-         NOBRK  = 0
-         ITEL   = 0
-         SCALE  = .FALSE.
-         ODS    = .FALSE.
-         BINFIL = .FALSE.
-         NEWREC = .FALSE.
-         GOTO  10
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. ods ) then
+         nti  = noitm + nodim + itmnr + idmnr + 1
+         ntr  = itel  + nconst + 1
+         ntd  = (ntr+1)/2 + 1
+         nts  = nconst + 1
+         iim  = iimax - nti
+         irm  = irmax - ntr
+         call dlwq5c ( chulp , lunut  , car   , iar      , rar(ntr),
+     *                 icmax , iimax  , irmax , drar     , noitm   ,
+     *                 nodim , iorder , scale , itmnr    , idmnr   ,
+     *                         amiss  , nobrk , ierr2    , iwar    )
+         if ( ierr2 .ne. 0 ) goto 510
+         nr2 = ntr + noitm*nodim*nobrk
+         call dlwq5e ( lunut , iar    , noitm , itmnr    , nodim   ,
+     *                 idmnr , iorder , rar   , iopt     , rar(ntr),
+     *                 nodim , nobrk  , amiss , iar(nti) , rar(nr2))
+         strng3 = 'breakpoint'
+         call dlwqj3 ( lunwr2 , lunut   , iwidth , nobrk  , iar    ,
+     *                 rar(nts),rar(nr2), itmnr  , idmnr  , iorder ,
+     *                 scale  , ods     , binfil , iopt   , ipro   ,
+     *                 itfacw , dtflg1  , dtflg3 , ifilsz , jfilsz ,
+     *                 sname  , strng1  , strng2 , strng3 , ioutpt )
+         if ( ierr2 .eq. 2 ) then
+            ierr2 = -2
+            goto 530
+         endif
+         if ( ierr2 .eq. 3 ) goto 510
+         iorder = 0
+         iflag  = 0
+         ioff   = 0
+         iopt   = 1
+         amiss  = -999.0
+         ittim  = 0
+         nobrk  = 0
+         itel   = 0
+         scale  = .false.
+         ods    = .false.
+         binfil = .false.
+         newrec = .false.
+         goto  10
+      endif
 !
 !          Absolute or relative timers
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:8) .EQ. 'ABSOLUTE') THEN
-         WRITE ( LUNUT , 1135 )
-         CHULP = 'TIME'
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp(1:8) .eq. 'ABSOLUTE') then
+         write ( lunut , 1135 )
+         chulp = 'TIME'
+      endif
 !
 !          Say it is a time function
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP(1:4) .EQ. 'TIME' ) THEN
-         ITTIM = 1
-         IOPT  = 1
-         GOTO 10
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp(1:4) .eq. 'TIME' ) then
+         ittim = 1
+         iopt  = 1
+         goto 10
+      endif
 !
 !          Scale factors begin
 !
-      IF ( IABS(ITYPE) .EQ. 1 .AND. CHULP .EQ. 'SCALE' ) THEN
-         IF ( NODIM .EQ. 0 ) THEN
-            WRITE ( LUNUT , 1180 )
-            IERR2 = 1
-            GOTO 510
-         ENDIF
-         IF ( ITEL .NE. 0 ) THEN
-            WRITE ( LUNUT , 1190 )
-            IERR2 = 1
-            GOTO 510
-         ENDIF
-         IFLAG = 4
-         SCALE = .TRUE.
-         GOTO 10
-      ENDIF
+      if ( iabs(itype) .eq. 1 .and. chulp .eq. 'SCALE' ) then
+         if ( nodim .eq. 0 ) then
+            write ( lunut , 1180 )
+            ierr2 = 1
+            goto 510
+         endif
+         if ( itel .ne. 0 ) then
+            write ( lunut , 1190 )
+            ierr2 = 1
+            goto 510
+         endif
+         iflag = 4
+         scale = .true.
+         goto 10
+      endif
 !          Getting the scale factors
-      IF ( IFLAG .EQ. 4 ) THEN
-         ITEL = ITEL + 1
-         RAR(ITEL+NCONST) = RHULP
-         IF ( ITEL .EQ. IDMNR ) IFLAG = 0
-         GOTO 10
-      ENDIF
+      if ( iflag .eq. 4 ) then
+         itel = itel + 1
+         rar(itel+nconst) = rhulp
+         if ( itel .eq. idmnr ) iflag = 0
+         goto 10
+      endif
 !
-      WRITE ( LUNUT , 1320  ) CHULP
-      WRITE ( LUNUT , '(A)' )
+      write ( lunut , 1320  ) chulp
+      write ( lunut , '(A)' )
      *   ' Expected character string should be a valid level 2 keyword'
-      IERR2 = 1
-  510 CLOSE ( LUNWR2 )
-      DO 520 I = 2 , LSTACK
-         IF ( LCH(I) .NE. ' ' ) THEN
-            CLOSE ( ILUN(I) )
-            LCH (I) = ' '
-            ILUN(I) =  0
-         ENDIF
-  520 CONTINUE
-  530 NEWRSP = NEWRSP + JFILSZ
-      NEWISP = NEWISP + IFILSZ
+      ierr2 = 1
+  510 close ( lunwr2 )
+      do 520 i = 2 , lstack
+         if ( lch(i) .ne. ' ' ) then
+            close ( ilun(i) )
+            lch (i) = ' '
+            ilun(i) =  0
+         endif
+  520 continue
+  530 newrsp = newrsp + jfilsz
+      newisp = newisp + ifilsz
       call check  ( chulp  , iwidth , iblock , ierr2  , ierr   )
   540 if ( timon ) call timstop( ithndl )
-      RETURN
+      return
 !
- 1000 FORMAT ( /' WARNING: Old file structure is used for this data !' )
- 1002 FORMAT (  ' Delay integers: IDATE = ',I6,', ITIME = ',I6,'.' )
- 1003 FORMAT (  ' New reference time is day: ',I2,'-',I2,'-',I4,
+ 1000 format ( /' WARNING: Old file structure is used for this data !' )
+ 1002 format (  ' Delay integers: IDATE = ',I6,', ITIME = ',I6,'.' )
+ 1003 format (  ' New reference time is day: ',I2,'-',I2,'-',I4,
      *          ' / ',I2,'H-',I2,'M-',I2,'S.' )
- 1004 FORMAT ( /' ERROR: you specified the TIME_DELAY keyword without',
+ 1004 format ( /' ERROR: you specified the TIME_DELAY keyword without',
      *          ' a valid value string for the delay !'/' 2 integers',
      *          ' are expected in YYMMDD and HHMMSS format !')
- 1005 FORMAT ( /' Linear interpolation is selected !' )
- 1010 FORMAT (  ' ERROR: USEFOR is not alowed here. Specify',
+ 1005 format ( /' Linear interpolation is selected !' )
+ 1010 format ( /' ERROR: USEFOR is not alowed here. Specify',
      *                 ' ITEM or CONCENTRATION first !' )
- 1020 FORMAT ( /' BLOCKED per ITEM:'   )
- 1030 FORMAT ( /' ERROR: Second time ITEMs keyword in this block !' )
- 1040 FORMAT ( /' ITEMs within the concentration blocks:'   )
- 1050 FORMAT ( /' BLOCKED per CONCENTRATION:'   )
- 1060 FORMAT ( /' CONCENTRATIONs within the item blocks:'   )
- 1070 FORMAT ( /' ERROR: Second time CONCENs keyword in this block !' )
- 1080 FORMAT ( /' ERROR: Nr of ITEMS (',I5,') or nr of concentrations',
+ 1011 format ( /' ERROR: USEDATA_ITEM is not alowed here. Specify',
+     *                 ' before ITEM or CONCENTRATION !' )
+ 1012 format ( /' ERROR: Expected a DATA_ITEM name' )
+ 1013 format ( /' ERROR: Expected USEDATA_ITEM keyword after USEDATA_ITEM <data_item>!' )
+ 1015 format ( /' When the DATA_ITEM ',A,' nr: ',I5,' is met, data is applied to the flowing items:'   )
+ 1016 format ( /' WARNING: DATA_ITEM has already been used, and is now redefined!' )
+ 1020 format ( /' BLOCKED per ITEM:'   )
+ 1021 format ( /' IDENTICAL DATA for all items ITEMS:'   )
+ 1022 format ( /' SINGLE BLOCK for DATA_ITEM:'   )
+ 1023 FORMAT (  ' Input DATA_ITEM ',A,' nr:',I5,' will be used for ',A,' nr:',I5,' with ID  : ', A20 )
+ 1024 FORMAT (  ' Input DATA_ITEM ',A,' nr:',I5,' will be used for ',A,' nr:',I5,' with type: ', A20 )
+ 1030 format ( /' ERROR: Second time ITEMs and/or DATA_ITEMs keyword in this block !' )
+ 1040 format ( /' ITEMs within the concentration blocks:'   )
+ 1045 format (  ' ERROR: Only one named DATA_ITEM allowed!' )
+ 1046 format (  ' WARNING: The DATA_ITEM does not reference to any valid ITEM! Data will be ignored.' )
+ 1047 format (  ' WARNING: No USEDATA_ITEM was not found for DATA_ITEM! Data will be ignored.' )
+ 1050 format ( /' BLOCKED per CONCENTRATION:'   )
+ 1060 format ( /' CONCENTRATIONs within the item blocks:'   )
+ 1070 format ( /' ERROR: Second time CONCENs keyword in this block !' )
+ 1080 format ( /' ERROR: Nr of ITEMS (',I5,') or nr of concentrations',
      *          ' (',I5,') is zero for this DATA block !' )
- 1110 FORMAT (  ' DATA will be retrieved from ODS-file: ',A )
- 1120 FORMAT (  ' ERROR: Insufficient memory ! Available:',I10,
+ 1110 format (  ' DATA will be retrieved from ODS-file: ',A )
+ 1120 format (  ' ERROR: Insufficient memory ! Available:',I10,
      *                                            ', needed:',I10,' !' )
- 1130 FORMAT (  ' This block consists of a time function.' )
- 1135 FORMAT (  ' Absolute times (YYYY/MM/DD;HH:MM:SS) expected in next'
+ 1130 format (  ' This block consists of a time function.' )
+ 1135 format (  ' Absolute times (YYYY/MM/DD;HH:MM:SS) expected in next'
      *         ,' time function block.' )
- 1160 FORMAT (  ' Number of valid time steps found: ',I6 )
- 1170 FORMAT (  ' This block consists of constant data.' )
- 1180 FORMAT (  ' ERROR: number of substances is zero !' )
- 1190 FORMAT (  ' ERROR: data has already been entered !' )
- 1320 FORMAT (  ' ERROR: token found on input file: ',A )
- 1330 FORMAT (/1X, 59('*'),' B L O C K -',I2,' ',5('*')/)
- 1340 FORMAT (  ' Output on administration only writen for output',
+ 1160 format (  ' Number of valid time steps found: ',I6 )
+ 1170 format (  ' This block consists of constant data.' )
+ 1180 format (  ' ERROR: number of substances is zero !' )
+ 1190 format (  ' ERROR: data has already been entered !' )
+ 1320 format (  ' ERROR: token found on input file: ',A )
+ 1330 format (/1X, 59('*'),' B L O C K -',I2,' ',5('*')/)
+ 1340 format (  ' Output on administration only writen for output',
      *          ' option 3 and higher !' )
- 1350 FORMAT (  ' Output of the data only writen for output',
+ 1350 format (  ' Output of the data only writen for output',
      *          ' option 4 and higher !' )
- 1360 FORMAT (  ' ERROR: no (valid) DATA record available !' )
- 2220 FORMAT (  ' Input comes from binary file: ',A      )
+ 1360 format (  ' ERROR: no (valid) DATA record available !' )
+ 2220 format (  ' Input comes from binary file: ',A      )
 !
-      END
+      end
 !
 !     Additional documentation on the memory lay out
 !

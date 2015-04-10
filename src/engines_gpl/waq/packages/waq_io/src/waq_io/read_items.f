@@ -106,6 +106,10 @@
      *         (  ctoken(1: 5) .eq. 'BLOCK'        .or.
      *            ctoken(1: 6) .eq. 'LINEAR'       .or.
      *            ctoken(1: 4) .eq. 'ITEM'         .or.
+     *            ctoken(1:13) .eq. 'IDENTICALITEM'.or.
+     *            ctoken(1:12) .eq. 'USEDATA_ITEM' .or.
+     *            ctoken(1: 7) .eq. 'FORITEM'      .or.
+     *            ctoken(1: 9) .eq. 'DATA_ITEM'    .or.
      *            ctoken(1: 6) .eq. 'CONCEN'       .or.
      *            ctoken(1: 6) .eq. 'DATA'         .or.
      *            ctoken(1:10) .eq. 'TIME_DELAY'   .or.

@@ -23,7 +23,7 @@
 
       SUBROUTINE DLWQ5D ( LUNUT  , IAR    , RAR    , IIMAX  , IRMAX  ,
      *                    IPOSR  , NPOS   , ILUN   , LCH    , LSTACK ,
-     *                    CCHAR  , CHULP  , NOTOT  , ITTIM  , NOBRK  ,
+     *                    CCHAR  , CHULP  , NOTOT  , NOTOTC , ITTIM  , NOBRK  ,
      *                    IOPT   , DTFLG1 , DTFLG3 , ITFACT , ITYPE  ,
      *                             IHULP  , RHULP  , IERR   , ierr3  )
 !
@@ -74,7 +74,7 @@
 !
       use timers       !   performance timers
 
-      INTEGER       IIMAX  , IRMAX
+      INTEGER       IIMAX  , IRMAX, I
       CHARACTER*(*) LCH(LSTACK) , CHULP
       CHARACTER*1   CCHAR
       DIMENSION     IAR(*) , RAR(*) , ILUN( LSTACK )
@@ -154,9 +154,16 @@
          GOTO 10
       ENDIF
 !
-      IF ( .NOT. IGNORE ) RAR(ITEL) = RHULP
+      IF ( .NOT. IGNORE ) THEN
+         DO I = 1, NOTOT/NOTOTC
+            RAR(ITEL + (I - 1) * NOTOTC) = RHULP
+         END DO
+      ENDIF
 !        are we to expect a new record ?
-      IF ( MOD(ITEL2,NOTOT) .EQ. 0 ) NEWREC = .TRUE.
+      IF ( MOD(ITEL2,NOTOTC) .EQ. 0 ) THEN
+         NEWREC = .TRUE.
+         ITEL = ITEL + NOTOT - NOTOTC
+      END IF
 !        it was a constant, so we can now return.
       IF ( NEWREC .AND. ITTIM .NE. 1 ) THEN
          NOBRK = 1
