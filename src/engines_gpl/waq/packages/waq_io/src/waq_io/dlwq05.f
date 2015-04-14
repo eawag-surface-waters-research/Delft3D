@@ -120,8 +120,8 @@
 !
       IF ( NOBND .EQ. 0 ) THEN
          WRITE ( LUNUT , 2000 )
-         IFOUND = GETTOKEN ( CHULP, IDUMMY, ITYPE, IERR2 )
-         IF (IERR2 .EQ. 2) THEN 
+         IFOUND = GETTOKEN ( CHULP, IDUMMY, RDUMMY, ITYPE, IERR2 )
+         IF (IERR2 .EQ. 2) THEN
             GOTO 175
          ELSE IF (ITYPE.EQ.2 .AND. IDUMMY.EQ.0) THEN
             WRITE ( LUNUT , 2120 )
