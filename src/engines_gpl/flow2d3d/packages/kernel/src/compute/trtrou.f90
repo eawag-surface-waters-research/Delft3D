@@ -685,7 +685,9 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              rcgrn = calca1*log10(calca2*depth/d90)
              !
              thetag = u2dh**2/(rcgrn**2*relden*d50)
-             if (thetag<=0.0) then
+             if (u2dh<=0.0_fp) then
+                thetag = 0.001_fp
+             elseif (thetag<=0.0_fp) then
                 write (cnum(1), '(i12)') nc
                 call remove_leading_spaces(cnum(1)   ,numlen(1) )
                 write (cnum(2), '(i12)') mc

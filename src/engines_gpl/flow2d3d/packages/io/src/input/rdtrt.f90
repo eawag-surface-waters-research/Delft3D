@@ -555,8 +555,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     if (filtmp == ' ') then
        i = 0
-       do m = 1,gdp%d%mmax
-          do n = 1,gdp%d%nmax
+       do m = mfg,(mfg+gdp%d%mmax-1)
+          do n = nfg,(nfg+gdp%d%nmax-1)
              i = i+1
              ittaru(i,1) = n
              ittaru(i,2) = m
