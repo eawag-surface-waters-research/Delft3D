@@ -1412,6 +1412,7 @@ stocfl,stocsu,stocsc
 "dDigS1HCH ","HCHS2     ",  -1.00000
 "dDigS2HCH ","HCHS2     ",   1.00000
 "dEvapConti","Continuity",   1.00000
+"dEvapConti","Prec      ",   1.00000
 "dAtmDepIM1","IM1       ",   1.00000
 "dAtmDepIM2","IM2       ",   1.00000
 "dAtmDepIM3","IM3       ",   1.00000
