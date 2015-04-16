@@ -274,6 +274,7 @@
 !
          okay = ios==0
       enddo
+      close (lun_ini)
       if ( timon ) call timstop ( ithndl )
       return
 !     error handling
