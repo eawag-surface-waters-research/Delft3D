@@ -28,6 +28,7 @@ module oildsp_mod
                             npart   , mpart   , wpart   , radius  , nodye   ,    &
                             npwndw  , nopart  , itime   , idelt   , wvelo   ,    &
                             const   , lun2    , nosubs  , nolay   , lgrid2  ,    &
+                            lgrid3,                                              &
                             mmax    , xb      , yb      , kpart   , mapsub  ,    &
                             isfile  , nfract  , mstick  , nstick  , fstick  ,    &
                             xa      , ya      , pg      , lsettl  , xpart   ,    &
@@ -128,6 +129,8 @@ module oildsp_mod
 !                                                                  evaporation constant is 1 for light oils and 10 for heavy oils
 !                                                                 (limit at visc=500)
 !                             26 July      2011 by Leo Postma      some cosmetic redesign and paralellism
+!                             27 Jan       2015 by Frank Kleissen   To calculate the concentration of surface floating oil lgrid2 was used. the Concentration 
+!                                                                  should be derived from lgri3 that contains the active segment numbering, this was corrected
 
 !     note                  : ioilt(1) = mapsub(1), oil in top layer, 1th fraction
 !                             ioild(1) = mapsub(2), oil dispersed, 1th fraction
@@ -184,6 +187,7 @@ module oildsp_mod
       real     ( dp), intent(in   ) :: wvelo  (*)            !< wind velocity
       integer  ( ip), pointer       :: lgrid (:,:)           !< active grid layout of the area
       integer  ( ip), pointer       :: lgrid2(:,:)           !< total grid layout of the area
+      integer  ( ip), pointer       :: lgrid3(:,:)           !< total grid layout of the area
       real     ( rp), pointer       :: xb     (:)            !< x-values of the corners of the gridcells
       real     ( rp), pointer       :: yb     (:)            !< y-values of the corners of the gridclls
       integer  ( ip), pointer       :: npart  (:)            !< 1st cell index of each particle
@@ -678,7 +682,7 @@ module oildsp_mod
             !if evaporation option (Fingas) is used then the Fingas rate can be scaled using the oil fraction (ie 1-waterfraction)
 
          enddo
-         ic = lgrid(npart(i), mpart(i))
+         ic = lgrid3(npart(i), mpart(i))
          if ( ic .gt. 0 ) then
 
 !           Compute the Delvigne/Sweeny entrainment value and store for all fractions and particles

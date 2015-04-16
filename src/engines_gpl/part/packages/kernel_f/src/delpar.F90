@@ -713,6 +713,7 @@ contains
                              npart    , mpart    , wpart    , radius   , nodye    ,    &
                              npwndw   , nopart   , itime    , idelt    , wvelo    ,    &
                              const    , lun(2)   , nosubs   , noslay   , lgrid2   ,    &
+                             lgrid3   ,                                                &
                              mmaxp    , xb       , yb       , kpart    , mapsub   ,    &
                              isfile   , nfract   , mstick   , nstick   , fstick   ,    &
                              xa       , ya       , pg(1)    , lsettl   , xpart    ,    &
