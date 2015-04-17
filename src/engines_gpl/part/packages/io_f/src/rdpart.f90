@@ -586,10 +586,14 @@
                i = i + 1
                if ( gettoken( const(i), ierr2 ) .ne. 0 ) goto 4020   ! dispersion rate/day
                write ( lun2, '(8x,a,es15.7)' ) 'Dispersion rate (per day)                        : ', const(i)    !  3
-            else
+            elseif (const(i).eq.1) then
                i = i + 1
                const(i) = 0.0                                        ! not used
                write ( lun2, '(8x,a,es15.7)' ) 'Dispersion C0 from Delvigne/Sweeney formula'
+            elseif (const(i).eq.2) then
+               i = i + 1
+               if ( gettoken( const(i), ierr2 ) .ne. 0 ) goto 4020   ! dispersion rate/day
+               write ( lun2, '(8x,a,es15.7)' ) 'Minimum wind speed dispersion activation        : ', const(i)    !  3
             endif
             i = i + 1
             if ( gettoken( const(i), ierr2 ) .ne. 0 ) goto 4020

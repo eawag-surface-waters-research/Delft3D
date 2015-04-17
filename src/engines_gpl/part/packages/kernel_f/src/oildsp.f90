@@ -33,7 +33,7 @@ module oildsp_mod
                             isfile  , nfract  , mstick  , nstick  , fstick  ,    &
                             xa      , ya      , pg      , lsettl  , xpart   ,    &
                             ypart   , zpart   , za      , locdep  , dps     ,    &
-                            tcktot  , substi  , hmin    , npmax   , rhow    ,    &
+                            tcktot  , substi  ,           npmax   , rhow    ,    &
                             amassd  , ioptrad , ndisapp , idisset , tydisp  ,    &
                             efdisp  , xpoldis , ypoldis , nrowsdis, wpartini,    &
                             iptime)
@@ -182,7 +182,7 @@ module oildsp_mod
       real     ( rp), pointer       :: const  (:)            !< constants as read from the input file
       real     ( rp), intent(  out) :: fstick (nfract)       !< sticking probability of a fraction
       real     ( rp), intent(in   ) :: rhow                  !< density of water
-      real     ( rp), intent(in   ) :: hmin                  !< hmin=0.0005 m based on adios (see kleissen 2003)
+      real     ( rp)                :: hmin                  !< hmin=0.0005 m based on adios (see kleissen 2003)
       real     ( rp), intent(  out) :: radius (nodye)        !< computed radius of dye releases of oil
       real     ( dp), intent(in   ) :: wvelo  (*)            !< wind velocity
       integer  ( ip), pointer       :: lgrid (:,:)           !< active grid layout of the area
@@ -229,7 +229,6 @@ module oildsp_mod
       real   (rp), parameter   :: rk2    = 1.45          ! Fays constant k2
       real   (rp), parameter   :: visw   = 1.0e-6        ! viscosity of water
       real   (rp), parameter   :: grav   = 9.81          ! accelleration of gravity
-      real   (rp), parameter   :: wveloi = 5.0           ! wind velocity at which white capping starts
       real   (rp), parameter   :: cb     = 0.032         ! pre-constant Holthuyzen
       logical    , parameter   :: lplgr  = .true.        ! there is a plotgrid
 
@@ -295,6 +294,7 @@ module oildsp_mod
       integer  ( ip) :: ix , iy                  ! help variables plot grid indices
       real     ( rp) :: xpf, ypf                 ! help variables plot grid coordinates
       real     ( rp) :: windw1, windw3           ! help variables plot window
+      real     ( rp) :: wveloi                   ! wind velocity at which white capping starts
       integer  ( ip) :: ndisp                    ! number accumulator entrained particles
       integer  ( ip) :: nevap                    ! number accumulator evaporated particles
       integer  ( ip) :: ic                       ! help variable for the grid index
@@ -414,6 +414,7 @@ module oildsp_mod
          pi     = 4.0*atan(1.0)
          wpartini=0.0
          npadd = 0   !additional parameters in case we use evaporatoin option 0, added to maintain backward compatibility
+         wveloi = 5.0   ! default value 
          
          do 10 ifrac = 1, nfract
             ioptev (ifrac) = const((ifrac-1)*nfcons+npadd+ 1)       ! evaporatoin option (-2 (Fingas incl. effect of waterfraction on evaporation, or -1 = fingas, >0 = first order)
@@ -440,8 +441,11 @@ module oildsp_mod
             ioils  (ifrac) = mapsub((ifrac-1)*3 + 3)
             if ( ioptd(ifrac)   .eq.   0   ) then              !  dispersion rate/day
                fractd( ifrac )    = const ((ifrac-1)*nfcons+npadd+ 3) * idelt/86400.0
-            else                                               !  delvigne/sweeny
+            elseif ( ioptd(ifrac)   .eq.   1   ) then                                               !  delvigne/sweeny
                fractd( ifrac )    = 0.0
+            elseif ( ioptd(ifrac)   .eq.   2   ) then
+               wveloi = const ((ifrac-1)*nfcons+npadd+ 3)           !when option 2 the minimu windspeed at which
+                                                           !waves start to break can be varied
             endif
             rhooil(ifrac) = const ((ifrac-1)*nfcons+npadd+ 9)
             visotmp(ifrac) = const ((ifrac-1)*nfcons+npadd+ 10)
@@ -450,6 +454,7 @@ module oildsp_mod
                viso   ( ifrac, i ) = visotmp(ifrac)  !  kin. viscosity
             enddo
    10    continue
+         hmin = const ((nfract-1)*nfcons*nfract+npadd+ 11)
 
 !        calculate and report the release radius (Fay-Holt formula) per release
 
@@ -503,7 +508,12 @@ module oildsp_mod
             if ( ioptd(ifrac) .eq. 1 ) then
                write( lun2, * ) ' Fraction ', ifrac,' volatile fraction: ', volfrac(ifrac)
                write( lun2, * ) ' Oil dispersion according to Delvigne/Sweeney'
+            elseif ( ioptd(ifrac) .eq. 2 ) then
+               write( lun2, * ) ' Fraction ', ifrac,' volatile fraction: ', volfrac(ifrac)
+               write( lun2, * ) ' Oil dispersion according to Delvigne/Sweeney'
+               write( lun2, * ) ' Wind speed at which waves start to break: ', wveloi
             else
+            
                write( lun2, * ) ' Oil dispersion according to a fixed % : '
                write( lun2, * ) ' Fraction ',ifrac,' dispersed: ', fractd( ifrac )/idelt*86400.0,' per day '
                write( lun2, * ) ' Fraction ',ifrac,' dispersed: ', fractd(ifrac)  ,' per time step '
@@ -750,7 +760,7 @@ module oildsp_mod
                   endif
 !     This is the Delvigne/Sweeny formula for entrainment in the model
 
-                  if ( ioptd(ifrac) .eq. 1 ) then                     !  delvigne/sweeny
+                  if ( ioptd(ifrac) .eq. 1 .or. ioptd(ifrac) .eq. 2) then                     !  delvigne/sweeny
                      if ( viso(ifrac,i) .lt. 125.0 ) then
                         cdelv  = fac1 * viso(ifrac,i)**(-0.0658)
                      elseif ( viso(ifrac,i) .lt. 10000.0 )then        !when visc exceeds 10000 then this process stops

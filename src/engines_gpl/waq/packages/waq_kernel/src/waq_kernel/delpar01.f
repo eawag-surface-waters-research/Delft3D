@@ -257,11 +257,12 @@
      &                    npart    , mpart    , wpart    , radius   , nodye    ,    
      &                    npwndw   , nopart   , itime    , idelt    , wvelo    ,    
      &                    const    , lunut    , nosubs   , noslay   , lgrid2   ,    
+     &                    lgrid3   ,
      &                    mmaxp    , xb       , yb       , kpart    , mapsub   ,    
      &                    isfile   , nfract   , mstick   , nstick   , fstick   ,    
      &                    xa       , ya       , pg(1)    , lsettl   , xpart    ,    
      &                    ypart    , zpart    , za       , locdep   , dpsp     ,    
-     &                    tcktot   , substi   , hmin     , npmax    , rhow     ,    
+     &                    tcktot   , substi   ,            npmax    , rhow     ,    
      &                    amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    
      &                    efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,
      &                    iptime)

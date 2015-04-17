@@ -504,14 +504,10 @@ contains
       oil2dh = oil .and. layt == 1
       oil3d  = oil .and. layt  > 1
 
-!     minimum thickness oil layer (since v3.66.00)
-
-      if (oil2dh) hmin = const(noconsp ) ! 2dh: last par        =hmin
 
 !     deflection angle for coriolis effect.(3d oil module only)
 
       if (oil3d) then
-         hmin     = const(noconsp-1)
          defang   = const(noconsp)
       endif
 !3d
@@ -718,7 +714,7 @@ contains
                              isfile   , nfract   , mstick   , nstick   , fstick   ,    &
                              xa       , ya       , pg(1)    , lsettl   , xpart    ,    &
                              ypart    , zpart    , za       , locdep   , dpsp     ,    &
-                             tcktot   , substi   , hmin     , npmax    , rhow     ,    &
+                             tcktot   , substi   ,            npmax    , rhow     ,    &
                              amassd   , ioptrad  , ndisapp  , idisset  , tydisp   ,    &
                              efdisp   , xpoldis  , ypoldis  , nrowsdis , wpartini ,    &
                              iptime)
