@@ -3217,7 +3217,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "ExcBurS1DM","x"," ",   -999.000    ,"(gDM/m2/d)          ","excess burial DM from layer S1                    ","volume    ","volume    "," ","                              "
 "fBurS2DM  ","x"," ",    0.00000    ,"(gDM/m2/d)          ","total burial flux DM from layer S2                ","volume    ","volume    "," ","                              "
 "UdfBurS2DM","x"," ",   -999.000    ,"(gDM/m2/d)          ","zero-order burial rate DM from layer S2           ","volume    ","volume    "," ","                              "
-"ExcBurS2DM","x"," ",   -999.000    ,"(gDM/m2/d)          ","excess burial DM from layer S1                    ","volume    ","volume    "," ","                              "
+"ExcBurS2DM","x"," ",   -999.000    ,"(gDM/m2/d)          ","excess burial DM from layer S2                    ","volume    ","volume    "," ","                              "
 "fBurS1IM1 ","x"," ",    0.00000    ,"(g/m2/d)            ","burial flux of IM1 from layer S1                  ","volume    ","volume    "," ","                              "
 "dBurS1IM1 ","x"," ",   -999.000    ,"(g/m3/d)            ","burial flux IM1 from layer S1                     ","volume    ","volume    "," ","                              "
 "fBurS1IM2 ","x"," ",    0.00000    ,"(g/m2/d)            ","burial flux IM2 from layer S1                     ","volume    ","volume    "," ","                              "
