@@ -401,7 +401,7 @@ contains
 
       integer(ip)         :: ierror  , itime   , lunpr
       integer(ip)         :: nosubud , noth
-      integer(ip)         :: ilp
+      integer(ip)         :: ilp, iext, nores, noras
       real(sp)            :: dtstep
       logical             :: update
       character(len=*)    :: ifnam
@@ -586,6 +586,12 @@ contains
          call inipart( lgrid   , lgrid2  , nmaxp   , mmaxp   , xb      ,    &
                        yb      , nopart  , nosubs  , substi  , ini_file,    &
                        xpol    , ypol    , npolmax , wpart   , xpart   ,    &
+                       ypart   , zpart   , npart   , mpart   , kpart   ,    &
+                       iptime  , npmax   , nrowsmax, lunpr   )
+      elseif ( ini_opt .eq. 2 .and. oil ) then
+          call inipart_asc( lgrid   , lgrid2  , nmaxp   , mmaxp   , xb  ,    &
+                       yb      , nopart  , nosubs  , substi  , ini_file,    &
+                       xpol    , ypol    , wpart   , xpart   , conc2 ,       &
                        ypart   , zpart   , npart   , mpart   , kpart   ,    &
                        iptime  , npmax   , nrowsmax, lunpr   )
       endif
