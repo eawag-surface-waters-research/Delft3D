@@ -849,10 +849,24 @@
 
 !           get maximum no. of initial particles (npmax) and
 !           maximum no. of rows for polygones (nrowsmax)
+            write ( lun2, * ) ' Reading number of initial particles from polygon file:', trim(ini_file)
 
             call getdim_ini ( 50, ini_file, npmax, npolmax, nrowsmax, lun2 )
             close ( 50 )
          endif
+!        ini_opt = 2 : ascii text file from rasterdata
+         if (ini_opt .eq. 2 ) then                              
+            if ( gettoken( ini_file, ierr2 ) .ne. 0 ) goto 6012
+            open ( 50, file=ini_file, status='old', iostat=ierr2 )
+            if ( ierr2 .ne. 0 ) go to 1710
+
+!           get maximum no. of initial particles (npmax) and
+!           maximum no. of rows for coordinates (nrowsmax)
+            write ( lun2, * ) ' Reading number of initial particles from ascii file:', ini_file(1:len_trim(idp_file))
+            call getdim_asc ( 50, ini_file, npmax, nrowsmax, lun2 )
+            close ( 50 )
+         endif
+
 
 !     optional definition of dispersant releases and boom introductions (from v3.76)
 
@@ -1014,6 +1028,14 @@
       if ( gettoken( cbuffer, nosta, itype, ierr2 ) .ne. 0 ) goto 4031
       if ( itype .eq. 1 ) then
          idp_file = cbuffer
+         if ( idp_file .ne. ' ' ) then
+            write ( *, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
+            write ( lun2, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
+            call openfl ( 50, idp_file, ftype(2), 0 )
+!           get maximum no. of initial particles (npmax), don't combine ini_oil with this!
+            read ( 50 ) idummy, npmax, idummy
+            close ( 50 )
+         endif
          if ( gettoken( nosta, ierr2 ) .ne. 0 ) goto 4031
       endif
       if ( ihstepp .le. 0 .and. nosta .gt. 0 ) then
@@ -2304,6 +2326,63 @@
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       write(lunlog,'(//a)') ' Error: premature end-of-file found'
       write(lunlog,'(/a )') ' Please check file !!'
+      call srstop(1)
+      end subroutine
+
+subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
+                              lunlog   )
+
+      use get_key_mod
+      use openfl_mod          ! explicit interface
+      use precision_part      ! flexible size definition
+      implicit none           ! force explicit typing
+
+      integer, parameter                  :: max_len_line=200
+      integer, parameter                  :: max_len_key=20
+      integer                             :: npart_ini,lun, ios
+      integer                             :: npart_asc, npart_fact
+      integer (ip)                        :: nrowsmax
+      integer                             :: lunlog
+      integer                             :: len_file
+      character(len=256)                  :: asc_file
+      character(len=max_len_key )         :: key
+      logical                             :: key_found
+      logical more_data
+
+      len_file = len_trim(asc_file)
+
+      npart_ini = 0  ! count no. of initial particles
+      ios       = 0
+      do while ( ios == 0 )
+
+          key = 'particles'
+          call get_int_key(lun,key,npart_asc,key_found)
+          if (.not. key_found) go to 1000
+
+          key = 'factor'
+          call get_int_key(lun,key,npart_fact,key_found)
+          if (.not. key_found) go to 1000
+          npart_ini = npart_ini + npart_asc*npart_fact
+
+          nrowsmax = npart_asc
+          if ( .not. more_data(lun) ) go to 100
+
+      enddo
+  100 continue
+      return
+
+!     error handling
+
+ 1000 write(*,'(//a,a)')  &
+        ' Error: problem while reading ini-file ',asc_file(:len_file)
+      write(*     ,'(//a,a,a,a)')  &
+        ' Error: could not find key ',key
+      write(*     ,'(/a)') ' Please check file !!'
+      write(lunlog,'(//a,a)')  &
+        ' Error: problem while reading ini-file ',asc_file(:len_file)
+      write(lunlog,'(//a,a,a,a)')  &
+        ' Error: could not find key ',key
+      write(lunlog,'(/a)') ' Please check file !!'
       call srstop(1)
       end subroutine
 
