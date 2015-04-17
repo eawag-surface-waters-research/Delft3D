@@ -507,10 +507,12 @@ contains
 !**   store 'old' particles positions
 
       if ( threed .and. oilmod .and. coriol ) then
-         xpart0 = xpart
-         ypart0 = ypart
-         npart0 = npart
-         mpart0 = mpart
+         do ipart = 1, nopart
+           xpart0(ipart) = xpart(ipart)
+           ypart0(ipart) = ypart(ipart)
+           npart0(ipart) = npart(ipart)
+           mpart0(ipart) = mpart(ipart)
+        enddo
       endif
 
 !**   loop over the particles
