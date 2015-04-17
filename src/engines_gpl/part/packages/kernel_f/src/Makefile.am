@@ -33,7 +33,8 @@ libkernel_f_la_SOURCES = \
          oildsp.f90 \
          umagi.f90 \
          p10cor.f90 \
-         inipart.f90 \
+         inipart_asc \
+		 inipart.f90 \
          densty.f90 \
          part01.f90 \
          part10.f90 \

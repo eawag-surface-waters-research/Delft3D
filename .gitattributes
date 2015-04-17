@@ -1358,6 +1358,7 @@ src/engines_gpl/part/packages/kernel_f/src/diffus.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/dlmain.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/extout.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/inipart.f90 -text
+src/engines_gpl/part/packages/kernel_f/src/inipart_asc.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/mudrel.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/oildsp.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/p10cor.f90 -text

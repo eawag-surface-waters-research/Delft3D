@@ -301,6 +301,7 @@ module partmem
       real          (sp       ) ,  pointer, dimension(:,:,:,: ) :: amapsett
       real          (sp       ) ,  pointer, dimension(:       ) :: xpol
       real          (sp       ) ,  pointer, dimension(:       ) :: ypol
+      real          (sp       ) ,  pointer, dimension(:       ) :: conc2
       character     (len=16   ) ,  pointer, dimension(:       ) :: elt_names
       character     (len=16   ) ,  pointer, dimension(:       ) :: elt_types
       integer       (sp       ) ,  pointer, dimension(:       ) :: elt_bytes

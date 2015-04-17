@@ -186,6 +186,7 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:     ) :: c2
       real          (sp       ) ,  pointer, dimension(:,:     ) :: cdelv
       real          (sp       ) ,  pointer, dimension(:,:     ) :: conc
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: conc2
       real          (sp       ) ,  pointer, dimension(:,:     ) :: constev
       real          (sp       ) ,  pointer, dimension(:,:     ) :: decay
       real          (sp       ) ,  pointer, dimension(:,:     ) :: flres

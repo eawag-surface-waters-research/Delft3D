@@ -67,6 +67,7 @@ contains
       call dealloc(chismp     )
       call dealloc(chispl     )
       call dealloc(conc       )
+      call dealloc(conc2      )
       call dealloc(const      )
       call dealloc(constev    )
       call dealloc(c2         )
