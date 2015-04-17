@@ -79,6 +79,7 @@ module partmem
       integer  ( ip)           :: ntrack        ! substance for number of particles per bin ?
       integer  ( ip)           :: nstick        ! number of sticking substances
       integer  ( ip)           :: nopart        ! number of particles
+      integer  ( ip)           :: nopart_res    ! number of restart particles
       integer  ( ip)           :: npmax         ! maximum number of particles
       integer  ( ip)           :: npolmax       ! maximum number of polygons in initial conditions
       real     ( rp)           :: rough         ! roughness length
@@ -105,6 +106,7 @@ module partmem
       integer  ( ip)           :: ini_opt       ! option for initial conditions of oil
       character(256)           :: ini_file      ! file name initial conditions of oil
       character(256)           :: idp_file      ! file name initial conditions of delpar
+      character(256)           :: res_file      ! file name for restart file written a the end of a run
       integer  ( ip)           :: tydisp        ! type of dispersant application effectiveness parameter
       integer  ( ip)           :: ndisapp       ! number of dispersant applications
       integer  ( ip)           :: tyboom        ! type of boom effectiveness parameter

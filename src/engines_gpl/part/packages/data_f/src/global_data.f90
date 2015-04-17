@@ -240,5 +240,8 @@ module global_pointers
 
 !     special feature parameters
 module spec_feat_par
+      use precision_part
       logical                                                   :: vertical_bounce
+      logical                                                   :: write_restart_file
+      integer  (ip)                                              :: max_restart_age
 end module

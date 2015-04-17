@@ -29,6 +29,7 @@ use precision_part                  ! single/double precision
 use timers
 use fileinfo  , lun=> lunit    ! logical unit numbers for files
 use filtyp_mod                 ! explicit interface
+use spec_feat_par
 !
 !  module procedure(s)
 !
@@ -596,12 +597,17 @@ contains
                        iptime  , npmax   , nrowsmax, lunpr   )
       endif
       if ( idp_file .ne. ' ' ) then
-         write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
-         call openfl ( 50, idp_file, ftype(2), 0 )
-         read ( 50 ) ilp, nopart, ilp
-         do ilp = 1, nopart
-            read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1,ilp)
-         enddo
+         if (modtyp .ne. 6) then
+            write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
+            call openfl ( 50, idp_file, ftype(2), 0 )
+            read ( 50 ) ilp, nopart, nosubs
+            do ilp = 1, nopart
+               read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp),iptime(ilp)
+            enddo
+            close ( 50 )
+         else
+!           Model type 6 (density driven settling) will follow later
+         end if
       endif
 
 !     echo start- and stop-time to screen
@@ -862,6 +868,79 @@ contains
       call exit_alloc ( nstep )
 
       call delete_file ( "particle.wrk", ierror )
+
+      if (write_restart_file) then
+         ! first to calculate the number of particles in the restart files
+         nores = 0
+         noras = 0
+         do ilp = 1, nopart
+            if (npart(ilp)>1.and.mpart(ilp)>1) then          !only for the active particles
+               if (lgrid( npart(ilp), mpart(ilp)).ge.1) then
+                  nores = nores + 1          ! only for the active particles
+                  if (max_restart_age .gt. 0 .and. iptime(ilp) .lt. max_restart_age) then
+                     noras = noras + 1       ! if max_restart_age is a positve and the particles' age is less then max_restart_age
+                  end if
+               end if
+            end if
+         enddo
+
+         res_file = fname(1)
+         iext = len_trim(res_file) - 3
+         if (max_restart_age .lt. 0) then
+!           Write the restart file with all active paritcles
+            if (modtyp.eq.6)then
+               res_file(iext+1:iext+4) = 'ses'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
+               write ( lunpr, * ) ' Including particle dependent settling velocity'
+            else
+               res_file(iext+1:iext+4) = 'res'     !all results, except those that are inactive (outside model)
+            end if
+            write ( lunpr, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
+            call openfl ( 50, res_file, ftype(2), 1 )
+            write ( 50 ) 0, nores, nosubs
+
+            do ilp = 1, nopart
+               if (npart(ilp)>1.and.mpart(ilp)>1) then
+                  if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
+                     if (modtyp.ne.6) then
+                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                                     wpart(1:nosubs,ilp),iptime(ilp)
+                     else
+                        !                    Model type 6 (density driven settling) will follow later
+                     end if
+                  end if
+               end if
+            enddo
+            write (lunpr,*) ' Number of active particles in the restart file: ',nores
+            close ( 50 )
+         else
+!        Write the restart file with all active paritcles below a certain age
+            if (modtyp.eq.6)then
+               res_file(iext+1:iext+4) = 'sas'    !limited number of particles (for 'plastics' modeltype 6 restart, as 'ras' but including settling values)
+               write ( lunpr, * ) ' Including particle dependent settling velocity'
+            else
+               res_file(iext+1:iext+4) = 'ras'    !limited number of particles (remove particles older than a certain age or inactive)
+            end if
+            write ( lunpr, * ) ' Opening restart particles file:', idp_file(1:len_trim(res_file))
+            write ( lunpr, * ) ' Particles older than ',max_restart_age,' seconds are removed'
+            call openfl ( 50, res_file, ftype(2), 1 )
+            write ( 50 ) 0, noras, nosubs
+
+            do ilp = 1, nopart
+               if (npart(ilp)>1.and.mpart(ilp)>1) then
+                  if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than two weeks, time in seconds
+                     if (modtyp.ne.6) then
+                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                                     wpart(1:nosubs,ilp),iptime(ilp)
+                     else
+                        !                       Model type 6 (density driven settling) will follow later
+                     end if
+                  end if
+               end if
+            enddo
+            write (lunpr,*) ' Number of active particles in the restart file with maximum age: ',noras
+            close ( 50 )
+         end if
+      end if
 
       call report_date_time(lunpr)
       write ( *    , '(//a)') ' Normal end of PART simulation'

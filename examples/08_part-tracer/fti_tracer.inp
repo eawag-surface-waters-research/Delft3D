@@ -46,7 +46,9 @@
 ;                            Model specific parameters
  
    0 ; number of model specific parameters
- 
+   
+write_restart_file 
+max_restart_age    3600
 ;                            Timers 
 ;yyyy mm dd hh mm ss 
           0 12 30  0      ;simulation start time 

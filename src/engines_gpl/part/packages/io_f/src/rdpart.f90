@@ -640,6 +640,8 @@
 ! read special features
 ! add defaults when special features are not used first
       vertical_bounce = .true.
+      write_restart_file = .false.
+      max_restart_age = -1
 
       if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) then
          if (ierr2 .eq. 2) then
@@ -655,7 +657,23 @@
                select case (trim(cbuffer))
                case ('no_vertical_bounce')
                   write ( lun2, '(/a)' ) ' Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
+                  write ( *   , '(/a)' ) ' Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
                   vertical_bounce = .false.
+               case ('write_restart_file')
+                  write ( lun2, '(/a)' ) ' Found keyword "write_restart_file".'
+                  write ( *   , '(/a)' ) ' Found keyword "write_restart_file".'
+                  write ( lun2, '(/a,a)' ) ' At the end of a simulation, delpar will write ', &
+                                         'a file containing data for all active particles.'
+                  write ( *   , '(/a,a)' ) ' At the end of a simulation, delpar will write ', &
+                                         'a file containing data for all active particles.'
+                  write_restart_file = .true.
+               case ('max_restart_age')
+                  write ( lun2, '(/a)' ) ' Found keyword "max_restart_age".'
+                  write ( *   , '(/a)' ) ' Found keyword "max_restart_age".'
+                  if (gettoken (max_restart_age, ierr2) .ne. 0 ) goto 9010
+                  if (max_restart_age.eq.0) goto 9011
+                  write ( lun2, '(/a,i)' ) ' Maximum age for particles writen into restart file in seconds: ', max_restart_age
+                  write ( *   , '(/a,i)' ) ' Maximum age for particles writen into restart file in seconds: ', max_restart_age
                case default
                   write ( lun2, '(/a,a)' ) ' Unrecognised keyword: ', trim(cbuffer)
                   goto 9000
@@ -862,7 +880,7 @@
 
 !           get maximum no. of initial particles (npmax) and
 !           maximum no. of rows for coordinates (nrowsmax)
-            write ( lun2, * ) ' Reading number of initial particles from ascii file:', ini_file(1:len_trim(idp_file))
+            write ( lun2, * ) ' Reading number of initial particles from ascii file:', trim(ini_file)
             call getdim_asc ( 50, ini_file, npmax, nrowsmax, lun2 )
             close ( 50 )
          endif
@@ -2170,6 +2188,10 @@
       call srstop(1)
 
 9000  write(*,*) ' Error: reading special features ',ini_file
+      call srstop(1)
+9010  write(*,*) 'Error: value of max_restart_age constant'
+      call srstop(1)
+9011  write(*,*) 'Error: max_restart_age is zero. Did you specify a value?'
       call srstop(1)
       end
 
