@@ -937,7 +937,7 @@ contains
                   end if
                end if
             enddo
-            write (lunpr,*) ' Number of active particles in the restart file with maximum age: ',noras
+            write (lunpr,*) ' Number of active particles in the restart file below maximum age: ',noras
             close ( 50 )
          end if
       end if
