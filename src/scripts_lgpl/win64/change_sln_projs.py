@@ -1,6 +1,11 @@
 import os, sys
 
+#=== Visual Studio version ====================================================
 vs = 2010
+# Don't do vs changes: when opening the solution in a newer vs version, it will be updated automatically
+vs = 0
+
+#=== Intel Fortran compiler version ===========================================
 ifort = 13
 
 sln = "d_hydro_open_source_vs2010.sln"
@@ -166,8 +171,6 @@ def processProjectFile(pfile):
 #
 #
 # MAIN ====================================
-# Don't do vs changes: when opening the solution in a newer vs version, it will be updated automatically
-vs = 0
 ProjectFiles = []
 # Read sln file
 with open(sln, "r") as filinhandle:
@@ -187,15 +190,15 @@ with open(sln, "w") as filouthandle:
             elif vs==2012:
                 line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
             elif vs==2013:
-                line = "Microsoft Visual Studio Solution File, Format Version 13.00\n"
+                line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
             elif vs==2014:
-                line = "Microsoft Visual Studio Solution File, Format Version 14.00\n"
+                line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
             elif vs==2015:
-                line = "Microsoft Visual Studio Solution File, Format Version 15.00\n"
+                line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
             elif vs==2016:
-                line = "Microsoft Visual Studio Solution File, Format Version 16.00\n"
+                line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
             elif vs==2017:
-                line = "Microsoft Visual Studio Solution File, Format Version 17.00\n"
+                line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
             # else:
                 # leave line unchanged
         startpos = str(line).find("# Visual Studio")
