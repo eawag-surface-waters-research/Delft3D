@@ -31,7 +31,7 @@ compiler=''
 configureArgs=''
 debug=0
 noMake=0
-platform='ia32'
+platform='intel64'
 useSp=0
 
 #-------------------------------------------------------------------------------
@@ -150,22 +150,40 @@ fi
 
 
 #===============================================================================
+# Initialize Modules
+initModule1=". /usr/share/Modules/init/sh"
+initModule2=". /usr/share/Modules/init/bash"
+eval $initModule1
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Module initialization(1/2) fails!'
+    cd $orgdir
+    exit 1
+fi
+eval $initModule2
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Module initialization(2/2) fails!'
+    cd $orgdir
+    exit 1
+fi
+
+#===============================================================================
 # Initialize Fortran compiler
 
+fortranModule=""
 case $compiler in
     gnu)
-        ifortInit=""
+        fortranModule="gcc/4.9.1"
+        ifortInit="module load $fortranModule"
         iccInit=""
-        addpath PATH /opt/gcc/4.9.1/bin
-        addpath LD_LIBRARY_PATH /opt/gcc/4.9.1/lib /opt/gcc/4.9.1/lib64
         echo "Using GNU compilers in `witch gfortran`"
         ;;
 
-	intel14)
-        ifortInit=". /opt/intel/composer_xe_2013_sp1.3.174/bin/compilervars.sh $platform"
+    intel14)
+        fortranModule="intel/14.0.3"
+        ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using Intel 14.0.3 Fortran ($platform) compiler"
-		;;
+        ;;
 
     intel12)
         ifortInit=". /opt/intel/bin/ifortvars.sh $platform"
@@ -218,7 +236,7 @@ esac
 if [ "$ifortInit" != '' ]; then
     eval $ifortInit
     if [ $? -ne 0 ]; then
-        echo 'Initialization of the Fortran compiler fails!'
+        echo 'ERROR: Initialization of the Fortran compiler fails!'
         cd $orgdir
         exit 1
     fi
@@ -227,7 +245,7 @@ fi
 if [ "$iccInit" != '' ]; then
     eval $iccInit
     if [ $? -ne 0 ]; then
-        echo 'Initialization of the C compiler fails!'
+        echo 'ERROR: Initialization of the C compiler fails!'
         cd $orgdir
         exit 1
     fi
@@ -237,33 +255,51 @@ fi
 #===============================================================================
 # Use the correct Autotools
 
-# When the autotools are not installed in the default location,
-# point to them explicitly
-addpath PATH \
-    /opt/automake/1.14.1/bin \
-    /opt/autoconf/2.69/bin \
-    /opt/libtool/2.4.3/bin
+automakeModule="automake/1.14.1"
+autoconfModule="autoconf/2.69"
+libtoolModule="libtool/2.4.3"
 
+initAutomake="module load $automakeModule"
+initAutoconf="module load $autoconfModule"
+initLibtool="module load $libtoolModule"
+eval $initAutomake
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Automake initialization fails!'
+    cd $orgdir
+    exit 1
+fi
+eval $initAutoconf
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Autoconf initialization fails!'
+    cd $orgdir
+    exit 1
+fi
+eval $initLibtool
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Libtool initialization fails!'
+    cd $orgdir
+    exit 1
+fi
 
 #===============================================================================
 # Additional library settings
 
 #---------------------
 # mpich2
+mpichModule=""
+
 if [ "$compiler" = 'gnu' ]; then
-    addpath PATH /opt/mpich2/1.4.1_gcc4.9.1/bin
-    export MPI_INCLUDE=/opt/mpich2/1.4.1_gcc4.9.1/include
-    export MPILIBS_ADDITIONAL="-L/opt/mpich2/1.4.1_gcc4.9.1/lib -lfmpich -lmpich -lmpl"
-    # export MPILIBS_ADDITIONAL=" "
-    export MPIFC=/opt/mpich2/1.4.1_gcc4.9.1/bin/mpif90  
+    mpichModule="mpich2/1.4.1_gcc4.9.1"
 else
     # Intel compilers
-    addpath PATH /opt/mpich2/1.4.1_intel14.0.3/bin
-    export MPI_INCLUDE=/opt/mpich2/1.4.1_intel14.0.3/include
-    export MPILIBS_ADDITIONAL="-L/opt/mpich2/1.4.1_intel14.0.3/lib -lfmpich -lmpich"
-    if [ "$platform" = 'intel64' ]; then
-        export MPIFC=/opt/mpich2/1.4.1_intel14.0.3/bin/mpif90  
-    fi
+    mpichModule="mpich2/1.4.1_intel14.0.3"
+fi
+initMpich2="module load $mpichModule"
+eval $initMpich2
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Mpich2 initialization fails!'
+    cd $orgdir
+    exit 1
 fi
 
 
@@ -289,27 +325,56 @@ fi
 
 #---------------------
 # netcdf
- export NETCDFROOT=/opt/netcdf/v4.3.2_v4.4.0_intel_14.0.3/
- export PKG_CONFIG_PATH=/$NETCDFROOT/lib/pkgconfig:$PKG_CONFIG_PATH
- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NETCDFROOT/lib
-
+netcdfModule=""
+if [ "$compiler" = 'gnu' ]; then
+    netcdfModule="netcdf/v4.3.2_v4.4.0_gcc_4.9.1"
+else
+    # Intel compilers
+    netcdfModule="netcdf/v4.3.2_v4.4.0_intel_14.0.3"
+fi
+initNetcdf="module load $netcdfModule"
+eval $initNetcdf
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Netcdf initialization fails!'
+    cd $orgdir
+    exit 1
+fi
 
 #===============================================================================
-echo "Current settings:"
-echo "export ACLOCAL=\"$ACLOCAL\""
-echo "export AUTOMAKE=\"$AUTOMAKE\""
-echo "export AUTOHEADER=\"$AUTOHEADER\""
-echo "export AUTOCONF=\"$AUTOCONF\""
-echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
-echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
-echo "export LDFLAGS=\"$LDFLAGS\""
-echo "export LDFLAGSMT_ADDITIONAL=\"$LDFLAGSMT_ADDITIONAL\""
-echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
-echo "export MPIFC=\"$MPIFC\""
-echo "export MPI_INCLUDE=\"$MPI_INCLUDE\""
-echo "export MPILIBS_ADDITIONAL=\"$MPILIBS_ADDITIONAL\""
-echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
-echo "export PATH=\"$PATH\""
+echo
+echo ===========================================================================
+echo "Loaded modules:"
+echo "$initModule1"
+echo "$initModule2"
+echo "$fortranModule"
+echo "$automakeModule"
+echo "$autoconfModule"
+echo "$libtoolModule"
+echo "$mpichModule"
+echo "$netcdfModule"
+echo
+echo "Module display of loaded modules:"
+module display $fortranModule
+module display $automakeModule
+module display $autoconfModule
+module display $libtoolModule
+module display $mpichModule
+module display $netcdfModule
+# echo "export ACLOCAL=\"$ACLOCAL\""
+# echo "export AUTOMAKE=\"$AUTOMAKE\""
+# echo "export AUTOHEADER=\"$AUTOHEADER\""
+# echo "export AUTOCONF=\"$AUTOCONF\""
+# echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
+# echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
+# echo "export LDFLAGS=\"$LDFLAGS\""
+# echo "export LDFLAGSMT_ADDITIONAL=\"$LDFLAGSMT_ADDITIONAL\""
+# echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
+# echo "export MPIFC=\"$MPIFC\""
+# echo "export MPI_INCLUDE=\"$MPI_INCLUDE\""
+# echo "export MPILIBS_ADDITIONAL=\"$MPILIBS_ADDITIONAL\""
+# echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
+# echo "export PATH=\"$PATH\""
+echo ===========================================================================
 echo
 
 
@@ -341,7 +406,7 @@ log "Running $command"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log "Autogen fails!"
+    log "ERROR: Autogen fails!"
     cd $orgdir
     exit 1
 fi
@@ -364,29 +429,22 @@ fi
 # More information here:
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
-if [ "$platform" = 'intel64' ]; then
-    command=" \
-        CFLAGS='$flags $CFLAGS' \
-        CXXFLAGS='$flags $CXXFLAGS' \
-        FFLAGS='$flags $fflags $FFLAGS' \
-        FCFLAGS='$flags $fflags $FCFLAGS' \
-            ./configure --prefix=`pwd` $configureArgs &> $log \
-        "
-else
-    command=" \
-        CFLAGS='$flags $CFLAGS' \
-        CXXFLAGS='$flags $CXXFLAGS' \
-        FFLAGS='$flags $fflags $FFLAGS' \
-        FCFLAGS='$flags $fflags $FCFLAGS' \
-            ./configure --prefix=`pwd` $configureArgs &> $log \
-        "
-fi
+command=" \
+    CFLAGS='$flags $CFLAGS' \
+    CXXFLAGS='$flags $CXXFLAGS' \
+    AM_FFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FFLAGS' \
+    FFLAGS='$flags $fflags $FFLAGS' \
+    AM_FCFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FCFLAGS' \
+    FCFLAGS='$flags $fflags $FCFLAGS' \
+    AM_LDFLAGS='$LDFLAGSMT_ADDITIONAL $AM_LDFLAGS' \
+        ./configure --prefix=`pwd` $configureArgs &> $log \
+    "
 
 log "Running `echo $command | sed 's/ +/ /g'`"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log "Configure fails!"
+    log "ERROR: Configure fails!"
     cd $orgdir
     exit 1
 fi
@@ -409,7 +467,7 @@ log "Running $command"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log "Make fails!"
+    log "ERROR: Make fails!"
     cd $orgdir
     exit 1
 fi

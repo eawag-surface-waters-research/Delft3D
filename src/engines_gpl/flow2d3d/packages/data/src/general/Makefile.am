@@ -15,7 +15,6 @@ noinst_LTLIBRARIES = libDataGeneral.la
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I${NETCDFROOT}/include \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \

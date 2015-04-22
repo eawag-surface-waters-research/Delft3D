@@ -134,6 +134,20 @@ dnl check if open(...shared) works
 ACX_F77_SHARED_SPECIFIER
 AC_LANG_POP
 
+# NetCDF, for fortran 90...
+AC_LANG_PUSH([Fortran])
+AC_ARG_WITH(netcdf,[AS_HELP_STRING([--with-netcdf],[Build with netcdf support @<:@default=check@:>@])], [],[with_netcdf=check])
+AS_IF([test "x$with_netcdf" != "xno"],
+        [
+        # For netcdf >= 4.2 (separate fortran)
+        # Check for netcdf 4 if not found...
+        PKG_CHECK_MODULES([NETCDF_FORTRAN], [netcdf-fortran],[],[PKG_CHECK_MODULES(NETCDF, netcdf >= 4)])
+        AC_DEFINE([HAVE_NETCDF],1,[Defined if you have NETCDF library.])
+        ],
+        [])
+AM_CONDITIONAL([USENETCDF], test "x$with_netcdf" != "xno")
+AC_LANG_POP
+
 dnl Fortran compiler defaults (this could be a separate m4 file)
 AC_MSG_CHECKING([whether using Fortran preset flags])
 AC_ARG_ENABLE(fortran-flags-preset,
