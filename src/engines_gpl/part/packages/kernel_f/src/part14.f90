@@ -33,7 +33,7 @@ module part14_mod
                           ncheck , t0buoy , modtyp , abuoy  , t0cf   ,    &
                           acf    , lun2   , kpart  , layt   , tcktot ,    &
                           nplay  , kwaste , nolay  , linear , track  ,    &
-                          nmconr , sizep  , rhopart, noconsp, const)
+                          nmconr , spart  , rhopart, noconsp, const)
 
 !       Deltares Software Centre
 
@@ -85,6 +85,7 @@ module part14_mod
       use precision_part          ! single/double precision
       use timers
       use grid_search_mod
+      use spec_feat_par
       implicit none
 
 !     Arguments
@@ -137,7 +138,7 @@ module part14_mod
       integer  ( ip), intent(in   ) :: linear (nocont)       !< 1 = linear interpolated loads
       real     ( rp), intent(inout) :: track  (8,*)          !< track array for all particles
       character( 20), intent(in   ) :: nmconr (nocont)       !< names of the continuous loads
-      real     ( rp), intent(  in)  :: sizep  (nosubs,*)     !< size of the particles addedDana
+      real     ( rp), intent(  in)  :: spart  (nosubs,*)     !< size of the particles addedDana
       real     ( rp), intent(  out) :: rhopart  (nosubs,*)     !< size of the particles addedDana
       integer  ( ip), intent(in   ) :: noconsp               !< number of constants
       real     ( rp), intent(in   ) :: const(*)              !< constant values
@@ -375,7 +376,7 @@ module part14_mod
             do isub = 1, nosubs
                wpart (isub, i) = aconc(ie, isub)
                if (modtyp .eq. 6) then
-                  rhopart(isub, i) = const(4)
+                  rhopart(isub, i) = pldensity(isub)
                endif                 
             enddo
 

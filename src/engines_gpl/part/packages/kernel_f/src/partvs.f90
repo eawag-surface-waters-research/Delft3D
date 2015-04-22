@@ -25,7 +25,7 @@
                           ivtime , vsfour , vsfact , wpart  , wsettl ,   &
                           modtyp , nmax   , mmax   , lgrid3 , nolay  ,   &
                           npart  , mpart  , kpart  , nosegp , noseglp ,  &
-                          rhopart, rhowatc  , sizep  , const  , rhow   )
+                          rhopart, rhowatc, spart  )
 
 !       Deltares Software Centre
 
@@ -66,6 +66,7 @@
 !     functions   called    : none.
 
       use precision_part    ! single/double precision
+      use spec_feat_par
       use timers
       implicit none    ! explicit typing
 
@@ -95,10 +96,7 @@
       integer  ( ip), intent(in   ) :: nolay
       real     ( rp), intent(in   ) :: rhopart (nosubs, nopart)
       real     ( rp), intent(in   ) :: rhowatc (nosegp)
-      real     ( rp), intent(in   ) :: sizep (nosubs,*)     !< size of the particles
-      real     ( rp), intent(in   ) :: const(*)              !< constant values
-      real     ( rp), intent(in   ) :: rhow                  !< fixed density of water from input
-
+      real     ( rp), intent(in   ) :: spart (nosubs,*)     !< size of the particles
 
 !     local scalars
 
@@ -114,7 +112,6 @@
       integer(ip)     nonset         ! accumulator for non-settling particles
       real   (dp)     waver          ! accumulator of the settling velocities
       integer(ip)     ic, iseg       ! 2D and 3D segmentnumber of particle
-      real  ( rp)  :: rhow_used      ! used density of water
 
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
@@ -124,7 +121,7 @@
 !     initialisation
 
       twopi = 8.0*atan(1.0)
-      g=9.81 				   ! gravitational acceleration (m/s2)
+      g = 9.81                 ! gravitational acceleration (m/s2)
       viscosity_water=1.002e-3 ! viscosity of water (Pa.s)
 
 !     find the moment
@@ -163,30 +160,21 @@
          vs6 = 0.0
          vst = 0.0
          do isub = 1, nosubs
-            vsfact1 = vsfact(1,isub)
             if (modtyp .eq. 6) then
-               if( nint(const(3)) .ne. 0 ) then 
-                  ! density dependent settling velocity 
-                   
-                  ic = lgrid3(npart(ipart), mpart(ipart))
-!
-!                 active cell's only
-!
-                  if (ic  >  0) then
-!
-                     if(kpart(ipart) <= 0.or.kpart(ipart) > nolay) then
-                        write(*,*) ' ipart = ',ipart,' k = ',kpart(ipart)
-                        stop ' K is out of range in partwr '
-                     endif
-                     iseg = (kpart(ipart) - 1)*noseglp + ic
-                     if ( nint(const(1)) .eq. 0 ) then
-                        rhow_used = rhow
-                     else
-                        rhow_used = rhowatc(iseg)
-                     endif
-                     vsfact1 = 2.0e0/9.0e0*(rhopart(isub,ipart)-rhow_used)/viscosity_water*g*sizep(isub,ipart)**2
+               ! density dependent settling velocity 
+               ic = lgrid3(npart(ipart), mpart(ipart))
+!              active cell's only
+               if (ic  >  0) then
+                  if(kpart(ipart) <= 0.or.kpart(ipart) > nolay) then
+                     write(*,*) ' ipart = ',ipart,' k = ',kpart(ipart)
+                     stop ' K is out of range in partwr '
                   endif
+                  iseg = (kpart(ipart) - 1)*noseglp + ic
+                  vsfact1 = plshapefactor(isub) * 2.0e0 / 9.0e0 * (rhopart(isub,ipart) - rhowatc(iseg)) / &
+                            viscosity_water * g * spart(isub,ipart)**2
                endif
+            else
+               vsfact1 = vsfact(1,isub)
             endif
             
             if ( abs(vsfact1) .gt. 1.0e-15 .or.             &

@@ -89,6 +89,16 @@
       real     ( sp), allocatable :: ypoltmp(:)      ! temp y-coordinates polygon
       integer  ( ip)                 nrowstmp        ! temp length polygon
       integer  ( ip)                 npmargin        ! allocation margin in number of particles
+      
+      character( 20)                 cplastic        ! plastic name
+      real     ( sp)                 rdpldensity     ! read plastic density    
+      real     ( sp)                 rdplshapefactor ! read plastic shapefactor
+      real     ( sp)                 rdplmeansize    ! read plastic meansize   
+      real     ( sp)                 rdplvarsize     ! read plastic stdevsize  
+      real     ( sp)                 rdplmusize      ! read plastic meansize   
+      real     ( sp)                 rdplsigmasize   ! read plastic stdevsize  
+      real     ( sp)                 rdpldegrrate    ! read plastic degrrate  
+      integer  ( ip)                 plmissing
 
       integer(4) ithndl              ! handle to time this subroutine
       data       ithndl / 0 /
@@ -300,7 +310,7 @@
          if ( gettoken( nfract , ierr2 ) .ne. 0 ) goto 4009
       endif
       write ( *   , *       ) ' Modelled substances : '
-      write ( lun2, '(//a)' ) ' Modelled substances : '
+      write ( lun2, '(//a)' ) '  Modelled substances : '
       nosubc = nosubs
       if ( modtyp .eq. 2 ) then
          nolayp = 2
@@ -642,6 +652,8 @@
       vertical_bounce = .true.
       write_restart_file = .false.
       max_restart_age = -1
+      pldebug = .false.
+
 
       if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) then
          if (ierr2 .eq. 2) then
@@ -656,13 +668,13 @@
                call str_lower(cbuffer, len(cbuffer))
                select case (trim(cbuffer))
                case ('no_vertical_bounce')
-                  write ( lun2, '(/a)' ) ' Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
+                  write ( lun2, '(/a)' ) '  Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
                   write ( *   , '(/a)' ) ' Found keyword "no_vertical_bounce": vertical bouncing is switched off.'
                   vertical_bounce = .false.
                case ('write_restart_file')
-                  write ( lun2, '(/a)' ) ' Found keyword "write_restart_file".'
+                  write ( lun2, '(/a)' ) '  Found keyword "write_restart_file".'
                   write ( *   , '(/a)' ) ' Found keyword "write_restart_file".'
-                  write ( lun2, '(/a,a)' ) ' At the end of a simulation, delpar will write ', &
+                  write ( lun2, '(/a,a)' ) '  At the end of a simulation, delpar will write ', &
                                          'a file containing data for all active particles.'
                   write ( *   , '(/a,a)' ) ' At the end of a simulation, delpar will write ', &
                                          'a file containing data for all active particles.'
@@ -672,10 +684,80 @@
                   write ( *   , '(/a)' ) ' Found keyword "max_restart_age".'
                   if (gettoken (max_restart_age, ierr2) .ne. 0 ) goto 9010
                   if (max_restart_age.eq.0) goto 9011
-                  write ( lun2, '(/a,i)' ) ' Maximum age for particles writen into restart file in seconds: ', max_restart_age
-                  write ( *   , '(/a,i)' ) ' Maximum age for particles writen into restart file in seconds: ', max_restart_age
+                  write ( lun2, '(/a,i10)' ) ' Maximum age for particles writen into restart file in seconds: ', max_restart_age
+                  write ( *   , '(/a,i10)' ) ' Maximum age for particles writen into restart file in seconds: ', max_restart_age
+               case ('plastics_parameters')
+                  if (modtyp /= 6) goto 9101
+                  write ( *   , 3500 )
+                  write ( lun2, 3500 )
+                  call alloc ( "plparset", plparset, nosubs )
+                  plparset = 0
+                  call alloc ( "plparset", pldensity, nosubs )
+                  pldensity = 0.0
+                  call alloc ( "plparset", plshapefactor, nosubs )
+                  plshapefactor = 0.0
+                  call alloc ( "plparset", plmeansize, nosubs )
+                  plmeansize = 0.0
+                  call alloc ( "plparset", plvarsize, nosubs )
+                  plvarsize = 0.0
+                  call alloc ( "plparset", plmusize, nosubs )
+                  plmusize = 0.0
+                  call alloc ( "plparset", plsigmasize, nosubs )
+                  plsigmasize = 0.0
+                  call alloc ( "plparset", pldegrrate, nosubs )
+                  pldegrrate = 0.0
+! read the following parameters per plastic substance:
+!                 name   density   shapefactor   meansize   varsize   degradationrate
+                  if (gettoken( cplastic, ierr2 ) .ne. 0) goto 9103
+                  do while (cplastic .ne. 'end')
+                     write ( lun2, 3501 ) trim(cplastic)
+                     if (gettoken(rdpldensity, ierr2 ) .ne. 0) goto 9104
+                     write ( lun2, 3502 ) rdpldensity
+                     if (gettoken(rdplshapefactor, ierr2 ) .ne. 0) goto 9104
+                     write ( lun2, 3503 ) rdplshapefactor
+                     if (gettoken(rdplmeansize, ierr2 ) .ne. 0) goto 9104
+                     write ( lun2, 3504 ) rdplmeansize
+                     if (gettoken(rdplvarsize, ierr2 ) .ne. 0) goto 9104
+                     write ( lun2, 3505 ) rdplvarsize
+                     if (gettoken(rdpldegrrate, ierr2 ) .ne. 0) goto 9104
+                     write ( lun2, 3506 ) rdpldegrrate
+                     if (rdplmeansize .le. 0.0) goto 9105
+                     rdplmusize = log((rdplmeansize**2)/sqrt(rdplvarsize+rdplmeansize**2))
+                     rdplsigmasize = sqrt(log(rdplvarsize/(rdplmeansize**2)+1))
+                     call zoek20( cplastic, nosubs, substi, 20, isb)
+                     if(isb .gt. 0) then
+                        if (plparset(isb) .eq. 1) goto 9106
+                        write ( lun2, 3507) trim(cplastic)
+                        plparset(isb) = 1
+                        pldensity(isb) = rdpldensity
+                        plshapefactor(isb) = rdplshapefactor
+                        plmeansize(isb) = rdplmeansize
+                        plvarsize(isb) = rdplvarsize
+                        plmusize(isb) = rdplmusize
+                        plsigmasize(isb) = rdplsigmasize
+                        pldegrrate(isb) = rdpldegrrate
+                     else
+                        write ( lun2, 3508) trim(cplastic)
+                     endif
+                     if (gettoken( cplastic, ierr2 ) .ne. 0) goto 9103
+                  end do
+                  plmissing = 0
+                  do isb = 1, nosubs
+                     if (plparset(isb) .eq. 0) then
+                        write (lun2, 3509) trim(substi(isb))
+                        write (*   , 3509) trim(substi(isb))
+                        plmissing = plmissing + 1
+                     end if
+                  end do
+                  if (plmissing .gt. 0) goto 9107
+                  write (lun2, 3510)
+               case ('pldebug')
+                  write ( lun2, '(/a)' ) '  Found keyword "pldebug": will write plastics debug info (e.g. sizes).'
+                  write ( *   , '(/a)' ) ' Found keyword "pldebug": will write plastics debug info (e.g. sizes).'
+                  pldebug = .true.
                case default
-                  write ( lun2, '(/a,a)' ) ' Unrecognised keyword: ', trim(cbuffer)
+                  write ( lun2, '(/a,a)' ) '  Unrecognised keyword: ', trim(cbuffer)
+                  write ( *   , '(/a,a)' ) ' Unrecognised keyword: ', trim(cbuffer)
                   goto 9000
                end select
                if ( gettoken( cbuffer, id, itype, ierr2 ) .ne. 0 ) goto 4021
@@ -1043,16 +1125,18 @@
 !     their names and their (x,y) coordinates
 
       idp_file = " "
+      nopart_res = 0
       if ( gettoken( cbuffer, nosta, itype, ierr2 ) .ne. 0 ) goto 4031
-      if ( itype .eq. 1 ) then
+      if ( itype .eq. 1) then
          idp_file = cbuffer
          if ( idp_file .ne. ' ' ) then
             write ( *, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
             write ( lun2, * ) ' Reading number of initial particles from file:', idp_file(1:len_trim(idp_file))
             call openfl ( 50, idp_file, ftype(2), 0 )
-!           get maximum no. of initial particles (npmax), don't combine ini_oil with this!
-            read ( 50 ) idummy, npmax, idummy
+!           get maximum no. of initial particles (nrespart), don't combine ini_oil with this!
+            read ( 50 ) idummy, nopart_res, idummy
             close ( 50 )
+            npmax = nopart_res
          endif
          if ( gettoken( nosta, ierr2 ) .ne. 0 ) goto 4031
       endif
@@ -1697,7 +1781,7 @@
       if (oil) then
          call alloc ( "wpartini ", wpartini , nfract   , npmax  )
       end if
-      call alloc ( "sizep ", sizep , nosubs      , npmax  )
+      call alloc ( "spart ", spart , nosubs      , npmax  )
       call alloc ( "rhopart ", rhopart , nosubs      , npmax  )
       call alloc ( "abuoy ", abuoy , npmax        )
       call alloc ( "cbuff ", cbuff , npmax        )
@@ -1971,7 +2055,19 @@
  3322 format('  Error 2003. Dispersant application time not in ascending',&
                   ' order or at the same time as previous!'       )
 
-  11  write(*,*) ' Error when reading the model type '
+ 3500 format('  Found plastics_parameters keyword '       )
+ 3501 format(/'  Plastics name              : ',A)
+ 3502 format( '  Plastics density           : ',F14.2)
+ 3503 format( '  Plastics shape factor      : ',F14.4)
+ 3504 format( '  Plastics mean size         : ',E14.4)
+ 3505 format( '  Plastics std dev size      : ',E14.4)
+ 3506 format( '  Plastics degradation rate (*not active yet) : ',F14.4)
+ 3507 format(/'  ', A, ' is active in the current model'/)
+ 3508 format(/'  ', A, ' is NOT active in the current model, settings not used!'/)
+ 3509 format(/'  No parameters found for plastic named : ',A)
+ 3510 format(/'  Parameters were found for all plastics'/)
+
+11    write(*,*) ' Error when reading the model type '
       write(*,*) ' Is this version 3.50?'
       call srstop(1)
 4001  write(*,*) 'Error: version string can not be read correctly'
@@ -2187,14 +2283,37 @@
 1710  write(*,*) ' Error: could not open ini-file ',ini_file
       call srstop(1)
 
-9000  write(*,*) ' Error: reading special features ',ini_file
+9000  write(lun2,*) ' Error: reading special features '
+      write(*   ,*) ' Error: reading special features '
       call srstop(1)
-9010  write(*,*) 'Error: value of max_restart_age constant'
+9010  write(lun2,*) ' Error: value of max_restart_age constant'
+      write(*   ,*) ' Error: value of max_restart_age constant'
       call srstop(1)
-9011  write(*,*) 'Error: max_restart_age is zero. Did you specify a value?'
+9011  write(lun2,*) ' Error: max_restart_age is zero. Did you specify a value?'
+      write(*   ,*) ' Error: max_restart_age is zero. Did you specify a value?'
       call srstop(1)
-      end
 
+9101  write(lun2,*) ' Error: found plastics_parameters, but this is not a plastics model (modtype /= 6) '
+      write(*   ,*) ' Error: found plastics_parameters, but this is not a plastics model (modtype /= 6) '
+      call srstop(1)
+9103  write(lun2,*) ' Error: expected substance name of a plastic to be specified '
+      write(*   ,*) ' Error: expected substance name of a plastic to be specified '
+      call srstop(1)
+9104  write(lun2,*) ' Error: could not read plastic parameter correctly for ', trim(cplastic)
+      write(*   ,*) ' Error: could not read plastic parameter correctly for ', trim(cplastic)
+      call srstop(1)
+9105  write(lun2,*) ' Error: zero or negative mean size specified for ', trim(cplastic)
+      write(*   ,*) ' Error: zero or negative mean size specified for ', trim(cplastic)
+      call srstop(1)
+9106  write(lun2,*) ' Error: plastic "', trim(cplastic), '" was already defined! '
+      write(*   ,*) ' Error: plastic "', trim(cplastic), '" was already defined! '
+      call srstop(1)
+9107  write(lun2,'(/A,I3,A)') '  Error: ', plmissing, ' plastic(s) is/are not parametrised! '
+      write(*   ,'(/A,I3,A)')  ' Error: ', plmissing, ' plastic(s) is/are not parametrised! '
+      call srstop(1)
+
+      end
+   
       subroutine getdim_dis ( lun      , dis_file , nrowsmax, lunlog   )
 !
 !     programmer : michel jeuken

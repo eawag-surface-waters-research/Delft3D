@@ -209,7 +209,7 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:     ) :: vsfact
       real          (sp       ) ,  pointer, dimension(:,:     ) :: wpart
       real          (sp       ) ,  pointer, dimension(:,:     ) :: wpartini
-      real          (sp       ) ,  pointer, dimension(:,:     ) :: sizep
+      real          (sp       ) ,  pointer, dimension(:,:     ) :: spart
 
       real          (sp       ) ,  pointer, dimension(:,:     ) :: xyztrk
       real          (sp       ) ,  pointer, dimension(:,:     ) :: efdisp
@@ -240,8 +240,25 @@ module global_pointers
 
 !     special feature parameters
 module spec_feat_par
-      use precision_part
+
+      use precision_part      ! single and double precision
+
+!     vertical bounce
       logical                                                   :: vertical_bounce
+
+!     restart files
       logical                                                   :: write_restart_file
-      integer  (ip)                                              :: max_restart_age
+      integer  (ip)                                             :: max_restart_age
+
+!     plastics parameters
+      integer   (sp)            ,  pointer, dimension(:       ) :: plparset
+      real      (sp)            ,  pointer, dimension(:       ) :: pldensity
+      real      (sp)            ,  pointer, dimension(:       ) :: plshapefactor
+      real      (sp)            ,  pointer, dimension(:       ) :: plmeansize
+      real      (sp)            ,  pointer, dimension(:       ) :: plvarsize
+      real      (sp)            ,  pointer, dimension(:       ) :: plmusize
+      real      (sp)            ,  pointer, dimension(:       ) :: plsigmasize
+      real      (sp)            ,  pointer, dimension(:       ) :: pldegrrate
+      logical                                                   :: pldebug
+      
 end module

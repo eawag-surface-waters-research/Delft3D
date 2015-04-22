@@ -106,6 +106,7 @@ module partmem
       integer  ( ip)           :: ini_opt       ! option for initial conditions of oil
       character(256)           :: ini_file      ! file name initial conditions of oil
       character(256)           :: idp_file      ! file name initial conditions of delpar
+      character(256)           :: size_file     ! file name for dump of particle sizes
       character(256)           :: res_file      ! file name for restart file written a the end of a run
       integer  ( ip)           :: tydisp        ! type of dispersant application effectiveness parameter
       integer  ( ip)           :: ndisapp       ! number of dispersant applications
@@ -224,7 +225,7 @@ module partmem
       integer  ( ip), pointer  :: ivtime (:)    ! array with time points for settling velocities
       real     ( rp), pointer  :: wpart (:,:)   ! weight of the substances in each particle
       real     ( rp), pointer  :: wpartini (:,:)   ! weight of the substances in each particle
-      real     ( sp), pointer  :: sizep (:,:)   ! size of the particles
+      real     ( sp), pointer  :: spart (:,:)   ! size of the particles
       real     ( rp), pointer  :: rhopart (:,:) ! density of the substances in each particle
 
       real     ( rp), pointer  :: vsfour(:,:,:) ! matrix with fourier coefficients settling

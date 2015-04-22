@@ -30,6 +30,7 @@ use timers
 use fileinfo  , lun=> lunit    ! logical unit numbers for files
 use filtyp_mod                 ! explicit interface
 use spec_feat_par
+use normal_mod
 !
 !  module procedure(s)
 !
@@ -402,11 +403,14 @@ contains
 
       integer(ip)         :: ierror  , itime   , lunpr
       integer(ip)         :: nosubud , noth
-      integer(ip)         :: ilp, iext, nores, noras
+      integer(ip)         :: ilp, isp, iext, nores, noras
       real(sp)            :: dtstep
       logical             :: update
       character(len=*)    :: ifnam
 
+      real     ( dp)              :: rseed = 0.5d0
+      real     ( sp)              :: rnorm
+      
       integer(4) ithndl              ! handle to time this subroutine
       data ithndl / 0 /
       call timini ( )
@@ -415,7 +419,7 @@ contains
 
 !     initialize normal distribution generator
 
-!     call norm_init()
+      call norm_init()
 
 !     set file types (binary for pc ; unformatted for unix)
 
@@ -463,8 +467,7 @@ contains
                     flow1    , vdiff1   , update   , cellpntp , flowpntp ,    &
                     tau      , tau1     , caltau   , salin    , salin1   ,    &
                     temper   , temper1  , nfiles   , lun      , fname    ,    &
-                    ftype    , sizep    , rhowatc    , npmax    , nosubs   ,    &
-                    modtyp )
+                    ftype    , rhowatc)
 
 !     Read the whole input file ! Data is put in the partmem module !
 
@@ -602,13 +605,42 @@ contains
             call openfl ( 50, idp_file, ftype(2), 0 )
             read ( 50 ) ilp, nopart, nosubs
             do ilp = 1, nopart
-               read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp),iptime(ilp)
+               read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), iptime(ilp)
             enddo
             close ( 50 )
          else
-!           Model type 6 (density driven settling) will follow later
+            write ( lunpr, * ) ' Opening initial particles file:', idp_file(1:len_trim(idp_file))
+            call openfl ( 50, idp_file, ftype(2), 0 )
+            read ( 50 ) ilp, nopart, nosubs
+            do ilp = 1, nopart
+               read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), &
+                          spart(1:nosubs,ilp), iptime(ilp)
+            enddo
+            close ( 50 )
          end if
       endif
+
+!     Draw random log normal distributed particle sizes for non-restart particles
+      if (modtyp .eq. 6) then
+         do ilp = 1, npmax
+            rnorm = normal(rseed)
+            if (ilp .gt. nopart_res) then
+               do isp = 1, nosubs
+                   spart(isp,ilp) = exp(plmusize(isp) + plsigmasize(isp) * rnorm)
+               enddo
+            endif
+         enddo
+         if (pldebug) then
+            size_file = fname(1)
+            iext = len_trim(size_file) - 3
+            size_file(iext+1:iext+5) = 'size'    !dump file for drawn plastic sizes
+            open  (50, file = size_file)
+            do ilp = 1, npmax
+               write(50 , '(100E17.7)') ilp, spart(1:nosubs,ilp)
+            enddo
+            close(50)
+         endif
+      end if
 
 !     echo start- and stop-time to screen
 
@@ -642,8 +674,7 @@ contains
                        flow1    , vdiff1   , update   , cellpntp , flowpntp ,    &
                        tau      , tau1     , caltau   , salin    , salin1   ,    &
                        temper   , temper1  , nfiles   , lun      , fname    ,    &
-                       ftype    , sizep    ,rhowatc     , npmax    , nosubs   ,    &
-                       modtyp)
+                       ftype    , rhowatc)
 
 !        Part12 makes .map files, binary and Nefis versions
 
@@ -766,7 +797,7 @@ contains
                        ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,    &
                        acf      , lun(2)   , kpart    , layt     , tcktot   ,    &
                        nplay    , kwaste   , nolayp   , linear   , track    ,    &
-                       nmconr   , sizep    , rhopart  , noconsp  , const)
+                       nmconr   , spart    , rhopart  , noconsp  , const)
 
 !        write particle tracks
 
@@ -816,7 +847,7 @@ contains
                        ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,    &
                        modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,    &
                        npart    , mpart    , kpart    , nosegp   , noseglp  ,    &
-                       rhopart  , rhowatc  , sizep    , const    , rhow     )
+                       rhopart  , rhowatc  , spart    )
 
 
 !         calculate actual decaycoefficient
@@ -903,9 +934,10 @@ contains
                   if (lgrid( npart(ilp), mpart(ilp)).ge.1) then  !only for the active particles
                      if (modtyp.ne.6) then
                         write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
-                                     wpart(1:nosubs,ilp),iptime(ilp)
+                                     wpart(1:nosubs,ilp), iptime(ilp)
                      else
-                        !                    Model type 6 (density driven settling) will follow later
+                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
                      end if
                   end if
                end if
@@ -932,7 +964,8 @@ contains
                         write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp),iptime(ilp)
                      else
-                        !                       Model type 6 (density driven settling) will follow later
+                        write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
+                                     wpart(1:nosubs,ilp), spart(1:nosubs,ilp), iptime(ilp)
                      end if
                   end if
                end if

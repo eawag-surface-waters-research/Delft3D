@@ -134,9 +134,6 @@
       ipp  =index(fnam(3)(isep:),'.')+isep-1
       write(fnam(17),'(a,a)') fnam(3)(:ipp),'dps'
 
-      !     24. Try to read the particle size parameters filename
-      read (610, *, end=101) lun(24), fnam(24)
-      lun(24) = lun(24) + 900
 101   continue
 
 !     total number of files

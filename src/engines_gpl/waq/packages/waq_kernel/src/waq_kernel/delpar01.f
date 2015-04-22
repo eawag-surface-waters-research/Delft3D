@@ -301,7 +301,7 @@
      &                 ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,
      &                 acf      , lunut    , kpart    , layt     , tcktot   ,
      &                 nplay    , kwaste   , nolayp   , linear   , track    ,
-     &                 nmconr   , sizep    , rhopart  , noconsp  , const   )
+     &                 nmconr   , spart    , rhopart  , noconsp  , const   )
 
 !     write particle tracks
 
@@ -351,7 +351,7 @@
      &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,
      &              modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,
      &              npart    , mpart    , kpart    , nosegp   , noseglp  ,
-     &              rhopart  , rhowatc  , sizep    , const    , rhow     )
+     &              rhopart  , rhowatc  , spart    )
 
 !      calculate actual decaycoefficient
 

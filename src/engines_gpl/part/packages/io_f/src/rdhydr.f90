@@ -47,8 +47,7 @@ module rdhydr_mod
                           flow1  , vdiff1 , update , cellpnt, flowpnt,  &
                           tau    , tau1   , caltau , salin  , salin1 ,  &
                           temper , temper1, nfiles , lunit  , fname  ,  &
-                          ftype  , sizep  , rhowatc  , npmax  ,  &
-                          nosubs , modtyp )
+                          ftype  , rhowatc)
 !
 !     READING HYDRODYNAMICS FILE (*.hyd)
 !              (initially)
@@ -108,22 +107,14 @@ module rdhydr_mod
       integer  (ip), intent(inout) :: lunit(nfiles)    !< unit nrs of all files
       character(* ), intent(inout) :: fname(nfiles)    !< file names of all files
       character(20), intent(inout) :: ftype(2)         !< 'binary'
-      integer ( ip), intent(in)    :: npmax            !< number of particles
-      integer ( ip), intent(in)    :: nosubs           !< number of substances
-      real     (sp), intent(out)   :: sizep(nosubs,npmax) !< size_of_particles
-      integer  ( ip), intent(in   ) :: modtyp          !< model-run-type
-
 
 !     locals
 
       logical           :: updatv, updatf, updatd, lblock
 !
       logical :: first  = .true.
-      logical :: read_particle_sizes  = .true.
       integer(ip) :: i     , i2    , idelt1 , ifflag , iocond , isflag, kmax
-      integer(ip) :: it1   , it2   , max    , mod    , lunut, isub
-      integer(ip) :: lunit_sizepart               ! addedDana represents the unit number for the size_of_particles file
-      character(256) :: fname_sizepart            ! addedDana represents the file name for the size_of_particles file
+      integer(ip) :: it1   , it2   , max    , mod    , lunut
       integer(ip) :: idtimv , itimv1 , itimv2     ! timings of the volumes file
       integer(ip) :: idtimf , itimf1 , itimf2     ! timings of the flow file
       integer(ip) :: idtimd , itimd1 , itimd2     ! timings of the vertical diffusion file
@@ -266,23 +257,6 @@ module rdhydr_mod
                           temper   , cellpnt , fname(23), isflag , ifflag ,   &
                           updatd   )
          endif
-!
-!.. read particle sizes
-
-         if ( read_particle_sizes .and. modtyp .eq. 6) then  
-            lunit_sizepart = lunit(24)
-            fname_sizepart = fname(24)
-          
-            write ( *, * ) ' Opening the size particles file:',  fname_sizepart
-            call openfl ( lunit_sizepart, fname_sizepart, ftype(2), 0 )
-          
-            do isub = 1, nosubs
-                read(lunit_sizepart) (sizep(isub,i),i=1,npmax) ! read the data into array x, of the appropriate data type
-            enddo
-            read_particle_sizes = .false.
-         endif
-                
-               
 
          first  = .false.
          if (itimv1  /=  itimf1) goto 170
@@ -314,23 +288,16 @@ module rdhydr_mod
 !
 !     end of routine
 !
+      if ( lunit(22) .gt. 0 .and. lunit(23) .gt. 0 ) then
+         do i = 1, noseg
+            rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
+         enddo
+      else
+         do i = 1, noseg
+            rhowatc(i) = rhow
+         enddo
+      endif
       
-!      if ( read_once == 2 ) then  
-!        write (998, *) 'itime, i, ifullgrid, salin, temper, rhowc'
-!      end if
-      do i = 1, noseg
-         rhowatc(i) = densty(max(0.0e0,salin1(i)), temper1(i))
-!        if ( read_once > 2 ) then  
-!            if (salin1(i)==0) then
-!               write (998, '(i10,",",i10,",NaN,NaN,NaN")') &
-!                     itime, i
-!            else
-!               write (998, '(i10,",",i10,",",i10,",",es15.7,",",es15.7,",",es15.7)') &
-!                     itime, i, cellpnt(i), salin1(i), temper1(i), rhowc(i)
-!            end if
-!         end if
-      enddo
-           
       if ( timon ) call timstop ( ithndl )
       return
 !
