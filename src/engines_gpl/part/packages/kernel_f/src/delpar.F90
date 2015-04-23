@@ -634,9 +634,10 @@ contains
             size_file = fname(1)
             iext = len_trim(size_file) - 3
             size_file(iext+1:iext+5) = 'size'    !dump file for drawn plastic sizes
-            open  (50, file = size_file)
+            open  (50, file = size_file, form = 'formatted')
+            write(50 , '(A10,100A20)') 'particle', (trim(substi(isp)), isp=1,nosubs)
             do ilp = 1, npmax
-               write(50 , '(100E17.7)') ilp, spart(1:nosubs,ilp)
+               write(50 , '(I10,100E20.7)') ilp, spart(1:nosubs,ilp)
             enddo
             close(50)
          endif

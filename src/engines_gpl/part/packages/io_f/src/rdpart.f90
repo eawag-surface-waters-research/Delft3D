@@ -724,7 +724,13 @@
                      if (rdplmeansize .le. 0.0) goto 9105
                      rdplmusize = log((rdplmeansize**2)/sqrt(rdplvarsize+rdplmeansize**2))
                      rdplsigmasize = sqrt(log(rdplvarsize/(rdplmeansize**2)+1))
-                     call zoek20( cplastic, nosubs, substi, 20, isb)
+                     isb = -1
+                     do i = 1, nosubs
+                        if(cplastic .eq. substi(i)) then
+                           isb = i
+                           exit
+                        endif
+                     enddo
                      if(isb .gt. 0) then
                         if (plparset(isb) .eq. 1) goto 9106
                         write ( lun2, 3507) trim(cplastic)
