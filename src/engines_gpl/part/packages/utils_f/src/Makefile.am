@@ -27,6 +27,7 @@ libutils_f_la_SOURCES = \
          wait.f90 \
          stop_exit.f90 \
          write_version.f90 \
+         normal_mod.f90 \
          lower_case.f90 \
          get_key.f90 \
          pinpok.f90 \
