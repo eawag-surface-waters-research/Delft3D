@@ -101,7 +101,7 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
     !
     if (.not.parll .or. (parll .and. inode==master)) then
        if (soort == 'tdatom') then
-          if (gdp%arch == 'win32') then
+          if (gdp%arch == 'win32' .or. gdp%arch == 'win64') then
              libname = 'flow2d3d.dll'
           else
              libname = 'libflow2d3d.so'

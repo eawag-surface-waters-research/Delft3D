@@ -251,7 +251,7 @@ module globaldata
        integer                      :: uwindECItemId = -1
        integer                      :: vwindECItemId = -1
        !
-       ! arch is currently 'win32' or 'linux'
+       ! arch is currently 'win32', 'win64' or 'linux'
        !
        character(10)      , pointer :: arch
        !

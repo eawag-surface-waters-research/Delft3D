@@ -114,6 +114,8 @@ subroutine initialize_wavedata(wavedata)
    call small(txthlp,999)
    if (txthlp == 'win32' .or. txthlp == 'w32') then
       arch = 'win32'
+   elseif (txthlp == 'win64') then
+      arch = 'win64'
    else
       arch = 'linux'
    endif

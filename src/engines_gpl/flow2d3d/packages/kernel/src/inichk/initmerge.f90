@@ -94,7 +94,7 @@ subroutine initmerge (nmmax, lsed, runid, gdp)
        ! mmsync file name is going to be:
        ! <path>/sync/<condition>flow<runid>
        !
-       if (gdp%arch == 'win32') then
+       if (gdp%arch == 'win32' .or. gdp%arch == 'win64') then
           slash = '\'
           !
           ! In filhand: replace all occurences of / by \

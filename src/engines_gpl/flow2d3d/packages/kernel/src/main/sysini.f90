@@ -148,6 +148,8 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     call small(txthlp,message_len)
     if (txthlp == 'win32' .or. txthlp == 'w32') then
        gdp%arch = 'win32'
+    elseif (txthlp == 'win64') then
+       gdp%arch = 'win64'
     else
        gdp%arch = 'linux'
     endif

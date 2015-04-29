@@ -343,7 +343,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                             call prop_get(link_ptr, '*', 'CulvertLib', rec)
                             dll_name(isrc) = rec
                             if (rec /= ' ') then
-                               if (gdp%arch == 'win32') then
+                               if (gdp%arch == 'win32' .or. gdp%arch == 'win64') then
                                   rec(len_trim(rec)+1:) = '.dll'
                                else
                                   rec(len_trim(rec)+1:) = '.so'

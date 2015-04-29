@@ -102,6 +102,9 @@ subroutine merge (inputfile, workdir, runid)
    if (value == 'win32' .or. value == 'w32') then
       arch = 'win32'
       slash = '\'
+   elseif (value == 'win64') then
+      arch = 'win64'
+      slash = '\'
    else
       arch = 'linux'
       slash = '/'
