@@ -106,6 +106,7 @@ subroutine wrhfluff(lundia    ,error     ,filename  ,grpnam    , &
        ! Define elements
        !
        call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'MFLUFF', ' ', IO_REAL4, 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', attribs=(/idatt_sta/) )
+       ierror = 0
     case (REQUESTTYPE_WRITE)
        !
        ! Write data to file

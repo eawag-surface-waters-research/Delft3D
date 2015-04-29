@@ -374,7 +374,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        if (lsedtot > 0) then
           call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                    & 1         ,fds       ,grpnam    , &
+                    & REQUESTTYPE_DEFINE   ,fds       ,grpnam    , &
                     & filename  ,gdp       ,filetype  , &
                     & mf        ,ml        ,nf        ,nl        ,iarrc     )
        endif
@@ -383,7 +383,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        if (lsed > 0) then
           call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                      & 1         ,fds       ,grpnam    , &
+                      & REQUESTTYPE_DEFINE   ,fds       ,grpnam    , &
                       & filename  ,gdp       ,filetype  , &
                       & mf        ,ml        ,nf        ,nl        ,iarrc     )
        endif
@@ -1177,7 +1177,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        if (lsedtot > 0) then
           call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                    & 2         ,fds       ,grpnam    , &
+                    & REQUESTTYPE_WRITE    ,fds       ,grpnam    , &
                     & filename  ,gdp       ,filetype  , &
                     & mf        ,ml        ,nf        ,nl        ,iarrc     )
           if (error) goto 9999
@@ -1187,7 +1187,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        if (lsed > 0) then
           call wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
-                      & 2         ,fds       ,grpnam    , &
+                      & REQUESTTYPE_WRITE    ,fds       ,grpnam    , &
                       & filename  ,gdp       ,filetype  , &
                       & mf        ,ml        ,nf        ,nl        ,iarrc     )
           if (error) goto 9999

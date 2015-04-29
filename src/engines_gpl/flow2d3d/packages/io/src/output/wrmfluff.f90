@@ -77,18 +77,18 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
 !
 ! Local variables
 !
-    integer                 :: ierror    ! Local error flag
-    integer                 :: i
-    integer                 :: l
-    integer                 :: m
-    integer                 :: n
-    integer                 :: nm
+    integer                                       :: iddim_n
+    integer                                       :: iddim_m
+    integer                                       :: iddim_lsed
+    integer                                       :: ierror    ! Local error flag
+    integer                                       :: i
+    integer                                       :: l
+    integer                                       :: m
+    integer                                       :: n
+    integer                                       :: nm
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
-    character(256)          :: errmsg
-    !
-    integer                 :: iddim_n
-    integer                 :: iddim_m
-    integer                 :: iddim_lsed
+    character(256)                                :: errmsg
+    character(64)                                 :: name
 !
 !! executable statements -------------------------------------------------------
 !
@@ -105,13 +105,17 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
        !
        ! Define dimensions
        !
-       iddim_n       = adddim(gdp, lundia, FILOUT_MAP, 'N'      , nmaxgl        ) ! Number of N-grid points (cell centres)
-       iddim_m       = adddim(gdp, lundia, FILOUT_MAP, 'M'      , mmaxgl        ) ! Number of M-grid points (cell centres)
-       iddim_lsed    = adddim(gdp, lundia, FILOUT_MAP, 'LSED'   , lsed          ) ! Number of sediment constituents
+       name = 'N'
+       iddim_n       = adddim(gdp, lundia, FILOUT_MAP, name, nmaxgl        ) ! Number of N-grid points (cell centres)
+       name = 'M'
+       iddim_m       = adddim(gdp, lundia, FILOUT_MAP, name, mmaxgl        ) ! Number of M-grid points (cell centres)
+       name = 'LSED'
+       iddim_lsed    = adddim(gdp, lundia, FILOUT_MAP, name, lsed          ) ! Number of sediment constituents
        !
        ! Define elements
        !
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MFLUFF', ' ', IO_REAL4, 3, (/iddim_n, iddim_m, iddim_lsed/), longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MFLUFF', ' ', IO_REAL4, 3, longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', dimids=(/iddim_n, iddim_m, iddim_lsed/), acl='z')
+       ierror = 0
     case (REQUESTTYPE_WRITE)
        !
        ! Write data to file

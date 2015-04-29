@@ -244,6 +244,14 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
          endif
        endif
        !
+       ! Add fluff fields  
+       !
+       if (lsed > 0) then
+          call wrhfluff(lundia    ,error     ,filename  ,grnam5    , &
+                      & nostat    ,lsed      ,REQUESTTYPE_DEFINE   , &
+                      & fds       ,nostatto  ,nostatgl  ,order_sta , gdp     )
+       endif
+       !
        group4%grp_dim = iddim_time
        group5%grp_dim = iddim_time
        celidt = 0
@@ -529,6 +537,14 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              deallocate(rbuff2)
              if (ierror/= 0) goto 9999
           endif
+       endif
+       !
+       ! Add fluff fields  
+       !
+       if (lsed > 0) then
+          call wrhfluff(lundia    ,error     ,filename  ,grnam5    , &
+                      & nostat    ,lsed      ,REQUESTTYPE_WRITE    , &
+                      & fds       ,nostatto  ,nostatgl  ,order_sta , gdp     )
        endif
     end select
     !
