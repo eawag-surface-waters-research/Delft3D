@@ -30,6 +30,7 @@
     <ProjectGuid>{DE06B5A7-57CC-4DD0-B168-1CE6CDC02C17}</ProjectGuid>
     <RootNamespace>delftonline</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>delftonline</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -191,7 +192,8 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
-      <Command>..\..\..\..\install_qt_guis.cmd mfe_app bin $(Platform)_$(Configuration)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Link>
       <AdditionalDependencies>Ws2_32.lib;pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -222,7 +224,8 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
-      <Command>..\..\..\..\install_qt_guis.cmd mfe_app bin $(Platform)_$(Configuration)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <Link>
       <AdditionalDependencies>Ws2_32.lib;pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
