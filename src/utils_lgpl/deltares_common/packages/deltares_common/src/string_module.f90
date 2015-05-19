@@ -82,20 +82,24 @@ module string_module
       ! ------------------------------------------------------------------------------
       !   Subroutine: str_token
       !   Purpose:    Obtain first token from string
-      !   Summary:    Scan string for non-space characters and return first set found.
+      !   Summary:    Scan string for non-delimiter (e.g. non-space) characters and
+      !               return first set found.
       !   Arguments:
       !   string      on input : String to be scanned
       !               on output: Remainder of string
       !   token       on output: String containing token
       !   quote       on input : Optional quote character
+      !   delims      on input : Optional string with delimiter characters.
+      !                          Default: space, tab, LF, CR: 32, 9, 10, 13.
       ! ------------------------------------------------------------------------------
-      subroutine str_token(string, token, quote)
+      subroutine str_token(string, token, quote, delims)
           !
           ! Call variables
           !
           character(*)          , intent(inout) :: string
           character(*)          , intent(out)   :: token
           character(1), optional, intent(in)    :: quote
+          character(*), optional, intent(in)    :: delims !< String where each character will be used as a delimiter (replacing the default whitespace delimiters)
           !
           ! Local variables
           !
@@ -105,9 +109,23 @@ module string_module
           integer :: j
           integer :: strlen
           logical :: quoted
+          integer :: ndelim
+          integer, allocatable :: idelims(:) !< Integer character codes for one or more delimiters
           !
           !! executable statements ---------------------------------------------------
           !
+          if (present(delims)) then
+             ndelim = len(delims)
+             allocate(idelims(ndelim))
+             do i=1,ndelim
+                idelims(i) = ichar(delims(i:i))
+             end do
+          else
+             ndelim = 4
+             allocate(idelims(ndelim))
+             idelims = (/ 32, 9, 10, 13 /)
+          end if
+
           i1     = -1
           i2     = -1
           quoted = .false.
@@ -115,15 +133,15 @@ module string_module
           ! find start of token
           do i = 1, strlen
              j = ichar(string(i:i))
-             if (j == 32 .or. j == 9 .or. j == 10 .or. j == 13) then
-                ! a space
+             if (any(idelims == j)) then
+                ! a delimiter (e.g. space)
                 if (i1>0 .and. .not.quoted) then
                    ! token ends here
                    i2 = i-1
                    exit
                 endif
              else
-                ! not a space
+                ! not a delimiter
                 if (i1<0) then
                    ! token starts here and may continue till the end of the string
                    if (present(quote)) then
@@ -155,6 +173,10 @@ module string_module
              endif
              string = string(i2+1:strlen)
           endif
+          
+          if (allocated(idelims)) then
+             deallocate(idelims)
+          end if
       end subroutine str_token
 
 
