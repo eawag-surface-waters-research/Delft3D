@@ -32,6 +32,7 @@ module grid_dimens_module
 ! This module defines the data structure for grid dimensions.
 !
 !!--module declarations---------------------------------------------------------
+use precision
 private
 
 !
@@ -151,6 +152,9 @@ type griddimtype
     integer, dimension(:,:), pointer :: aggrtable => null() ! aggrtable(i,j) = 0 no cell, nm = cell index (>0)
     integer, dimension(:)  , pointer :: celltype => null()  ! 0 = inactive, 1 = active (internal), 2 = boundary, -1 = ghost
     integer, dimension(:,:), pointer :: nmbnd => null()     ! (1,nb) = nm boundary, (2,nb) = nm internal
+    !
+    real(fp), dimension(:), pointer :: xz => null() ! X-coord. of the water elevation pnt.
+    real(fp), dimension(:), pointer :: yz => null() ! Y-coord. of the water elevation pnt.
 end type griddimtype
 
 contains

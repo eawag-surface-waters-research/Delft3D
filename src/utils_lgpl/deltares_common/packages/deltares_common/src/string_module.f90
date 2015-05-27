@@ -51,6 +51,7 @@ module string_module
    public :: remove_all_spaces
    public :: find_first_word
    public :: find_first_letter
+   public :: find_first_char
    public :: count_words
    public :: remove_substr
    public :: replace_char
@@ -438,7 +439,25 @@ module string_module
           endif
           deallocate (locstr)
       end function strcmpi
-      
+
+      !> Determine the index of the first non-whitespace character in a string.
+      !! Failure is indicated by: idx = 0
+      function find_first_char(string) result(idx)
+          implicit none
+          integer                      :: idx    !< index of the first non-whitespace character in string.
+          character(len=*), intent(in) :: string !< string to inspect
+
+          integer                        :: i
+          !
+          do i = 1, len(string)
+             if (.not. is_whitespace(string(i:i))) then
+                idx = i
+                return
+             endif
+          enddo
+          idx = 0
+      end function find_first_char
+
       !> Determine the indices of the first letter (not number) and last character of the first word in a string.
       !! Failure is indicated by: i1 = 0; i2 = 0
       subroutine find_first_word(string, i1, i2)
