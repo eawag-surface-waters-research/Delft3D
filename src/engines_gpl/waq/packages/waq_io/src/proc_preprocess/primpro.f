@@ -162,7 +162,16 @@
                ! skip dummy rules, factor equal zero
 
                if ( abs(proc%dispstochi(istochi)%scale) .gt. 1e-10 ) then
-                  call zoek( gen, 1, proc%dispstochi(istochi)%substance, 20, indx)
+                  ! If the stochi substance name is ALLACTIVE, apply to all -active- substances
+                  if (trim(proc%dispstochi(istochi)%substance).eq.'ALLACTIVE') then
+                     if (isys.le.nosys) then
+                        indx = 1
+                     else
+                        indx = -1
+                     end if
+                  else
+                     call zoek( gen, 1, proc%dispstochi(istochi)%substance, 20, indx)
+                  endif
                   if ( indx .eq. 1 ) then
                      idsp = idsp + 1
                      call zoekio ( proc%dispstochi(istochi)%ioitem, proc%no_output, proc%output_item,
@@ -231,7 +240,16 @@
                ! skip dummy rules, factor equal zero
 
                if ( abs(proc%velostochi(istochi)%scale) .gt. 1e-10 ) then
-                  call zoek( gen, 1, proc%velostochi(istochi)%substance, 20, indx)
+                  ! If the stochi substance name is ALLACTIVE, apply to all -active- substances
+                  if (trim(proc%velostochi(istochi)%substance).eq.'ALLACTIVE') then
+                     if (isys.le.nosys) then
+                        indx = 1
+                     else
+                        indx = 0
+                     end if
+                  else
+                     call zoek( gen, 1, proc%velostochi(istochi)%substance, 20, indx)
+                  endif
                   if ( indx .eq. 1 ) then
                      ivel = ivel + 1
                      call zoekio ( proc%velostochi(istochi)%ioitem, proc%no_output, proc%output_item,
