@@ -15,6 +15,12 @@ stocfl,stocsu,stocsc
 "dDumHorDiV","FrCon     ",   0.00000
 "dDumHorDiV","FrFlow    ",   0.00000
 "dDumHorDiV","SalBnd    ",   0.00000
+"dDumHorDiA","Continuity",   0.00000
+"dDumHorDiA","OXY       ",   0.00000
+"dDumHorDiA","Salinity  ",   0.00000
+"dDumHorDiA","FrCon     ",   0.00000
+"dDumHorDiA","FrFlow    ",   0.00000
+"dDumHorDiA","SalBnd    ",   0.00000
 "dDecTR1   ","dTR1      ",  -1.00000
 "dDecTR2   ","dTR2      ",  -1.00000
 "dDecTR3   ","dTR3      ",  -1.00000

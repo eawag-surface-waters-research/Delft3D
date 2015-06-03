@@ -154,6 +154,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "HDisperVel","TotalDepth",   7,"N","x",1
 "HDisperVel","XArea     ",   8,"Y","x",0
 "HDisperVel","Flow      ",   9,"Y","x",0
+"HDisperAdd","AddDispH  ",   1,"Y","x",1
 "Age1      ","cTR1      ",   1,"N","x",1
 "Age1      ","dTR1      ",   2,"N","x",1
 "Age1      ","RcDecTR1  ",   3,"Y","x",1

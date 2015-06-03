@@ -58,6 +58,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "HDisperVel","Ddir1     ",   1,"x",1
 "HDisperVel","Ddir2     ",   2,"x",1
 "HDisperVel","HorzDispV ",   3,"x",0
+"HDisperAdd","HorzDispA ",   1,"x",0
 "Age1      ","AgeTR1    ",   1,"x",1
 "Age2      ","AgeTR2    ",   1,"x",1
 "Age3      ","AgeTR3    ",   1,"x",1

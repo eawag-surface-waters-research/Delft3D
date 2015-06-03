@@ -15,6 +15,7 @@ procid,procco,procfo,procnm
 "VertDisp  ",  3,"STOX3D    ","Vertical dispersion (segment -> exchange)         "
 "HorzDisper",  1,"HDISP     ","Horizontal dispersion in a 1D model               "
 "HDisperVel",123,"HDISPV    ","Horizontal dispersion velocity dependent          "
+"HDisperAdd",123,"HDISPA    ","Additional horizontal dispersion                  "
 "Age1      ",123,"WATAGE    ","Age of water from source 1                        "
 "Age2      ",123,"WATAGE    ","Age of water from source 2                        "
 "Age3      ",123,"WATAGE    ","Age of water from source 3                        "

@@ -60,6 +60,7 @@ libwaq_process_la_SOURCES = \
        flxfrc.f90 \
        harves.f \
        hdisp.f \
+       hdispa.f \
        hdispv.f \
        heatfl.f \
        intpol.f \

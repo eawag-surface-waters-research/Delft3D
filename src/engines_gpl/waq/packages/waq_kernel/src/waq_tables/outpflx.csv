@@ -7,6 +7,7 @@ outfpr,outffl,outfnm,outfdo
 "ResTim    ","dDumResTim",   1,"x"
 "HorzDisper","dDumHorDis",   1,"x"
 "HDisperVel","dDumHorDiV",   1,"x"
+"HDisperAdd","dDumHorDiA",   1,"x"
 "Age1      ","dDecTR1   ",   1,"x"
 "Age2      ","dDecTR2   ",   1,"x"
 "Age3      ","dDecTR3   ",   1,"x"

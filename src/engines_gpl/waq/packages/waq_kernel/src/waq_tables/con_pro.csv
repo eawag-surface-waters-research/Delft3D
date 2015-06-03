@@ -15,6 +15,7 @@
 "VertDisp  ",A,A,A,A,
 "HorzDisper",A,A,A,A,
 "HDisperVel",A,A,A,A,
+"HDisperAdd",A,A,A,A,
 "Age1      ",A,A,A,A,
 "Age2      ",A,A,A,A,
 "Age3      ",A,A,A,A,

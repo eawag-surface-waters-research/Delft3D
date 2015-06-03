@@ -2116,6 +2116,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extinc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/flxfrc.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/harves.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/hdisp.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/hdispa.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/hdispv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/heatfl.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/intpol.f -text
