@@ -54,14 +54,21 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !
 ! Local variables
 !
+    real(hp) :: alpha  ! Angle 
+    real(hp) :: d128   ! Double precision d12
     real(hp) :: ddegrad
     real(hp) :: dearthrad
-    real(hp) :: d128      ! Double precision d12 
-    real(hp) :: phi       ! Angle 
-    real(hp) :: x1rad     ! X1 in radials 
-    real(hp) :: x2rad     ! X2 in radials 
-    real(hp) :: y1rad     ! Y1 in radials 
-    real(hp) :: y2rad     ! Y2 in radials 
+    real(hp) :: dslin  ! Linear distance between points 1 and 2
+    real(hp) :: x1rad  ! X1 in radials
+    real(hp) :: x2rad  ! X2 in radials
+    real(hp) :: y1rad  ! Y1 in radials
+    real(hp) :: y2rad  ! Y2 in radials
+    real(hp) :: xcrd1  ! X coordinate of point 1
+    real(hp) :: xcrd2  ! X coordinate of point 2
+    real(hp) :: ycrd1  ! Y coordinate of point 1
+    real(hp) :: ycrd2  ! Y coordinate of point 2
+    real(hp) :: zcrd1  ! Z coordinate of point 1
+    real(hp) :: zcrd2  ! Z coordinate of point 2
 !
 !! executable statements -------------------------------------------------------
 !
@@ -78,8 +85,18 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
        x2rad = real(x2, hp)*ddegrad
        y1rad = real(y1, hp)*ddegrad
        y2rad = real(y2, hp)*ddegrad
-       phi   = dcos(y1rad)*dcos(y2rad)*dcos(x1rad - x2rad) + dsin(y1rad)*dsin(y2rad)
-       d128  = dearthrad*dacos(phi)
+       !
+       xcrd1 = cos(y1rad)*sin(x1rad)
+       ycrd1 = cos(y1rad)*cos(x1rad)
+       zcrd1 = sin(y1rad)
+       !
+       xcrd2 = cos(y2rad)*sin(x2rad)
+       ycrd2 = cos(y2rad)*cos(x2rad)
+       zcrd2 = sin(y2rad)
+       !
+       dslin = dsqrt((xcrd2-xcrd1)**2 + (ycrd2-ycrd1)**2 + (zcrd2-zcrd1)**2)
+       alpha = dasin(dslin/2.0_hp)
+       d128  = dearthrad*2.0_hp*alpha
     else
        x1rad = real(x1, hp)
        x2rad = real(x2, hp)
