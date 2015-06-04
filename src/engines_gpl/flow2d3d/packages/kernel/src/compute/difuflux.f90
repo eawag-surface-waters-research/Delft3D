@@ -333,7 +333,14 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     ! Cumulative flux
     !
     if (flwoutput%cumdifuflux) then
-       fluxuc = fluxuc + fluxu * timest
-       fluxvc = fluxvc + fluxv * timest
+       ! Do loops are needed to avoid a stack overflow
+       do nm = 1,nmmax
+          do k = 1,kmax
+             do l = 1,lstsci
+                fluxuc(nm,k,l) = fluxuc(nm,k,l) + fluxu(nm,k,l) * timest
+                fluxvc(nm,k,l) = fluxvc(nm,k,l) + fluxv(nm,k,l) * timest
+             enddo
+          enddo
+       enddo
     endif
 end subroutine difuflux

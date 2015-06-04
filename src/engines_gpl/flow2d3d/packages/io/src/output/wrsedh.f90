@@ -301,7 +301,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
                 ! element 'ZRSDEQ'
                 ! kmax=1: don't use kmaxout/shlay
                 !
-                allocate(rbuff3(nostat,1,kmax), stat=istat)
+                allocate(rbuff3(nostat,1,lsed), stat=istat)
                 rbuff3(:,1,:) = zrsdeq
                 call wrtarray_n(fds, filename, filetype, grnam5, &
                        & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &

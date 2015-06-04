@@ -95,6 +95,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
     real(fp)                    :: logdprev
     real(fp)                    :: fracnonmud
     real(fp)                    :: fraccum
+    real(fp)                    :: fracfac
     real(fp)                    :: fracreq
     real(fp)                    :: fracinterval
     real(fp)                    :: mf1
@@ -222,7 +223,12 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                 s = stage(l)
                 if (s<nseddia(l)) then
                    if (s>0) then
-                      dens = dens + (frac(nm,l)/fracnonmud) &
+                      if (fracnonmud > 0.0_fp) then
+                         fracfac = frac(nm,l) / fracnonmud
+                      else
+                         fracfac = 1.0_fp
+                      endif
+                      dens = dens + fracfac &
                                              & * (logseddia(1,s+1,l) - logseddia(1,s,l)) &
                                              & / (logseddia(2,s+1,l) - logseddia(2,s,l))
                    endif

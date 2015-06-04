@@ -88,6 +88,9 @@ subroutine wrhfluff(lundia    ,error     ,filename  ,grpnam    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    if (gdp%gdmorpar%flufflyr%iflufflyr==0) return
+    if (lsed == 0) return
+    !
     call getdatagroup(gdp, FILOUT_HIS, grpnam, group)
     celidt     => group%celidt
     filetype = getfiletype(gdp, FILOUT_HIS)
