@@ -415,6 +415,7 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
    integer                             :: k
    integer                             :: minp
    integer                             :: it1
+   logical                             :: all_nodata
    real(fp)                            :: tread
    real(hp), dimension(:),     pointer :: uz     ! 1-dim array
    real(hp), dimension(:,:),   pointer :: vz     ! 2-dim array
@@ -525,12 +526,13 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
          case ( meteo_on_spiderweb_grid )
             !
             wz      => meteoitem%field(it1)%arr3d
-            success =  read_spiderweb_block(minp, wz, mx, nx, meteoitem, x_spw_eye, y_spw_eye)
+            success =  read_spiderweb_block(minp, wz, mx, nx, meteoitem, x_spw_eye, y_spw_eye, all_nodata)
             if (.not. success) then
                return
             endif
-            meteoitem%field(it1)%x_spw_eye = x_spw_eye
-            meteoitem%field(it1)%y_spw_eye = y_spw_eye            
+            meteoitem%field(it1)%x_spw_eye  = x_spw_eye
+            meteoitem%field(it1)%y_spw_eye  = y_spw_eye            
+            meteoitem%field(it1)%all_nodata = all_nodata
             !
       end select
       !
@@ -716,6 +718,9 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    integer                               :: nv
    integer                               :: iyx
    integer                               :: iyy
+   logical                               :: nodata0
+   logical                               :: nodata1
+   real(fp)                              :: alpha
    real(fp)                              :: unival
    real(fp)                              :: t1
    real(fp)                              :: t0
@@ -1086,15 +1091,41 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                   !
                   x01_eye =  meteoitem%field(it1)%x_spw_eye
                   y01_eye =  meteoitem%field(it1)%y_spw_eye
+                  nodata1 =  meteoitem%field(it1)%all_nodata
                   dx1     =  meteoitem%field(it1)%dx
                   dy1     =  meteoitem%field(it1)%dy
+                  !
                   x00_eye =  meteoitem%field(it0)%x_spw_eye
                   y00_eye =  meteoitem%field(it0)%y_spw_eye
+                  nodata0 =  meteoitem%field(it0)%all_nodata
                   !
                   ! Current position of cyclone eye
                   !
-                  x01   = a0*x00_eye + a1*x01_eye
-                  y01   = a0*y00_eye + a1*y01_eye
+                  if (nodata0 .and. x00_eye == nodata_default) then
+                     x01   = x01_eye
+                     y01   = y01_eye
+                  elseif (nodata1 .and. x01_eye == nodata_default) then
+                     x01   = x00_eye
+                     y01   = y00_eye
+                  else
+                     x01   = a0*x00_eye + a1*x01_eye
+                     y01   = a0*y00_eye + a1*y01_eye
+                  endif
+                  !
+                  if (nodata0) then
+                     alpha = a1
+                     a1 = 1.0_fp
+                     a0 = 0.0_fp
+                  elseif (nodata1) then
+                     alpha = a0
+                     a0 = 1.0_fp
+                     a1 = 0.0_fp
+                  else
+                     alpha = 1.0_fp
+                  endif
+                  !
+                  ! Radius of cyclone
+                  !
                   rcycl = dy1 * real((nx-1),fp)
                   !
                   ! Factor used for merging spiderweb and background winds
@@ -1123,6 +1154,9 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                            !
                            call distance2(msferic, x, y, x01, y01, yy)
                            if (yy > rcycl) cycle
+                           !
+                           ! We are located within the radius of the cyclone
+                           !
                            if (.not. (dy == 0.0_fp .and. dx == 0.0_fp)) then
                               xx = atan2(dy, dx)
                               !
@@ -1138,8 +1172,8 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                            !
                            ! Spatial merge function
                            !
-                           fm = fm0*yy/rcycl - fm0 + 1.0_fp
-                           spw%spwf(n, m) = max(0.0_fp, min(1.0_fp,fm))
+                           fm = fm0*(1.0_fp - yy/rcycl)
+                           spw%spwf(n, m) = 1.0_fp - (max(0.0_fp, min(1.0_fp,fm)))*alpha
                            x1  = xx / dx1
                            y1  = yy / dy1
                            i1  =  1 + int(x1)

@@ -60,6 +60,8 @@ module meteo_data
 !
    type tfield
       ! contains time and field information
+      logical                             :: all_nodata     ! Flag to indicate whether all data values are missing
+                                                            ! (Only for meteo_on_spiderweb_grid)
       real(hp)                            :: time
       real(hp)                            :: x_spw_eye      ! X-coordinate of cyclone eye (spiderweb centre) at specified TIME
       real(hp)                            :: y_spw_eye      ! Y-coordinate of cyclone eye (spiderweb centre) at specified TIME
@@ -215,6 +217,7 @@ end subroutine init_meteo_data
 subroutine nullifyfield( field )
    implicit none
    type(tfield)     :: field
+   field%all_nodata     = .false.
    field%dx             = nodata_default
    field%dy             = nodata_default
    field%x_spw_eye      = nodata_default

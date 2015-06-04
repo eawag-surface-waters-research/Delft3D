@@ -495,7 +495,7 @@ function read_spv_block(minp, meteoitem, d, mx, nx, kx) result(success)
 end function read_spv_block
 
 
-function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye) result(success)
+function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye, all_nodata) result(success)
    !
    ! Read spiderweb field including the location of the cyclone/spiderweb eye and the pressure drop there
    !
@@ -507,6 +507,7 @@ function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye) 
    real(hp), dimension(:,:,:) :: d
    real(fp)                   :: x_spw_eye
    real(fp)                   :: y_spw_eye
+   logical                    :: all_nodata
    logical                    :: success
    type(tmeteoitem)           :: meteoitem
    !
@@ -579,7 +580,27 @@ function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye) 
    !
    ! Conversion of pressure to Pa (N/m2). If already Pa, p_conv = 1.0_hp
    !
-   d(:,:,3) = d(:,:,3) * meteoitem%p_conv
+   all_nodata = .true.
+   do j = 2, nx
+      do i = 1, mx-1
+         if (d(i,j,1) == meteoitem%nodata_value) then
+            d(i,j,1) = nodata_default
+         else
+            all_nodata = .false.
+         endif
+         if (d(i,j,2) == meteoitem%nodata_value) then
+            d(i,j,2) = nodata_default
+         else
+            all_nodata = .false.
+         endif
+         if (d(i,j,3) == meteoitem%nodata_value) then
+            d(i,j,3) = nodata_default
+         else
+            all_nodata = .false.
+            d(i,j,3) = d(i,j,3) * meteoitem%p_conv
+         endif
+      enddo
+   enddo
    !
    do j = 1, nx
       !
@@ -589,6 +610,22 @@ function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye) 
       d(mx,j,2) = d(1,j,2)
       d(mx,j,3) = d(1,j,3)
    enddo
+   !
+   if (all_nodata) then
+      if (x_spw_eye == meteoitem%nodata_value .or. y_spw_eye == meteoitem%nodata_value) then
+         x_spw_eye = nodata_default
+         y_spw_eye = nodata_default
+      endif
+      if (p_drop_spw_eye == meteoitem%nodata_value) then
+         p_drop_spw_eye = nodata_default
+      endif
+   elseif (x_spw_eye == meteoitem%nodata_value .or. &
+           y_spw_eye == meteoitem%nodata_value .or. &
+           p_drop_spw_eye == meteoitem%nodata_value) then
+      meteomessage = 'Missing x_spw_eye, y_spw_eye, or p_drop_spw_eye not allowed'
+      success = .false.
+      return
+   endif
    success = .true.
    return
 100 continue
