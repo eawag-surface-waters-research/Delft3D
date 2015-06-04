@@ -76,6 +76,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     integer                         , pointer :: celidt
     integer                         , pointer :: keva
     integer  , dimension(:)         , pointer :: smlay
+    logical                         , pointer :: temp
     real(fp) , dimension(:,:,:)     , pointer :: fluxu
     real(fp) , dimension(:,:,:)     , pointer :: fluxuc
     real(fp) , dimension(:,:,:)     , pointer :: fluxv
@@ -247,6 +248,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     nmmax          => gdp%d%nmmax
     keva           => gdp%gdtricom%keva
     smlay          => gdp%gdpostpr%smlay
+    temp           => gdp%gdprocs%temp
     fluxu          => gdp%gdflwpar%fluxu
     fluxuc         => gdp%gdflwpar%fluxuc
     fluxv          => gdp%gdflwpar%fluxv
@@ -441,7 +443,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (prcp_file) then
              call addelm(gdp, lundia, FILOUT_MAP, grnam3, 'PRECIP', ' ', IO_REAL4       , 2, dimids=(/iddim_n, iddim_m/), longname='Precipitation rate (zeta point)', unit='mm/h', acl='z')
           endif
-          if (keva < 2) then 
+          if (keva < 2 .and. temp) then 
              !
              ! evaporation is calculated by the model
              !
@@ -1247,7 +1249,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
              if (ierror /= 0) goto 9999
           endif
           !
-          if (keva < 2) then
+          if (keva < 2 .and. temp) then
              !
              ! element 'EVAP'
              !

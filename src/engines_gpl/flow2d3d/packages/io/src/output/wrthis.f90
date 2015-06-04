@@ -69,6 +69,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
     integer       , dimension(:)    , pointer :: shlay
+    logical                         , pointer :: temp
     real(fp)      , dimension(:, :) , pointer :: xystat
     character(20) , dimension(:)    , pointer :: namst
     character*(10)                  , pointer :: trans_unit !  Unit of the variables ATR and DTR
@@ -200,6 +201,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
     shlay      => gdp%gdpostpr%shlay
+    temp       => gdp%gdprocs%temp
     xystat     => gdp%gdstations%xystat
     flwoutput  => gdp%gdflwpar%flwoutput
     !
@@ -318,7 +320,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
              call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWNDDIR', ' ', IO_REAL4, 1, dimids=(/iddim_nostat/), longname='Wind-direction in station', unit='degrees_Celsius', attribs=(/idatt_sta/))
              call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'PATM', ' ', IO_REAL4   , 1, dimids=(/iddim_nostat/), longname='Air pressure', unit='N/m2', attribs=(/idatt_sta/))
           endif
-          if (flwoutput%air) then
+          if (flwoutput%air .and. temp) then
              call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZPRECP', ' ', IO_REAL4 , 1, dimids=(/iddim_nostat/), longname='Instantaneous precipitation rate in station', unit='mm/h', attribs=(/idatt_sta/))
              call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZEVAP', ' ', IO_REAL4  , 1, dimids=(/iddim_nostat/), longname='Instantaneous evaporation rate in station', unit='mm/h', attribs=(/idatt_sta/))
           endif
@@ -544,7 +546,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
           !
           ! element 'ZPRECP' & 'ZEVAP'
           !
-          if (flwoutput%air) then
+          if (flwoutput%air .and. temp) then
              call wrtarray_n(fds, filename, filetype, grnam3, &
                     & celidt, nostat, nostatto, nostatgl, order_sta, gdp, &
                     & ierror, lundia, zprecp, 'ZPRECP', station)
