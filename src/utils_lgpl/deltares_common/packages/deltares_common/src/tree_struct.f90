@@ -52,6 +52,7 @@ module TREE_DATA_TYPES
       character(len=1), dimension(:), pointer         :: node_name
       character(len=1), dimension(:), pointer         :: node_data
       character(len=1), dimension(:), pointer         :: node_data_type
+      integer                                         :: node_visit
       type(TREE_DATA_PTR), dimension(:), pointer :: child_nodes
    end type
 
@@ -126,6 +127,7 @@ subroutine tree_create( name, tree )
          return
       else
          tree%node_name(1:newsize) = transfer( name, node_value )
+         tree%node_visit = 0
          nullify( tree%node_data )
          nullify( tree%node_data_type )
          nullify( tree%child_nodes )
