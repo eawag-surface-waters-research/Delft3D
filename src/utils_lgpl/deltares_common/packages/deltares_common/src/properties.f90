@@ -1074,8 +1074,8 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
               exit
            endif
         enddo
-        if (size(anode%node_data)>0) then           ! tag visited leafs
-           anode%node_visit = anode%node_visit + 1
+        if (size(anode%node_data)>0) then          
+           anode%node_visit = anode%node_visit + 1  ! Count visits (request of the value)
         endif 
     else
         ! Key not found

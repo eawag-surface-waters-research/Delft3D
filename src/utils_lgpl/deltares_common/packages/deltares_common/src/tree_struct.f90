@@ -52,7 +52,7 @@ module TREE_DATA_TYPES
       character(len=1), dimension(:), pointer         :: node_name
       character(len=1), dimension(:), pointer         :: node_data
       character(len=1), dimension(:), pointer         :: node_data_type
-      integer                                         :: node_visit
+      integer                                         :: node_visit     !< Zeroed upon construction, incremented upon node_data request (properties.f90: prop_get_string)
       type(TREE_DATA_PTR), dimension(:), pointer :: child_nodes
    end type
 
