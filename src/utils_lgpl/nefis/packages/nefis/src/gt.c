@@ -305,7 +305,7 @@ BInt4 Get_element ( BInt4   set          ,
     nefis_errcnt += 1   ;
     nefis_errno   = 3005;
     sprintf(error_text,
-       "Buffer length too small, should be %I64u instead of %ld\nGroup \"%s\", element \"%s\"\n",
+       "Buffer length too small, should be %llu instead of %ld\nGroup \"%s\", element \"%s\"\n",
        conv_bytes, buffer_length, grp_name, elm_name);
     return nefis_errno;
   }
