@@ -5545,6 +5545,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/fortapi.f90 -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcxproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c_vs2012.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c_vs2013.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-esm.h -text
@@ -5560,6 +5561,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/fsm.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcxproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number_vs2012.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number_vs2013.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/resource.h -text
