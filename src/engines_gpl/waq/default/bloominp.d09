@@ -1,6 +1,6 @@
 1985   ECOLUMN - BLOOM II model
- Gabaseerd op koefficienten ECOLUMN - BLOOM, maar aangepast
- Diatom-E en Flag-E als in 2 soorten som! C/CHL E-types verlaagd
+ Based on coefficients of ECOLUMN - BLOOM, but modified
+ Diatom-E and Flag-E as in 2 species calculation! C/CHL E-types lowerd
 TYPES          SPECIES        NUTRIENT    3  ADDITION    1
 FIRST       1  LAST       52  INCREM      1
 NITROGEN       TEMPDEP  0.006 NOMINAL        MULTIPLI  1.0  INCREM  0.0
