@@ -26,6 +26,7 @@ libproc_preprocess_la_SOURCES = partab.f90 \
        add_sumfrc.f \
        algrep.f \
        blmeff.f \
+	   blmd09.f \
        cnfrep.f \
        cnvpro.f \
        dhpfil.f \

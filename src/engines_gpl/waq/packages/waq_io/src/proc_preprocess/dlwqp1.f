@@ -94,6 +94,7 @@
       integer                   :: lurep           ! unit number report file
       integer                   :: lunblm          ! unit number bloom file
       integer                   :: lunfrm          ! unit number bloom frm file
+      integer                   :: lund09          ! unit number bloom d09 file
       integer                   :: mlevel          ! monitoring level
 
       integer                   :: isys            ! index variable
@@ -172,6 +173,7 @@
       ! information
 
       character*20   rundat
+      logical        ex
 
       ! bloom-species database
 
@@ -641,6 +643,14 @@
          call blmeff (lurep , lunblm, lunfrm, grpnam, nogrp )
          close(lunblm)
          close(lunfrm)
+         
+         inquire (file = 'bloominp.d09', exist = ex)
+         if(.not.ex) then
+            lund09 = 89
+            open ( lund09    , file='bloominp.d09' )
+            call blmd09 (lurep , lund09)
+            close(lund09)
+         endif
       endif
 
       ! calculate new totals
