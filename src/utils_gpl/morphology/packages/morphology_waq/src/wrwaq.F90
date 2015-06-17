@@ -163,6 +163,56 @@
       end subroutine wrwaqlen
 !
 !------------------------------------------------------------------------------
+!> Write ASCII attributes file for WAQ.
+      subroutine wrwaqatr(nosegl, nolay, kmk1, kmk2, filename)
+      implicit none
+      integer              , intent(in) :: nosegl   !< Nr. of segments per layer
+      integer              , intent(in) :: nolay    !< Nr. of layers
+      integer, dimension(:), intent(in) :: kmk1     !< First WAQ segment features at start of calculation
+      integer, dimension(:), intent(in) :: kmk2     !< Second WAQ segment features at start of calculation
+      character(*)         , intent(in) :: filename !< Name for output pointer file.
+!
+!           Local variables
+!
+      integer :: il, is
+      integer :: lunatr
+      character( 2 ) kenout(nosegl)          !!  this is now allocated on the stack !!!
+!
+!! executable statements -------------------------------------------------------
+!
+      call newfil(lunatr, trim(filename))
+      write ( lunatr , '(a)' )  '         ; DELWAQ_COMPLETE_ATTRIBUTES'
+      write ( lunatr , '(a)' )  '    2    ; two blocks with input     '
+      write ( lunatr , '(a)' )  '    1    ; number of attributes, they are :'
+      write ( lunatr , '(a)' )  '    1    ;  ''1'' is active ''0'' is not'
+      write ( lunatr , '(a)' )  '    1    ; data follows in this file '
+      write ( lunatr , '(a)' )  '    1    ; all data is given without defaults'
+      do il = 1,nolay
+          write ( lunatr , * ) '  ;    layer: ',il
+          do is = 1, nosegl
+              kenout(is) = '  '
+              write( kenout(is), '(I2)' ) kmk1( is + (il - 1) * nosegl )
+          enddo
+          write ( lunatr, '(500a2)' ) kenout
+      enddo
+      write ( lunatr , '(a)' )  '    1    ; number of attributes, they are :'
+      write ( lunatr , '(a)' )  '    2    ;  ''1'' has surface ''3'' has bottom'
+      write ( lunatr , '(a)' )  '         ;  ''0'' has both    ''2'' has none  '
+      write ( lunatr , '(a)' )  '    1    ; data follows in this file '
+      write ( lunatr , '(a)' )  '    1    ; all data is given without defaults'
+      do il = 1,nolay
+          write ( lunatr , * ) '  ;    layer: ',il
+          do is = 1, nosegl
+              kenout(is) = '  '
+              write( kenout(is), '(I2)' ) kmk2( is + (il - 1) * nosegl )
+          enddo
+          write ( lunatr, '(500a2)' ) kenout
+      enddo
+      write ( lunatr , '(a)' )  '    0    ; no time dependent attributes'
+      close(lunatr)
+      end subroutine wrwaqatr
+!
+!------------------------------------------------------------------------------
 
 
 
