@@ -328,7 +328,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,par       ,kmax      , &
     u     = utot * uuu / (umod+eps)
     v     = utot * vvv / (umod+eps)
     !
-    if (bed > 0.0_fp) then
+    if (bed>0.0_fp .or. bedw>0.0_fp .or. susw>0.0_fp) then
        call bedtr1993(uuu       ,vvv       ,utot      ,di50      ,d90       , &
                     & h1        ,taurat    ,ustarc    ,muc       ,rhosol    , &
                     & dstar     ,ws(1)     ,hrms      ,tp        ,teta      , &
