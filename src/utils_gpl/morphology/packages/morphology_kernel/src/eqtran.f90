@@ -275,13 +275,16 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        !
        ! Van Rijn 1993
        !
-       call tram1(numrealpar,realpar   ,wave      ,par       ,kmax      , &
-                & bed       ,tauadd    ,taucr0    ,aks       ,eps       , &
-                & camax     ,frac      ,sig       ,thick     ,ws        , &
-                & dicww     ,ltur      ,kmaxsd    ,taurat    ,caks      , &
-                & seddif    ,sigmol    ,rsedeq    ,scour     ,sbcu      , &
-                & sbcv      ,sbwu      ,sbwv      ,sswu      ,sswv      , &
-                & conc2d    ,error     ,message   )
+       call tram1(numrealpar,realpar   ,wave                 ,par       , &
+                & kmax      ,bed       , &
+                & tauadd    ,taucr0    ,aks       ,eps       ,camax     , &
+                & frac      ,sig       ,thick     ,ws        , &
+                & dicww     ,ltur      , &
+                & kmaxsd    ,taurat    ,caks      , &
+                & seddif    ,sigmol    ,rsedeq    ,scour     ,bedw      , &
+                & susw      ,sbcu      ,sbcv      ,sbwu      ,sbwv      , &
+                & sswu      ,sswv                 ,conc2d    ,error     , &
+                & message   )
        !
        if (error) then
           call write_error(message, unit=lundia)
