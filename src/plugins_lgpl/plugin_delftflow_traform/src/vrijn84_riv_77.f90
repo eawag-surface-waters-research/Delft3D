@@ -201,7 +201,7 @@ sswu    = 0.0_hp          ! suspended load transport, m direction due to waves i
 sswv    = 0.0_hp          ! suspended load transport, n direction due to waves is zero
 !
 ! Set the relaxation time for depth-averaged models to a negative value to use the default
-! Gallappatti formulation.
+! Galappatti formulation.
 !
 t_relax = -1.0_hp          ! relaxation time is zero
 !

@@ -32,7 +32,7 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes the sour and sink terms for the 2D case
-!              (Gallappatti aproach)
+!              (Galappatti aproach)
 !
 !
 !!--pseudo code and references--------------------------------------------------
@@ -82,7 +82,7 @@ subroutine soursin_2d(umod      ,ustarc    ,h0        ,h1        , &
        if (tsd <= 0.0) then
           !
           ! tsd not given by user transport formula
-          ! compute it using the Gallappatti formulations
+          ! compute it using the Galappatti formulations
           !
           u = ustarc/umod
           !
