@@ -616,6 +616,13 @@ contains
                read( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), wpart(1:nosubs,ilp), &
                           spart(1:nosubs,ilp), iptime(ilp)
             enddo
+            do ilp = 1, nopart
+               do isp = 1, nosubs
+                  if (modtyp .eq. 6) then
+                     rhopart(isp, ilp) = pldensity(isp)
+                  endif                 
+               enddo
+            enddo
             close ( 50 )
          end if
       endif
@@ -784,7 +791,8 @@ contains
                        wpart    , iptime   , nopart   , radius   , lgrid    ,    &
                        dx       , dy       , ndprt    , nosubs   , kpart    ,    &
                        layt     , tcktot   , nplay    , kwaste   , nolayp   ,    &
-                       modtyp   , zwaste   , track    , nmdyer   , substi   )
+                       modtyp   , zwaste   , track    , nmdyer   , substi   ,    &
+                       rhopart)
 
 !      add continuous release
 

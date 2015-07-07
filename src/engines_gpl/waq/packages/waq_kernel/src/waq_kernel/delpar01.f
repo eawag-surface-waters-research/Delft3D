@@ -287,7 +287,8 @@
      &                 wpart    , iptime   , nopart   , radius   , lgrid    ,
      &                 dx       , dy       , ndprt    , nosubs   , kpart    ,
      &                 layt     , tcktot   , nplay    , kwaste   , nolayp   ,
-     &                 modtyp   , zwaste   , track    , nmdyer   , substi   )
+     &                 modtyp   , zwaste   , track    , nmdyer   , substi   ,
+     &                 rhopart)
 
 !      add continuous release
 

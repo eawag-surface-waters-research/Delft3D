@@ -138,8 +138,8 @@ module part14_mod
       integer  ( ip), intent(in   ) :: linear (nocont)       !< 1 = linear interpolated loads
       real     ( rp), intent(inout) :: track  (8,*)          !< track array for all particles
       character( 20), intent(in   ) :: nmconr (nocont)       !< names of the continuous loads
-      real     ( rp), intent(  in)  :: spart  (nosubs,*)     !< size of the particles addedDana
-      real     ( rp), intent(  out) :: rhopart  (nosubs,*)     !< size of the particles addedDana
+      real     ( rp), intent(  in)  :: spart  (nosubs,*)     !< size of the particles
+      real     ( rp), intent(inout) :: rhopart  (nosubs,*)   !< density of the particles
       integer  ( ip), intent(in   ) :: noconsp               !< number of constants
       real     ( rp), intent(in   ) :: const(*)              !< constant values
 

@@ -30,7 +30,8 @@ contains
                           wpart  , iptime , nopart , radius , lgrid  ,  &
                           dx     , dy     , ndprt  , nosubs , kpart  ,  &
                           layt   , tcktot , nplay  , kwaste , nolay  ,  &
-                          modtyp , zwaste , track  , nmdyer , substi )
+                          modtyp , zwaste , track  , nmdyer , substi ,  &
+                          rhopart )
 
 !       Deltares Software Centre
 
@@ -68,6 +69,7 @@ contains
       use precision_part          ! single/double precision
       use timers
       use grid_search_mod
+      use spec_feat_par
       implicit none
 
 !     Arguments
@@ -109,6 +111,7 @@ contains
       real     ( rp), intent(inout) :: track  (8,*)          !< track array for all particles
       character( 20), intent(in   ) :: nmdyer (nodye)        !< names of the dye loads
       character( 20), intent(in   ) :: substi (nosubs)       !< names of the substances
+      real     ( rp), intent(inout) :: rhopart  (nosubs,*)   !< density of the particles
 
       save
 
@@ -232,6 +235,9 @@ contains
 
             do isub = 1, nosubs
                wpart( isub, i ) = aconc( id, isub )
+               if (modtyp .eq. 6) then
+                  rhopart(isub, i) = pldensity(isub)
+               endif                 
             enddo
             iptime(i) = 0
 
