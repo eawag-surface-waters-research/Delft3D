@@ -529,7 +529,7 @@ static BInt4 RT_update_var_array( BInt4    set         ,
         start_table = *grp_pointer+(BUInt8)SIZE_DAT_BUF-3*SIZE_BINT4+SIZE_BINT4;
     }
 
-    index_copy = malloc(sizeof(BInt4));
+    index_copy = (BInt4 *) malloc(sizeof(BInt4));
 
     error = RT_update_var_index_array( set  , gd   , start_table,
                                        level, index, &max_index  );
