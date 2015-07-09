@@ -50,7 +50,7 @@ extern BInt4  GP_variable_pointer( BInt4  , BUInt8 *, BUInt4 , BUInt8 *);
 extern BUInt8 GP_write_file      ( BInt4  , BText   , BUInt8 , BUInt8  );
 extern BInt4  RT_retrieve        ( BInt4   , BText  , BText  ,
                                   BUInt8 *, BUInt4 *, BUInt4 *,
-                                  BUInt4 *, BInt4 * , BText   ,
+                                  BUInt4 *, BUInt4 *, BText,
                                   BUInt4 *, BUInt4 *, BUInt4 *,
                                   BUInt8 *, BUInt8 *);
 #endif
