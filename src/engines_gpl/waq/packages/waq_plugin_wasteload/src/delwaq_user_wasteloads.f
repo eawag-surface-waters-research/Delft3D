@@ -463,6 +463,7 @@
       integer, save                       :: timestep               ! timestep, anticipate next time
       integer, save                       :: period                 ! period covered in the file
       integer, save                       :: nosegl                 ! number of segments per layer
+      integer, save                       :: nolay                  ! number of layers
       integer, dimension(:,:), allocatable, save :: lgrid           ! matrix with segment numbers
 
       integer                             :: newsegment
@@ -470,8 +471,8 @@
       integer                             :: id
       integer                             :: ierr
       integer                             :: lunrep
-      integer                             :: ix, iy, iz
-      integer                             :: mmax, nmax, nolay, noq1, noq2, noq3
+      integer                             :: ix, iy, iz, jz, offset
+      integer                             :: mmax, nmax, noq1, noq2, noq3
       logical                             :: l_exi
 
       ! test if there are any walking discharges
@@ -503,6 +504,8 @@
                    return
                endif
 
+               call dhnolay( nolay )
+
                allocate( lgrid(mmax,nmax) )
                read( 85 ) lgrid
                close( 85 )
@@ -512,11 +515,20 @@
             return
          endif
 
+         offset = 0
          do i = 1,nowalk
             read( 84, *, iostat = ierr ) id, ix, iy, iz
-            if ( id > 0 .and. id <= nowst ) then
-               newsegment = lgrid(ix,iy) + nosegl * (iz-1)
-               wasteloads(id)%loc%segnr = newsegment
+            if ( id > 0 .and. id+offset <= nowst ) then
+               if ( iz > 0 ) then
+                  newsegment = lgrid(ix,iy) + nosegl * (iz-1)
+                  wasteloads(id+offset)%loc%segnr = newsegment
+               else
+                  do jz = 1,nolay
+                     newsegment = lgrid(ix,iy) + nosegl * (jz-1)
+                     wasteloads(id+offset)%loc%segnr = newsegment
+                     offset = offset + 1
+                  enddo
+               endif
             endif
             write(lunrep,*) id, ix, iy, iz
          enddo
@@ -538,11 +550,20 @@
       ! position the file pointer and read the information
       do
          if ( next_time_in_file <= itime ) then
+            offset = 0
             do i = 1,nowalk
                read( 84, *, iostat = ierr ) id, ix, iy, iz
-               if ( id > 0 .and. id <= nowst ) then
-                  newsegment = lgrid(ix,iy) + nosegl * (iz-1)
-                  wasteloads(id)%loc%segnr = newsegment
+               if ( id > 0 .and. id+offset <= nowst ) then
+                  if ( iz > 0 ) then
+                     newsegment = lgrid(ix,iy) + nosegl * (iz-1)
+                     wasteloads(id+offset)%loc%segnr = newsegment
+                  else
+                     do jz = 1,nolay
+                        newsegment = lgrid(ix,iy) + nosegl * (jz-1)
+                        wasteloads(id+offset)%loc%segnr = newsegment
+                        offset = offset + 1
+                     enddo
+                  endif
                endif
                write(lunrep,*) id, ix, iy, iz
             enddo
