@@ -19,4 +19,4 @@ extern "C" {
     extern char * getcompanystring_nefis(void);
 }
 
-#endif NEFIS_VERSION
+#endif /* NEFIS_VERSION */
