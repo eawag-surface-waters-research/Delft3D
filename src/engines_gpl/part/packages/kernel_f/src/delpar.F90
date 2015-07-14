@@ -856,7 +856,7 @@ contains
                        ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,    &
                        modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,    &
                        npart    , mpart    , kpart    , nosegp   , noseglp  ,    &
-                       rhopart  , rhowatc  , spart    )
+                       rhopart  , rhowatc  , spart    , iptime)
 
 
 !         calculate actual decaycoefficient
@@ -968,7 +968,7 @@ contains
 
             do ilp = 1, nopart
                if (npart(ilp)>1.and.mpart(ilp)>1) then
-                  if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than two weeks, time in seconds
+                  if (lgrid( npart(ilp), mpart(ilp)).ge.1 .and. (iptime(ilp).lt.max_restart_age)) then   !only when the particles' age less than max_restart_age, time in seconds
                      if (modtyp.ne.6) then
                         write ( 50 ) npart(ilp), mpart(ilp), kpart(ilp), xpart(ilp), ypart(ilp), zpart(ilp), &
                                      wpart(1:nosubs,ilp),iptime(ilp)

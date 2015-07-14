@@ -352,7 +352,7 @@
      &              ivtime   , vsfour   , vsfact   , wpart    , wsettl   ,
      &              modtyp   , nmaxp    , mmaxp    , lgrid3   , noslay   ,
      &              npart    , mpart    , kpart    , nosegp   , noseglp  ,
-     &              rhopart  , rhowatc  , spart    )
+     &              rhopart  , rhowatc  , spart    , iptime)
 
 !      calculate actual decaycoefficient
 

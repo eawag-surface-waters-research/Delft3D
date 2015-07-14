@@ -25,7 +25,7 @@
                           ivtime , vsfour , vsfact , wpart  , wsettl ,   &
                           modtyp , nmax   , mmax   , lgrid3 , nolay  ,   &
                           npart  , mpart  , kpart  , nosegp , noseglp ,  &
-                          rhopart, rhowatc, spart  )
+                          rhopart, rhowatc, spart  , iptime)
 
 !       Deltares Software Centre
 
@@ -90,13 +90,15 @@
       integer  ( ip), intent(in   ) :: npart( nopart)
       integer  ( ip), intent(in   ) :: mpart( nopart)
       integer  ( ip), intent(in   ) :: kpart( nopart)
-      integer  ( ip), intent(in   ) :: nmax                  !< first dimension lgrid
-      integer  ( ip), intent(in   ) :: mmax                  !< second dimension lgrid
-      integer  ( ip), intent(in   ) :: lgrid3 (nmax,mmax)    !< active grid matrix with noseg numbering
+      integer  ( ip), intent(in   ) :: nmax                    !< first dimension lgrid
+      integer  ( ip), intent(in   ) :: mmax                    !< second dimension lgrid
+      integer  ( ip), intent(in   ) :: lgrid3 (nmax,mmax)      !< active grid matrix with noseg numbering
       integer  ( ip), intent(in   ) :: nolay
       real     ( rp), intent(in   ) :: rhopart (nosubs, nopart)
       real     ( rp), intent(in   ) :: rhowatc (nosegp)
-      real     ( rp), intent(in   ) :: spart (nosubs,*)     !< size of the particles
+      real     ( rp), intent(in   ) :: spart (nosubs,*)        !< size of the particles
+      integer  ( ip), intent(in   ) :: iptime (nopart)         !< age of the particles
+      
 
 !     local scalars
 
@@ -171,7 +173,7 @@
                   endif
                   iseg = (kpart(ipart) - 1)*noseglp + ic
                   vsfact1 = plshapefactor(isub) * 2.0e0 / 9.0e0 * (rhopart(isub,ipart) - rhowatc(iseg)) / &
-                            viscosity_water * g * spart(isub,ipart)**2
+                            viscosity_water * g * spart(isub,ipart)**2 / (2 ** ((iptime(ipart) / 86400.0e0) * plfragrate(isub)))
                endif
             else
                vsfact1 = vsfact(1,isub)

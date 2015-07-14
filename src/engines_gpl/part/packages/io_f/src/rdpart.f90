@@ -97,7 +97,7 @@
       real     ( sp)                 rdplvarsize     ! read plastic stdevsize  
       real     ( sp)                 rdplmusize      ! read plastic meansize   
       real     ( sp)                 rdplsigmasize   ! read plastic stdevsize  
-      real     ( sp)                 rdpldegrrate    ! read plastic degrrate  
+      real     ( sp)                 rdplfragrate    ! read plastic fragmentation rate
       integer  ( ip)                 plmissing
 
       integer(4) ithndl              ! handle to time this subroutine
@@ -704,8 +704,8 @@
                   plmusize = 0.0
                   call alloc ( "plparset", plsigmasize, nosubs )
                   plsigmasize = 0.0
-                  call alloc ( "plparset", pldegrrate, nosubs )
-                  pldegrrate = 0.0
+                  call alloc ( "plparset", plfragrate, nosubs )
+                  plfragrate = 0.0
 ! read the following parameters per plastic substance:
 !                 name   density   shapefactor   meansize   varsize   degradationrate
                   if (gettoken( cplastic, ierr2 ) .ne. 0) goto 9103
@@ -719,8 +719,8 @@
                      write ( lun2, 3504 ) rdplmeansize
                      if (gettoken(rdplvarsize, ierr2 ) .ne. 0) goto 9104
                      write ( lun2, 3505 ) rdplvarsize
-                     if (gettoken(rdpldegrrate, ierr2 ) .ne. 0) goto 9104
-                     write ( lun2, 3506 ) rdpldegrrate
+                     if (gettoken(rdplfragrate, ierr2 ) .ne. 0) goto 9104
+                     write ( lun2, 3506 ) rdplfragrate
                      if (rdplmeansize .le. 0.0) goto 9105
                      rdplmusize = log((rdplmeansize**2)/sqrt(rdplvarsize+rdplmeansize**2))
                      rdplsigmasize = sqrt(log(rdplvarsize/(rdplmeansize**2)+1))
@@ -741,7 +741,7 @@
                         plvarsize(isb) = rdplvarsize
                         plmusize(isb) = rdplmusize
                         plsigmasize(isb) = rdplsigmasize
-                        pldegrrate(isb) = rdpldegrrate
+                        plfragrate(isb) = rdplfragrate
                      else
                         write ( lun2, 3508) trim(cplastic)
                      endif
@@ -2062,12 +2062,12 @@
                   ' order or at the same time as previous!'       )
 
  3500 format('  Found plastics_parameters keyword '       )
- 3501 format(/'  Plastics name              : ',A)
- 3502 format( '  Plastics density           : ',F14.2)
- 3503 format( '  Plastics shape factor      : ',F14.4)
- 3504 format( '  Plastics mean size         : ',E14.4)
- 3505 format( '  Plastics std dev size      : ',E14.4)
- 3506 format( '  Plastics degradation rate (*not active yet) : ',F14.4)
+ 3501 format(/'  Plastics name                      : ',A)
+ 3502 format( '  Plastics density            [g/m3] : ',F14.2)
+ 3503 format( '  Plastics shape factor          [-] : ',F14.4)
+ 3504 format( '  Plastics mean size             [m] : ',E14.4)
+ 3505 format( '  Plastics std dev size          [m] : ',E14.4)
+ 3506 format( '  Plastics fragmentation rate  [1/d] : ',F14.4)
  3507 format(/'  ', A, ' is active in the current model'/)
  3508 format(/'  ', A, ' is NOT active in the current model, settings not used!'/)
  3509 format(/'  No parameters found for plastic named : ',A)

@@ -258,7 +258,7 @@ module spec_feat_par
       real      (sp)            ,  pointer, dimension(:       ) :: plvarsize
       real      (sp)            ,  pointer, dimension(:       ) :: plmusize
       real      (sp)            ,  pointer, dimension(:       ) :: plsigmasize
-      real      (sp)            ,  pointer, dimension(:       ) :: pldegrrate
+      real      (sp)            ,  pointer, dimension(:       ) :: plfragrate
       logical                                                   :: pldebug
       
 end module
