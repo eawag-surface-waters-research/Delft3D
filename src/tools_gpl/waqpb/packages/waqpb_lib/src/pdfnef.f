@@ -317,10 +317,11 @@ C
       CONTEN = 'DELWAQ PROCESS DEFINITION FILE'
       CALL DATTIM(RUNDAT)
       SOURCE = 'Deltares'
-      REMARK(1) = 'Remark 1'
-      REMARK(2) = 'Remark 2'
-      REMARK(3) = 'Remark 3'
-      REMARK(4) = 'Remark 4'
+      REMARK = ' '
+      REMARK(1) = '@(#)Deltares, DELWAQ Process Definition '
+      WRITE(REMARK(2), '(A12,F5.2,A1,I10,A2,A10)') 'File Version',VERSIO, '.', SERIAL, ', ', RUNDAT(1:10)
+      REMARK(3) = RUNDAT(11:20)
+      REMARK(4) = ' '
       CALL WR_FILID ( DEFFDS, FFORM , VFFORM, CONTEN,
      +                VERSIO, SERIAL, RUNDAT, SOURCE, REMARK,
      +                LUNREP, IERROR)
