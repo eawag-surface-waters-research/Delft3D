@@ -70,6 +70,7 @@ function readmeteoheader(minp, meteoitem) result(success)
     meteoitem%n_quantity       = 0
     meteoitem%n_cols           = 0
     meteoitem%n_rows           = 0
+    meteoitem%pref_option      = opt_not_defined
     meteoitem%nodata_value     = 0.0_fp
     meteoitem%spw_radius       = 0.0_fp
     meteoitem%spw_merge_frac   = 0.5_fp
@@ -79,6 +80,7 @@ function readmeteoheader(minp, meteoitem) result(success)
     meteoitem%y_llcorner       = -9.990e+20_hp
     meteoitem%x_llcenter       = -9.990e+20_hp
     meteoitem%y_llcenter       = -9.990e+20_hp
+    meteoitem%pref             = -9.990e+20_hp
     !
     ! Define the newest version of the format of the input files.
     ! A check is performed on the correctness using keyword FileVersion
@@ -161,6 +163,14 @@ function readmeteoheader(minp, meteoitem) result(success)
        elseif ( index(rec(1:il-2), 'spw_rad_unit'    ) /=0)  then
           read( rec(il:ir),'(a)', iostat = ierr      )             meteoitem%spw_rad_unit
           meteoitem%spw_rad_unit     = adjustl(meteoitem%spw_rad_unit    )
+       elseif ( index(rec(1:il-2), 'air_pressure_reference') /=0)  then
+          if (index(rec(il:ir), 'air_pressure_default_from_computational_engine') /= 0) then
+             meteoitem%pref_option = opt_use_from_kernel
+             meteoitem%pref        = patm_default
+          else
+             meteoitem%pref_option = opt_value_specified
+             read( rec(il:ir), *, iostat = ierr         )             meteoitem%pref
+          endif
        elseif ( index(rec(1:il-2), 'n_quantity'      ) /=0)  then
           read( rec(il:ir), *, iostat = ierr         )             meteoitem%n_quantity
        elseif ( index(rec(1:il-2), 'quantity1'       ) /=0)  then

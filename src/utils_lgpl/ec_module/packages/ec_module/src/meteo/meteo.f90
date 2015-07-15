@@ -572,19 +572,31 @@ function setmeteodefault(quantity, gapres) result(success)
 !
 ! Global variables
 !
-   real(fp)              , intent(in)  :: gapres    ! Global atmospheric pressure specified and/or read from 
-                                                    ! MD-file in rdproc.f90 for Delft3D-FLOW
+   real(fp)              , intent(in)  :: gapres    ! Global atmospheric pressure specified and/or read from MD-file in rdproc.f90 for Delft3D-FLOW
    character(*)          , intent(in)  :: quantity
 !
-
 ! Local variables
 !
+   integer :: i
+   integer :: j
 !
 !! executable statements -------------------------------------------------------
 !
    if (quantity == 'patm') then
       patm_default = gapres
       success = .true.
+      !
+      ! patm_default is copied to meteoitem%pref when pref_option=use_from_kernel
+      ! Normally, setmeteodefault('patm', value) is called after meteoitem%pref has been set
+      ! This means that pref has to be reset in all meteoitemscase using this flag
+      !
+      do i = 1, num_meteopointers
+         do j = 1, meteopointers(i)%pntr%nummeteoitems
+             if (meteopointers(i)%pntr%item(j)%ptr%pref_option == opt_use_from_kernel) then
+                meteopointers(i)%pntr%item(j)%ptr%pref = patm_default
+             endif
+         enddo
+      enddo
    else
       write(meteomessage,'(2a)') 'Setmeteodefault: Incorrect quantity found: ',trim(quantity)
       success = .false.
@@ -1258,7 +1270,12 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
          do m = 1,meteo%flowgrid%mmax
             do n = 1,meteo%flowgrid%nmax
                if (meteo%flowgrid%kcs(n,m) /= 0) then
-                  qarray(n,m) = qarray(n,m) - (1.0_fp-spw%spwf(n,m))*spw%spwarr(3,n,m)
+                  if (meteoitem%pref_option == opt_not_defined) then
+                     qarray(n,m) = qarray(n,m) - (1.0_fp-spw%spwf(n,m))*spw%spwarr(3,n,m)
+                  else
+                     qarray(n,m) = spw%spwf(n,m)*qarray(n,m) &
+                                 & + (1.0_fp-spw%spwf(n,m))*(meteoitem%pref - spw%spwarr(3,n,m))
+                  endif
                endif
             enddo
          enddo
