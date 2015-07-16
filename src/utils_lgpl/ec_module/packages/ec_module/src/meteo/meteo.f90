@@ -1124,7 +1124,9 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                      y01   = a0*y00_eye + a1*y01_eye
                   endif
                   !
-                  if (nodata0) then
+                  if (nodata0 .and. nodata1) then
+                     alpha = 0.0_fp
+                  elseif (nodata0) then
                      alpha = a1
                      a1 = 1.0_fp
                      a0 = 0.0_fp
