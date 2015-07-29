@@ -4264,6 +4264,16 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/autumn.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/avs.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/bluemap.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/bone.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-bathymetry.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-cdom.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-chlorophyll.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-density.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-oxygen.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-par.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-salinity.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-speed.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-temperature.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cmocean-turbidity.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/cool.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/copper.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/depth.clrmap -text
