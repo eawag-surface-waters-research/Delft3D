@@ -4488,6 +4488,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/difffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/dimensions.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/dir2uv.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/domains.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/dual_ugrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ecomsedfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.c -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.m -text
