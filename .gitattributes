@@ -3084,6 +3084,37 @@ src/third_party_open/lexyacc/bin/win32/byacc.exe -text
 src/third_party_open/lexyacc/bin/win32/cygwin1.dll -text
 src/third_party_open/lexyacc/bin/win32/flex.exe -text
 src/third_party_open/lexyacc/lexyacc_license_info.txt -text
+src/third_party_open/libsigwatch/AUTHORS -text
+src/third_party_open/libsigwatch/COPYING -text
+src/third_party_open/libsigwatch/ChangeLog -text
+src/third_party_open/libsigwatch/INSTALL -text
+src/third_party_open/libsigwatch/Makefile.am -text
+src/third_party_open/libsigwatch/Makefile.in -text
+src/third_party_open/libsigwatch/NEWS -text
+src/third_party_open/libsigwatch/README -text
+src/third_party_open/libsigwatch/aclocal.m4 -text
+src/third_party_open/libsigwatch/config.guess -text
+src/third_party_open/libsigwatch/config.h -text
+src/third_party_open/libsigwatch/config.h.in -text
+src/third_party_open/libsigwatch/config.sub -text
+src/third_party_open/libsigwatch/configure -text
+src/third_party_open/libsigwatch/configure.ac -text
+src/third_party_open/libsigwatch/depcomp -text
+src/third_party_open/libsigwatch/install-sh -text
+src/third_party_open/libsigwatch/libsigwatch.vcxproj -text
+src/third_party_open/libsigwatch/ltmain.sh -text
+src/third_party_open/libsigwatch/m4/libtool.m4 -text
+src/third_party_open/libsigwatch/m4/ltoptions.m4 -text
+src/third_party_open/libsigwatch/m4/ltsugar.m4 -text
+src/third_party_open/libsigwatch/m4/ltversion.m4 -text
+src/third_party_open/libsigwatch/m4/lt~obsolete.m4 -text
+src/third_party_open/libsigwatch/missing -text
+src/third_party_open/libsigwatch/sigwatch.3 -text
+src/third_party_open/libsigwatch/sigwatch.3.txt -text
+src/third_party_open/libsigwatch/sigwatch.c -text
+src/third_party_open/libsigwatch/sigwatch.html -text svneol=unset#application/xml
+src/third_party_open/libsigwatch/sigwatch.html.in -text svneol=unset#application/xml
+src/third_party_open/libsigwatch/style.css -text
 src/third_party_open/microsoft_redist/ms_redist_license_info.txt -text
 src/third_party_open/microsoft_redist/vcredist_x86[!!-~](2008[!!-~]SP1).exe -text
 src/third_party_open/mpich2/COPYRIGHT.rtf -text
