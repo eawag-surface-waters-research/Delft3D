@@ -463,7 +463,7 @@ subroutine message2string(level, w1, w2)
     integer         :: level
 
     integer :: l1, l2
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -479,7 +479,7 @@ subroutine message3string(level, w1, w2, w3)
     integer         :: level
 
     integer :: l1, l2, l3
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -497,7 +497,7 @@ subroutine message4string(level, w1, w2, w3, w4)
     integer         :: level
 
     integer :: l1, l2, l3, l4
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -520,7 +520,7 @@ subroutine message2char1real(level, w1, w2, r3)
     integer         :: level
 
     integer :: l1, l2
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -539,7 +539,7 @@ subroutine message2char2real(level, w1, w2, r3, r4)
     integer         :: level
 
     integer :: l1, l2
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -558,7 +558,7 @@ subroutine message1char1real(level, w1, r2)
     integer         :: level
 
     integer :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -574,7 +574,7 @@ subroutine message1char1double(level, w1, d2)
     integer         :: level
 
     integer :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -591,7 +591,7 @@ subroutine message1char1int(level, w1, i2)
     integer         :: level
 
     integer :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -608,7 +608,7 @@ subroutine message1char2int(level, w1, i2, i3)
     integer         :: level
 
     integer :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -626,7 +626,7 @@ subroutine message2int1char(level, i1, i2, w3)
     integer         :: level
 
     integer :: l3
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l3 = max(1, len_trim(w3))
@@ -644,7 +644,7 @@ subroutine message1char3int(level, w1, i2, i3, i4)
     intent (in) i2, i3, i4
     integer        :: level
     integer        :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -661,7 +661,7 @@ subroutine message1char2real(level, w1, r2, r3)
     intent(in)   :: level, w1, r2, r3
 
     integer        :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -678,7 +678,7 @@ subroutine message1char1int1double(level, w1, i2, d3)
     double precision :: d3
 
     integer :: l1
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l1 = max(1, len_trim(w1))
@@ -696,7 +696,7 @@ subroutine message1double1int1char(level, d1, i2, w3)
     double precision :: d1
 
     integer :: l3
-    character(600) :: rec
+    character(MAXSTRINGLEN) :: rec
 
     rec = ' '
     l3 = max(1, len_trim(w3))
