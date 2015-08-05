@@ -108,7 +108,7 @@
 !     RUNNAM  C*12  1             Filename consisting of runid without
 !     RADIAT  R     1             Irradiation (W/m2)
 !     SILICA  R     1             Silicate (gSi/m3)
-!     SWTICCO2 I    1             Carbon limitation switch (0/10=use TIC;1/11=use CO2;0/1 limit prpr; 10/11=optimisation in BLOOM)
+!     SWCLIM  I     1             Carbon limitation switch (0 inactive, 1 active)
 !     TIMMUL  R     1             Time step multiplyer Bloom call (-)
 !     TEMPER  R     1             Temperature (degrees C)
 !     TOTNUT  R     4             C, N, P, Si in algae (gX/m3)
@@ -136,7 +136,7 @@
      J         EXTTOT, DEAT4 , NUPTAK, FRAMMO, FBOD5 , EXTALG,
      J         CHLORO, TOTNUT(4)     ,                 ALGDM ,
      J         THRNH4, THRNO3, THRPO4, THRSI , RCRESP, TCRESP,
-     M         BLDEP , CL    , TIC   , CO2   , KCO2  , CO2LIM,
+     M         BLDEP , CL    , TIC   , CO2   ,         CO2LIM,
      j         PPMCO2, DETN  , DETP  , RDCNT , SDMIXN, VOLUME
       REAL  :: LIMFAC(6)
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8 , IP9 ,
@@ -151,7 +151,7 @@
       INTEGER  IFAUTO, IFDETR, IFOOXP, IFUPTA, IFPROD, IFMORT
       INTEGER  ISWVTR
       INTEGER  SWBLOOMOUT
-      INTEGER  SWTICCO2
+      INTEGER  SWCLIM
       INTEGER  LUNREP
       CHARACTER CDUMMY
       REAL*8 ORG_AVAILN
@@ -174,10 +174,10 @@
          BLSTEP = TIMMUL * DELTAT
          RDCNT  = - BLSTEP
          ID = 0
-         SWTICCO2 = NINT(PMSA(IPOINT(27)))
-         IF (INCREM(27).NE.0) CALL BLSTOP('SWTICCO2',ID)
+         SWCLIM = NINT(PMSA(IPOINT(28)))
+         IF (INCREM(28).NE.0) CALL BLSTOP('SWCLIM',ID)
          LCARB = .FALSE.
-         IF (SWTICCO2.GE.10) LCARB = .TRUE.
+         IF (SWCLIM.GT.0) LCARB = .TRUE.
 
 !     Set logical numbers and open autonomous I/O files Bloom
          RUNNAM = 'bloominp.XXX'
@@ -437,26 +437,7 @@
             IF (BLDEP.GT.0.) DEPTHW = BLDEP
             CL     = PMSA(IP22)
 
-            ! CO2 limitation (switch >=10 means BLOOM will deal with it)
-            
-            CO2LIM = 1.0
-            IF (SWTICCO2.LT.10) THEN
-              TIC   = MAX(0.0,PMSA(IP25))
-              CO2   = MAX(0.0,PMSA(IP26))
-              KCO2  = PMSA(IP28)
-
-            ! use tic or co2 depending on the switch
-              IF ( SWTICCO2 .EQ. 1 ) TIC  = CO2*12./44.
-
-            ! set limitation
-              IF ( KCO2 .GT. 1.0E-20 ) CO2LIM = MIN(1.0,TIC/KCO2)
-            ENDIF
-!nt2
             DO IALG = 1,NTYP_A
-!nt2           scale PP with co2 limitation
-               PPMCO2 = ALGTYP(8,IALG)*CO2LIM
-               CALL BLSPPM(IALG,PPMCO2)
-!nt2
 
 !jvb           set SDMIX for all types, time/space dependent
 !              SDMIXALG
@@ -492,9 +473,6 @@
 
             CALL SET_EFFI( TEMPER, RADIAT, EXTTOT, DEPTHW, DAYLEN,
      +                     ID    )
-!           EXTNOP = EXTTOT - EXTALG
-!           CALL SET_EFFINOP( TEMPER, RADNOP, EXTNOP, DEPTHW, DAYLEN,
-!    +                        ID    )
 
             IF ( IKMRK1 .EQ. 3 ) THEN
                CALL BL_RESTORE_AUTOLYSE(ORG_AVAILN) ! WAQ-G restore autolyse
@@ -585,18 +563,6 @@
       VOLUME = PMSA(IP23)
       TIC      = MAX(0.0,PMSA(IP25))
       CO2      = MAX(0.0,PMSA(IP26))
-      KCO2     = PMSA(IP28)
-
-      ! CO2 limitation (switch >=10 means BLOOM will deal with it)
-            
-      CO2LIM = 1.0
-      IF (SWTICCO2.LT.10) THEN
-        ! use tic or co2 depending on the switch
-        IF ( SWTICCO2 .EQ. 1 ) TIC  = CO2*12./44.
-
-        ! set limitation
-        IF ( KCO2 .GT. 1.0E-20 ) CO2LIM = MIN(1.0,TIC/KCO2)
-      ENDIF
 
 !     SUBTRACT THRESHOLDS FROM DISSOLVED CONCENTRATION, NOT BELOW ZERO,
 !     BUT BELOW ZERO IF ORIGINAL CONCENTRATION BELOW ZERO
@@ -607,10 +573,6 @@
 
       DO 20 IALG = 1,NTYP_A
 
-!nt2      scale PP with co2 limitation
-          PPMCO2 = ALGTYP(8,IALG)*CO2LIM
-          CALL BLSPPM(IALG,PPMCO2)
-!nt2
 !jvb     set SDMIX for all types, time/space dependent
 !        SDMIXALG
          IOFF = NIPFIX + 20*NTYP_M + IALG
@@ -726,15 +688,6 @@
          CALL BLSPPM(IALG,ALGTYP(8,IALG))
       ENDDO
 
-!     Reset PPMAX for ulva-fixed if necessary
-
-      IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
-         DO IALG = 1,NTYP_A
-            IF (IFIX(IALG).LT.0) THEN
-               CALL BLSPPM(IALG,ALGTYP(8,IALG))
-            ENDIF
-         ENDDO
-      ENDIF
       IF ( IKMRK1 .EQ. 3 ) THEN
          CALL BL_RESTORE_AUTOLYSE(ORG_AVAILN) ! WAQ-G restore autolyse
       ENDIF

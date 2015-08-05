@@ -637,7 +637,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM_P   ","TIC       ",  25,"Y","x",1
 "BLOOM_P   ","CO2       ",  26,"Y","x",1
 "BLOOM_P   ","SWTICdummy",  27,"Y"," ",1
-"BLOOM_P   ","KCO2      ",  28,"Y","x",1
+"BLOOM_P   ","SWCLim    ",  28,"Y","x",1
 "BLOOM_P   ","BLOOMALG  ",  29,"N","x",1
 "BLOOM_P   ","FrAutAlg  ",  30,"Y","x",1
 "BLOOM_P   ","FrDetAlg  ",  31,"Y","x",1
@@ -690,7 +690,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM     ","TIC       ",  25,"Y","x",1
 "BLOOM     ","CO2       ",  26,"Y","x",1
 "BLOOM     ","SWTICdummy",  27,"Y"," ",1
-"BLOOM     ","KCO2      ",  28,"Y","x",1
+"BLOOM     ","SWCLim    ",  28,"Y","x",1
 "BLOOM     ","BLOOMALG01",  29,"N","x",1
 "BLOOM     ","BLOOMALG02",  30,"B","x",1
 "BLOOM     ","BLOOMALG03",  31,"B","x",1

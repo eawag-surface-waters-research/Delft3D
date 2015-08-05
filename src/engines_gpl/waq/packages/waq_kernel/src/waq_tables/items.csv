@@ -832,7 +832,6 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "ThrAlgSi  ","x"," ",    0.00000    ,"(gSi/m3)            ","threshold concentration uptake silicium           ","volume    ","volume    "," ","                              "
 "SWBloomOut","x"," ",    0.00000    ,"(-)                 ","switch on BLOOM output (0=no,1=yes)               ","volume    ","volume    "," ","                              "
 "SWOxyProd ","x"," ",    0.00000    ,"(-)                 ","switch on oxygen prod. (0=BLOOM, 1=VAROXY)        ","volume    ","volume    "," ","                              "
-"KCO2      ","x"," ",    0.00000    ,"(gC/m3)             ","Critical CO2 concentration for limitation         ","volume    ","volume    "," ","                              "
 "FrAutAlg  ","x"," ",   0.350000    ,"(-)                 ","frac. mort. algae  dissolved as nutrients         ","volume    ","volume    "," ","                              "
 "FrDetAlg  ","x"," ",   0.650000    ,"(-)                 ","frac. mort. algae  detritus production            ","volume    ","volume    "," ","                              "
 "DMCFALG   ","x"," ",    2.50000    ,"(gDM/gC)            ","DM:C ratio algae                                  ","volume    ","volume    "," ","                              "
@@ -8904,3 +8903,4 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "AddDispH  ","x"," ",   10.00000    ,"(m2/s)              ","Additional horizontal dispersion parameter        ","volume    ","volume    "," ","                              "
 "HorzDispA "," ","x",   -999.000    ,"(m2/s)              ","variable horizontal dispersion                    ","volume    ","volume    "," ","                              "
 "dDumHorDiA","x"," ",   -999.000    ,"(-)                 ","dummy flux to access HorzDisper                   ","volume    ","volume    "," ","                              "
+"SWCLim    ","x"," ",    1.00000    ,"(-)                 ","Switch for C limitation (0=inactive 1=active)     ","volume    ","volume    "," ","                              "
