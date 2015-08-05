@@ -239,7 +239,7 @@ contains
       integer(4), dimension(100)      :: nplay
 !
       save          grnam1, grnam2, grnam3,            &
-                    nosize, first1, first2, nefis ,    &
+                    nosize, first1, nefis ,    &
                     celid1, celid2, filnam
 !
       real(4)    :: default = 999.999
@@ -347,14 +347,6 @@ contains
 !     initialize ierrem
 !
       ierrem = 0
-!
-      if (first2) then
-        first2 = .false.
-!
-!       initialize model dependent names for nefis
-!
-        if(nolay > 100) stop ' layt > 100 for nplay in part13 '
-      endif
 !
       do i   = 1, iptmax
         if (ipset(i  )  >=  itime) then
