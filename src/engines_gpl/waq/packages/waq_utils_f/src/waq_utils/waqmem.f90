@@ -48,6 +48,7 @@ MODULE waqmem
    real(8), allocatable :: volume0 (:)      ! begin volume of a time step
    real(8), allocatable :: volume1 (:)      ! end   volume of a time step
    real(4), allocatable :: mixlen  (:)      ! standard mixing flow m3/s
+   real(4), allocatable :: wdrawal (:)      ! withdrawal term
    integer, allocatable :: rowpnt  (:)      ! start of each row in the matrix (0:n)-array
    integer, allocatable :: fmat    (:)      ! pointer from(iq) in matrix
    integer, allocatable :: tmat    (:)      ! pointer to  (iq) in matrix
@@ -59,7 +60,7 @@ MODULE waqmem
 
    real(4), allocatable :: rhs     (:,:)    ! delmat right hand side
 
-!      solver 11, 12, 13 and 14 only
+!      solver 11, 12, 13, 14 and 24 only
 
    real(8), allocatable :: arhs    (:,:)    ! right hand side vertically implicit schemes
    real(8), allocatable :: adiag   (:,:)    ! diagonal filled with volumes vertically implicit schemes
@@ -129,6 +130,17 @@ MODULE waqmem
    real(4), allocatable :: n1      (:,:)
    real(4), allocatable :: n2      (:,:)
 
+!      solver 24 only
+
+   real(8), allocatable :: dwork   (:,:)    ! work array self adjusting step
+   real(8), allocatable :: volint  (:)      ! interpolation array for volumes
+   real(8), allocatable :: dconc2  (:,:)    ! first guess array concentrations
+   integer, allocatable :: ibas    (:)      ! administrative arrays for the self
+   integer, allocatable :: ibaf    (:)      ! adjusting time step procedure
+   integer, allocatable :: iords   (:)      ! id.
+   integer, allocatable :: iordf   (:)      ! id.
+   integer, allocatable :: nvert   (:,:)    ! id.
+   integer, allocatable :: ivert   (:)      ! id.
 
    contains
 
@@ -194,7 +206,6 @@ MODULE waqmem
        if (allocated(areau)) deallocate(areau)
        if (allocated(areav)) deallocate(areav)
        if (allocated(rscale)) deallocate(rscale)
-
 
 !      solver 21 only
 

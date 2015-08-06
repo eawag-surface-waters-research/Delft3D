@@ -189,7 +189,8 @@
 
 !     Some logicals
 
-      fluxco = intsrt .eq.  5 .or. intsrt .eq. 12 .or. intsrt .eq. 14
+      fluxco = intsrt .eq.  5 .or. intsrt .eq. 12 .or. intsrt .eq. 14 .or.
+     &         intsrt .eq. 24
       steady = intsrt .eq.  6 .or. intsrt .eq.  7 .or. intsrt .eq.  8 .or.
      &         intsrt .eq.  9 .or. intsrt .eq. 17 .or. intsrt .eq. 18
       iterat = intsrt .eq.  8 .or. intsrt .eq.  9
@@ -680,7 +681,8 @@
 
       ierr = 0
       nr_jar_new = nr_jar
-      itoti = itoti +  (noseg+nseg2)*nogrid ;  nr_jar_new = nr_jar_new+1                                    ! iknmkv
+      itoti = itoti +  (noseg+nseg2)*nogrid
+      nr_jar_new = nr_jar_new+1                                    ! iknmkv
       if ( l_decl ) allocate ( iknmkv( noseg+nseg2, nogrid ) , stat=ierr )
       if ( ierr .ne. 0 ) then ; write(lunrep,2010) "iknmkv              " ; call srstop(1) ; endif
       if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "iknmkv              ", (noseg+nseg2)*nogrid
@@ -692,27 +694,32 @@
          jstart = 1 - 2 * nmax
          nmmaxj = ( 2 + mmax ) * nmax
 
-         itoti = itoti +  (nmmaxj-jstart+1)*kmax ;  nr_jar_new = nr_jar_new+1                 ! kadu
+         itoti = itoti +  (nmmaxj-jstart+1)*kmax
+         nr_jar_new = nr_jar_new+1                 ! kadu
          if ( l_decl ) allocate ( kadu  ( jstart:nmmaxj , kmax )        , stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "kadu                " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "kadu                ", (nmmaxj-jstart+1)*kmax
 
-         itoti = itoti +  (nmmaxj-jstart+1)*kmax ;  nr_jar_new = nr_jar_new+1                 ! kadv
+         itoti = itoti +  (nmmaxj-jstart+1)*kmax
+         nr_jar_new = nr_jar_new+1                 ! kadv
          if ( l_decl ) allocate ( kadv  ( jstart:nmmaxj , kmax )        , stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "kadv                " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "kadv                ", (nmmaxj-jstart+1)*kmax
 
-         itoti = itoti +  (nmmaxj-jstart+1)      ;  nr_jar_new = nr_jar_new+1                 ! kcu
+         itoti = itoti +  (nmmaxj-jstart+1)
+         nr_jar_new = nr_jar_new+1                 ! kcu
          if ( l_decl ) allocate ( kcu   ( jstart:nmmaxj )               , stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "kcu                 " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "kcu                 ", (nmmaxj-jstart+1)
       endif
       if ( nmax*mmax .gt. 0 ) then
-         itoti = itoti +   noseg                 ;  nr_jar_new = nr_jar_new+1                 ! kcu
+         itoti = itoti +   noseg
+         nr_jar_new = nr_jar_new+1                 ! kcu
          if ( l_decl ) allocate ( cellpnt( noseg )                      , stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "cellpnt             " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "cellpnt             ",  noseg
-         itoti = itoti +   noq                   ;  nr_jar_new = nr_jar_new+1                 ! kcu
+         itoti = itoti +   noq
+         nr_jar_new = nr_jar_new+1                 ! kcu
          if ( l_decl ) allocate ( flowpnt( noq   )                      , stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "flowpnt             " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "flowpnt             ",  noq
@@ -720,27 +727,72 @@
       if ( f_solv ) then
          noth = OMP_GET_MAX_THREADS()
 
-         itoti = itoti +  noseg+nobnd + 1        ;  nr_jar_new = nr_jar_new+1                 ! rowpnt
+         itoti = itoti +  noseg+nobnd + 1
+         nr_jar_new = nr_jar_new+1                 ! rowpnt
          if ( l_decl ) allocate ( rowpnt (  0:noseg+nobnd               ), stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "rowpnt              " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "rowpnt              ",  noseg+nobnd + 1
 
-         itoti = itoti +  noq                    ;  nr_jar_new = nr_jar_new+1                 ! fmat
+         itoti = itoti +  noq
+         nr_jar_new = nr_jar_new+1                 ! fmat
          if ( l_decl ) allocate ( fmat   (  noq                         ), stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "fmat                " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "fmat                ",  noq
 
-         itoti = itoti +  noq                    ;  nr_jar_new = nr_jar_new+1                 ! tmat
+         itoti = itoti +  noq
+         nr_jar_new = nr_jar_new+1                 ! tmat
          if ( l_decl ) allocate ( tmat   (  noq                         ), stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "tmat                " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "tmat                ",  noq
 
-         itoti = itoti + (noseg+nobnd)*noth      ;  nr_jar_new = nr_jar_new+1                 ! iexseg
+         itoti = itoti + (noseg+nobnd)*noth
+         nr_jar_new = nr_jar_new+1                 ! iexseg
          if ( l_decl ) allocate ( iexseg (  noseg+nobnd           ,noth ), stat=ierr )
          if ( ierr .ne. 0 ) then ; write(lunrep,2010) "iexseg              " ; call srstop(1) ; endif
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "iexseg              ", (noseg+nobnd)          *noth
+
       endif
-      itoti = itoti +  (noseg+nseg2) ;  nr_jar_new = nr_jar_new+1                             ! isegcol
+      if ( intsrt .eq. 24 ) then
+
+         itoti  = itoti  +  noseg               ! ibas
+         nr_jar_new = nr_jar_new+1
+         if ( l_decl ) allocate ( ibas ( noseg ), stat=ierr )
+         if ( ierr .ne. 0 ) then ; write(lunrep,2010) "ibas                " ; call srstop(1) ; endif
+         if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "ibas                ", noseg
+
+         itoti  = itoti  +  noq                 ! ibaf
+         nr_jar_new = nr_jar_new+1
+         if ( l_decl ) allocate ( ibaf ( noq   ), stat=ierr )
+         if ( ierr .ne. 0 ) then ; write(lunrep,2010) "ibaf                " ; call srstop(1) ; endif
+         if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "ibaf                ", noq
+
+         itoti  = itoti  +  noseg               ! iords
+         nr_jar_new = nr_jar_new+1
+         if ( l_decl ) allocate ( iords( noseg ), stat=ierr )
+         if ( ierr .ne. 0 ) then ; write(lunrep,2010) "iords               " ; call srstop(1) ; endif
+         if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "iords               ", noseg
+
+         itoti  = itoti  +  noq                 ! iordf
+         nr_jar_new = nr_jar_new+1
+         if ( l_decl ) allocate ( iordf( noq   ), stat=ierr )
+         if ( ierr .ne. 0 ) then ; write(lunrep,2010) "iordf               " ; call srstop(1) ; endif
+         if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "iordf               ", noq
+
+         itoti  = itoti  +  2*noseg             ! nvert
+         nr_jar_new = nr_jar_new+1
+         if ( l_decl ) allocate ( nvert(2,noseg), stat=ierr )
+         if ( ierr .ne. 0 ) then ; write(lunrep,2010) "nvert               " ; call srstop(1) ; endif
+         if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "nvert               ", 2*noseg
+
+         itoti  = itoti  +  noseg               ! ivert
+         nr_jar_new = nr_jar_new+1
+         if ( l_decl ) allocate ( ivert(noseg), stat=ierr )
+         if ( ierr .ne. 0 ) then ; write(lunrep,2010) "ivert               " ; call srstop(1) ; endif
+         if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "ivert               ", noseg
+
+      endif
+      itoti = itoti +  (noseg+nseg2)
+      nr_jar_new = nr_jar_new+1                             ! isegcol
       if ( l_decl ) allocate ( isegcol( noseg+nseg2 ) , stat=ierr )
       if ( ierr .ne. 0 ) then ; write(lunrep,2010) "isegcol             " ; call srstop(1) ; endif
       if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "isegcol             ", noseg+nseg2

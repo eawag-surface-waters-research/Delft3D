@@ -43,6 +43,8 @@
 !     Created             : September 2010 by Leo Postma
 !     Modified            : August    2011 by Leo Postma test the volume of the whole column
 !                           April     2013    Leo Postma integrated with hsurf routine
+!                           April     2014    Michel Jeuken introduction of constants for
+!                                             minimum values areas and volumes.
 
 !     Files               : none
 
@@ -102,7 +104,7 @@
       minarea = 1.00                                         ! default value of 1 m2
       call zoek20 ( 'MIN_AREA', nocons, coname, 10, idryfld )
       if ( idryfld .gt. 0 ) minarea = cons(idryfld)            ! or the given value
-      
+
       do iseg = 1, nosegl
          call dhkmrk( 1, iknmrk(iseg), ikm )
          if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
@@ -150,6 +152,8 @@
 !     Created             : September 2010 by Leo Postma
 !     Modified            : August    2011 by Leo Postma: test the volume of the water column
 !                           April     2013    Leo Postma  integrated with hsurf routine
+!                           April     2014    Michel Jeuken introduction of constant for
+!                                             minimum value of volumes.
 
 !     Files               : none
 

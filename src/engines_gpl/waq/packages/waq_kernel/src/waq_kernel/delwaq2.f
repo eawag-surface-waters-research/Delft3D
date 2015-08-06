@@ -517,6 +517,9 @@
          case ( 23 )     !      Leonards QUICKEST
             call dlwqno ( a , j , c , lun , lchar, action, dlwqd, gridps )
 
+         case ( 24 )     !      Local flexible time step method by Leonard Postma
+            call dlwqnp ( a , j , c , lun , lchar, action, dlwqd, gridps )
+
          case default
             goto 990
 

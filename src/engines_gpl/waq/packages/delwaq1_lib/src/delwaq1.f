@@ -135,7 +135,7 @@
 !     variaous input-output structures
 !
       integer, parameter             :: noitm  = 11              ! number of items with time-functions
-      integer, parameter             :: noint  = 184             ! number of integration options implemented
+      integer, parameter             :: noint  = 192             ! number of integration options implemented
       integer, parameter             :: nooutp = 9               ! number of output files
       integer                        :: nrftot(noitm)            ! number of function per item
       integer                        :: nrharm(noitm)            ! number of harmoncs per item
@@ -237,7 +237,8 @@
      *              200 ,201 ,202 ,203 ,204 ,205 ,206 ,207 ,
      *              210 ,211 ,212 ,213 ,214 ,215 ,216 ,217 ,
      *              220 ,221 ,222 ,223 ,224 ,225 ,226 ,227 ,
-     *              230 ,231 ,232 ,233 ,234 ,235 ,236 ,237 /
+     *              230 ,231 ,232 ,233 ,234 ,235 ,236 ,237 ,
+     *              240 ,241 ,242 ,243 ,244 ,245 ,246 ,247 /
 
 !     Special system init
 

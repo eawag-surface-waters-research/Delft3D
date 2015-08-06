@@ -1895,6 +1895,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq12.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq13.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq14.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq15.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq15a.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq16.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq17.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq18.f -text
@@ -1997,6 +1998,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqni.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnj.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnm.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqno.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnp.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqo0.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqo2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqp0.f -text
