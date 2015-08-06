@@ -52,6 +52,7 @@
 !     ------  ----  ------   ---  -----------
 
 !     ALGDM   R     1             Dry matter in algae (gDM/m3)
+!  GRZMC         0.100000E-01 x Minimum input concentration of Zooplank    (gC/m3)
 ! ZDETFF         0.500000     x Faecal fraction for detritus of Zooplank       (-)
 ! ZDETPR          1.00000     x Preference of Zooplank for detritus            (-)
 ! ZGRZFM          1.50000     x Max. filtration velocity Zooplank        (m3/gC/d)
@@ -96,7 +97,7 @@
      4        IPV   ,        INV   ,          IFROM
 
       PARAMETER (NTOGRZ =  5, NTONUT =  4, NTOALG = 32,
-     1           NINGRZ = 24,
+     1           NINGRZ = 25,
      2           NIN    = 5+(NTONUT+2*NTOGRZ)*NTOALG+2*NTONUT+
      3                    NTOGRZ*NINGRZ)
 
@@ -119,7 +120,8 @@
      D        GRZFLX(NTONUT), TOTFLX(NTONUT), VOLUME        ,
      E        TMPRE (NTOGRZ), FRDBOT(NTOGRZ), DETRIT(NTONUT),
      F        POC   (NTONUT),                 DEPTH         ,
-     G        DFLUX         , FRDBOT_SAVE(NTOGRZ)
+     G        DFLUX         , FRDBOT_SAVE(NTOGRZ)           ,
+     H        GRZMC (NTOGRZ) 
       INTEGER BENTHS(NTOGRZ)
       INTEGER IKMRK1, IKMRK2
       REAL    GEM, MaxFiltration, MaxUptake, POSFLX, GrowthResp,
@@ -199,27 +201,28 @@
       GEM    = PMSA(IP(5))
       DO IFILSP = 1,NTOGRZ
        if (active_grazer(ifilsp)) then
-        DETFF (IFILSP) = PMSA(IP(8+(IFILSP-1)*NINGRZ))
-        DETPR (IFILSP) = PMSA(IP(9+(IFILSP-1)*NINGRZ))
-        GRZFM (IFILSP) = PMSA(IP(10+(IFILSP-1)*NINGRZ))
-        GRZGM (IFILSP) = PMSA(IP(11+(IFILSP-1)*NINGRZ))
-        GRZML (IFILSP) = PMSA(IP(12+(IFILSP-1)*NINGRZ))
-        GRZMM (IFILSP) = PMSA(IP(13+(IFILSP-1)*NINGRZ))
-        GRZMO (IFILSP) = PMSA(IP(14+(IFILSP-1)*NINGRZ))
-        GRZRE (IFILSP) = PMSA(IP(15+(IFILSP-1)*NINGRZ))
-        GRZRM (IFILSP) = PMSA(IP(16+(IFILSP-1)*NINGRZ))
-        GRZSE (IFILSP) = PMSA(IP(17+(IFILSP-1)*NINGRZ))
-        FRDBOT_SAVE(IFILSP) = PMSA(IP(18+(IFILSP-1)*NINGRZ))
+        GRZMC (IFILSP) = PMSA(IP(8+(IFILSP-1)*NINGRZ))
+        DETFF (IFILSP) = PMSA(IP(9+(IFILSP-1)*NINGRZ))
+        DETPR (IFILSP) = PMSA(IP(10+(IFILSP-1)*NINGRZ))
+        GRZFM (IFILSP) = PMSA(IP(11+(IFILSP-1)*NINGRZ))
+        GRZGM (IFILSP) = PMSA(IP(12+(IFILSP-1)*NINGRZ))
+        GRZML (IFILSP) = PMSA(IP(13+(IFILSP-1)*NINGRZ))
+        GRZMM (IFILSP) = PMSA(IP(14+(IFILSP-1)*NINGRZ))
+        GRZMO (IFILSP) = PMSA(IP(15+(IFILSP-1)*NINGRZ))
+        GRZRE (IFILSP) = PMSA(IP(16+(IFILSP-1)*NINGRZ))
+        GRZRM (IFILSP) = PMSA(IP(17+(IFILSP-1)*NINGRZ))
+        GRZSE (IFILSP) = PMSA(IP(18+(IFILSP-1)*NINGRZ))
+        FRDBOT_SAVE(IFILSP) = PMSA(IP(19+(IFILSP-1)*NINGRZ))
         DO I = 1,NTONUT
-          GRZST (I,IFILSP) = PMSA(IP(18+(IFILSP-1)*NINGRZ+I))
+          GRZST (I,IFILSP) = PMSA(IP(19+(IFILSP-1)*NINGRZ+I))
         ENDDO
-        TMPFM (IFILSP) = PMSA(IP(23+(IFILSP-1)*NINGRZ))
-        TMPGM (IFILSP) = PMSA(IP(24+(IFILSP-1)*NINGRZ))
-        TMPMM (IFILSP) = PMSA(IP(25+(IFILSP-1)*NINGRZ))
-        TMPRE (IFILSP) = PMSA(IP(26+(IFILSP-1)*NINGRZ))
-        TMPRM (IFILSP) = PMSA(IP(27+(IFILSP-1)*NINGRZ))
-        TMPSE (IFILSP) = PMSA(IP(28+(IFILSP-1)*NINGRZ))
-        BENTHS(IFILSP) = NINT(PMSA(IP(29+(IFILSP-1)*NINGRZ)))
+        TMPFM (IFILSP) = PMSA(IP(24+(IFILSP-1)*NINGRZ))
+        TMPGM (IFILSP) = PMSA(IP(25+(IFILSP-1)*NINGRZ))
+        TMPMM (IFILSP) = PMSA(IP(26+(IFILSP-1)*NINGRZ))
+        TMPRE (IFILSP) = PMSA(IP(27+(IFILSP-1)*NINGRZ))
+        TMPRM (IFILSP) = PMSA(IP(28+(IFILSP-1)*NINGRZ))
+        TMPSE (IFILSP) = PMSA(IP(29+(IFILSP-1)*NINGRZ))
+        BENTHS(IFILSP) = NINT(PMSA(IP(30+(IFILSP-1)*NINGRZ)))
        endif
       ENDDO
       DO I=1,NTOALG
@@ -257,9 +260,9 @@
       DEPTH  = PMSA(IP(4))
       DO 30 IFILSP = 1,NTOGRZ
        if (active_grazer(ifilsp)) then
-        GRZNEW(IFILSP) = MAX(PMSA(IP(6+(IFILSP-1)*NINGRZ)),1.0E-2) *
+        GRZNEW(IFILSP) = MAX(PMSA(IP(6+(IFILSP-1)*NINGRZ)),GRZMC(IFILSP)) *
      1                   GRZML(IFILSP)
-        GRZOLD(IFILSP) = MAX(PMSA(IP(7+(IFILSP-1)*NINGRZ)),1.0E-2) *
+        GRZOLD(IFILSP) = MAX(PMSA(IP(7+(IFILSP-1)*NINGRZ)),GRZMC(IFILSP)) *
      1                   GRZML(IFILSP)
 !       Correct unit of input concentration for zoobenthos
 !       Force concentration zero for zoobenthos segments without bottom
@@ -545,70 +548,6 @@
    20 CONTINUE
 !
  9000 CONTINUE
-
-!     MvdV 981130 added velocity
-!     Loop over nutrients
-!     JvG 11-12-2009
-!     Fecal pellets from zooplankton are rapidly sinking
-!     to the bootm. In 2D this can be arranged
-!     by producing some of the detritus as bottom detritus (FRDBOT)
-!     The code below was added to emulate this in 3D
-!     it contains a bug (no extra production of water detritus
-!     in stead of produced bottom detritus)
-!     and it contains a conceptual flaw (POC is shifted only one layer down)
-!     Therefore, we omit it, and consequently neglect the rapid
-!     sinking of fecal pellets in a 3D environment, they just become
-!     POC. A conceptually sound solution would be to create a
-!     state variable fecal pellets
-!     We also reduce the computational burden in 3D models
-!     (especially Z-layer with a lot of dummy exchanges)
-!     NOTE also that this version does not support the production of
-!     bottom detritus by filterfeeding benthos in a DELWAQ-G
-!     context
-
-!     DO 300 I = 1, NTONUT
-!C      Determine pointers for velocities
-!       IPV = 5+(NTONUT+2*NTOGRZ)*NTOALG+2*NTONUT+NTOGRZ*NINGRZ+NTOGRZ+I
-!       INV = INCREM(IPV)
-!       IPP = IPOINT(IPV)
-!
-!C      Exchangeloop over horizontal direction
-!       DO 8000 IQ=1,NOQ1+NOQ2
-!C        set horizontal velocities to zero
-!         PMSA(IPP) = 0.0
-!
-!         IPP = IPP + INV
-!
-!8000   CONTINUE
-!
-!C      Exchangeloop over vertical direction
-!       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
-!C        Calculate vertical velocities
-!         IFROM  = IEXPNT(1,IQ)
-!         IF ( IFROM .GT. 0 ) THEN
-!C           Get total flux
-!            DFLUX = FL(I+16+(IFROM-1)*NOFLUX)
-!C           Get GEM POC,N.P,Si concentration
-!            J = 5+NTOGRZ*NINGRZ+NTONUT+I
-!            POC(I) = PMSA(IPOINT(J)+(IFROM-1)*INCREM(J))
-!C           divide flux over Detritus and GEM POC
-!            FL(I+16+(IFROM-1)*NOFLUX) = DFLUX * (1.0-GEM)
-!            IF (GEM*POC(I).LE.1E-20) THEN
-!               PMSA(IPP) = 0.
-!            ELSE
-!C                     convert flux (g/m3/d) to velocity (m/s)
-!C             velo=flux/86400 * Cpoc / Ctot * Depth / Cpoc
-!C             velo=flux/86400 * Depth / Ctot
-!                  PMSA(IPP) = DFLUX / 86400. * DEPTH / POC(I)
-!            ENDIF
-!         ELSE
-!            PMSA(IPP) = 0.0
-!         ENDIF
-!         IPP = IPP + INV
-!
-!7000   CONTINUE
-!
-! 300 CONTINUE
 
       IF (INIT) INIT = .FALSE.
 
