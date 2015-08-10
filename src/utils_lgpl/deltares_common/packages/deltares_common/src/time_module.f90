@@ -44,6 +44,7 @@ module time_module
    public :: sec2ddhhmmss
    public :: ymd2jul
    public :: jul2ymd
+   public :: datetime_to_string
 
    interface ymd2jul
       module procedure GregorianDateToJulianDateNumber
@@ -314,5 +315,41 @@ module time_module
             read (timeunitstr(i+7:n), '(I4,1H,I2,1H,I2,1H,I2,1H,I2,1H,I2)', iostat = iostat) iyear, imonth, iday, ihour, imin, isec
          end if
       end function parse_ud_timeunit
-      
+
+      !> Creates a string representation of a date time, in the ISO 8601 format.
+      !! Example: 2015-08-07T18:30:27Z
+      !! 2015-08-07T18:30:27+00:00
+      !! Performs no check on validity of input numbers!
+      function datetime_to_string(iyear, imonth, iday, ihour, imin, isec, ierr) result(datetimestr)
+         integer,           intent(in)  :: iyear, imonth, iday
+         integer, optional, intent(in)  :: ihour, imin, isec !< Time is optional, will be printed as 00:00:00 if omitted.
+         integer, optional, intent(out) :: ierr !< Error status, 0 if success, nonzero in case of format error.
+
+         character(len=20) :: datetimestr !< The resulting date time string. Considering using trim() on it.
+
+         integer :: ihour_, imin_, isec_, ierr_
+         if (.not. present(ihour)) then
+            ihour_ = 0
+         else
+            ihour_ = ihour
+         end if
+         if (.not. present(imin)) then
+            imin_ = 0
+         else
+            imin_ = imin
+         end if
+         if (.not. present(isec)) then
+            isec_ = 0
+         else
+            isec_ = isec
+         end if
+
+         write (datetimestr, '(i4,"-",i2.2,"-",i2.2,"T",i2.2,":",i2.2,":",i2.2,"Z")', iostat=ierr_) &
+                               iyear, imonth, iday, ihour_, imin_, isec_
+
+         if (present(ierr)) then
+            ierr = ierr_
+         end if
+      end function datetime_to_string
+
 end module time_module
