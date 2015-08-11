@@ -147,7 +147,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     !
     ! Determine flow regime
     !
-    if (umod > 1.0e-6 .and. .not. wave) then
+    if (umod > 1.0e-6 .and. uorb < 1.0e-6) then
        !
        ! Flow only
        !
@@ -162,7 +162,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
           endif
           taumax = taum
        endif
-    elseif (umod < 1.0e-6 .and. wave) then
+    elseif (umod < 1.0e-6 .and. uorb >= 1.0e-6) then
        !
        ! Waves only
        !
@@ -176,7 +176,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
              taumax = 0.5 * rhowat * fws * uorbm * uorbm
           endif
        endif
-    elseif (umod >= 1.0e-6 .and. wave) then
+    elseif (umod >= 1.0e-6 .and. uorb >= 1.0e-6) then
        !
        ! Combined flow and waves
        !
