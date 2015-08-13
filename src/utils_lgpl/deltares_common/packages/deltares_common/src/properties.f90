@@ -1086,6 +1086,39 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
         success = success_
     end if
 end subroutine prop_get_string
+
+subroutine visit_tree(tree,direction)
+   implicit none
+   type(TREE_DATA), pointer                    :: tree
+   character(len=1), dimension(0)              :: data
+   logical                                     :: stop 
+   integer, intent(in)                         :: direction       
+   if (direction>0) then
+      call tree_traverse( tree, node_visit, data, stop )
+   else
+      call tree_traverse( tree, node_unvisit, data, stop )
+   endif 
+end subroutine visit_tree
+
+subroutine node_visit( node, data, stop )
+   use TREE_DATA_TYPES
+   type(TREE_DATA), pointer                    :: node
+   character(len=1), dimension(:), intent(in)  :: data
+   logical, intent(inout)                      :: stop
+   if (size(node%node_data)>0) then          
+      node%node_visit = node%node_visit + 1  ! Update visit count 
+   endif 
+end subroutine node_visit
+
+subroutine node_unvisit( node, data, stop )
+   use TREE_DATA_TYPES
+   type(TREE_DATA), pointer                    :: node
+   character(len=1), dimension(:), intent(in)  :: data
+   logical, intent(inout)                      :: stop
+   if (size(node%node_data)>0) then          
+      node%node_visit = max(0,node%node_visit - 1)  ! Update visit count 
+   endif 
+end subroutine node_unvisit
 !
 !
 ! --------------------------------------------------------------------
