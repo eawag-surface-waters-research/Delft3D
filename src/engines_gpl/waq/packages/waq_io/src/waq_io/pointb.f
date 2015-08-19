@@ -117,6 +117,7 @@
       integer              :: ioff2           ! offset volume nr's one but last water layer
       integer              :: inaarplus       ! the 'to+1' exchange pointer
       integer              :: i, k            ! loop counters
+      logical              :: odd             ! mention only the first boundary
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "pointb", ithndl )
 
@@ -269,13 +270,19 @@
          goto 9999
       endif
       write ( lunut , 1060 ) nsegb
+      odd = .true.
       if ( ioutpt .ge. 3 ) then
          write ( lunut , 1070 )
-         do iq = noq+1, noq+noq4 , 2
+         do iq = noq+1, noq+noq4
             if ( ipoint(1,iq) .lt. 0 .or.
      &           ipoint(2,iq) .lt. 0      ) then
                ib = min (ipoint(1,iq),ipoint(2,iq))
-               write ( lunut , 1080 ) ib,iq,(ipoint(k,iq),k=1,2)
+               if ( odd ) then
+                  write ( lunut , 1080 ) ib,iq,(ipoint(k,iq),k=1,2)
+                  odd = .false.
+               else
+                  odd = .true.
+               endif
             endif
          enddo
       else
