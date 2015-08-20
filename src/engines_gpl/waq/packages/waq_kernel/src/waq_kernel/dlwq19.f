@@ -122,7 +122,7 @@
       integer  ( 4), intent(in   ) :: iqdmp  (noq)           !< pointer from echange to dump location
       real     ( 4), intent(inout) :: dmpq   (nosys ,ndmpq,2)!< array with mass balance information
       integer   (4), intent(in   ) :: isdmp  (noseg )        !< volume to dump-location pointer
-      real      (4), intent(inout) :: dmps   (notot ,ndmps,2)!< dumped segment fluxes if IOPT > 7
+      real      (4), intent(inout) :: dmps   (notot ,ndmps,*)!< dumped segment fluxes if IOPT > 7
       integer   (4), intent(in   ) :: iwaste (nowst )        !< volume numbers of the waste locations
       real      (4), intent(inout) :: wstdmp (notot ,nowst,2)!< accumulated wasteloads 1/2 in and out
       integer  ( 4), intent(in   ) :: iopt                   !< integration features integer, see logicals
@@ -278,7 +278,7 @@
                   nvert(2,iseg  ) = ioff                  !  column starts at ioff in ivert
                   ivert(  ioff  ) = iseg
                   i = nvert(1,iseg)                       !  this is the cell below
-                  do while ( i .ne. 0 )
+                  do while ( i .gt. 0 )
                      ioff = ioff + 1
                      ivert(  ioff) = i
                      i = nvert(1,i)
@@ -314,8 +314,17 @@
             allocate ( low(maxlay), dia(maxlay), upr(maxlay) )
             write ( lunut, '(A,i4,A)' ) ' This model has at most    : ',maxlay,' layers'
          endif
+!    after this all: ivert(1:noseg)     contains all water cell numbers in their order of appearance in the columns
+!                    nvert(1,1:nosegl)  contains the start locations in ivert of columns 1:nosegl
+!                    nvert(1,nosegl+1)  contains the start location of the non existing column nosegl+1
+!                    nvert(2,1:noseg)   contains the column number of each cell, negative if not head of column
+!    the procedure works for any cell numbering if: the columns all are 1D-vertical so all 1-cell wide stacks
+!                                                   the vertical exchanges run from noq1+noq2+1 to noq1+noq2+noq3
+!                                                   the positive velocity or flow is from ipoint(1,iq) to ipoint(2,iq)
+!    it is easily seen that for 2D-horizontal models ivert and nvert(1:2,*) just contain the sequential cell numbers and
+!                    nosegl = noseg. Since nvert(1,noseg+1) is out of range, you will find statements that deal with this.
          write ( lunut, '(A)' ) ' '
-         init = 1
+         init = 1    !   do this only once per simulation
       endif
 
 !     PART 1 : make the administration for the variable time step approach
@@ -1558,7 +1567,7 @@
          enddo
       enddo
 
-      do iseg = 1, noseg       !  for if some diagonal entries are not 1.0
+      do iseg = 1, nosss       !  for if some diagonal entries are not 1.0
          do isys = 1, nosys
             rhs (isys,iseg) = rhs(isys,iseg) / diag(isys,iseg)
          enddo
@@ -1674,10 +1683,14 @@
             rhs  (isys,iseg) = rhs (isys,iseg)*vol
          enddo
       enddo
+
+!         assign the double precisison results to the single precision system arrays
+!                                                          for the bed phase only
       do iseg = noseg+1, nosss
          vol = volnew(iseg)
          do isys = 1, nosys
             amass(isys,iseg) = rhs (isys,iseg)*vol
+            conc (isys,iseg) = rhs (isys,iseg)
          enddo
          do isys = nosys+1, notot-nototp         ! all passive substances
             amass(isys,iseg) = amass(isys,iseg) + deriv(isys,iseg) * idt
@@ -1687,6 +1700,7 @@
       if ( timon ) call timstop ( ithand7 )
 
 !         assign the double precisison results to the single precision system arrays
+!                                                          for the water phase only
 
  9999 do iseg = 1, noseg
          vol = volnew(iseg)
