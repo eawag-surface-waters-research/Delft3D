@@ -16,7 +16,9 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_utils_la_SOURCES = \
+libwaq_utils_la_SOURCES =  \
+       gregor.f \
+       julian.f \
        waqmem.f90 \
        progress.f90 \
        fileutils.f90 \

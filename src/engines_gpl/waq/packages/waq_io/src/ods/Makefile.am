@@ -19,9 +19,7 @@ libods_la_SOURCES = getdim.f \
        getloc.f \
        getmat.f \
        getpar.f \
-       gettme.f \
-       gregor.f \
-       julian.f
+       gettme.f
 
 #-------------------------------------------------------------------------------
 # Libraries

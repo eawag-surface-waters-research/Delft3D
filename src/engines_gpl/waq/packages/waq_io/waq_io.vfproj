@@ -53,9 +53,7 @@
 		<File RelativePath=".\src\ods\getloc.f"/>
 		<File RelativePath=".\src\ods\getmat.f"/>
 		<File RelativePath=".\src\ods\getpar.f"/>
-		<File RelativePath=".\src\ods\gettme.f"/>
-		<File RelativePath=".\src\ods\gregor.f"/>
-		<File RelativePath=".\src\ods\julian.f"/></Filter>
+		<File RelativePath=".\src\ods\gettme.f"/></Filter>
 		<Filter Name="proc_preprocess">
 		<File RelativePath=".\src\proc_preprocess\actrep.f"/>
 		<File RelativePath=".\src\proc_preprocess\add_atrfrc.f"/>

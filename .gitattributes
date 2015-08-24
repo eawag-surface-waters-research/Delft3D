@@ -1606,8 +1606,6 @@ src/engines_gpl/waq/packages/waq_io/src/ods/getloc.f -text
 src/engines_gpl/waq/packages/waq_io/src/ods/getmat.f -text
 src/engines_gpl/waq/packages/waq_io/src/ods/getpar.f -text
 src/engines_gpl/waq/packages/waq_io/src/ods/gettme.f -text
-src/engines_gpl/waq/packages/waq_io/src/ods/gregor.f -text
-src/engines_gpl/waq/packages/waq_io/src/ods/julian.f -text
 src/engines_gpl/waq/packages/waq_io/src/proc_preprocess/Makefile.am -text
 src/engines_gpl/waq/packages/waq_io/src/proc_preprocess/actrep.f -text
 src/engines_gpl/waq/packages/waq_io/src/proc_preprocess/add_atrfrc.f -text
@@ -2390,6 +2388,8 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/filldm.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/getcom.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/getper.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/gkwini.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/gregor.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/julian.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/makpnt.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/monsys.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/movchr.f -text

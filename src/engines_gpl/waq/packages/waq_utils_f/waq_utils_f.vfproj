@@ -261,6 +261,8 @@
 		<File RelativePath=".\src\waq_utils\getcom.f"/>
 		<File RelativePath=".\src\waq_utils\getper.f"/>
 		<File RelativePath=".\src\waq_utils\gkwini.f"/>
+		<File RelativePath=".\src\waq_utils\gregor.f"/>
+		<File RelativePath=".\src\waq_utils\julian.f"/>
 		<File RelativePath=".\src\waq_utils\makpnt.f"/>
 		<File RelativePath=".\src\waq_utils\monsys.f"/>
 		<File RelativePath=".\src\waq_utils\movchr.f"/>
