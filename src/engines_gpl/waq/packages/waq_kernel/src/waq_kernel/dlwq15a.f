@@ -347,7 +347,7 @@
                     if ( abs(waste(i1,i)) .gt. 1.0E-30 ) withdrawal = .false.
                  enddo
                  if ( withdrawal ) then
-                    wdrawal(iwst) = WasteFlow
+                    wdrawal(iwst) = wdrawal(iwst) - WasteFlow
                  else
                     do i1 = isys,isys+nsys-1
                        ahelp = 0.0
@@ -537,7 +537,7 @@
                        if ( fluxes     ) wstdmp(i1,i,1) = wstdmp(i1,i,1) + waste(i1,i)*WasteFlow*idt
                     enddo
                  else
-                    wdrawal(icel) = WasteFlow
+                    wdrawal(icel) = wdrawal(icel) - WasteFlow
                  endif
               enddo
 
