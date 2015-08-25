@@ -349,22 +349,24 @@
 
       ! old serial definitions
 
-      call getcom ( '-target_serial'  , 1    , lfound, target_serial, rdummy, cdummy, ierr2)
-      if ( lfound ) then
-         write(line,'(a)' ) ' found -target_serial command line switch'
-         call monsys(line,1)
-         if ( ierr2.ne. 0 ) then
-            old_items%target_serial = target_serial
-            write(line,'(a)')' no serial number given, using current'
+      if ( .not. swi_nopro ) then
+         call getcom ( '-target_serial'  , 1    , lfound, target_serial, rdummy, cdummy, ierr2)
+         if ( lfound ) then
+            write(line,'(a)' ) ' found -target_serial command line switch'
             call monsys(line,1)
-            old_items%target_serial = serial
+            if ( ierr2.ne. 0 ) then
+               old_items%target_serial = target_serial
+               write(line,'(a)')' no serial number given, using current'
+               call monsys(line,1)
+               old_items%target_serial = serial
+            else
+               write(line,'(a,i13)') ' using target serial number: ', target_serial
+               call monsys(line,1)
+               old_items%target_serial = target_serial
+            endif
          else
-            write(line,'(a,i13)') ' using target serial number: ', target_serial
-            call monsys(line,1)
-            old_items%target_serial = target_serial
+            old_items%target_serial = serial
          endif
-      else
-         old_items%target_serial = serial
       endif
 
       ! configuration
