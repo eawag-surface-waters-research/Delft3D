@@ -363,7 +363,9 @@
                ! one. This is needed for working with multiple instances
                !
                aProp%itime1 = aProp%itime2                    ! copy info of second record to first record
-               aProp%array1 = aProp%array2
+               do i2=1,nrftot
+                  aProp%array1(i2) = aProp%array2(i2)
+               enddo
 
                if ( aProp%stream_access ) then
                   read ( aProp%ilun, end = 10, pos = aProp%position ) aProp%itime2, (aProp%array2(i2),i2=1,nrftot)   ! read new second record
@@ -523,11 +525,6 @@
      *                                     (1.0-fact)*alog(max(aProp%array1(i),1.0E-25))   )
          enddo
       endif
-
-!     write(*,*) 'Flinterpol: array1(56) =',aProp%array1(56), ' array2(56) =',aProp%array2(56),
-!    &     ' array3(56) =',array3(56)
-!     write(88,'(3(a,e15.6))') 'Flinterpol: array1(56) =',aProp%array1(56), ' array2(56) =',aProp%array2(56),
-!    &     ' array3(56) =',array3(56)
 
       end subroutine Flinterpol
 
