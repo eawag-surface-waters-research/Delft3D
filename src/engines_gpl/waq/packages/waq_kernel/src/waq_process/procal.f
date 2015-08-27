@@ -72,7 +72,7 @@
       integer(4), parameter :: nomax = 500
       integer(4), save      :: ithand(nomax) = 0 !  timer handles
       if ( timon ) then
-         if ( iproc .le. nomax ) call timstrt ( pronam, ithand(iproc) )
+         if ( imodul .le. nomax ) call timstrt ( pronam, ithand(imodul) )
       endif
 
 !     call timer_start(timer_offs_proces0+imodul)
@@ -502,7 +502,7 @@
 !     call timer_stop(timer_offs_proces0+imodul)
 
       if ( timon ) then
-         if ( iproc .le. nomax ) call timstop ( ithand(iproc) )
+         if ( imodul .le. nomax ) call timstop ( ithand(imodul) )
       endif
 
       return
