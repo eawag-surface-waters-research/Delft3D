@@ -162,7 +162,7 @@
       allocate ( wctime (     nohmax) )
       allocate ( tmsubnm(     nohmax) )
       allocate ( ncontxt(     nohmax) )
-      allocate ( context(99,2,nohmax) )
+      allocate ( context(99,3,nohmax) )
       ncontxt =   0
 
       return
@@ -180,7 +180,7 @@
       allocate ( wctt1(     nohmax+handinc) )
       allocate ( tmsu1(     nohmax+handinc) )
       allocate ( ncon1(     nohmax+handinc) )
-      allocate ( cont1(99,2,nohmax+handinc) )
+      allocate ( cont1(99,3,nohmax+handinc) )
       ncon1 = 0
 
       ntim1(    1:nohmax) = ntimcal
@@ -250,6 +250,7 @@
          if ( nohandl .eq. nohmax ) call timinc ( )
          handle  = nohandl                                   !  make a new timer handle
          context(i,2,ihandl) = handle                        !  save this handle for this context
+         context(1,3,handle) = ihandl
          tmsubnm(handle) = subrou                            !  save the ID of this timer
          ntimcal(handle) = 0                                 !  zero the accumulators
          cptime (handle) = 0.0d00
@@ -296,9 +297,9 @@
          return
       endif
 
-      call cpu_time      (          time )                   !  this is straight forward timing
-
+      call cpu_time ( time )
       cptime(handle) = cptime(handle) + time  - cpstart(handle)
+
       call system_clock  ( count, rate )
       stopt = real( count, 8 ) / real( rate, 8 )
       wctime(handle) = wctime(handle) + stopt - wcstart(handle)
@@ -310,61 +311,53 @@
 
       subroutine timdump ( afile )
 
-      integer(4)    i, j                       !   loop accross timer handles
-      integer(4)    ihandl                     !   loop accross subroutine handles
-      integer(4)    k                          !   loop accross contexts
-      real   (8)    cpfact, wcfact
+      integer(4)    i                          !   loop accross timer handles
       character*(*) afile
-      character(60) forchr
-      data          forchr / '(i5,i11,x,D13.6,x,f7.2,x,D13.6,'  /
 
-      if ( maxlvl .le. 6 ) then
-         open  ( 912, file=afile )                !  this will be the common size (132, the default)
-      else
-         open  ( 912, file=afile, recl=600 )      !  if the case is exceptional then we go for it
-      endif
+      open  ( 912, file=afile, recl=100+maxlvl*5 )
       write ( 912, '(a,98(a ))' ) ' nr.     times     cpu time      cpu    wall clock      wc',
      &                            '  level',('     ',i=3,maxlvl),' routine name'
       write ( 912, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %',
      &                            ( i, i=2,maxlvl)
-      cpfact = 100.0d00/cptime(1)
-      wcfact = 100.0d00/wctime(1)
       do i = 1, nohandl
          if ( level(i) .eq. -1 ) cycle
-         write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' ) (level(i)-1)*5+2,(maxlvl-level(i))*5+1
-         write ( 912, forchr ) i,ntimcal(i),cptime(i),cptime(i)*cpfact,wctime(i),wctime(i)*wcfact,
-     &                                                                                    tmsubnm(i)
-         if ( i .eq. nohandl ) cycle
-         if ( level(i+1) .lt. level(i) ) then            !  we are going up
-            do ihandl = 1, noshndl                       !  find the context of this timer
-               do k = 1, ncontxt(ihandl)
-                  j = context(k,2,ihandl)
-                  if ( j .eq. i ) then
-                     prevhnd = context(k,1,ihandl)       !  it is actually the calling timer we go for
-                     goto 10                             !  because the calling timer need to be closed
-                  endif                                  !  since we are going one level up
-               enddo
-            enddo
-   10       do ihandl = k+1, noshndl                     !  now find subsequent timers with the same caller
-               do k = 1, ncontxt(ihandl)                 !  and print them
-                  j = context(k,2,ihandl)
-                  if ( context(k,1,ihandl) .eq. prevhnd .and. level(j) .ne. -1 .and. j .ne. i ) then
-                     write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' )
-     &                                                  (level(j)-1)*5+2,(maxlvl-level(j))*5+1
-                     write ( 912, forchr ) j,ntimcal(j),cptime(j),cptime(j)*cpfact,
-     &                                                wctime(j),wctime(j)*wcfact,tmsubnm(j)
-                     level(j) = -1
-                  endif
-               enddo
-            enddo
-         endif
-         level(i) = -1
+         call timline ( i )
       enddo
 
       close ( 912 )
 
       return
       end subroutine timdump
+
+!***************
+
+      recursive subroutine timline ( ihandl )
+
+      integer(4)    ihandl
+      integer(4)    i, j, k
+      real   (8)    cpfact, wcfact
+
+      character(60) forchr
+      data          forchr / '(i5,i11,x,D13.6,x,f7.2,x,D13.6,'  /
+
+      cpfact = 100.0d00/cptime(1)
+      wcfact = 100.0d00/wctime(1)
+      write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' )
+     &                                   (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
+      write ( 912, forchr ) ihandl,ntimcal(ihandl),cptime(ihandl),cptime(ihandl)*cpfact,
+     &                                    wctime(ihandl),wctime(ihandl)*wcfact,tmsubnm(ihandl)
+      level(ihandl) = -1
+
+      do i = ihandl+1, nohandl
+         if ( level(i) .eq. -1 ) cycle
+         j = context(1,3,i)
+         do k = 1, ncontxt(j)
+            if ( context(k,1,j) .eq. ihandl .and. context(k,2,j) .eq. i ) call timline ( i )
+         enddo
+      enddo
+
+      return
+      end subroutine timline
 
 !***************
 
