@@ -1,4 +1,4 @@
-subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
+subroutine stoktb(hrmsnm, tpu, h, ustokes, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -45,50 +45,44 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp), pointer :: ag
+    real(fp), pointer :: gammax
 !
 ! Global variables
 !
-    real(fp)        :: h
-    real(fp), intent(in)               :: hrmsnm
-    real(fp)        :: tpu
-    real(fp), intent(out)              :: ustokes
-!
+    real(fp)              :: h
+    real(fp), intent(in)  :: hrmsnm
+    real(fp)              :: tpu
+    real(fp), intent(out) :: ustokes
 !
 ! Local variables
 !
-    real(fp)                       :: a
-    real(fp)                       :: fact
-    real(fp)                       :: kwav
-    real(fp)                       :: omega
-!
+    real(fp) :: a
+    real(fp) :: fact
+    real(fp) :: kwav
+    real(fp) :: omega
+    real(fp) :: p1
 !
 !! executable statements -------------------------------------------------------
 !
     ag         => gdp%gdphysco%ag
+    gammax     => gdp%gdnumeco%gammax
     !
+    ! Calculates Stokes velocities at the bed
     !
-    !-----Calculates Stokes velocities at the bottom
-    !
-    !
-    !  declarations
-    !
-    !     GLOBAL DATA
-    !
-    !     global data structure definition and access functions
-    !
-    a = hrmsnm/2.
-    if (tpu>0.1) then
-       omega = 2.*pi/tpu
+    a = 0.5_fp * (min(hrmsnm, gammax*h))
+    if (tpu > 0.1_fp) then
+       omega = 2.0_fp * pi / tpu
        !
-       !-----Determine Wave number
+       ! Determine Wave number
        !
-       call wavenr(h         ,tpu       ,kwav      ,ag        )
+       call wavenr(h, tpu, kwav, ag)
        !
-       !-----Determine Second order Stokes drift at the bed (z=0)
+       ! Determine Second order Stokes drift at the bed (z=0)
        !
-       fact = exp( - 2.*kwav*h)
-       ustokes = omega*kwav*a**2*(fact*2/(1. - fact)**2)
+       p1      = max(-25.0_fp,  -2.0_fp*kwav*h)
+       fact    = exp(p1)
+       ustokes = omega * kwav * a**2 * (fact*2.0_fp / (1.0_fp-fact)**2)
     else
-       ustokes = 0.
+       ustokes = 0.0_fp
     endif
 end subroutine stoktb
