@@ -47,24 +47,33 @@
       ! local declarations
 
       integer, save       :: ifirst = 1
-      integer             :: lunrep
+      integer, save       :: lunrep
+      integer             :: ierr
       integer             :: iwst
       integer             :: isys
 
       ! the inlet outlet coupling
 
+      if (ifirst == 1) then
+         call dhopnf (lunrep, 'delwaq_user_wasteloads.mon', 19, 1, ierr)
+         if (ierr .ne. 0) then
+            write(*,'(A)') 'Could not open delwaq_user_wasteloads.mon for writing.'
+            call srstop(1)
+         endif
+      endif
+
       call delwaq_user_inlet_outlet ( nowst , wasteloads, notot , nosys , noseg ,
-     +                                itime , conc      , syname)
+     +                                itime , conc      , syname, lunrep)
 
       ! walking discharges
 
       call delwaq_user_walking_discharges ( nowst , wasteloads, notot , nosys , noseg ,
-     +                                      itime , conc      , syname)
+     +                                      itime , conc      , syname, lunrep)
 
       ! report on wasteloads
 
       call delwaq_user_bubble_bath  ( nowst , wasteloads, notot , nosys , noseg ,
-     &                                itime , conc      , syname)
+     &                                itime , conc      , syname, lunrep)
 
       ifirst = 0
 
@@ -72,7 +81,7 @@
       end subroutine delwaq_user_wasteload
 
       subroutine delwaq_user_bubble_bath  ( nowst  , wls    , notot  , nosys  , noseg  ,
-     &                                      itime  , conc   , syname )
+     &                                      itime  , conc   , syname , lunrep)
 
 !       routine to set the bubble screen option for Nieuwe Meer
 !                made by Leo Postma at 6 october 2006
@@ -95,6 +104,7 @@
 !       local declarations
 
       logical                  :: first = .true.    ! initialisation indicator
+      integer                  :: lunrep            ! logical unit of report file
       logical                  :: l_exi             ! file exists or not
       integer                  :: noscrn            ! number of bubble screens
       integer                  :: iscrn             ! loop counter screens
@@ -117,12 +127,12 @@
          if ( l_exi ) then
             open  ( 83 , file='screen.dat' )        !  read file with
             read  ( 83 , * ) noscrn                 !  screen-names
-            write ( 32 , * ) 'Number of screens:', noscrn
+            write ( lunrep , * ) 'Number of screens:', noscrn
             if ( noscrn .gt. 0 ) then               !  may be more names
                allocate ( scrnam(noscrn) )          !  than existing in the
                do iscrn = 1, noscrn                 !  problem
                   read  ( 83 , * ) scrnam(iscrn)
-                  write ( 32 , * ) 'Screen:',iscrn,' is called: ',scrnam(iscrn)
+                  write ( lunrep , * ) 'Screen:',iscrn,' is called: ',scrnam(iscrn)
                enddo
                close ( 83 )
                allocate ( scrloc( nowst  ) )        !  pointer from waste to screen
@@ -133,20 +143,20 @@
                   do iscrn = 1, noscrn
                      if ( find_string( scrnam(iscrn), wls(iwst)%id%id ) ) then
                         scrloc(iwst) = iscrn
-                        write ( 32 , * ) 'Load:',iwst,' is part of screen:',iscrn
+                        write ( lunrep , * ) 'Load:',iwst,' is part of screen:',iscrn
                         exit
                      endif
                   enddo
                enddo
             endif
          else
-            write ( 32 , * ) 'No file <screen.dat> detected'
+            write ( lunrep , * ) 'No file <screen.dat> detected'
          endif
       endif
 
       if ( noscrn .eq. 0 ) return
 
-!     write ( 32 , * ) 'Time:',itime
+!     write ( lunrep , * ) 'Time:',itime
 
 !        First  step: sum the withdrawn masses and flow per screen
 
@@ -176,7 +186,7 @@
       do iscrn = 1, noscrn                          !  make the mixed
          wflow = scrwdf( iscrn )                    !  concentrations
          if ( wflow .ne. 0.0 ) then                 !  per active screen
-!           write ( 32 , * ) 'Screen:',iscrn,' Abstracted:',wflow
+!           write ( lunrep , * ) 'Screen:',iscrn,' Abstracted:',wflow
             do isub = 1, notot
                scrwtd ( iscrn, isub ) = scrwtd ( iscrn, isub ) / wflow
             enddo
@@ -190,7 +200,7 @@
          if ( iscrn .ne. 0 ) then                   !  screens only
             wflow = wls(iwst)%flow
             if ( wflow .gt. 0.0 ) then              !  releases only
-!              write ( 32 , * ) 'Screen:',iscrn,' Released:',wflow
+!              write ( lunrep , * ) 'Screen:',iscrn,' Released:',wflow
                do isub = 1, notot
                   wls(iwst)%loads(isub ) = scrwtd ( iscrn, isub )
                enddo
@@ -207,7 +217,7 @@
       end subroutine delwaq_user_bubble_bath
 
       subroutine delwaq_user_inlet_outlet ( nowst , wasteloads, notot , nosys , noseg ,
-     +                                      itime , conc      , syname)
+     +                                      itime , conc      , syname, lunrep)
 
       ! routine to set the default inlet-outlet coupling
 
@@ -256,7 +266,6 @@
 
       ! test if there are inlet outlet combinations
 
-      lunrep = 32
       if ( ifirst .eq. 1 ) then
          ifirst = 0
          write(lunrep,*)
@@ -435,7 +444,7 @@
       end function find_string
 
       subroutine delwaq_user_walking_discharges ( nowst , wasteloads, notot , nosys , noseg ,
-     +                                            itime , conc      , syname)
+     +                                            itime , conc      , syname, lunrep)
 
       ! routine to handle walking discharges
 
@@ -477,7 +486,6 @@
 
       ! test if there are any walking discharges
 
-      lunrep = 32
       if ( first ) then
          first = .false.
          nowalk = 0
@@ -540,12 +548,12 @@
          write( lunrep,2006)
       endif
 
-      write( lunrep, * ) 'Time in file: ', next_time_in_file, itime, nowalk
-
       ! do not bother with this if there are no walking discharges
       if ( nowalk == 0 ) then
          return
       endif
+
+      write( lunrep, * ) 'Time in file: ', next_time_in_file, itime, nowalk
 
       ! position the file pointer and read the information
       do
