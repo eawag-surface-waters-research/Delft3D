@@ -417,9 +417,6 @@ engines_gpl/waq/packages/delwaq2/Makefile
 engines_gpl/waq/packages/delwaq2/src/Makefile
 engines_gpl/waq/packages/delwaq2_version_number/Makefile
 engines_gpl/waq/packages/delwaq2_version_number/src/Makefile
-engines_gpl/waq/packages/delwaq_test/delwaq2_stepwise/src/Makefile
-engines_gpl/waq/packages/delwaq_test/unit_tests_waq/Makefile
-engines_gpl/waq/packages/delwaq_test/unit_tests_waq/src/Makefile
 engines_gpl/waq/packages/Makefile
 engines_gpl/waq/packages/waq_data/Makefile
 engines_gpl/waq/packages/waq_data/src/Makefile
