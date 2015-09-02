@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export ARCH=lnx
+export ARCH=lnx64
 export HOSTNAME=$HOSTNAME
 
 
@@ -10,7 +10,7 @@ scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 scriptname=$scriptdir/mormerge.tcl
 if [ ! -f $scriptname ]; then 
-  scriptname=../../../bin/lnx/flow2d3d/scripts/mormerge.tcl
+  scriptname=../../../bin/lnx64/flow2d3d/scripts/mormerge.tcl
 fi
 
 $scriptname -i basin_linux.mm -s $scriptname

@@ -1,24 +1,24 @@
 Please check the following sites for additional information:
 General information: http://oss.deltares.nl/web/delft3d/source-code
 FAQ                : http://oss.deltares.nl/web/delft3d/faq
-Compile forum      : http://oss.deltares.nl/web/delft3d/general/-/message_boards?_19_mbCategoryId=22276
+Compile forum      : http://oss.deltares.nl/web/delft3d/general/-/message_boards?_19_mbCategoryId=200432
 
 
 Compiling on Windows
 ====================
   0) Be sure that you have installed:
-     Visual Studio 2008, including Fortran compiler Intel 11.0 (11.1)
-     OR
-     Visual Studio 2010, including Fortran compiler Intel 12.0 (Intel(R) Visual Fortran Composer XE 2011)
+     - Microsoft Visual Studio 2010 or newer (https://www.visualstudio.com)
+     - Intel Fortran compiler 11.1 or newer (https://software.intel.com)
+     - Python (https://www.python.org/downloads)
      OR
      Visual Studio 2012, including Fortran compiler Intel 13.0 (Intel(R) Visual Fortran Composer XE 2013)
-  1) Open "src\d_hydro_open_source.sln" in Visual Studio 2008
-     OR
-     Open "src\d_hydro_open_source_vs2010.sln" in Visual Studio 2010/Visual Studio 2012
-  2) Select the "solution configuration" you want: "Debug" or "Release" (normally "Release")
-  3) Select the "solution platform" you want: "Win32" or "x64" (default "Win32")
+  1) Execute "...\src\prepare_sln.py" to create a "delft3d_open.sln" that fits to your tools
+     See the comments in "...\src\prepare_sln.py" for more information
+  2) Open "prepare_sln.py" in Visual Studio
+  2) Select the "solution configuration": "Release" or "Debug" (normally "Release")
+  3) Select the "solution platform"     : "x64"     or "Win32" (normally "x64")
   4) <Ctrl><Shift>B will compile the full solution
-  5) The binaries are installed in directory "bin\win32" (Release, Win32), "bin\win64" (Release, x64)
+  5) The binaries are installed in directory "bin\win64" (Release, x64), "bin\win32" (Release, Win32), 
      or in the subdirectory of the executable, e.g. "src\engines_gpl\d_hydro\bin\Debug" (Debug)
 
 
@@ -69,15 +69,9 @@ In directory "examples\01_standard":
 Windows:
 - Execute script "run_flow2d3d.bat"
   Parallel:
-  This model is very small and can only be run using 2 or 3 partitions:
-  - Open script "run_flow2d3d_parallel.bat" in a text editor:
-    - Read the comments about "When using mpich2 for the first time on a machine" very carefully
-    - Replace at the end of the file the text
-      %NUMBER_OF_PROCESSORS%
-      with
-      2
-    - Save the script
-  - Execute "run_flow2d3d_parallel.bat"
+  Execute "run_flow2d3d_parallel.bat"
+  This model is very small and can only be run using 5 partitions or less
+  Have a look at parameter %NPROC% in the script "run_flow2d3d_parallel.bat"
 Linux:
 - Execute script "run_flow2d3d.sh"
   Parallel:
@@ -110,7 +104,6 @@ You must have some experience with Microsoft Visual Studio and Running Deft3D ca
 
 Directory structure
 ===================
-engines     : Main programs
 engines_gpl : Open source engines, under GPL conditions, see ../gpl-3.0.txt
 tools_gpl   : Open source small programs which support the engines, under GPL conditions, see ../gpl-3.0.txt
 tools_lgpl  : Open source tools, under LGPL conditions, see ../lgpl-2.1.txt
@@ -125,6 +118,6 @@ common.am
 build.sh
 
 
-04 Feb 2015
+02 Sep 2015
 adri.mourits@deltares.nl
 

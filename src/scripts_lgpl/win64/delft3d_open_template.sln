@@ -53,7 +53,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "datsel_f", "tools_gpl\datse
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "lint_f", "tools_gpl\lint\packages\lint_f\lint_f.vfproj", "{0ACAC0F8-A142-4811-83AA-598E80A38FBB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel_intel13", "tools_gpl\datsel\packages\datsel\datsel_intel13.vcxproj", "{64F27FE8-975F-4F36-8C39-0BE14AB6C89E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel", "tools_gpl\datsel\packages\datsel\datsel.vcxproj", "{64F27FE8-975F-4F36-8C39-0BE14AB6C89E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
 		{03B0B2AB-125F-49E6-9C53-ED7E5FC7718D} = {03B0B2AB-125F-49E6-9C53-ED7E5FC7718D}
@@ -68,12 +68,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nefis", "utils_lgpl\nefis\p
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kubint_f", "tools_gpl\kubint\packages\kubint_f\kubint_f.vfproj", "{8ADDAA1C-ABB3-4E0F-AB8C-A905C6CC9EDF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kubint_intel13", "tools_gpl\kubint\packages\kubint\kubint_intel13.vcxproj", "{BC28FF1D-CC36-4812-B9AB-D3E8EF785FB2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kubint", "tools_gpl\kubint\packages\kubint\kubint.vcxproj", "{BC28FF1D-CC36-4812-B9AB-D3E8EF785FB2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8ADDAA1C-ABB3-4E0F-AB8C-A905C6CC9EDF} = {8ADDAA1C-ABB3-4E0F-AB8C-A905C6CC9EDF}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lint_intel13", "tools_gpl\lint\packages\lint\lint_intel13.vcxproj", "{685C7F3B-DD9A-4A64-AC7C-51A12391AA5E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lint", "tools_gpl\lint\packages\lint\lint.vcxproj", "{685C7F3B-DD9A-4A64-AC7C-51A12391AA5E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0ACAC0F8-A142-4811-83AA-598E80A38FBB} = {0ACAC0F8-A142-4811-83AA-598E80A38FBB}
 	EndProjectSection
@@ -149,7 +149,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "manager", "engines_gpl\wave
 		{62E2E1DA-4AFA-4880-A508-1C4F217C93B1} = {62E2E1DA-4AFA-4880-A508-1C4F217C93B1}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "wave_vs2010_intel13", "engines_gpl\wave\packages\wave\wave_vs2010_intel13.vfproj", "{35D95B51-6CBE-473D-9ED5-1BB7CE16BE24}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "wave", "engines_gpl\wave\packages\wave\wave.vfproj", "{35D95B51-6CBE-473D-9ED5-1BB7CE16BE24}"
 	ProjectSection(ProjectDependencies) = postProject
 		{91C4971E-914C-4AD8-9711-6B53E856884C} = {91C4971E-914C-4AD8-9711-6B53E856884C}
 		{5EC2EC2B-BE35-4303-963C-AA0BEDEF707C} = {5EC2EC2B-BE35-4303-963C-AA0BEDEF707C}
@@ -186,6 +186,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_dol_f", "engines_gpl\flo
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kernel", "engines_gpl\flow2d3d\packages\kernel\kernel.vfproj", "{6BD9299F-31B8-4AB1-B6CE-62DA33CF19B5}"
 	ProjectSection(ProjectDependencies) = postProject
+		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{FEBFF54E-5BBA-454C-A4A5-326B8D858990} = {FEBFF54E-5BBA-454C-A4A5-326B8D858990}
 		{B57FD1B0-684A-4A26-946D-2B54D0EB3994} = {B57FD1B0-684A-4A26-946D-2B54D0EB3994}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
@@ -221,7 +222,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02-streamtest", "utils_lgpl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mormerge_version_number", "tools_gpl\mormerge\packages\mormerge_version_number\mormerge_version_number.vcxproj", "{C2638430-A7F5-41DD-A51A-9C23D604FB34}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mormerge_vs2010", "tools_gpl\mormerge\packages\mormerge\mormerge_vs2010.vfproj", "{5849A2F3-6526-4967-97CF-30CA683A16CC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mormerge", "tools_gpl\mormerge\packages\mormerge\mormerge.vfproj", "{5849A2F3-6526-4967-97CF-30CA683A16CC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C2638430-A7F5-41DD-A51A-9C23D604FB34} = {C2638430-A7F5-41DD-A51A-9C23D604FB34}
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
@@ -249,7 +250,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "d_hydro_lib", "d_hydro_lib"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "d_hydro_lib", "utils_lgpl\d_hydro_lib\packages\d_hydro_lib\d_hydro_lib.vcxproj", "{C47698E9-FAF7-4B58-8D5D-416C10685325}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d_intel13", "engines_gpl\flow2d3d\packages\flow2d3d\flow2d3d_intel13.vcxproj", "{005E6B5B-C1D0-4DB2-9870-2098A33C40D0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d", "engines_gpl\flow2d3d\packages\flow2d3d\flow2d3d.vcxproj", "{005E6B5B-C1D0-4DB2-9870-2098A33C40D0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{F9102D02-48CF-4954-B1C2-ED815BAA11A6} = {F9102D02-48CF-4954-B1C2-ED815BAA11A6}
@@ -274,7 +275,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d_openda_lib", "engi
 		{F9102D02-48CF-4954-B1C2-ED815BAA11A6} = {F9102D02-48CF-4954-B1C2-ED815BAA11A6}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d_openda_intel13", "engines_gpl\flow2d3d\packages\flow2d3d_openda\flow2d3d_openda_intel13.vcxproj", "{657ABE78-F81C-46FB-8774-8F0C4CD545E1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d_openda", "engines_gpl\flow2d3d\packages\flow2d3d_openda\flow2d3d_openda.vcxproj", "{657ABE78-F81C-46FB-8774-8F0C4CD545E1}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{F9102D02-48CF-4954-B1C2-ED815BAA11A6} = {F9102D02-48CF-4954-B1C2-ED815BAA11A6}
@@ -296,7 +297,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d_openda_intel13", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nesthd1", "nesthd1", "{ED6C470E-6AD1-4EEC-A3D2-7CEA046CE060}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "nesthd1_vs2010", "tools_gpl\nesthd1\packages\nesthd1\nesthd1_vs2010.vfproj", "{E1C16E8B-106C-4F98-B405-7D252766DDA8}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "nesthd1", "tools_gpl\nesthd1\packages\nesthd1\nesthd1.vfproj", "{E1C16E8B-106C-4F98-B405-7D252766DDA8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C43743A1-7208-41D0-AA2D-098A15E43559} = {C43743A1-7208-41D0-AA2D-098A15E43559}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
@@ -304,7 +305,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "nesthd1_vs2010", "tools_gpl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nesthd2", "nesthd2", "{F4CA74CC-D0C3-4D11-8C8F-20653A3C74A1}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "nesthd2_vs2010", "tools_gpl\nesthd2\packages\nesthd2\nesthd2_vs2010.vfproj", "{D3D142F6-FAE5-4DBE-B158-190578B8A44B}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "nesthd2", "tools_gpl\nesthd2\packages\nesthd2\nesthd2.vfproj", "{D3D142F6-FAE5-4DBE-B158-190578B8A44B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A7BAFE5D-1301-48F8-878B-9BECB3DDE241} = {A7BAFE5D-1301-48F8-878B-9BECB3DDE241}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
@@ -386,7 +387,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq1_lib", "engines_gpl\
 		{2587ADEA-13B7-4BE1-BFB4-588FF22027DF} = {2587ADEA-13B7-4BE1-BFB4-588FF22027DF}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_lib_intel13", "engines_gpl\waq\packages\delwaq2_lib\delwaq2_lib_intel13.vfproj", "{93FF120B-FF39-4365-860B-2ADF26E746AC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_lib", "engines_gpl\waq\packages\delwaq2_lib\delwaq2_lib.vfproj", "{93FF120B-FF39-4365-860B-2ADF26E746AC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{30957B02-DE35-4C44-B4D5-0F0006645F1E} = {30957B02-DE35-4C44-B4D5-0F0006645F1E}
 		{00D4B807-6A0E-47E1-A5A3-F90F454829AC} = {00D4B807-6A0E-47E1-A5A3-F90F454829AC}
@@ -437,7 +438,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waqpb_import", "tools_gpl\w
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waqpb_lib", "tools_gpl\waqpb\packages\waqpb_lib\waqpb_lib.vfproj", "{F890CF86-BCA9-4527-9C17-EED27DFAE904}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_openda_lib_intel13", "engines_gpl\waq\packages\delwaq2_openda_lib\delwaq2_openda_lib_intel13.vfproj", "{92CAB073-51BF-4670-B748-C10DC6CCF05E}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_openda_lib", "engines_gpl\waq\packages\delwaq2_openda_lib\delwaq2_openda_lib.vfproj", "{92CAB073-51BF-4670-B748-C10DC6CCF05E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{30957B02-DE35-4C44-B4D5-0F0006645F1E} = {30957B02-DE35-4C44-B4D5-0F0006645F1E}
 		{7C606208-B8B7-4545-97ED-AC5BE4784EB8} = {7C606208-B8B7-4545-97ED-AC5BE4784EB8}
@@ -476,7 +477,6 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "morphology_kernel", "utils_
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "morphology_io", "utils_gpl\morphology\packages\morphology_io\morphology_io.vfproj", "{18FB4D20-7250-4F05-A237-E0E8D6BA601A}"
 	ProjectSection(ProjectDependencies) = postProject
-		{B57FD1B0-684A-4A26-946D-2B54D0EB3994} = {B57FD1B0-684A-4A26-946D-2B54D0EB3994}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
 		{F25A2ED2-7095-4B32-94F0-37E94F900227} = {F25A2ED2-7095-4B32-94F0-37E94F900227}
 		{5F3AF3FA-1CF3-4D3D-A105-8859BE35B757} = {5F3AF3FA-1CF3-4D3D-A105-8859BE35B757}
@@ -535,7 +535,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_utils_f", "engines_gpl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "part_version_number", "engines_gpl\part\packages\version_number\part_version_number.vcxproj", "{7C606208-B8B7-4545-97ED-AC5BE4784EB8}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delpar_intel13", "engines_gpl\part\packages\delpar\delpar_intel13.vfproj", "{47B72701-1377-428F-B374-9CB476FB0DDE}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delpar", "engines_gpl\part\packages\delpar\delpar.vfproj", "{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7C606208-B8B7-4545-97ED-AC5BE4784EB8} = {7C606208-B8B7-4545-97ED-AC5BE4784EB8}
 		{ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9} = {ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9}
@@ -544,7 +544,6 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delpar_intel13", "engines_g
 		{5A143484-553B-4345-B07C-C7DBF0309004} = {5A143484-553B-4345-B07C-C7DBF0309004}
 		{087FFCBF-7DEF-4D42-86EB-10A4B89ED1BA} = {087FFCBF-7DEF-4D42-86EB-10A4B89ED1BA}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
-		{2587ADEA-13B7-4BE1-BFB4-588FF22027DF} = {2587ADEA-13B7-4BE1-BFB4-588FF22027DF}
 	EndProjectSection
 EndProject
 Global
@@ -1159,14 +1158,14 @@ Global
 		{7C606208-B8B7-4545-97ED-AC5BE4784EB8}.Release|Win32.Build.0 = Release|Win32
 		{7C606208-B8B7-4545-97ED-AC5BE4784EB8}.Release|x64.ActiveCfg = Release|x64
 		{7C606208-B8B7-4545-97ED-AC5BE4784EB8}.Release|x64.Build.0 = Release|x64
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Debug|Win32.ActiveCfg = Debug|Win32
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Debug|Win32.Build.0 = Debug|Win32
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Debug|x64.ActiveCfg = Debug|x64
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Debug|x64.Build.0 = Debug|x64
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Release|Win32.ActiveCfg = Release|Win32
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Release|Win32.Build.0 = Release|Win32
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Release|x64.ActiveCfg = Release|x64
-		{47B72701-1377-428F-B374-9CB476FB0DDE}.Release|x64.Build.0 = Release|x64
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Debug|Win32.Build.0 = Debug|Win32
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Debug|x64.ActiveCfg = Debug|x64
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Debug|x64.Build.0 = Debug|x64
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Release|Win32.ActiveCfg = Release|Win32
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Release|Win32.Build.0 = Release|Win32
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Release|x64.ActiveCfg = Release|x64
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1275,6 +1274,6 @@ Global
 		{087FFCBF-7DEF-4D42-86EB-10A4B89ED1BA} = {BD01BDB3-4A45-448C-A2BA-E5B51DE92E47}
 		{E2628720-AE0A-4E42-9954-B71147CCE7DC} = {BD01BDB3-4A45-448C-A2BA-E5B51DE92E47}
 		{7C606208-B8B7-4545-97ED-AC5BE4784EB8} = {BD01BDB3-4A45-448C-A2BA-E5B51DE92E47}
-		{47B72701-1377-428F-B374-9CB476FB0DDE} = {BD01BDB3-4A45-448C-A2BA-E5B51DE92E47}
+		{ACB60532-1BA0-4B53-B0CF-617FDE3FC9FE} = {BD01BDB3-4A45-448C-A2BA-E5B51DE92E47}
 	EndGlobalSection
 EndGlobal

@@ -22,7 +22,7 @@ mdwfile=obw.mdw
     #
     # Set the directory containing delftflow.exe
     #
-export ARCH=lnx
+export ARCH=lnx64
 curdir=`pwd`
 export D3D_HOME=$curdir/../../bin
 waveexedir=$D3D_HOME/$ARCH/wave/bin

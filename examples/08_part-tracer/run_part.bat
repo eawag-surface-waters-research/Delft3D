@@ -23,7 +23,7 @@ set argfile=%currentdir%%mdpfile%
     rem
     rem Set the directory containing delpar.exe
     rem
-set exedir=%currentdir%..\..\bin\win32\part\bin
+set exedir=%currentdir%..\..\bin\win64\part\bin
 
     rem
     rem Run delpar

@@ -18,7 +18,7 @@
     rem
     rem Really needed
 set D3D_HOME=..\..\..\bin
-set ARCH=win32
+set ARCH=win64
 
     rem
     rem To make this script better readable

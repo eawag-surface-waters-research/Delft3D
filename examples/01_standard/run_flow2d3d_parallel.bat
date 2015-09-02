@@ -15,7 +15,7 @@
     rem Execute "smpd -install" as administrator:
     rem     "Start" -> "All programs" -> "Accessories", right-click "Command Prompt", "Run as Administrator"
     rem     In this command box:
-    rem         cd ..\..\bin\win32\flow2d3d\bin
+    rem         cd ..\..\bin\win64\flow2d3d\bin
     rem         (or when not compiled yet)
     rem         cd ..\..\src\third_party_open\mpich2\bin
     rem         (both paths above are relative to the location of this script "run_flow2d3d_parallel.bat")
@@ -36,7 +36,7 @@ set argfile=config_d_hydro.xml
     rem
     rem Set the directory containing ALL exes/dlls here (mpiexec.exe, delftflow.exe, flow2d3d.dll, mpich-dlls, DelftOnline dlls etc.)
     rem
-set ARCH=win32
+set ARCH=win64
 set D3D_HOME=..\..\bin
   rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin

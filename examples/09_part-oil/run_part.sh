@@ -25,7 +25,7 @@ argfile=$currentdir/$mdpfile
     #
     # Set the directory containing delpar
     #
-exedir=$currentdir/../../bin/lnx/part/bin
+exedir=$currentdir/../../bin/lnx64/part/bin
 export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
 
     #

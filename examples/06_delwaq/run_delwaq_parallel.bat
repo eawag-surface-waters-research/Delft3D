@@ -22,9 +22,9 @@ set argfile=%currentdir%%inpfile%
     rem Set the directory containing delwaq1.exe and delwaq2.exe and
     rem the directory containing the proc_def and bloom files here
     rem
-set exedir=%currentdir%..\..\bin\win32\waq\bin
+set exedir=%currentdir%..\..\bin\win64\waq\bin
   rem set exedir=c:\Program Files (x86)\Deltares\Delft3D 4.01.00\win32\waq\bin
-set procfile=%currentdir%..\..\bin\win32\waq\default\proc_def
+set procfile=%currentdir%..\..\bin\win64\waq\default\proc_def
   rem set procfile=c:\Program Files (x86)\Deltares\Delft3D 4.01.00\win32\waq\default\proc_def
 
     rem

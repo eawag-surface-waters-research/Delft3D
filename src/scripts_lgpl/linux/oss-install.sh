@@ -85,8 +85,8 @@ function delft3d_flow () {
 function d_hydro () {
     echo "installing d_hydro . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
-    dest_menu="$dest_main/lnx/menu/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_menu="$dest_main/lnx64/menu/bin"
 
     mkdir -p $dest_bin
     mkdir -p $dest_menu
@@ -111,10 +111,10 @@ function d_hydro () {
 function flow2d3d () {
     echo "installing flow2d3d . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
-    dest_default="$dest_main/lnx/flow2d3d/default"
-    dest_scripts="$dest_main/lnx/flow2d3d/scripts"
-    dest_plugins="$dest_main/lnx/plugins/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_default="$dest_main/lnx64/flow2d3d/default"
+    dest_scripts="$dest_main/lnx64/flow2d3d/scripts"
+    dest_plugins="$dest_main/lnx64/plugins/bin"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
@@ -153,10 +153,10 @@ function flow2d3d () {
 function flow2d3d_openda () {
     echo "installing flow2d3d_openda . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
-    dest_default="$dest_main/lnx/flow2d3d/default"
-    dest_scripts="$dest_main/lnx/flow2d3d/scripts"
-    dest_plugins="$dest_main/lnx/plugins/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_default="$dest_main/lnx64/flow2d3d/default"
+    dest_scripts="$dest_main/lnx64/flow2d3d/scripts"
+    dest_plugins="$dest_main/lnx64/plugins/bin"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
@@ -195,8 +195,8 @@ function flow2d3d_openda () {
 function waq () {
     echo "installing delwaq . . ."
 
-    dest_bin="$dest_main/lnx/waq/bin"
-    dest_default="$dest_main/lnx/waq/default"
+    dest_bin="$dest_main/lnx64/waq/bin"
+    dest_default="$dest_main/lnx64/waq/default"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
@@ -224,7 +224,7 @@ function waq () {
 function part () {
     echo "installing delpar . . ."
 
-    dest_bin="$dest_main/lnx/part/bin"
+    dest_bin="$dest_main/lnx64/part/bin"
 
     mkdir -p $dest_bin
 
@@ -246,10 +246,10 @@ function part () {
 function wave () {
     echo "installing wave . . ."
 
-    dest_bin="$dest_main/lnx/wave/bin"
-    dest_default="$dest_main/lnx/wave/default"
-    dest_swan_bin="$dest_main/lnx/swan/bin"
-    dest_swan_scripts="$dest_main/lnx/swan/scripts"
+    dest_bin="$dest_main/lnx64/wave/bin"
+    dest_default="$dest_main/lnx64/wave/default"
+    dest_swan_bin="$dest_main/lnx64/swan/bin"
+    dest_swan_scripts="$dest_main/lnx64/swan/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
@@ -279,7 +279,7 @@ function wave () {
 function plugin_culvert () {
     echo "installing plugin_culvert . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -301,7 +301,7 @@ function plugin_culvert () {
 function plugin_delftflow_traform () {
     echo "installing plugin_delftflow_traform . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -323,7 +323,7 @@ function plugin_delftflow_traform () {
 function datsel () {
     echo "installing datsel . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -345,7 +345,7 @@ function datsel () {
 function kubint () {
     echo "installing kubint . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -367,7 +367,7 @@ function kubint () {
 function lint () {
     echo "installing lint . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -389,8 +389,8 @@ function lint () {
 function mormerge () {
     echo "installing mormerge . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
-    dest_scripts="$dest_main/lnx/flow2d3d/scripts"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_scripts="$dest_main/lnx64/flow2d3d/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_scripts
@@ -414,7 +414,7 @@ function mormerge () {
 function vs () {
     echo "installing vs . . ."
 
-    dest="$dest_main/lnx/util/bin"
+    dest="$dest_main/lnx64/util/bin"
 
     mkdir -p $dest
 
@@ -436,7 +436,7 @@ function vs () {
 function nesthd1 () {
     echo "installing nesthd1 . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -458,7 +458,7 @@ function nesthd1 () {
 function nesthd2 () {
     echo "installing nesthd2 . . ."
 
-    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/flow2d3d/bin"
 
     mkdir -p $dest_bin
 

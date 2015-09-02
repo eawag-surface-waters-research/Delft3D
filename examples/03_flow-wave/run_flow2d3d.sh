@@ -23,7 +23,7 @@ mdwfile=r17.mdw
     #
     # Set the directory containing delftflow.exe
     #
-export ARCH=lnx
+export ARCH=lnx64
 curdir=`pwd`
 export D3D_HOME=$curdir/../../bin
 flowexedir=$D3D_HOME/$ARCH/flow2d3d/bin

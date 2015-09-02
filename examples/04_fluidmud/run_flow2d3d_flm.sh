@@ -14,7 +14,7 @@ argfilemud=config_d_hydro_mud.xml
     #
     # Set the directory containing deltares_hydro.exe and libflow2d3d.so here
     #
-export ARCH=lnx
+export ARCH=lnx64
 export D3D_HOME=../../bin
 exedir=$D3D_HOME/$ARCH/flow2d3d/bin
 useSharedMem=1

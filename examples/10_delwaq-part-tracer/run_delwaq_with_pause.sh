@@ -24,9 +24,9 @@ argfile=$currentdir/$inpfile
     # Set the directory containing delwaq1 and delwaq2 and
     # the directory containing the proc_def and bloom files here
     #
-exedir=$currentdir/../../bin/lnx/waq/bin
+exedir=$currentdir/../../bin/lnx64/waq/bin
 export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
-procfile=$currentdir/../../bin/lnx/waq/default/proc_def
+procfile=$currentdir/../../bin/lnx64/waq/default/proc_def
 
     #
     # Run delwaq 1

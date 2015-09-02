@@ -22,7 +22,7 @@ set mdwfile=obw.mdw
     rem
     rem Set the directory containing wave.exe and swan
     rem
-set ARCH=win32
+set ARCH=win64
 set D3D_HOME=..\..\bin
   rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set waveexedir=%D3D_HOME%\%ARCH%\wave\bin

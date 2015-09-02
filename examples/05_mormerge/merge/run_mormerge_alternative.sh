@@ -20,7 +20,7 @@ cd ../../../bin
 export D3D_HOME=`pwd`
 cd $curdir
 
-export ARCH=lnx
+export ARCH=lnx64
 
     #
     # To make this script better readable

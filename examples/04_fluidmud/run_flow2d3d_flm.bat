@@ -24,7 +24,7 @@ set argfilemud=config_d_hydro_mud.xml
     rem
     rem Set the directory containing delftflow.exe here
     rem
-set ARCH=win32
+set ARCH=win64
 set D3D_HOME=..\..\bin
   rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
 set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
