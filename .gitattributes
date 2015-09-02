@@ -295,7 +295,6 @@ src/clean.cmd -text
 src/clean.sh -text
 src/common.am -text
 src/configure.ac -text
-src/d_hydro_open_source.sln -text
 src/doxyfile_delft3d -text
 src/doxyfile_delwaq -text
 src/engines_gpl/Makefile.am -text
