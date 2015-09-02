@@ -49,22 +49,22 @@ cd ..
 
 echo "Running testcase 05_mormerge (sp) ..."
 cd 05_mormerge\input
-..\%TCL_EXE% ../../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
+"..\%TCL_EXE%" ..\..\sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 cd ..\merge
-call run_flow2d3d_wave_mormerge.bat >screen.log 2>&1
+rem call run_flow2d3d_wave_mormerge.bat >screen.log 2>&1
 cd ..\input
-..\%TCL_EXE% ../../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
+"..\%TCL_EXE%" ..\..\sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
 cd ..\..
-
+dir
 
 echo "Skipping testcases 06_delwaq, 07_wave, 08_part-tracer, 09_part-oil, and 10_delwaq-part-tracer (no sp variant)"
 
 
 echo "Running testcase 11_standard_netcdf (sp) ..."
 cd 11_standard_netcdf
-%TCL_EXE% ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
+%TCL_EXE% ..\sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 call run_flow2d3d.bat >screen.log 2>&1
-%TCL_EXE% ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
+%TCL_EXE% ..\sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d_sp" "<library>flow2d3d"
 cd ..
 
 
