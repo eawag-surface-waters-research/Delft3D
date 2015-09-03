@@ -10,6 +10,7 @@ Compiling on Windows
      - Microsoft Visual Studio 2010 or newer (https://www.visualstudio.com)
      - Intel Fortran compiler 11.1 or newer (https://software.intel.com)
      - Python (https://www.python.org/downloads)
+       Both versions (2.7.xx and 3.4.xx) will do
   1) Execute "...\src\prepare_sln.py" to create a "delft3d_open.sln" that fits to your tools
      See the comments in "...\src\prepare_sln.py" for more information
   2) Open "delft3d_open.sln" in Visual Studio
