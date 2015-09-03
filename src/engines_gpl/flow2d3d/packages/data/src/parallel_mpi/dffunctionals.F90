@@ -48,12 +48,12 @@ module dffunctionals
    integer , parameter :: FILTER_MIN      =  1
    integer , parameter :: FILTER_MAX      =  2
    integer , parameter :: FILTER_SUM      =  3
-   integer , parameter :: MIN_INT_KIND_4  = -2147483648
-   integer , parameter :: MAX_INT_KIND_4  =  2147483647
+   integer , parameter :: MIN_INT_KIND_4  = -2147483647
+   integer , parameter :: MAX_INT_KIND_4  =  2147483646
    real(sp), parameter :: MIN_REAL_KIND_4 = -3.4028e+38_sp
    real(sp), parameter :: MAX_REAL_KIND_4 =  3.4028e+38_sp
-   real(hp), parameter :: MIN_REAL_KIND_8 = -1.7977e+308_hp
-   real(hp), parameter :: MAX_REAL_KIND_8 =  1.7977e+308_hp
+   real(hp), parameter :: MIN_REAL_KIND_8 = -1.7976e+308_hp
+   real(hp), parameter :: MAX_REAL_KIND_8 =  1.7976e+308_hp
    !
    real(sp), dimension(:,:),     allocatable, save :: glbarr2
    real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
