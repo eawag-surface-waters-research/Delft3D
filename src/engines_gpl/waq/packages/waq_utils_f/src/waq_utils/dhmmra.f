@@ -131,13 +131,18 @@
 
 !     How many threads ?
 
-!     The '-nothreads [N]' argument for delwaq2 will turn on parallelism, and override
+!     The '-threads [N]' argument for delwaq2 will turn on parallelism, and override
 !     any setting of the number of threads in the input file.
 !     No value or zero for [N] will use the maximum number of available threads
       nothreadsarg = 0
-      call getcom ( '-nothreads', 1, lfound, nothreadsarg, rdummy, adummy, ierr2)
+      call getcom ( '-threads', 1, lfound, nothreadsarg, rdummy, adummy, ierr2)
       if (lfound) then
          nothrd = nothreadsarg
+      else
+         call getcom ( '-nothreads', 1, lfound, nothreadsarg, rdummy, adummy, ierr2)
+         if (lfound) then
+            nothrd = nothreadsarg
+         end if
       end if
 
       if ( nothrd .gt. 0 ) call OMP_SET_NUM_THREADS( nothrd )
