@@ -52,6 +52,8 @@
       INTEGER JT(MT),NONUNI(*),NONUN(*),IRS(*),LIB(*)
       DIMENSION X(*),XDEF(*),BIO(*)
       DATA NPAUSE /0/
+      
+      SAVE
 !
 !  Initialize XOPT if this is the first interval for a time period.
 !  If DUMP is specified, then print solution for interval JNOW.
