@@ -1,4 +1,4 @@
-subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
+subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -48,6 +48,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     type (grid)               :: sg           ! swan grid
     type (output_fields)      :: sof          ! output fields defined on swan grid
     type (wave_data_type)     :: wavedata
+    logical                   :: prevtime     ! true: the time to be written is the "previous time"
 !
 ! Local variables
 !
@@ -272,7 +273,11 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     !
     nelems = 29
     celidt=wavedata%output%count
-    idummy(1) = wavedata%time%calctimtscale
+    if (prevtime) then
+       idummy(1) = wavedata%time%calctimtscale_prev
+    else
+       idummy(1) = wavedata%time%calctimtscale
+    endif
     call putgti(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1) , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1)    , &
               & elmnms(1) ,celidt    ,wrswch    ,error     ,idummy(1)    )

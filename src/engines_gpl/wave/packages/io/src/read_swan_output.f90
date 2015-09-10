@@ -1,14 +1,22 @@
-subroutine read_swan_output (sof,sr)
+subroutine read_swan_output (sof, sr, offset, deletefile)
 !
 ! Head routine for calling read_bot
 !
 use swan_flow_grid_maps
 use swan_input
 implicit none
+!
+! parameters
 type (output_fields)           :: sof
 type (swan)                    :: sr
+integer                        :: offset
+logical                        :: deletefile
+!
+! local
 real                           :: north
 logical                        :: cart
+!
+! body
    north    = sr%northdir
    cart     = .not.sr%nautconv
    call hisout( &
@@ -18,7 +26,7 @@ logical                        :: cart
         & sof%v      ,sof%dspr   ,sof%rleak     ,sof%qb    ,sof%nmax   , &
         & sof%mmax   ,north      ,cart          , &
         & sof%dissip(:,:,2)      ,sof%dissip(:,:,3)        ,sof%dissip(:,:,4)      , &
-        & sof%rtp    ,sof%pdir   ,sof%windu     , &
+        & sof%rtp    ,sof%pdir   ,sof%windu     ,offset    ,deletefile , &
         & sof%windv  ,sof%tps    ,sof%tm02      ,sof%tmm10 ,sof%dhsign , &
         & sof%drtm01 ,sof%setup  ,sof%n_outpars ,sof%add_out_vals  )
 end subroutine read_swan_output
@@ -28,8 +36,8 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
                 & depth     ,fx        ,fy        ,mx        ,my        , &
                 & dissip    ,ubot      ,steep     ,wlen      ,u         , &
                 & v         ,dspr      ,rleak     ,qb        ,n         , &
-                & m         ,north     ,cart      ,dissurf   ,diswcap   ,disbot , &
-                & rtp       ,pdir      ,windu     , &
+                & m         ,north     ,cart      ,dissurf   ,diswcap   , disbot , &
+                & rtp       ,pdir      ,windu     ,offset    ,deletefile, &
                 & windv     ,tps       ,tm02      ,tmm10     ,dhsign    , &
                 & drtm01    ,setup     ,n_outpars ,add_out_vals)
 !----- GPL ---------------------------------------------------------------------
@@ -73,7 +81,10 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
     integer               , intent(in)  :: m
     integer               , intent(in)  :: n
     integer                             :: n_outpars
+    integer               , intent(in)  :: offset     ! # of blocks to skip in the SWAN output files. Default: 0
     logical               , intent(in)  :: cart
+    logical               , intent(in)  :: deletefile ! true: delete SWAN file after reading. This used to be default
+                                                      ! But now it may contain two fields to be read.
     real                  , intent(in)  :: north
     real    , dimension(*), intent(out) :: depth
     real    , dimension(*), intent(out) :: dhsign
@@ -115,6 +126,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
     integer           :: i
     integer           :: inf
     integer           :: iocond
+    integer           :: j
     integer           :: k
     integer           :: lunhis
     integer           :: npnt
@@ -192,6 +204,11 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
           stop
        endif
        rewind lunhis
+       do j = 1, offset
+          do i = 1, npnt
+             read (lunhis, '(A)', end = 150) record
+          enddo
+       enddo
        do i = 1, npnt
           read (lunhis, '(A)', end = 150) record
           do
@@ -347,7 +364,11 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
        enddo
        !
 150    continue
-       close (lunhis, status = 'delete')
+       if (deletefile) then
+          close (lunhis, status = 'delete')
+       else
+          close (lunhis)
+       endif
     enddo
     !
     ! Negative values found in swanout1 file? write to screen

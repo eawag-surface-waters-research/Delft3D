@@ -58,6 +58,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
    integer                                       :: itidewrite
    integer                                       :: lunhot
    integer                         , external    :: new_lun
+   integer                                       :: offset
    real(fp)                                      :: wave_timezone
    real(fp)                                      :: wave_timmin
    real(fp)        , dimension(:,:), pointer     :: patm_fp
@@ -281,7 +282,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
          write(*,'(a)') '  Write SWAN input'
          dom%curlif = swan_grids(i_swan)%tmp_name
 
-         call write_swan_input (swan_run, itide, wavedata%output%count, wavedata%time%calccount, i_swan, wavedata)
+         call write_swan_input (swan_run, itide, wavedata%time%calccount, i_swan, wavedata)
 
          ! The following commented code was used for a special version
          ! - to be implemented in a more constructive way
@@ -308,7 +309,25 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
          ! Read SWAN output
          !
          write(*,'(a)') '  Read SWAN output'
-         call read_swan_output(swan_output_fields, swan_run)
+         offset = 0
+         if (wavedata%time%calccount == 1 .and. swan_run%modsim == 3) then
+            ! SWANFile contains two datasets: from tstart and tend
+            ! First read the first dataset, DeleteSWANFile = false
+            call read_swan_output(swan_output_fields, swan_run, offset, .false.)
+            if (dom%cgnum) then
+               !
+               ! Write output to WAVE map file
+               !
+               write(*,'(a,i10,a,f15.3)') '  Write WAVE map file, nest ',i_swan,' time ',wavedata%time%timmin
+               ! DataFromPreviousTimestep = true
+               call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
+                                  & wavedata, swan_run%casl, .true.)
+               call setoutputcount(wavedata%output, wavedata%output%count + 1)
+            endif
+            offset = 1
+         endif
+         ! DeleteSWANFile = true
+         call read_swan_output(swan_output_fields, swan_run, offset, .true.)
 
          if (swan_run%swwav) then
             !
@@ -330,8 +349,9 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             ! Write output to WAVE map file
             !
             write(*,'(a,i10,a,f15.3)') '  Write WAVE map file, nest ',i_swan,' time ',wavedata%time%timmin
+            ! DataFromPreviousTimestep = false
             call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
-                               & wavedata, swan_run%casl)
+                               & wavedata, swan_run%casl, .false.)
          endif
          call dealloc_output_fields (swan_output_fields)
          !

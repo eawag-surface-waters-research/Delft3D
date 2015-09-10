@@ -3652,13 +3652,12 @@ end subroutine read_swan_mdw
 !
 !
 !==============================================================================
-subroutine write_swan_input (sr, itide, outcnt, calccount, inest, wavedata)
+subroutine write_swan_input (sr, itide, calccount, inest, wavedata)
     !
     implicit none
     !
     integer                           :: itide
     integer                           :: inest
-    integer                           :: outcnt
     integer                           :: calccount
     real                              :: wdir
     real                              :: wvel
@@ -3670,7 +3669,7 @@ subroutine write_swan_input (sr, itide, outcnt, calccount, inest, wavedata)
     wvel   = sr%wvel(itide)
     wdir   = sr%wdir(itide)
     !
-    call write_swan_inp (wavedata, outcnt, calccount, &
+    call write_swan_inp (wavedata, calccount, &
                     & itide        ,sr%nttide ,inest      ,sr%nnest  ,sr%swuvt  , &
                     & sr%swuvi     ,sr%prname ,sr%prnumb  ,sr%title1 ,sr%title2 , &
                     & sr%title3    ,sr%itest  ,sr%itrace  , &
@@ -3687,7 +3686,7 @@ end subroutine write_swan_input
 !
 !
 !==============================================================================
-subroutine write_swan_inp (wavedata, outcnt, calccount, &
+subroutine write_swan_inp (wavedata, calccount, &
                 & itide     ,nttide    ,inest     ,nnest     ,swuvt     , &
                 & swuvi     ,prname    ,prnumb    ,title1    ,title2    , &
                 & title3    ,itest     ,itrace    , &
@@ -3722,7 +3721,6 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
     integer                        , intent(in)  :: nobst
     integer                        , intent(in)  :: nscr
     integer                        , intent(in)  :: nttide
-    integer                        , intent(in)  :: outcnt
     integer      , dimension(ncrv) , intent(in)  :: nclin
     integer      , dimension(nobst), intent(in)  :: nlin
     logical                        , intent(in)  :: sferic
@@ -3779,6 +3777,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
     integer                     :: lc
     integer                     :: lunhot
     integer                     :: luninp
+    integer                     :: m
     integer                     :: mdc1
     integer                     :: msc
     integer                     :: mxfr
@@ -3826,6 +3825,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
     character(37)               :: mudfil
     character(37)               :: vegfil
     character(60)               :: lijn
+    character(60)               :: outfirst
     character(79)               :: line
     character(79)               :: pointname
     character(256)              :: fname
@@ -3843,6 +3843,11 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
 !
 !! executable statements -------------------------------------------------------
 !
+    ! The following output string is optionally used on several locations
+    !
+    tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
+    write(outfirst,'(3a,f8.2,a)') "OUT ",tbegc, " ", sr%deltc, " MIN"
+
     dom => sr%dom(inest)
     !
     !     *** additional swan arrays ***
@@ -4778,7 +4783,20 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
     line(38:79) = ' '
     write (luninp, '(1X,A)') line
     line(1:79)  = ' '
-    write (luninp, '(6(2X,A),''_'')') varnam1
+    if (calccount == 1 .and. sr%modsim == 3) then
+       ! The following do-loop is used to write an underscore (_) at the end of the last line with varnam elements
+       ! Is there a more easy way?
+       !
+       do j = 1, CEILING(real(size(varnam1))/6.0)
+          m = min(6, size(varnam1)-(j-1)*6)
+          lijn = ' '
+          write(lijn, '(A,I1.1,A)') "(", m, "(2X,A),'_')"
+          write (luninp, lijn) (varnam1(n),n=(j-1)*6+1,min(j*6,size(varnam1)))
+       enddo
+       write (luninp, '(2A)') "  ", trim(outfirst)
+    else
+       write (luninp, '(6(2X,A),''_'')') varnam1
+    endif
     line(1:79)  = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
@@ -4799,7 +4817,20 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
     line(38:79) = ' '
     write (luninp, '(1X,A)') line
     line(1:79)  = ' '
-    write (luninp, '(6(2X,A),''_'')') varnam2
+    if (calccount == 1 .and. sr%modsim == 3) then
+       ! The following do-loop is used to write an underscore (_) at the end of the last line with varnam elements
+       ! Is there a more easy way?
+       !
+       do j = 1, CEILING(real(size(varnam2))/6.0)
+          m = min(6, size(varnam2)-(j-1)*6)
+          lijn = ' '
+          write(lijn, '(A,I1.1,A)') "(", m, "(2X,A),'_')"
+          write (luninp, lijn) (varnam2(n),n=(j-1)*6+1,min(j*6,size(varnam2)))
+       enddo
+       write (luninp, '(2A)') "  ", trim(outfirst)
+    else
+       write (luninp, '(6(2X,A),''_'')') varnam2
+    endif
     line(1:79)  = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
@@ -5059,18 +5090,7 @@ subroutine write_swan_inp (wavedata, outcnt, calccount, &
              ! needing to cover the full simulation period.
              !
              if (calccount == 1 .and. sr%modsim == 3) then  
-                i         = i+1
-                line(i:)  = ' OUT'
-                i         = i+4
-                !
-                ! starttime 
-                !
-                tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)             
-                write (line(i:), '(1X,a)')    tbegc
-                i         = i+16
-                write (line(i:), '(f8.2)')    sr%deltc
-                i         = i+8
-                line(i:)  = ' MIN'
+                line(i+2:)  = trim(outfirst)
              endif
              write (luninp, '(1X,A)') line
              line(1:79) = ' '

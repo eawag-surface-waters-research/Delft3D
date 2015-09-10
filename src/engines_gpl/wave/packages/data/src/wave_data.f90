@@ -54,16 +54,18 @@ integer, parameter :: WC_WESTHUYSEN = 2
 ! Module types
 !
 type wave_time_type
-   integer  :: refdate         ! [yyyymmdd] reference date, reference time is 0:00 h
-   integer  :: timtscale       ! [tscale]   Current time of simulation since reference date (0:00h)
-   integer  :: calctimtscale   ! [tscale]   Current time of SWAN calculation since reference date (0:00h)
-                               !            calctimtscale = timtscale                 when sr%modsim /= 3
-                               !            calctimtscale = timtscale+sr%deltcom*60.0 when sr%modsim == 3
-   integer  :: calccount       ! [-]        Counts the number of calculations. Used for naming the sp2 output files
-   real     :: tscale          ! [sec]      Basic time unit: default = 60.0,
-                               ! when running online with FLOW tscale = FLOW_time_step
-   real     :: timsec          ! [sec]      Current time of simulation since reference date (0:00h)
-   real     :: timmin          ! [min]      Current time of simulation since reference date (0:00h)
+   integer  :: refdate            ! [yyyymmdd] reference date, reference time is 0:00 h
+   integer  :: timtscale          ! [tscale]   Current time of simulation since reference date (0:00h)
+   integer  :: calctimtscale      ! [tscale]   Current time of SWAN calculation since reference date (0:00h)
+                                  !            calctimtscale = timtscale                 when sr%modsim /= 3
+                                  !            calctimtscale = timtscale+sr%deltcom*60.0 when sr%modsim == 3
+   integer  :: calctimtscale_prev ! calctimtscale from "previous" time point
+                                  ! Only used when sr%modsim == 3 for output at the start of the simulation
+   integer  :: calccount          ! [-]        Counts the number of calculations. Used for naming the sp2 output files
+   real     :: tscale             ! [sec]      Basic time unit: default = 60.0,
+                                  ! when running online with FLOW tscale = FLOW_time_step
+   real     :: timsec             ! [sec]      Current time of simulation since reference date (0:00h)
+   real     :: timmin             ! [min]      Current time of simulation since reference date (0:00h)
 end type wave_time_type
 !
 type wave_output_type
@@ -95,18 +97,19 @@ subroutine initialize_wavedata(wavedata)
    type(wave_data_type) :: wavedata
    character(30)        :: txthlp
 
-   wavedata%mode                   =  0
-   wavedata%time%refdate           =  0
-   wavedata%time%timtscale         =  0
-   wavedata%time%calctimtscale     =  0
-   wavedata%time%calccount         =  0
-   wavedata%time%tscale            = 60.0
-   wavedata%time%timsec            =  0.0
-   wavedata%time%timmin            =  0.0
-   wavedata%output%count           =  0
-   wavedata%output%nexttim         =  0.0
-   wavedata%output%timseckeephot   =  0.0
-   wavedata%output%write_wavm      =  .false.
+   wavedata%mode                    =  0
+   wavedata%time%refdate            =  0
+   wavedata%time%timtscale          =  0
+   wavedata%time%calctimtscale      =  0
+   wavedata%time%calctimtscale_prev =  -999
+   wavedata%time%calccount          =  0
+   wavedata%time%tscale             = 60.0
+   wavedata%time%timsec             =  0.0
+   wavedata%time%timmin             =  0.0
+   wavedata%output%count            =  0
+   wavedata%output%nexttim          =  0.0
+   wavedata%output%timseckeephot    =  0.0
+   wavedata%output%write_wavm       =  .false.
    !
    ! platform definition
    !
@@ -151,7 +154,8 @@ subroutine settimtscale(wavetime, timtscale_in, modsim, deltcom)
    wavetime%timsec    = real(wavetime%timtscale) * wavetime%tscale
    wavetime%timmin    = wavetime%timsec / 60.0
    if (modsim == 3) then
-      wavetime%calctimtscale = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale      = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale_prev = wavetime%timtscale
    else
       wavetime%calctimtscale = wavetime%timtscale
    endif
@@ -180,7 +184,8 @@ subroutine settimsec(wavetime, timsec_in, modsim, deltcom)
    wavetime%timmin    = wavetime%timsec / 60.0
    wavetime%timtscale = nint(wavetime%timsec / wavetime%tscale)
    if (modsim == 3) then
-      wavetime%calctimtscale = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale      = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale_prev = wavetime%timtscale
    else
       wavetime%calctimtscale = wavetime%timtscale
    endif
@@ -198,7 +203,8 @@ subroutine settimmin(wavetime, timmin_in, modsim, deltcom)
    wavetime%timsec    = wavetime%timmin * 60.0
    wavetime%timtscale = nint(wavetime%timsec / wavetime%tscale)
    if (modsim == 3) then
-      wavetime%calctimtscale = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale      = wavetime%timtscale + int(deltcom*60.0/wavetime%tscale)
+      wavetime%calctimtscale_prev = wavetime%timtscale
    else
       wavetime%calctimtscale = wavetime%timtscale
    endif
