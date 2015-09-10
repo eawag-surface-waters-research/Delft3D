@@ -94,62 +94,9 @@
       real(4) ppvbxxup   !    2d uptake percentage p pool 1 and 2             (-)
       real(4) psvbxxup   !    2d uptake percentage s pool 1 and 2             (-)
 
-      integer, parameter           :: npnt = 24           ! number of pointers
+      integer, parameter           :: npnt = 25           ! number of pointers
       integer                      :: ipnt(npnt)          ! local work array for the pointering
-      logical, save                :: first = .true.      !
       integer                      :: ibotseg             ! bottom segment for macrophyte
-      integer, allocatable, save   :: botseg(:)           ! bottom segment for macrophyte
-      integer                      :: lunrep              ! lunrep
-
-      ! initialise variable indicating bottom segment
-
-      call getmlu(lunrep)
-      if (first) then
-
-         allocate(botseg(noseg))
-         botseg = -1
-
-         ! set botseg equal to iseg for the segments which have a bottom
-
-         do iseg = 1,noseg
-            call dhkmrk(3,iknmrk(iseg),ikmrk1)
-            if (ikmrk1.eq.1) then
-               call dhkmrk(2,iknmrk(iseg),ikmrk2)
-               if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-                  botseg(iseg) = iseg
-               endif
-            endif
-         enddo
-
-         ! loop to find bottom segment in water columns
-
-         do iq = noq1+noq2+noq3, noq1 + noq2 +1, -1
-            ifrom   = iexpnt(1,iq)
-            ito     = iexpnt(2,iq)
-            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               ibotseg = botseg(ito)
-               if ( ibotseg .gt. 0 ) then
-                  botseg(ifrom) = ibotseg
-               endif
-            endif
-         enddo
-
-         ! do the same for the delwaq-g bottom
-
-         do iq = noq1+noq2+noq3+1, noq1+noq2+noq3+noq4
-            ifrom   = iexpnt(1,iq)
-            ito     = iexpnt(2,iq)
-            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               ibotseg = botseg(ifrom)
-               if ( ibotseg .gt. 0 ) then
-                  botseg(ito) = ibotseg
-               endif
-            endif
-         enddo
-
-         first = .false.
-
-      endif
 
       ! accumulate mass in the rooting zone in the pool of the bottom segment
 
@@ -171,31 +118,31 @@
          fl_fs2vbxxupy =  0.0
 
          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-         if (ikmrk1.eq.1 .or. ikmrk1 .eq. 2) then
+!         if (ikmrk1.eq.1 .or. ikmrk1 .eq. 3) then !=> NO TESTING ON IKMRK1, PROCESS IS ALLWAYS ON!
 
-            ibotseg     = botseg(iseg)
-            inicovvbxx  = pmsa(ipoint( 12)+(ibotseg-1)*increm( 12)) / 100.
+            ibotseg     = NINT(pmsa(ipnt(4)))
+            inicovvbxx  = pmsa(ipoint( 13)+(ibotseg-1)*increm( 13)) / 100.
 
             if (inicovvbxx .gt. 0.001) then
 
                depth       = pmsa(ipnt(1))
                totaldepth  = pmsa(ipnt(2))
                localdepth  = pmsa(ipnt(3))
-               hmax        = pmsa(ipnt(4))
-               delt        = pmsa(ipnt(5))
-               nh4         = pmsa(ipnt(6))
-               no3         = pmsa(ipnt(7))
-               aap         = pmsa(ipnt(8))
-               po4         = pmsa(ipnt(9))
-               so4         = pmsa(ipnt(10))
-               sud         = pmsa(ipnt(11))
+               hmax        = pmsa(ipnt(5))
+               delt        = pmsa(ipnt(6))
+               nh4         = pmsa(ipnt(7))
+               no3         = pmsa(ipnt(8))
+               aap         = pmsa(ipnt(9))
+               po4         = pmsa(ipnt(10))
+               so4         = pmsa(ipnt(11))
+               sud         = pmsa(ipnt(12))
 
-               vbxxnavail  = pmsa(ipoint(13)+(ibotseg-1)*increm(13))
-               vbxxpavail  = pmsa(ipoint(14)+(ibotseg-1)*increm(14))
-               vbxxsavail  = pmsa(ipoint(15)+(ibotseg-1)*increm(15))
-               fnvbxxup    = pmsa(ipoint(16)+(ibotseg-1)*increm(16))
-               fpvbxxup    = pmsa(ipoint(17)+(ibotseg-1)*increm(17))
-               fsvbxxup    = pmsa(ipoint(18)+(ibotseg-1)*increm(18))
+               vbxxnavail  = pmsa(ipoint(14)+(ibotseg-1)*increm(14))
+               vbxxpavail  = pmsa(ipoint(15)+(ibotseg-1)*increm(15))
+               vbxxsavail  = pmsa(ipoint(16)+(ibotseg-1)*increm(16))
+               fnvbxxup    = pmsa(ipoint(17)+(ibotseg-1)*increm(17))
+               fpvbxxup    = pmsa(ipoint(18)+(ibotseg-1)*increm(18))
+               fsvbxxup    = pmsa(ipoint(19)+(ibotseg-1)*increm(19))
 
 
                ! percentage uptake = uptake/available/percentage coverage
@@ -252,7 +199,7 @@
                      fS2vbxxupy = pSvbxxup*sud*depth/delt
                   endif
 
-               elseif (ikmrk1.eq.2 .and. hmax .lt. 0.0) then
+               elseif (ikmrk1.eq.3 .and. hmax .lt. 0.0) then
 
                   ! delwaq-g segment, distribution over the bottom segments
 
@@ -292,14 +239,14 @@
 
             endif
 
-         endif
+!!         endif
 
-         pmsa(ipnt(19)) =  fn1vbxxupy
-         pmsa(ipnt(20)) =  fn2vbxxupy
-         pmsa(ipnt(21)) =  fp1vbxxupy
-         pmsa(ipnt(22)) =  fp2vbxxupy
-         pmsa(ipnt(23)) =  fs1vbxxupy
-         pmsa(ipnt(24)) =  fs2vbxxupy
+         pmsa(ipnt(20)) =  fn1vbxxupy
+         pmsa(ipnt(21)) =  fn2vbxxupy
+         pmsa(ipnt(22)) =  fp1vbxxupy
+         pmsa(ipnt(23)) =  fp2vbxxupy
+         pmsa(ipnt(24)) =  fs1vbxxupy
+         pmsa(ipnt(25)) =  fs2vbxxupy
          fl(iflux+1) =  fl_fn1vbxxupy
          fl(iflux+2) =  fl_fn2vbxxupy
          fl(iflux+3) =  fl_fp1vbxxupy

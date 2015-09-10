@@ -147,10 +147,10 @@
 
       do  iseg = 1 , noseg
 
-!        active botom and active 2d segments only
-         call dhkmrk(3,iknmrk(iseg),ikmrk1)
+!        lowest water and 2d segments only (also when dry!)
+         call dhkmrk(1,iknmrk(iseg),ikmrk1)
          call dhkmrk(2,iknmrk(iseg),ikmrk2)
-         if (ikmrk1.eq.1 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+         if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 !
 
             VB1        = pmsa( ipnt(  1) )

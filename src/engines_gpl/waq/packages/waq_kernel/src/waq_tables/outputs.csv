@@ -2684,8 +2684,9 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VB01availN","VB01Savail",   3,"x",1
 "VBStatus01","SwVB01Gro ",   1,"x",1
 "VBStatus01","SwVB01Mrt ",   2,"x",1
-"VBStatus01","nsfVB     ",   3,"x",1
+"VBStatus01","nsfVB01   ",   3,"x",1
 "VBStatus01","nsnlVB01  ",   4,"x",1
+"VBStatus01","botsegVB01",   5,"x",1
 "VBGrowth01","ageVB01   ",   1,"x",1
 "VBGrowth01","VB01ha    ",   2,"x",1
 "VBGrowth01","VB01Aha   ",   3,"x",1
@@ -2783,6 +2784,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus02","SwVB02Mrt ",   2,"x",1
 "VBStatus02","nsfVB02   ",   3,"x",1
 "VBStatus02","nsnlVB02  ",   4,"x",1
+"VBStatus02","botsegVB02",   5,"x",1
 "VBGrowth02","ageVB02   ",   1,"x",1
 "VBGrowth02","VB02ha    ",   2,"x",1
 "VBGrowth02","VB02Aha   ",   3,"x",1
@@ -2880,6 +2882,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus03","SwVB03Mrt ",   2,"x",1
 "VBStatus03","nsfVB03   ",   3,"x",1
 "VBStatus03","nsnlVB03  ",   4,"x",1
+"VBStatus03","botsegVB03",   5,"x",1
 "VBGrowth03","ageVB03   ",   1,"x",1
 "VBGrowth03","VB03ha    ",   2,"x",1
 "VBGrowth03","VB03Aha   ",   3,"x",1
@@ -2977,6 +2980,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus04","SwVB04Mrt ",   2,"x",1
 "VBStatus04","nsfVB04   ",   3,"x",1
 "VBStatus04","nsnlVB04  ",   4,"x",1
+"VBStatus04","botsegVB04",   5,"x",1
 "VBGrowth04","ageVB04   ",   1,"x",1
 "VBGrowth04","VB04ha    ",   2,"x",1
 "VBGrowth04","VB04Aha   ",   3,"x",1
@@ -3074,6 +3078,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus05","SwVB05Mrt ",   2,"x",1
 "VBStatus05","nsfVB05   ",   3,"x",1
 "VBStatus05","nsnlVB05  ",   4,"x",1
+"VBStatus05","botsegVB05",   5,"x",1
 "VBGrowth05","ageVB05   ",   1,"x",1
 "VBGrowth05","VB05ha    ",   2,"x",1
 "VBGrowth05","VB05Aha   ",   3,"x",1
@@ -3171,6 +3176,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus06","SwVB06Mrt ",   2,"x",1
 "VBStatus06","nsfVB06   ",   3,"x",1
 "VBStatus06","nsnlVB06  ",   4,"x",1
+"VBStatus06","botsegVB06",   5,"x",1
 "VBGrowth06","ageVB06   ",   1,"x",1
 "VBGrowth06","VB06ha    ",   2,"x",1
 "VBGrowth06","VB06Aha   ",   3,"x",1
@@ -3268,6 +3274,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus07","SwVB07Mrt ",   2,"x",1
 "VBStatus07","nsfVB07   ",   3,"x",1
 "VBStatus07","nsnlVB07  ",   4,"x",1
+"VBStatus07","botsegVB07",   5,"x",1
 "VBGrowth07","ageVB07   ",   1,"x",1
 "VBGrowth07","VB07ha    ",   2,"x",1
 "VBGrowth07","VB07Aha   ",   3,"x",1
@@ -3365,6 +3372,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus08","SwVB08Mrt ",   2,"x",1
 "VBStatus08","nsfVB08   ",   3,"x",1
 "VBStatus08","nsnlVB08  ",   4,"x",1
+"VBStatus08","botsegVB08",   5,"x",1
 "VBGrowth08","ageVB08   ",   1,"x",1
 "VBGrowth08","VB08ha    ",   2,"x",1
 "VBGrowth08","VB08Aha   ",   3,"x",1
@@ -3462,6 +3470,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VBStatus09","SwVB09Mrt ",   2,"x",1
 "VBStatus09","nsfVB09   ",   3,"x",1
 "VBStatus09","nsnlVB09  ",   4,"x",1
+"VBStatus09","botsegVB09",   5,"x",1
 "VBGrowth09","ageVB09   ",   1,"x",1
 "VBGrowth09","VB09ha    ",   2,"x",1
 "VBGrowth09","VB09Aha   ",   3,"x",1

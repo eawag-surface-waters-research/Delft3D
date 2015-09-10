@@ -72,67 +72,16 @@
       integer ito         !    from segment
       integer iflux       !    index in the fl array
 
-      integer, parameter           :: nipfix =  7         ! first number of entries in pmsa independent of number of parameters
+      integer, parameter           :: nipfix =  8         ! first number of entries in pmsa independent of number of parameters
       integer, parameter           :: nopfix =  1         ! first output entries in pmsa independent of number of parameters
       integer, parameter           :: nivar  =  1         ! number of variable inputs per nvbxx
       integer, parameter           :: novar  =  1         ! number of variable outputs per nvbxx
       integer                      :: npnt                ! number of pointers
       integer                      :: ivbxx               ! loop counter nvbxx
       integer, allocatable         :: ipnt(:)             ! local work array for the pointering
-      logical, save                :: first = .true.      !
       integer                      :: ibotseg             ! bottom segment for macrophyte
-      integer, allocatable, save   :: botseg(:)           ! bottom segment for macrophyte
 
-      ! initialise variable indicating bottom segment
-
-      if (first) then
-
-         allocate(botseg(noseg))
-         botseg = -1
-
-         ! set botseg equal to iseg for the segments which have a bottom
-
-         do iseg = 1,noseg
-            call dhkmrk(3,iknmrk(iseg),ikmrk1)
-            if (ikmrk1.eq.1) then
-               call dhkmrk(2,iknmrk(iseg),ikmrk2)
-               if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-                  botseg(iseg) = iseg
-               endif
-            endif
-         enddo
-
-         ! loop to find bottom segment in water columns
-
-         do iq = noq1+noq2+noq3, noq1 + noq2 +1, -1
-            ifrom   = iexpnt(1,iq)
-            ito     = iexpnt(2,iq)
-            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               ibotseg = botseg(ito)
-               if ( ibotseg .gt. 0 ) then
-                  botseg(ifrom) = ibotseg
-               endif
-            endif
-         enddo
-
-         ! do the same for the delwaq-g bottom
-
-         do iq = noq1+noq2+noq3+1, noq1+noq2+noq3+noq4
-            ifrom   = iexpnt(1,iq)
-            ito     = iexpnt(2,iq)
-            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               ibotseg = botseg(ifrom)
-               if ( ibotseg .gt. 0 ) then
-                  botseg(ito) = ibotseg
-               endif
-            endif
-         enddo
-
-         first = .false.
-
-      endif
-
-      nvbxx = nint(pmsa(ipoint(7)))
+      nvbxx = nint(pmsa(ipoint(8)))
       npnt  = nipfix + nivar*nvbxx + nopfix + novar*nvbxx
       allocate(ipnt(npnt))
       ipnt  = ipoint(1:npnt)
@@ -142,14 +91,13 @@
          depth       = pmsa(ipnt(1))
          totaldepth  = pmsa(ipnt(2))
          localdepth  = pmsa(ipnt(3))
-         swmacdis    = pmsa(ipnt(4))
-         hmax        = pmsa(ipnt(5))
-         ffac        = pmsa(ipnt(6))
-
-         ibotseg     = botseg(iseg)
+         ibotseg     = NINT(pmsa(ipnt(4)))
+         swmacdis    = pmsa(ipnt(5))
+         hmax        = pmsa(ipnt(6))
+         ffac        = pmsa(ipnt(7))
 
          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-         if (ikmrk1.eq.1) then
+         if (ikmrk1.lt.3) then ! also when dry!
 
             ! active water segment
 
@@ -190,7 +138,7 @@
 
             endif
 
-         elseif (ikmrk1.eq.2) then
+         elseif (ikmrk1.eq.3) then
 
             ! delwaq-g segment
 
@@ -241,20 +189,27 @@
 
          pmsa(ipnt(nipfix+nivar*nvbxx+1)) = frbmlay
          do ivbxx = 1, nvbxx
-            if (ikmrk1.ne.0) then
+! alway calculate the fluxes, even in dry cells...            
+!            if (ikmrk1.ne.0) then
                vb      = pmsa(ipoint(nipfix+ivbxx)+(ibotseg-1)*increm(nipfix+ivbxx))
                bmlayvb = frbmlay * vb
-            else
-               bmlayvb = 0.0
-            endif
+!            else
+!               bmlayvb = 0.0
+!            endif
             pmsa(ipnt(nipfix+nivar*nvbxx+1+ivbxx)) = bmlayvb
+            if (depth.gt.0.0) then
             fl(ivbxx+iflux) =  bmlayvb/depth
+            else
+               fl(ivbxx+iflux) =  0.0
+            end if
          enddo
 
          ipnt  = ipnt  + increm(1:npnt)
          iflux = iflux + noflux
 
       enddo
+
+      deallocate(ipnt)
 
       return
       end

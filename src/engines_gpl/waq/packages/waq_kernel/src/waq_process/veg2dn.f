@@ -76,68 +76,17 @@
       integer ito         !    from segment
       integer iflux       !    index in the fl array
 
-      integer, parameter           :: npnt = 15           ! number of pointers
+      integer, parameter           :: npnt = 16           ! number of pointers
       integer                      :: ipnt(npnt)          ! local work array for the pointering
-      logical, save                :: first = .true.      !
       integer                      :: ibotseg             ! bottom segment for macrophyte
-      integer, allocatable, save   :: botseg(:)           ! bottom segment for macrophyte
-
-      ! initialise variable indicating bottom segment
-
-      if (first) then
-
-         allocate(botseg(noseg))
-         botseg = -1
-
-         ! set botseg equal to iseg for the segments which have a bottom
-
-         do iseg = 1,noseg
-            call dhkmrk(3,iknmrk(iseg),ikmrk1)
-            if (ikmrk1.eq.1) then
-               call dhkmrk(2,iknmrk(iseg),ikmrk2)
-               if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-                  botseg(iseg) = iseg
-               endif
-            endif
-         enddo
-
-         ! loop to find bottom segment in water columns
-
-         do iq = noq1+noq2+noq3, noq1 + noq2 +1, -1
-            ifrom   = iexpnt(1,iq)
-            ito     = iexpnt(2,iq)
-            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               ibotseg = botseg(ito)
-               if ( ibotseg .gt. 0 ) then
-                  botseg(ifrom) = ibotseg
-               endif
-            endif
-         enddo
-
-         ! do the same for the delwaq-g bottom
-
-         do iq = noq1+noq2+noq3+1, noq1+noq2+noq3+noq4
-            ifrom   = iexpnt(1,iq)
-            ito     = iexpnt(2,iq)
-            if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
-               ibotseg = botseg(ifrom)
-               if ( ibotseg .gt. 0 ) then
-                  botseg(ito) = ibotseg
-               endif
-            endif
-         enddo
-
-         first = .false.
-
-      endif
 
       ! zero the pool for all segments
 
       ipnt  = ipoint(1:npnt)
       do iseg = 1 , noseg
-         pmsa(ipnt(13)) = 0.0
          pmsa(ipnt(14)) = 0.0
          pmsa(ipnt(15)) = 0.0
+         pmsa(ipnt(16)) = 0.0
          ipnt  = ipnt  + increm(1:npnt)
       enddo
 
@@ -151,19 +100,19 @@
          localdepth  = pmsa(ipnt(3))
          volume      = pmsa(ipnt(4))
          surf        = pmsa(ipnt(5))
-         hmax        = pmsa(ipnt(6))
-         nh4         = pmsa(ipnt(7))
-         no3         = pmsa(ipnt(8))
-         aap         = pmsa(ipnt(9))
-         po4         = pmsa(ipnt(10))
-         so4         = pmsa(ipnt(11))
-         sud         = pmsa(ipnt(12))
+         ibotseg     = NINT(pmsa(ipnt(6)))
+         hmax        = pmsa(ipnt(7))
+         nh4         = pmsa(ipnt(8))
+         no3         = pmsa(ipnt(9))
+         aap         = pmsa(ipnt(10))
+         po4         = pmsa(ipnt(11))
+         so4         = pmsa(ipnt(12))
+         sud         = pmsa(ipnt(13))
 
 
-         ibotseg     = botseg(iseg)
 
          call dhkmrk(1,iknmrk(iseg),ikmrk1)
-         if (ikmrk1.eq.1) then
+         if (ikmrk1.lt.3) then ! also when dry!
 
             ! active water segment
 
@@ -182,19 +131,19 @@
                elseif (zm . lt. z1 ) then
                   ! partialy in segment:
                   frlay = (z2-zm)/depth
-                  pmsa(ipoint(13)+(ibotseg-1)*increm(13)) = pmsa(ipoint(13)+(ibotseg-1)*increm(13)) + (nh4+no3)*volume*frlay
-                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (aap+po4)*volume*frlay
-                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (so4+sud)*volume*frlay
+                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (nh4+no3)*volume*frlay
+                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (aap+po4)*volume*frlay
+                  pmsa(ipoint(16)+(ibotseg-1)*increm(16)) = pmsa(ipoint(16)+(ibotseg-1)*increm(16)) + (so4+sud)*volume*frlay
                else
                   ! completely in segment:
-                  pmsa(ipoint(13)+(ibotseg-1)*increm(13)) = pmsa(ipoint(13)+(ibotseg-1)*increm(13)) + (nh4+no3)*volume
-                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (aap+po4)*volume
-                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (so4+sud)*volume
+                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (nh4+no3)*volume
+                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (aap+po4)*volume
+                  pmsa(ipoint(16)+(ibotseg-1)*increm(16)) = pmsa(ipoint(16)+(ibotseg-1)*increm(16)) + (so4+sud)*volume
                endif
 
             endif
 
-         elseif (ikmrk1.eq.2) then
+         elseif (ikmrk1.eq.3) then
 
             ! delwaq-g segment
 
@@ -208,15 +157,15 @@
 
                if (hmax .gt. localdepth) then
                   ! completely in segment:
-                  pmsa(ipoint(13)+(ibotseg-1)*increm(13)) = pmsa(ipoint(13)+(ibotseg-1)*increm(13)) + (nh4+no3)*volume
-                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (aap+po4)*volume
-                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (so4+sud)*volume
+                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (nh4+no3)*volume
+                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (aap+po4)*volume
+                  pmsa(ipoint(16)+(ibotseg-1)*increm(16)) = pmsa(ipoint(16)+(ibotseg-1)*increm(16)) + (so4+sud)*volume
                elseif (hmax .gt. z1 ) then
                   ! partialy in segment:
                   frlay = (hmax-z1)/depth
-                  pmsa(ipoint(13)+(ibotseg-1)*increm(13)) = pmsa(ipoint(13)+(ibotseg-1)*increm(13)) + (nh4+no3)*volume*frlay
-                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (aap+po4)*volume*frlay
-                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (so4+sud)*volume*frlay
+                  pmsa(ipoint(14)+(ibotseg-1)*increm(14)) = pmsa(ipoint(14)+(ibotseg-1)*increm(14)) + (nh4+no3)*volume*frlay
+                  pmsa(ipoint(15)+(ibotseg-1)*increm(15)) = pmsa(ipoint(15)+(ibotseg-1)*increm(15)) + (aap+po4)*volume*frlay
+                  pmsa(ipoint(16)+(ibotseg-1)*increm(16)) = pmsa(ipoint(16)+(ibotseg-1)*increm(16)) + (so4+sud)*volume*frlay
                else
                   ! not in segment:
                endif
@@ -233,12 +182,12 @@
 
       ipnt  = ipoint(1:npnt)
       do iseg = 1 , noseg
-         ibotseg     = botseg(iseg)
+         ibotseg     = NINT(pmsa(ipnt(6)))
          if ( ibotseg .eq. iseg ) then
             surf           = pmsa(ipnt(5))
-            pmsa(ipnt(13)) = pmsa(ipnt(13))/surf
             pmsa(ipnt(14)) = pmsa(ipnt(14))/surf
             pmsa(ipnt(15)) = pmsa(ipnt(15))/surf
+            pmsa(ipnt(16)) = pmsa(ipnt(16))/surf
          endif
          ipnt  = ipnt  + increm(1:npnt)
       enddo
