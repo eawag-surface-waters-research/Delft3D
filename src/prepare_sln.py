@@ -319,7 +319,9 @@ def do_work():
             # Search for project file references
             pp = line.split("\"")
             for subline in pp:
-                if max(str(subline).find(".vfproj"), str(subline).find(".vcxproj"), str(subline).find(".vcproj")) != -1:
+                # Exclude (the external, third_party_open) netcdf project files
+                if (max(str(subline).find(".vfproj"), str(subline).find(".vcxproj"), str(subline).find(".vcproj")) != -1
+                    and str(subline).find("netcdf") == -1):
                     projectfiles.append(subline)
             # Changes to the sln file based on VS version
             startpos = str(line).find("Microsoft Visual Studio Solution File, Format Version")
