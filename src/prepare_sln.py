@@ -208,18 +208,6 @@ def process_project_file(pfile):
                 elif str(line).find(config_val64) != -1:
                     configuration = 64
             #
-            # netcdf
-            # Only lines with .../netcdf/lib... , not with ...;netcdf.lib;f77_netcdf.lib;...
-            startpos = str(line).find("netcdf")
-            if startpos != -1 and str(line).find("netcdf.lib") == -1:
-                parts = str(line).split(";")
-                i = 0
-                for part in parts:
-                    if str(part).find("netcdf") != -1:
-                        parts[i] = "..\\..\\..\\..\\third_party_open\\netcdf\\lib\\$(PlatformName)\\$(ConfigurationName)\\ifort" + str(ifort)
-                    i += 1
-                line = ";".join(parts)
-            #
             # IFORT_COMPILER ...
             startpos = str(line).find("$(IFORT_COMPILER")
             if startpos != -1:
@@ -319,9 +307,7 @@ def do_work():
             # Search for project file references
             pp = line.split("\"")
             for subline in pp:
-                # Exclude (the external, third_party_open) netcdf project files
-                if (max(str(subline).find(".vfproj"), str(subline).find(".vcxproj"), str(subline).find(".vcproj")) != -1
-                    and str(subline).find("netcdf") == -1):
+                if max(str(subline).find(".vfproj"), str(subline).find(".vcxproj"), str(subline).find(".vcproj")) != -1:
                     projectfiles.append(subline)
             # Changes to the sln file based on VS version
             startpos = str(line).find("Microsoft Visual Studio Solution File, Format Version")
@@ -402,7 +388,7 @@ def build_gui():
     Radiobutton(root, text="VS 2012                 ", variable=vs_gui, value=2012).grid(row=3, column=0, sticky=W)
     Radiobutton(root, text="VS 2010                 ", variable=vs_gui, value=2010).grid(row=4, column=0, sticky=W)
     # default value
-    vs_gui.set(2010)
+    vs_gui.set(2012)
     
     Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
     Radiobutton(root, text="IFORT16: (not tested yet)                      ", variable=ifort_gui, value=16).grid(row=1, column=2, sticky=W)
@@ -411,7 +397,7 @@ def build_gui():
     Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=4, column=2, sticky=W)
     Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=5, column=2, sticky=W)
     # default value
-    ifort_gui.set(12)
+    ifort_gui.set(13)
     
     Label(text=" ").grid(row=6)
     Label(text="Choose your Visual Studio version and IFORT version and click 'Apply'").grid(row=7, column=0, columnspan=3)

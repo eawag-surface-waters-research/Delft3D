@@ -22,7 +22,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\wave_version.F90 ..\..\ .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd wave ..\bin &quot;$(IFORT_COMPILER12)redist\ia32\compiler\&quot;
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd wave ..\bin &quot;$(IFORT_COMPILER13)redist\ia32\compiler\&quot;
 echo &quot;This file is overwritten by the post-build command of the project wave&quot; &gt; ./src/wave_version.F90"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="../../bin/$(PlatformName)\$(ConfigurationName)">
@@ -43,7 +43,7 @@ echo &quot;This file is overwritten by the post-build command of the project wav
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\wave_version.F90 ..\..\ .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd wave ..\bin &quot;$(IFORT_COMPILER12)redist\intel64\compiler\&quot;
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd wave ..\bin &quot;$(IFORT_COMPILER13)redist\intel64\compiler\&quot;
 echo &quot;This file is overwritten by the post-build command of the project wave&quot; &gt; ./src/wave_version.F90"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
