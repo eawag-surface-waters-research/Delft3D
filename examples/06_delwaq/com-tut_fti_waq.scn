@@ -35,8 +35,8 @@ end-integration
 output-files
    binary-history-file yes
    binary-map-file     yes
-   nefis-history-file  yes
-   nefis-map-file      yes
+   nefis-history-file  no
+   nefis-map-file      no
 end-output-files
 
 dispersion

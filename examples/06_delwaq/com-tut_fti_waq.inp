@@ -444,8 +444,8 @@ BINARY_FILE  'com-tut_fti_waq.vdf'  ; binary file
   'LocalDepth'    
   1 ; binary history file on
   1 ; binary map     file on
-  1 ; nefis  history file on
-  1 ; nefis  map     file on
+  0 ; nefis  history file on
+  0 ; nefis  map     file on
 ;
  #9 ; delimiter for the ninth block
 ;
