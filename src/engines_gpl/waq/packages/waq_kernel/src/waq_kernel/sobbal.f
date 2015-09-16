@@ -157,11 +157,11 @@
      J                              ITRANS(:),
      J                              IPROCS(:),
      J                              NPROCS(:),
-     J                              SEGDMP(:),
-     J                              IWDMP(:)
+     J                              SEGDMP(:)
       character*20, allocatable : : OUNAME(:),
      J                              DANAMP(:),
      J                              SYNAMP(:)
+      logical, allocatable      : : IWDMP(:,:)
 
       LOGICAL       LUMPEM, LUMPPR, IFIRST, SUPPFT, ONLYSM,
      J              INCLUD, BOUNDA, LUMPTR, B_AREA, B_VOLU
@@ -310,13 +310,13 @@
           ENDIF
           IF ( .NOT. LUMPEM ) THEN
 
-!             allocate and set IWDMP, first dump number for each wasteload
+!             allocate and set IWDMP, set to true is wasteload is in dump area
               if ( allocated(iwdmp) ) then
                   deallocate( iwdmp )
               endif
-              allocate ( IWDMP(NOWST),STAT = IERR )
+              allocate ( IWDMP(NOWST, NDMPAR),STAT = IERR )
               IF ( IERR .GT. 0 ) GOTO 9000
-              IWDMP  = 0
+              IWDMP  = .FALSE.
               ITEL   = 0
               IDUMP_OUT = 0
               DO IDUMP = 1 , NDMPAR
@@ -328,8 +328,8 @@
                          ISEG  = IPDMP(NDMPAR+NTDMPQ+NDMPAR+ITEL)
                          IF ( ISEG .GT. 0 ) THEN
                              DO IW = 1, NOWST
-                                IF ( IWASTE(IW) .EQ. ISEG .AND. IWDMP(IW) .EQ. 0 ) THEN
-                                   IWDMP(IW) = IDUMP_OUT
+                                IF ( IWASTE(IW) .EQ. ISEG) THEN
+                                   IWDMP(IW,IDUMP_OUT) = .TRUE.
                                 ENDIF
                              ENDDO
                          ENDIF
@@ -640,7 +640,7 @@
      J                         SFACTO   , NOOUT , NOTOT )
              ELSE
                  DO IW = 1 , NOWST
-                    IF ( IWDMP(IW) .EQ. IDUMP_OUT ) THEN
+                    IF ( IWDMP(IW, IDUMP_OUT) ) THEN
                        IFRAC = INWTYP(IW)
                        IBAL_OFF = (NOBTYP+IFRAC-1)*2
                        CALL UPDBAL ( IDUMP_OUT, NOTOT , IMASSA        , IEMISS, IBAL_OFF,
