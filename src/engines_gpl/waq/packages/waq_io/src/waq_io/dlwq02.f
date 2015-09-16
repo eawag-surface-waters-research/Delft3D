@@ -589,7 +589,9 @@
  2120 format ( /' Integration option :               ',F5.2)
  2130 format ( /' ERROR No in-active substances allowed for',
      &          ' fast-solver steady state scheme')
- 2140 format ( /' ERROR: Absolute timer does not fit in timer format :',A)
+ 2140 format ( /' ERROR: Absolute timer does not fit in timer format :',A,/
+     &          ' Is your T0 setting in block #1 correct?'/,
+     &          ' Allowed difference with T0 is usually ca. 68 years.' )
  2150 format ( /' ERROR: String is not a valid absolute timer :',A)
  2160 format (  ' ERROR, Stop time (',I10,') smaller than start time(',
      &                                I10,').' )

@@ -152,7 +152,9 @@
 
  2000 format (   ' Printed output only for option 4 or higher !' )
  2010 format (   ' Breakpoint ',I7,' :',A   )
- 2020 format ( /' ERROR: Absolute timer does not fit in timer format :',A)
+ 2020 format ( /' ERROR: Absolute timer does not fit in timer format :',A,/
+     &          ' Is your T0 setting in block #1 correct?'/,
+     &          ' Allowed difference with T0 is usually ca. 68 years.' )
  2030 format ( /' ERROR: String is not a valid absolute timer :',A)
  2040 format (   ' Breakpoint ',I7,' :',I10 )
  2050 format (   ' Scale factors:',/,6X,10I12)

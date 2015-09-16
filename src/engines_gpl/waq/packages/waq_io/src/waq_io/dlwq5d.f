@@ -182,7 +182,9 @@
  1010 FORMAT ( ' ERROR ! Number of data points exceeds system',
      *         ' maximum of: ' , I10 )
  1020 FORMAT ( ' ERROR ! Absolute timer does not fit in timer ',
-     *         'format: ', A)
+     *         'format: ', A,/
+     *         ' Is your T0 setting in block #1 correct?'/,
+     *          ' Allowed difference with T0 is usually ca. 68 years.' )
  1030 FORMAT (/' ERROR ! Time value ',I10,' not larger than previous time value ',I10 )
  1040 FORMAT (/' WARNING ! There are only ',I2,' breakpoints found for this time series' )
 !
