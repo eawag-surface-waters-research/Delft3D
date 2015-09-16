@@ -21,14 +21,16 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE FIOSUB (OUTVAL, IOPOIN, NRVAR , NOCONS, NOPA  ,
-     +                   NOFUN , NOSFUN, NOTOT , CONC  , SEGFUN,
-     +                   FUNC  , PARAM , CONS  , IDT   , ITIME ,
-     +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
-     +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
-     +                   NCOUT , NTDMPQ, paname, sfname, funame,
+      subroutine fiosub (outval, iopoin, nrvar , nocons, nopa  ,
+     +                   nofun , nosfun, notot , conc  , segfun,
+     +                   func  , param , cons  , idt   , itime ,
+     +                   volume, noseg , nosys , ndmpar, ipdmp ,
+     +                   bound , noloc , proloc, nodef , defaul,
+     +                   ncout , ntdmpq, paname, sfname, funame,
      +                   danam )
       use timers
+
+      implicit none
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -74,66 +76,67 @@
 !
 !     Declaration of arguments
 !
-      INTEGER    NRVAR , NOCONS, NOPA  , NOFUN , NOSFUN,
-     +           NOTOT , IDT   , ITIME , NOSEG , NOSYS ,
-     +           NDMPAR, NOLOC , NODEF , NCOUT , NTDMPQ
-      INTEGER    IOPOIN(*)      , IPDMP(*)
-      REAL       OUTVAL(*)      , CONC(NOTOT,*),
-     +           segfun(noseg,nosfun), FUNC(*) ,
-     +           param (nopa ,noseg ), CONS(*) ,
-     +           VOLUME(*)      , BOUND(*)     ,
-     +           PROLOC(*)      , DEFAUL(*)
+      integer    nrvar , nocons, nopa  , nofun , nosfun,
+     +           notot , idt   , itime , noseg , nosys ,
+     +           ndmpar, noloc , nodef , ncout , ntdmpq
+      integer    iopoin(*)      , ipdmp(*)
+      real       outval(*)      , conc(notot,*),
+     +           segfun(noseg,nosfun), func(*) ,
+     +           param (nopa ,noseg ), cons(*) ,
+     +           volume(*)      , bound(*)     ,
+     +           proloc(*)      , defaul(*)
       character(20) paname(*) , sfname(*)
       character(len=20), intent(in   ) :: funame(*) ! function names
       character(len=20), intent(in   ) :: danam(*)  ! dump area names
 !
 !     Local
 !
-      PARAMETER ( RMISS = -999. )
-      PARAMETER ( NOPRED= 6     )
-      INTEGER     IOPA  , IOFUNC, IOSFUN, IOCONC, IOLOC ,
-     +            IODEF , IP    , IP1   , IP2   , ITEL2 ,
-     +            ISYS  , IVAR  , IDUMP , ISC   , ISEG  ,
-     +            NSC   , IOFDMP, IOCONS, IIP   , IIDUMP
+      real, parameter    :: rmiss = -999.
+      integer, parameter :: nopred= 6     
+      integer     iopa  , iofunc, iosfun, ioconc, ioloc ,
+     +            iodef , ip    , ip1   , ip2   , itel2 ,
+     +            isys  , ivar  , idump , isc   , iseg  ,
+     +            nsc   , iofdmp, iocons, iip   , iidump,
+     +            indx 
       integer  :: ifun   ! index in function arrays
-      REAL        HLPVAR, HLPCUM, VALCUM, VALVAR
+      real        hlpvar, hlpcum, valcum, valvar, srf, cumsrf
       logical     parm
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "fiosub", ithandl )
 !
 !     Pointer offsets
 !
-      IOCONS = NOPRED + 1
-      IOPA   = IOCONS + NOCONS
-      IOFUNC = IOPA   + NOPA
-      IOSFUN = IOFUNC + NOFUN
-      IOCONC = IOSFUN + NOSFUN
-      IOLOC  = IOCONC + NOTOT
-      IODEF  = IOLOC  + NOLOC
+      iocons = nopred + 1
+      iopa   = iocons + nocons
+      iofunc = iopa   + nopa
+      iosfun = iofunc + nofun
+      ioconc = iosfun + nosfun
+      ioloc  = ioconc + notot
+      iodef  = ioloc  + noloc
 !
 !     Zero the output buffer for it is used as accumulation variable.
 !
-      CALL ZERO(OUTVAL,(NCOUT+NRVAR)*NDMPAR)
+      call zero(outval,(ncout+nrvar)*ndmpar)
 !
 !     Fill the output buffer OUTVAL
 !
-      IP1   = NDMPAR + NTDMPQ
-      ITEL2 = NDMPAR + NTDMPQ + NDMPAR
+      ip1   = ndmpar + ntdmpq
+      itel2 = ndmpar + ntdmpq + ndmpar
 !
 !     Loop over the dump area's
 !
-      DO 300 IDUMP = 1 , NDMPAR
+      do idump = 1 , ndmpar
 !
 !        the segment contributes
 !
-         NSC = IPDMP(IP1+IDUMP)
-         IOFDMP = (IDUMP-1)*(NCOUT+NRVAR)
+         nsc = ipdmp(ip1+idump)
+         iofdmp = (idump-1)*(ncout+nrvar)
 !
 !        If one segment don't bother to calculate mean value
 !
-         IF ( NSC .EQ. 1 ) THEN
-            ITEL2 = ITEL2 + 1
-            ISEG  = IPDMP(ITEL2)
+         if ( nsc .eq. 1 ) then
+            itel2 = itel2 + 1
+            iseg  = ipdmp(itel2)
             if ( danam(idump)(1:6) .eq. 'MOVING' ) then
                do ifun = 1, nofun
                   if ( danam(idump) .eq. funame(ifun) ) then
@@ -144,82 +147,83 @@
 !
 !           The substances
 !
-            IF ( NCOUT .GT. 0 ) THEN
-               IF ( ISEG .LT. 0 ) THEN
-                  DO 10 ISYS = 1 , NOSYS
-                     IIDUMP = IOFDMP+ISYS
-                     IIP = (-ISEG-1)*NOSYS + ISYS
-                     OUTVAL(IIDUMP) = BOUND(IIP)
-  10              CONTINUE
-                  DO 20 ISYS = NOSYS+1 , NOTOT
-                     IIDUMP = IOFDMP+ISYS
-                     OUTVAL(IIDUMP) = RMISS
-  20              CONTINUE
-               ELSEIF ( ISEG .EQ. 0 ) THEN
-                  DO 30 ISYS = 1 , NOTOT
-                     IIDUMP = IOFDMP+ISYS
-                     OUTVAL(IIDUMP) = RMISS
-  30              CONTINUE
-               ELSE
-                  DO 40 ISYS = 1 , NOTOT
-                     IIDUMP = IOFDMP+ISYS
-                     OUTVAL(IIDUMP) = CONC(ISYS,ISEG)
-  40              CONTINUE
-               ENDIF
-            ENDIF
+            if ( ncout .gt. 0 ) then
+               if ( iseg .lt. 0 ) then
+                  do isys = 1 , nosys
+                     iidump = iofdmp+isys
+                     iip = (-iseg-1)*nosys + isys
+                     outval(iidump) = bound(iip)
+                  enddo
+                  do isys = nosys+1 , notot
+                     iidump = iofdmp+isys
+                     outval(iidump) = rmiss
+                  enddo
+               elseif ( iseg .eq. 0 ) then
+                  do isys = 1 , notot
+                     iidump = iofdmp+isys
+                     outval(iidump) = rmiss
+                  enddo
+               else
+                  do isys = 1 , notot
+                     iidump = iofdmp+isys
+                     outval(iidump) = conc(isys,iseg)
+                  enddo
+               endif
+            endif
 !
 !           The extra variables
 !
-            DO 50 IVAR = 1 , NRVAR
-               IP = IOPOIN(IVAR)
-               IIDUMP = IOFDMP+NCOUT+IVAR
-               IF ( ISEG .LT. 0 ) THEN
-                  IF ( IP .GE. IOCONC .AND. IP .LT. IOCONC+NOSYS ) THEN
-                     IIP = (-ISEG-1)*NOSYS + IP-IOCONC+1
-                     OUTVAL(IIDUMP) = BOUND(IIP)
-                  ELSE
-                     OUTVAL(IIDUMP) = RMISS
-                  ENDIF
-               ELSEIF ( ISEG .EQ. 0 ) THEN
-                  OUTVAL(IIDUMP) = RMISS
-               ELSE
-                  IF ( IP .GE. IODEF  ) THEN
-                     OUTVAL(IIDUMP) = DEFAUL(IP-IODEF+1)
-                  ELSEIF ( IP .GE. IOLOC  ) THEN
-                     IIP = (ISEG-1)*NOLOC + IP-IOLOC+1
-                     OUTVAL(IIDUMP) = PROLOC(IIP)
-                  ELSEIF ( IP .GE. IOCONC ) THEN
-                     OUTVAL(IIDUMP) = CONC(IP-IOCONC+1,ISEG)
-                  ELSEIF ( IP .GE. IOSFUN ) THEN
-                     OUTVAL(IIDUMP) = SEGFUN(ISEG,IP-IOSFUN+1)
-                  ELSEIF ( IP .GE. IOFUNC ) THEN
-                     OUTVAL(IIDUMP) = FUNC(IP-IOFUNC+1)
-                  ELSEIF ( IP .GE. IOPA ) THEN
+            do ivar = 1 , nrvar
+               ip = iopoin(ivar)
+               iidump = iofdmp+ncout+ivar
+               if ( iseg .lt. 0 ) then
+                  if ( ip .ge. ioconc .and. ip .lt. ioconc+nosys ) then
+                     iip = (-iseg-1)*nosys + ip-ioconc+1
+                     outval(iidump) = bound(iip)
+                  else
+                     outval(iidump) = rmiss
+                  endif
+               elseif ( iseg .eq. 0 ) then
+                  outval(iidump) = rmiss
+               else
+                  if ( ip .ge. iodef  ) then
+                     outval(iidump) = defaul(ip-iodef+1)
+                  elseif ( ip .ge. ioloc  ) then
+                     iip = (iseg-1)*noloc + ip-ioloc+1
+                     outval(iidump) = proloc(iip)
+                  elseif ( ip .ge. ioconc ) then
+                     outval(iidump) = conc(ip-ioconc+1,iseg)
+                  elseif ( ip .ge. iosfun ) then
+                     outval(iidump) = segfun(iseg,ip-iosfun+1)
+                  elseif ( ip .ge. iofunc ) then
+                     outval(iidump) = func(ip-iofunc+1)
+                  elseif ( ip .ge. iopa ) then
                      outval(iidump) = param(ip-iopa+1,iseg)
-                  ELSEIF ( IP .GE. IOCONS ) THEN
-                     OUTVAL(IIDUMP) = CONS(IP-IOCONS+1)
-                  ELSEIF ( IP .EQ. 3 ) THEN
-                     OUTVAL(IIDUMP) = REAL(IDT)
-                  ELSEIF ( IP .EQ. 2 ) THEN
-                     OUTVAL(IIDUMP) = REAL(ITIME)
-                  ELSEIF ( IP .EQ. 1 ) THEN
-                     OUTVAL(IIDUMP) = VOLUME(ISEG)
-                  ELSEIF ( IP .LE. 0 ) THEN
-                     OUTVAL(IIDUMP) = RMISS
-                  ENDIF
-               ENDIF
+                  elseif ( ip .ge. iocons ) then
+                     outval(iidump) = cons(ip-iocons+1)
+                  elseif ( ip .eq. 3 ) then
+                     outval(iidump) = real(idt)
+                  elseif ( ip .eq. 2 ) then
+                     outval(iidump) = real(itime)
+                  elseif ( ip .eq. 1 ) then
+                     outval(iidump) = volume(iseg)
+                  elseif ( ip .le. 0 ) then
+                     outval(iidump) = rmiss
+                  endif
+               endif
 !
-  50        CONTINUE
+            enddo
 !
-         ELSE
+         else
 !
 !           The substances ( if asked ) in one loop
 !
-            IF ( NCOUT .GT. 0 ) THEN
+            if ( ncout .gt. 0 ) then
 !
 !              Zero the accummulative variables, OUTVAL already done.
 !
-               HLPCUM = 0.0
+               hlpcum = 0.0
+               cumsrf = 0.0
                if ( nosys .ne. notot ) then
                   cumsrf = 1.0
                   call zoek20 ( 'SURF      ', nopa, paname, 10, indx )
@@ -235,22 +239,22 @@
                   endif
                endif
 !
-               DO 120 ISC = 1 , NSC
-                  ISEG  = IPDMP(ITEL2+ISC)
+               do isc = 1 , nsc
+                  iseg  = ipdmp(itel2+isc)
 !
 !                 Accumulate VOLUME, substances in OUTVAL
 !
-                  IF ( ISEG .GT. 0 ) THEN
-                     HLPVAR = VOLUME(ISEG)
-                     HLPCUM = HLPCUM + HLPVAR
+                  if ( iseg .gt. 0 ) then
+                     hlpvar = volume(iseg)
+                     hlpcum = hlpcum + hlpvar
 !
 !                    All active substances weighted by volume
 !
-                     DO 100 ISYS = 1 , NOSYS
-                        IIDUMP = IOFDMP+ISYS
-                        OUTVAL(IIDUMP) = OUTVAL(IIDUMP) +
-     +                                   CONC(ISYS,ISEG)*HLPVAR
-  100                CONTINUE
+                     do isys = 1 , nosys
+                        iidump = iofdmp+isys
+                        outval(iidump) = outval(iidump) +
+     +                                   conc(isys,iseg)*hlpvar
+                     enddo
 
 !       take care of mass/m2 for inactive substances if possible
 
@@ -273,18 +277,18 @@
                            enddo
                         endif
                      endif
-                  ENDIF
+                  endif
 !
-  120          CONTINUE
+               enddo
 !
 !              Calculate mean for then active and inactive substances
 !
-               IF ( ABS(HLPCUM) .GT. 1.0E-20 ) THEN
-                  DO 130 ISYS = 1 , NOSYS
-                     IIDUMP = IOFDMP+ISYS
-                     OUTVAL(IIDUMP) = OUTVAL(IIDUMP) / HLPCUM
-  130             CONTINUE
-               ENDIF
+               if ( abs(hlpcum) .gt. 1.0e-20 ) then
+                  do isys = 1 , nosys
+                     iidump = iofdmp+isys
+                     outval(iidump) = outval(iidump) / hlpcum
+                  enddo
+               endif
                if ( abs(cumsrf) .gt. 1.0e-20 ) then
                   do isys = nosys+1, notot
                      iidump = iofdmp+isys
@@ -292,124 +296,124 @@
                   enddo
                endif
 !
-            ENDIF
+            endif
 !
 !           The extra output variables each in a seperate loop
 !
-            DO 210 IVAR = 1 , NRVAR
+            do ivar = 1 , nrvar
 !
 !              Accumulate
 !
-               IP  = IOPOIN(IVAR)
-               IP2 = IOPOIN(NRVAR+IVAR)
-               VALCUM = 0.0
-               HLPCUM = 0.0
-               DO 200 ISC = 1 , NSC
-                  ISEG  = IPDMP(ITEL2+ISC)
+               ip  = iopoin(ivar)
+               ip2 = iopoin(nrvar+ivar)
+               valcum = 0.0
+               hlpcum = 0.0
+               do isc = 1 , nsc
+                  iseg  = ipdmp(itel2+isc)
 !
 !                 The output variable
 !
-                  IF ( ISEG .GT. 0 ) THEN
-                     IP = IOPOIN(IVAR)
-                     IF ( ISEG .LT. 0 ) THEN
-                        IF ( IP.GE.IOCONC .AND. IP.LT.IOCONC+NOSYS ) THEN
-                           IIP = (-ISEG-1)*NOSYS + IP-IOCONC+1
-                           VALVAR = BOUND(IIP)
-                        ELSE
-                           VALVAR = 0.0
-                        ENDIF
-                     ELSEIF ( ISEG .EQ. 0 ) THEN
-                        VALVAR = 0.0
-                     ELSE
-                        IF ( IP .GE. IODEF  ) THEN
-                           VALVAR = DEFAUL(IP-IODEF+1)
-                        ELSEIF ( IP .GE. IOLOC  ) THEN
-                           IIP = (ISEG-1)*NOLOC + IP-IOLOC+1
-                           VALVAR = PROLOC(IIP)
-                        ELSEIF ( IP .GE. IOCONC ) THEN
-                           VALVAR = CONC(IP-IOCONC+1,ISEG)
-                        ELSEIF ( IP .GE. IOSFUN ) THEN
-                           VALVAR = SEGFUN(ISEG,IP-IOSFUN+1)
-                        ELSEIF ( IP .GE. IOFUNC ) THEN
-                           VALVAR = FUNC(IP-IOFUNC+1)
-                        ELSEIF ( IP .GE. IOPA ) THEN
+                  if ( iseg .gt. 0 ) then
+                     ip = iopoin(ivar)
+                     if ( iseg .lt. 0 ) then
+                        if ( ip.ge.ioconc .and. ip.lt.ioconc+nosys ) then
+                           iip = (-iseg-1)*nosys + ip-ioconc+1
+                           valvar = bound(iip)
+                        else
+                           valvar = 0.0
+                        endif
+                     elseif ( iseg .eq. 0 ) then
+                        valvar = 0.0
+                     else
+                        if ( ip .ge. iodef  ) then
+                           valvar = defaul(ip-iodef+1)
+                        elseif ( ip .ge. ioloc  ) then
+                           iip = (iseg-1)*noloc + ip-ioloc+1
+                           valvar = proloc(iip)
+                        elseif ( ip .ge. ioconc ) then
+                           valvar = conc(ip-ioconc+1,iseg)
+                        elseif ( ip .ge. iosfun ) then
+                           valvar = segfun(iseg,ip-iosfun+1)
+                        elseif ( ip .ge. iofunc ) then
+                           valvar = func(ip-iofunc+1)
+                        elseif ( ip .ge. iopa ) then
                            valvar = param(ip -iopa+1,iseg)
-                        ELSEIF ( IP .GE. IOCONS ) THEN
-                           VALVAR = CONS(IP-IOCONS+1)
-                        ELSEIF ( IP .EQ. 3 ) THEN
-                           VALVAR = REAL(IDT)
-                        ELSEIF ( IP .EQ. 2 ) THEN
-                           VALVAR = REAL(ITIME)
-                        ELSEIF ( IP .EQ. 1 ) THEN
-                           VALVAR = VOLUME(ISEG)
-                        ELSEIF ( IP .LE. 0 ) THEN
-                           VALVAR = RMISS
-                        ENDIF
-                     ENDIF
+                        elseif ( ip .ge. iocons ) then
+                           valvar = cons(ip-iocons+1)
+                        elseif ( ip .eq. 3 ) then
+                           valvar = real(idt)
+                        elseif ( ip .eq. 2 ) then
+                           valvar = real(itime)
+                        elseif ( ip .eq. 1 ) then
+                           valvar = volume(iseg)
+                        elseif ( ip .le. 0 ) then
+                           valvar = rmiss
+                        endif
+                     endif
 !
 !                    The weigth variable
 !
-                     IF ( ISEG .LT. 0 ) THEN
-                        HLPVAR = 1.0
-                     ELSEIF ( ISEG .EQ. 0 ) THEN
-                        HLPVAR = 0.0
-                     ELSE
-                        IF ( IP2 .GE. IODEF  ) THEN
-                           HLPVAR = DEFAUL(IP2-IODEF+1)
-                        ELSEIF ( IP2 .GE. IOLOC  ) THEN
-                           IIP = (ISEG-1)*NOLOC + IP2-IOLOC+1
-                           HLPVAR = PROLOC(IIP)
-                        ELSEIF ( IP2 .GE. IOCONC ) THEN
-                           HLPVAR = CONC(IP2-IOCONC+1,ISEG)
-                        ELSEIF ( IP2 .GE. IOSFUN ) THEN
-                           HLPVAR = SEGFUN(ISEG,IP2-IOSFUN+1)
-                        ELSEIF ( IP2 .GE. IOFUNC ) THEN
-                           HLPVAR = FUNC(IP2-IOFUNC+1)
-                        ELSEIF ( IP2 .GE. IOPA ) THEN
+                     if ( iseg .lt. 0 ) then
+                        hlpvar = 1.0
+                     elseif ( iseg .eq. 0 ) then
+                        hlpvar = 0.0
+                     else
+                        if ( ip2 .ge. iodef  ) then
+                           hlpvar = defaul(ip2-iodef+1)
+                        elseif ( ip2 .ge. ioloc  ) then
+                           iip = (iseg-1)*noloc + ip2-ioloc+1
+                           hlpvar = proloc(iip)
+                        elseif ( ip2 .ge. ioconc ) then
+                           hlpvar = conc(ip2-ioconc+1,iseg)
+                        elseif ( ip2 .ge. iosfun ) then
+                           hlpvar = segfun(iseg,ip2-iosfun+1)
+                        elseif ( ip2 .ge. iofunc ) then
+                           hlpvar = func(ip2-iofunc+1)
+                        elseif ( ip2 .ge. iopa ) then
                            hlpvar = param(ip2-iopa+1,iseg)
-                        ELSEIF ( IP2 .GE. IOCONS ) THEN
-                           HLPVAR = CONS(IP2-IOCONS+1)
-                        ELSEIF ( IP2 .EQ. 3 ) THEN
-                           HLPVAR = REAL(IDT)
-                        ELSEIF ( IP2 .EQ. 2 ) THEN
-                           HLPVAR = REAL(ITIME)
-                        ELSEIF ( IP2 .EQ. 1 ) THEN
-                           HLPVAR = VOLUME(ISEG)
-                        ELSEIF ( IP2 .EQ. 0 ) THEN
-                           HLPVAR = 0.0
-                        ELSEIF ( IP2 .LT. 0 ) THEN
-                           HLPVAR = 1.
-                        ENDIF
-                     ENDIF
+                        elseif ( ip2 .ge. iocons ) then
+                           hlpvar = cons(ip2-iocons+1)
+                        elseif ( ip2 .eq. 3 ) then
+                           hlpvar = real(idt)
+                        elseif ( ip2 .eq. 2 ) then
+                           hlpvar = real(itime)
+                        elseif ( ip2 .eq. 1 ) then
+                           hlpvar = volume(iseg)
+                        elseif ( ip2 .eq. 0 ) then
+                           hlpvar = 0.0
+                        elseif ( ip2 .lt. 0 ) then
+                           hlpvar = 1.
+                        endif
+                     endif
 !
-                     IF ( IP2 .EQ. 0 ) THEN
-                        VALCUM = VALCUM + VALVAR
-                     ELSE
-                        VALCUM = VALCUM + VALVAR * HLPVAR
-                        HLPCUM = HLPCUM + HLPVAR
-                     ENDIF
-                  ENDIF
+                     if ( ip2 .eq. 0 ) then
+                        valcum = valcum + valvar
+                     else
+                        valcum = valcum + valvar * hlpvar
+                        hlpcum = hlpcum + hlpvar
+                     endif
+                  endif
 !
-  200          CONTINUE
+               enddo
 !
 !              Calculate mean , HLPCUM = 0.0 has a double meaning
 !              1. only accumulation, 2. no divide by zero HLPCUM
 !
-               IIDUMP = IOFDMP+NCOUT+IVAR
+               iidump = iofdmp+ncout+ivar
 !
-               IF ( ABS(HLPCUM) .GT. 1.0E-20 ) THEN
-                  OUTVAL(IIDUMP) = VALCUM / HLPCUM
-               ELSE
-                  OUTVAL(IIDUMP) = VALCUM
-               ENDIF
+               if ( abs(hlpcum) .gt. 1.0e-20 ) then
+                  outval(iidump) = valcum / hlpcum
+               else
+                  outval(iidump) = valcum
+               endif
 !
-  210       CONTINUE
+            enddo
 !
-            ITEL2 = ITEL2 + NSC
-         ENDIF
+            itel2 = itel2 + nsc
+         endif
 !
-  300 CONTINUE
+      enddo
 !
       if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
+      return
+      end
