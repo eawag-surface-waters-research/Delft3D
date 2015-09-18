@@ -1,4 +1,4 @@
-subroutine wavenr(h         ,t         ,k          )
+subroutine wavenr_htk(h, t, k)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -90,4 +90,4 @@ subroutine wavenr(h         ,t         ,k          )
     den = 1.0D0 + ome2*(b1 + ome2*(b2 + ome2*(b3 + ome2*(b4 + ome2*a6))))
     kd = sqrt(ome2*num/den)/dble(h)
     k = real(kd)
-end subroutine wavenr
+end subroutine wavenr_htk

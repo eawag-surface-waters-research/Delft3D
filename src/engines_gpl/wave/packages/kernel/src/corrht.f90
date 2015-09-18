@@ -84,7 +84,7 @@ subroutine corrht(hrm       ,deph      ,tp        ,wavel     ,wavek     , &
           !
           ! Adjust wave-coefficients
           !
-          call wavenr(deph, tp, wavek)
+          call wavenr_htk(deph, tp, wavek)
           !
           hmax   = 0.88/wavek*tanh(gamma*wavek*deph/0.88)
           hrm    = min(hrm, hmax)
@@ -95,7 +95,7 @@ subroutine corrht(hrm       ,deph      ,tp        ,wavel     ,wavek     , &
           tp     = min(tp, tpmin)
        endif
        !
-       call wavenr(deph, tp, wavek)
+       call wavenr_htk(deph, tp, wavek)
        !
        wavel = twopi/wavek
     else
