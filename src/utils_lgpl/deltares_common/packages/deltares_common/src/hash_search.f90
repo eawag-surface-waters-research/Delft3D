@@ -7,8 +7,12 @@ module m_hash_search
    
    public hashfill
    public hashsearch
-
+   public dealloc
    
+   interface dealloc
+      module procedure deallochashtable
+   end interface
+
    type, public :: t_hashlist
       integer :: hashcon = 1009
       integer :: id_count = 0
@@ -17,7 +21,21 @@ module m_hash_search
       integer, allocatable, dimension(:) :: hashnext
    end type
    
-contains   
+   contains   
+   
+   subroutine deallochashtable(hashlist)
+      type(t_hashlist) :: hashlist
+      
+      if (allocated(hashlist%hashfirst)) then
+         deallocate(hashlist%hashfirst)
+         deallocate(hashlist%hashnext)
+         if (allocated(hashlist%id_list)) then
+            deallocate(hashlist%id_list)
+         endif
+      endif
+      hashlist%id_count= 0
+   end subroutine deallochashtable
+   
    
    integer function hashfun(string, hashcon)
 
@@ -51,6 +69,7 @@ contains
    subroutine hashfill(hashlist)
  
       ! Module description: Fill hashing arrays
+      use string_module
  
       ! Global Variables
       type(t_hashlist), pointer, intent(inout) :: hashlist
@@ -60,7 +79,6 @@ contains
       integer                                  :: hashcode
       integer                                  :: inr
       integer                                  :: next
-      integer                                  :: hashfun
       integer                                  :: ierr
       character(len=idLen)                      :: locid
       
@@ -78,7 +96,7 @@ contains
          locid = hashlist%id_list(icount)
          call str_upper(locid)
          
-         hashcode = hashfun(locid)
+         hashcode = hashfun(locid, hashlist%hashcon)
   
          !      write(*,*) ' Hashfill ', id,' ', hashcode
   
@@ -110,7 +128,7 @@ contains
    integer function hashsearch(hashlist, id)
  
       ! Module description: Search in hashing arrays
- 
+      use string_module
       ! Global Variables
       character(len=*), intent(in)                    :: id
       type(t_hashlist), pointer, intent(inout)        :: hashlist
@@ -139,7 +157,7 @@ contains
         do while (next .ne. 0)
            
           idtest = hashlist%id_list(next)
-          call upperc (idtest)
+          call str_upper (idtest)
           
           if (locid .ne. idtest) then
             inr  = next
