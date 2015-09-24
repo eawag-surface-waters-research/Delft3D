@@ -5698,6 +5698,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/distance.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/geometry_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/grid_dimens_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/handles.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/hash_search.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/iso_c_utils.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/juldat.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/malloc.f90 -text
