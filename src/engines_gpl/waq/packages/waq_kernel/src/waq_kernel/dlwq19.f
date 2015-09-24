@@ -483,6 +483,7 @@
 !          1f: determine size of the baskets for fluxes (highest of 'from' and 'to')
 
       itf = 0
+      ibaf = 0
       do iq = 1, noq
          ifrom = ipoint(1,iq)
          ito   = ipoint(2,iq)
@@ -563,15 +564,13 @@
 
 !          1i: Create backpointers from cell to order of execution and to box nr.
 
-      ibas = 0                         ! these arrays are re-used now for cells only
-      ibaf = 0                         ! this leans on the fact that noq > noseg
+      ibas = 0                         ! this array is now re-used
       do ibox = 1 , nob+1
          is1 = its(ibox+1)+1           ! reversed order: highest number box underneith + 1
          is2 = its(ibox)               !                 highest number of this box
          do i = is1 , is2              !                 is the set of cells in this box
-            iseg  = iords(i)
-            ibas(iseg) = i             ! to find this cell in the order list
-            ibaf(iseg) = ibox          ! to find the box number of this cell
+            iseg = iords(i)
+            ibas(iseg) = ibox          ! to find the box number of this cell
          enddo
       enddo
 
@@ -712,8 +711,8 @@
                   cycle
                endif
                if ( q .gt. 0 ) then                                   ! Internal volumes
-                  if ( ibaf(ito  ) .eq. nob+1 ) then                  !    'to' should be wetting if q > 0
-                     if ( ibaf(ifrom) .eq. nob+1 ) then               !       'from' is also wetting in this time step
+                  if ( ibas(ito  ) .eq. nob+1 ) then                  !    'to' should be wetting if q > 0
+                     if ( ibas(ifrom) .eq. nob+1 ) then               !       'from' is also wetting in this time step
                         ifrom = ivert( nvert(1,iabs(nvert(2,ifrom))) )
                         ito   = ivert( nvert(1,iabs(nvert(2,ito  ))) )
                         if ( volint(ifrom) .ge.  q ) then             !          it should then have enough volume
@@ -749,8 +748,8 @@
                      endif
                   endif
                else                                                   ! same procedure but now mirrorred for q < 0
-                  if ( ibaf(ifrom) .eq. nob+1 ) then
-                     if ( ibaf(ito) .eq. nob+1 ) then
+                  if ( ibas(ifrom) .eq. nob+1 ) then
+                     if ( ibas(ito) .eq. nob+1 ) then
                         ifrom = ivert( nvert(1,iabs(nvert(2,ifrom))) )
                         ito   = ivert( nvert(1,iabs(nvert(2,ito  ))) )
                         if ( volint(ito  ) .gt. -q ) then
