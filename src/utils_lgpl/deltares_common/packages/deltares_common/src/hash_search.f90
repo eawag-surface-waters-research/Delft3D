@@ -1,7 +1,6 @@
 module m_hash_search
    
    use m_alloc
-   use m_netw, only: lenc
    use messageHandling
    
    implicit none
@@ -63,7 +62,7 @@ contains
       integer                                  :: next
       integer                                  :: hashfun
       integer                                  :: ierr
-      character(len=lenc)                      :: locid
+      character(len=idLen)                      :: locid
       
       call realloc(hashlist%hashfirst, hashlist%hashcon - 1, lindex = 0, stat = ierr)
       call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
@@ -117,8 +116,8 @@ contains
       type(t_hashlist), pointer, intent(inout)        :: hashlist
       
       ! Local Variables
-      character(len=lenc)                             :: locid
-      character(len=lenc)                             :: idtest
+      character(len=idLen)                             :: locid
+      character(len=idLen)                             :: idtest
       integer                                         :: hashcode
       integer                                         :: inr
       integer                                         :: next
