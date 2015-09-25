@@ -385,7 +385,7 @@
          endif
 
 !     call output system
-         call dlwqo2 ( notot   , noseg   , nopa    , nosfun  , itime   ,
+         call dlwqo2 ( notot   , nosss   , nopa    , nosfun  , itime   ,
      &                 c(imnam), c(isnam), c(idnam), j(idump), nodump  ,
      &                 a(iconc), a(icons), a(iparm), a(ifunc), a(isfun),
      &                 a(ivol) , nocons  , nofun   , idt     , noutp   ,
