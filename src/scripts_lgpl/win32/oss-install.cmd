@@ -233,7 +233,6 @@ rem ====================
     call :copyFile "third_party_open\mpich2\bin\*.exe"                          !dest_bin!
     call :copyFile "third_party_open\mpich2\lib\*.dll"                          !dest_bin!
     call :copyFile "third_party_open\expat\win32\bin\Release\libexpat.dll"      !dest_bin!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"             !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*"                             !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_plugins!
@@ -291,7 +290,6 @@ rem ===========================
     call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_bin!
     call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll       !dest_bin!
     call :copyFile "third_party_open\openda\core\native\lib\win32\*.dll"      !dest_bin!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_plugins!
@@ -414,10 +412,6 @@ rem ==============================
     
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
 	
-    call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\win32\libmmd.dll         !dest_bin!
-	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
@@ -469,8 +463,6 @@ rem ================
 
     call :copyFile engines_gpl\part\bin\release\delpar.exe !dest!
 
-    call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll !dest!
-	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
@@ -509,7 +501,6 @@ rem ================
     call :copyFile engines_gpl\wave\bin\release\wave.exe            !dest_bin!
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini       !dest_default!
     call :copyFile "third_party_open\pthreads\bin\win32\*.dll"      !dest_bin!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll" !dest_bin!
     call :copyFile "third_party_open\swan\bin\win32\*.*"            !dest_swan_bin!
     call :copyFile third_party_open\swan\scripts\swan_install.bat " !dest_swan_scripts!\swan.bat"
     rem
