@@ -1,3 +1,5 @@
+  rem Jump to the directory where this build.cmd script is
+cd %~dp0
 del build.log
 call "%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
   rem the path to devenv.exe is now added to PATH: no full path specificitation needed on next line.
