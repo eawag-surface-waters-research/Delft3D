@@ -346,7 +346,6 @@ rem =======================
     
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq2_lib.dll           !dest_bin!
 	
-	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
@@ -640,11 +639,11 @@ rem ===================
 :nestwq1
     rem echo "installing nestwq1 . . ."
 
-    rem set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    rem set dest_bin="!dest_main!\win64\waq\bin"
 
     rem call :makeDir !dest_bin!
 
-    rem call :copyFile tools\nestwq1\packages\nestwq1\Release\nestwq1.exe !dest_bin!
+    rem call :copyFile tools\nestwq1\packages\nestwq1\x64\Release\nestwq1.exe !dest_bin!
 goto :endproc
 
 
@@ -655,11 +654,11 @@ rem ===================
 :nestwq2
     rem echo "installing nestwq2 . . ."
 
-    rem set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    rem set dest_bin="!dest_main!\win64\waq\bin"
 
     rem call :makeDir !dest_bin!
 
-    rem call :copyFile tools\nestwq2\packages\nestwq2\Release\nestwq2.exe !dest_bin!
+    rem call :copyFile tools\nestwq2\packages\nestwq2\x64\Release\nestwq2.exe !dest_bin!
 goto :endproc
 
 

@@ -377,11 +377,7 @@ rem =======================
     
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
 	
-    call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\win32\libifcoremd.dll    !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\win32\libmmd.dll         !dest_bin!
-	
+
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
@@ -678,7 +674,7 @@ rem ===================
 :nestwq1
     echo "installing nestwq1 . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\waq\bin"
 
     call :makeDir !dest_bin!
 
@@ -693,7 +689,7 @@ rem ===================
 :nestwq2
     echo "installing nestwq2 . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\waq\bin"
 
     call :makeDir !dest_bin!
 
