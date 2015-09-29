@@ -6,12 +6,12 @@ cd %~dp0
   rem Single precision build (or forced high precision code conversion):
 if [%1] EQU [/sp] (
     cd utils_lgpl\deltares_common\scripts
-    singleprecision.bat
+    call singleprecision.bat
     cd %~dp0
 )
 if [%1] EQU [/hp] (
     cd utils_lgpl\deltares_common\scripts
-    doubleprecision.bat
+    call doubleprecision.bat
     cd %~dp0
 )
   
