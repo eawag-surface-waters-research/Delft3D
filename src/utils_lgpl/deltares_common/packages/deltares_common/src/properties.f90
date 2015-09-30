@@ -1605,9 +1605,9 @@ subroutine prop_get_logical(tree  ,chapter   ,key       ,value     ,success)
     character(max_length) :: prop_value
     !
     data truth/    &
-     & '|Y|y|YES|yes|Yes|T|t|TRUE|true|True|J|j|JA|Ja|ja|W|w|WAAR|Waar|waar|'/
+     & '|1|Y|y|YES|yes|Yes|T|t|TRUE|true|True|J|j|JA|Ja|ja|W|w|WAAR|Waar|waar|'/
     data falsity/  &
-     & '|N|n|NO|no|No|F|f|FALSE|false|False|N|n|NEE|Nee|nee|O|o|ONWAAR|Onwaar|onwaar|'/
+     & '|0|N|n|NO|no|No|F|f|FALSE|false|False|N|n|NEE|Nee|nee|O|o|ONWAAR|Onwaar|onwaar|'/
     !
     !! executable statements -------------------------------------------------------
     !
