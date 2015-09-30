@@ -50,14 +50,13 @@ module m_hash_search
       integer                                :: ires
       integer                                :: length
       integer                                :: i
-
       ires = 0
       length = len_trim(string)
 
       do i = 1, length
-         ires = ires + iachar(string(i:i))
+         ires = ishft(ires,4) + ires+ iachar(string(i:i))
       enddo
-
+      ires = iabs(ires)
       ires = mod (ires, hashcon)
       
       if (ires == 0) ires = hashcon
@@ -72,7 +71,7 @@ module m_hash_search
       use string_module
  
       ! Global Variables
-      type(t_hashlist), pointer, intent(inout) :: hashlist
+      type(t_hashlist), intent(inout) :: hashlist
 
       ! Local Variables
       integer                                  :: icount
@@ -81,8 +80,9 @@ module m_hash_search
       integer                                  :: next
       integer                                  :: ierr
       character(len=idLen)                      :: locid
+      integer ires
       
-      call realloc(hashlist%hashfirst, hashlist%hashcon - 1, lindex = 0, stat = ierr)
+      call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)
       call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
     
       call realloc(hashlist%hashnext, hashlist%id_count, stat = ierr)
