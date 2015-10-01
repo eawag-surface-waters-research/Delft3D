@@ -564,15 +564,7 @@
 
 !          1i: Create backpointers from cell to order of execution and to box nr.
 
-      ibas = 0                         ! this array is now re-used
-      do ibox = 1 , nob+1
-         is1 = its(ibox+1)+1           ! reversed order: highest number box underneith + 1
-         is2 = its(ibox)               !                 highest number of this box
-         do i = is1 , is2              !                 is the set of cells in this box
-            iseg = iords(i)
-            ibas(iseg) = ibox          ! to find the box number of this cell
-         enddo
-      enddo
+!      The backpointer became obsolete, ibas can be reused directly
 
 !         1j: Fill the off-diagonals of the matrix for the vertical advection of water only
 
