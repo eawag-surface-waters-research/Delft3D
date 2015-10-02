@@ -391,6 +391,10 @@
             work(3,ito  ) = work(3,ito  ) + e
          endif
       enddo
+      ! Add withdrawals to outgoing (1,..) too
+      do iseg = 1, noseg
+          work(1,iseg) = work(1,iseg) + wdrawal(iseg)
+      end do
 
 !          1c: assign a basket number to each cell
 
