@@ -130,8 +130,8 @@ module m_hash_search
       ! Module description: Search in hashing arrays
       use string_module
       ! Global Variables
-      character(len=*), intent(in)                    :: id
-      type(t_hashlist), pointer, intent(inout)        :: hashlist
+      character(len=*), intent(in)           :: id
+      type(t_hashlist), intent(inout)        :: hashlist
       
       ! Local Variables
       character(len=idLen)                             :: locid
