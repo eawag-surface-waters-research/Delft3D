@@ -412,7 +412,7 @@ static retrieve * Tree ( retrieve * p           ,
   return (p);
 }
 /*==========================================================================*/
-retrieve * free_retrieve_ptrs( retrieve * p )
+DLLEXPORT retrieve * free_retrieve_ptrs(retrieve * p)
 {
     if (p->left  != NULL)
     {

@@ -188,7 +188,7 @@ BUInt8 GP_read_file  ( BInt4  fds     ,
  *  return: n_read      number bytes read
  */
 /*==========================================================================*/
-BUInt8 GP_read_file_pointers  ( BInt4   fds    ,
+DLLEXPORT BUInt8 GP_read_file_pointers(BInt4   fds,
                                 BText   string ,
                                 BUInt8  start  ,
                                 BUInt8  n_bytes,
@@ -1188,7 +1188,7 @@ BInt4 GP_get_attribute ( BInt4   set        ,
   return nefis_errno;
 }
 /*==========================================================================*/
-BInt4 GP_get_next_grp  ( BInt4   set        ,    /* I file set descriptor */
+DLLEXPORT BInt4 GP_get_next_grp(BInt4   set,    /* I file set descriptor */
                          BInt4   next       ,    /* I first(0) or next(1) */
                          BText   grp_name   ,    /* O */
                          BText   grp_defined)    /* O */
@@ -1548,7 +1548,7 @@ BInt4 GP_get_next_cell ( BInt4    set             ,/* I file set descriptor */
  * Get contents of group as defined on definition file
  */
 /*=========================================================================*/
-BInt4 GP_get_next_def_grp ( BInt4    set             ,/* I file set descriptor */
+DLLEXPORT BInt4 GP_get_next_def_grp(BInt4    set,/* I file set descriptor */
                             BInt4    next            ,/* I first(0) or next(1) */
                             BText    grp_name        ,/* O */
                             BText    cel_name        ,/* O */

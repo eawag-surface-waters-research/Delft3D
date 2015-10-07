@@ -103,9 +103,9 @@
 #include "nef-def.h"
 #include "oc.h"
 
-extern char * getcompanystring_nefis(void);
-extern char * getfileversionstring_nefis(void);
-extern char * getfullversionstring_nefis(void);
+DLLEXPORT char * getcompanystring_nefis(void);
+DLLEXPORT char * getfileversionstring_nefis(void);
+DLLEXPORT char * getfullversionstring_nefis(void);
 
 static BChar   tree_name[MAX_TREE_NAME];
 static BInt4   first_create   = TRUE;

@@ -70,7 +70,7 @@ extern BChar error_text[LENGTH_ERROR_MESSAGE+1];
 extern BInt4  convert_ieee          ( voidp *, charp *, BUInt8  , BInt4  , BText  , BInt4  );
 extern BInt4  GP_flush_hash         ( BInt4  , BInt4  );
 extern BUInt8 GP_read_file          ( BInt4  , BText  , BUInt8  , BUInt8 );
-extern BUInt8 GP_read_file_pointers ( BInt4  , BText  , BUInt8  , BUInt8 , BInt4 );
+DLLEXPORT BUInt8 GP_read_file_pointers(BInt4, BText, BUInt8, BUInt8, BInt4);
 extern BUInt8 GP_write_file         ( BInt4  , BText  , BUInt8  , BUInt8 );
 extern BUInt8 GP_write_file_pointers( BInt4  , BText  , BUInt8  , BUInt8 , BInt4);
 #if DO_DEBUG
@@ -84,5 +84,5 @@ extern BUInt8 GP_write_file_pointers( BInt4  , BText  , BUInt8  , BUInt8 , BInt4
 
 BUInt8 *** retrieve_var;
 extern struct retrieve * array_retrieve_ptrs[MAX_NEFIS_FILES];
-extern struct retrieve * free_retrieve_ptrs( struct retrieve * );
+DLLEXPORT struct retrieve * free_retrieve_ptrs(struct retrieve *);
 #endif

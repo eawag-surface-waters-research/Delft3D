@@ -32,19 +32,19 @@
 #include "nefis.h"
 #include "nef-tag.h"
 
-BInt4 nefis_errcnt;
-BInt4 nefis_errno;
-BChar error_text[LENGTH_ERROR_MESSAGE+1];
-BInt4 nefis_flush;
+extern BInt4 nefis_errcnt;
+extern BInt4 nefis_errno;
+extern BChar error_text[LENGTH_ERROR_MESSAGE+1];
+extern BInt4 nefis_flush;
 
 BInt4 close_nefis_files    ( BInt4 *);
 BInt4 create_nefis_files   ( BInt4 *, BText  , BText  , BChar  , BChar  );
 BInt4 DBG_nefis_tree       ( BInt4  , BText  );
-BInt4 Define_cel           ( BInt4  , BText  , BInt4  , BText  );
+DLLEXPORT BInt4 Define_cel           ( BInt4  , BText  , BInt4  , BText  );
 BInt4 Define_data          ( BInt4  , BText  , BText  );
-BInt4 Define_element       ( BInt4  , BText  , BText  , BText  , BText  ,
+DLLEXPORT BInt4 Define_element(BInt4, BText, BText, BText, BText,
                                     BText  , BInt4  , BInt4  , BInt4 *);
-BInt4 Define_group         ( BInt4  , BText  , BText  , BInt4  , BInt4 *,
+DLLEXPORT BInt4 Define_group(BInt4, BText, BText, BInt4, BInt4 *,
                                     BInt4 *);
 BInt4 Get_element          ( BInt4  , BText  , BText  , BInt4 *, BInt4 *,
                                     BUInt4 , BData  );
@@ -54,9 +54,9 @@ BInt4 GP_get_next_cell     ( BInt4   , BInt4  , BText  , BText *, BUInt4 *,
 BInt4 GP_get_next_elm      ( BInt4  , BInt4  , BText  , BText  , BText  ,
                                     BText  , BText  , BUInt4 *, BUInt4 *, BUInt4 *,
                                     BUInt8 *);
-BInt4 GP_get_next_def_grp  ( BInt4  , BInt4  , BText  , BText  , BInt4 *,
+DLLEXPORT BInt4 GP_get_next_def_grp(BInt4, BInt4, BText, BText, BInt4 *,
                                     BInt4 *, BInt4 *);
-BInt4 GP_get_next_grp      ( BInt4  , BInt4  , BText  , BText  );
+DLLEXPORT BInt4 GP_get_next_grp(BInt4, BInt4, BText, BText);
 BInt4 GP_get_attribute     ( BInt4  , BInt4  , BText  , BText  , BData  ,
                                     BText  );
 BInt4 GP_inquire_cel       ( BInt4  , BText   , BUInt4 *, BText *, BUInt8 *);

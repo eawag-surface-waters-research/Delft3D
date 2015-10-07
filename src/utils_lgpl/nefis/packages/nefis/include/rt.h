@@ -45,8 +45,8 @@ extern BInt4  GP_inquire_elm      ( BInt4  , BText   , BText   , BText   , BText
                                     BText  , BUInt4 *, BUInt4 *, BUInt4 *, BUInt8 *);
 extern BInt4  GP_inquire_grp_def  ( BInt4   , BText   , BText   ,
                                     BUInt4 *, BUInt4 *, BUInt4 *);
-extern BUInt8 GP_read_file        ( BInt4  , BText  , BUInt8  , BUInt8  );
-extern BUInt8 GP_read_file_pointers ( BInt4  , BText  , BUInt8  , BUInt8  , BUInt4);
+DLLEXPORT BUInt8 GP_read_file        ( BInt4  , BText  , BUInt8  , BUInt8  );
+DLLEXPORT BUInt8 GP_read_file_pointers(BInt4, BText, BUInt8, BUInt8, BUInt4);
 extern BInt4  GP_variable_pointer ( BInt4  , BUInt8 *, BUInt4 , BUInt8 *);
 extern BUInt8 GP_write_file       ( BInt4  , BText  , BUInt8  , BUInt8  );
 
