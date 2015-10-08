@@ -95,7 +95,7 @@ BInt4 DF_check_bytes_elm(BUInt8 *, BText, BUInt4, BUInt4);
  *  elm_buf.s[176-179] = elm_buf.i[44] = elm_num_dim[4]
  */
 /*==========================================================================*/
-DLLEXPORT BInt4 Define_element(BInt4    set,
+BInt4 Define_element ( BInt4    set         ,
                        BText    elm_name    ,
                        BText    elm_type    ,
                        BText    elm_quantity,
@@ -375,7 +375,7 @@ DLLEXPORT BInt4 Define_element(BInt4    set,
  */
 /*==========================================================================*/
 
-DLLEXPORT BInt4 Define_cel(BInt4   set,
+BInt4 Define_cel ( BInt4   set       ,
                    BText   cel_name  ,
                    BUInt4  cel_dimens,
                    BText   elm_names )
@@ -676,7 +676,7 @@ DLLEXPORT BInt4 Define_cel(BInt4   set,
  *  grp_buf.s[ 96- 99] = grp_buf.i[21] = grp_order[4]
  */
 /*==========================================================================*/
-DLLEXPORT BInt4 Define_group(BInt4   set,
+BInt4 Define_group ( BInt4   set         ,
                      BText   grp_name    ,
                      BText   cel_name    ,
                      BUInt4  grp_num_dim ,

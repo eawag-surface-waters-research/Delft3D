@@ -50,14 +50,10 @@
 #include <limits.h>
 #include <time.h>
 
-#if HAVE_CONFIG_H
-#  define DLLEXPORT extern "C"
+#if defined(NEFIS_DLL)
+#  define DLLEXPORT  __declspec( dllexport )
 #else
-#   if defined(NEFIS_DLL)
-#      define DLLEXPORT  __declspec( dllexport )
-#   else
-#      define DLLEXPORT 
-#   endif
+#  define DLLEXPORT
 #endif
 
 #if defined(WIN32) || defined(WIN64)
@@ -763,7 +759,7 @@ DLLEXPORT BInt4 GET_DEF_HEADER( BInt4 * fd           ,
  *         !=0                 Error occured
  */
 
-DLLEXPORT BInt4 GET_ELEMENT(BInt4 * fd,
+DLLEXPORT BInt4 GET_ELEMENT    ( BInt4 * fd               ,
                        BText   gr_name          ,
                        BText   el_name          ,
                        BInt4 * user_index       ,

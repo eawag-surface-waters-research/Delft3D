@@ -1,3 +1,4 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
-         src
+         src \
+         src_so
