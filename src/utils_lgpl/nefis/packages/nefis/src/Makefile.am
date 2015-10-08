@@ -17,10 +17,12 @@ noinst_LTLIBRARIES = libNefis.la
 AM_CFLAGS += \
     -I../include \
     -D_FILE_OFFSET_BITS=64 \
+    -DLINUX64 \
     -DPTR8
 AM_CXXFLAGS += \
     -I../include \
     -D_FILE_OFFSET_BITS=64 \
+    -DLINUX64 \
     -DPTR8
 
 #-------------------------------------------------------------------------------
