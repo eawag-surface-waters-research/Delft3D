@@ -231,12 +231,13 @@ subroutine prop_inifile_pointer(lu, tree)
                 exit
             endif
             ! There could be a comment (started by #) after line continuation backslash
-            lcend = scan(linecont(1:lcend),'#',.true.) - 1 ! risk: no # allowed in comment text itself
+            lcend = scan(linecont(1:lcend),'#',.false.) - 1 ! risk: no # allowed in line content, since it finds the first
             if (lcend > 0) then
                 lcend = len_trim(linecont(1:lcend)) ! Strip off whitespace preceding possible comment
             else
                 lcend = len_trim(linecont)
             end if
+            linecont = linecont(1:lcend)            ! actually DO strip input 
             if (lcend > 0) then
                 num_bs = lcend - verify(linecont(1:lcend),char(92),.true.) ! nr of backslashes at end of line
                 if (mod(num_bs, 2) == 1) then ! Odd nr of backslashes, indeed line continuation
