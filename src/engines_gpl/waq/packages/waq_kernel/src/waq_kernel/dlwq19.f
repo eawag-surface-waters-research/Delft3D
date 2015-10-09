@@ -332,12 +332,12 @@
 
       dt(1) = dfloat(idt)
       do ibox = 2, nob
-         dt(ibox) = dt(ibox-1) / 2.0d+00
+         dt(ibox) = dt(ibox-1) / 2.0d0
       enddo
 
 !          1b: sum the outgoing (1,..) and ingoing (2,..) horizontal flows and constant diffusions (3,..) per cell
 
-      work = 0.0
+      work = 0.0d0
       d    = disp (1)
       al   = aleng(1,1)
       do iq = 1, noqh
@@ -354,7 +354,7 @@
          if ( ilflag .eq. 1 ) al = aleng(1,iq) + aleng(2,iq)
          e = d*a/al
          if ( ifrom .lt. 0 ) then                           ! Boundary
-            if ( flow(iq) .gt. 0.0 ) then
+            if ( flow(iq) .gt. 0.0d0 ) then
                work(2,ito  ) = work(2,ito  ) + flow(iq)
             else
                work(1,ito  ) = work(1,ito  ) - flow(iq)
@@ -401,9 +401,9 @@
       ibas    = 0
       wetting = .false.
       do iseg = 1, noseg
-         if ( work(1,iseg) .le. 0.0 .and.
-     &        work(2,iseg) .le. 0.0 .and.
-     &        work(3,iseg) .le. 0.0       ) then
+         if ( work(1,iseg) .le. 0.0d0 .and.
+     &        work(2,iseg) .le. 0.0d0 .and.
+     &        work(3,iseg) .le. 0.0d0      ) then
             ibas(iseg) = nob+2          !  cell is dry, number is 1 higher than
             cycle                       !  the nr of wet and 'wetting' basket
          endif
@@ -578,7 +578,7 @@
          if2 = itf  (ibox)
          do i = if1, if2
             iq = iordf(i)
-            q  = flow(iq)*dt(ibox)/2.0d+00     !  Watch out! Central differences here.
+            q  = flow(iq)*dt(ibox)/2.0d0       !  Watch out! Central differences here.
 !           q  = flow(iq)*dt(ibox)             !  Watch out! Upwind  differences here.
             ifrom = ipoint(1,iq)               !  The diagonal now is the sum of the
             ito   = ipoint(2,iq)               !  new volume that increments with each step
@@ -643,14 +643,14 @@
             iseg = iords(i)
             j    = nvert(2,iseg)
             if ( j .le. 0 ) cycle
-            if ( abs(volint(iseg)) .gt. 1.0e-25 ) then
+            if ( abs(volint(iseg)) .gt. 1.0d-25 ) then
                do isys = 1, nosys
                   conc (isys,iseg) = rhs(isys,iseg)/volint(iseg)      ! column averaged concentrations
                enddo
             else                                                      ! dry
                do isys = 1, nosys
-                  rhs (isys,iseg) = 0.0
-                  conc(isys,iseg) = 0.0
+                  rhs (isys,iseg) = 0.0d0
+                  conc(isys,iseg) = 0.0d0
                enddo
             endif
          enddo
@@ -675,7 +675,7 @@
                   if ( iqdmp(iq) .gt. 0 ) ipb = iqdmp(iq)
                endif
                if ( ifrom .lt. 0 ) then
-                  if ( q .gt. 0.0 ) then
+                  if ( q .gt. 0.0d0 ) then
                      ito   = ivert( nvert(1,iabs(nvert(2,ito  ))) )   ! cell-nr at offset of head of collumn in ivert
                      volint(ito  ) =  volint(ito  ) + q
                      do isys = 1, nosys
@@ -691,7 +691,7 @@
                   cycle
                endif
                if ( ito   .lt. 0 ) then
-                  if ( q .lt. 0.0 ) then
+                  if ( q .lt. 0.0d0 ) then
                      ifrom = ivert( nvert(1,iabs(nvert(2,ifrom))) )
                      volint(ifrom) =  volint(ifrom) - q
                      do isys = 1, nosys
@@ -718,7 +718,7 @@
                               dq = q * conc(isys,ifrom)
                               rhs (isys,ifrom) = rhs(isys,ifrom) - dq
                               rhs (isys,ito  ) = rhs(isys,ito  ) + dq
-                              if ( volint(ifrom) .gt. 1.0e-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
+                              if ( volint(ifrom) .gt. 1.0d-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
                               conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                               if ( ipb .gt. 0 ) dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
                            enddo
@@ -735,7 +735,7 @@
                            dq = q * conc(isys,ifrom)
                            rhs (isys,ifrom) = rhs(isys,ifrom) - dq
                            rhs (isys,ito  ) = rhs(isys,ito  ) + dq
-                           if ( volint(ifrom) .gt. 1.0e-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
+                           if ( volint(ifrom) .gt. 1.0d-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
                            conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                            if ( ipb .gt. 0 ) dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
                         enddo
@@ -756,7 +756,7 @@
                               rhs (isys,ifrom) = rhs(isys,ifrom) - dq
                               rhs (isys,ito  ) = rhs(isys,ito  ) + dq
                               conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
-                              if ( volint(ito  ) .gt. 1.0e-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
+                              if ( volint(ito  ) .gt. 1.0d-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                               if ( ipb .gt. 0 ) dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
                            enddo
                            iordf(i) = -iordf(i)
@@ -773,7 +773,7 @@
                            rhs (isys,ifrom) = rhs(isys,ifrom) - dq
                            rhs (isys,ito  ) = rhs(isys,ito  ) + dq
                            conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
-                           if ( volint(ito  ) .gt. 1.0e-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
+                           if ( volint(ito  ) .gt. 1.0d-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                            if ( ipb .gt. 0 ) dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
                         enddo
                         iordf(i) = -iordf(i)
@@ -806,13 +806,13 @@
                if ( iqdmp(iq) .gt. 0 ) ipb = iqdmp(iq)
             endif
             if ( ifrom .lt. 0 ) then                                  ! The 'from' element was a boundary.
-               if ( q .lt. 0.0 ) then
+               if ( q .lt. 0.0d0 ) then
                   ito   = ivert( nvert(1,iabs(nvert(2,ito  ))) )
                   volint(ito  ) = volint(ito  ) + q
                   do isys = 1, nosys
                      dq = q * conc(isys,ito  )
                      rhs (isys,ito  ) = rhs(isys,ito  ) + dq
-                     if ( volint(ito  ) .gt. 1.0e-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
+                     if ( volint(ito  ) .gt. 1.0d-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                      if ( massbal    ) amass2(isys,    5) = amass2(isys    ,5) - dq
                      if ( ipb .gt. 0 ) dmpq  (isys,ipb,2) = dmpq  (isys,ipb,2) - dq
                   enddo
@@ -820,13 +820,13 @@
                cycle
             endif
             if ( ito   .lt. 0 ) then                                  ! The 'to'   element was a boundary.
-               if ( q .gt. 0.0 ) then
+               if ( q .gt. 0.0d0 ) then
                   ifrom = ivert( nvert(1,iabs(nvert(2,ifrom) )) )
                   volint(ifrom) = volint(ifrom) - q
                   do isys = 1, nosys
                      dq = q * conc(isys,ifrom)
                      rhs (isys,ifrom) = rhs(isys,ifrom) - dq
-                     if ( volint(ifrom) .gt. 1.0e-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
+                     if ( volint(ifrom) .gt. 1.0d-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
                      if ( massbal    ) amass2(isys,    5) = amass2(isys,    5) + dq
                      if ( ipb .gt. 0 ) dmpq  (isys,ipb,1) = dmpq  (isys,ipb,1) + dq
                   enddo
@@ -841,7 +841,7 @@
                   dq = q*conc(isys,ifrom)
                   rhs (isys,ifrom) = rhs(isys,ifrom) - dq
                   rhs (isys,ito  ) = rhs(isys,ito  ) + dq
-                  if ( volint(ifrom) .gt. 1.0e-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
+                  if ( volint(ifrom) .gt. 1.0d-25 ) conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
                   conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                   if ( ipb .gt. 0 ) dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
                enddo
@@ -854,7 +854,7 @@
                   rhs (isys,ifrom) = rhs(isys,ifrom) - dq
                   rhs (isys,ito  ) = rhs(isys,ito  ) + dq
                   conc(isys,ifrom) = rhs(isys,ifrom)/volint(ifrom)
-                  if ( volint(ito  ) .gt. 1.0e-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
+                  if ( volint(ito  ) .gt. 1.0d-25 ) conc(isys,ito  ) = rhs(isys,ito  )/volint(ito  )
                   if ( ipb .gt. 0 ) dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
                enddo
             endif
@@ -876,7 +876,7 @@
                write ( lunut, '(A,i8,E16.7,A,E16.7,A)' ) 'Warning: trying to withdraw from cell',iseg2,q,
      &                                                   ' m3. Available is',volint(iseg),' m3!'
                q = volint(iseg)
-               volint(iseg) = 0.0
+               volint(iseg) = 0.0d0
             endif
             ipb  = isdmp(iseg2)
             do isys = 1, nosys
@@ -907,29 +907,29 @@
                else
                   ih2 = noseg+1
                endif
-               vol = 0.0                                              ! determine new integrated volume in the flow-file
+               vol = 0.0d0                                            ! determine new integrated volume in the flow-file
                do j = ih1, ih2-1
                   iseg2 = ivert(j)
-                  vol = vol + fact*volnew(iseg2) + (1.0-fact)*volold(iseg2)
+                  vol = vol + fact*volnew(iseg2) + (1.0d0-fact)*volold(iseg2)
                   do isys = 1, nosys                                  !    apply the derivatives (also wasteloads)
                      rhs (isys,iseg) = rhs(isys,iseg) + deriv(isys,iseg2)*dt(fbox)
                   enddo
                enddo
-               if ( vol .gt. 1.0e-25 ) then
+               if ( vol .gt. 1.0d-25 ) then
                   do isys = 1, nosys                                  !    the new concentrations
                      conc(isys,iseg) = rhs(isys,iseg)/vol
                   enddo
                endif
                do j = ih1, ih2-1
                   iseg2 = ivert(j)
-                  f1 = fact*volnew(iseg2) + (1.0-fact)*volold(iseg2)
+                  f1 = fact*volnew(iseg2) + (1.0d0-fact)*volold(iseg2)
                   volint(iseg2) = f1
                   do isys = 1, nosys
                      conc(isys,iseg2) = conc(isys,iseg)
-                     if ( f1 .gt. 1.0e-25 ) then
+                     if ( f1 .gt. 1.0d-25 ) then
                         rhs (isys,iseg2) = conc(isys,iseg)*f1
                      else
-                        rhs (isys,iseg2) = 0.0
+                        rhs (isys,iseg2) = 0.0d0
                      endif
                   enddo
                enddo
@@ -952,7 +952,7 @@
                if ( ifrom .eq. 0 .or. ito .eq. 0 ) cycle
                if ( ifrom .lt. 0 ) then                               ! The 'from' element was a boundary.
                   volint(ito  ) = volint(ito  ) + q
-                  if ( q .gt. 0.0 ) then
+                  if ( q .gt. 0.0d0 ) then
                      do isys = 1, nosys
                         dq = q*bound(isys,-ifrom)
                         rhs  (isys,ito) = rhs  (isys,ito) + dq
@@ -967,7 +967,7 @@
                endif
                if ( ito   .lt. 0 ) then                               ! The 'to' element was a boundary.
                   volint(ifrom) = volint(ifrom) - q
-                  if ( q .gt. 0.0 ) then
+                  if ( q .gt. 0.0d0 ) then
                      do isys = 1, nosys
                         dq = q*conc (isys, ifrom)
                         rhs  (isys,ifrom) = rhs  (isys,ifrom) - dq
@@ -982,7 +982,7 @@
                endif
                volint(ifrom) = volint(ifrom) - q                      ! The regular case
                volint(ito  ) = volint(ito  ) + q
-               if ( q .gt. 0.0 ) then
+               if ( q .gt. 0.0d0 ) then
                   do isys = 1, nosys
                      dq = q * conc(isys,ifrom)
                      rhs  (isys,ifrom) = rhs  (isys,ifrom) - dq
@@ -1002,7 +1002,7 @@
             is2 = its(ibox)
             do i = is1, is2
                iseg = iords(i)
-               if ( volint(iseg) .gt. 1.0e-25 ) then
+               if ( volint(iseg) .gt. 1.0d-25 ) then
                   do isys = 1, nosys
                      dconc2(isys,iseg) = rhs  (isys,iseg) / volint(iseg)
                   enddo
@@ -1033,7 +1033,7 @@
                if ( ifrom .le. 0 .and. ito .le. 0 ) cycle
                a = area(iq)
                q = flow(iq)
-               if ( abs(q) .lt. 10.0e-25 .and. disp0q0 )  cycle   ! thin dam option, no dispersion at zero flow
+               if ( abs(q) .lt. 10.0d-25 .and. disp0q0 )  cycle   ! thin dam option, no dispersion at zero flow
                ipb = 0
                if ( fluxes ) then
                   if ( iqdmp(iq) .gt. 0 ) ipb = iqdmp(iq)
@@ -1048,7 +1048,7 @@
                endif
                if ( ilflag .eq. 1 ) then
                   al = aleng(1,iq) + aleng(2,iq)
-                  if ( al .lt. 1.0e-25) cycle
+                  if ( al .lt. 1.0d-25) cycle
                   f1 = aleng(1,iq) / al
                else
                   f1 = 0.5
@@ -1057,24 +1057,24 @@
 
                if ( ifrom .lt. 0 ) then
                   vto     = volint(ito)
-                  d = 0.0D00
+                  d = 0.0d0
                   if ( .not. disp0bnd ) d = e
                   if ( .not. loword   ) then
                      f2 = f1
-                     if ( q .lt. 0.0 ) f2 = f2 - 1.0
-                     d = d + min( -f2*q + 0.5*q*q*dt(ibox)/a/al , 0.0 )
+                     if ( q .lt. 0.0d0 ) f2 = f2 - 1.0
+                     d = d + min( -f2*q + 0.5d0*q*q*dt(ibox)/a/al , 0.0d0 )
                   endif
                   d = d * dt(ibox)
                   do isys = 1 , nosys
                      dq = d * ( bound(isys,-ifrom) - conc(isys,ito) )
                      rhs   (isys,ito  ) = rhs   (isys,ito  ) + dq
                      dconc2(isys,ito  ) = dconc2(isys,ito  ) + dq / vto
-                     if ( q .gt. 0.0 ) then
+                     if ( q .gt. 0.0d0 ) then
                         dq = dq + q * bound(isys,-ifrom) * dt(ibox)
                      else
                         dq = dq + q * conc (isys, ito  ) * dt(ibox)
                      endif
-                     if ( dq .gt. 0.0 ) then
+                     if ( dq .gt. 0.0d0 ) then
                         if ( massbal    ) amass2(isys,    4) = amass2(isys,    4) + dq
                         if ( ipb .gt. 0 ) dmpq  (isys,ipb,1) = dmpq  (isys,ipb,1) + dq
                      else
@@ -1087,24 +1087,24 @@
 
                if ( ito   .lt. 0 ) then
                   vfrom   = volint(ifrom)
-                  d = 0.0D00
+                  d = 0.0d0
                   if ( .not. disp0bnd ) d = e
                   if ( .not. loword   ) then
                      f2 = f1
-                     if ( q .lt. 0 ) f2 = f2 - 1.0
-                     d = d + min( -f2*q + 0.5*q*q*dt(ibox)/a/al , 0.0 )
+                     if ( q .lt. 0 ) f2 = f2 - 1.0d0
+                     d = d + min( -f2*q + 0.5d0*q*q*dt(ibox)/a/al , 0.0d0 )
                   endif
                   d = d * dt(ibox)
                   do isys = 1 , nosys
                      dq = d * ( conc(isys,ifrom) - bound(isys,-ito) )
                      rhs   (isys,ifrom) = rhs   (isys,ifrom) - dq
                      dconc2(isys,ifrom) = dconc2(isys,ifrom) - dq/vfrom
-                     if ( q .gt. 0.0 ) then
+                     if ( q .gt. 0.0d0 ) then
                         dq = dq + q * conc (isys, ifrom) * dt(ibox)
                      else
                         dq = dq + q * bound(isys,-ito  ) * dt(ibox)
                      endif
-                     if ( dq .gt. 0.0 ) then
+                     if ( dq .gt. 0.0d0 ) then
                         if ( massbal    ) amass2(isys,    5) = amass2(isys,    5) + dq
                         if ( ipb .gt. 0 ) dmpq  (isys,ipb,1) = dmpq  (isys,ipb,1) + dq
                      else
@@ -1118,21 +1118,21 @@
                vfrom   = volint(ifrom)
                vto     = volint(ito  )
                f2 = f1
-               if ( q .lt. 0.0 ) f2 = f2 - 1.0
-               d  = e + min( - f2*q + 0.5*q*q*dt(ibox)/a/al , 0.0 )
+               if ( q .lt. 0.0d0 ) f2 = f2 - 1.0d0
+               d  = e + min( - f2*q + 0.5d0*q*q*dt(ibox)/a/al , 0.0d0 )
                d  = d * dt(ibox)
                do isys = 1 , nosys
-                  if ( d .lt. 0.0 ) then
+                  if ( d .lt. 0.0d0 ) then
                      e2 = d * ( conc(isys,ifrom) - conc(isys,ito) )
-                     s  = sign ( 1.0 , e2 )
+                     s  = sign ( 1.0d0 , e2 )
                      select case ( ifrom_1 )
                         case ( 1: )
                            cfrm_1 = dconc2(isys, ifrom_1)
                         case (  0 )
                            if ( s .gt. 0 ) then
-                              cfrm_1 = 0.0
+                              cfrm_1 = 0.0d0
                            else
-                              cfrm_1 = 2.0*dconc2(isys, ifrom)
+                              cfrm_1 = 2.0d0*dconc2(isys, ifrom)
                            endif
                         case ( :-1 )
                            cfrm_1 = bound (isys,-ifrom_1)
@@ -1144,14 +1144,14 @@
                            if ( s .gt. 0 ) then
                               cto_1 = 2.0*dconc2(isys, ito)
                            else
-                              cto_1 = 0.0
+                              cto_1 = 0.0d0
                            endif
                         case ( :-1 )
                            cto_1 = bound (isys,-ito_1)
                      end select
                      e1 = ( dconc2(isys,ifrom) - cfrm_1 ) * vfrom
                      e3 = ( cto_1  - dconc2(isys,ito  ) ) * vto
-                     dq = s * max( 0.0 , min( s*e1 , s*e2 , s*e3 ) )
+                     dq = s * max( 0.0d0 , min( s*e1 , s*e2 , s*e3 ) )
                   else
                      dq = d * ( dconc2(isys,ifrom) - dconc2(isys,ito) )
                   endif
@@ -1160,12 +1160,12 @@
                   dconc2(isys,ifrom) = dconc2(isys,ifrom) - dq/vfrom
                   dconc2(isys,ito  ) = dconc2(isys,ito  ) + dq/vto
                   if ( ipb .gt. 0 ) then
-                     if ( q .gt. 0.0 ) then
+                     if ( q .gt. 0.0d0 ) then
                         dq = dq + q * conc(isys,ifrom) * dt(ibox)
                      else
                         dq = dq + q * conc(isys,ito  ) * dt(ibox)
                      endif
-                     if ( dq .gt. 0.0 ) then
+                     if ( dq .gt. 0.0d0 ) then
                         dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
                      else
                         dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
@@ -1199,7 +1199,7 @@
                   enddo
                else
                   ilay = 0
-                  low  = 0.0  ;  dia  =  0.0   ;  upr  = 0.0          ! Span the tridiagonal system for this column
+                  low  = 0.0d0  ;  dia  =  0.0d0   ;  upr  = 0.0d0          ! Span the tridiagonal system for this column
                   do j = ih1, ih2-1
                      iseg = ivert(j)
                      volint(iseg) = volint(iseg) - 2*(work(3,iseg)+work(1,iseg))
@@ -1269,7 +1269,7 @@
                   write ( lunut, '(A,i8,E16.7,A,E16.7,A)' ) 'Warning: trying to withdraw from cell', iseg,
      &                                                      q, ' m3. Available is', volint(iseg), ' m3!'
                   q = volint(iseg)
-                  volint(iseg) = 0.0
+                  volint(iseg) = 0.0d0
                endif
                ipb  = isdmp(iseg)
                do isys = 1, nosys
@@ -1296,7 +1296,7 @@
                if ( ipb .eq. 0 ) cycle
                ifrom = ipoint(1,iq)
                ito   = ipoint(2,iq)
-               q     = flow(iq) * dt(ibox) / 2.0                      ! This is the central differences version
+               q     = flow(iq) * dt(ibox) / 2.0d0                      ! This is the central differences version
                if ( q .gt. 0. 0 ) then
                   do isys = 1, nosys
                      dq = q * ( dconc2(isys,ifrom) + dconc2(isys,ito) )
@@ -1318,9 +1318,9 @@
             is2 = its(ibox)
             do i = is1 , is2
                iseg = iords(i)
-               vol = fact*volnew(iseg) + (1.0-fact)*volold(iseg)
+               vol = fact*volnew(iseg) + (1.0d0-fact)*volold(iseg)
                volint(iseg) = vol
-               if ( vol .gt. 1.0e-25 ) then
+               if ( vol .gt. 1.0d-25 ) then
                   do isys = 1, nosys
                      rhs (isys,iseg) = rhs(isys,iseg) + deriv(isys,iseg)*dt(ibox)
                      conc(isys,iseg) = rhs(isys,iseg)/vol
@@ -1379,8 +1379,8 @@
 
 !         Initialisation
 
-      acodia(:,1:noqv) = 0.0
-      bcodia(:,1:noqv) = 0.0
+      acodia(:,1:noqv) = 0.0d0
+      bcodia(:,1:noqv) = 0.0d0
 
 !         Loop over exchanges to fill the matrices
 
@@ -1403,40 +1403,40 @@
          if ( ilflag .eq. 1 ) then
             al = aleng(1,iq) + aleng(2,iq)
          endif
-         f1 = 0.5
-         f2 = 0.5
-         if ( al .gt. 1.0E-25 ) then
+         f1 = 0.5d0
+         f2 = 0.5d0
+         if ( al .gt. 1.0d-25 ) then
             if ( ilflag .eq. 1 ) then
                f1 = aleng(2,iq) / al
-               f2 = 1.0 - f1
+               f2 = 1.0d0 - f1
             endif
             dl = a / al
          else
-            dl = 0.0
+            dl = 0.0d0
          endif
          e  = e*dl
-         if ( iq .gt. noq ) e = 0.0        !  no constant water diffusion in the bed
+         if ( iq .gt. noq ) e = 0.0d0        !  no constant water diffusion in the bed
 
          do isys = 1, nosys
 
 !           advection
 
-            q = 0.0
+            q = 0.0d0
             if ( ivpnt(isys) .gt. 0 ) q = velo  ( ivpnt(isys), iq ) * a
             if ( sw_settling ) then         !  additional velocity upwind
-               if ( q .gt. 0.0 ) then
+               if ( q .gt. 0.0d0 ) then
                   q1 = q
-                  q2 = 0.0
+                  q2 = 0.0d0
                else
-                  q1 = 0.0
+                  q1 = 0.0d0
                   q2 = q
                endif
             else if ( iq .gt. noq .or. ( abound .and. loword ) ) then  ! in the bed upwind
-               if ( q .gt. 0.0 ) then
+               if ( q .gt. 0.0d0 ) then
                   q1 = q
-                  q2 = 0.0
+                  q2 = 0.0d0
                else
-                  q1 = 0.0
+                  q1 = 0.0d0
                   q2 = q
                endif
             else                         ! central velocities in the water phase
@@ -1448,7 +1448,7 @@
 
             d = e
             if ( idpnt(isys) .gt. 0 ) d = d + disper( idpnt(isys), iq ) * dl
-            if ( abound  .and. disp0bnd ) d = 0.0
+            if ( abound  .and. disp0bnd ) d = 0.0d0
 
 !           fill the tridiag matrix
 
@@ -1591,38 +1591,38 @@
          if ( ilflag .eq. 1 ) al = aleng(1,iq) + aleng(2,iq)
          f1 = 0.5
          f2 = 0.5
-         if ( al .gt. 1.0E-25 ) then
+         if ( al .gt. 1.0d-25 ) then
             if ( ilflag .eq. 1 ) then
                f1 = aleng(2,iq) / al
-               f2 = 1.0 - f1
+               f2 = 1.0d0 - f1
             endif
             dl = a / al
          else
-            dl = 0.0
+            dl = 0.0d0
          endif
          e  = e*dl
-         if ( iq .gt. noq ) e = 0.0      !  no constant water diffusion in the bottom
+         if ( iq .gt. noq ) e = 0.0d0      !  no constant water diffusion in the bottom
 
          do isys = 1, nosys
 
 !           advection
 
-            q = 0.0
+            q = 0.0d0
             if ( ivpnt(isys) .gt. 0 ) q = velo  ( ivpnt(isys), iq ) * a
             if ( sw_settling ) then         !  additional velocity upwind
-               if ( q .gt. 0.0 ) then
+               if ( q .gt. 0.0d0 ) then
                   q1 = q
-                  q2 = 0.0
+                  q2 = 0.0d0
                else
-                  q1 = 0.0
+                  q1 = 0.0d0
                   q2 = q
                endif
             else if ( iq .gt. noq .or. ( abound .and. loword ) ) then  ! in the bed upwind
-               if ( q .gt. 0.0 ) then
+               if ( q .gt. 0.0d0 ) then
                   q1 = q
-                  q2 = 0.0
+                  q2 = 0.0d0
                else
-                  q1 = 0.0
+                  q1 = 0.0d0
                   q2 = q
                endif
             else                         ! central velocities in the water phase
@@ -1634,7 +1634,7 @@
 
             d = e
             if ( idpnt(isys) .gt. 0 ) d = d + disper( idpnt(isys), iq ) * dl
-            if ( abound  .and. disp0bnd ) d = 0.0
+            if ( abound  .and. disp0bnd ) d = 0.0d0
 
 !           fill the tridiag matrix
 
@@ -1643,14 +1643,14 @@
             if ( abound ) then
                if ( ito   .gt. 0 )  then
                   dq = q3 * bound(isys,-ifrom) + q4 * rhs  (isys, ito  )
-                  if ( dq .gt. 0.0 ) then
+                  if ( dq .gt. 0.0d0 ) then
                      amass2( isys, 4) = amass2( isys, 4) + dq
                   else
                      amass2( isys, 5) = amass2( isys, 5) - dq
                   endif
                else
                   dq = q3 * rhs  (isys, ifrom) + q4 * bound(isys,-ito  )
-                  if ( dq .gt. 0.0 ) then
+                  if ( dq .gt. 0.0d0 ) then
                      amass2( isys, 5) = amass2( isys, 5) + dq
                   else
                      amass2( isys, 4) = amass2( isys, 4) - dq
@@ -1706,7 +1706,7 @@
          endif
          do isys = 1, nosys
             amass(isys,iseg) = rhs(isys,iseg)
-            if ( abs(vol) .gt. 1.0e-25 ) then
+            if ( abs(vol) .gt. 1.0d-25 ) then
                conc(isys,iseg) = rhs(isys,iseg)/vol
             else
                conc(isys,iseg) = dconc2(isys,iseg)
@@ -1717,7 +1717,7 @@
             conc (isys,iseg) = amass(isys,iseg) / surface(iseg)
          enddo
       enddo
-      deriv = 0.0
+      deriv = 0.0d0
 
       if ( timon ) call timstop ( ithandl )
       return
