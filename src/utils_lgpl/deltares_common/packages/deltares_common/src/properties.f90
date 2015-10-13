@@ -195,7 +195,7 @@ subroutine prop_inifile_pointer(lu, tree)
     !
     integer               :: eof
     integer               :: eqpos, valend
-    integer               :: k, k2
+    integer               :: k, k2, i
     integer               :: lend, lcend, num_bs
     integer               :: iostatus
     logical               :: filestatus
@@ -206,6 +206,7 @@ subroutine prop_inifile_pointer(lu, tree)
     character(max_length) :: value
     type(tree_data), pointer  :: achapter
     type(tree_data), pointer  :: anode
+    integer               :: num_hash
 
     !
     !! executable statements -------------------------------------------------------
@@ -218,6 +219,7 @@ subroutine prop_inifile_pointer(lu, tree)
         line = ''
         lend = 0
         multiple_lines = .false.
+
         do ! Check on line continuation
             read (lu, '(a)', iostat = eof) linecont
             linecont = adjustl(linecont)
@@ -231,13 +233,26 @@ subroutine prop_inifile_pointer(lu, tree)
                 exit
             endif
             ! There could be a comment (started by #) after line continuation backslash
-            lcend = scan(linecont(1:lcend),'#',.false.) - 1 ! risk: no # allowed in line content, since it finds the first
-            if (lcend > 0) then
-                lcend = len_trim(linecont(1:lcend)) ! Strip off whitespace preceding possible comment
-            else
-                lcend = len_trim(linecont)
-            end if
-            linecont = linecont(1:lcend)            ! actually DO strip input 
+            num_hash = 0
+            do i=1,lcend                                          ! count number of #
+               if (linecont(i:i)=='#') num_hash = num_hash + 1 
+            enddo 
+            if (num_hash==0) then                                 ! if none, it is easy
+               lcend = len_trim(linecont)
+            else 
+               if (num_hash==1) then                              ! if only one, then this is THE comment mark
+                  lcend = index(linecont(1:lcend),'#') - 1
+               else                                               ! if more than one
+                                                                  !    if nothing between '=' and the first '#', cut after second '#'
+                  if (len_trim(linecont(index(linecont(1:lcend),'=')+1:index(linecont(1:lcend),'#')-1))==0) then 
+                     lcend=index(linecont(index(linecont(1:lcend),'#')+1:lcend),'#')+index(linecont(1:lcend),'#')
+                  else 
+                     lcend = index(linecont(1:lcend),'#') - 1     !    else cut before the first
+                  endif 
+               endif 
+            endif 
+            lcend=len_trim(linecont(1:lcend))                     ! finally, remove trailing blanks
+            linecont=linecont(1:lcend)                            ! and actually remove the end of the string
             if (lcend > 0) then
                 num_bs = lcend - verify(linecont(1:lcend),char(92),.true.) ! nr of backslashes at end of line
                 if (mod(num_bs, 2) == 1) then ! Odd nr of backslashes, indeed line continuation
