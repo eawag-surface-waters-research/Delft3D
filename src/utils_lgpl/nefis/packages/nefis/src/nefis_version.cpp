@@ -35,6 +35,9 @@ static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis
 #elif defined(W64)
 static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64)"};
 static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64), "__DATE__", "__TIME__""};
+#elif defined(LINUX64)
+static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64)"};
+static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Linux64), "__DATE__", "__TIME__""};
 #else
 static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Unknown)"};
 static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Unknown), "__DATE__", "__TIME__""};
