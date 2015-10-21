@@ -14,11 +14,12 @@ else:
 # Adapt and use it for your own purpose.
 #
 # adri.mourits@deltares.nl
-# 02 Sep 2015
+# 21 Oct 2015
 #
 # Usage:
 # 1. Install Python on your machine https://www.python.org/downloads/
-# 2. Execute "prepare_sln.py". A window will pop-up in which you can select the
+#    In case Python does not work: check that the path to "python.exe" is added to your environment parameter "PATH"
+# 2. Execute "prepare_sln.py" (double-clicking it in your file browser will do). A window will pop-up in which you can select the
 #    VisualStudio version you are using and the Intel Fortran compiler version
 #    Optional usage without pop-up window:
 #    python prepare_sln.py -vs 2013 -ifort 15

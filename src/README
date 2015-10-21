@@ -11,7 +11,9 @@ Compiling on Windows
      - Intel Fortran compiler 11.1 or newer (https://software.intel.com)
      - Python (https://www.python.org/downloads)
        Both versions (2.7.xx and 3.4.xx) will do
-  1) Execute "...\src\prepare_sln.py" to create a "delft3d_open.sln" that fits to your tools
+       Check that the path to "python.exe" is added to your environment parameter "PATH" (should work automatically)
+  1) Execute "...\src\prepare_sln.py" (double-clicking it in your file browser will do)
+     to create a "delft3d_open.sln" that fits to your tools
      See the comments in "...\src\prepare_sln.py" for more information
   2) Open "delft3d_open.sln" in Visual Studio
   2) Select the "solution configuration": "Release" or "Debug" (normally "Release")
@@ -117,6 +119,6 @@ common.am
 build.sh
 
 
-02 Sep 2015
+21 Oct 2015
 adri.mourits@deltares.nl
 
