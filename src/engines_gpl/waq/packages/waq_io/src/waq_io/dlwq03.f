@@ -118,6 +118,8 @@
       integer                 iknm1, iknm2      !  help variables for attributes
       integer                 iknmrk            !  help variables merged attributes
       integer                 ivalk             !  return value dhknmrk
+      
+      character*255           ugridfile         !  name of the ugrid-file
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq03", ithndl )
 
@@ -129,9 +131,24 @@
       iwar2  = 0
       iposr  = 0
 
-!       Read number of computational volumes
-
-      if ( gettoken( noseg, ierr2 ) .gt. 0 ) goto 240
+!     Check if there is a keyword for the ugrid
+      if ( gettoken( cdummy, idummy, itype, ierr2 ) .gt. 0 ) goto 240
+      if (itype .eq. 1 .and. cdummy .eq. 'UGRID') then
+         write ( lunut , 2500 )
+         iwar2 = iwar2 + 1
+         if ( gettoken( ugridfile, ierr2 ) .gt. 0 ) goto 240
+         write ( lunut , 2510 ) trim(ugridfile)
+!        Read number of computational volumes
+         if ( gettoken( noseg, ierr2 ) .gt. 0 ) goto 240
+      else if (itype .eq. 2) then
+!        Or the number of computational volumes was already read
+         noseg = idummy
+      else
+!        Or something went wrong
+         write ( lunut , 2005 )
+         ierr = ierr+1
+         goto 240
+      end if
       if ( noseg .gt. 0 ) then
          write ( lunut , 2000 ) noseg
       else
@@ -466,6 +483,7 @@
 !       Output formats
 
  2000 format ( //' Number of segments :',I15 )
+ 2005 format ( / ' ERROR, could not read number of segments.' )
  2010 format ( / ' ERROR, invalid number of segments:',I10 )
  2015 format (   ' ERROR, nr of volumes in Delwaq not equal to nr of volumes in Delpar:',I10 )
  2020 format (   ' Number of layers in base grid :',I10)
@@ -517,5 +535,6 @@
  2395 format ( / ' ERROR, volumes for Delpar from different file : ',A20 )
  2400 format ( / ' ERROR, end of file on unit:' ,I3, / ' Filename: ',A20 )
  2410 format ( / ' ERROR, reading file on unit:',I3, / ' Filename: ',A20 )
-
+ 2500 format ( / ' WARNING, Found UGRID keyword, but not supported yet (ignored)' )
+ 2510 format ( / ' File containing the grid: ', A, ' (ignored)' )
       end
