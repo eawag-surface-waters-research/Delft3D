@@ -86,7 +86,7 @@
          inc = increm( 14)
          
          do iseg = 1,noseg
-            pmsa(ip + inc * (iseg - 1)) = SNGL(-1)
+            pmsa(ip + inc * (iseg - 1)) = real(-1,4)
          end do
 
          ! set botseg equal to iseg for the segments which have a bottom
@@ -96,7 +96,7 @@
             if (ikmrk1.lt.3) then
                call dhkmrk(2,iknmrk(iseg),ikmrk2)
                if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-                  pmsa(ip + inc * (iseg - 1)) = SNGL(iseg)
+                  pmsa(ip + inc * (iseg - 1)) = real(iseg,4)
                endif
             endif
          enddo
@@ -109,7 +109,7 @@
             if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
                ibotseg = pmsa(ip + inc * (ito - 1))
                if ( ibotseg .gt. 0 ) then
-                  pmsa(ip + inc * (ifrom - 1)) = SNGL(ibotseg)
+                  pmsa(ip + inc * (ifrom - 1)) = real(ibotseg,4)
                endif
             endif
          enddo
@@ -122,7 +122,7 @@
             if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
                ibotseg = pmsa(ip + inc * (ifrom - 1))
                if ( ibotseg .gt. 0 ) then
-                  pmsa(ip + inc * (ito - 1)) = SNGL(ibotseg)
+                  pmsa(ip + inc * (ito - 1)) = real(ibotseg,4)
                endif
             endif
          enddo
