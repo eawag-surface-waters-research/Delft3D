@@ -106,6 +106,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     integer, dimension(maxfld)       :: itype
     integer, dimension(maxfld)       :: lenchr 
     logical                          :: outside              ! indicating whether a line of thin dams is outside subdomain (.TRUE.) or not (.FALSE.)
+    logical                          :: onParbndIsInside
     real(fp)                         :: brlosc               ! Barrier energy loss coefficient 
     real(fp)                         :: gate                 ! Initial gate height for barrier 
     real(fp)                         :: rdef                 ! Help var. containing default va- lue(s) for real variable 
@@ -218,7 +219,8 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        ! Check if barrier is fully (.TRUE.) outside subdomain/partition
        ! If partly outside, ival is changed, specifying the interior part
        !
-       call adjlin (ival,outside,gdp%d%mmax,gdp%d%nmaxus)
+       onParbndIsInside = .true.
+       call adjlin (ival, outside, gdp%d%mmax, gdp%d%nmaxus, onParbndIsInside)
        if (.not. parll) then
           !
           ! If ival is changed (compared with the copy in m/n1/2) the barrier is partly outside the domain

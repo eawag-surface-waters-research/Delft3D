@@ -52,33 +52,36 @@ subroutine dfupdi_nm_pos2 ( field, ks, ke, gdp )
     implicit none
     !
     type(globdat), target    :: gdp
+    include 'fsm.i'
+    include 'tri-dyn.igd'
+    integer(pntrsize), pointer :: kcs
 !
 ! Global variables
 !
     integer, intent(in)                                            :: ke    ! last index in vertical direction
     integer, intent(in)                                            :: ks    ! first index in vertical direction
 !
-    integer, dimension(ks:ke,gdp%d%nmlb:gdp%d%nmub), intent(inout) :: field ! real array for which halo values must
-                                                                            ! be copied from neighbouring subdomains
+    integer, dimension(ks:ke,gdp%d%nmlb:gdp%d%nmub), intent(inout) :: field ! real array for which halo values must be copied from neighbouring subdomains
 !
 ! Local variables
 !
-    integer, dimension(:), pointer      :: iblkad
-    integer                            :: idom   ! subdomain number
-    integer                            :: inb    ! neighbour counter
-    integer                            :: istart ! pointer in array IBLKAD
-    integer                            :: itag   ! message tag for sending and receiving
-    integer                            :: j      ! loop counter
-    integer                            :: k      ! loop counter in vertical direction
-    integer                            :: ksiz   ! size in vertical direction (e.g. total number of sigma layers)
-    integer                            :: nneigh ! number of neighbouring subdomains
-    integer                            :: novlu  ! number of overlapping unknowns
-    integer                             :: worksize  ! 
-    integer                             :: request(4,2)  ! 
-    integer, dimension(:,:,:), allocatable :: work   ! work array to store data to be sent to or received from neighbour
+    integer, dimension(:), pointer         :: iblkad
+    integer                                :: idom          ! subdomain number
+    integer                                :: inb           ! neighbour counter
+    integer                                :: istart        ! pointer in array IBLKAD
+    integer                                :: itag          ! message tag for sending and receiving
+    integer                                :: j             ! loop counter
+    integer                                :: k             ! loop counter in vertical direction
+    integer                                :: ksiz          ! size in vertical direction (e.g. total number of sigma layers)
+    integer                                :: nneigh        ! number of neighbouring subdomains
+    integer                                :: novlu         ! number of overlapping unknowns
+    integer                                :: worksize
+    integer                                :: request(4,2)
+    integer, dimension(:,:,:), allocatable :: work          ! work array to store data to be sent to or received from neighbour
 !
 !! executable statements -------------------------------------------------------
 !
+    kcs    => gdp%gdr_i_ch%kcs
     iblkad => gdp%gdparall%iblkad
     !
     ksiz = ke - ks + 1
@@ -92,8 +95,7 @@ subroutine dfupdi_nm_pos2 ( field, ks, ke, gdp )
     !
     itag = 2
     call dfsendi_nm_pos2 ( field, work, worksize, ks, ke, request, itag, gdp )
-    call dfwaiti_nm_pos2 ( field, work, worksize, ks, ke, request, itag, gdp )
+    call dfwaiti_nm_pos2 ( field, work, worksize, ks, ke, request, itag, i(kcs), gdp )
     !
     deallocate(work)
-
 end subroutine dfupdi_nm_pos2

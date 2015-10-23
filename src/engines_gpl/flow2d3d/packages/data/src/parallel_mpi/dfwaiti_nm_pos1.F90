@@ -1,32 +1,32 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-subroutine dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
+subroutine dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, tag, kcs, gdp )
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2015.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -47,9 +47,6 @@ subroutine dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
 !      receive next array and store in WORK
 !      store the received data
 !
-!   Jan Thorbecke
-!   June 2009
-!
 !!--declarations----------------------------------------------------------------
     use precision
 #ifdef HAVE_MPI
@@ -67,8 +64,9 @@ subroutine dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                                        , intent(in)    :: ke           ! last index in vertical direction
     integer                                        , intent(in)    :: ks           ! first index in vertical direction
     integer                                        , intent(in)    :: tag          ! unique tag
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)     , intent(in)    :: kcs          !  Description and declaration in esm_alloc_int.f90
     integer                                        , intent(inout) :: request(4,2) ! MPI communication handle (should be inout, becaused it's defined that way in mpi_wait)
-    integer                                        , intent(in)    :: worksize     ! 
+    integer                                        , intent(in)    :: worksize     !
     integer, dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field        ! real array for which halo values must
     integer, dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
 !
@@ -143,7 +141,9 @@ subroutine dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
              n                 = mod(iblkad(istart+novlu+j)-1,gdp%d%nmax) + 1
              m                 = ((iblkad(istart+novlu+j)-1)/gdp%d%nmax)+1
              indxddb           = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
-             field(indxddb, k) = work((k-ks)*novlu+j, inb, 2)
+             if (kcs(indxddb) /= 2) then
+                field(indxddb, k) = work((k-ks)*novlu+j, inb, 2)
+             endif
           enddo
        enddo
     enddo

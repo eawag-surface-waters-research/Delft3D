@@ -70,6 +70,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
     integer, external     :: newlun
     integer, dimension(4) :: ival   ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
     logical               :: outsd  ! indicating whether all dry points are outside subdomain (.TRUE.) or not (.FALSE.)
+    logical               :: onParbndIsInside
     integer, pointer      :: mfg
     integer, pointer      :: nfg
 !
@@ -77,6 +78,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
 !
     mfg => gdp%gdparall%mfg
     nfg => gdp%gdparall%nfg
+    onParbndIsInside = .true.
     ! test file existence, if so read
     !
     lfile = len(fildry)
@@ -113,7 +115,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
           !
           ! Note: for single domain runs, outsd = .FALSE., i.e. dry points are completely inside domain
           !
-          call adjlin (ival,outsd,gdp%d%mmax,gdp%d%nmaxus)
+          call adjlin (ival, outsd, gdp%d%mmax, gdp%d%nmaxus, onParbndIsInside)
           if ( .not. outsd ) then
              imnd = imnd + 1
              write (lundry) (ival(m), m = 1, 4)
@@ -156,7 +158,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
           !
           ! Note: for single domain runs, outsd = .FALSE., i.e. dry points are completely inside domain
           !
-          call adjlin (ival,outsd,gdp%d%mmax,gdp%d%nmaxus)
+          call adjlin (ival, outsd, gdp%d%mmax, gdp%d%nmaxus, onParbndIsInside)
           if ( .not. outsd ) then
              imnd = imnd + 1
              write (lundry) (ival(m), m = 1, 4)

@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-subroutine dfwaitr_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
+subroutine dfwaitr_nm_pos1 ( field, work, worksize, ks, ke, request, tag, kcs, gdp )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2015.
@@ -47,27 +47,24 @@ subroutine dfwaitr_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
 !      receive next array and store in WORK
 !      store the received data
 !
-!
 !!--declarations----------------------------------------------------------------
     use precision
 #ifdef HAVE_MPI
     use mpi
 #endif
-    use globaldata
     use dfparall
+    use globaldata
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
+    type(globdat), target    :: gdp
 !
 ! Global variables
 !
     integer                                         , intent(in)    :: ke           ! last index in vertical direction
     integer                                         , intent(in)    :: ks           ! first index in vertical direction
     integer                                         , intent(in)    :: tag          ! unique tag
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)    :: kcs          !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(inout) :: request(4,2) ! MPI communication handle (should be inout because mpi_wait is inout)
     integer                                         , intent(in)    :: worksize     !
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field        ! real array for which halo values must
@@ -144,7 +141,9 @@ subroutine dfwaitr_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
              n                 = mod(iblkad(istart+novlu+j)-1,gdp%d%nmax) + 1
              m                 = ((iblkad(istart+novlu+j)-1)/gdp%d%nmax)+1
              indxddb           = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
-             field(indxddb, k) = work((k-ks)*novlu+j, inb, 2)
+             if (kcs(indxddb) /= 2) then
+                field(indxddb, k) = work((k-ks)*novlu+j, inb, 2)
+             endif
           enddo
        enddo
     enddo

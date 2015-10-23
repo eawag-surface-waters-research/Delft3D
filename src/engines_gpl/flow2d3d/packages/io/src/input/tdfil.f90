@@ -78,6 +78,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     integer               :: nlook  ! Help var.: nr. of data to look for in the MD-file 
     integer, dimension(4) :: ival   ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
     logical               :: outsd  ! indicating whether a line of thin dams is outside subdomain (.TRUE.) or not (.FALSE.)
+    logical               :: onParbndIsInside
     character(1)          :: dirtd  ! Velocity points on which the thin dams have been specified (U or V) 
     character(132)        :: rec132 ! Standard rec. length in an attribute file (132) 
 !
@@ -90,6 +91,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     lenc  = 1
     nlook = 4
     idef  = 0
+    onParbndIsInside = .true.
     !
     ! test file existence, if so read
     !
@@ -126,7 +128,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
           !
           ! Note: for single domain runs, outsd = .FALSE., i.e. thin dams are completely inside domain
           !
-          call adjlin (ival,outsd,gdp%d%mmax,gdp%d%nmaxus)
+          call adjlin (ival, outsd, gdp%d%mmax, gdp%d%nmaxus, onParbndIsInside)
           if ( .not. outsd ) then
              imnt = imnt + 1
              write (luntd) (ival(m), m = 1, 4), dirtd
@@ -196,7 +198,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
           !
           ! Note: for single domain runs, outsd = .FALSE., i.e. thin dams are completely inside domain
           !
-          call adjlin (ival,outsd,gdp%d%mmax,gdp%d%nmaxus)
+          call adjlin (ival, outsd, gdp%d%mmax, gdp%d%nmaxus, onParbndIsInside)
           if ( .not. outsd ) then
              imnt = imnt + 1
              write (luntd) (ival(m), m = 1, 4), dirtd

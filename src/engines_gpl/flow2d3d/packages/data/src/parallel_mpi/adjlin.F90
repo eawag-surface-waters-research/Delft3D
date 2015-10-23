@@ -1,4 +1,4 @@
-subroutine adjlin ( ival, outside, mmax, nmax )
+subroutine adjlin ( ival, outside, mmax, nmax, onParbndIsInside )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -74,6 +74,7 @@ subroutine adjlin ( ival, outside, mmax, nmax )
 !
 !
 !!--declarations----------------------------------------------------------------
+    use dfparall
     implicit none
 !
 ! Global variables
@@ -83,6 +84,10 @@ subroutine adjlin ( ival, outside, mmax, nmax )
     integer, intent(in)                  :: nmax    ! number of gridpoints in the y-direction
     logical, intent(out)                 :: outside ! true if piece of line is fully outside subdomain
                                                     ! false if piece of line is partly or fully inside subdomain
+    logical, intent(in)                  :: onParbndIsInside ! true : structure entirely on (internal) partition boundary is marked as being inside
+                                                             !        (default)
+                                                             ! false: structure entirely on (internal) partition boundary is marked as being outside
+                                                             !        needed for openboundaries
 !
 ! Local variables
 !
@@ -265,6 +270,46 @@ subroutine adjlin ( ival, outside, mmax, nmax )
                       enddo
                    endif
                 endif
+             endif
+          endif
+       endif
+    endif
+    !
+    ! Default: onParbndIsInside = true:
+    !          When this item is exactly on the partition boundary, it is
+    !          marked as being inside
+    ! Open boundaries: onParbndIsInside = false:
+    !          An open boundary exactly on the partition boundary will go
+    !          wrong when the active cells (kcs=1) adjecent to the open boundary
+    !          are in another partition. In case the active cells are in the
+    !          current partition, it will not harm to remove the open boundary, because
+    !          it's located in the halo of this partition: data will be copied from the neighbouring partition.
+    if (.not.onParbndIsInside) then
+       if (inode > 1) then
+          ! Check left/lower partion boundaries
+          if (idir == 1) then
+             ! n=1 is a partition boundary
+             if (n1==n2 .and. n1<2) then
+                outsdf = .true.
+             endif
+          else if (idir == 2) then
+             ! m=1 is a partition boundary
+             if (m1==m2 .and. m1<2) then
+                outsdf = .true.
+             endif
+          endif
+       endif
+       if (inode < nproc) then
+          ! Check right/upper partion boundaries
+          if (idir == 1) then
+             ! n=nmax is a partition boundary
+             if (n1==n2 .and. n1>nmax-1) then
+                outsdf = .true.
+             endif
+          else if (idir == 2) then
+             ! m=mmax is a partition boundary
+             if (m1==m2 .and. m1>mmax-1) then
+                outsdf = .true.
              endif
           endif
        endif

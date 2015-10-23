@@ -150,6 +150,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     logical               :: lerror ! Flag=TRUE if a local error is encountered 
     logical               :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     logical               :: outsd  ! indicating whether all dry/thin dam points are outside subdomain (.TRUE.) or not (.FALSE.)
+    logical               :: onParbndIsInside
     character(1)          :: cdef   ! Default value when CVAR not found 
     character(1)          :: cval   ! Help variable 
     character(11)         :: fmtdef ! Default file format (usually=blank) 
@@ -203,6 +204,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        ival(i) = 0
     enddo
     cval = ' '
+    onParbndIsInside = .true.
     !
     ! define length of runid and put in fixed size array
     ! size is tested in iniid
@@ -424,7 +426,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           !
           ! Note: for single domain runs, outsd = .FALSE., i.e. dry points are completely inside domain
           !
-          call adjlin (ival,outsd,mmax,nmaxus)
+          call adjlin (ival, outsd, mmax, nmaxus, onParbndIsInside)
           mndry(1, idry) = ival(1)
           mndry(2, idry) = ival(2)
           mndry(3, idry) = ival(3)
@@ -622,7 +624,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           !
           ! Note: for single domain runs, outsd = .FALSE., i.e. thin dams are completely inside domain
           !
-          call adjlin (ival,outsd,mmax,nmaxus)
+          call adjlin (ival, outsd, mmax, nmaxus, onParbndIsInside)
           mntd(1, itd) = ival(1)
           mntd(2, itd) = ival(2)
           mntd(3, itd) = ival(3)

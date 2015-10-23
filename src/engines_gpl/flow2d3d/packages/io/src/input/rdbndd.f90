@@ -130,6 +130,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                                     :: newkw    ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     logical                                     :: nodef    ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     logical                                     :: outsd    ! indicating whether boundary opening is outside subdomain (.TRUE.) or not (.FALSE.)
+    logical                                     :: onParbndIsInside
     real(fp)                                    :: rdef     ! Help var. containing default va- lue(s) for real variable 
     real(fp)      , dimension(4)                :: rval     ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
     real(fp)      , dimension(:), allocatable   :: rtemp    ! work array to store alpha temporarily
@@ -586,7 +587,8 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! check if boundary opening is fully (.TRUE.) or partly (.FALSE.) outside subdomain
           !
-          call adjlin (ival,outsd,mmax,nmaxus)
+          onParbndIsInside = .false.
+          call adjlin (ival, outsd, mmax, nmaxus, onParbndIsInside)
           !
           if (.not.outsd) then
              !

@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-subroutine dfwaitd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
+subroutine dfwaitd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, kcs, gdp )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2015.
@@ -47,9 +47,6 @@ subroutine dfwaitd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
 !      receive next array and store in WORK
 !      store the received data
 !
-!   Jan Thorbecke
-!   June 2009
-!
 !!--declarations----------------------------------------------------------------
     use precision
 #ifdef HAVE_MPI
@@ -67,6 +64,7 @@ subroutine dfwaitd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                                         , intent(in)    :: ke           ! last index in vertical direction
     integer                                         , intent(in)    :: ks           ! first index in vertical direction
     integer                                         , intent(in)    :: tag          ! unique tag
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)    :: kcs          !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(inout) :: request(4,2) ! MPI communication handle (should be inout because it's passed to inout mpi_wait)
     integer                                         , intent(in)    :: worksize     !
     real(hp), dimension(ks:ke,gdp%d%nmlb:gdp%d%nmub), intent(inout) :: field        ! real array for which halo values must
@@ -97,8 +95,8 @@ subroutine dfwaitd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
 !
 !! executable statements -------------------------------------------------------
 !
-    iblkad => gdp%gdparall%iblkad
     lundia => gdp%gdinout%lundia
+    iblkad => gdp%gdparall%iblkad
     !
     if (.not.parll) return
     !
@@ -143,7 +141,9 @@ subroutine dfwaitd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
              n                 = mod(iblkad(istart+novlu+j)-1,gdp%d%nmax) + 1
              m                 = ((iblkad(istart+novlu+j)-1)/gdp%d%nmax)+1
              indxddb           = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
-             field(k,indxddb) = work((k-ks)*novlu+j, inb, 2)
+             if (kcs(indxddb) /= 2) then
+                field(k,indxddb) = work((k-ks)*novlu+j, inb, 2)
+             endif
           enddo
        enddo
     enddo
