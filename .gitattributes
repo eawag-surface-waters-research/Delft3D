@@ -4770,6 +4770,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/getnormpos.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/getsubfields.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gettimezone.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/getvalstr.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/gmsh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/grib_disp.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/grib_find.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gribfil.m -text
