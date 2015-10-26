@@ -8,6 +8,7 @@ stocfl,stocsu,stocsc
 "dDumVarSal","FrFlow    ",   0.00000
 "dDumVarSal","SalBnd    ",   0.00000
 "dDumRestim","Continuity",   0.00000
+"dDumVerDis","OXY       ",   0.00000
 "dDumHorDis","OXY       ",   0.00000
 "dDumHorDiV","Continuity",   0.00000
 "dDumHorDiV","OXY       ",   0.00000
