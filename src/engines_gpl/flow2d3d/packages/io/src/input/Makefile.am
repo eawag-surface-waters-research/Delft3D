@@ -14,11 +14,14 @@ noinst_LTLIBRARIES = libIOInput.la
 
 #-------------------------------------------------------------------------------
 #Includes
+AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
+
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
+        -I$(NETCDFROOT)/include \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_io/src \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \

@@ -77,13 +77,6 @@ AM_FFLAGS = \
 
 
 #-------------------------------------------------------------------------------
-#   NetCDF
-AM_FCFLAGS+=${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
-# Manualy add the netcdff (fortran dll), bug in pkg-config file is not fixed until in NetCDF 4.4 HEAD
-LIBS+=${NETCDF_LIBS} ${NETCDF_FORTRAN_LIBS} -lnetcdff
-
-
-#-------------------------------------------------------------------------------
 #   (disabled) LEX and YACC flags
 
 #AM_LFLAGS += -L

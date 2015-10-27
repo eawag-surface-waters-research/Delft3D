@@ -14,12 +14,15 @@ noinst_LTLIBRARIES = libIOOutput.la
 
 #-------------------------------------------------------------------------------
 #Includes
+AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
+
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
+        -I$(NETCDFROOT)/include \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
