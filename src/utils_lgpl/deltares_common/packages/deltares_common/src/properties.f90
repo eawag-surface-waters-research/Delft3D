@@ -37,6 +37,7 @@ module properties
     implicit none
     !
     integer, private, parameter                   :: max_length = 256
+    integer, private, parameter                   :: max_line   = maxlen
     integer, private, parameter                   :: dp = kind(1.0d00)
     !
     interface max_keylength
@@ -201,9 +202,9 @@ subroutine prop_inifile_pointer(lu, tree)
     logical               :: filestatus
     logical               :: multiple_lines
     character(max_length) :: key
-    character(max_length) :: line
-    character(max_length) :: linecont !< Placeholder for continued line
-    character(max_length) :: value
+    character(max_line) :: line
+    character(max_line) :: linecont !< Placeholder for continued line
+    character(max_line) :: value
     type(tree_data), pointer  :: achapter
     type(tree_data), pointer  :: anode
     integer               :: num_hash
@@ -438,7 +439,7 @@ subroutine prop_tekalfile_pointer(lu, tree)
     integer, dimension(2) :: blockdims
     real   , dimension(:),allocatable :: arow
     logical               :: filestatus
-    character(max_length) :: line
+    character(max_line) :: line
     type(tree_data), pointer  :: atekalblock
     type(tree_data), pointer  :: anode
     !
@@ -997,7 +998,7 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
     character(80)             :: nodename
     character(255)            :: chapter
     character(255)            :: key
-    character(max_length)     :: localvalue
+    character(max_line)       :: localvalue
     type(tree_data), pointer  :: thechapter
     type(tree_data), pointer  :: anode
     !
@@ -1102,6 +1103,130 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
         success = success_
     end if
 end subroutine prop_get_string
+
+! --------------------------------------------------------------------
+!   Subroutine: prop_get_string
+!   Author:     Jaap Zeekant
+!   Purpose:    Get array of strings separated by sepChar (default ';')
+!   Context:    Used by applications
+!   Summary:    Go through the list of props to check the
+!               chapter. When the right chapter is found, check
+!               for the key.
+!               Only set the value if the key matches
+!   Arguments:
+!   chapter     Name of the chapter (case-insensitive) or "*" to get any key
+!   key         Name of the key (case-insensitive)
+!   value       Value of the key (not set if the key is not found,
+!               so you can set a default value)
+!   valuelength lenjth of array
+!   success     Whether successful or not
+!   sepChar     Optional Separation Character (Default ';')
+!
+! --------------------------------------------------------------------
+!
+subroutine prop_get_strings(tree, chapterin, keyin, valuelength, value, success, spChar)
+
+   implicit none
+   !
+   ! Parameters
+   !
+   type(tree_data), pointer                          :: tree
+   character(*),intent(in)                           :: chapterin
+   character(*),intent(in)                           :: keyin
+   integer, intent(in)                               :: valuelength
+   character*(*), intent(out), dimension(:)          :: value
+   logical, intent (out)                             :: success
+   character(1), optional                            :: spChar
+   !
+   ! Local variables
+   !
+   logical                   :: ignore
+   logical                   :: success_
+   integer                   :: free_space ! Length of parameter "value" that is not written yet
+   integer                   :: i          ! Childnode number with node_name = key
+                                          ! All following child nodes with node_name = " " are also added
+   integer                   :: k
+   character(80)             :: nodename
+   character(255)            :: chapter
+   character(255)            :: key
+   character(1)              :: sepChar
+   character(max_line)       :: localvalue
+   type(tree_data), pointer  :: thechapter
+   type(tree_data), pointer  :: anode
+   integer                   :: icount
+   integer                   :: ipos
+   !
+   !! executable statements -------------------------------------------------------
+   !
+   success_ = .false.
+   chapter = chapterin
+   key     = keyin
+   call lowercase(chapter,999)
+   call lowercase(key,999)
+   localvalue = ' '
+    
+   ! Determine separation character
+   if (present(spChar)) then
+      sepChar = spChar
+   else
+      sepChar = ';'
+   endif
+   !
+   ! Handle chapters
+   !
+   ignore = chapter(1:1)=='*' .or. len_trim(chapter) == 0
+   !
+   ! Find the chapter first
+   !
+   thechapter => tree
+   if (.not.ignore) then
+      call tree_get_node_by_name(tree, trim(chapter), thechapter)
+      if ( .not. associated(thechapter) ) then
+         thechapter => tree
+      endif
+   endif
+   !
+   ! Find the key
+   ! To do:
+   !    Remove leading blanks
+   ! Note:
+   !    Work around an apparent problem with the SUN Fortran 90
+   !    compiler
+   !
+   call tree_get_node_by_name(thechapter, trim(key), anode, i)
+
+   if ( associated(anode) ) then
+
+      call tree_get_data_string( anode, localvalue, success)
+      if (.not. success) return
+      localvalue = trim(localvalue)
+       
+      ipos   = scan(localvalue, sepChar)
+      icount = 0
+       
+      do while (ipos > 0 .and. icount < valuelength)
+           
+         icount = icount + 1
+
+         value(icount) = trim(localvalue(1:ipos - 1))
+           
+         localvalue = localvalue(ipos+1:)
+           
+         ipos = scan(localvalue, sepChar)
+         
+         ! Pickup the last one
+         if (ipos == 0 .and. icount < valuelength) then
+            icount = icount + 1
+            value(icount) = trim(localvalue)
+         endif
+           
+      enddo
+      
+   else
+      success = .false.
+   endif
+
+end subroutine prop_get_strings
 
 subroutine visit_tree(tree,direction)
    implicit none
@@ -1226,7 +1351,7 @@ subroutine prop_get_integers(tree   ,chapter   ,key       ,value     ,valuelengt
     character(12)  :: intchars = '0123456789-+'
     character(20)  :: fmt
     character(255) :: avalue
-    character(255) :: prop_value
+    character(max_line) :: prop_value
     !
     !! executable statements -------------------------------------------------------
     !
@@ -1364,7 +1489,7 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
     character(15)   :: realchars = '0123456789-+.eE'
     character(20)   :: fmt
     character(255)  :: avalue
-    character(1000) :: prop_value
+    character(max_line) :: prop_value
     logical         :: digitfound
     !
     !! executable statements -------------------------------------------------------
@@ -1515,7 +1640,7 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
     character(17)   :: realchars = '0123456789-+.eEdD'
     character(20)   :: fmt
     character(255)  :: avalue
-    character(1000) :: prop_value
+    character(max_line) :: prop_value
     logical         :: digitfound
     !
     !! executable statements -------------------------------------------------------
@@ -1618,7 +1743,7 @@ subroutine prop_get_logical(tree  ,chapter   ,key       ,value     ,success)
     integer :: vallength
     character(100) :: falsity
     character(100) :: truth
-    character(max_length) :: prop_value
+    character(max_line) :: prop_value
     !
     data truth/    &
      & '|1|Y|y|YES|yes|Yes|T|t|TRUE|true|True|J|j|JA|Ja|ja|W|w|WAAR|Waar|waar|'/

@@ -79,7 +79,7 @@ module m_hash_search
       integer                                  :: inr
       integer                                  :: next
       integer                                  :: ierr
-      character(len=idLen)                      :: locid
+      character(len=idLen)                     :: locid
       integer ires
       
       call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)

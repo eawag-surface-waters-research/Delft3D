@@ -74,7 +74,7 @@ module TREE_STRUCTURES
    !
    ! Auxiliary variable
    !
-   integer, parameter                            :: maxlen = 300
+   integer, public, parameter                    :: maxlen = 100000
    integer,save                                  :: traverse_level = 0
 
    !
