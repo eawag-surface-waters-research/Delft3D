@@ -202,12 +202,14 @@ subroutine prop_inifile_pointer(lu, tree)
     logical               :: filestatus
     logical               :: multiple_lines
     character(max_length) :: key
-    character(max_line) :: line
-    character(max_line) :: linecont !< Placeholder for continued line
-    character(max_line) :: value
-    type(tree_data), pointer  :: achapter
-    type(tree_data), pointer  :: anode
-    integer               :: num_hash
+    
+    character(max_line), save   :: line
+    character(max_line), save   :: linecont !< Placeholder for continued line
+    character(max_line), save   :: value
+    
+    type(tree_data), pointer    :: achapter
+    type(tree_data), pointer    :: anode
+    integer                     :: num_hash
 
     !
     !! executable statements -------------------------------------------------------
@@ -439,7 +441,7 @@ subroutine prop_tekalfile_pointer(lu, tree)
     integer, dimension(2) :: blockdims
     real   , dimension(:),allocatable :: arow
     logical               :: filestatus
-    character(max_line) :: line
+    character(max_line), save :: line
     type(tree_data), pointer  :: atekalblock
     type(tree_data), pointer  :: anode
     !
@@ -998,7 +1000,7 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
     character(80)             :: nodename
     character(255)            :: chapter
     character(255)            :: key
-    character(max_line)       :: localvalue
+    character(max_line), save :: localvalue
     type(tree_data), pointer  :: thechapter
     type(tree_data), pointer  :: anode
     !
@@ -1150,7 +1152,7 @@ subroutine prop_get_strings(tree, chapterin, keyin, valuelength, value, success,
    character(255)            :: chapter
    character(255)            :: key
    character(1)              :: sepChar
-   character(max_line)       :: localvalue
+   character(max_line), save :: localvalue
    type(tree_data), pointer  :: thechapter
    type(tree_data), pointer  :: anode
    integer                   :: icount
@@ -1351,7 +1353,7 @@ subroutine prop_get_integers(tree   ,chapter   ,key       ,value     ,valuelengt
     character(12)  :: intchars = '0123456789-+'
     character(20)  :: fmt
     character(255) :: avalue
-    character(max_line) :: prop_value
+    character(max_line), save :: prop_value
     !
     !! executable statements -------------------------------------------------------
     !
@@ -1489,7 +1491,7 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
     character(15)   :: realchars = '0123456789-+.eE'
     character(20)   :: fmt
     character(255)  :: avalue
-    character(max_line) :: prop_value
+    character(max_line), save :: prop_value
     logical         :: digitfound
     !
     !! executable statements -------------------------------------------------------
@@ -1640,7 +1642,7 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
     character(17)   :: realchars = '0123456789-+.eEdD'
     character(20)   :: fmt
     character(255)  :: avalue
-    character(max_line) :: prop_value
+    character(max_line), save :: prop_value
     logical         :: digitfound
     !
     !! executable statements -------------------------------------------------------
@@ -1743,7 +1745,7 @@ subroutine prop_get_logical(tree  ,chapter   ,key       ,value     ,success)
     integer :: vallength
     character(100) :: falsity
     character(100) :: truth
-    character(max_line) :: prop_value
+    character(max_line), save :: prop_value
     !
     data truth/    &
      & '|1|Y|y|YES|yes|Yes|T|t|TRUE|true|True|J|j|JA|Ja|ja|W|w|WAAR|Waar|waar|'/
