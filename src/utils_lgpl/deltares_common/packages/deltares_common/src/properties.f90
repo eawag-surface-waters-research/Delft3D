@@ -37,7 +37,7 @@ module properties
     implicit none
     !
     integer, private, parameter                   :: max_length = 256
-    integer, private, parameter                   :: max_line   = 100000
+    integer, private, parameter                   :: max_line   = maxlen
     integer, private, parameter                   :: dp = kind(1.0d00)
     !
     interface max_keylength
