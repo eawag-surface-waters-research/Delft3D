@@ -123,6 +123,70 @@ module m_hash_search
       
    end subroutine hashfill
  
+   subroutine hashfill_init(hashlist, count)
+   
+      type(t_hashlist), intent(inout) :: hashlist
+      integer, intent(in) :: count
+      
+      integer                                  :: ierr
+      
+      call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)
+      call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
+    
+      call realloc(hashlist%hashnext, count, stat = ierr)
+      call aerr('hashnext(id_count)', ierr, count)
+      
+      hashlist%hashfirst = 0
+      hashlist%hashnext  = 0
+   end subroutine hashfill_init
+   
+   subroutine hashfill_inc(hashlist, ind)
+ 
+      ! Module description: Fill hashing arrays
+      use string_module
+ 
+      ! Global Variables
+      type(t_hashlist), intent(inout) :: hashlist
+      integer, intent(in) :: ind
+
+      ! Local Variables
+      integer                                  :: icount
+      integer                                  :: hashcode
+      integer                                  :: inr
+      integer                                  :: next
+      integer                                  :: ierr
+      character(len=idLen)                     :: locid
+      integer ires
+      
+
+      locid = hashlist%id_list(ind)
+      call str_upper(locid)
+      
+      hashcode = hashfun(locid, hashlist%hashcon)
+  
+      !      write(*,*) ' Hashfill ', id,' ', hashcode
+  
+      if (hashlist%hashfirst(hashcode) .eq. 0) then
+         
+         hashlist%hashfirst(hashcode) = icount
+         hashlist%hashnext(icount)    = 0
+        
+      else
+         
+         inr  = hashlist%hashfirst(hashcode)
+         next = hashlist%hashnext(inr)
+        
+         do while (next .ne. 0)
+            inr  = next
+            next = hashlist%hashnext (inr)
+         enddo
+        
+         hashlist%hashnext(inr) = icount
+         
+      endif
+
+   end subroutine hashfill_inc
+
  !  inode = hashsearch(node_local_id, nodefirst, nodenext, node_id)
    
    integer function hashsearch(hashlist, id)
