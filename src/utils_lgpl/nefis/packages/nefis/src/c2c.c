@@ -975,7 +975,8 @@ DLLEXPORT BInt4 INQUIRE_CELL        ( BInt4 * fd             ,
         }
         for ( i=0; i<cel_num_dim; i++ )
         {
-            strcpy( el_names[i], &elm_names[i*(MAX_NAME+1)] );
+            strncpy( el_names[i], &elm_names[i*(MAX_NAME+1)], MAX_NAME );
+            el_names[i][MAX_NAME] = '\0';
         }
         *cl_num_dim = cel_num_dim;
     }
@@ -1035,7 +1036,8 @@ DLLEXPORT BInt4 INQUIRE_CELL2( BInt4 * fd             ,
 
         for ( i=0; i<cel_num_dim; i++ )
         {
-            strcpy( *(el_names[i]), &elm_names[i*(MAX_NAME+1)] );
+            strncpy( *(el_names[i]), &elm_names[i*(MAX_NAME+1)], MAX_NAME );
+            el_names[i][MAX_NAME] = '\0';
         }
         *cl_num_dim = cel_num_dim;
     }
@@ -1095,7 +1097,8 @@ DLLEXPORT BInt4 INQUIRE_CELL3( BInt4 * fd             ,
 
         for ( i=0; i<cel_num_dim; i++ )
         {
-            strcpy( el_names+i*(MAX_NAME+1), &elm_names[i*(MAX_NAME+1)] );
+            strncpy( el_names+i*(MAX_NAME+1), &elm_names[i*(MAX_NAME+1)], MAX_NAME );
+            (el_names + i*(MAX_NAME + 1))[MAX_NAME] = '\0';
         }
         *cl_num_dim = cel_num_dim;
     }
