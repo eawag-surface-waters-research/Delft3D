@@ -109,7 +109,7 @@ subroutine secrhs(s0        ,s1        ,dps       ,u1        ,v1        , &
     integer        :: nmd
     real(fp)       :: alpha
     real(fp)       :: bendeq  ! Bend equilibrium for spiral motion 
-    real(fp)       :: chezy   ! Chezy coefficient at zeta point 
+    real(fp)       :: czosg   ! Chezy/sqrt(ag) coefficient at zeta point 
     real(fp)       :: corieq  ! Coriolis equilibrium for spiral m. 
     real(fp)       :: geta2
     real(fp)       :: gksi2
@@ -177,18 +177,15 @@ subroutine secrhs(s0        ,s1        ,dps       ,u1        ,v1        , &
           endif
           bendeq = umod*h0old*riv
           corieq = 0.5*fcorio(nm)*h0old
-          chezy = (kfu(nm)*cfurou(nm, 1) + kfu(nmd)*cfurou(nmd, 1) + kfv(nm)    &
+          czosg = (kfu(nm)*cfurou(nm, 1) + kfu(nmd)*cfurou(nmd, 1) + kfv(nm)    &
                 & *cfvrou(nm, 1) + kfv(ndm)*cfvrou(ndm, 1))                     &
                 & /(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
           !
           !---------ALPHA should be >= .5 else SOURC & SINK become < 0.
           !         because TAH0 = 0.5*(1.-2.*ALPHA)*H0 should be > 0
           !
-          if (chezy>chzmin) then
-             alpha = sqrt(ag)/(vonkar*chezy)
-          else
-             alpha = sqrt(ag)/(vonkar*chzmin)
-          endif
+          czosg = max(czosg, chzmin/sqrt(ag))
+          alpha = 1.0_fp/(vonkar*czosg)
           if (alpha>=0.5) then
              ierr = ierr + 1
           endif

@@ -113,8 +113,7 @@ subroutine vihsec(u         ,v         ,guu       ,gvu       ,gvv       , &
     real(fp)                       :: alpha
     real(fp)                       :: beta
     real(fp)                       :: betast
-    real(fp)                       :: chezy                ! Chezy coefficient at zeta point 
-    real(fp)                       :: chezyr
+    real(fp)                       :: czosg                ! Chezy/sqrt(ag) coefficient at zeta point 
     real(fp)                       :: dgdx
     real(fp)                       :: dgdy
     real(fp)                       :: dgdyl
@@ -160,9 +159,9 @@ subroutine vihsec(u         ,v         ,guu       ,gvu       ,gvv       , &
           uuu = 0.5*(u(nm, k) + u(nmd, k))
           vvv = 0.5*(v(nm, k) + v(ndm, k))
           umod = max(1.E-8_fp, sqrt(uuu*uuu + vvv*vvv))
-          chezy = 0.5*(cfurou(nm, 1) + cfurou(nmd, 1))
-          chezyr = max(chezy, chzmin)
-          alpha = sqrt(ag)/(vonkar*chezyr)
+          czosg = 0.5*(cfurou(nm, 1) + cfurou(nmd, 1))
+          czosg = max(czosg, chzmin/sqrt(ag))
+          alpha = 1.0_fp/(vonkar*czosg)
           betast = betac*(5.0*alpha - 15.6*alpha*alpha + 37.5*alpha*alpha*alpha)
           beta = betast*r0(nm, k, lsecfl)/umod
           !
@@ -190,10 +189,10 @@ subroutine vihsec(u         ,v         ,guu       ,gvu       ,gvv       , &
           if (kenmu>0) uuu = (kfu(nm)*u(nm, k) + kfu(num)*u(num, k))/kenmu
           if (kenmv>0) vvv = (kfv(nm)*v(nm, k) + kfv(nmu)*v(nmu, k))/kenmv
           umod = max(1.E-8_fp, sqrt(uuu*uuu + vvv*vvv))
-          chezy = (kfu(nm)*cfurou(nm, 1) + kfu(num)*cfurou(num, 1) + kfv(nm)    &
+          czosg = (kfu(nm)*cfurou(nm, 1) + kfu(num)*cfurou(num, 1) + kfv(nm)    &
                 & *cfvrou(nm, 1) + kfv(nmu)*cfvrou(nmu, 1))/(kenmu + kenmv)
-          chezyr = max(chezy, chzmin)
-          alpha = sqrt(ag)/(vonkar*chezyr)
+          czosg = max(czosg, chzmin/sqrt(ag))
+          alpha = 1.0_fp/(vonkar*czosg)
           betast = betac*(5.0*alpha - 15.6*alpha*alpha + 37.5*alpha*alpha*alpha)
           rsecfl = (kfu(nm)*(r0(nm, k, lsecfl) + r0(nmu, k, lsecfl)) + kfu(num) &
                  & *(r0(num, k, lsecfl) + r0(numu, k, lsecfl)) + kfv(nm)        &
