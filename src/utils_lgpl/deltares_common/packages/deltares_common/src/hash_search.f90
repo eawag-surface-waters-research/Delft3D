@@ -8,6 +8,8 @@ module m_hash_search
    public hashfill
    public hashsearch
    public dealloc
+   public hashsearch_or_add
+   public hashfill_init
    
    interface dealloc
       module procedure deallochashtable
@@ -138,6 +140,7 @@ module m_hash_search
       
       hashlist%hashfirst = 0
       hashlist%hashnext  = 0
+      hashlist%id_count  = 0
    end subroutine hashfill_init
    
    subroutine hashfill_inc(hashlist, ind)
@@ -195,7 +198,7 @@ module m_hash_search
       use string_module
       ! Global Variables
       character(len=*), intent(in)           :: id
-      type(t_hashlist), intent(inout)        :: hashlist
+      type(t_hashlist), intent(in)           :: hashlist
       
       ! Local Variables
       character(len=idLen)                             :: locid
@@ -240,5 +243,82 @@ module m_hash_search
       hashsearch = ifound
  
    end function hashsearch
+   
+   integer function hashsearch_or_add(hashlist, id)
+ 
+      ! Module description: Search in hashing arrays
+      use string_module
+      ! Global Variables
+      character(len=*), intent(in)           :: id
+      type(t_hashlist), intent(inout)        :: hashlist
+      
+      ! Local Variables
+      character(len=idLen)                             :: locid
+      character(len=idLen)                             :: idtest
+      integer                                         :: hashcode
+      integer                                         :: inr
+      integer                                         :: next
+      integer                                         :: ifound
+ 
+      ifound = -1
+      locid  = id
+      call str_upper(locid)
+      
+      hashcode = hashfun(locid, hashlist%hashcon)
+ 
+      !   write(*,*) ' Hashsearch', id, hashcode
+ 
+      if (hashlist%hashfirst(hashcode) > 0) then
+ 
+        inr  = hashlist%hashfirst(hashcode)
+        next = inr
+        
+        do while (next .ne. 0)
+           
+          idtest = hashlist%id_list(next)
+          call str_upper (idtest)
+          
+          if (locid .ne. idtest) then
+            inr  = next
+            next = hashlist%hashnext (inr)
+          else
+            ifound = next
+            exit
+          endif
+          
+        enddo
+        
+      else
+         ! 'Hash search failed'
+      endif
+      
+         if (ifound<0) then
+         hashlist%id_count = hashlist%id_count+1
+         hashlist%id_list(hashlist%id_count) = id
+         ifound = hashlist%id_count 
+         
+         if (hashlist%hashfirst(hashcode) .eq. 0) then
+         
+            hashlist%hashfirst(hashcode) = ifound
+            hashlist%hashnext(ifound)    = 0
+        
+         else
+         
+            inr  = hashlist%hashfirst(hashcode)
+            next = hashlist%hashnext(inr)
+        
+            do while (next .ne. 0)
+               inr  = next
+               next = hashlist%hashnext (inr)
+            enddo
+        
+            hashlist%hashnext(inr) = ifound
+         
+         endif
+      endif         
+      
+      hashsearch_or_add = ifound
+ 
+   end function hashsearch_or_add
 
 end module m_hash_search
