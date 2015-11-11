@@ -629,6 +629,10 @@
          arrlen(i_jar) = arrdm1(i_jar)*arrdm2(i_jar)*arrdm3(i_jar)
          if ( .not. l_decl ) write ( 328, 2040 ) i_jar-iasize, arrnam(i_jar), arrlen(i_jar)
          itoti = itoti + arrlen(i_jar)
+         if ( itoti .lt. 0 ) then
+            write(lunrep,2005)
+            call srstop(1)
+         endif
       enddo
 
 !     Declare memory
@@ -640,7 +644,7 @@
             namarr = arrnam(i_jar)
             if ( iarlen .gt. 0 ) then
                ip = makptr(part, namarr,iartyp ,iarlen)
-               if ( ip .eq. 0 ) then
+               if ( ip .le. 0 ) then
                   write(lunrep,2010) namarr
                   call srstop(1)
                endif
@@ -802,6 +806,7 @@
       return
 
  2000 format ( ' total integer array space: ',I8)
+ 2005 format ( ' ERROR  : integer array is too big. Unable to create pointer. ' )
  2010 format ( ' ERROR  : allocating integer array. Name   : ',A)
  2020 format ( ' Parallel processing with ',i3,' processors')
  2030 format ('  Parallel processing with ',i3,' processors')

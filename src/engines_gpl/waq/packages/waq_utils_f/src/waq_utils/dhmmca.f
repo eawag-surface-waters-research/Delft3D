@@ -219,6 +219,10 @@
          arrlen(i_car) = arrdm1(i_car)*arrdm2(i_car)*arrdm3(i_car)*5
          if ( .not. l_decl ) write ( 328, 2040 ) i_car-iasize-ijsize, arrnam(i_car), arrlen(i_car)
          itotc         = itotc + arrlen(i_car)
+         if ( itotc .lt. 0 ) then
+            write(lunrep,2005)
+            call srstop(1)
+         endif
          arrlen(i_car) = arrlen(i_car)*4
       enddo
 cjvb                                     ??lp
@@ -237,7 +241,7 @@ cjvb                                     ??lp
             namarr = arrnam(i_car)
             if ( iarlen .gt. 0 ) then
                ip = makptr(part, namarr, iartyp ,iarlen)
-               if ( ip .eq. 0 ) then
+               if ( ip .le. 0 ) then
                   write(lunrep,2010) namarr
                   call srstop(1)
                endif
@@ -267,6 +271,7 @@ cjvb
       return
 
  2000 format ( ' total character array space: ',I8)
+ 2005 format ( ' ERROR  : character array is too big. Unable to create pointer. ' )
  2010 format ( ' ERROR  : allocating character array. Name   : ',A)
  2040 format (   i4,1x,a20,i12 )
 

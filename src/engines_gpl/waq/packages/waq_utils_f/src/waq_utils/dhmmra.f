@@ -670,6 +670,10 @@
          arrlen(i_rar) = arrdm1(i_rar)*arrdm2(i_rar)*arrdm3(i_rar)
          if ( .not. l_decl ) write ( 328, 2040 ) i_rar, arrnam(i_rar), arrlen(i_rar)
          itota = itota + arrlen(i_rar)
+         if ( itota .lt. 0 ) then
+            write(lunrep,2005)
+            call srstop(1)
+         endif
       enddo
 
 !     Declare memory
@@ -681,7 +685,7 @@
             namarr = arrnam(i_rar)
             if ( iarlen .gt. 0 ) then
                ip = makptr(part, namarr,iartyp ,iarlen)
-               if ( ip .eq. 0 ) then
+               if ( ip .le. 0 ) then
                   write(lunrep,2010) namarr
                   call srstop(1)
                endif
@@ -1156,6 +1160,7 @@
 
       return
 
+ 2005 format ( ' ERROR  : real array is too big. Unable to create pointer. ' )
  2010 format ( ' ERROR  : allocating real array. Name   : ',A )
  2020 format (/' Parallel processing with ',i3,' processor(s)'/)
  2030 format ('  Parallel processing with ',i3,' processor(s)')
