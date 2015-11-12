@@ -2484,7 +2484,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & r(dfv)    ,r(dis)    ,r(hrms)   ,r(uorb)   ,r(tp)     , &
                       & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb6)  , &
                       & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
-                      & r(ubnd)   ,r(wrkb12) ,i(iwrk1)  ,r(wrka1)  ,i(iwrk2)  , &
+                      & r(ubnd)   ,i(iwrk2)  , &
                       & r(wrka2)  ,r(wrkb5)  ,i(kfsmin) ,i(kfsmn0) ,i(kfsmax) , &
                       & i(kfsmx0) ,i(kfuz1)  ,i(kfvz1)  ,r(dzs1)   ,r(wrkb13) , &
                       & r(wrkb14) ,gdp       )

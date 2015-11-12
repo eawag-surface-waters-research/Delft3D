@@ -10,7 +10,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                   & dfv       ,dis       ,hrms      ,uorb      ,tp        , &
                   & aak       ,bbk       ,cck       ,ddk       ,bdx       , &
                   & bux       ,bdy       ,buy       ,umea      ,vmea      , &
-                  & ubnd      ,pkwbt     ,kpkwbt    ,hpkwbt    ,kdismx    , &
+                  & ubnd      ,kdismx    , &
                   & hsurft    ,pkwav     ,kfsmin    ,kfsmn0    ,kfsmax    , &
                   & kfsmx0    ,kfuz1     ,kfvz1     ,dzs1      ,ueul      , &
                   & veul      ,gdp       )
@@ -128,7 +128,6 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer      , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kpkwbt
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kfuz1  !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kfvz1  !  Description and declaration in esm_alloc_int.f90
     real(fp)     , dimension(2, ltur, 0:kmax, 2, nto)                          :: ubnd   !  Description and declaration in trisol.igs
@@ -144,7 +143,6 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hpkwbt
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hsurft
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
@@ -172,7 +170,6 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bux    !  Internal work array, implicit coupling of concentration in (N,M,K) with layer concentration in (N,M+1,K)
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: buy
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: pkwbt
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: tkedis !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: tkepro !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
@@ -238,7 +235,6 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     :: h0
     real(fp)     :: hsurf
     real(fp)     :: laydep
-    real(fp)     :: pkwbt0
     real(fp)     :: pransm
     real(fp)     :: rz
     real(fp)     :: s
@@ -638,15 +634,13 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           do nm = 1, nmmax
              if (kfs(nm) == 1) then
                 pkwav(nm, kfsmin(nm)) = 0.
-                pkwbt(nm, kfsmin(nm)) = 0.
                 pkwav(nm, kfsmax(nm)) = 0.
                 !
                 do k = kfsmin(nm)+1, kfsmax(nm)-1
                    !
-                   ! Reset pkwav and pkwbt tke sources due to waves
+                   ! Reset pkwav tke sources due to waves
                    !
                    pkwav(nm, k   )       = 0.
-                   pkwbt(nm, k   )       = 0.
                    !
                    ddk(nm, k) = ddk(nm, k) + 2*(vicmol + vicww(nm, k))*bdy(nm, k)
                 enddo
@@ -671,36 +665,6 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                          ddk(nm,k)   = ddk(nm,k) + pkwav(nm, k)   
                       else
                          kdismx(nm)=k+1
-                         exit
-                      endif
-                   enddo
-                   !
-                   ! Turbulent production due wave diss. in wave boundary layer
-                   !
-                   ! Thickness boundary layer due to waves (delta) in [m], by change of definition in TAUBOT 
-                   !
-                   nmd    = nm - icx
-                   ndm    = nm - icy
-                   fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
-                   deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
-                   zw     = 0.0_fp
-                   do k = kfsmin(nm), kfsmax(nm)
-                      zw  = zw  + dzs1(nm,k) 
-                      if (zw < deltas) then
-                         !
-                         ! Production term due to waves near the bottom switched off
-                         ! Already accounted for in increased z0 (in subroutine TAUBOT)
-                         !
-                      elseif (k == kfsmax(nm)) then
-                         !
-                         ! we got to the top and haven't defined kpwbt and hpkwbt
-                         !
-                         kpkwbt(nm) = kfsmax(nm)
-                         if (deltas>h0) then  
-                            call prterr(lundia, 'P004', 'Deltas > water depth in TRATUR ')
-                         endif  
-                      else
-                         kpkwbt(nm) = k - 1
                          exit
                       endif
                    enddo
