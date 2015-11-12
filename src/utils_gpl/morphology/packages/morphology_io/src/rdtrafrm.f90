@@ -624,6 +624,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
        else
           par(10+i,l) = pardef(i)
           !
+          parfile = ' '
           if (ifrac>0 .and. associated(sed_ptr%node_name)) then
              ! try to locate parameter in sedblock
              call prop_get(sed_ptr,'Sediment',parkeyw(i),parfile)
