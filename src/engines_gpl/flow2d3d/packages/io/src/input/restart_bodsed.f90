@@ -163,7 +163,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
        goto 50
     endif
     !
-    ierror = getelt(fds , 'map-sed-series', 'BODSED', uindex, 1, &
+    ierror = getelt(fds , 'map-sed-series', elmnam, uindex, 1, &
                  & mmaxgl*nmaxgl*rst_lsedtot*4, rst_bodsed )
     if (ierror/= 0) goto 50
     !    end of master part
