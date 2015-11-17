@@ -3,6 +3,11 @@ import os
 import sys
 import shutil
 if sys.version_info<(3,0,0):
+   # To avoid problems with encoding:
+   # - Use codecs.open instead of open (Python 2.x only)
+   # - open files with encoding='utf-8' (Both Python 2.x and 3.x)
+   # - Do not use str(line) on lines read from file
+   from codecs import open as open
    from Tkinter import *
 else:
    from tkinter import *
@@ -115,7 +120,9 @@ toolsversion[2010] = "4.0"
 toolsversion[2012] = "4.0"
 toolsversion[2013] = "12.0"
 toolsversion[2014] = "12.0"
-toolsversion[2015] = "12.0"
+toolsversion[2015] = "14.0"
+toolsversion[2016] = "14.0"
+toolsversion[2017] = "14.0"
 
 #
 #
@@ -125,9 +132,9 @@ platformtoolset[2010] = ""
 platformtoolset[2012] = "    <PlatformToolset>v110</PlatformToolset>"
 platformtoolset[2013] = "    <PlatformToolset>v120</PlatformToolset>"
 platformtoolset[2014] = "    <PlatformToolset>v120</PlatformToolset>"
-platformtoolset[2015] = "    <PlatformToolset>v120</PlatformToolset>"
-platformtoolset[2016] = "    <PlatformToolset>v120</PlatformToolset>"
-platformtoolset[2017] = "    <PlatformToolset>v120</PlatformToolset>"
+platformtoolset[2015] = "    <PlatformToolset>v140</PlatformToolset>"
+platformtoolset[2016] = "    <PlatformToolset>v140</PlatformToolset>"
+platformtoolset[2017] = "    <PlatformToolset>v140</PlatformToolset>"
 
 
 #
@@ -163,32 +170,32 @@ def process_project_file(pfile):
         config_val64 = "x64"
     #
     # Put the full file contents in filin_contents
-    with open(pfile, "r") as filinhandle:
+    with open(pfile, "r", encoding='utf-8') as filinhandle:
         filin_contents = filinhandle.readlines()
     #
     # Scan the contents and rewrite the full file
     configuration = 0
-    with open(pfile, "w") as filouthandle:
+    with open(pfile, "w", encoding='utf-8') as filouthandle:
         for line in filin_contents:
             #
             # ToolsVersion
             # Skip this change when vs=0
             if vs != 0:
-                startpos = str(line).find("ToolsVersion=")
+                startpos = line.find("ToolsVersion=")
                 if startpos != -1:
-                    parts = str(line).split("\"")
+                    parts = line.split('"')
                     i = 0
                     for part in parts:
-                        if str(part).find("ToolsVersion=") != -1:
+                        if part.find("ToolsVersion=") != -1:
                             parts[i+1] = toolsversion[vs]
                         i += 1
-                    line = "\"".join(parts)
+                    line = '"'.join(parts)
             #
             # PlatformToolSet:
             # Skip this change when vs=0
             # Search for line with <CharacterSet>
             if vs != 0:
-                startpos = str(line).find("<CharacterSet>")
+                startpos = line.find("<CharacterSet>")
                 if startpos != -1:
                     #
                     # Write line and add put the PlatformToolSet stuff in line,
@@ -196,33 +203,33 @@ def process_project_file(pfile):
                     if platformtoolset[vs] != "":
                         filouthandle.write(line)
                         line = platformtoolset[vs] + "\n"
-                elif str(line).find("PlatformToolset") != -1:
+                elif line.find("PlatformToolset") != -1:
                     #
                     # Remove the original PlatformToolset line (if present)
                     continue
             #
             # config_tag, to set configuration
-            startpos = str(line).find(config_tag)
+            startpos = line.find(config_tag)
             if startpos != -1:
-                if str(line).find(config_val32) != -1:
+                if line.find(config_val32) != -1:
                     configuration = 32
-                elif str(line).find(config_val64) != -1:
+                elif line.find(config_val64) != -1:
                     configuration = 64
             #
             # IFORT_COMPILER ...
-            startpos = str(line).find("$(IFORT_COMPILER")
+            startpos = line.find("$(IFORT_COMPILER")
             if startpos != -1:
                 split_char = ";"
-                if str(line).find("oss-install") != -1:
+                if line.find("oss-install") != -1:
                     #
                     # ... in argument of oss-install
                     if ptype == "c":
-                        split_char = "\""
-                    parts = str(line).split(split_char)
+                        split_char = '"'
+                    parts = line.split(split_char)
                     added = False
                     i = 0
                     for part in parts:
-                        if str(part).find("$(IFORT_COMPILER") != -1:
+                        if part.find("$(IFORT_COMPILER") != -1:
                             if not added:
                                 key = ptype + str(ifort) + str(configuration)
                                 parts[i] = redistdir[key]
@@ -235,14 +242,14 @@ def process_project_file(pfile):
                             i += 1
                     del parts[i:]
                     line = split_char.join(parts)
-                if str(line).find("AdditionalLibraryDirectories") != -1:
+                if line.find("AdditionalLibraryDirectories") != -1:
                     #
                     # ... in specification of AdditionalLibrarieDirectories
-                    parts = str(line).split(split_char)
+                    parts = line.split(split_char)
                     added = False
                     i = 0
                     for part in parts:
-                        startpos = str(part).find("$(IFORT_COMPILER")
+                        startpos = part.find("$(IFORT_COMPILER")
                         if startpos != -1:
                             if not added:
                                 key = ptype + str(ifort) + str(configuration)
@@ -299,19 +306,19 @@ def do_work():
     projectfiles = []
     # Read sln file:
     # Put the full file contents in filin_contents
-    with open(sln, "r") as filinhandle:
+    with open(sln, "r", encoding='utf-8') as filinhandle:
         filin_contents = filinhandle.readlines()
 
     # Scan the contents and rewrite the full solution file
-    with open(sln, "w") as filouthandle:
+    with open(sln, "w", encoding='utf-8') as filouthandle:
         for line in filin_contents:
             # Search for project file references
-            pp = line.split("\"")
+            pp = line.split('"')
             for subline in pp:
-                if max(str(subline).find(".vfproj"), str(subline).find(".vcxproj"), str(subline).find(".vcproj")) != -1:
+                if max(subline.find(".vfproj"), subline.find(".vcxproj"), subline.find(".vcproj")) != -1:
                     projectfiles.append(subline)
             # Changes to the sln file based on VS version
-            startpos = str(line).find("Microsoft Visual Studio Solution File, Format Version")
+            startpos = line.find("Microsoft Visual Studio Solution File, Format Version")
             if startpos == 0:
                 if vs == 2010:
                     line = "Microsoft Visual Studio Solution File, Format Version 11.00\n"
@@ -329,7 +336,7 @@ def do_work():
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
                 # else:
                     # leave line unchanged
-            startpos = str(line).find("# Visual Studio")
+            startpos = line.find("# Visual Studio")
             if startpos == 0:
                 if vs == 2010:
                     line = "# Visual Studio 2010\n"
