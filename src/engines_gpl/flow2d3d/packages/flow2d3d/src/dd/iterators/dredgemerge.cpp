@@ -132,60 +132,63 @@ DredgeMerge_Function (
     delete initBlob;
 
     // Main processing loop
+    // Only when there are at least two partitions left
 
-    int numeldomain;
-    Blob * sblob  = new Blob (&numeldomain, sizeof numeldomain);
+    if (npart >= 2) {
+        int numeldomain;
+        Blob * sblob  = new Blob (&numeldomain, sizeof numeldomain);
 
-    while (true) {
-        int iarr;
-        int ipart;
+        while (true) {
+            int iarr;
+            int ipart;
 
-        // Get value from each neighbor and compute the sum,
-        // for each array element numelements = 0;
+            // Get value from each neighbor and compute the sum,
+            // for each array element numelements = 0;
 
-        for (ipart = 0 ; ipart < npart ; ipart++) {
-            int blobtype;
-            part[ipart]->Receive (sblob, &blobtype);
-            if (blobtype != DredgeMerge::F2DM_voldred)
-                throw new Exception (true, "Unexpected message (%d) from Flow %s",blobtype,part[ipart]->name);
+            for (ipart = 0 ; ipart < npart ; ipart++) {
+                int blobtype;
+                part[ipart]->Receive (sblob, &blobtype);
+                if (blobtype != DredgeMerge::F2DM_voldred)
+                    throw new Exception (true, "Unexpected message (%d) from Flow %s",blobtype,part[ipart]->name);
 
-            if (ipart == 0)
-                numelements = numeldomain;
-            else if (numeldomain != numelements)
-                throw new Exception (true, "Dredge array size (%d) from Flow %s deviates from size (%d) from Flow %s", numeldomain,part[ipart]->name, numelements,part[0]->name);
-            }
+                if (ipart == 0)
+                    numelements = numeldomain;
+                else if (numeldomain != numelements)
+                    throw new Exception (true, "Dredge array size (%d) from Flow %s deviates from size (%d) from Flow %s", numeldomain,part[ipart]->name, numelements,part[0]->name);
+                }
 
-        REAL_FP *mesg = new REAL_FP[numelements];
-        Blob * mblob  = new Blob (mesg, sizeof(REAL_FP)* numelements);
+            REAL_FP *mesg = new REAL_FP[numelements];
+            Blob * mblob  = new Blob (mesg, sizeof(REAL_FP)* numelements);
 
-        // Allocate the array that is going to contain the merged values
+            // Allocate the array that is going to contain the merged values
 
-        REAL_FP *mergedvoldred = new REAL_FP[numelements];
-        for (iarr = 0 ; iarr < numelements ; iarr++)
-            mergedvoldred[iarr] = 0.0;
-
-        for (ipart = 0 ; ipart < npart ; ipart++) {
-            int blobtype;
-            part[ipart]->Receive (mblob, &blobtype);
-            if (blobtype != DredgeMerge::F2DM_voldred)
-                throw new Exception (true, "Unexpected message (%d) from Flow %s", blobtype,part[ipart]->name);
+            REAL_FP *mergedvoldred = new REAL_FP[numelements];
             for (iarr = 0 ; iarr < numelements ; iarr++)
-                mergedvoldred[iarr] += mesg[iarr];
+                mergedvoldred[iarr] = 0.0;
+
+            for (ipart = 0 ; ipart < npart ; ipart++) {
+                int blobtype;
+                part[ipart]->Receive (mblob, &blobtype);
+                if (blobtype != DredgeMerge::F2DM_voldred)
+                    throw new Exception (true, "Unexpected message (%d) from Flow %s", blobtype,part[ipart]->name);
+                for (iarr = 0 ; iarr < numelements ; iarr++)
+                    mergedvoldred[iarr] += mesg[iarr];
+                }
+
+            // Send merged values to all participants by reusing mesg
+
+            for (iarr = 0 ; iarr < numelements ; iarr++)
+                mesg[iarr] = mergedvoldred[iarr];
+            for (ipart = 0 ; ipart < npart ; ipart++)
+                part[ipart]->Send (mblob, DredgeMerge::DM2F_mergedvoldred);
+
+            delete mblob;
+            delete [] mesg;
+            delete [] mergedvoldred;
             }
 
-        // Send merged values to all participants by reusing mesg
-
-        for (iarr = 0 ; iarr < numelements ; iarr++)
-            mesg[iarr] = mergedvoldred[iarr];
-        for (ipart = 0 ; ipart < npart ; ipart++)
-            part[ipart]->Send (mblob, DredgeMerge::DM2F_mergedvoldred);
-
-        delete mblob;
-        delete [] mesg;
-        delete [] mergedvoldred;
+        delete sblob;
         }
-
-    delete sblob;
     delete [] part;
 
     self->dd->log->Write (Log::ITER_MAJOR, "DredgeMerge iterator done");
