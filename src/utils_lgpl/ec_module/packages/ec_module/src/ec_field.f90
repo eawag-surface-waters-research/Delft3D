@@ -1,11 +1,10 @@
-module ec_field
 !----- LGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2013.                                
 !                                                                               
 !  This library is free software; you can redistribute it and/or                
 !  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
+!  License as published by the Free Software Foundation version 2.1.            
 !                                                                               
 !  This library is distributed in the hope that it will be useful,              
 !  but WITHOUT ANY WARRANTY; without even the implied warranty of               
@@ -23,247 +22,201 @@ module ec_field
 !  All indications and logos of, and references to, "Delft3D" and "Deltares"    
 !  are registered trademarks of Stichting Deltares, and remain the property of  
 !  Stichting Deltares. All rights reserved.                                     
-!                                                                               
-!-------------------------------------------------------------------------------
+
 !  $Id$
 !  $HeadURL$
-!!--description-----------------------------------------------------------------
-!
-! see ec_module.f90
-! More information: http://wiki.deltares.nl/display/FLOW/EC-Module
-!
-!!--pseudo code and references--------------------------------------------------
-!
-! arjen.markus@deltares.nl
-! adri.mourits@deltares.nl
-!
-!!--declarations----------------------------------------------------------------
-  use precision
-  use ec_parameters
-  use ec_message
-  use ec_typedefs
-  !
-  implicit none
-!
-! parameters
-!
-!
-!
-! interfaces
-!
-  interface init_field
-    module procedure init_field_val
-    module procedure init_field_1d
-    module procedure init_field_2d
-    module procedure init_field_3d
-  end interface
-  interface setField
-    module procedure setField_val
-    module procedure setField_timval
-  end interface
-!
-! public entities
-!
-  public :: tECField
-  public :: init_field
-  public :: setField
-  public :: emptyField
-contains
-!
-!
-!==============================================================================
-function init_field_val(field, elSetId, numDim, dim1Len, dim2Len, dim3Len) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField)       , pointer      :: field
-  integer              , intent(in)   :: elSetId
-  integer              , intent(in)   :: numDim
-  integer              , intent(in)   :: dim1Len
-  integer    ,optional , intent(in)   :: dim2Len
-  integer    ,optional , intent(in)   :: dim3Len
-  !
-  ! locals
-  integer :: istat
-  !
-  ! body
-  field%missingValue = -999.0_hp
-  field%elementSetId = elSetid
-  select case (numDim)
-  case (1)
-    allocate(field%arr3d(1, 1, dim1Len), STAT = istat)
-    if (istat == 0) then
-      success = .true.
-    else
-      success = .false.
-      call setECMessage("ERROR: ec_field::init_field_val: Unable to allocate additional memory (1d)")
-      return
-    endif
-    field%arr1d => field%arr3d(1, 1, :)
-    field%arr2d => null()
-  case (2)
-    allocate(field%arr3d(dim1Len, dim2Len, 1), STAT = istat)
-    if (istat == 0) then
-      success = .true.
-    else
-      success = .false.
-      call setECMessage("ERROR: ec_field::init_field_val: Unable to allocate additional memory (2d)")
-      return
-    endif
-    field%arr1d => null()
-    field%arr2d => field%arr3d(:, :, 1)
-  case (3)
-    allocate(field%arr3d(dim1Len, dim2Len, dim3Len), STAT = istat)
-    if (istat == 0) then
-      success = .true.
-    else
-      success = .false.
-      call setECMessage("ERROR: ec_field::init_field_val: Unable to allocate additional memory (3d)")
-      return
-    endif
-    field%arr1d => null()
-    field%arr2d => null()
-  case default
-    success = .false.
-  end select
-  success = setField(field, real(field%missingValue,fp))
-end function init_field_val
-!
-!
-!==============================================================================
-function init_field_1d(field, time, array, elSetId) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField)        , pointer     :: field
-  real(hp)              , intent(in)  :: time
-  real(fp), dimension(:), pointer     :: array
-  integer               , intent(in)  :: elSetId
-  !
-  ! locals
-  !
-  ! body
-  field%time         = time
-  field%arr1d        => array
-  field%arr2d        => null()
-  field%arr3d        => null()
-  field%elementSetId = elSetid
-  success            = .true.
-end function init_field_1d
-!
-!
-!==============================================================================
-function init_field_2d(field, time, array, elSetId) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField)          , pointer    :: field
-  real(hp)                , intent(in) :: time
-  real(fp), dimension(:,:), pointer    :: array
-  integer                 , intent(in) :: elSetId
-  !
-  ! locals
-  !
-  ! body
-  field%time         = time
-  field%arr1d        => null()
-  field%arr2d        => array
-  field%arr3d        => null()
-  field%elementSetId = elSetid
-  success            = .true.
-end function init_field_2d
-!
-!
-!==============================================================================
-function init_field_3d(field, time, array, elSetId) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField)            , pointer    :: field
-  real(hp)                  , intent(in) :: time
-  real(fp), dimension(:,:,:), pointer    :: array
-  integer                   , intent(in) :: elSetId
-  !
-  ! locals
-  !
-  ! body
-  field%time         = time
-  field%arr1d        => null()
-  field%arr2d        => null()
-  field%arr3d        => array
-  field%elementSetId = elSetid
-  success            = .true.
-end function init_field_3d
-!
-!
-!==============================================================================
-function setField_val(field, value) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField)           :: field
-  real(fp)    , intent(in) :: value
-  !
-  ! locals
-  !
-  ! body
-  ! No time specified; set to missing value
-  success = setField(field, field%missingValue, value)
-end function setField_val
-!
-!
-!==============================================================================
-function setField_timval(field, time, value) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField)           :: field
-  real(hp)    , intent(in) :: time
-  real(fp)    , intent(in) :: value
-  !
-  ! locals
-  !
-  ! body
-  field%time = time
-  if (associated(field%arr3d)) then
-    field%arr3d = value
-  elseif (associated(field%arr2d)) then
-    field%arr2d = value
-  else
-    field%arr1d = value
-  endif
-  success = .true.
-end function setField_timval
-!
-!
-!==============================================================================
-function emptyField(field) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECField) :: field
-  !
-  ! locals
-  !
-  ! body
-  success = setField(field, field%missingValue, real(field%missingValue,fp))
-end function emptyField
 
-
-
-
-end module ec_field
+!> This module contains all the methods for the datatype tEcField.
+!! @author arjen.markus@deltares.nl
+!! @author adri.mourits@deltares.nl
+!! @author stef.hummel@deltares.nl
+!! @author edwin.bos@deltares.nl
+module m_ec_field
+   use m_ec_typedefs
+   use m_ec_message
+   use m_ec_support
+   use m_ec_alloc
+   
+   implicit none
+   
+   private
+   
+   public :: ecFieldCreate
+   public :: ecFieldFree1dArray
+   public :: ecFieldSetMissingValue
+   public :: ecFieldSet1dArray
+   public :: ecFieldCreate1dArray
+   
+   contains
+      
+      ! =======================================================================
+      
+      !> Construct a new Field with the specified id.
+      !! Failure is indicated by returning a null pointer.
+      function ecFieldCreate(fieldId) result(fieldPtr)
+         type(tEcField), pointer            :: fieldPtr !< the new Field, intent(out)
+         integer,                intent(in) :: fieldId  !< unique Field id
+         !
+         integer :: istat !< allocate() status
+         !
+         ! allocation
+         allocate(fieldPtr, stat = istat)
+         if (istat /= 0) then
+            call setECMessage("ERROR: ec_field::ecFieldCreate: Unable to allocate additional memory")
+            fieldPtr => null()
+            return
+         end if
+         ! The arr1d array is allocated on-demand.
+         !
+         ! initialization
+         fieldPtr%id = fieldId
+         fieldPtr%timesteps = ec_undef_hp
+         fieldPtr%missingValue = ec_undef_hp
+         fieldPtr%x_spw_eye = ec_undef_hp
+         fieldPtr%y_spw_eye = ec_undef_hp
+      end function ecFieldCreate
+      
+      ! =======================================================================
+      
+      !> Free a tEcField, after which it can be deallocated.
+      function ecFieldFree(field) result (success)
+         logical                       :: success !< function status
+         type(tEcField), intent(inout) :: field   !< Field to free
+         !
+         integer :: istat !< deallocate() status
+         !
+         success = .true.
+         ! The array is not dynamically allocated so nullify.
+         field%arr1dPtr => null()
+         ! Either this array is used, or the above pointer points to an array outside the EC-module.
+         if (allocated(field%arr1d)) then
+            deallocate(field%arr1d, stat = istat)
+            if (istat /= 0) success = .false.
+         end if
+         if (allocated(field%astro_components)) then
+            deallocate(field%astro_components, stat = istat)
+            if (istat /= 0) success = .false.
+         end if            
+      end function ecFieldFree
+      
+      ! =======================================================================
+      
+      !> Frees a 1D array of tEcFieldPtrs, after which the fieldPtr is deallocated.
+      function ecFieldFree1dArray(fieldPtr, nFields) result (success)
+         logical                                  :: success  !< function status
+         type(tEcFieldPtr), dimension(:), pointer :: fieldPtr !< intent(inout)
+         integer                                  :: nFields  !< number of Fields
+         !
+         integer :: i      !< loop counter
+         integer :: istat  !< deallocate() status
+         !
+         success = .true.
+         !
+         if (.not. associated(fieldPtr)) then
+            call setECMessage("WARNING: ec_field::ecFieldFree1dArray: Dummy argument fieldPtr is already disassociated.")
+         else
+            ! Free and deallocate all tEcFieldPtrs in the 1d array.
+            do i=1, nFields
+               if (ecFieldFree(fieldPtr(i)%ptr)) then
+                  deallocate(fieldPtr(i)%ptr, stat = istat)
+                  if (istat /= 0) success = .false.
+               else
+                  success = .false.
+               end if
+            end do
+            ! Finally deallocate the tEcFieldPtr(:) pointer.
+            if (success) then
+               deallocate(fieldPtr, stat = istat)
+               if (istat /= 0) success = .false.
+            end if
+         end if
+      end function ecFieldFree1dArray
+      
+      ! =======================================================================
+      
+      !> Change the missing value of the Field corresponding to fieldId.
+      function ecFieldSetMissingValue(instancePtr, fieldId, missingValue) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: fieldId      !< unique Field id
+         real(hp),                  intent(in) :: missingValue !< new missing value of the Field
+         !
+         type(tEcField), pointer :: fieldPtr !< Field corresponding to fieldId
+         !
+         success = .false.
+         fieldPtr => null()
+         fieldPtr => ecSupportFindField(instancePtr, fieldId)
+         if (associated(fieldPtr)) then
+            fieldPtr%missingValue = missingValue
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_field::ecFieldSetMissingValue: Cannot find a Field with the supplied id.")
+         end if
+      end function ecFieldSetMissingValue
+      
+      ! =======================================================================
+      
+      !> Associate a Field's 1D array pointer with an external 1D data array.
+      !! This allows a target Item to write directly into a kernel's data array.
+      function ecFieldSet1dArray(instancePtr, fieldId, arrayPtr) result(success)
+         logical                                    :: success     !< function status
+         type(tEcInstance),      pointer            :: instancePtr !< intent(in)
+         integer,                        intent(in) :: fieldId     !< unique Field id
+         real(hp), dimension(:), pointer            :: arrayPtr    !< external 1D array data pointer
+         !
+         type(tEcField), pointer :: fieldPtr !< Field corresponding to fieldId
+         !
+         success = .false.
+         fieldPtr => null()
+         !
+         fieldPtr => ecSupportFindField(instancePtr, fieldId)
+         if (associated(fieldPtr)) then
+            fieldPtr%arr1dPtr => arrayPtr
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_field::ecFieldSet1dArray: Cannot find a Field with the supplied id.")
+         end if
+      end function ecFieldSet1dArray
+      
+      ! =======================================================================
+      
+      !> Allocate the Field's 1D array and associate the Field's 1D array pointer with it.
+      function ecFieldCreate1dArray(instancePtr, fieldId, arraySize) result(success)
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: fieldId     !< unique Field id
+         integer,                   intent(in) :: arraySize   !< requested size of 1D array
+         !
+         type(tEcField), pointer :: fieldPtr !< Field corresponding to fieldId
+         integer                 :: istat    !< (de)allocate status
+         !
+         success = .true.
+         fieldPtr => null()
+         !
+         fieldPtr => ecSupportFindField(instancePtr, fieldId)
+         if (associated(fieldPtr)) then
+            ! Reallocate 1D real(hp) array.
+            if (allocated(fieldPtr%arr1d)) then
+               deallocate(fieldPtr%arr1d, stat = istat)
+               if (istat /= 0) then
+                  call setECMessage("ERROR: ec_field::ecFieldCreate1dArray: Unable to deallocate memory.")
+                  success = .false.
+               end if
+            end if
+            if (success) then
+               allocate(fieldPtr%arr1d(arraySize), stat = istat)
+               if (istat /= 0) then
+                  call setECMessage("ERROR: ec_field::ecFieldCreate1dArray: Unable to allocate additional memory.")
+                  success = .false.
+               else
+                  fieldPtr%arr1d = ec_undef_hp
+               end if
+            end if
+            if (success) then
+               fieldPtr%arr1dPtr => fieldPtr%arr1d
+            end if
+         else
+            call setECMessage("ERROR: ec_field::ecFieldCreate1dArray: Cannot find a Field with the supplied id.")
+         end if
+      end function ecFieldCreate1dArray
+end module m_ec_field

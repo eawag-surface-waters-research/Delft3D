@@ -5,7 +5,7 @@
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="..\..\lib\$(ConfigurationName)\static" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/deltares_common/lib/$(ConfigurationName)/static" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../../../../utils_lgpl/deltares_common/lib/$(ConfigurationName)/static" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" NullPointerCheck="true" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -15,7 +15,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="..\..\lib\$(ConfigurationName)\static" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/deltares_common/lib/$(ConfigurationName)/static" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../../../../utils_lgpl/deltares_common/lib/$(ConfigurationName)/static" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -119,14 +119,19 @@
 				<Tool Name="VFFortranCompilerTool" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File></Filter>
+		<File RelativePath=".\src\ec_bccollect.f90"/>
+		<File RelativePath=".\src\ec_bcreader.f90"/>
 		<File RelativePath="src\ec_connection.f90"/>
 		<File RelativePath="src\ec_converter.f90"/>
-		<File RelativePath="src\ec_data.f90"/>
-		<File RelativePath="src\ec_ecitem.f90"/>
 		<File RelativePath="src\ec_elementset.f90"/>
 		<File RelativePath="src\ec_field.f90"/>
+		<File RelativePath=".\src\ec_filereader.F90"/>
+		<File RelativePath=".\src\ec_filereader_read.F90"/>
+		<File RelativePath=".\src\ec_instance.f90"/>
+		<File RelativePath=".\src\ec_item.f90"/>
 		<File RelativePath="src\ec_message.f90"/>
 		<File RelativePath="src\ec_module.f90"/>
+		<File RelativePath=".\src\ec_netcdf_timeseries.f90"/>
 		<File RelativePath="src\ec_parameters.f90"/>
 		<File RelativePath="src\ec_provider.F90">
 			<FileConfiguration Name="Debug|Win32">
@@ -137,16 +142,9 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath="src\ec_provider_read.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\ec_quantity.f90"/>
+		<File RelativePath=".\src\ec_stringbuffer.f90"/>
+		<File RelativePath=".\src\ec_support.f90"/>
 		<File RelativePath="src\ec_typedefs.f90"/>
-		<File RelativePath="src\openexistingfile.f90"/></Filter></Files>
+		<File RelativePath=".\src\transform_shiftedpole.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

@@ -1,11 +1,10 @@
-module ec_connection
 !----- LGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2013.                                
 !                                                                               
 !  This library is free software; you can redistribute it and/or                
 !  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
+!  License as published by the Free Software Foundation version 2.1.            
 !                                                                               
 !  This library is distributed in the hope that it will be useful,              
 !  but WITHOUT ANY WARRANTY; without even the implied warranty of               
@@ -23,426 +22,211 @@ module ec_connection
 !  All indications and logos of, and references to, "Delft3D" and "Deltares"    
 !  are registered trademarks of Stichting Deltares, and remain the property of  
 !  Stichting Deltares. All rights reserved.                                     
-!                                                                               
-!-------------------------------------------------------------------------------
+
 !  $Id$
 !  $HeadURL$
-!!--description-----------------------------------------------------------------
-!
-! see ec_module.f90
-! More information: http://wiki.deltares.nl/display/FLOW/EC-Module
-!
-!!--pseudo code and references--------------------------------------------------
-!
-! arjen.markus@deltares.nl
-! adri.mourits@deltares.nl
-!
-!!--declarations----------------------------------------------------------------
-  use precision
-  use ec_parameters
-  use ec_message
-  use ec_ecitem
-  use ec_typedefs
-  !
-  implicit none
-!
-! parameters
-!
-! interfaces
-!
-  interface init
-     module procedure init_connection_noData
-  end interface
-  interface addConnection
-     module procedure addConnection
-     module procedure addConnection_ids
-  end interface
-  interface ECConnectionAddSource
-     module procedure ECConnectionAddSource
-  end interface
-  interface ECConnectionAddTarget
-     module procedure ECConnectionAddTarget
-  end interface
-  interface dump
-    module procedure dump_connection
-  end interface
-!
-! public entities
-!
-contains
-!
-!
-!==============================================================================
-function free_connection(connection) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECConnection) :: connection
-  !
-  ! locals
-  integer :: istat
-  !
-  ! body
-  if (associated(connection%sourceItems)) deallocate(connection%sourceItems, STAT = istat)
-  if (associated(connection%targetItems)) deallocate(connection%targetItems, STAT = istat)
-  success = .true.
-end function free_connection
-!
-!
-!==============================================================================
-function init_connection_noData(connection) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECConnection) :: connection
-  !
-  ! locals
-  integer :: istat
-  !
-  ! body
-  connection%id = 0
-                  allocate(connection%sourceItems(0), STAT = istat)
-  if (istat == 0) allocate(connection%targetItems(0), STAT = istat)
-  if (istat == 0) then
-    success = .true.
-  else
-    success = .false.
-    call setECMessage("ERROR: ec_connection::init_connection_noData: Unable to allocate additional memory")
-  endif
-end function init_connection_noData
-!
-!
-!==============================================================================
-function increaseSize_connectionPtrs(connectionPtrs) result (k)
-  !
-  ! result
-  integer :: k
-  !
-  ! arguments
-  type(tECConnectionPtr), dimension(:), pointer :: connectionPtrs
-  !
-  ! locals
-  integer                                       :: istat
-  logical                                       :: success
-  type(tECConnectionPtr), dimension(:), pointer :: newConnectionPtrs
-  !
-  ! body
-  k = size(connectionPtrs) + 1
-  allocate(newConnectionPtrs(k), STAT = istat)
-  if (istat == 0) then
-    success = .true.
-  else
-    success = .false.
-    call setECMessage("ERROR: ec_connection::increaseSize_connectionPtrs: Unable to allocate additional memory")
-    return
-  endif
-  success = copyArray_connections(connectionPtrs,newConnectionPtrs)
-  if (.not. success) k=0
-  deallocate (connectionPtrs, STAT = istat)
-  connectionPtrs => newConnectionPtrs
-end function increaseSize_connectionPtrs
-!
-!
-!==============================================================================
-function copyArray_connections(sourceArr, targetArr) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECConnectionPtr), dimension(:), pointer :: sourceArr
-  type(tECConnectionPtr), dimension(:), pointer :: targetArr
-  !
-  ! locals
-  integer :: istat
-  integer :: k
-  integer :: arrLenSource
-  integer :: arrLenTarget
-  !
-  ! body
-  success      = .true.
-  arrLenSource = min(size(sourceArr), size(targetArr))
-  arrLenTarget = size(targetArr)
-  do k = 1,arrLenSource
-    targetArr(k)%ECConnectionPtr => sourceArr(k)%ECConnectionPtr
-  enddo
-  do k = arrLenSource+1, arrLenTarget
-    allocate(targetArr(k)%ECConnectionPtr, STAT = istat)
-    if (istat == 0) then
-      success = .true.
-    else
-      success = .false.
-      call setECMessage("ERROR: ec_connection::copyArray_connections: Unable to allocate additional memory")
-      return
-    endif
-    success = init(targetArr(k)%ECConnectionPtr)
-  enddo
-end function copyArray_connections
-!
-!
-!==============================================================================
-function increaseSize_sources(connection) result (k)
-  !
-  ! result
-  integer :: k
-  !
-  ! arguments
-  type(tECConnection) :: connection
-  !
-  ! locals
-  integer                                 :: istat
-  logical                                 :: success
-  type(tECItemPtr), dimension(:), pointer :: newSources
-  !
-  ! body
-  k = size(connection%sourceItems) + 1
-  allocate(newSources(k), STAT = istat)
-  if (istat == 0) then
-    success = .true.
-  else
-    success = .false.
-    call setECMessage("ERROR: ec_connection::increaseSize_sources: Unable to allocate additional memory")
-    return
-  endif
-  success = copyArray_ECItemPtrs(connection, connection%sourceItems, newSources)
-  if (.not. success) k=0
-  deallocate (connection%sourceItems, STAT = istat)
-  connection%sourceItems => newSources
-end function increaseSize_sources
-!
-!
-!==============================================================================
-function increaseSize_targets(connection) result (k)
-  !
-  ! result
-  integer :: k
-  !
-  ! arguments
-  type(tECConnection) :: connection
-  !
-  ! locals
-  integer                                 :: istat
-  logical                                 :: success
-  type(tECItemPtr), dimension(:), pointer :: newTargets
-  !
-  ! body
-  k = size(connection%targetItems) + 1
-  allocate(newTargets(k), STAT = istat)
-  if (istat == 0) then
-    success = .true.
-  else
-    success = .false.
-    call setECMessage("ERROR: ec_connection::increaseSize_targets: Unable to allocate additional memory")
-    return
-  endif
-  success = copyArray_ECItemPtrs(connection, connection%targetItems, newTargets)
-  if (.not. success) k=0
-  deallocate (connection%targetItems, STAT = istat)
-  connection%targetItems => newTargets
-end function increaseSize_targets
-!
-!
-!==============================================================================
-function copyArray_ECItemPtrs(connection, sourceArr, targetArr) result (success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECConnection)                     :: connection
-  type(tECItemPtr), dimension(:), pointer :: sourceArr
-  type(tECItemPtr), dimension(:), pointer :: targetArr
-  !
-  ! locals
-  integer :: k
-  integer :: arrLenSource
-  integer :: arrLenTarget
-  !
-  ! body
-  arrLenSource = min(size(sourceArr), size(targetArr))
-  arrLenTarget = size(targetArr)
-  do k = 1,arrLenSource
-    targetArr(k)%ECItemPtr => sourceArr(k)%ECItemPtr
-  enddo
-  do k = arrLenSource+1, arrLenTarget
-    nullify(targetArr(k)%ECItemPtr)
-  enddo
-  success = .true.
-end function copyArray_ECItemPtrs
-!
-!
-!==============================================================================
-function getConnection(connectionPtrs, sourceItem, targetItem) result(id)
-  !
-  ! result: unique connection id or zero if it does not exist
-  integer :: id
-  !
-  ! arguments
-  type(tECConnectionPtr), dimension(:), pointer :: connectionPtrs
-  type(tECItem)                                 :: sourceItem
-  type(tECItem)                                 :: targetItem
-  !
-  ! locals
-  integer            :: aSourceId
-  integer            :: aTargetId
-  integer            :: sourceItemId
-  integer            :: targetItemId
-  integer            :: i
-  integer            :: j
-  integer            :: k
-  integer            :: retVal
-  character(len=100) :: string
-  !
-  ! body
-  sourceItemId = getECItemId(sourceItem)
-  targetItemId = getECItemId(targetItem)
 
-  retVal = 0
-  do i=1, size(connectionPtrs)
-    do j=1, size(connectionPtrs(i)%ECConnectionPtr%sourceItems)
-      do k=1, size(connectionPtrs(i)%ECConnectionPtr%targetItems)
-        aSourceId = getECItemId(connectionPtrs(i)%ECConnectionPtr%sourceItems(j)%ECItemPtr)
-        aTargetId = getECItemId(connectionPtrs(i)%ECConnectionPtr%targetItems(k)%ECItemPtr)
-        if (aSourceId==sourceItemId .and. aTargetId==targetItemId) then
-          if (retVal == 0) then
-            !
-            ! i is the first match found
-            !
-            retVal = i
-          else
-            !
-            ! retVal >  0: i is the second match found
-            ! retVal = -1: i is the third/fourth/... match found
-            ! In both cases:
-            !
-            retVal = -1
-            write(string,'(a,i0,a,i0,a)') 'sourceId "', sourceItemId, '" and targetId "', targetItemId, '"'
-            call setECMessage("ERROR: More than one ECconnection with", trim(string))
+!> This module contains all the methods for the datatype tEcConnection.
+!! @author arjen.markus@deltares.nl
+!! @author adri.mourits@deltares.nl
+!! @author stef.hummel@deltares.nl
+!! @author edwin.bos@deltares.nl
+module m_ec_connection
+   use m_ec_typedefs
+   use m_ec_message
+   use m_ec_support
+   use m_ec_alloc
+   
+   implicit none
+   
+   private
+   
+   public :: ecConnectionCreate
+   public :: ecConnectionFree1dArray
+   public :: ecConnectionSetConverter
+   public :: ecConnectionAddSourceItem
+   public :: ecConnectionAddTargetItem
+   
+   contains
+      
+      ! =======================================================================
+      
+      !> Construct a new Connection with the specified id.
+      !! Failure is indicated by returning a null pointer.
+      function ecConnectionCreate(connectionId) result(connectionPtr)
+         type(tEcConnection), pointer            :: connectionPtr !< the new Connection, intent(out)
+         integer,                     intent(in) :: connectionId  !< unique Connection id
+         !
+         integer :: istat !< allocate() status
+         !
+         ! allocation
+         allocate(connectionPtr, stat = istat)
+         if (istat == 0) then
+            allocate(connectionPtr%sourceItemsPtr(1), stat = istat)
+            if (istat == 0) then
+               allocate(connectionPtr%targetItemsPtr(1), stat = istat)
+            end if
+         end if
+         if (istat /= 0) then
+            call setECMessage("ERROR: ec_converter::ecConnectionCreate: Unable to allocate additional memory.")
+            connectionPtr => null()
             return
-          endif
-        endif
-      enddo
-    enddo
-  enddo
-  if (retVal == -1) then
-    retVal = 0
-  endif
-  id = retVal
-end function getConnection
-!
-!
-!==============================================================================
-function addConnection(connectionPtrs) result(id)
-  !
-  ! result: unique new connection id
-  integer :: id
-  !
-  ! arguments
-  type(tECConnectionPtr), dimension(:), pointer :: connectionPtrs
-  !
-  ! locals
-  !
-  ! body
-  !
-  ! allocate a new one
-  id                 = increaseSize_connectionPtrs(connectionPtrs)
-  connectionPtrs(id)%ECConnectionPtr%id = id
-end function addConnection
-!
-!
-!==============================================================================
-function addConnection_ids(connectionPtrs, sourceItem, targetItem) result(id)
-  !
-  ! result: unique new connection id
-  integer :: id
-  !
-  ! arguments
-  type(tECConnectionPtr), dimension(:), pointer :: connectionPtrs
-  type(tECItem)                       , pointer :: targetItem
-  type(tECItem)                       , pointer :: sourceItem
-  !
-  ! locals
-  logical :: success
-  !
-  ! body
-  id = getConnection(connectionPtrs, sourceItem, targetItem)
-  if (id == 0) then
-    !
-    ! allocate a new one
-    !
-    id      = addConnection(connectionPtrs)
-    success = ECConnectionAddSource(connectionPtrs(id)%ECConnectionPtr, sourceItem)
-    if (.not. success) id = 0
-    success = ECConnectionAddTarget(connectionPtrs(id)%ECConnectionPtr, targetItem)
-    if (.not. success) id = 0
-  endif
-end function addConnection_ids
-!
-!
-!==============================================================================
-function ECConnectionAddSource(connection, sourceItem) result(success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECConnection)          :: connection
-  type(tECItem)      , pointer :: sourceItem
-  !
-  ! locals
-  integer :: id
-  !
-  ! body
-  id = increaseSize_sources(connection)
-  connection%sourceItems(id)%ECItemPtr => sourceItem
-  success = .true.
-end function ECConnectionAddSource
-!
-!
-!==============================================================================
-function ECConnectionAddTarget(connection, targetItem) result(success)
-  !
-  ! result
-  logical :: success
-  !
-  ! arguments
-  type(tECConnection)          :: connection
-  type(tECItem)      , pointer :: targetItem
-  !
-  ! locals
-  integer :: id
-  !
-  ! body
-  id = increaseSize_targets(connection)
-  connection%targetItems(id)%ECItemPtr => targetItem
-  success = .true.
-end function ECConnectionAddTarget
-!
-!
-!==============================================================================
-subroutine dump_connection(connection)
-  !
-  ! arguments
-  type(tECConnection) :: connection
-  !
-  ! locals
-  integer :: i
-  !
-  ! body
-  write (*,'(a,i0)') '    id         : ', connection%id
-  write (*,'(a,i0)') '    converterId: ', connection%converterId
-  do i=1, size(connection%sourceItems)
-    write (*,'(a,i0,a,i0)') '    sourceItems(',i,')id: ', connection%sourceItems(i)%ECItemPtr%id
-  enddo
-  do i=1, size(connection%targetItems)
-    write (*,'(a,i0,a,i0)') '    targetItems(',i,')id: ', connection%targetItems(i)%ECItemPtr%id
-  enddo
-end subroutine dump_connection
+         end if
+         ! initialization
+         connectionPtr%id = connectionId
+         connectionPtr%nSourceItems = 0
+         connectionPtr%nTargetItems = 0
+      end function ecConnectionCreate
+      
+      ! =======================================================================
 
-
-
-end module ec_connection
+      !> Free a tEcConnection, after which it can be deallocated.
+      function ecConnectionFree(connection) result (success)
+         logical                            :: success    !< function status
+         type(tEcConnection), intent(inout) :: connection !< Connection to free
+         !
+         integer :: i     !< loop counter
+         integer :: istat !< deallocate() status
+         !
+         success = .true.
+         !
+         ! A connection does not own the tEcConverters, the tEcInstance does, so nullify rather then ecConverterFree().
+         connection%converterPtr => null()
+         ! A connection does not own the tEcItems, the tEcInstance does, so nullify rather then ecItemFree().
+         do i=1, connection%nSourceItems
+            connection%sourceItemsPtr(i)%ptr => null()
+         end do
+         deallocate(connection%sourceItemsPtr, stat = istat)
+         if (istat /= 0) success = .false.
+         do i=1, connection%nTargetItems
+            connection%targetItemsPtr(i)%ptr => null()
+         end do
+         deallocate(connection%targetItemsPtr, stat = istat)
+         if (istat /= 0) success = .false.
+      end function ecConnectionFree
+      
+      ! =======================================================================
+      
+      !> Frees a 1D array of tEcConnectionPtrs, after which the connectionPtr is deallocated.
+      function ecConnectionFree1dArray(connectionPtr, nConnections) result (success)
+         logical                                       :: success       !< function status
+         type(tEcConnectionPtr), dimension(:), pointer :: connectionPtr !< intent(inout)
+         integer                                       :: nConnections  !< number of Connections
+         !
+         integer :: i      !< loop counter
+         integer :: istat  !< deallocate() status
+         !
+         success = .true.
+         !
+         if (.not. associated(connectionPtr)) then
+            call setECMessage("WARNING: ec_connection::ecConnectionFree1dArray: Dummy argument connectionPtr is already disassociated.")
+         else
+            ! Free and deallocate all tEcConnectionPtrs in the 1d array.
+            do i=1, nConnections
+               if (ecConnectionFree(connectionPtr(i)%ptr)) then
+                  deallocate(connectionPtr(i)%ptr, stat = istat)
+                  if (istat /= 0) success = .false.
+               else
+                  success = .false.
+               end if
+            end do
+            ! Finally deallocate the tEcConnectionPtr(:) pointer.
+            if (success) then
+               deallocate(connectionPtr, stat = istat)
+               if (istat /= 0) success = .false.
+            end if
+         end if
+      end function ecConnectionFree1dArray
+      
+      ! =======================================================================
+      
+      !> Change the Converter of the Connection corresponding to connectionId.
+      function ecConnectionSetConverter(instancePtr, connectionId, converterId) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: connectionId !< unique Connection id
+         integer,                   intent(in) :: converterId  !< unique Converter id
+         !
+         type(tEcConnection), pointer :: connectionPtr !< Connection corresponding to connectionId
+         type(tEcConverter),  pointer :: converterPtr  !< Converter corresponding to converterId
+         !
+         success = .false.
+         connectionPtr => null()
+         converterPtr => null()
+         !
+         connectionPtr => ecSupportFindConnection(instancePtr, connectionId)
+         converterPtr => ecSupportFindConverter(instancePtr, converterId)
+         if (associated(connectionPtr) .and. associated(converterPtr)) then
+            connectionPtr%converterPtr => converterPtr
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_connection::ecConnectionSetConverter: Cannot find a Connection or Converter with the supplied id.")
+         end if
+      end function ecConnectionSetConverter
+      
+      ! =======================================================================
+      
+      !> Add a source Item to a Connection's array of source Items.
+      function ecConnectionAddSourceItem(instancePtr, connectionId, itemId) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: connectionId !< unique Connection id
+         integer,                   intent(in) :: itemId       !< unique Item id
+         !
+         type(tEcConnection), pointer :: connectionPtr !< Connection corresponding to connectionId
+         type(tEcItem),       pointer :: itemPtr       !< Item corresponding to itemId
+         !
+         success = .false.
+         connectionPtr => null()
+         itemPtr => null()
+         !
+         connectionPtr => ecSupportFindConnection(instancePtr, connectionId)
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         if (associated(connectionPtr) .and. associated(itemPtr)) then
+            ! ensure capacity
+            if (connectionPtr%nSourceItems == size(connectionPtr%sourceItemsPtr)) then
+               if (.not. ecArrayIncrease(connectionPtr%sourceItemsPtr, connectionPtr%nSourceItems)) then
+                  return
+               end if
+            end if
+            connectionPtr%nSourceItems = connectionPtr%nSourceItems + 1
+            connectionPtr%sourceItemsPtr(connectionPtr%nSourceItems)%ptr => itemPtr
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_connection::ecConnectionAddSourceItem: Cannot find a Connection or Item with the supplied id.")
+         end if
+      end function ecConnectionAddSourceItem
+      
+      ! =======================================================================
+      
+      !> Add a target Item to a Connection's array of target Items.
+      function ecConnectionAddTargetItem(instancePtr, connectionId, itemId) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: connectionId !< unique Connection id
+         integer,                   intent(in) :: itemId       !< unique Item id
+         !
+         type(tEcConnection), pointer :: connectionPtr !< Connection corresponding to connectionId
+         type(tEcItem),       pointer :: itemPtr       !< Item corresponding to itemId
+         !
+         success = .false.
+         connectionPtr => null()
+         itemPtr => null()
+         !
+         connectionPtr => ecSupportFindConnection(instancePtr, connectionId)
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         if (associated(connectionPtr) .and. associated(itemPtr)) then
+            ! ensure capacity
+            if (connectionPtr%nTargetItems == size(connectionPtr%targetItemsPtr)) then
+               if (.not. ecArrayIncrease(connectionPtr%targetItemsPtr, connectionPtr%nTargetItems)) then
+                  return
+               end if
+            end if
+            connectionPtr%nTargetItems = connectionPtr%nTargetItems + 1
+            connectionPtr%targetItemsPtr(connectionPtr%nTargetItems)%ptr => itemPtr
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_connection::ecConnectionAddTargetItem: Cannot find a Connection or Item with the supplied id.")
+         end if
+      end function ecConnectionAddTargetItem
+end module m_ec_connection

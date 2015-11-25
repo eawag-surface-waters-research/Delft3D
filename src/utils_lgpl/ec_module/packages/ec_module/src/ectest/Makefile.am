@@ -9,7 +9,7 @@
 
 include $(top_srcdir)/common.am
 
-bin_PROGRAMS= ectest
+#bin_PROGRAMS= ectest
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,15 +19,16 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 
-ectest_SOURCES= \
-         ectest_gdp.f90 \
-         ectest_readmeteo.f90 \
-         ectest_rr_cf.f90 \
-         ectest.f90
+#ectest_SOURCES= \
+#         ectest_gdp.f90
 
+# Broken:
+# ectest_readmeteo.f90 
+# ectest_rr_cf.f90
+# ectest.f90
 
-ectest_LDADD =\
-	../libECModule.la \
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-        $(CCLIBS)
+#ectest_LDADD =\
+#	$(builddir)/../libECModule.la \
+#        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
+#        $(CCLIBS)
 
