@@ -39,7 +39,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use meteo
-    use ec_module
+    !use ec_module
     use precision
     use dfparall
     use globaldata
@@ -61,10 +61,10 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     integer        , pointer :: kc
     integer        , pointer :: itdate
     real(fp)       , pointer :: tzone
-    type(tECHandle), pointer :: ECHandle
-    integer        , pointer :: patmECItemId
-    integer        , pointer :: uwindECItemId
-    integer        , pointer :: vwindECItemId
+    !type(tECHandle), pointer :: ECHandle
+    !integer        , pointer :: patmECItemId
+    !integer        , pointer :: uwindECItemId
+    !integer        , pointer :: vwindECItemId
     real(hp)       , pointer :: dtimmin       ! Current timestep (in min) in high precision
 !
 ! Global variables
@@ -103,10 +103,10 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     kc            => gdp%d%kc
     itdate        => gdp%gdexttim%itdate
     tzone         => gdp%gdexttim%tzone
-    ECHandle      => gdp%gd_ECHandle
-    patmECItemId  => gdp%patmECItemId
-    uwindECItemId => gdp%uwindECItemId
-    vwindECItemId => gdp%vwindECItemId
+    !ECHandle      => gdp%gd_ECHandle
+    !patmECItemId  => gdp%patmECItemId
+    !uwindECItemId => gdp%uwindECItemId
+    !vwindECItemId => gdp%vwindECItemId
     dtimmin       => gdp%gdinttim%dtimmin
     !
     time          = timhr*60.0  ! time in minutes
@@ -114,7 +114,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     !
     ! update all meteo items (if necessary)
     !
-    if (patmECItemId == -1) then
+    !if (patmECItemId == -1) then
        success = meteoupdate(gdp%runid, itdate, tzone, time)
        call checkmeteoresult(success, gdp)
        !
@@ -167,14 +167,14 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
        !
        success = getmeteoval(gdp%runid,  'patm', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub,  patm, 0)
        call checkmeteoresult(success, gdp)
-    else
-       success = getVal(ECHandle, patmECItemId , dtimmin,  patm, nlb, nub, mlb, mub)
-       call checkResult(ECHandle, success)
-       success = getVal(ECHandle, uwindECItemId, dtimmin, windu, nlb, nub, mlb, mub)
-       call checkResult(ECHandle, success)
-       success = getVal(ECHandle, vwindECItemId, dtimmin, windv, nlb, nub, mlb, mub)
-       call checkResult(ECHandle, success)
-    endif
+    !else
+    !   success = getVal(ECHandle, patmECItemId , dtimmin,  patm, nlb, nub, mlb, mub)
+    !   call checkResult(ECHandle, success)
+    !   success = getVal(ECHandle, uwindECItemId, dtimmin, windu, nlb, nub, mlb, mub)
+    !   call checkResult(ECHandle, success)
+    !   success = getVal(ECHandle, vwindECItemId, dtimmin, windv, nlb, nub, mlb, mub)
+    !   call checkResult(ECHandle, success)
+    !endif
     !
     ! Get possible input from OpenDA. Here: scalar adjustment of windfiles. Noise on an entire grid
     ! has already been precessed above, inside the getmeteoval call.

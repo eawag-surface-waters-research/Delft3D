@@ -47,7 +47,7 @@ module globaldata
     use dio_plt_rw, only:dioplttype
     use handles
     use message_module
-    use ec_typedefs
+    !use ec_typedefs
     use bedcomposition_module, only:bedcomp_data
     use morphology_data_module, only:morpar_type, sedpar_type, moroutputtype, &
                               & mornumericstype, bedbndtype, cmpbndtype, &
@@ -245,7 +245,7 @@ module globaldata
        !
        ! ec-module
        !
-       type(tECHandle)              :: gd_ECHandle
+       !type(tECHandle)              :: gd_ECHandle
        integer                      :: gridECItemId  = -1
        integer                      :: patmECItemId  = -1
        integer                      :: uwindECItemId = -1

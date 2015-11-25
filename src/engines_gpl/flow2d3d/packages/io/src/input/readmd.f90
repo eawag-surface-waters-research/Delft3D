@@ -48,7 +48,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     use globaldata
     use dfparall
-    use ec_module
+    !use ec_module
     !
     implicit none
     !
@@ -255,7 +255,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     logical                       , pointer :: bedupd
     real(fp)                      , pointer :: zbot
     real(fp)                      , pointer :: ztop
-    type(tECHandle)               , pointer :: ECHandle
+!    type(tECHandle)               , pointer :: ECHandle
 !
 ! Global variables
 !
@@ -544,9 +544,9 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     zbot                => gdp%gdzmodel%zbot
     ztop                => gdp%gdzmodel%ztop
     ascon               => gdp%gdbcdat%ascon
-    ECHandle            => gdp%gd_ECHandle
-    gridECItemId        => gdp%gridECItemId
-    !
+    !ECHandle            => gdp%gd_ECHandle
+    !gridECItemId        => gdp%gridECItemId
+    !!
     rewind (lunmd)
     read (lunmd, '(a300)') mdfrec
     !
@@ -924,22 +924,22 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Initialization of ec and meteo module
     !
     ecwind = .false.
-    success = create(ECHandle, .true.)
-    call checkResult(ECHandle, success)
-    if (ecwind) then
-       sizenm = nmax*(1 + gdp%d%mub - gdp%d%mlb)
-       gridECItemId = addElementSet(ECHandle, r(xcor+iofset:xcor+iofset+sizenm), &
-                                            & r(ycor+iofset:ycor+iofset+sizenm), &
-                                            & i(kcs:kcs+sizenm), sferic, nmax, &
-                                            & mmax, gdp%d%mub, gdp%d%mlb)
-       if (gridECItemId == 0) call checkResult(ECHandle)
-       success = setInternalGrid(ECHandle, gridECItemId)
-    endif
+    !success = create(ECHandle, .true.)
+    !call checkResult(ECHandle, success)
+    !if (ecwind) then
+    !   sizenm = nmax*(1 + gdp%d%mub - gdp%d%mlb)
+    !   gridECItemId = addElementSet(ECHandle, r(xcor+iofset:xcor+iofset+sizenm), &
+    !                                        & r(ycor+iofset:ycor+iofset+sizenm), &
+    !                                        & i(kcs:kcs+sizenm), sferic, nmax, &
+    !                                        & mmax, gdp%d%mub, gdp%d%mlb)
+    !   if (gridECItemId == 0) call checkResult(ECHandle)
+    !   success = setInternalGrid(ECHandle, gridECItemId)
+    !endif
     call rdmeteo(gdp, ecwind)
     !
     if (ecwind) then
-       success = ECCheck(ECHandle, 60d0) ! todo: real(ntstop,hp) * dt)
-       call checkResult(ECHandle, success)
+    !   success = ECCheck(ECHandle, 60d0) ! todo: real(ntstop,hp) * dt)
+    !   call checkResult(ECHandle, success)
     endif
     !
     ! Limit fwfac

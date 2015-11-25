@@ -41,7 +41,7 @@ subroutine gdp_dealloc(gdp)
     use bedcomposition_module
     use message_module
     use flow_tables
-    use ec_module
+    !use ec_module
     use globaldata
     use dfparall
     !
@@ -338,7 +338,7 @@ subroutine gdp_dealloc(gdp)
     endif
     deallocate (gdp%gdparall , STAT = istat)
     !
-    success = free(gdp%gd_ECHandle)
+    !success = free(gdp%gd_ECHandle)
     deallocate (gdp%arch     , STAT = istat)
     deallocate (gdp%errorcode, STAT = istat)
     !
