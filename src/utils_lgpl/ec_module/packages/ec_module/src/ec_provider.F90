@@ -2548,7 +2548,7 @@ module m_ec_provider
                      if (allocated(pdiri)) deallocate(pdiri)
                      allocate(pdiri(fgd_size*sgd_size))
                      call gb2lla(fgd_data_1d, sgd_data_1d, fgd_data_trans, sgd_data_trans, pdiri, fgd_size*sgd_size, &
-                          gsplon, gsplat, 0.0_fp, 0.0_fp, -90.0_fp, 0.0_fp) 
+                          gsplon, gsplat, 0.0_hp, 0.0_hp, -90.0_hp, 0.0_hp) 
                      if (.not.ecElementSetSetLatitudeArray(instancePtr, elementSetId, sgd_data_trans)) then 
                         call setECMessage("Setting latitude array failed for "//trim(fileReaderPtr%filename)//".")
                         return

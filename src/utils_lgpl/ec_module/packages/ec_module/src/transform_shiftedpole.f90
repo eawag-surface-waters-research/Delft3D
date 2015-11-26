@@ -9,11 +9,12 @@
 !     subroutines provided by KNMI to calculate the rotation
 !     of the wind-vector in the case of shifted pole coordinates.
 !
+      use precision
       implicit none
       private
 
 !     switch for single/double precision:
-      integer, parameter, public :: vp = 8
+      integer, parameter, public :: vp = hp
 
 !     some constants
       real(kind=vp), private :: pi, zrad, zrho
