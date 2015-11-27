@@ -61,15 +61,22 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
     !
     implicit none
     !
-    type(globdat)     , target    :: gdp
-    type(dfparalltype), pointer   :: gdparall
-    integer           , pointer   :: lundia
-    integer           , pointer   :: nfg
-    integer           , pointer   :: nlg
-    integer           , pointer   :: mfg
-    integer           , pointer   :: mlg
-    integer           , pointer   :: nmaxgl
-    integer           , pointer   :: mmaxgl
+    type(globdat)          , target    :: gdp
+    type(dfparalltype)     , pointer   :: gdparall
+    integer                , pointer   :: lundia
+    integer                , pointer   :: nfg
+    integer                , pointer   :: nlg
+    integer                , pointer   :: mfg
+    integer                , pointer   :: mlg
+    integer, dimension(:,:), pointer   :: iarrc
+    integer, dimension(:)  , pointer   :: nf
+    integer, dimension(:)  , pointer   :: nl
+    integer, dimension(:)  , pointer   :: mf
+    integer, dimension(:)  , pointer   :: ml
+    integer                , pointer   :: ngridlo
+    integer                , pointer   :: ngridgl
+    integer                , pointer   :: nmaxgl
+    integer                , pointer   :: mmaxgl
 !
 ! Parameters
 !
@@ -266,6 +273,32 @@ subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
           nlg = nmax
        endif
     endif
+    !
+    allocate(gdparall%nf(0:nproc-1), &
+           & gdparall%nl(0:nproc-1), &
+           & gdparall%mf(0:nproc-1), &
+           & gdparall%ml(0:nproc-1), &
+           & gdparall%iarrc(4,0:nproc-1), stat=istat)
+    nf       => gdparall%nf
+    nl       => gdparall%nl
+    mf       => gdparall%mf
+    ml       => gdparall%ml
+    iarrc    => gdparall%iarrc
+    ngridlo  => gdparall%ngridlo
+    ngridgl  => gdparall%ngridgl
+    !
+    call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
+       &                 nf, nl, mf, ml, iarrc, ngridgl, ngridlo, gdp )
+    !
+    ! broadcast LOCAL grid indices to ALL partitions
+    ! so every partition knows the dimensions and positions
+    ! of the other partitions in the global domain
+    !
+    call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
+    call dfbroadc_gdp ( nf, nproc, dfint, gdp )
+    call dfbroadc_gdp ( nl, nproc, dfint, gdp )
+    call dfbroadc_gdp ( mf, nproc, dfint, gdp )
+    call dfbroadc_gdp ( ml, nproc, dfint, gdp )
     !
     nsiz = nlg - nfg + 1
     if ( mod(nsiz,2)==0 ) nsiz = nsiz + 1

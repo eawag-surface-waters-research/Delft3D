@@ -1,4 +1,4 @@
-subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
+subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -60,6 +60,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
     character(*)     , intent(in)  :: neffil !!  File name for FLOW NEFIS output
                                              !!  files: tri"h/m/d"-"casl""labl" or
                                              !!  for Comm. file com-"casl""labl"
+    character(*)     , intent(in)  :: part_nr !! Partition number string
     character(16)    , intent(in)  :: simdat !!  Simulation date representing the
                                              !!  flow condition at this date
     character(6)     , intent(in)  :: soort  !!  String containing to which output
@@ -107,7 +108,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
     ierror = 0
     !
     filnam = neffil
-    if (soort(1:3)/='com') filnam = neffil(1:3) // soort(1:1) // neffil(5:)
+    if (soort(1:3)/='com') filnam = neffil(1:3) // soort(1:1) // trim(neffil(5:)) // trim(part_nr) 
     grnam4 = soort(1:3) // '-version'
     errmsg = ' '
     !

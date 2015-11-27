@@ -106,7 +106,8 @@ subroutine initsafe(gdp)
     !
     call sbuff_init
     !
-    call initdfparall  (gdp) 
+    call initdfparall  (gdp%gdparall) 
+    call initdfparall  (gdp%iopartit) 
     ! 
     ! Since GDP allocation has not yet succeeded, I can't call prterr(...,gdp) and d3stop(...)
     !

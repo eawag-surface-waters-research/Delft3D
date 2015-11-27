@@ -37,7 +37,6 @@ subroutine delnef(filnam, gdp)
     use precision
     use globaldata
     use string_module
-    use dfparall
     !
     implicit none
     !
@@ -61,41 +60,43 @@ subroutine delnef(filnam, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    if (parll .and. (inode /= master)) return
-    !
     lundia              => gdp%gdinout%lundia
     !
     locfnm = ' '
     locfnm = filnam
     call remove_leading_spaces(locfnm    ,ind       )
     !
-    ! test files existence - NEFIS DAT file
-    !
-    inquire (file = locfnm(:ind) // '.dat', exist = exists)
-    if (exists) then
-       call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.dat')
-       luntmp = newlun(gdp)
-       open (luntmp, file = locfnm(:ind) // '.dat')
-       close (luntmp, status = 'delete')
-    endif
-    !
-    ! test files existence - NEFIS DEF file
-    !
-    inquire (file = locfnm(:ind) // '.def', exist = exists)
-    if (exists) then
-       call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.def')
-       luntmp = newlun(gdp)
-       open (luntmp, file = locfnm(:ind) // '.def')
-       close (luntmp, status = 'delete')
-    endif
-    !
-    ! test files existence - NetCDF version
-    !
-    inquire (file = locfnm(:ind) // '.nc', exist = exists)
-    if (exists) then
-       call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.nc')
-       luntmp = newlun(gdp)
-       open (luntmp, file = locfnm(:ind) // '.nc')
-       close (luntmp, status = 'delete')
+    if (locfnm(ind-2:ind) == '.nc') then
+       !
+       ! test files existence - NetCDF version
+       !
+       inquire (file = locfnm(:ind), exist = exists)
+       if (exists) then
+          call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind))
+          luntmp = newlun(gdp)
+          open (luntmp, file = locfnm(:ind))
+          close (luntmp, status = 'delete')
+       endif
+    else
+       !
+       ! test files existence - NEFIS DAT file
+       !
+       inquire (file = locfnm(:ind) // '.dat', exist = exists)
+       if (exists) then
+          call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.dat')
+          luntmp = newlun(gdp)
+          open (luntmp, file = locfnm(:ind) // '.dat')
+          close (luntmp, status = 'delete')
+       endif
+       !
+       ! test files existence - NEFIS DEF file
+       !
+       inquire (file = locfnm(:ind) // '.def', exist = exists)
+       if (exists) then
+          call prterr(lundia,'G051','Removing old output file: '//locfnm(:ind)// '.def')
+          luntmp = newlun(gdp)
+          open (luntmp, file = locfnm(:ind) // '.def')
+          close (luntmp, status = 'delete')
+       endif
     endif
 end subroutine delnef

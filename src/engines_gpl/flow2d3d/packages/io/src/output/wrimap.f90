@@ -10,7 +10,7 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
                   & dps       ,dpu       ,dpv       ,gsqs      ,wrifou    , &
                   & irequest  ,fds       ,iarrc     ,mf        ,ml        , &
                   & nf        ,nl        ,nostatto  ,nostatgl  ,order_sta , &
-                  & ntruvto   ,ntruvgl   ,order_tra ,gdp       )
+                  & ntruvto   ,ntruvgl   ,order_tra ,ipartition,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -100,6 +100,7 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
     integer                                                                                         :: nostat      !  Description and declaration in dimens.igs
     integer                                                                                         :: nsrc        !  Description and declaration in esm_alloc_int.f90
     integer                                                                                         :: ntruv       !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: ipartition  !  Partition number
     integer , dimension(5, noroco)                                                                  :: irocol      !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: kcs         !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     , intent(in)  :: kcu         !  Description and declaration in esm_alloc_int.f90
@@ -922,24 +923,10 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
        !
        ! Parallel partition
        !
-       if (inode == master) then
-          allocate(ibuff2(nmaxgl,mmaxgl), stat=istat)
-          if (parll) then
-             do ip = 0, nproc-1
-                do n = nf(ip), nl(ip)
-                   do m = mf(ip), ml(ip)
-                      ibuff2(n, m) = ip
-                   enddo
-                enddo
-             enddo
-          else
-             ibuff2 = 0
-          endif
-          call wrtvar(fds, filename, filetype, grnam2, 1, &
-                    & gdp, ierror, lundia, ibuff2, 'PPARTITION')
-          deallocate(ibuff2, stat=istat)
-          if (ierror/=0) goto 9999
-       endif
+       call wrtarray_nm(fds, filename, filetype, grnam2, 1, &
+                     & nf, nl, mf, ml, iarrc, gdp, &
+                     & ierror, lundia, ipartition, 'PPARTITION')    
+       if (ierror/=0) goto 9999
        !
        if (filetype == FTYPE_NEFIS) then
           !

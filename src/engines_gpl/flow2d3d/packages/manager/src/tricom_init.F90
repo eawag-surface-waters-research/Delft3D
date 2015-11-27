@@ -443,7 +443,6 @@ subroutine tricom_init(olv_handle, gdp)
     character(16)                                 :: simdat        ! Simulation date representing the flow condition at this date 
     character(256)                                :: filrgf        ! File name for the curvi-linear grid file (telmcrgf.xxx) !! file will be read formatted !! 
     character(256)                                :: filrol
-    character(256)                                :: fixtri        ! fixed size version of trifil, needed for character concatenation 
     character(6)                                  :: soort         ! String containing to which output file version group or to diagnostic file should be written 
     character(30)  , dimension(10)                :: runtxt        ! Textual description of model input 
     character(60)                                 :: txtput        ! Text to be print
@@ -1409,20 +1408,6 @@ subroutine tricom_init(olv_handle, gdp)
     ! files first for INITI=1 and file requested (times <> 0)
     !
     if (initi == 1) then
-       trilen = min(len(fixtri), len(trifil))
-       fixtri(1:trilen) = trifil(1:trilen)
-       if (ithisi /= 0) then
-          call delnef(fixtri(1:3) // 'h' // fixtri(5:trilen)     ,gdp       )
-       endif
-       if (itmapi /= 0) then
-          call delnef(fixtri(1:3) // 'm' // fixtri(5:trilen)     ,gdp       )
-       endif
-       if (drogue) then
-          call delnef(fixtri(1:3) // 'd' // fixtri(5:trilen)     ,gdp       )
-       endif
-       if (gdp%d%nofou > 0) then
-          call delnef(fixtri(1:3) // 'f' // fixtri(5:trilen)     ,gdp       )
-       endif
        !
        ! The following files may be generated for "debug" purpose
        ! Remove them if they are already there from a previous run

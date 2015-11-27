@@ -220,7 +220,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                    !
                    ! AT U POINT
                    !
-                   if (kfu(nm)==0 .or. (kcs(nm)/=1 .and. kcs(nmu)/=1)) cycle
+                   if (kfu(nm)==0 .or. (abs(kcs(nm))/=1 .and. abs(kcs(nmu))/=1)) cycle
                    !
                    ! set bed gradients in u and v directions at u point
                    !
@@ -258,7 +258,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                    !
                    ! AT V POINT
                    !
-                   if (kfv(nm)==0 .or. (kcs(nm)/=1 .and. kcs(num)/=1)) cycle
+                   if (kfv(nm)==0 .or. (abs(kcs(nm))/=1 .and. abs(kcs(num))/=1)) cycle
                    !
                    ! set bed gradients in u and v directions at v point
                    !
@@ -373,10 +373,10 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                          if (islope==3) then
                             dmloc = sqrt(dm(nm)*dm(nm2))
                             if (comparereal(dmloc,0.0_fp)==0) then
-                                if (kcs(nm)==1) then
-                                    dmloc = kcs(nm)
-                                elseif (kcs(nm2)==1) then
-                                    dmloc = kcs(nm2)
+                                if (abs(kcs(nm))==1) then
+                                    dmloc = dm(nm)
+                                elseif (abs(kcs(nm2))==1) then
+                                    dmloc = dm(nm2)
                                 endif
                             endif
                             ftheta  = ashld*(shield**bshld)* &
@@ -444,17 +444,17 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                 !
                 ! Apply upwind frac and fixfac.
                 !
-                ! At inflow (open, dd, and partition) boundaries the fixfac should not be taken upwind.
+                ! At inflow (open and dd) boundaries the fixfac should not be taken upwind.
                 !
-                if ((sbedcorr>0.0 .and. kcs(nm)==1) .or. kcs(nm2)/=1) then
+                if ((sbedcorr>0.0 .and. abs(kcs(nm))==1) .or. abs(kcs(nm2))/=1) then
                    fixf = fixfac(nm,l)
                 else
                    fixf = fixfac(nm2,l)
                 endif
                 !
-                ! At dd and partition boundaries the fraction should not be taken upwind (because these quantities have not been communicated).
+                ! At dd boundaries the fraction should not be taken upwind (because these quantities have not been communicated).
                 !
-                if ((sbedcorr>0.0 .and. (kcs(nm)==1 .or. kcs(nm)==2)) .or. (kcs(nm2)/=1 .and. kcs(nm2)/=2)) then
+                if ((sbedcorr>0.0 .and. kcs(nm)/=3) .or. (kcs(nm2)==3)) then
                    frc = frac(nm,l)
                 else
                    frc = frac(nm2,l)
@@ -488,14 +488,14 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
              !
              ! suu
              !
-             if (kcs(nm)==1 .and. kcs(nmu)==3) then
+             if (abs(kcs(nm))==1 .and. kcs(nmu)==3) then
                 if (sbuut(nm) < 0.0_fp) then ! To be used: sbu(nm)
                    ! transport from right neighbour into this domain: this suu must be overwritten
                    suu(nm,l) = 0.0_fp
                 else
                    suu(nm,l) = sbuut(nm)
                 endif
-             elseif (kcs(nm)==3 .and. kcs(nmu)==1) then
+             elseif (kcs(nm)==3 .and. abs(kcs(nmu))==1) then
                 if (sbuut(nm) > 0.0_fp) then ! To be used: sbu(nmu)
                    ! transport from left neighbour into this domain: this suu must be overwritten
                    suu(nm,l) = 0.0_fp
@@ -508,14 +508,14 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
              !
              ! svv
              !
-             if (kcs(nm)==1 .and. kcs(num)==3) then
+             if (abs(kcs(nm))==1 .and. kcs(num)==3) then
                 if (sbvvt(nm) < 0.0_fp) then ! To be used: sbv(nm)
                    ! transport from top neighbour into this domain: this svv must be overwritten
                    svv(nm,l) = 0.0_fp
                 else
                    svv(nm,l) = sbvvt(nm)
                 endif
-             elseif (kcs(nm)==3 .and. kcs(num)==1) then
+             elseif (kcs(nm)==3 .and. abs(kcs(num))==1) then
                 if (sbvvt(nm) > 0.0_fp) then ! To be used: sbv(num)
                    ! transport from bottom neighbour into this domain: this svv must be overwritten
                    svv(nm,l) = 0.0_fp

@@ -1196,7 +1196,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
           ! Check validity of input data
           !
           do nm = 1, nmmax
-             if (dims%celltype(nm) == 1) then
+             if (abs(dims%celltype(nm)) == 1) then
                 !
                 ! At an internal point the composition is important.
                 ! Check the values carefully before continuing.
@@ -1466,7 +1466,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                    ! Check validity of input data.
                    !
                    do nm = 1, nmmax
-                      if (dims%celltype(nm) == 1) then
+                      if (abs(dims%celltype(nm)) == 1) then
                          !
                          ! At an internal point the composition of all layers is important.
                          ! Check the values carefully before continuing.
@@ -1726,7 +1726,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                    ! Check validity of input data.
                    !
                    do nm = 1, nmmax
-                      if (dims%celltype(nm) == 1) then
+                      if (abs(dims%celltype(nm)) == 1) then
                          !
                          ! At an internal point the composition of all layers is important.
                          ! Check the values carefully before continuing.

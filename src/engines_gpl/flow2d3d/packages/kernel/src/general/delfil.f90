@@ -54,6 +54,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     use globaldata
     use string_module
     use dfparall 
+    use properties
     !
     implicit none
     !
@@ -62,7 +63,6 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer , pointer :: itis
-    integer , pointer :: lunmd
     integer , pointer :: lundia
     integer , pointer :: lunscr
     logical , pointer :: reusetmp !  TRUE when temporary files will be reused if possible 
@@ -74,43 +74,19 @@ subroutine delfil(runid     ,filmd     ,gdp       )
 !
 ! Local variables
 !
-    integer                        :: lenc    ! Help var. (length of var. cvar to be looked for in the MD-file) 
-    integer                        :: lkw     ! Length of keyword string 
-    integer                        :: lmd     ! Length of character string filmd 
     integer                        :: lrid    ! Length of character string runid 
     integer                        :: lunout  ! Unit number for file to write out- put to (:=LUNDIA or LUNSCR) 
-    integer                        :: nlook   ! Help var.: nr. of data to look for in the MD-file 
-    integer                        :: nrrec   ! Pointer to the record number in the MD-file 
-    integer                        :: ntrec   ! Help. var to keep track of NRREC 
-    integer, external              :: newlun
-    logical                        :: ex      ! Flag to test if file exists 
-    logical                        :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
-    logical                        :: lerror  ! Flag=TRUE if a local error is encountered 
-    logical                        :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     logical                        :: opend   ! Flag to check if file is open 
     character(12)                  :: fildef
     character(256)                 :: filnam  ! String contaning complete file name "TMP_RUNID.extension" 
     character(256)                 :: filrd   ! File name read from Md-file/flow file 
-    character(300)                 :: mdfrec  ! Standard rec. length in MD-file (300) 300 = 256 + a bit (field, =, ##, etc.) 
-    character(6)                   :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
-    logical                        :: lmd_open
 !
 !! executable statements -------------------------------------------------------
 !
-    lunmd       => gdp%gdinout%lunmd
     lundia      => gdp%gdinout%lundia
     lunscr      => gdp%gdinout%lunscr
     itis        => gdp%gdrdpara%itis
     reusetmp    => gdp%gdtmpfil%reusetmp
-    !
-    lerror   = .false.
-    newkw    = .true.
-    found    = .false.
-    lmd_open = .false.
-    nlook    = 1
-    lkw      = 6
-    lenc     = 12
-    fildef   = ' '
     !
     ! Unit number to write output to
     !
@@ -122,398 +98,97 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     !
     call remove_leading_spaces(runid     ,lrid      )
     !
-    ! Open mdf/md-file/md-flow file to see if temporary files are really
-    ! temporary. If no mdf/md-file/md-flow file defined defined then no
-    ! temporary files either
-    !
-    call remove_leading_spaces(filmd     ,lmd       )
-    inquire (file = filmd(1:lmd), exist = ex)
-    if (ex) then
-       inquire (file = filmd(1:lmd), opened = opend)
-       if (opend) then
-          rewind (lunmd)
-       else
-          lunmd = newlun(gdp)
-          open (lunmd, file = filmd(1:lmd), form = 'formatted')
-       endif
-       !
-       ! Md-file is opened, it should be closed at the end of this routine
-       !
-       lmd_open = .true.
-    else
-       goto 9999
-    endif
-    !
-    ! Read first record and define NRREC
-    !
-    read (lunmd, '(a)') mdfrec
-    nrrec = 1
     if (.not. reusetmp) then
         !
-        ! Locate 'Filgrd' record in MD-file/flow file
-        ! to test temporary file defining grid
+        ! Filcco
         !
-        keyw = 'Filgrd'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Filcco',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.grd'
-        if (inode == master) call rmdel(filnam    ,gdp       )
+        if (filnam/=filrd .and. inode == master) call rmdel(filnam    ,gdp       )
         ! 
         ! append node number to file name in case of parallel computing within single-domain case 
         ! 
         if ( parll ) then
            write(filnam(8+lrid+1:8+lrid+4),'(a,i3.3)') '-',inode 
         endif
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           call rmdel(filnam    ,gdp       )
-        endif
+        if (filnam/=filrd) call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'Fildry' record in MD-file/flow file
-        ! to test temporary file defining permanent dry points
+        ! Fildry
         !
-        keyw = 'Fildry'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Fildry',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.dry'
-        ! 
-        ! append node number to file name in case of parallel computing within single-domain case 
-        ! 
         if ( parll ) then
            write(filnam(8+lrid+1:8+lrid+4),'(a,i3.3)') '-',inode 
         endif
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           call rmdel(filnam    ,gdp       )
-        endif
+        if (filnam/=filrd) call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'Filtd' record in MD-file/flow file
-        ! to test temporary file defining thin dams
+        ! Filtd
         !
-        keyw = 'Filtd'
-        lkw = 5
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Filtd',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.td'
-        ! 
-        ! append node number to file name in case of parallel computing within single-domain case 
-        ! 
         if ( parll ) then
            write(filnam(7+lrid+1:7+lrid+4),'(a,i3.3)') '-',inode 
         endif
-        if (filnam(:7 + lrid)/=filrd(:7 + lrid)) then
-           call rmdel(filnam    ,gdp       )
-        endif
+        if (filnam/=filrd) call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'FilbcH' record in MD-file/flow file
-        ! to test temporary file defining fourier boundary conditions
+        ! FilbcH
         !
-        keyw = 'FilbcH'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','FilbcH',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.bch'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       ) 
-        endif
+        if (filnam/=filrd .and. inode==master) call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'FilbcT' record in MD-file/flow file
-        ! to test temporary files defining time varying hydrodynamic data
-        ! at open boundaries
+        ! FilbcT
         !
-        keyw = 'FilbcT'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','FilbcT',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.bct'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       ) 
-        endif
+        if (filnam/=filrd .and. filrd/=' ') call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'FilbcQ' record in MD-file/flow file
-        ! to test temporary files defining time varying concentration data
-        ! at open boundaries
+        ! FilbcQ
         !
-        keyw = 'FilbcQ'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','FilbcQ',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.bcq'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       )
-        endif
+        if (filnam/=filrd .and. filrd/=' ') call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'FilbcC' record in MD-file/flow file
-        ! to test temporary files defining time varying concentration data
-        ! at open boundaries
+        ! FilbcC
         !
-        keyw = 'FilbcC'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','FilbcC',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.bcc'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       ) 
-        endif
+        if (filnam/=filrd .and. filrd/=' ') call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'Fildis' record in MD-file/flow file
-        ! to test temporary files defining time varying data at discharge
-        ! locations
+        ! Fildis
         !
-        keyw = 'Fildis'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Fildis',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.dis'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       ) 
-        endif
+        if (filnam/=filrd .and. filrd/=' ') call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'Filtmp' record in MD-file/flow file
-        ! to test temporary files defining time varying data for heat models
+        ! Filtmp
         !
-        keyw = 'Filtmp'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Filtmp',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.tem'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       ) 
-        endif
+        if (filnam/=filrd .and. filrd/=' ') call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'Fileva' record in MD-file/flow file
-        ! to test temporary files defining time varying data for
-        ! evaporations and rain
+        ! Fileva
         !
-        keyw = 'Fileva'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Fileva',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.eva'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       )
-        endif
+        if (filnam/=filrd .and. filrd/=' ') call rmdel(filnam    ,gdp       )
         !
-        ! Locate 'Filwnd' record in MD-file/flow file
-        ! to test temporary files defining time varying wind data
+        ! Filwnd
         !
-        keyw = 'Filwnd'
-        lkw = 6
-        ntrec = nrrec
-        call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                  & 'NO'      )
-        if (found) then
-           call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                     & mdfrec    ,filrd     ,fildef    ,lenc      ,nrrec     , &
-                     & ntrec     ,lunout    ,gdp       )
-           if (lerror) then
-              lerror = .false.
-              filrd = fildef
-           endif
-        else
-           filrd = fildef
-        endif
-        !
-        ! First test name of temporary file is not equal to name of
-        ! attribute file in MD-file/flow file
-        ! If not test existence of intermediate files and if they are opened
-        ! close the files and delete them using routine RMDEL
-        !
+        filrd = fildef
+        call prop_get(gdp%mdfile_ptr,'*','Filwnd',filrd)
         filnam = 'TMP_' // runid(:lrid) // '.wnd'
-        if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           if (inode == master) call rmdel(filnam    ,gdp       )
-        endif
+        if (filnam/=filrd .and. inode==master) call rmdel(filnam    ,gdp       )
     endif
     !
     ! Temporary file created (Tricom.f90) when leaving online visualisation 
@@ -535,7 +210,4 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     ! old name
     filnam = 'com-' // runid(:lrid) // '.srctmp'
     if (inode == master) call rmdel(filnam, gdp)
-9999 continue
-    !
-    if (lmd_open) close(lunmd)
 end subroutine delfil

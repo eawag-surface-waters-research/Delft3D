@@ -46,6 +46,8 @@ type sv_postpr
     integer, dimension(:)  , pointer :: kfst0   !  kfs at the start of the simulation
     ! 
     ! logicals
+	!
+	logical :: mergemap !  Flag indicating whether a parallel simulation should write one overall trim-file (TRUE) or one file per partition (FALSE) - always true for serial simulations
     !
     ! characters
     character*131 :: header(10) !  Print file header

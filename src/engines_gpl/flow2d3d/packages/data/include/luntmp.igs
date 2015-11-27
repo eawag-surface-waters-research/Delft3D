@@ -29,14 +29,6 @@
 !-------------------------------------------------------------------------------
     type gd_luntmp
 !
-       integer :: lungrd     !  Global data
-                             !  Unit number of local scratch file
-       integer :: lundry     !  Global data
-                             !  Unit number of local scratch file
-       integer :: luntd      !  Global data
-                             !  Unit number of local scratch file
-       integer :: luncut
-       integer :: lun45
        integer :: lunbct     !  Global data
                              !  Unit number for file with time dep.
                              !  hydrodynamic boundary condition
@@ -56,10 +48,6 @@
                              !  evaperature
                              !  Unit number for file with time dep.
                              !  rainfall / evaporation model
-       integer :: lunwnd     !  Global data
-                             !  Unit number for file with time dep.
-                             !  wind
-       integer :: lunwav
        integer :: lunbcq     !  Global data
                              !  Unit number for file with QH-rel.
                              !  Unit number for file with time dep.

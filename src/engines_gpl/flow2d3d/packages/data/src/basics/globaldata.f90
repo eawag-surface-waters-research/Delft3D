@@ -242,6 +242,7 @@ module globaldata
        ! data fields for parallel Delft3D-FLOW
        !
        type(dfparalltype) , pointer :: gdparall
+       type(dfparalltype) , pointer :: iopartit
        !
        ! ec-module
        !

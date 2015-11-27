@@ -299,7 +299,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
        if (error) goto 9999
        soort = 'com'
        call wridoc(error     ,comfil    ,soort     ,simdat    ,runtxt    , &
-                 & commrd    ,gdp       )
+                 & commrd    ,''        ,gdp       )
        if (error) goto 9999
        !
        ! Write group WIND
@@ -329,7 +329,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           call prihis(gdp)
           soort = 'ascii'
           call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
-                    & commrd    ,gdp       )
+                    & commrd    ,''        ,gdp       )
           if (error) goto 9999
        endif
        !

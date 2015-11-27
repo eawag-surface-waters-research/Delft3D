@@ -144,6 +144,7 @@ subroutine wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
        if (irequest == REQUESTTYPE_DEFINE) then
           if (.not.first) cycle
           if (inode /= master) cycle
+          call delnef(filename,gdp       )
        endif
        !
        ! create or open the file
@@ -153,6 +154,10 @@ subroutine wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
        elseif (first .and. irequest == REQUESTTYPE_WRITE) then
           ! the file has already been opened in step 1
        elseif (filetype == FTYPE_NEFIS) then
+          if (first .and. irequest == REQUESTTYPE_DEFINE) then              
+             write(lundia,*) 'Creating new '//trim(filename)//'.dat'
+             write(lundia,*) 'Creating new '//trim(filename)//'.def'
+          endif
           ierror = open_datdef(filename ,fds      , .false.)
           if (ierror /= 0) then
              write(error_string,'(2a)') 'While trying to open dat/def-file ',trim(filename)
@@ -160,6 +165,7 @@ subroutine wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
           endif
        elseif (filetype == FTYPE_NETCDF) then
           if (first .and. irequest == REQUESTTYPE_DEFINE) then              
+             write(lundia,*) 'Creating new '//trim(filename)
              ierror = nf90_create(filename, 0, fds); call nc_check_err(lundia, ierror, "creating file", filename)
              !
              ! global attributes
@@ -228,7 +234,7 @@ subroutine wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
           if (first) then
              soort = 'dro'
              call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
-                       & .false.   ,gdp       )
+                       & .false.   ,''        ,gdp       )
           endif
        endif
        if (ierror/= 0) error = .true.

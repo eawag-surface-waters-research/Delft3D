@@ -83,12 +83,19 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
                                    !!  rent simulation (used to determine
                                    !!  the names of the in- /output files
                                    !!  used by the system)
-    integer, pointer                          :: mfg
-    integer, pointer                          :: mlg
-    integer, pointer                          :: nfg
-    integer, pointer                          :: nlg
-    integer, pointer                          :: nmaxgl
-    integer, pointer                          :: mmaxgl
+    integer                              , pointer :: mfg
+    integer                              , pointer :: mlg
+    integer                              , pointer :: nfg
+    integer                              , pointer :: nlg
+    integer                              , pointer :: nmaxgl
+    integer                              , pointer :: mmaxgl
+    integer       , dimension(:,:)       , pointer :: iarrc
+    integer       , dimension(:)         , pointer :: mf
+    integer       , dimension(:)         , pointer :: ml
+    integer       , dimension(:)         , pointer :: nf
+    integer       , dimension(:)         , pointer :: nl
+    integer                              , pointer :: lenlo
+    integer                              , pointer :: lengl
 !
 !
 ! Local variables
@@ -102,7 +109,6 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
     integer                        :: newlun
     logical                        :: ex                   ! Help logical var. to determine whether the file currently beeing checked exist
 
-    integer, dimension(4,0:nproc-1)       :: iarrc  ! array containing collected grid indices
     integer                               :: indx   ! array index
     integer                               :: jndx   ! array index
     integer                               :: kndx   ! array index
@@ -110,17 +116,11 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
     integer                               :: istart ! start pointer for each subdomain in collected array
     integer                               :: k      ! loop counter
     integer                               :: l      ! loop counter
-    integer                               :: lenlo  ! length of field of current subdomain
-    integer                               :: lengl  ! length of field containing collected data
     integer                               :: nohalo_length  ! length of field containing collected data
                                                             ! without halo points
     integer                               :: m      ! loop counter
-    integer, dimension(0:nproc-1)         :: mf     ! first index w.r.t. global grid in x-direction
-    integer, dimension(0:nproc-1)         :: ml     ! last index w.r.t. global grid in x-direction
     integer                               :: msiz   ! size of present subdomain in x-direction
     integer                               :: n      ! loop counter
-    integer, dimension(0:nproc-1)         :: nf     ! first index w.r.t. global grid in y-direction
-    integer, dimension(0:nproc-1)         :: nl     ! last index w.r.t. global grid in y-direction
     integer                               :: nsiz   ! size of present subdomain in y-direction
 
     real(fp)  , dimension(:), allocatable :: rdum    ! global array gathered from all nodes
@@ -145,16 +145,14 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
     nlg     => gdp%gdparall%nlg
     mmaxgl  => gdp%gdparall%mmaxgl
     nmaxgl  => gdp%gdparall%nmaxgl
+    iarrc   => gdp%gdparall%iarrc
+    mf      => gdp%gdparall%mf
+    ml      => gdp%gdparall%ml
+    nf      => gdp%gdparall%nf
+    nl      => gdp%gdparall%nl
+    lenlo   => gdp%gdparall%ngridlo
+    lengl   => gdp%gdparall%ngridgl
     !
-    ! gather grid indices of all subdomains
-    !
-    call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
-       &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-    call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
-    call dfbroadc_gdp ( nf, nproc, dfint, gdp )
-    call dfbroadc_gdp ( nl, nproc, dfint, gdp )
-    call dfbroadc_gdp ( mf, nproc, dfint, gdp )
-    call dfbroadc_gdp ( ml, nproc, dfint, gdp )
     if (inode == master) then
        !
        !    - calculates global length without halo points

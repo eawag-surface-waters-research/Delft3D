@@ -336,16 +336,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
     dtmor   = dt*morfac
     nm_pos  = 1
     !
-    ! parallel case: exchange arrays in the overlapping regions
-    ! other arrays are their overlap data exchanged in erosed.f90
-    !
-    call dfexchg( fixfac,1, lsedtot, dfloat, nm_pos, gdp)
-    call dfexchg( frac,  1, lsedtot, dfloat, nm_pos, gdp)
-    if (lsed > 0) then
-       call dfexchg( aks,   1, lsed,    dfloat, nm_pos, gdp)
-       call dfexchg( rca,   1, lsed,    dfloat, nm_pos, gdp)
-    endif
-    !
     !   Calculate suspended sediment transport correction vector (for SAND)
     !   Note: uses GLM velocites, consistent with DIFU
     !
@@ -373,9 +363,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           do l = 1, lsed
              ll = lstart + l
              if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
-                !
-                call dfexchg( fluxu(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
-                call dfexchg( fluxv(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
                 do nm = 1, nmmax
                    nmu = nm + icx
                    num = nm + icy
@@ -394,9 +381,9 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                    !
                    if ((kfu(nm)*kfsed(nm)*kfsed(nmu)) /= 0) then
                       cumflux = 0.0_fp
-                      if (kcs(nmu) == 3 .or. kcs(nmu) == -1) then
+                      if (kcs(nmu) == 3) then
                          aksu = aks(nm, l)
-                      elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
+                      elseif (kcs(nm) == 3) then
                          aksu = aks(nmu, l)
                       else
                          aksu = (aks(nm, l) + aks(nmu, l)) / 2.0_fp
@@ -432,12 +419,12 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       ! Layer below kmaxsd layer:
                       k = kmxsed(nm,l) - 1
                       if (k < kfumax(nm)) then
-                         if (kcs(nmu) == 3 .or. kcs(nmu) == -1) then
+                         if (kcs(nmu) == 3) then
                             !
                             ! correction for domain decomposition:
                             !
                             ceavg = rca(nm, l)
-                         elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
+                         elseif (kcs(nm) == 3) then
                             ceavg = rca(nmu, l)
                          else
                             ceavg = (rca(nm, l) + rca(nmu, l))/2.0_fp
@@ -487,9 +474,9 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                    !
                    if ((kfv(nm)*kfsed(nm)*kfsed(num)) /= 0) then
                       cumflux = 0.0_fp
-                      if (kcs(num) == 3 .or. kcs(num) == -1) then
+                      if (kcs(num) == 3) then
                          aksu = aks(nm, l)
-                      elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
+                      elseif (kcs(nm) == 3) then
                          aksu = aks(num, l)
                       else
                          aksu = (aks(nm, l)+aks(num, l)) / 2.0_fp
@@ -524,12 +511,12 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       !
                       k = kmxsed(nm,l) - 1
                       if (k < kfvmax(nm)) then
-                         if (kcs(num) == 3 .or. kcs(num) == -1) then
+                         if (kcs(num) == 3) then
                             !
                             ! correction for domain decomposition:
                             !
                             ceavg = rca(nm,l)
-                         elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
+                         elseif (kcs(nm) == 3) then
                             ceavg = rca(num,l)
                          else
                             ceavg = (rca(nm,l)+rca(num,l)) / 2.0_fp
@@ -565,7 +552,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                       ! a case, the suspended sediment transport vector must
                       ! also be reduced.
                       !
-                      if ((svcor(nm,l) > 0.0_fp .and. kcs(nm)==1) .or. kcs(num)/=1) then
+                      if ((svcor(nm,l) > 0.0_fp .and. abs(kcs(nm))==1) .or. abs(kcs(num))/=1) then
                          svcor(nm, l) = svcor(nm, l)*fixfac(nm, l)
                       else
                          svcor(nm, l) = svcor(nm, l)*fixfac(num, l)
@@ -575,11 +562,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
              endif    ! sedtyp = SEDTYP_NONCOHESIVE_SUSPENDED
           enddo       ! l
        endif          ! kmax>1
-       !
-       if (lsed > 0) then
-          call dfexchg( sucor,   1, lsed, dfloat, nm_pos, gdp)
-          call dfexchg( svcor,   1, lsed, dfloat, nm_pos, gdp)
-       endif
        !
        ! Calculate suspended sediment transport vector components for
        ! output
@@ -624,11 +606,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           enddo     ! l
        endif        ! sscomp .or. nst>=itmor
     endif           ! sus /= 0.0
-    !
-    if (lsed > 0) then
-       call dfexchg( ssuu,   1, lsed, dfloat, nm_pos, gdp)
-       call dfexchg( ssvv,   1, lsed, dfloat, nm_pos, gdp)
-    endif
     !
     ! if morphological computations have started
     !
@@ -737,9 +714,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           endif       ! icond = 4 or 5 (boundary with transport condition)
        enddo          ! jb (open boundary) 
        !
-       call dfexchg(sbuu, 1, lsedtot, dfloat, nm_pos, gdp)
-       call dfexchg(sbvv, 1, lsedtot, dfloat, nm_pos, gdp)
-       !
        ! Update quantity of bottom sediment
        !
        dbodsd = 0.0_fp
@@ -754,7 +728,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
              !
              ! note: do not update bottom sediment at open boundary pnts
              !
-             if (kcs(nm)*kfs(nm) /= 1) cycle
+             if (abs(kcs(nm))*kfs(nm) /= 1) cycle
              !
              nmu     = nm + icx
              num     = nm + icy
@@ -874,10 +848,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
        !
        call fluff_burial(gdp%gdmorpar%flufflyr, dbodsd, lsed, lsedtot, gdp%d%nmlb, gdp%d%nmub, dt, morfac)
        !
-       nm_pos = 2
-       call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
-       nm_pos = 1
-       !
        ! Re-distribute erosion near dry and shallow points to allow erosion
        ! of dry banks
        !
@@ -885,7 +855,7 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           !
           ! If this is a cell in which sediment processes are active then ...
           !
-          if (kcs(nm)*kfs(nm)*kfsed(nm) /= 1) cycle
+          if (abs(kcs(nm))*kfs(nm)*kfsed(nm) /= 1) cycle
           !
           nmu = nm + icx
           num = nm + icy
@@ -1045,13 +1015,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           enddo
        enddo
        !
-       call dfexchg(sbuuc, 1, lsedtot, dfloat, nm_pos, gdp)
-       call dfexchg(sbvvc, 1, lsedtot, dfloat, nm_pos, gdp)
-       if (lsed > 0) then
-          call dfexchg(ssuuc, 1, lsed, dfloat, nm_pos, gdp)
-          call dfexchg(ssvvc, 1, lsed, dfloat, nm_pos, gdp)
-       endif
-       !
        ! Apply erosion and sedimentation to bookkeeping system
        !
        if (cmpupd) then
@@ -1089,8 +1052,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
              endif
           enddo
        endif
-       !
-       call dfexchg(depchg, 1, 1, dfloat, nm_pos, gdp)
        !
        ! Bed boundary conditions
        !
@@ -1190,8 +1151,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
        enddo
     endif ! nst >= itmor
     !
-    call dfexchg(depchg, 1, 1, dfloat, nm_pos, gdp)
-    !
     ! Update bottom elevations
     !
     if (bedupd) then
@@ -1248,8 +1207,6 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
           endif
        enddo
        !
-       call dfexchg( kcsbot, 1, 1, dfint, nm_pos, gdp)
-       !
        ! Dredging and Dumping
        !
        if (dredge) then
@@ -1279,6 +1236,5 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
                     &           + depchg(nmu)*gsqs(nmu) + depchg(numu)*gsqs(numu))/fact
           endif
        enddo
-       call dfexchg(dp, 1, 1, dfloat, nm_pos, gdp)
     endif
 end subroutine z_bott3d

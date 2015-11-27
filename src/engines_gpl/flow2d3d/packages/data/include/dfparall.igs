@@ -37,6 +37,12 @@ type dfparalltype
    integer                          :: mfg         ! first index of own subdomain w.r.t. global grid in x-direction
    integer                          :: mlg         ! last index of own subdomain w.r.t. global grid in x-direction
    !
+   integer, dimension(:,:), pointer :: iarrc       ! array containing collected grid indices
+   integer, dimension(:)  , pointer :: nf          ! first index w.r.t. global grid in y-direction
+   integer, dimension(:)  , pointer :: nl          ! last index w.r.t. global grid in y-direction
+   integer, dimension(:)  , pointer :: mf          ! first index w.r.t. global grid in x-direction
+   integer, dimension(:)  , pointer :: ml          ! last index w.r.t. global grid in x-direction
+   !
    integer, dimension(:)  , pointer :: iblkad      ! administration array for subdomain interfaces
                                                    ! contents:
                                                    ! pos. 1                     number of neighbouring subdomains = m
@@ -48,6 +54,13 @@ type dfparalltype
                                                    ! pos. 3*m+3+n ... 3*m+2*n+2 position of unknown in array to be received from neighbour
    !
    integer, dimension(:)  , pointer :: iweig       ! weights to determine load per part
+   !
+   integer                          :: ngridlo     ! local number of grid points
+   integer                          :: ngridgl     ! global number of grid points
+   integer                          :: nostatgl    ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+   integer                          :: nostatto    ! total number of stations (including "duplicate" stations located in halo regions)
+   integer                          :: ntruvgl     ! global number of transects (i.e. original number excluding duplicate stations located in the halo regions)
+   integer                          :: ntruvto     ! total number of transects (including "duplicate" stations located in halo regions)
    !
    integer, dimension(:)  , pointer :: order_tra   ! keeps track of original order of cross sections for output
    integer, dimension(:)  , pointer :: order_sta   ! keeps track of original order of monitoring stations for output

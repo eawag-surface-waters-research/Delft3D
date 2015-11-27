@@ -70,11 +70,18 @@ subroutine rmdel(filnam    ,gdp       )
        inquire (file = filnam(:lfil), opened = ex)
        if (ex) then
           inquire (file = filnam(:lfil), number = luntmp)
-       else
-          luntmp = newlun(gdp)
-          open (luntmp, file = filnam(:lfil), iostat = ierr)
+          ! Need to close this first. The status = 'delete' triggers an error when file was opened as readonly.
+          close (luntmp, iostat = ierr)
        endif
-       call prterr(lundia,'G051','Removing file: '//filnam(:lfil))
-       close (luntmp, status = 'delete', iostat = ierr)
+       luntmp = newlun(gdp)
+       open (luntmp, file = filnam(:lfil), iostat = ierr)
+       if (ierr==0) then
+          close (luntmp, status = 'delete', iostat = ierr)
+          if (ierr==0) then
+             call prterr(lundia,'G051','Removing file: '//filnam(:lfil))
+          else
+             call prterr(lundia,'U190','Unable to remove file: '//filnam(:lfil))
+          endif
+       endif
     endif
 end subroutine rmdel

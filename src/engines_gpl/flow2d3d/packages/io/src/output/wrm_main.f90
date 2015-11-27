@@ -175,6 +175,13 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     integer                              , pointer :: nlg
     integer                              , pointer :: nmaxgl
     integer                              , pointer :: mmaxgl
+    integer       , dimension(:,:)       , pointer :: iarrc
+    integer       , dimension(:)         , pointer :: mf
+    integer       , dimension(:)         , pointer :: ml
+    integer       , dimension(:)         , pointer :: nf
+    integer       , dimension(:)         , pointer :: nl
+    !
+    logical                              , pointer :: mergemap
 !
 ! Global variables
 !
@@ -214,13 +221,18 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     character(16)                                     :: simdat        ! Simulation date representing the flow condition at this date
     character(20)                                     :: rundat        ! Execution date of the simulation
     character(6)                                      :: soort         ! String containing to which output file version group should be written
-    integer    , dimension(4,0:nproc-1)               :: iarrc         ! array containing collected grid indices
-    integer                                           :: lenlo         ! length of field of current subdomain
-    integer                                           :: lengl         ! length of field containing collected data
-    integer    , dimension(0:nproc-1)                 :: mf            ! first index w.r.t. global grid in x-direction
-    integer    , dimension(0:nproc-1)                 :: ml            ! last index w.r.t. global grid in x-direction
-    integer    , dimension(0:nproc-1)                 :: nf            ! first index w.r.t. global grid in y-direction
-    integer    , dimension(0:nproc-1)                 :: nl            ! last index w.r.t. global grid in y-direction
+    !
+    integer                                           :: ii
+    integer                                           :: ip
+    integer                                           :: istat
+    integer                                           :: n
+    integer                                           :: m
+    character(4)                                      :: part_nr
+    integer                                           :: bck_inode
+    integer                                           :: bck_nproc
+    logical                                           :: bck_parll
+    type(dfparalltype)                  , pointer     :: bck_gdparall
+    integer      , dimension(:,:)       , allocatable :: ipartition
 !
 !! executable statements -------------------------------------------------------
 !
@@ -333,15 +345,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     rouflo              => gdp%gdtricom%rouflo
     rhow                => gdp%gdphysco%rhow
     ktemp               => gdp%gdtricom%ktemp
-    !
-    mfg                 => gdp%gdparall%mfg
-    mlg                 => gdp%gdparall%mlg
-    nfg                 => gdp%gdparall%nfg
-    nlg                 => gdp%gdparall%nlg
-    mmaxgl              => gdp%gdparall%mmaxgl
-    nmaxgl              => gdp%gdparall%nmaxgl
-    order_tra           => gdp%gdparall%order_tra
-    order_sta           => gdp%gdparall%order_sta
+    mergemap            => gdp%gdpostpr%mergemap
     lfsdu               => gdp%gdprocs%lfsdu
     !
     if (wrifou) then
@@ -354,6 +358,80 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     !
     call getdatagroup(gdp, ifile, 'map-const', group)
     first               => group%first
+    !
+    if (first) then
+       mfg                 => gdp%gdparall%mfg
+       nfg                 => gdp%gdparall%nfg
+       mf                  => gdp%gdparall%mf
+       ml                  => gdp%gdparall%ml
+       nf                  => gdp%gdparall%nf
+       nl                  => gdp%gdparall%nl
+       !
+       allocate(ipartition(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), stat=istat)
+       if (parll) then
+          do ip = 0, nproc-1
+             do n = max(gdp%d%nlb,nf(ip)-nfg+1), min(nl(ip)-nfg+1,gdp%d%nub)
+                do m = max(gdp%d%mlb,mf(ip)-mfg+1), min(ml(ip)-mfg+1,gdp%d%mub)
+                   ipartition(n, m) = ip
+                enddo
+             enddo
+          enddo
+       else
+          ipartition = 0
+       endif
+    endif
+    !
+    if (mergemap) then
+        part_nr = '';
+    else
+        bck_inode = inode
+        bck_nproc = nproc
+        bck_parll = parll
+        bck_gdparall => gdp%gdparall
+        !
+        write(part_nr,'(A,I3.3)') '-',inode
+        !
+        inode = 1
+        nproc = 1
+        parll = .false.
+        !
+        if (first) then
+           gdp%iopartit%mfg = 1
+           gdp%iopartit%mlg = mmax
+           gdp%iopartit%nfg = 1
+           gdp%iopartit%nlg = nmaxus
+           gdp%iopartit%mmaxgl = mmax
+           gdp%iopartit%nmaxgl = nmaxus
+           allocate(gdp%iopartit%nf(1))
+           allocate(gdp%iopartit%nl(1))
+           allocate(gdp%iopartit%mf(1))
+           allocate(gdp%iopartit%ml(1))
+           allocate(gdp%iopartit%iarrc(4,1))
+           allocate(gdp%iopartit%order_tra(1:ntruv))
+           do ii = 1,ntruv
+               gdp%iopartit%order_tra(ii) = ii
+           enddo
+           allocate(gdp%iopartit%order_sta(1:nostat))
+           do ii = 1,nostat
+               gdp%iopartit%order_sta(ii) = ii
+           enddo
+        endif
+        gdp%gdparall => gdp%iopartit
+    endif
+    !
+    mfg                 => gdp%gdparall%mfg
+    mlg                 => gdp%gdparall%mlg
+    nfg                 => gdp%gdparall%nfg
+    nlg                 => gdp%gdparall%nlg
+    mf                  => gdp%gdparall%mf
+    ml                  => gdp%gdparall%ml
+    nf                  => gdp%gdparall%nf
+    nl                  => gdp%gdparall%nl
+    iarrc               => gdp%gdparall%iarrc
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl
+    order_tra           => gdp%gdparall%order_tra
+    order_sta           => gdp%gdparall%order_sta
     !
     call dattim(rundat    )
     simdat(1:16)  = 'yyyymmdd  hhmmss'
@@ -368,6 +446,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     call date_and_time(cdate, ctime, czone)
     !
     filetype = getfiletype(gdp, ifile)
+    filename = trim(filename) // trim(part_nr) 
     if (filetype == FTYPE_NETCDF) filename = trim(filename)//'.nc'
     !
     if (gdp%gdflwpar%flwoutput%veuler) then
@@ -381,24 +460,6 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     endif
     !
     if (parll) then
-       !
-       ! allocate data arrays for collection data
-       !
-       ! gather LOCAL grid indices of all partitions
-       !
-       call dfsync(gdp)
-       call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
-          &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-       !
-       ! broadcast LOCAL grid indices to ALL partitions
-       ! so every partition knows the dimensions and positions
-       ! of the other partitions in the global domain
-       !
-       call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
-       call dfbroadc_gdp ( nf, nproc, dfint, gdp )
-       call dfbroadc_gdp ( nl, nproc, dfint, gdp )
-       call dfbroadc_gdp ( mf, nproc, dfint, gdp )
-       call dfbroadc_gdp ( ml, nproc, dfint, gdp )
        !
        ! Recalculates the effective number of stations, filtering out duplicates affected to more
        ! than one partition (i.e. located in halos)
@@ -433,6 +494,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        if (irequest == REQUESTTYPE_DEFINE) then
           if (.not.first) cycle
           if (inode /= master) cycle
+          call delnef(filename,gdp       )
        endif
        !
        ! create or open the file
@@ -442,6 +504,10 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        elseif (first .and. irequest == REQUESTTYPE_WRITE) then
           ! the file has already been opened in step 1
        elseif (filetype == FTYPE_NEFIS) then
+          if (first .and. irequest == REQUESTTYPE_DEFINE) then              
+             write(lundia,*) 'Creating new '//trim(filename)//'.dat'
+             write(lundia,*) 'Creating new '//trim(filename)//'.def'
+          endif
           ierror = open_datdef(filename ,fds      , .false.)
           if (ierror /= 0) then
              write(error_string,'(2a)') 'While trying to open dat/def-file ',trim(filename)
@@ -449,6 +515,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
           endif
        elseif (filetype == FTYPE_NETCDF) then
           if (first .and. irequest == REQUESTTYPE_DEFINE) then              
+             write(lundia,*) 'Creating new '//trim(filename)
              ierror = nf90_create(filename, 0, fds); call nc_check_err(lundia, ierror, "creating file", filename)
              !
              ! global attributes
@@ -481,7 +548,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
                     & d(dps)    ,r(dpu)    ,r(dpv)    ,r(gsqs)   ,wrifou    , &
                     & irequest  ,fds       ,iarrc     ,mf        ,ml        , &
                     & nf        ,nl        ,nostatto  ,nostatgl  ,order_sta , &
-                    & ntruvto   ,ntruvgl   ,order_tra ,gdp       )
+                    & ntruvto   ,ntruvgl   ,order_tra ,ipartition,gdp       )
           if (error) goto 9999
        endif
        !
@@ -578,7 +645,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
           if (first .and. .not.wrifou) then
              soort = 'map'
              call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
-                       & .false.   ,gdp       )
+                       & .false.   ,part_nr   ,gdp       )
              !
              if (.not. parll .and. .not. error) then
                 call wrplot(filename  ,lundia    ,error     ,mmax      ,nmax      , &
@@ -590,4 +657,12 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        if (ierror/= 0) error = .true.
     endif
     first = .false.
+    !
+    if (allocated(ipartition)) deallocate(ipartition, stat=istat)
+    if (.not.mergemap) then
+        inode = bck_inode
+        parll = bck_parll
+        nproc = bck_nproc
+        gdp%gdparall => bck_gdparall
+    endif
 end subroutine wrm_main

@@ -55,6 +55,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     use properties
     use globaldata
     use netcdf
+    use dfparall, only: parll
     !
     implicit none
     !
@@ -67,6 +68,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     integer, dimension(:), pointer :: shlay
     logical,               pointer :: htur2d
     integer,               pointer :: nc_prec
+    logical,               pointer :: mergemap
 !
 ! Global variables
 !
@@ -116,6 +118,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     htur2d     => gdp%gdprocs%htur2d
     itis       => gdp%gdrdpara%itis
     nc_prec    => gdp%gdpostpr%nc_prec
+    mergemap   => gdp%gdpostpr%mergemap
     newkw = .true.
     cdef  = 'YYYYYYYYYY'
     !
@@ -157,81 +160,35 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        call d3stop(1, gdp)
     endif
     !
+    ! merge map files into one trim-file in case of parallel simulation (default: true)
+    ! mergemap should be true for serial simulations
+    !
+    mergemap = .true.
+    call prop_get(gdp%mdfile_ptr, '*', 'MergeMap', mergemap)
+    if (.not.parll) mergemap = .true.
+    !
     ! locate 'PHhydr' record for print flag History hydrodynamic
     !
-    keyw  = 'PHhydr'
-    ntrec = nrrec
-    lenc  = 6
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:6) = cdef(1:6)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PHhydr', chulp)
     prshis(1:6) = chulp(1:6)
     !
     ! locate 'PHproc' record for print flag History processes
     !
-    keyw  = 'PHproc'
-    ntrec = nrrec
-    lenc  = 10
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:10) = cdef(1:10)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PHproc', chulp)
     prshis(7:16) = chulp(1:10)
     !
     ! locate 'PHderv' record for print flag History derivitives
     !
-    keyw  = 'PHderv'
-    ntrec = nrrec
-    lenc  = 3
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:3) = cdef(1:3)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PHderv', chulp)
     prshis(17:19) = chulp(1:3)
     !
-    ! locate 'PHflux' record for print flag History fluxes (cross-
-    ! sections)
+    ! locate 'PHflux' record for print flag History fluxes (cross-sections)
     !
-    keyw  = 'PHflux'
-    ntrec = nrrec
-    lenc  = 4
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:4) = cdef(1:4)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PHflux', chulp)
     prshis(20:23) = chulp(1:4)
     !
     ! test for 'N' (default is 'Y')
@@ -251,59 +208,20 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     ! locate 'PMhydr' record for print flag Map hydrodynamic
     !
-    keyw  = 'PMhydr'
-    ntrec = nrrec
-    lenc  = 6
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:6) = cdef(1:6)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PMhydr', chulp)
     prsmap(1:6) = chulp(1:6)
     !
     ! locate 'PMproc' record for print flag Map processes
     !
-    keyw  = 'PMproc'
-    ntrec = nrrec
-    lenc  = 10
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:10) = cdef(1:10)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PMproc', chulp)
     prsmap(7:16) = chulp(1:10)
     !
     ! locate 'PMderv' record for print flag Map derivitives
     !
-    keyw  = 'PMderv'
-    ntrec = nrrec
-    lenc  = 3
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:3) = cdef(1:3)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'PMderv', chulp)
     prsmap(17:19) = chulp(1:3)
     !
     ! test for 'N' (default is 'Y')
@@ -320,79 +238,27 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     ! locate 'SHhydr' record for print flag History hydrodynamic
     !
-    keyw  = 'SHhydr'
-    ntrec = nrrec
-    lenc  = 4
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:4) = cdef(1:4)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'SHhydr', chulp)
     selhis(1:4) = chulp(1:4)
     !
     ! locate 'SHproc' record for print flag History processes
     !
-    keyw  = 'SHproc'
-    ntrec = nrrec
-    lenc  = 10
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:10) = cdef(1:10)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'SHproc', chulp)
     selhis(5:14) = chulp(1:10)
     !
     ! locate 'SHderv' record for print flag History derivitives
     !
-    keyw  = 'SHderv'
-    ntrec = nrrec
-    lenc  = 5
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:5) = cdef(1:5)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'SHderv', chulp)
     selhis(15:19) = chulp(1:5)
     !
     ! locate 'SHflux' record for print flag History fluxes (stations
     ! and cross-sections)
     !
-    keyw  = 'SHflux'
-    ntrec = nrrec
-    lenc  = 4
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:4) = cdef(1:4)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'SHflux', chulp)
     selhis(20:23) = chulp(1:4)
     !
     ! test for 'N' (default is 'Y')
@@ -417,64 +283,21 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     ! locate 'SMhydr' record for print flag Map hydrodynamic
     !
-    keyw  = 'SMhydr'
-    ntrec = nrrec
-    lenc  = 5
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:5) = cdef(1:5)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'SMhydr', chulp)
     selmap(1:5) = chulp(1:5)
     !
     ! locate 'SMproc' record for print flag Map processes
     !
-    keyw  = 'SMproc'
-    ntrec = nrrec
-    lenc  = 10
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:10) = cdef(1:10)
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'SMproc', chulp)
     selmap(6:15) = chulp(1:10)
     !
     ! locate 'SMderv' record for print flag Map derivitives
     !
-    keyw  = 'SMderv'
-    ntrec = nrrec
-    lenc  = 6
-    nlook = 0
     chulp = cdef
-    call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-              & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-              & ntrec     ,lundia    ,gdp       )
-    !
-    ! reading error?
-    !
-    if (lerror) then
-       lerror = .false.
-       chulp(1:5) = cdef(1:5)
-       chulp(6:6) = 'N'
-    endif
-    !
-    ! 6-th character is recently added. When it is not present it
-    ! defaults to N
-    !
+    chulp(6:6) = 'N'
+    call prop_get(gdp%mdfile_ptr, '*', 'SMderv', chulp)
     if (chulp(6:6) == ' ') chulp(6:6) = 'N'
     selmap(16:21) = chulp(1:6)
     !
@@ -636,31 +459,6 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     ! Read flag for test results in zsol file
     !
-    keyw  = 'Tstprt'
-    ntrec = nrrec
-    lkw   = 6
-    call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-              & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-              & 'NO'      )
-    lerror = .false.
-    !
-    ! not found ?
-    !
-    if (found) then
-       lenc     = 1
-       cdef(:1) = 'N'
-       call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                 & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
-                 & ntrec     ,lundia    ,gdp       )
-       !
-       ! reading error?
-       !
-       if (lerror) then
-          lerror = .false.
-          chulp(:1) = cdef(:1)
-       endif
-       tstprt = .false.
-       if (chulp(:1)=='y' .or. chulp(:1)=='Y') tstprt = .true.
-    endif
+    call prop_get(gdp%mdfile_ptr, '*', 'Tstprt', tstprt)
     deallocate(ival, stat=istat)
 end subroutine rdprfl

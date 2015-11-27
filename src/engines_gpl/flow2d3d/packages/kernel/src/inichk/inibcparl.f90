@@ -73,6 +73,11 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     integer                 , pointer :: nlg
     integer                 , pointer :: mmaxgl
     integer                 , pointer :: nmaxgl
+    integer , dimension(:,:), pointer :: iarrc
+    integer , dimension(:)  , pointer :: mf
+    integer , dimension(:)  , pointer :: ml
+    integer , dimension(:)  , pointer :: nf
+    integer , dimension(:)  , pointer :: nl
     integer , dimension(:)  , pointer :: bct_order       !  Description and declaration in bcdat.igs
     integer , dimension(:,:), pointer :: mnbnd_global    !  Description and declaration in bcdat.igs
     integer                 , pointer :: lundia
@@ -103,18 +108,11 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     integer                                :: nsta
     integer                                :: nend
     integer                                :: n
-    integer , dimension(4,0:nproc-1)       :: iarrc        ! array containing collected grid indices 
-    integer                                :: lenlo        ! length of field of current subdomain
-    integer                                :: lengl        ! length of field containing collected data
     integer                                :: mgg          ! M-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering
     integer                                :: ngg          ! N-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering
     integer                                :: np
     integer                                :: lb           ! lowerboundary of loopcounter
     integer                                :: ub           ! upperboundary of loopcounter
-    integer , dimension(0:nproc-1)         :: mf           ! first index w.r.t. global grid in x-direction
-    integer , dimension(0:nproc-1)         :: ml           ! last index w.r.t. global grid in x-direction
-    integer , dimension(0:nproc-1)         :: nf           ! first index w.r.t. global grid in y-direction
-    integer , dimension(0:nproc-1)         :: nl           ! last index w.r.t. global grid in y-direction
     integer                                :: pivot        ! loops over start_pivot and end_pivot
     logical                                :: horiz
     real(fp)                               :: distx
@@ -141,6 +139,11 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     nlg          => gdp%gdparall%nlg
     nmaxgl       => gdp%gdparall%nmaxgl
     mmaxgl       => gdp%gdparall%mmaxgl
+    iarrc        => gdp%gdparall%iarrc
+    mf           => gdp%gdparall%mf
+    ml           => gdp%gdparall%ml
+    nf           => gdp%gdparall%nf
+    nl           => gdp%gdparall%nl
     bct_order    => gdp%gdbcdat%bct_order
     mnbnd_global => gdp%gdbcdat%mnbnd_global
     lundia       => gdp%gdinout%lundia
@@ -152,20 +155,6 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
        call d3stop(1, gdp)
     endif
     dist_pivot_part = 0.0_fp
-    !
-    call dfsync(gdp)
-    call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
-       &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-    !
-    ! broadcast LOCAL grid indices to ALL partitions
-    ! so every partition knows the dimensions and positions
-    ! of the other partitions in the global domain
-    !
-    call dfbroadc_gdp( iarrc, 4*nproc, dfint, gdp )
-    call dfbroadc_gdp( nf, nproc, dfint, gdp )
-    call dfbroadc_gdp( nl, nproc, dfint, gdp )
-    call dfbroadc_gdp( mf, nproc, dfint, gdp )
-    call dfbroadc_gdp( ml, nproc, dfint, gdp )
     !
                   allocate(guu_global(1:nmaxgl,1:mmaxgl), stat=istat)
     if (istat==0) allocate(gvv_global(1:nmaxgl,1:mmaxgl), stat=istat)

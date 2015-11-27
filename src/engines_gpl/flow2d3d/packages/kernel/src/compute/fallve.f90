@@ -198,14 +198,14 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
        if (.not. zmodel) then
           do k = 1, kmax
              do nm = 1, nmmax
-                if (kfs(nm)==1 .and. kcs(nm)>-1 .and. kcs(nm)<=2) then
+                if (kfs(nm)==1 .and. kcs(nm)<=2) then
                    aak(nm, k) = aak(nm, k) + r0(nm, k, ll)
                 endif
              enddo
           enddo
        else
           do nm = 1, nmmax
-             if (kfs(nm)==1 .and. kcs(nm)>-1 .and. kcs(nm)<=2) then
+             if (kfs(nm)==1 .and. kcs(nm)<=2) then
                 do k = kfsmn0(nm), kfsmx0(nm)
                    aak(nm, k) = aak(nm, k) + r0(nm, k, ll)
                 enddo

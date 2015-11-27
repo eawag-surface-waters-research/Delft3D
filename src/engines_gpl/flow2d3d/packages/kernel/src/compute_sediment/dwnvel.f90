@@ -156,7 +156,7 @@ subroutine dwnvel(nmmax     ,kmax      ,icx       , &
        !
        ufac = 0.5_fp
        vfac = 0.5_fp
-       if (kcs(nm) == 1) then
+       if (abs(kcs(nm)) == 1) then
           !
           ! Internal point
           ! Set velocity in U direction.

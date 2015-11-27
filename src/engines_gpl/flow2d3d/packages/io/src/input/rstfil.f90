@@ -52,18 +52,21 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)              , pointer :: tstart
-    integer               , pointer :: julday
-    !
+    real(fp)                             , pointer :: tstart
+    integer                              , pointer :: julday
+    integer                              , pointer :: mfg
+    integer                              , pointer :: mlg
+    integer                              , pointer :: nfg
+    integer                              , pointer :: nlg
+    integer                              , pointer :: mmaxgl
+    integer                              , pointer :: nmaxgl
+    integer       , dimension(:)         , pointer :: mf
+    integer       , dimension(:)         , pointer :: ml
+    integer       , dimension(:)         , pointer :: nf
+    integer       , dimension(:)         , pointer :: nl
 !
 ! Global variables
 !
-    integer                                                                    , pointer     :: mfg
-    integer                                                                    , pointer     :: mlg
-    integer                                                                    , pointer     :: nfg
-    integer                                                                    , pointer     :: nlg
-    integer                                                                    , pointer     :: mmaxgl
-    integer                                                                    , pointer     :: nmaxgl
     integer                                                                    , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
@@ -94,17 +97,10 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     integer                                              :: ipos    ! index to a position in a string
     integer                                              :: k       ! Help var. 
     integer                                              :: l       ! Help var. 
-    integer                                              :: lengl
-    integer                                              :: lenlo
     integer                                              :: luntmp  ! Unit number file 
     integer                                              :: m       ! Help var. 
     integer                                              :: n       ! Help var. 
     integer                                              :: newlun
-    integer       , dimension(4,0:nproc-1)               :: iarrc   ! array containing collected grid indices
-    integer       , dimension(0:nproc-1)                 :: mf      ! first index w.r.t. global grid in x-direction
-    integer       , dimension(0:nproc-1)                 :: ml      ! last index w.r.t. global grid in x-direction
-    integer       , dimension(0:nproc-1)                 :: nf      ! first index w.r.t. global grid in y-direction
-    integer       , dimension(0:nproc-1)                 :: nl      ! last index w.r.t. global grid in y-direction
     logical                                              :: ex
     logical                                              :: ex_nfs
     real(sp)      , dimension(:,:,:,:)     , allocatable :: sbuff   !!  Single precision buffer to read from file
@@ -124,6 +120,10 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     nlg             => gdp%gdparall%nlg
     mmaxgl          => gdp%gdparall%mmaxgl
     nmaxgl          => gdp%gdparall%nmaxgl
+    mf              => gdp%gdparall%mf
+    ml              => gdp%gdparall%ml
+    nf              => gdp%gdparall%nf
+    nl              => gdp%gdparall%nl
     !
     error = .false.
     nm_pos = 1
@@ -186,15 +186,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                & status = 'old')
        endif
        !
-       ! gather grid indices of all subdomains
-       !
-       call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
-          &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-       call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
-       call dfbroadc_gdp ( nf, nproc, dfint, gdp )
-       call dfbroadc_gdp ( nl, nproc, dfint, gdp )
-       call dfbroadc_gdp ( mf, nproc, dfint, gdp )
-       call dfbroadc_gdp ( ml, nproc, dfint, gdp )
        ! read restart values and distributed via a broadcast to the slaves
        ! per nmaxus mmax values in s1 array
        ! NOTE: nmaxus and mmax equal nmaxgl and mmaxgl, respectively (for entire domain)
