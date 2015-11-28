@@ -274,28 +274,27 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           sig     (kmax                ) in sigma model
     !                           sig     (0:kmax              ) = zk() in z model
     !                           zwork   (kmax*5              )
+    !
     pntnam = 'thick'         !  Relative layer thickness
     ierr = mkfpnt(pntnam, kmax, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'sig'           !  Sigma [-1,0] levels of layer centers (in sigma model): kmax
                              !  or Z levels of layer interfaces (in z model): kmax+1
     ierr = mkfpnt(pntnam, kmax+1, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'zwork'         !  Work array for Z layer model
     ierr = mkfpnt(pntnam, kmax*5, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----array for: x,y,z position of sources
     !
     !                           xyzsrc  (3     ,nsrc         )
-    pntnam = 'XYZSRC'        !  Global data
+    !
+    pntnam = 'XYZSRC'        !  Coordinates for discharge points
     ierr = mkfpnt(pntnam, 3*nsrc, gdp)
-                             !  Pointer of array XYZSRC
-                             !  Array containing the coordinates in
-                             !  the X,Y,Z plane for discharges
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: boundaries
     !
@@ -314,23 +313,18 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           qtfrac  (nopest)
     !                           qtfrct  (nto   )
     !                           qtfrt2  (nto   )
-    pntnam = 'alpha'         !  Global data
-    ierr = mkfpnt(pntnam, nto, gdp)
-                             !  Pointer of array ALPHA
-                             !  HLES parameter; slope of the energy
+    !
+    pntnam = 'alpha'         !  HLES parameter; slope of the energy
                              !  density spectrum
                              !  Weakly reflective coefficient
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nto, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'omega'         !  Global data
+    pntnam = 'omega'         !  Frequencies of the Hydrod. forcings
     ierr = mkfpnt(pntnam, kc, gdp)
-                             !  Pointer of array OMEGA
-                             !  Frequencies of the Hydrod. forcings
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hydrbc'        !  Global data
-    ierr = mkfpnt(pntnam, 4*nto*kcd, gdp)
-                             !  Hydrodynamic bound. val. at MNBND sections.
+    pntnam = 'hydrbc'        !  Hydrodynamic bound. val. at MNBND sections.
                              !  The array is completely filled when the
                              !  H-type boundary is considered.
                              !  When time series is considered, the array is
@@ -347,255 +341,195 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !                        subeseq. time
                              !  K = 1,.,KC & N = 1,.,NTOF (H)
                              !  K = 1,.,KMAX & N = NTOF+1,.,NTO (T)
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, 4*nto*kcd, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'procbc'        !  Global data
-    ierr = mkfpnt(pntnam, 4*nto*kmax*lstsc, gdp)
-                             ! Boundary val. for constituents at
+    pntnam = 'procbc'        !  Boundary val. for constituents at
                              !  opening sections (time series).
                              !  1,N,K,L = value at a
                              !  2,N,K,L = value at b
                              !  3,N,K,L = time incr. at a
                              !  4,N,K,L = time incr. at b
-                             !  N=1,.,NTO; K=1,.,KMAX & L=1,.,LSTSC;
-    if (ierr<= - 9) goto 9999
+                             !  N=1,.,NTO; K=1,.,KMAX & L=1,.,LSTSC
+    ierr = mkfpnt(pntnam, 4*nto*kmax*lstsc, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rob'           !  Global data
+    pntnam = 'rob'           !  Help array
     ierr = mkfpnt(pntnam, kmax*nopest, gdp)
-                             !  Hulp array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zstep'         !  Global data
-    ierr = mkfpnt(pntnam, 2*nto*lstsc, gdp)
-                             !  Pointer of array ZSTEP
-                             !  Time varying location of disconti-
+    pntnam = 'zstep'         !  Time varying location of disconti-
                              !  nuity for the 3D BC for constituents
                              !  old and new time in index 1 and 2
-                             !  Time varying location of disconti-
-                             !  nuity for the 3D BC for constituents
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, 2*nto*lstsc, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'circ3d'        !  Global data
+    pntnam = 'circ3d'        !  Array with 3D Boundary Conditions
     ierr = mkfpnt(pntnam, kmax*2*nlcest, gdp)
-                             !  Pointer of array CIRC3D
-                             !  Array with 3D Boundary Conditions
-                             ! 
-                             !  Array with 3D Boundary Conditions
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'circ2d'        !  Global data
-    ierr = mkfpnt(pntnam, 4*nlcest, gdp)
-                             !  Pointer of array CIRC2D
-                             !  Array with Boundary Conditions and
+    pntnam = 'circ2d'        !  Array with Boundary Conditions and
                              !  Reflection coefficients hydrodynamics
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, 4*nlcest, gdp)
+    if (ierr <= -9) goto 9999
     !
     !    MAX(lstsc,1) is applied to avoid undefined rbnd pointer in tritra when calling difu*, when lstsc is 0.
-    pntnam = 'rbnd'          !  Global data
-    ierr = mkfpnt(pntnam, kmax*max(lstsc, 1)*2*nlcest, gdp)
-                             !  Pointer of array RBND
-                             ! 
-                             !  Array containing the actual Boundary
-                             !  Conditions for constituents
-                             !  Array containing the return time for
-                             !  constituents at each bnd. point
-                             !  n,1; return time at surface
-                             !  n,2; return time at bottom
-                             ! 
-                             !  Array with Boundary Conditions for
-                             !  constituents
-                             ! 
-                             !  Boundary values for constituents at
-                             !  each open boundary point (after in-
+    pntnam = 'rbnd'          !  Return time/Boundary values for constituents
+                             !  at each open boundary point (after in-
                              !  terpolation in space has been
                              !  carried out). 2-nd and 3-rd index in
                              !  the array points to IROCOL).
                              !  RBND(K,L,I,N) = AMPL
                              !  L=1,.,LSTSC & I=1/2 & N=1,.,NOROCO
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, kmax*max(lstsc, 1)*2*nlcest, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rthbnd'        !  Global data
-    ierr = mkfpnt(pntnam, kmax*lstsc*2*nlcest, gdp)
-                             !  Pointer of array RTHBND
-                             ! 
-                             !  Array containing the last outflow
-                             !  (Th.Harleman) value of Boundary
+    pntnam = 'rthbnd'        !  Last outflow (Th.Harleman) value of Boundary
                              !  Conditions for constituents
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, kmax*lstsc*2*nlcest, gdp)
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'thtim'         !  Actual Thatcher Harleman time
     ierr = mkfpnt(pntnam, kmax*lstsc*2*nlcest, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'rettim'        !  User defined delay for Thatcher Harleman return time
     ierr = mkfpnt(pntnam, 2*nto*lstsc, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'qtfrac'        !  Global data
+    pntnam = 'qtfrac'        !  no description (yet)
     ierr = mkfpnt(pntnam, nopest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'qtfrct'        !  Global data
+    pntnam = 'qtfrct'        !  no description (yet)
     ierr = mkfpnt(pntnam, nto, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'qtfrt2'        !  Global data
+    pntnam = 'qtfrt2'        !  no description (yet)
     ierr = mkfpnt(pntnam, nto, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! for Riemann-Van Dongeren-Svendsen left bc incoming signal (begin)
     !
     ! left boundary
     !
-    pntnam = 'ctif'          !  Global data
+    pntnam = 'ctif'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'stif'          !  Global data
+    pntnam = 'stif'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zetabf'        !  Global data
+    pntnam = 'zetabf'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ctbf'          !  Global data
+    pntnam = 'ctbf'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'stbf'          !  Global data
+    pntnam = 'stbf'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'encgf'         !  Global data
+    pntnam = 'encgf'         !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'cgdghf'        !  Global data
+    pntnam = 'cgdghf'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wenf'          !  Global data
+    pntnam = 'wenf'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wenfm'         !  Global data
+    pntnam = 'wenfm'         !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zbmnf'         !  Global data
+    pntnam = 'zbmnf'         !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zetaif'        !  Global data
+    pntnam = 'zetaif'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ctrf'          !  Global data
+    pntnam = 'ctrf'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'umeanf'        !  Global data
+    pntnam = 'umeanf'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zmeanf'        !  Global data
+    pntnam = 'zmeanf'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! right boundary
     !
-    pntnam = 'ctil'          !  Global data
+    pntnam = 'ctil'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'stil'          !  Global data
+    pntnam = 'stil'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zetabl'        !  Global data
+    pntnam = 'zetabl'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ctbl'          !  Global data
+    pntnam = 'ctbl'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'stbl'          !  Global data
+    pntnam = 'stbl'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'encgl'         !  Global data
+    pntnam = 'encgl'         !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'cgdghl'        !  Global data
+    pntnam = 'cgdghl'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wenl'          !  Global data
+    pntnam = 'wenl'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wenlm'         !  Global data
+    pntnam = 'wenlm'         !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zbmnl'         !  Global data
+    pntnam = 'zbmnl'         !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zetail'        !  Global data
+    pntnam = 'zetail'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ctrl'          !  Global data
+    pntnam = 'ctrl'          !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'umeanl'        !  Global data
+    pntnam = 'umeanl'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zmeanl'        !  Global data
+    pntnam = 'zmeanl'        !  no description (yet)
     ierr = mkfpnt(pntnam, 2*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'crbc'          !  Global data
+    pntnam = 'crbc'          !  no description (yet)
     ierr = mkfpnt(pntnam, 24*nlcest, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! for Riemann-Van Dongeren-Svendsen bc incoming signal (end)
     !
@@ -612,85 +546,57 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           hu0   (nmaxddb  ,mmaxddb)
     !                           hv    (nmaxddb  ,mmaxddb)
     !                           hv0   (nmaxddb  ,mmaxddb)
-    pntnam = 'dp'            !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DP
-                             !  Depth value at depth points
-                             !  only if NOUI = .true. real value
-                             !  Depth value at depth points
-                             !  depth value at depth points
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'dpu'           !  Global data
+    pntnam = 'dp'            !  Depth value at depth points
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DPU
-                             !  Depth value at u-points incl. crest
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dpu'           !  Depth value at u-points incl. crest
                              !  height (only for general 3D weir)
-                             !  Depth value at u-points incl. crest
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'dpv'           !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DPV
-                             !  Depth value at v-points incl. crest
-                             !  height (only for general 3D weir)
-                             !  Depth value at v-points incl. crest
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dps'           !  Global data
+    pntnam = 'dpv'           !  Depth value at V-points incl. crest
+                             !  height (only for general 3D weir)
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dps'           !  Depth at waterlevel points
     if (prec == sp) then
        ierr = mkrpnt(pntnam, nmaxddb*mmaxddb, gdp)
     elseif (prec == hp) then
        ierr = mkdpnt(pntnam, nmaxddb*mmaxddb, gdp)
     else
-       ! catched at top of esm_alloc_real.f90
+       ! caught at top of esm_alloc_real.f90
     endif
-                             !  Pointer of array DPS
-                             !  Depth at waterlevel points
-                             !
-                             !  Depth value at zeta points
-                             !  Depth value at zeta point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hkru'          !  Global data
+    pntnam = 'hkru'          !  Vertical position crest of U-weir
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array HKRU
-                             !  Crest height in u points
-                             !  Vertical position crest of U-weir
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hkrv'          !  Global data
+    pntnam = 'hkrv'          !  Vertical position crest of V-weir
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array HKRV
-                             !  Crest height in v points
-                             !  Vertical position crest of U-weir(2D)
-                             !  Vertical position crest of V-weir(2D)
-                             !  Vertical position crest of V-weir
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hu'            !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Total water depth in u-point [m]
+    pntnam = 'hu'            !  Total water depth in u-point [m]
                              !  Upwind approach in
                              !  a. points with HU below 5*dryflc
                              !  b. barrier points.
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'hu0'            !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Total water depth in u-point [m] in previous time step
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hv'            !  Global data
+    pntnam = 'hu0'           !  Total water depth in u-point [m] in previous time step
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array HV
-                             !  Total water depth in v-point [m]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hv0'            !  Global data
+    pntnam = 'hv'            !  Total water depth in v-point [m]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Total water depth in v-point [m] in previous time step
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'hv0'           !  Total water depth in v-point [m] in previous time step
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: initial field values
     !
@@ -708,163 +614,68 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           rtur1 (nmaxddb ,mmaxddb,0:kmax,ltur )
     !                           rtur0 (nmaxddb ,mmaxddb,0:kmax,ltur )
     !                           decay (lstsc )
-    pntnam = 's1'            !  Global data
+    !
+    pntnam = 's1'            !  Water level (zeta) at NEW time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array S1
-                             !  Zeta at NEW time level
-                             !  Zeta at new time level
-                             !  Zeta at old time level
-                             !  Zeta
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 's0'            !  Global data
+    pntnam = 's0'            !  Water level (zeta) at old time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array S0
-                             !  Zeta at old time level
-                             !  Zeta in old time level
-                             !  Depth (output) value at vel. points
-                             !  zeta at old time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'u1'            !  Global data
+    pntnam = 'u1'            !  U-velocities at new time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array U1
-                             !  U-velocities at new time level
-                             !  U-velocities at old time level
-                             !  U-velocities new time step
-                             ! 
-                             !  U-velocities at new time level
-                             ! called as WRKB3(4)
-                             !  U-velocities at new time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'u0'            !  Global data
+    pntnam = 'u0'            !  U-velocities at old time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array U0
-                             !  Horizontal u-velocity component on
-                             !  hydrodynamic grid (zeta point)
-                             !  U-velocities at old time level
-                             !  fluid mud layer
-                             !  U-velocities at old time level
-                             !  U-velocities mud at old time level
-                             ! 
-                             !  U-velocities at old time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'umean'         !  Global data
+    pntnam = 'umean'         !  Depth-average of u-velocity component
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array UMEAN
-                             !  Depth-average of u-velocity component
-                             !  Depth-averaged U-velocities
-                             !  Mean horizontal velocity
-                             !  depth-averaged U-velocities
-                             !  at old time level
-                             !  depth-averaged U-velocities
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'v1'            !  Global data
+    pntnam = 'v1'            !  V-velocities at new time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array V1
-                             !  V-velocities at new time level
-                             !  V-velocities at new time level
-                             !  V-velocities at new time level
-                             !  V-velocities at old time level
-                             !  V-velocities new time step
-                             ! 
-                             !  V-velocities at new time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'v0'            !  Global data
+    pntnam = 'v0'            !  V-velocities at old time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array V0
-                             !  Horizontal v-velocity component on
-                             !  hydrodynamic grid (zeta point)
-                             !  V-velocities at old time level
-                             !  fluid mud layer
-                             !  V-velocities at old time level
-                             !  V-velocities mud at old time level
-                             ! 
-                             !  V-velocities at old time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vmean'         !  Global data
+    pntnam = 'vmean'         !  Depth-average of v-velocity component
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array VMEAN
-                             !  Depth-average of v-velocity component
-                             !  Depth-averaged V-velocities
-                             !  Mean horizontal velocity
-                             !  depth-averaged U-velocities
-                             !  at old time level
-                             !  depth-averaged V-velocities
-                             !  at old time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'w1'            !  Global data
+    pntnam = 'w1'            !  Omega-velocity at new time level
+                             !  (velocity relative to sigma-plane)
     ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
-                             !  Pointer of array W1
-                             !  = WSTCOF(1)
-                             ! 
-                             !  Omega-velocity at new time level
-                             !  (velocity relative to sigma-plane)
-                             ! 
-                             !  Omega-velocity at old time level
-                             !  (velocity relative to sigma-plane)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'r1'            !  Global data
+    pntnam = 'r1'            !  Concentrations at new time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lstsci, gdp)
-                             !  Pointer of array R1
-                             ! 
-                             !  Concentrations at new time level
-                             !  (before and after filter)
-                             ! 
-                             !  Concentrations at new time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'r0'            !  Global data
+    pntnam = 'r0'            !  Concentrations at old time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lstsci, gdp)
-                             !  Pointer of array R0
-                             ! 
-                             !  Array for concentration (including
-                             !  sediment)
-                             ! 
-                             !  Concentrations at old time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rtur1'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*ltur, gdp)
-                             !  Pointer of array RTUR1
-                             ! 
-                             !  Concentrations turbulent energy and
-                             !  dissipation at new time level
-                             ! 
-                             !  Concentrations turbulent energy and
-                             !  dissipation at old time level
-                             ! 
-                             !  Turbulence at new time level
-                             !  (before and after filter)
-    if (ierr== - 1) goto 9999
-    !
-    pntnam = 'rtur0'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*ltur, gdp)
-                             !  Pointer of array RTUR0
-                             !  Turbulent kinetic energy (0:kmax,1)
+    pntnam = 'rtur1'         !  Turbulent kinetic energy (0:kmax,1)
                              !  and its dissipation rate (0:kmax,2)
-                             !  Turbulent kinetic energy and its dis-
-                             !  sipation rate
-                             ! 
-                             !  Concentrations turbulent energy and
-                             !  dissipation at old time level
-                             ! 
-                             !  Turbulence at old time level
-    if (ierr== - 1) goto 9999
+                             !  at new time level
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*ltur, gdp)
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'decay'         !  Global data
-    ierr = mkfpnt(pntnam, lstsc, gdp)
-                             !  Pointer of array DECAY
-                             !  Decay rates per day as input
+    pntnam = 'rtur0'         !  Turbulent kinetic energy (0:kmax,1)
+                             !  and its dissipation rate (0:kmax,2)
+                             !  at old time level
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*ltur, gdp)
+    if (ierr == -1) goto 9999
+    !
+    pntnam = 'decay'         !  Decay rates per day as input
                              !  divided by 86400. in RDIC
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, lstsc, gdp)
+    if (ierr <= -9) goto 9999
     !
     !
     !-----arrays for: subgrid viscosity model
@@ -875,40 +686,35 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           vmnflc(nmaxddb  ,mmaxddb)
     !                           vortic(nmaxddb  ,mmaxddb,kmax)
     !                           enstro(nmaxddb  ,mmaxddb,kmax)
-    pntnam = 'umnldf'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Depth-averaged low-pass filtered
+    !
+    pntnam = 'umnldf'        !  Depth-averaged low-pass filtered
                              !  U-velocities
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'umnflc'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Depth-averaged fluctuating
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'umnflc'        !  Depth-averaged fluctuating
                              !  U-velocities
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'vmnldf'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Depth-averaged low-pass filtered
-                             !  V-velocities
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vmnflc'        !  Global data
+    pntnam = 'vmnldf'        !  Depth-averaged low-pass filtered
+                             !  V-velocities
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Depth-averaged fluctuating
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'vmnflc'        !  Depth-averaged fluctuating
                              !  V-velocities
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
     !
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vortic'        !  Global data
+    pntnam = 'vortic'        !  Vorticity
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'enstro'        !  Global data
+    pntnam = 'enstro'        !  Enstrophy
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: roughness, viscosity and diffusity field values
     !
@@ -920,74 +726,53 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           vicww (nmax3d ,-1:mmax3d+2,0:kmax(>1))
     !                           dicuv (nmaxddb  ,mmaxddb,kmax+2)
     !                           dicww (nmax3d ,-1:mmax3d+2,0:kmax(>1))
-    pntnam = 'cfurou'        !  Global data
+    !
+    pntnam = 'cfurou'        !  1: ratio magnitude velocity/ustar
+                             !  in U-point (Chezy/sqrt(g))
+                             !  2: U-roughness expressed in User
+                             !  RouMet unit (includes trachytopes)
+                             !  3: default U-roughness expressed in User
+                             !  RouMet unit (excludes trachytopes)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*3, gdp)
-                             !  2DH : array containing space depen-
-                             !        dent coefficients in roughness
-                             !        method in U-point
-                             !        Manning         for ROUFLO=MANN
-                             !        Chezy           for ROUFLO=CHEZ
-                             !        White Colebrook for ROUFLO=WHIT
-                             !  3D  : array containing
-                             !        ratio magnitude velocity/ustar
-                             !        in U-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'cfvrou'        !  Global data
+    pntnam = 'cfvrou'        !  1: ratio magnitude velocity/ustar
+                             !  in V-point (Chezy/sqrt(g))
+                             !  2: V-roughness expressed in User
+                             !  RouMet unit (includes trachytopes)
+                             !  3: default V-roughness expressed in User
+                             !  RouMet unit (excludes trachytopes)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*3, gdp)
-                             !  2DH : array containing space depen-
-                             !        dent coefficient in roughness
-                             !        method in V-point
-                             !        Manning         for ROUFLO=MANN
-                             !        Chezy           for ROUFLO=CHEZ
-                             !        White Colebrook for ROUFLO=WHIT
-                             !  3D  : array containing
-                             !        ratio magnitude velocity/ustar
-                             !        in V-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'cvalu0'        !  Global data
+    pntnam = 'cvalu0'        !  Chezy value for roughness in U-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'cvalv0'        !  Global data
+    pntnam = 'cvalv0'        !  Chezy value for roughness in V-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vicuv'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 2), gdp)
-                             !  Horizontal eddy visc. coefficient
-                             !  [m2/s] (in density point)
+    pntnam = 'vicuv'         !  Horizontal eddy visc. coefficient [m2/s] (in density point)
                              !  Background value will be set in layer kmax+1
                              !  Horizontal eddy value (HLES or roller) will be set in layer kmax+2
-  if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'vicww'         !  Global data
-    ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
-                             !  Vertial eddy viscosity coefficient
-                             !  [m2/s] (at interface between layer k
-                             !  and k+1)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'dicuv'         !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 2), gdp)
-                             !  Horizontal Diffusion coeff. [m2/s]
+  if (ierr <= -9) goto 9999
+    !
+    pntnam = 'vicww'         !  Vertial eddy viscosity coefficient [m2/s] (at interface between layer k and k+1)
+    ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dicuv'         !  Horizontal Diffusion coefficient [m2/s]
                              !  Background value will be set in layer kmax+1
                              !  Horizontal eddy value (HLES or roller) will be set in layer kmax+2
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 2), gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dicww'         !  Global data
-    ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
-                             !  Pointer of array DICWW
-                             !  Vertical   Diffusion coeff. [m2/s]
-                             !  Used to calculate Z0
-                             ! 
-                             !  Vertical   Diffusion coeff. [m2/s]
-                             ! Vertical   Diffusion coeff. [m2/s]
+    pntnam = 'dicww'         !  Vertical   Diffusion coefficient [m2/s]
                              !  at layer interfaces
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: grid information
     !
@@ -1010,252 +795,158 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           gsqiu (nmaxddb  ,mmaxddb)
     !                           gsqiv (nmaxddb  ,mmaxddb)
     !
-    pntnam = 'guu'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GUU
-                             !  Grid distance in the ETA-/Y-direction
+    pntnam = 'guu'           !  Grid distance in the ETA-/Y-direction
                              !  at U-velocity point
-                             !  Grid distance in the eta-/y-dir. at
-                             !  u-velocity point
-                             !  Grid distance in the eta-/y-direction
-                             !  at u-velocity point
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'gvv'           !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GVV
-                             !  Grid distance in the KSI-/X-direction
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'gvv'           !  Grid distance in the KSI-/X-direction
                              !  at V-velocity point
-                             !  Grid distance in the ksi-/x-dir. at
-                             !  v-velocity point
-                             !  Grid distance in the ksi-/x-direction
-                             !  at v-velocity point
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'gsqs'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GSQS
-                             !  Area of computational cell defined at
-                             !  zeta point
-                             !  Area of computational cell defined
-                             !  at zeta point.
-                             !  Reduced in case of rigid lid
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'gsqs'          !  Area of computational cell defined at
+                             !  zeta point. Reduced in case of rigid lid
                              !  approximation.
-                             !  Area of computational cell defined
-                             !  at zeta point
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'gsqd'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GSQD
-                             !  Area of a cell defined at the depth
-                             !  point (Not yet used)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'alfas'         !  Global data
+    pntnam = 'gsqd'          !  Area of a cell defined at the depth point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array ALFAS
-                             !  Array containing the orientation
-                             !  of each computational cell defined
-                             !  as the angle formed by the line
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'alfas'         !  Orientation of each computational cell
+                             !  defined as the angle formed by the line
                              !  spanned by the u-velocity points
                              !  around the zeta point and the x-axis
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'guv'           !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GUV
-                             !  Grid distance in the eta-/y-direction
-                             !  at v-velocity point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gvu'           !  Global data
+    pntnam = 'guv'           !  Grid distance in the eta-/y-direction at v-velocity point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GVU
-                             !  Grid distance in the ksi-/x-direction
-                             !  at u-velocity point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'xcor'          !  Global data
+    pntnam = 'gvu'           !  Grid distance in the ksi-/x-direction at u-velocity point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array XCOR
-                             !  X-coord. of the depth point
-                             !  x-coord. of the depth point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ycor'          !  Global data
+    pntnam = 'xcor'          !  X-coord. of the depth point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array YCOR
-                             !  Y-coord. of the depth point
-                             !  Current only Z0 values (for use in EROSED)
-                             !  Y-coord. of the depth point
-                             !  y-coord. of the depth point
-                             !
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'xz'            !  Global data
+    pntnam = 'ycor'          !  Y-coord. of the depth point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array XZ
-                             !  X-coord. of the water elevation pnt.
-                             !  X-coord. of the water-elevation pnt.
-                             !  X-coord. of the zeta  point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'yz'            !  Global data
+    pntnam = 'xz'            !  X-coord. of the zeta/water elevation pnt.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array YZ
-                             !  X-coord. of the zeta  point
-                             !  Y-coord. of the water elevation pnt.
-                             !  Y-coord. of the water-elevation pnt.
-                             !  Y-coord. of the zeta  point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wphy'          !  Global data
+    pntnam = 'yz'            !  Y-coord. of the zeta/water elevation pnt.
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wphy'          !  Physical w-velocity at new time level (in fixed coordinate system)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array WPHY
-                             !  Physical w-velocity at new time level
-                             !  (in fixed coordinate system)
-                             !  Physical w-velocity at new time level
-                             ! 
-                             !  Physical w-velocity at new time level
-                             !  (in fixed coordinate system)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'guz'           !  Global data
+    pntnam = 'guz'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gvz'           !  Global data
+    pntnam = 'gvz'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gud'           !  Global data
+    pntnam = 'gud'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gvd'           !  Global data
+    pntnam = 'gvd'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gsqiu'         !  Global data
+    pntnam = 'gsqiu'         !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gsqiv'         !  Global data
+    pntnam = 'gsqiv'         !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: flows
     !
     !                           qxk   (nmaxddb  ,mmaxddb ,kmax  )
     !                           qyk   (nmaxddb  ,mmaxddb ,kmax  )
     !                           qzk   (nmax3d ,-1:mmax3d+2,0:kmax)
-    pntnam = 'qxk'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array QXK
-                             !  Discharges for layer k in the X-dir.
+    !
+    pntnam = 'qxk'           !  Discharges for layer k in the X-dir.
                              !  in U-velocity point at following time
                              !  integration continuity equation
-                             ! 
-                             !  Discharges for layer k in the X-dir.
-                             !  in U-velocity point at following time
-                             !  integration continuity equation
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'qyk'           !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array QYK
-                             !  Discharges for layer k in the Y-dir.
-                             !  in V-velocity point at following time
-                             !  integration continuity equation
-                             ! 
-                             !  Discharges for layer k in the Y-dir.
-                             !  in V-velocity point at following time
-                             !  integration continuity equation
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'qzk'           !  Global data
-    ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
-                             !  Pointer of array QZK
-                             ! 
-                             !  Discharges at layer interface k+1/2
+    pntnam = 'qyk'           !  Discharges for layer k in the Y-dir.
+                             !  in V-velocity point at following time
+                             !  integration continuity equation
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'qzk'           !  Discharges at layer interface k+1/2
                              !  in the Z-direction following time in-
                              !  tegration continuity equation
-                             ! 
-                             !  Discharges at layer interface k+1/2
-                             !  in the Z-direction following
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmax3d*(mmax3d + 4)*(kmax + 1), gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: Coriolis
     !
     !                           fcorio(nmaxddb  ,mmaxddb)
-    pntnam = 'fcorio'        !  Global data
+    !
+    pntnam = 'fcorio'        !  Coriolis Force
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array FCORIO
-                             !  Coriolis Force (currently uniform in space)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for drogues; dxydro and xydro
     !
     !                           dxydro(2,ndro  )
     !                           xydro (2,ndro  )
-    pntnam = 'dxydro'        !  Global data
-    ierr = mkfpnt(pntnam, 2*ndro, gdp)
-                             !  Pointer of array DXYDRO
-                             !  Delta X(1)Y(2)-coordinate correspon-
+    !
+    pntnam = 'dxydro'        !  Delta X(1)Y(2)-coordinate correspon-
                              !  ding to drogue starting point
                              !  0. := left/lower cell boundary
                              !  1. := right/upper cell boundary
-                             !  Delta X(1)Y(2)-coordinate correspon-
-                             !  ding to drogue track starting point
-                             !  0. := left/lower cell boundary
-                             !  1. := right/upper cell boundary
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'xydro'         !  Global data
     ierr = mkfpnt(pntnam, 2*ndro, gdp)
-                             !  Pointer of array XYDRO
-                             !   X(1)Y(2)-coordinate corresponding to
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'xydro'         !  X(1)Y(2)-coordinate corresponding to
                              !  drogue starting point if
                              !  track is calculated else 999.999
-                             !   X(1)Y(2)-coordinate corresponding to
-                             !  drogue track starting point if
-                             !  track is calculated else 999.999
-                             !  X(1)Y(2)-coordinate corresponding to
-                             !  drogue starting point if
-                             !  track is calculated else 999.999
-    if (ierr<= - 9) goto 9999
-    pntnam = 'drodep'        !  Global data
+    ierr = mkfpnt(pntnam, 2*ndro, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'drodep'        !  Depth of each drogue under water level
     ierr = mkfpnt(pntnam, ndro, gdp)
-                             !  Depth of each drogue under water level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for barriers;
     !
     !                           cbuv  (4,nsluv   )
     !                           cbuvrt(2,nsluv   )
-    pntnam = 'cbuv'          !  Global data
-    ierr = mkfpnt(pntnam, 4*nsluv, gdp)
-                             !  CBUV(1,*) = Initial gate height
+    !
+    pntnam = 'cbuv'          !  CBUV(1,*) = Initial gate height
                              !  CBUV(2,*) = old (1.0) or new (2.0) format of barrier specification
                              !  CBUV(3,*) = Loss coefficient
                              !  CBUV(4,*) = ??? used in new format only
-    if (ierr<= - 9) goto 9999
-    pntnam = 'cbuvrt'        !  Global data
-    ierr = mkfpnt(pntnam, 2*nsluv, gdp)
-                             !  Pointer of array CBUVRT
-                             !  Run time barrier data:
+    ierr = mkfpnt(pntnam, 4*nsluv, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cbuvrt'        !  Run time barrier data:
                              !  CBUVRT(1,*) = Return status from RTC
                              !              > 0 : OK
                              !              < 0 : Not OK/Found
                              !  CBUVRT(2,*) = Value from RTC
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, 2*nsluv, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: structure information
     !
@@ -1276,137 +967,81 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           porosv   (nmaxddb  ,mmaxddb, kmax)
     !                           areau    (nmaxddb  ,mmaxddb, kmax)
     !                           areav    (nmaxddb  ,mmaxddb, kmax)
-    pntnam = 'pship'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array PSHIP
-                             !  Depth value (input),pressure (output)
-                             !  Depth value at depth points
-                             !  only if NOUI = .true. real value
-                             !  Depth value floating structure
+    !
+    pntnam = 'pship'         !  Depth value floating structure
                              !  Later re-defined as pressure
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ubrlsu'        !  Global data
+    pntnam = 'ubrlsu'        !  Roughness coefficient in x-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array UBRLSU
-                             !  Roughness coefficient in x-dir.
-                             !  Wall roughness in x-dir.
-                             ! 
-                             !  Roughness coefficient in x-dir.
-                             ! 
-                             !  Wall roughness in x-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ubrlsv'        !  Global data
+    pntnam = 'ubrlsv'        !  Roughness coefficient in y-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array UBRLSV
-                             !  Roughness coefficient in y-dir.
-                             !  Wall roughness in y-dir.
-                             ! 
-                             !  Roughness coefficient in y-dir.
-                             ! 
-                             !  Wall roughness in y-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'uwtypu'        !  Global data
+    pntnam = 'uwtypu'        !  Type of weir in x-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array UWTYPU
-                             !  Type of weir in x-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'uwtypv'        !  Global data
+    pntnam = 'uwtypv'        !  Type of weir in y-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array UWTYPV
-                             !  Type of weir in x-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dteu'          !  Global data
+    pntnam = 'dteu'          !  Subgrid energy loss due to 2D weir in U-points
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DTEU
-                             !  Subgrid energy loss due to 2D weir
-                             !  in U-points
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dtev'          !  Global data
+    pntnam = 'dtev'          !  Subgrid energy loss due to 2D weir in V-points
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DTEV
-                             !  Subgrid energy loss due to 2D weir
-                             !  in V-points
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'cdwztu'          !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
-                               !  z co-ordinate of the top point of the fixed gate/cdw
-                               !  in u point of the cell
-                               !  [m]
+    pntnam = 'cdwztu'          !  vertical position [m] of top of the fixed gate/cdw in U-point
                                !  Only used in cells with KSPU(NM,0) = 10
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'cdwzbu'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
-                               !  z co-ordinate of the bottom point of the fixed gate/cdw
-                               !  in u point of the cell
-                               !  [m]
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cdwzbu'          !  vertical position [m] of bottom of the fixed gate/cdw in U-point
                                !  Only used in cells with KSPU(NM,0) = 10
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'cdwztv'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
-                               !  z co-ordinate of the top point of the fixed gate/cdw
-                               !  in v point of the cell
-                               !  [m]
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cdwztv'          !  vertical position [m] of top of the fixed gate/cdw in V-point
                                !  Only used in cells with KSPV(NM,0) = 10
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'cdwzbv'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
-                               !  z co-ordinate of the bottom point of the fixed gate/cdw
-                               !  in v point of the cell
-                               !  [m]
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cdwzbv'          !  vertical position [m] of bottom of the fixed gate/cdw in V-point
                                !  Only used in cells with KSPV(NM,0) = 10
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'cdwlsu'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
-                               !  loss coefficient of the fixed gate/cdw
-                               !  in u point of the cell
-                               !  [???]
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cdwlsu'          !  loss coefficient [???] of the fixed gate/cdw in U-point
                                !  Only used in cells with KSPU(NM,0) = 10
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'cdwlsv'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
-                               !  loss coefficient of the fixed gate/cdw
-                               !  in v point of the cell
-                               !  [???]
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cdwlsv'          !  loss coefficient [???] of the fixed gate/cdw in V-point
                                !  Only used in cells with KSPV(NM,0) = 10
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfaccdw, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'porosu'          !  Global data
+    pntnam = 'porosu'          !  porosity [-] in U-point, value in range [0.0 - 1.0]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                               !  porosity of cell in u point
-                               !  [-]
-                               !  interval [0.0 - 1.0] 
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'porosv'          !  Global data
+    pntnam = 'porosv'          !  porosity [-] in V-point, value in range [0.0 - 1.0]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                               !  porosity of cell in v point
-                               !  [-]
-                               !  interval [0.0 - 1.0] 
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'areau'          !  Global data
+    pntnam = 'areau'           !  flow area of cell in U-point [m2]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                               !  area of cell in u point
-                               !  [m2]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'areav'          !  Global data
+    pntnam = 'areav'           !  flow area of cell in V-point [m2]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                               !  area of cell in v point
-                               !  [m2]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----additional arrays for sediment transport
     !
@@ -1420,137 +1055,113 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                          sbuu  (nmaxddb  ,mmaxddb,lsedtot)
     !                          sbvv  (nmaxddb  ,mmaxddb,lsedtot)
     !
-    pntnam = 'ws'            !  Global data
+    pntnam = 'ws'            !  Settling/fall velocity
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*lsed, gdp)
-                             !  Pointer of array WS
-                             !  Fall velocity
-                             !
-                             !  Fall velocity
-                             !  Wave stresses (in the x-/y-direction)
-                             ! 
-                             !  Fall velocity (dependent on sediment
-                             !  type)
-                             ! 
-                             !  Settling velocity (concentration
-                             !  dependent)
-                             ! Settling velocity (concentration
-                             !  dependent)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rhowat'        !  Global data
+    pntnam = 'rhowat'        !  Water density [kg/m3]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array RHOWAT
-                             !  Array with water densities [kg/m3]
-                             !  Pointer of array RHOWAT
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'seddif'        !  Global data
+    pntnam = 'seddif'        !  Vertical sediment diffusion coeff.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1)*lmax, gdp)
-                             !  Vertical sediment diffusion coeff.
-                             !  Pointer of array SEDDIF
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'depchg'        !  Global data
+    pntnam = 'depchg'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'epscur'        !  Global data
+    pntnam = 'epscur'        !  no description (yet)
     ierr = mkfpnt(pntnam, kmax + 1, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'epswav'        !  Global data
+    pntnam = 'epswav'        !  dissipation at surface (breaking waves)
     ierr = mkfpnt(pntnam, kmax + 1, gdp)
-                             !  dissipation at surface (breaking waves)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sbuu'          !  Global data
+    pntnam = 'sbuu'          !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsedtot, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sbvv'          !  Global data
+    pntnam = 'sbvv'          !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsedtot, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !     Arrays for: fluid mud; driving forces for fluid mud layer
     !                   usus, vsus, czusus, czvsus, wssus, entr, rsed
     !                   excbed and soumud
     !
     !
-    pntnam = 'usus'          !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  U-velocities at old time level
+    pntnam = 'usus'          !  U-velocities at old time level
                              !  at k=kmax (suspension layer), water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     usus_mud = u0(kmax)_water
-    if (ierr<= - 9) goto 9999
-    pntnam = 'vsus'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  V-velocities at old time level
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'vsus'          !  V-velocities at old time level
                              !  at k=kmax (suspension layer), water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     vsus_mud = v0(kmax)_water
-    if (ierr<= - 9) goto 9999
-    pntnam = 'czusus'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  U-chezy coefficients
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'czusus'        !  U-chezy coefficients
                              !  at k=kmax (suspension layer), water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     czusus_mud = cfurou(2)_water
-    if (ierr<= - 9) goto 9999
-    pntnam = 'czvsus'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  V-chezy coefficients
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'czvsus'        !  V-chezy coefficients
                              !  at k=kmax (suspension layer), water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     czvsus_mud = cfvrou(2)_water
-    if (ierr<= - 9) goto 9999
-    pntnam = 'wssus'         !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Fall velocity
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wssus'         !  Fall velocity
                              !  at k=kmax (suspension layer), water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     wssus_mud = wstau_water
-    if (ierr<= - 9) goto 9999
-    pntnam = 'wstau'         !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Fall velocity at k=kmax
-    if (ierr<= - 9) goto 9999
-    pntnam = 'entr'          !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wstau'         !  Fall velocity at k=kmax
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Entrainment mud --> suspension layer
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'entr'          !  Entrainment mud --> suspension layer
                              !  Only used in water fraction of fluid mud calculation
-    if (ierr<= - 9) goto 9999
-    pntnam = 'rsed'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Concentration of sediment(1) at old time level
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'rsed'          !  Concentration of sediment(1) at old time level
                              !  at k=kmax (suspension layer), water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     rsed_mud = r0(kmax,l1)_water
                              !  WARNING: only the first sediment type is communicated!!!
-    if (ierr<= - 9) goto 9999
-    pntnam = 'soumud'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Growth speed mud layer (m/s)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'soumud'        !  Growth speed mud layer (m/s)
                              !  >0 source(>0) or sink(<0) for mud layer
                              !  source term for combined effect of
                              !  erosion/dewater (exchange) and settling/entrainment
                              !  Only used in mud fraction of fluid mud calculation
-    if (ierr<= - 9) goto 9999
-    pntnam = 'excbed'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Exchange bed / mud layer
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'excbed'        !  Exchange bed / mud layer
                              !  Only used in mud fraction of fluid mud calculation
-    if (ierr<= - 9) goto 9999
-    pntnam = 'sepsus'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Water level  at old time level of water fraction
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'sepsus'        !  Water level  at old time level of water fraction
                              !  Only used in mud fraction of fluid mud calculation:
                              !     sepsus_mud = s0_water
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: time dependent discharges
     !
@@ -1568,148 +1179,81 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        vmdis1(nsrc  )
     !                        sink  (nmaxddb  ,mmaxddb,kmax ,lstsci)
     !                        sour  (nmaxddb  ,mmaxddb,kmax ,lstsci)
-    pntnam = 'disch'         !  Global data
-    ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array DISCH
-                             !  Array with discharge values [m3/sec]
-                             !  At most MXDIST time varying dis-
-                             !  charges at discharge points
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'disinp'
+    pntnam = 'disch'         !  Time varying discharges [m3/sec]
+                             !  at discharge points
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Copy of array DISCH
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'disinp'        !  Copy of array DISCH
                              !  Contains input values (required for bubble screens)
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nsrc, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'disnf'         !  Global data
+    pntnam = 'disnf'         !  Discharge values [m3/sec]
+                             !  following from near field model
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DISNF
-                             !  Array with discharge values [m3/sec]
-                             !  Following from near field model
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'voldis'        !  Global data
+    pntnam = 'voldis'        !  Total volume discharged by discharge [m3]
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array VOLDIS
-                             !  Array with total volume discharged by discharge [m3]
-    if (ierr<= - 9) goto 9999    
+    if (ierr <= -9) goto 9999    
     !
-    pntnam = 'disch0'        !  Global data
+    pntnam = 'disch0'        !  Old discharge value
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array DISCH1
-                             !  Old discharge value
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'disch1'        !  Global data
+    pntnam = 'disch1'        !  New discharge value
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array DISCH1
-                             !  New discharge value
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rint'          !  Global data
+    pntnam = 'rint'          !  Concentration at discharge points
     ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
-                             !  Pointer of array RINT
-                             !  Concentration at discharge points
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rint0'         !  Global data
+    pntnam = 'rint0'         !  Old concentration value at discharge points
     ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
-                             !  Pointer of array RINT0
-                             !  Old concentration value at discharge points
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rint1'         !  Global data
+    pntnam = 'rint1'         !  New concentration value at discharge points
     ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
-                             !  Pointer of array RINT1
-                             !  New concentration value at discharge points
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'umdis'         !  Global data
+    pntnam = 'umdis'         !  Velocity for discharges (in the x-dir)
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array UMDIS
-                             !  Velocity for discharges (in the
-                             !  x-dir)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'umdis0'        !  Global data
+    pntnam = 'umdis0'        !  Old time velocity for discharges (in the x-dir)
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array UMDIS0
-                             !  Old time velocity for
-                             !  discharges (in the x-dir)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'umdis1'        !  Global data
+    pntnam = 'umdis1'        !  New time velocity for discharges (in the x-dir)
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array UMDIS1
-                             !  New time velocity for
-                             !  discharges (in the x-dir)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vmdis'         !  Global data
+    pntnam = 'vmdis'         !  Velocity for discharges (in the y-dir)
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array VMDIS
-                             !  Velocity for discharges (in the
-                             !  y-dir)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vmdis0'        !  Global data
+    pntnam = 'vmdis0'        !  Old time velocity for discharges (in the y-dir)
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array VMDIS0
-                             !  Old time velocity for
-                             !  discharges (in the y-dir)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'vmdis1'        !  Global data
+    pntnam = 'vmdis1'        !  New time velocity for discharges (in the y-dir)
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array VMDIS1
-                             !  New time velocity for
-                             !  discharges (in the y-dir)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sink'          !  Global data
+    pntnam = 'sink'          !  Sink terms advection-diffusion equation (added to main diagonal BBKL)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lstsci, gdp)
-                             !  Pointer of array SINK
-                             ! 
-                             !  Array with sink   terms
-                             !  (added to main diagonal   BBKL)
-                             ! 
-                             !  Array with sink   terms
-                             !  (added to main diagonal   bbkl)
-                             ! 
-                             !  Array with sink   terms
-                             ! 
-                             !  Array with sink terms sediment
-                             !  (added to main diagonal   BBKL)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sour'          !  Global data
+    pntnam = 'sour'          !  Source terms advection-diffusion equation (added to Right Hand Side DDKL)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lstsci, gdp)
-                             !  Pointer of array SOUR
-                             ! 
-                             !  Array with source terms sediment
-                             !  (added to Right Hand Side DDKL)
-                             ! 
-                             !  Array with source terms
-                             !  (added to Right Hand Side DDKL)
-                             !  Array with source terms for sediment
-                             ! 
-                             !  Array with source terms
-                             !  (added to Right Hand Side DDKL)
-                             ! 
-                             !  Array with source terms
-                             !  (added to right hand side ddkl)
-                             ! 
-                             !  Array with source terms
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sournf'          !  Global data
+    pntnam = 'sournf'        !  Sources for near field model (added to Right Hand Side DDKL)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lstsci, gdp)
-                             !  Pointer of array SOURNF
-                             !
-                             !  Sources for near field model
-                             !  (added to Right Hand Side DDKL)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: time dependent wind fields
     !
@@ -1720,67 +1264,46 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        patm  (nmaxddb  ,mmaxddb)
     !                        w10mag(nmaxddb  ,mmaxddb)
     !                        evap  (nmaxddb  ,mmaxddb)
-    pntnam = 'windu'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WINDU
-                             !  Current wind velocity in the ksi-dir.
-                             !  Interface Stress in the x-dir.
-                             !  Wind force in the x-dir.
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'windsu'        !  Global data
+    pntnam = 'windu'         !  Current wind velocity at 10 m in the ksi-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WINDSU
-                             !  Wind force in the x-dir.
-                             !  Wind stress in the ksi-dir.
-                             !  Wind stress in the x-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'windv'         !  Global data
+    pntnam = 'windsu'        !  Wind stress in the ksi-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WINDV
-                             !  Current wind velocity in the eta-dir.
-                             !  Wind force in the y-dir.
-                             !  Wind velocity in the eta-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'windsv'        !  Global data
+    pntnam = 'windv'         !  Current wind velocity at 10 m in the eta-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WINDSV
-                             !  Wind force in the y-dir.
-                             !  Wind stress in the eta-dir.
-                             !  Wind stress in the y-dir.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'patm'          !  Global data
+    pntnam = 'windsv'        !  Wind stress in the eta-dir.
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array PATM
-                             !  Atmosferic pressure in N/m2
-                             !  Current atmosferic pressure in N/m2
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'w10mag'        !  Global data
+    pntnam = 'patm'          !  Current atmosferic pressure in N/m2
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array W10MAG
-                             !  Magnitude of Wind at 10 M
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'w10mag'        !  Magnitude of Wind at 10 m
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'evap'          !  Evaporation in m/s
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-    if (ierr<= - 9) goto 9999
-    
+    if (ierr <= -9) goto 9999    
     !
     pntnam = 'zevap'         !  Instantaneous evaporation at monitoring stations
     ierr = mkfpnt(pntnam, nostat, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'precip'        !  Precipitation in m/s
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     pntnam = 'zprecp'       !  Instantaneous precipitation at monitoring stations
     ierr = mkfpnt(pntnam, nostat, gdp)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !
     !-----arrays for: diffusion, concentrations
@@ -1788,46 +1311,31 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        sigdif(lstsci )
     !                        sigmol(lstsci )
     !                        rmneg (lstsci )
-    pntnam = 'sigdif'        !  Global data
-    ierr = mkfpnt(pntnam, lstsci, gdp)
-                             !  Pointer of array SIGDIF
-                             !  Prandtl/schmidt-numbers for const.
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'sigmol'        !  Global data
+    pntnam = 'sigdif'        !  Prandtl/schmidt-numbers for const.
     ierr = mkfpnt(pntnam, lstsci, gdp)
-                             !  Pointer of array SIGMOL
-                             !  Moleculair Prandtl numbers for const.
-                             !  Moleculair Prandtl-numbers for const.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rmneg'         !  Global data
+    pntnam = 'sigmol'        !  Moleculair Prandtl numbers for const.
     ierr = mkfpnt(pntnam, lstsci, gdp)
-                             !  Pointer of array RMNEG
-                             !  Criterion for conc. above which fil-
-                             !  ter procedure is applied
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'rmneg'         !  Criterion for conc. above which filter procedure is applied
+    ierr = mkfpnt(pntnam, lstsci, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: diffusion, concentrations
     !
     !                        rho   (nmaxddb  ,mmaxddb,kmax  )
     !                        sumrho(nmaxddb  ,mmaxddb,kmax  )
-    pntnam = 'rho'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array RHO
-                             !  Array with densities [kg/m3]
-                             !  Array with mud-water densities
-                             !  [kg/m3]
-                             ! 
-                             !  Array with densities [kg/m3]
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'sumrho'        !  Global data
+    pntnam = 'rho'           !  Mud-water densities [kg/m3]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array SUMRHO
-                             !  Integral of density from layer k
-                             !  until free surface [kg/m3]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'sumrho'        !  Integral of density from layer k until free surface [kg/m3]
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: tau
     !
@@ -1841,72 +1349,50 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        ryy   (nmaxddb  ,mmaxddb,kmax  )
     !                        rxz   (nmaxddb  ,mmaxddb,kmax  )
     !                        ryz   (nmaxddb  ,mmaxddb,kmax  )
-    pntnam = 'taubpu'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array TAUBPU
-                             !  Primary   bottom friction term in the
+    !
+    pntnam = 'taubpu'        !  Primary   bottom friction term in the
                              !  x-dir. (velocity dependent)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'taubpv'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array TAUBPV
-                             !  Primary   bottom friction term in the
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'taubpv'        !  Primary   bottom friction term in the
                              !  y-dir. (velocity dependent)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'taubsu'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array TAUBSU
-                             !  Pointer of array TAUBSV
-                             !  Secondary bottom friction term in the
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'taubsu'        !  Secondary bottom friction term in the
                              !  x-dir. (velocity dependent)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'taubsv'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array TAUBSV
-                             !  Secondary bottom friction term in the
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'taubsv'        !  Secondary bottom friction term in the
                              !  y-dir. (velocity dependent)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'taubmx'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array TAUBMX
-                             !  Primary maximal bottom friction term
-                             !  (scalar entity)
-                             !  Primary maximal bottom friction term
-                             !  in the x-dir. (velocity dependent)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rxx'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array RXX
-                             !  Spiral motion stresses
-                             !  Turbulent stresses
-    if (ierr<= - 9) goto 9999
+    pntnam = 'taubmx'        !  Primary maximal bottom friction term
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rxy'           !  Global data
+    pntnam = 'rxx'           !  Turbulent stresses
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array RXY
-                             !  Spiral motion stresses
-                             !  Turbulent stresses
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ryy'           !  Global data
+    pntnam = 'rxy'           !  Turbulent stresses
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array RYY
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rxz'           !  Global data
+    pntnam = 'ryy'           !  Turbulent stresses
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ryz'           !  Global data
+    pntnam = 'rxz'           !  Turbulent stresses
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'ryz'           !  Turbulent stresses
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: waves
     !
@@ -1960,350 +1446,247 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        dfv   (nmaxddb  ,mmaxddb)
     !                        deltau(nmaxddb  ,mmaxddb)
     !                        deltav(nmaxddb  ,mmaxddb)
-    pntnam = 'dis'           !  Global data
+    !
+    pntnam = 'dis'           !  Dissipation waves
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*4, gdp)
-                             !  Pointer of array DIS
-                             !  Dissipation waves
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'df'            !  Global data
+    pntnam = 'df'            !  Dissipation waves in wave boundary layer
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array DF
-                             !  Dissipation waves in wave boundary layer
-    if (ierr<= - 9) goto 9999
-    pntnam = 'discom'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'discom'        !  Help array to interpolate between to consecutive timesteps for dissipation waves
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  dissipation waves
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rlabda'        !  Global data
+    pntnam = 'rlabda'        !  Wavelength
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array RLABDA
-                             !  Wavelength
-                             !  wavelength
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'teta'          !  Global data
+    pntnam = 'teta'          !  Angle waves
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array TETA
-                             !  Angle waves
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dircom'        !  Global data
+    pntnam = 'dircom'        !  Help array to interpolate between to consecutive timesteps for angle waves
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  angle waves
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dircos'        !  Global data
+    pntnam = 'dircos'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dirsin'        !  Global data
+    pntnam = 'dirsin'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'uorb'          !  Global data
+    pntnam = 'uorb'          !  Orbital velocity at the bottom layer
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array UORB
-                             !  Orbital velocity at the bottom layer
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ubot'          !  Global data
+    pntnam = 'ubot'          !  Peak orbital velocity at the bottom layer
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array UBOT
-                             !  Peak orbital velocity at the bottom layer
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ubcom'         !  Global data
+    pntnam = 'ubcom'         !  Help array to interpolate between to consecutive timesteps for peak orbital velocity at the bottom layer
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array UBCOM
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  Peak orbital velocity at the bottom layer
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hrms'          !  Global data
+    pntnam = 'hrms'          !  RMS Wave Height
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array HRMCOM
-                             !  RMS Wave Height
-                             !  Wave heights
-                             !  Wave hights
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hrmcom'        !  Global data
+    pntnam = 'hrmcom'        !  Help array to interpolate between to consecutive timesteps for RMS wave height
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  orbital velocity at the bottom layer
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'tp'            !  Global data
+    pntnam = 'tp'            !  Period waves
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array TP
-                             !  Period Waves
-                             !  Period waves
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'tpcom'         !  Global data
+    pntnam = 'tpcom'         !  Help array to interpolate between to consecutive timesteps for period waves
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  period waves
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'grmasu'        !  Global data
+    pntnam = 'grmasu'        !  Mass flux waves (in the x direction)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GRMASU
-                             !  Mass flux waves (in the x direction)
-                             !  Mass flux waves (in the x-dir.)
-                             !  Mass flux waves (in the x-direction)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'grmasv'        !  Global data
+    pntnam = 'grmasv'        !  Mass flux waves (in the y direction)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GRMASV
-                             !  Mass flux waves (in the y direction)
-                             !  Mass flux waves (in the y-dir.)
-                             !  Mass flux waves (in the y-direction)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'grmsur'        !  Global data
+    pntnam = 'grmsur'        !  Mass flux Roller (in the x direction)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GRMSUR
-                             !  Mass flux Roller (in the x direction)
-
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'grmsvr'        !  Global data
+    pntnam = 'grmsvr'        !  Mass flux Roller (in the y direction)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GRMSVR
-                             !  Mass flux Roller (in the y direction)
-
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'grfacu'        !  Global data
+    pntnam = 'grfacu'        !  Breaker Delay Adjustment (in the x direction)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GRFACU
-                             !  Breaker Delay Adjustment (in the x direction)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'grfacv'        !  Global data
+    pntnam = 'grfacv'        !  Breaker Delay Adjustment (in the y direction)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array GRFACV
-                             !  Breaker Delay Adjustment (in the y direction)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'msucom'        !  Global data
+    pntnam = 'msucom'        !  Help array to interpolate between to consecutive timesteps for mass flux waves (in the x-dir.)
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  mass flux waves (in the x-dir.)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'msvcom'        !  Global data
+    pntnam = 'msvcom'        !  Help array to interpolate between to consecutive timesteps for mass flux waves (in the y-dir.)
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  mass flux waves (in the y-dir.)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wsu'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WSU
-                             !  Local x-component of the flow-driving
-                             !  force due to wave breaking (:= WSU)
+    pntnam = 'wsu'           !  Local x-component of the flow-driving force due to wave breaking (:= WSU)
                              !  Wave stresses (in the x-direction)
-                             ! 
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wsucom'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  wave stresses (in the x-direction)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wsv'           !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WSV
-                             !  Local y-component of the flow-driving
-                             !  force due to wave breaking (:= WSV)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wsucom'        !  Help array to interpolate between to consecutive timesteps for wave stresses (in the x-direction)
+    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wsv'           !  Local y-component of the flow-driving force due to wave breaking (:= WSV)
                              !  Wave stresses (in the y-direction)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wsvcom'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  wave stresses (in the y-direction)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wsbu'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WSBODYU
-                             !  Local x-component of the flow-driving
-                             !  force due to waves in the water column (:= WSBODYU)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wsvcom'        !  Help array to interpolate between to consecutive timesteps for wave stresses (in the y-direction)
+    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wsbu'          !  Local x-component of the flow-driving force due to waves in the water column (:= WSBODYU)
                              !  Wave stresses in the water column (in the x-direction)
-                             ! 
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wsbuc'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  wave stresses in the water column (in the x-direction)
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wsbv'          !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WSBODYV
-                             !  Local y-component of the flow-driving
-                             !  force due to waves in the water column (:= WSBODYV)
+                             ! 
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wsbuc'         !  Help array to interpolate between to consecutive timesteps for wave stresses in the water column (in the x-direction)
+    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'wsbv'          !  Local y-component of the flow-driving force due to waves in the water column (:= WSBODYV)
                              !  Wave stresses in the water column (in the y-direction)
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wsbvc'         !  Global data
+    pntnam = 'wsbvc'         !  Help array to interpolate between to consecutive timesteps for wave stresses in the water column (in the y-direction)
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  wave stresses in the water column (in the y-direction)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wlen'          !  Global data
+    pntnam = 'wlen'          !  Mean wave length
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Pointer of array WLEN
-                             !  Mean wave length
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wlcom'        !  Global data
+    pntnam = 'wlcom'        !  Help array to interpolate between to consecutive timesteps for mean wave length
     ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Pointer of array WLCOM
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  Mean wave length
-    if (ierr<= - 9) goto 9999
-    !roller
-    pntnam = 'qxkw'          !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'qxkw'          !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'qykw'          !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'qykw'          !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'cgc'           !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'cgc'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'c'             !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'c'             !  Internal work array, tridiagonal matrix water levels upper diagonal
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  Complete char. array (mempool.inc)
-                             !  Internal work array, tridiagonal
-                             !  matrix water levels upper diagonal
-                             ! 
-    if (ierr<= - 9) goto 9999
-    pntnam = 'qxkr'          !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'qxkr'          !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'qykr'          !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'qykr'          !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'ewabr0'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'ewabr0'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'ewabr1'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'ewabr1'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'ewave0'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'ewave0'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'ewave1'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'ewave1'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'eroll0'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'eroll0'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'eroll1'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'eroll1'        !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'sinkw'         !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'sinkw'         !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'sourw'         !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'sourw'         !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'sinkr'         !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'sinkr'         !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'sourr'         !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'sourr'         !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'fxw'           !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'fxw'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'fyw'           !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'fyw'           !  no description (yet)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'ampbc'         !  Global data
-    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'ombc'          !  Global data
-    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'phibc'         !  Global data
-    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'thetbc'        !  Global data
-    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dfu'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DFU
-                             !  Bottom wave dissipation in u-point
-    if (ierr<= - 9) goto 9999
+    pntnam = 'ampbc'         !  no description (yet)
+    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
     !
-    pntnam = 'dfv'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DFV
-                             !  Bottom wave dissipation in v-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    pntnam = 'ombc'          !  no description (yet)
+    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'deltau'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DELTAU
-                             !  Boundary layer thickness in u-point
-    if (ierr<= - 9) goto 9999
+    pntnam = 'phibc'         !  no description (yet)
+    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'deltav'        !  Global data
+    pntnam = 'thetbc'        !  no description (yet)
+    ierr = mkfpnt(pntnam, ncmax*kfacwv*kfacrl, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dfu'           !  Bottom wave dissipation in u-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DELTAV
-                             !  Boundary layer thickness in v-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dfv'           !  Bottom wave dissipation in v-point
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'deltau'        !  Boundary layer thickness in u-point
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'deltav'        !  Boundary layer thickness in v-point
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: derivatives
     !
@@ -2311,37 +1694,28 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        dddeta(nmaxddb  ,mmaxddb)
     !                        dzdksi(nmaxddb  ,mmaxddb)
     !                        dzdeta(nmaxddb  ,mmaxddb)
-    pntnam = 'dddksi'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DDDKSI
-                             !  Ddepth/deta in u-point
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'dddeta'        !  Global data
+    pntnam = 'dddksi'        !  Ddepth/deta in u-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DDDETA
-                             !  Ddepth/dksi in v-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzdksi'        !  Global data
+    pntnam = 'dddeta'        !  Ddepth/dksi in v-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DZDKSI
-                             !  Dzeta /deta in v-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzdeta'        !  Global data
+    pntnam = 'dzdeta'        !  Dzeta /deta in u-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array DZDETA
-                             !  Dzeta /dksi in u-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dzdksi'        !  Dzeta /dksi in v-point
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
     !      Export HDT to shared mem
     !
-    pntnam = 'hdt'           !  Global data
+    pntnam = 'hdt'           !  Half Integration time step [seconds]
     ierr = mkfpnt(pntnam, 1, gdp)
-                             !  Half Integration time step [seconds]
-                             !  Half integration time step [seconds]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! overview workarrays for version v240:
     ! 16 2D arrays (r 80-88 + 88a-88e)
@@ -2362,87 +1736,70 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                wrka14   (nmaxddb  ,mmaxddb)
     !                wrka15   (nmaxddb  ,mmaxddb)
     !                wrka16   (nmaxddb  ,mmaxddb)
-    pntnam = 'wrka1'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WRKA1
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'wrka2'         !  Global data
+    pntnam = 'wrka1'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array WRKA2
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka3'         !  Global data
+    pntnam = 'wrka2'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka4'         !  Global data
+    pntnam = 'wrka3'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka5'         !  Global data
+    pntnam = 'wrka4'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka6'         !  Global data
+    pntnam = 'wrka5'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka7'         !  Global data
+    pntnam = 'wrka6'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka8'         !  Global data
+    pntnam = 'wrka7'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka9'         !  Global data
+    pntnam = 'wrka8'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka10'        !  Global data
+    pntnam = 'wrka9'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrka11'        !  Global data
+    pntnam = 'wrka10'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999    
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'wrka12'        !  Global data
+    pntnam = 'wrka11'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999    
     !
-    pntnam = 'wrka13'        !  Global data
+    pntnam = 'wrka12'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'wrka14'        !  Global data
+    pntnam = 'wrka13'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'wrka15'        !  Global data
+    pntnam = 'wrka14'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'wrka16'        !  Global data
+    pntnam = 'wrka15'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  no description (yet)
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
+    !
+    pntnam = 'wrka16'        !  Internal work array
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr == -1) goto 9999
     !
     !-----arrays for: coefficient matrices (double kmax dimension)
     !     for the array rbuff we use wrkb1 or wrkc1 dependent on the value
@@ -2476,99 +1833,77 @@ subroutine esm_alloc_real(lundia, error, gdp)
     if (lmax>1) lrbuff = 0
     laak = max(nmaxddb*mmaxddb*(kmax + 1), lrbuff)
     !
-    pntnam = 'wrkb1'         !  Global data
+    pntnam = 'wrkb1'         !  Internal work array
     ierr = mkfpnt(pntnam, laak, gdp)
-                             !  Pointer of array WRKB1
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb2'         !  Global data
+    pntnam = 'wrkb2'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array WRKB2
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb3'         !  Global data
+    pntnam = 'wrkb3'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array WRKB3
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb4'         !  Global data
+    pntnam = 'wrkb4'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array WRKB4
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb5'         !  Global data
+    pntnam = 'wrkb5'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb6'         !  Global data
+    pntnam = 'wrkb6'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax+1), gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb7'         !  Global data
+    pntnam = 'wrkb7'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb8'         !  Global data
+    pntnam = 'wrkb8'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb9'         !  Global data
+    pntnam = 'wrkb9'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb10'        !  Global data
+    pntnam = 'wrkb10'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb11'        !  Global data
+    pntnam = 'wrkb11'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb12'        !  Global data
+    pntnam = 'wrkb12'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb13'        !  Global data
+    pntnam = 'wrkb13'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb14'        !  Global data
+    pntnam = 'wrkb14'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb15'        !  Global data
+    pntnam = 'wrkb15'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb16'        !  Global data
+    pntnam = 'wrkb16'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Internal work array
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb17'        !  Global data
+    pntnam = 'wrkb17'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkb18'        !  Global data
+    pntnam = 'wrkb18'        !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for: coefficient matrices (double kmax dimension)
     !
@@ -2580,30 +1915,27 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        wrkc2  (nmaxddb  ,mmaxddb,kmax,lmax)
     !                        wrkc3  (nmaxddb  ,mmaxddb,kmax,lmax)
     !                        wrkc4  (nmaxddb  ,mmaxddb,kmax,lmax)
+    !
     lmaxsed = max(lmax,lsedtot)
     lrbuff  = nmaxus*mmax*(kmax + 1)*lmaxsed
     if (lmaxsed<=1) lrbuff = 0
     laakl = max(nmaxddb*mmaxddb*kmax*lmaxsed, lrbuff)
     !
-    pntnam = 'wrkc1'         !  Global data
+    pntnam = 'wrkc1'         !  Internal work array
     ierr = mkfpnt(pntnam, laakl, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkc2'         !  Global data
+    pntnam = 'wrkc2'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*max(1, lmax), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkc3'         !  Global data
+    pntnam = 'wrkc3'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*lmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'wrkc4'         !  Global data
+    pntnam = 'wrkc4'         !  Internal work array
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*max(1, lmax), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! RBUFF is used only outside TRISOL. So we use a work array, which
     ! is initialized each timestep in TRISOL, here WRKB1 or WRKC1
@@ -2614,41 +1946,28 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ! RBUFF is going to point to WRKB1 or WRKC1, depending on their size
     ! See subroutine gtptrs.f90
     !
-    !
-    !
     !-----arrays for: curvature coefficients of streakline
     !
     !                        x3    (nmaxddb  ,mmaxddb)
     !                        x2y   (nmaxddb  ,mmaxddb)
     !                        xy2   (nmaxddb  ,mmaxddb)
     !                        y3    (nmaxddb  ,mmaxddb)
-    pntnam = 'x3'            !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array X3
-                             !  Coef. of u**3 used for curvature
-                             !  Coefficient of U**3
-    if (ierr<= - 9) goto 9999
     !
-    pntnam = 'x2y'           !  Global data
+    pntnam = 'x3'            !  Coef. of u**3 used for curvature
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array X2Y
-                             !  Coef. of u**2*v used for curvature
-                             !  Coefficient of U**2*V
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'xy2'           !  Global data
+    pntnam = 'x2y'           !  Coef. of u**2*v used for curvature
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array XY2
-                             !  Coef. of u*v**2 used for curvature
-                             !  Coefficient of U*V**2
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'y3'            !  Global data
+    pntnam = 'xy2'           !  Coef. of u*v**2 used for curvature
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array Y3
-                             !  Coef. of v**3  used for curvature
-                             !  Coefficient of V**3
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'y3'            !  Coef. of v**3  used for curvature
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for anti creep algorithm
     !
@@ -2660,105 +1979,38 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        dtdeta(nmaxddb  ,mmaxddb,1:kmax )
     !                        dldksi(nmaxddb  ,mmaxddb,1:kmax )
     !                        dldeta(nmaxddb  ,mmaxddb,1:kmax )
-    pntnam = 'dpdksi'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DPDKSI
-                             !  Horizontal gradient baroclinic part
-                             !  pressure, strictly horizontal
-                             !  Horizontal gradient baroclinic
-                             !  pressure in ksi-direction
-                             !  Strictly horizontal gradient density
-                             !  in pressure term in ksi-direction
-                             !  strictly horizontal gradient density
-                             !  in pressure term in ksi direction,
-    if (ierr== - 1) goto 9999
     !
-    pntnam = 'dpdeta'        !  Global data
+    pntnam = 'dpdksi'        !  Strictly horizontal gradient density (baroclinic part) in pressure term in ksi-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DPDETA
-                             !  Horizontal gradient baroclinic
-                             !  pressure in eta-direction
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dsdksi'        !  Global data
+    pntnam = 'dpdeta'        !  Strictly horizontal gradient density (baroclinic part) in pressure term in eta-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DSDKSI
-                             !  Horizontal gradient salinity
-                             !  in ksi-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-                             !  Horizontal gradient salinity
-                             !  in ksi-direction
-                             !  Horizontal gradient salinity,
-                             !  strictly horizontal in ksi-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dsdeta'        !  Global data
+    pntnam = 'dsdksi'        !  Strictly horizontal gradient salinity in ksi-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DSDETA
-                             !  Horizontal gradient salinity
-                             !  in eta-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-                             !  Horizontal gradient salinity
-                             !  in eta-direction
-                             !  Horizontal gradient salinity,
-                             !  strictly horizontal in eta-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dtdksi'        !  Global data
+    pntnam = 'dsdeta'        !  Strictly horizontal gradient salinity in eta-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DTDKSI
-                             !  Horizontal gradient temperature
-                             !  in ksi-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-                             !  Horizontal gradient temperature
-                             !  in ksi-direction
-                             !  Horizontal gradient temperature,
-                             !  strictly horizontal in ksi-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dtdeta'        !  Global data
+    pntnam = 'dtdksi'        !  Strictly horizontal gradient temperature in ksi-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DTDETA
-                             !  Horizontal gradient temperature
-                             !  in eta-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-                             !  Horizontal gradient temperature
-                             !  in eta-direction
-                             !  Horizontal gradient temperature,
-                             !  strictly horizontal in eta-direction
-                             !  For Anti Creep: Contribution diffu-
-                             !  sive flux interpolated on Cartesian
-                             !  grid to cell NM
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dldksi'        !  Global data
+    pntnam = 'dtdeta'        !  Strictly horizontal gradient temperature in eta-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DLDKSI
-                             !  Horizontal gradient sediment,
-                             !  strictly horizontal in ksi-direction
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dldeta'        !  Global data
+    pntnam = 'dldksi'        !  Horizontal gradient sediment, strictly horizontal in ksi-direction
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array DLDETA
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
+    !
+    pntnam = 'dldeta'        !  Horizontal gradient sediment, strictly horizontal in eta-direction
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
+    if (ierr == -1) goto 9999
     !
     !-----arrays for: matrices for turbulence model
     !
@@ -2766,61 +2018,22 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        rich  (nmaxddb  ,mmaxddb,0:kmax )
     !                        dudz  (nmaxddb  ,mmaxddb,0:kmax )
     !                        dvdz  (nmaxddb  ,mmaxddb,0:kmax )
-    pntnam = 'bruvai'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array BRUVAI
-                             !  Bouyancy frequency, squared, defined
-                             !  on hydrodyn. grid
-                             !  Bouyancy frequency, squared, defined
-                             !  on hydrodynamic grid
-                             ! 
-                             !  Brunt vaisly frequency
-                             ! BRUNT VAISLY FREQUENCY
-                             ! Brunt vaisly frequency
-                             !  -AG*DRHODZ/RHO
-    if (ierr== - 1) goto 9999
     !
-    pntnam = 'rich'          !  Global data
+    pntnam = 'bruvai'        !  Bouyancy frequency, squared - Brunt Vaisly frequency
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array RICH
-                             !  Gradient Richardson number on hydro-
-                             !  dynamic grid
-                             !  Richardson numbers at layer
-                             !  interfaces
-                             ! 
-                             !  Array with Richardson numbers
-                             ! 
-                             !  Richardson numbers at layer
-                             !  interfaces
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dudz'          !  Global data
+    pntnam = 'rich'          !  Gradient Richardson number at layer interfaces
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array DUDZ
-                             !  Vertical gradient of u-velocity com-
-                             !  ponent of hydrodynamic module
-                             !  Vertical gradient of u-velocity
-                             !  component
-                             ! 
-                             !  Vertical velocity gradients at layer
-                             !  interface
-                             ! Vertical velocity gradients
-                             !  at layer interface
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'dvdz'          !  Global data
+    pntnam = 'dudz'          !  Vertical gradient of u-velocity component at layer interface
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
-                             !  Pointer of array DVDZ
-                             !  Vertical gradient of v-velocity com-
-                             !  ponent of hydrodynamic module
-                             !  Vertical gradient of v-velocity
-                             !  component
-                             ! 
-                             !  Vertical velocity gradients at layer
-                             !  interface
-                             ! Vertical velocity gradients
-                             !  at layer interface
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
+    !
+    pntnam = 'dvdz'          !  Vertical gradient of v-velocity component at layer interface
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax + 1), gdp)
+    if (ierr == -1) goto 9999
     !
     !-----arrays for DELWAQ
     !
@@ -2832,53 +2045,38 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        z0vrou(nmaxddb  ,mmaxddb       )
     !                        qu    (nmaxddb  ,mmaxddb,kmax  )
     !                        qv    (nmaxddb  ,mmaxddb,kmax  )
-    pntnam = 'volum0'        !  Global data
+    !
+    pntnam = 'volum0'        !  Volume of a cell at old time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array VOLUM0
-                             !  Volume of a cell at old time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'volum1'        !  Global data
+    pntnam = 'volum1'        !  Volume of a cell at new time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array VOLUM1
-                             !  Volume of a cell at new time level
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'z0ucur'        !  Global data
+    pntnam = 'z0ucur'        !  Z0 roughness related to currents in U-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Z0 roughness related to currents in U-point
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'z0vcur'        !  Global data
+    pntnam = 'z0vcur'        !  Z0 roughness related to currents in V-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Z0 roughness related to currents in V-point
-    if (ierr== - 1) goto 9999
+    if (ierr == -1) goto 9999
     !
-    pntnam = 'z0urou'        !  Global data
+    pntnam = 'z0urou'        !  Wave enhanced Z0 roughness in U-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Wave enhanced Z0 roughness in U-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'z0vrou'        !  Global data
+    pntnam = 'z0vrou'        !  Wave enhanced Z0 roughness in V-point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Wave enhanced Z0 roughness in V-point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'qu'            !  Global data
+    pntnam = 'qu'            !  Cummulative discharge for layer k in the X-dir. in U-velocity point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array QU
-                             ! 
-                             !  Cummulative discharge for layer k
-                             !  in the X-dir. in U-velocity point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'qv'            !  Global data
+    pntnam = 'qv'            !  Cummulative discharge for layer k in the Y-dir. in V-velocity point
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Pointer of array QV
-                             ! 
-                             !  Cummulative discharge for layer k
-                             !  in the Y-dir. in V-velocity point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for post processing HIS file
     !
@@ -2918,290 +2116,167 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        zvort (nostat,kmax  )
     !                        zenst (nostat,kmax  )
     !                       hydprs(nostat,kmax  )
-    pntnam = 'zwl'           !  Global data
+    !
+    pntnam = 'zwl'           !  Water elevation at the monitoring stations
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZWL
-                             !  Water elevation at the monitoring
-                             !  stations
-                             !  Flag for activation of Z-MODEL
-                             !  Water elevation at the monitoring
-                             !  stations
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zalfas'        !  Global data
+    pntnam = 'zalfas'        !  Orientation at the monitoring stations (defined at the water elevation point) as the angle formed by
+                             !  the line spanned by the u-velocity points around the zeta point and the x-axis
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZALFAS
-                             !  Orientation at the monitoring sta-
-                             !  tions (defined at the water eleva-
-                             !  tion point) as the angle formed by
-                             !  the line spanned by the u-velocity
-                             !  points around the zeta point and the
-                             !  x-axis
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zcuru'         !  Global data
+    pntnam = 'zcuru'         !  U-velocity at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  Pointer of array ZCURU
-                             !  U-velocity at the monitoring sta-
-                             !  tions (defined at the water eleva-
-                             !  tion point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zcurv'         !  Global data
+    pntnam = 'zcurv'         !  V-velocity at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  Pointer of array ZCURV
-                             !  V-velocity at the monitoring sta-
-                             !  tions (defined at the water eleva-
-                             !  tion point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zcurw'         !  Global data
+    pntnam = 'zcurw'         !  W-velocity at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  Pointer of array ZCURW
-                             !  W-velocity at the monitoring sta-
-                             !  tions (defined at the water eleva-
-                             !  tion point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zqxk'          !  Global data
+    pntnam = 'zqxk'          !  Flow in the x-dir. at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  Pointer of array ZQXK
-                             !  Flow in the x-dir. at the monito-
-                             !  ring stations (defined at the water
-                             !  elevation point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zqyk'          !  Global data
+    pntnam = 'zqyk'          !  Flow in the y-dir. at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  Pointer of array ZQYK
-                             !  Flow in the y-dir. at the monito-
-                             !  ring stations (defined at the water
-                             !  elevation point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ztauks'        !  Global data
+    pntnam = 'ztauks'        !  Bottom friction in KSI direction at the monitoring stations defined at the water elevation point
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZTAUKS
-                             !  Bottom friction in KSI direction at
-                             !  the monitoring stations defined at
-                             !  the water elevation point
-                             !  Density at the monitoring stations
-                             !  defined at the water elevation point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ztauet'        !  Global data
+    pntnam = 'ztauet'        !  Bottom friction in ETA direction at the monitoring stations defined at the water elevation point
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZTAUET
-                             !  Bottom friction in ETA direction at
-                             !  the monitoring stations defined at
-                             !  the water elevation point
-                             !  Density at the monitoring stations
-                             !  defined at the water elevation point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zvicww'        !  Global data
+    pntnam = 'zvicww'        !  Vertical Eddy viscosity-3D at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*(kmax + 1), gdp)
-                             !  Pointer of array ZVICWW
-                             !  Vertical Eddy viscosity-3D at the
-                             !  monitoring stations (defined at
-                             !  the water elevation point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zdicww'        !  Global data
+    pntnam = 'zdicww'        !  Vertical Eddy diffusivity-3D at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*(kmax + 1), gdp)
-                             !  Pointer of array ZDICWW
-                             !  Vertical Eddy diffusivity-3D at the
-                             !  monitoring stations (defined at
-                             !  the water elevation point)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zrich'         !  Global data
+    pntnam = 'zrich'         !  Richardson numbers at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*(kmax + 1), gdp)
-                             !  Pointer of array ZRICH
-                             !  Richardson numbers at the monitoring
-                             !  stations defined at the water ele-
-                             !  vation point
-                             !  Richsardson numbers at the monitoring
-                             !  stations defined at the water ele-
-                             !  vation point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zrho'          !  Global data
+    pntnam = 'zrho'          !  Density at the monitoring stations (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  Pointer of array ZRHO
-                             !  Density at the monitoring stations
-                             !  defined at the water elevation point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zwndsp'        !  Global data
+    pntnam = 'zwndsp'        !  Wind speed at the monitoring stations
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZWNDSP
-                             !  Wind speed at the monitoring
-                             !  stations
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zwnddr'        !  Global data
+    pntnam = 'zwnddr'        !  Wind direction at the monitoring stations
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZWNDDR
-                             !  Wind direction at the monitoring
-                             !  stations
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zairp'         !  Global data
+    pntnam = 'zairp'         !  Air pressure at the monitoring stations
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Pointer of array ZAIRP
-                             !  Air pressure at the monitoring
-                             !  stations
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'fltr'          !  Global data
+    pntnam = 'fltr'          !  Cumulative volume transport for water through the cross section.
     ierr = mkfpnt(pntnam, ntruv, gdp)
-                             !  Pointer of array FLTR
-                             !  Array for the cumulative volume
-                             !  transport for water along the
-                             !  cross section.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ctr'           !  Global data
+    pntnam = 'ctr'           !  Total flow through the cross section.
     ierr = mkfpnt(pntnam, ntruv, gdp)
-                             !  Array for the total flow along the
-                             !  cross section.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'gro'           !  Global data
+    pntnam = 'gro'           !  Concentration values at the monitoring stations
     ierr = mkfpnt(pntnam, nostat*kmax*lstsci, gdp)
-                             !  Pointer of array GRO
-                             ! 
-                             !  Array containing the concentration
-                             !  value at the monitoring stations
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'ztur'          !  Global data
+    pntnam = 'ztur'          !  Concentrations turbulent energy and dissipation at the monitoring station (defined at the water elevation point)
     ierr = mkfpnt(pntnam, nostat*(kmax + 1)*ltur, gdp)
-                             !  Pointer of array ZTUR
-                             ! 
-                             !  Concentrations turbulent energy and
-                             !  dissipation at the monitoring station
-                             !  defined at the water elevation point
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'atr'           !  Global data
+    pntnam = 'atr'           !  Cumulative advective transport for constituents through the cross section.
     ierr = mkfpnt(pntnam, ntruv*lstsci, gdp)
-                             !  Pointer of array ATR
-                             !  Array for the cumulative advective
-                             !  transport for constituents along
-                             !  the cross section.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dtr'           !  Global data
+    pntnam = 'dtr'           !  Cumulative diffusive transport for constituents through the cross section.
     ierr = mkfpnt(pntnam, ntruv*lstsci, gdp)
-                             !  Pointer of array CTR
-                             !  Pointer of array DTR
-                             !  Array for the cumulative diffusive
-                             !  transport for constituents along
-                             !  the cross section.
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sbtr'          !  Global data
+    pntnam = 'sbtr'          !  no description (yet)
     ierr = mkfpnt(pntnam, ntruv*lsedtot, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sstr'          !  Global data
+    pntnam = 'sstr'          !  no description (yet)
     ierr = mkfpnt(pntnam, ntruv*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sbtrc'         !  Global data
+    pntnam = 'sbtrc'         !  no description (yet)
     ierr = mkfpnt(pntnam, ntruv*lsedtot, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'sstrc'         !  Global data
+    pntnam = 'sstrc'         !  no description (yet)
     ierr = mkfpnt(pntnam, ntruv*lsed, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'discum'        !  Global data
+    pntnam = 'discum'        !  Discharge values [m3/sec] cumulative in time
     ierr = mkfpnt(pntnam, nsrc, gdp)
-                             !  Pointer of array DISCUM
-                             !  Array with discharge values [m3/sec]
-                             !  cummulalive in time
-                             !  Array with discharge values [m3/sec]
-                             !  cummulative in time
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zws'           !  Global data
+    pntnam = 'zws'           !  Fall velocity (dependent on sediment type)
     ierr = mkfpnt(pntnam, nostat*(kmax + 1)*lsed, gdp)
-                             !  Fall velocity (dependent on sediment
-                             !  type)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zrsdeq'        !  Global data
+    pntnam = 'zrsdeq'        !  Equilibrium sediment concentration
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
-                             !  Equilibrium sediment concentration
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zbdsed'        !  Global data
+    pntnam = 'zbdsed'        !  Total sediment in bed: kg /m2
     ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
-                             !  Array with total sediment in NM
-                             !  units : kg /m2
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zdpsed'        !  Global data
+    pntnam = 'zdpsed'        !  Total thickness of sediment layer
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Total depth sediment layer
-                             !  (not yet used)
-                             !  type)
-                             !  Total depth sediment layer
-                             !  (not yet used)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zdps'          !  Global data
+    pntnam = 'zdps'          !  Depth at monitoring station
     ierr = mkfpnt(pntnam, nostat, gdp)
-                             !  Depth at monitoring station
-                             !
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zsbu'          !  Global data
+    pntnam = 'zsbu'          !  Bed load transport in u-direction at station
     ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
-                             !  Bed load transport in u-direction at station
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zsbv'          !  Global data
+    pntnam = 'zsbv'          !  Bed load transport in v-direction at station
     ierr = mkfpnt(pntnam, nostat*lsedtot, gdp)
-                             !  Bed load transport in v-direction at station
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zssu'          !  Global data
+    pntnam = 'zssu'          !  Susp. load transport in u-direction at station
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
-                             !  Susp. load transport in u-direction at station
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zssv'          !  Global data
+    pntnam = 'zssv'          !  Susp. load transport in v-direction at station
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
-                             !  Susp. load transport in v-direction at station
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zrca'          !  Global data
+    pntnam = 'zrca'          !  Near-bed reference concentration of sediment at station
     ierr = mkfpnt(pntnam, nostat*lsed, gdp)
-                             !  Near-bed reference concentration of sediment at station
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zvort'         !  Global data
+    pntnam = 'zvort'         !  Vorticity at station
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zenst'         !  Global data
+    pntnam = 'zenst'         !  Enstrophy at station
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'hydprs'        !  Global data
+    pntnam = 'hydprs'        !  Non-hydrostatic pressure at station
     ierr = mkfpnt(pntnam, nostat*kmax, gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for Internal wave energy
     !
@@ -3213,62 +2288,36 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        fuiwe (nmaxddb  ,mmaxddb,kmax  )
     !                        fviwe (nmaxddb  ,mmaxddb,kmax  )
     !
-    pntnam = 'tgarkx'        !  Global data
-    ierr = mkfpnt(pntnam, 15*(kmax + 1), gdp)
-                             !  Delft3D flow arrays for point (N,M)
+    pntnam = 'tgarkx'        !  Delft3D flow arrays for point (N,M)
                              !  for all layers  0:KMAX
-    if (ierr<= - 9) goto 9999
-    pntnam = 'tgarkt'        !  Global data
-    ierr = mkfpnt(pntnam, 24*(kmxdt + 1), gdp)
-                             !  All work arrays for IWE for point
-                             !  (N,M) for all KMXT layers
-    if (ierr<= - 9) goto 9999
-    pntnam = 'tgarnp'        !  Global data
-    ierr = mkfpnt(pntnam, 4*(npiwe + 1), gdp)
-                             !  All work arrays for IWE for point
-                             !  (N,M) for all NFREQS frequencies
-    if (ierr<= - 9) goto 9999
+    ierr = mkfpnt(pntnam, 15*(kmax + 1), gdp)
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'tkepro'        !  Global data
+    pntnam = 'tgarkt'        !  All work arrays for IWE for point
+                             !  (N,M) for all KMXT layers
+    ierr = mkfpnt(pntnam, 24*(kmxdt + 1), gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'tgarnp'        !  All work arrays for IWE for point
+                             !  (N,M) for all NFREQS frequencies
+    ierr = mkfpnt(pntnam, 4*(npiwe + 1), gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'tkepro'        !  Turbulence production term due to IWE
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Transfer rate of IWE to TKE, on
-                             !  hydrodynamic grid, derived from TIWTK
-                             !  Turbulence production term
-                             !  due to IWE
-                             ! 
-                             !  Transfer rate of IWE to TKE, on
-                             !  hydrodynamic grid, derived from TIWTK
-    if (ierr<= - 9) goto 9999
-    pntnam = 'tkedis'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'tkedis'        !  Turbulence dissipation term due to IWE
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Transfer rate of TKE to IWE, on
-                             !  hydrodynamic grid, derived from TTKIW
-                             !  Turbulence dissipation term
-                             !  due to IWE
-                             ! 
-                             !  Transfer rate of TKE to IWE, on
-                             !  hydrodynamic grid, derived from TTKIW
-    if (ierr<= - 9) goto 9999
-    pntnam = 'fuiwe'         !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'fuiwe'         !  Force/momentum flux in u-direction due to critical-layer formation, on hydrodynamic grid (not yet installed)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Force/momentum flux in u-direction
-                             !  due to critical-layer formation, on
-                             !  hydrodynamic grid (not yet installed)
-                             ! 
-                             !  Force/momentum flux in u-direction
-                             !  due to critical-layer formation, on
-                             !  hydrodynamic grid (not yet installed)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'fviwe'         !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'fviwe'         !  Force/momentum flux in v-direction due to critical-layer formation, on hydrodynamic grid (not yet installed)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
-                             !  Force/momentum flux in v-direction
-                             !  due to critical-layer formation, on
-                             !  hydrodynamic grid (not yet installed)
-                             ! 
-                             !  Force/momentum flux in v-direction
-                             !  due to critical-layer formation, on
-                             !  hydrodynamic grid (not yet installed)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !-----arrays for 2D Turbulence model
     !
@@ -3278,41 +2327,25 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        rtu2d1(nmaxddb  ,mmaxddb,   2  )
     !                        rtubnd(nmaxddb  ,mmaxddb,   2  )
     !
-    pntnam = 'vnu2d'         !  Global data
+    pntnam = 'vnu2d'         !  Horizontal eddy visc. coefficient [m2/s] (in depth point), due to 2D-turbulence
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array VNU2D
-                             !  Horizontal eddy visc. coefficient
-                             !  [m2/s] (in depth point), due to
-                             !  2D-turbulence
-    if (ierr<= - 9) goto 9999
-    pntnam = 'vnu3d'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array VNU3D
-                             !  Depth-averaged vertical
-                             !  eddy visc. coefficient
-                             !  [m2/s] (in depth point), due to
-                             !  3D-turbulence
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rtu2d0'        !  Global data
+    pntnam = 'vnu3d'         !  Depth-averaged vertical eddy visc. coefficient [m2/s] (in depth point), due to 3D-turbulence
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'rtu2d0'        !  Concentrations turbulent energy and dissipation/enstrophy at old time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*2, gdp)
-                             !  Concentrations turbulent energy and
-                             !  enstrophy at old time level
-    if (ierr<= - 9) goto 9999
-    pntnam = 'rtu2d1'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'rtu2d1'        !  Concentrations turbulent energy and dissipation/enstrophy at new time level
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*2, gdp)
-                             !  Pointer of array RTU2D1
-                             !  Concentrations turbulent energy and
-                             !  dissipation at new time level
-                             ! 
-                             !  Concentrations turbulent energy and
-                             !  enstrophy at new time level
-    if (ierr<= - 9) goto 9999
-    pntnam = 'rtubnd'        !  Global data
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'rtubnd'        !  Boundary conditions for turbulent quantities
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*2, gdp)
-                             !  Array with boundary conditions for
-                             !  turbulent quantities
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! arrays for: vertical grid information for Online Visualisation
     !
@@ -3321,25 +2354,21 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        zdist (max(nmax,mmax),kmax+2)
     !                        dpc   (max(nmax,mmax),kmax+2)
     !
-    pntnam = 'uvdist'        !  Global data
+    pntnam = 'uvdist'        !  no description (yet)
     ierr = mkfpnt(pntnam, max(nmax, mmax)*(kmax + 2), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'huvw'          !  Global data
+    pntnam = 'huvw'          !  no description (yet)
     ierr = mkfpnt(pntnam, max(nmax, mmax)*(kmax + 2), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'zdist'         !  Global data
+    pntnam = 'zdist'         !  no description (yet)
     ierr = mkfpnt(pntnam, max(nmax, mmax)*(kmax + 2), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dpc'           !  Global data
+    pntnam = 'dpc'           !  no description (yet)
     ierr = mkfpnt(pntnam, max(nmax, mmax)*(kmax + 2), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! BEGIN arrays for: z-model (fixed layer)
     !
@@ -3353,118 +2382,99 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !            * kfacz     dzv0  (nmaxddb,mmaxddb,kmax)
     !            * kfacz     dzv1  (nmaxddb,mmaxddb,kmax)
     !
-    pntnam = 'dzs0'          !  Global data
+    pntnam = 'dzs0'          !  Layer thickness at Z-points (old time level)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzs1'          !  Global data
+    pntnam = 'dzs1'          !  Layer thickness at Z-points (new time level)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             ! 
-                             !  Layer thickness at Z-points
-                             !  (new time level)
-    if (ierr<= - 9) goto 9999
-    pntnam = 'dzu0'          !  Global data
-    ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzu1'          !  Global data
+    pntnam = 'dzu0'          !  Layer thickness at U-points (old time level)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzv0'          !  Global data
+    pntnam = 'dzu1'          !  Layer thickness at U-points (new time level)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzv1'          !  Global data
+    pntnam = 'dzv0'          !  Layer thickness at V-points (old time level)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'dzv1'          !  Layer thickness at V-points (new time level)
+    ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
+    if (ierr <= -9) goto 9999
     !
     ! arrays for: baroclinic pressure gradient
     !
     !                        drhodx(nmaxddb,mmaxddb,kmax+2)
     !                        drhody(nmaxddb,mmaxddb,kmax+2)
-    pntnam = 'drhodx'        !  Global data
+    !
+    pntnam = 'drhodx'        !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'drhody'        !  Global data
+    pntnam = 'drhody'        !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     !
-    ! END arrays for: fixed layer approach
+    ! END arrays for: z-model (fixed layer)
     !
     !
     ! BEGIN arrays for: non-hydrostatic pressure
     !
     !
-    pntnam = 'p1'            !  Global data
+    pntnam = 'p1'            !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'p0'            !  Global data
+    pntnam = 'p0'            !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'p00'           !  Global data
+    pntnam = 'p00'           !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'pnhcor'        !  Global data
+    pntnam = 'pnhcor'        !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'w0'            !  Global data
+    pntnam = 'w0'            !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*(kmax + 1)*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 's00'           !  Global data
+    pntnam = 's00'           !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzs00'         !  Global data
+    pntnam = 'dzs00'         !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzu00'         !  Global data
+    pntnam = 'dzu00'         !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'dzv00'         !  Global data
+    pntnam = 'dzv00'         !  no description (yet)
     ierr = mkfpnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    ! END arrays for: non-hydrostatic pressure (NOT verified)
+    ! END arrays for: non-hydrostatic pressure
     !
     !
     ! BEGIN arrays for: (Rigid) 3D Vegetation Model
     !
     !
-    pntnam = 'diapl'         !  Global data
+    pntnam = 'diapl'         !  plant stem diameter [m]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*kfacvg3d, gdp)
-                             !  plant stem diameter (m)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'rnpl'          !  Global data
+    pntnam = 'rnpl'          !  number of stems per horizontal unit area [1/m2]
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax*kfacvg3d, gdp)
-                             !  number of stems per horizontal unit area (1/m2)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
     ! END arrays for: (Rigid) 3D Vegetation Model
     !
@@ -3487,28 +2497,22 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !    mapper needs them). The GDP-structure and local allocation variants
     !    must be replaced by pointers to the shared memory instance.
     !
-    pntnam = 'AG'            !  Global data
+    pntnam = 'AG'            !  Gravity acceleration [m2/s]
     ierr = mkfpnt(pntnam, 1, gdp)
-                             !  Gravity acceleration [m2/s]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'RHOW'          !  Global data
+    pntnam = 'RHOW'          !  Density of water [kg/m3]
     ierr = mkfpnt(pntnam, 1, gdp)
-                             !  Density of water [kg/m3]
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'DT'            !  Global data
+    pntnam = 'DT'            !  Integration time step in tunits (tunit is 60.0 sec by default)
     ierr = mkfpnt(pntnam, 1, gdp)
-                             !  Integration time step in tunits (tunit is 60.0 sec by default)
-    if (ierr<= - 9) goto 9999
+    if (ierr <= -9) goto 9999
     !
-    pntnam = 'TSCALE'        !  Global data
-    ierr = mkfpnt(pntnam, 1, gdp)
-                             !  Integration time step in seconds
+    pntnam = 'TSCALE'        !  Integration time step in seconds
                              !  TSCALE = dt*tunit
-    if (ierr<= - 9) goto 9999
-    !
-    !
+    ierr = mkfpnt(pntnam, 1, gdp)
+    if (ierr <= -9) goto 9999
     !
     ! GDP arrays
     !
@@ -3529,8 +2533,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
        gdp%gdtrisol%vstokes = 0.0_fp
     endif
     !
-    !
-    !
     ! Test if pointer declaration outside declaration in POINTRS.INC
     !
     if (ierr== - 3) then
@@ -3540,11 +2542,10 @@ subroutine esm_alloc_real(lundia, error, gdp)
                        & nrpntr - mxrpnt
     endif
     !
-    !
     ! Test exit code which are not allowed (in theory not possible)
     !
  9999 continue
-    if (ierr<= - 9) then
+    if (ierr <= -9) then
        error = .true.
        call prterr(lundia    ,'G920'    ,'esm_alloc_real'   )
     endif
