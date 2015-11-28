@@ -1,7 +1,7 @@
 subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,yestdd    ,filsrc    ,fmtsrc    ,nsrc      , &
-                & mmax      ,nmax      ,nmaxus    ,mnksrc    ,namsrc    , &
-                & disint    ,upwsrc    ,gdp       )
+                & yestdd    ,filsrc    ,fmtsrc    ,nsrc      ,mmax      , &
+                & nmax      ,nmaxus    ,mnksrc    ,namsrc    ,disint    , &
+                & upwsrc    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -67,7 +67,6 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                             , intent(out) :: upwsrc !  Description and declaration in esm_alloc_int.f90 
     integer      , dimension(7, nsrc)   , intent(out) :: mnksrc !  Description and declaration in esm_alloc_int.f90 
     logical                             , intent(out) :: error  !  Flag=TRUE if an error is encountered 
-    logical                             , intent(in)  :: noui   !  Flag for reading from User Interface 
     logical                             , intent(in)  :: yestdd !  Flag for call from TDATOM (.true.) for time varying data 
     character(*)                        , intent(out) :: filsrc !  File name for the discharge location definition file 
     character(*)                                      :: mdfrec !  Standard rec. length in MD-file (300) 
@@ -161,12 +160,8 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & ntrec     ,lundia    ,gdp       ) 
        ! 
        if (lerror) then 
-          if (noui) then 
-             error = .true. 
-             goto 9999 
-          endif 
-          lerror = .false. 
-          filsrc = fildef 
+          error = .true. 
+          goto 9999 
        endif 
     else 
        filsrc = fildef 
@@ -199,11 +194,8 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                     & ntrec     ,lundia    ,gdp       ) 
           ! 
           if (lerror) then 
-             if (noui) then 
-                error = .true. 
-                goto 9999 
-             endif 
-             lerror = .false. 
+             error = .true. 
+             goto 9999 
           else              
              call small(chulp ,20         ) 
              if (chulp(:1) == 'y') then 
@@ -225,14 +217,12 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif 
        call prterr(lundia    ,'G051'    ,txtput      )
        ! 
-       ! Read discharge location definitions from file only if 
-       ! NOUI = .true. Stop if reading error occurred or file did not exist (error  = .true.) 
+       ! Read discharge location definitions from file.
+       ! Stop if reading error occurred or file did not exist (error  = .true.) 
        ! 
-       if (noui) then 
-          call srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , & 
-                    & namsrc    ,disint    ,gdp       ) 
-          if (error) goto 9999 
-       endif
+       call srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , & 
+                 & namsrc    ,disint    ,gdp       ) 
+       if (error) goto 9999 
 
     elseif (nsrc > 0) then 
        ! 
@@ -262,12 +252,12 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! Reading error? 
           ! 
           if (lerror) then 
-             if (noui) error = .true. 
+             error = .true. 
              lerror = .false. 
           else 
              namsrc(n) = chulp 
              if (namsrc(n) == cdef) then 
-                if (noui) error = .true. 
+                error = .true. 
                 call prterr(lundia, 'V012', ' ')
              endif 
           endif 
@@ -334,7 +324,7 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     do nr = 1, nsrc 
        do n = 1, nr - 1 
           if (namsrc(n) == namsrc(nr)) then 
-             if (noui) error = .true. 
+             error = .true. 
              call prterr(lundia, 'U173', namsrc(nr))
           endif 
        enddo 

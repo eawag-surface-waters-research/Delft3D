@@ -1,7 +1,7 @@
 subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,roumet    ,threed    ,filrgh    ,fmtrgh    , &
-               & ccofu     ,ccofv     ,wave      ,rouwav    ,mmax      , &
-               & nmax      ,nmaxus    ,cfurou    ,cfvrou    ,gdp       )
+               & roumet    ,threed    ,filrgh    ,fmtrgh    ,ccofu     , &
+               & ccofv     ,wave      ,rouwav    ,mmax      ,nmax      , &
+               & nmaxus    ,cfurou    ,cfvrou    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -62,7 +62,6 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                                          :: nrrec  !!  Pointer to the record number in the
                                                                                !!  MD-file
     logical                                                          :: error  !!  Flag=TRUE if an error is encountered
-    logical                                            , intent(in)  :: noui   !!  Flag for reading from User Interface
     logical                                            , intent(in)  :: threed !  Description and declaration in procs.igs
     logical                                            , intent(in)  :: wave   !  Description and declaration in procs.igs
     real(fp)                                                         :: ccofu  !!  Array containing the uniform bottom
@@ -130,7 +129,7 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     if (.not.threed .and. roumet=='Z') then
        call prterr(lundia    ,'V046'    ,' '       )
-       if (noui) error = .true.
+       error = .true.
     endif
     !
     ! locate 'Filrgh' record for non-uniform bottom roughness coeffi-
@@ -213,16 +212,13 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     endif
     !
     ! copy the first contents of the array CF to the second
-    ! only if noui = .true.
     !
-    if (noui) then
-       do n = 1 - ddb, nmaxus
-          do m = 1 - ddb, mmax
-             cfurou(n, m, 2) = cfurou(n, m, 1)
-             cfvrou(n, m, 2) = cfvrou(n, m, 1)
-          enddo
+    do n = 1 - ddb, nmaxus
+       do m = 1 - ddb, mmax
+          cfurou(n, m, 2) = cfurou(n, m, 1)
+          cfvrou(n, m, 2) = cfvrou(n, m, 1)
        enddo
-    endif
+    enddo
     !
     ! locate and read 'Rouwav' record for bottom roughness formulation
     ! for waves if WAVE = .true.

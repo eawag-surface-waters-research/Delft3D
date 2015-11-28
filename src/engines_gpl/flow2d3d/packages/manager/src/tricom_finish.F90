@@ -29,20 +29,7 @@ subroutine tricom_finish(olv_handle, gdp)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Read md-file
-!              - Initialize input arrays and verify input
-!              - Perform a TRISULA computation for the
-!                time interval (tb, te)
-!                In case of a stand-alone system ITB and ITE
-!                are set 0. Besides if WAVE = TRUE then ITLEN
-!                and TSCALE will be read from the communication
-!                file, else they will also be set 0.
-!              - Update the communication file
-!              NOTE: TRICOM called by main module of DELFT3D then
-!                    ITLEN and TSCALE always defined
-!                    TRICOM called by module TRISIM then ITLEN=0
-!                    and ITLEN can be read from comm. file or are
-!                    defined by the trisula time frame
+!    Function: - Finalize Delft3D-FLOW computation
 !
 ! Method used:
 !
@@ -348,10 +335,8 @@ subroutine tricom_finish(olv_handle, gdp)
     character(23)                       , pointer :: prshis
     character(23)                       , pointer :: selhis
     character(36)                       , pointer :: tgfcmp
-    integer                             , pointer :: ite           !!  End time of computational interval for a stand alone system the input value from TRISIM: ITE = -1
     integer                             , pointer :: itima         !!  Time to start simulation (N * tscale) according to DELFT3D conventions
     integer                             , pointer :: itlen         !  Description and declaration in esm_alloc_int.f90
-    logical                             , pointer :: mainys        !!  Logical flag for TRISULA is main program (TRUE) for writing output
     character(256)                      , pointer :: comfil        !!  Communication file name
     character(256)                      , pointer :: runid         !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
     character(256)                      , pointer :: trifil        !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
@@ -399,10 +384,8 @@ subroutine tricom_finish(olv_handle, gdp)
 !
     initi               => gdp%gdtricom%initi
     iphisc              => gdp%gdtricom%iphisc
-    ite                 => gdp%gdtricom%ite
     itima               => gdp%gdtricom%itima
     itlen               => gdp%gdtricom%itlen
-    mainys              => gdp%gdtricom%mainys
     comfil              => gdp%gdtricom%comfil
     runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
@@ -747,16 +730,15 @@ subroutine tricom_finish(olv_handle, gdp)
        !
        call rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
                  & itcomi    ,mmax      ,nmax      ,nmaxus    ,r(dp)     , &
-                 & r(rbuff)  ,ite       ,gdp       )
+                 & r(rbuff)  ,gdp       )
        if (error) goto 9999
     endif
     !
     ! Calculate post processing info and write to files if required
     !
     call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
-              & trifil    ,mainys    ,runid     ,prsmap    ,prshis    , &
-              & selmap    ,selhis    ,rhow      ,grdang    , &
-              & initi     ,dtsec     , &
+              & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
+              & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
               & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
               & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
               & itrstc    ,ktemp     ,.false.   ,gdp       )
@@ -769,11 +751,11 @@ subroutine tricom_finish(olv_handle, gdp)
           if (prec == hp) then
              call rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     , &
                               & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)    , &
-                              & r(rbuff)  ,ite       ,gdp       )
+                              & r(rbuff)  ,gdp       )
           else
              call rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
                        & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)    , &
-                       & r(rbuff)  ,ite       ,gdp       )
+                       & r(rbuff)  ,gdp       )
           endif
           call timer_start(timer_wait, gdp)
           ierror = flow_to_wave_command(flow_wave_comm_finalize, &

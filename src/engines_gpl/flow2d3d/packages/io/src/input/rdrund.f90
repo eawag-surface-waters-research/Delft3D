@@ -1,5 +1,5 @@
 subroutine rdrund(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,runtxt    ,gdp       )
+                & runtxt    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -53,7 +53,6 @@ subroutine rdrund(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                  :: lunmd  !  Description and declaration in inout.igs
     integer                                  :: nrrec  !!  Pointer to the record number in the MD-file
     logical                                  :: error  !!  Flag=TRUE if an error is encountered
-    logical                     , intent(in) :: noui   !!  Flag for reading from User Interface
     character(*)                             :: mdfrec !!  Standard rec. length in MD-file (300)
     character(30), dimension(10)             :: runtxt !!  Textual description of model input
 !
@@ -65,7 +64,7 @@ subroutine rdrund(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                        :: lkw    ! Actual length of KEYW 
     integer                        :: nlook  ! Help var.: nr. of data to look for in the MD-file 
     integer                        :: ntrec  ! Help. var to keep track of NRREC 
-    integer                        :: nwrite ! Number of lines to write to diag- nostic file for NOUI 
+    integer                        :: nwrite ! Number of lines to write to diagnostic file 
     logical                        :: found  ! FOUND=TRUE if KEYW in the MD-file was found 
     logical                        :: lerror ! Flag=TRUE if an error is encountered 
     logical                        :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
@@ -133,16 +132,14 @@ subroutine rdrund(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     !-----write output to file
     !
-    if (noui) then
-       if (nwrite/=0) then
-          write (lundia, '(a)') '*** Start of User Defined Model description '
-          write (lundia, '(a)') ' -'
-          do i = 1, nwrite
-             write (lundia, '(a,a)') ' -  ', runtxt(i)
-          enddo
-          write (lundia, '(a)') ' -'
-          write (lundia, '(a)') '*** End   of User Defined Model description '
-          write (lundia, '(a)')
-       endif
+    if (nwrite/=0) then
+       write (lundia, '(a)') '*** Start of User Defined Model description '
+       write (lundia, '(a)') ' -'
+       do i = 1, nwrite
+          write (lundia, '(a,a)') ' -  ', runtxt(i)
+       enddo
+       write (lundia, '(a)') ' -'
+       write (lundia, '(a)') '*** End   of User Defined Model description '
+       write (lundia, '(a)')
     endif
 end subroutine rdrund

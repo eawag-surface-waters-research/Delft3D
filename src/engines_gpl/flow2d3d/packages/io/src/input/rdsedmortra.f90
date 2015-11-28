@@ -1,8 +1,7 @@
 subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-                     & lsedtot   ,lstsci    ,ltur      ,namcon    , &
-                     & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
-                     & nmmax     ,nto       ,nambnd    ,lsec      ,tstart    , &
-                     & tunit     ,gdp       )
+                     & lsedtot   ,lstsci    ,ltur      ,namcon    ,iopsus    , &
+                     & mmax      ,nmax      ,nmaxus    ,nmmax     ,nto       , &
+                     & nambnd    ,lsec      ,tstart    ,tunit     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                     
@@ -65,7 +64,6 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
     character(20) , dimension(lstsci + ltur)               :: namcon  !  Description and declaration in ckdim.f90
     integer                                                :: iopsus
-    character(*)                                           :: filnam
     integer                                  , intent(in)  :: mmax
     integer                                  , intent(in)  :: nmax
     integer                                  , intent(in)  :: nmaxus

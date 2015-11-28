@@ -1,10 +1,9 @@
 subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
-                & trifil    ,mainys    ,runid     ,prsmap    ,prshis    , &
-                & selmap    ,selhis    ,rhow      ,grdang    , &
-                & initi     ,dtsec     ,nst       ,iphisc    ,npmap     , &
-                & itcomc    ,itimc     ,itcur     ,ntcur     ,ithisc    , &
-                & itmapc    ,itdroc    ,itrstc    ,ktemp     ,halftime  , &
-                & gdp       )
+                & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
+                & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
+                & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
+                & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
+                & itrstc    ,ktemp     ,halftime  ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -367,7 +366,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                                    :: ntcur  !!  Total number of timesteps on communication file (to write to)
     logical                                    :: error  !!  Flag=TRUE if an error is encountered
     logical                      , intent(in)  :: halftime !!  Update time of next write if Flag=TRUE
-    logical                      , intent(in)  :: mainys !!  Flag for running main routines
     real(fp)                                   :: dtsec  !!  Integration time step [in seconds]
     real(fp)                                   :: grdang !  Description and declaration in tricom.igs
     real(fp)                                   :: rhow   !  Description and declaration in esm_alloc_real.f90
@@ -895,186 +893,183 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        velt = 'GLM'
     endif
     !
-    ! Output for specific FLOW files (MAINYS = .true.)
+    ! Output for specific FLOW files
     !
-    if (mainys) then
-       !
-       ! HIS file
-       !
-       ! Store flow- and concentration fluxes in defined cross-sections
-       ! for every NST when or ITHISI or IPHISI or both are > 0
-       !
-       if (ithisi+iphisi > 0) then
-          call tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
-                    & lstsci    ,nmaxus    ,nmax      ,mmax      ,kmax      , &
-                    & i(kfu)    ,i(kfv)    ,r(ctr)    ,r(fltr)   , &
-                    & r(atr)    ,r(dtr)    ,r(guu)    ,r(gvv)    ,r(guv)    , &
-                    & r(gvu)    ,r(thick)  ,r(r1)     ,r(qxk)    ,r(qyk)    , &
-                    & r(hu)     ,r(hv)     ,r(dicuv)  ,lsed      ,lsedtot   , &
-                    & r(sbtr)   ,r(sstr)   ,r(sbtrc)  ,r(sstrc)  ,r(sbuu)   , &
-                    & r(sbvv)   ,gdp       )
-          ftcros = .true.
-       endif
-       !
-       ! Store water-levels and concentrations in defined stations
-       ! and calculated velocities and discharges to zeta points
-       ! for defined stations
-       ! Only in case NST = ITHISC or NST = IPHISC
-       ! The following workarrays are used to transport results to wrwavh:
-       ! wrka1 zhs
-       ! wrka2 ztp
-       ! wrka3 zdir
-       ! wrka4 zrlabd
-       ! wrka5 zuorb
-       !
-       if (nst==ithisc .or. nst==iphisc) then
-          call update_stat_locations(nostat    ,ndro      ,i(mndro)  , &
-                                   & r(xydro)  ,timhr     ,julday    , &
-                                   & lundia    ,gdp       )
-          call tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
-                   & nmax      ,mmax      ,kmax      ,lmax      ,lstsci    , &
-                   & ltur      ,lsal      ,ltem      ,lsed      ,lsedtot   , &
-                   & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kcs)    ,i(kfuz1)  , &
-                   & i(kfvz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) , &
-                   & i(kfsmin) ,i(kfsmax) ,i(zkfs)   ,r(s1)     ,r(velu)   , &
-                   & r(velv)   ,r(r1)     ,r(rtur1)  ,r(wphy)   ,r(qxk)    , &
-                   & r(qyk)    ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv) , &
-                   & r(alfas)  ,r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    , &
-                   & r(ws)     ,d(dps)    , &
-                   & r(zwl)    ,r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  , &
-                   & r(zqxk)   ,r(zqyk)   ,r(gro)    ,r(ztur)   ,            &
-                   & r(ztauks) ,r(ztauet) ,r(zvicww) ,r(zdicww) ,r(zrich)  , &
-                   & r(zrho)   ,r(zbdsed) ,r(zrsdeq) ,r(zdpsed) ,r(zdps)   , &
-                   & r(zws)    ,r(hydprs) ,r(p1)     ,r(vortic) ,r(enstro) , &
-                   & r(zvort)  ,r(zenst)  ,r(zsbu)   ,r(zsbv)   ,r(zssu)   , &
-                   & r(zssv)   ,r(sbuu)   ,r(sbvv)   , &
-                   & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
-                   & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
-                   & wave      ,r(zrca)   ,r(windu)  ,r(windv)  , &
-                   & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
-                   & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
-          ftstat = .true.
-       endif
-       !
-       ! Call USER OUTPUT ROUTINE
-       !
-       call u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
-                & prshis    ,selmap    ,selhis    ,runid     ,rhow      , &
-                & grdang    ,dtsec     ,nst       ,iphisc    , &
-                & npmap     ,ithisc    ,itmapc    ,itdroc    ,itrstc    , &
-                & ftstat    ,ftcros    ,gdp       )
+    ! HIS file
+    !
+    ! Store flow- and concentration fluxes in defined cross-sections
+    ! for every NST when or ITHISI or IPHISI or both are > 0
+    !
+    if (ithisi+iphisi > 0) then
+       call tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
+                 & lstsci    ,nmaxus    ,nmax      ,mmax      ,kmax      , &
+                 & i(kfu)    ,i(kfv)    ,r(ctr)    ,r(fltr)   , &
+                 & r(atr)    ,r(dtr)    ,r(guu)    ,r(gvv)    ,r(guv)    , &
+                 & r(gvu)    ,r(thick)  ,r(r1)     ,r(qxk)    ,r(qyk)    , &
+                 & r(hu)     ,r(hv)     ,r(dicuv)  ,lsed      ,lsedtot   , &
+                 & r(sbtr)   ,r(sstr)   ,r(sbtrc)  ,r(sstrc)  ,r(sbuu)   , &
+                 & r(sbvv)   ,gdp       )
+       ftcros = .true.
+    endif
+    !
+    ! Store water-levels and concentrations in defined stations
+    ! and calculated velocities and discharges to zeta points
+    ! for defined stations
+    ! Only in case NST = ITHISC or NST = IPHISC
+    ! The following workarrays are used to transport results to wrwavh:
+    ! wrka1 zhs
+    ! wrka2 ztp
+    ! wrka3 zdir
+    ! wrka4 zrlabd
+    ! wrka5 zuorb
+    !
+    if (nst==ithisc .or. nst==iphisc) then
+       call update_stat_locations(nostat    ,ndro      ,i(mndro)  , &
+                                & r(xydro)  ,timhr     ,julday    , &
+                                & lundia    ,gdp       )
+       call tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
+                & nmax      ,mmax      ,kmax      ,lmax      ,lstsci    , &
+                & ltur      ,lsal      ,ltem      ,lsed      ,lsedtot   , &
+                & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kcs)    ,i(kfuz1)  , &
+                & i(kfvz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) , &
+                & i(kfsmin) ,i(kfsmax) ,i(zkfs)   ,r(s1)     ,r(velu)   , &
+                & r(velv)   ,r(r1)     ,r(rtur1)  ,r(wphy)   ,r(qxk)    , &
+                & r(qyk)    ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv) , &
+                & r(alfas)  ,r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    , &
+                & r(ws)     ,d(dps)    , &
+                & r(zwl)    ,r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  , &
+                & r(zqxk)   ,r(zqyk)   ,r(gro)    ,r(ztur)   ,            &
+                & r(ztauks) ,r(ztauet) ,r(zvicww) ,r(zdicww) ,r(zrich)  , &
+                & r(zrho)   ,r(zbdsed) ,r(zrsdeq) ,r(zdpsed) ,r(zdps)   , &
+                & r(zws)    ,r(hydprs) ,r(p1)     ,r(vortic) ,r(enstro) , &
+                & r(zvort)  ,r(zenst)  ,r(zsbu)   ,r(zsbv)   ,r(zssu)   , &
+                & r(zssv)   ,r(sbuu)   ,r(sbvv)   , &
+                & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
+                & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
+                & wave      ,r(zrca)   ,r(windu)  ,r(windv)  , &
+                & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
+                & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
+       ftstat = .true.
+    endif
+    !
+    ! Call USER OUTPUT ROUTINE
+    !
+    call u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
+             & prshis    ,selmap    ,selhis    ,runid     ,rhow      , &
+             & grdang    ,dtsec     ,nst       ,iphisc    , &
+             & npmap     ,ithisc    ,itmapc    ,itdroc    ,itrstc    , &
+             & ftstat    ,ftcros    ,gdp       )
+    if (error) goto 9999
+    !
+    ! Print water-levels and concentrations in defined stations
+    ! and calculated velocities to zeta points for defined stations
+    ! Only in case NST = IPHISC
+    !
+    if (nst == iphisc) then
+       call prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
+                 & nuprpg    ,nuprln    ,header    ,iphisc    ,julday    , &
+                 & dtsec     ,nostat    ,ntruv     ,ntru      ,kmax      , &
+                 & lstsci    ,lsal      ,ltem      ,ltur      ,lmax      , &
+                 & namst     ,namtra    ,ch(namcon),mnstat    ,mnit      , &
+                 & r(zwl)    ,r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  , &
+                 & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(gro)    , &
+                 & r(ztur)   ,r(ctr)    ,r(fltr)   ,r(atr)    ,r(dtr)    )
        if (error) goto 9999
        !
-       ! Print water-levels and concentrations in defined stations
-       ! and calculated velocities to zeta points for defined stations
-       ! Only in case NST = IPHISC
+       ! Update timestep to print HIS data
+       ! ITSTRT <= IPHISF <= IPHISC <= IPHISL <= ITFINISH
        !
-       if (nst == iphisc) then
-          call prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
-                    & nuprpg    ,nuprln    ,header    ,iphisc    ,julday    , &
-                    & dtsec     ,nostat    ,ntruv     ,ntru      ,kmax      , &
-                    & lstsci    ,lsal      ,ltem      ,ltur      ,lmax      , &
-                    & namst     ,namtra    ,ch(namcon),mnstat    ,mnit      , &
-                    & r(zwl)    ,r(zalfas) ,r(zcuru)  ,r(zcurv)  ,r(zcurw)  , &
-                    & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(gro)    , &
-                    & r(ztur)   ,r(ctr)    ,r(fltr)   ,r(atr)    ,r(dtr)    )
-          if (error) goto 9999
-          !
-          ! Update timestep to print HIS data
-          ! ITSTRT <= IPHISF <= IPHISC <= IPHISL <= ITFINISH
-          !
-          if (.not.halftime .and. iphisc+iphisi <= iphisl) iphisc = iphisc + iphisi
+       if (.not.halftime .and. iphisc+iphisi <= iphisl) iphisc = iphisc + iphisi
+    endif
+    !
+    ! Write to binary HIS file
+    ! only in case NST = ITHISC
+    !
+    if (nst == ithisc) then
+       call wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
+                   & ithisc    ,runtxt    ,trifil    ,gdp       )
+       if (error) goto 9999
+       !
+       ! Update timestep to write HIS files
+       ! ITSTRT <= ITHISF <= ITHISC <= ITHISL <= ITFINISH
+       !
+       if (.not.halftime .and. nst==ithisc .and. ithisc+ithisi<=ithisl) then
+          ithisc = ithisc + ithisi
        endif
+    endif
+    !
+    ! MAP file
+    !
+    ! Print water-levels and concentrations and calculated velocities
+    ! to zeta points for 2dH maps
+    ! Only in case NST = IPMAP (NPMAPC)
+    !
+    ipmapc = ipmap(npmap)
+    if (nst == ipmapc) then
+       call prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
+                 & nuprln    ,header    ,ipmapc    ,julday    ,dtsec     , &
+                 & grdang    ,nmax      ,mmax      ,kmax      ,nmaxus    , &
+                 & lstsci    ,ltur      ,lmaxd     ,lsal      ,ltem      , &
+                 & ch(namcon),i(kfu)    ,i(kfv)    ,i(kcs)    ,r(s1)     , &
+                 & r(velu)   ,r(velv)   ,r(wphy)   ,r(alfas)  ,r(r1)     , &
+                 & r(rtur1)  ,r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    , &
+                 & r(rbuff)  ,r(rbuff)  ,velt      ,gdp       )
+       if (error) goto 9999
        !
-       ! Write to binary HIS file
-       ! only in case NST = ITHISC
+       ! Update timestep to print MAP data
+       ! ITSTRT <= IPMAP (NPMAP) <= IPMAP (NPMAP+1) <= ITFINISH
        !
-       if (nst == ithisc) then
-          call wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
-                      & ithisc    ,runtxt    ,trifil    ,gdp       )
-          if (error) goto 9999
-          !
-          ! Update timestep to write HIS files
-          ! ITSTRT <= ITHISF <= ITHISC <= ITHISL <= ITFINISH
-          !
-          if (.not.halftime .and. nst==ithisc .and. ithisc+ithisi<=ithisl) then
-             ithisc = ithisc + ithisi
-          endif
+       if (.not.halftime) then
+          npmap = npmap + 1
        endif
-       !
-       ! MAP file
-       !
-       ! Print water-levels and concentrations and calculated velocities
-       ! to zeta points for 2dH maps
-       ! Only in case NST = IPMAP (NPMAPC)
-       !
-       ipmapc = ipmap(npmap)
-       if (nst == ipmapc) then
-          call prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
-                    & nuprln    ,header    ,ipmapc    ,julday    ,dtsec     , &
-                    & grdang    ,nmax      ,mmax      ,kmax      ,nmaxus    , &
-                    & lstsci    ,ltur      ,lmaxd     ,lsal      ,ltem      , &
-                    & ch(namcon),i(kfu)    ,i(kfv)    ,i(kcs)    ,r(s1)     , &
-                    & r(velu)   ,r(velv)   ,r(wphy)   ,r(alfas)  ,r(r1)     , &
-                    & r(rtur1)  ,r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    , &
-                    & r(rbuff)  ,r(rbuff)  ,velt      ,gdp       )
+    endif
+    !
+    ! Write to binary MAP file
+    ! Only in case ITMAPI>0 and NST = ITMAPC
+    !
+    if (itmapi > 0) then
+       if (nst == itmapc) then
+          call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
+                      & itmapc    ,runtxt    ,trifil    ,.false.   ,initi     , &
+                      & gdp       )
           if (error) goto 9999
-          !
-          ! Update timestep to print MAP data
-          ! ITSTRT <= IPMAP (NPMAP) <= IPMAP (NPMAP+1) <= ITFINISH
-          !
-          if (.not.halftime) then
-             npmap = npmap + 1
-          endif
        endif
-       !
-       ! Write to binary MAP file
-       ! Only in case ITMAPI>0 and NST = ITMAPC
-       !
-       if (itmapi > 0) then
-          if (nst == itmapc) then
-             call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
-                         & itmapc    ,runtxt    ,trifil    ,.false.   ,initi     , &
-                         & gdp       )
-             if (error) goto 9999
-          endif
 
-          if (wave .and. waveol .and. nst==itmapc) then
-             !
-             ! Create file TMP_write_wavm
-             ! waves.exe will only write wave maps if file TMP_write_wavm exists 
-             ! The file will be deleted by waves.exe after the map is written
-             ! Note: the creation of file TMP_write_wavm will be repeated for each domain, but doesn't matter
-             !
-             filwri = newlun(gdp)
-             open(filwri, file='TMP_write_wavm', status='unknown')
-             close(filwri, status='keep')
-          endif
+       if (wave .and. waveol .and. nst==itmapc) then
           !
-          ! Update timestep to write MAP files
-          ! ITSTRT <= ITMAPF <= ITMAPC <= ITMAPL <= ITFINISH
+          ! Create file TMP_write_wavm
+          ! waves.exe will only write wave maps if file TMP_write_wavm exists 
+          ! The file will be deleted by waves.exe after the map is written
+          ! Note: the creation of file TMP_write_wavm will be repeated for each domain, but doesn't matter
           !
-          if (.not.halftime .and. nst==itmapc .and. itmapc+itmapi<=itmapl) then
-             itmapc = itmapc + itmapi
-          endif
+          filwri = newlun(gdp)
+          open(filwri, file='TMP_write_wavm', status='unknown')
+          close(filwri, status='keep')
        endif
        !
-       ! DRO file
+       ! Update timestep to write MAP files
+       ! ITSTRT <= ITMAPF <= ITMAPC <= ITMAPL <= ITFINISH
        !
-       ! Write to binary DRO file
-       ! Only in case NST = ITDROC
+       if (.not.halftime .and. nst==itmapc .and. itmapc+itmapi<=itmapl) then
+          itmapc = itmapc + itmapi
+       endif
+    endif
+    !
+    ! DRO file
+    !
+    ! Write to binary DRO file
+    ! Only in case NST = ITDROC
+    !
+    if (drogue .and. nst==itdroc .and. .not.halftime) then
+       call wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
+                   & trifil    ,dtsec     ,gdp       )
+       if (error) goto 9999
        !
-       if (drogue .and. nst==itdroc .and. .not.halftime) then
-          call wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
-                      & trifil    ,dtsec     ,gdp       )
-          if (error) goto 9999
-          !
-          ! Update timestep to write drogue file
-          ! ITSTRT <= ITDROF <= ITDROC <= ITDROL <= ITFINISH
-          !
-          if (itdroc+itdroi <= itdrol) then
-             itdroc = itdroc + itdroi
-          endif
+       ! Update timestep to write drogue file
+       ! ITSTRT <= ITDROF <= ITDROC <= ITDROL <= ITFINISH
+       !
+       if (itdroc+itdroi <= itdrol) then
+          itdroc = itdroc + itdroi
        endif
     endif
     !

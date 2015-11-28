@@ -1,4 +1,4 @@
-subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
+subroutine inippr(lundia    ,error     ,trifil    ,comfil    , &
                 & initi     ,selhis    ,selmap    ,tscale    ,commrd    , &
                 & itlen     ,itcur     ,itimc     , &
                 & it01      ,it02      ,sferic    ,grdang    , &
@@ -155,8 +155,6 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     integer                                    :: lundia !  Description and declaration in inout.igs
     integer                                    :: nfltyp !  Description and declaration in esm_alloc_int.f90
     logical                                    :: error  !!  Flag=TRUE if an error is encountered
-    logical                       , intent(in) :: mainys !!  Logical flag for FLOW is main
-                                                         !!  program (TRUE) for writing output
     logical                                    :: commrd
     logical                                    :: sferic !  Description and declaration in tricom.igs
     real(fp)                                   :: grdang !  Description and declaration in tricom.igs
@@ -175,7 +173,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     logical                                    :: wrifou  ! true: wrimap is going to write the initial part of the fourier nefis file
     character(16)                              :: simdat  ! Simulation date representing the flow condition at this date
     character(20)                              :: rundat  ! Execution date of the simulation
-    character(6)                               :: soort   ! String containing to which output file version group should be written
+    character(6)                               :: ftype   ! String containing to which output file version group should be written
     integer                                    :: ithisc  ! Dummy variable for wrh_main call (actual value needed in POSTPR)
     integer                                    :: itmapc  ! Dummy variable for wrm_main call (actual value needed in POSTPR)
     integer                                    :: itdroc  ! Dummy variable for wrd_main call (actual value needed in POSTPR)
@@ -297,8 +295,8 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
                  & nmaxus    ,i(kcs)    ,i(ibuff)  ,r(xz)     ,r(yz)     , &
                  & sferic    ,gdp       )
        if (error) goto 9999
-       soort = 'com'
-       call wridoc(error     ,comfil    ,soort     ,simdat    ,runtxt    , &
+       ftype = 'com'
+       call wridoc(error     ,comfil    ,ftype     ,simdat    ,runtxt    , &
                  & commrd    ,''        ,gdp       )
        if (error) goto 9999
        !
@@ -316,51 +314,49 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     !
     ! FLOW output files
     !
-    if (mainys) then
+    !
+    ! Definition, declaration and writing of group 2 to the HIS DAT
+    ! and HIS DEF files following the NEFIS description
+    !
+    if (iphisi > 0 .or. ipmap(1) > -1) then
        !
-       ! Definition, declaration and writing of group 2 to the HIS DAT
-       ! and HIS DEF files following the NEFIS description
+       ! Writing output to ascii file tri-prt.<runid> as is requested through
+       ! the use of keyword PRHIS in the MD-file
        !
-       if (iphisi > 0 .or. ipmap(1) > -1) then
-          !
-          ! Writing output to ascii file tri-prt.<runid> as is requested through
-          ! the use of keyword PRHIS in the MD-file
-          !
-          call prihis(gdp)
-          soort = 'ascii'
-          call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
-                    & commrd    ,''        ,gdp       )
-          if (error) goto 9999
-       endif
-       !
-       ithisc = 0
-       itmapc = 0
-       itdroc = 0
-       !
-       if (ithisi > 0) then
-          call wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
-                      & ithisc    ,runtxt    ,trifil    ,gdp       )
-          if (error) goto 9999
-       endif
-       if (itmapi > 0) then
-          wrifou = .false.
-          call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
-                      & itmapc    ,runtxt    ,trifil    ,wrifou    ,initi     , &
-                      & gdp       )
-          if (error) goto 9999
-       endif
-       if (drogue) then
-          call wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
-                      & trifil    ,dtsec     ,gdp       )
-          if (error) goto 9999
-       endif
-       if (nofou>0 .and. (getfiletype(gdp,FILOUT_FOU) == FTYPE_NETCDF)) then
-          wrifou = .true.
-          call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
-                      & itmapc    ,runtxt    ,trifil    ,wrifou    ,initi     , &
-                      & gdp       )
-          if (error) goto 9999
-       endif
+       call prihis(gdp)
+       ftype = 'ascii'
+       call wridoc(error     ,trifil    ,ftype     ,simdat    ,runtxt    , &
+                 & commrd    ,''        ,gdp       )
+       if (error) goto 9999
+    endif
+    !
+    ithisc = 0
+    itmapc = 0
+    itdroc = 0
+    !
+    if (ithisi > 0) then
+       call wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
+                   & ithisc    ,runtxt    ,trifil    ,gdp       )
+       if (error) goto 9999
+    endif
+    if (itmapi > 0) then
+       wrifou = .false.
+       call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
+                   & itmapc    ,runtxt    ,trifil    ,wrifou    ,initi     , &
+                   & gdp       )
+       if (error) goto 9999
+    endif
+    if (drogue) then
+       call wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
+                   & trifil    ,dtsec     ,gdp       )
+       if (error) goto 9999
+    endif
+    if (nofou>0 .and. (getfiletype(gdp,FILOUT_FOU) == FTYPE_NETCDF)) then
+       wrifou = .true.
+       call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
+                   & itmapc    ,runtxt    ,trifil    ,wrifou    ,initi     , &
+                   & gdp       )
+       if (error) goto 9999
     endif
  9999 continue
 end subroutine inippr

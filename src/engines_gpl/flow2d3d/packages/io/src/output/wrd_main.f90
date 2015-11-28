@@ -97,7 +97,7 @@ subroutine wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
     !
     character(16) :: simdat  ! Simulation date representing the flow condition at this date
     character(20) :: rundat  ! Execution date of the simulation
-    character(6)  :: soort   ! String containing to which output file version group should be written
+    character(6)  :: ftype   ! String containing to which output file version group should be written
 
 !
 !! executable statements -------------------------------------------------------
@@ -232,8 +232,8 @@ subroutine wrd_main(lundia    ,error     ,ndro      ,itdroc    ,runtxt    , &
           ! duplicate definition of the dro-version group.
           !
           if (first) then
-             soort = 'dro'
-             call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
+             ftype = 'dro'
+             call wridoc(error     ,trifil    ,ftype     ,simdat    ,runtxt    , &
                        & .false.   ,''        ,gdp       )
           endif
        endif

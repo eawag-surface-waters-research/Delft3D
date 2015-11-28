@@ -1,9 +1,9 @@
 subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,nto       ,ntof      ,ntoq      ,mmax      , &
-                & nmaxus    ,kmax      ,mxdnto    ,mxnto     ,filbnd    , &
-                & fmtbnd    ,ascon     ,nambnd    ,typbnd    ,datbnd    , &
-                & mnbnd     ,alpha     ,tprofu    ,statns    ,nhsub     , &
-                & yestdd    ,gdp       )
+                & nto       ,ntof      ,ntoq      ,mmax      ,nmaxus    , &
+                & kmax      ,mxdnto    ,mxnto     ,filbnd    ,fmtbnd    , &
+                & ascon     ,nambnd    ,typbnd    ,datbnd    ,mnbnd     , &
+                & alpha     ,tprofu    ,statns    ,nhsub     ,yestdd    , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -86,7 +86,6 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer     , dimension(7, mxdnto)                :: mnbnd  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(mxnto)                    :: nhsub  !  integer array to store sequence numbers of harmonic boundary condition in own subdomain
     logical                                           :: error  !!  Flag=TRUE if an error is encountered
-    logical                                           :: noui   !!  Flag for reading from User Interface
     real(fp)    , dimension(mxdnto)                   :: alpha  !  Description and declaration in esm_alloc_real.f90
     character(*)                                      :: filbnd !!  File name for the boundary definition file
     character(*)                                      :: mdfrec !!  Standard rec. length in MD-file (300)
@@ -235,16 +234,16 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           fmtbnd = 'UN'
        endif
        !
-       ! read data from file only if noui = .true.
+       ! read data from file
        ! goto end of subroutine if reading error occurred or file did
        ! not exist (error  = .true.)
        ! NOTE: test for lnto and lntof may be deleted (per definition
        ! not possible, see also rddim or dimrd)
        !
-       call bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
-                 & lntof     ,lntoq     ,mxdnto    ,mxnto     ,filbnd    , &
-                 & fmttmp    ,profil    ,nambnd    ,typbnd    ,datbnd    , &
-                 & mnbnd     ,alpha     ,tprofu    ,statns    ,gdp       )
+       call bndfil(lundia    ,error     ,kmax      ,lnto      ,lntof     , &
+                 & lntoq     ,mxdnto    ,mxnto     ,filbnd    ,fmttmp    , &
+                 & profil    ,nambnd    ,typbnd    ,datbnd    ,mnbnd     , &
+                 & alpha     ,tprofu    ,statns    ,gdp       )
        if (error) goto 9999
        if (lnto/=nto) then
           call prterr(lundia    ,'U145'    ,' '       )
@@ -301,7 +300,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              nambnd(n) = cdefn
              call prterr(lundia    ,'U150'    ,' '       )
@@ -322,7 +321,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
           else
              typbnd(n) = chulp(1)(:1)
@@ -343,7 +342,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if (lerror) then
              lerror = .false.
-             if (noui) error = .true.
+             error = .true.
           else
              datbnd(n) = chulp(1)(:1)
           endif
@@ -362,7 +361,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
           else
              mnbnd(1, n) = ival(1)
@@ -416,7 +415,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              if (lerror) then
                 tprofu(n) = cdefp
                 lerror = .false.
-                if (noui) error = .true.
+                error = .true.
              else
                 tprofu(n) = chulp(1)
              endif
@@ -429,7 +428,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (inprof == 0) then
              call prterr(lundia    ,'U066'    ,chulp(1)  )
              tprofu(n) = cdefp
-             if (noui) error = .true.
+             error = .true.
           endif
           !
           ! TPROFU may be "3d-profile" only for Time series
@@ -438,7 +437,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (datbnd(n)/='T' .and. tprofu(n)(:10)=='3d-profile') then
              call prterr(lundia ,'U021' ,'<3D-profile> not allowed for H/A/Q open boundary definitions' )
              tprofu(n) = cdefp
-             if (noui) error = .true.
+             error = .true.
           endif
           !
           ! locate 'Label ' record
@@ -490,7 +489,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     do n = 1, nto
        do nn = 1, n - 1
           if (nambnd(nn)==nambnd(n)) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'U174'    ,nambnd(n) )
           endif
        enddo
@@ -564,7 +563,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! if not, default is used
           !
           if ( mnbnd(1,n)<1 .or. mnbnd(2,n)<1 .or. mnbnd(3,n)<1 .or. mnbnd(4,n)<1 ) then
-             if (noui) error = .true.
+             error = .true.
              call prterr( lundia, 'U151', ' ')
              mnbnd(1, n) = max(mnbnd(1, n), 1)
              mnbnd(2, n) = max(mnbnd(2, n), 1)
@@ -572,7 +571,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              mnbnd(4, n) = max(mnbnd(4, n), 1)
           endif
           if ( mnbnd(1,n)>mmaxgl .or. mnbnd(2,n)>nmaxgl .or. mnbnd(3,n)>mmaxgl .or. mnbnd(4,n)>nmaxgl ) then
-             if (noui) error = .true.
+             error = .true.
              call prterr( lundia, 'U151', ' ')
              mnbnd(1, n) = min(mnbnd(1, n), mmaxgl)
              mnbnd(2, n) = min(mnbnd(2, n), nmaxgl)
@@ -675,7 +674,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (      typbnd(n)/='Z' .and. typbnd(n)/='C' .and. typbnd(n)/='Q' &
          & .and. typbnd(n)/='R' .and. typbnd(n)/='T' .and. typbnd(n)/='N'  ) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U047'    ,' '       )
           typbnd(n) = cdeft
        endif
@@ -684,7 +683,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (datbnd(n)/='T' .and. datbnd(n)/='H' .and. datbnd(n)/='A' .and.       &
          & datbnd(n)/='Q') then
-          if (noui) error = .true.
+          error = .true.
           write (errmsg, '(i3)') n
           call prterr(lundia    ,'V004'    ,errmsg    )
           datbnd(n) = cdefd
@@ -694,11 +693,11 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! as long as ntest = 0 datbnd = only 'H' or only 'A' is permitted
        !
        if ((datbnd(n)=='H' .or. datbnd(n)=='A') .and. ntest/=0) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U039'    ,' '       )
        elseif (datbnd(n)=='Q') then
           if (ntest>1) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'U078'    ,' '       )
           else
              ntest = 1
@@ -712,14 +711,14 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (ascon=='Y' .and. datbnd(n)=='H' .or. ascon=='N' .and. datbnd(n)=='A')&
          & then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U065'    ,' '       )
        endif
        !
        ! test consistency for QH relations
        !
        if (datbnd(n)=='Q' .and. typbnd(n)/='Z') then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U077'    ,' '       )
        endif
        if (mnbnd(5,n) /= 0) then
@@ -748,7 +747,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if ( parll .and. .not.yestdd ) cycle
        if (mnbnd(1, n)<1 .or. mnbnd(2, n)<1 .or. mnbnd(3, n)<1 .or. mnbnd(4, n)<1) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U151'    ,' '       )
           !
           mnbnd(1, n) = max(mnbnd(1, n), 1)
@@ -758,7 +757,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
        if (mnbnd(1, n)>mmax .or. mnbnd(2, n)>nmaxus .or. mnbnd(3, n)>mmax .or.  &
          & mnbnd(4, n)>nmaxus) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U151'    ,' '       )
           mnbnd(1, n) = min(mnbnd(1, n), mmax)
           mnbnd(2, n) = min(mnbnd(2, n), nmaxus)

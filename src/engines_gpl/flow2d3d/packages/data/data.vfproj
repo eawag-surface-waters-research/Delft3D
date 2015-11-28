@@ -48,7 +48,6 @@
 		<Filter Name="Header Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath="include\address.igs"/>
 		<File RelativePath="include\adv2d.igs"/>
-		<File RelativePath="include\autok.igs"/>
 		<File RelativePath="include\bcdat.igs"/>
 		<File RelativePath="include\bedformpar.igs"/>
 		<File RelativePath="include\betaro.igs"/>

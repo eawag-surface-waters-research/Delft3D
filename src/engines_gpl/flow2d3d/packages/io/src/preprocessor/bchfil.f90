@@ -55,7 +55,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     integer                                  , intent(in)  :: kc      ! Description and declaration in dimens.igs
     integer                                  , intent(in)  :: lundia  ! Description and declaration in inout.igs
     integer                                  , intent(in)  :: mxkc    ! Maximum number of frequencies
-    integer                                  , intent(in)  :: mxnto   ! Maximum number of open boundaries, for NOUI = .true. MXNTO := NTO
+    integer                                  , intent(in)  :: mxnto   ! Maximum number of open boundaries, MXNTO := NTO
     integer                                  , intent(in)  :: ntof    ! Description and declaration in dimens.igs
     logical                                  , intent(out) :: error   ! Flag=TRUE if an error is encountered
     real(fp)     , dimension(4, mxnto, mxkc)               :: hydrbc  ! Description and declaration in esm_alloc_real.f90

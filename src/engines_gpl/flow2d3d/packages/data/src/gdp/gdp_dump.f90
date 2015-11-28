@@ -56,8 +56,6 @@ subroutine gdp_dump(gdp       )
 !
     write (*, *) 'GDP % gdaddress'
     write (*, *) gdp%gdaddress
-    write (*, *) 'GDP % gdautok'
-    write (*, *) gdp%gdautok
     !      write(*,*) 'GDP % gdcheckc'
     !      write(*,*) GDP % gdcheckc
     !      write(*,*) 'GDP % gdchecki'

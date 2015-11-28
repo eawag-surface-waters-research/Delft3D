@@ -1,4 +1,4 @@
-subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
+subroutine wridoc(error, neffil, ftype, simdat, runtxt, commrd, part_nr, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -29,8 +29,8 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Writes the initial group 4 ('"soort"-version') to
-!              "SOORT"-DAT
+!    Function: Writes the initial group 4 ('"ftype"-version') to
+!              the "ftype"-DAT/DEF files
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -61,11 +61,8 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
                                              !!  files: tri"h/m/d"-"casl""labl" or
                                              !!  for Comm. file com-"casl""labl"
     character(*)     , intent(in)  :: part_nr !! Partition number string
-    character(16)    , intent(in)  :: simdat !!  Simulation date representing the
-                                             !!  flow condition at this date
-    character(6)     , intent(in)  :: soort  !!  String containing to which output
-                                             !!  file version group or to diagnostic
-                                             !!  file should be written
+    character(16)    , intent(in)  :: simdat !!  Simulation date representing the flow condition at this date
+    character(6)     , intent(in)  :: ftype  !!  String containing to which output file version group or to diagnostic file should be written
     character(30), dimension(10)   :: runtxt !!  Textual description of model input
 
 !
@@ -108,20 +105,19 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
     ierror = 0
     !
     filnam = neffil
-    if (soort(1:3)/='com') filnam = neffil(1:3) // soort(1:1) // trim(neffil(5:)) // trim(part_nr) 
-    grnam4 = soort(1:3) // '-version'
+    if (ftype(1:3)/='com') filnam = neffil(1:3) // ftype(1:1) // trim(neffil(5:)) // trim(part_nr) 
+    grnam4 = ftype(1:3) // '-version'
     errmsg = ' '
     !
-    ! Write system definition to diagnostic file for SOORT = 'dia'
-    ! and skip rest of routine
+    ! Write system definition to diagnostic file for ftype = 'dia' and skip rest of routine
     !
     version_full  = ' '
     !version_short = ' '
     call getfullversionstring_flow2d3d(version_full)
     !
-    if (soort(1:3) == 'dia') then
+    if (ftype(1:3) == 'dia') then
        ! nothing
-    elseif (soort(1:5) == 'ascii') then
+    elseif (ftype(1:5) == 'ascii') then
         !
         ! write start date and time to LUNPRT
         !
@@ -153,7 +149,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
           write (lunprt, '(a)') header(iheader)
        enddo
     else
-       select case (soort(1:3))
+       select case (ftype(1:3))
        case ('his')
            IO_FIL = FILOUT_HIS
        case ('map')
@@ -215,17 +211,17 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, part_nr, gdp)
        ! comm    file  'c'
        !
        cdum16(1) = '00.00.00.00'
-       if (soort(1:1)=='d') then
+       if (ftype(1:1)=='d') then
           call getdrofileversionstring_flow2d3d(cdum16(1))
-       elseif (soort(1:1)=='h') then
+       elseif (ftype(1:1)=='h') then
           call gethisfileversionstring_flow2d3d(cdum16(1))
-       elseif (soort(1:1)=='m') then
+       elseif (ftype(1:1)=='m') then
           call getmapfileversionstring_flow2d3d(cdum16(1))
-       elseif (soort(1:1)=='c') then
+       elseif (ftype(1:1)=='c') then
           call getcomfileversionstring_flow2d3d(cdum16(1))
        else
        endif
-       if (soort(1:1)=='c') then
+       if (ftype(1:1)=='c') then
           !
           ! Check if COM-file is a new one or an existing one
           !

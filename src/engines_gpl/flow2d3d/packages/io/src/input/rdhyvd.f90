@@ -1,8 +1,7 @@
-subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
-                & fmtedy    ,tkemod    ,xlo       ,vicouv    ,dicouv    , &
-                & vicoww    ,dicoww    ,mmax      ,nmax      ,nmaxus    , &
-                & kmax      ,lstsci    ,vicuv     ,dicuv     , &
-                & gdp       )
+subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,filedy    ,fmtedy    , &
+                & tkemod    ,xlo       ,vicouv    ,dicouv    ,vicoww    , &
+                & dicoww    ,mmax      ,nmax      ,nmaxus    ,kmax      , &
+                & lstsci    ,vicuv     ,dicuv     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -86,7 +85,6 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
     integer                                                                                   :: nrrec  !!  Pointer to the record number in the
                                                                                                         !!  MD-file
     logical                                                                                   :: error  !!  Flag=TRUE if an error is encountered
-    logical                                                                     , intent(in)  :: noui   !!  Flag for reading from User Interface
     real(fp)                                                                                  :: dicouv !!  Horizontal Diffusion coeff. [m2/s]
     real(fp)                                                                                  :: dicoww !  Description and declaration in tricom.igs
     real(fp)                                                                                  :: vicouv !!  Horizontal eddy visc. coefficient
@@ -249,42 +247,36 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
        endif
        !
        ! write per nmaxus mmax vicouv in vicuv array
-       ! only if noui = .true.
        !
-       if (noui) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                vicuv(n, m, kbg) = vicouv
-             enddo
+       do m = 1, mmax
+          do n = 1, nmaxus
+             vicuv(n, m, kbg) = vicouv
           enddo
-          !
-          ! write per nmaxus mmax dicouv in dicuv array
-          ! if lstsci = 0 then dicouv = 0 (ok)
-          !
-          do m = 1, mmax
-             do n = 1, nmaxus
-                dicuv(n, m, kbg) = dicouv
-             enddo
-          enddo
-       endif
-    endif
-    !
-    ! copy vicuv and dicuv for all layers only if noui = .true.
-    !
-    if (noui) then
-       do k = 1, kmax
-          do m = 1, mmax
-             do n = 1, nmaxus
-                vicuv(n, m, k) = vicuv(n, m, kbg)
-                dicuv(n, m, k) = dicuv(n, m, kbg)
-             enddo
+       enddo
+       !
+       ! write per nmaxus mmax dicouv in dicuv array
+       ! if lstsci = 0 then dicouv = 0 (ok)
+       !
+       do m = 1, mmax
+          do n = 1, nmaxus
+             dicuv(n, m, kbg) = dicouv
           enddo
        enddo
     endif
     !
+    ! copy vicuv and dicuv for all layers
+    !
+    do k = 1, kmax
+       do m = 1, mmax
+          do n = 1, nmaxus
+             vicuv(n, m, k) = vicuv(n, m, kbg)
+             dicuv(n, m, k) = dicuv(n, m, kbg)
+          enddo
+       enddo
+    enddo
+    !
     ! locate 'Tkemod' record for the specification of the turb. model
     ! default value allowed = 'Algebraic ' (version 2.03 upwards)
-    ! only for noui = .true. (for ui tkemod is read in rddim)
     !
     if (kmax > 1) then
        tkemod = ' '

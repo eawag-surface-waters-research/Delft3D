@@ -101,7 +101,6 @@ subroutine gdp_dealloc(gdp)
     call clradv2d(istat, gdp)
     deallocate (gdp%gdadv2d  , STAT = istat)
     deallocate (gdp%gdaddress, STAT = istat)
-    deallocate (gdp%gdautok  , STAT = istat)
     if (localbubble) then
        if (associated(gdp%gdbubble%cpdis)) deallocate (gdp%gdbubble%cpdis, STAT = istat)
        if (associated(gdp%gdbubble%hsink)) deallocate (gdp%gdbubble%hsink, STAT = istat)

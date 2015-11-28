@@ -59,7 +59,6 @@ subroutine gdp_alloc(gdp)
     !
     allocate (gdp%gdadv2d)
     allocate (gdp%gdaddress)
-    allocate (gdp%gdautok)
     allocate (gdp%gdbedformpar)
     allocate (gdp%gdbubble)
     allocate (gdp%gdconst)

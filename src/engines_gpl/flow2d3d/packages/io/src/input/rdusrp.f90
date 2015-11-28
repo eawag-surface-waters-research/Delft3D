@@ -1,5 +1,5 @@
 subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-                & noui      ,gdp       )
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -65,7 +65,6 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     integer                    :: lunmd  !  Description and declaration in inout.igs
     integer                    :: nrrec  !!  Pointer to the record number in the MD-file
     logical      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical      , intent(in)  :: noui   !!  Flag for reading from User Interface
     character(*)               :: mdfrec !!  Standard rec. length in MD-file (300)
 !
 !
@@ -172,7 +171,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           write (errtxt(:2), '(i2)') nprocs
           call prterr(lundia    ,'V211'    ,errtxt(:2))
           !
-          if (noui) error = .true.
+          error = .true.
           lerror = .true.
           goto 9999
        endif
@@ -208,7 +207,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           if (prcusr(n)==chdef) then
              call prterr(lundia    ,'V212'    ,' '       )
              !
-             if (noui) error = .true.
+             error = .true.
              lerror = .true.
              exit
           endif
@@ -222,7 +221,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
                 if (nread(k)/=0) then
                    call prterr(lundia    ,'V213'    ,prcusr(n) )
                    !
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .true.
                    goto 9999
                 endif
@@ -234,7 +233,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           if (nk==0) then
              call prterr(lundia    ,'V202'    ,prcusr(n) )
              !
-             if (noui) error = .true.
+             error = .true.
              lerror = .true.
              exit
           endif
@@ -254,7 +253,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           !
           if (lerror) then
              lerror = .false.
-             if (noui) error = .true.
+             error = .true.
              do k = 1, 4
                 ival(k) = idef
              enddo
@@ -269,7 +268,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
              if (nprinp(k, n)/=nprdim(k, nk)) then
                 call prterr(lundia    ,'V214'    ,prcusr(n) )
                 !
-                if (noui) error = .true.
+                error = .true.
                 lerror = .true.
                 goto 9999
              endif
@@ -279,7 +278,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
                 write (errtxt(:2), '(i2)') mxusrp
                 call prterr(lundia    ,'V215'    ,errtxt(:2))
                 !
-                if (noui) error = .true.
+                error = .true.
                 lerror = .true.
                 goto 9999
              endif

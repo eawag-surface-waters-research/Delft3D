@@ -30,8 +30,7 @@ subroutine dimbub(error, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimension for discharge definition,
-!              sources and sinks, from the MD-file or from the
-!              attribute file for NOUI
+!              sources and sinks, from the MD-file
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------

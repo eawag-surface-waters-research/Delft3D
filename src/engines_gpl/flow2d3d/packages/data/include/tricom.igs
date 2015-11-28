@@ -222,12 +222,6 @@
                                                     !!  =3 no initialization
        integer                            :: it01   !  Description and declaration in esm_alloc_int.f90
        integer                            :: it02   !  Description and declaration in esm_alloc_int.f90
-       integer                            :: itb    !!  Start time of computational interval
-                                                    !!  for a stand alone system the input
-                                                    !!  value from TRISIM: ITB = 1
-       integer                            :: ite    !!  End time of computational interval
-                                                    !!  for a stand alone system the input
-                                                    !!  value from TRISIM: ITE = -1
        integer                            :: itima  !!  Time to start simulation (N * tscale)
                                                     !!  according to DELFT3D conventions
        integer                            :: itlen  !  Description and declaration in esm_alloc_int.f90
@@ -252,10 +246,6 @@
        integer                            :: npmap  ! Current array counter for printing map data 
        integer                            :: ntcur  ! Total number of timesteps on comm. file (to write to) 
        integer                            :: ntwav  ! Total number of timesteps on comm. file (to read from) for waves 
-       logical                            :: alone  !!  TRUE when flow runs stand-alone,
-                                                    !!  FALSE when flow is part of morsys
-       logical                            :: mainys !!  Logical flag for TRISULA is main
-                                                    !!  program (TRUE) for writing output
 
        logical                            :: cyclic ! Flag = TRUE if cyclic system assumed 
        logical                            :: fout   ! Flag=TRUE if an error is encountered 

@@ -1,4 +1,4 @@
-subroutine tdatmain(runid, alone, filmrs, nuerr, gdp)
+subroutine tdatmain(runid, filmrs, nuerr, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -52,7 +52,6 @@ subroutine tdatmain(runid, alone, filmrs, nuerr, gdp)
 ! Global variables
 !
     integer                    :: nuerr  ! Exit code: 0 := ok, < 0 then error
-    logical       , intent(in) :: alone  ! TRUE when flow runs stand-alone, FALSE when flow is part of morsys 
     character(*)  , intent(in) :: runid
     character(12) , intent(in) :: filmrs ! File name for DELFT3D_MOR FLOW input file (MD-flow.xxx) 
 !
@@ -74,6 +73,6 @@ subroutine tdatmain(runid, alone, filmrs, nuerr, gdp)
     !
     ! Call to major routine to create time dependent data files
     !
-    call tdatom(runid, filmrs, nuerr ,alone, gdp)
+    call tdatom(runid, filmrs, nuerr ,gdp)
     !
 end subroutine tdatmain

@@ -1,6 +1,6 @@
 subroutine rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
-               & itcomi    ,mmax      ,nmax      ,nmaxus    ,dp        , &
-               & rbuff     ,ite       ,gdp       )
+                & itcomi    ,mmax      ,nmax      ,nmaxus    ,dp        , &
+                & rbuff     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -60,7 +60,6 @@ subroutine rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
                                                                                    !!     file
                                                                                    !!  =3 no initialization
     integer                                                , intent(in)  :: itcomi !  Description and declaration in inttim.igs
-    integer                                                , intent(in)  :: ite
     integer                                                , intent(in)  :: itima  !!  Time to start simulation (N * tscale)
                                                                                    !!  according to DELFT3D conventions
     integer                                                              :: lundia !  Description and declaration in inout.igs

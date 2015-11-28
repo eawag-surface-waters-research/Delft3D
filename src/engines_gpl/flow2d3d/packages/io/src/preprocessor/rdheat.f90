@@ -1,9 +1,6 @@
-subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
-                & noui      ,runid       ,filtem    ,fmttem    ,ktemp       , &
-                & rttem     ,dt          ,itstrt    ,itfinish  ,mxtemt      , &
-                & ntemtm    ,ivapop      ,rhum      ,tdryb     ,qsolar      , &
-                & tback     ,tair        ,vapres    ,cfclou    ,solrad_read , &
-                & gdp       )
+subroutine rdheat(lunmd     ,lundia    ,error     ,nrrec       ,mdfrec    , &
+                & runid     ,filtem    ,fmttem    ,ktemp       ,dt        , &
+                & itstrt    ,itfinish  ,ivapop    ,solrad_read ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -72,22 +69,10 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
     integer                        , intent(in)  :: ktemp       !  Description and declaration in tricom.igs
     integer                                      :: lundia      !  Description and declaration in inout.igs
     integer                                      :: lunmd       !  Description and declaration in inout.igs
-    integer                        , intent(in)  :: mxtemt      !!  Maximum number of times for which heat model data is allowed in the MD-file
     integer                                      :: nrrec       !!  Pointer to the record number in the MD-file
-    integer                        , intent(out) :: ntemtm      !!  Actual number of times for which heat model data is allowed in the MD-file
     logical                                      :: error       !!  Flag=TRUE if an error is encountered
-    logical                        , intent(in)  :: noui        !!  Flag for reading from User Interface
     logical                        , intent(in)  :: solrad_read !  Description and declaration in heat.igs
     real(fp)                                     :: dt          !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(mxtemt), intent(out) :: cfclou      !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxtemt), intent(out) :: qsolar      !!  Sun Insolation (Cloud-less if KTEMP=1 or 4,
-                                                                !!  QSUN in HEATU, or net if KTEMP=2, QRADIN in HEATU)
-    real(fp)    , dimension(mxtemt), intent(out) :: rhum        !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxtemt)              :: rttem       !!  At most MXTEMT times for time varying heat model data
-    real(fp)    , dimension(mxtemt), intent(out) :: tair        !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxtemt), intent(out) :: tback       !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxtemt), intent(out) :: tdryb       !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxtemt), intent(out) :: vapres      !  Description and declaration in heat.igs
     character(*)                                 :: filtem      !!  File name for the time varying heat model file
     character(*)                                 :: mdfrec      !!  Standard rec. length in MD-file (300)
     character(*)                                 :: runid       !!  Run identification code for the current simulation (used to determine
@@ -97,7 +82,6 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
 ! Local variables
 !
     integer                      :: iocond   ! IO status for reading 
-    integer                      :: item     ! Help var. for times read 
     integer                      :: itold    ! Help var. to store last read time to test accending order 
     integer                      :: ittdep   ! Help var. for the time read (now defined as multiples of DT, but in future it may take any value) 
     integer                      :: l        ! Help var. 
@@ -129,7 +113,6 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
     !
     ! initialize global parameters
     !
-    item   = 1
     itold  = -1
     rec1st = .true.
     nlook  = 1
@@ -156,46 +139,43 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        fmttmp = 'formatted'
        error  = .false.
        !
-       ! If not UI then:
        ! Check filename "filtem" <> TMP file or
        ! "filtem" = TMP file and access is unformatted
        ! Define length of RUNID
        ! open output file (ONLY VERSION 2.48 or lower) +
        ! Set name for the constituents, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.tem'
-          !
-          ! define length of file name
-          !
-          call remove_leading_spaces(filtem, lf)
-          !
-          ! open unformatted tem-file
-          !
-          lunout = newlun(gdp)
-          inquire (file = filout(:8 + lrid), exist = ex)
-          if (ex) then
-             open (lunout, file = filout(:8 + lrid))
-             close (lunout, status = 'delete')
-          endif
-          open (lunout, file = filout(:8 + lrid), form = 'unformatted',      &
-              & status = 'unknown')
-          !
-          write (message, '(2a)') 'Reading Heat module file ', filtem(:lf)
-          call prterr(lundia, 'G051', trim(message))
-          nrval = 1
-          if (ktemp /= 3) then
-             nrval = 3
-             if (ivapop == 1 .or. solrad_read) then
-                nrval = 4
-             endif
-             
-          endif
-          call rdtdf(lundia    ,lunout    ,error     ,filtem    ,fmttmp    , &
-                   & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
-                   & gdp       )
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.tem'
+       !
+       ! define length of file name
+       !
+       call remove_leading_spaces(filtem, lf)
+       !
+       ! open unformatted tem-file
+       !
+       lunout = newlun(gdp)
+       inquire (file = filout(:8 + lrid), exist = ex)
+       if (ex) then
+          open (lunout, file = filout(:8 + lrid))
+          close (lunout, status = 'delete')
        endif
+       open (lunout, file = filout(:8 + lrid), form = 'unformatted',      &
+           & status = 'unknown')
+       !
+       write (message, '(2a)') 'Reading Heat module file ', filtem(:lf)
+       call prterr(lundia, 'G051', trim(message))
+       nrval = 1
+       if (ktemp /= 3) then
+          nrval = 3
+          if (ivapop == 1 .or. solrad_read) then
+             nrval = 4
+          endif
+          
+       endif
+       call rdtdf(lundia    ,lunout    ,error     ,filtem    ,fmttmp    , &
+                & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
+                & gdp       )
     else
        !
        ! time varying heat module data in a .tem file
@@ -256,13 +236,9 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
            endif
        enddo
        !
-       ! NOTE : in the future one should be able to interpolate across dt
-       !
-       rttem(item) = rval(1)
-       !
-       ittdep = nint(rttem(item)/dt)
-       if (dtn(ittdep, rttem(item), dt)) then
-          if (noui) error = .true.
+       ittdep = nint(rval(1)/dt)
+       if (dtn(ittdep, rval(1), dt)) then
+          error = .true.
           call prterr(lundia    ,'U044'    ,'Tstmp'   )
        !
        endif
@@ -272,81 +248,19 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        if (rec1st) then
           if (ittdep > itstrt) then
              call prterr(lundia    ,'U041'    ,'First time Tstmp  >' )
-             if (noui) error = .true.
+             error = .true.
           endif
           rec1st = .false.
        endif
        !
        if (ittdep <= itold) then
           call prterr(lundia    ,'U060'    ,'Tstmp'   )
-          if (noui) error = .true.
+          error = .true.
        endif
        !
-       ! define relative humidity, dry bulb temperature and solar
-       ! insolation (cloudiness) data in array for KTEMP=1
+       ! writing to LUNOUT
        !
-       if (ktemp == 1) then
-          rhum(item)   = rval(2)
-          tdryb(item)  = rval(3)
-          qsolar(item) = rval(4)
-       endif
-       !
-       ! define relative humidity, dry bulb temperature and solar
-       ! insolation (net) data in array for KTEMP=2
-       !
-       if (ktemp == 2) then
-          rhum(item)   = rval(2)
-          tdryb(item)  = rval(3)
-          qsolar(item) = rval(4)
-       endif
-       !
-       ! define background temperature data in array for KTEMP=3
-       !
-       if (ktemp == 3) then
-          tback(item) = rval(2)
-       endif
-       !
-       ! define relative humidity, air temperature, solar insolation
-       ! (net) and (if IVAPOP = 1) vapour pressure data for KTEMP=4
-       !
-       if (ktemp == 4) then
-          rhum(item)   = rval(2)
-          tair(item)   = rval(3)
-          qsolar(item) = rval(4)
-          if (ivapop == 1) then
-             vapres(item) = rval(5)
-          endif
-       endif
-       !
-       ! define relative humidity, air temperature and fraction of
-       ! sky coverd with clouds data in array for KTEMP=5
-       !
-       if (ktemp == 5) then
-          rhum(item) = rval(2)
-          tair(item) = rval(3)
-          cfclou(item) = rval(4)
-          if (solrad_read) then
-             qsolar(item) = rval(5)
-          endif
-       endif
-       !
-       ! writing to LUNOUT only if NOUI = .true.
-       !
-       if (noui) then
-          write (lunout) (rval(l), l = 1, nlook)
-       endif
-       !
-       ! check if item exceeds maximum value, then item will be
-       ! reset, for NOUI = .true. this will never appear
-       !
-       if (.not.noui) item = item + 1
-       !
-       if (item > mxtemt) then
-          call prterr(lundia    ,'U157'    ,' '       )
-          !
-          item = mxtemt
-          goto 500
-       endif
+       write (lunout) (rval(l), l = 1, nlook)
        !
        ! next time to read
        !
@@ -371,7 +285,6 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
              goto 9999
           endif
        endif
-       ntemtm = item - 1
     endif
     !
     ! close files
@@ -382,7 +295,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        write (message, '(a)') 'No heat module file(s) found'
        call prterr(lundia, 'P004', message)
     endif
-    if (noui .and. lunout /= 8) then
+    if (lunout /= 8) then
        if (error) then
           close (lunout, status = 'delete')
        else

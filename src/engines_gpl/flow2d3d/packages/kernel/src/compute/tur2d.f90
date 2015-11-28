@@ -434,7 +434,7 @@ subroutine tur2d(dischy    ,j         ,nmmaxj    ,nmmax     ,nmax      , &
        do nm = 1, nmmax
           rtu2d1(nm, l) = rtu2d0(nm, l)
        enddo
-          !
+       !
        ! in case of parallel runs, block Jacobi is applied at coupling boundaries
        ! and consequently, rate of convergence of Gauss Seidel iteration will be
        ! deteriorated somewhat en hence, more iterations are needed

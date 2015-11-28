@@ -313,17 +313,12 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer                               :: iofset      ! Offset to get begin pointer of array at point (1,1) instead of (1,-1)
     integer                               :: ivapop      ! Flag specifying whether vapour pressure data are to be computed or specified Only for KTEMP=4 IVAPOP can be 1
     integer                               :: mxdnto      ! Array dimension for opening boundary definition arrays, which are dynamic declared (NTO in call to RDBNDD)
-    integer                               :: ncpgrd      ! Actional number of computaional grid enclosure points
-    integer                               :: ndry        ! Actional number of dry points sections
     integer                               :: nmaxddb
     integer                               :: sizenm
     integer                               :: nprttm      ! Number of print times steps
     integer                               :: nrrec       ! Pointer to the record number in the MD-file
-    integer                               :: ntd         ! Actional number of thin dams
     integer                               :: ntofgl      ! total number of H/A-type boundary sections of entire domain
-    integer        , dimension(4, mxnpnt) :: mnpnt       ! Work array with M,N coordinates for grid points, dry point sections and thin dam point sections in RDGRID
     integer        , dimension(mxnto)     :: nhsub       ! integer array to store sequence numbers of harmonic boundary condition in own subdomain
-    logical                               :: noui        ! Flag for reading from User Interface
     logical                               :: solrad_read ! Flag=TRUE means Nett Solar Radiation is to be read from .tem file
     logical                               :: yestdd      ! Flag for call from TDATOM (.true.) for time varying data
     logical                               :: ecwind      ! Temporary flag to switch between meteo and ec module
@@ -337,7 +332,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     character(1)                          :: ctunit      ! Time scale for time parameters, currently set to 'M'(inute - fixed).
     character(1)                          :: equili      ! Equilibrium or advection and diffusion default = no equilibrium ('N') which means LSEC = 1
     character(1)                          :: sphere      ! Flag Yes / No spherical coordinates
-    character(1)   , dimension(mxnpnt)    :: dirtd       ! Work array for direction of thin dam point sections in RDGRID
     character(1)   , dimension(mxnto)     :: datbnd      ! Type of open boundary: -'H'(armonic/Tide) -'T'(ime series/time dependent)
     character(2)                          :: fmtfil      ! File format for attribute files
     character(10)                         :: citdat      ! Reference date for the simulation times. Format: "DD MMM 'YY"
@@ -559,7 +553,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     nmaxddb = nmax + 2*gdp%d%ddbound
     iofset  = 2*nmaxddb
     nrrec   = 1
-    noui    = .true.
     yestdd  = .false.
     mxdnto  = nto
     !
@@ -575,39 +568,36 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Read model description
     !
     call rdrund(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-              & noui      ,runtxt    ,gdp       )
+              & runtxt    ,gdp       )
     if (error) goto 9999
     !
     if (zmodel) call prterr(lundia    ,'G051'    ,'Z-model used' )
     !
     ! Read grid information
     !
-    call rdxyzo(lunmd     ,lundia    ,error          ,nrrec          ,mdfrec    , &
-              & noui      ,kmax      ,zbot           ,ztop           , &
-              & dx        ,dy        ,filrgf         ,fmtfil         ,r(thick)  , &
-              & anglat    ,anglon    ,grdang         ,sphere         ,sferic    , &
-              & zmodel    ,mmax      ,nmax      ,r(xcor+iofset) ,r(ycor+iofset) , &
-              & gdp       )
+    call rdxyzo(lunmd     ,lundia         ,error          ,nrrec     ,mdfrec    , &
+              & kmax      ,zbot           ,ztop           ,dx        ,dy        , &
+              & filrgf    ,fmtfil         ,r(thick)       ,anglat    ,anglon    , &
+              & grdang    ,sphere         ,sferic         ,zmodel    ,mmax      , &
+              & nmax      ,r(xcor+iofset) ,r(ycor+iofset) ,gdp       )
     if (error) goto 9999
     !
     ! GRID dimensions read in a group
     !
     call rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
-              & mdfrec    ,noui      ,runid     ,mmax      ,nmaxus    , &
-              & filnam    ,fmtfil    ,flgrd     ,mnpnt     ,mxnpnt    , &
-              & ncpgrd    ,filnam    ,fmtfil    ,fldry     ,mnpnt     , &
-              & mxnpnt    ,ndry      ,filnam    ,fmtfil    ,dirtd     , &
-              & fltd      ,mnpnt     ,mxnpnt    ,ntd       ,filnam    , &
-              & flcut     ,filnam    ,fl45      ,gdp       )
+              & mdfrec    ,runid     ,mmax      ,nmaxus    ,filnam    , &
+              & fmtfil    ,flgrd     ,filnam    ,fmtfil    ,fldry     , &
+              & filnam    ,fmtfil    ,fltd      ,filnam    ,flcut     , &
+              & filnam    ,fl45      ,gdp       )
     if (error) goto 9999
     !
     ! Special points, discharge sources ,barriers and weir losses
     ! (barriers and local weir losses not yet implemented)
     !
     call rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-              & noui      ,yestdd    ,filnam    ,fmtfil    ,nsrcd     , &
-              & mmax      ,nmax      ,nmaxus    ,i(mnksrc) ,ch(namsrc), &
-              & ch(disint),upwsrc    ,gdp       )
+              & yestdd    ,filnam    ,fmtfil    ,nsrcd     ,mmax      , &
+              & nmax      ,nmaxus    ,i(mnksrc) ,ch(namsrc),ch(disint), &
+              & upwsrc    ,gdp       )
     if (error) goto 9999
     !
     ! Depth information
@@ -624,20 +614,20 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ntofgl = ntof
     if (nto > 0) then
        call rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                 & noui      ,nto       ,ntof      ,ntoq      ,mmax      , &
-                 & nmaxus    ,kmax      ,mxdnto    ,mxnto     ,filnam    , &
-                 & fmtfil    ,ascon     ,ch(nambnd),ch(typbnd),datbnd    , &
-                 & i(mnbnd)  ,r(alpha)  ,ch(tprofu),statns    ,nhsub     , &
-                 & yestdd    ,gdp       )
+                 & nto       ,ntof      ,ntoq      ,mmax      ,nmaxus    , &
+                 & kmax      ,mxdnto    ,mxnto     ,filnam    ,fmtfil    , &
+                 & ascon     ,ch(nambnd),ch(typbnd),datbnd    ,i(mnbnd)  , &
+                 & r(alpha)  ,ch(tprofu),statns    ,nhsub     ,yestdd    , &
+                 & gdp       )
        if (error) goto 9999
     endif
     !
     ! Initial Run Time parameters and define Julian Day from ITDATE
     !
     call rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-             & noui      ,citdat    ,tstart    ,tstop     ,tzone     , &
-             & itdate    ,julday    ,itstrt    ,itfinish  ,dt        , &
-             & ctunit    ,tunit     ,gdp       )
+             & citdat    ,tstart    ,tstop     ,tzone     ,itdate    , &
+             & julday    ,itstrt    ,itfinish  ,dt        ,ctunit    , &
+             & tunit     ,gdp       )
     if (error) goto 9999
     !
     ! Open boundary correction
@@ -649,15 +639,14 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Restart file or Initial Conditions and names of constituents
     !
     call rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-            & noui      ,runid     ,restid    ,filic     ,fmtfil    , &
-            & salin     ,temp      ,const     ,secflo    ,lturi     , &
-            & lsal      ,ltem      ,lstsc     ,zini      ,wrkini    , &
-            & wrkini    ,wrkini    ,wrkini    ,wrkini    ,wrkini    , &
-            & mmax      ,nmax      ,nmaxus    ,kmax      , &
-            & lstsci    ,ltur      ,ch(namcon),r(s1)     ,r(u1)     , &
-            & r(v1)     ,r(r1)     ,r(rtur1)  ,r(decay)  ,r(umnldf) , &
-            & r(vmnldf) ,i(kfu)    ,i(kfv)    ,r(dp)     ,lsed      , &
-            & gdp       )
+            & runid     ,restid    ,filic     ,fmtfil    ,salin     , &
+            & temp      ,const     ,secflo    ,lturi     ,lsal      , &
+            & ltem      ,lstsc     ,zini      ,wrkini    ,wrkini    , &
+            & wrkini    ,wrkini    ,wrkini    ,wrkini    ,mmax      , &
+            & nmax      ,nmaxus    ,kmax      ,lstsci    ,ltur      , &
+            & ch(namcon),r(s1)     ,r(u1)     ,r(v1)     ,r(r1)     , &
+            & r(rtur1)  ,r(decay)  ,r(umnldf) ,r(vmnldf) ,i(kfu)    , &
+            & i(kfv)    ,r(dp)     ,lsed      ,gdp       )
     if (error) goto 9999
     !
     ! Boundary conditions general (only if nto > 0)
@@ -665,11 +654,10 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     if (nto > 0) then
        call rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,itlfsm    ,tlfsmo    ,dt        ,tunit     , &
-                & nto       ,lstsc     ,bndneu    ,cstbnd    , &
-                & ch(nambnd),ch(typbnd),r(rettim) ,ntoq      ,thetqh    , &
-                & restid    ,filic     ,paver     ,pcorr     ,tstart    , &
-                & tstop     ,gdp       )
+                & itlfsm    ,tlfsmo    ,dt        ,tunit     ,nto       , &
+                & lstsc     ,bndneu    ,cstbnd    ,ch(nambnd),ch(typbnd), &
+                & r(rettim) ,ntoq      ,thetqh    ,restid    ,filic     , &
+                & paver     ,pcorr     ,tstart    ,tstop     ,gdp       )
        if (error) goto 9999
     endif
     !
@@ -712,19 +700,18 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Physical Coefficients, Hydrodynamic Bedstress
     !
     call rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-             & noui      ,roumet    ,threed    ,filnam    ,fmtfil    , &
-             & ccofu     ,ccofv     ,wave      ,rouwav    ,mmax      , &
-             & nmax      ,nmaxus    ,r(cfurou) ,r(cfvrou) ,gdp       )
+             & roumet    ,threed    ,filnam    ,fmtfil    ,ccofu     , &
+             & ccofv     ,wave      ,rouwav    ,mmax      ,nmax      , &
+             & nmaxus    ,r(cfurou) ,r(cfvrou) ,gdp       )
     if (error) goto 9999
     !
     ! Physical Coefficients, Hydrodynamic Viscosity and Diffusion
     ! initialize global and local parameters first
     !
-    call rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filnam    , &
-              & fmtfil    ,tkemod    ,xlo       ,vicouv    ,dicouv    , &
-              & vicoww    ,dicoww    ,mmax      ,nmax      ,nmaxus    , &
-              & kmax      ,lstsci    ,r(vicuv)  ,r(dicuv)  , &
-              & gdp       )
+    call rdhyvd(error     ,nrrec     ,mdfrec    ,filnam    ,fmtfil    , &
+              & tkemod    ,xlo       ,vicouv    ,dicouv    ,vicoww    , &
+              & dicoww    ,mmax      ,nmax      ,nmaxus    ,kmax      , &
+              & lstsci    ,r(vicuv)  ,r(dicuv)  ,gdp       )
     if (error) goto 9999
     !
     ! Physical Coefficients, Process
@@ -733,14 +720,13 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Wind    - wstcof(4) and rhoa
     ! Drogue  - drogues
     !
-    call rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
-              & salin    ,temp      ,wind     ,ktemp       , &
-              & keva     ,ivapop    ,irov     ,ctunit      , &
-              & z0v      ,sferic    ,tgfcmp   ,temeqs      ,saleqs      , &
-              & wstcof   ,rhoa      ,secflo   ,betac       ,equili      , &
-              & lsec     ,chzmin    ,rmincf   ,rtcmod      ,couplemod   , &
-              & nonhyd   ,mmax      ,nmax     ,nmaxus      ,sedim       , &
-              & idensform,solrad_read, gdp)
+    call rdproc(error     ,nrrec     ,mdfrec    ,htur2d     ,salin    , &
+              & temp      ,wind      ,ktemp     ,keva       ,ivapop   , &
+              & irov      ,ctunit    ,z0v       ,sferic     ,tgfcmp   , &
+              & temeqs    ,saleqs    ,wstcof    ,rhoa       ,secflo   , &
+              & betac     ,equili    ,lsec      ,chzmin     ,rmincf   , &
+              & rtcmod    ,couplemod ,nonhyd    ,mmax       ,nmax     , &
+              & nmaxus    ,sedim     ,idensform ,solrad_read, gdp)
     if (error) goto 9999
     !
     ! Physical Coefficients, Special
@@ -763,9 +749,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! for all other cases on ANGLAT
     !
     call rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-              & noui      ,sferic    ,anglat    ,dy        , &
-              & filnam    ,fmtfil    ,mmax      ,nmax      ,nmaxus    , &
-              & r(fcorio) ,gdp       )
+              & sferic    ,anglat    ,dy        ,filnam    ,fmtfil    , &
+              & mmax      ,nmax      ,nmaxus    ,r(fcorio) ,gdp       )
     if (error) goto 9999
     !
     ! Special points
@@ -793,27 +778,25 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Site: monitoring station + monitoring cross-section + RTC input station
     !
     call rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-              & noui      ,dt        ,filnam    ,fmtfil    ,nostat    , &
-              & filnam    ,fmtfil    ,ntruv     ,filnam    ,fmtfil    , &
-              & ndro      ,drogue    ,ch(namdro),i(mndro)  ,i(itdro)  , &
-              & r(dxydro) ,r(drodep) ,gdp       )
+              & dt        ,filnam    ,fmtfil    ,nostat    ,filnam    , &
+              & fmtfil    ,ntruv     ,filnam    ,fmtfil    ,ndro      , &
+              & drogue    ,ch(namdro),i(mndro)  ,i(itdro)  ,r(dxydro) , &
+              & r(drodep) ,gdp       )
     if (error) goto 9999
     !
     ! Output Site Quantity
-    ! Define FILNAM It is used as test for settings of flags (old UI)
     !
-    filnam = ' '
     call rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
               & kmax      ,lstsci    ,ltur      ,lsal      ,ltem      , &
-              & nostat    ,filnam    ,ntruv     ,filnam    ,prsmap    , &
-              & prshis    ,selmap    ,selhis    ,lsed      ,gdp       )
+              & nostat    ,ntruv     ,prsmap    ,prshis    ,selmap    , &
+              & selhis    ,lsed      ,gdp       )
     !
     ! Read  fourier input file
     !
     if (nofou > 0) then
        call rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                 & noui      ,nofou     ,kmax      ,lstsc     ,lsal      , &
-                 & ltem      ,gdp       )
+                 & nofou     ,kmax      ,lstsc     ,lsal      ,ltem      , &
+                 & gdp       )
        if (error) goto 9999
     endif
     !
@@ -852,10 +835,9 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     if (sedim) then
        call rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-                      & lsedtot   ,lstsci    ,ltur      ,ch(namcon), &
-                      & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
-                      & nmmax     ,nto       ,ch(nambnd),lsec      ,tstart    , &
-                      & tunit     ,gdp       )
+                      & lsedtot   ,lstsci    ,ltur      ,ch(namcon),iopsus    , &
+                      & mmax      ,nmax      ,nmaxus    ,nmmax     ,nto       , &
+                      & ch(nambnd),lsec      ,tstart    ,tunit     ,gdp       )
        if (error) goto 9999
     endif
     !
@@ -894,10 +876,11 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     ! IWE input if flag IWEFLG = .true.
     !
+    filnam = ' '
     if (iweflg) then
        call rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,dt        ,itiwei    ,tinciw    ,kmxt      , &
-                & kmxdt     ,nfreqs    ,npiwe     ,filnam    ,gdp       )
+                & dt        ,itiwei    ,tinciw    ,kmxt      ,kmxdt     , &
+                & nfreqs    ,npiwe     ,filnam    ,gdp       )
        if (error) goto 9999
     endif
     !
@@ -906,15 +889,15 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! and user defined constants related to these processes
     !
     call rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-              & noui      ,gdp       )
+              & gdp       )
     if (error) goto 9999
     !
     call rdusrf(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-              & noui      ,gdp       )
+              & gdp       )
     if (error) goto 9999
     !
     call rdusrc(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-              & noui      ,gdp       )
+              & gdp       )
     if (error) goto 9999
     !
     ! Real User defined data

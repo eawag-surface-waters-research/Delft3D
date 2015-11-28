@@ -1,7 +1,7 @@
 subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
                 & kmax      ,lstsci    ,ltur      ,lsal      ,ltem      , &
-                & nostat    ,filsta    ,ntruv     ,filtra    ,prsmap    , &
-                & prshis    ,selmap    ,selhis    ,lsed      ,gdp       )
+                & nostat    ,ntruv     ,prsmap    ,prshis    ,selmap    , &
+                & selhis    ,lsed      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -43,9 +43,6 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 !              - Writes the flags to a character string PRSHIS
 !                (char*23) and PRSMAP (char*19).
 !                Default = 'YYYYYYYYYYYYYYYYYYYYYYY'
-!              - For NOUI FILSTA and FILTRA are dummy arguments
-!                but then the values for NOSTAT and NTRUV are
-!                read from attribute file
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -84,8 +81,6 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     integer                    :: nrrec  !!  Pointer to the record number in the MD-file
     integer      , intent(in)  :: ntruv  !  Description and declaration in dimens.igs
     logical      , intent(out) :: tstprt !  Description and declaration in tricom.igs
-    character(*) , intent(in)  :: filsta !!  File name for the monitoring stations file
-    character(*) , intent(in)  :: filtra !!  File name for the cross sections file
     character(*)               :: mdfrec !!  Standard rec. length in MD-file (300)
     character(19)              :: prsmap !  Description and declaration in tricom.igs
     character(21)              :: selmap !  Description and declaration in tricom.igs
@@ -202,9 +197,9 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     if (ltur   == 0)                 prshis(15:16) = 'NN'
     if (kmax   == 1)                 prshis(17:18) = 'NN'
     if (max(lsal,ltem) == 0)         prshis(19:19) = 'N'
-    if (nostat==0 .and. filsta==' ') prshis( 1:19) = 'NNNNNNNNNNNNNNNNNNN'
+    if (nostat==0)                   prshis( 1:19) = 'NNNNNNNNNNNNNNNNNNN'
     if (lstsci == 0)                 prshis(22:23) = 'NN'
-    if (ntruv==0 .and. filtra==' ')  prshis(20:23) = 'NNNN'
+    if (ntruv==0)                    prshis(20:23) = 'NNNN'
     !
     ! locate 'PMhydr' record for print flag Map hydrodynamic
     !
@@ -274,11 +269,11 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     if (kmax   == 1)                   selhis(17:18) = 'NN'
     if (max(lsal, ltem, lsed) == 0)    selhis(19:19) = 'N'
     if (lstsci == 0)                   selhis(22:23) = 'NN'
-    if (nostat==0 .and. filsta==' ') then
+    if (nostat==0) then
                                        selhis( 1:19) = 'NNNNNNNNNNNNNNNNNNN'
-       if (ntruv==0 .and. filtra==' ') selhis(20:23) = 'NNNN'
+       if (ntruv==0)                   selhis(20:23) = 'NNNN'
     else
-       if (ntruv==0 .and. filtra==' ') selhis(21:23) = 'NNN'
+       if (ntruv==0)                   selhis(21:23) = 'NNN'
     endif
     !
     ! locate 'SMhydr' record for print flag Map hydrodynamic

@@ -220,7 +220,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     character(1024)                                   :: error_string
     character(16)                                     :: simdat        ! Simulation date representing the flow condition at this date
     character(20)                                     :: rundat        ! Execution date of the simulation
-    character(6)                                      :: soort         ! String containing to which output file version group should be written
+    character(6)                                      :: ftype         ! String containing to which output file version group should be written
     !
     integer                                           :: ii
     integer                                           :: ip
@@ -643,8 +643,8 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
           ! duplicate definition of the map-version group.
           !
           if (first .and. .not.wrifou) then
-             soort = 'map'
-             call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
+             ftype = 'map'
+             call wridoc(error     ,trifil    ,ftype     ,simdat    ,runtxt    , &
                        & .false.   ,part_nr   ,gdp       )
              !
              if (.not. parll .and. .not. error) then

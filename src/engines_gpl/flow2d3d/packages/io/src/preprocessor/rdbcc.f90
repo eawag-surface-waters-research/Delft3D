@@ -1,10 +1,9 @@
 subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,nrver     ,runid     ,filbcc    ,eol       , &
-               & nambnd    ,namcon    ,nto       ,lstsc     ,kmax      , &
-               & rtbcc     ,itstrt    ,itfinish  ,mxbctm    ,nbcctm    , &
-               & salin     ,temp      ,const     ,lconc     ,sab       , &
-               & tab       ,cab       ,zstep     ,tprofc    ,bubble    , &
-               & gdp       )
+               & nrver     ,runid     ,filbcc    ,eol       ,nambnd    , &
+               & namcon    ,nto       ,lstsc     ,kmax      ,rtbcc     , &
+               & itstrt    ,itfinish  ,mxbctm    ,nbcctm    ,salin     , &
+               & temp      ,const     ,lconc     ,sab       ,tab       , &
+               & cab       ,zstep     ,tprofc    ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -82,7 +81,6 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                                     , intent(in)  :: bubble   !  Description and declaration in procs.igs
     logical                                     , intent(in)  :: const    !  Description and declaration in procs.igs
     logical                                                   :: error    !  Flag=TRUE if an error is encountered
-    logical                                     , intent(in)  :: noui     !  Flag for reading from User Interface
     logical                                     , intent(in)  :: salin    !  Description and declaration in procs.igs
     logical                                     , intent(in)  :: temp     !  Description and declaration in procs.igs
     real(fp)     , dimension(4, 5, mxbctm, nto)               :: cab      !  At most MXBCTM time varying concentrations on boundaries (end A and end B)
@@ -197,119 +195,116 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        filbcc = fildef
     endif
     !
-    ! Read data from external file only if NOUI = .true.
+    ! Read data from external file
     !
     if (filbcc/=fildef) then
        !
-       ! If not UI then:
        ! Define length of RUNID
        ! Check filename "filbcc" <> TMP file or
        ! "filbcc" = TMP and access is direct
        ! open output file (ONLY VERSION 2.49 or lower) +
        ! Set name for the constituents, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.bcc'
-          !
-          ! Check filename and access
-          ! For NRVER =< 249 this cannot be the case
-          !
-          if (filout==filbcc) then
-             inquire (file = filout(:8 + lrid), exist = ex)
-             if (.not.ex) then
-                call prterr(lundia    ,'G004'    ,filout    )
-                !
-                error = .true.
-                goto 9999
-             endif
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.bcc'
+       !
+       ! Check filename and access
+       ! For NRVER =< 249 this cannot be the case
+       !
+       if (filout==filbcc) then
+          inquire (file = filout(:8 + lrid), exist = ex)
+          if (.not.ex) then
+             call prterr(lundia    ,'G004'    ,filout    )
              !
-             lunout = newlun(gdp)
-             open (lunout, file = filout(:8 + lrid))
-             read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
-             close (lunout)
-             lunout = 8
-             !
-             ! Not able to read record length for direct access
-             !
-             if (iocond/=0) then
-                call prterr(lundia    ,'U081'    ,filout    )
-                !
-                error = .true.
-                goto 9999
-             endif
-             !
-             ! Record length read
-             !
-             noread = .true.
-          endif
-          !
-          ! define length of file name
-          !
-          call remove_leading_spaces(filbcc    ,lf        )
-          !
-          ! Test file existence <YES> -> open file <NO> -> error
-          !
-          if (exifil(filbcc, lundia)) then
-             if (nrver<=249) then
-                !
-                ! Open file only in case NRVER =< 249. Otherwise it will be
-                ! opened later as the record length is dependent on the
-                ! profile type Maximum number of values to write is 5 (for
-                ! profile = <step>)
-                ! Total lenght from strings formats FMTBCC(2) = 89
-                ! from Profile <step> = 83
-                !
-                mxlrec = 89
-                lunout = newlun(gdp)
-                inquire (file = filout(:8 + lrid), exist = ex)
-                if (ex) then
-                   open (lunout, file = filout(:8 + lrid))
-                   close (lunout, status = 'delete')
-                endif
-                open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
-                    & access = 'direct', status = 'unknown', recl = mxlrec)
-                write (lunout, fmtbcc(1), rec = 1) '#', mxlrec, eol
-                !
-                ! Open FILBCC to read data from
-                !
-                lunrd = newlun(gdp)
-                open (lunrd, file = filbcc(:lf), form = 'formatted',            &
-                     & status = 'old')
-                write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
-                call prterr(lundia, 'G051', trim(message))
-                call rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
-                         & runid     ,profil    ,eol       ,itstrt    ,itfinish  , &
-                         & nto       ,lstsc     ,nambnd    ,namcon    ,gdp       )
-                !
-                close (lunrd)
-             elseif (.not.noread) then
-                !
-                ! Open FILBCC to read data from
-                !
-                lunrd = newlun(gdp)
-                open (lunrd, file = filbcc(:lf), form = 'formatted',            &
-                     & status = 'old')
-                write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
-                call prterr(lundia, 'G051', trim(message))
-                call rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
-                          & filbcc    ,runid     ,profil    ,eol       ,itstrt    , &
-                          & itfinish  ,nto       ,lstsc     ,kmax       ,nambnd    , &
-                          & namcon    ,bubble    ,gdp       )
-                !
-                close (lunrd)
-             else
-                !
-                ! Reading TDD file for open boundary transport data skipped
-                ! in TDATOM
-                ! Define "fake" timeframe
-                !
-                write (message, '(3a)') 'BC-transport file ', filbcc(:lf), ' will be skipped in TDATOM'
-                call prterr(lundia, 'G051', trim(message))
-             endif
-          else
              error = .true.
+             goto 9999
           endif
+          !
+          lunout = newlun(gdp)
+          open (lunout, file = filout(:8 + lrid))
+          read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
+          close (lunout)
+          lunout = 8
+          !
+          ! Not able to read record length for direct access
+          !
+          if (iocond/=0) then
+             call prterr(lundia    ,'U081'    ,filout    )
+             !
+             error = .true.
+             goto 9999
+          endif
+          !
+          ! Record length read
+          !
+          noread = .true.
+       endif
+       !
+       ! define length of file name
+       !
+       call remove_leading_spaces(filbcc    ,lf        )
+       !
+       ! Test file existence <YES> -> open file <NO> -> error
+       !
+       if (exifil(filbcc, lundia)) then
+          if (nrver<=249) then
+             !
+             ! Open file only in case NRVER =< 249. Otherwise it will be
+             ! opened later as the record length is dependent on the
+             ! profile type Maximum number of values to write is 5 (for
+             ! profile = <step>)
+             ! Total lenght from strings formats FMTBCC(2) = 89
+             ! from Profile <step> = 83
+             !
+             mxlrec = 89
+             lunout = newlun(gdp)
+             inquire (file = filout(:8 + lrid), exist = ex)
+             if (ex) then
+                open (lunout, file = filout(:8 + lrid))
+                close (lunout, status = 'delete')
+             endif
+             open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
+                 & access = 'direct', status = 'unknown', recl = mxlrec)
+             write (lunout, fmtbcc(1), rec = 1) '#', mxlrec, eol
+             !
+             ! Open FILBCC to read data from
+             !
+             lunrd = newlun(gdp)
+             open (lunrd, file = filbcc(:lf), form = 'formatted',            &
+                  & status = 'old')
+             write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
+             call prterr(lundia, 'G051', trim(message))
+             call rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
+                      & runid     ,profil    ,eol       ,itstrt    ,itfinish  , &
+                      & nto       ,lstsc     ,nambnd    ,namcon    ,gdp       )
+             !
+             close (lunrd)
+          elseif (.not.noread) then
+             !
+             ! Open FILBCC to read data from
+             !
+             lunrd = newlun(gdp)
+             open (lunrd, file = filbcc(:lf), form = 'formatted',            &
+                  & status = 'old')
+             write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
+             call prterr(lundia, 'G051', trim(message))
+             call rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
+                       & filbcc    ,runid     ,profil    ,eol       ,itstrt    , &
+                       & itfinish  ,nto       ,lstsc     ,kmax       ,nambnd    , &
+                       & namcon    ,bubble    ,gdp       )
+             !
+             close (lunrd)
+          else
+             !
+             ! Reading TDD file for open boundary transport data skipped
+             ! in TDATOM
+             ! Define "fake" timeframe
+             !
+             write (message, '(3a)') 'BC-transport file ', filbcc(:lf), ' will be skipped in TDATOM'
+             call prterr(lundia, 'G051', trim(message))
+          endif
+       else
+          error = .true.
        endif
     !
     ! Time varying data for processes on boundaries in file? <NO>
@@ -318,29 +313,26 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     elseif (nto>0) then
        !
-       ! If not UI then:
        ! Define length of RUNID
        ! open output file (ONLY VERSION 2.49 or lower) +
        ! Set name for the constituents, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.bcc'
-          !
-          ! Open file only in case NRVER =< 249, which always the
-          ! case for data in MDF file
-          !
-          mxlrec = 89
-          lunout = newlun(gdp)
-          inquire (file = filout(:8 + lrid), exist = ex)
-          if (ex) then
-             open (lunout, file = filout(:8 + lrid))
-             close (lunout, status = 'delete')
-          endif
-          open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
-               & access = 'direct', status = 'unknown', recl = mxlrec)
-          write (lunout, fmtbcc(1), rec = 1) '#', mxlrec, eol
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.bcc'
+       !
+       ! Open file only in case NRVER =< 249, which always the
+       ! case for data in MDF file
+       !
+       mxlrec = 89
+       lunout = newlun(gdp)
+       inquire (file = filout(:8 + lrid), exist = ex)
+       if (ex) then
+          open (lunout, file = filout(:8 + lrid))
+          close (lunout, status = 'delete')
        endif
+       open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
+            & access = 'direct', status = 'unknown', recl = mxlrec)
+       write (lunout, fmtbcc(1), rec = 1) '#', mxlrec, eol
        !
        ! Define parameter name for time column
        !
@@ -369,12 +361,6 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           nbcctm = nbcctm + 1
           goto 150
        endif
-       !<==
-       if (nbcctm>mxbctm .and. .not.noui) then
-          call prterr(lundia    ,'U153'    ,' '       )
-          !
-          nbcctm = mxbctm
-       endif
        !
        ! Read time dependent data from MD_file
        !
@@ -389,8 +375,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        lenc = 10
        !
        do ib = 1, nbcctm
-          ibcc = ib
-          if (noui) ibcc = 1
+          ibcc = 1
           !
           ! Locate 'TsbcC ' record and read RVAL
           !
@@ -404,7 +389,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! Reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              exit
           endif
@@ -417,7 +402,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                     & ittdep    ,itold     ,itstrt    ,ib        ,gdp       )
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              exit
           endif
@@ -452,7 +437,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -468,7 +453,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    if (sab(j, ibcc, nn)<0.0) then
                       call prterr(lundia    ,'V061'    ,'Salinity at open boundary'     )
                       !
-                      if (noui) error = .true.
+                      error = .true.
                       goto 700
                    endif
                    !
@@ -495,7 +480,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -514,7 +499,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -540,7 +525,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    if (tprofc(nn, ll)=='3d-profile') then
                       call prterr(lundia    ,'V095'    ,'for v249 or less'   )
                       !
-                      if (noui) error = .true.
+                      error = .true.
                       goto 700
                    endif
                 else
@@ -550,7 +535,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    call small(chulp     ,lenc      )
                    if (chulp/=tprofc(nn, ll)) then
-                      if (noui) error = .true.
+                      error = .true.
                       call prterr(lundia    ,'U066'    ,chulp     )
                       !
                       goto 700
@@ -581,7 +566,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -597,7 +582,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    if (tab(j, ibcc, nn)<0.0) then
                       call prterr(lundia    ,'V061'    ,'Temperature at open boundary'  )
                       !
-                      if (noui) error = .true.
+                      error = .true.
                       goto 700
                    endif
                    !
@@ -624,7 +609,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -643,7 +628,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -669,7 +654,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    if (tprofc(nn, ll)=='3d-profile') then
                       call prterr(lundia    ,'V095'    ,'for v249 or less'   )
                       !
-                      if (noui) error = .true.
+                      error = .true.
                       goto 700
                    endif
                 else
@@ -679,7 +664,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    call small(chulp     ,lenc      )
                    if (chulp/=tprofc(nn, ll)) then
-                      if (noui) error = .true.
+                      error = .true.
                       call prterr(lundia    ,'U066'    ,chulp     )
                       !
                       goto 700
@@ -712,7 +697,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Reading error?
                    !
                    if (lerror) then
-                      if (noui) error = .true.
+                      error = .true.
                       lerror = .false.
                       goto 700
                    endif
@@ -728,7 +713,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       if (cab(j, l, ibcc, nn)<0.0) then
                          call prterr(lundia    ,'V061'    ,'Concentration at open boundary')
                          !
-                         if (noui) error = .true.
+                         error = .true.
                          goto 700
                       endif
                       !
@@ -755,7 +740,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Reading error?
                    !
                    if (lerror) then
-                      if (noui) error = .true.
+                      error = .true.
                       lerror = .false.
                       goto 700
                    endif
@@ -774,7 +759,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Reading error?
                    !
                    if (lerror) then
-                      if (noui) error = .true.
+                      error = .true.
                       lerror = .false.
                       goto 700
                    endif
@@ -800,7 +785,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       if (tprofc(nn, ll)=='3d-profile') then
                          call prterr(lundia    ,'V095'    ,'for v249 or less'   )
                          !
-                         if (noui) error = .true.
+                         error = .true.
                          goto 700
                       endif
                    else
@@ -810,7 +795,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       !
                       call small(chulp     ,lenc      )
                       if (chulp/=tprofc(nn, ll)) then
-                         if (noui) error = .true.
+                         error = .true.
                          call prterr(lundia    ,'U066'    ,chulp     )
                          !
                          goto 700
@@ -819,170 +804,168 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 enddo
              endif
              !
-             ! Write constituent data to LUNOUT only if NOUI = .true.
+             ! Write constituent data to LUNOUT
              !
-             if (noui) then
-                do l = 1, ll
-                   !
-                   ! Define number of parameter records
-                   !
-                   if (ib==1) then
-                      if (tprofc(nn, l)(:7)=='uniform') then
-                         ntpara(l) = ntpara(l - 1) + 3
-                      elseif (tprofc(nn, l)(:6)=='linear') then
-                         ntpara(l) = ntpara(l - 1) + 5
-                      elseif (tprofc(nn, l)(:4)=='step') then
-                         ntpara(l) = ntpara(l - 1) + 6
-                      else
-                      endif
-                   endif
-                   !
-                   ! Define record
-                   !
-                   irec = (nn - 1)*(ll*(nbcctm + 8) + ntpara(ll)) + (l - 1)     &
-                        & *(nbcctm + 8) + ntpara(l - 1) + 1
-                   !
-                   ! Write first 8+NPARA(L) records with block
-                   ! information for time IB=1
-                   !
-                   if (ib==1) then
-                      !
-                      ! Define table name
-                      !
-                      tablnm = 'T-serie BCC ' // nambnd(nn) // '-' // namcon(l) &
-                             & // ' for run: '
-                      !
-                      ! Write first 7 description records to file
-                      !
-                      write (lunout, fmtbcc(2), rec = irec + 1) &
-                          & keywrd(1), quote, tablnm, runid, quote, eol
-                      write (lunout, fmtbcc(3), rec = irec + 2) &
-                          & keywrd(2), quote, tprofc(nn, l), quote, cntain, eol
-                      write (lunout, fmtbcc(4), rec = irec + 3) &
-                          & keywrd(3), quote, nambnd(nn), quote, eol
-                      write (lunout, fmtbcc(7), rec = irec + 4) &
-                          & keywrd(8), quote, 'non-equidistant' , quote, eol
-                      write (lunout, fmtbcc(8), rec = irec + 5) &
-                          & keywrd(9), itdate, eol
-                      write (lunout, fmtbcc(9), rec = irec + 6) &
-                          & keywrd(10), quote, 'minutes', quote, eol
-                      write (lunout, fmtbcc(10), rec = irec + 7) &
-                          & keywrd(12), quote, 'linear', quote, eol
-                      !
-                      ! Write parameter name for time to file
-                      !
-                      npara(l) = 1
-                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                          & ) keywrd (14), quote, parnam (1), quote, keywrd (15)  &
-                          & (:10), quote, parunt (1), quote, eol
-                      !
-                      ! Define parameter name for constituent L
-                      !
-                      parnam(2)(:20) = namcon(l)
-                      parunt(2) = '[    -   ]'
-                      if (parnam(2)(:8)=='salinity') parunt(2) = '[   ppt  ]'
-                      if (parnam(2) &
-                       & (:11)=='temperature') parunt(2) = '[   deg  ]'
-                      !
-                      ! Write parameter names for profile <uniform>
-                      !
-                      if (tprofc(nn, l)(:7)=='uniform') then
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end A uniform  '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end B uniform  '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                      !
-                      ! Write parameter names for profile <linear>
-                      !
-                      elseif (tprofc(nn, l)(:6)=='linear') then
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end A surface  '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end A bed      '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         !
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end B surface  '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end B bed      '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                      !
-                      ! Write parameter names for profile <step>
-                      !
-                      elseif (tprofc(nn, l)(:4)=='step') then
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end A surface  '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end A bed      '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         !
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end B surface  '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         npara(l) = npara(l) + 1
-                         parnam(2)(21:) = ' end B bed      '
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                         !
-                         npara(l) = npara(l) + 1
-                         parnam(2) = 'discontinuity'
-                         parunt(2) = '[    m   ]'
-                         write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
-                             & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
-                             & (:10), quote, parunt (2), quote, eol
-                      else
-                      endif
-                      !
-                      ! Write number of time dependent data to file
-                      !
-                      write (lunout, fmtbcc(12), rec = irec + 8 + npara(l) &
-                          & ) keywrd (16), nbcctm , eol
-                   endif
-                   !
-                   ! Write time dependent data to block for constituent
-                   ! L skipping first 8+NPARA(L) records with block info
-                   !
-                   irec = irec + ib + 8 + npara(l)
+             do l = 1, ll
+                !
+                ! Define number of parameter records
+                !
+                if (ib==1) then
                    if (tprofc(nn, l)(:7)=='uniform') then
-                      fmtbcc(13)(10:10) = '2'
-                      write (lunout, fmtbcc(13), rec = irec) &
-                          & rtbcc(ibcc), rwbval(1, l), rwbval(3, l), eol
+                      ntpara(l) = ntpara(l - 1) + 3
                    elseif (tprofc(nn, l)(:6)=='linear') then
-                      fmtbcc(13)(10:10) = '4'
-                      write (lunout, fmtbcc(13), rec = irec) &
-                          & rtbcc(ibcc), (rwbval(j, l), j = 1, 4), eol
+                      ntpara(l) = ntpara(l - 1) + 5
                    elseif (tprofc(nn, l)(:4)=='step') then
-                      fmtbcc(13)(10:10) = '5'
-                      write (lunout, fmtbcc(13), rec = irec) &
-                          & rtbcc(ibcc), (rwbval(j, l), j = 1, 4), rwdep(l) , eol
+                      ntpara(l) = ntpara(l - 1) + 6
                    else
                    endif
-                enddo
-             endif
+                endif
+                !
+                ! Define record
+                !
+                irec = (nn - 1)*(ll*(nbcctm + 8) + ntpara(ll)) + (l - 1)     &
+                     & *(nbcctm + 8) + ntpara(l - 1) + 1
+                !
+                ! Write first 8+NPARA(L) records with block
+                ! information for time IB=1
+                !
+                if (ib==1) then
+                   !
+                   ! Define table name
+                   !
+                   tablnm = 'T-serie BCC ' // nambnd(nn) // '-' // namcon(l) &
+                          & // ' for run: '
+                   !
+                   ! Write first 7 description records to file
+                   !
+                   write (lunout, fmtbcc(2), rec = irec + 1) &
+                       & keywrd(1), quote, tablnm, runid, quote, eol
+                   write (lunout, fmtbcc(3), rec = irec + 2) &
+                       & keywrd(2), quote, tprofc(nn, l), quote, cntain, eol
+                   write (lunout, fmtbcc(4), rec = irec + 3) &
+                       & keywrd(3), quote, nambnd(nn), quote, eol
+                   write (lunout, fmtbcc(7), rec = irec + 4) &
+                       & keywrd(8), quote, 'non-equidistant' , quote, eol
+                   write (lunout, fmtbcc(8), rec = irec + 5) &
+                       & keywrd(9), itdate, eol
+                   write (lunout, fmtbcc(9), rec = irec + 6) &
+                       & keywrd(10), quote, 'minutes', quote, eol
+                   write (lunout, fmtbcc(10), rec = irec + 7) &
+                       & keywrd(12), quote, 'linear', quote, eol
+                   !
+                   ! Write parameter name for time to file
+                   !
+                   npara(l) = 1
+                   write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                       & ) keywrd (14), quote, parnam (1), quote, keywrd (15)  &
+                       & (:10), quote, parunt (1), quote, eol
+                   !
+                   ! Define parameter name for constituent L
+                   !
+                   parnam(2)(:20) = namcon(l)
+                   parunt(2) = '[    -   ]'
+                   if (parnam(2)(:8)=='salinity') parunt(2) = '[   ppt  ]'
+                   if (parnam(2) &
+                    & (:11)=='temperature') parunt(2) = '[   deg  ]'
+                   !
+                   ! Write parameter names for profile <uniform>
+                   !
+                   if (tprofc(nn, l)(:7)=='uniform') then
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end A uniform  '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end B uniform  '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                   !
+                   ! Write parameter names for profile <linear>
+                   !
+                   elseif (tprofc(nn, l)(:6)=='linear') then
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end A surface  '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end A bed      '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      !
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end B surface  '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end B bed      '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                   !
+                   ! Write parameter names for profile <step>
+                   !
+                   elseif (tprofc(nn, l)(:4)=='step') then
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end A surface  '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end A bed      '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      !
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end B surface  '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      npara(l) = npara(l) + 1
+                      parnam(2)(21:) = ' end B bed      '
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                      !
+                      npara(l) = npara(l) + 1
+                      parnam(2) = 'discontinuity'
+                      parunt(2) = '[    m   ]'
+                      write (lunout, fmtbcc(11), rec = irec + 7 + npara(l) &
+                          & ) keywrd (14), quote, parnam (2), quote, keywrd (15)  &
+                          & (:10), quote, parunt (2), quote, eol
+                   else
+                   endif
+                   !
+                   ! Write number of time dependent data to file
+                   !
+                   write (lunout, fmtbcc(12), rec = irec + 8 + npara(l) &
+                       & ) keywrd (16), nbcctm , eol
+                endif
+                !
+                ! Write time dependent data to block for constituent
+                ! L skipping first 8+NPARA(L) records with block info
+                !
+                irec = irec + ib + 8 + npara(l)
+                if (tprofc(nn, l)(:7)=='uniform') then
+                   fmtbcc(13)(10:10) = '2'
+                   write (lunout, fmtbcc(13), rec = irec) &
+                       & rtbcc(ibcc), rwbval(1, l), rwbval(3, l), eol
+                elseif (tprofc(nn, l)(:6)=='linear') then
+                   fmtbcc(13)(10:10) = '4'
+                   write (lunout, fmtbcc(13), rec = irec) &
+                       & rtbcc(ibcc), (rwbval(j, l), j = 1, 4), eol
+                elseif (tprofc(nn, l)(:4)=='step') then
+                   fmtbcc(13)(10:10) = '5'
+                   write (lunout, fmtbcc(13), rec = irec) &
+                       & rtbcc(ibcc), (rwbval(j, l), j = 1, 4), rwdep(l) , eol
+                else
+                endif
+             enddo
           enddo
        enddo
        !
@@ -1007,7 +990,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! close files
     !
  9999 continue
-    if (noui .and. lunout/=8) then
+    if (lunout/=8) then
        if (error) then
           close (lunout, status = 'delete')
        else

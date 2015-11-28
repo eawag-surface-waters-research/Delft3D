@@ -359,12 +359,8 @@ subroutine tricom_init(olv_handle, gdp)
     integer                             , pointer :: initia  !!  if < 0: iteration process of morsys else  : equal to INITI =1 initialization =2 initialization and read restart information from the communication file =3 no initialization
     integer                             , pointer :: it01    !  Description and declaration in esm_alloc_int.f90
     integer                             , pointer :: it02    !  Description and declaration in esm_alloc_int.f90
-    integer                             , pointer :: itb     !!  Start time of computational interval for a stand alone system the input value from TRISIM: ITB = 1
-    integer                             , pointer :: ite     !!  End time of computational interval for a stand alone system the input value from TRISIM: ITE = -1
     integer                             , pointer :: itima   !!  Time to start simulation (N * tscale) according to DELFT3D conventions
     integer                             , pointer :: itlen   !  Description and declaration in esm_alloc_int.f90
-    logical                             , pointer :: alone   !!  TRUE when flow runs stand-alone, FALSE when flow is part of morsys
-    logical                             , pointer :: mainys  !!  Logical flag for FLOW is main program (TRUE) for writing output
     real(fp)                            , pointer :: tscale  !  Description and declaration in esm_alloc_real.f90
     character(256)                      , pointer :: comfil  !!  Communication file name
     character(256)                      , pointer :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
@@ -443,7 +439,7 @@ subroutine tricom_init(olv_handle, gdp)
     character(16)                                 :: simdat        ! Simulation date representing the flow condition at this date 
     character(256)                                :: filrgf        ! File name for the curvi-linear grid file (telmcrgf.xxx) !! file will be read formatted !! 
     character(256)                                :: filrol
-    character(6)                                  :: soort         ! String containing to which output file version group or to diagnostic file should be written 
+    character(6)                                  :: ftype         ! String containing to which output file version group or to diagnostic file should be written 
     character(30)  , dimension(10)                :: runtxt        ! Textual description of model input 
     character(60)                                 :: txtput        ! Text to be print
     character(300)                                :: message
@@ -740,12 +736,8 @@ subroutine tricom_init(olv_handle, gdp)
     tgfcmp              => gdp%gdtricom%tgfcmp
     it01                => gdp%gdtricom%it01
     it02                => gdp%gdtricom%it02
-    itb                 => gdp%gdtricom%itb
-    ite                 => gdp%gdtricom%ite
     itima               => gdp%gdtricom%itima
     itlen               => gdp%gdtricom%itlen
-    alone               => gdp%gdtricom%alone
-    mainys              => gdp%gdtricom%mainys
     tscale              => gdp%gdtricom%tscale
     comfil              => gdp%gdtricom%comfil
     runid               => gdp%runid
@@ -883,8 +875,8 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! Test Comm. file version for consistency
     !
-    soort = 'com'
-    call chkcom(lundia    ,error     ,comfil    ,soort     ,gdp       )
+    ftype = 'com'
+    call chkcom(lundia    ,error     ,comfil    ,ftype     ,gdp       )
     if (error) goto 9996
     !
     ! Read TSCALE and ITLEN from comm. file for ITLEN = 0,
@@ -911,8 +903,6 @@ subroutine tricom_init(olv_handle, gdp)
           !
           itlen = 0
        endif
-       itb   = 1
-       ite   = -1
        itima = itstrt
     endif
     !
@@ -933,31 +923,19 @@ subroutine tricom_init(olv_handle, gdp)
     ! stand alone and no initialisation not permitted !!
     !
     itp = nint(dt*tunit/tscale)
-    if (ite < itb) then
-       if (initi == 3) then
-          call prterr(lundia    ,'D003'    ,' '       )
-          error = .true.
-          goto 9996
-       endif
-       it01 = itdate
-       it02 = 0
-       itb  = itstrt*itp
-       ite  = itfinish*itp
-       if (itb > itlen .and. itlen /= 0) then
-          call prterr(lundia    ,'D004'    ,' '       )
-          error = .true.
-          goto 9996
-       endif
+    if (initi == 3) then
+       call prterr(lundia    ,'D003'    ,' '       )
+       error = .true.
+       goto 9996
     endif
+    it01 = itdate
+    it02 = 0
     !
     ! Initialize time parameters regarding to 2D/3D system parameters
-    ! the time frame can be set N cycli back if ITLEN < itfinish
     ! For evaluating single time steps (for example, for OMI or OpenDA purposes), 
     ! itstop will be reset to itstrt+1
     !
     itlent = itlen/itp
-    itstrt = modlen(itb, itlen)/itp
-    itfinish = itstrt + (ite - itb)/itp
     itstop = itfinish
     !
     ! Initialize itrw on a not used value
@@ -1146,7 +1124,7 @@ subroutine tricom_init(olv_handle, gdp)
     ! - Continue when online coupling with waves is applied
     !
     if (wave .and. .not.waverd) then
-       if (alone .and. .not. (cnstwv .or. snelli) .and. .not. waveol .and. .not. xbeach) then
+       if (.not. (cnstwv .or. snelli) .and. .not. waveol .and. .not. xbeach) then
           error = .true.
           call prterr(lundia    ,'D007'    ,' '       )
           goto 9996
@@ -1211,16 +1189,16 @@ subroutine tricom_init(olv_handle, gdp)
           if (prec == hp) then
              call rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     , &
                               & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)    , &
-                              & r(rbuff)  ,ite       ,gdp       )
+                              & r(rbuff)  ,gdp       )
           else
              call rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
                        & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)    , &
-                       & r(rbuff)  ,ite       ,gdp       )
+                       & r(rbuff)  ,gdp       )
           endif
        else
           call rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
                     & itcomi    ,mmax      ,nmax      ,nmaxus    ,r(dp)     , &
-                    & r(rbuff)  ,ite       ,gdp       )
+                    & r(rbuff)  ,gdp       )
        endif
        if (error) goto 9996
        !
@@ -1485,7 +1463,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! Write initial input to output files after checking output file times
     !
-    call inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
+    call inippr(lundia    ,error     ,trifil    ,comfil    , &
               & initi     ,selhis    ,selmap    ,tscale    ,commrd    , &
               & itlen     ,itcur     ,itimc     , &
               & it01      ,it02      ,sferic    ,grdang    , &

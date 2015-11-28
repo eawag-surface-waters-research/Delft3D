@@ -1,4 +1,4 @@
-subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
+subroutine iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -65,7 +65,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
     character(*)               :: filmd  !  File name for MD FLOW file
     character(*)               :: runid  !  Run identification
     character(12), intent(in)  :: filmrs !  File name for DELFT3D_MOR FLOW input file (MD-flow.xxx)
-    character(6) , intent(in)  :: soort  !  Help var. determining the prog. name currently active
+    character(6) , intent(in)  :: prgnm  !  Help var. determining the prog. name currently active
 !
 ! Local variables
 !
@@ -348,23 +348,10 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        endif
     endif
     !
-    ! open LUNDIA (depends on value of SOORT = verify)
-    !
-    if (soort=='verify') then
-       filtmp(1:8 + lrid) = 'md-diag.' // runid(1:lrid)
-       inquire (file = filtmp(1:8 + lrid), exist = ex)
-       lundia = newlun(gdp)
-       if (ex) then
-          open (lundia, file = filtmp(1:8 + lrid), form = 'formatted')
-          close (lundia, status = 'delete')
-       endif
-       open (lundia, file = filtmp(1:8 + lrid), form = 'formatted',             &
-            & status = 'new')
-    !
-    ! open LUNDIA (depends on value of SOORT = tdatom)
+    ! open LUNDIA (depends on value of prgnm = tdatom)
     ! for DELFT3DMOR test if lundia was already in use by tri-diag
     !
-    elseif (soort=='tdatom') then
+    if (prgnm=='tdatom') then
        filtmp(1:9 + lrid) = 'tri-diag.' // runid(1:lrid)
        inquire (file = filtmp(1:9 + lrid), opened = opend)
        if (opend) then
@@ -389,7 +376,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        open (lundia, file = filtmp(1:8 + lrid), form = 'formatted',             &
             & status = 'new')
     !
-    ! open LUNDIA (depends on value of SOORT = trisim)
+    ! open LUNDIA (depends on value of prgnm = trisim)
     !
     else
        !

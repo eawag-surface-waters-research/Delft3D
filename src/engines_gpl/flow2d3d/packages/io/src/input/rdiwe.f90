@@ -1,6 +1,6 @@
 subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,dt        ,itiwei    ,tinciw    ,kmxt      , &
-               & kmxdt     ,nfreqs    ,npiwe     ,filiwe    ,gdp       )
+               & dt        ,itiwei    ,tinciw    ,kmxt      ,kmxdt     , &
+               & nfreqs    ,npiwe     ,filiwe    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -71,7 +71,6 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                   :: npiwe  !  Description and declaration in dimens.igs
     integer                   :: nrrec  !!  Record counter keeping the track of the last record read
     logical     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical     , intent(in)  :: noui
     real(fp)                  :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                  :: tinciw !!  Time in UNIT's to activate the Internal Wave Energy calculation
     character(*)              :: filiwe !!  File name for the IWE parameters
@@ -153,7 +152,7 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! Reading error
     !
     if (lerror) then
-       if (noui) error = .true.
+       error = .true.
        goto 9999
     endif
     !

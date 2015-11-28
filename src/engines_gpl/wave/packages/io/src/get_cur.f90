@@ -120,10 +120,6 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1         , &
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    ! cyclic reduction of wavtim
-    ! wavtim = mod(wavtim, itlen)
-    !
     call filldm(elmdmt    ,1         ,1         ,1         ,0         , &
               & 0         ,0         ,0         )
     call filldm(elmdms    ,1         ,1         ,1         ,0         , &

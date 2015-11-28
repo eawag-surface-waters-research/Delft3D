@@ -43,7 +43,6 @@ libKernelGeneral_la_SOURCES = \
          distance_gdp.f90 \
          dittar.f90 \
          dtn.f90 \
-         endscr.f90 \
          errmsg.f90 \
          evenquotes.f90 \
          filfmt.f90 \

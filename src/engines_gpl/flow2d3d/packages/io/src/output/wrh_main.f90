@@ -185,7 +185,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
     !
     character(16) :: simdat  ! Simulation date representing the flow condition at this date
     character(20) :: rundat  ! Execution date of the simulation
-    character(6)  :: soort   ! String containing to which output file version group should be written
+    character(6)  :: ftype   ! String containing to which output file version group should be written
 
 !
 !! executable statements -------------------------------------------------------
@@ -502,8 +502,8 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
           ! duplicate definition of the his-version group.
           !
           if (first) then
-             soort = 'his'
-             call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , &
+             ftype = 'his'
+             call wridoc(error     ,trifil    ,ftype     ,simdat    ,runtxt    , &
                        & .false.   ,''        ,gdp       )
           endif
        endif

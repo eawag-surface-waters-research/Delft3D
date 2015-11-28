@@ -1,10 +1,9 @@
 subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,nrver     ,runid     ,fildis    ,eol       , &
-               & namsrc    ,disint    ,namcon    ,nsrc      ,rtdis     , &
-               & itstrt    ,itfinish  ,mxnsrc    ,mxdist    ,ndistm    , &
-               & lstsc     ,salin     ,temp      ,const     ,lconc     , &
-               & disch     ,cqs       ,cqt       ,cqc       ,bubble    , &
-               & gdp       )
+               & nrver     ,runid     ,fildis    ,eol       ,namsrc    , &
+               & disint    ,namcon    ,nsrc      ,rtdis     ,itstrt    , &
+               & itfinish  ,mxnsrc    ,mxdist    ,ndistm    ,lstsc     , &
+               & salin     ,temp      ,const     ,lconc     ,disch     , &
+               & cqs       ,cqt       ,cqc       ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -88,7 +87,6 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                                 , intent(in)  :: bubble   !  Description and declaration in procs.igs
     logical                                 , intent(in)  :: const    !  Description and declaration in procs.igs
     logical                                               :: error    !  Flag=TRUE if an error is encountered
-    logical                                 , intent(in)  :: noui     !  Flag for reading from User Interface
     logical                                 , intent(in)  :: salin    !  Description and declaration in procs.igs
     logical                                 , intent(in)  :: temp     !  Description and declaration in procs.igs
     real(fp)     , dimension(5, mxdist, mxnsrc)           :: cqc      !  At most MXDIST time varying concen-trations at discharge points
@@ -230,120 +228,117 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        fildis = fildef
     endif
     !
-    ! read data from external file only if NOUI = .true.
+    ! read data from external file
     !
     if (fildis/=fildef) then
        !
-       ! If not UI then:
        ! Check filename "fildis" <> TMP file or
        ! "fildis" = TMP file and access is direct
        ! Define length of RUNID
        ! open output file (ONLY VERSION 2.49 or lower) +
        ! Set name for the constituents, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.dis'
-          !
-          ! Check filename and access
-          ! For NRVER =< 249 this cannot be the case
-          !
-          if (filout==fildis) then
-             inquire (file = filout(:8 + lrid), exist = ex)
-             if (.not.ex) then
-                call prterr(lundia    ,'G004'    ,filout    )
-                !
-                error = .true.
-                goto 9999
-             endif
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.dis'
+       !
+       ! Check filename and access
+       ! For NRVER =< 249 this cannot be the case
+       !
+       if (filout==fildis) then
+          inquire (file = filout(:8 + lrid), exist = ex)
+          if (.not.ex) then
+             call prterr(lundia    ,'G004'    ,filout    )
              !
-             lunout = newlun(gdp)
-             open (lunout, file = filout(:8 + lrid))
-             read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
-             close (lunout)
-             lunout = 8
-             !
-             ! Not able to read record length for direct access
-             !
-             if (iocond/=0) then
-                call prterr(lundia    ,'U081'    ,filout    )
-                !
-                error = .true.
-                goto 9999
-             endif
-             !
-             ! Record length read
-             !
-             noread = .true.
-          endif
-          !
-          ! define length of file name
-          !
-          call remove_leading_spaces(fildis    ,lf        )
-          !
-          ! test file existence <YES> -> open file <NO> -> error
-          !
-          if (exifil(fildis, lundia)) then
-             if (nrver<=249) then
-                !
-                ! Open file only in case NRVER =< 249. Otherwise it will be
-                ! opened later as the record length is dependent on the
-                ! profile type
-                ! Total lenght from strings formats (FMTDIS(3) or (11))=63
-                ! from discharge = 13+(1+lstsc)*14 (MAX = 125)
-                !
-                mxlrec = 125
-                lunout = newlun(gdp)
-                inquire (file = filout(:8 + lrid), exist = ex)
-                if (ex) then
-                   open (lunout, file = filout(:8 + lrid))
-                   close (lunout, status = 'delete')
-                endif
-                open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
-                    & access = 'direct', status = 'unknown', recl = mxlrec)
-                write (lunout, fmtdis(1), rec = 1) '#', mxlrec, eol
-                !
-                ! Open FILDIS to read data from
-                !
-                lunrd = newlun(gdp)
-                open (lunrd, file = fildis(:lf), form = 'formatted',            &
-                     & status = 'old')
-                write (message, '(2a)') 'Reading Discharge file ', fildis(:lf)
-                call prterr(lundia, 'G051', trim(message))
-                nrval = 1 + lstsc
-                call rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
-                         & runid     ,cntain    ,eol       ,itstrt    ,itfinish  , &
-                         & nsrc      ,lstsc     ,nrval     ,rval      ,namsrc    , &
-                         & disint    ,parnam    ,parunt    ,gdp       )
-                !
-                close (lunrd)
-             elseif (.not.noread) then
-                !
-                ! Open FILDIS to read data from
-                !
-                lunrd = newlun(gdp)
-                open (lunrd, file = fildis(:lf), form = 'formatted',            &
-                     & status = 'old')
-                write (message, '(2a)') 'Reading Discharge file ', fildis(:lf)
-                call prterr(lundia, 'G051', trim(message))
-                maxval = 1 + lstsc + 2
-                call rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
-                          & fildis    ,runid     ,eol       ,itstrt    ,itfinish  , &
-                          & nsrc      ,lstsc     ,rval      ,maxval    ,namsrc    , &
-                          & disint    ,parnam    ,parunt    ,bubble    ,gdp       )
-                !
-                close (lunrd)
-             else
-                !
-                ! Reading TDD file for discharges skipped in TDATOM
-                ! Define "fake" timeframe
-                !
-                write (message, '(3a)') 'Discharge file ', fildis(:lf), ' will be skipped in TDATOM'
-                call prterr(lundia, 'G051', trim(message))
-             endif
-          else
              error = .true.
+             goto 9999
           endif
+          !
+          lunout = newlun(gdp)
+          open (lunout, file = filout(:8 + lrid))
+          read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
+          close (lunout)
+          lunout = 8
+          !
+          ! Not able to read record length for direct access
+          !
+          if (iocond/=0) then
+             call prterr(lundia    ,'U081'    ,filout    )
+             !
+             error = .true.
+             goto 9999
+          endif
+          !
+          ! Record length read
+          !
+          noread = .true.
+       endif
+       !
+       ! define length of file name
+       !
+       call remove_leading_spaces(fildis    ,lf        )
+       !
+       ! test file existence <YES> -> open file <NO> -> error
+       !
+       if (exifil(fildis, lundia)) then
+          if (nrver<=249) then
+             !
+             ! Open file only in case NRVER =< 249. Otherwise it will be
+             ! opened later as the record length is dependent on the
+             ! profile type
+             ! Total lenght from strings formats (FMTDIS(3) or (11))=63
+             ! from discharge = 13+(1+lstsc)*14 (MAX = 125)
+             !
+             mxlrec = 125
+             lunout = newlun(gdp)
+             inquire (file = filout(:8 + lrid), exist = ex)
+             if (ex) then
+                open (lunout, file = filout(:8 + lrid))
+                close (lunout, status = 'delete')
+             endif
+             open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
+                 & access = 'direct', status = 'unknown', recl = mxlrec)
+             write (lunout, fmtdis(1), rec = 1) '#', mxlrec, eol
+             !
+             ! Open FILDIS to read data from
+             !
+             lunrd = newlun(gdp)
+             open (lunrd, file = fildis(:lf), form = 'formatted',            &
+                  & status = 'old')
+             write (message, '(2a)') 'Reading Discharge file ', fildis(:lf)
+             call prterr(lundia, 'G051', trim(message))
+             nrval = 1 + lstsc
+             call rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
+                      & runid     ,cntain    ,eol       ,itstrt    ,itfinish  , &
+                      & nsrc      ,lstsc     ,nrval     ,rval      ,namsrc    , &
+                      & disint    ,parnam    ,parunt    ,gdp       )
+             !
+             close (lunrd)
+          elseif (.not.noread) then
+             !
+             ! Open FILDIS to read data from
+             !
+             lunrd = newlun(gdp)
+             open (lunrd, file = fildis(:lf), form = 'formatted',            &
+                  & status = 'old')
+             write (message, '(2a)') 'Reading Discharge file ', fildis(:lf)
+             call prterr(lundia, 'G051', trim(message))
+             maxval = 1 + lstsc + 2
+             call rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
+                       & fildis    ,runid     ,eol       ,itstrt    ,itfinish  , &
+                       & nsrc      ,lstsc     ,rval      ,maxval    ,namsrc    , &
+                       & disint    ,parnam    ,parunt    ,bubble    ,gdp       )
+             !
+             close (lunrd)
+          else
+             !
+             ! Reading TDD file for discharges skipped in TDATOM
+             ! Define "fake" timeframe
+             !
+             write (message, '(3a)') 'Discharge file ', fildis(:lf), ' will be skipped in TDATOM'
+             call prterr(lundia, 'G051', trim(message))
+          endif
+       else
+          error = .true.
        endif
     !
     ! Time varying data at discharge points in file? <NO>
@@ -352,29 +347,26 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     elseif (nsrc>0) then
        !
-       ! If not UI then:
        ! Define length of RUNID
        ! open output file (ONLY VERSION 2.49 or lower) +
        ! Set name for the parameters, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.dis'
-          !
-          ! Open file only in case NRVER =< 249, which always the
-          ! case for data in MDF file
-          !
-          mxlrec = 125
-          lunout = newlun(gdp)
-          inquire (file = filout(:8 + lrid), exist = ex)
-          if (ex) then
-             open (lunout, file = filout(:8 + lrid))
-             close (lunout, status = 'delete')
-          endif
-          open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
-               & access = 'direct', status = 'unknown', recl = mxlrec)
-          write (lunout, fmtdis(1), rec = 1) '#', mxlrec, eol
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.dis'
+       !
+       ! Open file only in case NRVER =< 249, which always the
+       ! case for data in MDF file
+       !
+       mxlrec = 125
+       lunout = newlun(gdp)
+       inquire (file = filout(:8 + lrid), exist = ex)
+       if (ex) then
+          open (lunout, file = filout(:8 + lrid))
+          close (lunout, status = 'delete')
        endif
+       open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
+            & access = 'direct', status = 'unknown', recl = mxlrec)
+       write (lunout, fmtdis(1), rec = 1) '#', mxlrec, eol
        !
        ! Time varying data at discharge points contains a group
        ! of records. all records part of the group are supposed to lie
@@ -397,13 +389,8 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ndistm = ndistm + 1
           goto 150
        endif
-       !<==
+       !
        ndistm = ndistm/nsrc
-       if (ndistm>mxdist .and. .not.noui) then
-          call prterr(lundia    ,'U153'    ,' '       )
-          !
-          ndistm = mxdist
-       endif
        !
        ! Read time dependent data from MD_file
        !
@@ -418,8 +405,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        nlook = 2
        !
        do id = 1, ndistm
-          idis = id
-          if (noui) idis = 1
+          idis = 1
           !
           ! Read process values and write to help array's for every NSRC
           !
@@ -438,7 +424,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! Reading error?
              !
              if (lerror) then
-                if (noui) error = .true.
+                error = .true.
                 lerror = .false.
                 goto 700
              endif
@@ -451,7 +437,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                           & ittdep    ,itold     ,itstrt    ,id        ,gdp       )
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -476,7 +462,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -492,7 +478,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 if (cqs(idis, n)<0.0) then
                    call prterr(lundia    ,'V061'    ,'Salinity at discharge point'   )
                    !
-                   if (noui) error = .true.
+                   error = .true.
                    goto 700
                 endif
              endif
@@ -511,7 +497,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -527,7 +513,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 if (cqt(idis, n)<0.0) then
                    call prterr(lundia    ,'V061'    ,'Temperature at discharge point')
                    !
-                   if (noui) error = .true.
+                   error = .true.
                    goto 700
                 endif
              endif
@@ -546,7 +532,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! reading error?
                 !
                 if (lerror) then
-                   if (noui) error = .true.
+                   error = .true.
                    lerror = .false.
                    goto 700
                 endif
@@ -563,71 +549,69 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    if (cqc(l, idis, n)<0.0) then
                       call prterr(lundia    ,'V061'    ,'Concentration at discharge point'         )
                       !
-                      if (noui) error = .true.
+                      error = .true.
                       goto 700
                    endif
                 enddo
              endif
              !
-             ! Write discharge data to LUNOUT only if NOUI = .true.
+             ! Write discharge data to LUNOUT
              !
-             if (noui) then
-                irec = (n - 1)*(ndistm + 9 + ll) + 1
+             irec = (n - 1)*(ndistm + 9 + ll) + 1
+             !
+             ! Write first 9+LL records with block information
+             ! for time ID=1
+             !
+             if (id==1) then
+                interp = 'linear    '
+                if (disint(n)=='N') interp = 'block    '
                 !
-                ! Write first 9+LL records with block information
-                ! for time ID=1
+                ! Define table name
                 !
-                if (id==1) then
-                   interp = 'linear    '
-                   if (disint(n)=='N') interp = 'block    '
-                   !
-                   ! Define table name
-                   !
-                   tablnm = 'T-serie DIS ' // namsrc(n) // ' for run: '
-                   !
-                   ! Write first 7 description records to file
-                   !
-                   write (lunout, fmtdis(2), rec = irec + 1) &
-                       & keywrd(1), quote, tablnm, runid, quote, eol
-                   write (lunout, fmtdis(3), rec = irec + 2) &
-                       & keywrd(2), quote, cntain(:10), quote, cntain(11:40), eol
-                   write (lunout, fmtdis(4), rec = irec + 3) &
-                       & keywrd(3), quote, namsrc(n), quote, eol
-                   write (lunout, fmtdis(7), rec = irec + 4) &
-                       & keywrd(8), quote, 'non-equidistant', quote, eol
-                   write (lunout, fmtdis(8), rec = irec + 5) &
-                       & keywrd(9), itdate, eol
-                   write (lunout, fmtdis(9), rec = irec + 6) &
-                       & keywrd(10), quote, 'minutes', quote, eol
-                   write (lunout, fmtdis(10), rec = irec + 7) &
-                       & keywrd(12), quote, interp, quote, eol
-                   !
-                   ! Write parameter name for time to file
-                   !
-                   write (lunout, fmtdis(11), rec = irec + 8) &
-                       & keywrd(14), quote, parnam(1), quote, keywrd(15)(:10), quote, parunt(1),  &
-                       & quote, eol
-                   !
-                   ! Write parameter names for discharges and concentrations
-                   !
-                   do l = 1, ll
-                      write (lunout, fmtdis(11), rec = irec + 8 + l) &
-                          & keywrd(14), quote, parnam (1 + l), quote, keywrd(15)  &
-                          & (:10), quote, parunt (1 + l), quote, eol
-                   enddo
-                   !
-                   ! Write number of time dependent data to file
-                   !
-                   write (lunout, fmtdis(12), rec = irec + 9 + ll) &
-                       & keywrd(16), ndistm, eol
-                endif
+                tablnm = 'T-serie DIS ' // namsrc(n) // ' for run: '
                 !
-                ! Write time dependent data to block for constituent
-                ! L skipping first 9+LL records with block info
+                ! Write first 7 description records to file
                 !
-                write (lunout, fmtdis(13), rec = irec + 9 + ll + id) &
-                    & rtdis(idis) , (rwdis(l), l = 1, ll), eol
+                write (lunout, fmtdis(2), rec = irec + 1) &
+                    & keywrd(1), quote, tablnm, runid, quote, eol
+                write (lunout, fmtdis(3), rec = irec + 2) &
+                    & keywrd(2), quote, cntain(:10), quote, cntain(11:40), eol
+                write (lunout, fmtdis(4), rec = irec + 3) &
+                    & keywrd(3), quote, namsrc(n), quote, eol
+                write (lunout, fmtdis(7), rec = irec + 4) &
+                    & keywrd(8), quote, 'non-equidistant', quote, eol
+                write (lunout, fmtdis(8), rec = irec + 5) &
+                    & keywrd(9), itdate, eol
+                write (lunout, fmtdis(9), rec = irec + 6) &
+                    & keywrd(10), quote, 'minutes', quote, eol
+                write (lunout, fmtdis(10), rec = irec + 7) &
+                    & keywrd(12), quote, interp, quote, eol
+                !
+                ! Write parameter name for time to file
+                !
+                write (lunout, fmtdis(11), rec = irec + 8) &
+                    & keywrd(14), quote, parnam(1), quote, keywrd(15)(:10), quote, parunt(1),  &
+                    & quote, eol
+                !
+                ! Write parameter names for discharges and concentrations
+                !
+                do l = 1, ll
+                   write (lunout, fmtdis(11), rec = irec + 8 + l) &
+                       & keywrd(14), quote, parnam (1 + l), quote, keywrd(15)  &
+                       & (:10), quote, parunt (1 + l), quote, eol
+                enddo
+                !
+                ! Write number of time dependent data to file
+                !
+                write (lunout, fmtdis(12), rec = irec + 9 + ll) &
+                    & keywrd(16), ndistm, eol
              endif
+             !
+             ! Write time dependent data to block for constituent
+             ! L skipping first 9+LL records with block info
+             !
+             write (lunout, fmtdis(13), rec = irec + 9 + ll + id) &
+                 & rtdis(idis) , (rwdis(l), l = 1, ll), eol
           enddo
           newkw = .false.
        enddo
@@ -653,7 +637,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! close files
     !
  9999 continue
-    if (noui .and. lunout/=8) then
+    if (lunout/=8) then
        if (error) then
           close (lunout, status = 'delete')
        else

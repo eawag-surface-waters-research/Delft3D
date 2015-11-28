@@ -1,4 +1,4 @@
-subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
+subroutine chkcom(lundia    ,error     ,neffil    ,ftype     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -57,7 +57,7 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
     integer     , intent(in)  :: lundia !  Description and declaration in inout.igs
     logical     , intent(out) :: error  !  Flag=TRUE if an error is encountered
     character(*), intent(in)  :: neffil !  File name for FLOW NEFIS output files: tri"h/m/d"-"casl""labl" or for Comm. file com-"casl""labl"
-    character(3), intent(in)  :: soort  !  String containing to which output file version group or to diagnostic file should be written
+    character(3), intent(in)  :: ftype  !  String containing to which output file version group or to diagnostic file should be written
 !
 ! Local variables
 !
@@ -103,7 +103,7 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
     hlptxt(1) = refnr
     filnam = neffil
     !
-    grnam4 = soort // '-version'
+    grnam4 = ftype // '-version'
     elnms4 = 'FILE-VERSION'
     !
     grnam5 = 'DWQTIM'

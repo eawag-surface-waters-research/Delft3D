@@ -1,8 +1,8 @@
 subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,nrver     ,runid     ,filbct    ,eol       , &
-               & nambnd    ,typbnd    ,tprofu    ,nto       ,ntot      , &
-               & ntof      ,kmax      ,rtbct     ,itstrt    ,itfinish  , &
-               & mxbctm    ,nbcttm    ,tampab    ,bubble    ,gdp       )
+               & nrver     ,runid     ,filbct    ,eol       ,nambnd    , &
+               & typbnd    ,tprofu    ,nto       ,ntot      ,ntof      , &
+               & kmax      ,rtbct     ,itstrt    ,itfinish  ,mxbctm    , &
+               & nbcttm    ,tampab    ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -83,7 +83,6 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                        :: ntot     !  Description and declaration in dimens.igs
     logical, intent(in)                            :: bubble   !  Description and declaration in procs.igs
     logical                                        :: error    !!  Flag=TRUE if an error is encountered
-    logical, intent(in)                            :: noui     !!  Flag for reading from User Interface
     real(fp), dimension(2, mxbctm, nto)            :: tampab   !!  At most MXBCTM amlitudes for time
                                                                !!  varying boundary openings (end A and end B)
     real(fp), dimension(mxbctm)                    :: rtbct    !!  At most MXBCTM times for time varying boundary openings
@@ -203,120 +202,117 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        filbct = fildef
     endif
     !
-    ! Read data from external file only if NOUI = .true.
+    ! Read data from external file
     !
     if (filbct /= fildef) then
        !
-       ! If not UI then:
        ! Define length of RUNID
        ! Check filename "filbct" <> TMP file or
        ! "filbct" = TMP file and access is direct
        ! open output file (ONLY VERSION 2.49 or lower) +
        ! Set name for the parameters, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.bct'
-          !
-          ! Check filename and access
-          ! For NRVER =< 249 this cannot be the case
-          !
-          if (filout == filbct) then
-             inquire (file = filout(:8 + lrid), exist = ex)
-             if (.not.ex) then
-                call prterr(lundia    ,'G004'    ,filout    )
-                !
-                error = .true.
-                goto 9999
-             endif
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.bct'
+       !
+       ! Check filename and access
+       ! For NRVER =< 249 this cannot be the case
+       !
+       if (filout == filbct) then
+          inquire (file = filout(:8 + lrid), exist = ex)
+          if (.not.ex) then
+             call prterr(lundia    ,'G004'    ,filout    )
              !
-             lunout = newlun(gdp)
-             open (lunout, file = filout(:8 + lrid))
-             read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
-             close (lunout)
-             lunout = 8
-             !
-             ! Not able to read record length for direct access
-             !
-             if (iocond /= 0) then
-                call prterr(lundia    ,'U081'    ,filout    )
-                !
-                error = .true.
-                goto 9999
-             endif
-             !
-             ! Record length read
-             !
-             noread = .true.
-          endif
-          !
-          ! define length of file name
-          !
-          call remove_leading_spaces(filbct    ,lf        )
-          !
-          ! test file existence <YES> -> open file <NO> -> error
-          !
-          if ( exifil(filbct, lundia) ) then
-             if (nrver <= 249) then
-                !
-                ! Open file only in case NRVER =< 249. Otherwise it will be
-                ! opened later as the record length is dependent on the
-                ! profile type
-                !
-                mxlrec = 83
-                lunout = newlun(gdp)
-                inquire (file = filout(:8 + lrid), exist = ex)
-                if (ex) then
-                   open (lunout, file = filout(:8 + lrid))
-                   close (lunout, status = 'delete')
-                endif
-                open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
-                    & access = 'direct', status = 'unknown', recl = mxlrec)
-                write (lunout, fmtbct(1), rec = 1) '#', mxlrec, eol
-                !
-                ! Open FILBCT to read data from
-                !
-                lunrd = newlun(gdp)
-                open (lunrd, file = filbct(:lf), form = 'formatted',            &
-                     & status = 'old')
-                write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
-                call prterr(lundia, 'G051', trim(message))
-                call rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
-                         & runid     ,typtst    ,eol       ,itstrt    ,itfinish  , &
-                         & nto       ,ntot      ,ntof      ,tprofu    ,nambnd    , &
-                         & typbnd    ,namtyp    ,unttyp    ,gdp       )
-                !
-                close (lunrd)
-             elseif (.not.noread) then
-                !
-                ! Open FILBCT to read data from
-                !
-                call flw_readtable(tseriesfile, filbct, julday, gdp)
-                !
-                lunrd = newlun(gdp)
-                open (lunrd, file = filbct(:lf), form = 'formatted',            &
-                     & status = 'old')
-                write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
-                call prterr(lundia, 'G051', trim(message))
-                call rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
-                          & filbct    ,runid     ,typtst    ,eol       ,itstrt    , &
-                          & itfinish  ,nto       ,ntof      ,ntot      ,kmax      , &
-                          & tprofu    ,nambnd    ,typbnd    ,namtyp    ,unttyp    , &
-                          & bubble    ,gdp       )
-                !
-                close (lunrd)
-             else
-                !
-                ! Reading TDD file for BC-hydrodynamic data skipped in
-                ! TDATOM
-                ! Define "fake" timeframe
-                !
-                write (message, '(3a)') 'BC-hydrodynamic file ', filbct(:lf), ' will be skipped in TDATOM'
-                call prterr(lundia, 'G051', trim(message))
-             endif
-          else
              error = .true.
+             goto 9999
           endif
+          !
+          lunout = newlun(gdp)
+          open (lunout, file = filout(:8 + lrid))
+          read (lunout, '(a1,i5)', iostat = iocond) cdummy, lrec
+          close (lunout)
+          lunout = 8
+          !
+          ! Not able to read record length for direct access
+          !
+          if (iocond /= 0) then
+             call prterr(lundia    ,'U081'    ,filout    )
+             !
+             error = .true.
+             goto 9999
+          endif
+          !
+          ! Record length read
+          !
+          noread = .true.
+       endif
+       !
+       ! define length of file name
+       !
+       call remove_leading_spaces(filbct    ,lf        )
+       !
+       ! test file existence <YES> -> open file <NO> -> error
+       !
+       if ( exifil(filbct, lundia) ) then
+          if (nrver <= 249) then
+             !
+             ! Open file only in case NRVER =< 249. Otherwise it will be
+             ! opened later as the record length is dependent on the
+             ! profile type
+             !
+             mxlrec = 83
+             lunout = newlun(gdp)
+             inquire (file = filout(:8 + lrid), exist = ex)
+             if (ex) then
+                open (lunout, file = filout(:8 + lrid))
+                close (lunout, status = 'delete')
+             endif
+             open (lunout, file = filout(:8 + lrid), form = 'formatted',     &
+                 & access = 'direct', status = 'unknown', recl = mxlrec)
+             write (lunout, fmtbct(1), rec = 1) '#', mxlrec, eol
+             !
+             ! Open FILBCT to read data from
+             !
+             lunrd = newlun(gdp)
+             open (lunrd, file = filbct(:lf), form = 'formatted',            &
+                  & status = 'old')
+             write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
+             call prterr(lundia, 'G051', trim(message))
+             call rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
+                      & runid     ,typtst    ,eol       ,itstrt    ,itfinish  , &
+                      & nto       ,ntot      ,ntof      ,tprofu    ,nambnd    , &
+                      & typbnd    ,namtyp    ,unttyp    ,gdp       )
+             !
+             close (lunrd)
+          elseif (.not.noread) then
+             !
+             ! Open FILBCT to read data from
+             !
+             call flw_readtable(tseriesfile, filbct, julday, gdp)
+             !
+             lunrd = newlun(gdp)
+             open (lunrd, file = filbct(:lf), form = 'formatted',            &
+                  & status = 'old')
+             write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
+             call prterr(lundia, 'G051', trim(message))
+             call rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
+                       & filbct    ,runid     ,typtst    ,eol       ,itstrt    , &
+                       & itfinish  ,nto       ,ntof      ,ntot      ,kmax      , &
+                       & tprofu    ,nambnd    ,typbnd    ,namtyp    ,unttyp    , &
+                       & bubble    ,gdp       )
+             !
+             close (lunrd)
+          else
+             !
+             ! Reading TDD file for BC-hydrodynamic data skipped in
+             ! TDATOM
+             ! Define "fake" timeframe
+             !
+             write (message, '(3a)') 'BC-hydrodynamic file ', filbct(:lf), ' will be skipped in TDATOM'
+             call prterr(lundia, 'G051', trim(message))
+          endif
+       else
+          error = .true.
        endif
     !
     ! Time varying boundary conditions (flow) in file? <NO>
@@ -325,29 +321,26 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     elseif (ntot > 0) then
        !
-       ! If not UI then:
        ! Define length of RUNID
        ! open output file (ONLY VERSION 2.49 or lower) +
        ! Set name for the parameters, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.bct'
-          !
-          ! Open file only in case NRVER =< 249, which always the
-          ! case for data in MDF file
-          !
-          mxlrec = 83
-          lunout = newlun(gdp)
-          inquire (file = filout(:8 + lrid), exist = ex)
-          if (ex) then
-             open (lunout, file = filout(:8 + lrid))
-             close (lunout, status = 'delete')
-          endif
-          open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
-               & access = 'direct', status = 'unknown', recl = mxlrec)
-          write (lunout, fmtbct(1), rec = 1) '#', mxlrec, eol
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.bct'
+       !
+       ! Open file only in case NRVER =< 249, which always the
+       ! case for data in MDF file
+       !
+       mxlrec = 83
+       lunout = newlun(gdp)
+       inquire (file = filout(:8 + lrid), exist = ex)
+       if (ex) then
+          open (lunout, file = filout(:8 + lrid))
+          close (lunout, status = 'delete')
        endif
+       open (lunout, file = filout(:8 + lrid), form = 'formatted',           &
+            & access = 'direct', status = 'unknown', recl = mxlrec)
+       write (lunout, fmtbct(1), rec = 1) '#', mxlrec, eol
        !
        ! Define parameter name for time column
        !
@@ -385,12 +378,6 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           nbcttm = nbcttm + 1
           goto 150
        endif
-       !<==
-       if (nbcttm>mxbctm .and. .not.noui) then
-          call prterr(lundia    ,'U153'    ,' '       )
-          !
-          nbcttm = mxbctm
-       endif
        !
        ! Read time dependent data from MD_file
        !
@@ -404,8 +391,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        newkw = .true.
        !
        do ib = 1, nbcttm
-          ibct = ib
-          if (noui) ibct = 1
+          ibct = 1
           !
           ! Locate 'TsbcT ' record and read RVAL
           !
@@ -419,7 +405,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! Reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              exit
           endif
@@ -431,7 +417,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                     & ittdep    ,itold     ,itstrt    ,ib        ,gdp       )
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              exit
           endif
@@ -455,7 +441,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! reading error?
              !
              if (lerror) then
-                if (noui) error = .true.
+                error = .true.
                 lerror = .false.
                 goto 500
              endif
@@ -468,71 +454,69 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              newkw = .false.
              !
-             ! writing to LUNOUT only if NOUI = .true.
+             ! writing to LUNOUT
              !
-             if (noui) then
-                irec = (n - 1)*(11 + nbcttm) + 1
+             irec = (n - 1)*(11 + nbcttm) + 1
+             !
+             ! Write first 11 records with block information for time
+             ! IB=1
+             ! Define NAMTYP index dependent on value of TYPBND(NTOF+N)
+             !
+             if (ib == 1) then
+                ntyp = index(typtst, typbnd(ntof + n))
+                parnam(2)(:20) = namtyp(ntyp)
+                parunt(2) = unttyp(ntyp)
                 !
-                ! Write first 11 records with block information for time
-                ! IB=1
-                ! Define NAMTYP index dependent on value of TYPBND(NTOF+N)
+                ! Define table name
                 !
-                if (ib == 1) then
-                   ntyp = index(typtst, typbnd(ntof + n))
-                   parnam(2)(:20) = namtyp(ntyp)
-                   parunt(2) = unttyp(ntyp)
-                   !
-                   ! Define table name
-                   !
-                   tablnm = 'T-serie BCT ' // nambnd(ntof + n) // ' for run: '
-                   !
-                   ! Write first 7 description records to file
-                   !
-                   write (lunout, fmtbct(2), rec = irec + 1) &
-                       & keywrd(1), quote, tablnm, runid, quote, eol
-                   write (lunout, fmtbct(3), rec = irec + 2) &
-                       & keywrd(2), quote, tprofu(ntof + n), quote, cntain, eol
-                   write (lunout, fmtbct(4), rec = irec + 3) &
-                       & keywrd(3), quote, nambnd(ntof + n), quote, eol
-                   write (lunout, fmtbct(7), rec = irec + 4) &
-                       & keywrd(8), quote, 'non-equidistant', quote, eol
-                   write (lunout, fmtbct(8), rec = irec + 5) &
-                       & keywrd(9), itdate, eol
-                   write (lunout, fmtbct(9), rec = irec + 6) &
-                       & keywrd(10), quote, 'minutes', quote, eol
-                   write (lunout, fmtbct(10), rec = irec + 7) &
-                       & keywrd(12), quote, 'linear', quote, eol
-                   !
-                   ! Write parameter name for time to file
-                   !
-                   write (lunout, fmtbct(11), rec = irec + 8) &
-                       & keywrd(14), quote, parnam(1), quote, keywrd(15)(:10), quote, parunt(1),  &
-                       & quote, eol
-                   !
-                   ! Write parameter name for TYPBND for end A and end B
-                   !
-                   parnam(2)(21:) = ' end A          '
-                   write (lunout, fmtbct(11), rec = irec + 9) &
-                       & keywrd(14), quote, parnam(2), quote, keywrd(15)(:10), quote, parunt(2),  &
-                       & quote, eol
-                   parnam(2)(21:) = ' end B          '
-                   write (lunout, fmtbct(11), rec = irec + 10) &
-                       & keywrd(14), quote, parnam(2), quote, keywrd(15) (:10), quote,  &
-                       & parunt(2), quote, eol
-                   !
-                   ! Write number of time dependent data to file
-                   !
-                   write (lunout, fmtbct(12), rec = irec + 11) &
-                       & keywrd(16), nbcttm, eol
-                endif
+                tablnm = 'T-serie BCT ' // nambnd(ntof + n) // ' for run: '
                 !
-                ! Write time dependent data to block for open boundary N
-                ! skipping first 11 records with block info
+                ! Write first 7 description records to file
                 !
-                irec = irec + 11 + ib
-                write (lunout, fmtbct(13), rec = irec) &
-                    & rtbct(ibct), (tampab(j, ibct, n), j = 1, 2), eol
+                write (lunout, fmtbct(2), rec = irec + 1) &
+                    & keywrd(1), quote, tablnm, runid, quote, eol
+                write (lunout, fmtbct(3), rec = irec + 2) &
+                    & keywrd(2), quote, tprofu(ntof + n), quote, cntain, eol
+                write (lunout, fmtbct(4), rec = irec + 3) &
+                    & keywrd(3), quote, nambnd(ntof + n), quote, eol
+                write (lunout, fmtbct(7), rec = irec + 4) &
+                    & keywrd(8), quote, 'non-equidistant', quote, eol
+                write (lunout, fmtbct(8), rec = irec + 5) &
+                    & keywrd(9), itdate, eol
+                write (lunout, fmtbct(9), rec = irec + 6) &
+                    & keywrd(10), quote, 'minutes', quote, eol
+                write (lunout, fmtbct(10), rec = irec + 7) &
+                    & keywrd(12), quote, 'linear', quote, eol
+                !
+                ! Write parameter name for time to file
+                !
+                write (lunout, fmtbct(11), rec = irec + 8) &
+                    & keywrd(14), quote, parnam(1), quote, keywrd(15)(:10), quote, parunt(1),  &
+                    & quote, eol
+                !
+                ! Write parameter name for TYPBND for end A and end B
+                !
+                parnam(2)(21:) = ' end A          '
+                write (lunout, fmtbct(11), rec = irec + 9) &
+                    & keywrd(14), quote, parnam(2), quote, keywrd(15)(:10), quote, parunt(2),  &
+                    & quote, eol
+                parnam(2)(21:) = ' end B          '
+                write (lunout, fmtbct(11), rec = irec + 10) &
+                    & keywrd(14), quote, parnam(2), quote, keywrd(15) (:10), quote,  &
+                    & parunt(2), quote, eol
+                !
+                ! Write number of time dependent data to file
+                !
+                write (lunout, fmtbct(12), rec = irec + 11) &
+                    & keywrd(16), nbcttm, eol
              endif
+             !
+             ! Write time dependent data to block for open boundary N
+             ! skipping first 11 records with block info
+             !
+             irec = irec + 11 + ib
+             write (lunout, fmtbct(13), rec = irec) &
+                 & rtbct(ibct), (tampab(j, ibct, n), j = 1, 2), eol
           enddo
        enddo
        !
@@ -556,7 +540,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! close files
     !
  9999 continue
-    if (noui .and. lunout/=8) then
+    if (lunout/=8) then
        if (error) then
           close (lunout, status = 'delete')
        else

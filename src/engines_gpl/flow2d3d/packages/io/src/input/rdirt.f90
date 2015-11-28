@@ -1,7 +1,7 @@
 subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,citdat    ,tstart    ,tstop     ,tzone     , &
-               & iitdat    ,julday    ,itstrt    ,itfinish  ,dt        , &
-               & ctunit    ,rtunit    ,gdp       )
+               & citdat    ,tstart    ,tstop     ,tzone     ,iitdat    , &
+               & julday    ,itstrt    ,itfinish  ,dt        ,ctunit    , &
+               & rtunit    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -64,7 +64,6 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                    :: lunmd    !  Description and declaration in inout.igs
     integer                    :: nrrec    !!  Pointer to the record number in the MD-file
     logical      , intent(out) :: error    !!  Flag=TRUE if an error is encountered
-    logical      , intent(in)  :: noui     !!  Flag for reading from User Interface
     real(fp)                   :: dt       !  Description and declaration in esm_alloc_real.f90
     real(fp)     , intent(out) :: rtunit   !!  Time scale for time parameters (sec)
     real(fp)                   :: tstart   !  Description and declaration in exttim.igs
@@ -157,7 +156,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! reading error?
     !
     if (lerror) then
-       if (noui) error = .true.
+       error = .true.
        lerror = .false.
     else
        citdat = chulp(1:10)
@@ -188,7 +187,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call read1i(chulp     ,lrec      ,ibeg      ,iend      ,iday      , &
                     & idef      ,ier       )
           if (ier <= 0) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
@@ -203,7 +202,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call read1c(chulp     ,lrec      ,ibeg      ,iend      ,maand     , &
                     & lenc      ,ier       )
           if (ier <= 0) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
@@ -217,7 +216,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call read1i(chulp     ,lrec      ,ibeg      ,iend      ,iyear     , &
                     & idef      ,ier       )
           if (ier <= 0) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
@@ -230,7 +229,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           imonth = (index(month, maand) + 3)/4
           if (imonth == 0) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
@@ -263,12 +262,11 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           write (citdat, '(i4.4,a1,i2.2,a1,i2.2)') &
               & iyear, '-', imonth, '-', iday
           !
-          ! test if iitdat is a legal date
-          ! JULDAY = 0 not allowed for NOUI
+          ! test if iitdat is a legal date: JULDAY = 0 not allowed
           !
           call juldat(iitdat    ,julday    )
           if (julday == 0) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
@@ -314,7 +312,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! reading error?
     !
     if (lerror) then
-       if (noui) error = .true.
+       error = .true.
        lerror = .false.
        dt = rdef
     else
@@ -335,7 +333,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! reading error?
     !
     if (lerror) then
-       if (noui) error = .true.
+       error = .true.
        lerror = .false.
        tstart = rdef
     else
@@ -354,7 +352,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! reading error?
     !
     if (lerror) then
-       if (noui) error = .true.
+       error = .true.
        lerror = .false.
        tstop = rdef
     else
@@ -365,17 +363,17 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     if (dt <= 0.) then
        call prterr(lundia    ,'U007'    ,'value for Simulation time interval'       )
-       if (noui) error = .true.
+       error = .true.
     else
        itstrt = nint(tstart/dt)
        if (dtn(itstrt, tstart, dt)) then
           call prterr(lundia    ,'U044'    ,'Start time'         )
-          if (noui) error = .true.
+          error = .true.
        endif
        itfinish = nint(tstop/dt)
        if (dtn(itfinish, tstop, dt)) then
           call prterr(lundia    ,'U044'    ,'Stop time'          )
-          if (noui) error = .true.
+          error = .true.
        endif
        if ((itfinish - itstrt) <= 0) then
           itfinish = itstrt
@@ -421,7 +419,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! reading error?
        !
        if (lerror) then
-          if (noui) error = .true.
+          error = .true.
           lerror = .false.
           tzone = rdef
        else

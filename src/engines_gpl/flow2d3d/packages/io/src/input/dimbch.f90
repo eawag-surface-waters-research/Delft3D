@@ -1,5 +1,5 @@
-subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                & kc        ,gdp       )
+subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,kc        , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -31,7 +31,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimension for harmonic components from
-!              the MD-file or from the attribute file for NOUI or the TRIANA-file
+!              the MD-file
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -58,7 +58,6 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                :: lunmd  !  Description and declaration in inout.igs
     integer                :: nrrec  !!  Record counter keeping the track of the last record read
     logical , intent(out)  :: error  !!  Flag=TRUE if an error is encountered
-    logical , intent(in)   :: noui   !!  Flag true if program calling routine is not User Interface
 !
 !
 ! Local variables
@@ -82,7 +81,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                          :: ntrec   ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
     logical                          :: defaul  ! Flag to detrmine if a default value is allowed when no value is read 
     logical                          :: lexist  ! Flag to check whether TRIANA file exists
-    logical                          :: lerror  ! Flag=TRUE if an local error is encountered For NOUI this can mean error will be set TRUE 
+    logical                          :: lerror  ! Flag=TRUE if an local error is encountered
     logical                          :: newkw   ! Flag to specify if the keyword to look for is a new keyword 
     integer                          :: nrcmp   ! Index of component 
     real(fp)                         :: rdef    ! Default value for real parameters 
@@ -227,10 +226,6 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
           lerror = .false.
           fmttmp = fmtdef(3:)
        endif
-       !
-       ! skip reading from file for UI
-       !
-       if (.not.noui) goto 9999
        !
        ! test file existence
        !

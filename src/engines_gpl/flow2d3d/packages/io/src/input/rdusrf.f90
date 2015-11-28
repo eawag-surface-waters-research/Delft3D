@@ -1,5 +1,5 @@
 subroutine rdusrf(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-                & noui      ,gdp       )
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -58,7 +58,6 @@ subroutine rdusrf(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     integer                   :: nrrec  !!  Pointer to the record number in the
                                         !!  MD-file
     logical     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical     , intent(in)  :: noui   !!  Flag for reading from User Interface
     character(*)              :: mdfrec !!  Standard rec. length in MD-file (300)
 !
 ! Local variables
@@ -126,7 +125,7 @@ subroutine rdusrf(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           if (filusr(n)==fildef) then
              call prterr(lundia    ,'V220'    ,' '       )
              !
-             if (noui) error = .true.
+             error = .true.
              exit
           endif
        enddo

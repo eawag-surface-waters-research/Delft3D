@@ -1,5 +1,4 @@
-subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short   , &
-                & soort     ,gdp       )
+subroutine flwlic(lunscr    ,version_full ,prgnm     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -30,14 +29,8 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Obtains add-ons, checks validity of program ver-
-!              sion number and gets username from Licence file,
-!              using Flexlm.
-!              It also detect automatically through checksum
-!              whether the file has been tampered with.
-!              At the background, it automatically checks
-!              authorisation to use Delft3D, verd3dn expiry date,
-!              hardware-id (UNIX only).
+!    Function: Obtains list of user defined functions.
+!
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -55,7 +48,6 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    character(256)                 , pointer :: licfil
     integer                        , pointer :: nprocs
     integer      , dimension(:, :) , pointer :: nprdim
     character*20 , dimension(:)    , pointer :: procs
@@ -63,10 +55,7 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
 ! Global variables
 !
     integer     , intent(in)  :: lunscr        !  Description and declaration in inout.igs
-    logical     , intent(out) :: error         !  false if NO errror is encountered
-    character(*)              :: soort         !!  Help var. determining the prog. name currently active
-    character(*)              :: username      !  Licensee name
-    character(*), intent(in)  :: version_short !  Version nr. of the module of the current package
+    character(*)              :: prgnm         !!  Help var. determining the prog. name currently active
     character(*), intent(in)  :: version_full
 !
 ! Local variables
@@ -81,13 +70,9 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
     nprocs   => gdp%gdusrpar%nprocs
     nprdim   => gdp%gdusrpar%nprdim
     procs    => gdp%gdusrpar%procs
-    licfil   => gdp%gdautok%licfil
     !
-    error    = .false.
-    username = ' '
     n        = 0
     k        = 0
-    licfil   = ' '
     !
     nprocs = 0
     do n = 1, mxusrp
@@ -100,7 +85,7 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
     txtfil  = '--------------------------------------------------------------------------------'
     !
     if (.not.parll .or. (parll .and. inode==master)) then
-       if (soort == 'tdatom') then
+       if (prgnm == 'tdatom') then
           if (gdp%arch == 'win32' .or. gdp%arch == 'win64') then
              libname = 'flow2d3d.dll'
           else

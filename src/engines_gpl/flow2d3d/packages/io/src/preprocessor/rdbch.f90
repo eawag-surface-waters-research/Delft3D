@@ -1,7 +1,6 @@
 subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,filbch    ,fmtbch    ,ntof      ,mxnto     , &
-               & kc        ,mxkc      ,omega     ,hydrbc    ,ascon     , &
-               & gdp       )
+               & filbch    ,fmtbch    ,ntof      ,mxnto     ,kc        , &
+               & mxkc      ,omega     ,hydrbc    ,ascon     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -63,7 +62,6 @@ subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                       :: nrrec  !!  Pointer to the record number in the MD-file
     integer                                       :: ntof   !  Description and declaration in dimens.igs
     logical                                       :: error  !!  Flag=TRUE if an error is encountered
-    logical                         , intent(in)  :: noui   !!  Flag for reading from User Interface
     real(fp), dimension(4, mxnto, mxkc)           :: hydrbc !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(mxkc)                     :: omega  !  Description and declaration in esm_alloc_real.f90
     character(*)                                  :: filbch !!  File name for the harmonic boundary conditions file
@@ -161,13 +159,11 @@ subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              fmtbch = 'UN'
           endif
           !
-          ! read data from external file only if noui = .true.
+          ! read data from external file
           !
-          if (noui) then
-             call bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
-                       & mxnto     ,kc        ,mxkc      ,omega     ,hydrbc    , &
-                       & gdp       )
-          endif
+          call bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
+                    & mxnto     ,kc        ,mxkc      ,omega     ,hydrbc    , &
+                    & gdp       )
        !
        ! harmonic boundary conditions in file? <NO>
        ! first locate and read 'Omega' record for kc frequencies
@@ -183,9 +179,7 @@ subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) then
-                error = .true.
-             endif
+             error = .true.
              lerror = .false.
           endif
           !
@@ -222,9 +216,7 @@ subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! reading error?
                 !
                 if (lerror) then
-                   if (noui) then
-                      error = .true.
-                   endif
+                   error = .true.
                    lerror = .false.
                    goto 9999
                 else
@@ -253,9 +245,7 @@ subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! reading error?
                 !
                 if (lerror) then
-                   if (noui) then
-                      error = .true.
-                   endif
+                   error = .true.
                    lerror = .false.
                    goto 9999
                 else

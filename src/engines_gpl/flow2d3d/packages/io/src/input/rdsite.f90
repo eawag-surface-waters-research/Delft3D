@@ -1,8 +1,8 @@
 subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,dt        ,filsta    ,fmtsta    ,nostat    , &
-                & filtra    ,fmttra    ,ntruv     ,fildro    ,fmtdro    , &
-                & ndro      ,drogue    ,namdro    ,mndro     ,itdro     , &
-                & dxydro    ,drodep    ,gdp       )
+                & dt        ,filsta    ,fmtsta    ,nostat    ,filtra    , &
+                & fmttra    ,ntruv     ,fildro    ,fmtdro    ,ndro      , &
+                & drogue    ,namdro    ,mndro     ,itdro     ,dxydro    , &
+                & drodep    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -100,7 +100,6 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer       , dimension(2, ndro)               :: mndro  !  Description and declaration in esm_alloc_int.f90
     logical                                          :: drogue !  Description and declaration in procs.igs
     logical                                          :: error  !!  Flag=TRUE if an error is encountered
-    logical                            , intent(in)  :: noui   !!  Flag for reading from User Interface
     real(fp)                                         :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(2, ndro)               :: dxydro !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(ndro)                  :: drodep !  Description and declaration in esm_alloc_real.f90
@@ -271,15 +270,13 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           fmtsta = 'FR'
        endif
        !
-       ! read monitoring station definitions from file only if
-       ! NOUI = .true. Stop if reading error occurred or file did not
+       ! read monitoring station definitions from file.
+       ! Stop if reading error occurred or file did not
        ! exist (error  = .true.)
        !
-       if (noui) then
-          call stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
-                    & namst     ,mnstat    ,gdp       )
-          if (error) goto 9999
-       endif
+       call stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
+                 & namst     ,mnstat    ,gdp       )
+       if (error) goto 9999
     !
     ! monitoring station definitions in file? <NO> and NOSTAT <> 0
     ! start from top and read a record first, because newkw = .true.
@@ -312,7 +309,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! there must be a name defined !!
           !
           if (namst(n)==cdef) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V013'    ,' '       )
              exit
           endif
@@ -330,7 +327,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              exit
           else
@@ -349,7 +346,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     do n = 1, nostat
        do nn = 1, n - 1
           if (namst(nn)==namst(n)) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'U170'    ,namst(n)  )
           endif
        enddo
@@ -541,15 +538,13 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           fmttra = 'FR'
        endif
        !
-       ! read monitoring cross-section definitions from file only if
-       ! NOUI = .true. Stop if reading error occurred or file did not
+       ! read monitoring cross-section definitions from file.
+       ! Stop if reading error occurred or file did not
        ! exist (error  = .true.)
        !
-       if (noui) then
-          call trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
-                    & namtra    ,mnit      ,gdp       )
-          if (error) goto 9999
-       endif
+       call trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
+                 & namtra    ,mnit      ,gdp       )
+       if (error) goto 9999
     !
     ! monitoring cross-section definitions in file? <NO> and NTRUV <> 0
     ! start from top and read a record first, because newkw = .true.
@@ -581,7 +576,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! there must be a name defined !!
           !
           if (namtra(n)==cdef) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V014'    ,' '       )
              exit
           endif
@@ -600,7 +595,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              exit
           else
@@ -621,7 +616,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     do n = 1, ntruv
        do nn = 1, n - 1
           if (namtra(nn)==namtra(n)) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'U171'    ,namtra(n) )
           endif
        enddo
@@ -849,20 +844,18 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           fmtdro = 'FR'
        endif
        !
-       ! read drogue data from file only if NOUI = .true.
+       ! read drogue data from file only.
        ! goto end of subroutine if reading error occurred or file
        ! did not exist (error  = .true.)
        !
-       if (noui) then
-          call drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
-                    & dt        ,namdro    ,mndro     ,itdro     ,dxydro    , &
-                    & drodep    ,gdp       )
-          if (error) goto 9999
-          !
-          ! redefine DROGUE, for drogues read from file
-          !
-          drogue = .true.
-       endif
+       call drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
+                 & dt        ,namdro    ,mndro     ,itdro     ,dxydro    , &
+                 & drodep    ,gdp       )
+       if (error) goto 9999
+       !
+       ! redefine DROGUE, for drogues read from file
+       !
+       drogue = .true.
     !
     ! drogues in file? <NO>
     !
@@ -895,7 +888,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! there must be a name defined !!
           !
           if (namdro(n)==cdef) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'V034'    ,' '       )
              exit
           endif
@@ -911,7 +904,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              rval(1) = rdef
              rval(2) = rdef
           endif
@@ -921,13 +914,13 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           itdro(1, n) = nint(rval(1)/dt)
           itdro(2, n) = nint(rval(2)/dt)
           if (dtn(itdro(1, n), rval(1), dt)) then
-             if (noui) error = .true.
+             error = .true.
              errmsg = 'start time'
              call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (dtn(itdro(2, n), rval(2), dt)) then
-             if (noui) error = .true.
+             error = .true.
              errmsg = 'stop  time'
              call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
@@ -949,7 +942,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              exit
           endif
           !
@@ -971,7 +964,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     do n = 1, ndro
        do nn = 1, n - 1
           if (namdro(nn)==namdro(n)) then
-             if (noui) error = .true.
+             error = .true.
              call prterr(lundia    ,'U172'    ,namdro(n) )
           endif
        enddo

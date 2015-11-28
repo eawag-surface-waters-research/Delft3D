@@ -58,7 +58,6 @@ subroutine postpr_hdt(nst, gdp)
     character(21)                       , pointer :: selmap
     character(23)                       , pointer :: prshis
     character(23)                       , pointer :: selhis
-    logical                             , pointer :: mainys  !!  Logical flag for TRISULA is main program (TRUE) for writing output
     character(256)                      , pointer :: comfil  !!  Communication file name
     character(256)                      , pointer :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
     character(256)                      , pointer :: trifil  !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
@@ -95,7 +94,6 @@ subroutine postpr_hdt(nst, gdp)
     selmap              => gdp%gdtricom%selmap
     prshis              => gdp%gdtricom%prshis
     selhis              => gdp%gdtricom%selhis
-    mainys              => gdp%gdtricom%mainys
     comfil              => gdp%gdtricom%comfil
     runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
@@ -120,9 +118,8 @@ subroutine postpr_hdt(nst, gdp)
     call psemnefis
     call timer_start(timer_postpr, gdp)
     call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
-              & trifil    ,mainys    ,runid     ,prsmap    ,prshis    , &
-              & selmap    ,selhis    ,rhow      ,grdang    , &
-              & initi     ,dtsec     , &
+              & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
+              & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
               & nst+1     ,iphisc    ,npmap     ,itcomc    ,itimc     , &
               & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
               & itrstc    ,ktemp     ,.true.    ,gdp       )

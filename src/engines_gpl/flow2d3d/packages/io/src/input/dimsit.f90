@@ -1,5 +1,5 @@
-subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                & nosite    ,keyw      ,gdp       )
+subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,nosite    , &
+                & keyw      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -31,7 +31,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimension for site definitions from
-!              the MD-file or from the attribute file for NOUI
+!              the MD-file
 !              Site definitions can be - monitoring stations
 !                                      - cross-sections
 !                                      - drogue tracks
@@ -59,7 +59,6 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                    :: nosite  ! Number of elevation points, can be monitoring stations, cross-sections or drogue track definitions
     integer                    :: nrrec   ! Record counter keeping the track of the last record read
     logical      , intent(out) :: error   ! Flag=TRUE if an error is encountered
-    logical      , intent(in)  :: noui    ! Flag true if program calling routine is not User Interface
     character(6)               :: keyw    ! Key word to define the type of "site"
 !
 !
@@ -74,7 +73,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                 :: nlook   ! Nr. of values to look for in a record 
     integer                 :: ntrec   ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
     logical                 :: found   ! Flag is true if KEYW is found 
-    logical                 :: lerror  ! Flag=TRUE if an local error is encountered For NOUI this can mean error will be set TRUE 
+    logical                 :: lerror  ! Flag=TRUE if an local error is encountered
     logical                 :: newkw   ! Flag to specify if the keyword to look for is a new keyword 
     character(11)           :: fmtdef  ! Default format of an attribute file = blank 
     character(11)           :: fmttmp  ! Format of FILTMP (UN/FRee formatted) 
@@ -121,12 +120,8 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        ! reading error?
        !
        if (lerror) then
-          if (noui) then
-             error = .true.
-             goto 520
-          endif
-          lerror = .false.
-          filtmp = fildef
+          error = .true.
+          goto 520
        endif
     endif
     if (filtmp/=fildef) then
@@ -156,10 +151,6 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
           lerror = .false.
           fmttmp = 'formatted'
        endif
-       !
-       ! skip reading from file for UI
-       !
-       if (.not.noui) goto 520
        !
        ! test file existence
        !
@@ -266,11 +257,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                     & ntrec     ,lundia    ,gdp       )
           !
           if (lerror .or. nlook<0) then
-             if (noui) then
-                error = .true.
-                goto 520
-             endif
-             lerror = .false.
+             error = .true.
              goto 520
           endif
           if (nlook==999) goto 520

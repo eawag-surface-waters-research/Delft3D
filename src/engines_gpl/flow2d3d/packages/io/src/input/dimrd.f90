@@ -1,5 +1,5 @@
 subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
-               & soort     ,wind      ,salin     ,temp      ,sedim     , &
+               & prgnm     ,wind      ,salin     ,temp      ,sedim     , &
                & const     ,secflo    ,drogue    ,wave      ,iweflg    , &
                & htur2d    ,mudlay    , &
                & flmd2d    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , &
@@ -145,7 +145,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     character(256)               :: nflmod    !  Near field model to apply
     character(*)                 :: runid     !!  Run identification code for the current simulation (used to determine
                                               !!  the names of the in- /output files used by the system)
-    character(6)   , intent(in)  :: soort     !!  Help var. determining the prog. name currently active
+    character(6)   , intent(in)  :: prgnm     !!  Help var. determining the prog. name currently active
 !
 ! Local variables
 !
@@ -167,7 +167,6 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     logical                                  :: lerror
     logical                                  :: newkw  ! Flag to specify if the keyword to look for is a new keyword 
     logical                                  :: nodef  ! Flag to specify that no default is allowed if a value can not be found 
-    logical                                  :: noui   ! Flag true if program calling routine is not User Interface 
     character(1)                             :: ascon
     character(1)                             :: cdef
     character(1)                             :: chulp
@@ -235,7 +234,6 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     newkw  = .true.
     defaul = .true.
     nodef  = .not.defaul
-    noui   = .true.
     tkemod = ' '
     tkehlp = ' '
     q2emod = ' '
@@ -315,15 +313,15 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     sbkol   = .false.
     nfl     = .false.
     !
-    call dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-              & lsts      ,lstsc     ,lstsci    ,lsal      ,ltem      , &
-              & lsed      ,lsedtot   ,lsecfl    ,salin     ,temp      , &
-              & sedim     ,const     ,secflo    ,wind      ,drogue    , &
-              & wave      ,mudlay    ,flmd2d    ,roller    , &
-              & wavcmp    ,ncmax     ,culvert   ,dredge    ,filbar    , &
-              & filcdw    ,snelli    ,cnstwv    ,veg3d     ,waveol    , &
-              & filbub    ,lrdamp    ,sbkol     ,bubble    ,nfl       , &
-              & nflmod    ,soort     ,lfsdu     ,lfsdus1   ,gdp       )
+    call dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
+              & lstsc     ,lstsci    ,lsal      ,ltem      ,lsed      , &
+              & lsedtot   ,lsecfl    ,salin     ,temp      ,sedim     , &
+              & const     ,secflo    ,wind      ,drogue    ,wave      , &
+              & mudlay    ,flmd2d    ,roller    ,wavcmp    , &
+              & ncmax     ,culvert   ,dredge    ,filbar    ,filcdw    , &
+              & snelli    ,cnstwv    ,veg3d     ,waveol    ,filbub    , &
+              & lrdamp    ,sbkol     ,bubble    ,nfl       ,nflmod    , &
+              & prgnm     ,lfsdu     ,lfsdus1   ,gdp       )
     if (error) goto 9999
     !
     ! read MMAX, NMAX, KMAX
@@ -365,8 +363,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     ! calculate NSRCD
     !
     nsrcd = 0
-    call dimdis(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-              & nsrcd     ,gdp       )
+    call dimdis(lunmd     ,lundia    ,error     ,nrrec     ,nsrcd     , &
+              & gdp       )
     if (error) goto 9999
     !
     ! calculate NXBUB and NBUB
@@ -388,23 +386,23 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     ntot   = 0
     ascon  = 'N'
     filtmp = ' '
-    call dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-              & filtmp    ,nto       ,ntof      ,ntoq      ,ntot      , &
-              & ascon     ,gdp       )
+    call dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,filtmp    , &
+              & nto       ,ntof      ,ntoq      ,ntot      ,ascon     , &
+              & gdp       )
     if (error) goto 9999
     !
     ! calculate KC if NTOF > 0
     !
     kc = 0
     if (ntof > 0) then
-       if (soort /= 'tdatom') then
+       if (prgnm /= 'tdatom') then
           if (ascon == 'Y') then
               !
               ! the astronomical components are no longer written to the file
               ! TMP_//runid//.bch, so we have to calculate KC
               !
-              call dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                        & kc        ,gdp       )
+              call dimbch(lunmd     ,lundia    ,error     ,nrrec     ,kc        , &
+                        & gdp       )
               if (error) goto 9999
           else
               !
@@ -433,8 +431,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
           !
           ! calculate KC
           !
-          call dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                    & kc        ,gdp       )
+          call dimbch(lunmd     ,lundia    ,error     ,nrrec     ,kc        , &
+                    & gdp       )
           if (error) goto 9999
        else
        endif
@@ -571,16 +569,16 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     !
     nostat = 0
     keyw   = 'Filsta'
-    call dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-              & nostat    ,keyw      ,gdp       )
+    call dimsit(lunmd     ,lundia    ,error     ,nrrec     ,nostat    , &
+              & keyw      ,gdp       )
     if (error) goto 9999
     !
     ! calculate NTRUV
     !
     ntruv = 0
     keyw  = 'Filcrs'
-    call dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-              & ntruv     ,keyw      ,gdp       )
+    call dimsit(lunmd     ,lundia    ,error     ,nrrec     ,ntruv     , &
+              & keyw      ,gdp       )
     if (error) goto 9999
     !
     ! calculate NDRO
@@ -604,8 +602,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
           !
           keyw = 'Filpar'
        endif
-       call dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                 & ndro      ,keyw      ,gdp       )
+       call dimsit(lunmd     ,lundia    ,error     ,nrrec     ,ndro      , &
+                 & keyw      ,gdp       )
        if (error) goto 9999
        if (ndro==0) drogue = .false.
     endif
@@ -614,8 +612,8 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     !
     nofou  = 0
     filtmp = ' '
-    call dimfou(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-              & filtmp    ,nofou     ,gdp       )
+    call dimfou(lunmd     ,lundia    ,error     ,nrrec     ,filtmp    , &
+              & nofou     ,gdp       )
     !
     ! Read IWE dimensions and re-define flag IWEFLG
     !

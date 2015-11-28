@@ -30,11 +30,9 @@ subroutine tricom_step(olv_handle, gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function: 
-!              - Perform a TRISULA computation for the
-!                time interval (tb, te)
-!                In case of a stand-alone system ITB and ITE
-!                are set 0. Besides if WAVE = TRUE then ITLEN
-!                and TSCALE will be read from the communication
+!              - Perform a Delft3D-FLOW computation.
+!                If WAVE = TRUE then ITLEN and TSCALE
+!                will be read from the communication
 !                file, else they will also be set 0.
 !              - Update the communication file
 !              NOTE: TRICOM called by main module of DELFT3D then
@@ -361,7 +359,6 @@ subroutine tricom_step(olv_handle, gdp)
     character(23)                       , pointer :: selhis
     character(36)                       , pointer :: tgfcmp
     integer                             , pointer :: itlen   !  Description and declaration in esm_alloc_int.f90
-    logical                             , pointer :: mainys  !!  Logical flag for TRISULA is main program (TRUE) for writing output
     character(256)                      , pointer :: comfil  !!  Communication file name
     character(256)                      , pointer :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
     character(256)                      , pointer :: trifil  !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
@@ -713,7 +710,6 @@ subroutine tricom_step(olv_handle, gdp)
     selhis              => gdp%gdtricom%selhis
     tgfcmp              => gdp%gdtricom%tgfcmp
     itlen               => gdp%gdtricom%itlen
-    mainys              => gdp%gdtricom%mainys
     comfil              => gdp%gdtricom%comfil
     runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
@@ -802,9 +798,8 @@ subroutine tricom_step(olv_handle, gdp)
        call psemnefis
        call timer_start(timer_postpr, gdp)
        call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
-                 & trifil    ,mainys    ,runid     ,prsmap    ,prshis    , &
-                 & selmap    ,selhis    ,rhow      ,grdang    , &
-                 & initi     ,dtsec     , &
+                 & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
+                 & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
                  & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
                  & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
                  & itrstc    ,ktemp     ,.false.   ,gdp       )
@@ -835,11 +830,11 @@ subroutine tricom_step(olv_handle, gdp)
              if (prec == hp) then
                 call rwbotc_double(comfil    ,lundia    ,error     ,initi     ,nst     , &
                                  & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)  , &
-                                 & r(rbuff)  ,nst       ,gdp       )
+                                 & r(rbuff)  ,gdp       )
              else
                 call rwbotc(comfil    ,lundia    ,error     ,initi     ,nst     , &
                           & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)  , &
-                          & r(rbuff)  ,nst       ,gdp       )
+                          & r(rbuff)  ,gdp       )
              endif
              call timer_stop(timer_tricom_rest, gdp)
              !

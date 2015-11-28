@@ -99,8 +99,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
                                                         ! = 3 no initialization 
     integer        , pointer            :: it01         ! Reference date in yymmdd 
     integer        , pointer            :: it02         ! Reference time in hhmmss 
-    integer        , pointer            :: itb          ! Start time of computational interval 
-    integer        , pointer            :: ite          ! End time of computational interval 
     integer        , pointer            :: itima        ! Time to start simulation (N * tscale) according to DELFT3D conventions 
     integer        , pointer            :: itlen        ! Lenght of the tide cycle 
     integer                             :: lenid
@@ -109,11 +107,9 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     integer                             :: nhystp
     integer                  , external :: newlun
     integer                  , external :: fsmtrf
-    logical        , pointer            :: alone        ! TRUE when flow runs stand-alone, FALSE when flow is part of morsys 
     logical                             :: ex
     logical                             :: init         ! Flag=TRUE when initialisation is required (always the case if FLOW is used stand alone) 
     logical                             :: lexist
-    logical        , pointer            :: mainys       ! Logical flag for FLOW is main porgram (TRUE) for writing output 
     logical                             :: opend        ! Help logical var. to determine whether each of the output files was opened 
     real(fp)       , pointer            :: tscale       ! Basic unit time 
     character(12)                       :: filmrs       ! File name for DELFT3D_MOR FLOW input file (MD-flow.xxx) 
@@ -169,12 +165,8 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     initi        => gdp%gdtricom%initi 
     it01         => gdp%gdtricom%it01
     it02         => gdp%gdtricom%it02
-    itb          => gdp%gdtricom%itb
-    ite          => gdp%gdtricom%ite
     itima        => gdp%gdtricom%itima
     itlen        => gdp%gdtricom%itlen
-    alone        => gdp%gdtricom%alone
-    mainys       => gdp%gdtricom%mainys
     tscale       => gdp%gdtricom%tscale
     comfil       => gdp%gdtricom%comfil
     trifil       => gdp%gdtricom%trifil
@@ -187,7 +179,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     
     init     = .true.
     filmrs   = ' '
-    alone    = .true.
     !
     iphisi   = 0
     ipmap(1) = -1
@@ -242,7 +233,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     ! Run TDATOM
     !
     if (.not.parll .or. inode == master) then
-       call tdatmain(runid, alone, filmrs, icheck, gdp) 
+       call tdatmain(runid, filmrs, icheck, gdp) 
     endif
     call dfbroadc_gdp(icheck, 1, dfint,gdp)
     call dfsync(gdp)
@@ -263,8 +254,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
        !
        ! Read  dimensions of arrays and declare array pointers
        !
-       call tripoi(runid, filmrs, versio, filmd, &
-                 & alone, gdp)
+       call tripoi(runid, filmrs, versio, filmd, gdp)
        if (gdp%errorcode > 0) then
           if (btest(rtcmod,dataFromRTCToFLOW)) then
              call timer_start(timer_wait, gdp)
@@ -290,14 +280,9 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     it01   = 0
     it02   = 0
     !
-    itb    = 1
-    ite    = -1
     itlen  = 0
     tscale = 1.0
     !
-    itima  = 0
-    !
-    mainys = .true.
     itima  = 0
     !
     ! Initialize communication file name

@@ -1,6 +1,6 @@
 subroutine rdnamc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,salin     ,temp      ,lconc     ,lstsc     , &
-                & namcon    ,gdp       )
+                & salin     ,temp      ,lconc     ,lstsc     ,namcon    , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -59,7 +59,6 @@ subroutine rdnamc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                         :: nrrec  !!  Pointer to the record number in the
                                               !!  MD-file
     logical           , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical           , intent(in)  :: noui   !!  Flag for reading from User Interface
     logical           , intent(in)  :: salin  !  Description and declaration in procs.igs
     logical           , intent(in)  :: temp   !  Description and declaration in procs.igs
     character(*)                    :: mdfrec !!  Standard rec. length in MD-file (300)
@@ -134,7 +133,7 @@ subroutine rdnamc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !        because LCONC is defined by namcon values <> ' '
        !
        if (namcon(lnconc)==cdef) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'V015'    ,' '       )
        endif
        !

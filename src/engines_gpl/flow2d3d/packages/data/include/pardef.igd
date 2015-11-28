@@ -29,6 +29,5 @@
 !-------------------------------------------------------------------------------
 integer, parameter :: mxkmax =    100 ! Max. number of layers
 integer, parameter :: mxnsrc =   5000 ! Max. number of discharge points
-integer, parameter :: mxnpnt =      1 ! NOT USED?? Max. number of grid points, dry point sections and thin dam point sections
 integer, parameter :: mxnto  =    500 ! Max. number of open boundaries
 integer, parameter :: mxkc   =    234 ! Max. number of frequencies for harmonic boundary conditions

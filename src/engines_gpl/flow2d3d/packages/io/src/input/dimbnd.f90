@@ -1,6 +1,6 @@
-subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                & filtmp    ,nto       ,ntof      ,ntoq      ,ntot      , &
-                & ascon     ,gdp       )
+subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,filtmp    , &
+                & nto       ,ntof      ,ntoq      ,ntot      ,ascon     , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -61,7 +61,6 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                    :: ntoq   !  Description and declaration in dimens.igs
     integer      , intent(out) :: ntot   !  Description and declaration in dimens.igs
     logical      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical      , intent(in)  :: noui   !!  Flag true if program calling routine is not User Interface
     character(*)               :: filtmp !!  File name for open bounday conditions
     character(1) , intent(out) :: ascon  !!  Flag (Y/N) if minimal first boundary data type is ASCON
 !
@@ -82,7 +81,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                        :: nrrec0  ! Record counter keeping the track of the last record read 
     integer                        :: ntrec   ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
     integer         , external     :: newlun
-    logical                        :: lerror  ! Flag=TRUE if an local error is encountered For NOUI this can mean error will be set TRUE 
+    logical                        :: lerror  ! Flag=TRUE if an local error is encountered
     logical                        :: newkw   ! Flag to specify if the keyword to look for is a new keyword 
     character(1)                   :: cdum    ! Dummy character variable 
     character(1)                   :: datbnd  ! Boundary data type read (Timedepen- dent or Harmonics) 
@@ -175,13 +174,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 if (iocond>0) then
                    call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
-                   if (noui) then
-                      error = .true.
-                      goto 9999
-                   endif
-                   nto = 0
-                   ntof = 0
-                   ntoq = 0
+                   error = .true.
+                   goto 9999
                 endif
                 !
                 ! close file
@@ -226,13 +220,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                    if (iocond>0) then
                       call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                       !
-                      if (noui) then
-                         error = .true.
-                         goto 9999
-                      endif
-                      nto = 0
-                      ntof = 0
-                      ntoq = 0
+                      error = .true.
+                      goto 9999
                    endif
                    close (luntmp)
                    goto 710
@@ -246,15 +235,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 if (ier<=0) then
                    call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
-                   if (noui) then
-                      error = .true.
-                      goto 9999
-                   endif
-                   nto = 0
-                   ntof = 0
-                   ntoq = 0
-                   close (luntmp)
-                   goto 710
+                   error = .true.
+                   goto 9999
                 endif
                 !
                 ! read DATBND from record, empty or long
@@ -266,15 +248,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 if (ier<=0) then
                    call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
-                   if (noui) then
-                      error = .true.
-                      goto 9999
-                   endif
-                   nto = 0
-                   ntof = 0
-                   ntoq = 0
-                   close (luntmp)
-                   goto 710
+                   error = .true.
+                   goto 9999
                 endif
                 !
                 call small(datbnd    ,ldtbnd    )
@@ -304,13 +279,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                    if (iocond>0) then
                       call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                       !
-                      if (noui) then
-                         error = .true.
-                         goto 9999
-                      endif
-                      nto = 0
-                      ntof = 0
-                      ntoq = 0
+                      error = .true.
+                      goto 9999
                    endif
                    close (luntmp)
                    goto 710
@@ -332,10 +302,9 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        ! file does not exist !!
        !
-       elseif (noui) then
+       else
           error = .true.
           goto 9999
-       else
        endif
     else
        !
@@ -356,12 +325,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                  & ntrec     ,lundia    ,gdp       )
        !
        if (lerror .or. nlook<0) then
-          if (noui) then
-             error = .true.
-             goto 9999
-          endif
-          lerror = .false.
-          goto 710
+          error = .true.
+          goto 9999
        endif
        if (nlook==999) goto 710
        !
@@ -382,15 +347,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
           if (lerror) then
              call prterr(lundia    ,'U101'    ,'Nambnd & ' // keyw  )
              !
-             if (noui) then
-                error = .true.
-                goto 9999
-             endif
-             lerror = .false.
-             nto = 0
-             ntof = 0
-             ntoq = 0
-             goto 710
+             error = .true.
+             goto 9999
           endif
           !
           nto = nto + 1

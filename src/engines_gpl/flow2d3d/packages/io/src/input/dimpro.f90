@@ -1,12 +1,12 @@
-subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
-                & lsts      ,lstsc     ,lstsci    ,lsal      ,ltem      , &
-                & lsed      ,lsedtot   ,lsecfl    ,salin     ,temp      , &
-                & sedim     ,const     ,secflo    ,wind      ,drogue    , &
-                & wave      ,mudlay    ,flmd2d    ,roller    , &
-                & wavcmp    ,ncmax     ,culvert   ,dredge    ,filbar    , &
-                & filcdw    ,snelli    ,cnstwv    ,veg3d     ,waveol    , &
-                & filbub    ,lrdamp    ,sbkol     ,bubble    ,nfl       , &
-                & nflmod    ,soort     ,lfsdu     ,lfsdus1   ,gdp       )
+subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
+                & lstsc     ,lstsci    ,lsal      ,ltem      ,lsed      , &
+                & lsedtot   ,lsecfl    ,salin     ,temp      ,sedim     , &
+                & const     ,secflo    ,wind      ,drogue    ,wave      , &
+                & mudlay    ,flmd2d    ,roller    ,wavcmp    , &
+                & ncmax     ,culvert   ,dredge    ,filbar    ,filcdw    , &
+                & snelli    ,cnstwv    ,veg3d     ,waveol    ,filbub    , &
+                & lrdamp    ,sbkol     ,bubble    ,nfl       ,nflmod    , &
+                & prgnm     ,lfsdu     ,lfsdus1   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -93,7 +93,6 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     logical        , intent(out) :: lfsdu   !  Description and declaration in procs.igs
     logical        , intent(out) :: lfsdus1 !  Description and declaration in procs.igs
     logical        , intent(out) :: lrdamp  !  Description and declaration in procs.igs
-    logical        , intent(in)  :: noui    !! Flag true if program calling routine is not User Interface
     logical        , intent(out) :: nfl     !! Flag true if Near field computations are requested
     logical                      :: roller
     logical                      :: cnstwv  !  Description and declaration in procs.igs
@@ -107,7 +106,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     logical        , intent(out) :: wave    !  Description and declaration in procs.igs
     logical        , intent(out) :: waveol  !  Description and declaration in procs.igs
     logical        , intent(out) :: wind    !  Description and declaration in procs.igs
-    character(6)   , intent(in)  :: soort   !! Help var. determining the prog. name currently active
+    character(6)   , intent(in)  :: prgnm   !! Help var. determining the prog. name currently active
     character(256)               :: filbar
     character(256)               :: filbub
     character(256)               :: filcdw
@@ -124,7 +123,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                   :: nlook  ! Nr. of values to look for in a record 
     integer                   :: ntrec  ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
     integer                   :: uw
-    logical                   :: lerror ! Flag=TRUE if an local error is encountered For NOUI this can mean error will be set TRUE 
+    logical                   :: lerror ! Flag=TRUE if an local error is encountered
     logical                   :: found
     logical                   :: newkw  ! Flag to specify if the keyword to look for is a new keyword 
     character(20)             :: cdef   ! Default value for chulp 
@@ -320,7 +319,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     call prop_get_string(gdp%mdfile_ptr, '*', 'Fildad', dredgefile)
     if (dredgefile /= ' ') then
        dredge = .true.
-    elseif (soort /= 'tdatom') then
+    elseif (prgnm /= 'tdatom') then
        if (numdomains > 1) then
           !
           ! Notify the dredge merge iterator that this subdomain

@@ -1,9 +1,8 @@
 subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,itlfsm    ,tlfsmo    ,dt        ,tunit     , &
-               & nto       ,lstsc     ,bndneu    ,cstbnd    , &
-               & nambnd    ,typbnd    ,rettim    ,ntoq      ,thetqh    , &
-               & restid    ,filic     ,paver     ,pcorr     ,tstart    , &
-               & tstop     ,gdp       )
+               & itlfsm    ,tlfsmo    ,dt        ,tunit     ,nto       , &
+               & lstsc     ,bndneu    ,cstbnd    ,nambnd    ,typbnd    , &
+               & rettim    ,ntoq      ,thetqh    ,restid    ,filic     , &
+               & paver     ,pcorr     ,tstart    ,tstop     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -72,7 +71,6 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                                    :: bndneu !  Description and declaration in numeco.igs
     logical                                    :: cstbnd !  Description and declaration in numeco.igs
     logical                      , intent(out) :: error  !  Flag=TRUE if an error is encountered
-    logical                      , intent(in)  :: noui   !  Flag=true if not User Interface
     logical                                    :: pcorr  !  Flag=TRUE when using pressure correction on boundaries using PAVER
     real(fp)                                   :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                                   :: paver  !  Description and declaration in numeco.igs
@@ -164,7 +162,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     itlfsm = nint(tlfsmo/dt)
     if (dtn(itlfsm, tlfsmo, dt)) then
        call prterr(lundia    ,'U044'    ,'Smoothing time'     )
-       if (noui) error = .true.
+       error = .true.
     endif
     if (itlfsm > 0) then
        smofrac = 100.0_fp * tlfsmo/(tstop-tstart)
@@ -290,11 +288,8 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
                  & ntrec     ,lundia    ,gdp       )
        if (lerror) then
-          if (noui) then
-             error = .true.
-             goto 9999
-          endif
-          lerror = .false.
+          error = .true.
+          goto 9999
        else
           call small(chulp, 1)
           if (chulp == 'y') cstbnd = .true.
@@ -328,11 +323,8 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & mdfrec    ,chulp     ,cdef      ,lenc      ,nrrec     , &
                  & ntrec     ,lundia    ,gdp       )
        if (lerror) then
-          if (noui) then
-             error = .true.
-             goto 9999
-          endif
-          lerror = .false.
+          error = .true.
+          goto 9999
        else
           call small(chulp, 1)
           if (chulp == 'y') bndneu = .true.

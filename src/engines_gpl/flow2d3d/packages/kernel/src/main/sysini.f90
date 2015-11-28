@@ -1,5 +1,5 @@
-subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
-                & verify    ,version_short ,filmd     ,gdp       )
+subroutine sysini(error     ,runid     ,filmrs    ,prgnm     , &
+                & version_short ,filmd     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -65,14 +65,12 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
 !
 ! Global variables
 !
-    logical                     :: alone         !!  TRUE when flow runs stand-alone, FALSE when flow is part of morsys
     logical                     :: error         !!  Flag=TRUE if an error is encountered
-    logical       , intent(out) :: verify        !!  Always FALSE to be removed: was used for program=MD-VER
     character(*)                :: filmd         !!  File name for MD FLOW file
     character(*)                :: runid         !!  Run identification code for the current simulation
     character(*)                :: version_short !!  Version nr. of the current package
     character(12)               :: filmrs        !!  File name for DELFT3D_MOR FLOW input file (MD-flow.xxx)
-    character(6)                :: soort         !!  Help var. determining the prog. name currently active
+    character(6)                :: prgnm         !!  Help var. determining the prog. name currently active
 !
 ! Local variables
 !
@@ -90,7 +88,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     character(256)             :: version_full
     character(256)             :: filtmp       ! Help var. to specify file name
     character(55)              :: txtput       ! Texts to be filled in the header
-    character(256)             :: usernm       ! Licensee name set in 'userfil'
     type(message_stack)        :: stack
 !
 !! executable statements -------------------------------------------------------
@@ -123,16 +120,11 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     !           in triend when lundia is not yet opened
     !
     txtput = ' '
-    if (soort=='tdatom') then
+    if (prgnm=='tdatom') then
        txtput = 'Part I    - Initialisation Time Dep. Data module...'
-    elseif (soort=='verify') then
-       txtput = 'Part III  - Initialisation of the Verify module...'
     else
        txtput = 'Part III  - Initialisation of the Execution module...'
     endif
-    !
-    verify = .false.
-    if (soort=='verify') verify = .true.
     !
     ! initialisation unit numbers
     ! a lun gets fake unit number (< 10), for the inquire statement
@@ -165,9 +157,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     call getfullversionstring_deltares_common(version_full)
     call getfullversionstring_flow2d3d(version_full)
     call getshortversionstring_flow2d3d(version_short)
-    call flwlic(lunscr    ,error     ,usernm    ,version_full ,version_short   , &
-              & soort     ,gdp       )
-    if (error) goto 9999
+    call flwlic(lunscr    ,version_full ,prgnm     ,gdp       )
     !
     ! put header on screen
     !
@@ -177,12 +167,12 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     !
     ! initialisation id's (computer, runid ) and open lundia
     !
-    call iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
+    call iniid(error     ,prgnm     ,runid     ,filmd     ,filmrs    , &
              & gdp       )
     if (error) goto 9999
     call remove_leading_spaces(runid     ,lrid      )
     if (.not.parll .or. (parll .and. inode==master)) then
-       if (soort == 'tdatom') then
+       if (prgnm == 'tdatom') then
           write (lunscr, '(a,a)') '            runid : ', runid(:lrid)
        endif
     endif
@@ -226,7 +216,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     write (lundia, '(80a1)') ('*', n = 1, 80)
     write (lundia, '(a)')
     !
-    if (soort=='tdatom') goto 9999
+    if (prgnm=='tdatom') goto 9999
     !
     ! copy contents of old td-diag file created by tdatom
     ! test for ERRORS and if found, stop

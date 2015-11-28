@@ -1,7 +1,6 @@
 subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
-                & noui      ,sferic    ,anglat    ,dy        , &
-                & filcio    ,fmtcio    ,mmax      ,nmax      ,nmaxus    , &
-                & fcorio    ,gdp       )
+                & sferic    ,anglat    ,dy        ,filcio    ,fmtcio    , &
+                & mmax      ,nmax      ,nmaxus    ,fcorio    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -64,7 +63,6 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     integer                                                                          :: nrrec  !!  Pointer to the record number in the
                                                                                                !!  MD-file
     logical                                                                          :: error  !!  Flag=TRUE if an error is encountered
-    logical                                                            , intent(in)  :: noui   !!  Flag for reading from User Interface
     logical                                                            , intent(in)  :: sferic !  Description and declaration in tricom.igs
     real(fp)                                                           , intent(in)  :: anglat !!  - Angle of latitude of the model
                                                                                                !!    centre (used to determine the coef.
@@ -148,21 +146,19 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
        ! Test attribute file in combination with SFERIC not allowed
        !
        if (sferic) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U135'    ,' '       )
        !
-       ! Test file existence only in case NOUI = .true.
-       !
-       elseif (noui) then
-          call ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
-                    & nmaxus    ,fcorio    ,gdp       )
+       ! Test file existence
        !
        else
+          call ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
+                    & nmaxus    ,fcorio    ,gdp       )
        endif
     !
     ! Coriolis values in file? <NO>
     !
-    elseif (noui) then
+    else
        !
        ! Set coriolis parameter based upon anglat
        !
@@ -174,6 +170,5 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
              enddo
           enddo
        endif
-    else
     endif
 end subroutine rdfcio

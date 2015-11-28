@@ -106,7 +106,7 @@ subroutine rddept(lundia    ,error     , &
           write(lundia,'(10x,a,f7.3)') 'Using Depuni = ', depuni
        endif
        !
-       ! write per nmaxus mmax depuni in dp array only if noui = .true.
+       ! write per nmaxus mmax depuni in dp array
        !
        do m = 1, mmax
           do n = 1, nmaxus

@@ -1,6 +1,6 @@
 subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,nofou     ,kmax      ,lstsc     ,lsal      , &
-                & ltem      ,gdp       )
+                & nofou     ,kmax      ,lstsc     ,lsal      ,ltem      , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -60,7 +60,6 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                   :: nofou  !  Description and declaration in dimens.igs
     integer                   :: nrrec  !!  Pointer to the record number in the MD-file
     logical                   :: error  !!  Flag=TRUE if an error is encountered
-    logical      , intent(in) :: noui   !!  Flag = TRUE for every program but ui
     character(*)              :: mdfrec !!  Standard rec. length in MD-file (300)
 !
 ! Local variables
@@ -133,20 +132,15 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (exifil(filfou, lundia)) then
           !
-          !---------read data from external file only if noui = .true.
+          !---------read data from external file
           !
-          if (noui) then
-             !
-             !-----------open input file
-             !
-             lunfou = newlun(gdp)
-             open (lunfou, file = filfou(1:lfile), form = fmtfou,               &
-                 & status = 'old')
-             call reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
-                       & lstsc     ,lsal      ,ltem      ,nofou     ,gdp       )
-             !
-             close (lunfou)
-          endif
+          lunfou = newlun(gdp)
+          open (lunfou, file = filfou(1:lfile), form = fmtfou,               &
+              & status = 'old')
+          call reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
+                    & lstsc     ,lsal      ,ltem      ,nofou     ,gdp       )
+          !
+          close (lunfou)
        !
        !-------test file existence <NO>
        !

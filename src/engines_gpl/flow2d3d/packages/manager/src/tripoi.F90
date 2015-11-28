@@ -1,5 +1,4 @@
-subroutine tripoi(runid, filmrs, versio, filmd, &
-                & alone, gdp       )
+subroutine tripoi(runid, filmrs, versio, filmd,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -66,8 +65,6 @@ subroutine tripoi(runid, filmrs, versio, filmd, &
 !
 ! Global variables
 !
-    logical                    :: alone  !!  TRUE when flow runs stand-alone,
-                                         !!  FALSE when flow is part of morsys
     character(*)               :: filmd  !!  File name for MD FLOW file
     character(*)               :: runid  !!  Run identification code for the cur-
                                          !!  rent simulation (used to determine
@@ -81,8 +78,7 @@ subroutine tripoi(runid, filmrs, versio, filmd, &
 !
     integer(pntrsize), external :: gtipnt
     logical           :: error  ! Flag=TRUE if an error is encountered 
-    logical           :: verify ! Flag=FALSE for the FLOW sim. prg. =TRUE  for the MD-VER       prg. 
-    character(6)      :: soort  ! Help var. determining the prog. name currently active 
+    character(6)      :: prgnm  ! Help var. determining the prog. name currently active 
 !
 !! executable statements -------------------------------------------------------
 !
@@ -98,19 +94,18 @@ subroutine tripoi(runid, filmrs, versio, filmd, &
     lundia    => gdp%gdinout%lundia
     !
     error  = .false.
-    verify = .false.
-    soort  = 'trisim'
+    prgnm  = 'trisim'
     !
     ! start FLOW simulation program
     !
-    call sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
-              & verify    ,versio    ,filmd     ,gdp       )
+    call sysini(error     ,runid     ,filmrs    ,prgnm     , &
+              & versio    ,filmd     ,gdp       )
     if (error) goto 9999
     !
     ! read  dimensions of arrays and declare array pointers
     !
-    call decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
-              & soort     ,gdp       )
+    call decarr(lunmd     ,lundia    ,error     ,runid     , &
+              & prgnm     ,gdp       )
     if (error) goto 9999
     !
     ! test local dimensions in various subroutines

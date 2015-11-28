@@ -90,9 +90,6 @@ subroutine get_wind(wavetime, windu, windv, mmax, nmax, filnam)
 !
 !! executable statements -------------------------------------------------------
 !
-    ! cyclic reduction of wavtim
-    ! wavtim = mod(wavtim, itlen)
-    !
     call filldm(elmdmst, 1, 1, 1   , 0   , 0, 0, 0)
     call filldm(elmdms , 1, 1, 1   , 0   , 0, 0, 0)
     call filldm(elmdms , 2, 2, nmax, mmax, 0, 0, 0)

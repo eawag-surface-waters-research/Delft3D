@@ -1,7 +1,6 @@
 subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & noui      ,runid     ,fileva    ,fmteva    ,rteva     , &
-               & dt        ,itstrt    ,itfinish  ,mxevat    ,nevatm    , &
-               & precipt   ,evapor    ,train     ,gdp       )
+               & runid     ,fileva    ,fmteva    ,dt        ,itstrt    , &
+               & itfinish  ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -65,16 +64,9 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                       :: itstrt     !  Description and declaration in inttim.igs
     integer                         , intent(in)  :: lundia     !  Description and declaration in inout.igs
     integer                         , intent(in)  :: lunmd      !  Description and declaration in inout.igs
-    integer                         , intent(in)  :: mxevat     !  Maximum number of times for which rain/evaporation model data is allowed in the Md-file
-    integer                         , intent(out) :: nevatm     !  Actual number of times for which rain/evaporation model data is specified in the Md-file
     integer                                       :: nrrec      !  Pointer to the record number in the MD-file
     logical                         , intent(out) :: error      !  Flag=TRUE if an error is encountered
-    logical                         , intent(in)  :: noui       !  Flag for reading from User Interface
     real(fp)                        , intent(in)  :: dt         !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(mxevat) , intent(out) :: evapor     !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxevat) , intent(out) :: precipt    !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxevat)               :: rteva      !  At most MXTEMT times for time varying rain/evaporation model data
-    real(fp)    , dimension(mxevat) , intent(out) :: train      !  Description and declaration in heat.igs
     character(*)                                  :: fileva     !  File name for the time varying rain/evaporation model file
     character(*)                                  :: mdfrec     !  Standard rec. length in MD-file (300)
     character(*)                                  :: runid      !  Run identification code for the current simulation (used to determine
@@ -84,7 +76,6 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Local variables
 !
-    integer                        :: ieva
     integer                        :: iocond               ! IO status for reading 
     integer                        :: itold                ! Help var. to store last read time to test accending order 
     integer                        :: ittdep               ! Help var. for the time read (now de- fined as multiples of DT, but in fu- ture it may take any value) 
@@ -106,6 +97,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                        :: nodef                ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     logical                        :: noread               ! Flag if FILBCC is equal to TMP file and should not be read. 
     logical                        :: rec1st               ! Flag set to TRUE if the record read is the first record 
+    real(fp)                       :: rtime                ! Time associated with data
     real(fp)                       :: rdef                 ! Help var. containing default va- lue(s) for real variable 
     real(fp)                       :: rdummy
     real(fp), dimension(4)         :: rval                 ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
@@ -213,113 +205,70 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        fmteva = 'FR'
        if (fmttmp(:2)=='un') fmteva = 'UN'
        !
-       !-------If not UI then:
-       !              Check filename "fileva" <> TMP file or
-       !              "fileva" = TMP file and access is unformatted
-       !              Define length of RUNID
-       !              open output file (ONLY VERSION 2.48 or lower) +
-       !              Set name for the constituents, Regenerated locally
+       !-------Check filename "fileva" <> TMP file or
+       !       "fileva" = TMP file and access is unformatted
+       !       Define length of RUNID
+       !       open output file (ONLY VERSION 2.48 or lower) +
+       !       Set name for the constituents, Regenerated locally
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.eva'
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.eva'
+       !
+       !---------Check filename and format
+       !         Value of FMTTMP will only be overwritten for FILOUT=FILEVA
+       !         and FMTEVA='UN' which leads to NOREAD=.true. or error
+       !
+       if (filout==fileva) then
           !
-          !---------Check filename and format
-          !         Value of FMTTMP will only be overwritten for FILOUT=FILEVA
-          !         and FMTEVA='UN' which leads to NOREAD=.true. or error
+          !-----------Check filename format
           !
-          if (filout==fileva) then
+          if (fmteva=='UN') then
+             inquire (file = filout(:8 + lrid), exist = ex)
+             if (.not.ex) then
+                call prterr(lundia    ,'G004'    ,filout    )
+                !
+                error = .true.
+                goto 9999
+             endif
              !
-             !-----------Check filename format
+             lunout = newlun(gdp)
+             open (lunout, file = filout(:8 + lrid), form = 'unformatted')
+             read (lunout, iostat = iocond) rdummy
+             close (lunout)
+             lunout = 8
              !
-             if (fmteva=='UN') then
-                inquire (file = filout(:8 + lrid), exist = ex)
-                if (.not.ex) then
-                   call prterr(lundia    ,'G004'    ,filout    )
-                   !
-                   error = .true.
-                   goto 9999
-                endif
-                !
-                lunout = newlun(gdp)
-                open (lunout, file = filout(:8 + lrid), form = 'unformatted')
-                read (lunout, iostat = iocond) rdummy
-                close (lunout)
-                lunout = 8
-                !
-                !-------------FMTEVA='UN' but file formatted => error
-                !
-                if (iocond/=0) then
-                   call prterr(lundia    ,'U080'    ,filout    )
-                   !
-                   error = .true.
-                   goto 9999
-                endif
-                !
-                !-------------FMTEVA='UN' => and file unformatted NOREAD=.true.
-                !
-                noread = .true.
+             !-------------FMTEVA='UN' but file formatted => error
              !
-             !-----------FMTEVA='FR' => error
-             !
-             else
+             if (iocond/=0) then
                 call prterr(lundia    ,'U080'    ,filout    )
                 !
                 error = .true.
                 goto 9999
              endif
-          endif
-          !
-          !---------define length of file name
-          !
-          call remove_leading_spaces(fileva    ,lf        )
-          !
-          !---------Read data from file only in case .not.NOREAD
-          !
-          if (.not.noread) then
              !
-             !-----------open unformatted eva-file
+             !-------------FMTEVA='UN' => and file unformatted NOREAD=.true.
              !
-             lunout = newlun(gdp)
-             inquire (file = filout(:8 + lrid), exist = ex)
-             if (ex) then
-                open (lunout, file = filout(:8 + lrid))
-                close (lunout, status = 'delete')
-             endif
-             open (lunout, file = filout(:8 + lrid), form = 'unformatted',      &
-                 & status = 'unknown')
-             !
-             write (message, '(2a)') 'Reading Evaporation & Rain file ', fileva(:lf)
-             call prterr(lundia, 'G051', trim(message))
-             nrval = 3
-             call rdtdf(lundia    ,lunout    ,error     ,fileva    ,fmttmp    , &
-                      & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
-                      & gdp       )
-             if (error) goto 9999
+             noread = .true.
+          !
+          !-----------FMTEVA='FR' => error
           !
           else
+             call prterr(lundia    ,'U080'    ,filout    )
              !
-             !-------------Reading TDD file for evaporation and rain skipped in
-             !             TDATOM Define "fake" timeframe
-             !
-             write (message, '(3a)') 'Evaporation & Rain file ', fileva(:lf), ' will be skipped in TDATOM'
-             call prterr(lundia, 'G051', trim(message))
+             error = .true.
+             goto 9999
           endif
        endif
-    !
-    !-----time varying evaporation/rain data in file? <NO>
-    !
-    else
        !
-       !---------If not UI then:
-       !              Define length of RUNID
-       !              open output file
+       !---------define length of file name
        !
-       if (noui) then
-          call remove_leading_spaces(runid     ,lrid      )
-          filout = 'TMP_' // runid(:lrid) // '.eva'
+       call remove_leading_spaces(fileva    ,lf        )
+       !
+       !---------Read data from file only in case .not.NOREAD
+       !
+       if (.not.noread) then
           !
-          !---------Open file
+          !-----------open unformatted eva-file
           !
           lunout = newlun(gdp)
           inquire (file = filout(:8 + lrid), exist = ex)
@@ -327,9 +276,46 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              open (lunout, file = filout(:8 + lrid))
              close (lunout, status = 'delete')
           endif
-          open (lunout, file = filout(:8 + lrid), form = 'unformatted',         &
-               & status = 'unknown')
+          open (lunout, file = filout(:8 + lrid), form = 'unformatted',      &
+              & status = 'unknown')
+          !
+          write (message, '(2a)') 'Reading Evaporation & Rain file ', fileva(:lf)
+          call prterr(lundia, 'G051', trim(message))
+          nrval = 3
+          call rdtdf(lundia    ,lunout    ,error     ,fileva    ,fmttmp    , &
+                   & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
+                   & gdp       )
+          if (error) goto 9999
+       !
+       else
+          !
+          !-------------Reading TDD file for evaporation and rain skipped in
+          !             TDATOM Define "fake" timeframe
+          !
+          write (message, '(3a)') 'Evaporation & Rain file ', fileva(:lf), ' will be skipped in TDATOM'
+          call prterr(lundia, 'G051', trim(message))
        endif
+    !
+    !-----time varying evaporation/rain data in file? <NO>
+    !
+    else
+       !
+       !---------Define length of RUNID
+       !         open output file
+       !
+       call remove_leading_spaces(runid     ,lrid      )
+       filout = 'TMP_' // runid(:lrid) // '.eva'
+       !
+       !---------Open file
+       !
+       lunout = newlun(gdp)
+       inquire (file = filout(:8 + lrid), exist = ex)
+       if (ex) then
+          open (lunout, file = filout(:8 + lrid))
+          close (lunout, status = 'delete')
+       endif
+       open (lunout, file = filout(:8 + lrid), form = 'unformatted',         &
+            & status = 'unknown')
        !
        !-------time varying evaporation/rain data contains a group of records
        !       with keyword 'Tseva  '
@@ -340,7 +326,6 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !-------locate 'Tseva ' record
        !       first time NEWKW  = .true., next times NEWKW  = .false.
        !
-       ieva   = 1
        ittdep = -1
        itold  = -1
        !
@@ -357,7 +342,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
                  & 'NO'      )
        if (lerror) then
-          if (noui) error = .true.
+          error = .true.
           call prterr(lundia    ,'U100'    ,keyw      )
           !
           goto 500
@@ -370,7 +355,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              write(message,'(a,a,a)') 'Last time of parameters for rain/evaporation model in file ', trim(fileva), ' <' 
              call prterr(lundia    ,'U042'    ,message  )
              !
-             if (noui) error = .true.
+             error = .true.
           endif
           goto 500
        endif
@@ -386,7 +371,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !---------reading error?
        !
        if (lerror) then
-          if (noui) error = .true.
+          error = .true.
           lerror = .false.
           goto 500
        endif
@@ -403,13 +388,11 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
            endif
        enddo
        !
-       !---------NOTE : in the future one should be able to interpolate across dt
+       rtime = rval(1)
        !
-       rteva(ieva) = rval(1)
-       !
-       ittdep = nint(rteva(ieva)/dt)
-       if (dtn(ittdep, rteva(ieva), dt)) then
-          if (noui) error = .true.
+       ittdep = nint(rtime/dt)
+       if (dtn(ittdep, rtime, dt)) then
+          error = .true.
           call prterr(lundia    ,'U044'    ,'Tseva'   )
        !
        endif
@@ -420,7 +403,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (ittdep>itstrt) then
              call prterr(lundia    ,'U041'    ,'First time Tseva >' )
              !
-             if (noui) error = .true.
+             error = .true.
           endif
           rec1st = .false.
        endif
@@ -428,32 +411,12 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (ittdep<=itold) then
           call prterr(lundia    ,'U060'    ,'Tseva'   )
           !
-          if (noui) error = .true.
+          error = .true.
        endif
        !
-       !---------define precipitation, evaporation and rain temperature data
+       !---------writing to LUNOUT
        !
-       precipt(ieva) = rval(2)
-       evapor(ieva) = rval(3)
-       train(ieva) = rval(4)
-       !
-       !---------writing to LUNOUT only if NOUI = .true.
-       !
-       if (noui) then
-          write (lunout) (rval(l), l = 1, nlook)
-       endif
-       !
-       !---------check if IEVA exceeds maximum value, then IEVA will be
-       !         reset, for NOUI = .true. this will never appear
-       !
-       if (.not.noui) ieva = ieva + 1
-       !
-       if (ieva>mxevat) then
-          call prterr(lundia    ,'U958'    ,' '       )
-          !
-          ieva = mxevat
-          goto 500
-       endif
+       write (lunout) (rval(l), l = 1, nlook)
        !
        !---------next time to read
        !
@@ -479,13 +442,12 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              goto 9999
           endif
        endif
-       nevatm = ieva - 1
     endif
     !
     !-----close files
     !
  9999 continue
-    if (noui .and. lunout/=8) then
+    if (lunout/=8) then
        if (error) then
           close (lunout, status = 'delete')
        else

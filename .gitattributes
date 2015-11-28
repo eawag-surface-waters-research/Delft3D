@@ -324,7 +324,6 @@ src/engines_gpl/flow2d3d/packages/data/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/data.vfproj -text
 src/engines_gpl/flow2d3d/packages/data/include/address.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/adv2d.igs -text
-src/engines_gpl/flow2d3d/packages/data/include/autok.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/bcdat.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/bedformpar.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/betaro.igs -text
@@ -1066,7 +1065,6 @@ src/engines_gpl/flow2d3d/packages/kernel/src/general/delnef.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/distance_gdp.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/dittar.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/dtn.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/general/endscr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/errmsg.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/evenquotes.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/filfmt.f90 -text

@@ -63,7 +63,6 @@ module globaldata
     !
     include 'address.igs'
     include 'adv2d.igs'
-    include 'autok.igs'
     include 'bcdat.igs'
     include 'bedformpar.igs'
     include 'betaro.igs'
@@ -148,7 +147,6 @@ module globaldata
     type globdat
        type (gd_address)  , pointer :: gdaddress
        type (gd_adv2d)     , pointer :: gdadv2d
-       type (gd_autok)    , pointer :: gdautok
        type (gd_bcdat)    , pointer :: gdbcdat
        type (gd_bedformpar), pointer :: gdbedformpar
        type (gd_betaro)   , pointer :: gdbetaro

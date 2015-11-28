@@ -1,4 +1,4 @@
-subroutine errpnt(pntnam    ,soort     ,callty    ,gdp       )
+subroutine errpnt(pntnam    ,dtype     ,callty    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -51,7 +51,7 @@ subroutine errpnt(pntnam    ,soort     ,callty    ,gdp       )
 !
     character(*), intent(in)       :: callty !!  Type of call 'getprt' or 'makptr'
     character(*), intent(in)       :: pntnam !!  Character string containing array name (hence max 6 characters).
-    character(*), intent(in)       :: soort  !!  Character string containing type of pointer to be made
+    character(*), intent(in)       :: dtype  !!  Character string containing data type of the pointer to be created
 !
 ! Local variables
 !
@@ -61,10 +61,10 @@ subroutine errpnt(pntnam    ,soort     ,callty    ,gdp       )
 !
     lundia => gdp%gdinout%lundia
     if (lundia /= 0) then
-       write (lundia, *) '*** ERROR in ', soort, ' array ', callty, ' of ', pntnam
+       write (lundia, *) '*** ERROR in ', dtype, ' array ', callty, ' of ', pntnam
        write (lundia, *) '          Contact Deltares'
     endif
-    write (*, *) '*** ERROR in ', soort, ' array ', callty, ' of ', pntnam
+    write (*, *) '*** ERROR in ', dtype, ' array ', callty, ' of ', pntnam
     write (*, *) '          Contact Deltares'
     call d3stop(1, gdp)
 end subroutine errpnt

@@ -1,4 +1,4 @@
-subroutine esm_alloc_char(lundia, error, verify, gdp)
+subroutine esm_alloc_char(lundia, error, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -72,13 +72,10 @@ subroutine esm_alloc_char(lundia, error, verify, gdp)
 !
     integer              :: lundia ! Description and declaration in inout.igs
     logical, intent(out) :: error  ! TRUE if an error is encountered
-    logical, intent(in)  :: verify ! TRUE  if current program=MD-VER
-                                   ! FALSE if current program=TRISIM
 !
 ! Local variables
 !
     integer           :: ierr   ! errorflag 
-    integer           :: kfacvr ! Multiplication factor; 0 if VERIFY=TRUE 1 if VERIFY=FALSE for arrays before fcorio, which are not used with verify
     integer, external :: mkcpnt
     character(6)      :: pntnam ! Pointername 
 !
@@ -96,11 +93,6 @@ subroutine esm_alloc_char(lundia, error, verify, gdp)
     nsluv     => gdp%d%nsluv
     !
     ! Initialize local variable
-    ! note: because the difference between verify and simulation for
-    !       character array's very small is kfacvr = 1 per definition
-    !
-    kfacvr = 1
-    if (verify) kfacvr = 0
     !
     ! arrays for: discharge sources
     !
@@ -110,7 +102,7 @@ subroutine esm_alloc_char(lundia, error, verify, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'dismmt'        !  Global data
-    ierr = mkcpnt(pntnam, nsrc*kfacvr, gdp)
+    ierr = mkcpnt(pntnam, nsrc, gdp)
                              !  Option to take momentum into account
                              !  for the disch. Time dependent values
                              !  for velocity magnitude and direction
@@ -150,7 +142,7 @@ subroutine esm_alloc_char(lundia, error, verify, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'tprofc'        !  Global data
-    ierr = mkcpnt(pntnam, nto*lstsc*10*kfacvr, gdp)
+    ierr = mkcpnt(pntnam, nto*lstsc*10, gdp)
                              !  Shape function for constituent
                              !     - uniform
                              !     - linear

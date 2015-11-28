@@ -246,7 +246,6 @@
 		<File RelativePath="src\general\distance_gdp.f90"/>
 		<File RelativePath="src\general\dittar.f90"/>
 		<File RelativePath="src\general\dtn.f90"/>
-		<File RelativePath="src\general\endscr.f90"/>
 		<File RelativePath="src\general\errmsg.f90"/>
 		<File RelativePath="src\general\evenquotes.f90"/>
 		<File RelativePath="src\general\filfmt.f90"/>

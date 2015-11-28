@@ -1,5 +1,5 @@
-subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
-                & soort     ,gdp       )
+subroutine decarr(lunmd     ,lundia    ,error     ,runid     , &
+                & prgnm     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -98,13 +98,11 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     integer         :: lundia      !  Description and declaration in inout.igs
     integer         :: lunmd       !  Description and declaration in inout.igs
     logical         :: error       !!  Flag=TRUE if an error is encountered
-    logical         :: verify      !!  Flag=TRUE  if current program=MD-VER
-                                   !!      =FALSE if current program=TRISIM
     character(*)    :: runid       !!  Run identification code for the cur-
                                    !!  rent simulation (used to determine
                                    !!  the names of the in- /output files
                                    !!  used by the system)
-    character(6)    :: soort       !!  Help var. determining the prog. name
+    character(6)    :: prgnm       !!  Help var. determining the prog. name
                                    !!  currently active
 !
 ! Local variables
@@ -193,7 +191,7 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     ! read dimensions out of md-file
     !
     call dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
-             & soort     ,wind      ,salin     ,temp      ,sedim     , &
+             & prgnm     ,wind      ,salin     ,temp      ,sedim     , &
              & const     ,secflo    ,drogue    ,wave      ,iweflg    , &
              & htur2d    ,mudlay    , &
              & flmd2l    ,zmodel    ,nonhyd    ,roller    ,wavcmp    , &
@@ -242,14 +240,13 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     ! calculate indices of integer arrays
     !
     lerror = .false.
-    call esm_alloc_int(lundia    ,lerror    ,verify    ,zmodel    , &
-             & gdp       )
+    call esm_alloc_int(lundia    ,lerror    ,zmodel    ,gdp       )
     if (lerror) error = .true.
     !
     ! calculate indices of character arrays
     !
     lerror = .false.
-    call esm_alloc_char(lundia    ,lerror    ,verify    ,gdp       )
+    call esm_alloc_char(lundia    ,lerror    ,gdp       )
     if (lerror) error = .true.
     !
     ! Allocate arrays in GDP structure using read dimensions

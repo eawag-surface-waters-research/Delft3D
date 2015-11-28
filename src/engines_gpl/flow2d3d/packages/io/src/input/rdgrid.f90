@@ -1,10 +1,8 @@
 subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
-                & mdfrec    ,noui      ,runid     ,mmax      ,nmaxus    , &
-                & filgrd    ,fmtgrd    ,flgrd     ,mngrd     ,mxnppt    , &
-                & ncpgrd    ,fildry    ,fmtdry    ,fldry     ,mndry     , &
-                & mxndry    ,ndry      ,filtd     ,fmttd     ,dirtd     , &
-                & fltd      ,mntd      ,mxntd     ,ntd       ,filcut    , &
-                & flcut     ,fil45     ,fl45      ,gdp       )
+                & mdfrec    ,runid     ,mmax      ,nmaxus    ,filgrd    , &
+                & fmtgrd    ,flgrd     ,fildry    ,fmtdry    ,fldry     , &
+                & filtd     ,fmttd     ,fltd      ,filcut    ,flcut     , &
+                & fil45     ,fl45      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -37,7 +35,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
 !
 !    Function: - Reads from either the MD-file or the attribute
 !                file(s) the following data : FILGRD, FMTGRD,
-!                MNGRD, MNDRY, FILTD, FMTTD & MNTD
+!                FILTD, FMTTD
 !              - Sets the default computational grid enclosure if
 !                none is specified
 !              - Checked against 0 values for c.grid enclosure,
@@ -73,34 +71,14 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     integer                                      :: lundia !  Description and declaration in inout.igs
     integer                                      :: lunmd  !  Description and declaration in inout.igs
     integer                        , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                        , intent(in)  :: mxndry !!  Maximum number of dry points
-                                                           !!  sections
-    integer                        , intent(in)  :: mxnppt !!  Maximum number of grid enclosure,
-                                                           !!  thindams etc. points from interactive
-                                                           !!  reading
-    integer                        , intent(in)  :: mxntd  !!  Maximum number of thin dams from
-                                                           !!  interactive reading
-    integer                        , intent(out) :: ncpgrd !!  Actual number of computational grid
-                                                           !!  enclosure points
-    integer                        , intent(out) :: ndry   !!  Actual number of dry points
-                                                           !!  sections
     integer                        , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    integer                                      :: nrrec  !!  Pointer to the record number in the
-                                                           !!  MD-file
-    integer                        , intent(out) :: ntd    !!  Actual number of thin dams
-    integer, dimension(2, mxnppt)                :: mngrd  !!  M,N coordinates for grid enclosure
-                                                           !!  points
-    integer, dimension(4, mxndry)                :: mndry  !!  M,N coordinates for begin and end
-                                                           !!  dry points for dams
-    integer, dimension(4, mxntd)                 :: mntd   !!  M,N coordinates for begin and end
-                                                           !!  point thin dams
+    integer                                      :: nrrec  !!  Pointer to the record number in the MD-file
     logical                                      :: fl45
     logical                                      :: flcut
     logical                                      :: fldry  !  Description and declaration in tmpfil.igs
     logical                                      :: flgrd  !  Description and declaration in tmpfil.igs
     logical                                      :: fltd   !  Description and declaration in tmpfil.igs
     logical                                      :: error  !!  Flag=TRUE if an error is encountered
-    logical                        , intent(in)  :: noui   !!
     logical                        , intent(in)  :: zmodel !  Description and declaration in procs.igs
     character(*)                                 :: fil45
     character(*)                                 :: filcut
@@ -113,8 +91,6 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
                                                            !!  rent simulation (used to determine
                                                            !!  the names of the in- /output files
                                                            !!  used by the system)
-    character(1), dimension(mxntd)               :: dirtd  !!  Velocity points on which the thin
-                                                           !!  dams have been specified (U or V)
     character(2)                   , intent(out) :: fmtdry !!  File format for the dam points file
     character(2)                   , intent(out) :: fmtgrd !!  File format for the grid enclosure
                                                            !!  file
@@ -124,12 +100,9 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
 !
     integer               :: i      ! Help var. 
     integer               :: idef   ! Help var. containing default va- lue(s) for integer variable 
-    integer               :: idry   ! Help var. for the dry points 
     integer               :: imnd   ! Help var. for the dry points 
-    integer               :: imng   ! Help var. for the grid points 
     integer               :: imnt   ! Help var. for the thin dam points 
     integer               :: ippt   ! Help var. for the grid points 
-    integer               :: itd    ! Help var. for the dam points 
     integer               :: j      ! Help var. 
     integer               :: lenc   ! Help var. (length of var. cvar to be looked for in the MD-file) 
     integer               :: lfnm   ! actual length of file name
@@ -182,14 +155,6 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     fmtdry = 'FR'
     fmttd  = 'FR'
     !
-    ncpgrd = 0
-    ndry   = 0
-    ntd    = 0
-    !
-    do n = 1, mxnppt
-       dirtd(n) = 'U'
-    enddo
-    !
     ! initialize local paramters
     !
     fildef = ' '
@@ -218,13 +183,11 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     !
     if (parll) goto 201
     !
-    ! open semi-scratch file, only if noui = .true.
+    ! open semi-scratch file
     !
-    if (noui) then
-       lungrd = newlun(gdp)
-       open (lungrd, file = 'TMP_' // fixid(1:lrid) // '.grd',                  &
-            & form = 'unformatted', status = 'unknown')
-    endif
+    lungrd = newlun(gdp)
+    open (lungrd, file = 'TMP_' // fixid(1:lrid) // '.grd',                  &
+        & form = 'unformatted', status = 'unknown')
     !
     ! 'Filgrd': grid enclosure file
     !
@@ -266,12 +229,10 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           fmtgrd = 'UN'
        endif
        !
-       ! read data from external file only if noui = .true.
+       ! read data from external file
        !
-       if (noui) then
-          call grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
-                    & flgrd     ,gdp       )
-       endif
+       call grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
+                 & flgrd     ,gdp       )
     else
        !
        ! No grid enclosure file, you have to specify one
@@ -282,29 +243,25 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     !
     ! close files
     !
-    if (noui) then
-       if (error) then
-          close (lungrd, status = 'delete')
-       else
-          close (lungrd)
-       endif
+    if (error) then
+       close (lungrd, status = 'delete')
+    else
+       close (lungrd)
     endif
 201 continue
     !=======================================================================
-    ! open semi-scratch file, only if noui = .true.
+    ! open semi-scratch file
     !
-    if (noui) then
-       lundry = newlun(gdp)
-       filnam = 'TMP_' // fixid(1:lrid) // '.dry'
-       !
-       ! append node number to file name in case of parallel computing within single-domain case
-       !
-       if ( parll ) then
-          call remove_leading_spaces(filnam,lfnm)
-          write(filnam(lfnm+1:lfnm+4),666) inode
-       endif
-       open (lundry, file = trim(filnam), form = 'unformatted', status = 'unknown')
+    lundry = newlun(gdp)
+    filnam = 'TMP_' // fixid(1:lrid) // '.dry'
+    !
+    ! append node number to file name in case of parallel computing within single-domain case
+    !
+    if ( parll ) then
+       call remove_leading_spaces(filnam,lfnm)
+       write(filnam(lfnm+1:lfnm+4),666) inode
     endif
+    open (lundry, file = trim(filnam), form = 'unformatted', status = 'unknown')
     !
     ! locate 'Fildry' record for dry points in extra input file
     ! If NLOOK = 0 and 'Fildry' not found => no error and item skipped
@@ -358,28 +315,17 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        fmtdry = 'FR'
        if (fmttmp(:2)=='un') fmtdry = 'UN'
        !
-       ! read data from external file only if noui = .true.
+       ! read data from external file
        !
-       if (noui) then
-          call dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
-                    & fldry     ,gdp       )
-       endif
+       call dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
+                 & fldry     ,gdp       )
     !
     ! dry points in file? <NO>
     !
     else
        !
-       ! Initialize "global" array MNDRY (4,MXNPPT)
-       !
-       do n = 1, mxnppt
-          do j = 1, 4
-             mndry(j, n) = 0
-          enddo
-       enddo
-       !
        ! locate 'MNdry' record for dry points
        !
-       idry = 1
        imnd = 1
        !
        keyw  = 'MNdry '
@@ -409,7 +355,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        !
        if (lerror) goto 300
        !
-       ! define mndry, and test values
+       ! test values
        !
        if (ival(1)==0 .or. ival(2)==0 .or. ival(3)==0 .or. ival(4)==0) then
           if (imnd>1) then
@@ -427,30 +373,14 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           ! Note: for single domain runs, outsd = .FALSE., i.e. dry points are completely inside domain
           !
           call adjlin (ival, outsd, mmax, nmaxus, onParbndIsInside)
-          mndry(1, idry) = ival(1)
-          mndry(2, idry) = ival(2)
-          mndry(3, idry) = ival(3)
-          mndry(4, idry) = ival(4)
           !
-          ! write mndry semi-scratch file if noui = .true.
+          ! write indices to semi-scratch file
           !
-          if (noui .and. .not.outsd) then
-             write (lundry) (mndry(j, idry), j = 1, 4)
+          if (.not.outsd) then
+             write (lundry) (ival(j), j = 1, 4)
           endif
           !
-          ! check if idry exceeds maximum value, then idry will be
-          ! reset, for noui = .true. this will never occur
-          ! reset 1 to large, because ndry = idry - 1
-          !
-          if (.not.noui)  idry = idry + 1
           if (.not.outsd) imnd = imnd + 1
-          if (idry>mxndry) then
-             lerror = .true.
-             write (errmsg, '(i3)') idry - mxndry
-             call prterr(lundia    ,'U131'    ,errmsg    )
-             idry = mxndry + 1
-             goto 300
-          endif
           !
           ! next records newkw = false
           !
@@ -469,7 +399,6 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        ! define actual number of dry point sections and define fldry
        !
   300  continue
-       ndry = idry - 1
        imnd = imnd - 1
        !
        fldry = .true.
@@ -482,28 +411,24 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     !
     ! close files
     !
-    if (noui) then
-       if (error .or. .not.fldry) then
-          close (lundry, status = 'delete')
-       else
-          close (lundry)
-       endif
+    if (error .or. .not.fldry) then
+       close (lundry, status = 'delete')
+    else
+       close (lundry)
     endif
     !=======================================================================
-    ! open semi-scratch file, only if noui = .true.
+    ! open semi-scratch file
     !
-    if (noui) then
-       luntd = newlun(gdp)
-       filnam = 'TMP_' // fixid(1:lrid) // '.td'
-       !
-       ! append node number to file name in case of parallel computing within single-domain case
-       !
-       if ( parll ) then
-          call remove_leading_spaces(filnam,lfnm)
-          write(filnam(lfnm+1:lfnm+4),666) inode
-       endif
-       open (luntd, file = trim(filnam), form = 'unformatted', status = 'unknown')
+    luntd = newlun(gdp)
+    filnam = 'TMP_' // fixid(1:lrid) // '.td'
+    !
+    ! append node number to file name in case of parallel computing within single-domain case
+    !
+    if ( parll ) then
+       call remove_leading_spaces(filnam,lfnm)
+       write(filnam(lfnm+1:lfnm+4),666) inode
     endif
+    open (luntd, file = trim(filnam), form = 'unformatted', status = 'unknown')
     !
     ! locate 'Filtd ' record for thin dams in extra input file
     !
@@ -543,29 +468,18 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        fmttd = 'FR'
        if (fmttmp(:2)=='un') fmttd = 'UN'
        !
-       ! read data from external file only if noui = .true.
+       ! read data from external file
        !
-       if (noui) then
-          call tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
-                   & fltd      ,gdp       )
-       endif
+       call tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
+                & fltd      ,gdp       )
     !
     ! thin dams in file? <NO>
     !
     else
        !
-       ! Initialize "global" array MNTD  (4,MXNPPT)
-       !
-       do n = 1, mxnppt
-          do j = 1, 4
-             mntd(j, n) = 0
-          enddo
-       enddo
-       !
        ! Locate 'MNtd' record for m1td, n1td, m2td, n2td and dirtd
        ! first time newkw = .true.
        !
-       itd  = 1
        imnt = 1
        keyw  = 'MNtd  '
        newkw = .true.
@@ -594,14 +508,8 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        !
        if (lerror) goto 400
        !
-       ! define mntd, and test values
+       ! test values
        !
-       !      mntd(1, itd) = ival(1)
-       !      mntd(2, itd) = ival(2)
-       !      mntd(3, itd) = ival(3)
-       !      mntd(4, itd) = ival(4)
-       !      if (mntd(1, itd)==0 .or. mntd(2, itd)==0 .or. mntd(3, itd)==0 .or.       &
-       !        & mntd(4, itd)==0) then
        if (ival(1)==0 .or. ival(2)==0 .or. ival(3)==0 .or. ival(4)==0) then
           if (imnt > 1) then
              lerror = .true.
@@ -614,7 +522,6 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
                     & mdfrec    ,cval      ,cdef      ,lenc      ,nrrec     , &
                     & ntrec     ,lundia    ,gdp       )
           if (lerror) goto 400
-          dirtd(itd) = cval
           ival(1) = ival(1) -mfg +1
           ival(2) = ival(2) -nfg +1
           ival(3) = ival(3) -mfg +1
@@ -625,30 +532,14 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           ! Note: for single domain runs, outsd = .FALSE., i.e. thin dams are completely inside domain
           !
           call adjlin (ival, outsd, mmax, nmaxus, onParbndIsInside)
-          mntd(1, itd) = ival(1)
-          mntd(2, itd) = ival(2)
-          mntd(3, itd) = ival(3)
-          mntd(4, itd) = ival(4)
           !
-          ! write mntd, dirtd to semi-scratch file if noui = .true.
+          ! write data to semi-scratch file
           !
-          if (noui .and. .not.outsd) then
-             write (luntd) (mntd(j, itd), j = 1, 4), dirtd(itd)
+          if (.not.outsd) then
+             write (luntd) (ival(j), j = 1, 4), cval
           endif
           !
-          ! check if itd exceeds maximum value, then itd will be
-          ! reset, for noui = .true. this will never occur
-          ! reset 1 to large, because ntd = itd - 1
-          !
-          if (.not.noui)   itd = itd + 1
           if (.not.outsd) imnt = imnt + 1
-          if (itd > mxntd) then
-             lerror = .true.
-             write (errmsg, '(i3)') itd - mxntd
-             call prterr(lundia    ,'U132'    ,errmsg    )
-             itd = mxntd + 1
-             goto 400
-          endif
           !
           ! next records newkw = false
           !
@@ -668,7 +559,6 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        ! and define fltd
        !
   400  continue
-       ntd  = itd - 1
        imnt = imnt - 1
        fltd = .true.
        if (imnt==0) then
@@ -682,12 +572,10 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
     !
     ! close files
     !
-    if (noui) then
-       if (error .or. .not.fltd) then
-          close (luntd, status = 'delete')
-       else
-          close (luntd)
-       endif
+    if (error .or. .not.fltd) then
+       close (luntd, status = 'delete')
+    else
+       close (luntd)
     endif
     !
     ! open semi-scratch file for "cut-cell" definition of grids

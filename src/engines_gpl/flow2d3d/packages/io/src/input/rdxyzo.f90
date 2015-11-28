@@ -1,9 +1,8 @@
 subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-                & noui      ,kmax      ,zbot      ,ztop      , &
-                & dx        ,dy        ,filrgf    ,fmtrgf    ,thick     , &
-                & anglat    ,anglon    ,grdang    ,sphere    ,sferic    , &
-                & zmodel    ,mmax      ,nmax      ,xcor      ,ycor      , &
-                & gdp       )
+                & kmax      ,zbot      ,ztop      ,dx        ,dy        , &
+                & filrgf    ,fmtrgf    ,thick     ,anglat    ,anglon    , &
+                & grdang    ,sphere    ,sferic    ,zmodel    ,mmax      , &
+                & nmax      ,xcor      ,ycor      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2015.                                
@@ -70,7 +69,6 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                :: nrrec  !!  Pointer to the record number in the
                                                      !!  MD-file
     logical                  , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical                  , intent(in)  :: noui   !!  Flag for reading from User Interface
     logical                  , intent(out) :: sferic !  Description and declaration in tricom.igs
     logical                  , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp)                               :: anglat !!  - Angle of latitude of the model
@@ -179,7 +177,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           call filfmt(lundia    ,keyw      ,fmttmp    ,lerror    ,gdp       )
           if (lerror) then
-             if (noui) error = .true.
+             error = .true.
              lerror = .false.
              fmttmp = fmtdef(3:)
           endif
@@ -188,16 +186,14 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        fmtrgf = 'FR'
        if (fmttmp(:2)=='un') fmtrgf = 'UN'
        !
-       ! test file existence only in case noui = .true.
+       ! test file existence
        !
-       if (noui) then
-          lfile = len(filrgf)
-          error = .not.exifil(filrgf, lundia)
-          !
-          if (fmtrgf/='FR') then
-             write(lundia, '(a)') '*** error inconsistent format for grid file'
-             error = .true.
-          endif
+       lfile = len(filrgf)
+       error = .not.exifil(filrgf, lundia)
+       !
+       if (fmtrgf/='FR') then
+          write(lundia, '(a)') '*** error inconsistent format for grid file'
+          error = .true.
        endif
        !
        ! Read sferic, xcor and ycor
@@ -273,7 +269,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! reading error?
        !
        if (lerror) then
-          if (noui) error = .true.
+          error = .true.
           lerror = .false.
        else
           do k = 1, kmax
