@@ -82,9 +82,9 @@ module TREE_STRUCTURES
    !
    public  :: TREE_DATA
    public  :: tree_create, tree_create_node, tree_add_node, tree_get_node_by_name, tree_num_nodes, &
-              tree_get_data_ptr, tree_put_data, tree_get_name, &
-              tree_get_datatype, tree_get_data_string,         &
-              tree_traverse, tree_traverse_level, print_tree, &
+              tree_get_data_ptr, tree_put_data, tree_get_name, tree_get_data,                      &
+              tree_get_datatype, tree_get_data_string,                                             &
+              tree_traverse, tree_traverse_level, print_tree,                                      &
               tree_fold, tree_destroy
    ! nested function has to be public for gfortran
    public ::  dealloc_tree_data
@@ -255,6 +255,26 @@ function tree_get_name( tree ) result( node_name )
       node_name(i:i) =  tree%node_name(i)
    end do
 end function tree_get_name
+
+! tree_get_data --
+!    Return the data of the tree or node
+!
+! Arguments:
+!    tree         The tree or node
+!
+function tree_get_data( tree ) result( node_data )
+   type(TREE_DATA), pointer :: tree
+   character(len=80)        :: node_data
+
+   integer                  :: length
+   integer                  :: i
+
+   length    = min(80, size( tree%node_data ))
+   node_data = ' '
+   do i=1,length
+      node_data(i:i) =  tree%node_data(i)
+   end do
+end function tree_get_data
 
 ! tree_get_datatype --
 !    Return the data type for the data stored in the tree or node
