@@ -1196,7 +1196,14 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
           ! Check validity of input data
           !
           do nm = 1, nmmax
-             if (abs(dims%celltype(nm)) == 1) then
+             !
+             ! Do not check the ghost cells: if (abs(dims%celltype(nm)) == 1) then
+             ! Reason: Open boundaries in the ghost areas currently have kcs=-1 and will be included in this extended check
+             !         But invalid data on open boundaries is allowed
+             ! Motivation: Introduction of kcs=-2 (or 2) in ghost areas on these locations will have more impact
+             !             And a value in a ghost cell will be checked in the other partition, where this value is in an active cell
+             !
+             if (dims%celltype(nm) == 1) then
                 !
                 ! At an internal point the composition is important.
                 ! Check the values carefully before continuing.
@@ -1466,7 +1473,14 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                    ! Check validity of input data.
                    !
                    do nm = 1, nmmax
-                      if (abs(dims%celltype(nm)) == 1) then
+                      !
+                      ! Do not check the ghost cells: if (abs(dims%celltype(nm)) == 1) then
+                      ! Reason: Open boundaries in the ghost areas currently have kcs=-1 and will be included in this extended check
+                      !         But invalid data on open boundaries is allowed
+                      ! Motivation: Introduction of kcs=-2 (or 2) in ghost areas on these locations will have more impact
+                      !             And a value in a ghost cell will be checked in the other partition, where this value is in an active cell
+                      !
+                      if (dims%celltype(nm) == 1) then
                          !
                          ! At an internal point the composition of all layers is important.
                          ! Check the values carefully before continuing.
@@ -1726,7 +1740,14 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                    ! Check validity of input data.
                    !
                    do nm = 1, nmmax
-                      if (abs(dims%celltype(nm)) == 1) then
+                      !
+                      ! Do not check the ghost cells: if (abs(dims%celltype(nm)) == 1) then
+                      ! Reason: Open boundaries in the ghost areas currently have kcs=-1 and will be included in this extended check
+                      !         But invalid data on open boundaries is allowed
+                      ! Motivation: Introduction of kcs=-2 (or 2) in ghost areas on these locations will have more impact
+                      !             And a value in a ghost cell will be checked in the other partition, where this value is in an active cell
+                      !
+                      if (dims%celltype(nm) == 1) then
                          !
                          ! At an internal point the composition of all layers is important.
                          ! Check the values carefully before continuing.
