@@ -4777,6 +4777,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/gridcelldata.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gridfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gridinterp.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gsharp.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/hdffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/hls2rgb.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/idx2rgb.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/incanalysis.m -text
