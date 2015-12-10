@@ -91,6 +91,7 @@ module m_ec_filereader
          fileReaderPtr%tframe%ec_timestep_unit = ec_undef_int
          fileReaderPtr%tframe%nr_timesteps = ec_undef_hp
          fileReaderPtr%lastReadTime = ec_undef_hp
+         fileReaderPtr%end_of_data = .false.
       end function ecFileReaderCreate
       
       ! =======================================================================
@@ -231,9 +232,11 @@ module m_ec_filereader
                   if (fileReaderPtr%nItems==1) then         ! RL: preserving original code 
                      success = ecBCReadBlock(fileReaderPtr, fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%timesteps, &
                                                             fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1dPtr)
-                     fieldPtrA => fileReaderPtr%items(1)%ptr%sourceT1FieldPtr
-                     fileReaderPtr%items(1)%ptr%sourceT1FieldPtr => fileReaderPtr%items(1)%ptr%sourceT0FieldPtr
-                     fileReaderPtr%items(1)%ptr%sourceT0FieldPtr => fieldPtrA
+                     if (success) then
+                        fieldPtrA => fileReaderPtr%items(1)%ptr%sourceT1FieldPtr
+                        fileReaderPtr%items(1)%ptr%sourceT1FieldPtr => fileReaderPtr%items(1)%ptr%sourceT0FieldPtr
+                        fileReaderPtr%items(1)%ptr%sourceT0FieldPtr => fieldPtrA
+                     endif
                   end if 
                   if (fileReaderPtr%nItems>1) then          ! RL: in the case of multiple items for this filereader
                      allocate(values(fileReaderPtr%bc%numcols)) 

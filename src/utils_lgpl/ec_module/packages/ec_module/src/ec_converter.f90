@@ -867,7 +867,7 @@ module m_ec_converter
                      call setECMessage("ERROR: ec_converter::ecConverterUniform: Unsupported operand type requested.")
                      return
                end select
-            case (interpolate_time) ! performs implicit space conversion from 2D to 3D, 
+            case (interpolate_time, interpolate_time_extrapolation_ok) ! performs implicit space conversion from 2D to 3D, 
                ! ===== operation =====
                select case(connection%converterPtr%operandType)
                   case(operand_replace_element)

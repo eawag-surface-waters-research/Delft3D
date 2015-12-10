@@ -931,7 +931,6 @@ contains
          !
          integer        :: istat !< status of operation
          character(132) :: rec   !< content of a line
-         logical        :: eof   !< end-of_file mark 
          !
          success = .true.
          nr_rows = 0
@@ -948,9 +947,9 @@ contains
          !
          do
             if (fileReaderPtr%ofType == provFile_bc) then 
-               if (.not.ecBCReadLine(fileReaderPtr, recout=rec, eof=eof)) then 
+               if (.not.ecBCReadLine(fileReaderPtr, recout=rec)) then 
                   ! TODO (RL): insert real message handling/reporting here (deltarescommon message)
-                  if (eof) then           ! legitimate way to exit, data simply ended  
+                  if (fileReaderPtr%end_of_data) then           ! legitimate way to exit, data simply ended  
                      istat = 0
                   else                    ! reading failed but not eof! something wrong
                      istat = -666      
@@ -1046,10 +1045,10 @@ contains
          is_astro=.false.
          do
             if (fileReaderPtr%ofType == provFile_bc) then 
-               if (.not.ecBCReadLine(fileReaderPtr, recout=rec, eof=eof)) then 
+               if (.not.ecBCReadLine(fileReaderPtr, recout=rec)) then 
                   ! TODO (RL): insert real message handling/reporting here (deltarescommon message)
                   istat = -666   
-                  success = eof        ! if reading failed, allow only if eof 
+                  success = fileReaderPtr%end_of_data        ! if reading failed, allow only if at end of data
                   exit
                else
                   istat = 0

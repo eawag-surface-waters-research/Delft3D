@@ -502,7 +502,7 @@ contains
 
   !> Read the next record from a *.bc file.
   !> Requests a line from the EcBC object's stringbuffer block, advancing its pointer in the block
-  function ecBCReadLine(fileReaderPtr, values, time_steps, recout, eof) result(success)
+  function ecBCReadLine(fileReaderPtr, values, time_steps, recout) result(success)
     use m_ec_netcdf_timeseries
     implicit none
     logical                                                 :: success       !< function status
@@ -510,7 +510,6 @@ contains
     real(hp), optional,                       intent(inout) :: time_steps    !< number of time steps of duration: seconds
     real(hp), dimension(:), optional,         intent(inout) :: values        !< vector of values for a BC_FUNC_TSERIES
     character(len=*), optional,               intent(out)   :: recout        !< line prepared from input for caller
-    logical, optional,                        intent(out)   :: eof           !< reading failed, but only because eof
 
     !
     type(tEcBCBlock),           pointer                     :: bcPtr
@@ -528,7 +527,7 @@ contains
     real(kind=hp)  :: amplitude
 
     bcPtr => fileReaderPtr%bc
-
+    
     success = .false.
 
     select case (bcPtr%ftype)
@@ -541,19 +540,14 @@ contains
        endif
        rec = ''
        reclen = len_trim(rec)
-       if (present(eof)) then
-          eof = .false.
-       endif
        do while(reclen==0)
           if (mf_eof(bcPtr%fhandle)) then
              select case (BCPtr%func)
-             case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
+             case (BC_FUNC_TSERIES, BC_FUNC_TIM3D, BC_FUNC_CONSTANT)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
                 call setECMessage("Datablock end (eof) has been reached.")
+                fileReaderPtr%end_of_data = .true.
              end select
-             if (present(eof)) then
-                eof = .true.
-             endif
              return
           endif
 
@@ -572,15 +566,15 @@ contains
           commentpos = index(rec,'!')
           if (commentpos>0) reclen = min(reclen,commentpos-1)
           reclen = len_trim(rec(1:reclen))                                 ! Finally remove trailing spaces
-          if (index(rec,'[forcing]')>0) then
+          if (index(rec,'[forcing]'         )>0 .or. &
+              index(rec,'[Boundary]'        )>0 .or. &
+              index(rec,'[LateralDischarge]')>0) then ! new boundary chapter       
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
                 call setECMessage("Datablock end (new [forcing] block) has been prematurely reached.")
+                fileReaderPtr%end_of_data = .true.
              end select
-             if (present(eof)) then
-                eof = .true.
-             endif
              return
           endif
        enddo
@@ -600,6 +594,9 @@ contains
        endif
 
        select case (BCPtr%func)
+       case (BC_FUNC_CONSTANT)
+          ec_timesteps(1) = 0.0d+0
+          read (BCPtr%columns(1), *)  values(1)
        case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
           read (BCPtr%columns(n_col_time), *) ec_timesteps(1)
           ! Convert source time to kernel time:

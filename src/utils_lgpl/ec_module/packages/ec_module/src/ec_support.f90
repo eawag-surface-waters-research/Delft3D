@@ -864,14 +864,22 @@ end subroutine ecInstanceListSourceItems
          integer :: factor_out   !< conversion factor from k_timestep_unit to seconds     (Kernel)
          integer :: factor       !< resulting conversion factor 
          !
-         factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
-         factor_out = ecSupportTimeUnitConversionFactor(tframe%k_timestep_unit)
-         factor = real(factor_in)/real(factor_out)
-         !
-         timesteps = thistime * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp
-         !
-         ! Correct for Kernel's timzone.
-         timesteps = timesteps + tframe%k_timezone*3600.0_hp
+         if (tframe%k_refdate > (-1.0d+0 + 1.0d-10)) then
+            ! convert time stamp in file (*.tmp) to kernel time stamp
+            factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
+            factor_out = ecSupportTimeUnitConversionFactor(tframe%k_timestep_unit)
+            factor = real(factor_in)/real(factor_out)
+            !
+            timesteps = thistime * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp
+            !
+            ! Correct for Kernel's timzone.
+            timesteps = timesteps + tframe%k_timezone*3600.0_hp
+         else
+            ! no kernel ref date defined, convert to modified julian day
+            factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
+            timesteps = tframe%ec_refdate + factor_in * thistime / 86400.0_hp
+         endif
+         
       end function ecSupportThisTimeToTimesteps
 
 end module m_ec_support

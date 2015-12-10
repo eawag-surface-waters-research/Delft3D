@@ -793,7 +793,13 @@ module m_ec_provider
                    success = ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)
                endif 
                if (success) then
-                   success = ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)
+                  if (fileReaderPtr%bc%func /= BC_FUNC_CONSTANT) then
+                     ! read second line for T1-Field
+                     success = ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)
+                  else
+                     item%sourceT1FieldPtr%timesteps = 54321.0D+10
+                     item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
+                  endif
                endif 
          end select 
          ! Add successfully created source Item to the FileReader
@@ -2225,7 +2231,7 @@ module m_ec_provider
           ! Initialize the new Converter.
           if (.not. (ecConverterSetType(instancePtr, converterId, convType_uniform))) return
           if (.not. (ecConverterSetOperand(instancePtr, converterId, operand_replace_element))) return
-          if (.not. (ecConverterSetInterpolation(instancePtr, converterId, interpolate_time))) return
+          if (.not. (ecConverterSetInterpolation(instancePtr, converterId, interpolate_time_extrapolation_ok))) return
           if (.not. (ecConverterSetElement(instancePtr, converterId, targetIndex))) return
 
           ! Construct a new Connection.
@@ -2802,22 +2808,31 @@ module m_ec_provider
          real(hp),            intent(in) :: k_timezone       !< Kernel's timezone.
          integer,             intent(in) :: k_timestep_unit  !< Kernel's time step unit (1=seconds, 2=minutes, 3=hours)
          real(hp), optional,  intent(in) :: dtnodal          !< Nodal factors update interval
+         real(hp) :: julianDay
          !
          success = .false.
          !
-         fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400000.5_hp)
-         fileReaderPtr%tframe%k_timezone = k_timezone
-         fileReaderPtr%tframe%k_timestep_unit = k_timestep_unit
+         if (k_refdate > -1) then
 
-         fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%k_refdate
-         fileReaderPtr%tframe%ec_timezone = fileReaderPtr%tframe%k_timezone
-         fileReaderPtr%tframe%ec_timestep_unit = fileReaderPtr%tframe%k_timestep_unit 
-         ! TODO: EB: sort out setting of detault ec/k_timestep_unit     ! RL: EC and kernel by default the same timeframe
-         if(present(dtnodal) .and. dtnodal /= 0.0_hp) then
-            fileReaderPtr%tframe%dtnodal = dtnodal
+            fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400000.5_hp)
+            fileReaderPtr%tframe%k_timezone = k_timezone
+            fileReaderPtr%tframe%k_timestep_unit = k_timestep_unit
+
+            fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%k_refdate
+            fileReaderPtr%tframe%ec_timezone = fileReaderPtr%tframe%k_timezone
+            fileReaderPtr%tframe%ec_timestep_unit = fileReaderPtr%tframe%k_timestep_unit 
+
+            if(present(dtnodal) .and. dtnodal /= 0.0_hp) then
+               fileReaderPtr%tframe%dtnodal = dtnodal
+            else
+               fileReaderPtr%tframe%dtnodal = 1e+20_hp
+            endif
+
          else
-            fileReaderPtr%tframe%dtnodal = 1e+20_hp
+            ! no kernel ref date defined
+            fileReaderPtr%tframe%k_refdate = -1
          endif
+
          !
          select case(fileReaderPtr%ofType)
             case (provFile_undefined)
@@ -2867,6 +2882,12 @@ module m_ec_provider
                if (fileReaderPtr%bc%func == BC_FUNC_TSERIES .or. fileReaderPtr%bc%func == BC_FUNC_TIM3D) then 
                   success = ecSupportTimestringToUnitAndRefdate(fileReaderPtr%bc%timeunit, &
                                                                 fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate)
+                  if (success) then
+                     ! TODO: handle MJD in a proper way. For now, abstract the .5 day that originated
+                     !       from the fact that in ecSupportTimestringToUnitAndRefdate the
+                     !       call to ymd2jul in leads to a rounded off integer value.
+                     fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%ec_refdate - 0.5d+0
+                  endif
                else 
                   success = .true.
                endif 

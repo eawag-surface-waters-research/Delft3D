@@ -289,6 +289,7 @@ module m_ec_typedefs
       integer                                             :: vectormax = 1           !< number of vector elements (from the demand side) 
                                                                                      !  This field is used to pass the dimensionality from the 
                                                                                      !            highest to the lowest level upon creation
+      logical                                             :: end_of_data             !< End of data reached?
       character(len=100), dimension(:), allocatable :: standard_names                ! Standard names by varid in a netcdf-file 
       character(len=100), dimension(:), allocatable :: variable_names                ! Variable names by varid in a netcdf file 
    end type tEcFileReader

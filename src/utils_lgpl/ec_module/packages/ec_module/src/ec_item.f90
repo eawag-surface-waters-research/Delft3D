@@ -210,7 +210,8 @@ module m_ec_item
          ! update the source Items
          do i=1, item%nConnections
             do j=1, item%connectionsPtr(i)%ptr%nSourceItems
-               if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps))) then
+               if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
+                          item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
                   !
                   ! No interpolation in time possible.
                   ! Check whether extrapolation is allowed
@@ -252,11 +253,12 @@ module m_ec_item
       ! =======================================================================
       
       !> Retrieve data from a FileReader as needed to achieve t0<=timesteps<=t1.
-      function ecItemUpdateSourceItem(instancePtr, item, timesteps) result(success)
-         logical                                  :: success     !< function status
-         type(tEcInstance), pointer               :: instancePtr !< intent(inout)
-         type(tEcItem),             intent(inout) :: item        !< the source item
-         real(hp),                  intent(in)    :: timesteps   !< objective: t0<=timesteps<=t1
+      function ecItemUpdateSourceItem(instancePtr, item, timesteps, interpol_type) result(success)
+         logical                                  :: success       !< function status
+         type(tEcInstance), pointer               :: instancePtr   !< intent(inout)
+         type(tEcItem),             intent(inout) :: item          !< the source item
+         real(hp),                  intent(in)    :: timesteps     !< objective: t0<=timesteps<=t1
+         integer ,                  intent(in)    :: interpol_type !< interpolation
          !
          integer                        :: i                       !< loop counter
          integer                        :: j                       !< loop counter
@@ -290,13 +292,17 @@ module m_ec_item
          
          ! timesteps < t0 : not supported 
          if (comparereal(timesteps, item%sourceT0FieldPtr%timesteps) == -1) then
-            write(str, '(a,f13.3,a,f8.1,a,a)') "             Requested: t=", timesteps, ' seconds'
-            call setECMessage(str)
-            write(str, '(a,f13.3,a,f8.1,a,a)') "       Current EC-time: t=", item%sourceT0FieldPtr%timesteps,' seconds'
-            call setECMessage(str)
-            write(str, '(a,i0,a,f10.3,a,a)')    "Requested time preceeds current forcing EC-timelevel by ", &
-                &        int(item%sourceT0FieldPtr%timesteps-timesteps)," seconds = ", (item%sourceT0FieldPtr%timesteps-timesteps)/86400.," days."
-            call setECMessage(str)
+            if (interpol_type /= interpolate_time_extrapolation_ok) then
+               write(str, '(a,f13.3,a,f8.1,a,a)') "             Requested: t=", timesteps, ' seconds'
+               call setECMessage(str)
+               write(str, '(a,f13.3,a,f8.1,a,a)') "       Current EC-time: t=", item%sourceT0FieldPtr%timesteps,' seconds'
+               call setECMessage(str)
+               write(str, '(a,i0,a,f10.3,a,a)')    "Requested time preceeds current forcing EC-timelevel by ", &
+                   &        int(item%sourceT0FieldPtr%timesteps-timesteps)," seconds = ", (item%sourceT0FieldPtr%timesteps-timesteps)/86400.," days."
+               call setECMessage(str)
+            else
+               success = .true.
+            endif
          ! t0<=timesteps<=t1 : no update required
          else if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
             success = .true.
@@ -304,16 +310,24 @@ module m_ec_item
          else
             ! Update all source Items which belong to the found FileReader, if associated .
             if (associated(fileReaderPtr)) then
-               do ! read next record untill t0<=timesteps<=t1
-                  if (ecFileReaderReadNextRecord(fileReaderPtr, timesteps)) then
-                     if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
-                        success = .true.
-                        exit
+               if (.not. fileReaderPtr%end_of_data) then
+                  do ! read next record untill t0<=timesteps<=t1
+                     if (ecFileReaderReadNextRecord(fileReaderPtr, timesteps)) then
+                        write(6,*) 'Read OK: ', timesteps
+                        if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
+                           write(6,*) 'Read OK: ', timesteps, ' success = .true., exit'
+                           success = .true.
+                           exit
+                        end if
+                     else
+                        write(6,*) 'Read NOT OK: ', timesteps
+                        if (interpol_type == interpolate_time_extrapolation_ok) then
+                           write(6,*) 'Read NOT OK: interpolate_time_extrapolation_ok, exit'
+                           exit
+                        end if
                      end if
-                  else
-                     exit
-                  end if
-               end do
+                  end do
+               endif
             end if
          end if
       end function ecItemUpdateSourceItem

@@ -84,7 +84,9 @@ module m_ec_bccollect
        if (commentpos>0) reclen = min(reclen,commentpos-1)
 
        if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines 
-          if (index(rec,'[forcing]')>0) then                   ! new boundary chapter       
+          if (index(rec,'[forcing]'         )>0 .or. &
+              index(rec,'[Boundary]'        )>0 .or. &
+              index(rec,'[LateralDischarge]')>0) then          ! new boundary chapter       
              jaheader = .true.                                 ! switching to header mode 
              keyvaluestr = ','
              jablock=.false.
@@ -170,13 +172,15 @@ module m_ec_bccollect
 !============================================================================================================================
 ! Collectloop: Scan a bc-file
 !              For each bc-block, create a file reader, add it to the list of file readers in the instance
-    integer function collectbc_all(instancePtr, fname, k_refdate, k_timezone, k_timestep_unit, iostat, dtnodal) result (count)
+    integer function collectbc_all(instancePtr, fname, iostat, k_refdate, k_timezone, k_timestep_unit, dtnodal) result (count)
     implicit none            
     type (tEcInstance),     pointer,   intent(in)      :: instancePtr     !< EC Instance, overall structure for the EC-module 
     character(len=*),                  intent(in)      :: fname           !< file name (bc-format)
     integer,                           intent(out)     :: iostat
+    integer,                optional,  intent(in)      :: k_refdate       !< Kernel timeframe refdate
+    real(hp),               optional,  intent(in)      :: k_timezone      !< Kernel timeframe timezone
+    integer,                optional,  intent(in)      :: k_timestep_unit !< Kernel timeframe timestep unit 
     real(kind=hp),          optional,  intent(in)      :: dtnodal         !< Nodal factors update interval
-
 
     integer (kind=8)    ::  fhandle
     character*(255)     ::  rec          
@@ -198,15 +202,12 @@ module m_ec_bccollect
     logical             :: success
     integer             :: unit
 
-    integer             :: k_refdate
-    real(hp)            :: k_timezone
-    integer             :: k_timestep_unit
-
     real(hp)            :: ref_date
 
     iostat = EC_UNKNOWN_ERROR
     lineno = 0 
     savepos = 0
+    jaheader = .false.
 
     if (.not.ecSupportOpenExistingFileGnu(fhandle, fname)) then
        iostat = EC_DATA_NOTFOUND
@@ -233,16 +234,20 @@ module m_ec_bccollect
        if (commentpos>0) reclen = min(reclen,commentpos-1)
        commentpos = index(rec,'!')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
+       
+       if (reclen < 3) cycle
 
        if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines 
-          if (index(rec,'[forcing]')>0) then                   ! new boundary chapter       
+          if (index(rec,'[forcing]'         )>0 .or. &
+              index(rec,'[Boundary]'        )>0 .or. &
+              index(rec,'[LateralDischarge]')>0) then          ! new boundary chapter       
              jaheader = .true.                                 ! switching to header mode 
              keyvaluestr = ','
              jablock=.false.
              nfld = 0                                          ! count the number of fields in this header block 
              nq = 0                                            ! count the (maximum) number of quantities in this block 
           else
-             if (jaheader) then 
+             if (jaheader) then
                 posfs = index(rec(1:reclen),'=')               ! key value pair ?  
                 if (posfs>0) then 
                    call replace_char(rec,9,32)                 ! replace tabs by spaces, header key-value pairs only 
@@ -262,7 +267,9 @@ module m_ec_bccollect
                    fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderID)
                    fileReaderPtr%bc => bcBlockPtr
                    fileReaderPtr%ofType = provFile_bc
-                   if (.not.(processhdr_all_quantities(bcBlockPtr,nfld,nq,keyvaluestr))) return  ! dumb translation of bc-object metadata  
+                   if (.not.(processhdr_all_quantities(bcBlockPtr,nfld,nq,keyvaluestr))) then
+                     return  ! dumb translation of bc-object metadata  
+                   endif
 !                  if (.not.(checkhdr(bcBlockPtr))) return    ! skip check                       ! check on the contents of the bc-object       
                    bcBlockPtr%fname = fname 
                    bcBlockPtr%ftype=BC_FTYPE_ASCII                                               ! set BC-Block filetype to ASCII
@@ -273,12 +280,16 @@ module m_ec_bccollect
                    !   endif           ! Parsing the time string failed 
                    !endif              ! Timeseries function 
 
-                   if(present(dtnodal)) then
-                      if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit, dtnodal)) return
+                   if (present(k_refdate) .and. present(k_timezone) .and. present(k_timestep_unit)) then 
+                      if (present(dtnodal)) then
+                         if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit, dtnodal)) return
+                      else
+                         if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit)) return
+                      endif
                    else
-                      if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit)) return
+                      if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, -1, 0.d0, ec_second)) return
                    endif
-                   
+
                    if (ecSupportOpenExistingFileGnu(bcBlockPtr%fhandle, fname)) then
                       call mf_backspace(bcBlockPtr%fhandle, savepos)           ! set newly opened file to the appropriate position 
                       count = count + 1 
@@ -352,6 +363,7 @@ module m_ec_bccollect
        bc%quantities(iq)%jacolumn = .false.        
        bc%quantities(iq)%jacolumn(iq) = .true.    
     enddo
+
     hdrvals=''
     hdrkeys=''
     read(keyvaluestr,*,iostat=iostat) dumstr,(hdrkeys(ifld),hdrvals(ifld),ifld=1,nfld)
@@ -372,8 +384,10 @@ module m_ec_bccollect
                   if (trim(hdrvals(ifld))=='TIME') then    ! special check on the time field 
                      bc%timecolumn = iq 
                   endif 
+               case (BC_FUNC_CONSTANT)
                case default
-                  return                                   ! TODO: error message, we do not support other than timeseries yet
+                  call setECMessage("Collecting items from BC file currently only supports time series")
+                  return
                end select                                          
           case ('UNIT')
                bc%quantities(iq)%unit = trim(hdrvals(ifld))
@@ -385,6 +399,8 @@ module m_ec_bccollect
                select case (trim(adjustl(hdrvals(ifld))))
                   case ('TIMESERIES')
                      bc%func = BC_FUNC_TSERIES
+                  case ('CONSTANT')                        ! Constant is a special version of time-series (Sobek3)
+                     bc%func = BC_FUNC_CONSTANT
                   case ('T3D')
                      bc%func = BC_FUNC_TIM3D
                end select 
@@ -408,11 +424,12 @@ module m_ec_bccollect
        end select 
     enddo 
 
+    bc%numcols = iq
     ! Fill bc%quantity%col2elm(nq) which holds the mapping of columns in the file to vector positions
     bc%numcols = iq
     do iq = 1, nq 
-       bc%quantities(iq)%col2elm(iq) = 1
        bc%quantities(iq)%col2elm = -1 
+       bc%quantities(iq)%col2elm(iq) = 1
     enddo 
     
     deallocate(hdrkeys)

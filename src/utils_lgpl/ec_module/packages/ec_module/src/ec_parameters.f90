@@ -171,7 +171,8 @@ module m_ec_parameters
     integer, parameter :: BC_FUNC_ASTROCORR    = 5   !< astronomic correction
     integer, parameter :: BC_FUNC_QHTABLE      = 6   !< qh-relation
     integer, parameter :: BC_FUNC_TIM3D        = 7   !< t3d  timeseries 
-    integer, parameter :: BC_FUNC_CMP3D        = 8   !< t3d  components 
+    integer, parameter :: BC_FUNC_CMP3D        = 8   !< t3d  components
+    integer, parameter :: BC_FUNC_CONSTANT     = 9   !< timeseries with one constant value
 
     ! Time interpolation type 
     integer, parameter :: BC_TIMEINT_LIN       = 1   !< linear
