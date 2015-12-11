@@ -24,7 +24,7 @@
       subroutine putget(defnam    ,datnam    ,grpnam    ,nelems    ,
      *                  elmnms    ,elmdms    ,elmtps    ,nbytsg    ,
      *                  elmnam    ,celidt    ,wrilog    ,error     ,
-     *                  buffr     )
+     *                  buffr     ,fd_nef                          )
       implicit none
 !-----------------------------------------------------------------------
 !     Small adjustment wrt Delft3D-FLOW code
@@ -76,8 +76,9 @@ cf   *                elmqty(    *),elmunt(    *),elmdes(     *)
       external        clsnef, credat, crenef, defcel, defelm,
      *                defgrp, getelt, inqelm, neferr, putelt
 !
-      save fd_nef
-      data fd_nef /-1/
+!AM
+!     save fd_nef
+!     data fd_nef /-1/
 !-----------------------------------------------------------------------
 !-----Initialization
 !-----------------------------------------------------------------------
@@ -99,13 +100,15 @@ cf   *                elmqty(    *),elmunt(    *),elmdes(     *)
         access = 'r'
       endif
 !
-      error  = CRENEF (fd_nef, datnam, defnam,
-     *                         coding, access)
-      if (error.ne.0 .and. .not.wrilog) then
-        error = -211
-        goto 10000
+      if ( fd_nef < 0 ) then
+        error  = CRENEF (fd_nef, datnam, defnam,
+     *                           coding, access)
+        if (error.ne.0 .and. .not.wrilog) then
+          error = -211
+          goto 10000
+        endif
+        if ( error.ne.0 ) goto 9999
       endif
-      if ( error.ne.0 ) goto 9999
 
       if (wrilog) then
         error  = putelt(fd_nef,grpnam,elmnam,
@@ -197,7 +200,7 @@ cf   *                    elmdes(lelmnr),elmdms(1,lelmnr),
  9999 continue
       if (error .ne. 0) ierror = Neferr(1, errstr)
 10000 continue
-      ierror = clsnef( fd_nef )
+!      ierror = clsnef( fd_nef )
 !
       return
       end

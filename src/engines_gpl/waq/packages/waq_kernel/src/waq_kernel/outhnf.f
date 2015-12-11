@@ -103,6 +103,10 @@
       integer                              :: iseg                   ! loop counter segments
       integer                              :: neferr                 ! nefis error function
       integer                              :: notot                  ! total number of output variables
+
+      integer, save                        :: fd_nef = -1            ! handle to NEFIS file
+      integer, external                    :: FLSDAT, FLSDEF
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "outhnf", ithandl )
 
@@ -232,37 +236,37 @@
 
          call putgtc(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(1), celid1,
-     +               lwrite, ierr  , type  )
+     +               lwrite, ierr  , type  , fd_nef)
          if (ierr .ne. 0) go to 110
 
          call putgtc(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(2), celid1,
-     +               lwrite, ierr  , moname)
+     +               lwrite, ierr  , moname, fd_nef)
          if (ierr .ne. 0) go to 110
 
          call putgtc(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(3), celid1,
-     +               lwrite, ierr  , syname)
+     +               lwrite, ierr  , syname, fd_nef)
          if (ierr .ne. 0) go to 110
 
          call putgtc(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(4), celid1,
-     +               lwrite, ierr  , duname)
+     +               lwrite, ierr  , duname, fd_nef)
          if (ierr .ne. 0) go to 110
 
          call putget(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(5), celid1,
-     +               lwrite, ierr  , nosize)
+     +               lwrite, ierr  , nosize, fd_nef)
          if (ierr .ne. 0) go to 110
 
          call putget(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(6), celid1,
-     +               lwrite, ierr  , window)
+     +               lwrite, ierr  , window, fd_nef)
          if (ierr .ne. 0) go to 110
 
          call putget(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(7), celid1,
-     +               lwrite, ierr  , itoff )
+     +               lwrite, ierr  , itoff , fd_nef)
 
   110    continue
          ierrem = ierr
@@ -278,7 +282,7 @@
          itoff(7) = celid2
          call putget(defnam, datnam, grnam1, noelm1   , elmnms,
      +               elmdms, elmpts, nbytsg, elmnms(7), celid1,
-     +               lwrite, ierr  , itoff )
+     +               lwrite, ierr  , itoff , fd_nef)
          if (ierr .ne. 0) go to 310
 
          ! write actual time to cell
@@ -289,7 +293,7 @@
      +                elmpts(noparm), nbytsg(noparm)  ,
      +                elmnms(noparm), celid2          ,
      +                lwrite        , ierr            ,
-     +                itime         )
+     +                itime         , fd_nef)
          if  (ierr .ne. 0) go to 310
 
          ! fill and write output buffer for every output variable to cell
@@ -319,7 +323,7 @@
      +                   elmpts(noparm)     , nbytsg(noparm)  ,
      +                   elmnms(noparm+isys), celid2          ,
      +                   lwrite             , ierr            ,
-     +                   rbuffr             )
+     +                   rbuffr             , fd_nef)
             if  (ierr .ne. 0) go to 310
          enddo
 
@@ -338,6 +342,9 @@
          iret_error = neferr(1, error_string)
          write (lunout, *) iret_error,':',error_string
       endif
+
+      ierr = FLSDAT( fd_nef )
+      ierr = FLSDEF( fd_nef )
 
       if ( timon ) call timstop ( ithandl )
       return
