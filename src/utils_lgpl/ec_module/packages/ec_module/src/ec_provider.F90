@@ -2712,8 +2712,14 @@ module m_ec_provider
          nvar = 0 
          ierror = nf90_inquire(fileReaderPtr%fileHandle, nvariables = nvar)
          if (nvar>0) then 
-            allocate(fileReaderPtr%standard_names(nvar))          ! Note: one of these may be obsolete (if we only check standard names)
-            allocate(fileReaderPtr%variable_names(nvar))
+            if (allocated(fileReaderPtr%standard_names)) then
+               deallocate(fileReaderPtr%standard_names, stat=ierror)
+            endif
+            if (allocated(fileReaderPtr%variable_names)) then
+               deallocate(fileReaderPtr%variable_names, stat=ierror)
+            endif
+            allocate(fileReaderPtr%standard_names(nvar), stat=ierror)          ! Note: one of these may be obsolete (if we only check standard names)
+            allocate(fileReaderPtr%variable_names(nvar), stat=ierror)
             fileReaderPtr%standard_names = ''
             fileReaderPtr%variable_names = ''
             do ivar = 1,nvar 
