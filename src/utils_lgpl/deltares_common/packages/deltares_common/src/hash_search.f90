@@ -96,6 +96,10 @@ module m_hash_search
       do icount = 1, hashlist%id_count
       
          locid = hashlist%id_list(icount)
+         if (len_trim(locid) == 0) then
+            cycle
+         endif
+         
          call str_upper(locid)
          
          hashcode = hashfun(locid, hashlist%hashcon)
