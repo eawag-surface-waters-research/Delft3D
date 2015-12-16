@@ -116,7 +116,7 @@
          end do
          if (catch) then
             xcatch = sngl(xcross(inear))
-            ycatch = sngl(xcross(inear))
+            ycatch = sngl(ycross(inear))
 !           bounce without crossing boom?
             rl  = ((xboomd(inear) - xnewd) * b2(inear) + (ynewd - yboomd(inear)) * a2(inear)) / (b2(inear)**2 + a2(inear)**2)
             xn = xboomd(inear) - rl * b2(inear)
