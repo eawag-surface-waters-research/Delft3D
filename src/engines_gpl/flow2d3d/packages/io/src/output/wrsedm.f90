@@ -358,16 +358,16 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'FRAC', ' ', IO_REAL4     , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Availability fraction in top layer', acl='z')
        endif
        if (moroutput%mudfrac) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MUDFRAC', ' ', IO_REAL4  , 2, (/iddim_n, iddim_m/), longname='Mud fraction in top layer', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MUDFRAC', ' ', IO_REAL4  , 2, dimids=(/iddim_n, iddim_m/), longname='Mud fraction in top layer', acl='z')
        endif
        if (moroutput%sandfrac) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SANDFRAC', ' ', IO_REAL4 , 2, (/iddim_n, iddim_m/), longname='Sand fraction in top layer', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'SANDFRAC', ' ', IO_REAL4 , 2, dimids=(/iddim_n, iddim_m/), longname='Sand fraction in top layer', acl='z')
        endif
        if (moroutput%fixfac) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'FIXFAC', ' ', IO_REAL4   , 3, (/iddim_n, iddim_m, iddim_lsedtot/), longname='Reduction factor due to limited sediment thickness', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'FIXFAC', ' ', IO_REAL4   , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Reduction factor due to limited sediment thickness', acl='z')
        endif
        if (moroutput%hidexp) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'HIDEXP', ' ', IO_REAL4   , 3, (/iddim_n, iddim_m, iddim_lsedtot/), longname='Hiding and exposure factor', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'HIDEXP', ' ', IO_REAL4   , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Hiding and exposure factor', acl='z')
        endif
        !
        ! Add mor fields  ! this is the same for nefis and netcdf... being moved out of the if-statement
