@@ -186,7 +186,7 @@ echo "This file is overwritten by the post-build command of the project flow2d3d
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>include;src;src/dd;src/dd/iterators;src/dd/mapper;../../../../third_party_open/mpich2/include;../../../../third_party_open/pthreads/include/x64;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat_x64\x64\release;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl\deltares_common\packages\deltares_common_c\include\;../../../../utils_lgpl/delftonline/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WITH_DELFTONLINE;WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
