@@ -494,7 +494,7 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
                !
                ! Conversion of pressure to Pa (N/m2). If already Pa, p_conv = 1.0_hp 
                !
-               if (meteoitem%quantities(k) == 'air_pressure') then
+               if (meteoitem%quantities(k) == 'air_pressure' .or. meteoitem%quantities(k) == 'patm'.or. meteoitem%quantities(k) == 'p_drop') then
                   do m = 1, size(wz,2)
                      do n = 1, size(wz,1)
                         wz(n,m,k) = wz(n,m,k) * meteoitem%p_conv
