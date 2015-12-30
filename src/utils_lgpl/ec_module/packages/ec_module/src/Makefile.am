@@ -50,7 +50,6 @@ libECModule_la_SOURCES = \
          ec_parameters.f90 \
          ec_typedefs.f90 \
          ec_message.f90 \
-         ec_stringbuffer.f90 \
          ec_support.f90 \
          ec_netcdf_timeseries.f90 \
          ec_bcreader.f90 \
