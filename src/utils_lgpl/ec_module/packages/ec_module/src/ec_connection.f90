@@ -111,7 +111,7 @@ module m_ec_connection
       function ecConnectionFree1dArray(connectionPtr, nConnections) result (success)
          logical                                       :: success       !< function status
          type(tEcConnectionPtr), dimension(:), pointer :: connectionPtr !< intent(inout)
-         integer                                       :: nConnections  !< number of Connections
+         integer, intent(inout)                        :: nConnections  !< number of Connections
          !
          integer :: i      !< loop counter
          integer :: istat  !< deallocate() status
@@ -136,6 +136,7 @@ module m_ec_connection
                if (istat /= 0) success = .false.
             end if
          end if
+         nConnections = 0
       end function ecConnectionFree1dArray
       
       ! =======================================================================

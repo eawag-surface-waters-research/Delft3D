@@ -467,23 +467,27 @@ end subroutine ecInstanceListSourceItems
          integer :: i, j                                         !< loop counter over filereader, items 
          type (tEcItem), pointer               :: itemPtr
          type (tEcFileReader), pointer         :: fileReaderPtr
-         character(len=:), allocatable         :: quantityname_upper, locationname_upper
+         character(len=:), allocatable         :: quantity_requested, location_requested
+         character(len=:), allocatable         :: quantity_supplied, location_supplied
 !        character(len=maxNameLen)         :: quantityname_upper, locationname_upper
          
 
-         quantityname_upper = trim(quantityname)
-         call str_upper(quantityname_upper)
-         locationname_upper = trim(locationname)
-         call str_upper(locationname_upper)
+         quantity_requested = trim(quantityname)
+         call str_upper(quantity_requested)
+         location_requested = trim(locationname)
+         call str_upper(location_requested)
          itemID = -1 
          if (associated(instancePtr)) then
            frs:do i=1, instancePtr%nFileReaders
                fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
                if (fileReaderPtr%nItems<=0) cycle                                               ! No items to check 
-               if (fileReaderPtr%items(1)%ptr%elementSetPtr%name/=locationname_upper) cycle     ! Items have the wrong location 
+               location_supplied = fileReaderPtr%items(1)%ptr%elementSetPtr%name
+               if (location_supplied/=location_requested) cycle     ! Items have the wrong location 
                do j=1, fileReaderPtr%nItems
                   itemPtr => fileReaderPtr%items(j)%ptr
-                  if (itemPtr%quantityPtr%name==quantityname_upper) then
+                  quantity_supplied = itemPtr%quantityPtr%name
+                  call str_upper(quantity_supplied)
+                  if (quantity_supplied==quantity_requested) then
                      itemID = itemPtr%id
                      exit frs
                   end if

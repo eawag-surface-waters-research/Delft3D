@@ -1,7 +1,6 @@
 module m_ec_netcdf_timeseries
     use precision 
     use m_ec_parameters
-    use m_ec_stringbuffer
     use m_ec_support
     use m_ec_message
     use m_ec_typedefs
@@ -64,11 +63,11 @@ module m_ec_netcdf_timeseries
           continue
           ! TODO: issue a warning here 
        endif 
+       if (allocated(netcdf%dimlen)) then      
+          deallocate(netcdf%dimlen)
+       endif 
        if (allocated(netcdf%standard_names)) then      
           deallocate(netcdf%standard_names)
-       endif 
-       if (allocated(netcdf%tsid)) then      
-          deallocate(netcdf%tsid)
        endif 
        if (allocated(netcdf%tsid)) then      
           deallocate(netcdf%tsid)

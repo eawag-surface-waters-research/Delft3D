@@ -79,7 +79,7 @@ module m_ec_quantity
       function ecQuantityFree1dArray(quantityPtr, nQuantities) result (success)
          logical                                     :: success     !< function status
          type(tEcQuantityPtr), dimension(:), pointer :: quantityPtr !< intent(inout)
-         integer                                     :: nQuantities !< number of Quantities
+         integer, intent(inout)                      :: nQuantities !< number of Quantities
          !
          integer :: i     !< loop counter
          integer :: istat !< deallocate() status
@@ -100,6 +100,7 @@ module m_ec_quantity
                if (istat /= 0) success = .false.
             end if
          end if
+         nQuantities = 0
       end function ecQuantityFree1dArray
       
       ! =======================================================================

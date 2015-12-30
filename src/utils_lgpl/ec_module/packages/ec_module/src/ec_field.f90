@@ -105,7 +105,7 @@ module m_ec_field
       function ecFieldFree1dArray(fieldPtr, nFields) result (success)
          logical                                  :: success  !< function status
          type(tEcFieldPtr), dimension(:), pointer :: fieldPtr !< intent(inout)
-         integer                                  :: nFields  !< number of Fields
+         integer, intent(inout)                   :: nFields  !< number of Fields
          !
          integer :: i      !< loop counter
          integer :: istat  !< deallocate() status
@@ -130,6 +130,7 @@ module m_ec_field
                if (istat /= 0) success = .false.
             end if
          end if
+         nFields = 0
       end function ecFieldFree1dArray
       
       ! =======================================================================

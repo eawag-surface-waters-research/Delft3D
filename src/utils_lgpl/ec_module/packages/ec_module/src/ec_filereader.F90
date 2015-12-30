@@ -49,6 +49,7 @@ module m_ec_filereader
    public :: ecFileReaderAddItem
    public :: ecFileReaderGetNumberOfItems
    public :: ecFileReaderGetItem
+   public :: ecFileReaderProvidesQHtable
    
    contains
       
@@ -129,13 +130,6 @@ module m_ec_filereader
          deallocate(fileReader%tframe, stat = istat)
          if (istat /= 0) success = .false.
 
-         if (associated(fileReader%bc)) then                    ! pointer, but only associated by this filereader, so deallocatable
-            if (.not.ecBCBlockFree(fileReader%bc)) then 
-               ! Todo: issue a warning 
-               continue
-            endif 
-            deallocate(fileReader%bc)                           ! filereader really owns the bcblock
-         endif 
          if (allocated(fileReader%variable_names)) then
             deallocate(fileReader%variable_names)
          endif 
@@ -150,7 +144,7 @@ module m_ec_filereader
       function ecFileReaderFree1dArray(ptr, nFileReaders) result (success)
          logical                                       :: success      !< function status
          type(tEcFileReaderPtr), dimension(:), pointer :: ptr          !< intent(inout)
-         integer                                       :: nFileReaders !< number of FileReaders
+         integer, intent(inout)                        :: nFileReaders !< number of FileReaders
          !
          integer :: i      !< loop counter
          integer :: istat  !< deallocate() status
@@ -175,6 +169,7 @@ module m_ec_filereader
                if (istat /= 0) success = .false.
             end if
          end if
+         nFileReaders = 0
       end function ecFileReaderFree1dArray
       
       ! =======================================================================
@@ -472,6 +467,43 @@ module m_ec_filereader
       end function ecFileReaderGetNumberOfItems
       
       ! =======================================================================
+
+      !> Return is_QH=true and in that case also pointers to the arrays Q and H if this provider provides a QH-table
+      !> Otherwise is_QH is false and the pointers are null
+      function ecFileReaderProvidesQHtable(instancePtr, fileReaderId, item_H, item_Q) result(is_QH)
+      implicit none
+         logical                               :: is_QH        !< true if QH table
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,           intent(in)         :: fileReaderId !< unique FileReader id
+         real(hp), dimension(:), pointer       :: Hptr         !< pointer to the waterlevel array
+         real(hp), dimension(:), pointer       :: Qptr         !< pointer to the discharge array
+         integer,           intent(out)        :: item_Q        !< ID of item holding the discharges
+         integer,           intent(out)        :: item_H        !< ID of item holding the waterlevels
+         !
+         type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader corresponding to fileReaderId
+         integer                      :: i              !< loop counter
+         !
+         item_Q = ec_undef_int
+         item_H = ec_undef_int
+         is_QH = .false.  
+
+         fileReaderPtr => null()
+         fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
+         if (associated(fileReaderPtr%bc)) then
+            if (fileReaderPtr%bc%func == BC_FUNC_QHTABLE) then
+               is_QH = .true.
+               ! find items in this filereader and pointer to their fields arr1d 
+               item_H = ecFileReaderFindItem(instancePtr, fileReaderId, 'waterlevel') 
+               item_Q = ecFileReaderFindItem(instancePtr, fileReaderId, 'discharge') 
+            end if
+         else
+            ! TODO, give error message
+            return
+         end if
+
+      end function ecFileReaderProvidesQHtable
+      
+      ! =======================================================================
       
       !> Add a source Item to a FileReader's array of source Items.
       function ecFileReaderAddItem(instancePtr, fileReaderId, itemId) result(success)
@@ -489,6 +521,7 @@ module m_ec_filereader
          !
          fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
          itemPtr => ecSupportFindItem(instancePtr, itemId)
+         itemPtr%providerId = fileReaderId
          if (associated(fileReaderPtr) .and. associated(itemPtr)) then
             ! ensure capacity
             if (fileReaderPtr%nItems == size(fileReaderPtr%items)) then
@@ -499,8 +532,11 @@ module m_ec_filereader
             fileReaderPtr%nItems = fileReaderPtr%nItems + 1
             fileReaderPtr%items(fileReaderPtr%nItems)%ptr => itemPtr
             if (associated(fileReaderPtr%bc) .and. associated(itemPtr%quantityPtr)) then           ! transfer from filereader%bc to item%quantity
-               itemPtr%quantityPtr%zInterpolationType = fileReaderPtr%bc%zInterpolationType
-               itemPtr%quantityPtr%vectormax = fileReaderPtr%bc%quantity%vectormax
+               select case (fileReaderPtr%bc%func)
+               case (BC_FUNC_TIM3D, BC_FUNC_TSERIES, BC_FUNC_CONSTANT)
+                  itemPtr%quantityPtr%zInterpolationType = fileReaderPtr%bc%zInterpolationType
+                  itemPtr%quantityPtr%vectormax = fileReaderPtr%bc%quantity%vectormax
+               end select
             endif 
             success = .true.
          end if

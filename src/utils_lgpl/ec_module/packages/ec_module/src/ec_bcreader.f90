@@ -1,7 +1,6 @@
 module m_ec_bcreader
   use precision
   use m_ec_parameters
-  use m_ec_stringbuffer
   use m_ec_support
   use m_ec_message
   use m_ec_typedefs
@@ -16,11 +15,13 @@ module m_ec_bcreader
   public   ::  ecBCReadLine
   public   ::  ecBCBlockCreate
   public   ::  ecBCBlockFree
+  public   ::  ecBCBlockFree1dArray
   public   ::  jakeyvalue
   public   ::  jakeyvaluelist
   public   ::  processhdr
   public   ::  checkhdr
   public   ::  sortndx
+
 
 contains
 
@@ -321,25 +322,25 @@ contains
                 if (trim(hdrvals(ifld))=='TIME') then    ! special check on the time field
                    bc%timecolumn = iq
                 endif
-             case (BC_FUNC_HARMONIC, BC_FUNC_ASTRO, BC_FUNC_HARMOCORR, BC_FUNC_ASTROCORR, BC_FUNC_CMP3D)
-                if (trim(hdrvals(ifld))=='HARMONIC COMPONENT') then          ! harmonic component
-                   bc%quantity%astro_component_column = iq
-                endif
-                if (trim(hdrvals(ifld))=='ASTRONOMIC COMPONENT') then        ! astronomic component label
-                   bc%quantity%astro_component_column = iq
-                endif
-                if (trim(hdrvals(ifld))==trim(bc%qname)//' AMPLITUDE') then  ! amplitude field for astronomic/harmonic components
-                   bc%quantity%astro_amplitude_column = iq
-                endif
-                if (trim(hdrvals(ifld))==trim(bc%qname)//' PHASE') then      ! phase field for astronomic/harmonic components
-                   bc%quantity%astro_phase_column = iq
-                endif
+                case (BC_FUNC_HARMONIC, BC_FUNC_ASTRO, BC_FUNC_HARMOCORR, BC_FUNC_ASTROCORR, BC_FUNC_CMP3D)
+                   if (trim(hdrvals(ifld))=='HARMONIC COMPONENT') then          ! harmonic component
+                      bc%astro_component_column = iq
+                   endif
+                   if (trim(hdrvals(ifld))=='ASTRONOMIC COMPONENT') then        ! astronomic component label
+                      bc%astro_component_column = iq
+                   endif
+                   if (trim(hdrvals(ifld))==trim(bc%qname)//' AMPLITUDE') then  ! amplitude field for astronomic/harmonic components
+                      bc%astro_amplitude_column = iq
+                   endif
+                   if (trim(hdrvals(ifld))==trim(bc%qname)//' PHASE') then      ! phase field for astronomic/harmonic components
+                      bc%astro_phase_column = iq
+                   endif
              case (BC_FUNC_QHTABLE)
                 if (trim(hdrvals(ifld))==trim(bc%qname)//' WATERLEVEL') then ! waterlevel field for qh-boundary
-                   bc%quantity%qh_waterlevel_column = iq
+                   bc%qh_waterlevel_column = iq
                 endif
                 if (trim(hdrvals(ifld))==trim(bc%qname)//' DISCHARGE') then  ! discharge field for qh-boundary
-                   bc%quantity%qh_discharge_column = iq
+                   bc%qh_discharge_column = iq
                 endif
              end select
           endif
@@ -365,7 +366,7 @@ contains
           if (iq==bc%timecolumn) then                     ! Is this the unit of time ?
              bc%timeunit = trim(hdrvals(ifld))            ! store timeunit string in this bc instance
           endif
-          if (iq == bc%quantity%astro_component_column) then
+          if (iq == bc%astro_component_column) then
              bc%timeunit = trim(hdrvals(ifld))            ! store period/feq unit in time unit
           endif
        case ('FUNCTION')
@@ -501,8 +502,7 @@ contains
   end function checkhdr
 
   !> Read the next record from a *.bc file.
-  !> Requests a line from the EcBC object's stringbuffer block, advancing its pointer in the block
-  function ecBCReadLine(fileReaderPtr, values, time_steps, recout) result(success)
+  function ecBCReadLine(fileReaderPtr, values, time_steps, recout, eof) result(success)
     use m_ec_netcdf_timeseries
     implicit none
     logical                                                 :: success       !< function status
@@ -510,6 +510,7 @@ contains
     real(hp), optional,                       intent(inout) :: time_steps    !< number of time steps of duration: seconds
     real(hp), dimension(:), optional,         intent(inout) :: values        !< vector of values for a BC_FUNC_TSERIES
     character(len=*), optional,               intent(out)   :: recout        !< line prepared from input for caller
+    logical, optional,                        intent(out)   :: eof           !< reading failed, but only because eof
 
     !
     type(tEcBCBlock),           pointer                     :: bcPtr
@@ -527,7 +528,7 @@ contains
     real(kind=hp)  :: amplitude
 
     bcPtr => fileReaderPtr%bc
-    
+
     success = .false.
 
     select case (bcPtr%ftype)
@@ -540,14 +541,19 @@ contains
        endif
        rec = ''
        reclen = len_trim(rec)
+       if (present(eof)) then
+          eof = .false.
+       endif
        do while(reclen==0)
           if (mf_eof(bcPtr%fhandle)) then
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D, BC_FUNC_CONSTANT)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
                 call setECMessage("Datablock end (eof) has been reached.")
-                fileReaderPtr%end_of_data = .true.
              end select
+             if (present(eof)) then
+                eof = .true.
+             endif
              return
           endif
 
@@ -573,8 +579,10 @@ contains
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
                 call setECMessage("Datablock end (new [forcing] block) has been prematurely reached.")
-                fileReaderPtr%end_of_data = .true.
              end select
+             if (present(eof)) then
+                eof = .true.
+             endif
              return
           endif
        enddo
@@ -594,9 +602,6 @@ contains
        endif
 
        select case (BCPtr%func)
-       case (BC_FUNC_CONSTANT)
-          ec_timesteps(1) = 0.0d+0
-          read (BCPtr%columns(1), *)  values(1)
        case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
           read (BCPtr%columns(n_col_time), *) ec_timesteps(1)
           ! Convert source time to kernel time:
@@ -633,20 +638,20 @@ contains
        case (BC_FUNC_ASTRO,BC_FUNC_HARMONIC,BC_FUNC_ASTROCORR,BC_FUNC_HARMOCORR)
           ! Produce a record of component, amplitude, phase extracted from rec
           ! Apply the factor to the amplitude column only
-          read(BCPtr%columns(BCPtr%quantity%astro_amplitude_column),*,iostat=istat) amplitude
+          read(BCPtr%columns(BCPtr%astro_amplitude_column),*,iostat=istat) amplitude
           if (istat==0) then
              amplitude = amplitude * BCPtr%quantity%factor
-             write(BCPtr%columns(BCPtr%quantity%astro_amplitude_column),*) amplitude
+             write(BCPtr%columns(BCPtr%astro_amplitude_column),*) amplitude
           endif
 
           ! construct a new record
-          recout =                     trim(BCPtr%columns(BCPtr%quantity%astro_component_column))
-          recout = trim(recout)//'  '//trim(BCPtr%columns(BCPtr%quantity%astro_amplitude_column))
-          recout = trim(recout)//'  '//trim(BCPtr%columns(BCPtr%quantity%astro_phase_column))
+          recout =                     trim(BCPtr%columns(BCPtr%astro_component_column))
+          recout = trim(recout)//'  '//trim(BCPtr%columns(BCPtr%astro_amplitude_column))
+          recout = trim(recout)//'  '//trim(BCPtr%columns(BCPtr%astro_phase_column))
        case (BC_FUNC_QHTABLE)
           ! Produce a record of waterlevel, discharge extracted from rec
-          recout =                     trim(BCPtr%columns(BCPtr%quantity%qh_discharge_column))
-          recout = trim(recout)//'  '//trim(BCPtr%columns(BCPtr%quantity%qh_waterlevel_column))
+          recout =                     trim(BCPtr%columns(BCPtr%qh_discharge_column))
+          recout = trim(recout)//'  '//trim(BCPtr%columns(BCPtr%qh_waterlevel_column))
        end select
 
     case (BC_FTYPE_NETCDF)
@@ -735,6 +740,8 @@ contains
     implicit none
     logical                         :: success !< function status
     type(tEcBCBlock), intent(inout) :: bcblock !< intent(inout)
+    !
+    integer   :: i
 
     success = .False.
     if (associated(bcblock%ncptr)) then
@@ -756,12 +763,48 @@ contains
        deallocate(bcblock%vp)
     endif
 
-    if (.not.ecBCQuantityFree(bcblock%quantity)) then
-       return                                        ! TODO: issue a warning
-    endif
+    do i = 1,size(bcblock%quantities,dim=1)
+       if (.not.ecBCQuantityFree(bcblock%quantities(i))) then
+          return                                        ! TODO: issue a warning
+       endif
+    enddo
 
     success = .True.
   end function ecBCBlockFree
+
+   !> Frees a 1D array of tEcFieldPtrs, after which the fieldPtr is deallocated.
+  function ecBCBlockFree1dArray(BCBlockPtr, nBCBlocks) result (success)
+    logical                                    :: success    !< function status
+    type(tEcBCBlockPtr), dimension(:), pointer :: BCBlockPtr !< intent(inout)
+    integer, intent(inout)                     :: nBCBlocks  !< number of Fields
+    !
+    integer :: i      !< loop counter
+    integer :: istat  !< deallocate() status
+    !
+    success = .true.
+    !
+    if (.not. associated(BCBlockPtr)) then
+       call setECMessage("WARNING: ec_bcreader::ecBCBlockFree1dArray: Dummy argument BCBlockPtr is already disassociated.")
+    else
+       ! Free and deallocate all tEcFieldPtrs in the 1d array.
+       do i=1, nBCBlocks
+          if (ecBCBlockFree(BCBlockPtr(i)%Ptr)) then
+             deallocate(BCBlockPtr(i)%ptr, stat = istat)
+             if (istat /= 0) success = .false.
+          else
+             success = .false.
+          end if
+       end do
+       ! Finally deallocate the tEcFieldPtr(:) pointer.
+       if (success) then
+          deallocate(BCBlockPtr, stat = istat)
+          if (istat /= 0) success = .false.
+       end if
+    end if
+    nBCBlocks = 0
+end function ecBCBlockFree1dArray
+      
+      ! =======================================================================
 
   ! BCQuantity destructor
   function ecBCQuantityFree(bcquantity) result(success)

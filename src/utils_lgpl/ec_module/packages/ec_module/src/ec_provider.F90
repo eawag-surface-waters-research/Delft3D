@@ -41,7 +41,6 @@ module m_ec_provider
    use m_ec_converter
    use m_ec_filereader
    use m_ec_filereader_read
-   use m_ec_stringbuffer
    use m_ec_quantity
    use m_ec_bcreader
    use time_module
@@ -58,7 +57,8 @@ module m_ec_provider
    private
    
    public :: ecSetFileReaderProperties
-   public :: ecInstanceCreateUniformItems
+   public :: ecProviderCreateUniformItems
+   public :: ecProviderCreateQhtableItems
    public :: ecProviderCreateTimeInterpolatedItem
    public :: ecProviderInitializeTimeFrame
    public :: items_from_bc_quantities
@@ -67,10 +67,6 @@ module m_ec_provider
    interface ecSetFileReaderProperties
       module procedure ecProviderInitializeFileReader
    end interface ecSetFileReaderProperties
-
-   interface ecInstanceCreateUniformItems
-      module procedure ecProviderCreateUniformItems
-   end interface ecInstanceCreateUniformItems
 
    public :: ecAtLeastOnePointIsCorrection            ! TODO: Refactor this shortcut (UNST-180).
    logical :: ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
@@ -321,6 +317,8 @@ module m_ec_provider
          type(tEcItem),              pointer :: item_crossing   !< Item
          integer :: i !< loop counter
          integer :: n1, n2 !< helper variables
+         character(len=:), allocatable :: elementSetName
+
          !
          success = .true.
          item_discharge  => null()
@@ -328,7 +326,18 @@ module m_ec_provider
          item_slope  => null()
          item_crossing  => null()
          n1 = 12345 ! arbitrary large number
-         !
+
+         ! Find elementset name (=location name), later store it into the elementset 
+         select case (fileReaderPtr%ofType)
+            case (provFile_qhtable)
+               elementSetName = fileReaderPtr%fileName
+               if (index(elementSetName,'.')>0) then
+                  elementSetName = elementSetName(1:index(elementSetName,'.'))
+               end if 
+            case (provFile_bc)
+               elementSetName = fileReaderPtr%bc%bcname
+         end select 
+
          ! Determine the number of rows and read the data.
          success = ecQhtableReadAll(fileReaderPtr, discharges, waterlevels, nr_rows)
          if (.not. success) return
@@ -337,11 +346,14 @@ module m_ec_provider
          if (.not. (ecQuantitySetName(instancePtr, quantityId, 'discharge'))) then
             success = .false.
          end if
+
          elementSetId = ecInstanceCreateElementSet(instancePtr)
-         if (.not. (ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
+         if (.not. (ecElementSetSetName(instancePtr, elementSetId, elementSetName) .and. &
+                    ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
                     ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, nr_rows))) then
             success = .false.
          end if
+                    
          field0Id = ecInstanceCreateField(instancePtr)
          if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, nr_rows))) then
             success = .false.
@@ -367,7 +379,8 @@ module m_ec_provider
             success = .false.
          end if
          elementSetId = ecInstanceCreateElementSet(instancePtr)
-         if (.not. (ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
+         if (.not. (ecElementSetSetName(instancePtr, elementSetId, elementSetName) .and. &
+                    ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
                     ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, nr_rows))) then
             success = .false.
          end if
@@ -395,8 +408,8 @@ module m_ec_provider
          if (.not. (ecQuantitySetName(instancePtr, quantityId, 'slope'))) then
             success = .false.
          end if
-         elementSetId = ecInstanceCreateElementSet(instancePtr)
-         if (.not. (ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
+         if (.not. (ecElementSetSetName(instancePtr, elementSetId, elementSetName) .and. &
+                    ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
                     ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, nr_rows))) then
             success = .false.
          end if
@@ -419,13 +432,15 @@ module m_ec_provider
          else
             item_slope => ecSupportFindItem(instancePtr, itemId)
          end if
+         !
          ! Create the item 'crossing'.
          quantityId = ecInstanceCreateQuantity(instancePtr)
          if (.not. (ecQuantitySetName(instancePtr, quantityId, 'crossing'))) then
             success = .false.
          end if
          elementSetId = ecInstanceCreateElementSet(instancePtr)
-         if (.not. (ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
+         if (.not. (ecElementSetSetName(instancePtr, elementSetId, elementSetName) .and. &
+                    ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian) .and. &
                     ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, nr_rows))) then
             success = .false.
          end if
@@ -481,6 +496,7 @@ module m_ec_provider
             item_crossing%sourceT1FieldPtr%timesteps = 10000.0_hp
          end if
          ! Add successfully created source Items to the FileReader
+
          if (success) success = ecFileReaderAddItem(instancePtr, fileReaderPtr%id, item_discharge%id)
          if (success) success = ecFileReaderAddItem(instancePtr, fileReaderPtr%id, item_waterlevel%id)
          if (success) success = ecFileReaderAddItem(instancePtr, fileReaderPtr%id, item_slope%id)
@@ -699,7 +715,7 @@ module m_ec_provider
          character(len=:), allocatable :: elementSetName
          character(len=:), allocatable :: quantityName
          !
-         success = .true.
+         success = .false.
          item => null()
          !
          ! At this point fileReaderPtr%vectormax holds the vectormax requested from DEMAND side (toplevel), 
@@ -735,7 +751,7 @@ module m_ec_provider
          select case (fileReaderPtr%ofType)
             case (provFile_uniform, provFile_unimagdir)
                if (.not. ecQuantitySetName(instancePtr, quantityId, 'uniform_item')) then
-                  success = .false.
+                  return
                end if
                elementSetName = fileReaderPtr%fileName
                if (index(elementSetName,'.')>0) then
@@ -743,7 +759,7 @@ module m_ec_provider
                end if 
             case (provFile_bc)
                if (.not. ecQuantitySetName(instancePtr, quantityId, fileReaderPtr%bc%quantity%name)) then ! trim(fileReaderPtr%bc%qname))) then
-                  success = .false.
+                  return
                end if
                elementSetName = fileReaderPtr%bc%bcname
          end select 
@@ -751,60 +767,50 @@ module m_ec_provider
          ! N_quantities number of scalar quantities.
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not. (ecElementSetSetName(instancePtr, elementSetId, elementSetName))) then 
-            success = .false.
+            return
          end if
          if (.not. (ecElementSetSetType(instancePtr, elementSetId, elmSetType_scalar))) then 
-            success = .false.
+            return
          end if
          ! N_quantities scalars in a Field array.
          field0Id = ecInstanceCreateField(instancePtr)
          if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, n_quantities))) then
-            success = .false.
+            return
          end if
          field1Id = ecInstanceCreateField(instancePtr)
          if (.not. (ecFieldCreate1dArray(instancePtr, field1Id, n_quantities))) then
-            success = .false.
+            return
          end if
          itemId = ecInstanceCreateItem(instancePtr)
-         if (.not. (ecItemSetRole(instancePtr, itemId, itemType_source) .and. &
-                    ecItemSetType(instancePtr, itemId, accessType_fileReader) .and. &
-                    ecItemSetQuantity(instancePtr, itemId, quantityId) .and. &
-                    ecItemSetElementSet(instancePtr, itemId, elementSetId) .and. &
-                    ecItemSetSourceT0Field(instancePtr, itemId, field0Id) .and. &
-                    ecItemSetSourceT1Field(instancePtr, itemId, field1Id))) then
-            success = .false.
-         else
-            item => ecSupportFindItem(instancePtr, itemId)
-         end if
+         if (.not. ecItemSetRole(instancePtr, itemId, itemType_source)) return
+         if (.not. ecItemSetType(instancePtr, itemId, accessType_fileReader)) return
+         if (.not. ecItemSetQuantity(instancePtr, itemId, quantityId)) return
+         if (.not. ecItemSetElementSet(instancePtr, itemId, elementSetId)) return
+         if (.not. ecItemSetSourceT0Field(instancePtr, itemId, field0Id)) return
+         if (.not. ecItemSetSourceT1Field(instancePtr, itemId, field1Id)) return
+         item => ecSupportFindItem(instancePtr, itemId)
 
          ! ===== finish initialization of Fields =====
          ! Read the first two records into tEcItem%sourceT0FieldPtr and tEcItem%sourceT1FieldPtr.
          select case (fileReaderPtr%ofType)
             case (provFile_uniform, provFile_unimagdir)
                rewind(unit=fileReaderPtr%fileHandle)
-               if (success) then
-                   success = ecUniReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)
-               endif 
-               if (success) then
-                   success = ecUniReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)
-               endif 
+               if (.not. ecUniReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) return
+               if (.not. ecUniReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) return
             case (provFile_bc)
-               if (success) then
-                   success = ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)
-               endif 
-               if (success) then
-                  if (fileReaderPtr%bc%func /= BC_FUNC_CONSTANT) then
+               if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) return
+               if (fileReaderPtr%bc%func /= BC_FUNC_CONSTANT) then
                      ! read second line for T1-Field
-                     success = ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)
-                  else
-                     item%sourceT1FieldPtr%timesteps = 54321.0D+10
-                     item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
-                  endif
-               endif 
+                  if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) return
+               else
+                  item%sourceT0FieldPtr%timesteps = 54321.0D+10
+                  item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
+               endif
          end select 
          ! Add successfully created source Item to the FileReader
-         if (success) success = ecFileReaderAddItem(instancePtr, fileReaderPtr%id, item%id)
+         if (.not. ecFileReaderAddItem(instancePtr, fileReaderPtr%id, item%id)) return
          item%quantityPtr%vectorMax = n_quantities 
+         success = .true.
       end function ecProviderCreateUniformItems
       
       ! =======================================================================
@@ -2712,14 +2718,8 @@ module m_ec_provider
          nvar = 0 
          ierror = nf90_inquire(fileReaderPtr%fileHandle, nvariables = nvar)
          if (nvar>0) then 
-            if (allocated(fileReaderPtr%standard_names)) then
-               deallocate(fileReaderPtr%standard_names, stat=ierror)
-            endif
-            if (allocated(fileReaderPtr%variable_names)) then
-               deallocate(fileReaderPtr%variable_names, stat=ierror)
-            endif
-            allocate(fileReaderPtr%standard_names(nvar), stat=ierror)          ! Note: one of these may be obsolete (if we only check standard names)
-            allocate(fileReaderPtr%variable_names(nvar), stat=ierror)
+            allocate(fileReaderPtr%standard_names(nvar))          ! Note: one of these may be obsolete (if we only check standard names)
+            allocate(fileReaderPtr%variable_names(nvar))
             fileReaderPtr%standard_names = ''
             fileReaderPtr%variable_names = ''
             do ivar = 1,nvar 
@@ -3247,16 +3247,22 @@ module m_ec_provider
    bcPtr => fileReaderPtr%bc
    nc = bcPtr%numcols
    allocate(bcPtr%columns(bcPtr%numcols))
-   do ic = 1, nc
-      if (ic==bcPtr%timecolumn) then
-         print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'", (time)'
-      else
-         print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'"'
-         bcPtr%quantity => bcPtr%quantities(ic)
-         if (.not.(ecInstanceCreateUniformItems(instancePtr, fileReaderPtr))) then
-         endif
-      endif
-   enddo
+   select case(bcPtr%func)
+      case (BC_FUNC_TSERIES)
+         do ic = 1, nc
+            if (ic==bcPtr%timecolumn) then
+               print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'", (time)'
+            else
+               print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'"'
+               bcPtr%quantity => bcPtr%quantities(ic)
+               if (.not.(ecProviderCreateUniformItems(instancePtr, fileReaderPtr))) return
+            endif
+         enddo
+      case (BC_FUNC_QHTABLE)
+         if (.not.(ecProviderCreateQhtableItems(instancePtr, fileReaderPtr))) return
+         ! This step produces four items for this filereader with quantities named 'waterlevel', 'discharge', 'slope' and 'crossing',
+         ! each having a fieldT0%arr1D holding the table column values
+   end select
 
    success = .True.
    end function items_from_bc_quantities

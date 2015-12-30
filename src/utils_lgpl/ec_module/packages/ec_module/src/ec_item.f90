@@ -56,6 +56,9 @@ module m_ec_item
    public :: ecItemSetSourceT1Field
    public :: ecItemSetTargetField
    public :: ecItemAddConnection
+   public :: ecItemGetProvider
+   public :: ecItemGetArr1dPtr
+   public :: ecItemGetQHtable
    
    contains
       
@@ -86,6 +89,7 @@ module m_ec_item
          itemPtr%id = itemId
          itemPtr%role = itemType_undefined
          itemPtr%accessType = accessType_undefined
+         itemPtr%providerId = ec_undef_int
          itemPtr%nConnections = 0
       end function ecItemCreate
       
@@ -124,7 +128,7 @@ module m_ec_item
       function ecItemFree1dArray(itemPtr, nItems) result(success)
          logical                                 :: success !< function status
          type(tEcItemPtr), dimension(:), pointer :: itemPtr !< intent(inout)
-         integer                                 :: nItems  !< number of Items
+         integer, intent(inout)                  :: nItems  !< number of Items
          !
          integer :: i     !< loop counter
          integer :: istat !< deallocate() status
@@ -149,6 +153,7 @@ module m_ec_item
                if (istat /= 0) success = .false.
             end if
          end if
+         nItems = 0
       end function ecItemFree1dArray
       
       ! =======================================================================
@@ -192,7 +197,98 @@ module m_ec_item
          end do
       end function ecItemGetValues
       
-      ! =======================================================================
+! =======================================================================
+      !> Retrieve the id of the provider (filereader) that supplies this item
+      function ecItemGetProvider(instancePtr, itemId) result(providerID)
+      implicit none
+      integer                               :: providerID
+      type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
+      integer,                intent(in)    :: itemID       !< unique Item id
+
+      integer  :: i
+      type(tEcItem), pointer :: itemPtr            !< Item under consideration
+
+      providerID = ec_undef_int
+
+      do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
+         itemPtr => instancePtr%ecItemsPtr(i)%ptr
+         if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_source)) then
+            providerID = itemPtr%providerID
+         end if
+      enddo
+      end function ecItemGetProvider
+! =======================================================================
+      !> Retrieve pointers to the Q and H arrays of a QH-table associated with this item
+      !> Returns true if this source item is associated with a QH-table
+      function ecItemGetQHtable(instancePtr, itemId, h_values, q_values, success) result(is_QH)
+      implicit none 
+      logical                             :: is_QH
+      type(tEcInstance),      pointer     :: instancePtr  !< intent(in)
+      integer, intent(in)                 :: itemId
+      real(hp), dimension(:),     pointer :: q_values, h_values
+      logical, intent(out)                :: success
+
+      integer  ::    ec_qh_provider_id
+      integer  ::    item_H, item_Q
+
+      success = .False. 
+      is_QH = .False.
+      h_values => null()
+      q_values => null()
+      ec_qh_provider_id = ecItemGetProvider(instancePtr, itemId)                              ! request the provider for this item
+      if (ec_qh_provider_id<1) then 
+         return
+         ! TODO: something went wrong, issue an error message
+      end if
+      if (ecFileReaderProvidesQHtable(instancePtr, ec_qh_provider_id, item_H, item_Q)) then   ! Infer if this provider is of type QH, if so ...
+                                                                                              ! NB: either item_H == itemId or item_Q == itemId
+         h_values => ecItemGetArr1DPtr(instancePtr, item_H, 0)                                !    obtain a pointer to the waterlevels
+         q_values => ecItemGetArr1DPtr(instancePtr, item_Q, 0)                                !    obtain a pointer to the discharges 
+         is_QH = .True.
+      end if       
+      success = .True.
+      end function ecItemGetQHtable
+
+! =======================================================================
+      !> Retrieve a pointer to the item's field's arr1d
+      function ecItemGetArr1DPtr(instancePtr, itemId, selector) result(Arr1DPtr)
+      implicit none
+      integer                               :: providerID
+      type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
+      integer,                intent(in)    :: itemID       !< unique Item id
+      integer,                intent(in)    :: selector     !< selects field, 0:source0, 1:source1, 2:target
+      real(hp), dimension(:), pointer       :: Arr1DPtr     !< points to a 1-dim array field, stored in arr1d OR in a kernel
+
+      integer  :: i
+      type(tEcItem) , pointer :: itemPtr
+      type(tEcField), pointer :: fieldptr
+
+      arr1dPtr => null()
+
+      do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
+         itemPtr => instancePtr%ecItemsPtr(i)%ptr
+         if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_source)) then
+            fieldptr => null()
+            select case (selector)
+            case(0)
+               fieldptr => itemPtr%sourceT0FieldPtr
+            case(1)
+               fieldptr => itemPtr%sourceT1FieldPtr
+            case(2)
+               fieldptr => itemPtr%targetFieldPtr
+            end select
+            if (associated(fieldptr)) then
+               if (allocated(fieldptr%arr1d)) then
+                  Arr1DPtr => fieldptr%arr1d
+               else
+                  Arr1DPtr => fieldptr%arr1dPtr
+               endif
+            end if 
+         end if
+      enddo
+      end function ecItemGetArr1DPtr
+! =======================================================================
+      
       
       !> Retrieve data for a specific number of timesteps since the kernel's reference date by first updating the source Items.
       !! Their data is processed through a Converter, which updates the Field of each of the Connection's target Items.

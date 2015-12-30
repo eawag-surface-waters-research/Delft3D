@@ -143,7 +143,6 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\ec_quantity.f90"/>
-		<File RelativePath=".\src\ec_stringbuffer.f90"/>
 		<File RelativePath=".\src\ec_support.f90"/>
 		<File RelativePath="src\ec_typedefs.f90"/>
 		<File RelativePath=".\src\transform_shiftedpole.f90"/></Filter></Files>

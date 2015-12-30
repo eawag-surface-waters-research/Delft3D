@@ -125,11 +125,6 @@ module m_ec_instance
                   success = .false.
                end if
                ptr%nBCBlocks = 0
-               allocate(ptr%ecStringbufferPtr(1), STAT = istat)
-               if (istat /= 0) then
-                  call setECMessage("ERROR: ec_instance::ecInstanceCreate: Unable to allocate memory for ecStringbufferPtr array.")
-                  success = .false.
-               end if
                allocate(ptr%ecItemsPtr(10), STAT = istat)
                if (istat /= 0) then
                   call setECMessage("ERROR: ec_instance::ecInstanceCreate: Unable to allocate memory for ecItemsPtr array.")
@@ -162,18 +157,36 @@ module m_ec_instance
             call setECMessage("INFO: ec_instance::ecInstanceFree: Dummy argument ptr is already disassociated.")
          else
             ! Delegate Free-and-deallocate call to all constituent data types.
-            if (ecConnectionFree1dArray(ptr%ecConnectionsPtr, ptr%nConnections) .and. &
-                ecConverterFree1dArray(ptr%ecConvertersPtr, ptr%nConverters) .and. &
-                ecElementSetFree1dArray(ptr%ecElementSetsPtr, ptr%nElementSets) .and. &
-                ecFileReaderFree1dArray(ptr%ecFileReadersPtr, ptr%nFileReaders) .and. &
-                ecNetCDFFree1dArray(ptr%ecNetCDFsPtr, ptr%nNetCDFs) .and. &
-                ecItemFree1dArray(ptr%ecItemsPtr, ptr%nItems) .and. &
-                ecQuantityFree1dArray(ptr%ecQuantitiesPtr, ptr%nQuantities) .and. &
-                ecFieldFree1dArray(ptr%ecFieldsPtr, ptr%nFields)) then
+            if (.not.ecConnectionFree1dArray(ptr%ecConnectionsPtr, ptr%nConnections)) then
+               return
+            endif
+            if (.not.ecConverterFree1dArray(ptr%ecConvertersPtr, ptr%nConverters)) then
+               return
+            endif
+            if (.not.ecElementSetFree1dArray(ptr%ecElementSetsPtr, ptr%nElementSets)) then
+               return
+            endif
+            if (.not.ecFieldFree1dArray(ptr%ecFieldsPtr, ptr%nFields)) then
+               return
+            endif
+            if (.not.ecFileReaderFree1dArray(ptr%ecFileReadersPtr, ptr%nFileReaders)) then
+               return
+            endif
+            if (.not.ecBCBlockFree1dArray(ptr%ecBCBlocksPtr, ptr%nBCBlocks)) then
+               return
+            endif
+            if (.not.ecNetCDFFree1dArray(ptr%ecNetCDFsPtr, ptr%nNetCDFs)) then
+               return
+            endif
+            if (.not.ecItemFree1dArray(ptr%ecItemsPtr, ptr%nItems)) then
+               return
+            endif
+            if (.not.ecQuantityFree1dArray(ptr%ecQuantitiesPtr, ptr%nQuantities)) then
+               return
+            endif
                ! Finally deallocate the tEcInstance pointer.
-               deallocate(ptr, stat = istat)
-               if (istat == 0) success = .true.
-            end if
+            deallocate(ptr, stat = istat)
+            if (istat == 0) success = .true.
          end if
       end function ecInstanceFree
       

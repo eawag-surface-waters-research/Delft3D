@@ -167,7 +167,7 @@ module m_ec_elementSet
       function ecElementSetFree1dArray(elementSetPtr, nElementSets) result (success)
          logical                                       :: success       !< function status
          type(tEcElementSetPtr), dimension(:), pointer :: elementSetPtr !< intent(inout)
-         integer                                       :: nElementSets  !< number of ElementSets
+         integer, intent(inout)                        :: nElementSets  !< number of ElementSets
          !
          integer :: i      !< loop counter
          integer :: istat  !< deallocate() status
@@ -192,6 +192,7 @@ module m_ec_elementSet
                if (istat /= 0) success = .false.
             end if
          end if
+         nElementSets = 0
       end function ecElementSetFree1dArray
       
       ! =======================================================================

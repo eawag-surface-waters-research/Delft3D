@@ -125,8 +125,10 @@ module m_ec_bccollect
                    elseif (jakeyvalue(keyvaluestr,'FUNCTION','QH')) then  
                       ! Check for qh
                       jablock = .true.
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATERLEVEL')
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'DISCHARGE')
+                      jablock = jablock .and. ( jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATERLEVEL') .or. &
+                                                jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATER_LEVEL'))
+                      jablock = jablock .and. ( jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'DISCHARGE') .or. &
+                                                jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATER_DISCHARGE'))
                    elseif (jakeyvalue(keyvaluestr,'FUNCTION','T3D')) then  
                       ! Check for timeseries on sigma- or z-levels 
                       jablock = jakeyvalue(keyvaluestr,'QUANTITY',quantity)
@@ -352,8 +354,12 @@ module m_ec_bccollect
        deallocate(bc%quantities)
     endif 
     allocate(hdrkeys(nfld),hdrvals(nfld))
-    allocate(bc%quantities(nq))                    ! individual quantity objects 
 
+    hdrvals=''
+    hdrkeys=''
+    read(keyvaluestr,*,iostat=iostat) dumstr,(hdrkeys(ifld),hdrvals(ifld),ifld=1,nfld)
+
+    allocate(bc%quantities(nq))                    ! individual quantity objects 
     ! RL666: TODO: support vectors and layers, grouping of columns into quantities 
     do iq = 1,nq 
        allocate(bc%quantities(iq)%jacolumn(nq))
@@ -363,10 +369,7 @@ module m_ec_bccollect
        bc%quantities(iq)%jacolumn = .false.        
        bc%quantities(iq)%jacolumn(iq) = .true.    
     enddo
-
-    hdrvals=''
-    hdrkeys=''
-    read(keyvaluestr,*,iostat=iostat) dumstr,(hdrkeys(ifld),hdrvals(ifld),ifld=1,nfld)
+    
     iq = 0                              
     iq_sel = 0
     do ifld=1,nfld
@@ -384,10 +387,28 @@ module m_ec_bccollect
                   if (trim(hdrvals(ifld))=='TIME') then    ! special check on the time field 
                      bc%timecolumn = iq 
                   endif 
-               case (BC_FUNC_CONSTANT)
-               case default
-                  call setECMessage("Collecting items from BC file currently only supports time series")
-                  return
+               case (BC_FUNC_HARMONIC, BC_FUNC_ASTRO, BC_FUNC_HARMOCORR, BC_FUNC_ASTROCORR, BC_FUNC_CMP3D)
+                  if (trim(hdrvals(ifld))=='HARMONIC COMPONENT') then          ! harmonic component
+                     bc%astro_component_column = iq
+                  endif
+                  if (trim(hdrvals(ifld))=='ASTRONOMIC COMPONENT') then        ! astronomic component label
+                     bc%astro_component_column = iq
+                  endif
+                  if (trim(hdrvals(ifld))==trim(bc%qname)//' AMPLITUDE') then  ! amplitude field for astronomic/harmonic components
+                     bc%astro_amplitude_column = iq
+                  endif
+                  if (trim(hdrvals(ifld))==trim(bc%qname)//' PHASE') then      ! phase field for astronomic/harmonic components
+                     bc%astro_phase_column = iq
+                  endif
+               case (BC_FUNC_QHTABLE)
+                  if (trim(hdrvals(ifld))==trim(bc%qname)//' WATERLEVEL' .or. & 
+                      trim(hdrvals(ifld))=='WATER_LEVEL')                 then ! waterlevel field for qh-
+                     bc%qh_waterlevel_column = iq
+                  endif
+                  if (trim(hdrvals(ifld))==trim(bc%qname)//' DISCHARGE' .or. & 
+                      trim(hdrvals(ifld))=='WATER_DISCHARGE')            then  ! discharge field for qh-
+                     bc%qh_discharge_column = iq
+                  endif
                end select                                          
           case ('UNIT')
                bc%quantities(iq)%unit = trim(hdrvals(ifld))
@@ -403,6 +424,19 @@ module m_ec_bccollect
                      bc%func = BC_FUNC_CONSTANT
                   case ('T3D')
                      bc%func = BC_FUNC_TIM3D
+                     allocate(bc%quantities(1))                     ! joint quantity objects
+                  case ('QHTABLE')
+                     bc%func = BC_FUNC_QHTABLE
+                     if (len_trim(bc%qname)==0) then
+                        bc%qname = 'QHBND'
+                     endif
+                  case ('HARMONIC')
+                     bc%func = BC_FUNC_HARMONIC
+                  case ('ASTRONOMIC')
+                     bc%func = BC_FUNC_ASTRO
+                  case default
+                     call setECMessage("Unknown function """//trim(hdrvals(ifld))//"""")
+                  return
                end select 
           case ('OFFSET')                           
                if (iq>0) cycle 
@@ -423,15 +457,14 @@ module m_ec_bccollect
                end select  
        end select 
     enddo 
-
-    bc%numcols = iq
+    
     ! Fill bc%quantity%col2elm(nq) which holds the mapping of columns in the file to vector positions
     bc%numcols = iq
-    do iq = 1, nq 
+    do iq = 1,nq 
        bc%quantities(iq)%col2elm = -1 
        bc%quantities(iq)%col2elm(iq) = 1
     enddo 
-    
+
     deallocate(hdrkeys)
     deallocate(hdrvals)
     success = .True.

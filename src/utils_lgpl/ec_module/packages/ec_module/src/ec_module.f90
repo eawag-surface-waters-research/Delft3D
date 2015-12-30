@@ -125,7 +125,11 @@ module m_ec_module
    interface ecGetValues
       module procedure ecItemGetValues
    end interface ecGetValues
-      
+
+   interface ecGetQHtable
+      module procedure ecItemGetQHtable
+   end interface ecGetQHtable
+
    interface ecFindItemInFileReader
       module procedure ecFileReaderFindItem
    end interface ecFindItemInFileReader

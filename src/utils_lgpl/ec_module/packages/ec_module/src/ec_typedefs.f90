@@ -60,27 +60,10 @@ module m_ec_typedefs
       type(tEcItemPtr),         dimension(:), pointer :: ecItemsPtr        => null()
       integer                                         :: nItems                      !< Number of tEcItemPtrs <= size(ecItemsPtr)
       type(tEcQuantityPtr),     dimension(:), pointer :: ecQuantitiesPtr   => null()
-      type(tEcStringbufferPtr), dimension(:), pointer :: ecStringbufferPtr => null()
       integer                                         :: nQuantities                 !< Number of tEcQuantityPtrs <= size(ecQuantitiesPtr)
       integer                                         :: idCounter                   !< helper variable for assigning unique ids to the Instance's stored objects
       integer                                         :: coordsystem = -1            !< Coordinate system of 
    end type tEcInstance
-   
-   !===========================================================================
-   
-    type tEcStringbuffer
-       integer                                     ::  nlines = 0           !< Number of lines currently buffered 
-       integer                                     ::  nblocks = 0          !< Number of bc blocks currently buffered 
-       character(len=maxRecordlen), allocatable    ::  lines(:)             !< Array of lines currently buffered 
-       integer, allocatable                        ::  numbers(:)           !< Line numbers 
-       character(len=maxFileNameLen), allocatable  ::  bcnames(:)           !< Names of stored blocks 
-       integer, allocatable                        ::  from_line(:)         !< From where thru where is this block stored in the stringbuffer ? 
-       integer, allocatable                        ::  thru_line(:)        
-    end type tEcStringbuffer 
-
-   type tEcStringbufferPtr
-      type(tEcStringbuffer), pointer :: ptr => null()
-   end type tEcStringbufferPtr
    
    !===========================================================================
 
@@ -97,12 +80,7 @@ module m_ec_typedefs
         real(hp)                ::  factor = 1.d0  !< to be multiplied with all data for this quantity
 !       integer, allocatable    ::  vertndx(:)  !< vertical position nr (indices into the global vertical position array)
         integer                 ::  vertndx     !< vertical position nr (indices into the global vertical position array)
-        integer                 ::  astro_component_column = -1  !< number of the column, containing astronomic components
-        integer                 ::  astro_amplitude_column = -1  !< number of the column, containing astronomic amplitudes
-        integer                 ::  astro_phase_column     = -1  !< number of the column, containing astronomic phases
-        integer                 ::  qh_waterlevel_column   = -1  !< number of the column, containing qh-type waterlevel (h)
-        integer                 ::  qh_discharge_column    = -1  !< number of the column, containing qh-type discharge (q)
-        integer                 ::  vectormax              = 1   !< number of vector elements, default scalar 
+        integer                 ::  vectormax   = 1   !< number of vector elements, default scalar 
 
         character(len=8), allocatable  :: astro_component(:)     !< original component label read 
         real(hp), allocatable          :: astro_amplitude(:)     !< original amplitude read 
@@ -118,7 +96,6 @@ module m_ec_typedefs
         character(len=maxFileNameLen), allocatable ::  columns(:)      !< temporary substrings from columns, used by the line reader 
         integer                                    ::  from_line = -1  !< Data for this block start linenumber in temporary string buffer
         integer                                    ::  thru_line = -1  !< Data for this block final linenumber in temporary string buffer 
-        integer                                    ::  readpos         !< Current reading position in the stringbuffer
         integer                                    ::  func
         integer                                    ::  timecolumn      !< Number of the column holding the time strings, compul
         character(len=50)                          ::  timeunit        !< netcdf-convention time unit definition 
@@ -128,18 +105,24 @@ module m_ec_typedefs
         integer                                    ::  numlay = 1      !< number of vertical layers 
         integer                                    ::  zInterpolationType  !< Type of vertical interpolation 
         real(hp)                                   ::  missing         !< Missing value 
-        character(len=maxFileNameLen)              ::  bcname          !< Name (identifier) for this BC block (assumed to be uniq)
-        character(len=maxFileNameLen)              ::  qname           !< Quantity name with which all found quantities must identify 
-        character(len=maxFileNameLen)              ::  fname           !< Filename the data originates from 
+        character(len=maxFileNameLen)              ::  bcname  = ''    !< Name (identifier) for this BC block (assumed to be uniq)
+        character(len=maxFileNameLen)              ::  qname   = ''    !< Quantity name with which all found quantities must identify 
+        character(len=maxFileNameLen)              ::  fname   = ''    !< Filename the data originates from 
         integer(kind=8)                            ::  fhandle= -1     !< (C) filehandle to open file 
         integer                                    ::  ftype  = -1     !< ASCII, NetCDF, ....
         type (tEcBCQuantity), pointer              ::  quantity        !< Quantity object 
         type (tEcBCQuantity), allocatable          ::  quantities(:)   !< Array of quantity objects for each quantity with the same name  
-        type (tEcStringbuffer), pointer            ::  strbufptr       !< pointer to a stringbuffer (to be set upon construction) 
         type (tEcNetCDF), pointer                  ::  ncptr => null() !< pointer to a NetCDF instance, responsible for a connected NetCDF file 
         integer                                    ::  ncvarndx = -1   !< varid in the associated netcdf for the requested quantity 
         integer                                    ::  nclocndx = -1   !< index in the timeseries_id dimension for the requested location 
         integer                                    ::  nctimndx =  1   !< record number to be read 
+        !
+        integer                 ::  astro_component_column = -1  !< number of the column, containing astronomic components
+        integer                 ::  astro_amplitude_column = -1  !< number of the column, containing astronomic amplitudes
+        integer                 ::  astro_phase_column     = -1  !< number of the column, containing astronomic phases
+        integer                 ::  qh_waterlevel_column   = -1  !< number of the column, containing qh-type waterlevel (h)
+        integer                 ::  qh_discharge_column    = -1  !< number of the column, containing qh-type discharge (q)
+!       integer                 ::  vectormax              = 1   !< number of vector elements, default scalar 
    end type tEcBCBlock
 
    type tEcBCBlockPtr
@@ -305,6 +288,7 @@ module m_ec_typedefs
       integer                                       :: id                           !< unique Item number, set by ecInstanceCreateItem
       integer                                       :: role                         !< source or target Item, see itemType enumeration
       integer                                       :: accessType                   !< file reader, file writer, data provider
+      integer                                       :: providerId = ec_undef_int    !< identifier of the provider (usually a file reader)
       type(tEcQuantity),                    pointer :: quantityPtr        => null() !< Quantity, stored in tEcInstance%ecQuantitiesPtr
       type(tEcElementSet),                  pointer :: elementSetPtr      => null() !< ElementSet, stored in tEcInstance%ecElementSetsPtr
       type(tEcField),                       pointer :: sourceT0FieldPtr   => null() !< Field containing source data of second to last read data block.

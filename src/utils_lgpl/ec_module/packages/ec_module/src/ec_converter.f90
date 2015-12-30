@@ -113,7 +113,7 @@ module m_ec_converter
       function ecConverterFree1dArray(converterPtr, nConverters) result (success)
          logical                                      :: success      !< function status
          type(tEcConverterPtr), dimension(:), pointer :: converterPtr !< intent(inout)
-         integer                                      :: nConverters  !< number of Converters
+         integer, intent(inout)                       :: nConverters  !< number of Converters
          !
          integer :: i      !< loop counter
          integer :: istat  !< deallocate() status
@@ -138,6 +138,7 @@ module m_ec_converter
                if (istat /= 0) success = .false.
             end if
          end if
+         nConverters = 0
       end function ecConverterFree1dArray
       
       ! =======================================================================
