@@ -27,6 +27,11 @@ stocfl,stocsu,stocsc
 "dDecTR3   ","dTR3      ",  -1.00000
 "dDecTR4   ","dTR4      ",  -1.00000
 "dDecTR5   ","dTR5      ",  -1.00000
+"dDumSM01  ","SM01      ",   0.00000
+"dDumSM02  ","SM02      ",   0.00000
+"dDumSM03  ","SM03      ",   0.00000
+"dDumSm04  ","SM04      ",   0.00000
+"dDumSM05  ","SM05      ",   0.00000
 "dDumphsimp","ALKA      ",   0.00000
 "dDumphsimp","TIC       ",   0.00000
 "dDumspcarb","TIC       ",   0.00000
@@ -1979,3 +1984,268 @@ stocfl,stocsu,stocsc
 "dP2VB09upy","PO4       ",  -1.00000
 "dS1VB09upy","SO4       ",  -1.00000
 "dS2VB09upy","SUD       ",  -1.00000
+"dGrowEM01 ","EM01      ",   1.00000
+"dGrowSM01 ","SM01      ",   1.00000
+"dDecayEM01","EM01      ",  -1.00000
+"dDecaySM01","SM01      ",  -1.00000
+"dCtEMtRH01","RH01      ",   1.00000
+"dCtSMtRH01","RH01      ",   1.00000
+"dCtRHtEM01","RH01      ",  -1.00000
+"dCtRHtSM01","RH01      ",  -1.00000
+"dNtEMtRH01","NRH01     ",   1.00000
+"dNtSMtRH01","NRH01     ",   1.00000
+"dNtRHtEM01","NRH01     ",  -1.00000
+"dNtRHtSM01","NRH01     ",  -1.00000
+"dPtEMtRH01","PRH01     ",   1.00000
+"dPtSMtRH01","PRH01     ",   1.00000
+"dPtRHtEM01","PRH01     ",  -1.00000
+"dPtRHtSM01","PRH01     ",  -1.00000
+"dNH4upEM01","NH4       ",  -1.00000
+"dNO3upEM01","NO3       ",  -1.00000
+"dPO4upEM01","PO4       ",  -1.00000
+"dPrPOC1M01","POC1      ",   1.00000
+"dPrPOC1M01","DetC      ",   1.00000
+"dPrPOC2M01","POC2      ",   1.00000
+"dPrPOC2M01","OOC       ",   1.00000
+"dPrPOC3M01","POC3      ",   1.00000
+"dPrPOC3M01","OOC       ",   1.00000
+"dPrPON1M01","PON1      ",   1.00000
+"dPrPON1M01","DetN      ",   1.00000
+"dPrPON2M01","PON2      ",   1.00000
+"dPrPON2M01","OON       ",   1.00000
+"dPrPON3M01","PON3      ",   1.00000
+"dPrPON3M01","OON       ",   1.00000
+"dPrPOP1M01","POP1      ",   1.00000
+"dPrPOP1M01","DetP      ",   1.00000
+"dPrPOP2M01","POP2      ",   1.00000
+"dPrPOP2M01","DetP      ",   1.00000
+"dPrPOP3M01","POP3      ",   1.00000
+"dPrPOP3M01","DetP      ",   1.00000
+"dNH4upSM01","NH4       ",  -1.00000
+"dNO3upSM01","NO3       ",  -1.00000
+"dPO4upSM01","PO4       ",  -1.00000
+"dCO2upSM01","TIC       ",  -1.00000
+"dCO2upSM01","CO2       ",  -3.67000
+"dOXYprSM01","OXY       ",   2.67000
+"dGrowEM02 ","EM02      ",   1.00000
+"dGrowSM02 ","SM02      ",   1.00000
+"dDecayEM02","EM02      ",  -1.00000
+"dDecaySM02","SM02      ",  -1.00000
+"dCtEMtRH02","RH02      ",   1.00000
+"dCtSMtRH02","RH02      ",   1.00000
+"dCtRHtEM02","RH02      ",  -1.00000
+"dCtRHtSM02","RH02      ",  -1.00000
+"dNtEMtRH02","NRH02     ",   1.00000
+"dNtSMtRH02","NRH02     ",   1.00000
+"dNtRHtEM02","NRH02     ",  -1.00000
+"dNtRHtSM02","NRH02     ",  -1.00000
+"dPtEMtRH02","PRH02     ",   1.00000
+"dPtSMtRH02","PRH02     ",   1.00000
+"dPtRHtEM02","PRH02     ",  -1.00000
+"dPtRHtSM02","PRH02     ",  -1.00000
+"dNH4upEM02","NH4       ",  -1.00000
+"dNO3upEM02","NO3       ",  -1.00000
+"dPO4upEM02","PO4       ",  -1.00000
+"dPrPOC1M02","POC1      ",   1.00000
+"dPrPOC1M02","DetC      ",   1.00000
+"dPrPOC2M02","POC2      ",   1.00000
+"dPrPOC2M02","OOC       ",   1.00000
+"dPrPOC3M02","POC3      ",   1.00000
+"dPrPOC3M02","OOC       ",   1.00000
+"dPrPON1M02","PON1      ",   1.00000
+"dPrPON1M02","DetN      ",   1.00000
+"dPrPON2M02","PON2      ",   1.00000
+"dPrPON2M02","OON       ",   1.00000
+"dPrPON3M02","PON3      ",   1.00000
+"dPrPON3M02","OON       ",   1.00000
+"dPrPOP1M02","POP1      ",   1.00000
+"dPrPOP1M02","DetP      ",   1.00000
+"dPrPOP2M02","POP2      ",   1.00000
+"dPrPOP2M02","DetP      ",   1.00000
+"dPrPOP3M02","POP3      ",   1.00000
+"dPrPOP3M02","DetP      ",   1.00000
+"dNH4upSM02","NH4       ",  -1.00000
+"dNO3upSM02","NO3       ",  -1.00000
+"dPO4upSM02","PO4       ",  -1.00000
+"dCO2upSM02","TIC       ",  -1.00000
+"dCO2upSM02","CO2       ",  -3.67000
+"dOXYprSM02","OXY       ",   2.67000
+"dGrowEM03 ","EM03      ",   1.00000
+"dGrowSM03 ","SM03      ",   1.00000
+"dDecayEM03","EM03      ",  -1.00000
+"dDecaySM03","SM03      ",  -1.00000
+"dCtEMtRH03","RH03      ",   1.00000
+"dCtSMtRH03","RH03      ",   1.00000
+"dCtRHtEM03","RH03      ",  -1.00000
+"dCtRHtSM03","RH03      ",  -1.00000
+"dNtEMtRH03","NRH03     ",   1.00000
+"dNtSMtRH03","NRH03     ",   1.00000
+"dNtRHtEM03","NRH03     ",  -1.00000
+"dNtRHtSM03","NRH03     ",  -1.00000
+"dPtEMtRH03","PRH03     ",   1.00000
+"dPtSMtRH03","PRH03     ",   1.00000
+"dPtRHtEM03","PRH03     ",  -1.00000
+"dPtRHtSM03","PRH03     ",  -1.00000
+"dNH4upEM03","NH4       ",  -1.00000
+"dNO3upEM03","NO3       ",  -1.00000
+"dPO4upEM03","PO4       ",  -1.00000
+"dPrPOC1M03","POC1      ",   1.00000
+"dPrPOC1M03","DetC      ",   1.00000
+"dPrPOC2M03","POC2      ",   1.00000
+"dPrPOC2M03","OOC       ",   1.00000
+"dPrPOC3M03","POC3      ",   1.00000
+"dPrPOC3M03","OOC       ",   1.00000
+"dPrPON1M03","PON1      ",   1.00000
+"dPrPON1M03","DetN      ",   1.00000
+"dPrPON2M03","PON2      ",   1.00000
+"dPrPON2M03","OON       ",   1.00000
+"dPrPON3M03","PON3      ",   1.00000
+"dPrPON3M03","OON       ",   1.00000
+"dPrPOP1M03","POP1      ",   1.00000
+"dPrPOP1M03","DetP      ",   1.00000
+"dPrPOP2M03","POP2      ",   1.00000
+"dPrPOP2M03","DetP      ",   1.00000
+"dPrPOP3M03","POP3      ",   1.00000
+"dPrPOP3M03","DetP      ",   1.00000
+"dNH4upSM03","NH4       ",  -1.00000
+"dNO3upSM03","NO3       ",  -1.00000
+"dPO4upSM03","PO4       ",  -1.00000
+"dCO2upSM03","TIC       ",  -1.00000
+"dCO2upSM03","CO2       ",  -3.67000
+"dOXYprSM03","OXY       ",   2.67000
+"dGrowEM04 ","EM04      ",   1.00000
+"dGrowSM04 ","SM04      ",   1.00000
+"dDecayEM04","EM04      ",  -1.00000
+"dDecaySM04","SM04      ",  -1.00000
+"dCtEMtRH04","RH04      ",   1.00000
+"dCtSMtRH04","RH04      ",   1.00000
+"dCtRHtEM04","RH04      ",  -1.00000
+"dCtRHtSM04","RH04      ",  -1.00000
+"dNtEMtRH04","NRH04     ",   1.00000
+"dNtSMtRH04","NRH04     ",   1.00000
+"dNtRHtEM04","NRH04     ",  -1.00000
+"dNtRHtSM04","NRH04     ",  -1.00000
+"dPtEMtRH04","PRH04     ",   1.00000
+"dPtSMtRH04","PRH04     ",   1.00000
+"dPtRHtEM04","PRH04     ",  -1.00000
+"dPtRHtSM04","PRH04     ",  -1.00000
+"dNH4upEM04","NH4       ",  -1.00000
+"dNO3upEM04","NO3       ",  -1.00000
+"dPO4upEM04","PO4       ",  -1.00000
+"dPrPOC1M04","POC1      ",   1.00000
+"dPrPOC1M04","DetC      ",   1.00000
+"dPrPOC2M04","POC2      ",   1.00000
+"dPrPOC2M04","OOC       ",   1.00000
+"dPrPOC3M04","POC3      ",   1.00000
+"dPrPOC3M04","OOC       ",   1.00000
+"dPrPON1M04","PON1      ",   1.00000
+"dPrPON1M04","DetN      ",   1.00000
+"dPrPON2M04","PON2      ",   1.00000
+"dPrPON2M04","OON       ",   1.00000
+"dPrPON3M04","PON3      ",   1.00000
+"dPrPON3M04","OON       ",   1.00000
+"dPrPOP1M04","POP1      ",   1.00000
+"dPrPOP1M04","DetP      ",   1.00000
+"dPrPOP2M04","POP2      ",   1.00000
+"dPrPOP2M04","DetP      ",   1.00000
+"dPrPOP3M04","POP3      ",   1.00000
+"dPrPOP3M04","DetP      ",   1.00000
+"dNH4upSM04","NH4       ",  -1.00000
+"dNO3upSM04","NO3       ",  -1.00000
+"dPO4upSM04","PO4       ",  -1.00000
+"dCO2upSM04","TIC       ",  -1.00000
+"dCO2upSM04","CO2       ",  -3.67000
+"dOXYprSM04","OXY       ",   2.67000
+"dGrowEM05 ","EM05      ",   1.00000
+"dGrowSM05 ","SM05      ",   1.00000
+"dDecayEM05","EM05      ",  -1.00000
+"dDecaySM05","SM05      ",  -1.00000
+"dCtEMtRH05","RH05      ",   1.00000
+"dCtSMtRH05","RH05      ",   1.00000
+"dCtRHtEM05","RH05      ",  -1.00000
+"dCtRHtSM05","RH05      ",  -1.00000
+"dNtEMtRH05","NRH05     ",   1.00000
+"dNtSMtRH05","NRH05     ",   1.00000
+"dNtRHtEM05","NRH05     ",  -1.00000
+"dNtRHtSM05","NRH05     ",  -1.00000
+"dPtEMtRH05","PRH05     ",   1.00000
+"dPtSMtRH05","PRH05     ",   1.00000
+"dPtRHtEM05","PRH05     ",  -1.00000
+"dPtRHtSM05","PRH05     ",  -1.00000
+"dNH4upEM05","NH4       ",  -1.00000
+"dNO3upEM05","NO3       ",  -1.00000
+"dPO4upEM05","PO4       ",  -1.00000
+"dPrPOC1M05","POC1      ",   1.00000
+"dPrPOC1M05","DetC      ",   1.00000
+"dPrPOC2M05","POC2      ",   1.00000
+"dPrPOC2M05","OOC       ",   1.00000
+"dPrPOC3M05","POC3      ",   1.00000
+"dPrPOC3M05","OOC       ",   1.00000
+"dPrPON1M05","PON1      ",   1.00000
+"dPrPON1M05","DetN      ",   1.00000
+"dPrPON2M05","PON2      ",   1.00000
+"dPrPON2M05","OON       ",   1.00000
+"dPrPON3M05","PON3      ",   1.00000
+"dPrPON3M05","OON       ",   1.00000
+"dPrPOP1M05","POP1      ",   1.00000
+"dPrPOP1M05","DetP      ",   1.00000
+"dPrPOP2M05","POP2      ",   1.00000
+"dPrPOP2M05","DetP      ",   1.00000
+"dPrPOP3M05","POP3      ",   1.00000
+"dPrPOP3M05","DetP      ",   1.00000
+"dNH4upSM05","NH4       ",  -1.00000
+"dNO3upSM05","NO3       ",  -1.00000
+"dPO4upSM05","PO4       ",  -1.00000
+"dCO2upSM05","TIC       ",  -1.00000
+"dCO2upSM05","CO2       ",  -3.67000
+"dOXYprSM05","OXY       ",   2.67000
+"dGrazeEM01","EM01      ",  -1.00000
+"dGrazeSM01","SM01      ",  -1.00000
+"dGrazeRH01","RH01      ",  -1.00000
+"dGrzNRH01 ","NRH01     ",  -1.00000
+"dGrzPRH01 ","PRH01     ",  -1.00000
+"dGrazeEM02","EM02      ",  -1.00000
+"dGrazeSM02","SM02      ",  -1.00000
+"dGrazeRH02","RH02      ",  -1.00000
+"dGrzNRH02 ","NRH02     ",  -1.00000
+"dGrzPRH02 ","PRH02     ",  -1.00000
+"dGrazeEM03","EM03      ",  -1.00000
+"dGrazeSM03","SM03      ",  -1.00000
+"dGrazeRH03","RH03      ",  -1.00000
+"dGrzNRH03 ","NRH03     ",  -1.00000
+"dGrzPRH03 ","PRH03     ",  -1.00000
+"dGrazeEM04","EM04      ",  -1.00000
+"dGrazeSM04","SM04      ",  -1.00000
+"dGrazeRH04","RH04      ",  -1.00000
+"dGrzNRH04 ","NRH04     ",  -1.00000
+"dGrzPRH04 ","PRH04     ",  -1.00000
+"dGrazeEM05","EM05      ",  -1.00000
+"dGrazeSM05","SM05      ",  -1.00000
+"dGrazeRH05","RH05      ",  -1.00000
+"dGrzNRH05 ","NRH05     ",  -1.00000
+"dGrzPRH05 ","PRH05     ",  -1.00000
+"dHrvEM01  ","EM01      ",  -1.00000
+"dHrvSM01  ","SM01      ",  -1.00000
+"dHrvRH01  ","RH01      ",  -1.00000
+"dHrvNRH01 ","NRH01     ",  -1.00000
+"dHrvPRH01 ","PRH01     ",  -1.00000
+"dHrvEM02  ","EM02      ",  -1.00000
+"dHrvSM02  ","SM02      ",  -1.00000
+"dHrvRH02  ","RH02      ",  -1.00000
+"dHrvNRH02 ","NRH02     ",  -1.00000
+"dHrvPRH02 ","PRH02     ",  -1.00000
+"dHrvEM03  ","EM03      ",  -1.00000
+"dHrvSM03  ","SM03      ",  -1.00000
+"dHrvRH03  ","RH03      ",  -1.00000
+"dHrvNRH03 ","NRH03     ",  -1.00000
+"dHrvPRH03 ","PRH03     ",  -1.00000
+"dHrvEM04  ","EM04      ",  -1.00000
+"dHrvSM04  ","SM04      ",  -1.00000
+"dHrvRH04  ","RH04      ",  -1.00000
+"dHrvNRH04 ","NRH04     ",  -1.00000
+"dHrvPRH04 ","PRH04     ",  -1.00000
+"dHrvEM05  ","EM05      ",  -1.00000
+"dHrvSM05  ","SM05      ",  -1.00000
+"dHrvRH05  ","RH05      ",  -1.00000
+"dHrvNRH05 ","NRH05     ",  -1.00000
+"dHrvPRH05 ","PRH05     ",  -1.00000

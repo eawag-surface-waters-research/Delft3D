@@ -34,6 +34,24 @@ outppr,outpit,outpnm,outpdo,outpsx
 "HeatBal   ","Vevap     ",  12,"x",1
 "HeatBal   ","RhoWater  ",  13,"x",1
 "HeatBal   ","ModTemp   ",  14,"x",1
+"MaxMacro  ","MaxEM01   ",   1,"x",1
+"MaxMacro  ","MaxSM01   ",   2,"x",1
+"MaxMacro  ","MaxEM02   ",   3,"x",1
+"MaxMacro  ","MaxSM02   ",   4,"x",1
+"MaxMacro  ","MaxEM03   ",   5,"x",1
+"MaxMacro  ","MaxSM03   ",   6,"x",1
+"MaxMacro  ","MaxEM04   ",   7,"x",1
+"MaxMacro  ","MaxSM04   ",   8,"x",1
+"MaxMacro  ","MaxEM05   ",   9,"x",1
+"MaxMacro  ","MaxSM05   ",  10,"x",1
+"Coverage  ","fcover    ",   1,"x",1
+"Coverage  ","CoverEM01 ",   2,"x",1
+"Coverage  ","CoverEM02 ",   3,"x",1
+"Coverage  ","CoverEM03 ",   4,"x",1
+"Coverage  ","CoverEM04 ",   5,"x",1
+"Coverage  ","CoverEM05 ",   6,"x",1
+"Coverage  ","IbotSeg   ",   7,"x",1
+"Coverage  ","RadSurf   ",   8,"x",1
 "DAYRAD    ","DayRadSurf",   1,"x",1
 "Temperatur","RCHeat    ",   1,"x",1
 "Temperatur","Temp      ",   2,"x",1
@@ -74,6 +92,26 @@ outppr,outpit,outpnm,outpdo,outpsx
 "CalTau    ","TauVELOC  ",   2,"x",1
 "CalTau    ","TauWIND   ",   3,"x",1
 "CalTau    ","CalVelTau ",   4,"x",1
+"MACDIS01  ","FrBmSM01  ",   1,"x",1
+"MACDIS01  ","BmLaySM01 ",   2,"x",1
+"MACDIS01  ","HactSM01  ",   3,"x",1
+"MACDIS01  ","ITopSeg01 ",   4,"x",1
+"MACDIS02  ","FrBmSM02  ",   1,"x",1
+"MACDIS02  ","BmLaySM02 ",   2,"x",1
+"MACDIS02  ","HactSM02  ",   3,"x",1
+"MACDIS02  ","ITopSeg02 ",   4,"x",1
+"MACDIS03  ","FrBmSM03  ",   1,"x",1
+"MACDIS03  ","BmLaySM03 ",   2,"x",1
+"MACDIS03  ","HactSM03  ",   3,"x",1
+"MACDIS03  ","ITopSeg03 ",   4,"x",1
+"MACDIS04  ","FrBmSM04  ",   1,"x",1
+"MACDIS04  ","BmLaySM04 ",   2,"x",1
+"MACDIS04  ","HactSM04  ",   3,"x",1
+"MACDIS04  ","ITopSeg04 ",   4,"x",1
+"MACDIS05  ","FrBmSM05  ",   1,"x",1
+"MACDIS05  ","BmLaySM05 ",   2,"x",1
+"MACDIS05  ","HactSM05  ",   3,"x",1
+"MACDIS05  ","ITopSeg05 ",   4,"x",1
 "pH_simp   ","pH        ",   1,"x",1
 "pH_simp   ","CO2       ",   2,"x",1
 "SpecCarb  ","DisCO2    ",   1,"x",1
@@ -90,6 +128,8 @@ outppr,outpit,outpnm,outpdo,outpsx
 "EXTINABUVP","ExtUvPhyt ",   1,"x",1
 "EXTINABUV ","ExtUvPhyt ",   1," ",1
 "ExtPhDUV  ","ExtUvPhyt ",   1,"x",1
+"ExtMacroVl","ExtVlMacro",   1,"x",1
+"ExtMacroUV","ExtUvMacro",   1,"x",1
 "Extinc_VLG","ExtVl     ",   1,"x",1
 "Extinc_VLG","ExtVlISS  ",   2,"x",1
 "Extinc_VLG","ExtVlOSS  ",   3,"x",1
@@ -3561,3 +3601,140 @@ outppr,outpit,outpnm,outpdo,outpsx
 "VB09_Upt3D","fP2VB09upy",   4,"x",1
 "VB09_Upt3D","fS1VB09upy",   5,"x",1
 "VB09_Upt3D","fS2VB09upy",   6,"x",1
+"Rad_SM01  ","LimRadSM01",   1,"x",1
+"Rad_SM02  ","LimRadSM02",   1,"x",1
+"Rad_SM03  ","LimRadSM03",   1,"x",1
+"Rad_SM04  ","LimRadSM04",   1,"x",1
+"Rad_SM05  ","LimRadSM05",   1,"x",1
+"NPPoreS12 ","NH4S12    ",   1,"x",1
+"NPPoreS12 ","PO4S12    ",   2,"x",1
+"MACNUTSM01","LimNSM01W ",   1,"x",1
+"MACNUTSM01","LimPSM01W ",   2,"x",1
+"MACNUTSM01","LCO2SM01  ",   3,"x",1
+"MACNUTSM01","LimNSM01B ",   4,"x",1
+"MACNUTSM01","LimPSM01B ",   5,"x",1
+"MACNUTSM01","LimNutSM01",   6,"x",1
+"MACNUTSM01","FrootNSM01",   7,"x",1
+"MACNUTSM01","FrootPSM01",   8,"x",1
+"MACNUTSM01","CDINSM01W ",   9,"x",1
+"MACNUTSM01","CPO4SM01W ",  10,"x",1
+"MACNUTSM01","CCO2SM01  ",  11,"x",1
+"MACNUTSM01","CHCO3SM01 ",  12,"x",1
+"MACNUTSM01","CDINSM01B ",  13,"x",1
+"MACNUTSM01","CPO4SM01B ",  14,"x",1
+"MACNUTSM02","LimNSM02W ",   1,"x",1
+"MACNUTSM02","LimPSM02W ",   2,"x",1
+"MACNUTSM02","LCO2SM02  ",   3,"x",1
+"MACNUTSM02","LimNSM02B ",   4,"x",1
+"MACNUTSM02","LimPSM02B ",   5,"x",1
+"MACNUTSM02","LimNutSM02",   6,"x",1
+"MACNUTSM02","FrootNSM02",   7,"x",1
+"MACNUTSM02","FrootPSM02",   8,"x",1
+"MACNUTSM02","CDINSM02W ",   9,"x",1
+"MACNUTSM02","CPO4SM02W ",  10,"x",1
+"MACNUTSM02","CCO2SM02  ",  11,"x",1
+"MACNUTSM02","CHCO3SM02 ",  12,"x",1
+"MACNUTSM02","CDINSM02B ",  13,"x",1
+"MACNUTSM02","CPO4SM02B ",  14,"x",1
+"MACNUTSM03","LimNSM03W ",   1,"x",1
+"MACNUTSM03","LimPSM03W ",   2,"x",1
+"MACNUTSM03","LCO2SM03  ",   3,"x",1
+"MACNUTSM03","LimNSM03B ",   4,"x",1
+"MACNUTSM03","LimPSM03B ",   5,"x",1
+"MACNUTSM03","LimNutSM03",   6,"x",1
+"MACNUTSM03","FrootNSM03",   7,"x",1
+"MACNUTSM03","FrootPSM03",   8,"x",1
+"MACNUTSM03","CDINSM03W ",   9,"x",1
+"MACNUTSM03","CPO4SM03W ",  10,"x",1
+"MACNUTSM03","CCO2SM03  ",  11,"x",1
+"MACNUTSM03","CHCO3SM03 ",  12,"x",1
+"MACNUTSM03","CDINSM03B ",  13,"x",1
+"MACNUTSM03","CPO4SM03B ",  14,"x",1
+"MACNUTSM04","LimNSM04W ",   1,"x",1
+"MACNUTSM04","LimPSM04W ",   2,"x",1
+"MACNUTSM04","LCO2SM04  ",   3,"x",1
+"MACNUTSM04","LimNSM04B ",   4,"x",1
+"MACNUTSM04","LimPSM04B ",   5,"x",1
+"MACNUTSM04","LimNutSM04",   6,"x",1
+"MACNUTSM04","FrootNSM04",   7,"x",1
+"MACNUTSM04","FrootPSM04",   8,"x",1
+"MACNUTSM04","CDINSM04W ",   9,"x",1
+"MACNUTSM04","CPO4SM04W ",  10,"x",1
+"MACNUTSM04","CCO2SM04  ",  11,"x",1
+"MACNUTSM04","CHCO3SM04 ",  12,"x",1
+"MACNUTSM04","CDINSM04B ",  13,"x",1
+"MACNUTSM04","CPO4SM04B ",  14,"x",1
+"MACNUTSM05","LimNSM05W ",   1,"x",1
+"MACNUTSM05","LimPSM05W ",   2,"x",1
+"MACNUTSM05","LCO2SM05  ",   3,"x",1
+"MACNUTSM05","LimNSM05B ",   4,"x",1
+"MACNUTSM05","LimPSM05B ",   5,"x",1
+"MACNUTSM05","LimNutSM05",   6,"x",1
+"MACNUTSM05","FrootNSM05",   7,"x",1
+"MACNUTSM05","FrootPSM05",   8,"x",1
+"MACNUTSM05","CDINSM05W ",   9,"x",1
+"MACNUTSM05","CPO4SM05W ",  10,"x",1
+"MACNUTSM05","CCO2SM05  ",  11,"x",1
+"MACNUTSM05","CHCO3SM05 ",  12,"x",1
+"MACNUTSM05","CDINSM05B ",  13,"x",1
+"MACNUTSM05","CPO4SM05B ",  14,"x",1
+"MacroPhyt1","EM01M2    ",   1,"x",1
+"MacroPhyt1","SM01M2    ",   2,"x",1
+"MacroPhyt1","RH01M2    ",   3,"x",1
+"MacroPhyt1","LimNH4EM01",   4,"x",1
+"MacroPhyt1","LimNO3EM01",   5,"x",1
+"MacroPhyt1","LimPO4EM01",   6,"x",1
+"MacroPhyt1","LimNutEM01",   7,"x",1
+"MacroPhyt1","LimCO2SM01",   8,"x",1
+"MacroPhyt1","LimDLEM01 ",   9,"x",1
+"MacroPhyt1","LimDLSM01 ",  10,"x",1
+"MacroPhyt1","LimTEM01  ",  11,"x",1
+"MacroPhyt1","LimTSM01  ",  12,"x",1
+"MacroPhyt2","EM02M2    ",   1,"x",1
+"MacroPhyt2","SM02M2    ",   2,"x",1
+"MacroPhyt2","RH02M2    ",   3,"x",1
+"MacroPhyt2","LimNH4EM02",   4,"x",1
+"MacroPhyt2","LimNO3EM02",   5,"x",1
+"MacroPhyt2","LimPO4EM02",   6,"x",1
+"MacroPhyt2","LimNutEM02",   7,"x",1
+"MacroPhyt2","LimCO2SM02",   8,"x",1
+"MacroPhyt2","LimDLEM02 ",   9,"x",1
+"MacroPhyt2","LimDLSM02 ",  10,"x",1
+"MacroPhyt2","LimTEM02  ",  11,"x",1
+"MacroPhyt2","LimTSM02  ",  12,"x",1
+"MacroPhyt3","EM03M2    ",   1,"x",1
+"MacroPhyt3","SM03M2    ",   2,"x",1
+"MacroPhyt3","RH03M2    ",   3,"x",1
+"MacroPhyt3","LimNH4EM03",   4,"x",1
+"MacroPhyt3","LimNO3EM03",   5,"x",1
+"MacroPhyt3","LimPO4EM03",   6,"x",1
+"MacroPhyt3","LimNutEM03",   7,"x",1
+"MacroPhyt3","LimCO2SM03",   8,"x",1
+"MacroPhyt3","LimDLEM03 ",   9,"x",1
+"MacroPhyt3","LimDLSM03 ",  10,"x",1
+"MacroPhyt3","LimTEM03  ",  11,"x",1
+"MacroPhyt3","LimTSM03  ",  12,"x",1
+"MacroPhyt4","EM04M2    ",   1,"x",1
+"MacroPhyt4","SM04M2    ",   2,"x",1
+"MacroPhyt4","RH04M2    ",   3,"x",1
+"MacroPhyt4","LimNH4EM04",   4,"x",1
+"MacroPhyt4","LimNO3EM04",   5,"x",1
+"MacroPhyt4","LimPO4EM04",   6,"x",1
+"MacroPhyt4","LimNutEM04",   7,"x",1
+"MacroPhyt4","LimCO2SM04",   8,"x",1
+"MacroPhyt4","LimDLEM04 ",   9,"x",1
+"MacroPhyt4","LimDLSM04 ",  10,"x",1
+"MacroPhyt4","LimTEM04  ",  11,"x",1
+"MacroPhyt4","LimTSM04  ",  12,"x",1
+"MacroPhyt5","EM05M2    ",   1,"x",1
+"MacroPhyt5","SM05M2    ",   2,"x",1
+"MacroPhyt5","RH05M2    ",   3,"x",1
+"MacroPhyt5","LimNH4EM05",   4,"x",1
+"MacroPhyt5","LimNO3EM05",   5,"x",1
+"MacroPhyt5","LimPO4EM05",   6,"x",1
+"MacroPhyt5","LimNutEM05",   7,"x",1
+"MacroPhyt5","LimCO2SM05",   8,"x",1
+"MacroPhyt5","LimDLEM05 ",   9,"x",1
+"MacroPhyt5","LimDLSM05 ",  10,"x",1
+"MacroPhyt5","LimTEM05  ",  11,"x",1
+"MacroPhyt5","LimTSM05  ",  12,"x",1
