@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 127)
+      PARAMETER   ( NOMODU = 136)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -183,8 +183,17 @@
      +   'SUMFRC',
      +   'FLXFRC',
      +   'PHCARB',
-     +   'HDISPA'
-     +    /
+     +   'HDISPA',
+     +   'MAXMAC',
+     +   'COVMAC',
+     +   'MACDIS',
+     +   'RADMAC',
+     +   'MACNUT',
+     +   'MACROP',
+     +   'MAC3DU',
+     +   'GRZMAC',
+     +   'NPPS12'
+     +   /
 !
 !     Set module number
 !

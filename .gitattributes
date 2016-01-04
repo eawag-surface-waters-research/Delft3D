@@ -2062,6 +2062,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/caltau.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/calwav.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/clcrad.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/consbl.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/covmac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/cselac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/d40blo.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dayl.f -text
@@ -2085,6 +2086,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/emersi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extina.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extinc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/flxfrc.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/grzmac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/harves.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/hdisp.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/hdispa.f -text
@@ -2093,12 +2095,18 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/heatfl.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/intpol.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ironox.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ironre.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/mac3du.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/macdis.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/macnut.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/macrop.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/makpoc.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/maxmac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/meteo.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/methox.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/nh3fre.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/nitrif.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/nlalg.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/npps12.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/nralgs.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/nutrel.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/nutupt.f -text
@@ -2115,6 +2123,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/procal.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/pronrs.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ptewor.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/radalg.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/radmac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/rdbalg.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/rear.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/resant.f -text

@@ -458,6 +458,33 @@
          case (127 ) ;  call HDISPA ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
+         case (128 ) ;  call MAXMAC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (129 ) ;  call COVMAC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (130 ) ;  call MACDIS ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (131 ) ;  call RADMAC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (132 ) ;  call MACNUT ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (133 ) ;  call MACROP ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (134 ) ;  call MAC3DU ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (135 ) ;  call GRZMAC ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
+         case (136 ) ;  call NPPS12 ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
 
          case default
 
