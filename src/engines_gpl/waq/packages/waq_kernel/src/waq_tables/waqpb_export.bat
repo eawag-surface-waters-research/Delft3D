@@ -1,6 +1,6 @@
 @echo off
 set version=5.05
-set serial=2015102601
+set serial=2016010501
 if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_export\Release\waqpb_export.exe (
     echo This will execute: waqpb_export.exe -version%version% -serial%serial%
     echo.

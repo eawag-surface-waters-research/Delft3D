@@ -259,10 +259,10 @@
                RH01min    = PMSA( IPNT( 12) )
                NRH01min   = PMSA( IPNT( 13) )
                PRH01min   = PMSA( IPNT( 14) )
-               NH4crEM01  = PMSA( IPNT( 15) )
-               NO3crEM01  = PMSA( IPNT( 16) )
-               PO4crEM01  = PMSA( IPNT( 17) )
-               CO2crSM01  = PMSA( IPNT( 18) )
+               NH4crEM01  = PMSA( IPNT( 15) ) + 1.0e-20
+               NO3crEM01  = PMSA( IPNT( 16) ) + 1.0e-20
+               PO4crEM01  = PMSA( IPNT( 17) ) + 1.0e-20
+               CO2crSM01  = PMSA( IPNT( 18) ) + 1.0e-20
                NH4        = MAX(PMSA( IPNT( 19) ),0.0)
                NO3        = MAX(PMSA( IPNT( 20) ),0.0)
                PO4        = MAX(PMSA( IPNT( 21) ),0.0)
@@ -375,6 +375,8 @@
                LimNO3EM01 = MIN(NO3/NO3crEM01,1.0)
                LimPO4EM01 = MIN(PO4/PO4crEM01,1.0)
                LimNutEM01 = MIN(MAX(LimNH4EM01,LimNO3EM01),LimPO4EM01)
+
+               LimCO2SM01 = 1.0 ! TODO: CO2 limitation is not implemented yet
 
                ! daylength limitation EM01 and SM01
 
