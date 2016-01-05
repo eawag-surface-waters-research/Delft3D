@@ -50,7 +50,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
     use globaldata
     use netcdf, only: nf90_unlimited
     use dfparall, only: inode, master
-    use wrtarray, only: wrtvar, wrtarray_n, station
+    use wrtarray, only: wrtvar, wrtarray_n, station, transec
     !
     implicit none
     !
@@ -465,7 +465,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              call wrtarray_n(fds, filename, filetype, grnam5, &
                     & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
                     & lsedtot, &
-                    & ierror, lundia, rbuff2, 'SBTR', station)
+                    & ierror, lundia, rbuff2, 'SBTR', transec)
              if (ierror/= 0) goto 9999
              !
              ! element 'SBTRC'
@@ -486,7 +486,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              call wrtarray_n(fds, filename, filetype, grnam5, &
                     & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
                     & lsedtot, &
-                    & ierror, lundia, rbuff2, 'SBTRC', station)
+                    & ierror, lundia, rbuff2, 'SBTRC', transec)
              deallocate(rbuff2)
              if (ierror/= 0) goto 9999
           endif
@@ -512,7 +512,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              call wrtarray_n(fds, filename, filetype, grnam5, &
                     & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
                     & lsed, &
-                    & ierror, lundia, rbuff2, 'SSTR', station)
+                    & ierror, lundia, rbuff2, 'SSTR', transec)
              if (ierror/= 0) goto 9999
              !
              ! element 'SSTRC'
@@ -533,7 +533,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
              call wrtarray_n(fds, filename, filetype, grnam5, &
                     & celidt, ntruv, ntruvto, ntruvgl, order_tra, gdp, &
                     & lsed, &
-                    & ierror, lundia, rbuff2, 'SSTRC', station)
+                    & ierror, lundia, rbuff2, 'SSTRC', transec)
              deallocate(rbuff2)
              if (ierror/= 0) goto 9999
           endif
