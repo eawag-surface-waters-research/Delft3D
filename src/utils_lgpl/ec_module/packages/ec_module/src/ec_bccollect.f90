@@ -450,6 +450,8 @@ module m_ec_bccollect
                select case (trim(adjustl(hdrvals(ifld))))
                   case ('LINEAR')
                      bc%timeint = BC_TIMEINT_LIN
+                  case ('LINEAR-EXTRAPOLATE')
+                     bc%timeint = BC_TIMEINT_LIN_EXTRAPOL
                   case ('BLOCK-TO')
                      bc%timeint = BC_TIMEINT_BTO
                   case ('BLOCK-FROM')

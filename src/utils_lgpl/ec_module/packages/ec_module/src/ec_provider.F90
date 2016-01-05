@@ -714,6 +714,7 @@ module m_ec_provider
          character(len=300)     :: msgbuf 
          character(len=:), allocatable :: elementSetName
          character(len=:), allocatable :: quantityName
+         character(len=maxMessageLen)  :: message
          !
          success = .false.
          item => null()
@@ -798,13 +799,24 @@ module m_ec_provider
                if (.not. ecUniReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) return
                if (.not. ecUniReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) return
             case (provFile_bc)
-               if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) return
+               if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) then
+                  write (message,'(a)') "Failed reading timelevel 0 from file '"    &
+                     //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'."
+                  call setECMessage(message)
+                  return
+               endif
+               item%sourceT0FieldPtr%timesteps = 54321.0D+10
+               item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
                if (fileReaderPtr%bc%func /= BC_FUNC_CONSTANT) then
-                     ! read second line for T1-Field
-                  if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) return
-               else
-                  item%sourceT0FieldPtr%timesteps = 54321.0D+10
-                  item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
+                  ! read second line for T1-Field
+                  if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) then
+                     if (.not.fileReaderPtr%bc%timeint==BC_TIMEINT_LIN_EXTRAPOL) then 
+                        write (message,'(a)') "Failed reading timelevel 1 from file '"    &
+                           //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'."
+                        call setECMessage(message)
+                        return
+                     endif
+                  endif
                endif
          end select 
          ! Add successfully created source Item to the FileReader
@@ -3244,6 +3256,7 @@ module m_ec_provider
    integer                                ::      ic, nc
    logical                                ::      success
 
+   success = .false.
    bcPtr => fileReaderPtr%bc
    nc = bcPtr%numcols
    allocate(bcPtr%columns(bcPtr%numcols))

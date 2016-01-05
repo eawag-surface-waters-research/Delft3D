@@ -175,9 +175,10 @@ module m_ec_parameters
     integer, parameter :: BC_FUNC_CONSTANT     = 9   !< timeseries with one constant value
 
     ! Time interpolation type 
-    integer, parameter :: BC_TIMEINT_LIN       = 1   !< linear
-    integer, parameter :: BC_TIMEINT_BTO       = 2   !< block-to 
-    integer, parameter :: BC_TIMEINT_BFROM     = 3   !< block-from 
+    integer, parameter :: BC_TIMEINT_LIN           = 1   !< linear
+    integer, parameter :: BC_TIMEINT_BTO           = 2   !< block-to 
+    integer, parameter :: BC_TIMEINT_BFROM         = 3   !< block-from 
+    integer, parameter :: BC_TIMEINT_LIN_EXTRAPOL  = 4   !< linear
 
     ! Vertical position type 
     integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed 
