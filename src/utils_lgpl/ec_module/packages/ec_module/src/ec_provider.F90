@@ -3261,7 +3261,7 @@ module m_ec_provider
    nc = bcPtr%numcols
    allocate(bcPtr%columns(bcPtr%numcols))
    select case(bcPtr%func)
-      case (BC_FUNC_TSERIES)
+      case (BC_FUNC_TSERIES, BC_FUNC_CONSTANT)
          do ic = 1, nc
             if (ic==bcPtr%timecolumn) then
                print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'", (time)'

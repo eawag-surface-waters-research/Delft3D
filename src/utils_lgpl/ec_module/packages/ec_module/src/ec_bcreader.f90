@@ -602,10 +602,12 @@ contains
        endif
 
        select case (BCPtr%func)
-       case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
-          read (BCPtr%columns(n_col_time), *) ec_timesteps(1)
-          ! Convert source time to kernel time:
-          time_steps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, ec_timesteps(1))
+       case (BC_FUNC_TSERIES, BC_FUNC_TIM3D, BC_FUNC_CONSTANT)
+          if (n_col_time>0) then
+             read (BCPtr%columns(n_col_time), *) ec_timesteps(1)
+             ! Convert source time to kernel time:
+             time_steps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, ec_timesteps(1))
+          endif
           j=0
           if (count(BCPtr%quantity%col2elm>0)==0) then                ! col2elm is not used to map the read colums, added to the vector in reading order
              do i=1,n_col
