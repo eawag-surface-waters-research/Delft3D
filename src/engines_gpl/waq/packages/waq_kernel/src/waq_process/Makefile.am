@@ -155,7 +155,16 @@ libwaq_process_la_SOURCES = \
        vbmrt.f90 \
        vbstat.f90 \
        vbupt.f90 \
-       veloc.f90
+       veloc.f90 \
+	   macdis.f \
+       npps12.f90 \
+       mac3du.f90 \
+       maxmac.f \
+       macrop.f \
+       radmac.f \
+       grzmac.f \
+       macnut.f90 \
+       covmac.f
 	   
 #-------------------------------------------------------------------------------
 # Libraries
