@@ -813,13 +813,13 @@ module m_ec_provider
                if (.not. ecUniReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) return
                if (.not. ecUniReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) return
             case (provFile_bc)
+               item%sourceT0FieldPtr%timesteps = 54321.0D+10
                if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) then
                   write (message,'(a)') "Failed reading timelevel 0 from file '"    &
                      //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'."
                   call setECMessage(message)
                   return
                endif
-               item%sourceT0FieldPtr%timesteps = 54321.0D+10
                item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
                if (fileReaderPtr%bc%func /= BC_FUNC_CONSTANT) then
                   ! read second line for T1-Field
