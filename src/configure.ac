@@ -513,12 +513,6 @@ tools_gpl/vs/packages/vs/Makefile
 tools_gpl/vs/packages/vs/src/Makefile
 tools_gpl/vs/packages/vs_version_number/Makefile
 tools_gpl/vs/packages/vs_version_number/src/Makefile
-tools_gpl/waq_run_processes/Makefile
-tools_gpl/waq_run_processes/packages/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes/src/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile
-tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/Makefile
 utils_gpl/Makefile
 utils_gpl/morphology/Makefile
 utils_gpl/morphology/packages/Makefile
