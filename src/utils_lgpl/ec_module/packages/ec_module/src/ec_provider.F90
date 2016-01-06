@@ -298,10 +298,11 @@ module m_ec_provider
       ! =======================================================================
 
       !> Create source Items and their contained types, from a qh-table file.
-      function ecProviderCreateQhtableItems(instancePtr, fileReaderPtr) result(success)
+      function ecProviderCreateQhtableItems(instancePtr, fileReaderPtr, use_std_names) result(success)
          logical                      :: success       !< function status
          type(tEcInstance),   pointer :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(inout)
+         logical, optional            :: use_std_names !< us
          !
          real(hp), dimension(:), allocatable :: discharges      !< the table's discharge values
          real(hp), dimension(:), allocatable :: waterlevels     !< the table's water level values
@@ -318,6 +319,7 @@ module m_ec_provider
          integer :: i !< loop counter
          integer :: n1, n2 !< helper variables
          character(len=:), allocatable :: elementSetName
+         character(len=maxNameLen)     :: quantityName
 
          !
          success = .true.
@@ -343,7 +345,13 @@ module m_ec_provider
          if (.not. success) return
          ! Create the item 'discharge'.
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'discharge'))) then
+         quantityName = 'discharge'
+         if (present(use_std_names)) then
+            if (use_std_names) then
+               quantityName = 'water_discharge'
+            endif
+         endif
+         if (.not. (ecQuantitySetName(instancePtr, quantityId, quantityName))) then
             success = .false.
          end if
 
@@ -375,7 +383,13 @@ module m_ec_provider
          end if
          ! Create the item 'waterlevel'.
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'waterlevel'))) then
+         quantityName = 'waterlevel'
+         if (present(use_std_names)) then
+            if (use_std_names) then
+               quantityName = 'water_level'
+            endif
+         endif
+         if (.not. (ecQuantitySetName(instancePtr, quantityId, quantityName))) then
             success = .false.
          end if
          elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -3272,7 +3286,7 @@ module m_ec_provider
             endif
          enddo
       case (BC_FUNC_QHTABLE)
-         if (.not.(ecProviderCreateQhtableItems(instancePtr, fileReaderPtr))) return
+         if (.not.(ecProviderCreateQhtableItems(instancePtr, fileReaderPtr, use_std_names=.true.))) return
          ! This step produces four items for this filereader with quantities named 'waterlevel', 'discharge', 'slope' and 'crossing',
          ! each having a fieldT0%arr1D holding the table column values
    end select

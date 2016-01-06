@@ -493,8 +493,8 @@ module m_ec_filereader
             if (fileReaderPtr%bc%func == BC_FUNC_QHTABLE) then
                is_QH = .true.
                ! find items in this filereader and pointer to their fields arr1d 
-               item_H = ecFileReaderFindItem(instancePtr, fileReaderId, 'waterlevel') 
-               item_Q = ecFileReaderFindItem(instancePtr, fileReaderId, 'discharge') 
+               item_H = ecFileReaderFindItem(instancePtr, fileReaderId, 'water_level') 
+               item_Q = ecFileReaderFindItem(instancePtr, fileReaderId, 'water_discharge') 
             end if
          else
             ! TODO, give error message
