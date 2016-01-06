@@ -91,11 +91,17 @@
 
       noq12 = noq1 + noq2
       if ( ipopt1 .eq. 0 )  then
-         call dhopnf  ( lun(8) , lchar(8) , 8      , 2+ftype, ierr2 )
+         call dhopnf  ( lun(44) , lchar(44) , 44      , 2+ftype, ierr2 )
          if ( ierr2 .ne. 0 ) goto 100
          do iq = 1, noq
-            read ( lun(8) ) ipnt(:,iq)
+            read ( lun(44) ) ipnt(:,iq)
          enddo
+         close ( lun(44) )
+         call dhopnf  ( lun(8) , lchar(8) , 8     , 1     , ierr2 )
+         if ( ierr2 .ne. 0 ) goto 100
+         if ( noq1 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq =       1, noq1  )
+         if ( noq2 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq = noq1 +1, noq12 )
+         if ( noq3 .gt. 0 ) write( lun(8) )( ipnt(:,iq), iq = noq12+1, noq   )
       else
          do iq = 1 , noq
             do ip = 1 , 4

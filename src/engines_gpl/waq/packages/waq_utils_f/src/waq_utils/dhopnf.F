@@ -546,6 +546,24 @@
                   ierr = 3
             end select
 
+         case ( 44 )                          !     pointer file
+            select case ( opmode )
+               case ( 1 )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
+               case ( 2 )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
+               case ( 11, 12 )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
+               case ( 21, 22 )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
+     &                                                 convert='big_endian' )
+               case ( 31, 32 )
+                  open ( lun, file = finam, err = 910, form='unformatted',
+     &                                                 convert='big_endian' )
+               case default
+                  ierr = 3
+            end select
+
          case default                         !     no valid number present
             ierr = 2
 

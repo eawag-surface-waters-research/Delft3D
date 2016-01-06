@@ -347,11 +347,11 @@
 
       if ( gettoken( iopt1, ierr2 ) .gt. 0 ) goto 100
       write ( lunut , 2180 )  iopt1
-      call opt1 ( iopt1   , lun     , 8      , lchar  ,  filtype ,
-     &            dtflg1  , dtflg3  , 0      , ierr2  ,  iwar    )
-      if ( ierr2  .gt. 0 ) goto 100
 
       if ( intsrt .eq. 19 .or. intsrt .eq. 20 .or. regular ) then  !        Regular grid
+         call opt1 ( iopt1   , lun     , 8      , lchar  ,  filtype ,
+     &               dtflg1  , dtflg3  , 0      , ierr2  ,  iwar    )
+         if ( ierr2  .gt. 0 ) goto 100
          noqt = noq4
          call pointr ( lun    , lchar  , noseg  , nmax   , mmax   ,
      &                 kmax   , noq    , noq1   , noq2   , noq3   ,
@@ -359,6 +359,9 @@
      &                 jtrack , ioutpt , iwidth , GridPs , cellpnt,
      &                 flowpnt, ierr   , iwar    )
       else                                            !        Irregular grid
+         call opt1 ( iopt1   , lun     , 44     , lchar  ,  filtype ,
+     &               dtflg1  , dtflg3  , 0      , ierr2  ,  iwar    )
+         if ( ierr2  .gt. 0 ) goto 100
          noqt = noq  + noq4
          allocate ( ipnt(4,noqt) , stat = ierr2 )
          if ( ierr2 .ne. 0 ) then
@@ -367,7 +370,7 @@
          endif
          call pointi ( lun    , lchar  , noseg  , noq       , noq1   ,
      &                 noq2   , noq3   , noqt   , nobnd     , ipnt   ,
-     &                 intsrt , iopt1  , jtrack , filtype(8), ioutpt ,
+     &                 intsrt , iopt1  , jtrack , filtype(44), ioutpt ,
      &                 GridPs , ierr   , iwar   )
       endif
       noq12 = noq1 + noq2
