@@ -553,8 +553,6 @@ utils_lgpl/deltares_common/packages/deltares_common_mpi/src/Makefile
 utils_lgpl/deltares_common/packages/deltares_common/src/Makefile
 utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/Makefile
 utils_lgpl/deltares_common/packages/Makefile
-utils_lgpl/deltares_common/tests/09_system_info/Makefile
-utils_lgpl/deltares_common/tests/Makefile
 utils_lgpl/d_hydro_lib/include/Makefile
 utils_lgpl/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/Makefile
