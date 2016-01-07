@@ -524,7 +524,6 @@ utils_gpl/morphology/packages/morphology_kernel/Makefile
 utils_gpl/morphology/packages/morphology_kernel/src/Makefile
 utils_gpl/morphology/packages/morphology_plugins_c/Makefile
 utils_gpl/morphology/packages/morphology_plugins_c/src/Makefile
-utils_gpl/morphology/packages/morphology_proclib/Makefile
 utils_gpl/morphology/packages/morphology_waq/Makefile
 utils_gpl/morphology/packages/morphology_waq/src/Makefile
 utils_lgpl/delftio/include/Makefile
