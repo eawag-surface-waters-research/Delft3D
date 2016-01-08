@@ -162,3 +162,8 @@ Building on Linux
 Now, retrying: Intel CC and Fortran, all static libraries (as I realised
 that the shared version of NetCDF is most probably superfluous - I
 needed to add the flag -ldl anyway).
+
+That fails: /usr/bin/ar: -ldl: no such file or directory. And CMake
+is still using /usr/bin/cc. So I will have to force it to use Intel CC
+and Fortran manually. Very odd, this stuff.
+
