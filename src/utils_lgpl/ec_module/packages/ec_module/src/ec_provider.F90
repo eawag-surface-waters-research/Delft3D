@@ -490,7 +490,8 @@ module m_ec_provider
                item_waterlevel%sourceT0FieldPtr%arr1dPtr(i) = waterlevels(i)
                n2 = i-1 
                if (i > 1) then
-                  if (discharges(i) <= discharges(n2)) then
+                  if ( (discharges(i) > 0 .and. discharges(i) <= discharges(n2)) .or. &
+                       (discharges(i) < 0 .and. discharges(i) >= discharges(n2))      ) then
                      call setECMessage("ERROR: ec_provider::ecProviderCreateQhtableItems: First column should be ordered increasingly.")
                      success = .false.
                      exit

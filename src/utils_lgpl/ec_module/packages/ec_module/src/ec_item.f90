@@ -409,9 +409,9 @@ module m_ec_item
                if (.not. fileReaderPtr%end_of_data) then
                   do ! read next record untill t0<=timesteps<=t1
                      if (ecFileReaderReadNextRecord(fileReaderPtr, timesteps)) then
-                        write(6,*) 'Read OK: ', timesteps
+                        !write(6,*) 'Read OK: ', timesteps
                         if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
-                           write(6,*) 'Read OK: ', timesteps, ' success = .true., exit'
+                           !write(6,*) 'Read OK: ', timesteps, ' success = .true., exit'
                            success = .true.
                            exit
                         end if

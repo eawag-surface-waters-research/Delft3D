@@ -181,7 +181,7 @@ contains
          real(hp),               intent(inout) :: time_steps    !< number of time steps of duration: seconds
          real(hp), dimension(:), intent(inout) :: values        !< read values
          type(tEcItem),          pointer       :: item
-         success = ecBCreadline(fileReaderPtr, values = values, time_steps = time_steps)
+         success = ecBCreadline(fileReaderPtr, values = values, time_steps = time_steps, eof = fileReaderPtr%end_of_data)
       end function ecBCReadBlock
 
       ! =======================================================================
