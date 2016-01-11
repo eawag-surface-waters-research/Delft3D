@@ -73,6 +73,8 @@
 #   define CUTIL_MF_BACKSPACE  FC_FUNC(cutil_mf_backspace,CUTIL_MF_BACKSPACE)
 #   define CUTIL_MF_READ  FC_FUNC(cutil_mf_read,CUTIL_MF_READ)
 #   define CUTIL_MF_EOF  FC_FUNC(cutil_mf_eof,CUTIL_MF_EOF)
+#   define CUTIL_CMP_DOUBLE  FC_FUNC(cutil_cmp_double,CUTIL_CMP_DOUBLE)
+#   define CUTIL_CMP_SINGLE  FC_FUNC(cutil_cmp_float,CUTIL_CMP_SINGLE)
 #else
 // WIN32
 #   define STDCALL  /* nothing */
@@ -88,6 +90,8 @@
 #   define CUTIL_MF_BACKSPACE  CUTIL_MF_BACKSPACE
 #   define CUTIL_MF_READ  CUTIL_MF_READ
 #   define CUTIL_MF_EOF  CUTIL_MF_EOF
+#   define CUTIL_CMP_DOUBLE  CUTIL_CMP_DOUBLE
+#   define CUTIL_CMP_SINGLE  CUTIL_CMP_SINGLE
 #endif
 
 

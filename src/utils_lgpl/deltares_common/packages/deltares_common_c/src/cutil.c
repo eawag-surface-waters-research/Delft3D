@@ -372,6 +372,39 @@ CUTIL_MF_CLOSE (
     return(0);
     }
 
+/*-------------------------------------------------------------------------------------------*/
+// Some routines for comparing doubles and floats by converting to their integer representation
+
+int STDCALL
+	CUTIL_CMP_DOUBLE (
+	    double* val1,
+		double* val2,
+		int* eps
+		) {
+		long longDiff;
+        if (*val1 == *val2)
+           return 0;                   // exactly equal
+        longDiff = abs(*(long*)val1 - *(long*)val2);
+        if (longDiff <= *eps)
+           return 0;                   // equal within tolerance
+        return ((*val1)>(*val2)?1:-1); // greater than, less than
+        }
+
+int STDCALL
+	CUTIL_CMP_SINGLE (
+	    float* val1,
+		float* val2,
+		int* eps
+		) {
+		long longDiff;
+        if (*val1 == *val2)
+           return 0;                   // exactly equal
+        longDiff = abs(*(long*)val1 - *(long*)val2);
+        if (longDiff <= *eps)
+           return 0;                   // equal within tolerance
+        return ((*val1)>(*val2)?1:-1); // greater than, less than
+        }
+
 /*------------------------------------------------------------------------------*/
 
 
