@@ -201,7 +201,7 @@ module m_ec_bccollect
     type (tEcFileReader), pointer :: fileReaderPtr
     integer             :: bcBlockId, fileReaderId
     integer             :: ifr 
-    logical             :: success
+    logical             :: success, isLateral
     integer             :: unit
 
     real(hp)            :: ref_date
@@ -210,6 +210,7 @@ module m_ec_bccollect
     lineno = 0 
     savepos = 0
     jaheader = .false.
+    isLateral = .false.
 
     if (.not.ecSupportOpenExistingFileGnu(fhandle, fname)) then
        iostat = EC_DATA_NOTFOUND
@@ -247,7 +248,12 @@ module m_ec_bccollect
              keyvaluestr = ','
              jablock=.false.
              nfld = 0                                          ! count the number of fields in this header block 
-             nq = 0                                            ! count the (maximum) number of quantities in this block 
+             nq = 0                                            ! count the (maximum) number of quantities in this block
+             if (index(rec,'[LateralDischarge]')>0) then
+                isLateral = .true.
+             else
+                isLateral = .false.
+             endif
           else
              if (jaheader) then
                 posfs = index(rec(1:reclen),'=')               ! key value pair ?  
@@ -269,6 +275,7 @@ module m_ec_bccollect
                    fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderID)
                    fileReaderPtr%bc => bcBlockPtr
                    fileReaderPtr%ofType = provFile_bc
+                   bcBlockPtr%isLateral = isLateral
                    if (.not.(processhdr_all_quantities(bcBlockPtr,nfld,nq,keyvaluestr))) then
                      return  ! dumb translation of bc-object metadata  
                    endif

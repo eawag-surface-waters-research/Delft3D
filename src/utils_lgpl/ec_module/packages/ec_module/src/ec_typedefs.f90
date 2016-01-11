@@ -91,31 +91,32 @@ module m_ec_typedefs
    !===========================================================================
 
    type :: tEcBCBlock
-        integer                                    ::  id              !< unique BCBlock number, set by ecInstanceCreateBCBlock
-        integer                                    ::  numcols         !< number of data columns 
-        character(len=maxFileNameLen), allocatable ::  columns(:)      !< temporary substrings from columns, used by the line reader 
-        integer                                    ::  from_line = -1  !< Data for this block start linenumber in temporary string buffer
-        integer                                    ::  thru_line = -1  !< Data for this block final linenumber in temporary string buffer 
-        integer                                    ::  func
-        integer                                    ::  timecolumn      !< Number of the column holding the time strings, compul
-        character(len=50)                          ::  timeunit        !< netcdf-convention time unit definition 
-        integer                                    ::  timeint         !< Type of time interpolation 
-        integer                                    ::  vptyp           !< Type of specification of vertical position
-        real(hp), allocatable                      ::  vp(:)           !< vertical positions  
-        integer                                    ::  numlay = 1      !< number of vertical layers 
+        integer                                    ::  id                  !< unique BCBlock number, set by ecInstanceCreateBCBlock
+        integer                                    ::  numcols             !< number of data columns 
+        character(len=maxFileNameLen), allocatable ::  columns(:)          !< temporary substrings from columns, used by the line reader 
+        integer                                    ::  from_line = -1      !< Data for this block start linenumber in temporary string buffer
+        integer                                    ::  thru_line = -1      !< Data for this block final linenumber in temporary string buffer 
+        integer                                    ::  func                
+        integer                                    ::  timecolumn          !< Number of the column holding the time strings, compul
+        character(len=50)                          ::  timeunit            !< netcdf-convention time unit definition 
+        integer                                    ::  timeint             !< Type of time interpolation 
+        integer                                    ::  vptyp               !< Type of specification of vertical position
+        real(hp), allocatable                      ::  vp(:)               !< vertical positions  
+        integer                                    ::  numlay = 1          !< number of vertical layers 
         integer                                    ::  zInterpolationType  !< Type of vertical interpolation 
-        real(hp)                                   ::  missing         !< Missing value 
-        character(len=maxFileNameLen)              ::  bcname  = ''    !< Name (identifier) for this BC block (assumed to be uniq)
-        character(len=maxFileNameLen)              ::  qname   = ''    !< Quantity name with which all found quantities must identify 
-        character(len=maxFileNameLen)              ::  fname   = ''    !< Filename the data originates from 
-        integer(kind=8)                            ::  fhandle= -1     !< (C) filehandle to open file 
-        integer                                    ::  ftype  = -1     !< ASCII, NetCDF, ....
-        type (tEcBCQuantity), pointer              ::  quantity        !< Quantity object 
-        type (tEcBCQuantity), allocatable          ::  quantities(:)   !< Array of quantity objects for each quantity with the same name  
-        type (tEcNetCDF), pointer                  ::  ncptr => null() !< pointer to a NetCDF instance, responsible for a connected NetCDF file 
-        integer                                    ::  ncvarndx = -1   !< varid in the associated netcdf for the requested quantity 
-        integer                                    ::  nclocndx = -1   !< index in the timeseries_id dimension for the requested location 
-        integer                                    ::  nctimndx =  1   !< record number to be read 
+        real(hp)                                   ::  missing             !< Missing value 
+        character(len=maxFileNameLen)              ::  bcname  = ''        !< Name (identifier) for this BC block (assumed to be uniq)
+        character(len=maxFileNameLen)              ::  qname   = ''        !< Quantity name with which all found quantities must identify 
+        character(len=maxFileNameLen)              ::  fname   = ''        !< Filename the data originates from 
+        integer(kind=8)                            ::  fhandle= -1         !< (C) filehandle to open file 
+        logical                                    ::  isLateral = .false. !< Lateral discharge? (otherwise: boundary condition)
+        integer                                    ::  ftype  = -1         !< ASCII, NetCDF, ....
+        type (tEcBCQuantity), pointer              ::  quantity            !< Quantity object 
+        type (tEcBCQuantity), allocatable          ::  quantities(:)       !< Array of quantity objects for each quantity with the same name  
+        type (tEcNetCDF), pointer                  ::  ncptr => null()     !< pointer to a NetCDF instance, responsible for a connected NetCDF file 
+        integer                                    ::  ncvarndx = -1       !< varid in the associated netcdf for the requested quantity 
+        integer                                    ::  nclocndx = -1       !< index in the timeseries_id dimension for the requested location 
+        integer                                    ::  nctimndx =  1       !< record number to be read 
         !
         integer                 ::  astro_component_column = -1  !< number of the column, containing astronomic components
         integer                 ::  astro_amplitude_column = -1  !< number of the column, containing astronomic amplitudes

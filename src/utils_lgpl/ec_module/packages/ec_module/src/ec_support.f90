@@ -459,16 +459,18 @@ end subroutine ecInstanceListSourceItems
       !> Retrieve the item ID given a quantitystring and locationstring
       !> Use the fact that each filereader is associated with ONE location, but possibly MULTIPLE quantities
       !> i.e., select filereader first and check its items. 
-      function ecSupportFindItemByQuantityLocation(instancePtr, locationname, quantityname ) result(itemID)
-         type(tEcInstance), pointer            :: instancePtr    !< EC-instance
-         character(len=*), intent(in)          :: quantityname   !< Desired quantity  
-         character(len=*), intent(in)          :: locationname   !< Desired location 
-         integer                               :: itemID         !< returned item ID
-         integer :: i, j                                         !< loop counter over filereader, items 
-         type (tEcItem), pointer               :: itemPtr
-         type (tEcFileReader), pointer         :: fileReaderPtr
-         character(len=:), allocatable         :: quantity_requested, location_requested
-         character(len=:), allocatable         :: quantity_supplied, location_supplied
+      function ecSupportFindItemByQuantityLocation(instancePtr, locationname, quantityname, isLateral) result(itemID)
+         type(tEcInstance), pointer             :: instancePtr    !< EC-instance
+         character(len=*), intent(in)           :: quantityname   !< Desired quantity  
+         character(len=*), intent(in)           :: locationname   !< Desired location 
+         logical         , intent(in), optional :: isLateral      !< searching for lateral discharge?
+         integer                                :: itemID         !< returned item ID
+         integer                                :: i, j           !< loop counter over filereader, items 
+         logical                                :: found          !< item found?
+         type (tEcItem), pointer                :: itemPtr
+         type (tEcFileReader), pointer          :: fileReaderPtr
+         character(len=:), allocatable          :: quantity_requested, location_requested
+         character(len=:), allocatable          :: quantity_supplied, location_supplied
 !        character(len=maxNameLen)         :: quantityname_upper, locationname_upper
          
 
@@ -488,8 +490,19 @@ end subroutine ecInstanceListSourceItems
                   quantity_supplied = itemPtr%quantityPtr%name
                   call str_upper(quantity_supplied)
                   if (quantity_supplied==quantity_requested) then
-                     itemID = itemPtr%id
-                     exit frs
+                     found = .true.
+                     if (present(isLateral)) then
+                        found = .false.
+                        if (isLateral) then
+                           if (associated(fileReaderPtr%bc)) then
+                              found = fileReaderPtr%bc%isLateral
+                           endif
+                        endif
+                     endif
+                     if (found) then
+                        itemID = itemPtr%id
+                        exit frs
+                     endif
                   end if
                end do 
             end do frs
