@@ -2,7 +2,7 @@ subroutine increm(mx1       ,ny1       ,mx2       ,ny2       ,incx      , &
                 & incy      ,maxinc    ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2015.                                
+!  Copyright (C)  Stichting Deltares, 2011-2016.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

@@ -1,4 +1,4 @@
-!!  Copyright (C)  Stichting Deltares, 2012-2015.
+!!  Copyright (C)  Stichting Deltares, 2012-2016.
 !!
 !!  This program is free software: you can redistribute it and/or modify
 !!  it under the terms of the GNU General Public License version 3,
@@ -61,7 +61,7 @@
      +'บ Sales          : sales@deltaressystems.nl     tel: +31 (0)88 335 8188 บ',
      +'บ Support options: support@deltaressystems.nl   tel: +31 (0)88 335 8100 บ',
      +'บ Open source website and forum: http://oss.delft3d.nl/                 บ',
-     +'บ Copyright (c) 1993-2015 Deltares                                      บ',
+     +'บ Copyright (c) 1993-2016 Deltares                                      บ',
      +'ศอออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผ'/
      
       integer(4) ithndl /0/
