@@ -454,8 +454,8 @@
                dPrPON2M01 = factorE*FrPOC2EM01 + factorS*FrPOC2SM01
                dPrPON3M01 = factorE*FrPOC3EM01 + factorS*FrPOC3SM01
 
-               factorE    = dDecayEM01*PCRatEM01-dNtEMtRH01
-               factorS    = dDecaySM01*PCRatSM01-dNtSMtRH01
+               factorE    = dDecayEM01*PCRatEM01-dPtEMtRH01
+               factorS    = dDecaySM01*PCRatSM01-dPtSMtRH01
                dPrPOP1M01 = factorE*FrPOC1EM01 + factorS*FrPOC1SM01
                dPrPOP2M01 = factorE*FrPOC2EM01 + factorS*FrPOC2SM01
                dPrPOP3M01 = factorE*FrPOC3EM01 + factorS*FrPOC3SM01
