@@ -334,17 +334,31 @@
             pdffil = lchar(34)
          endif
          call rd_tabs( pdffil, lurep , versio, serial, noinfo,
-     +                 nowarn, ierr  )
-         write (lurep, *  )
-         write (lurep,2001) trim(lchar(34))
-         write (lurep,2002) versio
-         write (lurep,2003) serial
-         write (lurep, *  )
-
-         ! fill the old_items conversion table
-
-         call fill_old_items(old_items)
-
+     +                 nowarn, ierr )
+         if (ierr.gt.0) then
+            write(lurep,*) ' '
+            write(lurep,*) ' ERROR: Could not read the process definition file.'
+            write(lurep,*) '        Check if the filename after -p is correct, and exists.'
+            write(lurep,*) '        Use -np if you want to run without processes.'
+            write(lurep,*) ' '
+            write(*,*) ' error opening nefis file(s):', trim(pdffil)
+            write(*,*) ' '
+            write(*,*) ' ERROR: Could not read the process definition file.'
+            write(*,*) '        Check if the filename after -p is correct, and exists.'
+            write(*,*) '        Use -np if you want to run without processes.'
+            write(*,*) ' '
+            call srstop(1)
+         else
+            write (lurep, *  )
+            write (lurep,2001) trim(lchar(34))
+            write (lurep,2002) versio
+            write (lurep,2003) serial
+            write (lurep, *  )
+   
+            ! fill the old_items conversion table
+   
+            call fill_old_items(old_items)
+         endif
       endif
 
       ! old serial definitions

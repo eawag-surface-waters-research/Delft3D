@@ -94,22 +94,12 @@
          ! no extension assume nefis dat and def file, but check existence def file
 
          ilen = len(pdffil)
-         do i = ilen , 1 , -1
-            iend = i
-            if ( pdffil(i:i) .ne. ' ' ) goto 10
-         enddo
-         iend = 0
-   10    continue
+         iend = len_trim(pdffil)
          if ( iend .eq. ilen ) iend = max(0,ilen-4)
 
          pdffil(iend+1:) = '.dat'
          fildat = pdffil
-         pdffil(iend+1:) = '.def'
          fildef = pdffil
-         inquire ( file=fildef , exist = lexi )
-         if ( .not. lexi ) then
-            fildef = fildat
-         endif
 
       endif
 
@@ -121,15 +111,29 @@
          access = 'r'
          coding = 'n'
          ierror = crenef(deffds, fildat, fildef, coding, access)
+         if ( ierror .eq. 8023) then
+!           nefis error 8023 means it could not be read as a single file
+!           when the file ends in .dat, try if it works when we specify a def-file
+!           when the file ends in .def, try if it works when we specify a dat-file
+            iend = len_trim(fildef)
+            if ( fildef(iend-2:iend).eq.'dat') then
+               fildef(iend-2:iend)='def'
+               ierror = crenef(deffds, fildat, fildef, coding, access)
+            endif
+            if ( fildat(iend-2:iend).eq.'def') then
+               fildat(iend-2:iend)='dat'
+               ierror = crenef(deffds, fildat, fildef, coding, access)
+            endif
+         endif
          if ( ierror .ne. 0 ) then
             nerror = nerror + 1
-            call dhpfil(lunrep,' error opening nefis file(s):',pdffil(1:iend))
+            call dhpfil(lunrep,' error opening nefis file(s):',trim(pdffil))
             write(lunrep,*) 'error number:',ierror
             goto 900
          endif
       else
          nerror = nerror + 1
-         call dhpfil(lunrep,'error opening nefis file(s):',pdffil(1:iend))
+         call dhpfil(lunrep,'error opening nefis file(s):',trim(pdffil))
          write(lunrep,*) 'files do not exist'
          goto 900
       endif
