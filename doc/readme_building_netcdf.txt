@@ -182,3 +182,8 @@ well-known scheme, but on copying the links are not preserved.
 
 Now preparing everything for Windows, using MS VC, Visual Studio and
 Intel Fortran.
+
+dd. 12 january 2016
+By setting the environment variables CC and FC to the names of the
+compilers of choice we can make CMake use these compilers. It is as
+simple as that.
