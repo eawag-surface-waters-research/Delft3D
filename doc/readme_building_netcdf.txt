@@ -167,3 +167,18 @@ That fails: /usr/bin/ar: -ldl: no such file or directory. And CMake
 is still using /usr/bin/cc. So I will have to force it to use Intel CC
 and Fortran manually. Very odd, this stuff.
 
+
+dd. 11 january 2016
+I checked the code in H5PL.c to see if I can simply get around the
+dlopen problem. That does not seem all that easy, unless I patch
+the code - redefine the macros that are responsible for the actual
+calls to dlopen and friends. Perhaps worth the while though. No!
+Further checking reveals that the routine H5PL_load is used in
+several places in the HDF5 library itself, so it is not simply
+an external API for loading plugins.
+
+Possible problem on Linux: the libraries use soft links according to the
+well-known scheme, but on copying the links are not preserved.
+
+Now preparing everything for Windows, using MS VC, Visual Studio and
+Intel Fortran.
