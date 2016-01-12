@@ -318,6 +318,8 @@ module m_ec_bccollect
        success = items_from_bc_quantities(instancePtr,instancePtr%ecFileReadersPtr(ifr)%ptr)
     enddo
 
+    call mf_close(fhandle)
+
     end function collectbc_all
 !============================================================================================================================
     
