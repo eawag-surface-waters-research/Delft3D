@@ -3600,6 +3600,7 @@ src/third_party_open/netcdf/matlab/snctools/tests/verify_netcdf4.m -text
 src/third_party_open/netcdf/netcdf4/build.txt -text
 src/third_party_open/netcdf/netcdf4/buildnc.bat -text
 src/third_party_open/netcdf/netcdf4/buildnc.sh -text
+src/third_party_open/netcdf/netcdf4/netcdf-config.cmake.in.corrected -text
 src/third_party_open/netcdf/netcdf_license_info.txt -text
 src/third_party_open/netcdf/src/COPYRIGHT -text
 src/third_party_open/netcdf/src/INSTALL -text
