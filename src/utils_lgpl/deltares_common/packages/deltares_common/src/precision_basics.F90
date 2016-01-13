@@ -50,20 +50,6 @@ integer, parameter :: long = SELECTED_INT_KIND(16)
      module procedure comparerealsingle
   end interface
 ! 
-interface cmprd
-    integer function CUTIL_CMP_DOUBLE(val1,val2,eps)
-               real(kind=8)    :: val1
-               real(kind=8)    :: val2
-               integer(kind=4) :: eps
-    end function
-
-    integer function CUTIL_CMP_SINGLE(val1,val2,eps)
-               real(kind=4)    :: val1
-               real(kind=4)    :: val2
-               integer(kind=4) :: eps
-    end function
-end interface
-
 
 contains
 
