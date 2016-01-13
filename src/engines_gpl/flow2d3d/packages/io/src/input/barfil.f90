@@ -194,6 +194,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        if (nrflds<7 .or. itype(1)/=3) then
           error = .true.
           call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
+          call prterr(lundia    ,'P004'    ,'Invalid number of parameters specified for barrier "'//rec132(1:20)//'": '//trim(rec132(21:)) )
           goto 300
        endif
        !
@@ -203,6 +204,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        if (itype(2)/=1 .or. itype(3)/=1 .or. itype(4)/=1 .or. itype(5)/=1) then
           error = .true.
           call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
+          call prterr(lundia    ,'P004'    ,'Non-integer data specified for M,N coordinates of barrier "'//rec132(1:20)//'": '//trim(rec132(21:)) )
           goto 300
        endif
        !
@@ -268,12 +270,13 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        !
        call small(nambar(ibar), 20)
        !
-       ! there must be a name defined !!
+       ! There must be a name defined! Would be more logical to move this to top,
+       ! but leave it here for the time being (backward consistent).
        !
        if (nambar(ibar) == '') then
-          errmsg(12:) = ': no name defined'
           error = .true.
-          call prterr(lundia    ,'U021'    ,errmsg    )
+          call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
+          call prterr(lundia    ,'P004'    ,'Empty barrier name specified on line: '//trim(rec132) )
           goto 300
        endif
        !
