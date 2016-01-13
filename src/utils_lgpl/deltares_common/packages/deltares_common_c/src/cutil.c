@@ -374,6 +374,8 @@ CUTIL_MF_CLOSE (
 
 /*-------------------------------------------------------------------------------------------*/
 // Some routines for comparing doubles and floats by converting to their integer representation
+// These two are for testing equality between floats by using integers (as a cheaper alternative 
+// to comparedouble in fortran) and WILL be removed as soon as they are deemed obsolete. 
 
 int STDCALL
 	CUTIL_CMP_DOUBLE (
