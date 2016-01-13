@@ -490,29 +490,42 @@ module m_ec_instance
       end subroutine ecInstanceListFileReaders
       ! =======================================================================
       
-      !> 
-      subroutine ecInstancePrintState(instancePtr,dev)
+      subroutine ecInstancePrintState(instancePtr,messenger,lvl)
+      use m_ec_message
+      implicit none
          type(tEcInstance), pointer :: instancePtr           !< intent(in)
-         integer, intent(in)        :: dev                   !< target device 
-         !
+         interface 
+            subroutine messenger(lvl,msg)
+            integer, intent(in)             :: lvl
+            character(len=*), intent(in)    :: msg 
+            end subroutine
+         end interface
+         integer, intent(in)        :: lvl
+
          integer                      :: ii, ic, js, i, j
          type(tEcItem),       pointer :: targetItemPtr
          type(tEcConnection), pointer :: connectionPtr
          type(tEcItem),       pointer :: sourceItemPtr
          type(tEcFileReader), pointer :: FileReaderPtr
          type(tEcBCBlock),    pointer :: BCBlockPtr
+         character(len=maxMessageLen) :: line
     
+         call messenger(lvl, '.')
+         call messenger(lvl, 'EC MODULE ITEMS:')
          do ii=1, instancePtr%nItems 
             ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
             targetItemPtr => instancePtr%ecItemsPtr(ii)%ptr
             if (targetItemPtr%role == itemType_target) then
-               write(dev,'(a,i4.4,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
+               write(line,'(a,i4.4,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
+               call messenger(lvl, line)
                do ic=1, targetItemPtr%nConnections
                   connectionPtr => targetItemPtr%connectionsPtr(ic)%ptr
-                  write(dev,'(a,i4.4)') '   Connection ',connectionPtr%id 
+                  write(line,'(a,i4.4)') '   Connection ',connectionPtr%id 
+                  call messenger(lvl, line)
                   do js=1, connectionPtr%nSourceItems
                      sourceItemPtr => connectionPtr%sourceItemsPtr(js)%ptr
-                     write(dev,'(a,i4.4,a,i1,a)') '      Source Item ',sourceItemPtr%id, ' (name='//trim(sourceItemPtr%quantityPtr%name)//', vectormax=',sourceItemPtr%quantityPtr%vectormax,')'
+                     write(line,'(a,i4.4,a,i1,a)') '      Source Item ',sourceItemPtr%id, ' (name='//trim(sourceItemPtr%quantityPtr%name)//', vectormax=',sourceItemPtr%quantityPtr%vectormax,')'
+                     call messenger(lvl, line)
                      ! Find the FileReader which can update this source Item.
                      frs: do i=1, instancePtr%nFileReaders
                         do j=1, instancePtr%ecFileReadersPtr(i)%ptr%nItems
@@ -520,20 +533,25 @@ module m_ec_instance
                               fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
                               if (associated(fileReaderPtr%bc)) then 
                                  BCBlockPtr => fileReaderPtr%bc
-                                 write(dev,'(a,i4.4,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%bc%fname)//')'
-                                 write(dev,'(a,i4.4)') '            BCBlock ',BCBlockPtr%id 
+                                 write(line,'(a,i4.4,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%bc%fname)//')'
+                                 call messenger(lvl, line)
+                                 write(line,'(a,i4.4)') '            BCBlock ',BCBlockPtr%id 
+                                 call messenger(lvl, line)
                               else 
-                                 write(dev,'(a,i4.4,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%filename)//')'
+                                 write(line,'(a,i4.4,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%filename)//')'
+                                 call messenger(lvl, line)
                               end if 
                               if (associated(sourceItemPtr%QuantityPtr)) then
                               !  if (allocated(sourceItemPtr%QuantityPtr%name))  write(dev,'(a)') '            Quantity = '//trim(sourceItemPtr%QuantityPtr%name)
                                  if (len_trim(sourceItemPtr%QuantityPtr%name)>0) then
-                                    write(dev,'(a)') '            Quantity = '//trim(sourceItemPtr%QuantityPtr%name)
+                                    write(line,'(a)') '            Quantity = '//trim(sourceItemPtr%QuantityPtr%name)
+                                    call messenger(lvl, line)
                                  end if
                               end if
                               if (associated(sourceItemPtr%ElementSetPtr)) then
                                  if (len_trim(sourceItemPtr%ElementSetPtr%name)>0) then
-                                    write(dev,'(a)') '            Location = '//trim(sourceItemPtr%ElementSetPtr%name)
+                                    write(line,'(a)') '            Location = '//trim(sourceItemPtr%ElementSetPtr%name)
+                                    call messenger(lvl, line)
                                  end if
                               end if 
                               exit frs ! exits outer named do loop
@@ -544,6 +562,7 @@ module m_ec_instance
                enddo	! CONNECTIONS  
             endif 
          enddo ! TARGET ITEMS OF INSTANCE 
+         call messenger(lvl,'.')
       end subroutine ecInstancePrintState
 
 end module m_ec_instance
