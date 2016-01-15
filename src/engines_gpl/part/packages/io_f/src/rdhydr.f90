@@ -115,6 +115,7 @@ module rdhydr_mod
       logical :: first  = .true.
       integer(ip) :: i     , i2    , idelt1 , ifflag , iocond , isflag, kmax
       integer(ip) :: it1   , it2   , max    , mod    , lunut
+      integer(ip) :: mnmax                        ! number of cells per layer in the cube
       integer(ip) :: idtimv , itimv1 , itimv2     ! timings of the volumes file
       integer(ip) :: idtimf , itimf1 , itimf2     ! timings of the flow file
       integer(ip) :: idtimd , itimd1 , itimd2     ! timings of the vertical diffusion file
@@ -226,8 +227,10 @@ module rdhydr_mod
                           vdiff    , cellpnt , fname(20), isflag  , ifflag  ,   &
                           updatd  )
             if ( kmax .gt. 1 ) then                                    ! fill the zero last layer with the
-               vdiff(mnmaxk-  nmax*mmax+1:mnmaxk           ) =           &       ! values above
-               vdiff(mnmaxk-2*nmax*mmax+1:mnmaxk-nmax*mmax )
+               mnmax = nmax*mmax
+               do i = mnmaxk-mnmax+1,mnmaxk
+                  vdiff(i) = vdiff(i-mnmax)                        ! values above
+               end do
             endif
          endif
 
