@@ -1078,7 +1078,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
        mfluff = 0.0_fp
        !
        do ised = 1, lsed
-           if (sedpar%sedtyp(ised) /= SEDTYP_COHESIVE) continue
+           if (sedpar%sedtyp(ised) /= SEDTYP_COHESIVE) cycle
            inquire (file = mflfil(ised), exist = ex)
            if (ex) then
                call depfil(lundia    ,error     ,mflfil(ised)         , &
