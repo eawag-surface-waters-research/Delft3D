@@ -409,17 +409,15 @@ module m_ec_item
                if (.not. fileReaderPtr%end_of_data) then
                   do ! read next record untill t0<=timesteps<=t1
                      if (ecFileReaderReadNextRecord(fileReaderPtr, timesteps)) then
-                        !write(6,*) 'Read OK: ', timesteps
                         if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
-                           !write(6,*) 'Read OK: ', timesteps, ' success = .true., exit'
                            success = .true.
                            exit
                         end if
                      else
-                        write(6,*) 'Read NOT OK: ', timesteps
                         if (interpol_type == interpolate_time_extrapolation_ok) then
-                           write(6,*) 'Read NOT OK: interpolate_time_extrapolation_ok, exit'
                            exit
+                        else
+                           return         ! failed to update item AND no extrapolation allowed !!
                         end if
                      end if
                   end do

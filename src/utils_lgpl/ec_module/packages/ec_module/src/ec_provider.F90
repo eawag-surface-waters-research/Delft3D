@@ -2919,7 +2919,7 @@ module m_ec_provider
                      ! TODO: handle MJD in a proper way. For now, abstract the .5 day that originated
                      !       from the fact that in ecSupportTimestringToUnitAndRefdate the
                      !       call to ymd2jul in leads to a rounded off integer value.
-                     fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%ec_refdate - 0.5d+0
+                     !fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%ec_refdate - 0.5d+0        !!!! DISCUSS THIS LINE !!!
                   endif
                else 
                   success = .true.
