@@ -16,13 +16,14 @@ module m_hash_search
    end interface
 
    type, public :: t_hashlist
-      integer :: hashcon = 1009
+      integer :: hashcon
       integer :: id_count = 0
       character(len=idLen), allocatable, dimension(:) :: id_list
       integer, allocatable, dimension(:) :: hashfirst
       integer, allocatable, dimension(:) :: hashnext
    end type
    
+   integer, parameter :: hashcon = 1009
    contains   
    
    subroutine deallochashtable(hashlist)
@@ -84,6 +85,8 @@ module m_hash_search
       character(len=idLen)                     :: locid
       integer ires
       
+      hashlist%hashcon   = 1009
+      
       call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)
       call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
     
@@ -136,6 +139,7 @@ module m_hash_search
       
       integer                                  :: ierr
       
+      hashlist%hashcon = hashcon
       call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)
       call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
     
