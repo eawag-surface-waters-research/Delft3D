@@ -305,7 +305,7 @@
       do i = 1,noseg
           call dhkmrk( 1, iarray(i), active )
           call dhkmrk( 2, iarray(i), attrib )
-          if ( active .and. (attrib == 0 .or. attrib == 3) ) then
+          if ( active == 1 .and. (attrib == 0 .or. attrib == 3) ) then
              iarray(i) = 1 + mod(i-1,nosegl)
           else
              iarray(i) = 0
