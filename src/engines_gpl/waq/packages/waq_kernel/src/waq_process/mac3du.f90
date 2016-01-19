@@ -246,11 +246,13 @@
 
          ! fluxes, scale back to g/m3/d
 
-          fl  ( idnh4upsm01 ) = dnh4upsm01 / depth
-          fl  ( idno3upsm01 ) = dno3upsm01 / depth
-          fl  ( idpo4upsm01 ) = dpo4upsm01 / depth
-          fl  ( idco2upsm01 ) = dco2upsm01 / depth
-          fl  ( idoxyprsm01 ) = doxyprsm01 / depth
+         if ( depth > 0.0 ) then
+            fl  ( idnh4upsm01 ) = dnh4upsm01 / depth
+            fl  ( idno3upsm01 ) = dno3upsm01 / depth
+            fl  ( idpo4upsm01 ) = dpo4upsm01 / depth
+            fl  ( idco2upsm01 ) = dco2upsm01 / depth
+            fl  ( idoxyprsm01 ) = doxyprsm01 / depth
+         endif
 
          idnh4upsm01 = idnh4upsm01 + noflux
          idno3upsm01 = idno3upsm01 + noflux

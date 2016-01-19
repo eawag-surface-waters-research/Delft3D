@@ -87,12 +87,9 @@
       IPNT(21) = IPOINT(21)
       DO ISEG = 1,NOSEG
          PMSA( IPNT( 21) ) = -1
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-         IF (IKMRK1.EQ.1) THEN
-            CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-            IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-               PMSA( IPNT( 21) ) = ISEG
-            ENDIF
+         CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+         IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
+            PMSA( IPNT( 21) ) = ISEG
          ENDIF
          IPNT(21) = IPNT(21) + INCREM(21)
       ENDDO
@@ -128,94 +125,96 @@
 !
       DO 9000 ISEG = 1 , NOSEG
 
-          CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-        IF (IKMRK1.EQ.1) THEN
-        CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-        IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.1)) THEN
+         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
 
-!       Calculation of fcover for top layer only
+         IF (IKMRK1.EQ.1) THEN
+            CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+            IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.1)) THEN
 
-         nMacrophyt = PMSA( IPNT(  1) )
-         MaxEM01    = PMSA( IPNT(  4) )
-         MaxEM02    = PMSA( IPNT(  6) )
-         MaxEM03    = PMSA( IPNT(  8) )
-         MaxEM04    = PMSA( IPNT( 10) )
-         MaxEM05    = PMSA( IPNT( 12) )
-           IBotSeg    = nint(PMSA( IPNT( 13) ))
-           IF (IBotSeg .le. 0)
-     j   CALL DHERR2('IBotSeg',PMSA( IPNT( 13) ),ISEG,'COVMAC')
-           RadIn      = PMSA( IPNT( 14) )
-         EM01       = PMSA(IPOINT( 3)+(IBotSeg-1)*INCREM( 3))
-         EM02       = PMSA(IPOINT( 5)+(IBotSeg-1)*INCREM( 5))
-         EM03       = PMSA(IPOINT( 7)+(IBotSeg-1)*INCREM( 7))
-         EM04       = PMSA(IPOINT( 9)+(IBotSeg-1)*INCREM( 9))
-         EM05       = PMSA(IPOINT(11)+(IBotSeg-1)*INCREM(11))
+!           Calculation of fcover for top layer only
+
+               nMacrophyt = PMSA( IPNT(  1) )
+               MaxEM01    = PMSA( IPNT(  4) )
+               MaxEM02    = PMSA( IPNT(  6) )
+               MaxEM03    = PMSA( IPNT(  8) )
+               MaxEM04    = PMSA( IPNT( 10) )
+               MaxEM05    = PMSA( IPNT( 12) )
+               IBotSeg    = nint(PMSA( IPNT( 13) ))
+               IF (IBotSeg .le. 0)
+     j            CALL DHERR2('IBotSeg',PMSA( IPNT( 13) ),ISEG,'COVMAC')
+
+               RadIn      = PMSA( IPNT( 14) )
+               EM01       = PMSA(IPOINT( 3)+(IBotSeg-1)*INCREM( 3))
+               EM02       = PMSA(IPOINT( 5)+(IBotSeg-1)*INCREM( 5))
+               EM03       = PMSA(IPOINT( 7)+(IBotSeg-1)*INCREM( 7))
+               EM04       = PMSA(IPOINT( 9)+(IBotSeg-1)*INCREM( 9))
+               EM05       = PMSA(IPOINT(11)+(IBotSeg-1)*INCREM(11))
 !
 !   *****     Insert your code here  *****
 !
-         ! check input
+               ! check input
 
 
-         ! coverage per species
+               ! coverage per species
 
-         IF ( MaxEM01 .GT. 1E-20 ) THEN
-            CoverEM01  = EM01/MaxEM01
-         ELSE
-            CoverEM01  = 0.0
-         ENDIF
+               IF ( MaxEM01 .GT. 1E-20 ) THEN
+                  CoverEM01  = EM01/MaxEM01
+               ELSE
+                  CoverEM01  = 0.0
+               ENDIF
 
-         IF ( MaxEM02 .GT. 1E-20 ) THEN
-            CoverEM02  = EM02/MaxEM02
-         ELSE
-            CoverEM02  = 0.0
-         ENDIF
+               IF ( MaxEM02 .GT. 1E-20 ) THEN
+                  CoverEM02  = EM02/MaxEM02
+               ELSE
+                  CoverEM02  = 0.0
+               ENDIF
 
-         IF ( MaxEM03 .GT. 1E-20 ) THEN
-            CoverEM03  = EM03/MaxEM03
-         ELSE
-            CoverEM03  = 0.0
-         ENDIF
+               IF ( MaxEM03 .GT. 1E-20 ) THEN
+                  CoverEM03  = EM03/MaxEM03
+               ELSE
+                  CoverEM03  = 0.0
+               ENDIF
 
-         IF ( MaxEM04 .GT. 1E-20 ) THEN
-            CoverEM04  = EM04/MaxEM04
-         ELSE
-            CoverEM04  = 0.0
-         ENDIF
+               IF ( MaxEM04 .GT. 1E-20 ) THEN
+                  CoverEM04  = EM04/MaxEM04
+               ELSE
+                  CoverEM04  = 0.0
+               ENDIF
 
-         IF ( MaxEM05 .GT. 1E-20 ) THEN
-            CoverEM05  = EM05/MaxEM05
-         ELSE
-            CoverEM05  = 0.0
-         ENDIF
+               IF ( MaxEM05 .GT. 1E-20 ) THEN
+                  CoverEM05  = EM05/MaxEM05
+               ELSE
+                  CoverEM05  = 0.0
+               ENDIF
 
-         ! overall coverage, use emerged only
+               ! overall coverage, use emerged only
 
-         fcover     = min (1., (CoverEM01 + CoverEM02 + CoverEM03
-     j                + CoverEM04 + CoverEM05) )
-         RadSurf = Radin*(1.-fcover)
+               fcover     = min (1., (CoverEM01 + CoverEM02 + CoverEM03
+     j                    + CoverEM04 + CoverEM05) )
+               RadSurf = Radin*(1.-fcover)
 
-        ELSE
-!       no cover in other layers
-            CoverEM01 = 0.0
-            CoverEM02 = 0.0
-            CoverEM03 = 0.0
-            CoverEM04 = 0.0
-            CoverEM05 = 0.0
-          fcover = 0.
-          RadSurf = 0.
-          ENDIF
+            ELSE
+!              no cover in other layers
+               CoverEM01 = 0.0
+               CoverEM02 = 0.0
+               CoverEM03 = 0.0
+               CoverEM04 = 0.0
+               CoverEM05 = 0.0
+               fcover = 0.
+               RadSurf = 0.
+            ENDIF
 !
 !   *****     End of your code       *****
 !
-         PMSA( IPNT( 15)   ) = fcover
-         PMSA( IPNT( 16)   ) = CoverEM01
-         PMSA( IPNT( 17)   ) = CoverEM02
-         PMSA( IPNT( 18)   ) = CoverEM03
-         PMSA( IPNT( 19)   ) = CoverEM04
-         PMSA( IPNT( 20)   ) = CoverEM05
-         PMSA( IPNT( 22)   ) = RadSurf
+            PMSA( IPNT( 15)   ) = fcover
+            PMSA( IPNT( 16)   ) = CoverEM01
+            PMSA( IPNT( 17)   ) = CoverEM02
+            PMSA( IPNT( 18)   ) = CoverEM03
+            PMSA( IPNT( 19)   ) = CoverEM04
+            PMSA( IPNT( 20)   ) = CoverEM05
+            PMSA( IPNT( 22)   ) = RadSurf
 
-          ENDIF
+         ENDIF
 !
          IPNT        = IPNT        + INCREM
 !
