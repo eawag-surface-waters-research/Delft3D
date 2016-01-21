@@ -2739,25 +2739,6 @@ module m_ec_provider
             ! no variables in the file or netcdf inquiry error .... handle exception 
             return
          endif 
-         
-
-         ! Make a list of standard names of variables available in the netcdf file 
-         nvar = 0 
-         ierror = nf90_inquire(fileReaderPtr%fileHandle, nvariables = nvar)
-         if (nvar>0) then 
-            allocate(fileReaderPtr%standard_names(nvar))          ! Note: one of these may be obsolete (if we only check standard names)
-            allocate(fileReaderPtr%variable_names(nvar))
-            fileReaderPtr%standard_names = ''
-            fileReaderPtr%variable_names = ''
-            do ivar = 1,nvar 
-               ierror = nf90_get_att(fileReaderPtr%fileHandle, ivar, 'standard_name', fileReaderPtr%standard_names(ivar))
-               ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, name=fileReaderPtr%variable_names(ivar))
-            enddo 
-         else 
-            ! no variables in the file or netcdf inquiry error .... handle exception 
-            return
-         endif 
-         
          !
          ! Cartesian or spheric
          ! WARNING: elementSetType must be set before elementSetNumberOfCoordinates (why???)
