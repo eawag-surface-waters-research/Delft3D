@@ -485,6 +485,9 @@
          case (136 ) ;  call NPPS12 ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
      &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
      &                                 noq3   , noq4   )
+         case (137 ) ;  call DEBGRZ ( pmsa   , flux   , ipoint , increm , noseg  ,               ! &
+     &                                 noflux , iexpnt , iknmrk , noq1   , noq2   ,               ! &
+     &                                 noq3   , noq4   )
 
          case default
 

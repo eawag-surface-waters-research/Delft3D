@@ -2069,6 +2069,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/d40blo.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dayl.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dayrad.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ddepth.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/debgrz.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/decbod.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/decdet.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/decpc5.f -text
