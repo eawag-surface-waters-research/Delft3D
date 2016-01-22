@@ -1490,14 +1490,14 @@ module m_ec_provider
          if (.not. ecItemSetTargetField(instancePtr, itemId, fieldId)) return
 
          itemPT => ecSupportFindItem(instancePtr, itemId)
-         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)
+!        call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400001.0_hp), k_yyyymmdd)     ! From Modified Jul day
+         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)     ! From Reduced Jul day
 
          ! Init BCBlock for (global) qh-bound 
          is_qh = .false. 
          ! Determine the end of the base of the fileName.
          L = index(fileReaderPtr%fileName, '.', back = .true.) - 1
          ! Create providers at each support point, depending on the availability of specific files.
-         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)
          ! Exceptional case: A single qh-table supplies all support points of the pli-file.
          filename = fileReaderPtr%fileName(1:L)//'.qh'
          inquire (file = trim(filename), exist = exists)
@@ -1742,7 +1742,8 @@ module m_ec_provider
                read(rec(lblstart+6:len_trim(rec)),*,iostat=istat)  plipointlbls(i)
             endif
          enddo
-         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)
+!        call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400001.0_hp), k_yyyymmdd)  ! Conversion from MJD
+         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)  ! Conversion from RJD
 
          ! Construct the poly_tim Item
          quantityId = ecInstanceCreateQuantity(instancePtr)
@@ -2828,7 +2829,8 @@ module m_ec_provider
          !
          if (k_refdate > -1) then
 
-            fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400000.5_hp)
+!           fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400001.0_hp)         ! This EXACTLY yields MJD (epoch = 1858-11-17, 0 hours)
+            fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400000.5_hp)         ! This EXACTLY yields RJD (epoch = 1858-11-17, 12 hours)
             fileReaderPtr%tframe%k_timezone = k_timezone
             fileReaderPtr%tframe%k_timestep_unit = k_timestep_unit
 
@@ -2896,12 +2898,6 @@ module m_ec_provider
                if (fileReaderPtr%bc%func == BC_FUNC_TSERIES .or. fileReaderPtr%bc%func == BC_FUNC_TIM3D) then 
                   success = ecSupportTimestringToUnitAndRefdate(fileReaderPtr%bc%timeunit, &
                                                                 fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate)
-                  if (success) then
-                     ! TODO: handle MJD in a proper way. For now, abstract the .5 day that originated
-                     !       from the fact that in ecSupportTimestringToUnitAndRefdate the
-                     !       call to ymd2jul in leads to a rounded off integer value.
-                     !fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%ec_refdate - 0.5d+0        !!!! DISCUSS THIS LINE !!!
-                  endif
                else 
                   success = .true.
                endif 

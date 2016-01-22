@@ -104,7 +104,8 @@ module m_ec_support
          success = .true.
          !
          spd = 60.0_hp * 60.0_hp * 24.0_hp
-         jd = timeFramePtr%k_refdate + (steps / spd) + 2400000.5_hp
+!        jd = timeFramePtr%k_refdate + (steps / spd) + 2400001.0_hp  ! From Modified Jul day 
+         jd = timeFramePtr%k_refdate + (steps / spd) + 2400000.5_hp  ! From Reduced Jul day
          call jul2ymd(int(jd), yyyymmdd)
          ssm = mod(steps, spd)
          hh = int(ssm) / 3600
@@ -816,7 +817,8 @@ end subroutine ecInstanceListSourceItems
                yyyymmdd = yyyymmdd + 100*temp
                read(string(i+8 : i+10), '(I2)') temp
                yyyymmdd = yyyymmdd + temp
-               ref_date = real(ymd2jul(yyyymmdd)) - 2400000.5_hp ! Julian Day to Modified Julian Date.
+!              ref_date = real(ymd2jul(yyyymmdd)) - 2400001.0_hp ! Julian Day to Modified Julian Date (exact)
+               ref_date = real(ymd2jul(yyyymmdd)) - 2400000.5_hp ! Julian Day to Reduced Julian Date (exact)
                ! Time
                read(string(i+11 : i+13), '(I2)') temp
                ref_date = ref_date + dble(temp) / 24.0_hp
