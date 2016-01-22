@@ -40,6 +40,7 @@ libwaq_process_la_SOURCES = \
        dayl.f \
        dayrad.f \
        ddepth.f \
+       debgrz.f \
        decbod.f \
        decdet.f \
        decpc5.f \
