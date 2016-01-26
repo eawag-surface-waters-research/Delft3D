@@ -333,9 +333,10 @@
          else
             pdffil = lchar(34)
          endif
+         ierr2 = ierr
          call rd_tabs( pdffil, lurep , versio, serial, noinfo,
      +                 nowarn, ierr )
-         if (ierr.gt.0) then
+         if (ierr.gt.ierr2) then
             write(lurep,*) ' '
             write(lurep,*) ' ERROR: Could not read the process definition file.'
             write(lurep,*) '        Check if the filename after -p is correct, and exists.'
@@ -354,9 +355,9 @@
             write (lurep,2002) versio
             write (lurep,2003) serial
             write (lurep, *  )
-   
+
             ! fill the old_items conversion table
-   
+
             call fill_old_items(old_items)
          endif
       endif
@@ -659,7 +660,7 @@
          call blmeff (lurep , lunblm, lunfrm, grpnam, nogrp )
          close(lunblm)
          close(lunfrm)
-         
+
          inquire (file = 'bloominp.d09', exist = ex)
          if(.not.ex) then
             lund09 = 89
