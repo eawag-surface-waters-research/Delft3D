@@ -1,3 +1,11 @@
+module m_initsedtra
+
+private 
+
+public initsedtra
+
+contains
+
 subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, nmlb, nmub, nmmax, lsed, lsedtot)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -188,3 +196,5 @@ subroutine initsedtra(sedtra, sedpar, trapar, morpar, morlyr, rhow, ag, vicmol, 
        hidexp = 1.0
     endif
 end subroutine initsedtra
+
+end module m_initsedtra

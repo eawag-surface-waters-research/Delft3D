@@ -43,6 +43,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     use bedcomposition_module
     use morphology_data_module, only: allocsedtra, CODE_DELFT3D
     use sediment_basics_module
+    use m_initsedtra, only: initsedtra
     !
     implicit none
     !
