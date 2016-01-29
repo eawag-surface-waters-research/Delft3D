@@ -325,7 +325,7 @@
             CCFOOD  (1) = 1.
             BenFood (1) = NINT(0.)
 
-            if (DETBIO(1) > 0.1e-010) then
+            if (DETBIO(1) > tiny(DETBIO(1))) then
                NCFOOD(1)   = DETBIO(2) / DETBIO(1)
                PCFOOD(1)   = DETBIO(3) / DETBIO(1)
                SiCFOOD(1)  = DETBIO(4) / DETBIO(1)
@@ -340,7 +340,7 @@
             CCFOOD  (2) = 1.
             BenFood (2) = NINT(1.)
 
-            if (DETS1(1) > 1e-010) then
+            if (DETS1(1) > tiny(DETS1(1))) then
                NCFOOD(2)   = DETS1(2) / DETS1(1)
                PCFOOD(2)   = DETS1(3) / DETS1(1)
                SiCFOOD(2)  = DETS1(4) / DETS1(1)
@@ -358,7 +358,7 @@
             conv_cm3_gC = min(conv_cm3_gC,conv_J_gC*Eg_L3)
 
 !       !if cell has grazers
-            IF (Vtot > 0.)  THEN
+            IF (Vtot > tiny(Vtot))  THEN
                Etot=max(0.,Etot)
                Rtot=max(0.,Rtot)
 
@@ -381,9 +381,9 @@
                   R_m2 = Rtot                                                !R_m2 is population gonadal biomass (gC/m2)
                ENDIF
 
-               V = V_m2 / (Dens_m2 * conv_cm3_gC)                            !V is individual volume (cm3/ind)
-               E = E_m2 / (Dens_m2 * conv_J_gC)                              !E is individual energy (J/ind)
-               R = R_m2 / (Dens_m2 * conv_J_gC)                              !R is individual gonads (J/ind)
+               V = max( V_m2 / (Dens_m2 * conv_cm3_gC), tiny(V) )            !V is individual volume (cm3/ind)
+               E = max( E_m2 / (Dens_m2 * conv_J_gC), tiny(E) )              !E is individual energy (J/ind)
+               R = max( R_m2 / (Dens_m2 * conv_J_gC), tiny(R) )              !R is individual gonads (J/ind)
 
                if (SwitchV1.eq.1) then
                   V=Vd                                                       !to avoid numerical artefacts at small biomasses
@@ -575,7 +575,7 @@
                   fadult=1.
                endif
 
-               GSI = (R*conv_J_gC)/((V+tiny(V))*fadult*conv_cm3_gC +
+               GSI = (R*conv_J_gC)/(V*fadult*conv_cm3_gC +
      &               E*fadult*conv_J_gC + R*conv_J_gC)
                Pjj = ((1.-kappa)/(kappa+tiny(kappa))) * Pm_L3 * (V*fjuv) * kT          !maturity maintenance juveniles (J/ind/d)
                Pjj = min(Pjj, ((1.-kappa) * Pc * fjuv ))
@@ -680,7 +680,7 @@
                   FL (24 + IFLUX  ) = 0.                                              !growth    (Dens [#/m3/d])
                else                                                                   !if V1-morph
 !     V1-morphs have a constant (individual) V, the population V only grows through increase in density
-                  FL (24 + IFLUX  ) =((Pv*conv_J_gC/conv_cm3_gC)/(V+tiny(V)))*Dens_m2 /Depth      !growth    (Dens [#/m3/d])
+                  FL (24 + IFLUX  ) =((Pv*conv_J_gC/conv_cm3_gC)/V)*Dens_m2 /Depth      !growth    (Dens [#/m3/d])
                endif
                FL (25 + IFLUX  ) = min(1.,(rMor + rHrv))*Dens_m2 /Depth               !mortality (Dens [#/m3/d])
                FL (26 + IFLUX  ) = (0.+ GEM)*dFil(1) * Dens_m2 /DEPTH                 !uptake    [gC/m3/d]
