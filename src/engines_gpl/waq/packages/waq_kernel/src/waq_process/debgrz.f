@@ -23,118 +23,118 @@
 
       SUBROUTINE DEBGRZ  (PMSA , FL , IPOINT , INCREM , NOSEG , NOFLUX ,
      +                   IEXPNT, IKNMRK, IPODIM, NOQ1, NOQ2, NOQ3, NOQ4)
-C**********************************************************************
-C     +----------------------------------------+
-C     |    D E L F T   H Y D R A U L I C S     |
-C     |    WAter Resources and Environment     |
-C     +----------------------------------------+
-C
-C***********************************************************************
-C
-C     Project : Hogere trofische niveaus met DEB
-C     Author  : Tineke Troost
-C     Date    : 19122014             Version : 0.01
-C
-C     History :
-C
-C     Date    Author          Description
-C     ------  --------------  -----------------------------------
-C     040116  Jeroen Wijsman  Created STORG
-C     141222  Tineke Troost   Transformed STORG into DEBGRZ
-C
-C***********************************************************************
-C
-C     Description of the module :
-C
-C        General routine for the dynamics of a grazer based on DEB theory.
-C        The modeled grazers can either form a cohort of equal organisms of
-C        increasing length (isomorphs) or a simplified population of individuals
-C        with an overall fixed size distribution (V1 morphs).
-C        Furthermore, the organisms can either be non-mobile or passively
-C        transported with the water.
-C        The organism can consume various (pelagic and benthic) food types,
-C        including dynamo and bloom algae and various detritus fractions
-C        (DetX, POX and DetXS1). The consumer has a specific preference
-C        for each food type.
-C
-C Name              Description                                  Units
-C ----           --- -  -    -------------------                           ----
-C DELT             x timestep for processes                         (d)
-C Volume           x volume of computational cell                  (m3)
-C Temp             x ambient water temperature                     (oC)
-C Depth            x depth of segment                               (m)
-C TotalDepth       x total depth water column                       (m)
-C TIM              x total inorganic matter                    (gDM/m3)
-C SWDetTyp         x use DetX (0) or POXi for GEM (1)               (-)
-C SwitchV1         x use ISO-morphs (0) or V1-morphs (1)            (-)
-C BENTHS           x Use 0 [pelagic] or 1 [benthic] for grazers     (-)
-C Vtot             x structural biomass grazer pop.    (gC/m3 or gC/m2)
-C Etot             x energy storage grazer pop.        (gC/m3 or gC/m2)
-C Rtot             x reproductional storage grazer pop.(gC/m3 or gC/m2)
-C Dens             x number of grazer individuals        (#/m3 or #/m2)
-C Length           x Individual Length                        (gWW m-2)
-C Dummy var        x
-C Vb               x volume at birth                              (cm3)
-C Vp               x volume at start of reproductive stage        (cm3)
-C shape            x shape coefficient                              (-)
-C Em               x Maximum storage density                    (J/cm3)
-C Eg               x Volume-specific costs for growth           (J/cm3)
-C Pm               x rate constant basal respiration grazers      (J/d)
-C JXm              x Maximum surface area-spec.ingestion rate (J/cm2/d)
-C kappaI           x Ingestion efficiency (pseudofaeces production) (-)
-C kappaA               x Assimilation efficiency                        (-)
-C kappa            x fraction of util.energy spent on maint&growth  (-)
-C kappaR           x fraction of repro.energy spent on              (-)
-C Ta               x Arrhenius temperature                          (K)
-C Tah              x Arr temp for rate of decrease at upper boundary(K)
-C Tal              x Arr temp for rate of decrease at lower boundary(K)
-C Th               x Upper boundary of tolerance range              (K)
-C Tl               x Lower boundary of tolerance range              (K)
-C GSIupr           x Minimum GSI for spawning                       (-)
-C GSIlwr           x minimum GSI while spawning                     (-)
-C DoSpawn          x indication of spawning                         (-)
-C rSpawn           x Spawning rate                                  (-)
-C MinSTmp          x Minimum temperature for spawning              (oC)
-C Xk               x Halfrate const food uptake Sup fdr         (gC/m3)
-C Yk               x Halfrate const TIM                         (gC/m3)
-C rMor_ref         x reference mortality rate grazers              (/d)
-C cMor             x length-dep coefficient mortality rate         (/d)
-C rHrv_ref         x reference  harvesting rate grazers            (/d)
-C cHrv             x length-dep coefficient harvesting rate        (/d)
-C c_J_gC           x conversion factor from J into gC            (gC/J)
-C c_cm3_C          x conversion factor from cm3 into gC        (gC/cm3)
-C c_AFW_C          x conversion factor from gAFDW into gC    (gC/gAFDW)
-C c_WW_gC          x conversion factor from gWW into gC        (gC/gWW)
-C TC               x C:C ratio grazers                          (gC/gC)
-C TN               x N:C ratio grazers                          (gN/gC)
-C TP               x P:C ratio grazers                          (gP/gC)
-C TSi              x Si:C ratio grazers                        (gSi/gC)
-C FrDetBot         x fraction of detritus into sediment or water    (-)
-C SFSusp           x Rel importance suspension vs deposit feeding   (-)
-C PrDet            x Preference of grazers for DetC or POC1         (-)
-C PrDetS1          x Preference of grazers for DetCS1               (-)
-C FFDet            x Faecal fraction of detritus                    (-)
-C FFDetS1          x Faecal fraction of bottom detritus             (-)
-C DetC             x Detritus Carbon  (DetC)                    (gC/m3)
-C DetN             x Detritus Nitrogen (DetN)                   (gN/m3)
-C DetP             x Detritus Phosphorus (DetP)                 (gP/m3)
-C DetSi            x Detritus Silica (DetSi)                   (gSi/m3)
-C POC1               POC1 (fast decaying fraction)              (gC/m3)
-C PON1               PON1 (fast decaying fraction)              (gN/m3)
-C POP1               POP1 (fast decaying fraction)              (gP/m3)
-C POSi1              dummy fast detritus silicium              (gSi/m3)
-C DetCS1           x DetC in layer S1                              (gC)
-C DetNS1           x DetN in layer S1                              (gN)
-C DetPS1           x DetP in layer S1                              (gP)
-C DetSiS1          x DetSi in layer S1                            (gSi)
+!**********************************************************************
+!     +----------------------------------------+
+!     |    D E L F T   H Y D R A U L I C S     |
+!     |    WAter Resources and Environment     |
+!     +----------------------------------------+
+!
+!***********************************************************************
+!
+!     Project : Hogere trofische niveaus met DEB
+!     Author  : Tineke Troost
+!     Date    : 19122014             Version : 0.01
+!
+!     History :
+!
+!     Date    Author          Description
+!     ------  --------------  -----------------------------------
+!     040116  Jeroen Wijsman  Created STORG
+!     141222  Tineke Troost   Transformed STORG into DEBGRZ
+!
+!***********************************************************************
+!
+!     Description of the module :
+!
+!        General routine for the dynamics of a grazer based on DEB theory.
+!        The modeled grazers can either form a cohort of equal organisms of
+!        increasing length (isomorphs) or a simplified population of individuals
+!        with an overall fixed size distribution (V1 morphs).
+!        Furthermore, the organisms can either be non-mobile or passively
+!        transported with the water.
+!        The organism can consume various (pelagic and benthic) food types,
+!        including dynamo and bloom algae and various detritus fractions
+!        (DetX, POX and DetXS1). The consumer has a specific preference
+!        for each food type.
+!
+! Name              Description                                  Units
+! ----           --- -  -    -------------------                           ----
+! DELT             x timestep for processes                         (d)
+! Volume           x volume of computational cell                  (m3)
+! Temp             x ambient water temperature                     (oC)
+! Depth            x depth of segment                               (m)
+! TotalDepth       x total depth water column                       (m)
+! TIM              x total inorganic matter                    (gDM/m3)
+! SWDetTyp         x use DetX (0) or POXi for GEM (1)               (-)
+! SwitchV1         x use ISO-morphs (0) or V1-morphs (1)            (-)
+! BENTHS           x Use 0 [pelagic] or 1 [benthic] for grazers     (-)
+! Vtot             x structural biomass grazer pop.    (gC/m3 or gC/m2)
+! Etot             x energy storage grazer pop.        (gC/m3 or gC/m2)
+! Rtot             x reproductional storage grazer pop.(gC/m3 or gC/m2)
+! Dens             x number of grazer individuals        (#/m3 or #/m2)
+! Length           x Individual Length                        (gWW m-2)
+! Dummy var        x
+! Vb               x volume at birth                              (cm3)
+! Vp               x volume at start of reproductive stage        (cm3)
+! shape            x shape coefficient                              (-)
+! Em               x Maximum storage density                    (J/cm3)
+! Eg               x Volume-specific costs for growth           (J/cm3)
+! Pm               x rate constant basal respiration grazers      (J/d)
+! JXm              x Maximum surface area-spec.ingestion rate (J/cm2/d)
+! kappaI           x Ingestion efficiency (pseudofaeces production) (-)
+! kappaA               x Assimilation efficiency                        (-)
+! kappa            x fraction of util.energy spent on maint&growth  (-)
+! kappaR           x fraction of repro.energy spent on              (-)
+! Ta               x Arrhenius temperature                          (K)
+! Tah              x Arr temp for rate of decrease at upper boundary(K)
+! Tal              x Arr temp for rate of decrease at lower boundary(K)
+! Th               x Upper boundary of tolerance range              (K)
+! Tl               x Lower boundary of tolerance range              (K)
+! GSIupr           x Minimum GSI for spawning                       (-)
+! GSIlwr           x minimum GSI while spawning                     (-)
+! DoSpawn          x indication of spawning                         (-)
+! rSpawn           x Spawning rate                                  (-)
+! MinSTmp          x Minimum temperature for spawning              (oC)
+! Xk               x Halfrate const food uptake Sup fdr         (gC/m3)
+! Yk               x Halfrate const TIM                         (gC/m3)
+! rMor_ref         x reference mortality rate grazers              (/d)
+! cMor             x length-dep coefficient mortality rate         (/d)
+! rHrv_ref         x reference  harvesting rate grazers            (/d)
+! cHrv             x length-dep coefficient harvesting rate        (/d)
+! c_J_gC           x conversion factor from J into gC            (gC/J)
+! c_cm3_C          x conversion factor from cm3 into gC        (gC/cm3)
+! c_AFW_C          x conversion factor from gAFDW into gC    (gC/gAFDW)
+! c_WW_gC          x conversion factor from gWW into gC        (gC/gWW)
+! TC               x C:C ratio grazers                          (gC/gC)
+! TN               x N:C ratio grazers                          (gN/gC)
+! TP               x P:C ratio grazers                          (gP/gC)
+! TSi              x Si:C ratio grazers                        (gSi/gC)
+! FrDetBot         x fraction of detritus into sediment or water    (-)
+! SFSusp           x Rel importance suspension vs deposit feeding   (-)
+! PrDet            x Preference of grazers for DetC or POC1         (-)
+! PrDetS1          x Preference of grazers for DetCS1               (-)
+! FFDet            x Faecal fraction of detritus                    (-)
+! FFDetS1          x Faecal fraction of bottom detritus             (-)
+! DetC             x Detritus Carbon  (DetC)                    (gC/m3)
+! DetN             x Detritus Nitrogen (DetN)                   (gN/m3)
+! DetP             x Detritus Phosphorus (DetP)                 (gP/m3)
+! DetSi            x Detritus Silica (DetSi)                   (gSi/m3)
+! POC1               POC1 (fast decaying fraction)              (gC/m3)
+! PON1               PON1 (fast decaying fraction)              (gN/m3)
+! POP1               POP1 (fast decaying fraction)              (gP/m3)
+! POSi1              dummy fast detritus silicium              (gSi/m3)
+! DetCS1           x DetC in layer S1                              (gC)
+! DetNS1           x DetN in layer S1                              (gN)
+! DetPS1           x DetP in layer S1                              (gP)
+! DetSiS1          x DetSi in layer S1                            (gSi)
 
 
-C     Logical Units : -
+!     Logical Units : -
 
-C     Modules called : -
+!     Modules called : -
 
-C     Name     Type   Library
-C     ------   -----  ------------
+!     Name     Type   Library
+!     ------   -----  ------------
 
       IMPLICIT  NONE
 
@@ -149,8 +149,8 @@ C     ------   -----  ------------
       INTEGER  :: NFOOD = 40 +2        ! 30 BLOOM algae + 2 DYNAMO algae + 8 dummy food sources + DetCS1 + Detritus = 40+2
       INTEGER  :: NTOTNUT = 4          ! Carbon, Nitrogen, Phosphorus and Silica
       INTEGER  :: BENTHS
-C
-C From PMSA array
+!
+! From PMSA array
       REAL     :: DELT , Volume, temp, TotalDepth, Depth, TIM, GEM,
      +            Length_ini, Vtot, Etot, Rtot, Dens_ini, E_L3,
      +            rMor_ref, cMor, rHrv_ref, cHrv, TC, TN, TP, TSi,
@@ -193,6 +193,7 @@ C From PMSA array
       LOGICAL,save :: INIT = .true.
 
       if (INIT) then
+         INIT  = .false.
          IP = IPOINT(1:NO_POINTER)
          IFLUX = 0
 
@@ -223,18 +224,18 @@ C From PMSA array
          enddo
       endif
 
-*********************************************************************
-c INITIALISATIONS AND CONVERSIONS
-*********************************************************************
-C     initialise pointers for PMSA and FL array
+!********************************************************************
+! INITIALISATIONS AND CONVERSIONS
+!********************************************************************
+!     initialise pointers for PMSA and FL array
       IP = IPOINT(1:NO_POINTER)
       BENTHS = NINT(PMSA( IP( 9)))
 
       IFLUX = 0
       DO 9000 ISEG = 1, NOSEG
          CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-C        !if cell is active
-         IF (IKMRK1.NE.1) THEN
+!        !if cell is active
+         IF (IKMRK1.EQ.1) THEN
             CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
             ! pelagics can occur everywhere, but benthic grazers can only exist in bottom layer
             IF ( (IKMRK2 == 1 .OR. IKMRK2 == 2 ) .AND. BENTHS.eq.1 ) then
@@ -242,7 +243,7 @@ C        !if cell is active
                GOTO 8900
             ENDIF
 
-C           Read input from first part of the PSMA
+!           Read input from first part of the PSMA
             DELT        =      PMSA( IP( 1))
             Volume      =      PMSA( IP( 2))
             Temp        =      PMSA( IP( 3))
@@ -318,13 +319,13 @@ C           Read input from first part of the PSMA
                FFFood(IFOOD) =        PMSA( IP(66 + 6*(NFOOD-2) + IFOOD))
             ENDDO
 
-C Add Detbio and DetS1 to the food array's
-C DetBIO is pelagic detritus
+! Add Detbio and DetS1 to the food array's
+! DetBIO is pelagic detritus
             CFOOD   (1) = DETBIO(1)
             CCFOOD  (1) = 1.
             BenFood (1) = NINT(0.)
 
-            if (DETBIO(1).gt.1e-010) then
+            if (DETBIO(1) > 0.1e-010) then
                NCFOOD(1)   = DETBIO(2) / DETBIO(1)
                PCFOOD(1)   = DETBIO(3) / DETBIO(1)
                SiCFOOD(1)  = DETBIO(4) / DETBIO(1)
@@ -334,12 +335,12 @@ C DetBIO is pelagic detritus
                SiCFOOD(1)  = 0.
             endif
 
-C DetS1 is a benthic detritus
+! DetS1 is a benthic detritus
             CFOOD   (2) = DETS1(1)
             CCFOOD  (2) = 1.
             BenFood (2) = NINT(1.)
 
-            if (DETS1(1).gt.1e-010) then
+            if (DETS1(1) > 1e-010) then
                NCFOOD(2)   = DETS1(2) / DETS1(1)
                PCFOOD(2)   = DETS1(3) / DETS1(1)
                SiCFOOD(2)  = DETS1(4) / DETS1(1)
@@ -352,16 +353,16 @@ C DetS1 is a benthic detritus
             Onethird = 1./3.
             Area = VOLUME / DEPTH
 
-c costs for growth set a maximum to the energy content of structural material and thus to the conversion coefficient conv_cm3_gC
-c this may affect the overhead costs for growth (kappa_G)
+! costs for growth set a maximum to the energy content of structural material and thus to the conversion coefficient conv_cm3_gC
+! this may affect the overhead costs for growth (kappa_G)
             conv_cm3_gC = min(conv_cm3_gC,conv_J_gC*Eg_L3)
 
-C       !if cell has grazers
-            IF (Vtot.gt.0.)  THEN
+!       !if cell has grazers
+            IF (Vtot > 0.)  THEN
                Etot=max(0.,Etot)
                Rtot=max(0.,Rtot)
 
-c convert benthic and pelagic grazer components to units /m2,
+! convert benthic and pelagic grazer components to units /m2,
                if (SwitchV1.eq.1) then
                   Vd = (shape*Length_ini)**3                                 !Vd is reference volume (cm3)
                   Dens = max(((Vtot/conv_cm3_gC)/Vd),tiny(Dens))             !Density derived from Vtot(unit dep on BENTHS)
@@ -391,24 +392,23 @@ c convert benthic and pelagic grazer components to units /m2,
                Length = (V**Onethird)/shape                                  !Length is derived from individual V
                E_scaled = E /( Em_L3 * (V+tiny(V)))                          !E_scaled is derived from E and V
 
-
-c convert benthic FOOD components to units gC m-2, do not convert pelagic components: unit stays gC m-3
+! convert benthic FOOD components to units gC m-2, do not convert pelagic components: unit stays gC m-3
                do IFOOD = 1,NFOOD
                   if (Benfood(ifood).eq.1) then
                      CFOOD(IFOOD)=max(CFOOD(IFOOD) / AREA , 0.)
                   endif
                enddo
 
-C Temperature dependent rates
+! Temperature dependent rates
                kT = exp(Ta/(20.+273.)- Ta/(Temp +273.))*
      &              (1.+ exp(Tal/(20.+273.)-Tal/Tl)+exp(Tah/Th-Tah/(20.+273.)))
      &              /(1.+ exp(Tal/(Temp+273.)-Tal/Tl)+exp(Tah/Th-Tah/(Temp+273.)))
 
-*********************************************************************
-C UPTAKE: FILTRATION, INGESTION and ASSIMILATION per INDIVIDUAL
-*********************************************************************
+!********************************************************************
+! UPTAKE: FILTRATION, INGESTION and ASSIMILATION per INDIVIDUAL
+!********************************************************************
 
-c effective food concentrations (gC/m3), and their faecal (=indigestible) fractions (FF)
+! effective food concentrations (gC/m3), and their faecal (=indigestible) fractions (FF)
                FoodPel = 0.
                FoodBen = 0.
                FFPel = 0.
@@ -428,12 +428,12 @@ c effective food concentrations (gC/m3), and their faecal (=indigestible) fracti
                FFPel = FFPel/(FoodPel+tiny(FoodPel))
                FF = (1.-Suspension)*FFBen + Suspension*FFPel
 
-C Calculate scaled functional respons FoodPel (-)
-C Half-saturation constant same for suspended and bottom food
+! Calculate scaled functional respons FoodPel (-)
+! Half-saturation constant same for suspended and bottom food
                Xk_S = Xk
                Xk_B = Xk
 
-c No assimilation and uptake when depth < 5 cm (to prevent uptake at dryfalling mudflats)
+! No assimilation and uptake when depth < 5 cm (to prevent uptake at dryfalling mudflats)
                if (TotalDepth .lt. 0.05) then
                   f_S = 0.
                   f_B = 0.
@@ -441,16 +441,17 @@ c No assimilation and uptake when depth < 5 cm (to prevent uptake at dryfalling 
                   f_S = (FoodPel / (FoodPel +  Xk_S *(1. + TIM/Yk)))
                   f_B = (FoodBen / (FoodBen +  Xk_B *(1. + TIM/Yk)))
                endif
-c to avoid negative values or values larger than 1, e.g. due to negative TIM
+! to avoid negative values or values larger than 1, e.g. due to negative TIM
                f_S=max(f_S,0.)
                f_B=max(f_B,0.)
                f_S=min(f_S,1.)
                f_B=min(f_B,1.)
 
-c Calculate the energy ingestion rates (J/ind/d) and filtration rates (gC/ind/d)
-c Filtration rates are determined from ingestion rates by conversion into units of gC,
-c by correction for pseudofaeces losses (1/kappaI),
-c and for the faecal fraction of food (FF), which fraction is low in energy and thus does not increase the ingested energy, but does add to the ingested carbon.
+! Calculate the energy ingestion rates (J/ind/d) and filtration rates (gC/ind/d)
+! Filtration rates are determined from ingestion rates by conversion into units of gC,
+! by correction for pseudofaeces losses (1/kappaI),
+! and for the faecal fraction of food (FF), which fraction is low in energy and thus does not increase the ingested
+! energy, but does add to the ingested carbon.
 
                Filtr   = 0.
                NFiltr  = 0.
@@ -480,22 +481,22 @@ c and for the faecal fraction of food (FF), which fraction is low in energy and 
                   SiFiltr = SiFiltr + dFil(IFOOD) * SiCFOOD(IFOOD)                       !(gSi/ind/d)
                enddo
 
-*********************************************************************
-C DEFAECATION per INDIVIDUAL
-*********************************************************************
-C From the ingested material, a fraction is lost due to (lack of) assimilation efficiency (kappaA) leading to faeces production
-c and/or due to (lack of) ingestion efficiency (kappaI) leading to pseudofaeces production
-c Also, the faecal food fraction (FF) is not assimilated; it is assumed to consist of carbon fibres only, and to be low in energy.
-C Furthermore the assimilated material has to match the N/C and P/C ratio of the grazer
+!********************************************************************
+! DEFAECATION per INDIVIDUAL
+!********************************************************************
+! From the ingested material, a fraction is lost due to (lack of) assimilation efficiency (kappaA) leading to faeces production
+! and/or due to (lack of) ingestion efficiency (kappaI) leading to pseudofaeces production
+! Also, the faecal food fraction (FF) is not assimilated; it is assumed to consist of carbon fibres only, and to be low in energy.
+! Furthermore the assimilated material has to match the N/C and P/C ratio of the grazer
 
-               if (Filtr.gt.0.) then
+               if (Filtr > 0.) then
                   UptakeC   = Filtr  *(kappaI*kappaA) * (1.-FF)                          ! Cuptake in (gC/ind/d)
                   NuptakeC =  NFiltr *(kappaI*kappaA) / TN                               ! Nuptake in carbon equivalents (gC/ind/d)
                   PuptakeC =  PFiltr *(kappaI*kappaA) / TP                               ! Puptake in carbon equivalents (gC/ind/d)
                   LimUptake = min(NuptakeC, PuptakeC, UptakeC)                           ! limiting uptake in carbon equivalents (gC/ind/d)
 
-c Pseudofaeces, efficiency losses, and excess nutrients are all released as Faeces
-C All uptake of silicate is lost by defecation
+! Pseudofaeces, efficiency losses, and excess nutrients are all released as Faeces
+! All uptake of silicate is lost by defecation
                   dDef  =  Filtr  - LimUptake                                            !(gC/ind/d)
                   dNDef = (NFiltr/ TN - LimUptake) * TN                                  !(gN/ind/d)
                   dPDef = (PFiltr/ TP - LimUptake) * TP                                  !(gP/ind/d)
@@ -508,15 +509,15 @@ C All uptake of silicate is lost by defecation
                   LimUptake = 0.
                endif
 
-C The remaining material is assimilated into the energy reserves
+! The remaining material is assimilated into the energy reserves
                Pa  =  LimUptake / conv_J_gC                                              !(J/ind/d)
 
-*********************************************************************
-C ENERGY RESERVE DYNAMICS per INDIVIDUAL
-*********************************************************************
-c volume specific and theoretically maximum uptake rate
-c this is the maximum rate with which energy can be obtained from the energy reserves
-c and (being a theoretical maximum) it is not dependent on the actual algae uptake Pa
+!********************************************************************
+! ENERGY RESERVE DYNAMICS per INDIVIDUAL
+!********************************************************************
+! volume specific and theoretically maximum uptake rate
+! this is the maximum rate with which energy can be obtained from the energy reserves
+! and (being a theoretical maximum) it is not dependent on the actual algae uptake Pa
                PAm_L2 = JXm_L2 * kappaA * kT
 
                E_L3 = (E/(V+tiny(V)))
@@ -526,26 +527,26 @@ c and (being a theoretical maximum) it is not dependent on the actual algae upta
                Pc = min(Pc, E/DELT)
                Pc = max(Pc, 0.)
 
-*********************************************************************
-C MAINTENANCE per INDIVIDUAL
-*********************************************************************
-C Respiration is only due to basal respiration, not to activity or stress.
-C Respiration of nutrients is related to the carbon respiration with ratios TN and TP
+!********************************************************************
+! MAINTENANCE per INDIVIDUAL
+!********************************************************************
+! Respiration is only due to basal respiration, not to activity or stress.
+! Respiration of nutrients is related to the carbon respiration with ratios TN and TP
                Pm = Pm_L3 * V * kT                                                       !(J/ind/d)
 
 
-*********************************************************************
-C GROWTH per INDIVIDUAL
-*********************************************************************
+!********************************************************************
+! GROWTH per INDIVIDUAL
+!********************************************************************
                Pg = kappa * Pc - Pm                                                      !(J/ind/d)
 
-c when growing, energy will be put in the new tissue and some will be lost due to overhead costs
-c if too little energy catabolized to pay maintenance, the organisms will shrink
-c in that case, the overhead costs are assumed to be proportional as those for growth
+! when growing, energy will be put in the new tissue and some will be lost due to overhead costs
+! if too little energy catabolized to pay maintenance, the organisms will shrink
+! in that case, the overhead costs are assumed to be proportional as those for growth
 
                kappa_G=conv_cm3_gC/(conv_J_gC*Eg_L3)
 
-               if (Pg.ge.0.) then
+               if (Pg > 0.) then
                   Pv = kappa_G*Pg                                                          !(J/ind/d)
                else
                   Pv = (1.+ (1.-kappa_G))*Pg
@@ -556,12 +557,12 @@ c in that case, the overhead costs are assumed to be proportional as those for g
                   Pm = min(Pm,(kappa*Pc + (V/DELT)*(conv_cm3_gC/conv_J_gC)))
                endif
 
-*********************************************************************
-C MATURITY and REPRODUCTION per INDIVIDUAL
-*********************************************************************
-c  ISO-morphs only produce gonads if they are larger than Vp and if GSI > G_upper
-c  V1-morphs produce gonads with a fraction related to the ratio of V and Vp
-c  some adjustments were made with respect to original equations to make sure all catabolized energy is being used
+!********************************************************************
+! MATURITY and REPRODUCTION per INDIVIDUAL
+!********************************************************************
+!  ISO-morphs only produce gonads if they are larger than Vp and if GSI > G_upper
+!  V1-morphs produce gonads with a fraction related to the ratio of V and Vp
+!  some adjustments were made with respect to original equations to make sure all catabolized energy is being used
 
                if (SwitchV1.eq.1) then
                   fjuv= Vp/(Vp+V)                                                         !juvenile fraction of the population
@@ -582,9 +583,9 @@ c  some adjustments were made with respect to original equations to make sure al
                Pja = ((1.-kappa)/(kappa+tiny(kappa)))* Pm_L3 * (Vp*fadult) * kT        !maturity maintenance adults (J/ind/d)
                Pra  = (1.-kappa) * Pc * fadult - Pja                                   !remainder goes to reproduction flux
 
-c if too little energy for juv mat maint and dev, these processes simply stop
-c but if too little energy for adult mat maint, costs are paid by R with additional overhead costs proportional to kappaR:
-               if (Pra.ge.0.) then
+! if too little energy for juv mat maint and dev, these processes simply stop
+! but if too little energy for adult mat maint, costs are paid by R with additional overhead costs proportional to kappaR:
+               if (Pra > 0.) then
                   Pr = kappaR*Pra                                                          !(J/ind/d)
                else
                   Pr = (1.+(1.-kappaR))*Pra
@@ -595,22 +596,22 @@ c but if too little energy for adult mat maint, costs are paid by R with additio
                   Pja = min(Pja,((1.-kappa)*Pc*fadult + (R/DELT)))
                endif
 
-c     if conditions are suitable, spawning will start
-               if (GSI.GT.GSI_upper) then
+!     if conditions are suitable, spawning will start
+               if (GSI > GSI_upper) then
                   DoSpawn = 1.
                endif
 
-c     spawning continues as long as conditions remain suitable
-               if (DoSpawn.gt.0) then
-                  if (( GSI > GSI_lower .AND. Temp > MinSpTemp ) .AND. R.GT.0 ) then
-c                    write(*,*) "Temp" , Temp, MinSpTemp
+!     spawning continues as long as conditions remain suitable
+               if (DoSpawn > 0) then
+                  if (( GSI > GSI_lower .AND. Temp > MinSpTemp ) .AND. R > 0 ) then
+!                    write(*,*) "Temp" , Temp, MinSpTemp
                      dSpw = (rSpawn * R + max(Pr,0.))                                    !(J/ind/d)
                      dSpw = min(dSpw,(R/DELT+min(Pr,0.)))
                   else
                      dSpw = 0.
                   endif
 
-                  if ( GSI > GSI_lower ) then
+                  if ( GSI < GSI_lower ) then
                      DoSpawn = 0.
                   endif
                else
@@ -621,9 +622,9 @@ c                    write(*,*) "Temp" , Temp, MinSpTemp
                dNSpw = dSpw * TN
                dPSpw = dSpw * TP
 
-*********************************************************************
-C RESPIRATION per INDIVIDUAL
-*********************************************************************
+!********************************************************************
+! RESPIRATION per INDIVIDUAL
+!********************************************************************
 
 !last two terms refer to overhead costs of growth and reproduction
                dRes =Pm+Pja+Pjj+Prj+(1.-kappa_G)*max(Pg,0.)+(1.-kappaR)*max(Pra,0.)      !(J/ind/d)
@@ -632,11 +633,11 @@ C RESPIRATION per INDIVIDUAL
                dPRes = dRes * TP
 
 
-*********************************************************************
-C MORTALITY
-*********************************************************************
-c Natural mortality and harvesting (only former comes back into the system as detritus)
-c These added fractions cannot be larger than one (minus the material used for maintenance, at Pv<0)
+!********************************************************************
+! MORTALITY
+!********************************************************************
+! Natural mortality and harvesting (only former comes back into the system as detritus)
+! These added fractions cannot be larger than one (minus the material used for maintenance, at Pv<0)
                rMor  = rMor_ref * (Length**cMor) *kt
                rMor  = min(rMor,(1.+(min(Pv,0.)*conv_J_gC)/(V*conv_cm3_gC)))
                rHrv  = rHrv_ref * (Length**cHrv)
@@ -646,11 +647,11 @@ c These added fractions cannot be larger than one (minus the material used for m
                dNMor = dMor * TN
                dPMor = dMor * TP
 
-*********************************************************************
-C End of Statements
-*********************************************************************
-c Fluxes in units of gX/ind/d converted to gX/m3/d for WAQ
-c
+!********************************************************************
+! End of Statements
+!********************************************************************
+! Fluxes in units of gX/ind/d converted to gX/m3/d for WAQ
+!
                FL ( 1 + IFLUX  ) = dMor*FrDetBot*Dens_m2  /DEPTH                      !mortality to detritus sediment [gC/m3/d]
                FL ( 2 + IFLUX  ) = dNMor*FrDetBot*Dens_m2 /DEPTH                      !mortality to detritus sediment [gN/m3/d]
                FL ( 3 + IFLUX  ) = dPMor*FrDetBot*Dens_m2 /DEPTH                      !mortality to detritus sediment [gP/m3/d]
@@ -675,10 +676,10 @@ c
                FL (22 + IFLUX  ) = (Pr*conv_J_gC) *Dens_m2 / DEPTH                    !growth    (Rtot [gC/m3/d])
                FL (23 + IFLUX  ) = (rMor+rHrv)* R * conv_J_gC *Dens_m2 / DEPTH        !mortality (Rtot [gC/m3/d])
                if (SwitchV1.eq.0) then                                                !if iso-morph
-c     iso-morphs only grow in V, not in density,
+!     iso-morphs only grow in V, not in density,
                   FL (24 + IFLUX  ) = 0.                                              !growth    (Dens [#/m3/d])
                else                                                                   !if V1-morph
-c     V1-morphs have a constant (individual) V, the population V only grows through increase in density
+!     V1-morphs have a constant (individual) V, the population V only grows through increase in density
                   FL (24 + IFLUX  ) =((Pv*conv_J_gC/conv_cm3_gC)/(V+tiny(V)))*Dens_m2 /Depth      !growth    (Dens [#/m3/d])
                endif
                FL (25 + IFLUX  ) = min(1.,(rMor + rHrv))*Dens_m2 /Depth               !mortality (Dens [#/m3/d])
@@ -699,7 +700,7 @@ c     V1-morphs have a constant (individual) V, the population V only grows thro
                      FL(35 + IFOOD + IFLUX) = dFil(IFOOD) * Dens_m2 /DEPTH
                enddo
 
-c Check on budgets: Nbal, Pbal and Sibal should be zero (unless material is harvested!!).
+! Check on budgets: Nbal, Pbal and Sibal should be zero (unless material is harvested!!).
                Cin   = Filtr * Dens_m2/DEPTH
                Cuit  = FL(1+IFlux)+ FL(4+IFLUX)+FL(7+IFLUX)+FL(10+IFLUX)+FL(14+IFLUX)
                Nin   = NFiltr *  Dens_m2/DEPTH
@@ -770,14 +771,13 @@ c Check on budgets: Nbal, Pbal and Sibal should be zero (unless material is harv
                PMSA(IP(368)) = Nbal           !gN/m3
                PMSA(IP(369)) = Pbal           !gP/m3
 
-            ENDIF   ! (Vtot.gt.0)
-         ENDIF      ! (IKMRK1.EQ.1)
+            ENDIF   ! (Vtot > 0)
+         ENDIF      ! (IKMRK1 == 1)
 
-C        update pointering in PMSA and FL array
+!        update pointering in PMSA and FL array
  8900    CONTINUE
          IFLUX = IFLUX + NOFLUX
          IP    = IP    + INCREM(1:NO_POINTER)
-         INIT  = .false.
 
  9000 CONTINUE
 
