@@ -37,8 +37,8 @@ module m_ec_item
    use m_ec_message
    use m_ec_support
    use m_ec_alloc
-   use m_ec_converter
    use m_ec_filereader
+   use m_ec_converter
    
    implicit none
    
@@ -173,6 +173,7 @@ module m_ec_item
          !
          success = .false.
          !
+         write(666,'(a,i5,a,f18.10,a,f18.10,a,f18.10,a)')  'GetValues   , ',itemId,', ',timesteps
          ! Find the Item.
          do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
             itemPtr => instancePtr%ecItemsPtr(i)%ptr
@@ -300,23 +301,61 @@ module m_ec_item
          !
          integer :: i, j !< loop variables
          character(len=1000)              :: message
+         type(tEcConnection), pointer     :: connection => null()
+         type(tEcConverter), pointer      :: converter => null()
+         integer                          :: ntimes
          !
          success = .true.
          !
+         write(666,'(a,i5,a,f18.10,a,f18.10,a,f18.10,a)') 'UpdateTarget, ',item%id,', ',timesteps,', ',item%targetFieldPtr%timesteps
+
          ! update the source Items
          do i=1, item%nConnections
+            connection => item%connectionsPtr(i)%ptr
+            converter => connection%converterPtr
             do j=1, item%connectionsPtr(i)%ptr%nSourceItems
+               !if (j==1) check if the converter already has a complete timeseries
+               !if so, update the (j=1)st item from the timeseries table in the converter, and cycle this item
+               !   
+               if (j==1 .and. converter%interpolationType == interpolate_time_periodic) then
+                  if (converter%timeseries%finalized) then
+                     ! ... update the item from the stored values ??
+                     cycle
+                  end if
+               end if
                if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
                           item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
-                  !
+                  ! If updating source item failed .....
                   ! No interpolation in time possible.
                   ! Check whether extrapolation is allowed
-                  if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
-                     write(message,'(a,i5.5)') "Updating source failed, quantity='"//trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%QUANTITYPTR%NAME)   &
-                              &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
-                     call setECMessage(trim(message))
-                     success = .false.
-                     return
+
+                  if (j==1 .and. converter%interpolationType == interpolate_time_periodic) then
+                     ! determine time span for the converter's timeseries (t0, t1)
+                     converter%timeseries%tmin = converter%timeseries%times(0)
+                     converter%timeseries%tmax = converter%timeseries%times(ntimes)
+                     ! realloc arrays in timeseries 
+                     ! set finalized in timeseries to TRUE !!!
+                     cycle
+                  end if
+                  if (converter%interpolationType == interpolate_time_extrapolation_ok) then
+                     cycle
+                  end if
+                  
+                  write(message,'(a,i5.5)') "Updating source failed, quantity='"//trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%QUANTITYPTR%NAME)   &
+                           &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
+                  call setECMessage(trim(message))
+                  success = .false.
+                  return
+               else  ! if updating source item succeeded ..... 
+                  if (i == 1) then
+                     if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType == interpolate_time_periodic) then
+                        if (item%connectionsPtr(i)%ptr%converterPtr%ofType == convType_uniform) then 
+                           if (.not.ecConverterItemToTimeseries(item%connectionsPtr(i)%ptr,i)) then  
+                              success = .false.
+                              return
+                           end if
+                        end if
+                     end if
                   end if
                end if
             end do
@@ -372,6 +411,7 @@ module m_ec_item
             success = .true.
             return
          end if
+         write(666,'(a,i5,a,f18.10,a,f18.10,a,f18.10,a)') 'UpdateSource, ',item%id,', ',timesteps,', ',item%sourceT0FieldPtr%timesteps,', ',item%sourceT1FieldPtr%timesteps 
          !
          if (item%accessType==accessType_fileReader) then 
             ! Find the FileReader which can update this source Item.
@@ -384,7 +424,6 @@ module m_ec_item
                end do
             end do frs
          endif 
-         !
          
          ! timesteps < t0 : not supported 
          if (comparereal(timesteps, item%sourceT0FieldPtr%timesteps) == -1) then
@@ -399,7 +438,16 @@ module m_ec_item
             else
                success = .true.
             endif
-         ! t0<=timesteps<=t1 : no update required
+            !do ! read previous record untill t0<=timesteps<=t1
+            !   if (ecFileReaderReadPreviousRecord(fileReaderPtr, timesteps)) then
+            !      if (comparereal(item%sourceT0FieldPtr%timesteps, timesteps) /= +1) then
+            !         success = .true.
+            !         exit
+            !      end if
+            !   else
+            !      exit
+            !   end if
+            !end do
          else if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
             success = .true.
          ! timesteps > t1: update untill t0<=timesteps<=t1

@@ -99,6 +99,7 @@ module m_ec_typedefs
         integer                                    ::  func                
         integer                                    ::  timecolumn          !< Number of the column holding the time strings, compul
         character(len=50)                          ::  timeunit            !< netcdf-convention time unit definition 
+        logical                                    ::  periodic = .False.  !< should a timeseries be rewinded beyond the last entry ? 
         integer                                    ::  timeint             !< Type of time interpolation 
         integer                                    ::  vptyp               !< Type of specification of vertical position
         real(hp), allocatable                      ::  vp(:)               !< vertical positions  
@@ -184,6 +185,20 @@ module m_ec_typedefs
       integer, allocatable          :: msk(:)                !< Array of mask values (TODO: should this be 2d?) 
    end type tEcMask
    
+   !===========================================================================
+   
+   !> Datatype containing a timeseries obtained from a uniform item and stored in here, supporting 'rewinding' of the timeries
+   type tEcTimeseries
+      integer                                 :: id
+      integer                                 :: ntimes = 0
+      logical                                 :: finalized = .False.!< no further updates for this timeseries; start from beginning
+      real(hp)                                :: tmin, tmax         !< time span of this series  
+      real(hp), dimension(:),     allocatable :: times              !< 1-dim times array 
+      real(hp), dimension(:,:),   allocatable :: values             !< 1-dim values array 
+   end type tEcTimeseries
+
+   !===========================================================================
+
    !> 
    type tEcConverter
       integer                       :: id                    !< unique Converter number, set by ecInstanceCreateConverter
@@ -193,6 +208,7 @@ module m_ec_typedefs
       integer                       :: targetIndex           !< Write to the target Item's Field's array element number targetIndex (vectormax (here called n_data) should already be accounted for, that offset is *not* recomputed in the converter).
       type(tEcIndexWeight), pointer :: indexWeight => null() !< 
       type(tEcMask)                 :: srcmask               !< Array with mask info on selection of gridpoints
+      type(tEcTimeseries), allocatable :: timeseries         !< Information supporting rewinding of a read timeseries 
    end type tEcConverter
    
    type tEcConverterPtr
@@ -312,6 +328,7 @@ module m_ec_typedefs
       character(len=maxNameLen) :: units                    !< physical units of the quantity
       integer                   :: vectorMax = 1            !< number of dimensions (vector data) or 1 in case of scalar
       integer                   :: zInterpolationType       !< Vertical interpolation type ! TODO: Add initialization in the constructor. (4748)
+      integer                   :: timeint = BC_TIMEINT_LIN !< Temporal interpolation type, default is linear
    end type tEcQuantity
    
    type tEcQuantityPtr

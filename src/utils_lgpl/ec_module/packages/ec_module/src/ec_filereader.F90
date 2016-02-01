@@ -174,6 +174,24 @@ module m_ec_filereader
       
       ! =======================================================================
       
+      !> Revert all Items which belong to this FileReader.
+      function ecFileReaderReadPreviousRecord(fileReaderPtr, timesteps) result(success)
+         use m_ec_filereader_read
+         use m_ec_support
+         !
+         ! return value
+         logical                      :: success    !< function status
+         !
+         ! parameters
+         type(tEcFileReader), pointer :: fileReaderPtr !< FileReader which must update
+         real(hp), intent(in)         :: timesteps     !< Time steps for nodal factors.
+         type(tEcField), pointer :: fieldPtrA     !< helper for pointer flipping
+         type(tEcField), pointer :: fieldPtrB     !< helper for pointer flipping
+         real(hp)                :: time_steps    !< time steps of read data block
+      end function ecFileReaderReadPreviousRecord
+
+      ! =======================================================================
+      
       !> Update all Items which belong to this FileReader.
       function ecFileReaderReadNextRecord(fileReaderPtr, timesteps) result(success)
          use m_ec_filereader_read
