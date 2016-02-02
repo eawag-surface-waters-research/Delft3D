@@ -47,7 +47,6 @@ module m_ec_quantity
    public :: ecQuantitySetName
    public :: ecQuantitySetUnits
    public :: ecQuantitySetVectorMax
-   public :: ecQuantitySetTimeint
    
    contains
       
@@ -175,28 +174,6 @@ module m_ec_quantity
          end if
       end function ecQuantitySetName
 
-      ! =======================================================================
-      
-      !> Change the timeinterpolation type of the Quantity corresponding to quantityId.
-      function ecQuantitySetTimeint(instancePtr, quantityId, timeint) result(success)
-         logical                               :: success     !< function status
-         type(tEcInstance), pointer            :: instancePtr !< intent(in)
-         integer,                   intent(in) :: quantityId  !< unique Quantity id
-         integer,                   intent(in) :: timeint     !< new vectormax of the Quantity
-         !
-         type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
-         !
-         success = .false.
-         quantityPtr => null()
-         !
-         quantityPtr => ecSupportFindQuantity(instancePtr, quantityId)
-         if (associated(quantityPtr)) then
-            quantityPtr%timeint = timeint
-            success = .true.
-         else
-            call setECMessage("ERROR: ec_quantity::ecQuantitySetTimeint: Cannot find a Quantity with the supplied id.")
-         end if
-      end function ecQuantitySetTimeint
       ! =======================================================================
       
       !> Change the vectormax of the Quantity corresponding to quantityId.

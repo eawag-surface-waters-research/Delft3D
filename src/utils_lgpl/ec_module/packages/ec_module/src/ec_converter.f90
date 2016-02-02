@@ -39,7 +39,6 @@ module m_ec_converter
    use m_ec_alloc
    use m_ec_magic_number
    use m_ec_parameters
-   use m_alloc
 
    implicit none
    
@@ -54,9 +53,6 @@ module m_ec_converter
    public :: ecConverterSetElement
    public :: ecConverterSetInterpolation
    public :: ecConverterSetMask
-   public :: ecConverterItemToTimeseries
-   public :: ecConverterFromTimeseries
-   public :: ecConverterFinalizeTimeseries
    
    contains
       
@@ -104,18 +100,6 @@ module m_ec_converter
             end if
             if (associated(converter%indexWeight%weightFactors)) then
                deallocate(converter%indexWeight%weightFactors, stat = istat)
-               if (istat /= 0) success = .false.
-            end if
-            if (allocated(converter%timeseries)) then
-               if (allocated(converter%timeseries%times)) then
-                   deallocate(converter%timeseries%times, stat = istat)
-                   if (istat /= 0) success = .false.
-               end if
-               if (allocated(converter%timeseries%values)) then
-                   deallocate(converter%timeseries%values, stat = istat)
-                   if (istat /= 0) success = .false.
-               end if
-               deallocate(converter%timeseries, stat = istat)
                if (istat /= 0) success = .false.
             end if
             deallocate(converter%indexWeight, stat = istat)
@@ -245,9 +229,6 @@ module m_ec_converter
          converterPtr => ecSupportFindConverter(instancePtr, converterId)
          if (associated(converterPtr)) then
             converterPtr%interpolationType = interpolationType
-            if (interpolationType == interpolate_time_periodic) then
-               allocate (converterPtr%timeseries)
-            end if
             success = .true.
          else
             call setECMessage("ERROR: ec_converter::ecConverterSetInterpolation: Cannot find a Converter with the supplied id.")
@@ -754,155 +735,10 @@ module m_ec_converter
             endif
          endif
          if (present(extrapolated)) extrapolated = l_extrapolated
-   end subroutine time_weight_factors
+      end subroutine time_weight_factors
       
       ! =======================================================================
-      !> Append the field1%timesteps and field1%arr1d value(s) of the FIRST item of the connection to an array of stored values within the converter.
-      !> This serves future reuse of these values.
-      function ecConverterToTimeseries(connection,timestep,values) result (success)
-         implicit none
-         logical                            :: success    !< function status
-         type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
-         real(hp)                           :: timestep   !< source item t0 and t1
-         real(hp), dimension(:), pointer    :: values     !< values at time t0
 
-         type(tEcConverter), pointer        :: cnvrt => null()
-         integer, parameter                 :: array_increment = 100
-         integer                            :: vectormax, newsize
-         type(tEcTimeseries), pointer       :: tseries
-
-         success = .false.
-         vectormax = size(values)
-         if (.not.associated(connection%converterPtr)) then
-            return
-         end if
-         cnvrt => connection%converterPtr
-         if (.not.allocated(cnvrt%timeseries))  then
-            allocate(cnvrt%timeseries)
-         end if
-         tseries => cnvrt%timeseries
-         tseries%ntimes = tseries%ntimes + 1 
-         if (tseries%ntimes == 1) then         
-            allocate (tseries%times(array_increment))
-            allocate (tseries%values(vectormax,array_increment))
-         end if
-
-         if (size(tseries%times) < tseries%ntimes) then
-            newsize = size(tseries%times) + array_increment
-            call realloc(tseries%times,newsize)
-            call realloc(tseries%values,vectormax,newsize) 
-         end if
-         tseries%times(tseries%ntimes) = timestep
-         tseries%values(1:vectormax,tseries%ntimes) = values(1:vectormax) 
-         success = .true.
-      end function ecConverterToTimeseries
-
-      ! =======================================================================
-      !> Append the field1%timesteps and field1%arr1d value(s) of the FIRST item of the connection to an array of stored values within the converter.
-      !> This serves future reuse of these values.
-      function ecConverterItemToTimeseries(connection,itemnr) result (success)
-         implicit none
-         logical                             :: success    !< function status
-         type(tEcConnection), intent(inout)  :: connection !< access to Converter and Items
-         integer, intent(in)                 :: itemnr    
-         real(hp)                            :: t0, t1        !< source item t0 and t1
-         real(hp), dimension(:), pointer     :: valuesT0      !< values at time t0
-         real(hp), dimension(:), pointer     :: valuesT1      !< values at time t1
-         type(tEcConverter), pointer         :: cnvrt => null()
-         type(tEcItem), pointer              :: item
-         integer, parameter                  :: array_increment = 100
-         integer                             :: vectormax, newsize
-         type(tEcTimeseries), pointer        :: tseries
-
-         success = .false.
-         item => connection%sourceItemsPtr(itemnr)%ptr
-         t0 = item%sourceT0FieldPtr%timesteps
-         t1 = item%sourceT1FieldPtr%timesteps
-         valuesT0 => item%sourceT0FieldPtr%arr1dPtr
-         valuesT1 => item%sourceT1FieldPtr%arr1dPtr
-         tseries => connection%converterPtr%timeseries
-         vectormax = size(valuesT0)
-
-         if (tseries%ntimes < 1) then         
-            if (.not.ecConverterToTimeseries(connection,t0,valuesT0)) then
-               return
-            end if
-         end if
-
-         if (.not.ecConverterToTimeseries(connection,t1,valuesT1)) then
-            return
-         end if
-         success = .true.
-      end function ecConverterItemToTimeseries
-
-      ! =======================================================================
-      !> Stop recording a converters timeseries
-      function ecConverterFinalizeTimeseries(connection) result (success)
-         implicit none
-         logical                            :: success    !< function status
-         type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
-         real(hp)                            :: t0, t1        !< source item t0 and t1
-         type(tEcConverter), pointer         :: cnvrt => null()
-         integer, parameter                  :: array_increment = 100
-         integer                             :: vectormax, ntimes
-
-         success = .false.
-         cnvrt => connection%converterPtr
-         ntimes = cnvrt%timeseries%ntimes
-         cnvrt%timeseries%tmin = cnvrt%timeseries%times(0)
-         cnvrt%timeseries%tmax = cnvrt%timeseries%times(ntimes)
-         vectormax = size(cnvrt%timeseries%values,dim=1)
-         call realloc(cnvrt%timeseries%times,ntimes,0)
-         call realloc(cnvrt%timeseries%values,vectormax,ntimes,1,0) 
-         cnvrt%timeseries%finalized = .true.
-         success = .true.
-      end function ecConverterFinalizeTimeseries
-
-      ! =======================================================================
-      !> Update the first source item in a periodical sence with values from a stored timeseries
-      function ecConverterFromTimeseries(connection,itemnr,timesteps) result (success)
-         implicit none
-         logical                            :: success    !< function status
-         type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
-         integer, intent(in)                :: itemnr    
-         real(hp),            intent(in)    :: timesteps  !< convert to this number of timesteps past the kernel's reference date
-         real(hp)                           :: tmin, tmax        !< source item t0 and t1
-         real(hp), dimension(:), pointer    :: valuesT0      !< values at time t0
-         real(hp), dimension(:), pointer    :: valuesT1      !< values at time t1
-         type(tEcConverter), pointer        :: cnvrt => null()
-         type(tEcItem), pointer             :: item
-         integer, parameter                 :: array_increment = 100
-         integer                            :: vectormax, newsize
-         type(tEcTimeseries), pointer       :: tseries
-         real(hp)                           :: tmod
-         integer                            :: it
-
-         success = .false.
-         cnvrt => connection%converterPtr
-         tseries => cnvrt%timeseries
-         tmin = tseries%tmin
-         tmax = tseries%tmax
-         tmod = mod(mod(timesteps-tmin,tmax-tmin)+(tmax-tmin),tmax-tmin)    ! time between (t0-t1) and (t1-t0)
-         if (tmod<0.d0) then 
-            tmod = mod(tmod+(tmax-tmin),tmax-tmin)                          ! time between 0 and t1-t0
-         end if
-         do it = 1,tseries%ntimes - 1
-            if (tseries%times(it)-tmin>tmod) exit
-         end do                                                             ! index of the first time in the series exceeding requested time 
-
-         ! Restore times and values in the T0 and T1 fields of the first item
-         item => connection%sourceItemsPtr(itemnr)%ptr
-         item%sourceT0FieldPtr%timesteps = tseries%times(it-1)
-         item%sourceT1FieldPtr%timesteps = tseries%times(it)
-         valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
-         valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr
-         valuesT0(1:vectormax) = tseries%values(1:vectormax,it-1)
-         valuesT1(1:vectormax) = tseries%values(1:vectormax,it)
-
-         success = .true.
-      end function ecConverterFromTimeseries
-
-      ! =======================================================================
       !> Perform the configured conversion, if supported, for a uniform FileReader.
       !! Supports linear interpolation in time, no interpolation in space and no weights.
       !! Supports overwriting and adding-to the entire target Field array, as well all as overwriting only one array element.
@@ -930,19 +766,10 @@ module m_ec_converter
          targetField => null()
          !
          ! ===== interpolation =====
-         select case(connection%sourceItemsPtr(1)%ptr%quantityptr%timeint)
-         case (BC_TIMEINT_LIN, BC_TIMEINT_LIN_EXTRAPOL)   
-            ! linear interpolation in time
-            t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
-            t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
-            call time_weight_factors(a0, a1, timesteps, t0, t1)
-         case (BC_TIMEINT_BTO)   
-            a0 = 0.0d0
-            a1 = 1.0d0
-         case (BC_TIMEINT_BFROM)   
-            a0 = 1.0d0
-            a1 = 0.0d0
-         end select
+         ! linear interpolation in time
+         t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
+         t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
+         call time_weight_factors(a0, a1, timesteps, t0, t1)
          !
          valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
          valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr
@@ -2502,5 +2329,4 @@ module m_ec_converter
             dbdistance = sqrt(rr)
          endif
       end function dbdistance
-   
 end module m_ec_converter

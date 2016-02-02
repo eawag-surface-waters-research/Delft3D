@@ -109,13 +109,12 @@ module m_ec_parameters
    integer, parameter :: interpolate_space                      = 5 !< interpolate in space
    integer, parameter :: interpolate_spacetimeSaveWeightFactors = 6 !< interpolate in space, save the space weight factors, then interpolate in time
    integer, parameter :: interpolate_time_extrapolation_ok      = 7 !< interpolate in time
-   integer, parameter :: interpolate_time_periodic              = 8 !< interpolate in time
-   integer, parameter :: interpolate_triangle                   = 9 !< interpolate in space by Delauney triangulation and linear interpolation.
-   integer, parameter :: interpolate_averaging                  = 10  !< Not yet supported: only spatial, averaging
-   integer, parameter :: interpolate_triangleindex              = 11 !< Not yet supported: only spatial, index triangulation
-   integer, parameter :: interpolate_smoothing                  = 12 !< Not yet supported: only spatial, smoothing
-   integer, parameter :: interpolate_intdiffusion               = 13 !< Not yet supported: only spatial, internal diffusion
-   integer, parameter :: interpolate_vertprofile                = 14 !< Not yet supported: only initial vertical profiles
+   integer, parameter :: interpolate_triangle                   = 8 !< interpolate in space by Delauney triangulation and linear interpolation.
+   integer, parameter :: interpolate_averaging                  = 9  !< Not yet supported: only spatial, averaging
+   integer, parameter :: interpolate_triangleindex              = 10 !< Not yet supported: only spatial, index triangulation
+   integer, parameter :: interpolate_smoothing                  = 11 !< Not yet supported: only spatial, smoothing
+   integer, parameter :: interpolate_intdiffusion               = 12 !< Not yet supported: only spatial, internal diffusion
+   integer, parameter :: interpolate_vertprofile                = 13 !< Not yet supported: only initial vertical profiles
 
    ! enumeration for vertical interpolation types
    integer, parameter :: zinterpolate_unknown                   = 0 !< type is uninitialized
@@ -176,7 +175,6 @@ module m_ec_parameters
     integer, parameter :: BC_FUNC_CONSTANT     = 9   !< timeseries with one constant value
 
     ! Time interpolation type 
-    integer, parameter :: BC_TIMEINT_UNKNOWN       = 0   !< type is uninitialized
     integer, parameter :: BC_TIMEINT_LIN           = 1   !< linear
     integer, parameter :: BC_TIMEINT_BTO           = 2   !< block-to 
     integer, parameter :: BC_TIMEINT_BFROM         = 3   !< block-from 

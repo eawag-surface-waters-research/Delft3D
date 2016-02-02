@@ -419,17 +419,6 @@ contains
              bc%timeint = BC_TIMEINT_BTO
           case ('BLOCK-FROM')
              bc%timeint = BC_TIMEINT_BFROM
-          case default
-             call setECMessage("Unknown time interpolation '"//trim(adjustl(hdrvals(ifld)))//           &
-                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
-             return
-          end select
-       case ('PERIODIC')
-          select case (trim(adjustl(hdrvals(ifld))))
-          case ('TRUE','T','.T.','1','JA','YES')
-             bc%periodic = .True.
-          case default
-             bc%periodic = .False.
           end select
        case ('VERTICAL INTERPOLATION')
           select case (trim(adjustl(hdrvals(ifld))))
@@ -441,9 +430,6 @@ contains
              bc%zInterpolationType = zinterpolate_block
           case default
              bc%zInterpolationType = zinterpolate_unknown
-             call setECMessage("Unknown vertical interpolation '"//trim(adjustl(hdrvals(ifld)))//           &
-                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
-             return
           end select
        case ('VERTICAL POSITION TYPE')
           IF (index(hdrvals(ifld),'PERCEN')+index(hdrvals(ifld),'BED')>0) then
@@ -462,10 +448,6 @@ contains
              bc%vptyp = BC_VPTYP_ZBED
           case ('ZSURF')
              bc%vptyp = BC_VPTYP_ZSURF
-          case default
-             call setECMessage("Unknown vertical position type '"//trim(adjustl(hdrvals(ifld)))//           &
-                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
-             return
           end select
        end select
     enddo

@@ -773,14 +773,8 @@ module m_ec_provider
                if (index(elementSetName,'.')>0) then
                   elementSetName = elementSetName(1:index(elementSetName,'.'))
                end if 
-               if (.not. ecQuantitySetTimeint(instancePtr, quantityId, BC_TIMEINT_LIN)) then ! trim(fileReaderPtr%bc%qname))) then
-                  return
-               end if
             case (provFile_bc)
                if (.not. ecQuantitySetName(instancePtr, quantityId, fileReaderPtr%bc%quantity%name)) then ! trim(fileReaderPtr%bc%qname))) then
-                  return
-               end if
-               if (.not. ecQuantitySetTimeint(instancePtr, quantityId, fileReaderPtr%bc%timeint)) then ! trim(fileReaderPtr%bc%qname))) then
                   return
                end if
                elementSetName = fileReaderPtr%bc%bcname
@@ -1187,7 +1181,6 @@ module m_ec_provider
          integer                             :: itemId        !< id of new Item
          integer                             :: layer_type    !< type of layer
          integer                             :: zInterpolationType    !< vertical interpolation type
-         integer                             :: timeint       !< time interpolation type
          type(tEcItem), pointer              :: valueptr      !< Item containing z/sigma-dependent values
          type(tEcBCBlock), pointer           :: bcptr
          character(len=132)                  :: rec           !< a read line
@@ -1204,12 +1197,12 @@ module m_ec_provider
          real(hp)                            :: zws_tmp
          integer                             :: vectormax, iostat
              
+            
          !
          success = .false.
          valueptr => null()
          vectormax = 1                    ! assumed scalar if vector dimensions not made explicit                      
          zInterpolationType = zinterpolate_unknown
-         timeint = BC_TIMEINT_LIN
 	      select case (fileReaderPtr%ofType)
          case (provFile_t3D)
             zInterpolationType = zinterpolate_linear
@@ -1289,8 +1282,7 @@ module m_ec_provider
                  call setECMessage("Invalid or missing vertical position type.")
 		           return
               end select 
-            zInterpolationType = bcptr%zInterpolationType
-            timeint = bcptr%timeint
+              zInterpolationType = bcptr%zInterpolationType
 	     !   Defined types (yet to be implemented):
 	     !   integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed 
 	     !   integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum 
@@ -1366,7 +1358,6 @@ module m_ec_provider
          end select
          !Assign vertical interpolation type        
          valueptr%quantityPtr%zInterpolationType = zInterpolationType
-         valueptr%quantityPtr%timeint = timeint
          ! Add successfully created source Items to the FileReader
          if (.not.ecFileReaderAddItem(instancePtr, fileReaderPtr%id, valueptr%id)) return 
          success = .true.
@@ -2274,14 +2265,7 @@ module m_ec_provider
           ! Initialize the new Converter.
           if (.not. (ecConverterSetType(instancePtr, converterId, convType_uniform))) return
           if (.not. (ecConverterSetOperand(instancePtr, converterId, operand_replace_element))) return
-          
-          ! --------------------------------- RL666: mogelijk set periodieke tijd interpolatie ------------
-          ! geval : extrapolatie
           if (.not. (ecConverterSetInterpolation(instancePtr, converterId, interpolate_time_extrapolation_ok))) return
-          ! geval : periodiek 
-          if (.not. (ecConverterSetInterpolation(instancePtr, converterId, interpolate_time_periodic))) return
-          ! --------------------------------- RL666: mogelijk set periodieke tijd interpolatie ------------
-          
           if (.not. (ecConverterSetElement(instancePtr, converterId, targetIndex))) return
 
           ! Construct a new Connection.

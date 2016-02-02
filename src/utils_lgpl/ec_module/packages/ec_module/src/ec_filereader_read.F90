@@ -725,7 +725,6 @@ contains
                netcdf_timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, i)
                ! field timesteps < NetCDf timesteps => read this block
                if (comparereal(fieldPtr%timesteps, netcdf_timesteps) == -1) then
-!              if (cmprd(fieldPtr%timesteps, netcdf_timesteps, 2) == -1) then ! RL666  ::: Replace the line above by this line 
                   times_index = i
                   exit
                end if
