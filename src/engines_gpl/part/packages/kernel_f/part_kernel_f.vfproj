@@ -57,7 +57,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\densty.f90"/>
 		<File RelativePath=".\src\diffus.f90"/>
-		<File RelativePath=".\src\dlmain.f90"/>
 		<File RelativePath=".\src\extout.f90"/>
 		<File RelativePath=".\src\inipart.f90"/>
 		<File RelativePath=".\src\inipart_asc.f90"/>

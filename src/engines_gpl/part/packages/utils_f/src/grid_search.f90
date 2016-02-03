@@ -42,8 +42,6 @@ use timers
 !
 !  module procedure(s)
 !
-use stop_exit_mod           ! explicit interface
-!
 implicit none               ! force explicit typing
 !
 contains

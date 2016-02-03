@@ -491,7 +491,7 @@ contains
 !       time-step not written ??  : error
 !
         write (lun2, 99006)
-        call srstop(1)
+        call stop_exit(1)
       endif
 !
 !     end of subroutine

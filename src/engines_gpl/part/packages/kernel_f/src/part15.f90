@@ -89,7 +89,7 @@
          if ( .not. yes1 .or. .not. yes2 ) then
             write ( lunpr, * ) " Error in meteomodule at time:", itime
             write (   *  , * ) " Error in meteomodule at time:", itime
-            call srstop(1)
+            call stop_exit(1)
          endif
          do id = 1, noseg
             avelo = wvelo(id)*wvelo(id) + wdir(id)*wdir(id)

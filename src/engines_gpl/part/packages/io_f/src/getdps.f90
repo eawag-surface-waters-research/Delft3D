@@ -77,7 +77,7 @@
          read (lundp) idum,idum,nmnw,nmnw,nmnw,idum
          if ( nmnw .ne. nosegl ) then
             write ( lunpr, * ) 'ERROR, dimension in dps file does not match!',nmnw,nosegl
-            call srstop(1)
+            call stop_exit(1)
          endif
          allocate ( depwrk(nosegl) )
          read (lundp, iostat = iocond) depwrk
@@ -93,5 +93,5 @@
   100 write (lunpr, *) 'Error 4407. Reading the depth file :', lnam(:len_trim(lnam))
       write (lunpr, *) '            (file maybe missing ??)      '
       write (*,  *)   'Error 4407. Reading the depth file :', lnam(:len_trim(lnam))
-      call srstop(1)
+      call stop_exit(1)
       end subroutine

@@ -23,8 +23,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libutils_f_la_SOURCES = \
-         srstop.f \
-         wait.f90 \
          stop_exit.f90 \
          write_version.f90 \
          normal_mod.f90 \

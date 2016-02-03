@@ -24,10 +24,7 @@ libdata_f_la_SOURCES = \
          file_info.f90 \
          modeldim.f90 \
          partmem.f90 \
-         global_data.f90 \
          alloc.f90 \
-         dealloc.f90 \
-         dealloc_part.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

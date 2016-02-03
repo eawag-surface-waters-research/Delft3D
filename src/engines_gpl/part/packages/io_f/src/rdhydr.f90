@@ -65,7 +65,7 @@ module rdhydr_mod
 !     logical unit numbers  : lun    - array with lu-numbers
 !
 !
-!     subroutines called    : srstop
+!     subroutines called    : stop_exit
 !                             dlwqtd.
 !                             dlwqbl.
 !
@@ -307,23 +307,23 @@ module rdhydr_mod
 !     exit with formats
 !
   120 write (lunut, *) ' Error 4403. Reading the volume file:', fname(6)
-      call srstop(1)
+      call stop_exit(1)
   130 write (lunut, *) ' Error 4404. Reading the volume file:', fname(6)
-      call srstop(1)
+      call stop_exit(1)
   140 write (lunut, *) 'Error 4405. Reading the flow file  :', fname(7)(:12)
-      call srstop(1)
+      call stop_exit(1)
   150 write (lunut, *) 'Error 4406. Reading the flow file  :', fname(7)(:12)
-      call srstop(1)
+      call stop_exit(1)
   160 write (lunut, *) ' Error 4409. Time steps do not match!'
       write (lunut, *) '             Time step in volume file:', idelt1
       write (lunut, *) '             Time step in flow   file:', idelt
       write (lunut, *) '             Time step in depth  file:', idelt
-      call srstop(1)
+      call stop_exit(1)
   170 write (lunut, *) ' Error 4410. Times in files do not match!'
       write (lunut, *) '             Volumes:',itimv1,' flows:',itimf1
-      call srstop(1)
+      call stop_exit(1)
   180 write (lunut, *) ' Error 4411. Files have not both been updated  '
       write (lunut, *) ' Volumes-update:',updatv,' flows-update:',updatf
-      call srstop(1)
+      call stop_exit(1)
       end subroutine
 end module

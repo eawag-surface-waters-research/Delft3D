@@ -34,7 +34,6 @@ use precision_part               ! single/double precision
 !
 use openfl_mod              ! explicit interface
 use grid_search_mod         ! explicit interface
-use stop_exit_mod           ! explicit interface
 !
 implicit none               ! force explicit typing
 !

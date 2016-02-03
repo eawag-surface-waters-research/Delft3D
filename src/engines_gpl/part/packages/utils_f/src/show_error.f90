@@ -43,7 +43,7 @@
 
       write( lunit(2), 1000 ) mess
 
-      call srstop(1)
+      call stop_exit(1)
 
  1000 format(' Error detected: ',/,a,//)
       return

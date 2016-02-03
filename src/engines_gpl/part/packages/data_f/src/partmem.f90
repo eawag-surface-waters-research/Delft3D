@@ -314,3 +314,29 @@ module partmem
       real          (sp       ) ,  pointer, dimension(:,:     ) :: flres
 
 end module partmem
+
+module spec_feat_par
+
+      !     special feature parameters
+
+      use precision_part      ! single and double precision
+
+!     vertical bounce
+      logical                                                   :: vertical_bounce
+
+!     restart files
+      logical                                                   :: write_restart_file
+      integer  (ip)                                             :: max_restart_age
+
+!     plastics parameters
+      integer   (sp)            ,  pointer, dimension(:       ) :: plparset
+      real      (sp)            ,  pointer, dimension(:       ) :: pldensity
+      real      (sp)            ,  pointer, dimension(:       ) :: plshapefactor
+      real      (sp)            ,  pointer, dimension(:       ) :: plmeansize
+      real      (sp)            ,  pointer, dimension(:       ) :: plvarsize
+      real      (sp)            ,  pointer, dimension(:       ) :: plmusize
+      real      (sp)            ,  pointer, dimension(:       ) :: plsigmasize
+      real      (sp)            ,  pointer, dimension(:       ) :: plfragrate
+      logical                                                   :: pldebug
+      
+end module spec_feat_par

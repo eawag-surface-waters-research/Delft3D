@@ -606,7 +606,7 @@ contains
                    write(lun2,*) ' i1, ilay '
                    write(lun2,*) i1, ilay
                    write(lun2,*) 'Error: ilay out of range in PART13'
-                   call srstop(1)
+                   call stop_exit(1)
                 endif
 !
                 if (modtyp==2) then

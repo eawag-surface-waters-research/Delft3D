@@ -1284,10 +1284,7 @@ src/engines_gpl/part/packages/data_f/Makefile.am -text
 src/engines_gpl/part/packages/data_f/part_data_f.vfproj -text
 src/engines_gpl/part/packages/data_f/src/Makefile.am -text
 src/engines_gpl/part/packages/data_f/src/alloc.f90 -text
-src/engines_gpl/part/packages/data_f/src/dealloc.f90 -text
-src/engines_gpl/part/packages/data_f/src/dealloc_part.f90 -text
 src/engines_gpl/part/packages/data_f/src/file_info.f90 -text
-src/engines_gpl/part/packages/data_f/src/global_data.f90 -text
 src/engines_gpl/part/packages/data_f/src/modeldim.f90 -text
 src/engines_gpl/part/packages/data_f/src/partmem.f90 -text
 src/engines_gpl/part/packages/data_f/src/precision.f90 -text
@@ -1299,7 +1296,6 @@ src/engines_gpl/part/packages/delpar/src/main.f -text
 src/engines_gpl/part/packages/io_f/Makefile.am -text
 src/engines_gpl/part/packages/io_f/part_io_f.vfproj -text
 src/engines_gpl/part/packages/io_f/src/Makefile.am -text
-src/engines_gpl/part/packages/io_f/src/close_all_files.f90 -text
 src/engines_gpl/part/packages/io_f/src/dd_prepare.f90 -text
 src/engines_gpl/part/packages/io_f/src/delete_file.f90 -text
 src/engines_gpl/part/packages/io_f/src/dlpr12.f90 -text
@@ -1334,12 +1330,9 @@ src/engines_gpl/part/packages/io_f/src/wrttrk.f90 -text
 src/engines_gpl/part/packages/kernel_f/Makefile.am -text
 src/engines_gpl/part/packages/kernel_f/part_kernel_f.vfproj -text
 src/engines_gpl/part/packages/kernel_f/src/Makefile.am -text
-src/engines_gpl/part/packages/kernel_f/src/avundf_linux.f90 -text
-src/engines_gpl/part/packages/kernel_f/src/avundf_win32.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/delpar.F90 -text
 src/engines_gpl/part/packages/kernel_f/src/densty.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/diffus.f90 -text
-src/engines_gpl/part/packages/kernel_f/src/dlmain.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/extout.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/inipart.f90 -text
 src/engines_gpl/part/packages/kernel_f/src/inipart_asc.f90 -text
@@ -1383,10 +1376,8 @@ src/engines_gpl/part/packages/utils_f/src/polpart.f90 -text
 src/engines_gpl/part/packages/utils_f/src/random_gen.f90 -text
 src/engines_gpl/part/packages/utils_f/src/show_error.f90 -text
 src/engines_gpl/part/packages/utils_f/src/skip_comments.f90 -text
-src/engines_gpl/part/packages/utils_f/src/srstop.f -text
 src/engines_gpl/part/packages/utils_f/src/stop_exit.f90 -text
 src/engines_gpl/part/packages/utils_f/src/strip_inputfile.f90 -text
-src/engines_gpl/part/packages/utils_f/src/wait.f90 -text
 src/engines_gpl/part/packages/utils_f/src/write_version.f90 -text
 src/engines_gpl/part/packages/version_number/Makefile.am -text
 src/engines_gpl/part/packages/version_number/include/resource.h -text

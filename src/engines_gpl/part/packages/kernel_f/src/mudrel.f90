@@ -34,7 +34,6 @@ use fileinfo              ! file information for all input/output files
 !  module procedure(s)
 !
 use openfl_mod            ! explicit interface
-use stop_exit_mod         ! explicit interface
 !
 implicit none             ! force explicit typing
 !

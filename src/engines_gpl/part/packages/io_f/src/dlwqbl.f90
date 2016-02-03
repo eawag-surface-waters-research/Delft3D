@@ -49,7 +49,7 @@
 !     logical unitnumbers   : lunin  - input unit number hydrodynamic file
 !                             lunout - monitor file
 
-!     subroutines called    : srstop   , stops execution
+!     subroutines called    : stop_exit   , stops execution
 
       use precision_part         ! single/double precision
       use timers
@@ -166,7 +166,7 @@
             messge = 0
             goto 20
          endif
-         call srstop( 1 )
+         call stop_exit( 1 )
       endif
 
       if ( timon ) call timstop ( ithndl )

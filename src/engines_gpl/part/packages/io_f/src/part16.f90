@@ -77,7 +77,7 @@ contains
 !                             lun2 - output log file
 !
 !
-!     subroutines called    : srstop
+!     subroutines called    : stop_exit
 !
 !
 !     functions   called    : none.
@@ -240,7 +240,7 @@ contains
 !
                 if (ilay   >  nolay) then
                   write (lun2, 99002)
-                  call srstop(1)
+                  call stop_exit(1)
                 endif
 !
                 do 50, isub = 1, nosubs

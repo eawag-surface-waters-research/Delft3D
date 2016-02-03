@@ -217,13 +217,13 @@
       write ( *   , * ) '   '
       if ( ihdel .lt. idelt ) then
          write ( lun2, 2023 )
-         call srstop(1)
+         call stop_exit(1)
       endif
       i = ihdel/idelt
       if ( ihdel .ne. i*idelt ) then
          write ( lun2, 2022 )
          write ( *   , 2022 )
-         call srstop(1)
+         call stop_exit(1)
       endif
       if ( ipc .le. 1 ) then
          lcorr = .false.
@@ -289,7 +289,7 @@
          case default
             write ( lun2, * ) ' Error: this vert.diff. option is not valid'
             write ( *   , * ) ' Error: this vert.diff. option is not valid'
-            call srstop(1)
+            call stop_exit(1)
       end select
       write ( lun2, * ) '   '
 
@@ -341,7 +341,7 @@
             write(lun2,*) ' red tide model is obsolete. Please contact Deltares. '
             write(*,*) ' You are trying to use the red tide model, but the '
             write(*,*) ' red tide model is obsolete. Please contact Deltares. '
-            call srstop(1)
+            call stop_exit(1)
          case ( 4 )
             write(*,'(//)')
             write(*,*) ' You are using the oil model '
@@ -407,7 +407,7 @@
                if ( jsub .eq. nosubs ) then
                   write ( *   , * ) ' Error: sticking substance has no source ', substi(is)
                   write ( lun2, * ) ' Error: sticking substance has no source ', substi(is)
-                  call srstop(1)
+                  call stop_exit(1)
                endif
             enddo
          endif
@@ -1257,7 +1257,7 @@
                   pg(i)%ztype = 3
                case default
                   write ( lun2, '(A,A,2f5.2)' ) 'ERROR: token not recognized: ',cbuffer(1:len_trim(cbuffer))
-                  call srstop(1)
+                  call stop_exit(1)
             end select
             if ( gettoken( pg(i)%mmap, ierr2 ) .ne. 0 ) goto 4038
          endif
@@ -1861,7 +1861,7 @@
       if ( ierr .ne. 0 ) then
          write (  *  , '(A,i3)' ) ' Number of errors in processing input file:', ierr
          write ( lun2, '(A,i3)' ) ' Number of errors in processing input file:', ierr
-         call srstop(1)
+         call stop_exit(1)
       else
          write (  *  , '(A   )' ) ' '
          write (  *  , '(A   )' ) '  Input file succesfully read.'
@@ -2075,248 +2075,248 @@
 
 11    write(*,*) ' Error when reading the model type '
       write(*,*) ' Is this version 3.50?'
-      call srstop(1)
+      call stop_exit(1)
 4001  write(*,*) 'Error: version string can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4002  write(*,*) 'Error: 4 title strings can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4003  write(*,*) 'Error: name of hyd file can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4007  write(*,*) &
       'Error: numerical scheme or time-step can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4008  write(*,*) &
        'Error: vert. disperson option, vert.disp scale factor', &
        'or vert.disp constant can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4009  write(*,*) 'Error: names of substances can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4011  write(*,*) 'Error: filename of nh4-file can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4012  write(*,*) 'Error: filename of no3-file can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4013  write(*,*) 'Error: number of particles can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4014  write(*,*) 'Error: roughness length can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4015  write(*,*) 'Error: horiz. disp. params can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4016  write(*,*) 'Error: wind drag coefficien can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 40161 write(*,*) 'Error: density of water can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4017  write(*,*) 'Error: no. wind breakpoints can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4018  write(*,*) 'Error: breakpoint for wind can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4019  write(*,*) 'Error: no. model specific constants',  &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4020  write(*,*) 'Error: value of a model specific constant', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4021  write(*,*) 'Error: start time of simulation',&
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4022  write(*,*) 'Error: stop time of simulation', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4023  write(*,*) 'Error: waq take over time can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4024  write(*,*) 'Error: start time of map file',  &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4025  write(*,*) 'Error: stop time of map file',   &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4026  write(*,*) 'Error: time-step in map file',   &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4027  write(*,*) 'Error: start time of his file',  &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4028  write(*,*) 'Error: stop time of his file',   &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4029  write(*,*) 'Error: time-step in map file',   &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4030  write(*,*) 'Error: time offset to real time for plotfile ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4031  write(*,*) 'Error: no. of observation points ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4032  write(*,*) 'Error: names/coor. stations can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4033  write(*,*) 'Error: no. plot grids can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4034  write(*,*) 'Error: breakpoint plotgrid can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4038  write(*,*) 'Error: (x,y) of zoom window can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4039  write(*,*) &
       'Error: no. instantaneous releases can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4040  write(*,*)  &
       'Error: names instantaneous releases can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4041  write(*,*) &
       'Error: breakpoint instantaneous rel. can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4042  write(*,*) &
       'Error: (x,y,k) instantaneous release can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4043  write(*,*) 'Error: relative z-coordinate or radius (m) or rel-%', &
        ' of the instantaneous release can not be read correctly'
 4044  write(*,*) &
        'Error: mass of substances released for instantaneous release ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4045  write(*,*) 'Error: no. cont.releases can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4046  write(*,*) 'Error: names cont.releases can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4047  write(*,*) 'Error: (x,y,k) cont.release can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4049  write(*,*) 'Error: scale factor of substance ', &
        ' can not be read correctly'
 4050  write(*,*) 'Error: stoechiometric coefficient of substance ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4051  write(*,*) 'Error: no. breakp. cont.rel can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4052  write(*,*) 'Error: breakpoint cont.rel. can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4053  write(*,*) 'Error: no. of user defined releases ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4054  write(*,*) 'Error: percentages and scale factors of user def.rel', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4055  write(*,*) 'Error: breakpoint and subst-no. of user def.release', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4056  write(*,*) 'Error: option for file type of user def.release', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4057  write(*,*) 'Error: filename of user defined release', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4058  write(*,*) 'Error: breakpoint and subst-no. of user def.release', &
        ' for the map or restart file from waq can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4059  write(*,*) 'Error: no. of breakpoints for decay rate ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4060  write(*,*) 'Error: breakp. decay rate can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4061  write(*,*) 'Error: no. of breakpoints for settling velocities ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4062  write(*,*) 'Error: breakp. settl. vel. can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4063  write(*,*) ' Error: sedimentation-erosion params are missing or', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4064  write(*,*) ' Error: power for concentration dependent settling', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4065  write(*,*) ' Error: grid refinement factor', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 4066  write(*,*) ' Error: layer number of instantaneous release higher', &
        ' than number of layers'
-      call srstop(1)
+      call stop_exit(1)
 4067  write(*,*) ' Error: layer number of continuous release higher', &
        ' than number of layers'
-      call srstop(1)
+      call stop_exit(1)
 5001  write(*,*) 'Error: 1th record of particles coordinates file', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 5002  write(*,*) 'Error: 2nd record of particles coordinates file', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 5049  write(*,*) 'Error: interpolation options for cont. releases ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6001  write(*,*) 'Error: option for initial condition (oil)'
-      call srstop(1)
+      call stop_exit(1)
 6002  write(*,*) 'Error: number of dispersant applications', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6003  write(*,*) 'Error: timing of dispersant application', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6005  write(*,*) 'Error: type of dispersant application parameterisation', &
        ' can currently only be 1 (direct chance to disperse)'
-      call srstop(1)
+      call stop_exit(1)
 6006  write(*,*) 'Error: parameter of dispersant application', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6007  write(*,*) 'Error: parameter of dispersant application', &
        ' of type 1 must be set between 0.0 and 1.0'
-      call srstop(1)
+      call stop_exit(1)
 6010  write(*,*) 'Error: filename of dispersant application', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6011  write(*,*) 'Error: option for initial condition (oil) ', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6012  write(*,*) 'Error: file name for initial condition (ini-file)', &
        ' can not be read correctly (warm start)'
-      call srstop(1)
+      call stop_exit(1)
 6022  write(*,*) 'Error: number of boom introductions', &
        ' can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6023  write(*,*) 'Error: timing of boom introductions', &
        ' can not be read correctly'
-      call srstop(1)
-      call srstop(1)
+      call stop_exit(1)
+      call stop_exit(1)
 6025  write(*,*) 'Error: type of boom parameterisation', &
        ' can currently only be 1 (chance be holded by the boom)'
-      call srstop(1)
+      call stop_exit(1)
 6026  write(*,*) 'Error: parameter of boom can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 6027  write(*,*) 'Error: parameter of boom of type 1 must be set between 0.0 and 1.0'
-      call srstop(1)
+      call stop_exit(1)
 6030  write(*,*) 'Error: filename of boom polygon can not be read correctly'
-      call srstop(1)
+      call stop_exit(1)
 1700  write(*,*) ' Error: could not open dis-file ',fidisp(i)
-      call srstop(1)
+      call stop_exit(1)
 1701  write(*,*) ' Error: could not open boom-file ',fiboom(i)
-      call srstop(1)
+      call stop_exit(1)
 1710  write(*,*) ' Error: could not open ini-file ',ini_file
-      call srstop(1)
+      call stop_exit(1)
 
 9000  write(lun2,*) ' Error: reading special features '
       write(*   ,*) ' Error: reading special features '
-      call srstop(1)
+      call stop_exit(1)
 9010  write(lun2,*) ' Error: value of max_restart_age constant'
       write(*   ,*) ' Error: value of max_restart_age constant'
-      call srstop(1)
+      call stop_exit(1)
 9011  write(lun2,*) ' Error: max_restart_age is zero. Did you specify a value?'
       write(*   ,*) ' Error: max_restart_age is zero. Did you specify a value?'
-      call srstop(1)
+      call stop_exit(1)
 
 9101  write(lun2,*) ' Error: found plastics_parameters, but this is not a plastics model (modtype /= 6) '
       write(*   ,*) ' Error: found plastics_parameters, but this is not a plastics model (modtype /= 6) '
-      call srstop(1)
+      call stop_exit(1)
 9103  write(lun2,*) ' Error: expected substance name of a plastic to be specified '
       write(*   ,*) ' Error: expected substance name of a plastic to be specified '
-      call srstop(1)
+      call stop_exit(1)
 9104  write(lun2,*) ' Error: could not read plastic parameter correctly for ', trim(cplastic)
       write(*   ,*) ' Error: could not read plastic parameter correctly for ', trim(cplastic)
-      call srstop(1)
+      call stop_exit(1)
 9105  write(lun2,*) ' Error: zero or negative mean size specified for ', trim(cplastic)
       write(*   ,*) ' Error: zero or negative mean size specified for ', trim(cplastic)
-      call srstop(1)
+      call stop_exit(1)
 9106  write(lun2,*) ' Error: plastic "', trim(cplastic), '" was already defined! '
       write(*   ,*) ' Error: plastic "', trim(cplastic), '" was already defined! '
-      call srstop(1)
+      call stop_exit(1)
 9107  write(lun2,'(/A,I3,A)') '  Error: ', plmissing, ' plastic(s) is/are not parametrised! '
       write(*   ,'(/A,I3,A)')  ' Error: ', plmissing, ' plastic(s) is/are not parametrised! '
-      call srstop(1)
+      call stop_exit(1)
 
       end
    
@@ -2372,7 +2372,7 @@
       write(lunlog,'(a,a)')    &
         '          last line read : ',line(:len_line)
       write(lunlog,'(/a)') ' Please check file !!'
-      call srstop(1)
+      call stop_exit(1)
    end subroutine
 
    subroutine getdim_ini ( lun      , ini_file , npart_ini, npolmax  , nrowsmax , &
@@ -2448,7 +2448,7 @@
       write(lunlog,'(//a,a,a,a)')  &
         ' Error: could not find key ',key
       write(lunlog,'(/a)') ' Please check file !!'
-      call srstop(1)
+      call stop_exit(1)
  1010 write(*,'(//a,a)')     &
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       backspace lun
@@ -2463,7 +2463,7 @@
       write(lunlog,'(a,a)')    &
         '          last line read : ',line(:len_line)
       write(lunlog,'(/a)') ' Please check file !!'
-      call srstop(1)
+      call stop_exit(1)
  1020 write(*,'(//a,a)')  &
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       backspace lun
@@ -2473,7 +2473,7 @@
         ' Error: problem while reading ini-file ',ini_file(:len_file)
       write(lunlog,'(//a)') ' Error: premature end-of-file found'
       write(lunlog,'(/a )') ' Please check file !!'
-      call srstop(1)
+      call stop_exit(1)
       end subroutine
 
 subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
@@ -2530,7 +2530,7 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
       write(lunlog,'(//a,a,a,a)')  &
         ' Error: could not find key ',key
       write(lunlog,'(/a)') ' Please check file !!'
-      call srstop(1)
+      call stop_exit(1)
       end subroutine
 
       logical function more_data(lun)
@@ -2597,6 +2597,6 @@ subroutine getdim_asc ( lun , asc_file , npart_ini, nrowsmax , &
       write(*,'(  a,a  )') ' Expected file type   : ',ftype
       write(*,'(  a    )') ' Please check if file exists'
       write(*,'(  a    )') ' Please check correct file type'
-      call srstop(1)
+      call stop_exit(1)
 !
       end subroutine

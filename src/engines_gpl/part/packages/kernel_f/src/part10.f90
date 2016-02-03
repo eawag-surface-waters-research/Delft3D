@@ -130,7 +130,6 @@ contains
       use typos
       use p10cor_mod
       use grid_search_mod
-      use stop_exit_mod
       use spec_feat_par    ! special feature parameters
 !
       implicit none             ! force explicit typing

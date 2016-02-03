@@ -32,7 +32,6 @@
       use get_key_mod
       use grid_search_mod
       use pinpok_mod
-      use wait_mod
 
       implicit none ! force explicit typing
 
@@ -211,35 +210,30 @@
 
   900 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(a)')           ' Could not open/find ini-file ??'
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(a,a)')     ' Could not open/find ini-file ??'
       stop  ' Part aborted'
 
   910 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(a,a)')         ' Could not find key ',key
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(a,a)')     ' Could not find key ',key
       stop  ' Part aborted'
 
   920 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a,a)')       ' End-of-file found on ini-file '
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a,a)')   ' End-of-file found on ini-file '
       stop  ' Part aborted'
 
   930 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a,a)')       ' Error while reading ini-file'
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a,a)')   ' Error while reading ini-file'
       stop  ' Part aborted'
 
   940 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a,a)')       ' Could not find substance ',fract
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a,a)')   ' Could not find substance ',fract
       stop  ' Part aborted'
@@ -247,7 +241,6 @@
   950 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a)')         ' Couldn''t find cells for the initial oil particles.'
       write(*,'(//a)')         ' Is (part of) the polygon within the grid range?'
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a)')     ' Couldn''t find cells for the initial oil particles.'
       write(lunpr,'(//a)')     ' Is (part of) the polygon within the grid range?'

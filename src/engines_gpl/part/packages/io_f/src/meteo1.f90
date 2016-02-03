@@ -161,7 +161,7 @@ subroutine readgrid( gridfile, mmax, nmax, x, y )
 
     101 continue
     write(*,*) 'ERROR: Premature end of grid file ',trim(gridfile)
-    call srstop( 1 )
+    call stop_exit( 1 )
 
 end subroutine readgrid
 

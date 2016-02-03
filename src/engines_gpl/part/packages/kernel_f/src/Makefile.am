@@ -25,7 +25,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libkernel_f_la_SOURCES = \
-         avundf_linux.f90 \
          vdisp.f90 \
          mudrel.f90 \
          extout.f90 \
@@ -34,7 +33,7 @@ libkernel_f_la_SOURCES = \
          umagi.f90 \
          p10cor.f90 \
          inipart_asc.f90 \
-		 inipart.f90 \
+         inipart.f90 \
          densty.f90 \
          part01.f90 \
          part10.f90 \
@@ -53,8 +52,7 @@ libkernel_f_la_SOURCES = \
          partvs.f90 \
          p10ddb.f90 \
          diffus.f90 \
-         delpar.F90 \
-         dlmain.f90
+         delpar.F90
 
 #-------------------------------------------------------------------------------
 #Libraries

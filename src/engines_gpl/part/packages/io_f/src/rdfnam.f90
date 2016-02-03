@@ -98,7 +98,7 @@
 !       input file doesn't exist
 
         write(*, 99002) ifnam
-        call srstop(1)
+        call stop_exit(1)
       endif
 
 !       note:
@@ -202,7 +202,7 @@
       return
 
  1000 write ( *, *) ' Error : reading the input file: ', fnam(1)
-      call srstop(1)
+      call stop_exit(1)
       return
 !
 !     formats

@@ -479,7 +479,7 @@ module oildsp_mod
                   write( lun2, '(a,i4   )' ) ' Dye release #', id
                   write( lun2, '(a,f10.2)' ) ' Density of oil   : ,= ', rhooil(ifrac)
                   write( lun2, '(a,f10.2)' ) ' Density of water : ,= ', rhow
-                  call srstop(1)
+                  call stop_exit(1)
                endif
                vol56   = vol0**(5.0/6.0)
                vis13   = visw**(1.0/3.0)
@@ -529,7 +529,7 @@ module oildsp_mod
             if ( fstick(ifrac) .lt. 0.0 .or. fstick(ifrac) .gt. 1.0 ) then
                write( *   , * ) 'Sticking fraction must be between 0 and 1'
                write( lun2, * ) 'Sticking fraction must be between 0 and 1'
-               call srstop(1)
+               call stop_exit(1)
             endif
             if ( rhooil(ifrac) .lt. 0.1 ) then
                write( *   , * ) 'Oil density not set,value of 980kg/m3 assumed'
@@ -666,7 +666,7 @@ module oildsp_mod
                   ifrac = isub/3
                   if ( 3*ifrac .ne. isub ) then
                      write( *, * ) ' programming error in oildsp.f '
-                     call srstop(1)
+                     call stop_exit(1)
                   endif
                   wsums(ifrac) = wsums(ifrac) + wpart( ioils(ifrac), i )
                endif

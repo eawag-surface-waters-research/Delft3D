@@ -75,13 +75,11 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\show_error.f90"/>
 		<File RelativePath=".\src\skip_comments.f90"/>
-		<File RelativePath="..\..\..\..\engines_gpl\waq\packages\waq_utils_f\src\waq_utils\SRSTOP.F"/>
 		<File RelativePath=".\src\stop_exit.f90"/>
 		<File RelativePath=".\src\strip_inputfile.f90">
 			<FileConfiguration Name="Release|x64">
 				<Tool Name="VFFortranCompilerTool" AdditionalIncludeDirectories="..\..\include"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" AdditionalIncludeDirectories="..\..\include"/></FileConfiguration></File>
-		<File RelativePath=".\src\wait.f90"/>
 		<File RelativePath=".\src\write_version.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

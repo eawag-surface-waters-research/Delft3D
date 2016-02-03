@@ -49,7 +49,6 @@ use partur_mod                 ! explicit interface
 use partwq_mod                 ! explicit interface
 use grid_search_mod            ! explicit interface
 use rdhydr_mod                 ! explicit interface
-use stop_exit_mod              ! explicit interface
 use writrk_mod                 ! explicit interface
 use partmem
 use alloc_mod
@@ -133,7 +132,6 @@ contains
 !
 !
 !     subroutines called    : write_version - echo header to screen
-!                             dlpr12 - write the history files
 !                             dlwqtd - does time inteprolation (like delwaq)
 !                             oildsp - oil dispersion (modtyp=4)
 !                             part01 - calculate distances and angles in grid

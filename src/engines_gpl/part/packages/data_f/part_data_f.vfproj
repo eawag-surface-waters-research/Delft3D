@@ -47,10 +47,7 @@
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\alloc.f90"/>
-		<File RelativePath=".\src\dealloc.f90"/>
-		<File RelativePath=".\src\dealloc_part.f90"/>
 		<File RelativePath=".\src\file_info.f90"/>
-		<File RelativePath=".\src\global_data.f90"/>
 		<File RelativePath=".\src\modeldim.f90"/>
 		<File RelativePath=".\src\partmem.f90"/>
 		<File RelativePath=".\src\precision.f90"/>

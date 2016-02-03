@@ -33,8 +33,6 @@ use precision_part             ! single and double precision
 !
 !  module procedure(s)
 !
-use stop_exit_mod         ! explicit interface
-!
 implicit none             ! force explicit typing
 !
 contains

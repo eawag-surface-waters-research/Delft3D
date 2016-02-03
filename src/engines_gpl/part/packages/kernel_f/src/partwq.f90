@@ -33,7 +33,6 @@ use precision_part               ! single/double precision
 !  module procedure(s)
 !
 use grid_search_mod         ! explicit interface
-use stop_exit_mod           ! explicit interface
 !
 implicit none               ! force explicit typing
 !

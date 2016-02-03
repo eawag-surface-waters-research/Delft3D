@@ -33,7 +33,6 @@
 !
       use precision_part ! single/double precision
       use timers
-      use wait_mod
 
       implicit none ! force explicit typing
 
@@ -117,21 +116,18 @@
 
   900 write(*,'(//a,a)')       ' Error: problem with pol-file ',pol_file(:len_file)
       write(*,'(a)')           ' Could not open/find pol-file ??'
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with pol-file ',pol_file(:len_file)
       write(lunpr,'(a,a)')     ' Could not open/find pol-file ??'
       stop  ' Part aborted'
 
   920 write(*,'(//a,a)')       ' Error: problem with pol-file ',pol_file(:len_file)
       write(*,'(//a,a)')       ' End-of-file found on pol-file '
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with pol-file ',pol_file(:len_file)
       write(lunpr,'(//a,a)')   ' End-of-file found on pol-file '
       stop  ' Part aborted'
 
   930 write(*,'(//a,a)')       ' Error: problem with pol-file ',pol_file(:len_file)
       write(*,'(//a,a)')       ' Error while reading pol-file'
-      call wait
       write(lunpr,'(//a,a)')   ' Error: problem with pol-file ',pol_file(:len_file)
       write(lunpr,'(//a,a)')   ' Error while reading pol-file'
       stop  ' Part aborted'

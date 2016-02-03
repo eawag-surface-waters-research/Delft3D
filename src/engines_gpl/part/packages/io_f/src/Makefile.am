@@ -21,7 +21,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libio_f_la_SOURCES = \
-         close_all_files.f90 \
          delete_file.f90 \
          dd_prepare.f90 \
          genfil.f90 \
