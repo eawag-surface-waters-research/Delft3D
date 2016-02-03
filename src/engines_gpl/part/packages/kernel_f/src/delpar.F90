@@ -21,50 +21,6 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-module delpar_mod
-!
-!  module declarations
-!
-use precision_part                  ! single/double precision
-use timers
-use fileinfo  , lun=> lunit    ! logical unit numbers for files
-use filtyp_mod                 ! explicit interface
-use spec_feat_par
-use normal_mod
-!
-!  module procedure(s)
-!
-use delete_file_mod            ! explicit interface
-use oildsp_mod                 ! explicit interface
-use part09_mod                 ! explicit interface
-use part10_mod                 ! explicit interface
-use grid_search_mod            ! explicit interface
-use part12_mod                 ! explicit interface
-use part13_mod                 ! explicit interface
-use part14_mod                 ! explicit interface
-use part18_mod                 ! explicit interface
-use part21_mod                 ! explicit interface
-use parths_mod                 ! explicit interface
-use partur_mod                 ! explicit interface
-use partwq_mod                 ! explicit interface
-use grid_search_mod            ! explicit interface
-use rdhydr_mod                 ! explicit interface
-use writrk_mod                 ! explicit interface
-use partmem
-use alloc_mod
-!use normal_mod
-
-#ifdef HAVE_CONFIG_H
-#else
-use ifcore
-#endif
-!
-implicit none                  ! force explicit typing
-!
-save
-contains
-      subroutine delpar(ifnam)
-
 !
 !
 !                          Deltares (former: Deltares)
@@ -397,9 +353,51 @@ contains
 !
 !     local scalars
 !
+      subroutine delpar(ifnam)
+      !
+      !  module declarations
+      !
+      use precision_part                  ! single/double precision
+      use timers
+      use fileinfo  , lun=> lunit    ! logical unit numbers for files
+      use filtyp_mod                 ! explicit interface
+      use spec_feat_par
+      use normal_mod
+      !
+      !  module procedure(s)
+      !
+      use delete_file_mod            ! explicit interface
+      use oildsp_mod                 ! explicit interface
+      use part09_mod                 ! explicit interface
+      use part10_mod                 ! explicit interface
+      use grid_search_mod            ! explicit interface
+      use part12_mod                 ! explicit interface
+      use part13_mod                 ! explicit interface
+      use part14_mod                 ! explicit interface
+      use part18_mod                 ! explicit interface
+      use part21_mod                 ! explicit interface
+      use parths_mod                 ! explicit interface
+      use partur_mod                 ! explicit interface
+      use partwq_mod                 ! explicit interface
+      use grid_search_mod            ! explicit interface
+      use rdhydr_mod                 ! explicit interface
+      use writrk_mod                 ! explicit interface
+      use partmem
+      use alloc_mod
+      !use normal_mod
+      
+      #ifdef HAVE_CONFIG_H
+      #else
+      use ifcore
+      #endif
+      !
+      implicit none                  ! force explicit typing
+      !
+      save
+
       include "omp_lib.h"
 
-      integer(ip)         :: ierror  , itime   , lunpr
+      integer(ip)         :: itime   , lunpr
       integer(ip)         :: nosubud , noth
       integer(ip)         :: ilp, isp, iext, nores, noras
       real(sp)            :: dtstep
@@ -1003,5 +1001,4 @@ contains
  2030 format (/'  Parallel processing with ',i3,' processor(s)'/)
 
       end subroutine delpar
-end module
 

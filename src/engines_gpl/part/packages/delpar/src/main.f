@@ -23,8 +23,6 @@
 
       program delpar_main
 
-      use delpar_mod
-
       implicit none
 
       integer                          :: argc
