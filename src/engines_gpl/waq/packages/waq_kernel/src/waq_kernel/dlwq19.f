@@ -200,6 +200,7 @@
       logical             massbal          ! set .true. if iaflag eq 1
       logical   , save :: report           ! write iteation reports in monitoring file
       integer          :: ierr2         !
+      real(4)     acc_remained, acc_changed ! For reporting: accumulated/averaged reporting parameters
       integer  ( 4)          ithandl /0/
       integer  ( 4)          ithand1 /0/
       integer  ( 4)          ithand2 /0/
@@ -597,6 +598,8 @@
          enddo
       enddo
 
+      acc_remained = 0.0
+      acc_changed  = 0.0
       volint = volold                                 ! Initialize volint. Becomes the volume 'in between'.
       do 100 istep = 1, nstep                         ! Big loop over the substeps
          fact = dfloat(istep) / dfloat(nstep)         ! Interpolation factor of this step
@@ -783,8 +786,8 @@
                endif
    10       continue
             if ( report .and. ( changed .ne. 0 .or. remained .ne. 0 ) ) then
-               write ( lunut, '(a,2i12)' ) 'Iteration, step  : ', istep  , iter
-               write ( lunut, '(a,2i12)' ) 'Changed, Remained: ', changed, remained
+               acc_remained = acc_remained + remained
+               acc_changed  = acc_changed  + changed
                if ( remained .gt. 0 .and. changed .eq. 0 ) then
                   write ( lunut, * ) 'Warning: No further progress in the wetting procedure!'
                   exit
@@ -1338,6 +1341,13 @@
 !        End of loop over fractional time steps
 
   100 continue
+
+      if ( report .and. ( acc_changed .gt. 0.0 .or. acc_remained .gt. 0.0 ) ) then
+         write ( lunut, '(a)' ) 'Averaged over all steps in this iteration:'
+         write ( lunut, '(a,2g12.4)' ) 'Number of segments changed:  ', acc_changed  / nstep
+         write ( lunut, '(a,2g12.4)' ) 'Number of segments remained: ', acc_remained / nstep
+      endif
+
       do i = 1 , its(nob+2)                  !  update mass of box of dry cells
          iseg = iords(i)
          do isys = 1, nosys

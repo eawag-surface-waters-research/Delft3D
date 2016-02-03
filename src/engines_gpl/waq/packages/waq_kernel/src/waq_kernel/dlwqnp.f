@@ -27,13 +27,13 @@
 !       Deltares Software Centre
 
 !>\file
-!>                         FCT horizontal, central implicit vertical (12)
+!>                         FCT horizontal, central implicit vertical, with adaptive timestep (24)
 !>
 !>                         Performs time dependent integration. Flux Corrected Transport
 !>                         (Boris and Book) horizontally, central implicit vertically.\n
+!>                         The timestep is locally adjusted if the stability for a segment requires this.\n
 !>                         Method has the option to treat additional velocities, like
 !>                         settling of suspended matter, upwind to avoid wiggles.\n
-!>                         Optional Forester filter to enhance vertical monotonicity.
 
 C     CREATED            : jan  1996 by R.J. Vos and Jan van Beek
 C
