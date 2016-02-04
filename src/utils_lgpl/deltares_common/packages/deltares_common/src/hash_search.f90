@@ -18,6 +18,8 @@ module m_hash_search
    type, public :: t_hashlist
       integer :: hashcon
       integer :: id_count = 0
+      integer :: growsby = 200
+      integer :: size = 0
       character(len=idLen), allocatable, dimension(:) :: id_list
       integer, allocatable, dimension(:) :: hashfirst
       integer, allocatable, dimension(:) :: hashnext
@@ -37,6 +39,7 @@ module m_hash_search
          endif
       endif
       hashlist%id_count= 0
+      hashlist%size= 0
    end subroutine deallochashtable
    
    
@@ -144,11 +147,13 @@ module m_hash_search
       call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
     
       call realloc(hashlist%hashnext, count, stat = ierr)
+      call realloc(hashlist%id_list, count, stat = ierr)
       call aerr('hashnext(id_count)', ierr, count)
       
       hashlist%hashfirst = 0
       hashlist%hashnext  = 0
       hashlist%id_count  = 0
+      hashlist%size      = count
    end subroutine hashfill_init
    
    subroutine hashfill_inc(hashlist, ind)
@@ -219,6 +224,10 @@ module m_hash_search
       ifound = -1
       locid  = id
       call str_upper(locid)
+      if (.not. allocated(hashlist%hashfirst)) then
+         hashsearch = -1
+         return
+      endif
       
       hashcode = hashfun(locid, hashlist%hashcon)
  
@@ -268,6 +277,13 @@ module m_hash_search
       integer                                         :: next
       integer                                         :: ifound
  
+      if (hashlist%size == 0) then
+         if (hashlist%growsBy <= 0) then
+            hashlist%growsBy = 100
+         endif
+         call hashfill_init(hashlist, hashlist%growsby)
+      endif
+      
       ifound = -1
       locid  = id
       call str_upper(locid)
@@ -300,7 +316,13 @@ module m_hash_search
          ! 'Hash search failed'
       endif
       
-         if (ifound<0) then
+      if (ifound<0) then
+         if (hashlist%id_count > hashlist%size) then
+            hashlist%size = hashlist%size + hashlist%growsBy
+            call realloc(hashlist%id_list, hashlist%size)
+            call realloc(hashlist%hashnext, hashlist%size)
+         endif
+         
          hashlist%id_count = hashlist%id_count+1
          hashlist%id_list(hashlist%id_count) = id
          ifound = hashlist%id_count 
