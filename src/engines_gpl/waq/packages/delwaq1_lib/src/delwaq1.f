@@ -244,7 +244,7 @@
 
       integer(4), save         :: ithndl = 0
       call timini ( )                          ! initializes timer
-      
+
       call dhstore_command( argv )
 
       narg = dhstored_number_args()            ! but timer is switched 'off' by default
@@ -366,10 +366,15 @@
       call dlwq01 ( lun     , psynam  , nosys   , notot   , nomult  ,
      &              multp   , iwidth  , otime   , isfact  , vrsion  ,
      &              ioutpt  , ierr    , iwar    )
+      if ( ierr .ne. 0 ) then
+         write ( lunrep , 2000 )
+         ierr = ierr + 1
+         goto 900
+      endif
       allocate(syname(notot+nomult),stat=ierr_alloc)
       allocate(imultp( 2 ,  nomult),stat=ierr_alloc)
       if ( ierr_alloc .ne. 0 ) then
-         write ( lunrep , 2000 ) ierr_alloc
+         write ( lunrep , 2005 ) ierr_alloc
          ierr = ierr + 1
          goto 900
       endif
@@ -532,7 +537,7 @@
       call dattim(rundat)
       write (lunrep,'(2A)') ' Execution stop : ',rundat
       close ( lunrep )
-      
+
 !
 ! Close all open LUN files
 !
@@ -553,7 +558,8 @@
       errorcode = 0
       return
 
- 2000 format (  /,' ERROR: allocating memory for system names:',I6)
+ 2000 format (  /,' ERROR: reading system names')
+ 2005 format (  /,' ERROR: allocating memory for system names:',I6)
  2010 format (  /,' Command line argument -IMAX, size of integer work array:',I12)
  2020 format (  /,' ERROR: interpreting command line argument -IMAX, size of integer work array:')
  2030 format (  /,' Command line argument -RMAX, size of real work array:',I12)

@@ -207,7 +207,10 @@
          if ( isys .eq. notot .and. ifound .eq. 2 ) exit
          if ( ifound .ne. 0 ) goto 100
          if ( itype .eq. 1 ) then                  ! a string was found. must be *n
-            if ( cdummy(1:1) .ne. '*' ) goto 100   ! only a multiplication is accepted
+            if ( cdummy(1:1) .ne. '*' ) then       ! only a multiplication is accepted
+               write( lunut, 2170 ) trim(cdummy)
+               goto 100
+            endif
             read ( cdummy(2:), * ) imult(isys)
             nomult = nomult + 1
             intread = .false.
@@ -343,5 +346,6 @@
  2140 format (      I5 , 5X , A20 )
  2150 format ( /' ERROR. End of file on unit:',I3,/' Filename = ',A )
  2160 format ( /' ERROR reading file on unit:',I3,/' Filename = ',A )
+ 2170 format ( /' ERROR encountered invalid repeat count - should start with an asterisk (*): ',A )
 
       end
