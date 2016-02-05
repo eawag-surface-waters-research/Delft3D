@@ -23,7 +23,7 @@
 
       subroutine gettok ( lun    , line   , str    , int    , reel   ,
      &                    itype  , iposl  , iposr  , iwidth , comc   ,
-     &                                               grpsep , ierr   )
+     &                                      grpsep , lineno , ierr   )
 
 !     Deltares Software Centre
 
@@ -58,6 +58,7 @@
       integer  (4), intent(in   ) :: iwidth            !< Line length of input lines
       character(1), intent(in   ) :: comc              !< Comment character
       character(1), intent(in   ) :: grpsep            !< Group separation character
+      integer  (4), intent(inout) :: lineno            !< line number in file
       integer  (4), intent(  out) :: ierr              !< not 0 error during processing
 
 !          local variables
@@ -106,8 +107,9 @@
       ierr  = 0
    10 if ( iposr .eq. 0 ) then
          read ( lun , '(a)' , end=100 , err=110 ) line
-         iposr = 0
-         ntot  = 0
+         iposr  = 0
+         ntot   = 0
+         lineno = lineno + 1
       endif
       iposr = iposr + 1
 

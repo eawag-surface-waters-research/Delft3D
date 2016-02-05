@@ -32,9 +32,9 @@ C     Deltares        SECTOR WATERRESOURCES AND ENVIRONMENT
 C
 C     CREATED            : May '96  by L. Postma
 C
-C     MODIFIED           : Jan '13  by M. Jeuken   
+C     MODIFIED           : Jan '13  by M. Jeuken
 C                                   - General name RDTOK1 for subroutine instead of DLWQJ1
-C                                   - Open file without DLWQ subroutine 
+C                                   - Open file without DLWQ subroutine
 C
 C     FUNCTION           : Reads a token and handles messages
 C
@@ -85,6 +85,7 @@ C DATA -------------------------------------------------------- Local --
 C
       SAVE
       CHARACTER  LINE*1000, LINE2*80 , CHULP*1000
+      INTEGER, DIMENSION(100) :: CURLINE = 0 ! Line number in the current file
 
 C BEGIN ================================================================
 
@@ -105,7 +106,7 @@ C
    10 IERR = 0
       CALL GETTOK ( LUNIN  , LINE   , CHULP  , IHULP  , RHULP   ,
      *              ITYPE  , IPOSL  , IPOSR  , NPOS   , CCHAR   ,
-     *                                         '#'    , IERR    )
+     *                       '#'    , CURLINE(IFL)    , IERR    )
       CHULP2 = CHULP
 C
 C           Deal with errors
@@ -116,7 +117,7 @@ C
          LINE2= ' ERROR Negative or zero repeats at repeat sign (*)'
          CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE   , IPOSL  ,
      *                 IPOSR  , NPOS   , LINE2   , 0      , ITYPE  ,
-     *                                                      0      )
+     *                                   CURLINE(IFL)     , 0      )
          ITYPEX = 2
          IERR   = 1
          GOTO 20
@@ -127,7 +128,7 @@ C        Integer overflow
          LINE2= ' ERROR integer value too large or too small (OVERFLOW)'
          CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE   , IPOSL  ,
      *                 IPOSR  , NPOS   , LINE2   , 0      , ITYPE  ,
-     *                                                      0      )
+     *                                   CURLINE(IFL)     , 0      )
          ITYPEX = 2
          IERR   = 1
          GOTO 20
@@ -138,7 +139,7 @@ C        Exponent out of range and real value allowed
          LINE2 = ' ERROR exponent too positive or too negative'
          CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE   , IPOSL  ,
      *                 IPOSR  , NPOS   , LINE2   , 0      , ITYPE  ,
-     *                                                      0      )
+     *                                   CURLINE(IFL)     , 0      )
          ITYPEX = 3
          IERR   = 1
          GOTO 20
@@ -149,7 +150,7 @@ C        End of data block found
             LINE2 = ' ERROR unexpected end of datagroup on unit'
             CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), ' '   , 0      ,
      *                    IPOSR  , NPOS   , LINE2   , 0     , ITYPE  ,
-     *                                                        0      )
+     *                                      CURLINE(IFL)    , 0      )
             GOTO 20
          ENDIF
          IERR   = 2
@@ -160,7 +161,7 @@ C        End of data block found
          LINE2 = ' No delimiting quote found !'
          CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE   , IPOSL  ,
      *                 IPOSR  , NPOS   , LINE2   , 0      , ITYPE  ,
-     *                                                      0      )
+     *                                   CURLINE(IFL)     , 0      )
          ITYPEX = 1
          IERR   = 1
          GOTO 20
@@ -175,7 +176,7 @@ C        End of data block found
             IF ( IFL .EQ. 1 )
      *      CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), ' '   , IPOSL,
      *                    IPOSR  , NPOS   , LINE2   , 0     , ITYPE  ,
-     *                                                        0      )
+     *                                      CURLINE(IFL)    , 0      )
          ENDIF
          IERR   = 3
          GOTO 20
@@ -184,7 +185,7 @@ C        End of data block found
          LINE2 = ' ERROR reading from the input unit'
          CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), ' '   , IPOSL  ,
      *                 IPOSR  , NPOS   , LINE2   , 0     , ITYPE  ,
-     *                                                     0      )
+     *                                   CURLINE(IFL)    , 0      )
          ITYPEX = 0
          IERR   = 1
          GOTO 20
@@ -201,11 +202,11 @@ C
          IERR = 0
          CALL GETTOK ( LUNIN  , LINE   , CHULP  , IHULP  , RHULP   ,
      *                 ITYPE  , IPOSL  , IPOSR  , NPOS   , CCHAR   ,
-     *                                            '#'    , IERR    )
+     *                          '#'    , CURLINE(IFL)    , IERR    )
          IF ( ITYPE .NE. 1 .AND. ITYPE .NE. -1 ) THEN
             CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE  , IPOSL  ,
      *                    IPOSR  , NPOS   , ' '     , 1     , ITYPE  ,
-     *                                                        0      )
+     *                                      CURLINE(IFL)    , 0      )
             WRITE ( LUNUT , 1030 )
             IERR = 2
             GOTO 20
@@ -233,7 +234,7 @@ C
      *     (ITYPEX .EQ.-3 .AND. ITYPE.EQ.3                  )     ) THEN
          CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE   , IPOSL  ,
      *                 IPOSR  , NPOS   , ' '     , ITYPEX , ITYPE  ,
-     *                                                      0      )
+     *                                    CURLINE(IFL)    , 0      )
          IERR = 4
       ENDIF
       IF ( ITYPE .EQ. 2 ) THEN
@@ -251,8 +252,9 @@ C
          IF ( IFL .GT. 1 ) THEN
             WRITE ( LUNUT , 1000 ) LCH(IFL)(:78)
             CLOSE ( ILUN(IFL) )
-            LCH (IFL) = ' '
-            ILUN(IFL) =  0
+            LCH (IFL)    = ' '
+            ILUN(IFL)    = 0
+            CURLINE(IFL) = 0
             IFL = IFL-1
             WRITE ( LUNUT , 1010 ) LCH(IFL)(:78)
             LUNIN = ILUN(IFL)
