@@ -44,6 +44,8 @@ module time_module
    public :: sec2ddhhmmss
    public :: ymd2jul
    public :: jul2ymd
+   public :: date2mjd
+   public :: mjd2date
    public :: datetime_to_string
 
    interface ymd2jul
@@ -55,6 +57,18 @@ module time_module
       module procedure JulianDateNumberToGregorianDate
       module procedure JulianDateNumberToGregorianYearMonthDay
    end interface jul2ymd
+
+   interface date2mjd
+      module procedure ymd2mjd
+      module procedure ymdhms2mjd
+      module procedure datetime2mjd
+   end interface date2mjd
+
+   interface mjd2date
+      module procedure mjd2datetime
+      module procedure mjd2ymdhms
+      module procedure mjd2ymd
+   end interface mjd2date
 
    contains
       
@@ -352,4 +366,104 @@ module time_module
          end if
       end function datetime_to_string
 
+
+!---------------------------------------------------------------------------------------------
+! implements interface date2mjd
+!---------------------------------------------------------------------------------------------
+      function ymd2mjd(ymd) result(days)
+      use precision_basics
+      implicit none
+      integer, intent(in)       :: ymd
+      real(hp)                  :: days
+      integer  :: year, month, day, hour, minute
+      real(hp) :: second
+      year   = int(ymd/10000)
+      month  = int(mod(ymd,10000)/100)
+      day    = mod(ymd,100)
+      days = datetime2mjd(year,month,day,0,0,0.d0)
+      end function
+
+      function ymdhms2mjd(ymd,hms) result(days)
+      use precision_basics
+      implicit none
+      integer, intent(in)       :: ymd
+      real(hp), intent(in)      :: hms
+      real(hp)                  :: days
+      integer  :: year, month, day, hour, minute
+      real(hp) :: second
+      year   = int(ymd/10000)
+      month  = int(mod(ymd,10000)/100)
+      day    = mod(ymd,100)
+      hour   = int(hms/10000)
+      minute = int(mod(hms,10000.d0)/100)
+      second = mod(hms,100.d0)
+      days = datetime2mjd(year,month,day,hour,minute,second)
+      end function
+
+      function datetime2mjd(year,month,day,hour,minute,second) result(days)
+      use precision_basics
+      implicit none
+      integer, intent(in)	:: year, month, day	
+      integer, intent(in)	:: hour, minute
+      real(hp):: second
+      real(hp) :: days
+      real(hp) :: dayfrac
+      dayfrac = (hour*3600+minute*60+second)/(24*3600)
+      days = real(GregorianYearMonthDayToJulianDateNumber(year,month,day),hp) + dayfrac - 2400001
+      end function datetime2mjd
+
+!---------------------------------------------------------------------------------------------
+! implements interface mjd2date
+!---------------------------------------------------------------------------------------------
+      function mjd2ymd(days,ymd) result(success)
+      use precision_basics
+      implicit none
+      real(hp), intent(in)       :: days
+      integer, intent(out)       :: ymd
+      integer  :: year, month, day, hour, minute
+      real(hp) :: second
+      integer  :: success
+
+      success = 0
+      if (mjd2datetime(days,year,month,day,hour,minute,second)==0) return
+      ymd = year*10000 + month*100 + day
+      success = 1
+      end function mjd2ymd
+
+      function mjd2ymdhms(days,ymd,hms) result(success)
+      use precision_basics
+      implicit none
+      real(hp), intent(in)       :: days
+      integer, intent(out)       :: ymd
+      real(hp), intent(out)      :: hms
+      integer  :: year, month, day, hour, minute
+      real(hp) :: second
+      integer  :: success
+
+      success = 0
+      if (mjd2datetime(days,year,month,day,hour,minute,second)==0) return
+      ymd = year*10000 + month*100 + day
+      hms = hour*10000 + minute*100 + second
+      success = 1
+      end function mjd2ymdhms
+       
+      function mjd2datetime(days,year,month,day,hour,minute,second) result(success)
+      use precision_basics
+      implicit none
+      real(hp), intent(in)  :: days
+      integer,  intent(out) :: year, month, day	
+      integer,  intent(out) :: hour, minute
+      real(hp), intent(out) :: second
+      real(hp) :: dayfrac
+      integer  :: success
+
+      success = 0
+      dayfrac = fraction(days)
+      call JulianDateNumberToGregorianYearMonthDay(int(days+2400001),year,month,day)
+      hour = int(dayfrac*24)
+      minute = int(mod(dayfrac*24*60,60.d0))
+      second = mod(dayfrac*24*60*60,60.d0)
+      success = 1
+      end function mjd2datetime
+      
 end module time_module
