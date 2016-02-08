@@ -390,7 +390,7 @@
                endif
 
                Length = (V**Onethird)/shape                                  !Length is derived from individual V
-               E_scaled = E /( Em_L3 * (V+tiny(V)))                          !E_scaled is derived from E and V
+               E_scaled = E /( Em_L3 * V )                                   !E_scaled is derived from E and V
 
 ! convert benthic FOOD components to units gC m-2, do not convert pelagic components: unit stays gC m-3
                do IFOOD = 1,NFOOD
