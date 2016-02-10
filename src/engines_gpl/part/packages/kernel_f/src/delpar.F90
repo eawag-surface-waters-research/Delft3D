@@ -386,10 +386,10 @@
       use alloc_mod
       !use normal_mod
       
-      #ifdef HAVE_CONFIG_H
-      #else
+#ifdef HAVE_CONFIG_H
+#else
       use ifcore
-      #endif
+#endif
       !
       implicit none                  ! force explicit typing
       !
