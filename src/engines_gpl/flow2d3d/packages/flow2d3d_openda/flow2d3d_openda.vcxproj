@@ -88,7 +88,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;../flow2d3d/include;../flow2d3d/src;../flow2d3d/src/dd;../flow2d3d/src/dd/iterators;../flow2d3d/src/dd/mapper;../../../../third_party_open/mpich2/include;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include;../../../../utils_lgpl/delftonline/include;../../../../utils_lgpl/esmfsm/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WITH_DELFTONLINE;WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WITH_DELFTONLINE;WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -123,7 +123,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;..\flow2d3d\include;..\flow2d3d\src;..\flow2d3d\src/dd;..\flow2d3d\src/dd/iterators;..\flow2d3d\src/dd/mapper;../../../../third_party_open/mpich2/x64/include;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/stream/include;../../../../utils_lgpl/esmfsm/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -157,7 +157,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>include;../flow2d3d/include;../flow2d3d/src;../flow2d3d/src/dd;../flow2d3d/src/dd/iterators;../flow2d3d/src/dd/mapper;../../../../third_party_open/mpich2/include;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include;../../../../utils_lgpl/delftonline/include;../../../../utils_lgpl/esmfsm/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WITH_DELFTONLINE;WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WITH_DELFTONLINE;WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -194,7 +194,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>include;../flow2d3d/include;../flow2d3d/src;../flow2d3d/src/dd;../flow2d3d/src/dd/iterators;../flow2d3d/src/dd/mapper;../../../../third_party_open/mpich2/x64/include;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/stream/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl\deltares_common\packages\deltares_common_c\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>

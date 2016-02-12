@@ -30,17 +30,17 @@
 #include "nefis_version.h"
 
 #if defined(W32)
-static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win32)"};
-static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win32), "__DATE__", "__TIME__""};
+static char nefis_version [] = {nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Win32)"};
+static char nefis_version_id [] = {"@(#)Deltares, " nefis_program " Version " nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Win32), " __DATE__ ", " __TIME__ ""};
 #elif defined(W64)
-static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64)"};
-static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64), "__DATE__", "__TIME__""};
+static char nefis_version [] = {nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Win64)"};
+static char nefis_version_id [] = {"@(#)Deltares, " nefis_program " Version " nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Win64), " __DATE__ ", " __TIME__ ""};
 #elif defined(LINUX64)
-static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Win64)"};
-static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Linux64), "__DATE__", "__TIME__""};
+static char nefis_version [] = {nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Win64)"};
+static char nefis_version_id [] = {"@(#)Deltares, " nefis_program " Version " nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Linux64), " __DATE__ ", " __TIME__ ""};
 #else
-static char nefis_version [] = {nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Unknown)"};
-static char nefis_version_id [] = {"@(#)Deltares, "nefis_program" Version "nefis_major"."nefis_minor"."nefis_revision"."nefis_build" (Unknown), "__DATE__", "__TIME__""};
+static char nefis_version [] = {nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Unknown)"};
+static char nefis_version_id [] = {"@(#)Deltares, " nefis_program " Version " nefis_major "." nefis_minor "." nefis_revision "." nefis_build " (Unknown), " __DATE__ ", " __TIME__ ""};
 #endif
 static char nefis_file_version [] = {"5.00.00"};
 static char nefis_company_name [] = {"Deltares"};

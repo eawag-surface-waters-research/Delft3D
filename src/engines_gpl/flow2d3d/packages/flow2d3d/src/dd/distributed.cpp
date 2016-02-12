@@ -37,7 +37,6 @@
 
 #ifdef WIN32
 #   define getpid GetCurrentProcessId
-#   define snprintf _snprintf
 #endif
 
 #include "flow2d3d.h"

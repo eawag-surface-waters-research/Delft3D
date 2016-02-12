@@ -47,7 +47,7 @@
 #  define max(a,b) (a)>(b) ? (a) : (b)
 #endif
 
-static char modname_version_id [] = {"@(#)Deltares, "modname_program" Version "modname_major"."modname_minor"."modname_revision"."modname_build", "__DATE__", "__TIME__""};
+static char modname_version_id [] = {"@(#)Deltares, " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build ", " __DATE__ ", " __TIME__ ""};
 
 void STDCALL GETSHORTVERSIONSTRING( char * str, int length_str )
 {

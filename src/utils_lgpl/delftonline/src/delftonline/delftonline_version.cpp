@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include "delftonline_version.h"
 
-static char delftonline_version_id [] = {"@(#)Deltares, "delftonline_program" Version "delftonline_major"."delftonline_minor"."delftonline_revision"."delftonline_build", "__DATE__", "__TIME__""};
+static char delftonline_version_id [] = {"@(#)Deltares, " delftonline_program " Version " delftonline_major "." delftonline_minor "." delftonline_revision "." delftonline_build ", " __DATE__ ", " __TIME__ ""};
 
 char * getfullversionstring_delftonline(void)
 {
