@@ -375,7 +375,7 @@ module m_ec_filereader
                case default
                   t0t1 = -1
                   do i=1, fileReaderPtr%nItems
-                     success = ecNetcdfReadBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, fileReaderPtr%items(i)%ptr%elementSetPtr%nCoordinates)
+                     success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1)
                      if (t0t1 == 0) then
                         ! flip t0 and t1
                         fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr
