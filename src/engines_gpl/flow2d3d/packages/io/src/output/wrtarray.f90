@@ -1664,9 +1664,9 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,ul ), stat = istat )
        rbuff4(:,:,:,:) = -999.0_fp
        if (parll) then
-          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+          call dfgather(rbuff4, glbarr4_sp, nf, nl, mf, ml, iarrc, gdp)
        else 
-          call dfgather_seq(rbuff4, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+          call dfgather_seq(rbuff4, glbarr4_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
        endif   
        deallocate(rbuff4)
        if (inode == master) then
@@ -1770,9 +1770,9 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
        enddo
     enddo
     if (parll) then
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(rbuff4, glbarr4_sp, nf, nl, mf, ml, iarrc, gdp)
     else 
-       call dfgather_seq(rbuff4, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(rbuff4, glbarr4_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif
     deallocate(rbuff4)
     if (inode == master) then
@@ -1852,9 +1852,9 @@ subroutine wrtarray_nmll(fds, filename, filetype, grpnam, &
     ! body
     !
     if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(var, glbarr4_sp, nf, nl, mf, ml, iarrc, gdp)
     else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(var, glbarr4_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif   
     if (inode == master) then
        select case (filetype)
@@ -1945,9 +1945,9 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
        allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout ), stat = istat )
        rbuff3(:,:,:) = -999.0_fp
        if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
+          call dfgather(rbuff3, glbarr3_sp, nf, nl, mf, ml, iarrc, gdp)
        else 
-          call dfgather_seq(rbuff3, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+          call dfgather_seq(rbuff3, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
        endif   
        deallocate(rbuff3)
        if (inode == master) then
@@ -2046,9 +2046,9 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
        enddo
     endif
     if (parll) then
-       call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(rbuff3, glbarr3_sp, nf, nl, mf, ml, iarrc, gdp)
     else
-       call dfgather_seq(rbuff3, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(rbuff3, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif   
     deallocate(rbuff3)
     if (inode == master) then
@@ -2175,9 +2175,9 @@ subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
        allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, ul ), stat = istat )
        rbuff3(:,:,:) = -999.0_fp
        if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
+          call dfgather(rbuff3, glbarr3_sp, nf, nl, mf, ml, iarrc,gdp)
        else 
-          call dfgather_seq(rbuff3, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+          call dfgather_seq(rbuff3, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
        endif   
        deallocate(rbuff3)
        if (inode == master) then
@@ -2256,9 +2256,9 @@ use precision
     ! body
     !
     if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(var, glbarr3_sp, nf, nl, mf, ml, iarrc, gdp)
     else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(var, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif   
     if (inode == master) then
        select case (filetype)
@@ -2420,9 +2420,9 @@ subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), stat = istat )
        rbuff2(:,:) = -999.0_sp
        if (parll) then
-          call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
+          call dfgather(rbuff2, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
        else 
-          call dfgather_seq(rbuff2, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+          call dfgather_seq(rbuff2, glbarr2_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
        endif   
        deallocate(rbuff2)
        if (inode == master) then
@@ -2508,9 +2508,9 @@ subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), stat = istat )
        rbuff2(:,:) = -999.0_hp
        if (parll) then
-          call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
+          call dfgather(rbuff2, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
        else 
-          call dfgather_seq(rbuff2, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+          call dfgather_seq(rbuff2, glbarr2_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
        endif   
        deallocate(rbuff2)
        if (inode == master) then
@@ -2548,9 +2548,7 @@ subroutine wrtarray_nm_2d(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, var, varnam)
     use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2_sp, dfgather, dfgather_seq
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use dfparall, only: nproc
     use globaldata
     !
     implicit none
@@ -2621,9 +2619,9 @@ subroutine wrtarray_nm_sp(fds, filename, filetype, grpnam, &
     ! body
     !
     if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(var, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
     else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(var, glbarr2_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif       
     if (inode == master) then
        select case (filetype)
@@ -2696,9 +2694,9 @@ subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
     ! body
     !
     if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(var, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
     else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(var, glbarr2_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif       
     if (inode == master) then
        select case (filetype)
@@ -2771,9 +2769,9 @@ subroutine wrtarray_nm_int(fds, filename, filetype, grpnam, &
     ! body
     !
     if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
+       call dfgather(var, glbari2, nf, nl, mf, ml, iarrc, gdp)
     else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       call dfgather_seq(var, glbari2, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
     endif       
     if (inode == master) then
        select case (filetype)

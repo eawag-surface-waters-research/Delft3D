@@ -165,7 +165,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! Collect all guu values from all partitions in the (single precision) array glbarr2_sp in the master partition
     !
-    call dfgather(guu,nf,nl,mf,ml,iarrc,gdp)
+    call dfgather(guu, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
     if (inode == master) then
        guu_global = glbarr2_sp
     endif
@@ -176,7 +176,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! Collect all gvv values from all partitions in the (single precision) array glbarr2_sp in the master partition
     !
-    call dfgather(gvv,nf,nl,mf,ml,iarrc,gdp)
+    call dfgather(gvv, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
     if (inode == master) then
        gvv_global = glbarr2_sp
     endif
