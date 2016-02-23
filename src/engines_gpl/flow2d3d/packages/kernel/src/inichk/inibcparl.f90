@@ -163,22 +163,22 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
        call d3stop(1, gdp)
     endif
     !
-    ! Collect all guu values from all partitions in the (single precision) array glbarr2 in the master partition
+    ! Collect all guu values from all partitions in the (single precision) array glbarr2_sp in the master partition
     !
     call dfgather(guu,nf,nl,mf,ml,iarrc,gdp)
     if (inode == master) then
-       guu_global = glbarr2
+       guu_global = glbarr2_sp
     endif
     !
     ! The master partition broadcasts this guu array to all partitions
     !
     call dfbroadc_gdp (guu_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
     !
-    ! Collect all gvv values from all partitions in the (single precision) array glbarr2 in the master partition
+    ! Collect all gvv values from all partitions in the (single precision) array glbarr2_sp in the master partition
     !
     call dfgather(gvv,nf,nl,mf,ml,iarrc,gdp)
     if (inode == master) then
-       gvv_global = glbarr2
+       gvv_global = glbarr2_sp
     endif
     !
     ! The master partition broadcasts this gvv array to all partitions

@@ -247,41 +247,41 @@ subroutine wrfous(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
     !
     if (fouelp(ifou)=='x' .or. fouelp(ifou)=='i' .or. fouelp(ifou)=='e') then
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-          if (allocated(glbarr2)) deallocate(glbarr2, stat = ierror)
-          allocate(glbarr2(nmaxgl,mmaxgl), stat = ierror)
-          glbarr2 = defaul
+          if (allocated(glbarr2_sp)) deallocate(glbarr2_sp, stat = ierror)
+          allocate(glbarr2_sp(nmaxgl,mmaxgl), stat = ierror)
+          glbarr2_sp = defaul
           do n = 1, nmaxus
              do m = 1, mmax
                 !
                 ! Only write values unequal to initial min/max values (-/+1.0e+30)
                 !
                 if (kcs(n,m)==1 .and. comparereal(abs(fousma(n,m,ifou)),1.0e29_fp)==-1) then
-                   glbarr2(n,m) = real(fousma(n,m,ifou),sp)
+                   glbarr2_sp(n,m) = real(fousma(n,m,ifou),sp)
                 endif
              enddo
           enddo
           fouvar = fouref(ifou,2)
           if (inode == master) then
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr2, start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr2_sp, start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
           endif
           if (fouelp(ifou)=='x' .and. founam(ifou)=='s1') then
              !
              ! Write max waterdepth too
              !
-             glbarr2 = defaul
+             glbarr2_sp = defaul
              do n = 1, nmaxus
                 do m = 1, mmax
                    !
                    ! Only write values unequal to initial min/max values (-/+1.0e+30)
                    !
                    if (kcs(n,m)==1 .and. comparereal(abs(fousmb(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr2(n,m) = real(fousmb(n,m,ifou),sp)
+                      glbarr2_sp(n,m) = real(fousmb(n,m,ifou),sp)
                    endif
                 enddo
              enddo
              fouvar = fouvar + 1
              if (inode == master) then
-                ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr2, start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+                ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr2_sp, start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              endif
           endif
        else
@@ -310,9 +310,9 @@ subroutine wrfous(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
        endif
     else
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-          if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
-          allocate(glbarr3(nmaxgl,mmaxgl,2), stat = ierror)
-          glbarr3 = defaul
+          if (allocated(glbarr3_sp)) deallocate(glbarr3_sp, stat = ierror)
+          allocate(glbarr3_sp(nmaxgl,mmaxgl,2), stat = ierror)
+          glbarr3_sp = defaul
        endif
        !
        ! Write data for user defined dimensions, hence NMAXUS and MMAX
@@ -350,8 +350,8 @@ subroutine wrfous(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
                 fas = mod(mod(fas, 360.0_fp) + 720.0_fp, 360.0_fp)
                 amp = amp/fknfac(ifou)
                 if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-                   glbarr3(n,m,1) = real(amp,sp)
-                   glbarr3(n,m,2) = real(fas,sp)
+                   glbarr3_sp(n,m,1) = real(amp,sp)
+                   glbarr3_sp(n,m,2) = real(fas,sp)
                 else
                    write (lunfou,'(4(f12.3,1x),2(i5,1x),2(e14.6E3,1x),3(i2,1x))') &
                        & xz(n, m), yz(n, m), xcor(n, m), ycor(n, m), m, n, amp,   &
@@ -364,8 +364,8 @@ subroutine wrfous(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
                 ! '0' instead of kcs, because TEKAL does not accept '2'
                 !
                 if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-                   glbarr3(n,m,1) = defaul
-                   glbarr3(n,m,2) = defaul
+                   glbarr3_sp(n,m,1) = defaul
+                   glbarr3_sp(n,m,2) = defaul
                 else
                    write (lunfou,'(4(f12.3,1x),2(i5,1x),2(f14.3,1x),3(i2,1x))') &
                        & defaul, defaul, xcor(n, m), ycor(n, m), m, n, defaul,  &
@@ -377,9 +377,9 @@ subroutine wrfous(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
           if (inode == master) then
              fouvar = fouref(ifou,2)
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
           endif
        endif
     endif

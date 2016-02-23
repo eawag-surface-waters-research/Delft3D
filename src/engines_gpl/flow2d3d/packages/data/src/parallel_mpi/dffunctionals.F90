@@ -55,9 +55,12 @@ module dffunctionals
    real(hp), parameter :: MIN_REAL_KIND_8 = -1.7976e+308_hp
    real(hp), parameter :: MAX_REAL_KIND_8 =  1.7976e+308_hp
    !
-   real(sp), dimension(:,:),     allocatable, save :: glbarr2
-   real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
-   real(sp), dimension(:,:,:,:), allocatable, save :: glbarr4
+   real(sp), dimension(:,:),     allocatable, save :: glbarr2_sp
+   real(sp), dimension(:,:,:),   allocatable, save :: glbarr3_sp
+   real(sp), dimension(:,:,:,:), allocatable, save :: glbarr4_sp
+   real(hp), dimension(:,:),     allocatable, save :: glbarr2_hp
+   real(hp), dimension(:,:,:),   allocatable, save :: glbarr3_hp
+   real(hp), dimension(:,:,:,:), allocatable, save :: glbarr4_hp
    integer,  dimension(:,:),     allocatable, save :: glbari2
    !
    interface dfgather_filter
@@ -77,21 +80,21 @@ module dffunctionals
    !
    interface dfgather
       module procedure dfgather_I2e
-      module procedure dfgather_R2e_sp
-      module procedure dfgather_R2e_hp
-      module procedure dfgather_R3e_sp
-      module procedure dfgather_R3e_hp
-      module procedure dfgather_R4e_sp
-      module procedure dfgather_R4e_hp
+      module procedure dfgather_R2e_sp2sp
+      module procedure dfgather_R2e_hp2sp
+      module procedure dfgather_R3e_sp2sp
+      module procedure dfgather_R3e_hp2sp
+      module procedure dfgather_R4e_sp2sp
+      module procedure dfgather_R4e_hp2sp
    end interface dfgather
    !
    interface dfgather_seq
-      module procedure dfgather_R2e_seq_sp
-      module procedure dfgather_R2e_seq_hp
-      module procedure dfgather_R3e_seq_sp
-      module procedure dfgather_R3e_seq_hp
-      module procedure dfgather_R4e_seq_sp
-      module procedure dfgather_R4e_seq_hp
+      module procedure dfgather_R2e_seq_sp2sp
+      module procedure dfgather_R2e_seq_hp2sp
+      module procedure dfgather_R3e_seq_sp2sp
+      module procedure dfgather_R3e_seq_hp2sp
+      module procedure dfgather_R4e_seq_sp2sp
+      module procedure dfgather_R4e_seq_hp2sp
       module procedure dfgather_I2_seq
    end interface dfgather_seq
 
@@ -1639,7 +1642,7 @@ end subroutine dfgather_I2e
 !
 !
 !===============================================================================
-subroutine dfgather_R2e_sp(inparr,nf,nl,mf,ml,iarrc,gdp)
+subroutine dfgather_R2e_sp2sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather distributed arrays in global array globar (owned by
@@ -1738,8 +1741,8 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl
-       if (allocated(glbarr2)) deallocate(glbarr2)
-       allocate( glbarr2(nmaxgl, mmaxgl) )
+       if (allocated(glbarr2_sp)) deallocate(glbarr2_sp)
+       allocate( glbarr2_sp(nmaxgl, mmaxgl) )
        is = 0
        do ip = 0, nproc-1
           !
@@ -1750,7 +1753,7 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
           do n = nf(ip), nl(ip)
              do m = mf(ip), ml(ip)
                 nm = is + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                glbarr2(n, m) = tmp(nm)
+                glbarr2_sp(n, m) = tmp(nm)
              enddo
           enddo
           !
@@ -1762,12 +1765,12 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
-end subroutine dfgather_R2e_sp
+end subroutine dfgather_R2e_sp2sp
 !
 !
 !
 !===============================================================================
-subroutine dfgather_R2e_hp(inparr,nf,nl,mf,ml,iarrc,gdp)
+subroutine dfgather_R2e_hp2sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather distributed arrays in global array globar (owned by
@@ -1800,13 +1803,13 @@ real(sp), dimension(:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2)))
 tmp = real(inparr,sp)
-call dfgather_R2e_sp(tmp,nf,nl,mf,ml,iarrc,gdp)
+call dfgather_R2e_sp2sp(tmp,nf,nl,mf,ml,iarrc,gdp)
 deallocate(tmp)
-end subroutine dfgather_R2e_hp
+end subroutine dfgather_R2e_hp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R3e_sp(inparr,nf,nl,mf,ml,iarrc,gdp)
+subroutine dfgather_R3e_sp2sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather distributed arrays in global array globar (owned by
@@ -1911,8 +1914,8 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl
-       if (allocated(glbarr3)) deallocate(glbarr3)
-       allocate( glbarr3(nmaxgl, mmaxgl, kf:kl) )
+       if (allocated(glbarr3_sp)) deallocate(glbarr3_sp)
+       allocate( glbarr3_sp(nmaxgl, mmaxgl, kf:kl) )
        is = 0
        do ip = 0, nproc-1
           !
@@ -1924,7 +1927,7 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
              do n = nf(ip), nl(ip)
                 do m = mf(ip), ml(ip)
                    nm = is + (k - kf)*nsiz*msiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                   glbarr3(n, m, k) = tmp(nm)
+                   glbarr3_sp(n, m, k) = tmp(nm)
                 enddo
              enddo
           enddo
@@ -1935,12 +1938,12 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
-end subroutine dfgather_R3e_sp
+end subroutine dfgather_R3e_sp2sp
 !
 !
 !
 !===============================================================================
-subroutine dfgather_R3e_hp(inparr,nf,nl,mf,ml,iarrc,gdp)
+subroutine dfgather_R3e_hp2sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather distributed arrays in global array globar (owned by
@@ -1973,13 +1976,13 @@ real(sp), dimension(:,:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2),size(inparr,3)))
 tmp = real(inparr,sp)
-call dfgather_R3e_sp(tmp,nf,nl,mf,ml,iarrc,gdp)
+call dfgather_R3e_sp2sp(tmp,nf,nl,mf,ml,iarrc,gdp)
 deallocate(tmp)
-end subroutine dfgather_R3e_hp
+end subroutine dfgather_R3e_hp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R4e_sp(inparr,nf,nl,mf,ml,iarrc,gdp)
+subroutine dfgather_R4e_sp2sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather distributed arrays in global array globar (owned by
@@ -2091,9 +2094,9 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl
-       if (allocated(glbarr4)) deallocate(glbarr4)
-       allocate( glbarr4(nmaxgl, mmaxgl, kf:kl, lf:ll) , stat=istat)
-       if (istat /= 0) write(gdp%gdinout%lundia,*)'dffunctionals.f90-gather_R4e allocation problem for glbarr4 array'
+       if (allocated(glbarr4_sp)) deallocate(glbarr4_sp)
+       allocate( glbarr4_sp(nmaxgl, mmaxgl, kf:kl, lf:ll) , stat=istat)
+       if (istat /= 0) write(gdp%gdinout%lundia,*)'dffunctionals.f90-gather_R4e allocation problem for glbarr4_sp array'
        is = 0
        do ip = 0, nproc-1
           msiz = iarrc(2,ip)-iarrc(1,ip)+1
@@ -2104,7 +2107,7 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
              do n = nf(ip), nl(ip)
                 do m = mf(ip), ml(ip)
                    nm = is + (l - lf)*msiz*nsiz*(kl-kf+1) + (k - kf)*msiz*nsiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                   glbarr4(n, m, k, l) = tmp(nm)
+                   glbarr4_sp(n, m, k, l) = tmp(nm)
                 enddo
              enddo
           enddo
@@ -2116,12 +2119,12 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
 #ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
-end subroutine dfgather_R4e_sp
+end subroutine dfgather_R4e_sp2sp
 !
 !
 !
 !===============================================================================
-subroutine dfgather_R4e_hp(inparr,nf,nl,mf,ml,iarrc,gdp)
+subroutine dfgather_R4e_hp2sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather distributed arrays in global array globar (owned by
@@ -2154,9 +2157,9 @@ real(sp), dimension(:,:,:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2),size(inparr,3),size(inparr,4)))
 tmp = real(inparr,sp)
-call dfgather_R4e_sp(tmp,nf,nl,mf,ml,iarrc,gdp)
+call dfgather_R4e_sp2sp(tmp,nf,nl,mf,ml,iarrc,gdp)
 deallocate(tmp)
-end subroutine dfgather_R4e_hp
+end subroutine dfgather_R4e_hp2sp
 !
 !
 !
@@ -2343,7 +2346,7 @@ enddo
 end subroutine dfgather_I2_seq
 !
 !===============================================================================
-subroutine dfgather_R2e_seq_sp(inparr,noff, moff, nmaxgl,mmaxgl)
+subroutine dfgather_R2e_seq_sp2sp(inparr,noff, moff, nmaxgl,mmaxgl)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather array in global array globar
@@ -2371,19 +2374,19 @@ integer                                      :: n
 !
 !! executable statements -------------------------------------------------------
 !
-if (allocated(glbarr2)) deallocate(glbarr2)
-allocate(glbarr2(1:nmaxgl,1:mmaxgl))
+if (allocated(glbarr2_sp)) deallocate(glbarr2_sp)
+allocate(glbarr2_sp(1:nmaxgl,1:mmaxgl))
 do n = 1, nmaxgl
    do m = 1, mmaxgl
-      glbarr2(n,m) = inparr(n+noff,m+moff)
+      glbarr2_sp(n,m) = inparr(n+noff,m+moff)
    enddo
 enddo
 
-end subroutine dfgather_R2e_seq_sp
+end subroutine dfgather_R2e_seq_sp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R2e_seq_hp(inparr,noff, moff, nmaxgl, mmaxgl)
+subroutine dfgather_R2e_seq_hp2sp(inparr,noff, moff, nmaxgl, mmaxgl)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather array in global array globar
@@ -2412,13 +2415,13 @@ real(sp), dimension(:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2)))
 tmp = real(inparr,sp)
-call dfgather_R2e_seq_sp(tmp,noff,moff,nmaxgl,mmaxgl)
+call dfgather_R2e_seq_sp2sp(tmp,noff,moff,nmaxgl,mmaxgl)
 deallocate(tmp)
-end subroutine dfgather_R2e_seq_hp
+end subroutine dfgather_R2e_seq_hp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R3e_seq_sp(inparr,noff,moff,nmaxgl,mmaxgl)
+subroutine dfgather_R3e_seq_sp2sp(inparr,noff,moff,nmaxgl,mmaxgl)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather array in global array globar
@@ -2451,21 +2454,21 @@ integer                                      :: kl
 !
 kf = lbound(inparr,3)
 kl = ubound(inparr,3)
-if (allocated(glbarr3)) deallocate(glbarr3)
-allocate(glbarr3(1:nmaxgl,1:mmaxgl,kf:kl))
+if (allocated(glbarr3_sp)) deallocate(glbarr3_sp)
+allocate(glbarr3_sp(1:nmaxgl,1:mmaxgl,kf:kl))
 do k = kf, kl
    do n = 1, nmaxgl
       do m = 1, mmaxgl
-         glbarr3(n,m,k) = inparr(n+noff,m+moff,k)
+         glbarr3_sp(n,m,k) = inparr(n+noff,m+moff,k)
       enddo
    enddo
 enddo
 !
-end subroutine dfgather_R3e_seq_sp
+end subroutine dfgather_R3e_seq_sp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R3e_seq_hp(inparr,noff,moff,nmaxgl, mmaxgl)
+subroutine dfgather_R3e_seq_hp2sp(inparr,noff,moff,nmaxgl, mmaxgl)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather array in global array globar
@@ -2497,14 +2500,14 @@ allocate(tmp(size(inparr,1),size(inparr,2),size(inparr,3)))
 
 
 tmp = real(inparr,sp)
-call dfgather_R3e_seq_sp(tmp,noff,moff,nmaxgl,mmaxgl)
+call dfgather_R3e_seq_sp2sp(tmp,noff,moff,nmaxgl,mmaxgl)
 
 deallocate(tmp)
-end subroutine dfgather_R3e_seq_hp
+end subroutine dfgather_R3e_seq_hp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R4e_seq_sp(inparr,noff,moff,nmaxgl,mmaxgl)
+subroutine dfgather_R4e_seq_sp2sp(inparr,noff,moff,nmaxgl,mmaxgl)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather array in global array globar
@@ -2543,23 +2546,23 @@ kl = ubound(inparr,3)
 lf = lbound(inparr,4)
 ll = ubound(inparr,4)
 
-if (allocated(glbarr4)) deallocate(glbarr4)
-allocate(glbarr4(1:nmaxgl,1:mmaxgl,kf:kl,lf:ll))
+if (allocated(glbarr4_sp)) deallocate(glbarr4_sp)
+allocate(glbarr4_sp(1:nmaxgl,1:mmaxgl,kf:kl,lf:ll))
 do l = lf, ll
    do k = kf, kl
       do n = 1, nmaxgl
          do m = 1, mmaxgl
-            glbarr4(n,m,k,l) = inparr(n+noff,m+moff,k,l)
+            glbarr4_sp(n,m,k,l) = inparr(n+noff,m+moff,k,l)
          enddo
       enddo
    enddo
 enddo
 
-end subroutine dfgather_R4e_seq_sp
+end subroutine dfgather_R4e_seq_sp2sp
 !
 !
 !===============================================================================
-subroutine dfgather_R4e_seq_hp(inparr,noff,moff,nmaxgl, mmaxgl)
+subroutine dfgather_R4e_seq_hp2sp(inparr,noff,moff,nmaxgl, mmaxgl)
 !!--description-----------------------------------------------------------------
 !
 !    Function:    Gather array in global array globar
@@ -2588,16 +2591,19 @@ real(sp), dimension(:,:,:,:), allocatable    :: tmp
 !
 allocate(tmp(size(inparr,1),size(inparr,2),size(inparr,3),size(inparr,4)))
 tmp = real(inparr,sp)
-call dfgather_R4e_seq_sp(tmp,noff,moff,nmaxgl,mmaxgl)
+call dfgather_R4e_seq_sp2sp(tmp,noff,moff,nmaxgl,mmaxgl)
 deallocate(tmp)
-end subroutine dfgather_R4e_seq_hp
+end subroutine dfgather_R4e_seq_hp2sp
 !
 !
 !===============================================================================
 subroutine dfcleanup_glbarrs
-   if (allocated(glbarr2)) deallocate(glbarr2)
-   if (allocated(glbarr3)) deallocate(glbarr3)
-   if (allocated(glbarr4)) deallocate(glbarr4)
+   if (allocated(glbarr2_sp)) deallocate(glbarr2_sp)
+   if (allocated(glbarr3_sp)) deallocate(glbarr3_sp)
+   if (allocated(glbarr4_sp)) deallocate(glbarr4_sp)
+   if (allocated(glbarr2_hp)) deallocate(glbarr2_hp)
+   if (allocated(glbarr3_hp)) deallocate(glbarr3_hp)
+   if (allocated(glbarr4_hp)) deallocate(glbarr4_hp)
    if (allocated(glbari2)) deallocate(glbari2)
 end subroutine dfcleanup_glbarrs
 

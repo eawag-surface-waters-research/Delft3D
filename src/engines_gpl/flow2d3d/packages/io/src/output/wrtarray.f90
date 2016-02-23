@@ -1610,7 +1610,7 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
                      & kmaxout, lk, uk, ul, ierr, lundia, varptr, varnam, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr4, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr4_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -1657,7 +1657,7 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
                      & kmaxout, lk, uk, ul, ierr, lundia, varptr, varnam, kfmin, kfmax)
     else
        !
-       ! TODO: It would be more efficient to just fill glbarr4 with -999.0_fp values, but I'm not sure
+       ! TODO: It would be more efficient to just fill glbarr4_sp with -999.0_fp values, but I'm not sure
        !       whether we can guarantee that it has been allocated with the appropriate size. Should
        !       check this and optimize.
        !
@@ -1682,7 +1682,7 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
                 namlen = min (16,len(grpnam))
                 grpnam_nfs = grpnam(1:namlen)
                 !
-                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr4)
+                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr4_sp)
                 if (ierr /= 0) then
                    ierr = neferr(0, errmsg)
                    call prterr(lundia, 'P004', errmsg)
@@ -1690,7 +1690,7 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
              case (FTYPE_NETCDF)
                 ierr = nf90_inq_varid(fds, varnam, idvar)
                 if (ierr == nf90_noerr) then
-                    ierr = nf90_put_var  (fds, idvar, glbarr4, start=(/ 1, 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, ul, 1 /))
+                    ierr = nf90_put_var  (fds, idvar, glbarr4_sp, start=(/ 1, 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, ul, 1 /))
                 endif
                 call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           endselect
@@ -1705,7 +1705,7 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
                      & kmaxout, lk, uk, ul,ierr, lundia, var, varnam, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr4, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr4_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -1788,7 +1788,7 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr4)
+             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr4_sp)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -1796,7 +1796,7 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, glbarr4, start=(/ 1, 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, ul, 1 /))
+                 ierr = nf90_put_var  (fds, idvar, glbarr4_sp, start=(/ 1, 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, ul, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
        endselect
@@ -1811,7 +1811,7 @@ subroutine wrtarray_nmll(fds, filename, filetype, grpnam, &
                     & u3, u4, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr4, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr4_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -1869,7 +1869,7 @@ subroutine wrtarray_nmll(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr4)
+             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr4_sp)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -1877,7 +1877,7 @@ subroutine wrtarray_nmll(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, glbarr4, start=(/ 1, 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, u3, u4, 1 /))
+                 ierr = nf90_put_var  (fds, idvar, glbarr4_sp, start=(/ 1, 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, u3, u4, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
        endselect
@@ -1892,7 +1892,7 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
                      & kmaxout, lk, uk, ierr, lundia, varptr, varnam, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr3, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr3_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -1938,7 +1938,7 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
                      & kmaxout, lk, uk, ierr, lundia, varptr, varnam, kfmin, kfmax)
     else
        !
-       ! TODO: It would be more efficient to just fill glbarr3 with -999.0_fp values, but I'm not sure
+       ! TODO: It would be more efficient to just fill glbarr3_sp with -999.0_fp values, but I'm not sure
        !       whether we can guarantee that it has been allocated with the appropriate size. Should
        !       check this and optimize.
        !
@@ -1963,7 +1963,7 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
                 namlen = min (16,len(grpnam))
                 grpnam_nfs = grpnam(1:namlen)
                 !
-                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3)
+                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3_sp)
                 if (ierr /= 0) then
                    ierr = neferr(0, errmsg)
                    call prterr(lundia, 'P004', errmsg)
@@ -1971,7 +1971,7 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
              case (FTYPE_NETCDF)
                 ierr = nf90_inq_varid(fds, varnam, idvar)
                 if (ierr == nf90_noerr) then
-                    ierr = nf90_put_var  (fds, idvar, glbarr3, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, 1 /))
+                    ierr = nf90_put_var  (fds, idvar, glbarr3_sp, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, 1 /))
                 endif
                 call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           endselect
@@ -1986,7 +1986,7 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
                     & kmaxout, lk, uk, ierr, lundia, var, varnam, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr3, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr3_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2064,7 +2064,7 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3)
+             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3_sp)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -2072,7 +2072,7 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, glbarr3, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, 1 /))
+                 ierr = nf90_put_var  (fds, idvar, glbarr3_sp, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, kmaxout, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
        endselect
@@ -2127,7 +2127,7 @@ subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
                      & ul, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr3, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr3_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2168,7 +2168,7 @@ subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
                      & ul, ierr, lundia, varptr, varnam)
     else
        !
-       ! TODO: It would be more efficient to just fill glbarr3 with -999.0_fp values, but I'm not sure
+       ! TODO: It would be more efficient to just fill glbarr3_sp with -999.0_fp values, but I'm not sure
        !       whether we can guarantee that it has been allocated with the appropriate size. Should
        !       check this and optimize.
        !
@@ -2193,7 +2193,7 @@ subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
                 namlen = min (16,len(grpnam))
                 grpnam_nfs = grpnam(1:namlen)
                 !
-                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3)
+                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3_sp)
                 if (ierr /= 0) then
                    ierr = neferr(0, errmsg)
                    call prterr(lundia, 'P004', errmsg)
@@ -2201,7 +2201,7 @@ subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
              case (FTYPE_NETCDF)
                 ierr = nf90_inq_varid(fds, varnam, idvar)
                 if (ierr == nf90_noerr) then
-                    ierr = nf90_put_var  (fds, idvar, glbarr3, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, ul, 1 /))
+                    ierr = nf90_put_var  (fds, idvar, glbarr3_sp, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, ul, 1 /))
                 endif
                 call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           endselect
@@ -2216,7 +2216,7 @@ subroutine wrtarray_nml(fds, filename, filetype, grpnam, &
                     & ul, ierr, lundia, var, varnam)
 use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr3, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr3_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2273,7 +2273,7 @@ use precision
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3)
+             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr3_sp)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -2281,7 +2281,7 @@ use precision
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, glbarr3, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, ul, 1 /))
+                 ierr = nf90_put_var  (fds, idvar, glbarr3_sp, start=(/ 1, 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, ul, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
        endselect
@@ -2373,7 +2373,7 @@ subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
                      & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr2_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2413,7 +2413,7 @@ subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
                      & ierr, lundia, varptr, varnam)
     else
        !
-       ! TODO: It would be more efficient to just fill glbarr2 with -999.0_fp values, but I'm not sure
+       ! TODO: It would be more efficient to just fill glbarr2_sp with -999.0_fp values, but I'm not sure
        !       whether we can guarantee that it has been allocated with the appropriate size. Should
        !       check this and optimize.
        !
@@ -2438,7 +2438,7 @@ subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
                 namlen = min (16,len(grpnam))
                 grpnam_nfs = grpnam(1:namlen)
                 !
-                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2)
+                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2_sp)
                 if (ierr /= 0) then
                    ierr = neferr(0, errmsg)
                    call prterr(lundia, 'P004', errmsg)
@@ -2446,7 +2446,7 @@ subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
              case (FTYPE_NETCDF)
                 ierr = nf90_inq_varid(fds, varnam, idvar)
                 if (ierr == nf90_noerr) then
-                    ierr = nf90_put_var  (fds, idvar, glbarr2, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
+                    ierr = nf90_put_var  (fds, idvar, glbarr2_sp, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
                 endif
                 call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           endselect
@@ -2461,7 +2461,7 @@ subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
                      & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr2_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2501,7 +2501,7 @@ subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
                      & ierr, lundia, varptr, varnam)
     else
        !
-       ! TODO: It would be more efficient to just fill glbarr2 with -999.0_fp values, but I'm not sure
+       ! TODO: It would be more efficient to just fill glbarr2_sp with -999.0_fp values, but I'm not sure
        !       whether we can guarantee that it has been allocated with the appropriate size. Should
        !       check this and optimize.
        !
@@ -2526,7 +2526,7 @@ subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
                 namlen = min (16,len(grpnam))
                 grpnam_nfs = grpnam(1:namlen)
                 !
-                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2)
+                ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2_sp)
                 if (ierr /= 0) then
                    ierr = neferr(0, errmsg)
                    call prterr(lundia, 'P004', errmsg)
@@ -2534,7 +2534,7 @@ subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
              case (FTYPE_NETCDF)
                 ierr = nf90_inq_varid(fds, varnam, idvar)
                 if (ierr == nf90_noerr) then
-                    ierr = nf90_put_var  (fds, idvar, glbarr2, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
+                    ierr = nf90_put_var  (fds, idvar, glbarr2_sp, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
                 endif
                 call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           endselect
@@ -2549,7 +2549,7 @@ subroutine wrtarray_nm_2d(fds, filename, filetype, grpnam, &
                    & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr2_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2585,7 +2585,7 @@ subroutine wrtarray_nm_sp(fds, filename, filetype, grpnam, &
                    & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr2_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2638,7 +2638,7 @@ subroutine wrtarray_nm_sp(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2)
+             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2_sp)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -2646,7 +2646,7 @@ subroutine wrtarray_nm_sp(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, glbarr2, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
+                 ierr = nf90_put_var  (fds, idvar, glbarr2_sp, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
        endselect
@@ -2660,7 +2660,7 @@ subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
                    & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
+    use dffunctionals, only: glbarr2_sp, dfgather, dfgather_seq
     use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
     use globaldata
     !
@@ -2713,7 +2713,7 @@ subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2)
+             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, glbarr2_sp)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -2721,7 +2721,7 @@ subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, glbarr2, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
+                 ierr = nf90_put_var  (fds, idvar, glbarr2_sp, start=(/ 1, 1, itime /), count = (/gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
        endselect

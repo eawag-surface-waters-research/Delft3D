@@ -274,9 +274,9 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
     !
     if (fouelp(ifou)=='x' .or. fouelp(ifou)=='i') then
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-          if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
-          allocate(glbarr3(nmaxgl,mmaxgl,3), stat = ierror)
-          glbarr3 = defaul
+          if (allocated(glbarr3_sp)) deallocate(glbarr3_sp, stat = ierror)
+          allocate(glbarr3_sp(nmaxgl,mmaxgl,3), stat = ierror)
+          glbarr3_sp = defaul
           do n = 1, nmaxus
              do m = 1, mmax
                 if (kcs(n,m) == 1) then
@@ -284,24 +284,24 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
                    ! Only write values unequal to initial min/max values (-/+1.0e+30)
                    !
                    if (comparereal(abs(fousma(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,1) = real(fousma(n,m,ifou),sp)
+                      glbarr3_sp(n,m,1) = real(fousma(n,m,ifou),sp)
                    endif
                    if (comparereal(abs(fousma(n,m,ifou+1)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,2) = real(fousma(n,m,ifou+1),sp)
+                      glbarr3_sp(n,m,2) = real(fousma(n,m,ifou+1),sp)
                    endif
                    if (comparereal(abs(fouvec(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,3) = real(fouvec(n,m,ifou),sp)
+                      glbarr3_sp(n,m,3) = real(fouvec(n,m,ifou),sp)
                    endif
                 endif
              enddo
           enddo
           if (inode == master) then
              fouvar = fouref(ifou,2)
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,3), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,3), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
           endif
        else
           do n = 1, nmaxus
@@ -441,39 +441,39 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
           if (inode == master) then
              !
-             ! Feed the single precision array glbarr3 to nf90_put_var
+             ! Feed the single precision array glbarr3_sp to nf90_put_var
              ! instead of the flexible precision arrays fousma/fousmb
              !
-             if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
-             allocate(glbarr3(nmaxgl,mmaxgl,4), stat = ierror)
-             glbarr3 = defaul
+             if (allocated(glbarr3_sp)) deallocate(glbarr3_sp, stat = ierror)
+             allocate(glbarr3_sp(nmaxgl,mmaxgl,4), stat = ierror)
+             glbarr3_sp = defaul
              do n = 1, nmaxus
                 do m = 1, mmax
                    !
                    ! Only write values unequal to initial min/max values (-/+1.0e+30)
                    !
                    if (comparereal(abs(fousma(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,1) = real(fousma(n,m,ifou)  , sp)
+                      glbarr3_sp(n,m,1) = real(fousma(n,m,ifou)  , sp)
                    endif
                    if (comparereal(abs(fousmb(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,2) = real(fousmb(n,m,ifou)  , sp)
+                      glbarr3_sp(n,m,2) = real(fousmb(n,m,ifou)  , sp)
                    endif
                    if (comparereal(abs(fousma(n,m,ifou+1)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,3) = real(fousma(n,m,ifou+1), sp)
+                      glbarr3_sp(n,m,3) = real(fousma(n,m,ifou+1), sp)
                    endif
                    if (comparereal(abs(fousmb(n,m,ifou+1)),1.0e29_fp)==-1) then
-                      glbarr3(n,m,4) = real(fousmb(n,m,ifou+1), sp)
+                      glbarr3_sp(n,m,4) = real(fousmb(n,m,ifou+1), sp)
                    endif
                 enddo
              enddo
              fouvar = fouref(ifou,2)
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,3), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,3), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,4), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,4), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
           endif
        endif
     endif
@@ -485,9 +485,9 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
        blnm = 'EP??'
        write (blnm(3:4), '(i2.2)') iblep
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-          if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
-          allocate(glbarr3(nmaxgl,mmaxgl,4), stat = ierror)
-          glbarr3 = defaul
+          if (allocated(glbarr3_sp)) deallocate(glbarr3_sp, stat = ierror)
+          allocate(glbarr3_sp(nmaxgl,mmaxgl,4), stat = ierror)
+          glbarr3_sp = defaul
        else
           write (lunfou, '(a,a16)') '* Elliptic parameters of      : ', namfun
           !
@@ -576,10 +576,10 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
                 ! Write to file
                 !
                 if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-                   glbarr3(n,m,1) = real(elam,sp)
-                   glbarr3(n,m,2) = real(elex,sp)
-                   glbarr3(n,m,3) = real(elfi,sp)
-                   glbarr3(n,m,4) = real(elps,sp)
+                   glbarr3_sp(n,m,1) = real(elam,sp)
+                   glbarr3_sp(n,m,2) = real(elex,sp)
+                   glbarr3_sp(n,m,3) = real(elfi,sp)
+                   glbarr3_sp(n,m,4) = real(elps,sp)
                 else
                    write (lunfou,'(4(f12.3,1x),2(i5,1x),4(e14.6E3,1x),3(i2,1x))') &
                        & xz(n, m), yz(n, m), xcor(n, m), ycor(n, m), m, n, elam,  &
@@ -587,7 +587,7 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
                 endif
              else
                 if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
-                   glbarr3(n,m,:) = defaul
+                   glbarr3_sp(n,m,:) = defaul
                 else
                    write (lunfou,'(4(f12.3,1x),2(i5,1x),4(f14.3,1x),3(i2,1x))') &
                        & defaul, defaul, xcor(n, m), ycor(n, m), m, n, defaul,  &
@@ -599,13 +599,13 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
        if (getfiletype(gdp, FILOUT_FOU) == FTYPE_NETCDF) then
           if (inode == master) then
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,1), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,2), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,3), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,3), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
              fouvar = fouvar + 1
-             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3(:,:,4), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
+             ierror = nf90_put_var(idfile, idvar(fouvar)  , glbarr3_sp(:,:,4), start=(/ 1, 1/), count = (/nmaxgl, mmaxgl/)); call nc_check_err(lundia, ierror, "put_var "//fouvarnam(fouvar), "fourier file")
           endif
        endif
     endif
