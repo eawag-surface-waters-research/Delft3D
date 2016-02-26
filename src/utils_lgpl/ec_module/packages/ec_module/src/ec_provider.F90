@@ -110,11 +110,10 @@ module m_ec_provider
              
          if (index(trim(fileName)//'|','.bc')>0) then                               ! ASCII: bc-format  : detection is extension-based
             bcBlockPtr%ftype=BC_FTYPE_ASCII
-         endif
-         if (index(trim(fileName)//'|','.nc')>0) then                               ! NETCDF: nc-format 
+         else if (index(trim(fileName)//'|','.nc')>0) then                               ! NETCDF: nc-format 
             !if (index(plilabel,'_')<=0) then 
-            !   return                                                               ! If this was not pli-label  bla_0001 then its is a qhbnd
-            !endif                                                                   ! not supported in combination with netcdf-files 
+            !   return                                                              ! If this was not pli-label  bla_0001 then its is a qhbnd
+            !endif                                                                  ! not supported in combination with netcdf-files 
                                                                                     ! This is something dirty, which deserves refactoring
                                                                                     ! but no alternative for it as we speak 
             bcBlockPtr%ncptr => ecSupportFindNetCDFByFilename(instancePtr, fileName)! is there a netCDF instance with this file ?
@@ -126,7 +125,11 @@ module m_ec_provider
                 endif 
             endif
             bcBlockPtr%ftype=BC_FTYPE_NETCDF
+         else
+           call setECMessage("Forcing file ("//trim(fileName)//") should either have extension .nc (netcdf timeseries file) or .bc (ascii BC-file).")
+           return
          endif 
+         
          if (.not.ecBCInit (instancePtr, filename, quantityName, plilabel, bcBlockPtr, iostat)) return
 
          ! Every BC block (instance) needs an associated filereader referring to it  
@@ -157,7 +160,7 @@ module m_ec_provider
             case (BC_FUNC_TIM3D)
                success = ecProviderCreatet3DItems(instancePtr, fileReaderPtr)
             case default
-               call setECMessage("ERROR: unknown function type.")
+               call setECMessage("ERROR: unknown function type.")             ! RL666 Todo: expand info on which file this is ...
          end select
          if (.not.success) then
             return
