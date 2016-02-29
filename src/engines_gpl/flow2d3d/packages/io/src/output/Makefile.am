@@ -100,8 +100,6 @@ libIOOutput_la_SOURCES = \
          wrkent.f90 \
          wrmfluff.f90 \
          wrmorm.f90 \
-         wrmorm1.f90 \
-         wrmorm2.f90 \
          wrparm.f90 \
          wrplot.f90 \
          wrrolm.f90 \
