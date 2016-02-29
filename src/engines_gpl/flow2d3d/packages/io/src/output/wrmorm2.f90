@@ -103,6 +103,7 @@ subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     integer                 :: iddim_m
     integer                 :: iddim_lsedtot
     integer                 :: iddim_nlyr
+    integer                 :: iddim_nlyrp1
 !
 !! executable statements -------------------------------------------------------
 !
@@ -120,12 +121,13 @@ subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        iddim_m       = adddim(gdp, lundia, FILOUT_MAP, 'M'      , mmaxgl        ) ! Number of M-grid points (cell centres)
        iddim_lsedtot = adddim(gdp, lundia, FILOUT_MAP, 'LSEDTOT', lsedtot       ) ! Number of total sediment fractions
        iddim_nlyr    = adddim(gdp, lundia, FILOUT_MAP, 'nlyr'   , nlyr          ) ! Number of bed layers
+       iddim_nlyrp1  = adddim(gdp, lundia, FILOUT_MAP, 'nlyrp1' , nlyr+1        ) ! Number of bed layer interfaces
        !
        ! Define elements
        !
        call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MSED', ' ', IO_REAL4     , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Mass of sediment in layer', unit='kg/m2', acl='z')
        call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'LYRFRAC', ' ', IO_REAL4  , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Volume fraction of sediment in layer', acl='z')
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'THLYR', ' ', IO_REAL4    , 3, dimids=(/iddim_n, iddim_m, iddim_nlyr/), longname='Thickness of sediment layer', unit='m', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DP_BEDLYR', ' ', IO_REAL4  , 3, dimids=(/iddim_n, iddim_m, iddim_nlyrp1/), longname='Vertical position of sediment layer interface', unit='m', acl='z')
        if (iporos>0) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'EPSPOR', ' ', IO_REAL4, 3, dimids=(/iddim_n, iddim_m, iddim_nlyr/), longname='Porosity coefficient', acl='z')
        endif
@@ -136,7 +138,6 @@ subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        ! element 'MSED'
        !
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot) )
-       rbuff4(:, :, :, :) = -999.0_fp
        do l = 1, lsedtot
           do k = 1, nlyr
              do m = 1, mmax
@@ -156,7 +157,6 @@ subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        ! element 'LYRFRAC'
        !
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot) )
-       rbuff4(:, :, :, :) = -999.0_fp
        do l = 1, lsedtot
           if (iporos==0) then
              dens = cdryb(l)
@@ -182,21 +182,21 @@ subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        deallocate(rbuff4)
        if (ierror /= 0) goto 9999
        !
-       ! element 'THLYR'
+       ! element 'DP_BEDLYR'
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr) )
-       rbuff3(:, :, :) = -999.0_fp
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr+1) )
+       rbuff3(:, :, 1) = 0.0_fp
        do k = 1, nlyr
           do m = 1, mmax
              do n = 1, nmaxus
                 call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff3(n, m, k) = thlyr(k, nm)
+                rbuff3(n, m, k+1) = rbuff3(n, m, k) + thlyr(k, nm)
              enddo
           enddo
        enddo
        call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
-                     & nf, nl, mf, ml, iarrc, gdp, nlyr, &
-                     & ierror, lundia, rbuff3, 'THLYR')
+                     & nf, nl, mf, ml, iarrc, gdp, nlyr+1, &
+                     & ierror, lundia, rbuff3, 'DP_BEDLYR')
        deallocate(rbuff3)
        if (ierror /= 0) goto 9999
        !

@@ -1072,9 +1072,9 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
        k = k+1
     enddo
     !
-    ! don't fill the last underlayer
+    ! don't fill the last underlayer unless it's empty
     !
-    if (k == nlyr) k = k-1
+    if (k == nlyr .and. thlyr(k, nm)>0.0_fp) k = k-1
     !
     ! start filling upwards
     !
@@ -1083,7 +1083,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
           !
           ! sediment can be added to this layer
           !
-          if ( dz > theulyr-thlyr(k, nm) ) then
+          if ( dz > theulyr-thlyr(k, nm) .and. thlyr(k, nm)>0.0_fp ) then
              !
              ! not all sediment can be added to this layer
              !
@@ -2032,11 +2032,16 @@ function allocmorlyr(this) result (istat)
     !                   neulyr  eulerian underlayers
     !                   1       persistent base layer
     !
-    settings%nlyr   = 2 + settings%nlalyr + settings%neulyr
-    settings%keuler = 2 + settings%nlalyr
-    if (settings%exchlyr) then
-       settings%nlyr   = settings%nlyr + 1
-       settings%keuler = settings%keuler + 1
+    if (settings%iunderlyr==1) then
+       settings%nlyr   = 1
+       settings%keuler = 1
+    elseif (settings%iunderlyr==2) then
+       settings%nlyr   = 2 + settings%nlalyr + settings%neulyr
+       settings%keuler = 2 + settings%nlalyr
+       if (settings%exchlyr) then
+          settings%nlyr   = settings%nlyr + 1
+          settings%keuler = settings%keuler + 1
+       endif
     endif
     !
     nmlb  = settings%nmlb
@@ -2685,7 +2690,7 @@ subroutine bedcomp_use_bodsed(this)
           enddo
           !
           ! base layer
-          !
+          ! 
           thlyr(this%settings%nlyr, nm) = sedthick
           fac = thlyr(this%settings%nlyr, nm)/thsed
           do ised = 1, this%settings%nfrac

@@ -103,7 +103,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        endif
        call wrmorm1   (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                      & irequest  ,fds       ,grpnam    ,bodsed    ,dpsed     , &
-                     & filename  ,gdp       ,filetype  , &
+                     & filename  ,gdp       ,filetype  ,cdryb     , &
                      & mf        ,ml        ,nf        ,nl        ,iarrc     )
     case (2)
        istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'nlyr',nlyr)

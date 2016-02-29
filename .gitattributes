@@ -671,6 +671,7 @@ src/engines_gpl/flow2d3d/packages/io/src/input/hybfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/icfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/inicut.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/inimet.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/inimorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/morbndfill.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/numcmp.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/polygon_module.f90 -text
@@ -1151,7 +1152,6 @@ src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inidis.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inieva.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inigeo.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inigrd.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inimorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/iniphy.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inirgl.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inised.f90 -text

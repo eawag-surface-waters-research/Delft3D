@@ -1,7 +1,12 @@
+module m_restart_lyrs
+
+contains
+
 subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                        & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
                        & mmax      ,nlyr      ,success   ,svfrac    , &
-                       & iporosity ,gdp       )
+                       & iporosity ,iunderlyr ,bodsed    ,dpsed     , &
+                       & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -55,6 +60,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !
     integer                                                                                   :: i_restart
     integer                                                                                   :: iporosity
+    integer                                                                                   :: iunderlyr
     integer                                                                                   :: lsedtot
     integer                                                                                   :: nlyr
     integer                                                                                   :: nmaxus
@@ -62,9 +68,16 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     logical                                                                                   :: error
     logical                                                                     , intent(out) :: success
     real(fp), dimension(lsedtot)                                                , intent(in)  :: cdryb
-    real(fp), dimension(lsedtot, nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: msed
-    real(fp), dimension(nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                       :: svfrac
-    real(fp), dimension(nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)         , intent(out) :: thlyr
+    real(fp), dimension(:, :, :), pointer :: msed
+    real(prec), dimension(:, :), pointer    :: bodsed
+    real(fp), dimension(:, :), pointer                       :: svfrac
+    real(fp), dimension(:, :), pointer          :: thlyr
+    real(fp), dimension(:), pointer               :: dpsed
+!    real(fp), dimension(lsedtot, nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: msed
+!    real(prec), dimension(lsedtot, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)    , intent(out) :: bodsed
+!    real(fp), dimension(nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                       :: svfrac
+!    real(fp), dimension(nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)         , intent(out) :: thlyr
+!    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: dpsed
     character(*)                                                                              :: restid
 !
 ! Local variables
@@ -198,38 +211,76 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     !
     elmndm = 5
     ierror = inqelm(fds , 'MSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-    if (ierror /= 0) then
+    if (ierror == 0) then
+        rst_nlyr = elmdms(3)
+    else
         ierror  = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-        layerfrac = 1
-        if (ierror /= 0) goto 50
+        if (ierror == 0) then
+            layerfrac = 1
+            rst_nlyr = elmdms(3)
+        else
+            ierror  = inqelm(fds , 'BODSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+            if (ierror == 0) then
+                layerfrac = 2
+                rst_nlyr = 1
+            else
+                goto 50
+            endif
+        endif
     endif
-    rst_nlyr = elmdms(3)
     !
     ! allocate restart-data for whole domain
     !
     allocate(rst_msed(nmaxgl, mmaxgl, rst_nlyr, rst_lsedtot))
-    allocate(rst_thlyr(nmaxgl, mmaxgl, rst_nlyr))
+    allocate(rst_thlyr(nmaxgl, mmaxgl, rst_nlyr+1)) ! reserve enough space for DP_BEDLYR 
     !
-    if (layerfrac==1) then
-        ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
-                 & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )       
-        if (ierror /= 0) goto 50
-    else
+    select case (layerfrac)
+    case (0)
         ierror = getelt(fds , 'map-sed-series', 'MSED', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )
         if (ierror /= 0) goto 50
-    endif
+    case (1)
+        ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
+                 & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )       
+        if (ierror /= 0) goto 50
+    case (2)
+        ierror = getelt(fds , 'map-sed-series', 'BODSED', uindex, 1, &
+                 & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )
+        if (ierror /= 0) goto 50
+    end select
     !
-    ierror = getelt(fds , 'map-sed-series', 'THLYR', uindex, 1, &
+    select case (layerfrac)
+    case (0,1)
+        ierror = inqelm(fds , 'DP_BEDLYR', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+        if (ierror == 0) then
+            ierror = getelt(fds , 'map-sed-series', 'DP_BEDLYR', uindex, 1, &
+                          & mmaxgl*nmaxgl*(rst_nlyr+1)*4, rst_thlyr )
+            if (ierror/= 0) goto 50
+            do k = 1, rst_nlyr
+                do m = 1, mmaxgl
+                    do n = 1, nmaxgl
+                        rst_thlyr(n,m,k) = rst_thlyr(n,m,k+1) - rst_thlyr(n,m,k)
+                    enddo
+                enddo
+            enddo
+        else
+            ierror = getelt(fds , 'map-sed-series', 'THLYR', uindex, 1, &
+                          & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
+            if (ierror/= 0) goto 50
+        endif
+    case (2)
+        ierror = getelt(fds , 'map-sed-series', 'DPSED', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
-    if (ierror/= 0) goto 50
+        if (ierror /= 0) goto 50
+    end select
+    !
     if (nlyr>=rst_nlyr) then
        !
        ! more layers in simulation than in restart file (or same number)
        !
        ! copy first layer
        !
-       thlyr_g(1:nmaxgl,1:mmaxgl,1)             = rst_thlyr(1:nmaxgl,1:mmaxgl,1)
+       thlyr_g(1:nmaxgl,1:mmaxgl,1)          = rst_thlyr(1:nmaxgl,1:mmaxgl,1)
        msed_g(1:nmaxgl,1:mmaxgl,1,1:lsedtot) = rst_msed(1:nmaxgl,1:mmaxgl,1,1:lsedtot)
        !
        ! insert empty layers (if necessary)
@@ -241,7 +292,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
        !
        ! copy remaining layers
        !
-       thlyr_g(1:nmaxgl,1:mmaxgl,nlyr-rst_nlyr+2:nlyr)             = rst_thlyr(1:nmaxgl,1:mmaxgl,2:rst_nlyr)
+       thlyr_g(1:nmaxgl,1:mmaxgl,nlyr-rst_nlyr+2:nlyr)          = rst_thlyr(1:nmaxgl,1:mmaxgl,2:rst_nlyr)
        msed_g(1:nmaxgl,1:mmaxgl,nlyr-rst_nlyr+2:nlyr,1:lsedtot) = rst_msed(1:nmaxgl,1:mmaxgl,2:rst_nlyr,1:lsedtot)
     else ! nlyr<rst_nlyr
        !
@@ -249,18 +300,18 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
        !
        ! copy the first nlyr layers
        !
-       thlyr_g(1:nmaxgl,1:mmaxgl,1:nlyr)             = rst_thlyr(1:nmaxgl,1:mmaxgl,1:nlyr)
+       thlyr_g(1:nmaxgl,1:mmaxgl,1:nlyr)          = rst_thlyr(1:nmaxgl,1:mmaxgl,1:nlyr)
        msed_g(1:nmaxgl,1:mmaxgl,1:nlyr,1:lsedtot) = rst_msed(1:nmaxgl,1:mmaxgl,1:nlyr,1:lsedtot)
        !
        !
        ! add contents of other layers to last layer
        !
        do k = nlyr+1, rst_nlyr
-          thlyr_g(1:nmaxgl,1:mmaxgl,nlyr)        = thlyr_g(1:nmaxgl,1:mmaxgl,nlyr) &
-                                             & + rst_thlyr(1:nmaxgl,1:mmaxgl,k)
+          thlyr_g(1:nmaxgl,1:mmaxgl,nlyr)     = thlyr_g(1:nmaxgl,1:mmaxgl,nlyr) &
+                                            & + rst_thlyr(1:nmaxgl,1:mmaxgl,k)
           do l = 1, lsedtot
              msed_g(1:nmaxgl,1:mmaxgl,nlyr,l) = msed_g(1:nmaxgl,1:mmaxgl,nlyr,l) &
-                    & + rst_msed(1:nmaxgl,1:mmaxgl,k,l) 
+                                            & + rst_msed(1:nmaxgl,1:mmaxgl,k,l) 
           enddo
        enddo
     endif
@@ -276,49 +327,37 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     call dfbroadc_gdp ( ierror, 1, dfint, gdp )
     if (ierror/=0) goto 9999
     !
-    call dfbroadc_gdp ( thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
-    call dfbroadc_gdp ( msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
+    call dfbroadc_gdp (thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
+    call dfbroadc_gdp (msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
     call dfbroadc_gdp (layerfrac, 1, dfint, gdp)
     ! 
     ! extract relevant parts of msed, thlyr, etc for each subdomain 
     ! 
     call dfsync ( gdp ) 
-    do j = mfg, mlg 
-       do i = nfg, nlg
-          do k = 1, nlyr
-             do l = 1, lsedtot
-                msed(l,k,i-nfg+1,j-mfg+1) = msed_g(i,j,k,l)
-             enddo
-             thlyr(k,i-nfg+1,j-mfg+1) = thlyr_g(i,j,k)
-          enddo
-       enddo 
-    enddo 
-    deallocate(msed_g, thlyr_g)    
+    !
+    ! correct msed if it contains volume fractions
     !
     if (layerfrac==1) then
-       !
-       ! msed contains volume fractions
-       !
        if (iporosity==0) then
-          do l = 1,lsedtot
-             do k = 1, nlyr
-                do m = 1, mmax
-                   do n = 1, nmaxus
-                      msed(l,k,n,m) = msed(l,k,n,m)*thlyr(k,n,m)*cdryb(l)
+          do j = mfg, mlg
+             do i = nfg, nlg
+                do k = 1, nlyr
+                   do l = 1,lsedtot
+                      msed_g(l,k,i,j) = msed_g(l,k,i,j)*thlyr_g(k,i,j)*cdryb(l)
                    enddo
                 enddo
              enddo
           enddo
        else
-          do k = 1, nlyr
-             do m = 1, mmax
-                do n = 1, nmaxus
+          do j = mfg, mlg
+             do i = nfg, nlg
+                do k = 1, nlyr
                    !
                    ! determine mass fractions
                    !
                    mfracsum = 0.0_fp
                    do l = 1, lsedtot
-                      mfrac(l) = msed(l,k,n,m)*rhosol(l)
+                      mfrac(l) = msed_g(l,k,i,j)*rhosol(l)
                       mfracsum = mfracsum + mfrac(l)
                    enddo
                    if (mfracsum>0.0_fp) then
@@ -329,7 +368,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                       ! obtain porosity and sediment thickness without pores
                       !
                       call getporosity(gdp%gdmorlyr, mfrac, poros)
-                      sedthick = thlyr(k,n,m)*(1.0_fp-poros)
+                      sedthick = thlyr_g(k,i,j)*(1.0_fp-poros)
                    else
                       sedthick = 0.0_fp
                       poros = 0.0_fp
@@ -338,26 +377,53 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                    ! convert volume fractions to sediment mass
                    !
                    do l = 1, lsedtot
-                      msed(l,k,n,m) = msed(l,k,n,m)*sedthick*rhosol(l)
+                      msed_g(l,k,i,j) = msed_g(l,k,i,j)*sedthick*rhosol(l)
                    enddo
-                   svfrac(k,n,m) = 1.0_fp-poros
                 enddo
-             enddo
-          enddo
-       endif
-    else
-       if (iporosity>0) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                sedthick = 0.0_fp
-                do l = 1, lsedtot
-                   sedthick = sedthick + msed(l,k,n,m)/rhosol(l)
-                enddo
-                svfrac(k,n,m) = sedthick/thlyr(k,n,m)
              enddo
           enddo
        endif
     endif
+    !
+    ! copy data to appropriate arrays
+    !
+    if (iunderlyr==2) then
+       do j = mfg, mlg 
+          do i = nfg, nlg
+             call n_and_m_to_nm(i-nfg+1, j-mfg+1, nm, gdp)
+             do k = 1, nlyr
+                do l = 1, lsedtot
+                   msed(l, k, nm) = msed_g(i, j, k, l)
+                enddo
+                thlyr(k, nm) = thlyr_g(i, j, k)
+             enddo
+          enddo 
+       enddo
+       !
+       if (iporosity>0) then
+          do m = 1, mmax
+             do n = 1, nmaxus
+                call n_and_m_to_nm(n, m, nm, gdp)
+                sedthick = 0.0_fp
+                do l = 1, lsedtot
+                   sedthick = sedthick + msed(l, k, nm)/rhosol(l)
+                enddo
+                svfrac(k, nm) = sedthick/thlyr(k, nm)
+             enddo
+          enddo
+       endif
+    else
+       do j = mfg, mlg 
+          do i = nfg, nlg
+             call n_and_m_to_nm(i-nfg+1, j-mfg+1, nm, gdp)
+             do l = 1, lsedtot
+                bodsed(l,nm) = real(msed_g(i, j, 1, l),prec)
+             enddo
+             dpsed(nm) = thlyr_g(i, j, 1)
+          enddo 
+       enddo
+    endif
+    deallocate(msed_g, thlyr_g)    
     success = .true.
     !
 9999 continue
@@ -367,3 +433,5 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
        ierror = clsnef(fds) 
     endif
 end subroutine restart_lyrs
+
+end module m_restart_lyrs

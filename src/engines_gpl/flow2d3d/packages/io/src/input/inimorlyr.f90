@@ -36,6 +36,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     use precision
     use bedcomposition_module
     use m_rdmorlyr, only: rdinimorlyr
+    use m_restart_lyrs
     use globaldata
     !
     implicit none
@@ -84,6 +85,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)                                      :: poros
     real(fp)                                      :: svf
     real(prec)       , dimension(:,:)   , pointer :: bodsed
+    real(fp)         , dimension(:)     , pointer :: dpsed
     real(fp)         , dimension(:,:)   , pointer :: mfluff
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
@@ -98,6 +100,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iunderlyr', iunderlyr)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
     if (istat==0) istat = bedcomp_getpointer_realprec(gdp%gdmorlyr, 'bodsed', bodsed)
+    if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr, 'dpsed', dpsed)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iporosity', iporosity)
     if (iunderlyr==2) then
        if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'msed'     , msed)
@@ -133,13 +136,12 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                   & 'MFLUFF'  ,gdp       )
        endif
        !
-       if (iunderlyr==2) then
-          call restart_lyrs ( &
-                 & error     ,restid    ,i_restart ,msed      , &
-                 & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
-                 & mmax      ,nlyr      ,rst_bedcmp,svfrac    , &
-                 & iporosity ,gdp       )
-       endif
+       call restart_lyrs ( &
+              & error     ,restid    ,i_restart ,msed      , &
+              & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
+              & mmax      ,nlyr      ,rst_bedcmp,svfrac    , &
+              & iporosity ,iunderlyr ,bodsed    ,dpsed     , &
+              & gdp       )
        !
        if (.not.rst_bedcmp) then
           call restart_bodsed ( &

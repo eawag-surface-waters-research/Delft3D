@@ -351,7 +351,6 @@
 		<File RelativePath="src\inichk\inieva.f90"/>
 		<File RelativePath="src\inichk\inigeo.f90"/>
 		<File RelativePath="src\inichk\inigrd.f90"/>
-		<File RelativePath="src\inichk\inimorlyr.f90"/>
 		<File RelativePath="src\inichk\iniphy.f90"/>
 		<File RelativePath="src\inichk\inirgl.f90"/>
 		<File RelativePath="src\inichk\inised.f90"/>
