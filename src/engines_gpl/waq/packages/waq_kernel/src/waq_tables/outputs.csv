@@ -746,15 +746,15 @@ outppr,outpit,outpnm,outpdo,outpsx
 "SPECSUD   ","FrH2Sdis  ",   4,"x",1
 "SPECSUD   ","FrHSdis   ",   5,"x",1
 "SPECSUD   ","FrS2dis   ",   6,"x",1
-"SPECSUDS1 ","DisH2SWKS1",   1,"x",1
-"SPECSUDS1 ","DisHSWKS1 ",   2,"x",1
-"SPECSUDS1 ","DisSWKS1  ",   3,"x",1
+"SPECSUDS1 ","DisH2SS1  ",   1,"x",1
+"SPECSUDS1 ","DisHSS1   ",   2,"x",1
+"SPECSUDS1 ","DisSS1    ",   3,"x",1
 "SPECSUDS1 ","FrH2SdisS1",   4,"x",1
 "SPECSUDS1 ","FrHSdisS1 ",   5,"x",1
 "SPECSUDS1 ","FrS2disS1 ",   6,"x",1
-"SPECSUDS2 ","DisH2SWKS2",   1,"x",1
-"SPECSUDS2 ","DisHSWKS2 ",   2,"x",1
-"SPECSUDS2 ","DisSWKS2  ",   3,"x",1
+"SPECSUDS2 ","DisH2SS2  ",   1,"x",1
+"SPECSUDS2 ","DisHSS2   ",   2,"x",1
+"SPECSUDS2 ","DisSS2    ",   3,"x",1
 "SPECSUDS2 ","FrH2SdisS2",   4,"x",1
 "SPECSUDS2 ","FrHSdisS2 ",   5,"x",1
 "SPECSUDS2 ","FrS2disS2 ",   6,"x",1
