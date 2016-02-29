@@ -415,7 +415,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           enddo
        else
           flspmc = ' '
-          call prop_get(sed_ptr, '*', 'PmCrit', pmcrit(1))
+          call prop_get(sed_ptr, 'SedimentOverall', 'PmCrit', pmcrit(1))
           pmcrit = min(pmcrit(1), 1.0_fp)
        endif
        !
