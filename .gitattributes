@@ -794,8 +794,6 @@ src/engines_gpl/flow2d3d/packages/io/src/output/wrkent.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrm_main.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrmfluff.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrmorm.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/output/wrmorm1.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/output/wrmorm2.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrparm.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrplot.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrrolm.f90 -text

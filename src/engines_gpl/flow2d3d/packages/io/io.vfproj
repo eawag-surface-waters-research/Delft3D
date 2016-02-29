@@ -243,8 +243,6 @@
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\output\wrmfluff.f90"/>
 		<File RelativePath="src\output\wrmorm.f90"/>
-		<File RelativePath="src\output\wrmorm1.f90"/>
-		<File RelativePath="src\output\wrmorm2.f90"/>
 		<File RelativePath="src\output\wrparm.f90"/>
 		<File RelativePath="src\output\wrplot.f90"/>
 		<File RelativePath="src\output\wrrolm.f90"/>
