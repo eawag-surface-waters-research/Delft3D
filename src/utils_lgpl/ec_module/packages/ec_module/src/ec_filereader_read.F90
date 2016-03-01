@@ -661,6 +661,19 @@ contains
          
          ierror = nf90_get_att(fileReaderPtr%fileHandle, varid, "_FillValue", dmiss_nc)
          times_index = ec_undef_int
+
+         if (t0t1 < 0) then
+            if (comparereal(item%sourceT0FieldPtr%timesteps,0.0_hp) == -1) then
+               t0t1 = 0
+            elseif (comparereal(item%sourceT1FieldPtr%timesteps,0.0_hp) == -1) then
+               t0t1 = 1
+            elseif (comparereal(item%sourceT0FieldPtr%timesteps,item%sourceT1FieldPtr%timesteps) /= 1) then
+               t0t1 = 0
+            else
+               t0t1 = 1
+            endif
+         endif
+         !
          !
          ! =============
          ! sanity checks
