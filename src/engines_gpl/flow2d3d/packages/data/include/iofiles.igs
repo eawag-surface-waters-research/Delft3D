@@ -53,6 +53,7 @@
     integer, parameter :: FTYPE_ASCII     = -1
     integer, parameter :: FTYPE_NEFIS     =  0
     integer, parameter :: FTYPE_NETCDF    =  1
+    integer, parameter :: FTYPE_UNFORM    =  2   ! UNFORMATTED
 !
     integer, parameter :: REQUESTTYPE_DEFINE =  1
     integer, parameter :: REQUESTTYPE_WRITE  =  2
