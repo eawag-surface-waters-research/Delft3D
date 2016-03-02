@@ -66,6 +66,7 @@ libIOInput_la_SOURCES = \
          icfil.f90 \
          inicut.f90 \
          inimet.f90 \
+         inimorlyr.f90 \
          morbndfill.f90 \
          numcmp.f90 \
          rdbedformpar.f90 \
