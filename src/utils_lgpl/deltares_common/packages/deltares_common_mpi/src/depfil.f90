@@ -107,7 +107,7 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,array     , &
        ! 
        ! the master opens and reads the depth file 
        ! 
-       if ( inode > master ) goto 10 
+       if ( inode /= master ) goto 10 
        ! 
        if (associated(dims%aggrtable)) then
           nmaxio = size(dims%aggrtable,1)
