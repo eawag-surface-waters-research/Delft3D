@@ -21,18 +21,18 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine sedcar ( pmsa   , fl     , ipoint , increm , noseg  ,
+      subroutine sedim  ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
 !>\file
-!>       Sedimentation routine used for OOC, algae, BOD pools, bacteria etc.
+!>       Sedimentation routine used for IMx
 
 !
 !     Description of the module :
 !
 !        General water quality module for DELWAQ:
 !        SEDIMENTATION FORMULATIONS
-!        MODULE VALID FOR DETC, OOC, DIAT, AAP, BLOOM ALGAE
+!        MODULE VALID FOR IM, IM2, IM3
 !
 ! Name    T   L I/O   Description                                    Units
 ! ----    --- -  -    -------------------                            -----
@@ -74,21 +74,6 @@
       INTEGER       :: IERR2
       INTEGER       :: LUNREP
 
-      IF ( FIRST ) THEN
-         CALL GETCOM('-psedmin', 2 , SW_PSEDMIN, IDUMMY, PSEDMIN, CDUMMY, IERR2)
-         IF ( SW_PSEDMIN ) THEN
-            CALL GETMLU(LUNREP)
-            IF ( IERR2 .EQ. 0 ) THEN
-               WRITE(LUNREP,*) ' option -psedmin found, value: ',PSEDMIN
-            ELSE
-               WRITE(LUNREP,*) ' ERROR: option -psedmin found but value not correct: ',PSEDMIN
-            ENDIF
-         ELSE
-            PSEDMIN = 0.0
-         ENDIF
-         FIRST = .FALSE.
-      ENDIF
-
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -101,6 +86,11 @@
       IP10 = IPOINT(10)
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
+      IP13 = IPOINT(13)
+      IP14 = IPOINT(14)
+      IP15 = IPOINT(15)
+      IP16 = IPOINT(16)
+      IP17 = IPOINT(17)
 
       IN1  = INCREM(1 )
       IN2  = INCREM(2 )
@@ -114,6 +104,11 @@
       IN10 = INCREM(10)
       IN11 = INCREM(11)
       IN12 = INCREM(12)
+      IN13 = INCREM(13)
+      IN14 = INCREM(14)
+      IN15 = INCREM(15)
+      IN16 = INCREM(16)
+      IN17 = INCREM(17)
 
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
@@ -138,10 +133,20 @@
       DEPTH   = PMSA(IP6 )
       DELT    = PMSA(IP7 )
       MINDEP  = PMSA(IP8 )
+      ALPHA   = PMSA(IP9 )
+      P       = PMSA(IP10)
+      PMAX    = PMSA(IP11)
+      PSEDMIN = PMSA(IP12)
 
 !***********************************************************************
 !**** Processes connected to the SEDIMENTATION
 !***********************************************************************
+
+!     if fraction IM1 in second layer P > PMAX then ALPHA = 0 meaning no sedimentations towards S2
+
+      IF ( P .GE. PMAX ) THEN
+         ALPHA = 0.0
+      ENDIF
 
 !     Calculate sedimenation probability
 
@@ -161,6 +166,7 @@
       IF ( DEPTH .LT. MINDEP) THEN
          MAXSED       = 0.0
          FL( 1+IFLUX) = 0.0
+         FL( 2+IFLUX) = 0.0
       ELSE
          POTSED = ZERSED + ( VSED * CONC ) * PSED
 
@@ -168,12 +174,14 @@
          MAXSED = MIN (POTSED, CONC / DELT * DEPTH)
 
 !        convert sedimentation to flux in M/L3/DAY
-         FL( 1+IFLUX) =  MAXSED / DEPTH
+         FL( 1+IFLUX) =  MAXSED*(1.-ALPHA) / DEPTH
+         FL( 2+IFLUX) =  MAXSED*ALPHA      / DEPTH
       ENDIF
 
 !     Output of calculated sedimentation rate
-      PMSA (IP10) = PSED
-      PMSA (IP11) = MAXSED
+      PMSA (IP14) = PSED
+      PMSA (IP15) = MAXSED*(1.-ALPHA)
+      PMSA (IP16) = MAXSED*ALPHA
 !
       ENDIF
       ENDIF
@@ -187,26 +195,30 @@
       IP6   = IP6   + IN6
       IP7   = IP7   + IN7
       IP8   = IP8   + IN8
+      IP9   = IP9   + IN9
       IP10  = IP10  + IN10
       IP11  = IP11  + IN11
-!
+      IP12  = IP12  + IN12
+      IP14  = IP14  + IN14
+      IP15  = IP15  + IN15
+      IP16  = IP16  + IN16
  9000 CONTINUE
 !
       IP1  = IPOINT(1 )
       IP6  = IPOINT(6 )
       IP8  = IPOINT(8 )
-      IP11 = IPOINT(11)
+      IP15 = IPOINT(15)
 
 !.....Exchangeloop over de horizontale richting
       DO 8000 IQ=1,NOQ1+NOQ2
 
-         PMSA(IP12) = 0.0
+         PMSA(IP17) = 0.0
 
-         IP12 = IP12 + IN12
+         IP17 = IP17 + IN17
 
  8000 CONTINUE
 
-      IP9 = IP9 + ( NOQ1+NOQ2 ) * IN9
+      IP13= IP13+ ( NOQ1+NOQ2 ) * IN13
 
 !.....Exchangeloop over de verticale richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3+NOQ4
@@ -228,7 +240,7 @@
 
 !               MAXSED = PMSA (IP11+(IVAN-1)*IN11)
 !               CONC   = MAX (1E-20, PMSA(IP1+(IVAN-1)*IN1) )
-!               PMSA(IP12) = MAXSED/86400./CONC
+!               PMSA(IP17) = MAXSED/86400./CONC
                 FL ( 1 + (IVAN-1)*NOFLUX ) = 0.0
 
             ELSEIF (IKMRKV.EQ.1.AND.IKMRKN.EQ.1) THEN
@@ -244,18 +256,18 @@
                 MINDEP = PMSA(IP8+(IVAN -1)*IN8)
                 MINDE2 = PMSA(IP8+(INAAR-1)*IN8)
                 IF ( DEPTH .GT. MINDEP .AND. DEPTH2 .GT. MINDE2 ) THEN
-                    PMSA(IP12) = PMSA(IP9)/86400.
+                    PMSA(IP17) = PMSA(IP13)/86400.
                 ELSE
-                    PMSA(IP12) = 0.0
+                    PMSA(IP17) = 0.0
                 ENDIF
             ELSE
-                PMSA(IP12) = 0.0
+                PMSA(IP17) = 0.0
             ENDIF
 
          ENDIF
 
-         IP9 = IP9 + IN9
-         IP12= IP12+ IN12
+         IP13= IP13+ IN13
+         IP17= IP17+ IN17
 
  7000 CONTINUE
 
@@ -273,6 +285,11 @@
       IP10 = IPOINT(10)
       IP11 = IPOINT(11)
       IP12 = IPOINT(12)
+      IP13 = IPOINT(13)
+      IP14 = IPOINT(14)
+      IP15 = IPOINT(15)
+      IP16 = IPOINT(16)
+      IP17 = IPOINT(17)
 
       DO IK = 1 , Coll%cursize
 
@@ -316,7 +333,7 @@
             ENDIF
 
             IF ( CONC .GT. 1.E-10 ) THEN
-               PMSA(IP12+(IQ-1)*IN12) = MAXSED/86400./CONC
+               PMSA(IP17+(IQ-1)*IN17) = MAXSED/86400./CONC
             ENDIF
 
          ENDDO

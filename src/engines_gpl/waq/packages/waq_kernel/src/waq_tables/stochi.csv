@@ -681,12 +681,24 @@ stocfl,stocsu,stocsc
 "dpyr      ","FeS       ",  -1.00000
 "dpyr      ","FeS2      ",   1.00000
 "dpyr      ","SUD       ",  -0.57400
+"dRIM1S2Pup","IM1       ",   1.00000
+"dRIM1S2Pup","IM1S2     ",  -1.00000
+"dRIM2S2Pup","IM2       ",   1.00000
+"dRIM2S2Pup","IM2S2     ",  -1.00000
+"dRIM3S2Pup","IM3       ",   1.00000
+"dRIM3S2Pup","IM3S2     ",  -1.00000
 "dSedIM1   ","IM1       ",  -1.00000
 "dSedIM1   ","IM1S1     ",   1.00000
+"dSedIM1S2 ","IM1       ",  -1.00000
+"dSedIM1S2 ","IM1S2     ",   1.00000
 "dSedIM2   ","IM2       ",  -1.00000
 "dSedIM2   ","IM2S1     ",   1.00000
+"dSedIM2S2 ","IM2       ",  -1.00000
+"dSedIM2S2 ","IM2S2     ",   1.00000
 "dSedIM3   ","IM3       ",  -1.00000
 "dSedIM3   ","IM3S1     ",   1.00000
+"dSedIM3S2 ","IM3       ",  -1.00000
+"dSedIM3S2 ","IM3S2     ",   1.00000
 "dSedDiat  ","Diat      ",  -1.00000
 "dSedGreen ","Green     ",  -1.00000
 "dSedAlg   ","APHANFIX  ",  -1.00000
@@ -786,7 +798,8 @@ stocfl,stocsu,stocsc
 "dSedPOS4  ","POS4      ",  -1.00000
 "dSedAAP   ","AAP       ",  -1.00000
 "dSedAAP   ","AAPS1     ",   1.00000
-"dSWSedAAP ","AAP       ",  -1.00000
+"dSedAAPS2 ","AAP       ",  -1.00000
+"dSedAAPS2 ","AAPS2     ",   1.00000
 "dResS1DetC","POC1      ",   1.00000
 "dResS1DetC","DetCS1    ",  -1.00000
 "dResS2DetC","DetCS2    ",  -1.00000
@@ -1179,38 +1192,74 @@ stocfl,stocsu,stocsc
 "dSedCd    ","Cd-par    ",  -1.00000
 "dSedCd    ","CdS1      ",   1.00000
 "dSedCd    ","CdS1-par  ",   1.00000
+"dSedCdS2  ","Cd        ",  -1.00000
+"dSedCdS2  ","Cd-par    ",  -1.00000
+"dSedCdS2  ","CdS2      ",   1.00000
+"dSedCdS2  ","CdS2-par  ",   1.00000
 "dSedCu    ","Cu        ",  -1.00000
 "dSedCu    ","Cu-par    ",  -1.00000
 "dSedCu    ","CuS1      ",   1.00000
 "dSedCu    ","CuS1-par  ",   1.00000
+"dSedCuS2  ","Cu        ",  -1.00000
+"dSedCuS2  ","Cu-par    ",  -1.00000
+"dSedCuS2  ","CuS2      ",   1.00000
+"dSedCuS2  ","CuS2-par  ",   1.00000
 "dSedZn    ","Zn        ",  -1.00000
 "dSedZn    ","Zn-par    ",  -1.00000
 "dSedZn    ","ZnS1      ",   1.00000
 "dSedZn    ","ZnS1-par  ",   1.00000
+"dSedZnS2  ","Zn        ",  -1.00000
+"dSedZnS2  ","Zn-par    ",  -1.00000
+"dSedZnS2  ","ZnS2      ",   1.00000
+"dSedZnS2  ","ZnS2-par  ",   1.00000
 "dSedHg    ","Hg        ",  -1.00000
 "dSedHg    ","Hg-par    ",  -1.00000
 "dSedHg    ","HgS1      ",   1.00000
 "dSedHg    ","HgS1-par  ",   1.00000
+"dSedHgS2  ","Hg        ",  -1.00000
+"dSedHgS2  ","Hg-par    ",  -1.00000
+"dSedHgS2  ","HgS2      ",   1.00000
+"dSedHgS2  ","HgS2-par  ",   1.00000
 "dSedNi    ","Ni        ",  -1.00000
 "dSedNi    ","Ni-par    ",  -1.00000
 "dSedNi    ","NiS1      ",   1.00000
 "dSedNi    ","NiS1-par  ",   1.00000
+"dSedNiS2  ","Ni        ",  -1.00000
+"dSedNiS2  ","Ni-par    ",  -1.00000
+"dSedNiS2  ","NiS2      ",   1.00000
+"dSedNiS2  ","NiS2-par  ",   1.00000
 "dSedPb    ","Pb        ",  -1.00000
 "dSedPb    ","Pb-par    ",  -1.00000
 "dSedPb    ","PbS1      ",   1.00000
 "dSedPb    ","PbS1-par  ",   1.00000
+"dSedPbS2  ","Pb        ",  -1.00000
+"dSedPbS2  ","Pb-par    ",  -1.00000
+"dSedPbS2  ","PbS2      ",   1.00000
+"dSedPbS2  ","PbS2-par  ",   1.00000
 "dSedCr    ","Cr        ",  -1.00000
 "dSedCr    ","Cr-par    ",  -1.00000
 "dSedCr    ","CrS1      ",   1.00000
 "dSedCr    ","CrS1-par  ",   1.00000
+"dSedCrS2  ","Cr        ",  -1.00000
+"dSedCrS2  ","Cr-par    ",  -1.00000
+"dSedCrS2  ","CrS2      ",   1.00000
+"dSedCrS2  ","CrS2-par  ",   1.00000
 "dSedAs    ","As        ",  -1.00000
 "dSedAs    ","As-par    ",  -1.00000
 "dSedAs    ","AsS1      ",   1.00000
 "dSedAs    ","AsS1-par  ",   1.00000
+"dSedAsS2  ","As        ",  -1.00000
+"dSedAsS2  ","As-par    ",  -1.00000
+"dSedAsS2  ","AsS2      ",   1.00000
+"dSedAsS2  ","AsS2-par  ",   1.00000
 "dSedVa    ","Va        ",  -1.00000
 "dSedVa    ","Va-par    ",  -1.00000
 "dSedVa    ","VaS1      ",   1.00000
 "dSedVa    ","VaS1-par  ",   1.00000
+"dSedVaS2  ","Va        ",  -1.00000
+"dSedVaS2  ","Va-par    ",  -1.00000
+"dSedVaS2  ","VaS2      ",   1.00000
+"dSedVaS2  ","VaS2-par  ",   1.00000
 "dSed153   ","153       ",  -1.00000
 "dSed153   ","153-par   ",  -1.00000
 "dSed153   ","153S1     ",   1.00000
@@ -2619,3 +2668,15 @@ stocfl,stocsu,stocsc
 "dG5_F6    ","F6        ",  -1.00000
 "dG5_F7    ","F7        ",  -1.00000
 "dG5_F8    ","F8        ",  -1.00000
+"drdg*IM1S1","IM1S1     ",  -1.00000
+"drdg*IM2S1","IM2S1     ",  -1.00000
+"drdg*IM3S1","IM3S1     ",  -1.00000
+"drdg*IM1S2","IM1S2     ",  -1.00000
+"drdg*IM2S2","IM2S2     ",  -1.00000
+"drdg*IM3S2","IM3S2     ",  -1.00000
+"dump*IM1  ","IM1       ",   1.00000
+"dump*IM2  ","IM2       ",   1.00000
+"dump*IM3  ","IM3       ",   1.00000
+"dFlocIM1  ","IM1       ",   1.00000
+"dFlocIM2  ","IM2       ",   1.00000
+"dFlocIM3  ","IM3       ",   1.00000

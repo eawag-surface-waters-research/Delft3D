@@ -64,132 +64,142 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      IMPLICIT NONE
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      real(4) pmsa(*)     !i/o process manager system array, window of routine to process library
+      real(4) fl(*)       ! o  array of fluxes made by this process in mass/volume/time
+      integer ipoint( 16) ! i  array of pointers in pmsa to get and store the data
+      integer increm( 16) ! i  increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer noseg       ! i  number of computational elements in the whole model schematisation
+      integer noflux      ! i  number of fluxes, increment in the fl array
+      integer iexpnt(4,*) ! i  from, to, from-1 and to+1 segment numbers of the exchange surfaces
+      integer iknmrk(*)   ! i  active-inactive, surface-water-bottom, see manual for use
+      integer noq1        ! i  nr of exchanges in 1st direction (the horizontal dir if irregular mesh)
+      integer noq2        ! i  nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
+      integer noq3        ! i  nr of exchanges in 3rd direction, vertical direction, pos. downward
+      integer noq4        ! i  nr of exchanges in the bottom (bottom layers, specialist use only)
+      integer ipnt( 16)   !    local work array for the pointering
+      integer iseg        !    local loop counter for computational element loop
 
-      IP1  = IPOINT( 1)
-      IP2  = IPOINT( 2)
-      IP3  = IPOINT( 3)
-      IP4  = IPOINT( 4)
-      IP5  = IPOINT( 5)
-      IP6  = IPOINT( 6)
-      IP7  = IPOINT( 7)
-      IP8  = IPOINT( 8)
-      IP9  = IPOINT( 9)
-      IP10 = IPOINT(10)
-      IP11 = IPOINT(11)
-      IP12 = IPOINT(12)
-      IP13 = IPOINT(13)
-      IP14 = IPOINT(14)
-      IP15 = IPOINT(15)
-!
-      IFLUX = 0
-      DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
-      IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-      IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
-!
+      real     im1s2, im2s2, im3s2
 
-      DMS1    = PMSA(IP1 )
-      DMS2    = PMSA(IP2 )
-      ZRES    = PMSA(IP3 )
-      VRES    = PMSA(IP4 )
-      TAU     = PMSA(IP5 )
-      TCRRS1  = PMSA(IP6 )
-      TCRRS2  = PMSA(IP7 )
-      DEPTH   = PMSA(IP8 )
-      DELT    = PMSA(IP9 )
-      MINDEP  = PMSA(IP10)
-      SURF    = PMSA(IP11)
+      integer iflux
+      integer ikmrk2
+      real(4) dms1  
+      real(4) dms2  
+      real(4) zres  
+      real(4) vres  
+      real(4) tau   
+      real(4) tcrrs1
+      real(4) tcrrs2
+      real(4) depth 
+      real(4) delt  
+      real(4) mindep
+      real(4) surf 
+      integer isw_zf
+      real(4) press1
+      real(4) press2
+      real(4) flres1
+      real(4) flres2
+      real(4) rfdms1
+      real(4) mrdms1
+      real(4) delts2
+      real(4) rfdms2
+      real(4) mrdms2
 
-!*******************************************************************************
+      ipnt  = ipoint
+
+      iflux = 0
+      do 9000 iseg = 1 , noseg
+      if (btest(iknmrk(iseg),0)) then
+      call dhkmrk(2,iknmrk(iseg),ikmrk2)
+      if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+
+      dms1    = pmsa(ipnt (1 ) )
+      dms2    = pmsa(ipnt (2 ) )
+      zres    = pmsa(ipnt (3 ) )
+      vres    = pmsa(ipnt (4 ) )
+      tau     = pmsa(ipnt (5 ) )
+      tcrrs1  = pmsa(ipnt (6 ) )
+      tcrrs2  = pmsa(ipnt (7 ) )
+      depth   = pmsa(ipnt (8 ) )
+      delt    = pmsa(ipnt (9 ) )
+      mindep  = pmsa(ipnt (10) )
+      surf    = pmsa(ipnt (11) )
+      isw_zf  = nint(pmsa(ipnt (12) ) )
+
+!***********************************************************************
 !**** Processes connected to the RESUSENSION
 !***********************************************************************
 
-      PRESS1 = 0.0
-      PRESS2 = 0.0
+      press1 = 0.0
+      press2 = 0.0
 
-!        Bereken de resuspensie kansen in S1
-         IF (TAU .EQ. -1.0) THEN
-              PRESS1 = 1.0
-         ELSE
-!           vergelijking met critische schuifspanning
-             PRESS1 = MAX ( 0.0, (TAU/TCRRS1 - 1.0) )
-         ENDIF
+!     Calculate resuspension probability in S1
+      if (tau .eq. -1.0) then
+           press1 = 1.0
+      else
+!         Compare with critical shear stress
+          press1 = max ( 0.0, (tau/tcrrs1 - 1.0) )
+      endif
 
-!        Bereken de resuspensie kansen in S2
-         IF (TAU .EQ. -1.0) THEN
-            PRESS2 = 1.0
-         ELSE
-!           vergelijking met critische schuifspanning
-            PRESS2 = MAX ( 0.0, (TAU/TCRRS2 - 1.0) )
-         ENDIF
+!     Calculate resuspension probability in S2
+      if (tau .eq. -1.0) then
+         press2 = 1.0
+      else
+!        Compare with critical shear stress
+         press2 = max ( 0.0, (tau/tcrrs2 - 1.0) )
+      endif
 
-!     BEREKENING RESUSPENSION
+!     No resuspension when depth below min depth
+      if ( depth .lt. mindep) then
+         flres1 = 0.0
+         flres2 = 0.0
+      else
+!        Resuspension from S1
+         if ( isw_zf .eq. 0 ) then
+            ! add zero and first order resuspension
+            rfdms1 = zres + ( vres * dms1 )
+         else
+            ! take the minimum of the first order and second order
+            rfdms1 = min(zres,( vres * dms1 ))
+         endif
 
-!     Green resuspension by ondiepe vakken
-      IF ( DEPTH .LT. MINDEP) THEN
-         FLRES1 = 0.0
-         FLRES2 = 0.0
-      ELSE
-
-!        Resuspensie uit S1
-         RFDMS1 = ZRES + ( VRES * DMS1 )
-
-!        Testen of genoeg materiaal aanwezig is in laag 1
-         MRDMS1 = MAX (0.0, DMS1 / DELT )
-
-         FLRES1 = MIN ( RFDMS1 * PRESS1,  MRDMS1 )
+!        Limit resuspension to available material in S1
+         mrdms1 = max (0.0, dms1 / delt )
+         flres1 = min ( rfdms1 * press1,  mrdms1 )
 
 !        If first layer is exhausted then resuspension from the second layer for the remaining of the timestep (DELTS2)
+         if ( rfdms1*press1 .gt. 1e-20 ) then
+            delts2 = max(0.0,(1.-flres1/(rfdms1*press1))*delt)
+         else
+            delts2 = 0.0
+         endif
 
-         IF ( RFDMS1*PRESS1 .GT. 1E-20 ) THEN
-            DELTS2 = MAX(0.0,(1.-FLRES1/(RFDMS1*PRESS1))*DELT)
-         ELSE
-            DELTS2 = 0.0
-         ENDIF
+         if ( isw_zf .eq. 0 ) then
+            rfdms2 = zres + ( vres * dms2 )
+         else
+            rfdms2 = min(zres,( vres * dms2 ))
+         endif
 
-         RFDMS2 = ZRES + ( VRES * DMS2 )
+!        Limit resuspension to available material in S2
+         mrdms2 = max (0.0, dms2 / delt )
+         flres2 = min ( rfdms2 * press2 * delts2/delt , mrdms2 )
+      endif
 
-!        Testen of genoeg materiaal aanwezig is
-         MRDMS2 = MAX (0.0, DMS2 / DELT )
+      pmsa (ipnt (13) ) = flres1
+      pmsa (ipnt (14) ) = flres2
+      pmsa (ipnt (15) ) = press1
+      pmsa (ipnt (16) ) = press2
 
-         FLRES2 = MIN ( RFDMS2 * PRESS2 * DELTS2/DELT , MRDMS2 )
-
-      ENDIF
-
-      PMSA (IP12) = FLRES1
-      PMSA (IP13) = FLRES2
-      PMSA (IP14) = PRESS1
-      PMSA (IP15) = PRESS2
-
-      ENDIF
-      ENDIF
+      endif
+      endif
 !
-      IFLUX = IFLUX + NOFLUX
-      IP1   = IP1   + INCREM (  1 )
-      IP2   = IP2   + INCREM (  2 )
-      IP3   = IP3   + INCREM (  3 )
-      IP4   = IP4   + INCREM (  4 )
-      IP5   = IP5   + INCREM (  5 )
-      IP6   = IP6   + INCREM (  6 )
-      IP7   = IP7   + INCREM (  7 )
-      IP8   = IP8   + INCREM (  8 )
-      IP9   = IP9   + INCREM (  9 )
-      IP10  = IP10  + INCREM ( 10 )
-      IP11  = IP11  + INCREM ( 11 )
-      IP12  = IP12  + INCREM ( 12 )
-      IP13  = IP13  + INCREM ( 13 )
-      IP14  = IP14  + INCREM ( 14 )
-      IP15  = IP15  + INCREM ( 15 )
+      iflux = iflux + noflux
+      ipnt  = ipnt  + increm
+      
+ 9000 continue
 !
- 9000 CONTINUE
+      return
 !
-      RETURN
-!
-      END
+      end

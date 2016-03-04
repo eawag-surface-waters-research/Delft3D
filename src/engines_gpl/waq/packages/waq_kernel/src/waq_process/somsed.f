@@ -43,14 +43,15 @@
 
 !     ------   -----  ------------
 
-      IMPLICIT none
+      IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( 37 ) , INCREM(37) , NOSEG , NOFLUX,
+      INTEGER  IPOINT( 40 ) , INCREM(40) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
-      INTEGER  IP(37)
-      REAL     FLX1  , FLX2  , FLX3  , FLPOC , FLPOM , FLALGC,
+      INTEGER  IP(40)
+      REAL     FLX1  , FLX2  , FLX3  , FLX1S2  , FLX2S2  , FLX3S2  , 
+     J         FLPOC , FLPOM , FLALGC,
      J         FLALGM, DMCF1 , DMCF2 , DMCF3 , TIMSED, TDMSED, POCSED,
      J         C1    , C2    , C3    , V1    , V2    , V3    , CTOT,
      J         FLPOC1, FLPOC2, FLPOC3, FLPOC4, DMPOC1, DMPOC2, DMPOC3,
@@ -76,28 +77,31 @@
       FLX1    = PMSA(IP(1 ))
       FLX2    = PMSA(IP(2 ))
       FLX3    = PMSA(IP(3 ))
-      FLPOC1  = PMSA(IP(4 ))
-      FLPOC2  = PMSA(IP(5 ))
-      FLPOC3  = PMSA(IP(6 ))
-      FLPOC4  = PMSA(IP(7 ))
-      FLALGC  = PMSA(IP(8 ))
-      FLALGM  = PMSA(IP(9 ))
-      DMCF1   = PMSA(IP(10))
-      DMCF2   = PMSA(IP(11))
-      DMCF3   = PMSA(IP(12))
-      DMPOC1  = PMSA(IP(13))
-      DMPOC2  = PMSA(IP(14))
-      DMPOC3  = PMSA(IP(15))
-      DMPOC4  = PMSA(IP(16))
+      FLX1S2  = PMSA(IP(4 ))
+      FLX2S2  = PMSA(IP(5 ))
+      FLX3S2  = PMSA(IP(6 ))
+      FLPOC1  = PMSA(IP(7 ))
+      FLPOC2  = PMSA(IP(8 ))
+      FLPOC3  = PMSA(IP(9 ))
+      FLPOC4  = PMSA(IP(10))
+      FLALGC  = PMSA(IP(11))
+      FLALGM  = PMSA(IP(12))
+      DMCF1   = PMSA(IP(13))
+      DMCF2   = PMSA(IP(14))
+      DMCF3   = PMSA(IP(15))
+      DMPOC1  = PMSA(IP(16))
+      DMPOC2  = PMSA(IP(17))
+      DMPOC3  = PMSA(IP(18))
+      DMPOC4  = PMSA(IP(19))
 
 !*******************************************************************************
 !**** Calculations connected to the sedimentation
 !***********************************************************************
 
 !    Calculate som sedimentation of dry matter
-      TIMSED = FLX1 * DMCF1 +
-     &         FLX2 * DMCF2 +
-     &         FLX3 * DMCF3
+      TIMSED = (FLX1 + FLX1S2) * DMCF1 +
+     &         (FLX2 + FLX2S2) * DMCF2 +
+     &         (FLX3 + FLX3S2) * DMCF3
       FLPOC  = FLPOC1 + FLPOC2 + FLPOC3 + FLPOC4
       FLPOM  = FLPOC1*DMPOC1 + FLPOC2*DMPOC2 + FLPOC3*DMPOC3 
      J                                       + FLPOC4*DMPOC4
@@ -106,11 +110,11 @@
 
       POCSED = FLPOC + FLALGC
 
-      PMSA (IP(31)) = TDMSED
-      PMSA (IP(32)) = TIMSED
-      PMSA (IP(33)) = POCSED
-      PMSA (IP(34)) = FLPOC
-      PMSA (IP(35)) = FLPOM
+      PMSA (IP(34)) = TDMSED
+      PMSA (IP(35)) = TIMSED
+      PMSA (IP(36)) = POCSED
+      PMSA (IP(37)) = FLPOC
+      PMSA (IP(38)) = FLPOM
 
       ENDIF
       ENDIF
@@ -123,16 +127,16 @@
 !.....Exchangeloop over de horizontale richting
       IP = IPOINT
       DO 8000 IQ=1,NOQ1+NOQ2
-         PMSA(IP(36)) = 0.0
-         PMSA(IP(37)) = 0.0
+         PMSA(IP(39)) = 0.0
+         PMSA(IP(40)) = 0.0
          IP = IP + INCREM
  8000 CONTINUE
 
 !.....Exchangeloop over de verticale richting
       DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
 
-         PMSA(IP(36)) = 0.0
-         PMSA(IP(37)) = 0.0
+         PMSA(IP(39)) = 0.0
+         PMSA(IP(40)) = 0.0
          IVAN  = IEXPNT(1,IQ)
          INAAR = IEXPNT(2,IQ)
 
@@ -145,26 +149,26 @@
 
 !            Water-water uitwisseling
 
-             C1 = PMSA(IPOINT(17)+(IVAN-1)*INCREM(17))
-             C2 = PMSA(IPOINT(18)+(IVAN-1)*INCREM(18))
-             C3 = PMSA(IPOINT(19)+(IVAN-1)*INCREM(19))
-             CP1 = PMSA(IPOINT(20)+(IVAN-1)*INCREM(20))
-             CP2 = PMSA(IPOINT(21)+(IVAN-1)*INCREM(21))
-             CP3 = PMSA(IPOINT(22)+(IVAN-1)*INCREM(22))
-             CP4 = PMSA(IPOINT(23)+(IVAN-1)*INCREM(23))
-             V1 = PMSA(IP(24))
-             V2 = PMSA(IP(25))
-             V3 = PMSA(IP(26))
-             VP1 = PMSA(IP(27))
-             VP2 = PMSA(IP(28))
-             VP3 = PMSA(IP(29))
-             VP4 = PMSA(IP(30))
+             C1 = PMSA(IPOINT(20)+(IVAN-1)*INCREM(20))
+             C2 = PMSA(IPOINT(21)+(IVAN-1)*INCREM(21))
+             C3 = PMSA(IPOINT(22)+(IVAN-1)*INCREM(22))
+             CP1 = PMSA(IPOINT(23)+(IVAN-1)*INCREM(23))
+             CP2 = PMSA(IPOINT(24)+(IVAN-1)*INCREM(24))
+             CP3 = PMSA(IPOINT(25)+(IVAN-1)*INCREM(25))
+             CP4 = PMSA(IPOINT(26)+(IVAN-1)*INCREM(26))
+             V1 = PMSA(IP(27))
+             V2 = PMSA(IP(28))
+             V3 = PMSA(IP(29))
+             VP1 = PMSA(IP(30))
+             VP2 = PMSA(IP(31))
+             VP3 = PMSA(IP(32))
+             VP4 = PMSA(IP(33))
              CTOT = C1 + C2 + C3
              CPTOT = CP1 + CP2 + CP3 + CP4
              IF ( CTOT .GT. 0.0 ) 
-     J       PMSA(IP(36)) = ( C1*V1+C2*V2+C3*V3 ) / CTOT
+     J       PMSA(IP(39)) = ( C1*V1+C2*V2+C3*V3 ) / CTOT
              IF ( CPTOT .GT. 0.0 ) 
-     J       PMSA(IP(37)) = ( CP1*VP1+CP2*VP2+CP3*VP3+CP4*VP4 ) / CPTOT
+     J       PMSA(IP(40)) = ( CP1*VP1+CP2*VP2+CP3*VP3+CP4*VP4 ) / CPTOT
          ENDIF
          ENDIF
 

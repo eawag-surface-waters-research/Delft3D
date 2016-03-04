@@ -178,6 +178,7 @@
 "CalVSALG28", , ,A,A,
 "CalVSALG29", , ,A,A,
 "CalVSALG30", , ,A,A,
+"Res_Pickup", , , , ,
 "Sed_IM1   ",A,A,A,A,
 "Sed_IM2   ",A,A,A,A,
 "Sed_IM3   ",A,A,A,A,
@@ -670,3 +671,5 @@
 "DEBGRZ_G3 ",A,A,A,A,
 "DEBGRZ_G4 ",A,A,A,A,
 "DEBGRZ_G5 ",A,A,A,A,
+"Dredge    ", , , , ,
+"IM_Floceq ", , , , ,

@@ -53,7 +53,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( NOMODU = 137)
+      PARAMETER   ( NOMODU = 142)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -193,7 +193,12 @@
      +   'MAC3DU',
      +   'GRZMAC',
      +   'NPPS12',
-     +   'DEBGRZ'
+     +   'DEBGRZ',
+     +   'FLOCEQ',
+     +   'DREDGE',
+     +   'RESPUP',
+     +   'SEDIM ',
+     +   'S12TIM'
      +   /
 !
 !     Set module number

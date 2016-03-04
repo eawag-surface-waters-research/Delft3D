@@ -43,137 +43,101 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      implicit none
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      real     pmsa  ( * ) , fl    (*)
+      integer  ipoint( 19) , increm( 19) , noseg , noflux,
+     +         iexpnt(4,*) , iknmrk( * ) , noq1, noq2, noq3, noq4
+      integer  ipnt(19)
 
-      REAL     HULP
+      integer  iflux, iseg, ikmrk2, iq, ifrom
 
-      IP1  = IPOINT( 1)
-      IP2  = IPOINT( 2)
-      IP3  = IPOINT( 3)
-      IP4  = IPOINT( 4)
-      IP5  = IPOINT( 5)
-      IP6  = IPOINT( 6)
-      IP7  = IPOINT( 7)
-      IP8  = IPOINT( 8)
-      IP9  = IPOINT( 9)
-      IP10 = IPOINT(10)
-      IP11 = IPOINT(11)
-      IP12 = IPOINT(12)
-      IP13 = IPOINT(13)
-      IP14 = IPOINT(14)
-      IP15 = IPOINT(15)
-      IP16 = IPOINT(16)
+      real     sfl1, sfl2, sfl3
+      real     sfl1s2, sfl2s2, sfl3s2
+      real     q1, q2, q3, depth
+      real     fpim1, fpim2, fpim3
+      real     vsim1, vsim2, vsim3
 
-      IN1  = INCREM( 1)
-      IN2  = INCREM( 2)
-      IN3  = INCREM( 3)
-      IN4  = INCREM( 4)
-      IN5  = INCREM( 5)
-      IN6  = INCREM( 6)
-      IN7  = INCREM( 7)
-      IN8  = INCREM( 8)
-      IN9  = INCREM( 9)
-      IN10 = INCREM(10)
-      IN11 = INCREM(11)
-      IN12 = INCREM(12)
-      IN13 = INCREM(13)
-      IN14 = INCREM(14)
-      IN15 = INCREM(15)
-      IN16 = INCREM(16)
-!
-      IFLUX = 0
-      DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
-      IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-      IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
+      ipnt = ipoint
+      iflux = 0
+
+      do 9000 iseg = 1 , noseg
+      if (btest(iknmrk(iseg),0)) then
+      call dhkmrk(2,iknmrk(iseg),ikmrk2)
+      if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 !
 
-      SFL1  = PMSA(IP1 )
-      SFL2  = PMSA(IP2 )
-      SFL3  = PMSA(IP3 )
-      Q1    = PMSA(IP4 )
-      Q2    = PMSA(IP5 )
-      Q3    = PMSA(IP6 )
-      DEPTH = PMSA(IP10)
-      SWITCH= PMSA(IP11)
+      sfl1   = pmsa(ipnt (1 ) )
+      sfl2   = pmsa(ipnt (2 ) )
+      sfl3   = pmsa(ipnt (3 ) )
+      sfl1s2 = pmsa(ipnt (4 ) )
+      sfl2s2 = pmsa(ipnt (5 ) )
+      sfl3s2 = pmsa(ipnt (6 ) )
+      q1     = pmsa(ipnt (7 ) )
+      q2     = pmsa(ipnt (8 ) )
+      q3     = pmsa(ipnt (9 ) )
+      depth  = pmsa(ipnt (13) )
+!      switch = pmsa(ipnt (14) ) ignore SWITCH
 
 !***********************************************************************
 !**** Processes connected to the SEDIMENTATION of AAP
 !***********************************************************************
 
-!     SEDIMENTATION
-      HULP = SFL1 * Q1 + SFL2 * Q2 + SFL3 * Q3
-      PMSA(IP15) = HULP
-      IF (ABS(SWITCH).LT.0.5) THEN
-!       NO SWITCH
-        FL( 1 + IFLUX ) =  HULP  / DEPTH
-        FL( 2 + IFLUX ) =  0.0
-      ELSE
-!       SWITCH
-        FL( 1 + IFLUX ) =  0.0
-        FL( 2 + IFLUX ) =  HULP / DEPTH
-      ENDIF
+!     Sedimentation to S1/S2
+      pmsa(ipnt(18)) = sfl1 * q1 + sfl2 * q2 + sfl3 * q3
+      pmsa(ipnt(19)) = sfl1s2 * q1 + sfl2s2 * q2 + sfl3s2 * q3
 
-      ENDIF
-      ENDIF
+      fl( 1 + iflux ) = pmsa(ipnt(18)) / depth
+      fl( 2 + iflux ) = pmsa(ipnt(19)) / depth
+
+      endif
+      endif
 !
-      IFLUX = IFLUX + NOFLUX
-      IP1   = IP1   + IN1
-      IP2   = IP2   + IN2
-      IP3   = IP3   + IN3
-      IP4   = IP4   + IN4
-      IP5   = IP5   + IN5
-      IP6   = IP6   + IN6
-      IP10  = IP10  + IN10
-      IP11  = IP11  + IN11
-      IP15  = IP15  + IN15
+      iflux = iflux + noflux
+      ipnt  = ipnt  + increm
 !
- 9000 CONTINUE
+ 9000 continue
 
-!.....Exchangeloop over de horizontale richting
-      DO 8000 IQ= 1 , NOQ1+NOQ2
+!.....Reset pointers
+      ipnt = ipoint
 
-!........VxSedAAP op nul
-         PMSA(IP16) = 0.0
+!.....Exchangeloop over horizontal direction
+      do 8000 iq=1,noq1+noq2
 
-         IP16 = IP16 + IN16
+!........Set VxSedAAP to zero
+         pmsa(ipnt(20)) = 0.0
+         ipnt(20) = ipnt(20) + increm(20)
 
- 8000 CONTINUE
+ 8000 continue
 
-!.....Startwaarde in de PMSA voor VxSedIMX in de 3e richting
-      IP12= IP12+ ( NOQ1+NOQ2 ) * IN12
-      IP13= IP13+ ( NOQ1+NOQ2 ) * IN13
-      IP14= IP14+ ( NOQ1+NOQ2 ) * IN14
+!.....Entery point in PMSA for VxSedIMX in the vertical direction
+      ipnt(15) = ipnt(15) + ( noq1+noq2 ) * increm(15)
+      ipnt(16) = ipnt(16) + ( noq1+noq2 ) * increm(16)
+      ipnt(17) = ipnt(17) + ( noq1+noq2 ) * increm(17)
 
-!.....Exchangeloop over de verticale richting
-      DO 7000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
+!.....Exchange loop over the vertical direction
+      do 7000 iq = noq1+noq2+1, noq1+noq2+noq3
 
-         IVAN  = IEXPNT(1,IQ)
+         ifrom  = iexpnt(1,iq)
 
-         IF ( IVAN .GT. 0 ) THEN
-            FPIM1 = PMSA( IP7 + (IVAN-1) * IN7 )
-            FPIM2 = PMSA( IP8 + (IVAN-1) * IN8 )
-            FPIM3 = PMSA( IP9 + (IVAN-1) * IN9 )
-            VSIM1 = PMSA(IP12)
-            VSIM2 = PMSA(IP13)
-            VSIM3 = PMSA(IP14)
-!...........berekenen VxSedAAP
-            PMSA(IP16) = FPIM1*VSIM1+FPIM2*VSIM2+FPIM3*VSIM3
-         ENDIF
+         if ( ifrom .gt. 0 ) then
+            fpim1 = pmsa(ipnt(10) + (ifrom-1) * increm(10))
+            fpim2 = pmsa(ipnt(11) + (ifrom-1) * increm(11))
+            fpim3 = pmsa(ipnt(12) + (ifrom-1) * increm(12))
+            vsim1 = pmsa(ipnt(15))
+            vsim2 = pmsa(ipnt(16))
+            vsim3 = pmsa(ipnt(17))
+!...........calculate VxSedAAP
+            pmsa(ipnt(20)) = fpim1*vsim1+fpim2*vsim2+fpim3*vsim3
+         endif
 
-!........Exchangepointers ophogen
-         IP12= IP12+ IN12
-         IP13= IP13+ IN13
-         IP14= IP14+ IN14
-         IP16= IP16+ IN16
+!........Exchangepointers increment
+         ipnt(15)= ipnt(15)+ increm(15)
+         ipnt(16)= ipnt(16)+ increm(16)
+         ipnt(17)= ipnt(17)+ increm(17)
+         ipnt(20)= ipnt(20)+ increm(20)
 
- 7000 CONTINUE
+ 7000 continue
 
-      RETURN
-      END
+      return
+      end

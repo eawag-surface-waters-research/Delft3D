@@ -42,168 +42,110 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      implicit none
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      real     pmsa  ( * ) , fl    (*)
+      integer  ipoint( 27) , increm( 27 ) , noseg , noflux,
+     +         iexpnt(4,*) , iknmrk(*) , noq1, noq2, noq3, noq4
+      integer  ipnt(27)
 
-      IP1  = IPOINT( 1)
-      IP2  = IPOINT( 2)
-      IP3  = IPOINT( 3)
-      IP4  = IPOINT( 4)
-      IP5  = IPOINT( 5)
-      IP6  = IPOINT( 6)
-      IP7  = IPOINT( 7)
-      IP8  = IPOINT( 8)
-      IP9  = IPOINT( 9)
-      IP10 = IPOINT(10)
-      IP11 = IPOINT(11)
-      IP12 = IPOINT(12)
-      IP13 = IPOINT(13)
-      IP14 = IPOINT(14)
-      IP15 = IPOINT(15)
-      IP16 = IPOINT(16)
-      IP17 = IPOINT(17)
-      IP18 = IPOINT(18)
-      IP19 = IPOINT(19)
-      IP20 = IPOINT(20)
-      IP21 = IPOINT(21)
-      IP22 = IPOINT(22)
-      IP23 = IPOINT(23)
+      integer  iflux, iseg, ikmrk2, iq, ifrom
+      real     fl1, fl2, fl3, fl1s2, fl2s2, fl3s2, fl4, fl5
+      real     q1, q2, q3, q4, q5, depth
+      real     fhmim1, fhmim2,fhmim3, fhmpoc, fhmphy
+      real     vsim1, vsim2, vsim3, vspoc, vsphy
 
-      IN1  = INCREM( 1)
-      IN2  = INCREM( 2)
-      IN3  = INCREM( 3)
-      IN4  = INCREM( 4)
-      IN5  = INCREM( 5)
-      IN6  = INCREM( 6)
-      IN7  = INCREM( 7)
-      IN8  = INCREM( 8)
-      IN9  = INCREM( 9)
-      IN10 = INCREM(10)
-      IN11 = INCREM(11)
-      IN12 = INCREM(12)
-      IN13 = INCREM(13)
-      IN14 = INCREM(14)
-      IN15 = INCREM(15)
-      IN16 = INCREM(16)
-      IN17 = INCREM(17)
-      IN18 = INCREM(18)
-      IN19 = INCREM(19)
-      IN20 = INCREM(20)
-      IN21 = INCREM(21)
-      IN22 = INCREM(22)
-      IN23 = INCREM(23)
+      ipnt = ipoint
+      iflux = 0
 
-      IFLUX = 0
-      DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1) THEN
-      IF (BTEST(IKNMRK(ISEG),0)) THEN
-      CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-      IF ((IKMRK2.EQ.0).OR.(IKMRK2.EQ.3)) THEN
+      do 9000 iseg = 1 , noseg
+      if (btest(iknmrk(iseg),0)) then
+      call dhkmrk(2,iknmrk(iseg),ikmrk2)
+      if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
-      FL1    = PMSA(IP1 )
-      FL2    = PMSA(IP2 )
-      FL3    = PMSA(IP3 )
-      FL4    = PMSA(IP4 )
-      FL5    = PMSA(IP5 )
-      Q1     = PMSA(IP6 )
-      Q2     = PMSA(IP7 )
-      Q3     = PMSA(IP8 )
-      Q4     = PMSA(IP9 )
-      Q5     = PMSA(IP10)
-      DEPTH  = PMSA(IP11)
+      fl1    = pmsa( ipnt(1 ) )
+      fl2    = pmsa( ipnt(2 ) )
+      fl3    = pmsa( ipnt(3 ) )
+      fl1s2  = pmsa( ipnt(4 ) )
+      fl2s2  = pmsa( ipnt(5 ) )
+      fl3s2  = pmsa( ipnt(6 ) )
+      fl4    = pmsa( ipnt(7 ) )
+      fl5    = pmsa( ipnt(8 ) )
+      q1     = pmsa( ipnt(9 ) )
+      q2     = pmsa( ipnt(10) )
+      q3     = pmsa( ipnt(11) )
+      q4     = pmsa( ipnt(12) )
+      q5     = pmsa( ipnt(13) )
+      depth  = pmsa( ipnt(14) )
 
-!*******************************************************************************
+!***********************************************************************
 !**** Processes connected to the BURIAL and DIGGING
 !***********************************************************************
 
-!.....SEDIMENTATION
-      FL( 1 + IFLUX) =  ( FL1 * Q1 +
-     &            FL2 * Q2 +
-     &            FL3 * Q3 +
-     &            FL4 * Q4 +
-     &            FL5 * Q5 ) / DEPTH
+!.....Sedimentation HM to S1/S2
+      pmsa(ipnt(25)) = fl1*q1 + fl2*q2 + fl3*q3 + fl4*q4 + fl5*q5
+      pmsa(ipnt(26)) = fl1s2*q1 + fl2s2*q2 + fl3s2*q3
 
-!.....SEDIMENTATION SCALED
-      PMSA(IP22) =  FL (1+IFLUX) * DEPTH
+      fl (1+iflux) = pmsa(ipnt(25)) / depth
+      fl (2+iflux) = pmsa(ipnt(26)) / depth
 
-      ENDIF
-      ENDIF
+      endif
+      endif
 
-      IFLUX = IFLUX + NOFLUX
-      IP1   = IP1   + INCREM (  1 )
-      IP2   = IP2   + INCREM (  2 )
-      IP3   = IP3   + INCREM (  3 )
-      IP4   = IP4   + INCREM (  4 )
-      IP5   = IP5   + INCREM (  5 )
-      IP6   = IP6   + INCREM (  6 )
-      IP7   = IP7   + INCREM (  7 )
-      IP8   = IP8   + INCREM (  8 )
-      IP9   = IP9   + INCREM (  9 )
-      IP10  = IP10  + INCREM ( 10 )
-      IP11  = IP11  + INCREM ( 11 )
-      IP22  = IP22  + INCREM ( 22 )
+      iflux = iflux + noflux
+      ipnt  = ipnt  + increm
 
- 9000 CONTINUE
+ 9000 continue
 
-!.....Exchangeloop over de horizontale richting
-      DO 8000 IQ=1,NOQ1+NOQ2
+!.....Reset pointers
+      ipnt = ipoint
+
+!.....Exchangeloop over horizontal direction
+      do 8000 iq=1,noq1+noq2
 
 !........VxSedHM op nul
-         PMSA(IP23) = 0.0
+         pmsa(ipnt(27)) = 0.0
+         ipnt(27) = ipnt(27) + increm(27)
 
-         IP23 = IP23 + IN23
+ 8000 continue
 
- 8000 CONTINUE
+!.....Entery point in PMSA for VxSedIM1, 2 en 3, VxSedPOC en VxSedPhyt
+      ipnt(20) = ipnt(20) + ( noq1+noq2 ) * increm(20)
+      ipnt(21) = ipnt(21) + ( noq1+noq2 ) * increm(21)
+      ipnt(22) = ipnt(22) + ( noq1+noq2 ) * increm(22)
+      ipnt(23) = ipnt(23) + ( noq1+noq2 ) * increm(23)
 
-!.....Startwaarden VxSedIM1, 2 en 3, VxSedPOC en VxSedPhyt
-      IP17 = IP17 + ( NOQ1+NOQ2 ) * IN17
-      IP18 = IP18 + ( NOQ1+NOQ2 ) * IN18
-      IP19 = IP19 + ( NOQ1+NOQ2 ) * IN19
-      IP20 = IP20 + ( NOQ1+NOQ2 ) * IN20
-      IP21 = IP21 + ( NOQ1+NOQ2 ) * IN21
+!.....Exchange loop over the vertical direction
+      do 7000 iq = noq1+noq2+1, noq1+noq2+noq3
 
-!.....Exchangeloop over de verticale richting
-      DO 7000 IQ=NOQ1+NOQ2+1,NOQ1+NOQ2+NOQ3
+         ifrom  = iexpnt(1,iq)
 
-         IVAN  = IEXPNT(1,IQ)
+         if ( ifrom .gt. 0 ) then
+            fhmim1 = pmsa( ipnt(15) + (ifrom-1) * increm(15) )
+            fhmim2 = pmsa( ipnt(16) + (ifrom-1) * increm(16) )
+            fhmim3 = pmsa( ipnt(17) + (ifrom-1) * increm(17) )
+            fhmpoc = pmsa( ipnt(18) + (ifrom-1) * increm(18) )
+            fhmphy = pmsa( ipnt(19) + (ifrom-1) * increm(19) )
+            vsim1 = pmsa(ipnt(20))
+            vsim2 = pmsa(ipnt(21))
+            vsim3 = pmsa(ipnt(22))
+            vspoc = pmsa(ipnt(23))
+            vsphy = pmsa(ipnt(24))
 
-         IF ( IVAN .GT. 0 ) THEN
-            FHMIM1 = PMSA( IP12 + (IVAN-1) * IN12 )
-            FHMIM2 = PMSA( IP13 + (IVAN-1) * IN13 )
-            FHMIM3 = PMSA( IP14 + (IVAN-1) * IN14 )
-            FHMPOC = PMSA( IP15 + (IVAN-1) * IN15 )
-            FHMPHY = PMSA( IP16 + (IVAN-1) * IN16 )
+!...........Calculate VxSedHM
+            pmsa(ipnt(27)) = fhmim1*vsim1 + fhmim2*vsim2 + fhmim3*vsim3 + 
+     &                       fhmpoc*vspoc + fhmphy*vsphy
+         endif
 
-            VSIM1 = PMSA(IP17)
-            VSIM2 = PMSA(IP18)
-            VSIM3 = PMSA(IP19)
-            VSPOC = PMSA(IP20)
-            VSPHY = PMSA(IP21)
+!........Exchangepointers increment
+         ipnt(20) = ipnt(20) + increm(20)
+         ipnt(21) = ipnt(21) + increm(21)
+         ipnt(22) = ipnt(22) + increm(22)
+         ipnt(23) = ipnt(23) + increm(23)
+         ipnt(24) = ipnt(24) + increm(24)
+         ipnt(27) = ipnt(27) + increm(27)
 
-!...........Berekenen VxSedHM
-            VSHM = FHMIM1*VSIM1 +
-     &             FHMIM2*VSIM2 +
-     &             FHMIM3*VSIM3 +
-     &             FHMPOC*VSPOC +
-     &             FHMPHY*VSPHY
+ 7000 continue
 
-!...........VxSedHM toekennen aan de PMSA
-            PMSA(IP23) = VSHM
-         ENDIF
-
-!........Exchangepointers ophogen
-         IP17 = IP17 + IN17
-         IP18 = IP18 + IN18
-         IP19 = IP19 + IN19
-         IP20 = IP20 + IN20
-         IP21 = IP21 + IN21
-         IP23 = IP23 + IN23
-
- 7000 CONTINUE
-
-      RETURN
-      END
+      return
+      end

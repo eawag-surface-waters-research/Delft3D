@@ -2069,12 +2069,14 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/diggin.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dissi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dlalg.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dmvol.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dredge.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dsptra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dsurf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ebuch4.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/emersi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extina.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extinc.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/floceq.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/flxfrc.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/grzmac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/harves.f -text
@@ -2118,8 +2120,10 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/rdbalg.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/rear.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/resant.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/resdm.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/respup.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/restim.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/rfpart.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/s12tim.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/s12tra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/salchl.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/satch4.f -text
@@ -2131,6 +2135,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedaap.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedcar.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedcom.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedhm.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedim.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sednut.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedomv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/sedox.f -text

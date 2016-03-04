@@ -949,15 +949,24 @@ outppr,outpit,outpnm,outpdo,outpsx
 "CalVSALG30","SalFnAlg30",   2,"x",1
 "CalVSALG30","FloFnAlg30",   3,"x",1
 "CalVSALG30","VSedAlg30 ",   4," ",0
+"Res_Pickup","FrIM1S2Pup",   1,"x",1
+"Res_Pickup","fRIM2S2Pup",   2,"x",1
+"Res_Pickup","fRIM3S2Pup",   3,"x",1
+"Res_Pickup","fRTIMS2Pup",   4,"x",1
+"Res_Pickup","Pshields  ",   5,"x",1
+"Res_Pickup","FrTIMS2   ",   6,"x",1
 "Sed_IM1   ","PSedIM1   ",   1,"x",1
 "Sed_IM1   ","fSedIM1   ",   2,"x",1
-"Sed_IM1   ","VxSedIM1  ",   3,"x",0
+"Sed_IM1   ","fSedIM1S2 ",   3," ",1
+"Sed_IM1   ","VxSedIM1  ",   4,"x",0
 "Sed_IM2   ","PSedIM2   ",   1,"x",1
 "Sed_IM2   ","fSedIM2   ",   2,"x",1
-"Sed_IM2   ","VxSedIM2  ",   3,"x",0
+"Sed_IM2   ","fSedIM2S2 ",   3," ",1
+"Sed_IM2   ","VxSedIM2  ",   4,"x",0
 "Sed_IM3   ","PSedIM3   ",   1,"x",1
 "Sed_IM3   ","fSedIM3   ",   2,"x",1
-"Sed_IM3   ","VxSedIM3  ",   3,"x",0
+"Sed_IM3   ","fSedIM3S2 ",   3," ",1
+"Sed_IM3   ","VxSedIM3  ",   4,"x",0
 "SedDiat   ","PSedDiat  ",   1,"x",1
 "SedDiat   ","fSedDiat  ",   2,"x",1
 "SedDiat   ","VxSedDiat ",   3,"x",0
@@ -1168,7 +1177,8 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Sum_Sedim ","VxSedTIM  ",   6,"x",0
 "Sum_Sedim ","VxSedPOCna",   7,"x",0
 "Sed_AAP   ","fSedAAP   ",   1,"x",1
-"Sed_AAP   ","VxSedAAP  ",   2,"x",0
+"Sed_AAP   ","fSedAAPS2 ",   2," ",1
+"Sed_AAP   ","VxSedAAP  ",   3,"x",0
 "Sed_CAAP  ","PSedAAP   ",   1,"x",1
 "Sed_CAAP  ","fSedAAP   ",   2,"x",1
 "Sed_CAAP  ","VxSedAAP  ",   3,"x",0
@@ -2483,23 +2493,32 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Volat_Diu ","kvDiu     ",   1,"x",1
 "Volat_Diu ","cHeDiu    ",   2,"x",1
 "Sed_Cd    ","fSedCd    ",   1,"x",1
-"Sed_Cd    ","VxSedCd   ",   2,"x",0
+"Sed_Cd    ","fSedCdS2  ",   2," ",1
+"Sed_Cd    ","VxSedCd   ",   3,"x",0
 "Sed_Cu    ","fSedCu    ",   1,"x",1
-"Sed_Cu    ","VxSedCu   ",   2,"x",0
+"Sed_Cu    ","fSedCuS2  ",   2," ",1
+"Sed_Cu    ","VxSedCu   ",   3,"x",0
 "Sed_Zn    ","fSedZn    ",   1,"x",1
-"Sed_Zn    ","VxSedZn   ",   2,"x",0
+"Sed_Zn    ","fSedZnS2  ",   2," ",1
+"Sed_Zn    ","VxSedZn   ",   3,"x",0
 "Sed_Hg    ","fSedHg    ",   1,"x",1
-"Sed_Hg    ","VxSedHg   ",   2,"x",0
+"Sed_Hg    ","fSedHgS2  ",   2," ",1
+"Sed_Hg    ","VxSedHg   ",   3,"x",0
 "Sed_Ni    ","fSedNi    ",   1,"x",1
-"Sed_Ni    ","VxSedNi   ",   2,"x",0
+"Sed_Ni    ","fSedNiS2  ",   2," ",1
+"Sed_Ni    ","VxSedNi   ",   3,"x",0
 "Sed_Pb    ","fSedPb    ",   1,"x",1
-"Sed_Pb    ","VxSedPb   ",   2,"x",0
+"Sed_Pb    ","fSedPbS2  ",   2," ",1
+"Sed_Pb    ","VxSedPb   ",   3,"x",0
 "Sed_Cr    ","fSedCr    ",   1,"x",1
-"Sed_Cr    ","VxSedCr   ",   2,"x",0
+"Sed_Cr    ","fSedCrS2  ",   2," ",1
+"Sed_Cr    ","VxSedCr   ",   3,"x",0
 "Sed_As    ","fSedAs    ",   1,"x",1
-"Sed_As    ","VxSedAs   ",   2,"x",0
+"Sed_As    ","fSedAsS2  ",   2," ",1
+"Sed_As    ","VxSedAs   ",   3,"x",0
 "Sed_Va    ","fSedVa    ",   1,"x",1
-"Sed_Va    ","VxSedVa   ",   2,"x",0
+"Sed_Va    ","fSedVaS2  ",   2," ",1
+"Sed_Va    ","VxSedVa   ",   3,"x",0
 "Sed_153   ","fSed153   ",   1,"x",1
 "Sed_153   ","VxSed153  ",   2,"x",0
 "Sed_HCB   ","fSedHCB   ",   1,"x",1
@@ -3843,3 +3862,4 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G5 ","G5_Cbal   ",  19,"x",1
 "DEBGRZ_G5 ","G5_Nbal   ",  20,"x",1
 "DEBGRZ_G5 ","G5_Pbal   ",  21,"x",1
+"IM_Floceq ","SPMratioem",   1,"x",1
