@@ -85,9 +85,9 @@
 
 !     Sedimentation to S1/S2
       pmsa(ipnt(18)) = sfl1 * q1 + sfl2 * q2 + sfl3 * q3
-      pmsa(ipnt(19)) = sfl1s2 * q1 + sfl2s2 * q2 + sfl3s2 * q3
-
       fl( 1 + iflux ) = pmsa(ipnt(18)) / depth
+
+      pmsa(ipnt(19)) = sfl1s2 * q1 + sfl2s2 * q2 + sfl3s2 * q3
       fl( 2 + iflux ) = pmsa(ipnt(19)) / depth
 
       endif

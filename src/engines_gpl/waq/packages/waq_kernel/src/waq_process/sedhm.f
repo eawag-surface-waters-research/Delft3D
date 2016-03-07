@@ -84,9 +84,9 @@
 
 !.....Sedimentation HM to S1/S2
       pmsa(ipnt(25)) = fl1*q1 + fl2*q2 + fl3*q3 + fl4*q4 + fl5*q5
-      pmsa(ipnt(26)) = fl1s2*q1 + fl2s2*q2 + fl3s2*q3
-
       fl (1+iflux) = pmsa(ipnt(25)) / depth
+
+      pmsa(ipnt(26)) = fl1s2*q1 + fl2s2*q2 + fl3s2*q3
       fl (2+iflux) = pmsa(ipnt(26)) / depth
 
       endif
