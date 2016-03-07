@@ -46,9 +46,9 @@
       implicit none
 
       real     pmsa  ( * ) , fl    (*)
-      integer  ipoint( 19) , increm( 19) , noseg , noflux,
+      integer  ipoint( 20) , increm( 20) , noseg , noflux,
      +         iexpnt(4,*) , iknmrk( * ) , noq1, noq2, noq3, noq4
-      integer  ipnt(19)
+      integer  ipnt(20)
 
       integer  iflux, iseg, ikmrk2, iq, ifrom
 
