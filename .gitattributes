@@ -5006,6 +5006,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/topodescription.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tricontour.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tricontourf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/trirst.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/udunits_parse_timeunit.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ui_inspectstruct.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ui_message.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/uislider.m -text
