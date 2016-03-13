@@ -598,15 +598,17 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (index(selmap(2:3),'Y') > 0) then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, u1, 'U1', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, u1, 'U1', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
           if (ierror /= 0) goto 9999
           !
           ! element 'V1'
           !
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, v1, 'V1', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, v1, 'V1', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -614,8 +616,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (selmap(4:4) == 'Y') then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, ierror, lundia, w1, 'W', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, ierror, lundia, w1, 'W', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -623,8 +626,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (selmap(5:5) == 'Y') then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, wphy, 'WPHY', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, wphy, 'WPHY', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -633,24 +637,27 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (index(selmap(6:13),'Y') /= 0) then
           call wrtarray_nmkl(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, r1, 'R1', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, lstsci, ierror, lundia, r1, 'R1', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
           if (flwoutput%difuflux) then
              !
              ! element 'R1FLX_UU'
              !
              call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxu, 'R1FLX_UU', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, lstsci, ierror, lundia, fluxu, 'R1FLX_UU', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
        
              !
              ! element 'R1FLX_VV'
              !
              call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxv, 'R1FLX_VV', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, lstsci, ierror, lundia, fluxv, 'R1FLX_VV', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -659,15 +666,17 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
              ! element 'R1FLX_UUC'
              !
              call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxuc, 'R1FLX_UUC', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, lstsci, ierror, lundia, fluxuc, 'R1FLX_UUC', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
              !
              ! element 'R1FLX_VVC'
              !
              call wrtarray_nmkl_ptr(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, lstsci, ierror, lundia, fluxvc, 'R1FLX_VVC', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, lstsci, ierror, lundia, fluxvc, 'R1FLX_VVC', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
        endif
@@ -679,8 +688,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_velchange)) then
              gdp%gdflwpar%mom_m_velchange = gdp%gdflwpar%mom_m_velchange / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -689,8 +699,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_densforce)) then
              gdp%gdflwpar%mom_m_densforce = gdp%gdflwpar%mom_m_densforce / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -699,8 +710,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_flowresist)) then
              gdp%gdflwpar%mom_m_flowresist = gdp%gdflwpar%mom_m_flowresist / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -709,8 +721,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_corioforce)) then
              gdp%gdflwpar%mom_m_corioforce = gdp%gdflwpar%mom_m_corioforce / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -719,8 +732,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_visco)) then
              gdp%gdflwpar%mom_m_visco = gdp%gdflwpar%mom_m_visco / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -769,8 +783,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_waveforce)) then
              gdp%gdflwpar%mom_m_waveforce = gdp%gdflwpar%mom_m_waveforce / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -779,8 +794,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_convec)) then
              gdp%gdflwpar%mom_m_convec = gdp%gdflwpar%mom_m_convec / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -789,8 +805,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_m_xadvec)) then
              gdp%gdflwpar%mom_m_xadvec = gdp%gdflwpar%mom_m_xadvec / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', kfumin, kfumax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', &
+                        & smlay_restr, kmaxout_restr, kfumin, kfumax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -801,8 +818,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_velchange)) then
              gdp%gdflwpar%mom_n_velchange = gdp%gdflwpar%mom_n_velchange / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -811,8 +829,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_densforce)) then
              gdp%gdflwpar%mom_n_densforce = gdp%gdflwpar%mom_n_densforce / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -821,8 +840,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_flowresist)) then
              gdp%gdflwpar%mom_n_flowresist = gdp%gdflwpar%mom_n_flowresist / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -831,8 +851,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_corioforce)) then
              gdp%gdflwpar%mom_n_corioforce = gdp%gdflwpar%mom_n_corioforce / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -841,8 +862,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_visco)) then
              gdp%gdflwpar%mom_n_visco = gdp%gdflwpar%mom_n_visco / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -891,8 +913,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_waveforce)) then
              gdp%gdflwpar%mom_n_waveforce = gdp%gdflwpar%mom_n_waveforce / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -901,8 +924,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_convec)) then
              gdp%gdflwpar%mom_n_convec = gdp%gdflwpar%mom_n_convec / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
           !
@@ -911,8 +935,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           if (associated(gdp%gdflwpar%mom_n_xadvec)) then
              gdp%gdflwpar%mom_n_xadvec = gdp%gdflwpar%mom_n_xadvec / mom_accum
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', kfvmin, kfvmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', &
+                        & smlay_restr, kmaxout_restr, kfvmin, kfvmax)
              if (ierror /= 0) goto 9999
           endif
        endif
@@ -923,8 +948,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (index(selmap(14:15),'Y') /= 0) then
           call wrtarray_nmkl(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, ltur, ierror, lundia, rtur1, 'RTUR1', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, ltur, ierror, lundia, rtur1, 'RTUR1', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -997,8 +1023,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (selmap(18:18) == 'Y') then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, ierror, lundia, vicww, 'VICWW', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, ierror, lundia, vicww, 'VICWW', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -1007,8 +1034,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (selmap(19:19) == 'Y') then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, ierror, lundia, dicww, 'DICWW', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, ierror, lundia, dicww, 'DICWW', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -1017,8 +1045,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (index(selmap(18:19),'Y') > 0) then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, ierror, lundia, rich, 'RICH', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, ierror, lundia, rich, 'RICH', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -1027,8 +1056,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (selmap(20:20) == 'Y') then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, rho, 'RHO', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, rho, 'RHO', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -1055,8 +1085,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! kmax+1 contains initial values and should not be written
           !
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax+1, ierror, lundia, vicuv, 'VICUV', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax+1, ierror, lundia, vicuv, 'VICUV', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        if (nsrc>0 .and. inode==master) then
@@ -1088,15 +1119,17 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (flwoutput%vortic) then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, vortic, 'VORTIC', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, vortic, 'VORTIC', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
           !
           ! Next ENSTRO
           !
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, enstro, 'ENSTRO', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, enstro, 'ENSTRO', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -1104,8 +1137,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
        !
        if (index(selmap(4:4),'Y')>0 .and. zmodel) then
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                        & kmaxout_restr, 1, kmax, ierror, lundia, p1, 'HYDPRES', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 1, kmax, ierror, lundia, p1, 'HYDPRES', &
+                        & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
        endif
        !
@@ -1200,8 +1234,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
                               & dps        ,thick     ,dzs1     ,kcs      ,kfs     , &
                               & kfsmin     ,kfsmax    ,zkt      ,gdp      )
           call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, ierror, lundia, zkt, 'LAYER_INTERFACE', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, ierror, lundia, zkt, 'LAYER_INTERFACE', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
           !
           ! Deallocate the array with vertical layer coordinates

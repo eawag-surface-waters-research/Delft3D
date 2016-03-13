@@ -643,7 +643,7 @@ subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             write (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
        endselect
     else
        ierr = 0
@@ -746,7 +746,9 @@ subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             do i3 = 1,u3
+                write (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+             enddo
        endselect
     else
        ierr = 0
@@ -1022,7 +1024,7 @@ subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             write (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
        endselect
     else
        ierr = 0
@@ -1125,7 +1127,9 @@ subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             do i3 = 1,u3
+                write (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+             enddo
        endselect
     else
        ierr = 0
@@ -1233,7 +1237,11 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             do i4 = 1,u4
+                do i3 = 1,u3
+                   write (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                enddo
+             enddo
        endselect
     else
        ierr = 0
@@ -1743,8 +1751,9 @@ end subroutine wrtarray_nkl_fp
 
 
 subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, lk, uk, ul, ierr, lundia, varptr, varnam, kfmin, kfmax)
+                     & itime, nf, nl, mf, ml, iarrc, gdp, &
+                     & lk, uk, ul, ierr, lundia, varptr, varnam, &
+                     & smlay, kmaxout, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: glbarr4_sp, dfgather, dfgather_seq
@@ -1790,8 +1799,9 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
     ! body
     if (associated(varptr)) then
        call wrtarray_nmkl(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, lk, uk, ul, ierr, lundia, varptr, varnam, kfmin, kfmax)
+                     & itime, nf, nl, mf, ml, iarrc, gdp, &
+                     & lk, uk, ul, ierr, lundia, varptr, varnam, &
+                     & smlay, kmaxout, kfmin, kfmax)
     else
        !
        ! TODO: It would be more efficient to just fill glbarr4_sp with -999.0_fp values, but I'm not sure
@@ -1812,8 +1822,9 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
 end subroutine wrtarray_nmkl_ptr
 
 subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, lk, uk, ul,ierr, lundia, var, varnam, kfmin, kfmax)
+                     & itime, nf, nl, mf, ml, iarrc, gdp, &
+                     & lk, uk, ul,ierr, lundia, var, varnam, &
+                     & smlay, kmaxout, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: glbarr4_sp, dfgather, dfgather_seq
@@ -1824,27 +1835,27 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
     !
     type(globdat),target :: gdp
     !
-    integer                                                                      , intent(in)  :: fds
-    integer                                                                      , intent(in)  :: filetype
-    integer                                                                      , intent(out) :: ierr
-    integer                                                                      , intent(in)  :: itime
-    integer                                                                      , intent(in)  :: lundia
-    integer                                                                      , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
-    integer                                                                      , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                      , intent(in)  :: ul            ! upperbound dim4
-    integer                                                                      , intent(in)  :: kmaxout       ! length of smlay
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(1:kmaxout)                                          , intent(in)  :: smlay
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kfmin
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kfmax
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul), intent(in)  :: var
-    character(*)                                                                 , intent(in)  :: varnam
-    character(*)                                                                 , intent(in)  :: grpnam
-    character(*)                                                                 , intent(in)  :: filename
+    integer                                                                      , intent(in)            :: fds
+    integer                                                                      , intent(in)            :: filetype
+    integer                                                                      , intent(out)           :: ierr
+    integer                                                                      , intent(in)            :: itime
+    integer                                                                      , intent(in)            :: lundia
+    integer                                                                      , intent(in)            :: lk            ! lowerbound dim3(0 or 1)
+    integer                                                                      , intent(in)            :: uk            ! upperbound dim3(kmax or kmax+1)
+    integer                                                                      , intent(in)            :: ul            ! upperbound dim4
+    integer                                                                      , intent(in), optional  :: kmaxout       ! length of smlay
+    integer      , dimension(0:nproc-1)                                          , intent(in)            :: mf            ! first index w.r.t. global grid in x-direction
+    integer      , dimension(0:nproc-1)                                          , intent(in)            :: ml            ! last index w.r.t. global grid in x-direction
+    integer      , dimension(0:nproc-1)                                          , intent(in)            :: nf            ! first index w.r.t. global grid in y-direction
+    integer      , dimension(0:nproc-1)                                          , intent(in)            :: nl            ! last index w.r.t. global grid in y-direction
+    integer      , dimension(4,0:nproc-1)                                        , intent(in)            :: iarrc         ! array containing collected grid indices 
+    integer      , dimension(:)                                                  , intent(in), optional  :: smlay
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in), optional  :: kfmin
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in), optional  :: kfmax
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul), intent(in)            :: var
+    character(*)                                                                 , intent(in)            :: varnam
+    character(*)                                                                 , intent(in)            :: grpnam
+    character(*)                                                                 , intent(in)            :: filename
     !
     ! local
     integer                                       :: idvar
@@ -1864,28 +1875,36 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout, ul ), stat = istat )
-    rbuff4(:,:,:,:) = -999.0_fp
-    do l = 1, ul
-       do k = 1, kmaxout
-          do m = 1, gdp%d%mmax
-             do n = 1, gdp%d%nmaxus
-                if (gdp%gdprocs%zmodel) then
-                   if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m)) then
-                      cycle
+    if (present(smlay)) then
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout, ul ), stat = istat )
+       rbuff4(:,:,:,:) = -999.0_fp
+       do l = 1, ul
+          do k = 1, kmaxout
+             do m = 1, gdp%d%mmax
+                do n = 1, gdp%d%nmaxus
+                   if (gdp%gdprocs%zmodel) then
+                      if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m)) then
+                         cycle
+                      endif
                    endif
-                endif
-                rbuff4(n,m,k,l) = var(n,m,smlay(k),l)
+                   rbuff4(n,m,k,l) = var(n,m,smlay(k),l)
+                enddo
              enddo
           enddo
        enddo
-    enddo
-    if (parll) then
-       call dfgather(rbuff4, glbarr4_sp, nf, nl, mf, ml, iarrc, gdp)
-    else 
-       call dfgather_seq(rbuff4, glbarr4_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       if (parll) then
+          call dfgather(rbuff4, glbarr4_sp, nf, nl, mf, ml, iarrc, gdp)
+       else 
+          call dfgather_seq(rbuff4, glbarr4_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       endif
+       deallocate(rbuff4)
+    else
+       if (parll) then
+          call dfgather(var, glbarr4_sp, nf, nl, mf, ml, iarrc, gdp)
+       else 
+          call dfgather_seq(var, glbarr4_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       endif
     endif
-    deallocate(rbuff4)
     call wrtvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, glbarr4_sp, varnam)
 end subroutine wrtarray_nmkl
@@ -1947,8 +1966,9 @@ end subroutine wrtarray_nmll
 
 
 subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, lk, uk, ierr, lundia, varptr, varnam, kfmin, kfmax)
+                     & itime, nf, nl, mf, ml, iarrc, gdp, &
+                     & lk, uk, ierr, lundia, varptr, varnam, &
+                     & smlay, kmaxout, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: glbarr3_sp, dfgather, dfgather_seq
@@ -1993,8 +2013,9 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
     ! body
     if (associated(varptr)) then
        call wrtarray_nmk(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, lk, uk, ierr, lundia, varptr, varnam, kfmin, kfmax)
+                     & itime, nf, nl, mf, ml, iarrc, gdp, &
+                     & lk, uk, ierr, lundia, varptr, varnam, &
+                     & smlay, kmaxout, kfmin, kfmax)
     else
        !
        ! TODO: It would be more efficient to just fill glbarr3_sp with -999.0_fp values, but I'm not sure
@@ -2015,8 +2036,9 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
 end subroutine wrtarray_nmk_ptr
 
 subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
-                    & itime, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                    & kmaxout, lk, uk, ierr, lundia, var, varnam, kfmin, kfmax)
+                    & itime, nf, nl, mf, ml, iarrc, gdp, &
+                    & lk, uk, ierr, lundia, var, varnam, &
+                    & smlay, kmaxout, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use dffunctionals, only: glbarr3_sp, dfgather, dfgather_seq
@@ -2027,26 +2049,26 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
     !
     type(globdat),target :: gdp
     !
-    integer                                                                  , intent(in)  :: fds
-    integer                                                                  , intent(in)  :: filetype
-    integer                                                                  , intent(out) :: ierr
-    integer                                                                  , intent(in)  :: itime
-    integer                                                                  , intent(in)  :: lundia
-    integer                                                                  , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
-    integer                                                                  , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                  , intent(in)  :: kmaxout       ! length of smlay
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                                    , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(1:kmaxout)                                      , intent(in)  :: smlay
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfmin
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfmax
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(in)  :: var
-    character(*)                                                             , intent(in)  :: varnam
-    character(*)                                                             , intent(in)  :: grpnam
-    character(*)                                                             , intent(in)  :: filename
+    integer                                                                  , intent(in)            :: fds
+    integer                                                                  , intent(in)            :: filetype
+    integer                                                                  , intent(out)           :: ierr
+    integer                                                                  , intent(in)            :: itime
+    integer                                                                  , intent(in)            :: lundia
+    integer                                                                  , intent(in)            :: lk            ! lowerbound dim3(0 or 1)
+    integer                                                                  , intent(in)            :: uk            ! upperbound dim3(kmax or kmax+1)
+    integer                                                                  , intent(in), optional  :: kmaxout       ! length of smlay
+    integer      , dimension(0:nproc-1)                                      , intent(in)            :: mf            ! first index w.r.t. global grid in x-direction
+    integer      , dimension(0:nproc-1)                                      , intent(in)            :: ml            ! last index w.r.t. global grid in x-direction
+    integer      , dimension(0:nproc-1)                                      , intent(in)            :: nf            ! first index w.r.t. global grid in y-direction
+    integer      , dimension(0:nproc-1)                                      , intent(in)            :: nl            ! last index w.r.t. global grid in y-direction
+    integer      , dimension(4,0:nproc-1)                                    , intent(in)            :: iarrc         ! array containing collected grid indices 
+    integer      , dimension(:)                                              , intent(in), optional  :: smlay
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in), optional  :: kfmin
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in), optional  :: kfmax
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(in)            :: var
+    character(*)                                                             , intent(in)            :: varnam
+    character(*)                                                             , intent(in)            :: grpnam
+    character(*)                                                             , intent(in)            :: filename
     !
     ! local
     integer                                       :: idvar
@@ -2065,25 +2087,33 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
     !
     ! body
     !
-    allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout), stat = istat )
-    do k=1,kmaxout
-       rbuff3(:,:,k) = var(:,:,smlay(k))
-    enddo
-    if (gdp%gdprocs%zmodel) then
-       do m = 1, gdp%d%mmax
-          do n = 1, gdp%d%nmaxus
-             do k = 1, kmaxout
-                if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+    if (present(smlay)) then
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout), stat = istat )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = var(:,:,smlay(k))
+       enddo
+       if (gdp%gdprocs%zmodel) then
+          do m = 1, gdp%d%mmax
+             do n = 1, gdp%d%nmaxus
+                do k = 1, kmaxout
+                   if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                enddo
              enddo
           enddo
-       enddo
-    endif
-    if (parll) then
-       call dfgather(rbuff3, glbarr3_sp, nf, nl, mf, ml, iarrc, gdp)
+       endif
+       if (parll) then
+          call dfgather(rbuff3, glbarr3_sp, nf, nl, mf, ml, iarrc, gdp)
+       else
+          call dfgather_seq(rbuff3, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       endif   
+       deallocate(rbuff3)
     else
-       call dfgather_seq(rbuff3, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif   
-    deallocate(rbuff3)
+       if (parll) then
+          call dfgather(var, glbarr3_sp, nf, nl, mf, ml, iarrc, gdp)
+       else
+          call dfgather_seq(var, glbarr3_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+       endif   
+    endif
     call wrtvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, glbarr3_sp, varnam)
 end subroutine wrtarray_nmk
@@ -2574,7 +2604,7 @@ subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
        call dfgather(var, glbarr2_sp, nf, nl, mf, ml, iarrc, gdp)
     else
        call dfgather_seq(var, glbarr2_sp, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif       
+    endif
     call wrtvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, glbarr2_sp, varnam)
 end subroutine wrtarray_nm_hp

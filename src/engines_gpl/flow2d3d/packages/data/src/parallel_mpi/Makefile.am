@@ -68,7 +68,6 @@ libDataParallelMPI_la_SOURCES = \
 	 dffunctionals.F90 \
 	 dfgather.F90 \
 	 dfgather_grddim.F90 \
-	 dfwrirst.F90 \
 	 adjlin.F90 \
 	 rdencl.F90 \
 	 removeDuplicateDDBFiles.f90 \

@@ -1191,17 +1191,10 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     ! Add interval ITRSTI to ITRSTC until ITFINISH (write also for ITFINISH)
     !
     if (nst == itrstc) then
-       if (.not. parll) then
-          call wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
-                    & nmax      ,kmax      ,lstsci    ,ltur      ,r(s1)     , &
-                    & r(u1)     ,r(v1)     ,r(r1)     ,r(rtur1)  ,r(umnldf) , &
-                    & r(vmnldf) ,gdp       )
-       else
-          call dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax , &
+       call wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
                  & nmax      ,kmax      ,lstsci    ,ltur      ,r(s1)     , &
                  & r(u1)     ,r(v1)     ,r(r1)     ,r(rtur1)  ,r(umnldf) , &
                  & r(vmnldf) ,gdp       )
-       endif
        write (lundia, '(a,f15.4,a)') '*** Restart file written at ', real(nst,sp)  &
                                    & *dtsec/60., ' minutes after ITDATE'
        itrstc = min(itrstc + itrsti, itfinish)

@@ -400,8 +400,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           ! element 'WS'
           !
           call wrtarray_nmkl(fds, filename, filetype, grpnam, celidt, &
-                        & nf, nl, mf, ml, iarrc, gdp, smlay, &
-                        & kmaxout, 0, kmax, lsed, ierror, lundia, ws, 'WS', kfsmin, kfsmax)
+                        & nf, nl, mf, ml, iarrc, gdp, &
+                        & 0, kmax, lsed, ierror, lundia, ws, 'WS', &
+                        & smlay, kmaxout, kfsmin, kfsmax)
           if (ierror /= 0) goto 9999
           !
           if (kmax==1) then
@@ -409,8 +410,9 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
              ! element 'RSEDEQ'
              !
              call wrtarray_nmkl(fds, filename, filetype, grpnam, celidt, &
-                          & nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                          & kmaxout_restr, 1, kmax, lsed, ierror, lundia, rsedeq, 'RSEDEQ', kfsmin, kfsmax)
+                          & nf, nl, mf, ml, iarrc, gdp, &
+                          & 1, kmax, lsed, ierror, lundia, rsedeq, 'RSEDEQ', &
+                          & smlay_restr, kmaxout_restr, kfsmin, kfsmax)
              if (ierror /= 0) goto 9999
           endif
        endif
