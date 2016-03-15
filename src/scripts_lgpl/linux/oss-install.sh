@@ -201,10 +201,13 @@ function waq () {
     mkdir -p $dest_bin
     mkdir -p $dest_default
 
-    copyFile "$prefix/bin/delwaq1"                    $dest_bin
-    copyFile "$prefix/bin/delwaq2"                    $dest_bin
-    copyFile "$prefix/lib/libwaq_plugin_wasteload.so" $dest_bin
-    copyFile "$srcdir/engines_gpl/waq/default/*"          $dest_default
+    copyFile "$prefix/bin/delwaq1"                           $dest_bin
+    copyFile "$prefix/bin/delwaq2"                           $dest_bin
+    copyFile "$prefix/lib/libwaq_plugin_wasteload.so"        $dest_bin
+    copyFile "$srcdir/engines_gpl/waq/default/bloom.spe"     $dest_default
+    copyFile "$srcdir/engines_gpl/waq/default/bloominp.d09"  $dest_default
+    copyFile "$srcdir/engines_gpl/waq/default/proc_def.dat"  $dest_default
+    copyFile "$srcdir/engines_gpl/waq/default/proc_def.def"  $dest_default
 
     echo "Gathering libraries for delwaq..."
     cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep -v $gatherExcludeFilter` $dest_bin
