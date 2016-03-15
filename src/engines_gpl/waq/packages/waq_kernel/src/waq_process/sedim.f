@@ -115,8 +115,9 @@
 
 !     zero output
 
-      PMSA (IP10) = 0.0
-      PMSA (IP11) = 0.0
+      PMSA (IP14) = 0.0
+      PMSA (IP15) = 0.0
+      PMSA (IP16) = 0.0
 
 !     sedimentation towards the bottom
 
