@@ -932,9 +932,9 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ! Added breaker delay adjustment
              !
              if (rolcorr==1) then
-                taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm) + grmsur(nm))/hu(nm)
+                taubsu(nm) = taubpu(nm)*(costu*ustokes + (grfacu(nm) + grmsur(nm))/hu(nm))
              else
-                taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm))/hu(nm) 
+                taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm)/hu(nm) )
              endif
              !
           endif
