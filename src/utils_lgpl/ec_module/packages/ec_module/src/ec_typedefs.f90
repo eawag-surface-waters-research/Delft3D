@@ -138,6 +138,7 @@ module m_ec_typedefs
         character(len=maxFileNameLen)                ::  ncname          !< netCDF filename
         integer, allocatable, dimension(:)           ::  dimlen          !< lengths of dimensions 
         character(len=maxFileNameLen), allocatable, dimension(:)       ::  standard_names          !< list of standard names
+        character(len=maxFileNameLen), allocatable, dimension(:)       ::  variable_names          !< list of variable names
         integer                                      ::  nDims = 0       !< Number of dimensions 
         integer                                      ::  nTims = 0       !< Number of timeseries 
         integer                                      ::  nVars = 0       !< Number of variables 
@@ -276,6 +277,7 @@ module m_ec_typedefs
       logical                                             :: end_of_data             !< End of data reached?
       character(len=100), dimension(:), allocatable :: standard_names                ! Standard names by varid in a netcdf-file 
       character(len=100), dimension(:), allocatable :: variable_names                ! Variable names by varid in a netcdf file 
+      integer, dimension(:), allocatable            :: dim_varids                    ! For each dimension in NetCDF: id of the associated variable
    end type tEcFileReader
 
    type tEcFileReaderPtr

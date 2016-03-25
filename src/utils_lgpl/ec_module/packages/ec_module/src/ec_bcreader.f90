@@ -81,8 +81,10 @@ contains
        bc%quantity%vectormax  = 1                              ! To be removed later, when we enable vectormax>1 for netcdf files
        !if (ecNetCDFGetAttrib (bc%ncptr, q_id, attribname, attribvalue)) then
        !endif
-
        bc%timeunit = bc%ncptr%timeunit
+    case default
+       call setECMessage("Forcing file ("//trim(bc%fname)//") should either be of type .nc (netcdf timeseries file) or .bc (ascii BC-file).")
+       return
     end select
     success=.true.
   end function ecBCInit
@@ -102,7 +104,7 @@ contains
     integer             ::  reclen
     integer             ::  commentpos
     character(len=:),   &
-         allocatable   ::  keyvaluestr                         ! all key-value pairs in one header
+         allocatable    ::  keyvaluestr                         ! all key-value pairs in one header
     integer             ::  posfs
     integer             ::  nfld
     integer             ::  nq

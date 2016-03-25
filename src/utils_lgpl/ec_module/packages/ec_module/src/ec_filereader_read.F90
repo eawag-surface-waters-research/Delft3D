@@ -650,12 +650,11 @@ contains
 
          ! With the the quantity name interpreted as a standard name, inquire from the filereader instance the varid 
          do varid=1,size(fileReaderPtr%standard_names)
-            if (fileReaderPtr%standard_names(varid)==item%quantityPtr%name) then 
-               exit 
-            endif 
+            if (strcmpi(fileReaderPtr%standard_names(varid),item%quantityPtr%name)) exit
          enddo 
          if (varid>size(fileReaderPtr%standard_names)) then 
             ! ERROR: standard name not found in this filereader, TODO: handle exception 
+            call setECMessage("No standard_name='"//trim(item%quantityPtr%name)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
             return 
          endif 
          
@@ -763,7 +762,7 @@ contains
             ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
             
             ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
-            if (trim(item%quantityPtr%name) == 'Rainfall' .or. trim(item%quantityPtr%name) == 'rainfall' .or. trim(item%quantityPtr%name)=='precipitation') then                          ! str_upper(item%quantityPtr%name)=='RAINFALL' 
+            if (strcmpi(item%quantityPtr%name,'rainfall') .or. strcmpi(item%quantityPtr%name,'precipitation')) then
                ! Data must be converted here to rainfall per day for FM.
                time_window = 1.d0 
                select case (item%quantityPtr%units)
