@@ -361,6 +361,12 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
                & ustokes   ,gdp       )
     call timer_stop(timer_sud_cucnp, gdp)
     !
+    ! In z_cucnp, the horizontal viscosity is added to ddk (explicit).
+    ! Therefore, ddk must be synchronised with neighbouring partitions.
+    ! With sigma layers, the horizontal viscosity is added in uzd only.
+    !
+    call dfexchg ( ddk, 1, kmax, dfloat, nm_pos, gdp )
+    !
     ! When neighbor cells ly higher, mass in/outflow is added to current column
     !
     call timer_start(timer_sud_rest, gdp)

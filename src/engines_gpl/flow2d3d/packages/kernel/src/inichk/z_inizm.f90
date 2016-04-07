@@ -395,4 +395,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        enddo
     endif
 9999 continue
+    call dfexchg ( kfuz1 , 1, kmax, dfint , nm_pos, gdp )
+    call dfexchg ( kfvz1 , 1, kmax, dfint , nm_pos, gdp )
+    call dfexchg ( kfsz1 , 1, kmax, dfint , nm_pos, gdp )
 end subroutine z_inizm
