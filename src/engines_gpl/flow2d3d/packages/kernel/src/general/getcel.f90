@@ -120,6 +120,7 @@ subroutine getcel(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
     !
     grpndm = 5
     coding = 'N'
+    fd_nef = -1
     !
     ! aggregate file names
     !

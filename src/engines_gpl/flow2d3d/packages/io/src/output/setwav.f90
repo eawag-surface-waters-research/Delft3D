@@ -246,7 +246,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
        !
        ! Read the actual COM-file version from the COM-file
        !
-       fd_nef               = 0
+       fd_nef               = -1
        ierror               = 0
        ierror               = crenef(fd_nef, datnam(1:datlen), defnam(1:deflen), ' ', 'r')
        uindex(1:3)          = 1

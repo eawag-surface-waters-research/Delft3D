@@ -99,6 +99,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     nullify(rst_bodsed)
     error        = .false.
     success      = .false.
+    fds          = -1
     call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file

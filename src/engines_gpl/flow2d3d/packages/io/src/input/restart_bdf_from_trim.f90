@@ -79,6 +79,7 @@ subroutine restart_bdf_from_trim(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     nullify(sbuff)
     bdfhread = .false.
     bdflread = .false.
+    fds      = -1
     call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file

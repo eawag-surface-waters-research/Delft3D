@@ -58,6 +58,7 @@ function open_datdef(filnam    ,fds       ,readonly)
 !
 !! executable statements -------------------------------------------------------
 !
+    fds = -1
     call remove_leading_spaces(filnam    ,len_fn    )
     dat_file = filnam(1:len_fn)//'.dat'
     def_file = filnam(1:len_fn)//'.def'

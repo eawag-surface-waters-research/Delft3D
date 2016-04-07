@@ -143,6 +143,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     nullify(rst_thlyr)
     error        = .false.
     success      = .false.
+    fds          = -1
     layerfrac    = 0
     call remove_leading_spaces(restid    ,lrid      )
     !

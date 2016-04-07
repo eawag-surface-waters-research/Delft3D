@@ -209,6 +209,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     nullify(sbuff)
     error        = .false.
     error_string = ' '
+    fds          = -1
     call remove_leading_spaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file

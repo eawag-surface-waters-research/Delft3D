@@ -98,6 +98,7 @@ subroutine chkcom(lundia    ,error     ,neffil    ,ftype     ,gdp       )
     coding = 'N'
     error = .false.
     errnr = ' '
+    fds   = -1
     refnr = '03.20.00.00'
     celidt = 1
     hlptxt(1) = refnr
