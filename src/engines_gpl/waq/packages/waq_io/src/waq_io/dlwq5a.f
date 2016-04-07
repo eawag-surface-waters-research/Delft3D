@@ -535,21 +535,26 @@
             write(lunut,1360)
             ierr = ierr + 1
          endif
+         if ( nodim .eq. 0) then
+            write(lunut,1370)
+            iwar = iwar + 1
+         else  
 !          Assigns according to computational rules
-         nr2 = ntr + nottt*nobrk
-         call dlwq5e ( lunut, iar   , noitm, itmnr   , nodim   ,
-     *                 idmnr, iorder, rar  , iopt    , rar(ntr),
-     *                 nocol, nobrk , amiss, iar(nti), rar(nr2))
-         strng3 = 'breakpoint'
+            nr2 = ntr + nottt*nobrk
+            call dlwq5e ( lunut, iar   , noitm, itmnr   , nodim   ,
+     *                    idmnr, iorder, rar  , iopt    , rar(ntr),
+     *                    nocol, nobrk , amiss, iar(nti), rar(nr2))
+            strng3 = 'breakpoint'
 !          Writes to the binary intermediate file
-         nts   = nconst + 1
-         ntc   = nti
-         icm   = icmax - ntc
-         call dlwqj3 ( lunwr2 , lunut   , iwidth , nobrk  , iar    ,
-     *                 rar(nts),rar(nr2), itmnr  , idmnr  , iorder ,
-     *                 scale  , .true.  , binfil , iopt   , ipro   ,
-     *                 itfacw , dtflg1  , dtflg3 , ifilsz , jfilsz ,
-     *                 sname  , strng1  , strng2 , strng3 , ioutpt )
+            nts   = nconst + 1
+            ntc   = nti
+            icm   = icmax - ntc
+            call dlwqj3 ( lunwr2 , lunut   , iwidth , nobrk  , iar    ,
+     *                    rar(nts),rar(nr2), itmnr  , idmnr  , iorder ,
+     *                    scale  , .true.  , binfil , iopt   , ipro   ,
+     *                    itfacw , dtflg1  , dtflg3 , ifilsz , jfilsz ,
+     *                    sname  , strng1  , strng2 , strng3 , ioutpt )
+         endif
          if ( ierr2 .eq. 2 ) goto 530
          if ( ierr2 .eq. 3 ) goto 510
          iorder = 0
@@ -742,6 +747,7 @@
  1350 format (  ' Output of the data only writen for output',
      *          ' option 4 and higher !' )
  1360 format (  ' ERROR: no (valid) DATA record available !' )
+ 1370 format (  ' WARNING: all DATA from this block is ignored !' )
  2220 format (  ' Input comes from binary file: ',A      )
 !
       end
