@@ -140,15 +140,17 @@ contains
          real(hp), dimension(:), intent(inout) :: values        !< read values
          !
          integer        :: n_values !< number of quantities in the file
-         character(132) :: rec      !< content of a line
+         character(132) :: rec, rec0!< content of a line
          integer        :: istat    !< status of read operation
          integer        :: i        !< loop counter
+
          !
          success = .false.
          n_values = size(values)
          ! continue reading lines untill a data line is encountered
          do
             read(fileReaderPtr%fileHandle, '(a)', IOSTAT = istat) rec
+            rec0 = rec                                         ! preserve originally read line for error reporting
             if (istat == 0) then
                call strip_comment(rec)
                if (len_trim(rec)>0) then 
@@ -159,7 +161,7 @@ contains
                      success = .true.
                   else
                      call setECMessage("Read failure before end of file: "//trim(fileReaderPtr%fileName))
-                     call setECMessage("     line = "//trim(rec))
+                     call setECMessage("     string = '"//trim(rec0)//"'")
                      return
                   end if
                   exit
