@@ -214,7 +214,7 @@
       REMEXP(J)=EXPNUT
       REMINU(J)=RNUTRI
       DO 140 K=1,NUSPEC
-  140 A(J,K)=AA(J,K)*(AVAILN*RMORT(K)*(1.0-EXPNUT)+RNUTRI)/RNUTRI
+  140 A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-EXPNUT)+RNUTRI)/RNUTRI
   150 CONTINUE
 !
 !  Calculate extinction coefficients
@@ -224,11 +224,11 @@
 !
 !
       REMIT=DEXP(REMILI(1)*T-REMILI(2))
-      QMREM=AVAILN/(REMIT+SEDRAT+FLUSH)
       DO 160 K=1,NUSPEC
-      ATEMP=EKX(K)*(QMREM*RMORT(K)*DABS(SDMIX(K))+1.0)
-      DO 160 J=NUFILI,NUABCO
-  160 A(J,K)=ATEMP
+        QMREM=AVAILN(K)/(REMIT+SEDRAT+FLUSH)
+        ATEMP=EKX(K)*(QMREM*RMORT(K)*DABS(SDMIX(K))+1.0)
+        DO 160 J=NUFILI,NUABCO
+  160     A(J,K)=ATEMP
 !
 !  Set "B" values for nutrients by substracting the amount in
 !  zooplankton from the input values and correcting for deviations

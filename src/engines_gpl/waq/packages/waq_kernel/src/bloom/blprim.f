@@ -238,7 +238,7 @@
             DO K=1,NUNUCO
                I = NUTCON(K)
                AUTNUT  = DBLE( TSTEPI * FLMORA(J)) * CTODRY(J) *
-     1                   (1.D0 - AVAILN) * AA(K,J)
+     1                   (1.D0 - AVAILN(J)) * AA(K,J)
                IF (I.LE.3) THEN
                  AUTO(I) = AUTO(I) + AUTNUT                   ! ONLY FOR N,P,Si
                  CONCEN(I) = CONCEN(I) + AUTNUT

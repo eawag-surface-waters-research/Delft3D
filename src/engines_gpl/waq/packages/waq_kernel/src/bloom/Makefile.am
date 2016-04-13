@@ -39,7 +39,6 @@ libbloom_la_SOURCES = blclmort.f \
        dayeu.f \
        diel.f \
        domina.f \
-       dynade.f \
        dynrun.f \
        ebcalc.f \
        edit.f \

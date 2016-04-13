@@ -58,7 +58,7 @@
 !  Calculate concentrations of dead algae in C-units,
 !  and the sedimentation rate to the bottom.
 !
-      DEAD=DEATH*AVAILN*ALIVE/(REMIOR*TEMP+SEDRAT+FLUSH)
+      DEAD=DEATH*AVAILN(1)*ALIVE/(REMIOR*TEMP+SEDRAT+FLUSH)
       SEDEAD=SEDRAT*DEAD
 !
 !  Print results.

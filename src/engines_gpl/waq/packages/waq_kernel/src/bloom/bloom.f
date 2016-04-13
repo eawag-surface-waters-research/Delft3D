@@ -216,7 +216,7 @@
           REMINU(J)= REMINU(J) + GRADET(J)
           REMEXP(J) = DEXP(-REMINU(J)*TSTEP*MI)
           DO 530 K=1,NUSPEC
-            A(J,K)=AA(J,K)*(AVAILN*RMORT(K)*(1.0-REMEXP(J))+REMINU(J))/
+            A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-REMEXP(J))+REMINU(J))/
      1             REMINU(J)
   530     CONTINUE
           B(J) = CONCEN(J) - DETRIT(J)*REMEXP(J)
@@ -536,7 +536,7 @@
             REMINU(J)= REMINU(J) + GRADET(J) - GDTOLD(J)
             REMEXP(J) = DEXP(-REMINU(J)*TSTEP*MI)
             DO 560 K=1,NUSPEC
-              A(J,K)=AA(J,K)*(AVAILN*RMORT(K)*(1.0-REMEXP(J))+
+              A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-REMEXP(J))+
      1               REMINU(J))/REMINU(J)
   560       CONTINUE
             B(J) = CONCEN(J) - DETRIT(J)*REMEXP(J)

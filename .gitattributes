@@ -1735,7 +1735,6 @@ src/engines_gpl/waq/packages/waq_kernel/src/bloom/czoopl.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/bloom/dayeu.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/bloom/diel.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/bloom/domina.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/bloom/dynade.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/bloom/dynrun.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/bloom/ebcalc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/bloom/edit.f -text

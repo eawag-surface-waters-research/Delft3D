@@ -173,7 +173,8 @@
 !  algae and the sedimentation rate of dead algae.
 !
       IF (LPOOLS .NE. 1) GO TO 120
-      CALL POOLS(CDATE,DEATH,ALIVE,TEMP)
+!      NOT POSSIBLE ANY MORE (AVAILN BECAME ARRAY)
+!      CALL POOLS(CDATE,DEATH,ALIVE,TEMP)
   120 CONTINUE
       RETURN
   130 CONTINUE

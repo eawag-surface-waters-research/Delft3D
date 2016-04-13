@@ -69,7 +69,6 @@
 		<File RelativePath=".\src\bloom\dayeu.f"/>
 		<File RelativePath=".\src\bloom\diel.f"/>
 		<File RelativePath=".\src\bloom\domina.f"/>
-		<File RelativePath=".\src\bloom\dynade.f"/>
 		<File RelativePath=".\src\bloom\dynrun.f"/>
 		<File RelativePath=".\src\bloom\ebcalc.f"/>
 		<File RelativePath=".\src\bloom\edit.f"/>

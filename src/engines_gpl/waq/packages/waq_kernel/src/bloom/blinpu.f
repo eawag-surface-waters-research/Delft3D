@@ -166,16 +166,8 @@
           RES1(I)   = ALGTYP(13,I)
           RES2(I)   = ALGTYP(14,I)
           SDMIX(I)  = ALGTYP(19,I)
-          IF (I.EQ.1) THEN
-            AUTOFR  = ALGTYP(15,I)
-            AVAILN=DBLE(1.D0 - AUTOFR)
-          ELSE
-            IF (ABS(ALGTYP(15,I)-ALGTYP(15,1)).GT.1.0E-6) THEN
-              WRITE(*,*) 'Fraction autolyse must be the same for all ',
-     1                   'BLOOM algae types'
-              CALL SRSTOP(1)
-            ENDIF
-          ENDIF
+          AUTOFR = ALGTYP(15,I)
+          AVAILN(I) = DBLE(1.D0 - AUTOFR)
    80   CONTINUE
    70 CONTINUE
 

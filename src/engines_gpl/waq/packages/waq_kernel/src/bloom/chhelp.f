@@ -75,7 +75,12 @@
       WRITE (OUTUNI,99840) FLUSH
       WRITE (OUTUNI,99830) REMIOR
       WRITE (OUTUNI,99820) REMILI(1),REMILI(2)
-      WRITE (OUTUNI,99810) AVAILN
+      IF (IOFLAG .EQ. 1) CALL CLRSCR
+      WRITE (OUUNI,99810)
+      DO I=1,NUSPEC
+         WRITE(OUUNI,99800) SPNAME(I),AVAILN(I)
+      END DO
+
       IF (IOFLAG .EQ. 1) CALL MORESC
 !
 !  Formats for this subroutine
@@ -110,6 +115,9 @@
      1        '*  Temperature')
 99820 FORMAT (1X,'Mineralization rate of chlorophyll is:',1X,
      1        'EXP (',2X,F7.4,' * Temperature- ',2X,F7.4,' )')
-99810 FORMAT (1X,'Nutrient fraction becoming detritus =',F6.3)
+99810 FORMAT (1X,'Nutrient fraction becoming detritus: ',/,' Species ',
+     1        'fDet')
+99800 FORMAT (1X,A10,F6.3)
+      
       RETURN
       END
