@@ -114,11 +114,15 @@
 !     TOTNUT  R     4             C, N, P, Si in algae (gX/m3)
 !     NUTCON  I*4   8             Nutrients involved in active nutrient constraints
 !     FLXCON  I*4   8             Uptake fluxes involved in active nutrient constra
+!     SWBLSA  I     1             Switch for BLOOM stand alone (0=no, 1=yes)     (-)
+!     TotNin  R     1             Total nitrogen for BLOOM stand alone        (g/m3)
+!     TotPin  R     1             Total phosphorous for BLOOM stand alone     (g/m3)
+!     TotSIin R     1             Total silicium for BLOOM stand alone        (g/m3)       
       INTEGER  NTYP_M, NIPFIX, NIPVAR, NOUTLIM, NUNUCOM, NOPFIX
       PARAMETER ( NTYP_M = 30 )
 !     NIPFIX      Nr of input items independent of BLOOM types, preceding BLOOM types input
 !     NIPVAR      Nr of input items for BLOOM types
-      PARAMETER ( NIPFIX = 28 , NIPVAR= 26 )
+      PARAMETER ( NIPFIX = 32 , NIPVAR= 26 )
       PARAMETER ( NOPFIX = 29 )
       PARAMETER (NUNUCOM = 8)
       PARAMETER (NOUTLIM = NUNUCOM + 2 + 2*NTYP_M)
@@ -142,7 +146,7 @@
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8 , IP9 ,
      J         IP10, IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18,
      J         IP19, IP20, IP21, IP22, IP23, IP24, IP25, IP26, IP27,
-     J         IP28
+     J         IP28, IP29, IP30, IP31, IP32
       INTEGER  IO(NOPFIX)
       INTEGER  NOSEGW, NOLAY, NOSEGL, IKMRK1, IKMRK2
       integer  ipo17, ipo18, ipo19
@@ -157,6 +161,8 @@
       REAL*8 ORG_AVAILN
       INTEGER NUTCON(NUNUCOM), FLXCON(NUNUCOM), CON2OUT(NUNUCOM)
       REAL    OUTLIM(NOUTLIM)
+      REAL    TotNin, TotPin, TotSIin
+      INTEGER SWBLSA
 !
 !     JVB much more variables needs to be saved, for the time being all
 !
@@ -178,6 +184,7 @@
          IF (INCREM(28).NE.0) CALL BLSTOP('SWCLIM',ID)
          LCARB = .FALSE.
          IF (SWCLIM.GT.0) LCARB = .TRUE.
+         SWBLSA = PMSA(IPOINT(29))
 
 !     Set logical numbers and open autonomous I/O files Bloom
          RUNNAM = 'bloominp.XXX'
@@ -385,6 +392,9 @@
       IP26 = IPOINT(26)
       IP27 = IPOINT(27)
       IP28 = IPOINT(28)
+      IP30 = IPOINT(30)
+      IP31 = IPOINT(31)
+      IP32 = IPOINT(32)
 
       DO IP = 1,NOPFIX
           IO(IP) = IPOINT(NIPFIX+NIPVAR*NTYP_M+IP)
@@ -495,6 +505,9 @@
          IP26 = IP26 + INCREM(26)
          IP27 = IP27 + INCREM(27)
          IP28 = IP28 + INCREM(28)
+         IP30 = IP30 + INCREM(30)
+         IP31 = IP31 + INCREM(31)
+         IP32 = IP32 + INCREM(32)
       ENDDO
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
@@ -508,6 +521,9 @@
       IP26 = IPOINT(26)
       IP27 = IPOINT(27)
       IP28 = IPOINT(28)
+      IP30 = IPOINT(30)
+      IP31 = IPOINT(31)
+      IP32 = IPOINT(32)
 
 !     Second segment loop, actual bloom call
 
@@ -542,6 +558,9 @@
 
       DAYLEN = PMSA(IP8 ) * 24.
       IF (DAYLEN.GT.24.) GOTO 903
+      TotNin = PMSA(IP30)
+      TotPin = PMSA(IP31)
+      TotSIin = PMSA(IP32)
       AMMONI = PMSA(IP9 )
       NITRAT = PMSA(IP10)
       PHOSPH = PMSA(IP11)
@@ -671,7 +690,8 @@
      J              CGROUP        , LMIXO         , LFIXN         ,
      J              LCARB         , NUTCON        , FLXCON        , 
      J              NOUTLIM       , OUTLIM        , NUNUCOM       , 
-     J              NTYP_M        , CON2OUT                       )
+     J              NTYP_M        , CON2OUT       , SWBLSA        ,
+     J              TotNin        , TotPin        , TotSIin       )
 
 !     Copy C-uptake flux to seperate flux for Oxygen
 
@@ -793,6 +813,9 @@
       IP26 = IP26 + INCREM(26)
       IP27 = IP27 + INCREM(27)
       IP28 = IP28 + INCREM(28)
+      IP30 = IP30 + INCREM(30)
+      IP31 = IP31 + INCREM(31)
+      IP32 = IP32 + INCREM(32)
 
       DO IP = 1,NOPFIX
           IO(IP) = IO(IP) + INCREM(NIPFIX+NIPVAR*NTYP_M+IP)

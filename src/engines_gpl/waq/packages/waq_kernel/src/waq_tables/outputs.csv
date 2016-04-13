@@ -252,31 +252,37 @@ outppr,outpit,outpnm,outpdo,outpsx
 "vtrans    ","FRACTIM100", 101,"x",1
 "BLOOM_P   ","ReqDin    ",   1,"x",1
 "BLOOM_P   ","FracUptNH4",   2,"x",1
-"BLOOM_P   ","BOD5/infPH",   3,"x",1
-"BLOOM_P   ","Limit Chlo",   4,"x",1
-"BLOOM_P   ","Limit nit ",   5,"x",1
-"BLOOM_P   ","Limit pho ",   6,"x",1
-"BLOOM_P   ","Limit sil ",   7,"x",1
-"BLOOM_P   ","Limit e   ",   8,"x",1
-"BLOOM_P   ","Limit gro ",   9,"x",1
-"BLOOM_P   ","Limit mor ",  10,"x",1
-"BLOOM_P   ","fPPtot    ",  11,"x",1
-"BLOOM_P   ","fResptot  ",  12,"x",1
-"BLOOM_P   ","fFixNUpt  ",  13,"x",1
-"BLOOM_P   ","Lim_IN    ",  14,"x",1
-"BLOOM_P   ","Lim_IP    ",  15,"x",1
-"BLOOM_P   ","Lim_Si    ",  16,"x",1
-"BLOOM_P   ","Lim_IC    ",  17,"x",1
-"BLOOM_P   ","Lim_DetN  ",  18,"x",1
-"BLOOM_P   ","Lim_DetP  ",  19,"x",1
-"BLOOM_P   ","Lim_FixN  ",  20,"x",1
-"BLOOM_P   ","Lim_dummy ",  21," ",1
-"BLOOM_P   ","Lim_inhib ",  22,"x",1
-"BLOOM_P   ","Lim_light ",  23,"x",1
-"BLOOM_P   ","RcPPALG   ",  24,"x",1
-"BLOOM_P   ","RcMrtALG  ",  25,"x",1
-"BLOOM_P   ","Lim_GALG  ",  26,"x",1
-"BLOOM_P   ","Lim_MALG  ",  27,"x",1
+"BLOOM_P   ","Phyt_bl   ",   3," ",1
+"BLOOM_P   ","AlgN_bl   ",   4," ",1
+"BLOOM_P   ","AlgP_bl   ",   5," ",1
+"BLOOM_P   ","AlgSi_bl  ",   6," ",1
+"BLOOM_P   ","AlgDM_bl  ",   7," ",1
+"BLOOM_P   ","BOD5/infPH",   8,"x",1
+"BLOOM_P   ","Chlfa_bl  ",   9," ",1
+"BLOOM_P   ","Limit Chlo",  10,"x",1
+"BLOOM_P   ","Limit nit ",  11,"x",1
+"BLOOM_P   ","Limit pho ",  12,"x",1
+"BLOOM_P   ","Limit sil ",  13,"x",1
+"BLOOM_P   ","Limit e   ",  14,"x",1
+"BLOOM_P   ","Limit gro ",  15,"x",1
+"BLOOM_P   ","Limit mor ",  16,"x",1
+"BLOOM_P   ","fPPtot    ",  17,"x",1
+"BLOOM_P   ","fResptot  ",  18,"x",1
+"BLOOM_P   ","fFixNUpt  ",  19,"x",1
+"BLOOM_P   ","Lim_IN    ",  20,"x",1
+"BLOOM_P   ","Lim_IP    ",  21,"x",1
+"BLOOM_P   ","Lim_Si    ",  22,"x",1
+"BLOOM_P   ","Lim_IC    ",  23,"x",1
+"BLOOM_P   ","Lim_DetN  ",  24,"x",1
+"BLOOM_P   ","Lim_DetP  ",  25,"x",1
+"BLOOM_P   ","Lim_FixN  ",  26,"x",1
+"BLOOM_P   ","Lim_dummy ",  27," ",1
+"BLOOM_P   ","Lim_inhib ",  28,"x",1
+"BLOOM_P   ","Lim_light ",  29,"x",1
+"BLOOM_P   ","RcPPALG   ",  30,"x",1
+"BLOOM_P   ","RcMrtALG  ",  31,"x",1
+"BLOOM_P   ","Lim_GALG  ",  32,"x",1
+"BLOOM_P   ","Lim_MALG  ",  33,"x",1
 "BLOOM     ","ReqDin    ",   1," ",1
 "BLOOM     ","FracUptNH4",   2," ",1
 "BLOOM     ","Phyt_bl   ",   3," ",1

@@ -11087,3 +11087,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dSedAsS2  ","x"," ",   -999.000    ,"(gAs/m3/d)          ","sedimentation flux As towards S2                  ","volume    ","volume    "," ","                              "
 "fSedVaS2  ","x"," ",   -999.000    ,"(gVa/m2/d)          ","sedimentation flux Va towards S2                  ","volume    ","volume    "," ","                              "
 "dSedVaS2  ","x"," ",   -999.000    ,"(gVa/m3/d)          ","sedimentation flux Va towards S2                  ","volume    ","volume    "," ","                              "
+"SWBloomSA ","x"," ",    0.00000    ,"(-)                 ","switch for BLOOM stand alone (0=no, 1=yes)        ","volume    ","volume    "," ","                              "
+"TotNBLSA  ","x"," ",    0.00000    ,"(g/m3)              ","Total nitrogen for BLOOM stand alone              ","volume    ","volume    "," ","                              "
+"TotPBLSA  ","x"," ",    0.00000    ,"(g/m3)              ","Total phosphorous for BLOOM stand alone           ","volume    ","volume    "," ","                              "
+"TotSiBLSA ","x"," ",    0.00000    ,"(g/m3)              ","Total silicium for BLOOM stand alone              ","volume    ","volume    "," ","                              "

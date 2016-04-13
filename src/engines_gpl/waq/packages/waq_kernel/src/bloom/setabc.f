@@ -40,7 +40,7 @@
 !  *********************************************************************
 !
       SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET,
-     1                  LCOUPL)
+     1                  SWBLSA)
       IMPLICIT REAL*8 (A-H,O-Z)
       SAVE
       INCLUDE 'blmdim.inc'
@@ -55,6 +55,7 @@
       INCLUDE 'dynam.inc'
       INCLUDE 'ioblck.inc'
       REAL*8 XINIT(*),PMAX20(MT),TCORR(MT),SDMIXN(MT),ZOOD(0:MG)
+      INTEGER SWBLSA
 !
 !  If this is the first time through the subroutine,
 !  then initiate A, B and C
@@ -201,7 +202,7 @@
 !  If RNUT(2,I)=1.0, remineralisation rate I =RNUT(1,I) * temperature
 !
       QMREM = 0.0
-      IF (LCOUPL .NE. 0) GO TO 170
+      IF (SWBLSA .NE. 1) GO TO 170
       DO 150 J=1,NUNUCO
       IF (RNUT(2,J) .LT. 1.0D-6) THEN
          RNUTRI=RNUT(1,J)+SEDRAT+FLUSH

@@ -75,7 +75,7 @@
 !  *********************************************************************
 !
       SUBROUTINE FIXINF(X,BIO,EXTTOT,EXTB,INHIB,NI,IRERUN,IRS,INFEAS,
-     &                  ERRIND,JKMAX,AROOT,CDATE,LCOUPL)
+     &                  ERRIND,JKMAX,AROOT,CDATE,SWBLSA)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'phyt1.inc'
@@ -86,7 +86,7 @@
       INCLUDE 'dynam.inc'
       INCLUDE 'sumout.inc'
       DIMENSION X(*),BIO(*),SUMNUT(MN),AROOT(*)
-      INTEGER IRS (*),JKMAX(*),LCOUPL
+      INTEGER IRS (*),JKMAX(*),SWBLSA
       CHARACTER*8 CDATE
       CHARACTER*1 ERRIND
 !
@@ -181,7 +181,8 @@
             B(K + NUEXRO) = BGRO(K)
             EXTREM = EXTREM + B(NUEXRO+NUECOG+K) * A(NUABCO,JKMAX(K))
   100    CONTINUE
-         IF (LCOUPL .EQ. 0) THEN
+
+         IF (SWBLSA .EQ. 1) THEN
             B(IRS(3)) = 0.0
             IF (LPRINT .EQ. 2) WRITE (NOUT,110) GRNAME (INDEX)
   110          FORMAT (' Mortality constraint of species ',A8,' is '//
@@ -253,7 +254,7 @@
       DO 220 I = 1,NUNUCO
       XI = B(I) - SUMNUT(I)
       IF (XI .LT. 0.0) THEN
-         IF (LDYN .EQ. 1) THEN
+         IF (SWBLSA .NE. 1) THEN
             IF (LPRINT .EQ. 2) THEN
               WRITE (NOUT,50) CDATE
               WRITE (NOUT,180) CSTRA(I)

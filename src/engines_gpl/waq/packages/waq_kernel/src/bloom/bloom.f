@@ -24,9 +24,10 @@
 !    Date:       31 Dec 1999
 !    Time:       11:52
 !    Program:    BLOOM.FOR
-!    Version:    1.82
+!    Version:    2.0
 !    Programmer: Hans Los
 !    Previous version(s):
+!    2.00 -- 13 Apr 2016 -- 12:55 -- Operating System: DOS
 !    1.82 -- 30 Dec 1999 -- 08:36 -- Operating System: DOS
 !    1.81 -- 12 Feb 1993 -- 08:33 -- Operating System: DOS
 !    1.8 -- 11 Feb 1993 -- 14:08 -- Operating System: DOS
@@ -46,6 +47,11 @@
 !    0.0 -- 26 Oct 1989 --  7:52
 !    and many, many others!
 !
+!    Update 2.0   TT/HL adjusted coupled model to emulate stand-alone version.
+!                 In case SWBLSA=1 a steady state is calculated on basis of
+!                 predescribed nutrients and the detritus concentration from
+!                 previous time step. Main changes are made in blprim.f
+!                 Also affected are blprim.f, dynrun.f, fixinf.f, setabc.f
 !    Update 1.82: Added LCOUPL flag to if statement before call to
 !                 MAXMOR:this makes it possible to maitain a single
 !                 version on all platforms!
@@ -94,7 +100,7 @@
 !
       SUBROUTINE BLOOM(CDATE,ID,MI,T,CSOL,PHYT,EXTB,DAY,DEATH,ZOOD,
      1           DEP,XINIT,XDEF,XECO,TOTAL,EXTTOT,EXTLIM,NSET,INFEAS,
-     2           NONUN,NUMUN,LCOUPL)
+     2           NONUN,NUMUN,LCOUPL,SWBLSA)
 
       USE DATA_3DL
 
@@ -110,7 +116,7 @@
       INCLUDE 'matri.inc'
       INCLUDE 'dynam.inc'
       INCLUDE 'ioblck.inc'
-      INTEGER IRS3
+      INTEGER IRS3, SWBLSA
       INTEGER NONUNI(MT),NONUN(MT),IRS(3),LIB(MX),JKMAX(MS)
       SAVE    IRS, IRS3
       DIMENSION X(MX),XINIT(*),XDEF(*),BIO(2),GROOT(2),
@@ -160,7 +166,7 @@
 !  Update 28 oct 92: added DEP to argument list.
 !
       USOL = CSOL
-      CALL SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET,LCOUPL)
+      CALL SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET,SWBLSA)
 !
 !   Test for (in)feasibility of the nutrient constraints in
 !   a run with a dynamic detritus computation.
@@ -468,7 +474,7 @@
   270 CONTINUE
       IRS(3) = IRS3
       CALL FIXINF(XDEF,BIO,EXTTOT,EXTB,INHIB,NI,IRERUN,IRS,INFEAS,
-     1            ERRIND,JKMAX,AROOT,CDATE,LCOUPL)
+     1            ERRIND,JKMAX,AROOT,CDATE,SWBLSA)
       IF (IRERUN .NE. 0) GO TO 200
 !
 !----------------------------------------------------------------------
@@ -723,7 +729,7 @@
 !  Print a warning message if potential non-unique solutions have been
 !  determined by subroutine SOLVLP.
 !
-      IF (IDUMP. EQ. 0 .OR. NUMUN .EQ. 0 .OR.BIO(2) .LT. 0.0) GO TO 460
+      IF (IDUMP. EQ. 0 .OR. NUMUN .EQ. 0 .OR.BIO(2) .LE. 0.0) GO TO 460
       WRITE (IOU(6),450) (NONUN(I),I=1,NUMUN)
   450 FORMAT ('  The following species have minimum reduced cost =',
      1        ' 0.0 and might replace',/'  one of the species in the ',

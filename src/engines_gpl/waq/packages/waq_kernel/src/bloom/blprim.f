@@ -42,7 +42,7 @@
      J                   UPTNIT, FRACAM, FBOD5 , RATGRO, RATMOR, ALGDM ,
      J                   ISEG  , CGROUP, LMIXO , LFIXN , LCARB , NUTCON,
      J                   FLXCON, NOUTLIM, OUTLIM, NUNUCOM, NUECOGM, 
-     j                   CON2OUT)
+     J                   CON2OUT,SWBLSA , TotNin, TotPin, TotSIin )
 
       IMPLICIT NONE
 
@@ -94,6 +94,7 @@
 !     NUNUCOM I     1        I    max nr of nutrient constraints in DELWAQ output
 !     NUECOGM I     1        I    max nr of algae groups in DELWAQ in/out
 !     CON2OUT I     1        I    mapping of actual nutrient constraints to DELWAQ output
+!     SWBLSA  I     1        I    switch for BLOOM stand alone option
 !
       REAL            BIOMAS(*), CNH4, CNO3, CPO4, CSIO, RATGRO(*),
      J                CCO2  , CTIC  , CDETN , CDETP,
@@ -103,8 +104,9 @@
      J                RATMOR(*), ALGDM, CGROUP(*)
       INTEGER         LCOUPL, NSET, ID, ISEG, NOUTLIM, NUNUCOM, NUECOGM
       INTEGER         CON2OUT(NUNUCOM), NUTCON(NUNUCOM), FLXCON(NUNUCOM)
-      REAL            OUTLIM(NOUTLIM)
+      REAL            OUTLIM(NOUTLIM), TotNin, TotPin, TotSIin
       LOGICAL         LMIXO , LFIXN , LCARB
+      INTEGER         SWBLSA
       
 !     Common block variables used
 !
@@ -293,6 +295,14 @@
 
 !  End of loop over algae species
       ENDDO
+!   In case of running in stand alone modus (SWBLSA=1) a steady state
+!   is calculated on basis of prescribed total nutrients and 
+!   detritus as based on the previous time step (TT dec 2015). 
+       IF (SWBLSA.EQ.1) THEN    
+         CONCEN (1) = DBLE(TotNin-CDETN)
+         CONCEN (2) = DBLE(TotPin-CDETP)
+         CONCEN (3) = DBLE(TotSIin)     
+       ENDIF 
 !
 ! Call BVECT to set the mortality constraints.
 !
@@ -317,7 +327,7 @@
 
       CALL DYNRUN (EXTOT8, EXBAC8, TEMP8 , RAD8  , DEPTH8, DAYL8 ,
      J             CHLOR8, ID    , ISEG  , LCOUPL, NSET  , EXTLIM,
-     J             DEAT  , TOTCHL, TOTDRY, TOTCAR)
+     J             DEAT  , TOTCHL, TOTDRY, TOTCAR, SWBLSA)
 
 !      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)
 !      write (1961,1001) 'XDEFB   ',(XDEF(NUROWS+J), J=1,NUSPEC)
@@ -382,10 +392,18 @@
 !  Correct for depletion of NH4 assume that
 !  phytoplankton first depletes ammonia (completely)
 
-      IF (XDEF(1) .LE. CNO3) THEN
-         UPTAKE = FLUPTN(2)
-         FLUPTN(2) = (CNH4 + AUTO(1)) / TSTEPI
-         FLUPTN(3) = UPTAKE - FLUPTN(2)
+!  If BLOOM stand alone then derive steady state surplus nutrients 
+      IF (SWBLSA.EQ.1) then
+         FLUPTN(2) =  (CNH4 + AUTO(1)) /TSTEPI 
+         FLUPTN(3) =  (CNO3 - TotNin + TOTNUT(2) + CDETN) /TSTEPI 
+         FLUPTN(4) =  (CPO4 - TotPin + TOTNUT(3) + CDETP) / TSTEPI 
+         FLUPTN(5) =  (CSIO - TotSIin + TOTNUT(4) ) / TSTEPI 
+      ELSE 
+         IF (XDEF(1) .LE. CNO3) THEN
+            UPTAKE = FLUPTN(2)
+            FLUPTN(2) = (CNH4 + AUTO(1)) / TSTEPI
+            FLUPTN(3) = UPTAKE - FLUPTN(2)
+         ENDIF
       ENDIF
       UPTNIT = FLUPTN(2) + FLUPTN(3)
       IF (UPTNIT .GT. 1E-30) THEN
