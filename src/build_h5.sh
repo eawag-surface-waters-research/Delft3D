@@ -344,14 +344,14 @@ fi
 echo
 echo ===========================================================================
 echo "Loaded modules:"
-echo "$initModule1"
-echo "$initModule2"
-echo "$fortranModule"
-echo "$automakeModule"
-echo "$autoconfModule"
-echo "$libtoolModule"
-echo "$mpichModule"
-echo "$netcdfModule"
+echo "module load $initModule1"
+echo "module load $initModule2"
+echo "module load $fortranModule"
+echo "module load $automakeModule"
+echo "module load $autoconfModule"
+echo "module load $libtoolModule"
+echo "module load $mpichModule"
+echo "module load $netcdfModule"
 echo
 echo "Module display of loaded modules:"
 module display $fortranModule
