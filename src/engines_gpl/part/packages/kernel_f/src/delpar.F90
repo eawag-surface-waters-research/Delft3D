@@ -433,7 +433,7 @@
       noth = OMP_GET_MAX_THREADS()
 
       write ( lunpr  , 2020 ) noth
-      write (    *   , 2030 ) noth
+      write (    *   , 2020 ) noth
 
 !     rdlgri also calculates tcktot ! Data is put in the partmem module
 
@@ -443,6 +443,12 @@
 
       call rdccol ( nmaxp   , mmaxp   , lun(5)  , fname(5) , ftype  ,    &
                     lgrid2  , xb      , yb      , lun(2)   )
+      
+      if((maxval(xb).le.180.0).and.(minval(xb).ge.-180.0).and. &
+         (maxval(yb).le.90.0 ).and.(minval(yb).ge.-90.0)) then
+         write ( lunpr  , 2030 )
+         write (    *   , 2030 )
+      endif      
 
 !     calculate distances and angles, and depth in the grid
 
@@ -998,7 +1004,9 @@
                 i6.4 ,'D-', i2.2 ,'H-', i2.2 ,'M-', i2.2 ,'S.', i11,' part. (of',i11,')')
 
  2020 format (/'  Parallel processing with ',i3,' processor(s)'/)
- 2030 format (/'  Parallel processing with ',i3,' processor(s)'/)
+ 2030 format (/'  WARNING: Your x-coordinates are in the range [-180,180] and your' &
+              /'           y-coordinates are in the range [-90,90]. You might have' &
+              /'           a spherical grid. This is not yet supported by PART.'//)
 
       end subroutine delpar
 
