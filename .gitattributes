@@ -5207,6 +5207,7 @@ src/utils_lgpl/delftio/include/nefis.inc -text
 src/utils_lgpl/delftio/packages/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio/delftio.vfproj -text
+src/utils_lgpl/delftio/packages/delftio/diofdll.vfproj -text
 src/utils_lgpl/delftio/packages/delftio/include/version_number.ini -text
 src/utils_lgpl/delftio/packages/delftio/src/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio/src/delftio_sync/Makefile.am -text
