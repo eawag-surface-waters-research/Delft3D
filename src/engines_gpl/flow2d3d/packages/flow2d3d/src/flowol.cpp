@@ -498,7 +498,7 @@ FLOWOL_Timestep (
 
     if (flowol->dol->waitOnStart()) {
         echoContinue = true;
-        printf("\tWaiting for Online Visualisation ...");
+        printf("\tWaiting for Online Visualisation ...\n");
         fflush (stdout);
     }
 
