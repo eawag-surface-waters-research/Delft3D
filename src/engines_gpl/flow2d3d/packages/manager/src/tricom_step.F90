@@ -358,34 +358,35 @@ subroutine tricom_step(olv_handle, gdp)
     character(23)                       , pointer :: prshis
     character(23)                       , pointer :: selhis
     character(36)                       , pointer :: tgfcmp
-    integer                             , pointer :: itlen   !  Description and declaration in esm_alloc_int.f90
-    character(256)                      , pointer :: comfil  !!  Communication file name
-    character(256)                      , pointer :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
-    character(256)                      , pointer :: trifil  !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
-    character(5)                        , pointer :: versio  !!  Version nr. of the current package
-    integer                             , pointer :: initi   ! Control parameter 
-    integer                             , pointer :: iphisc  ! Current time counter for printing history data 
-    integer                             , pointer :: itcomc  ! Current time counter for the communication file 
-    integer                             , pointer :: itcur   ! Current time counter for the communication file, where starting point depend on CYCLIC 
-    integer                             , pointer :: itdroc  ! Current time counter for the drogue data file 
-    integer                             , pointer :: ithisc  ! Current time counter for the history file 
-    integer                             , pointer :: itimc   ! Current time step counter for 2D system 
-    integer                             , pointer :: itiwec  ! Current time counter for the calibration of internal wave energy 
-    integer                             , pointer :: itmapc  ! Current time counter for the map file 
-    integer                             , pointer :: itp     ! Timestep for computation 2D system 
-    integer                             , pointer :: itrstc  ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
-    integer                             , pointer :: itwav   ! Current time counter for executation of a wave computation (online coupling with wave)
-    integer                             , pointer :: itrw    ! Time to read the wave information in case of online wave coupling
-    integer                             , pointer :: maxmn   ! Maximum of MMAX and NMAX 
-    integer                             , pointer :: npmap   ! Current array counter for printing map data 
-    integer                             , pointer :: ntcur   ! Total number of timesteps on comm. file (to write to) 
-    integer                             , pointer :: ntwav   ! Total number of timesteps on comm. file (to read from) for waves 
-    integer              , dimension(:) , pointer :: timwav  ! Array with time steps on comm. file for wave results 
-    logical                             , pointer :: waverd  ! Flag = TRUE if wave process and communication file exist 
-    real(fp)                            , pointer :: anglat  ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
-    real(fp)                            , pointer :: anglon  ! Angle of longitude of the model centre (used to determine solar radiation) 
-    real(fp)                            , pointer :: dtsec   ! DT in seconds 
-    real(fp)                            , pointer :: timnow  ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
+    integer                             , pointer :: itlen           ! Description and declaration in esm_alloc_int.f90
+    character(256)                      , pointer :: comfil          ! Communication file name
+    character(256)                      , pointer :: runid           ! Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
+    character(256)                      , pointer :: trifil          ! File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
+    character(5)                        , pointer :: versio          ! Version nr. of the current package
+    integer                             , pointer :: initi           ! Control parameter 
+    integer                             , pointer :: iphisc          ! Current time counter for printing history data 
+    integer                             , pointer :: itcomc          ! Current time counter for the communication file 
+    integer                             , pointer :: itcur           ! Current time counter for the communication file, where starting point depend on CYCLIC 
+    integer                             , pointer :: itdroc          ! Current time counter for the drogue data file 
+    integer                             , pointer :: ithisc          ! Current time counter for the history file 
+    integer                             , pointer :: itimc           ! Current time step counter for 2D system 
+    integer                             , pointer :: itiwec          ! Current time counter for the calibration of internal wave energy 
+    integer                             , pointer :: itmapc          ! Current time counter for the map file 
+    integer                             , pointer :: itp             ! Timestep for computation 2D system 
+    integer                             , pointer :: itrstc          ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
+    integer                             , pointer :: itwav           ! Current time counter for executation of a wave computation (online coupling with wave)
+    integer                             , pointer :: itrw            ! Time to read the wave information in case of online wave coupling
+    integer                             , pointer :: maxmn           ! Maximum of MMAX and NMAX 
+    integer                             , pointer :: npmap           ! Current array counter for printing map data 
+    integer                             , pointer :: ntcur           ! Total number of timesteps on comm. file (to write to) 
+    integer                             , pointer :: ntwav           ! Total number of timesteps on comm. file (to read from) for waves 
+    integer              , dimension(:) , pointer :: timwav          ! Array with time steps on comm. file for wave results
+    integer                             , pointer :: sleepduringwave ! Description and decleration in tricom.igs
+    logical                             , pointer :: waverd          ! Flag = TRUE if wave process and communication file exist 
+    real(fp)                            , pointer :: anglat          ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
+    real(fp)                            , pointer :: anglon          ! Angle of longitude of the model centre (used to determine solar radiation) 
+    real(fp)                            , pointer :: dtsec           ! DT in seconds 
+    real(fp)                            , pointer :: timnow          ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
 !
 ! Local parameters
 !
@@ -411,7 +412,7 @@ subroutine tricom_step(olv_handle, gdp)
     integer(pntrsize)                  , external :: gtipnt
     integer(pntrsize)                  , external :: gtrpnt
     logical                                       :: error         ! Flag=TRUE if an error is encountered 
-    logical                                       :: ex            ! Help flag = TRUE when file is found 
+    logical                                       :: ex            ! Help flag = TRUE when file is found
     real(fp)                                      :: zini
     character(60)                                 :: txtput        ! Text to be print
     type(olvhandle)                               :: olv_handle
@@ -736,6 +737,7 @@ subroutine tricom_step(olv_handle, gdp)
     anglat              => gdp%gdtricom%anglat
     anglon              => gdp%gdtricom%anglon
     dtsec               => gdp%gdtricom%dtsec
+    sleepduringwave     => gdp%gdtricom%sleepduringwave
     !  
     call timer_start(timer_simulation, gdp)
     !
@@ -842,14 +844,50 @@ subroutine tricom_step(olv_handle, gdp)
              ! of all sub domains.
              ! That's why flow_to_wave_command needs numdomains.
              !
+             ! When the master partition is communicating with WAVE, the other partitions are
+             ! doing nothing. In the clean/default way, the other partitions are waiting on the
+             ! "dfreduce_gdp" statement below.
+             ! Unfortunately, they are consuming CPU and thus hamper the WAVE computation.
+             ! MPI synchronisation without CPU usage is difficult. Therefore sleepduringwave is
+             ! introduced:
+             ! The partitions doing nothing are waiting in the "do sleep" loop below (not consuming CPU).
+             ! The master partition writes a TMP-file when it is ready with the WAVE communication.
+             ! All partitions proceed with dfreduce_gdp
+             ! Finally, the master partition can remove the TMP-file again.
+             ! Default: When not running parallel, sleepduringwave=  0
+             !          When     running paralell, sleepduringwave=100 (= millisec to wait in each CUTIL_SLEEP call)
+             ! sleepduringwave can be overwritten in the mdf-file
+             ! sleepduringwave is (on purpose) not in the manual: the user should not bother about it.
+             ! ASSUMPTION: all partitions are running in the same working directory
+             !
              call timer_start(timer_wait, gdp)
              if (.not.parll .or. (parll .and. inode == master)) then
                 ierror = flow_to_wave_command(flow_wave_comm_perform_step, &
                                              & numdomains, mudlay, nst)
+                if (sleepduringwave > 0) then
+                   lunfil = newlun(gdp)
+                   open (lunfil, file = "TMP_sleepduringwave.txt", status = 'new')
+                   write(lunfil,*) 1
+                   close(lunfil)
+                endif
              else
+                if (sleepduringwave > 0) then
+                   do
+                      inquire (file = "TMP_sleepduringwave.txt", exist = ex, iostat=istat)
+                      if (ex) then
+                         exit
+                      else
+                         call CUTIL_SLEEP(sleepduringwave);
+                      endif
+                   enddo
+                endif
                 ierror = 0
              endif
              call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
+             if (inode==master .and. sleepduringwave > 0) then
+                open (lunfil, file = "TMP_sleepduringwave.txt", status = 'old')
+                close(lunfil, status='delete')
+             endif
              call timer_stop(timer_wait, gdp)
              if (ierror /= 0) then
                 txtput = 'Delftio command to waves failed'

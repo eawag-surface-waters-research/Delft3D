@@ -236,6 +236,19 @@ CUTIL_SYSTEM (
     }
 
 
+void STDCALL
+CUTIL_SLEEP (
+    int *  millisec
+    ) {
+
+#if defined (WIN32)
+    Sleep(*millisec) ;
+#else
+    usleep(*millisec * 1000); // usleep takes microsec
+#endif
+    }
+
+
 
 
 ///*------------------------------------------------------------------------------*/

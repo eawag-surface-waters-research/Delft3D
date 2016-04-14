@@ -47,6 +47,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
+    use dfparall
     !
     use globaldata
     !
@@ -80,6 +81,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     integer                    , pointer :: n1_nhy
     integer                    , pointer :: n2_nhy
     integer                    , pointer :: nhiter
+    integer                    , pointer :: sleepduringwave ! Description and decleration in tricom.igs
     real(fp)                   , pointer :: epsnh
     logical                    , pointer :: l2norm
     real(fp)                   , pointer :: rel_epsnh
@@ -183,32 +185,33 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     maseva              => gdp%gdheat%maseva
     free_convec         => gdp%gdheat%free_convec
     solrad_read         => gdp%gdheat%solrad_read
-    m1_nhy    => gdp%gdnonhyd%m1_nhy
-    m2_nhy    => gdp%gdnonhyd%m2_nhy
-    n1_nhy    => gdp%gdnonhyd%n1_nhy
-    n2_nhy    => gdp%gdnonhyd%n2_nhy
-    nhiter    => gdp%gdnonhyd%nhiter
-    rel_epsnh => gdp%gdnonhyd%rel_epsnh
-    tetaq     => gdp%gdnonhyd%tetaq
-    tetaz     => gdp%gdnonhyd%tetaz
-    flag_pp   => gdp%gdnonhyd%flag_pp
-    updwl     => gdp%gdnonhyd%updwl
-    precon    => gdp%gdnonhyd%precon
-    krylov    => gdp%gdnonhyd%krylov
-    milu      => gdp%gdnonhyd%milu
-    nh_level  => gdp%gdnonhyd%nh_level
-    epsnh     => gdp%gdnonhyd%epsnh
-    l2norm    => gdp%gdnonhyd%l2norm
-    lunmd     => gdp%gdinout%lunmd
-    lundia    => gdp%gdinout%lundia
-    lunscr    => gdp%gdinout%lunscr
-    nrcmp     => gdp%gdtfzeta%nrcmp
-    tgfdef    => gdp%gdtfzeta%tgfdef
-    itis      => gdp%gdrdpara%itis
-    ti_nodal  => gdp%gdinttim%ti_nodal
-    xbeach    => gdp%gdprocs%xbeach
-    tunit     => gdp%gdexttim%tunit
-    ztbml     => gdp%gdzmodel%ztbml
+    m1_nhy              => gdp%gdnonhyd%m1_nhy
+    m2_nhy              => gdp%gdnonhyd%m2_nhy
+    n1_nhy              => gdp%gdnonhyd%n1_nhy
+    n2_nhy              => gdp%gdnonhyd%n2_nhy
+    nhiter              => gdp%gdnonhyd%nhiter
+    rel_epsnh           => gdp%gdnonhyd%rel_epsnh
+    tetaq               => gdp%gdnonhyd%tetaq
+    tetaz               => gdp%gdnonhyd%tetaz
+    flag_pp             => gdp%gdnonhyd%flag_pp
+    updwl               => gdp%gdnonhyd%updwl
+    precon              => gdp%gdnonhyd%precon
+    krylov              => gdp%gdnonhyd%krylov
+    milu                => gdp%gdnonhyd%milu
+    nh_level            => gdp%gdnonhyd%nh_level
+    epsnh               => gdp%gdnonhyd%epsnh
+    l2norm              => gdp%gdnonhyd%l2norm
+    lunmd               => gdp%gdinout%lunmd
+    lundia              => gdp%gdinout%lundia
+    lunscr              => gdp%gdinout%lunscr
+    nrcmp               => gdp%gdtfzeta%nrcmp
+    tgfdef              => gdp%gdtfzeta%tgfdef
+    itis                => gdp%gdrdpara%itis
+    ti_nodal            => gdp%gdinttim%ti_nodal
+    xbeach              => gdp%gdprocs%xbeach
+    tunit               => gdp%gdexttim%tunit
+    ztbml               => gdp%gdzmodel%ztbml
+    sleepduringwave     => gdp%gdtricom%sleepduringwave
     include 'tfzeta.gdt'
     !
     ! initialize local parameters
@@ -273,6 +276,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     n1_nhy      = 0
     m2_nhy      = 0
     n2_nhy      = 0
+    !
+    if (parll) then
+       sleepduringwave = 100
+    else
+       sleepduringwave = 0
+    endif
     !
     ! locate and read 'Ktemp ' number of temperature model use
     ! only if temp = .true., default value allowed => idef
@@ -1283,5 +1292,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
        call prterr(lundia, 'G051', trim(message))
        write (lundia, '(a)') '            smooth bottom shear stress representation (Z-model only)'
     endif
+    !
+    call prop_get(gdp%mdfile_ptr, '*', 'SleepDuringWave', sleepduringwave)
  9999 continue
 end subroutine rdproc

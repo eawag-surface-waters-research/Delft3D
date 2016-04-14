@@ -64,6 +64,7 @@
 #   define CUTIL_GETMP  FC_FUNC(cutil_getmp,CUTIL_GETMP)
 #   define CUTIL_GETENV FC_FUNC(cutil_getenv,CUTIL_GETENV)
 #   define CUTIL_SYSTEM FC_FUNC(cutil_system,CUTIL_SYSTEM)
+#   define CUTIL_SLEEP FC_FUNC(cutil_sleep,CUTIL_SLEEP)
 #   define CUTIL_CGETCP FC_FUNC(cutil_cgetcp,CUTIL_CGETCP)
 #   define CUTIL_CDATE  FC_FUNC(cutil_cdate,CUTIL_CDATE)
 #   define CUTIL_CSTOP  FC_FUNC(cutil_cstop,CUTIL_CSTOP)
@@ -81,6 +82,7 @@
 #   define CUTIL_GETMP  CUTIL_GETMP
 #   define CUTIL_GETENV CUTIL_GETENV
 #   define CUTIL_SYSTEM CUTIL_SYSTEM
+#   define CUTIL_SLEEP CUTIL_SLEEP
 #   define CUTIL_CGETCP CUTIL_CGETCP
 #   define CUTIL_CDATE  CUTIL_CDATE
 #   define CUTIL_CSTOP  CUTIL_CSTOP
@@ -103,10 +105,12 @@
 void    STDCALL         CUTIL_GETMP (char *, int *, int *);
 void    STDCALL         CUTIL_GETENV(char *, int *, char *, int *);
 void    STDCALL         CUTIL_SYSTEM(char *, int *);
+void    STDCALL         CUTIL_SLEEP (int *);
 #else
 void    STDCALL         CUTIL_GETMP (char *, int *, int *, int);
 void    STDCALL         CUTIL_GETENV(char *, int *, char *, int *, int, int);
 void    STDCALL         CUTIL_SYSTEM(char *, int *, int);
+void    STDCALL         CUTIL_SLEEP (int *);
 #endif
 
 #if defined (__cplusplus)
