@@ -40,7 +40,7 @@
       INCLUDE 'dynam.inc'
       INCLUDE 'arran.inc'
 !
-      PARAMETER (NOPT = 32)
+      PARAMETER (NOPT = 33)
       INTEGER CMS,STOS
       INTEGER OFON(NOPT)
       CHARACTER*56 TITLE
@@ -57,7 +57,8 @@
      4             'MORCHECK','NEWS    ','OBJECTIV','OXMODOUT',
      5             'PARAM   ','PFKEYS  ','PMAX+MOR','PRODUC  ',
      6             'PRTPLOT ','RESET   ','RUN     ','SCRPLOT ',
-     7             'SEL-DUMP','STOP    ','TEMPLIM ','WHICH?  '/
+     7             'SEL-DUMP','SEG-DUMP','STOP    ','TEMPLIM ',
+     8             'WHICH?  '/
       DATA WBASE /'CONSTANT','FRACTION'/
       DATA OJECT /'BIOMASS ','GROWTH  '/
       DATA SUBTIT /'        ','Plankton','ic (*) a','nd slack',
@@ -103,6 +104,7 @@
       OFON(9) = MEMORY
       IDUMP=0
       ISDUMP=0
+      IGDUMP=0
       LGRAMO=0
       LPRODU=0
       LDIEL=0
@@ -155,8 +157,8 @@
       GO TO (  200,  210,  150,  310,  930,  570,  140,  470,
      1         110,  170,  180,  600,  230,  920,  190,  120,
      2         530,  595,  596,  160,  600,  500,  580,  130,
-     3         340,  610,  220,  510,  960,  940,  590,  480,
-     4          80), NUMWRD
+     3         340,  610,  220,  510,  960,  965,  940,  590,  
+     4         480,   80), NUMWRD
 !
 !  Error in input option mode.
 !  Terminate in batch mode.
@@ -484,13 +486,20 @@
       WRITE (OUUNI,99690)
       GO TO 70
 !
-! Activate selective dump option.
+! Activate selective (period) dump option.
 !
   960 ISDUMP=1
       OFON(NUMWRD)=1
       IRC = INPTNM(1083,0.0D0,ISDPER(1),2)
       IRC = INPTNM(1084,0.0D0,ISDPER(2),2)
       WRITE (OUUNI,99680) ISDPER(1),ISDPER(2)
+      GO TO 70
+!
+! Activate selective (segment) dump option.
+!
+  965 OFON(NUMWRD)=1
+      IRC = INPTNM(1105,0.0D0,IGDUMP,2)
+      WRITE (OUUNI,99670) IGDUMP
       GO TO 70
 !
 !     Return to parameter mode to modify input values.
@@ -511,8 +520,8 @@
       GO TO (  740,   30,  690,  800,  770,  890,  680,  820,
      1         650,  710,  720,   70,  780,  760,  720,  660,
      2         870,  620,  915,  700,  770,  850,  900,  670,
-     3         810,  620,  770,  860,  970,  770,  910,  830,
-     4        630), NUM2
+     3         810,  620,  770,  860,  970,  975,  770,  910,  
+     4         830,  630), NUM2
 !
 !  Error in reset option mode.
 !
@@ -668,6 +677,11 @@
       WRITE (OUUNI,99960) WOPTIO(NUM2)
       GO TO 620
 !
+  975 IGDUMP=0
+      OFON(NUM2)=-1
+      WRITE (OUUNI,99960) WOPTIO(NUM2)
+      GO TO 620      
+!
 !----------------------------------------------------------------------
 !       Call SUBROUTINE OPHELP for help
 !----------------------------------------------------------------------
@@ -775,5 +789,6 @@
 99700 FORMAT (1X,'Ojective function: maximize total biomass.')
 99690 FORMAT (1X,'Ojective function: maximize net growth rates.')
 99680 FORMAT (1X,'Selective DUMP for periods ',I2,' through ',I2)
+99670 FORMAT (1X,'Selective DUMP for segment ',I8 )
       RETURN
       END

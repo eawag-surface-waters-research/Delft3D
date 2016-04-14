@@ -67,12 +67,11 @@
 !     Here we set them to their original values, ONLY if HISTOR is
 !     true, that is for history elements at history times.
 !     This is to avoid excessively sized output files of Bloom
-
-      LPRINT = 0
+!     The value of IDUMP is given to phyt2.inc, which could 
+!     not be done directly from d40blo.f
       IDUMP  = 0
       IF (HISTOR) THEN
-          LPRINT = LPRINO
-          IDUMP  = LDUMPO
+          IDUMP  = 1
       ENDIF
 
       RETURN

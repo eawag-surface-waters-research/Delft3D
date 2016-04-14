@@ -54,15 +54,13 @@
    10 RMORT(I) = DEATH
       IF (NREP .GT. 1) GO TO 110
       IF (FLUSH .LT. 1.0D-6) GO TO 30
-      IF (IPERM. GT. 1 .AND. IDUMP .EQ. 1) WRITE(IOU(6),20) FLUSH
+      IF (IDUMP .EQ. 1) WRITE(IOU(6),20) FLUSH
    20 FORMAT(2X,'Input mortality rates +',2X,F6.2,2X,'are used')
       GO TO 50
    30 CONTINUE
-      IF (IPERM. GT. 1 .AND. IDUMP .EQ. 1) WRITE(IOU(6),40)
+      IF (IDUMP .EQ. 1) WRITE(IOU(6),40)
    40 FORMAT(2X,'Input natural mortality rates are used')
    50 CONTINUE
-      IF (GRAMO1 .GT. 0. .AND. IDUMP .EQ. 1) WRITE(IOU(6),60) GRAMO1
-   60 FORMAT(2X,'Initial grazing rate:',2X,F6.2)
       GO TO 110
 !
 !  LCAL=4. STORE MAXIMUM DEATH RATE IN DEATH.
@@ -98,19 +96,6 @@
      1    RMORT(I) = MAX(RMORT(I),(TEMP+RMORT2(I)) * RMORT3(I))
         IF (RMORT(I) .GT. DEATH) DEATH = RMORT(I)
   100 CONTINUE
-!
-!  Print zooplankton biomass.
-!
   110 CONTINUE
-      IF (IDUMP .EQ. 0) RETURN
-
-!     Write for all grazers 0895 MvdV
-      IF (NUGRAZ .GT. 0) THEN
-        WRITE(IOU(6),130) (ZOOD(J),J=1,NUGRAZ)
-      ELSE
-        WRITE (IOU(6),120) ZOOD(0)
-      ENDIF
-  120 FORMAT(2X,'Zooplankton biomass =',F8.1)
-  130 FORMAT(2X,'Zooplankton biomass =',40F10.1)
       RETURN
       END

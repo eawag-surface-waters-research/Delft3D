@@ -73,13 +73,13 @@
 !
       IF (IDUMP .NE. 0) THEN
          WRITE (IOU(6),50) (PMAX(K),K=1,NUSPEC)
-   50    FORMAT ('  Pmax(T,j): ',10(F5.2,1X))
+   50    FORMAT ('  Pmax(T,j): ',30(F5.2,1X))
          WRITE (IOU(6),60) (RESP(K),K=1,NUSPEC)
-   60    FORMAT ('  Resp(T,j): ',10(F5.2,1X))
+   60    FORMAT ('  Resp(T,j): ',30(F5.2,1X))
          WRITE (IOU(6),70) (RMORT (K),K=1,NUSPEC)
-   70    FORMAT ('  Rmort(T,j): ',10(F5.2,1X))
+   70    FORMAT ('  Rmort(T,j):',30(F5.2,1X))
          WRITE (IOU(6),80) (SDMIX (K),K=1,NUSPEC)
-   80    FORMAT ('  Sdmix(j): ',10(F5.2,1X))
+   80    FORMAT ('  Sdmix(j):  ',30(F5.2,1X))
       END IF
       RETURN
       END

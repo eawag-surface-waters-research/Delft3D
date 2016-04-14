@@ -45,10 +45,12 @@
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'ioblck.inc'
+      INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'size.inc'
       INCLUDE 'sumout.inc'
+      INCLUDE 'postbl.inc'
       INTEGER JT(MT),NONUNI(*),NONUN(*),IRS(*),LIB(*)
       DIMENSION X(*),XDEF(*),BIO(*)
       DATA NPAUSE /0/
@@ -76,6 +78,8 @@
    20 CONTINUE
       WRITE (IOU(6),30) (JT(JJJ),JJJ=1,KLX)
    30 FORMAT(2X,'Types permitted',4X,20I4)
+      WRITE (IOU(6),31) (SPNAME(JT(JJJ)),JJJ=1,KLX)
+   31 FORMAT(2X,'Types permitted',4X,30(A8,1X))
    40 CONTINUE
 !
 !  Check for feasibility of interval JNOW.
@@ -98,8 +102,8 @@
   120 FORMAT('  A finite solution does not exist, solution is ',
      1       'unbounded')
       GO TO 170
-  130 WRITE (IOU(6),140) IRS(3)
-  140 FORMAT('  A feasible solution does not exist due to row ',I2)
+  130 WRITE (IOU(6),140) CNAMES(IRS(3))
+  140 FORMAT('  A feasible solution does not exist due to row ',A16)
       GO TO 170
   150 WRITE (IOU(6),160)
   160 FORMAT('  A finite solution can not be found',/,

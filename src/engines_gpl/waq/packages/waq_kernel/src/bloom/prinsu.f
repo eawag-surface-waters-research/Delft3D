@@ -71,8 +71,6 @@
      2             'Plank.  ','Diss.   ','CHL-obs ','Tot Ext.',
      3             'Growth  ','Mortalit'/
 
-!     write(*,*) 'Arjen 1: nugraz:',nugraz
-!
 !  Call subroutines to print headings for output on tape 10,14 and ntape
 !  if this is the first time through the subroutine.
 !  Set print array indices.
@@ -80,13 +78,7 @@
       IF (LPRINT .EQ. 2) NPRINT=NPRINT+1
       IF (NPRINT .GT. 1) GO TO 40
       CALL HEADIN (NTAPE,WORDS)
-!     0895 MvdV add output for CONSBL grazers
-      IF (NUGRAZ.GT.0) THEN
-        NTSEX = NUGRAZ -1
-      ELSE
-        NTSEX = 0
-      ENDIF
-      NTS14 = NTS14 + NTSEX
+
       NTSTOT=NTS14+1
 !
 !  Update 1.3. Construct constraint names and store them in CNAMES.
@@ -100,15 +92,10 @@
 !
 !  Blank for exclusion row
 !
-!     write(*,*) 'Arjen 2: nugraz:',nugraz
-!     write(*,*) 'Arjen 2: nuexro:',nuexro
-!     write(*,*) 'Arjen 2: phyt2:'
-!     write(*,'(10i5)')
 !    1             IT2,NSPF,NSF,NREP,NUSPEC,NUECOG,NUNUCO,
 !    1             NUCOLS,NUFILI,NUABCO,NUEXRO,NUROWS,NUSPE1,IDUMP
 
       CNAMES (NUEXRO) = WORDS (8)
-!     write(*,*) 'Arjen 2b: nugraz:',nugraz
 !
 !  Growth and mortality constraints: name + group name.
 !
@@ -119,14 +106,12 @@
          I2 = I2 + 1
          WRITE(CNAMES (I1), 30) WORDS (13), GRNAME(I)
          WRITE(CNAMES (I2), 30) WORDS (14), GRNAME(I)
-!     write(*,*) 'Arjen 2c: nugraz:',nugraz, i
    20 CONTINUE
    30 FORMAT (A6,'-',A8)
 !
 !  Start writing the output into print-arrays.
 !
    40 CONTINUE
-!     write(*,*) 'Arjen 2 - 40: nugraz:',nugraz
 !
 !  Calculate totals for species, the total chlorophyll concentration
 !  and record in OUT.
@@ -141,7 +126,7 @@
             TOTAL=TOTAL+XBIO/CHLR(J)
    50    CONTINUE
          XECO(K)=TOT2
-   60 OUT(K+NTS7+NTSEX)=TOT2
+   60 OUT(K+NTS7)=TOT2
       OUT(NTS14)=BIO2
       IF (BIO2 .LT. 0.0) OUT(NTS14) = 0.0
       OUT(NTSTOT)=TOTAL
@@ -149,7 +134,6 @@
 !  Determine limiting factors and record their names in COUT.
 !  Record in LIMIT in 1,0 notation.
 !
-!     write(*,*) 'Arjen 2 - 70: nugraz:',nugraz
       WRITE (LIMIT,70) ('0',K=1,NUABCO+1)
    70 FORMAT (9(1X,A1))
       DO 80 K=2,NTS6
@@ -159,7 +143,6 @@
 !  Update 1.3
 !  Initiate ISPLIM at 0
 !
-!     write(*,*) 'Arjen 3: nugraz:',nugraz
       DO 90 I = 1, NUSPEC
          ISPLIM(I) = 0
    90 CONTINUE
@@ -203,8 +186,6 @@
 !  Increment NCON by 1 to skip exclusion row!
 !
       NCON = NCON + 1
-!     write(*,*) 'Arjen 4: nugraz:',nugraz
-!     stop
 !
 ! 3. Growth constraints.
 !
@@ -234,7 +215,6 @@
 !  Print slacks for (optional) mortality constraints.
 !
   130 CONTINUE
-!     write(*,*) 'Arjen 4: nugraz:',nugraz
       LCON = .FALSE.
       IF (LMORCH .EQ. 0) GO TO 150
       K2 = K2 + 2
@@ -252,16 +232,7 @@
          END IF
   140 CONTINUE
   150 CONTINUE
-!     0895 MvdV add output for CONSBL grazers
-      IF (NUGRAZ.GT.0) THEN
-!       write(*,*) 'nts6:',nts6
-!       write(*,*) 'nugraz:',nugraz
-        DO 200 IG=1,NUGRAZ
-          OUT(NTS6+IG)=ZOOD(IG)*1000.*GCTDRY(IG)
-  200   CONTINUE
-      ELSE
-        OUT(NTS7) = ZOOD(0)
-      ENDIF
+      OUT(NTS7) = 0.
 !
 ! Exit if LPRINT <= 1: nothing more to be done here.
 !

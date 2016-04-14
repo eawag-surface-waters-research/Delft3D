@@ -235,16 +235,7 @@
 !  from steady state if option DYNADEAD was selected
 !
   170 DO 180 K=1,NUNUCO
-        IF (NUGRAZ .GT. 0) THEN
-          B(K)=CONCEN(K)-DETRIT(K)*REMEXP(K)
-
-!         0895 MvdV subtract nutrients for all grazer types
-          DO 190 J=1,NUGRAZ
-            B(K)=B(K)-ZOONUT(K,J)*ZOOD(J)
-  190     CONTINUE
-        ELSE
-          B(K)=CONCEN(K)-ZOONUT(K,0)*ZOOD(0)-DETRIT(K)*REMEXP(K)
-        ENDIF
+        B(K)=CONCEN(K)    
   180 CONTINUE
       IF (LDYDEA .EQ. 0) RETURN
       EXPMUL=1.0
@@ -262,9 +253,9 @@
      3        1X,'the amount of nutrients flushed from the dead algal',
      4        ' pool',/,' to be replaced by dissolved nutrients',
      5        ' from the intake water.',//)
-99997 FORMAT ('  Tcorr(j):   ',10(F5.2,1X))
+99997 FORMAT ('  Tcorr(j):  ',30(F5.2,1X))
 99996 FORMAT (//,1X,'Computation with inhomogeneous mixing.',/,
-     1        '  SDMIX(J):   ',20(F5.2,1X))
-99995 FORMAT ('  SDMIXN(J):  ',20(F5.2,1X))
+     1        '  SDMIX(J):   ',30(F5.2,1X))
+99995 FORMAT ('  SDMIXN(J):  ',30(F5.2,1X))
       RETURN
       END

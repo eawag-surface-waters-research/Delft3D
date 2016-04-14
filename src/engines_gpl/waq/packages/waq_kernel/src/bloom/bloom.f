@@ -47,11 +47,17 @@
 !    0.0 -- 26 Oct 1989 --  7:52
 !    and many, many others!
 !
-!    Update 2.0   TT/HL adjusted coupled model to emulate stand-alone version.
+!    Update 2.0 - TT/HL adjusted coupled model to emulate stand-alone version.
 !                 In case SWBLSA=1 a steady state is calculated on basis of
 !                 predescribed nutrients and the detritus concentration from
 !                 previous time step. Main changes are made in blprim.f
 !                 Also affected are blprim.f, dynrun.f, fixinf.f, setabc.f
+!               - TT/HL Cleaned up bloom.f by removing all CONSB2 related
+!                 statements and print statements triggered by LPRINT>0
+!                 Also cleaned up were bloutc.f, dynrun.f, input2.f, 
+!                 maxgro.f, maxprd.f, natmor.f, ophelp.f, option.f, 
+!                 prinma.f, prinsu.f, print6.f, promes.f, setabc.f
+
 !    Update 1.82: Added LCOUPL flag to if statement before call to
 !                 MAXMOR:this makes it possible to maitain a single
 !                 version on all platforms!
@@ -111,7 +117,6 @@
       INCLUDE 'phyt1.inc'
       INCLUDE 'phyt2.inc'
       INCLUDE 'sumout.inc'
-      INCLUDE 'graas.inc'
       INCLUDE 'cal1.inc'
       INCLUDE 'matri.inc'
       INCLUDE 'dynam.inc'
@@ -120,27 +125,14 @@
       INTEGER NONUNI(MT),NONUN(MT),IRS(3),LIB(MX),JKMAX(MS)
       SAVE    IRS, IRS3
       DIMENSION X(MX),XINIT(*),XDEF(*),BIO(2),GROOT(2),
-     1          OROOT(2*MT),ROOT(2),GRAMOR(MT),EMIN(MT),
-     2          OUT15(20+MG),OUTST(20+MG),XECO(*),XECOST(MS),ZOOD(0:MG),
-     3          ZOOC(MG),GRADET(MN),GDTOLD(MN)
+     1          OROOT(2*MT),ROOT(2),EMIN(MT),
+     2          OUT15(20+MG),OUTST(20+MG),XECO(*),XECOST(MS),ZOOD(0:MG)
       CHARACTER*8 CDATE
 *     CHARACTER*4 COUT(10),COUTST(10)
       CHARACTER*4 COUT(MN+5),COUTST(MN+5)
       CHARACTER*1 ERRIND
       LOGICAL LSOLU
       PARAMETER (SOLMIN=100.0)
-
-!  Save the amount of grazer biomass for the first timestep
-      IF ((NREP.EQ.1).AND.(NUGRAZ.GT.0)) THEN
-!     No grazing coupled version
-        IF (LCOUPL.NE.0) THEN
-          NUGRAZ = 0
-        ELSE
-          DO 620 J=1,NUGRAZ
-            ZOOC(J) = ZOOD(J)
-  620     CONTINUE
-        ENDIF
-      ENDIF
 
 !
 !
@@ -178,70 +170,6 @@
          GO TO 270
       END IF
    10 CONTINUE
-!
-!  Calculate minimum efficiency requirements for groups
-!  with initial grazing rate gramo1.
-!
-!  0895 MvdV Calculate initial grazing pressure for multiple grazers
-!            and correct the amount of available nutrients
-      DO 580 I=1,NUNUCO
-        GRADET(I) = 0.0D0
-  580 CONTINUE
-      DO 20 K=1,NUSPEC
-        IF (NUGRAZ.GT.0) THEN
-          GRAMOR(K) = 0.0
-          DO 500 J=1,NUGRAZ
-            GRAMOR(K)=GRAMOR(K) + GRAMO1*ZOOPR(K,J)
-            DO 590 I=1,NUNUCO
-              GRADET(I) = GRADET(I) - GRAMO1*ZOOPR(K,J)*GFECFR(K,J) *
-     1                    AA(I,K)*CTODRY(K)
-  590       CONTINUE
-  500     CONTINUE
-        ELSE
-          GRAMOR(K)=GRAMO1*ZOOPR(K,0)
-        ENDIF
-   20 CONTINUE
-      IF (NUGRAZ.GT.0) THEN
-        DO 510 J=1,NUGRAZ
-          DO 600 I=1,NUNUCO
-            GRADET(I) = GRADET(I) + GRAMO1 * GDETPR(J) *
-     1                  (1.0 - GDETFF(J))
-  600     CONTINUE
-  510   CONTINUE
-      ENDIF
-!     Correct detritus and available nutrients for the grazing rate
-      IF ((LCOUPL.EQ.0).AND.(NUGRAZ.GT.0).AND.(LDYDEA.EQ.1).AND.
-     1    (REMEXP(1).GT.1.0D-20)) THEN
-        DO 520 J=1,NUNUCO
-          REMINU(J)= REMINU(J) + GRADET(J)
-          REMEXP(J) = DEXP(-REMINU(J)*TSTEP*MI)
-          DO 530 K=1,NUSPEC
-            A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-REMEXP(J))+REMINU(J))/
-     1             REMINU(J)
-  530     CONTINUE
-          B(J) = CONCEN(J) - DETRIT(J)*REMEXP(J)
-          DO 540 K=1,NUGRAZ
-            B(J)=B(J)-ZOONUT(J,K)*ZOOD(K)
-  540     CONTINUE
-  520   CONTINUE
-      ENDIF
-
-      ITNUM=0
-      IF (IPERM .LE. 1) GO TO 70
-      BIOFOR=0.
-
-!
-!  Start grazing loop of the program; the loops ends at label 300
-!
-   40 CONTINUE
-      ITNUM=ITNUM+1
-      IF (ITNUM .EQ. 1) GO TO 50
-      BIOFOR=BIO(2)
-   50 CONTINUE
-      IF (IDUMP .EQ. 0) GO TO 70
-      WRITE (IOU(6),60) ITNUM
-   60 FORMAT (2X,'Zooplankton iteration: ',I2)
-   70 CONTINUE
 !
 ! Compute the euphotic depth and the euphotic day lenght if option
 ! "DAYEUPHO" is on.
@@ -281,16 +209,14 @@
       DAYM = DAYMUL(INDEX1,J) + ( DAYMUL(INDEX2,J) - DAYMUL(INDEX1,J) )
      1       * ( DAYEUF - DL(INDEX1) ) / ( DL(INDEX2) - DL(INDEX1) )
       DO 100 K=IT2(J,1),IT2(J,2)
-      EMIN(K)=(RESP(K)+RMORT(K)+FLUSH+GRAMOR(K)) / (PMAX(K)*DAYM)
+      EMIN(K)=(RESP(K)+RMORT(K)+FLUSH) / (PMAX(K)*DAYM)
   100 CONTINUE
   110 CONTINUE
 !
 !  Tranform sunlight to per hour units.
 !
-      IF (ITNUM .GT. 1) GOTO 130
       DO 120 J=1,NUSPEC
   120 SURF(J)=SURF(J)/DAY
-  130 CONTINUE
 !
 !  Average EMIN in time and find range of extinction coefficient for
 !  each species.
@@ -319,21 +245,6 @@
       ISKMAX = K
   140 CONTINUE
 !
-!  Calculate the maximum allowable grazing rate constant
-!  if option MAXGRA is chosen.
-!
-      IF (LGRAMO .EQ. 0 .OR. ITNUM .GT. 1) GO TO 160
-      EADJ=EMIN(K)
-      IF (GRAMO1 .LT. 1.0D-6) GO TO 150
-      EADJ=EMIN(K)-(GRAMOR(K)/PMAX(K))
-  150 CONTINUE
-!
-!  Update nov 4 1992: added DEP to parameter list.
-!  0895 MvdV GRAMX added to parameter list for output of max. grazing rate
-!            input of old grazing pressure (ZOOD(0))
-!
-      CALL MAXGRA(ROOT,EXTB,DAYEUF,SURF(K),EADJ,PMAX(K),CDATE,ZOOD(0),J,
-     1            K,DEP,GRAMX)
   160 CONTINUE
 !
 !  New section starts here.
@@ -361,24 +272,12 @@
 !
 !
       IF (LGROCH .EQ. 1 .OR. LOBFUN .EQ. 1) THEN
-         CALL MAXGRO(XINIT,GROOT,EXTTOT,EMIN(ISKMAX),GRAMOR(ISKMAX),J,
+         CALL MAXGRO(XINIT,GROOT,EXTTOT,EMIN(ISKMAX),J,
      *               ISKMAX,DEP)
          BGRO(J) = B(NUEXRO + J)
       END IF
       JKMAX(J) = ISKMAX
   170 CONTINUE
-!
-!  Compute values for mortality constraints if option "MORCHECK" is on.
-!  MvdV 961014 moved from RUN subroutine to iteration loop grazers
-!  Hans Los 991231: added LCOUPL
-!
-      IF (LCOUPL .EQ. 0) THEN
-         IF (LMORCH .EQ. 1) THEN
-            CALL MAXMOR (XDEF,MI,EXTLIM,INFEAS,GRAMOR)
-         ELSE
-            EXTLIM = 0.0
-         END IF
-      END IF
 !
 ! Print KMIN and KMAX roots of types if option "DUMP" is on.
 !
@@ -509,64 +408,6 @@
         IF (IDUMP .NE. 0) CALL PRINMA(XST,BIOST,TOTST,NI,NIN,INTST)
       END IF
 !
-!  Calculate grazing rate constant and recalculate bloom.
-!  Further iterations are not necessary if:
-!  1. The amount of food for the grazers reaches zero
-!  2. The maximum biomass of iteration I is the same as in
-!     interation I-1.
-!  3. The maximum iteration number is achieved.
-!  4. The difference in grazing rates GRADET en GRAMOR between
-!     two steps is less than 1.0D-06
-!
-      IF (IPERM .LE. 1 ) GO TO 300
-      IF (ITNUM .EQ. 1 ) GO TO 290
-      BISTOP=DABS(BIOFOR-BIO(2))
-      IF (BISTOP .LT. 1.D-6) GO TO 300
-!     0895 MvdV Start CONSBL if NUGRAZ > 0
-!               First save the grazing rate of detritus
-  290 IF (NUGRAZ.GT.0) THEN
-        DO 610 I=1,NUNUCO
-          GDTOLD(I) = GRADET(I)
-  610   CONTINUE
-        CALL CONSB2(XDEF,GRAMOR,GRADET,ZOOD,ZOOC,ITNUM,LGRAZ,T,
-     1              TSTEP*MI,GRAMX,LCOUPL,ZMAX)
-!       Correct detritus and available nutrients for the grazing rate
-        IF ((LCOUPL.EQ.0).AND.(LDYDEA.EQ.1)) THEN
-          DO 550 J=1,NUNUCO
-            REMINU(J)= REMINU(J) + GRADET(J) - GDTOLD(J)
-            REMEXP(J) = DEXP(-REMINU(J)*TSTEP*MI)
-            DO 560 K=1,NUSPEC
-              A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-REMEXP(J))+
-     1               REMINU(J))/REMINU(J)
-  560       CONTINUE
-            B(J) = CONCEN(J) - DETRIT(J)*REMEXP(J)
-            DO 570 K=1,NUGRAZ
-              B(J)=B(J)-ZOONUT(J,K)*ZOOD(K)
-  570       CONTINUE
-  550     CONTINUE
-        ENDIF
-      ELSE
-!  Further iterations are not necessary if:
-!  1. The grazing rate constant = 0.0.
-!  2. The maximum biomass of iteration I is the same as in
-!     interation I-1.
-!  3. The maximum iteration number is achieved.
-!
-        CALL GRAZIN(XDEF,GRAMOR,ZOOD(0),ITNUM,LGRAZ)
-      ENDIF
-      IF (LGRAZ .EQ. 1) GO TO 40
-  300 CONTINUE
-
-!  Save the amount of grazer biomass
-      IF (NUGRAZ.GT.0) THEN
-        DO 630 J=1,NUGRAZ
-          ZOOC(J) = ZOOD(J)
-  630   CONTINUE
-      ENDIF
-
-!     Extra output
-!     WRITE(243,'(4(1PE12.4))') (DETRIT(J),J=1,3),ZOOD(1)
-!
 !  Compute the total extinction
 !  Update nov 4 1992: don't divide by SDMIX. Questionable for species
 !  with buoyancy regulation; definitaly incorrect for species at the
@@ -585,146 +426,6 @@
   310 CONTINUE
   320 CONTINUE
       EXTTOT = EXDEAD + EXLIVE + EXTB
-!
-!  Print summary of solution(s) on unit OUUNI and unit 21.
-!
-!  0895 MvdV add extra grazers to the output
-      IF (NUGRAZ.GT.0) THEN
-        NTS8 = NTS7 + NUGRAZ
-      ELSE
-        NTS8=NTS7+1
-      ENDIF
-      IF (IOFLAG .EQ. 0) GO TO 360
-*     IF ( LPRINT .EQ. 2)  WRITE(IOU(21),330) ERRIND,CDATE,
-*    1                     (COUT(J),J=2,NTS6),(OUT15(K),K=NTS7,NTSTOT)
-* 330 FORMAT(1X,A1,A5,1X,6(A3,1X),A2,F5.0,2X,14(F8.1,1X))
-      IF ( LPRINT .EQ. 2) THEN
-        IF (NUNUCO .EQ. 3) WRITE(IOU(21),330) ERRIND,CDATE,
-     1                     (COUT(J),J=2,NTS6),(OUT15(K),K=NTS7,NTSTOT)
-        IF (NUNUCO .EQ. 4) WRITE(IOU(21),331) ERRIND,CDATE,
-     1                     (COUT(J),J=2,NTS6),(OUT15(K),K=NTS7,NTSTOT)
-        IF (NUNUCO .EQ. 5) WRITE(IOU(21),332) ERRIND,CDATE,
-     1                     (COUT(J),J=2,NTS6),(OUT15(K),K=NTS7,NTSTOT)
-        IF (NUNUCO .EQ. 6) WRITE(IOU(21),333) ERRIND,CDATE,
-     1                     (COUT(J),J=2,NTS6),(OUT15(K),K=NTS7,NTSTOT)
-      END IF
-  330 FORMAT(1X,A1,A5,1X,6(A3,1X),A2,F5.0,2X,14(F8.1,1X))
-  331 FORMAT(1X,A1,A5,1X,7(A3,1X),A2,F5.0,2X,14(F8.1,1X))
-  332 FORMAT(1X,A1,A5,1X,8(A3,1X),A2,F5.0,2X,14(F8.1,1X))
-  333 FORMAT(1X,A1,A5,1X,9(A3,1X),A2,F5.0,2X,14(F8.1,1X))
-!
-!  Convert output to compact format to fit on to terminal screen.
-!
-      IF (LPRINT .NE. 2) GO TO 387
-      DO 340 K=1,NUECOG
-      KK=NTS8+K-1
-  340 OUT15(KK)=OUT15(KK)/1000.
-      OUT15(NTS14)=OUT15(NTS14)/1000.
-      IF (NUNUCO .EQ. 3) WRITE(OUUNI,350) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                  (OUT15(K),K=NTS8,NTSTOT)
-      IF (NUNUCO .EQ. 4) WRITE(OUUNI,351) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                  (OUT15(K),K=NTS8,NTSTOT)
-      IF (NUNUCO .EQ. 5) WRITE(OUUNI,352) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                  (OUT15(K),K=NTS8,NTSTOT)
-      IF (NUNUCO .EQ. 6) WRITE(OUUNI,353) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                  (OUT15(K),K=NTS8,NTSTOT)
-  350 FORMAT (1X,A1,I2,3X,7(A1,1X),1X,14(F5.1,1X))
-  351 FORMAT (1X,A1,I2,3X,8(A1,1X),1X,14(F5.1,1X))
-  352 FORMAT (1X,A1,I2,3X,9(A1,1X),1X,14(F5.1,1X))
-  353 FORMAT (1X,A1,I2,3X,10(A1,1X),1X,14(F5.1,1X))
-      GO TO 370
-  360 CONTINUE
-      IF (LPRINT .NE. 2) GO TO 387
-      IF (NUNUCO.EQ.3) WRITE(OUUNI,330) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-      IF (NUNUCO.EQ.4) WRITE(OUUNI,331) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-      IF (NUNUCO.EQ.5) WRITE(OUUNI,332) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-      IF (NUNUCO.EQ.6) WRITE(OUUNI,333) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-!
-!  Print biomasses of phytoplankton types.
-!
-  370 CONTINUE
-      WRITE (IOU(24),375) CDATE,(XDEF(J+NUROWS)/1000,J=1,NUSPEC)
-  375 FORMAT (1X,A5,1X,20(F5.1,1X))
-!
-!  Print particulate organic and dissolved nutrient concentrations
-!  on unit 14.
-!  Update 1.82: never write more than 3 nutrients to plot files!
-!
-      NUNU3 = NUNU2 - 2*(NUNUCO-3)
-      WRITE (IOU(14),380) CDATE,(PARDIS(K),K=1,NUNU2),EXTTOT,TOTAL,PHYT
-      IF ((LPLOT .EQ. 1 .OR. LSCR .EQ. 1) .AND. LCOUPL .NE. 1)
-     1  WRITE (IPL3,381) CDATE,(PARDIS(K),K=1,NUNU3),EXTTOT,TOTAL,PHYT
-  380 FORMAT (2X,A5,4X,15(F7.2,5X))
-  381 FORMAT (2X,A5,4X,15(F11.2,1X))
-!
-!
-!   Echo the input to unit 25.
-!
-      IF (NUGRAZ.GT.0.) THEN
-      WRITE (IOU(25),385) CDATE,T,CSOL,PHYT,(B(I),I=1,NUNUCO),EXTB,DAY,
-     1             DEATH,(ZOOD(IG)*1000.*GCTDRY(IG),IG=1,NUGRAZ),DEP
-      ELSE
-      WRITE (IOU(25),385) CDATE,T,CSOL,PHYT,(B(I),I=1,NUNUCO),EXTB,DAY,
-     1             DEATH,ZOOD(0),DEP
-      ENDIF
-  385 FORMAT (1X,A5,1X,F7.1,1X,2(F7.0,1X),31(F7.2,1X))
-!
-!  Calculate production and respiration rates if option PRODUC was
-!  selected.
-!
-  387 IF (LPRODU .NE. 1) GO TO 390
-      CALL PRODUC(XDEF,GRAMOR,DEATH,CDATE,DAY,T,DEPEUF,0)
-  390 CONTINUE
-      IF (LST .EQ. 0) GO TO 440
-      IF (LPRINT .NE. 2) GO TO 440
-      DO 400 K=1,NTSST
-  400 OUT15(K)=OUTST(K)
-!
-!  Print biomasses of phytoplankton types.
-!
-      WRITE (IOU(24),375) CDATE,(XST(J+NUROWS)/1000,J=1,NUSPEC)
-      IF (IOFLAG .EQ. 0) GO TO 420
-      IF(NUNUCO.EQ.3)
-     1             WRITE(IOU(21),330) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     2             (OUT15(K),K=NTS7,NTSTOT)
-      IF(NUNUCO.EQ.4)
-     1             WRITE(IOU(21),331) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     2             (OUT15(K),K=NTS7,NTSTOT)
-      IF(NUNUCO.EQ.5)
-     1             WRITE(IOU(21),332) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     2             (OUT15(K),K=NTS7,NTSTOT)
-      IF(NUNUCO.EQ.6)
-     1             WRITE(IOU(21),333) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     2             (OUT15(K),K=NTS7,NTSTOT)
-      DO 410 K=1,NUECOG
-      KK=NTS8+K-1
-  410 OUT15(KK)=OUTST(KK)/1000.
-      OUT15(NTS14)=OUTST(NTS14)/1000.
-      IF(NUNUCO.EQ.3)  WRITE(OUUNI,350) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                 (OUT15(K),K=NTS8,NTSST)
-      IF(NUNUCO.EQ.4)  WRITE(OUUNI,351) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                 (OUT15(K),K=NTS8,NTSST)
-      IF(NUNUCO.EQ.5)  WRITE(OUUNI,352) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                 (OUT15(K),K=NTS8,NTSST)
-      IF(NUNUCO.EQ.6)  WRITE(OUUNI,353) ERRIND,ID,(COUT(K),K=2,NTS6),
-     1                 (OUT15(K),K=NTS8,NTSST)
-      GO TO 430
-  420 CONTINUE
-      IF(NUNUCO.EQ.3)  WRITE(OUUNI,330) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-      IF(NUNUCO.EQ.4)  WRITE(OUUNI,331) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-      IF(NUNUCO.EQ.5)  WRITE(OUUNI,332) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-      IF(NUNUCO.EQ.6)  WRITE(OUUNI,333) ERRIND,CDATE,(COUT(J),J=2,NTS6),
-     1                 (OUT15(K),K=NTS7,NTSTOT)
-  430 IF (LPRODU .NE. 1) GO TO 440
-      CALL PRODUC(XST,GRAMOR,DEATH,CDATE,DAY,T,DEPEUF,0)
-  440 CONTINUE
 !
 !  Print a warning message if potential non-unique solutions have been
 !  determined by subroutine SOLVLP.

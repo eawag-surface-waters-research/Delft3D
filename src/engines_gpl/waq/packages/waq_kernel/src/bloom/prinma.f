@@ -51,9 +51,9 @@
       BIOPOS = BIO2
       IF (BIOPOS .LT. 0.0) BIOPOS = 0.0
       WRITE (IOU(6),70) BIOPOS
-   70 FORMAT (2X,'Total biomass',6X,F11.4,3X,'mgm/m3')
+   70 FORMAT (2X,'Total biomass',6X,F11.4,3X,'g/m3')
       WRITE (IOU(6),90) TOTAL
-   90 FORMAT (2X,'Chlorophyll',8X,F11.4,3X,'mgm/m3',/)
+   90 FORMAT (2X,'Chlorophyll',8X,F11.4,3X,'mg/m3',/)
 !
 !  PRINT NUTRIENT CONCENTRATIONS
 !

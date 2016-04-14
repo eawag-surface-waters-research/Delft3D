@@ -82,9 +82,6 @@
       ELSE
         READ (INPU,99987) NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
       ENDIF
-!     write(*,*) 'Arjen: LCOUPL:',lcoupl
-!     write(*,*) 'Arjen: ',NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
-
       IF (NUSPEC .GT. MT) THEN
          WRITE (OUUNI,99985) NUSPEC,MT
          STOP
@@ -130,10 +127,6 @@
       NUSPE1=NUROWS+1
       NUCOLS=NUROWS+NUSPEC
 
-!     write(*,*)'Arjen: ', NUFILI,NOABCO,NOEXRO,NOROWS,NUSPE1,NOCOLS
-!     write(*,*)'Arjen: reading'
-!     write(*,*)'Arjen: nunuco:',nunuco
-!
 !  Read names of nutrient constraints, temperature (in)dependence,
 !  and whether the input value is to be used or some externally
 !  specified modification.
@@ -212,9 +205,6 @@
 !               (2) A species dependent function. The coefficients
 !                   are read following lable 140 of this subroutine.
 !
-!     read(inpu,'(a)') aline
-!     write(*,*)'Arjen: >',aline,'<'
-!     READ (aline,99995) WMODE,FLUSH
       READ (INPU,99995) WMODE,FLUSH
       IF (WMODE .NE. CONTRO(2)) GO TO 90
       LCAL=1
@@ -356,8 +346,6 @@
       LIMNAM (NUNUCO+1) = 'E  '
       LIMNAM (NUNUCO+2) = 'Gro'
       LIMNAM (NUNUCO+3) = 'Mor'
-
-!     write(*,*)'Arjen: 2', NUFILI,NOABCO,NOEXRO,NOROWS,NUSPE1,NOCOLS
 !
 !  Formats.
 !

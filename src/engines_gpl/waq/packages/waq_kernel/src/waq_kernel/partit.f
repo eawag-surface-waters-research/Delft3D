@@ -83,10 +83,6 @@
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "partit", ithandl )
 
-!     write(*,*) 'Arjen P (1): RTCACT = ', RTCACT
-!     write(*,*) 'Arjen P (1): SRWACT = ', SRWACT
-!     write(*,*) 'Arjen P (1): OLCFWQ = ', OLCFWQ
-
 !
 !     use trivial partitioning of the segments in the horizontal plane
 !
@@ -120,11 +116,6 @@
      +      ', assigning all segments to part "npart", none to other parts'
 
          owners = npart
-
-!     write(*,*) 'Arjen P (2): RTCACT = ', RTCACT
-!     write(*,*) 'Arjen P (2): SRWACT = ', SRWACT
-!     write(*,*) 'Arjen P (2): OLCFWQ = ', OLCFWQ
-
 
       elseif (noseg.eq.-13860 .and. intsrt.eq.12) then
 !
@@ -173,11 +164,6 @@
      +            ':',npart
             endif
          endif
-
-!     write(*,*) 'Arjen P (3): RTCACT = ', RTCACT
-!     write(*,*) 'Arjen P (3): SRWACT = ', SRWACT
-!     write(*,*) 'Arjen P (3): OLCFWQ = ', OLCFWQ
-
 !
 !        assign nsegpp segments to each part, assign one extra segment to the
 !        last nsegrm parts
@@ -259,11 +245,6 @@
       endif
 
       if (idebug.ge.1) write(lunrep,*)
-
-!     write(*,*) 'Arjen P (4): RTCACT = ', RTCACT
-!     write(*,*) 'Arjen P (4): SRWACT = ', SRWACT
-!     write(*,*) 'Arjen P (4): OLCFWQ = ', OLCFWQ
-
  9999 continue
       if ( timon ) call timstop ( ithandl )
       return

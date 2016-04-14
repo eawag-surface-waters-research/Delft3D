@@ -49,8 +49,8 @@
       GO TO ( 130,   160,   80,  220,  180,  290,   70,  240,
      1         40,   100,  110,   20,  210,  140,  120,   50,
      2        280,   320,  330,   90,  200,  260,  300,   60,
-     3        230,   150,  170,  270,  340,  190,  310,  250,
-     4         25), NUM
+     3        230,   150,  170,  270,  340,  350,  190,  310,  
+     4        250,    25), NUM
 !
 !  Return to input option mode if "END" is entered.
 !
@@ -168,6 +168,9 @@
       GO TO 10
   340 CONTINUE
       WRITE (OUUNI,99530) WOPTIO(NUM)
+      GO TO 10
+  350 CONTINUE
+      WRITE (OUUNI,99520) WOPTIO(NUM)
       GO TO 10
 !
 !  Formats for this subroutine.
@@ -293,4 +296,6 @@
      2        ' (default) or the growth rate.')
 99530 FORMAT (1X,'Option',1X,A8,1X,'activates "DUMP" for a selected',
      1        ' number of periods.')
+99520 FORMAT (1X,'Option',1X,A8,1X,'activates "DUMP" for a selected',
+     1        ' segment.')      
       END

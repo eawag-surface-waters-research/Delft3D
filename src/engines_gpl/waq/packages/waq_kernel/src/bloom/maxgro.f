@@ -47,7 +47,7 @@
 !    2. Use XINIT for the growth constraint if the total extinction
 !       gets too large; NO extra biomass reduction.
 !
-      SUBROUTINE MAXGRO(XINIT,ROOT,EXTTOT,EADJ,GRAMOJ,J,ISKMAX,DEP)
+      SUBROUTINE MAXGRO(XINIT,ROOT,EXTTOT,EADJ,J,ISKMAX,DEP)
 
       USE DATA_3DL
 
@@ -123,7 +123,7 @@
 !  Compute value BT for the growth constraint.
 !
          BT=DEXP( ( (PMAX(ISKMAX)-LPMORT*RMORT(ISKMAX))*EFFI - FLUSH
-     *              - GRAMOJ - RESP(ISKMAX) ) *TSTEP*MI)
+     *              - RESP(ISKMAX) ) *TSTEP*MI)
          BT = BT*XINIT(J)
 !
 ! Set the growth constraint to 0.0 when BT is negative.
@@ -154,6 +154,6 @@
 99995 FORMAT (' Warning from MAXGRO: negative growth constraint of ',
      1        ' species ',A8,' = ',F10.5,/,' replaced by 0.0')
 99990 FORMAT ('  Species ',A8,' EFFI = ',F5.2,' Growth rate = ',F5.2,
-     1        ' B-value = ',F8.1)
+     1        ' B-value = ',F7.3)
       RETURN
       END
