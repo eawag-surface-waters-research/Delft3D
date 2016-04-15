@@ -49,7 +49,7 @@ subroutine initialise_progress( progress, nstep, filename )
     character(len=*), intent(in)       :: filename     !< Name of the file to use
 
     progress%istep    = 0
-    progress%nstep    = 0
+    progress%nstep    = nstep
     progress%required = filename /= ' '
 
     call cpu_time( progress%secsprev )
