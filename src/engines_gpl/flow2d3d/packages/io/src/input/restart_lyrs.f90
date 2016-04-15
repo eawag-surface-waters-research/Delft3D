@@ -344,7 +344,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
              do i = nfg, nlg
                 do k = 1, nlyr
                    do l = 1,lsedtot
-                      msed_g(l,k,i,j) = msed_g(l,k,i,j)*thlyr_g(k,i,j)*cdryb(l)
+                      msed_g(i,j,k,l) = msed_g(i,j,k,l)*thlyr_g(i,j,k)*cdryb(l)
                    enddo
                 enddo
              enddo
@@ -358,7 +358,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                    !
                    mfracsum = 0.0_fp
                    do l = 1, lsedtot
-                      mfrac(l) = msed_g(l,k,i,j)*rhosol(l)
+                      mfrac(l) = msed_g(i,j,k,l)*rhosol(l)
                       mfracsum = mfracsum + mfrac(l)
                    enddo
                    if (mfracsum>0.0_fp) then
@@ -369,7 +369,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                       ! obtain porosity and sediment thickness without pores
                       !
                       call getporosity(gdp%gdmorlyr, mfrac, poros)
-                      sedthick = thlyr_g(k,i,j)*(1.0_fp-poros)
+                      sedthick = thlyr_g(i,j,k)*(1.0_fp-poros)
                    else
                       sedthick = 0.0_fp
                       poros = 0.0_fp
@@ -378,7 +378,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                    ! convert volume fractions to sediment mass
                    !
                    do l = 1, lsedtot
-                      msed_g(l,k,i,j) = msed_g(l,k,i,j)*sedthick*rhosol(l)
+                      msed_g(i,j,k,l) = msed_g(i,j,k,l)*sedthick*rhosol(l)
                    enddo
                 enddo
              enddo
