@@ -277,7 +277,8 @@ module m_ec_typedefs
       logical                                             :: end_of_data             !< End of data reached?
       character(len=100), dimension(:), allocatable :: standard_names                ! Standard names by varid in a netcdf-file 
       character(len=100), dimension(:), allocatable :: variable_names                ! Variable names by varid in a netcdf file 
-      integer, dimension(:), allocatable            :: dim_varids                    ! For each dimension in NetCDF: id of the associated variable
+      integer, dimension(:), allocatable            :: dim_varids                    ! For each dimension in NetCDF: id of the associated variable                               
+      integer, dimension(:), allocatable            :: dim_length                    ! For each dimension in NetCDF: length
    end type tEcFileReader
 
    type tEcFileReaderPtr

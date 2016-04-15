@@ -60,6 +60,7 @@ module m_ec_support
    public :: ecSupportFindNetCDF
    public :: ecSupportFindNetCDFByFilename
    public :: ecSupportNetcdfCheckError
+   public :: ecSupportNCFindCFCoordinates
    public :: ecSupportTimestringToUnitAndRefdate
    public :: ecSupportTimeUnitConversionFactor
    public :: ecSupportTimeToTimesteps
@@ -820,12 +821,14 @@ end subroutine ecInstanceListSourceItems
 !              ref_date = real(ymd2jul(yyyymmdd)) - 2400001.0_hp ! Julian Day to Modified Julian Date (exact)
                ref_date = real(ymd2jul(yyyymmdd)) - 2400000.5_hp ! Julian Day to Reduced Julian Date (exact)
                ! Time
-               read(string(i+11 : i+13), '(I2)') temp
-               ref_date = ref_date + dble(temp) / 24.0_hp
-               read(string(i+14 : i+16), '(I2)') temp
-               ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp
-               read(string(i+17 : i+19), '(I2)') temp
-               ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp / 60.0_hp
+               if(len_trim(string)>=i+18) then
+                  read(string(i+11 : i+12), *) temp
+                  ref_date = ref_date + dble(temp) / 24.0_hp
+                  read(string(i+14 : i+15), *) temp
+                  ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp
+                  read(string(i+17 : i+18), *) temp
+                  ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp / 60.0_hp
+               end if
             else
                call setECMessage("ERROR: ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
                return
@@ -898,8 +901,71 @@ end subroutine ecInstanceListSourceItems
             factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
             timesteps = tframe%ec_refdate + factor_in * thistime / 86400.0_hp
          endif
-         
       end function ecSupportThisTimeToTimesteps
+      
+
+      !> Find the CF-compliant longitude and latitude dimensions and associated variables
+      function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid) result(success)
+      use netcdf
+      logical              :: success
+      integer, intent(in)  :: ncid           !< NetCDF file ID
+      integer, intent(out) :: lon_varid      !< One dimensional coordinate variable recognized as longitude
+      integer, intent(out) :: lat_varid      !< One dimensional coordinate variable recognized as latitude
+      integer, intent(out) :: tim_varid      !< One dimensional coordinate variable recognized as time
+      integer, intent(out) :: lon_dimid      !< Longitude dimension
+      integer, intent(out) :: lat_dimid      !< Latitude dimension
+      integer, intent(out) :: tim_dimid      !< Time dimension
+      integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
+      integer :: dimids(1)
+      character(len=NF90_MAX_NAME)  :: units
+
+      success = .False.
+      lon_varid = -1
+      lat_varid = -1
+      tim_varid = -1
+      lon_dimid = -1
+      lat_dimid = -1
+      tim_dimid = -1
+      ierr = nf90_inquire(ncid, ndim, nvar, nglobatts, unlimdimid)
+      do ivar=1,nvar
+         ierr = nf90_inquire_variable(ncid, ivar, ndims=ndim)                      ! number of variables
+         if (ndim==1) then
+            units=''
+            ierr = nf90_inquire_variable(ncid, ivar, dimids=dimids)                ! number of variables
+            ierr = nf90_get_att(ncid, ivar, 'units', units)
+            select case (trim(units))
+               case ('degrees_east','degree_east','degree_E','degrees_E','degreeE','degreesE')
+                  lon_varid = ivar
+                  lon_dimid = dimids(1)
+               case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
+                  lat_varid = ivar
+                  lat_dimid = dimids(1)
+               case default
+                  ! see if is the time dimension
+                  if ((index(units,'seconds since')>0)   &
+                  .or.(index(units,'minutes since')>0)   &
+                  .or.(index(units,'hours since')>0)     &
+                  .or.(index(units,'days since')>0))     then
+                     tim_varid = ivar
+                     tim_dimid = dimids(1)
+                  end if
+               end select
+         end if
+      end do   !ivar
+      
+      success = .True.
+      end function ecSupportNCFindCFCoordinates
+
+      !!> Return dimension id's and lengths for the specified variable
+      !function ecSupportNCGetVarDim(ncid, varid, dimid, dimlen, ndim) result(success)
+      !use netcdf
+      !logical              :: success
+      !integer, intent(in)  :: ncid                      !< NetCDF file ID
+      !integer, intent(in)  :: varid                     !< Variable file ID
+      !
+      !integer, dimension(:), allocatable :: intent(out) !< array of dimension ID's for this variable 
+      !integer, dimension(:), allocatable :: intent(out) !< array of dimension s for this variable 
+      !end function ecSupportNCGetVarDim
 
 end module m_ec_support
 
@@ -1224,5 +1290,5 @@ module m_ec_alloc
             end if
          end if
       end function ecQuantityPtrArrayIncrease
-
+      
 end module m_ec_alloc
