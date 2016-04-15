@@ -101,6 +101,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     logical                 , pointer :: tair_file
     logical                 , pointer :: clou_file
     logical                 , pointer :: swrf_file
+    logical                 , pointer :: scc_file
     logical                 , pointer :: free_convec
     logical                 , pointer :: solrad_read
     integer                 , pointer :: lundia
@@ -290,6 +291,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     tair_file   => gdp%gdheat%tair_file
     clou_file   => gdp%gdheat%clou_file
     swrf_file   => gdp%gdheat%swrf_file
+    scc_file    => gdp%gdheat%scc_file
     free_convec => gdp%gdheat%free_convec
     solrad_read => gdp%gdheat%solrad_read
     lundia      => gdp%gdinout%lundia
@@ -307,7 +309,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     msgcount = 0
     htrsh    = 0.5_fp * dryflc
     !
-    if (rhum_file .or. tair_file .or. clou_file .or. swrf_file) then
+    if (rhum_file .or. tair_file .or. clou_file .or. swrf_file .or. scc_file) then
        !
        ! update meteo input (if necessary)
        !
@@ -332,6 +334,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        if (swrf_file) then
           success = getmeteoval(gdp%runid, 'swrf', time, gdp%gdparall%mfg, gdp%gdparall%nfg,&
                               & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, swrfarr , 0 )
+          call checkmeteoresult(success, gdp)
+       endif
+       if (scc_file) then
+          success = getmeteoval(gdp%runid, 'Secchi_depth', time, gdp%gdparall%mfg, gdp%gdparall%nfg,&          !timhr*60.0_fp?
+                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, secchi , 0 )
           call checkmeteoresult(success, gdp)
        endif
     endif

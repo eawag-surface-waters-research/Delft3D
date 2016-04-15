@@ -114,11 +114,13 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     real(fp), dimension(:)               , pointer :: tairarr
     real(fp), dimension(:)               , pointer :: clouarr
     real(fp), dimension(:)               , pointer :: swrfarr
+    real(fp), dimension(:)               , pointer :: secchi
     logical                              , pointer :: rhum_file
     logical                              , pointer :: tair_file
     logical                              , pointer :: clou_file
     logical                              , pointer :: prcp_file
     logical                              , pointer :: swrf_file
+    logical                              , pointer :: scc_file
     real(fp)                             , pointer :: morfac
     integer                              , pointer :: morfacpar
     integer                              , pointer :: morfacrec
@@ -472,11 +474,13 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     tairarr             => gdp%gdheat%tairarr
     clouarr             => gdp%gdheat%clouarr
     swrfarr             => gdp%gdheat%swrfarr
+    secchi              => gdp%gdheat%secchi
     rhum_file           => gdp%gdheat%rhum_file
     tair_file           => gdp%gdheat%tair_file
     clou_file           => gdp%gdheat%clou_file
     prcp_file           => gdp%gdheat%prcp_file
     swrf_file           => gdp%gdheat%swrf_file
+    scc_file            => gdp%gdheat%scc_file
     morfac              => gdp%gdmorpar%morfac
     morfacpar           => gdp%gdmorpar%morfacpar
     morfacrec           => gdp%gdmorpar%morfacrec
@@ -835,7 +839,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! The following arrays must be filled (when relevant)
     ! before the first call to postpr.
     ! - windu, windv, patm
-    ! - rhumarr, tairarr, clouarr, swrfarr
+    ! - rhumarr, tairarr, clouarr, swrfarr, secchi
     ! - sdu_t0 (subsidence/uplift) 
     ! 
     if (wind) then
@@ -867,6 +871,11 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     if (swrf_file) then
        success = getmeteoval(gdp%runid, 'swrf', timhr * 60.0_fp, &
                            &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, swrfarr , 0)
+       call checkmeteoresult(success, gdp)
+    endif
+    if (scc_file) then
+       success = getmeteoval(gdp%runid, 'Secchi_depth', timhr * 60.0_fp, &
+                           &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, secchi , 0)
        call checkmeteoresult(success, gdp)
     endif
     if (lfsdu) then 

@@ -134,11 +134,12 @@ type gd_heat
 !
 ! logicals
 !
-    logical :: rhum_file   = .false. !  True when relative humidity is read from input file
-    logical :: tair_file   = .false. !  True when air temperature   is read from input file
-    logical :: clou_file   = .false. !  True when cloudiness        is read from input file
-    logical :: prcp_file   = .false. !  True when precipitation     is read from input file
-    logical :: swrf_file   = .false. !  True when solar radiation   is read from input file
+    logical :: rhum_file   = .false. !  True when relative humidity is read from METEO input file
+    logical :: tair_file   = .false. !  True when air temperature   is read from METEO input file
+    logical :: clou_file   = .false. !  True when cloudiness        is read from METEO input file
+    logical :: prcp_file   = .false. !  True when precipitation     is read from METEO input file
+    logical :: swrf_file   = .false. !  True when solar radiation   is read from METEO input file
+    logical :: scc_file    = .false. !  True when Secchi depth      is read from METEO input file (only ktemp = 5)
     logical :: free_convec = .false. !  True when free convection   is read from input file (only ktemp = 5)
     logical :: solrad_read = .false. !  True when solar radiation   is read from extra column in .tem file (only ktemp = 5)
 !
