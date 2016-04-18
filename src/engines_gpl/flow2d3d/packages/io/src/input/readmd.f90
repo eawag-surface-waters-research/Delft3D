@@ -827,7 +827,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Read bedform characteristics
     !
     call rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
-                    & nmmax     ,kcs       ,sedim     ,gdp       )
+                    & nmmax     ,sedim     ,gdp       )
     if (error) goto 9999
     !
     ! Sediment input if flag SEDIM = .true.
