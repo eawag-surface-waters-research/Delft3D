@@ -70,6 +70,7 @@
       ! local declarations
 
       real, parameter           :: versip = 4.52   ! version process system
+      real                      :: verspe = 1.0    ! version bloom.spe file
       integer, parameter        :: novarm = 15000  ! max number of variables overall
       integer, parameter        :: nbprm  = 1750   ! max number of processes
       integer, parameter        :: nopred = 6      ! number of pre-defined variables
@@ -426,11 +427,21 @@
 
          lunblm = 88
          open ( lunblm    , file=blmfil )
-         call reaalg ( lurep  , lunblm , maxtyp , maxcof, notyp ,
-     +                 nocof  , noutgrp, nouttyp, alggrp, abrgrp,
-     +                 algtyp , abrtyp , algdsc , cofnam, algcof,
-     +                 outgrp , outtyp , noprot , namprot,nampact,
-     +                 nopralg,nampralg)
+         read ( lunblm    , '(a)' ) line
+         verspe = 1.0
+         ioff =  index(line, 'BLOOMSPE_VERSION_')
+         if(ioff.eq.0) then
+            rewind( lunblm )
+         else
+            read (line(ioff+17:), *, err = 100) verspe
+100         continue
+         endif
+
+         call reaalg ( lurep  , lunblm , verspe , maxtyp , maxcof , 
+     +                 notyp  , nocof  , noutgrp, nouttyp, alggrp ,
+     +                 abrgrp , algtyp , abrtyp , algdsc , cofnam ,
+     +                 algcof , outgrp , outtyp , noprot , namprot,
+     +                 nampact, nopralg, nampralg)
       else
          l_eco = .false.
          noprot  = 0
@@ -657,7 +668,7 @@
 
          lunfrm = 89
          open ( lunfrm    , file='bloominp.frm' )
-         call blmeff (lurep , lunblm, lunfrm, grpnam, nogrp )
+         call blmeff (lurep , lunblm, verspe, lunfrm, grpnam, nogrp , typnam, noalg)
          close(lunblm)
          close(lunfrm)
 

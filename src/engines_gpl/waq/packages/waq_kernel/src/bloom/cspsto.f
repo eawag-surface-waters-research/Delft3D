@@ -239,7 +239,7 @@
      3        1X,'with the "EDIT" command.',/)
 99920 FORMAT (1X,'Present species stochiometry: ',/,
      1        1X,'Spec.name',3X,'Spec ext',3X,8(A8,2X))
-99910 FORMAT (1X,A8,2X,D10.3,3F10.5,F10.4,4F10.5)
+99910 FORMAT (1X,A10,2X,D10.3,3F10.5,F10.4,4F10.5)
 99900 FORMAT (1X,'Message from subroutine "CSPSTO":',/,
      1        ' You cannot use option "EDIT" in a batch run,',/,
      2        ' as this option invokes the system editor.')
@@ -248,11 +248,11 @@
 99870 FORMAT (' Valid species names are: ',/,1X,10(1X,A9))
 99850 FORMAT(1X,'Incorrect type number ',I1,' for species',1X,A8)
 99840 FORMAT (1X,A3,1X,A8,1X,'for type ',I2,' in species',
-     1        1X,A8,1X,'=',1X,D10.3)
+     1        1X,A10,1X,'=',1X,D10.3)
 99830 FORMAT (1X,'Incorrect nutrient name ',A8)
 99820 FORMAT (1X,'Valid nutrients are: ',6A9)
 99810 FORMAT (1X,A3,1X,A8,1X,'coefficient for type ',I2,
-     1        ' in species',1X,A8,1X,'=',F10.5)
+     1        ' in species',1X,A10,1X,'=',F10.5)
 99800 FORMAT (1X,'New dry weight to chlorophyll ratio for ',
      1        'type ',I2,' of species',1X,A8,1X,'=',F10.5)
 99790 FORMAT (' Return code from edit: ',I3,'. Command not executed')

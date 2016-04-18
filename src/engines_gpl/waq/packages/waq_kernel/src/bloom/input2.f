@@ -314,6 +314,15 @@
 !----------------------------------------------------------------------
 !  Input section for FORMATTED read of efficiency curves!
 !
+      READ ( INEFF    , '(A)' ) ALINE
+      IOFF =  INDEX(ALINE, 'BLOOMFRM_VERSION_2.00')
+      IF(IOFF.EQ.0) THEN
+         REWIND( INEFF )
+      ELSE
+         READ (INEFF,199) (GRNAME(J),J=1,NUECOG)
+         READ (INEFF,199) (SPNAME(I),I=1,NUSPEC)
+      ENDIF
+  199 FORMAT (30(A10,X))
       READ (INEFF,200) NZ,TEFCUR
   200 FORMAT (I5,5X,F10.2)
       READ (INEFF,210) (ZVEC(I),I=1,NZ)

@@ -62,6 +62,7 @@
 		<File RelativePath=".\src\proc_preprocess\add_prcfrc.f"/>
 		<File RelativePath=".\src\proc_preprocess\add_sumfrc.f"/>
 		<File RelativePath=".\src\proc_preprocess\algrep.f"/>
+		<File RelativePath=".\src\proc_preprocess\bleffpro.f"/>
 		<File RelativePath=".\src\proc_preprocess\blmd09.f"/>
 		<File RelativePath=".\src\proc_preprocess\blmeff.f"/>
 		<File RelativePath=".\src\proc_preprocess\cnfrep.f"/>

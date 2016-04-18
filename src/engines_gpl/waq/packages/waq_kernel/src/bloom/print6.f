@@ -103,7 +103,7 @@
      1       'unbounded')
       GO TO 170
   130 WRITE (IOU(6),140) CNAMES(IRS(3))
-  140 FORMAT('  A feasible solution does not exist due to row ',A16)
+  140 FORMAT('  A feasible solution does not exist due to constraint ',A16)
       GO TO 170
   150 WRITE (IOU(6),160)
   160 FORMAT('  A finite solution can not be found',/,

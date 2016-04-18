@@ -300,7 +300,7 @@
 99920 FORMAT (1X,'Present species growth coefficients: ',/,' Species ',
      1        'Pmax 1  Pmax 2  P-func. Mort 1  Mort 2  Resp 1  ',
      2        'Resp 2  Relmix  Zoopref')
-99910 FORMAT (1X,A8,F6.3,1X,F7.3,1X,A8,6(F7.3,1X))
+99910 FORMAT (1X,A10,F6.3,1X,F7.3,1X,A8,6(F7.3,1X))
 99905 FORMAT (/)
 99900 FORMAT (1X,'Message from subroutine "CSPGRO":',/,
      1        ' You cannot use option "EDIT" in a batch run,',/,
