@@ -442,4 +442,3 @@
   190 fm(j)=alam*fofxm(i,j)+(1.0-alam)*fofxm(i-1,j)
       return
       end
-
