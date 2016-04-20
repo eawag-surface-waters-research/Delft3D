@@ -65,7 +65,6 @@
 		<File RelativePath="src\diof90\dio-ds-config.F90"/>
 		<File RelativePath="src\diof90\dio-ds.F90"/>
 		<File RelativePath="src\diof90\dio-ini.F90"/>
-		<File RelativePath="src\diof90\dio-plt-f77.F90"/>
 		<File RelativePath="src\diof90\dio-plt-rw.F90"/>
 		<File RelativePath="src\diof90\dio-plt-shm.F90"/>
 		<File RelativePath="src\diof90\dio-prop.F90"/>
