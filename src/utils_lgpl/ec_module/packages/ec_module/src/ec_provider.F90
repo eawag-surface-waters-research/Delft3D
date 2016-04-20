@@ -294,7 +294,7 @@ module m_ec_provider
                      case ("ERA_Interim_Dataset")
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case ("rainfall","airpressure_windx_windy","windxy","windx","windy","atmosphericpressure",    &
-                                     "dewpoint_airtemperature_cloudiness_solarradiation")
+                                     "dewpoint_airtemperature_cloudiness","dewpoint_airtemperature_cloudiness_solarradiation")
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
@@ -2427,6 +2427,13 @@ module m_ec_provider
             ncstdnames(2) = 'eastward_wind'
             ncvarnames(3) = 'v10'                            ! 10 meter northward wind
             ncstdnames(3) = 'northward_wind'
+         case ('dewpoint_airtemperature_cloudiness')
+            ncvarnames(1) = 'd2m'                            ! dew-point temperature
+            ncstdnames(1) = 'dew_point_temperature'
+            ncvarnames(2) = 't2m'                            ! 2-meter air temperature
+            ncstdnames(2) = 'air_temperature'
+            ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
+            ncstdnames(3) = 'cloud_area_fraction'
          case ('dewpoint_airtemperature_cloudiness_solarradiation')
             ncvarnames(1) = 'd2m'                            ! dew-point temperature
             ncstdnames(1) = 'dew_point_temperature'
