@@ -2441,8 +2441,8 @@ module m_ec_provider
             ncstdnames(2) = 'air_temperature'
             ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
             ncstdnames(3) = 'cloud_area_fraction'
-            ncvarnames(4) = 'tsr'                            ! outgoing SW radiation at the top-of-the-atmosphere
-            ncstdnames(4) = 'toa_net_upward_shortwave_flux'
+            ncvarnames(4) = 'ssr'                            ! outgoing SW radiation at the top-of-the-atmosphere
+            ncstdnames(4) = 'surface_net_downward_shortwave_flux'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
             ! we have faulty 
             call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
