@@ -1251,10 +1251,12 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
           !
           do ibnd = 1, size(dims%nmbnd,1)
              nm  = dims%nmbnd(ibnd,1)
-             nm2 = dims%nmbnd(ibnd,2)
-             do ised = 1,lsedtot
-                bodsed(ised, nm) = bodsed(ised, nm2)
-             enddo
+             if (bodsed(1, nm)<0) then
+                nm2 = dims%nmbnd(ibnd,2)
+                do ised = 1,lsedtot
+                   bodsed(ised, nm) = bodsed(ised, nm2)
+                enddo
+             endif
           enddo
           !
           ! Use BODSED: compute DPSED and as needed transfer information from BODSED to other arrays
