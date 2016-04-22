@@ -290,6 +290,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: precip
     integer(pntrsize)                    , pointer :: procbc
     integer(pntrsize)                    , pointer :: pship
+    integer(pntrsize)                    , pointer :: qsrcrt
     integer(pntrsize)                    , pointer :: qtfrac
     integer(pntrsize)                    , pointer :: qtfrct
     integer(pntrsize)                    , pointer :: qtfrt2
@@ -746,6 +747,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     precip              => gdp%gdr_i_ch%precip
     procbc              => gdp%gdr_i_ch%procbc
     pship               => gdp%gdr_i_ch%pship
+    qsrcrt              => gdp%gdr_i_ch%qsrcrt
     qtfrac              => gdp%gdr_i_ch%qtfrac
     qtfrct              => gdp%gdr_i_ch%qtfrct
     qtfrt2              => gdp%gdr_i_ch%qtfrt2
@@ -1035,7 +1037,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     ! (see routine CHKZMOD)!!!
     !
     if (rtcact) then
-       call rtc_comm_get(((nst*2)+1) * hdt,r(cbuvrt) ,nsluv     , gdp)
+       call rtc_comm_get(((nst*2)+1) * hdt, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (kc > 0 .or. nrcmp > 0) then
        call timer_start(timer_nodal_factor, gdp)
@@ -1116,7 +1118,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & r(disch0) ,r(disch1) ,r(rint)   ,r(rint0)  ,r(rint1)  , &
                  & r(umdis)  ,r(umdis0) ,r(umdis1) ,r(vmdis)  ,r(vmdis0) , &                 
                  & r(vmdis1) ,bubble    ,r(r0)     ,r(thick)  ,r(zwork)  , &
-                 & r(dzs0)   ,d(dps)    ,r(s0)     ,gdp       )
+                 & r(dzs0)   ,d(dps)    ,r(s0)     ,r(qsrcrt) ,gdp       )
        call timer_stop(timer_incdis, gdp)
        !
        ! Computation of discharge in case of culverts
@@ -1900,7 +1902,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     ! Communicate with RTC for second half time step
     !
     if (rtcact) then
-       call rtc_comm_get(((nst*2)+2) * hdt,r(cbuvrt) ,nsluv     , gdp)
+       call rtc_comm_get(((nst*2)+2) * hdt, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (wind) then
        !
@@ -1975,7 +1977,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & r(disch0) ,r(disch1) ,r(rint)   ,r(rint0)  ,r(rint1)  , &
                  & r(umdis)  ,r(umdis0) ,r(umdis1) ,r(vmdis)  ,r(vmdis0) , &                 
                  & r(vmdis1) ,bubble    ,r(r0)     ,r(thick)  ,r(zwork)  , &
-                 & r(dzs0)   ,d(dps)    ,r(s0)     ,gdp       )
+                 & r(dzs0)   ,d(dps)    ,r(s0)     ,r(qsrcrt) ,gdp       )
        call timer_stop(timer_incdis, gdp)
        !
        ! Computation of discharge in case of culverts

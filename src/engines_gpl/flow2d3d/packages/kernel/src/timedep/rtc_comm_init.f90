@@ -1,4 +1,4 @@
-subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
+subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -34,6 +34,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+    use string_module, only:str_lower
     use flow2d3d_timers
     use SyncRtcFlow
     use globaldata
@@ -58,6 +59,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
     character(20), dimension(:)   , pointer :: namrtcsta
     integer                       , pointer :: nlb
     integer                       , pointer :: nsluv
+    integer                       , pointer :: nsrc
     integer                       , pointer :: nub
     integer                       , pointer :: numdomains
     integer                       , pointer :: parget_offset
@@ -82,8 +84,9 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
 ! Global variables
 !
     logical                                                                                                   :: error  ! Flag=TRUE if an error is encountered 
-    character(20) , dimension(gdp%d%nsluv)                                                                    :: nambar ! names of all parameters to get from RTC
-    character(20) , dimension(gdp%d%lstsci)                                                                   :: namcon ! Description and declaration in ckdim.f90
+    character(20) , dimension(gdp%d%nsluv)                                                                    :: nambar ! Names of barriers
+    character(20) , dimension(gdp%d%lstsci)                                                                   :: namcon ! Names of the constituents
+    character(20) , dimension(gdp%d%nsrc)                                                                     :: namsrc ! Names of discharge points
 
 !
 ! Local variables
@@ -115,6 +118,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
     namrtcsta      => gdp%gdrtc%namrtcsta
     nlb            => gdp%d%nlb
     nsluv          => gdp%d%nsluv
+    nsrc           => gdp%d%nsrc
     nub            => gdp%d%nub
     numdomains     => gdp%gdprognm%numdomains
     parget_offset  => gdp%gdrtc%parget_offset
@@ -155,7 +159,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
          if (istat /= 0) goto 999
          nparams = 0.0_fp
          !
-         nparams(1,rtc_domainnr) = real(nsluv,fp) ! # parameters get
+         nparams(1,rtc_domainnr) = real(nsluv+nsrc,fp) ! # parameters get
          nparams(2,rtc_domainnr) = real(stacnt*kmax,fp) ! # parameters put
          !
          call rtccommunicate(nparams, 2*rtc_ndomains)
@@ -176,7 +180,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
          deallocate(nparams,stat=istat)
          if (istat /= 0) goto 999
       else
-         tnparget = nsluv
+         tnparget = nsluv+nsrc
          parget_offset = 0
          tnlocput = stacnt * kmax
          parput_offset = 0
@@ -192,6 +196,10 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,gdp       )
       tlocget_names = ' '
       do i = 1,nsluv
          tlocget_names(parget_offset+i) = nambar(i)
+      enddo
+      do i = 1,nsrc
+         tlocget_names(parget_offset+nsluv+i) = namsrc(i)
+         call str_lower(tlocget_names(parget_offset+nsluv+i))
       enddo
       !
       if (rtc_ndomains > 1) then

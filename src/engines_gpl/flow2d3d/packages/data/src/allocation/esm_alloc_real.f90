@@ -291,10 +291,20 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !-----array for: x,y,z position of sources
     !
     !                           xyzsrc  (3     ,nsrc         )
+    !                           qsrcrt  (2     ,nsrc         )
     !
     pntnam = 'XYZSRC'        !  Coordinates for discharge points
     ierr = mkfpnt(pntnam, 3*nsrc, gdp)
     if (ierr <= -9) goto 9999
+    !
+    pntnam = 'qsrcrt'        !  RTC-controlled discharge data:
+                             !  QSRCRT(1,*) = Return status from RTC
+                             !              > 0 : OK
+                             !              < 0 : Not OK/Found
+                             !  QSRCRT(2,*) = Value from RTC
+    ierr = mkfpnt(pntnam, 2*nsrc, gdp)
+    if (ierr <= -9) goto 9999
+
     !
     !-----arrays for: boundaries
     !
@@ -940,7 +950,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ierr = mkfpnt(pntnam, 4*nsluv, gdp)
     if (ierr <= -9) goto 9999
     !
-    pntnam = 'cbuvrt'        !  Run time barrier data:
+    pntnam = 'cbuvrt'        !  RTC-controlled barrier data:
                              !  CBUVRT(1,*) = Return status from RTC
                              !              > 0 : OK
                              !              < 0 : Not OK/Found

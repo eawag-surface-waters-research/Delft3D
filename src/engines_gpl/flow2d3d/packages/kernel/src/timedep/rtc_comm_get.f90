@@ -1,4 +1,4 @@
-subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
+subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,qsrcrt    ,nsrc     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -61,8 +61,10 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
 ! Global variables
 !
     integer                      , intent(in) :: nsluv  ! number of barriers
+    integer                      , intent(in) :: nsrc   ! number of discharge points
     real(fp)                     , intent(in) :: cursec ! Current simulation time in seconds 
     real(fp), dimension(2, nsluv)             :: cbuvrt ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(2, nsrc)              :: qsrcrt ! Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -112,6 +114,9 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
        !
        do id = 1, nsluv
           cbuvrt(:,id) = tparget(:,parget_offset+id)
+       enddo
+       do id = 1, nsrc
+          qsrcrt(:,id) = tparget(:,parget_offset+nsluv+id)
        enddo
     endif
     call timer_stop(timer_wait, gdp)

@@ -80,7 +80,7 @@ module SyncRtcFlow
   ! Locations for sending data
   character*20, dimension(2) :: Locbar
 !
-  data Locbar / 'Status', 'Height' /
+  data Locbar / 'Status', 'Value' /
 !
 ! Variables used by Delft3D-FLOW side
 !
@@ -417,7 +417,7 @@ end subroutine syncflowrtc_init
 !
 !
 !==============================================================================
-subroutine syncflowrtc_get(rtcstatus, cbuvrt, nsluv)
+subroutine syncflowrtc_get(rtcstatus, tparget, tnparget)
     use precision
 ! Routine to get RTC status and the barrier data from RTC.
 ! If the flow status is < 0, then RTC will quit.
@@ -425,12 +425,9 @@ subroutine syncflowrtc_get(rtcstatus, cbuvrt, nsluv)
 !
 ! Global variables
 !
-    integer                        ,intent (in)  :: nsluv     ! Number of U- and V-Barriers
-    integer                                      :: rtcstatus ! Status sent from RTC, < 0 tells Flow to quit.
-    real(fp), dimension(2, nsluv), intent (out)  :: cbuvrt    ! Run time barrier data:
-                                                              ! CBUVRT(1,*) = Return status from RTC
-                                                              !             > 0 : OK
-                                                              !             < 0 : Not OK/Found
+    integer                           ,intent (in)  :: tnparget  ! Number of parameters to get values for
+    integer                                         :: rtcstatus ! Status sent from RTC, < 0 tells Flow to quit.
+    real(fp), dimension(2, tnparget), intent (out)  :: tparget   ! Parameter values
 !
 ! Local variables
 !
@@ -450,9 +447,9 @@ subroutine syncflowrtc_get(rtcstatus, cbuvrt, nsluv)
     ! Flow will quit on bad status
     if (rtcstatus>=0) then
        if (diopltget(datartctoflow, DataValuesIn)) then
-          do i = 1, nsluv
-             cbuvrt(1, i) = real(DataValuesIn(i, 1),fp)
-             cbuvrt(2, i) = real(DataValuesIn(i, 2),fp)
+          do i = 1, tnparget
+             tparget(1, i) = real(DataValuesIn(i, 1),fp)
+             tparget(2, i) = real(DataValuesIn(i, 2),fp)
           enddo
        else
           ! No valid data received

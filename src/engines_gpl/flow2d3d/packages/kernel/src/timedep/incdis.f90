@@ -7,7 +7,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                 & disch0    ,disch1    ,rint      ,rint0     ,rint1     , &
                 & umdis     ,umdis0    ,umdis1    ,vmdis     ,vmdis0    , &
                 & vmdis1    ,bubble    ,r0        ,thick     ,relthk    , &
-                & dzs0      ,dps       ,s0        ,gdp       )
+                & dzs0      ,dps       ,s0        ,qsrcrt    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -69,6 +69,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
     real(fp), dimension(:), pointer :: capacity
     real(fp)              , pointer :: eps
     real(fp)              , pointer :: scalef
+    integer               , pointer :: rtcmod
     logical               , pointer :: zmodel
     logical , dimension(:), pointer :: flbub
 !
@@ -113,6 +114,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
     real(fp)    , dimension(nsrcd)                                            :: disch  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: disch0 !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: disch1 !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(2,nsrcd)                                          :: qsrcrt !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: umdis  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: umdis0 !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: umdis1 !  Description and declaration in esm_alloc_real.f90
@@ -164,6 +166,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
     scalef     => gdp%gdupddis%scalef
     zmodel     => gdp%gdprocs%zmodel
     flbub      => gdp%gdbubble%flbub
+    rtcmod     => gdp%gdrtc%rtcmod
     !
     timscl    = 1.0
     ddb       = gdp%d%ddbound
@@ -279,6 +282,13 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                 rint(l, isrc) = (1.0_fp-alpha)*rint0(l, isrc) + alpha*rint1(l, isrc)
             enddo
        endif
+       !
+       ! Overrule discharge if it has been set by RTC
+       !
+       if (btest(rtcmod,dataFromRTCToFLOW) .and. qsrcrt(1,isrc)>0) then
+           disch(isrc) = qsrcrt(2,isrc)
+       endif
+       !
        if (mnksrc(7,isrc) == 6) then
           !
           ! Q-type power station:

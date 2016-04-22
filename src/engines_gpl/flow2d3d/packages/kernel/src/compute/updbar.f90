@@ -120,7 +120,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
 !
     zmodel     => gdp%gdprocs%zmodel
     rtcmod     => gdp%gdrtc%rtcmod
-    lundia       => gdp%gdinout%lundia
+    lundia     => gdp%gdinout%lundia
     !
     do ibar = 1, nsluv
        !
@@ -142,7 +142,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
        if (btest(rtcmod,dataFromRTCToFLOW)) then
           !
           ! barriers are updated by RTC
-       !
+          !
           if (comparereal(cbuvrt(1,ibar),0.0_fp) == -1) then
              write(errmsg,'(a,i0)') 'No valid value obtained from RTC for barrier number ', ibar
              call prterr(lundia, 'P004', trim(errmsg))

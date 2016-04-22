@@ -192,6 +192,7 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: precip
     integer(pntrsize), pointer :: procbc
     integer(pntrsize), pointer :: pship
+    integer(pntrsize), pointer :: qsrcrt
     integer(pntrsize), pointer :: qtfrac
     integer(pntrsize), pointer :: qtfrct
     integer(pntrsize), pointer :: qtfrt2
@@ -665,6 +666,7 @@ subroutine gtptrs(gdp)
     precip     => gdp%gdr_i_ch%precip
     procbc     => gdp%gdr_i_ch%procbc
     pship      => gdp%gdr_i_ch%pship
+    qsrcrt     => gdp%gdr_i_ch%qsrcrt
     qtfrac     => gdp%gdr_i_ch%qtfrac
     qtfrct     => gdp%gdr_i_ch%qtfrct
     qtfrt2     => gdp%gdr_i_ch%qtfrt2
@@ -1215,6 +1217,7 @@ subroutine gtptrs(gdp)
     precip     = gtrpnt('precip', gdp)
     procbc     = gtrpnt('procbc', gdp)
     pship      = gtrpnt('pship' , gdp)
+    qsrcrt     = gtrpnt('qsrcrt', gdp)
     qtfrac     = gtrpnt('qtfrac', gdp)
     qtfrct     = gtrpnt('qtfrct', gdp)
     qtfrt2     = gtrpnt('qtfrt2', gdp)

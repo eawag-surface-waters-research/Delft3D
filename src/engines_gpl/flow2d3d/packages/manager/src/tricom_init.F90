@@ -1580,7 +1580,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! Initialize RTC-communication
     !
-    call rtc_comm_init(error     ,ch(nambar),ch(namcon),gdp)
+    call rtc_comm_init(error     ,ch(nambar),ch(namcon),ch(namsrc),gdp)
     if (error) goto 9998
     call rtc_comm_put (i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                      & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
