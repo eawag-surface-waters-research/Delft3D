@@ -3335,6 +3335,7 @@ module m_ec_provider
    end function items_from_bc_quantities
 
    function ecProviderNetcdfReadvars(fileReaderPtr) result(success)
+   use m_alloc
    implicit none
    type (tECFileReader), pointer    ::    fileReaderPtr
    logical                          ::    success
@@ -3350,16 +3351,20 @@ module m_ec_provider
    end if
 
    ierror = nf90_inquire(fileReaderPtr%fileHandle,nDimensions=ndim)
-   allocate(fileReaderPtr%dim_varids(ndim))
-   allocate(fileReaderPtr%dim_length(ndim))
-   fileReaderPtr%dim_varids = -1
-   fileReaderPtr%dim_length = -1
+   if (ndim>0) then 
+      allocate(fileReaderPtr%dim_length(ndim))
+      allocate(fileReaderPtr%dim_varids(ndim))
+      fileReaderPtr%dim_varids = -1
+      fileReaderPtr%dim_length = -1
+   end if
 
    ! Collects names and standard names of variables in the netcdf as well as the varids associated with dimids 
    ! The latter is used later to guess coordinates belonging to a variable
    if (nvar>0) then 
-      allocate(fileReaderPtr%standard_names(nvar))          ! Note: one of these may be obsolete (if we only check standard names)
-      allocate(fileReaderPtr%variable_names(nvar))
+!     allocate(fileReaderPtr%standard_names(nvar))          ! Note: one of these may be obsolete (if we only check standard names)
+!     allocate(fileReaderPtr%variable_names(nvar))
+      call realloc(fileReaderPtr%standard_names,nvar)       ! Note: one of these may be obsolete (if we only check standard names)
+      call realloc(fileReaderPtr%variable_names,nvar)
       fileReaderPtr%standard_names = ''
       fileReaderPtr%variable_names = ''
       do ivar = 1,nvar 
@@ -3371,7 +3376,7 @@ module m_ec_provider
              dim_name=''
              name_len=0
              ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,dimid(1),name=dim_name,len=dim_size)
-             if (dim_name==fileReaderPtr%variable_names(ivar)) then
+             if (trim(dim_name)==trim(fileReaderPtr%variable_names(ivar))) then
                 fileReaderPtr%dim_varids(dimid(1)) = ivar      ! connects a varid to a dimid 
                 fileReaderPtr%dim_length(dimid(1)) = dim_size  ! sets dimension extent
              end if

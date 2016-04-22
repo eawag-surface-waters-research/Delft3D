@@ -206,7 +206,7 @@ module m_ec_typedefs
    type tEcElementSet
       integer                             :: id             !< unique ElementSet number, set by ecInstanceCreateElementSet
       integer                             :: ofType         !< contained geometry type, using the elmSetType enumeration
-      character(len=maxNameLen)           :: name           !< Optional name for this elementset = locationname
+      character(len=maxNameLen)           :: name = ' '     !< Optional name for this elementset = locationname
       ! Data variables for ElementSet derived types. Usage depends on tEcElementSet%ofType.
       real(hp), dimension(:), pointer     :: x    => null() !< array of x-coordinates
       real(hp), dimension(:), pointer     :: y    => null() !< array of y-coordinates
@@ -277,8 +277,10 @@ module m_ec_typedefs
       logical                                             :: end_of_data             !< End of data reached?
       character(len=100), dimension(:), allocatable :: standard_names                ! Standard names by varid in a netcdf-file 
       character(len=100), dimension(:), allocatable :: variable_names                ! Variable names by varid in a netcdf file 
-      integer, dimension(:), allocatable            :: dim_varids                    ! For each dimension in NetCDF: id of the associated variable                               
-      integer, dimension(:), allocatable            :: dim_length                    ! For each dimension in NetCDF: length
+!     integer, dimension(:), allocatable            :: dim_varids                    ! For each dimension in NetCDF: id of the associated variable                               
+!     integer, dimension(:), allocatable            :: dim_length                    ! For each dimension in NetCDF: length
+      integer, dimension(:), pointer                :: dim_varids => null()          ! For each dimension in NetCDF: id of the associated variable                               
+      integer, dimension(:), pointer                :: dim_length => null()          ! For each dimension in NetCDF: length
    end type tEcFileReader
 
    type tEcFileReaderPtr
@@ -311,7 +313,7 @@ module m_ec_typedefs
    !> Datatype containing metadata which describe an ecItem's data.
    type tEcQuantity
       integer                   :: id                       !< unique Quantity number, set by ecInstanceCreateQuantity
-      character(len=maxNameLen) :: name                     !< description of the quantity
+      character(len=maxNameLen) :: name = ' '               !< description of the quantity
       character(len=maxNameLen) :: units                    !< physical units of the quantity
       integer                   :: vectorMax = 1            !< number of dimensions (vector data) or 1 in case of scalar
       integer                   :: zInterpolationType       !< Vertical interpolation type ! TODO: Add initialization in the constructor. (4748)
