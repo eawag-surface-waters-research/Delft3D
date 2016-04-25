@@ -48,8 +48,6 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    type(bedcomp_data) :: gdmorlyr
 !
 ! Global variables
 !
@@ -87,6 +85,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     real(fp)         , dimension(:,:)   , pointer :: svfrac
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
+    type (moroutputtype)                , pointer :: moroutput
     !
     integer                                       :: ierror      ! Local error flag
     integer                                       :: istat
@@ -113,6 +112,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !
     cdryb               => gdp%gdsedpar%cdryb
     rhosol              => gdp%gdsedpar%rhosol
+    moroutput           => gdp%gdmorpar%moroutput
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iunderlyr',iunderlyr)
     if (istat/=0) then
@@ -160,10 +160,16 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        !
        ! Define elements
        !
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MSED', ' ', IO_REAL4     , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Mass of sediment in layer', unit='kg/m2', acl='z')
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'LYRFRAC', ' ', IO_REAL4  , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Volume fraction of sediment in layer', acl='z')
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DP_BEDLYR', ' ', IO_REAL4  , 3, dimids=(/iddim_n, iddim_m, iddim_nlyrp1/), longname='Vertical position of sediment layer interface', unit='m', attribs=(/idatt_z,idatt_down/), acl='z')
-       if (iporos>0) then
+       if (moroutput%msed) then
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MSED', ' ', IO_REAL4     , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Mass of sediment in layer', unit='kg/m2', acl='z')
+       endif
+       if (moroutput%lyrfrac) then
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'LYRFRAC', ' ', IO_REAL4  , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Volume fraction of sediment in layer', acl='z')
+       endif
+       if (moroutput%dpbedlyr) then
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DP_BEDLYR', ' ', IO_REAL4  , 3, dimids=(/iddim_n, iddim_m, iddim_nlyrp1/), longname='Vertical position of sediment layer interface', unit='m', attribs=(/idatt_z,idatt_down/), acl='z')
+       endif
+       if (iporos>0 .and. moroutput%poros) then
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'EPSPOR', ' ', IO_REAL4, 3, dimids=(/iddim_n, iddim_m, iddim_nlyr/), longname='Porosity coefficient', acl='z')
        endif
     case (REQUESTTYPE_WRITE)
@@ -172,110 +178,116 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        !
        ! element 'MSED'
        !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot) )
-       select case (iunderlyr)
-       case (1)
-          do l = 1, lsedtot
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n, m, 1, l) = real(bodsed(l, nm),fp)
-                enddo
-             enddo
-          enddo
-       case (2)
-          do l = 1, lsedtot
-             do k = 1, nlyr
+       if (moroutput%msed) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot) )
+          select case (iunderlyr)
+          case (1)
+             do l = 1, lsedtot
                 do m = 1, mmax
                    do n = 1, nmaxus
                       call n_and_m_to_nm(n, m, nm, gdp)
-                      rbuff4(n, m, k, l) = msed(l, k, nm)
+                      rbuff4(n, m, 1, l) = real(bodsed(l, nm),fp)
                    enddo
                 enddo
              enddo
-          enddo
-       end select
-       call wrtarray_nmll(fds, filename, filetype, grpnam, celidt, &
-                     & nf, nl, mf, ml, iarrc, gdp, nlyr, lsedtot, &
-                     & ierror, lundia, rbuff4, 'MSED')
-       deallocate(rbuff4)
-       if (ierror /= 0) goto 9999
+          case (2)
+             do l = 1, lsedtot
+                do k = 1, nlyr
+                   do m = 1, mmax
+                      do n = 1, nmaxus
+                         call n_and_m_to_nm(n, m, nm, gdp)
+                         rbuff4(n, m, k, l) = msed(l, k, nm)
+                      enddo
+                   enddo
+                enddo
+             enddo
+          end select
+          call wrtarray_nmll(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, nlyr, lsedtot, &
+                        & ierror, lundia, rbuff4, 'MSED')
+          deallocate(rbuff4)
+          if (ierror /= 0) goto 9999
+       endif
        !
        ! element 'LYRFRAC'
        !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot) )
-       select case (iunderlyr)
-       case (1)
-          do l = 1, lsedtot
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   call n_and_m_to_nm(n, m, nm, gdp)
-                   if (dpsed(nm)>0.0_fp) then
-                        rbuff4(n, m, 1, l) = real(bodsed(l, nm),fp)/(cdryb(l)*dpsed(nm))
-                   else
-                        rbuff4(n, m, 1, l) = 0.0_fp
-                   endif
-                enddo
-             enddo
-          enddo
-       case (2)
-          do l = 1, lsedtot
-             if (iporos==0) then
-                dens = cdryb(l)
-             else
-                dens = rhosol(l)
-             endif
-             do k = 1, nlyr
+       if (moroutput%lyrfrac) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot) )
+          select case (iunderlyr)
+          case (1)
+             do l = 1, lsedtot
                 do m = 1, mmax
                    do n = 1, nmaxus
                       call n_and_m_to_nm(n, m, nm, gdp)
-                      if (thlyr(k,nm)>0.0_fp) then
-                           rbuff4(n, m, k, l) = msed(l, k, nm)/(dens*svfrac(k, nm)*thlyr(k, nm))
+                      if (dpsed(nm)>0.0_fp) then
+                           rbuff4(n, m, 1, l) = real(bodsed(l, nm),fp)/(cdryb(l)*dpsed(nm))
                       else
-                           rbuff4(n, m, k, l) = 0.0_fp
+                           rbuff4(n, m, 1, l) = 0.0_fp
                       endif
                    enddo
                 enddo
              enddo
-          enddo
-       end select
-       call wrtarray_nmll(fds, filename, filetype, grpnam, celidt, &
-                     & nf, nl, mf, ml, iarrc, gdp, nlyr, lsedtot, &
-                     & ierror, lundia, rbuff4, 'LYRFRAC')
-       deallocate(rbuff4)
-       if (ierror /= 0) goto 9999
+          case (2)
+             do l = 1, lsedtot
+                if (iporos==0) then
+                   dens = cdryb(l)
+                else
+                   dens = rhosol(l)
+                endif
+                do k = 1, nlyr
+                   do m = 1, mmax
+                      do n = 1, nmaxus
+                         call n_and_m_to_nm(n, m, nm, gdp)
+                         if (thlyr(k,nm)>0.0_fp) then
+                              rbuff4(n, m, k, l) = msed(l, k, nm)/(dens*svfrac(k, nm)*thlyr(k, nm))
+                         else
+                              rbuff4(n, m, k, l) = 0.0_fp
+                         endif
+                      enddo
+                   enddo
+                enddo
+             enddo
+          end select
+          call wrtarray_nmll(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, nlyr, lsedtot, &
+                        & ierror, lundia, rbuff4, 'LYRFRAC')
+          deallocate(rbuff4)
+          if (ierror /= 0) goto 9999
+       endif
        !
        ! element 'DP_BEDLYR'
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr+1) )
-       rbuff3(:, :, 1) = 0.0_fp
-       select case (iunderlyr)
-       case (1)
-          do m = 1, mmax
-             do n = 1, nmaxus
-                call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff3(n, m, 2) = dpsed(nm)
-             enddo
-          enddo
-       case (2)
-          do k = 1, nlyr
+       if (moroutput%dpbedlyr) then
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr+1) )
+          rbuff3(:, :, 1) = 0.0_fp
+          select case (iunderlyr)
+          case (1)
              do m = 1, mmax
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff3(n, m, k+1) = rbuff3(n, m, k) + thlyr(k, nm)
+                   rbuff3(n, m, 2) = dpsed(nm)
                 enddo
              enddo
-          enddo
-       end select
-       call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
-                     & nf, nl, mf, ml, iarrc, gdp, nlyr+1, &
-                     & ierror, lundia, rbuff3, 'DP_BEDLYR')
-       deallocate(rbuff3)
-       if (ierror /= 0) goto 9999
+          case (2)
+             do k = 1, nlyr
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      call n_and_m_to_nm(n, m, nm, gdp)
+                      rbuff3(n, m, k+1) = rbuff3(n, m, k) + thlyr(k, nm)
+                   enddo
+                enddo
+             enddo
+          end select
+          call wrtarray_nml(fds, filename, filetype, grpnam, celidt, &
+                        & nf, nl, mf, ml, iarrc, gdp, nlyr+1, &
+                        & ierror, lundia, rbuff3, 'DP_BEDLYR')
+          deallocate(rbuff3)
+          if (ierror /= 0) goto 9999
+       endif
        !
        ! element 'EPSPOR'
        !
-       if (iporos>0) then
+       if (iporos>0 .and. moroutput%poros) then
           allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr) )
           rbuff3(:, :, :) = -999.0_fp
           do k = 1, nlyr

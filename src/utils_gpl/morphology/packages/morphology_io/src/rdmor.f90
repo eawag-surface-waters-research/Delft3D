@@ -694,15 +694,20 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           error = .true.
           return
        endif
+       call prop_get_logical(mor_ptr, 'Output', 'BedTranspAtFlux'             , moroutput%sbuuvv)
+       call prop_get_logical(mor_ptr, 'Output', 'SuspTranspAtFlux'            , moroutput%ssuuvv)
        call prop_get_logical(mor_ptr, 'Output', 'BedTranspDueToCurrentsAtZeta', moroutput%sbcuv)
        call prop_get_logical(mor_ptr, 'Output', 'BedTranspDueToCurrentsAtFlux', moroutput%sbcuuvv)
        call prop_get_logical(mor_ptr, 'Output', 'BedTranspDueToWavesAtZeta'   , moroutput%sbwuv)
        call prop_get_logical(mor_ptr, 'Output', 'BedTranspDueToWavesAtFlux'   , moroutput%sbwuuvv)
        call prop_get_logical(mor_ptr, 'Output', 'SuspTranspDueToWavesAtZeta'  , moroutput%sswuv)
        call prop_get_logical(mor_ptr, 'Output', 'SuspTranspDueToWavesAtFlux'  , moroutput%sswuuvv)
+       call prop_get_logical(mor_ptr, 'Output', 'NearBedRefConcentration'     , moroutput%rca)
+       call prop_get_logical(mor_ptr, 'Output', 'EquilibriumConcentration'    , moroutput%rsedeq)
        call prop_get_logical(mor_ptr, 'Output', 'NearBedTranspCorrAtFlux'     , moroutput%suvcor)
        call prop_get_logical(mor_ptr, 'Output', 'SourceSinkTerms'             , moroutput%sourcesink)
        call prop_get_logical(mor_ptr, 'Output', 'ReferenceHeight'             , moroutput%aks)
+       call prop_get_logical(mor_ptr, 'Output', 'SettlingVelocity'            , moroutput%ws)
        !
        call prop_get_logical(mor_ptr, 'Output', 'Bedslope'                    , moroutput%dzduuvv)
        call prop_get_logical(mor_ptr, 'Output', 'Taurat'                      , moroutput%taurat)
@@ -715,6 +720,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'SandFrac'                    , moroutput%sandfrac)
        call prop_get_logical(mor_ptr, 'Output', 'FixFac'                      , moroutput%fixfac)
        call prop_get_logical(mor_ptr, 'Output', 'HidExp'                      , moroutput%hidexp)
+       !
+       call prop_get_logical(mor_ptr, 'Output', 'BedLayerSedimentMass'        , moroutput%msed)
+       call prop_get_logical(mor_ptr, 'Output', 'BedLayerVolumeFractions'     , moroutput%lyrfrac)
+       call prop_get_logical(mor_ptr, 'Output', 'BedLayerDepth'               , moroutput%dpbedlyr)
+       call prop_get_logical(mor_ptr, 'Output', 'BedLayerPorosity'            , moroutput%poros)
        !
        call prop_get_logical(mor_ptr, 'Output', 'AverageAtEachOutputTime'     , moroutput%cumavg)
        !

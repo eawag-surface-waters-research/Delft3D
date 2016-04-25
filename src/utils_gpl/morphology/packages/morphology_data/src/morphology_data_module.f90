@@ -174,17 +174,25 @@ type moroutputtype
     logical :: dg
     logical :: dgsd
     logical :: dm
+    logical :: dpbedlyr
     logical :: dzduuvv
     logical :: fixfac
     logical :: hidexp
     logical :: frac
+    logical :: lyrfrac
+    logical :: msed
     logical :: mudfrac
-    logical :: sandfrac
     logical :: percentiles
+    logical :: poros
+    logical :: rca
+    logical :: rsedeq
+    logical :: sandfrac
+    logical :: sbuuvv
     logical :: sbcuv
     logical :: sbcuuvv
     logical :: sbwuv
     logical :: sbwuuvv
+    logical :: ssuuvv
     logical :: sswuv
     logical :: sswuuvv
     logical :: suvcor
@@ -193,6 +201,7 @@ type moroutputtype
     logical :: umod
     logical :: ustar
     logical :: uuuvvv
+    logical :: ws
     logical :: zumod
 end type moroutputtype
 
@@ -1283,15 +1292,23 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%dg          = .false.
     morpar%moroutput%dgsd        = .false.
     morpar%moroutput%dm          = .false.
+    morpar%moroutput%dpbedlyr    = .true.
     morpar%moroutput%dzduuvv     = .false.
     morpar%moroutput%fixfac      = .false.
     morpar%moroutput%hidexp      = .false.
     morpar%moroutput%frac        = .false.
+    morpar%moroutput%lyrfrac     = .true.
+    morpar%moroutput%msed        = .true.
     morpar%moroutput%mudfrac     = .false.
-    morpar%moroutput%sandfrac    = .false.
     morpar%moroutput%percentiles = .false.
+    morpar%moroutput%poros       = .true.
+    morpar%moroutput%rca         = .true.
+    morpar%moroutput%rsedeq      = .true.
+    morpar%moroutput%sandfrac    = .false.
+    morpar%moroutput%sbuuvv      = .true.
     morpar%moroutput%sbcuv       = .false.
     morpar%moroutput%sbcuuvv     = .false.
+    morpar%moroutput%ssuuvv      = .true.
     morpar%moroutput%sbwuv       = .false.
     morpar%moroutput%sbwuuvv     = .false.
     morpar%moroutput%sswuv       = .false.
@@ -1302,6 +1319,7 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%umod        = .false.
     morpar%moroutput%ustar       = .false.
     morpar%moroutput%uuuvvv      = .false.
+    morpar%moroutput%ws          = .true.
     morpar%moroutput%zumod       = .false.
     !
     morpar%mornum%upwindbedload            = .true.
