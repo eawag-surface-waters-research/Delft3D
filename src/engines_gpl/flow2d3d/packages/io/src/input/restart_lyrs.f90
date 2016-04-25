@@ -54,6 +54,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                           , pointer :: lundia
     real(fp)        , dimension(:)    , pointer :: rhosol
 !
 ! Global variables
@@ -132,6 +133,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    lundia              => gdp%gdinout%lundia
     rhosol              => gdp%gdsedpar%rhosol
     mfg                 => gdp%gdparall%mfg
     mlg                 => gdp%gdparall%mlg
@@ -270,9 +272,33 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
             if (ierror/= 0) goto 50
         endif
     case (2)
-        ierror = getelt(fds , 'map-sed-series', 'DPSED', uindex, 1, &
-                 & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
-        if (ierror /= 0) goto 50
+        !
+        ! The DPSED value is not always consistent with the BODSED quantity, so don't
+        ! use it (otherwise this will trigger instantaneous consolidation/expansion at
+        ! the first time step, which causes a jump in the bed levels).
+        !
+        ! Without the layer thickness we have too little information for a simulation with
+        ! variable porosity; stop the simulation.
+        !
+        ! ierror = getelt(fds , 'map-sed-series', 'DPSED', uindex, 1, &
+        !               & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
+        ! if (ierror /= 0) goto 50
+        !
+        if (iporosity==0) then
+            do m = 1, mmaxgl
+                do n = 1, nmaxgl
+                    sedthick = 0.0_fp
+                    do l = 1,lsedtot
+                        sedthick = sedthick + real(rst_msed(n,m,1,l),fp)/cdryb(l)
+                    enddo
+                    rst_thlyr(n,m,1) = real(sedthick,sp)
+                enddo
+            enddo
+        else
+            call prterr(lundia,'P004','Variable porosity simulation cannot be restarted from a single layer run.')
+            ierror = 1
+            goto 50
+        endif
     end select
     !
     if (nlyr>=rst_nlyr) then

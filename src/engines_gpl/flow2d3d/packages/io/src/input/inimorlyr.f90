@@ -142,15 +142,6 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
               & mmax      ,nlyr      ,rst_bedcmp,svfrac    , &
               & iporosity ,iunderlyr ,bodsed    ,dpsed     , &
               & gdp       )
-       !
-       if (.not.rst_bedcmp) then
-          call restart_bodsed ( &
-                 & error     ,restid    ,i_restart ,bodsed    , &
-                 & lsedtot   ,nmaxus    ,mmax      ,rst_bedcmp, &
-                 & 'BODSED'  ,gdp       )
-          !
-          if (rst_bedcmp) call bedcomp_use_bodsed(gdp%gdmorlyr)
-       endif
     endif
     !
     ! Any parameters not obtained from restart file will be initialized using
