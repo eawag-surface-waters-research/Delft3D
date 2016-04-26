@@ -687,7 +687,7 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
         ! Discharge sources Time series 
         ! only if NSLUV > 0 and RTC-coupling for Barrier heights to FLOW 
         ! 
-        if (btest(rtcmod,dataFromRTCToFLOW) .and. nsluv>0) then
+        if (btest(rtcmod,dataFromRTCToFLOW) .and. nsluv+nsrc>0) then
            filnam = ' ' 
            ntimtm = 0 
            ! 
