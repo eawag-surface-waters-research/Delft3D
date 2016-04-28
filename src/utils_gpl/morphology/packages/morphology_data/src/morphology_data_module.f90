@@ -163,17 +163,30 @@ integer,parameter, public  :: FLUX_LIMITER_NONE   = 0
 integer,parameter, public  :: FLUX_LIMITER_MINMOD = 1
 integer,parameter, public  :: FLUX_LIMITER_MC     = 2
 
+integer,parameter, public  :: MOR_STAT_MIN = 1
+integer,parameter, public  :: MOR_STAT_MAX = 2
+integer,parameter, public  :: MOR_STAT_MEAN= 4
+integer,parameter, public  :: MOR_STAT_STD = 8
+
 ! collection of morphology output options
 !
 type moroutputtype
     integer :: transptype      ! 0 = mass
                                ! 1 = volume including pores
                                ! 2 = volume excluding pores
+    !
+    character(len=30), dimension(4) :: statqnt = (/"H1","UV","SBUV","SSUV"/)
+    character(len=30), dimension(4) :: statnam = (/"water depth","velocity","total bedload transport","total suspended transport"/)
+    character(len=30), dimension(4) :: statunt = (/"m","m/s","",""/)
+    integer, dimension(5,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
+    integer                         :: nstatqnt ! number of quantities for morphology statistics output
+    !
     logical :: aks
     logical :: cumavg
     logical :: dg
     logical :: dgsd
     logical :: dm
+    logical :: dmsedcum
     logical :: dpbedlyr
     logical :: dzduuvv
     logical :: fixfac
@@ -610,6 +623,8 @@ type sedtra_type
     real(fp)         , dimension(:,:)    , pointer :: srcmax   !(nc1:nc2,lsedtot)
     real(fp)         , dimension(:,:)    , pointer :: fixfac   !(nc1:nc2,lsedtot)
     real(fp)         , dimension(:,:)    , pointer :: taurat   !(nc1:nc2,lsedtot)
+    !
+    real(fp)         , dimension(:,:)    , pointer :: statqnt  !(nc1:nc2,nstatistics)
 end type sedtra_type
 
 contains
@@ -706,12 +721,14 @@ subroutine nullsedtra(sedtra)
     nullify(sedtra%srcmax)
     nullify(sedtra%fixfac)
     nullify(sedtra%taurat)
+    !
+    nullify(sedtra%statqnt)
 end subroutine nullsedtra
 !
 !
 !
 !============================================================================== 
-subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, iopt)
+subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, nstatqnt, iopt)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Allocate the arrays of sedtra_type data structure.
@@ -724,6 +741,7 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, iop
     ! Function/routine arguments
     !
     type (sedtra_type)                                       :: sedtra
+    type (moroutputtype)                                     :: moroutput
     integer                                    , intent(in)  :: kmax
     integer                                    , intent(in)  :: lsed
     integer                                    , intent(in)  :: lsedtot
@@ -732,10 +750,12 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, iop
     integer                                    , intent(in)  :: nu1
     integer                                    , intent(in)  :: nu2
     integer                                    , intent(in)  :: nxx
+    integer                                    , intent(in)  :: nstatqnt
     integer                         , optional , intent(in)  :: iopt
     !
     ! Local variables
     !
+    integer                                                  :: iq
     integer                                                  :: istat
     integer                                                  :: ioptloc
 !
@@ -819,6 +839,8 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, iop
     if (istat==0) allocate(sedtra%fixfac  (nc1:nc2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%taurat  (nc1:nc2,lsedtot), STAT = istat)
     !
+    if (istat==0) allocate(sedtra%statqnt (nc1:nc2,nstatqnt), STAT = istat)
+    !
     sedtra%kfsed    = 0
     sedtra%kmxsed   = 0
     !
@@ -889,6 +911,18 @@ subroutine allocsedtra(sedtra, kmax, lsed, lsedtot, nc1, nc2, nu1, nu2, nxx, iop
     sedtra%srcmax   = 0.0_fp
     sedtra%fixfac   = 1.0_fp
     sedtra%taurat   = 0.0_fp
+    !
+    sedtra%statqnt  = 0.0_fp
+    do iq = 1,4
+        ! min
+        if (moroutput%statflg(2,iq)>0) then
+            sedtra%statqnt(:,moroutput%statflg(2,iq)) = 1e10
+        endif
+        ! max
+        if (moroutput%statflg(3,iq)>0) then
+            sedtra%statqnt(:,moroutput%statflg(3,iq)) = -1e10
+        endif
+    enddo
 end subroutine allocsedtra
 !
 !
@@ -984,6 +1018,8 @@ subroutine clrsedtra(istat, sedtra)
     if (associated(sedtra%srcmax  ))   deallocate(sedtra%srcmax  , STAT = istat)
     if (associated(sedtra%fixfac  ))   deallocate(sedtra%fixfac  , STAT = istat)
     if (associated(sedtra%taurat  ))   deallocate(sedtra%taurat  , STAT = istat)
+    !
+    if (associated(sedtra%statqnt ))   deallocate(sedtra%statqnt , STAT = istat)
 end subroutine clrsedtra
 !
 !
@@ -1285,42 +1321,46 @@ subroutine nullmorpar(morpar)
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
     !
-    morpar%moroutput%transptype  = 2
+    morpar%moroutput%transptype   = 2
     !
-    morpar%moroutput%aks         = .false.
-    morpar%moroutput%cumavg      = .false.
-    morpar%moroutput%dg          = .false.
-    morpar%moroutput%dgsd        = .false.
-    morpar%moroutput%dm          = .false.
-    morpar%moroutput%dpbedlyr    = .true.
-    morpar%moroutput%dzduuvv     = .false.
-    morpar%moroutput%fixfac      = .false.
-    morpar%moroutput%hidexp      = .false.
-    morpar%moroutput%frac        = .false.
-    morpar%moroutput%lyrfrac     = .true.
-    morpar%moroutput%msed        = .true.
-    morpar%moroutput%mudfrac     = .false.
-    morpar%moroutput%percentiles = .false.
-    morpar%moroutput%poros       = .true.
-    morpar%moroutput%rca         = .true.
-    morpar%moroutput%rsedeq      = .true.
-    morpar%moroutput%sandfrac    = .false.
-    morpar%moroutput%sbuuvv      = .true.
-    morpar%moroutput%sbcuv       = .false.
-    morpar%moroutput%sbcuuvv     = .false.
-    morpar%moroutput%ssuuvv      = .true.
-    morpar%moroutput%sbwuv       = .false.
-    morpar%moroutput%sbwuuvv     = .false.
-    morpar%moroutput%sswuv       = .false.
-    morpar%moroutput%sswuuvv     = .false.
-    morpar%moroutput%suvcor      = .false.
-    morpar%moroutput%sourcesink  = .false.
-    morpar%moroutput%taurat      = .false.
-    morpar%moroutput%umod        = .false.
-    morpar%moroutput%ustar       = .false.
-    morpar%moroutput%uuuvvv      = .false.
-    morpar%moroutput%ws          = .true.
-    morpar%moroutput%zumod       = .false.
+    morpar%moroutput%statflg(:,:) = 0
+    morpar%moroutput%nstatqnt     = 0
+    !
+    morpar%moroutput%aks          = .false.
+    morpar%moroutput%cumavg       = .false.
+    morpar%moroutput%dg           = .false.
+    morpar%moroutput%dgsd         = .false.
+    morpar%moroutput%dm           = .false.
+    morpar%moroutput%dmsedcum     = .false.
+    morpar%moroutput%dpbedlyr     = .true.
+    morpar%moroutput%dzduuvv      = .false.
+    morpar%moroutput%fixfac       = .false.
+    morpar%moroutput%hidexp       = .false.
+    morpar%moroutput%frac         = .false.
+    morpar%moroutput%lyrfrac      = .true.
+    morpar%moroutput%msed         = .true.
+    morpar%moroutput%mudfrac      = .false.
+    morpar%moroutput%percentiles  = .false.
+    morpar%moroutput%poros        = .true.
+    morpar%moroutput%rca          = .true.
+    morpar%moroutput%rsedeq       = .true.
+    morpar%moroutput%sandfrac     = .false.
+    morpar%moroutput%sbuuvv       = .true.
+    morpar%moroutput%sbcuv        = .false.
+    morpar%moroutput%sbcuuvv      = .false.
+    morpar%moroutput%ssuuvv       = .true.
+    morpar%moroutput%sbwuv        = .false.
+    morpar%moroutput%sbwuuvv      = .false.
+    morpar%moroutput%sswuv        = .false.
+    morpar%moroutput%sswuuvv      = .false.
+    morpar%moroutput%suvcor       = .false.
+    morpar%moroutput%sourcesink   = .false.
+    morpar%moroutput%taurat       = .false.
+    morpar%moroutput%umod         = .false.
+    morpar%moroutput%ustar        = .false.
+    morpar%moroutput%uuuvvv       = .false.
+    morpar%moroutput%ws           = .true.
+    morpar%moroutput%zumod        = .false.
     !
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.

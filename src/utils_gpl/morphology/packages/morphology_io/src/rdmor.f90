@@ -164,6 +164,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                                                           :: i
     integer                                                           :: ilist
     integer                                                           :: ilun     ! Unit number for attribute file
+    integer                                                           :: iqnt
     integer                                                           :: istat
     integer                                                           :: j
     integer                                                           :: jj
@@ -174,6 +175,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                                                           :: nxxuser
     integer                                                           :: version
     integer                    , external                             :: newunit
+    integer                    , dimension(5)                         :: stat_flags
     integer                    , dimension(:) , allocatable           :: itype
     integer                    , dimension(:) , allocatable           :: ifield
     integer                    , dimension(:) , allocatable           :: lenchr
@@ -721,12 +723,57 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'FixFac'                      , moroutput%fixfac)
        call prop_get_logical(mor_ptr, 'Output', 'HidExp'                      , moroutput%hidexp)
        !
+       call prop_get_logical(mor_ptr, 'Output', 'CumNetSedimentationFlux'     , moroutput%dmsedcum)
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerSedimentMass'        , moroutput%msed)
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerVolumeFractions'     , moroutput%lyrfrac)
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerDepth'               , moroutput%dpbedlyr)
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerPorosity'            , moroutput%poros)
        !
        call prop_get_logical(mor_ptr, 'Output', 'AverageAtEachOutputTime'     , moroutput%cumavg)
+       i = 1+lsedtot ! index 1           used internally for weights
+                     ! index 2,lsedtot+1 used for CumNetSedimentationFlux
+       do iqnt = 1, 4
+           string = ' '
+           select case (iqnt)
+           case (1)
+               call prop_get_string (mor_ptr, 'Output', 'StatWaterDepth'             , string)
+           case (2)
+               call prop_get_string (mor_ptr, 'Output', 'StatVelocity'               , string)
+           case (3)
+               call prop_get_string (mor_ptr, 'Output', 'StatBedLoad'                , string)
+           case (4)
+               call prop_get_string (mor_ptr, 'Output', 'StatSuspLoad'               , string)
+           endselect
+           !
+           stat_flags(:) = 0
+           call str_lower(string)
+           if (index(string,'min') > 0) then
+               stat_flags(1) = stat_flags(1) + MOR_STAT_MIN
+               i = i+1
+               stat_flags(2) = i
+           endif
+           if (index(string,'max') > 0) then
+               stat_flags(1) = stat_flags(1) + MOR_STAT_MAX
+               i = i+1
+               stat_flags(3) = i
+           endif
+           if (index(string,'mean') > 0) then
+               stat_flags(1) = stat_flags(1) + MOR_STAT_MEAN
+               i = i+1
+               stat_flags(4) = i
+           endif
+           if (index(string,'std') > 0) then
+               stat_flags(1) = stat_flags(1) + MOR_STAT_STD
+               if (.not.btest(stat_flags(1),MOR_STAT_MEAN)) then
+                   i = i+1
+                   stat_flags(4) = i
+               endif
+               i = i+1
+               stat_flags(5) = i
+           endif
+           moroutput%statflg(:,iqnt) = stat_flags
+       enddo
+       moroutput%nstatqnt = i
        !
        ! Sediment percentiles
        ! Requested by the user via the .mor attribute file

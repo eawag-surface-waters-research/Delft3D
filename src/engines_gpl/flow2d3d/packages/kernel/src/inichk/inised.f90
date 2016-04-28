@@ -92,8 +92,9 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                      & gdp%gdsedpar%sedd50fld,nmlb     ,nmub      )
     endif
     !
-    call allocsedtra(gdp%gderosed, gdp%d%kmax, lsed, lsedtot, &
-                   & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx, CODE_DELFT3D)
+    call allocsedtra(gdp%gderosed, gdp%gdmorpar%moroutput, gdp%d%kmax, lsed, lsedtot, &
+                   & gdp%d%nmlb, gdp%d%nmub, gdp%d%nmlb, gdp%d%nmub, nxx, &
+                   & gdp%gdmorpar%moroutput%nstatqnt, CODE_DELFT3D)
     !
     ! Initialise morphology layers
     !

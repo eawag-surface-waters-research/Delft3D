@@ -376,7 +376,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'HIDEXP', ' ', IO_REAL4   , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Hiding and exposure factor', acl='z')
        endif
        !
-       ! Add mor fields  ! this is the same for nefis and netcdf... being moved out of the if-statement
+       ! Add mor fields
        !
        if (lsedtot > 0) then
           call wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
@@ -392,6 +392,15 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                       & REQUESTTYPE_DEFINE   ,fds       ,grpnam    , &
                       & filename  ,gdp       ,filetype  , &
                       & mf        ,ml        ,nf        ,nl        ,iarrc     )
+       endif
+       !
+       ! Add statistics fields  
+       !
+       if (lsed > 0) then
+          call wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                     & REQUESTTYPE_DEFINE   ,fds       ,grpnam    , &
+                     & filename  ,gdp       ,filetype  , &
+                     & mf        ,ml        ,nf        ,nl        ,iarrc     )
        endif
     case (REQUESTTYPE_WRITE)
        !
@@ -1203,6 +1212,15 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                       & filename  ,gdp       ,filetype  , &
                       & mf        ,ml        ,nf        ,nl        ,iarrc     )
           if (error) goto 9999
+       endif
+       !
+       ! Add statistics fields  
+       !
+       if (lsed > 0) then
+          call wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
+                     & REQUESTTYPE_WRITE   ,fds       ,grpnam    , &
+                     & filename  ,gdp       ,filetype  , &
+                     & mf        ,ml        ,nf        ,nl        ,iarrc     )
        endif
        !
 9999   continue

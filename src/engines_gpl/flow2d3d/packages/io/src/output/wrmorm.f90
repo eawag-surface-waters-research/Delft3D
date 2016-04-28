@@ -176,6 +176,8 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        !
        ! Write data to file
        !
+       ierror = 0
+       !
        ! element 'MSED'
        !
        if (moroutput%msed) then

@@ -214,15 +214,16 @@
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\compute_sediment\dwnvel.f90"/>
 		<File RelativePath="src\compute_sediment\erosed.f90"/>
+		<File RelativePath="src\compute_sediment\morstatistics.f90"/>
 		<File RelativePath="src\compute_sediment\red_soursin.f90"/>
 		<File RelativePath="src\compute_sediment\shearx.f90"/>
 		<File RelativePath="src\compute_sediment\upbdps.f90"/>
 		<File RelativePath="src\compute_sediment\updwaqflxsed.f90"/>
 		<File RelativePath="src\compute_sediment\upwbed.f90"/>
-		<File RelativePath=".\src\compute_sediment\z_bott3d.f90"/>
-		<File RelativePath=".\src\compute_sediment\z_dwnvel.f90"/>
-		<File RelativePath=".\src\compute_sediment\z_erosed.f90"/>
-		<File RelativePath=".\src\compute_sediment\z_red_soursin.f90"/></Filter>
+		<File RelativePath="src\compute_sediment\z_bott3d.f90"/>
+		<File RelativePath="src\compute_sediment\z_dwnvel.f90"/>
+		<File RelativePath="src\compute_sediment\z_erosed.f90"/>
+		<File RelativePath="src\compute_sediment\z_red_soursin.f90"/></Filter>
 		<Filter Name="dd">
 		<File RelativePath="src\dd\caldpu_dd.f90"/>
 		<File RelativePath="src\dd\chkdry_dd.f90"/>
@@ -297,7 +298,7 @@
 		<File RelativePath="src\general\vermdf.f90"/>
 		<File RelativePath="src\general\wrline.f90"/>
 		<File RelativePath="src\general\z_ainpro.f90"/>
-		<File RelativePath=".\src\general\z_taubotmodifylayers.f90"/></Filter>
+		<File RelativePath="src\general\z_taubotmodifylayers.f90"/></Filter>
 		<Filter Name="inichk">
 		<File RelativePath="src\inichk\allocadv2d.f90"/>
 		<File RelativePath="src\inichk\caldps.f90"/>
@@ -427,10 +428,10 @@
 		<File RelativePath="src\timedep\incbc.f90"/>
 		<File RelativePath="src\timedep\incbcc.f90"/>
 		<File RelativePath="src\timedep\incdis.f90"/>
-		<File RelativePath=".\src\timedep\inceva.f90"/>
+		<File RelativePath="src\timedep\inceva.f90"/>
 		<File RelativePath="src\timedep\incmeteo.f90"/>
 		<File RelativePath="src\timedep\incrbc.f90"/>
-		<File RelativePath=".\src\timedep\incsdu.f90"/>
+		<File RelativePath="src\timedep\incsdu.f90"/>
 		<File RelativePath="src\timedep\inctem.f90"/>
 		<File RelativePath="src\timedep\incwav.f90"/>
 		<File RelativePath="src\timedep\rtc_comm_get.f90"/>

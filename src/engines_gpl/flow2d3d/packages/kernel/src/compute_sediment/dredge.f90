@@ -40,6 +40,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     use bedcomposition_module
     use m_alloc
     use dfparall, only: parll, inode, nproc
+    use morstatistics, only: morstats
     !
     use globaldata
     !
@@ -1708,6 +1709,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     !
     if (cmpupd) then
        allocate(dz_dummy(gdp%d%nmlb:gdp%d%nmub), stat=istat)
+       call morstats(gdp, dbodsd, gdp%d%nmlb, gdp%d%nmub, lsedtot)
        if (updmorlyr(gdp%gdmorlyr, dbodsd, dz_dummy, gdp%messages) /= 0) then
           call writemessages(gdp%messages, lundia)
           call d3stop(1, gdp)

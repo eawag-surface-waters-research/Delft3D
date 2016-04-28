@@ -792,6 +792,7 @@ src/engines_gpl/flow2d3d/packages/io/src/output/wrkent.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrm_main.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrmfluff.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrmorm.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/output/wrmorst.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrparm.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrplot.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrrolm.f90 -text
@@ -1030,6 +1031,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredgedump.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dwnvel.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/erosed.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/morstatistics.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/red_soursin.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/shearx.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/upbdps.f90 -text

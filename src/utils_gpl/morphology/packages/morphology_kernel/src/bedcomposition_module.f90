@@ -35,9 +35,8 @@ module bedcomposition_module
 ! bed may be schematized using one or more layers.
 !
 !!--module declarations---------------------------------------------------------
-
 use precision
-
+private
 
 !
 ! public data types
@@ -143,15 +142,15 @@ type bedcomp_settings
     !
     ! pointers
     !
-    type (morlyrnumericstype) , pointer :: morlyrnum ! structure containing numerical settings
-    integer  , dimension(:)   , pointer :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
-    real(fp) , dimension(:,:) , pointer :: kdiff     ! diffusion coefficients for mixing between layers, units : m2/s
-    real(fp) , dimension(:)   , pointer :: phi       ! D50 diameter expressed on phi scale
-    real(fp) , dimension(:)   , pointer :: rhofrac   ! density of fraction (specific density or including pores)
-    real(fp) , dimension(:)   , pointer :: sigphi    ! standard deviation expressed on phi scale
-    real(fp) , dimension(:)   , pointer :: thexlyr   ! thickness of exchange layer
-    real(fp) , dimension(:)   , pointer :: thtrlyr   ! thickness of transport layer
-    real(fp) , dimension(:)   , pointer :: zdiff     ! depth below bed level for which diffusion coefficients are defined, units : m
+    type (morlyrnumericstype)    , pointer :: morlyrnum ! structure containing numerical settings
+    integer    , dimension(:)    , pointer :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
+    real(fp)   , dimension(:,:)  , pointer :: kdiff     ! diffusion coefficients for mixing between layers, units : m2/s
+    real(fp)   , dimension(:)    , pointer :: phi       ! D50 diameter expressed on phi scale
+    real(fp)   , dimension(:)    , pointer :: rhofrac   ! density of fraction (specific density or including pores)
+    real(fp)   , dimension(:)    , pointer :: sigphi    ! standard deviation expressed on phi scale
+    real(fp)   , dimension(:)    , pointer :: thexlyr   ! thickness of exchange layer
+    real(fp)   , dimension(:)    , pointer :: thtrlyr   ! thickness of transport layer
+    real(fp)   , dimension(:)    , pointer :: zdiff     ! depth below bed level for which diffusion coefficients are defined, units : m
     ! 
     ! logicals
     !
@@ -162,13 +161,13 @@ type bedcomp_settings
 end type bedcomp_settings
 !
 type bedcomp_state
-    real(prec) , dimension(:,:)  , pointer :: bodsed   ! Array with total sediment, units : kg /m2
-    real(fp)   , dimension(:)    , pointer :: dpsed    ! Total depth sediment layer, units : m
-    real(fp)   , dimension(:,:,:), pointer :: msed     ! composition of morphological layers: mass of sediment fractions, units : kg /m2
-    real(fp)   , dimension(:,:)  , pointer :: preload  ! historical largest load, units : kg
-    real(fp)   , dimension(:,:)  , pointer :: sedshort ! sediment shortage in transport layer, units : kg /m2
-    real(fp)   , dimension(:,:)  , pointer :: svfrac   ! 1 - porosity coefficient, units : -
-    real(fp)   , dimension(:,:)  , pointer :: thlyr    ! thickness of morphological layers, units : m
+    real(prec) , dimension(:,:)  , pointer :: bodsed    ! Array with total sediment, units : kg /m2
+    real(fp)   , dimension(:)    , pointer :: dpsed     ! Total depth sediment layer, units : m
+    real(fp)   , dimension(:,:,:), pointer :: msed      ! composition of morphological layers: mass of sediment fractions, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: preload   ! historical largest load, units : kg
+    real(fp)   , dimension(:,:)  , pointer :: sedshort  ! sediment shortage in transport layer, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: svfrac    ! 1 - porosity coefficient, units : -
+    real(fp)   , dimension(:,:)  , pointer :: thlyr     ! thickness of morphological layers, units : m
 end type bedcomp_state
 !
 type bedcomp_work
