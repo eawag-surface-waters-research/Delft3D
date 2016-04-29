@@ -836,6 +836,8 @@ subroutine defnewgrp_core(fds, ifile, gname, gdp, filnam, grpdim, errlog)
           nefisunit = '[M0.5/S ]'
        case ('m2')
           nefisunit = '[  M2   ]'
+       case ('m/s')
+          nefisunit = '[  M/S  ]'
        case ('m/s2')
           nefisunit = '[  M/S2 ]'
        case ('m2/s')
