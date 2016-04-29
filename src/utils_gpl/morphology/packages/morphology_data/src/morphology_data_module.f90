@@ -175,9 +175,12 @@ type moroutputtype
                                ! 1 = volume including pores
                                ! 2 = volume excluding pores
     !
-    character(len=30), dimension(4) :: statqnt = (/"H1","UV","SBUV","SSUV"/)
-    character(len=30), dimension(4) :: statnam = (/"water depth","velocity","total bedload transport","total suspended transport"/)
-    character(len=30), dimension(4) :: statunt = (/"m","m/s","",""/)
+    character(len=30), dimension(4) :: statqnt = (/"H1  ","UV  ","SBUV","SSUV"/)
+    character(len=30), dimension(4) :: statnam = (/"water depth              ", &
+                                                   "velocity                 ", &
+                                                   "total bedload transport  ",  &
+                                                   "total suspended transport"/)
+    character(len=30), dimension(4) :: statunt = (/"m  ","m/s","   ","   "/)
     integer, dimension(5,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
     integer                         :: nstatqnt ! number of quantities for morphology statistics output
     !
