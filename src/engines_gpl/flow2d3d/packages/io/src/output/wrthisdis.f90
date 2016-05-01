@@ -146,7 +146,7 @@ subroutine wrthisdis(lundia    ,error     ,filename  ,ithisc    ,zmodel    , &
        endif
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'RINT', ' ', IO_REAL4  , 2, dimids=(/iddim_nsrc, iddim_lstsc/), longname='Concentrations of the discharge')
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'ZQ', ' ', IO_REAL4    , 1, dimids=(/iddim_nsrc/), longname='Momentary discharge', unit='m3/s')
-       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'ZQ_SUM', ' ', IO_REAL4, 1, dimids=(/iddim_nsrc/), longname='Cummulative volume of the discharge', unit='m3')
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'ZQ_SUM', ' ', IO_REAL4, 1, dimids=(/iddim_nsrc/), longname='Cumulative volume of the discharge', unit='m3')
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'MCOR1', ' ', IO_INT4  , 1, dimids=(/iddim_nsrc/), longname='first M coordinate of discharge')
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'NCOR1', ' ', IO_INT4  , 1, dimids=(/iddim_nsrc/), longname='first N coordinate of discharge')
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'KCOR1', ' ', IO_INT4  , 1, dimids=(/iddim_nsrc/), longname='first K coordinate of discharge')

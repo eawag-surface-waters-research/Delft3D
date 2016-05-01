@@ -396,7 +396,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
                     & r(ycor)   ,i(kcs)    ,gdp       )
           if (error) goto 9999
           !
-          if (culvert) then
+          if (nsrc>0 .and. gdp%gdflwpar%flwoutput%hisdis) then
              call wrihisdis(lundia    ,error     ,filename  ,itdate    ,tunit     , &
                           & dt        ,nsrc      ,ch(namsrc),irequest  ,fds       , &
                           & gdp       )
@@ -431,7 +431,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
                     & ntruvgl   ,order_tra ,gdp       )
           if (error) goto 9999
           !
-          if (culvert) then
+          if (nsrc>0 .and. gdp%gdflwpar%flwoutput%hisdis) then
              call wrthisdis(lundia    ,error     ,filename  ,ithisc    , &
                           & zmodel    ,kmax      ,lstsci    ,nsrc      , &
                           & i(mnksrc) ,r(disch)  ,d(dps)    ,r(rint)   , &

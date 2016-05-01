@@ -60,6 +60,7 @@ subroutine initflwpar(gdp)
     gdp%gdflwpar%flwoutput%cumdifuflux     = .false.
     gdp%gdflwpar%flwoutput%difuflux        = .false.
     gdp%gdflwpar%flwoutput%halfdt          = .false.
+    gdp%gdflwpar%flwoutput%hisdis          = .false.
     gdp%gdflwpar%flwoutput%kf_minmax       = .false.
     gdp%gdflwpar%flwoutput%layering        = .false.
     gdp%gdflwpar%flwoutput%momentum        = .false.

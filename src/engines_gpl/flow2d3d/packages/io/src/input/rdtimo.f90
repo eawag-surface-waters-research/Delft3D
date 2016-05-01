@@ -470,6 +470,12 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'HdtOut' , flwoutput%halfdt)
     !
+    ! Flag for flow ratea and in-/outflow locations of discharges to history file
+    ! For historical reasons this flag is set to true for simulations with culverts.
+    !
+    if (gdp%gdprocs%culvert) flwoutput%hisdis = .true.
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'HisDis' , flwoutput%hisdis)
+    !
     ! Flag for additional timers (print extra timers in tri-diag file)
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'AddTim', flwoutput%addtim)

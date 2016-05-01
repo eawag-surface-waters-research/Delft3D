@@ -38,6 +38,7 @@ type flwoutputtype
     logical :: cumdifuflux
     logical :: difuflux
     logical :: halfdt
+	logical :: hisdis
     logical :: kf_minmax           ! Z-layer KF[S/U/V][MIN/MAX] arrays
     logical :: layering
     logical :: momentum
