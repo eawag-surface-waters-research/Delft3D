@@ -38,7 +38,8 @@ type flwoutputtype
     logical :: cumdifuflux
     logical :: difuflux
     logical :: halfdt
-	logical :: hisdis
+	logical :: hisbar              ! Write barrier height data to history file
+	logical :: hisdis              ! Write discharge (culvert and bubble screen) data to history file
     logical :: kf_minmax           ! Z-layer KF[S/U/V][MIN/MAX] arrays
     logical :: layering
     logical :: momentum

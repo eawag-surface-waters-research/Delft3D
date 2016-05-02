@@ -6,7 +6,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
                 & yz        ,alfas     ,dps       ,thick     ,sig       , &
                 & zk        ,irequest  ,fds       ,nostatto  ,nostatgl  , &
                 & order_sta ,ntruvto   ,ntruvgl   ,order_tra ,xcor      , &
-                & ycor      ,kcs       ,gdp       )
+                & ycor      ,kcs       ,nsluv     ,nambar    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -73,6 +73,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     character(20) , dimension(:)    , pointer :: namst
     character(20) , dimension(:)    , pointer :: namtra
     logical                         , pointer :: ztbml
+    type (flwoutputtype)            , pointer :: flwoutput
 !
 ! Global variables
 !
@@ -85,10 +86,11 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     integer                                                             , intent(in)  :: lstsci   !  Description and declaration in esm_alloc_int.f90
     integer                                                             , intent(in)  :: ltur     !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: lundia   !  Description and declaration in inout.igs
-    integer                                                                           :: mmax     !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: nmax     !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
-    integer                                                                           :: ntruv    !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: mmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nostat   !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: nsluv    !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: ntruv    !  Description and declaration in dimens.igs
     integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs      !  Description and declaration in esm_alloc_int.f90
     logical                                                             , intent(out) :: error    !  Flag=TRUE if an error is encountered
     logical                                                             , intent(in)  :: sferic   !  Description and declaration in tricom.igs
@@ -108,6 +110,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     real(fp)      , dimension(0:kmax)                                   , intent(in)  :: zk       !  Vertical coordinates of cell interfaces (Z-MODEL)
     character(*)                                                        , intent(in)  :: filename !  File name
     character(16)                                                       , intent(in)  :: simdat   !  Simulation date representing the flow condition at this date
+    character(20) , dimension(nsluv)                                    , intent(in)  :: nambar   !  Description and declaration in esm_alloc_char.f90
     character(20) , dimension(lmax)                                     , intent(in)  :: namcon   !  Description and declaration in esm_alloc_char.f90
     character(20) , dimension(lsedtot)                                  , intent(in)  :: namsed   !  Description and declaration in esm_alloc_char.f90
     character(23)                                                       , intent(in)  :: selhis   !  Description and declaration in tricom.igs
@@ -150,6 +153,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     integer                                           :: iddim_kmaxout_restr
     integer                                           :: iddim_kmax1
     integer                                           :: iddim_nostat
+    integer                                           :: iddim_nsluv
     integer                                           :: iddim_ntruv
     integer                                           :: iddim_lsed
     integer                                           :: iddim_lsedtot
@@ -188,6 +192,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     namst       => gdp%gdstations%namst
     namtra      => gdp%gdstations%namtra
     ztbml       => gdp%gdzmodel%ztbml
+    flwoutput   => gdp%gdflwpar%flwoutput
     !
     ! Initialize local variables
     !
@@ -239,6 +244,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
        if (lsedtot >0) iddim_lsedtot= adddim(gdp, lundia, FILOUT_HIS, 'LSEDTOT'           , lsedtot ) ! Number of total sediment fractions
                        iddim_2      = adddim(gdp, lundia, FILOUT_HIS, 'length_2'          , 2       )
                        iddim_4      = adddim(gdp, lundia, FILOUT_HIS, 'length_4'          , 4       )
+       if (nsluv   >0) iddim_nsluv  = adddim(gdp, lundia, FILOUT_HIS, 'NBARRIERS'         , nsluv   ) ! Number of barriers
        !
        lhlp = 0
        if (index(selhis(5:12), 'Y')/=0 .or. index(selhis(22:23), 'Y')/=0) lhlp = lhlp + lstsci
@@ -317,6 +323,9 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
        else
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAXOUT', ' ', IO_INT4, 1, dimids=(/iddim_kmaxout/), longname='User selected output layer interfaces', attribs=(/idatt_cmpintf/) )
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAXOUT_RESTR', ' ', IO_INT4, 1, dimids=(/iddim_kmaxout_restr/), longname='User selected output layer centres', attribs=(/idatt_cmplyr/) )
+       endif
+       if (nsluv > 0 .and. flwoutput%hisbar) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMBAR', ' ', 20       , 1, dimids=(/iddim_nsluv/), longname='Barrier names') !CHARACTER
        endif
        !
     case (REQUESTTYPE_WRITE)
@@ -700,6 +709,11 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
           if (ierror/=0) goto 9999
        endif
        !
+       if (nsluv > 0 .and. flwoutput%hisbar) then
+          call wrtvar(fds, filename, filetype, grnam2, 1, &
+                 & gdp, ierror, lundia, nambar, 'NAMBAR')
+          if (ierror/=0) goto 9999
+       endif
     end select
     deallocate(shlay_restr)
     !

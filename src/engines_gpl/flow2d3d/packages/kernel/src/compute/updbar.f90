@@ -68,7 +68,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfvmin !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspu   !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspv   !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(4, nsluv)                                       , intent(in) :: cbuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(4, nsluv)                                                    :: cbuv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(2, nsluv)                                       , intent(in) :: cbuvrt !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpu    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpv    !  Description and declaration in esm_alloc_real.f90
@@ -148,13 +148,13 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
              call prterr(lundia, 'P004', trim(errmsg))
              call d3stop(1,gdp)
           endif
-          hgate = cbuvrt(2, ibar)
+          cbuv(1, ibar) = cbuvrt(2, ibar)
        else
           !
           ! Use constant barrier height as read from file
           !
-          hgate = cbuv(1, ibar)
        endif
+       hgate = cbuv(1, ibar)
        !
        do inc = 1, maxinc + 1
           m = m + incx

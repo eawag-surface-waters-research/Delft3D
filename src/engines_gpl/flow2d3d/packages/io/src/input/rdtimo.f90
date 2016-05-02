@@ -470,7 +470,11 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'HdtOut' , flwoutput%halfdt)
     !
-    ! Flag for flow ratea and in-/outflow locations of discharges to history file
+    ! Flag for writing barrier height to history file
+    !
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'HisBar' , flwoutput%hisbar)
+    !
+    ! Flag for writing flow rates and in-/outflow locations of discharges to history file
     ! For historical reasons this flag is set to true for simulations with culverts.
     !
     if (gdp%gdprocs%culvert) flwoutput%hisdis = .true.

@@ -9,7 +9,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
                 & zwndsp    ,zwnddr    ,zairp     ,wind      ,sferic    , &
                 & zprecp    ,zevap     ,itdate    ,dtsec     ,irequest  , &
                 & fds       ,nostatto  ,nostatgl  ,order_sta ,ntruvto   , &
-                & ntruvgl   ,order_tra ,gdp       )
+                & ntruvgl   ,order_tra ,nsluv     ,cbuv      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -82,17 +82,18 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     integer                                                             , intent(in)  :: irequest !  REQUESTTYPE_DEFINE: define variables, REQUESTTYPE_WRITE: write variables
     integer                                                             , intent(in)  :: itdate   !  Description and declaration in exttim.igs
     integer                                                             , intent(in)  :: ithisc   !!  Current time counter for the history data file
-    integer                                                                           :: ithisi   !  Description and declaration in inttim.igs
-    integer                                                                           :: itstrt   !  Description and declaration in inttim.igs
-    integer                                                                           :: kmax     !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: lmax     !  Description and declaration in dimens.igs
-    integer                                                                           :: lsal     !  Description and declaration in dimens.igs
-    integer                                                                           :: lstsci   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                           :: ltem     !  Description and declaration in dimens.igs
-    integer                                                                           :: ltur     !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: ithisi   !  Description and declaration in inttim.igs
+    integer                                                             , intent(in)  :: itstrt   !  Description and declaration in inttim.igs
+    integer                                                             , intent(in)  :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: lmax     !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: lsal     !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: lstsci   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: ltem     !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: ltur     !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: lundia   !  Description and declaration in inout.igs
-    integer                                                                           :: nostat   !  Description and declaration in dimens.igs
-    integer                                                                           :: ntruv    !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: nostat   !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: nsluv    !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: ntruv    !  Description and declaration in dimens.igs
     integer      , dimension(nostat)                                                  :: zkfs     !  KFS in monitoring station
     logical                                                             , intent(out) :: error    !!  Flag=TRUE if an error is encountered
     logical                                                             , intent(in)  :: sferic   !  Description and declaration in tricom.igs
@@ -126,6 +127,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     real(fp)     , dimension(ntruv)                                                   :: fltr     !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(ntruv, lstsci)                                           :: atr      !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(ntruv, lstsci)                                           :: dtr      !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(4, nsluv)                                  , intent(in)  :: cbuv     !  Description and declaration in esm_alloc_real.f90
     character(*)                                                        , intent(in)  :: filename !  File name
     character(23)                                                       , intent(in)  :: selhis   !  Description and declaration in tricom.igs
     character(10)                                                       , intent(in)  :: velt     !! Velocity type 'eulerian' or 'GLM'
@@ -159,9 +161,11 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     integer                                           :: iddim_lstsci
     integer                                           :: iddim_ltur
     integer                                           :: iddim_nostat
+    integer                                           :: iddim_nsluv
     integer                                           :: iddim_ntruv
     integer                                           :: iddim_2
     !
+    integer                                           :: idatt_bar
     integer                                           :: idatt_cal
     integer                                           :: idatt_sta
     integer                                           :: idatt_tra
@@ -254,12 +258,14 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
        idatt_cal = addatt(gdp, lundia, FILOUT_HIS, 'calendar','proleptic_gregorian')
        idatt_sta = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMST XSTAT YSTAT')
        idatt_tra = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMTRA')
+       idatt_bar = addatt(gdp, lundia, FILOUT_HIS, 'coordinates','NAMBAR')
        !
-       if (lstsci  >0) iddim_lstsci = adddim(gdp, lundia, FILOUT_HIS, 'LSTSCI'            , lstsci  ) !'Number of constituents             '
-       if (ltur    >0) iddim_ltur   = adddim(gdp, lundia, FILOUT_HIS, 'LTUR'              , ltur    ) !'Number of turbulence quantities    '
-       if (nostat  >0) iddim_nostat = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT'            , nostatgl) !'Number of monitoring stations      '
-       if (ntruv   >0) iddim_ntruv  = adddim(gdp, lundia, FILOUT_HIS, 'NTRUV'             , ntruvgl ) !'Number of monitoring cross-sections'
+       if (lstsci  >0) iddim_lstsci = adddim(gdp, lundia, FILOUT_HIS, 'LSTSCI'            , lstsci  ) ! Number of constituents
+       if (ltur    >0) iddim_ltur   = adddim(gdp, lundia, FILOUT_HIS, 'LTUR'              , ltur    ) ! Number of turbulence quantities
+       if (nostat  >0) iddim_nostat = adddim(gdp, lundia, FILOUT_HIS, 'NOSTAT'            , nostatgl) ! Number of monitoring stations
+       if (ntruv   >0) iddim_ntruv  = adddim(gdp, lundia, FILOUT_HIS, 'NTRUV'             , ntruvgl ) ! Number of monitoring cross-sections
                        iddim_2      = adddim(gdp, lundia, FILOUT_HIS, 'length_2'          , 2       )
+       if (nsluv   >0) iddim_nsluv  = adddim(gdp, lundia, FILOUT_HIS, 'NBARRIERS'         , nsluv   ) ! Number of barriers'
        !
        ! his-info-series
        !
@@ -351,6 +357,9 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
           if (selhis(23:23)=='Y') then
              call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'DTR', ' ', IO_REAL4       , 2, dimids=(/iddim_ntruv, iddim_lstsci/), longname='Dispersive transport through cross section (velocity points)', attribs=(/idatt_tra/))
           endif
+       endif
+       if (nsluv > 0 .and. flwoutput%hisbar) then
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZBAR', ' ', IO_REAL4       , 1, dimids=(/iddim_nsluv/), longname='Barrier height', unit='m', attribs=(/idatt_bar/))
        endif
        !
        group1%grp_dim = iddim_time
@@ -672,6 +681,19 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
                     & ierror, lundia, dtr, 'DTR', transec)
              if (ierror/=0) goto 9999
           endif
+       endif
+       !
+       ! Following not yet compatible with parallel simulations (also check WRTHISDIS)
+       !
+       if (inode == master .and. nsluv > 0 .and. flwoutput%hisbar) then
+          allocate(rbuff1(nsluv), stat=istat)
+          do i = 1, nsluv
+             rbuff1(i) = cbuv(1,i)
+          enddo
+          call wrtvar(fds, filename, filetype, grnam3, celidt, &
+                    & gdp, ierror, lundia, rbuff1, 'ZBAR')
+          deallocate(rbuff1, stat=istat)
+          if (ierror/=0) goto 9999
        endif
        !
     end select
