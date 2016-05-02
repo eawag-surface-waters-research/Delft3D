@@ -117,7 +117,7 @@
 
 !     files, unit numbers, include file stack, input file settings
 !
-      integer, parameter             :: nlun   = 50              ! number of input / output files
+      integer, parameter             :: nlun   = 45              ! number of input / output files
 !     integer, parameter             :: lstack = 4               ! size include files stack
 !     integer, parameter             :: lchmax = 255             ! sring length file name variables
       integer                        :: lun(nlun)                ! unit numbers input / output files
@@ -191,33 +191,30 @@
      *                24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 ,
      *                34 , 35 , 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 ,
      *                44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 , 52 , 53 ,
-     *                54 , 55 , 56 , 57 , 58 , -1 , -1 , -1 , -1 , -1 /
-      data      lchar  / '-delwaq03.wrk' , '-delwaq04.wrk' ,     ! lun,lchar  1,  2
-     *                   '-harmonic.wrk' , '-pointers.wrk' ,     !            3,  4
-     *                   '-timestep.wrk' , '-gridding.wrk' ,     !            5,  6
-     *                   '-volumes.wrk ' , '-to_from.wrk ' ,     !            7,  8
-     *                   '-dispersi.wrk' , '-areas.wrk   ' ,     !            9, 10
-     *                   '-flows.wrk   ' , '-velocity.wrk' ,     !           11, 12
-     *                   '-lengthes.wrk' , '-boundary.wrk' ,     !           13, 14
-     *                   '-wastload.wrk' , '-function.wrk' ,     !           15, 16
-     *                   '-segfunc.wrk ' , '-initials.wrk' ,     !           17, 18
-     *                   '.mon         ' , '.dmp         ' ,     !           19, 20
-     *                   '.his         ' , '.map         ' ,     !           21, 22
-     *                   '.res         ' , '-proces.wrk  ' ,     !           23, 24
-     *                   '-output.wrk  ' , '.inp         ' ,     !           25, 26
-     *                   '             ' , '-delwaq02.wrk' ,     !           27, 28
-     *                   '.lst         ' , '-dlwqstrt.inc' ,     !           29, 30
-     *                   '-scratch1opt3' , '-scratch2opt3' ,     !           31, 32
-     *                   '-auxfileop1  ' , '-proces.def  ' ,     !           33, 34
-     *                   '.lsp         ' , '-stochi.inp  ' ,     !           35, 36
-     *                   '-bal.his     ' , '.hdf         ' ,     !           37, 38
-     *                   '.adf         ' , '-kenmerk.wrk ' ,     !           39, 40
-     *                   '-filenaam.wrk' , '-stat.map    ' ,     !           41, 42
-     *                   '-stat.mon    ' , '             ' ,     !           43, 44
-     *                   '<delparfile> ' , '<ncgridfile> ' ,     !           45, 46
-     *                   '-his.nc      ' , '-bal-his.nc  ' ,     !           47, 48
-     *                   '-map.nc      ' , '-stat-map.nc ' /     !           49, 50
-*                    /
+     *                54 , 55 , 56 , 57 , 58 /
+      data      lchar  / '-delwaq03.wrk' , '-delwaq04.wrk' ,
+     *                   '-harmonic.wrk' , '-pointers.wrk' ,
+     *                   '-timestep.wrk' , '-gridding.wrk' ,
+     *                   '-volumes.wrk ' , '-to_from.wrk ' ,
+     *                   '-dispersi.wrk' , '-areas.wrk   ' ,
+     *                   '-flows.wrk   ' , '-velocity.wrk' ,
+     *                   '-lengthes.wrk' , '-boundary.wrk' ,
+     *                   '-wastload.wrk' , '-function.wrk' ,
+     *                   '-segfunc.wrk ' , '-initials.wrk' ,
+     *                   '.mon         ' , '.dmp         ' ,
+     *                   '.his         ' , '.map         ' ,
+     *                   '.res         ' , '-proces.wrk  ' ,
+     *                   '-output.wrk  ' , '.inp         ' ,
+     *                   '             ' , '-delwaq02.wrk' ,
+     *                   '.lst         ' , '-dlwqstrt.inc' ,
+     *                   '-scratch1opt3' , '-scratch2opt3' ,
+     *                   '-auxfileop1  ' , '-proces.def  ' ,
+     *                   '.lsp         ' , '-stochi.inp  ' ,
+     *                   '-bal.his     ' , '.hdf         ' ,
+     *                   '.adf         ' , '-kenmerk.wrk ' ,
+     *                   '-filenaam.wrk' , '-stat.map    ' ,
+     *                   '-stat.mon    ' , '             ' ,
+     *                   ' '             /
       data    iopt / 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 ,
      *               20 , 21 , 22 , 23 , 24 , 25 , 26 , 27 ,
      *               30 , 31 , 32 , 33 , 34 , 35 , 36 , 37 ,

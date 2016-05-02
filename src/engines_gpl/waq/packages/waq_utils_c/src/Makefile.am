@@ -15,8 +15,7 @@ noinst_LTLIBRARIES = libwaq_utils_c.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_utils_c_la_SOURCES = f902c.cpp \
-                            getuuid.c
+libwaq_utils_c_la_SOURCES = f902c.cpp
 
 #-------------------------------------------------------------------------------
 # Libraries

@@ -220,8 +220,8 @@
 
       call rdodef ( noutp   , nrvar   , nrvarm  , isrtou  , car     ,
      &              infile  , nx      , ny      , nodump  , ibflag  ,
-     &              lmoutp  , ldoutp  , lhoutp  , lncout  , ierr    ,
-     &              igrdou  , ndmpar  , vrsion  )
+     &              lmoutp  , ldoutp  , lhoutp  , ierr    , igrdou  ,
+     &              ndmpar  , vrsion  )
 
 !     Calculate OUTPUT boot variables NVART, NBUFMX
 
@@ -271,6 +271,9 @@
 
 !     Write OUTPUT intermediate file
 
+      allocate( Outputs%names(nrvart), Outputs%pointers(nrvart) )
+      Outputs%cursize = nrvart
+      ivar = 0
       do i = 1 , noutp
          ioutps(1,i) = iostrt(i)
          ioutps(2,i) = iostop(i)
@@ -278,22 +281,11 @@
          ioutps(4,i) = nrvar (i)
          ioutps(5,i) = isrtou(i)
          ioutps(6,i) = igrdou(i)
-      enddo
-
-      allocate( Outputs%names(nrvart), Outputs%pointers(nrvart), Outputs%stdnames(nrvart),
-     &          Outputs%units(nrvart), Outputs%descrs(nrvart) )
-      Outputs%cursize = nrvart
-      
-      ivar = 0
-      do i = 1 , noutp
          do iv = 1 , nrvar(i)
             ivar = ivar + 1
             ip = (i-1)*nrvarm + iv
             Outputs%pointers(ivar) = iar(ip)
             Outputs%names   (ivar) = car(ip)
-            Outputs%stdnames(ivar) = car(ip)
-            Outputs%units   (ivar) = ' '
-            Outputs%descrs  (ivar) = ' '
          enddo
       enddo
 

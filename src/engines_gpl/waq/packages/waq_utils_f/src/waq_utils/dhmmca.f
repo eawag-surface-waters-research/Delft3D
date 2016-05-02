@@ -96,8 +96,7 @@
      &                      iibnam, iibtyp, iiwsid, iiwnam, iiwtyp,
      &                      iicnam, iipnam, iifnam, iisfna, iiedit,
      &                      iiprna, iionam, iidina, iivnam, iidana,
-     &                      iirnam, iicbuf, iilunt, iiosnm, iiouni,
-     &                      iiodsc, iissnm, iisuni, iisdsc
+     &                      iirnam, iicbuf, iilunt
       integer            :: i_car,  iartyp, iarlen, ip
 !
       IIANAM = IASIZE + IJSIZE +  1
@@ -123,12 +122,6 @@
       IIRNAM = IASIZE + IJSIZE + 21
       IICBUF = IASIZE + IJSIZE + 22
       IILUNT = IASIZE + IJSIZE + 23
-      IIOSNM = IASIZE + IJSIZE + 24
-      IIOUNI = IASIZE + IJSIZE + 25
-      IIODSC = IASIZE + IJSIZE + 26
-      IISSNM = IASIZE + IJSIZE + 27
-      IISUNI = IASIZE + IJSIZE + 28
-      IISDSC = IASIZE + IJSIZE + 29
 !
 !     Set defaults, no name no length
 !     Don't declare the first array , ARRNAM
@@ -211,24 +204,6 @@
 !
       ARRNAM(IILUNT) = 'LUNT  '
       ARRDM1(IILUNT) = NUFIL*10
-
-      ARRNAM(IIOSNM) = 'OUSNM '
-      ARRDM1(IIOSNM) = NRVART*5
-
-      ARRNAM(IIOUNI) = 'OUUNI '
-      ARRDM1(IIOUNI) = NRVART*2
-      
-      ARRNAM(IIODSC) = 'OUDSC '
-      ARRDM1(IIODSC) = NRVART*3
-
-      ARRNAM(IISSNM) = 'OSSNM '
-      ARRDM1(IISSNM) = NOTOT*5
-
-      ARRNAM(IISUNI) = 'OSUNI '
-      ARRDM1(IISUNI) = NOTOT*2
-      
-      ARRNAM(IISDSC) = 'OSDSC '
-      ARRDM1(IISDSC) = NOTOT*3
 
 !     the total array length
 

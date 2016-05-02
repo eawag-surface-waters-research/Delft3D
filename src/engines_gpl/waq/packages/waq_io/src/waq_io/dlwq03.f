@@ -64,8 +64,6 @@
       use rd_token     !   for the reading of tokens
       use partmem      !   for PARTicle tracking
       use timers       !   performance timers
-      use dlwq_netcdf  !   read/write grid in netcdf
-      use output       !   output settings
 
       implicit none
 
@@ -120,15 +118,8 @@
       integer                 iknm1, iknm2      !  help variables for attributes
       integer                 iknmrk            !  help variables merged attributes
       integer                 ivalk             !  return value dhknmrk
-
+      
       character*255           ugridfile         !  name of the ugrid-file
-      integer :: ncid, ncidout
-      integer :: varid, varidout, meshid, meshidout, timeid, bndtimeid, ntimeid, wqid
-      integer :: inc_error
-
-      character(len=nf90_max_name) :: mesh_name
-      character(len=nf90_max_name) :: dimname
-
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq03", ithndl )
 
@@ -140,101 +131,24 @@
       iwar2  = 0
       iposr  = 0
 
-!     Check if there is a keyword for the grid
-      lncout     = .false.
-      lchar (46) = ' '
+!     Check if there is a keyword for the ugrid
       if ( gettoken( cdummy, idummy, itype, ierr2 ) .gt. 0 ) goto 240
-      if (cdummy .eq. 'UGRID') then
-
-         ! Turn on debug info from dlwaqnc
-         inc_error = dlwqnc_debug_status(.true.)
-         ! Check if the UGRID file is suitable for Delwaq Output
+      if (itype .eq. 1 .and. cdummy .eq. 'UGRID') then
          write ( lunut , 2500 )
-
+         iwar2 = iwar2 + 1
          if ( gettoken( ugridfile, ierr2 ) .gt. 0 ) goto 240
-
          write ( lunut , 2510 ) trim(ugridfile)
-         lncout     = .True.
-         lchar (46) = ugridfile
-
-         ! Write the version of the netcdf library
-         write ( lunut , 2520 ) trim(nf90_inq_libvers())
-
-         ! Open the ugrid-file file
-         inc_error = nf90_open(ugridfile, nf90_nowrite, ncid )
-         if (inc_error /= nf90_noerr ) then
-            write ( lunut , 2530 ) trim(ugridfile)
-            write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-            ierr = ierr + 1
-            lncout    = .false.
-         end if
-
-         ! Find the variable with the attribute "delwaq_role"
-         ! If that does not exist, try and find one with the attribute "cf_role"
-         ! that has the value "mesh_topology"
-         inc_error = dlwqnc_find_var_with_att( ncid, "delwaq_role", varid )
-         if ( inc_error == nf90_noerr ) then
-            ! Determine the mesh variable from that
-            mesh_name = ' '
-            inc_error = nf90_get_att( ncid, varid, "mesh", mesh_name )
-            if ( inc_error /= nf90_noerr ) then
-               write ( lunut , 2555 )
-               write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-               lncout    = .false.
-               lchar(46) = ' '
-               iwar = iwar + 1
-!               ierr = ierr + 1
-            endif
-         else
-            inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid )
-
-            if ( inc_error /= nf90_noerr ) then
-               write ( lunut , 2540 )
-               write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-               lncout    = .false.
-               lchar(46) = ' '
-               iwar = iwar + 1
-!               ierr      = ierr + 1
-            else
-               ! Get the name of this variable
-               inc_error = nf90_inquire_variable( ncid, varid, name = mesh_name )
-               if ( inc_error /= nf90_noerr ) then
-                  write ( lunut , 2540 )
-                  write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-                  lncout    = .false.
-                  lchar(46) = ' '
-                  iwar = iwar + 1
-!                  ierr      = ierr + 1
-               endif
-            endif
-         endif
-
-         if (lncout) then
-            write ( lunut , 2550 ) trim(mesh_name)
-
-            ! Get the meshid
-            inc_error = nf90_inq_varid( ncid, mesh_name, meshid )
-            if ( inc_error /= nf90_noerr ) then
-                write ( lunut , 2556 ) trim(mesh_name)
-                write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-!                ierr      = ierr + 1
-                lncout    = .false.
-                lchar(46) = ' '
-                iwar = iwar + 1
-            endif
-            ! Everything seems to be fine for now, switch on netcdf output
-         endif
-
-!       Read number of computational volumes
+!        Read number of computational volumes
          if ( gettoken( noseg, ierr2 ) .gt. 0 ) goto 240
-
-         ! TODO: check the number of segments with the information in the waqgeom-file
-
-      else
-!       Or the number of computational volumes was already read
+      else if (itype .eq. 2) then
+!        Or the number of computational volumes was already read
          noseg = idummy
+      else
+!        Or something went wrong
+         write ( lunut , 2005 )
+         ierr = ierr+1
+         goto 240
       end if
-
       if ( noseg .gt. 0 ) then
          write ( lunut , 2000 ) noseg
       else
@@ -621,16 +535,6 @@
  2395 format ( / ' ERROR, volumes for Delpar from different file : ',A20 )
  2400 format ( / ' ERROR, end of file on unit:' ,I3, / ' Filename: ',A20 )
  2410 format ( / ' ERROR, reading file on unit:',I3, / ' Filename: ',A20 )
- 2500 format ( / ' Found UGRID keyword' )
- 2510 format ( / ' File containing the grid: ', A )
- 2520 format ( / ' NetCDF version: ', A )
- 2530 format ( / ' ERROR, opening NetCDF file. Filename: ',A )
- 2540 format ( / ' WARNING, no variable found with required attribute "delwaq_role" or "cf_type"' 
-     &         / '          this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
- 2550 format ( / ' Mesh used for Delwaq output: ', A )
- 2555 format ( / ' ERROR, Getting the mesh name failed' )
- 2556 format ( / ' Getting the mesh ID failed - variable: ', A )
-
- 2590 format ( / ' ERROR, closing NetCDF file. Filename: ',A )
- 2599 format ( / ' NetCDF error message: ', A60 )
+ 2500 format ( / ' WARNING, Found UGRID keyword, but not supported yet (ignored)' )
+ 2510 format ( / ' File containing the grid: ', A, ' (ignored)' )
       end

@@ -47,25 +47,17 @@
 !     IRNAM   INTEGER  1    pointer to RANAM , raaien names
 !     ICBUF   INTEGER  1    pointer to CBUFF , character array buffer
 !     ILUNT   INTEGER  1    pointer to LUNTX2, names of binary files
-!     IOSNM   INTEGER  1    pointer to OUSNM , output variables standard names
-!     IOUNI   INTEGER  1    pointer to OUUNI , output variables units
-!     IODSC   INTEGER  1    pointer to OUDSC , output variables descriptions
-!     ISSNM   INTEGER  1    pointer to OSSNM , substance standard names
-!     ISUNI   INTEGER  1    pointer to OSUNI , substance units
-!     ISDSC   INTEGER  1    pointer to OSDSC , substance descriptions
 !
       INTEGER         ICSIZE
       INTEGER         IANAM  , IMNAM  , ISNAM  , IDNAM  , IBNID  ,
      &                IBNAM  , IBTYP  , IWSID  , IWNAM  , IWTYP  ,
      &                ICNAM  , IPNAM  , IFNAM  , ISFNA  , IEDIT  ,
      &                IPRNA  , IONAM  , IDINA  , IVNAM  , IDANA  ,
-     &                IRNAM  , ICBUF  , ILUNT  , IOSNM  , IOUNI  ,
-     &                IODSC  , ISSNM  , ISUNI  , ISDSC
+     &                IRNAM  , ICBUF  , ILUNT
       COMMON / SYSC / IANAM  , IMNAM  , ISNAM  , IDNAM  , IBNID  ,
      &                IBNAM  , IBTYP  , IWSID  , IWNAM  , IWTYP  ,
      &                ICNAM  , IPNAM  , IFNAM  , ISFNA  , IEDIT  ,
      &                IPRNA  , IONAM  , IDINA  , IVNAM  , IDANA  ,
-     &                IRNAM  , ICBUF  , ILUNT  , IOSNM  , IOUNI  ,
-     &                IODSC  , ISSNM  , ISUNI  , ISDSC
+     &                IRNAM  , ICBUF  , ILUNT
 !
-      PARAMETER ( ICSIZE  = 29 )
+      PARAMETER ( ICSIZE  = 23 )

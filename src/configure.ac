@@ -439,7 +439,6 @@ engines_gpl/waq/packages/waq_plugin_wasteload/src/Makefile
 engines_gpl/waq/packages/waq_utils_c/Makefile
 engines_gpl/waq/packages/waq_utils_c/src/Makefile
 engines_gpl/waq/packages/waq_utils_f/Makefile
-engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/interact/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/Makefile

@@ -189,7 +189,6 @@ rem =======================
     set dest_bin="engines_gpl\waq\bin\debug"
     
     if not exist !dest_bin!     mkdir !dest_bin!
-    call :copyNetcdf
 	
     copy engines_gpl\waq\default\bloom.spe                           !dest_bin!
     copy engines_gpl\waq\default\bloominp.d09                        !dest_bin!
@@ -214,11 +213,7 @@ rem === INSTALL_DELWAQ2_LIB
 rem =======================
 :delwaq2_lib
     echo "installing delwaq2_lib . . ."
-
-    set dest_bin="engines_gpl\waq\bin\debug"
-    
-    if not exist !dest_bin!     mkdir !dest_bin!
-    call :copyNetcdf
+    echo "... nothing to be done"
 goto :endproc
 
 

@@ -147,8 +147,6 @@
          aItemProp%name    = itemid(iitem)
          aItemProp%text    = itemnm(iitem)
          aItemProp%unit    = itemun(iitem)
-         aItemProp%stdn    = itemsn(iitem)
-         aItemProp%stdu    = itemsu(iitem)
          aItemProp%default = itemde(iitem)
          aItemProp%aggrega = itemag(iitem)
          aItemProp%disaggr = itemda(iitem)

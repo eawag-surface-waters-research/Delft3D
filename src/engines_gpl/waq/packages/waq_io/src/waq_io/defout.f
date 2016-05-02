@@ -37,7 +37,6 @@
 !     COMMON's            : SYSI  , Timer characteristics
 
       use timers       !   performance timers
-      use output
 
       implicit none
 
@@ -61,6 +60,11 @@
 
 !     Local declarations
 
+      integer, parameter :: imon = 1 , imo2 = 2 , idmp = 3 , idm2 = 4 , ihis = 5 ,
+     &                      ihi2 = 6 , imap = 7 , ima2 = 8 , ibal = 9 , ihnf =10 ,
+     &                      ihn2 =11 , imnf =12 , imn2 =13 , imo3 =14 , imo4 =15 ,
+     &                      ihi3 =16 , ihi4 =17 , ihn3 =18 , ihn4 =19 , iba2 =20 ,
+     &                      iba3 =21
       integer, parameter :: igseg= 1 , igmon= 2 , iggrd= 3 , igsub = 4
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "defout", ithndl )

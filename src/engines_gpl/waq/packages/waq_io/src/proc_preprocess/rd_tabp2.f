@@ -27,8 +27,7 @@
      +                      ITEM_UNIT   , ITEM_DEFAULT,
      +                      ITEM_AGGREGA, ITEM_DISAGGR,
      +                      ITEM_GROUPID, ITEM_SEGX   ,
-     +                      ITEM_WK     , ITEM_SN     ,
-     +                      ITEM_SU     , LUNREP      ,
+     +                      ITEM_WK     , LUNREP      ,
      +                      IERROR      )
 !
 !     Deltares
@@ -81,8 +80,6 @@
       CHARACTER*30  ITEM_GROUPID(NO_ITEM_MAX)
       CHARACTER*1   ITEM_SEGX   (NO_ITEM_MAX)
       CHARACTER*1   ITEM_WK     (NO_ITEM_MAX)
-      CHARACTER*100 ITEM_SN     (NO_ITEM_MAX)
-      CHARACTER*40  ITEM_SU     (NO_ITEM_MAX)
 !
 !     Local variables
 !
@@ -94,7 +91,7 @@
 !     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
 !
       INTEGER       NELEMS
-      PARAMETER   ( NELEMS = 12 )
+      PARAMETER   ( NELEMS = 10 )
 !
       INTEGER       I               , IELM          ,
      +              BUFLEN
@@ -117,18 +114,16 @@
       DATA
      + (ELMNMS(I),ELMTPS(I),NBYTSG(I),ELMDMS(1,I),ELMDMS(2,I),ELMDES(I),
      +  I = 1 , NELEMS)
-     +/'NO_ITEM','INTEGER'  ,  4,1,1,'number of items'                  ,
-     + 'ITEM_ID','CHARACTER', 10,1,0,'unique item identification'       ,
-     + 'ITEM_NM','CHARACTER', 50,1,0,'item name'                        ,
-     + 'UNIT'   ,'CHARACTER', 20,1,0,'unit'                             ,
-     + 'DEFAULT','REAL'     ,  4,1,0,'default value'                    ,
-     + 'AGGREGA','CHARACTER', 10,1,0,'variable used for aggregation    ',
-     + 'DISAGGR','CHARACTER', 10,1,0,'variable used for dis-aggregation',
-     + 'GROUPID','CHARACTER', 30,1,0,'subtance group ID                ',
-     + 'SEG_EXC','CHARACTER',  1,1,0,'segment / exchange indication    ',
-     + 'WK'     ,'CHARACTER',  1,1,0,'active / inactive indication     ',
-     + 'ITEM_SN','CHARACTER',100,1,0,'netcdf standard name             ',
-     + 'ITEM_SU','CHARACTER', 40,1,0,'netcdf standard unit             '/
+     +/'NO_ITEM','INTEGER'  , 4,1,1,'number of items'                  ,
+     + 'ITEM_ID','CHARACTER',10,1,0,'unique item identification'       ,
+     + 'ITEM_NM','CHARACTER',50,1,0,'item name'                        ,
+     + 'UNIT'   ,'CHARACTER',20,1,0,'unit'                             ,
+     + 'DEFAULT','REAL'     , 4,1,0,'default value'                    ,
+     + 'AGGREGA','CHARACTER',10,1,0,'variable used for aggregation    ',
+     + 'DISAGGR','CHARACTER',10,1,0,'variable used for dis-aggregation',
+     + 'GROUPID','CHARACTER',30,1,0,'subtance group ID                ',
+     + 'SEG_EXC','CHARACTER', 1,1,0,'segment / exchange indication    ',
+     + 'WK'     ,'CHARACTER', 1,1,0,'active / inactive indication     '/
 !
 !     Read all elements
 !
@@ -143,14 +138,14 @@
      +                 UINDEX , 1        ,
      +                 buflen , NO_ITEM  )
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(1)
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(1)
          WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
       IF ( NO_ITEM .GT. NO_ITEM_MAX ) THEN
-         WRITE(LUNREP,*) 'ERROR reading group ',GRPNAM
-         WRITE(LUNREP,*) 'Actual number of items: ',NO_ITEM
-         WRITE(LUNREP,*) 'greater than maximum: ',NO_ITEM_MAX
+         WRITE(LUNREP,*) 'ERROR reading group',GRPNAM
+         WRITE(LUNREP,*) 'Actual number of items:',NO_ITEM
+         WRITE(LUNREP,*) 'greater than maximum:',NO_ITEM_MAX
          IERROR = 1
          GOTO 900
       ENDIF
@@ -167,8 +162,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_ID  )
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(2)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(2)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(3)
@@ -178,8 +173,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_NAME)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(3)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(3)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(4)
@@ -189,8 +184,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_UNIT)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(4)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(4)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(5)
@@ -200,8 +195,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_DEFAULT)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(5)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(5)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(6)
@@ -211,8 +206,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_DISAGGR)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(6)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(6)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(7)
@@ -222,8 +217,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_AGGREGA)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(7)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(7)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(8)
@@ -233,8 +228,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_GROUPID)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(8)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(8)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(9)
@@ -244,8 +239,8 @@
      +                 UINDEX , 1        ,
      +                 BUFLEN , ITEM_SEGX)
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(9)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(9)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(10)
@@ -255,35 +250,8 @@
      +                 UINDEX , 1         ,
      +                 BUFLEN , ITEM_WK  )
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(10)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
-         GOTO 900
-      ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(11)
-      BUFLEN = NBYTSG(11)*ELMDMS(2,11)
-      IERROR = GETELS (DEFFDS ,
-     +                 GRPNAM , ELMNMS(11),
-     +                 UINDEX , 1         ,
-     +                 BUFLEN , ITEM_SN  )
-      IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'WARNING reading element ',ELMNMS(11)
-         WRITE(LUNREP,*) 'Apparently this processes definition file has not been adapted for NetCDF'
-         WRITE(LUNREP,*) 'Ignoring standard names and units NetCDF'
-
-         IERROR = 0
-         ITEM_SN = ' '
-         ITEM_SU = ' '
-         GOTO 900
-      ENDIF
-!     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(12)
-      BUFLEN = NBYTSG(12)*ELMDMS(2,12)
-      IERROR = GETELS (DEFFDS ,
-     +                 GRPNAM , ELMNMS(12),
-     +                 UINDEX , 1         ,
-     +                 BUFLEN , ITEM_SU  )
-      IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(12)
-         WRITE(LUNREP,*) 'ERROR number: ',IERROR
+         WRITE(LUNREP,*) 'ERROR reading element',ELMNMS(10)
+         WRITE(LUNREP,*) 'ERROR number:',IERROR
          GOTO 900
       ENDIF
 !

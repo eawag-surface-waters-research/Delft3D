@@ -172,8 +172,7 @@
      +                itemag      , itemda      ,
      +                itemgr      , itemse      ,
 cjvb +                itemgr      , itemsx      ,
-     +                itemwk      , itemsn      ,
-     +                itemsu      , lunrep      ,
+     +                itemwk      , lunrep      ,
      +                ierror      )
       if ( ierror .ne. 0 ) then
          nerror = nerror + 1

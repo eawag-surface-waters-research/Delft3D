@@ -144,10 +144,7 @@
       nrvarm = outputs%cursize*2
       outputl%cursize=nrvarm
       allocate(outputl%names(nrvarm))
-      allocate(outputl%stdnames(nrvarm))
       allocate(outputl%pointers(nrvarm))
-      allocate(outputl%units(nrvarm))
-      allocate(outputl%descrs(nrvarm))
       nrvarn = 0
       nrvaro = 0
       do ioutp = 1 , noutp
@@ -254,29 +251,17 @@
       ! copy local output structure to argument
 
       deallocate(outputs%names)
-      deallocate(outputs%stdnames)
       deallocate(outputs%pointers)
-      deallocate(outputs%units)
-      deallocate(outputs%descrs)
       allocate(outputs%names(nrvarn))
-      allocate(outputs%stdnames(nrvarn))
       allocate(outputs%pointers(nrvarn))
-      allocate(outputs%units(nrvarm))
-      allocate(outputs%descrs(nrvarm))
       outputs%cursize  = nrvarn
       outputs%names(1:nrvarn) = outputl%names(1:nrvarn)
-      outputs%stdnames(1:nrvarn) = outputl%stdnames(1:nrvarn)
-      outputs%units(1:nrvarn) = outputl%units(1:nrvarn)
-      outputs%descrs(1:nrvarn) = outputl%descrs(1:nrvarn)
       outputs%pointers(1:nrvarn) = outputl%pointers(1:nrvarn)
 
       ! deallocate local output structure
 
       deallocate(outputl%names)
-      deallocate(outputl%stdnames)
       deallocate(outputl%pointers)
-      deallocate(outputl%units)
-      deallocate(outputl%descrs)
 
       if (timon) call timstop( ithndl )
       return

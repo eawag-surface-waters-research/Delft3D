@@ -67,8 +67,6 @@ c     Items table P2
       character*10 itemid(nitemm)
       character*20 itemun(nitemm)
       character*50 itemnm(nitemm)
-      character*100 itemsn(nitemm)
-      character*40  itemsu(nitemm)
       real         itemde(nitemm)
       character*1  itemwk(nitemm)
       character*10 itemag(nitemm),
@@ -77,8 +75,8 @@ c     Items table P2
       integer      item_i(nitemm)
 
       common /item/ itemse, itemex, itemid, itemun, itemnm,
-     +              itemsn, itemsu, itemde, itemwk, itemag,
-     j              itemda, itemgr, item_i
+     +              itemde, itemwk, itemag, itemda, itemgr,
+     j              item_i
 
 c     FORTRAN subroutines table P3
 

@@ -37,8 +37,6 @@
       integer                             :: istat                  !  loop counter statistical processes
       integer                             :: iioitem                !  loop counter io items
       integer                             :: iret                   !  function return code
-      integer                             :: ierr                   !  allocate error code
-      
       integer(4)                          :: ithndl = 0             !  handle for performance timer
       if (timon) call timstrt( "set_stat_output", ithndl )
 
@@ -188,9 +186,10 @@
 
          ! put the local arrays in the output structure
 
-         deallocate(Outputs%names, Outputs%pointers, Outputs%stdnames, Outputs%units, Outputs%descrs, STAT=ierr)
-         allocate(Outputs%names(nrvart), Outputs%pointers(nrvart), Outputs%stdnames(nrvart),
-     &          Outputs%units(nrvart), Outputs%descrs(nrvart), STAT=ierr)
+         deallocate(outputs%pointers)
+         deallocate(outputs%names)
+         allocate(outputs%pointers(nrvart))
+         allocate(outputs%names(nrvart))
          outputs%cursize = nrvart
          outputs%pointers(1:nrvart) = iopoi3(1:nrvart)
          outputs%names(1:nrvart)    = ounam3(1:nrvart)

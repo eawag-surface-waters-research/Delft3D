@@ -60,7 +60,6 @@ delwaq2_LDADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
     -lpthread \
-    -luuid \
     -ldl
 
 delwaq2_LDFLAGS = -export-dynamic 
