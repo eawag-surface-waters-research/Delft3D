@@ -207,6 +207,7 @@
          ! for openda-usage, where multiple instances are launched,
          ! the time module does not work correctly.
          if ( dlwqd%set_timer ) timon = .true.
+         timon = .true.
          if (timon) call timstrt( "delwaq2", ithndl )
 !
 !        boot the system; read dimensions of sysn from delwaq03.wrk-file

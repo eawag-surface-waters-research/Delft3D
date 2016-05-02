@@ -116,7 +116,7 @@ subroutine delwaq2_global_data_initialize(runid_given)
                       24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 , &
                       34 , 35 , 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 , &
                       44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 , 52 , 53 , &
-                      54 , 55 , 56 , 0   ,0  ,0   ,0   ,0   ,0   ,0  /)
+                      54 , 55 , 56 , 57 , 58 , -1 , -1 , -1 , -1 , -1 /)
 
     lchar =   (/  '-delwaq03.wrk' , '-delwaq04.wrk' , &
                   '-harmonic.wrk' , '-pointers.wrk' , &
@@ -140,9 +140,9 @@ subroutine delwaq2_global_data_initialize(runid_given)
                   '.adf         ' , '-kenmerk.wrk ' , &
                   '-filenaam.wrk' , '-stat.map    ' , &
                   '-stat.mon    ' , '             ' , &
-                  '             ' , '             ' , &
-                  '             ' , '             ' , &
-                  '             ' , '             '/)
+                  '<delparfile> ' , '<ncgridfile> ' , &
+                  '-his.nc      ' , '-bal-his.nc  ' , &
+                  '-map.nc      ' , '-stat-map.nc '/)
 
     filtype = 0
 

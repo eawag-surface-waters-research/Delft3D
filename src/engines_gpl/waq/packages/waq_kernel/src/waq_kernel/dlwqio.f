@@ -22,8 +22,9 @@
 !!  rights reserved.
 
       SUBROUTINE DLWQIO ( LUNWRO, LCH   , LUREP , NOUTP , NRVART,
-     +                    NBUFMX, IOUTPS, IOPOIN, OUNAM , LUN   ,
-     +                    LCHAR , MYPART, IERR  )
+     +                    NBUFMX, IOUTPS, IOPOIN, OUNAM , OUSNM ,
+     +                    OUUNI , OUDSC , NOTOT , SYSNM , SYUNI ,
+     +                    SYDSC , LUN   , LCHAR , MYPART, IERR  )
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -57,6 +58,12 @@
 !                                            index 7 = initialize flag
 !     IOPOIN  INTEGER  NRVART    OUTPUT   Pointer to DELWAQ array's
 !     OUNAM   CHAR*(*) NRVART    OUTPUT   name of output variable
+!     OUSNM   CHAR*(*) NRVART    OUTPUT   standard name of output variable
+!     OUUNI   CHAR*(*) NRVART    OUTPUT   unit of output variable
+!     OUDSC   CHAR*(*) NRVART    OUTPUT   description of output variable
+!     OSSNM   CHAR*(*) NRVART    OUTPUT   standard name of substance
+!     OSUNI   CHAR*(*) NRVART    OUTPUT   unit of substance
+!     OSDSC   CHAR*(*) NRVART    OUTPUT   description of substance
 !     LUN     INTEGER    *        INPUT   array with unit numbers
 !     LCHAR   CHAR*(*)   *        INPUT   filenames
 !     MYPART  INTEGER       1     INPUT   subdomain number in parallel run
@@ -65,20 +72,20 @@
 !     Declaration of arguments
 !
       use timers
-      INTEGER       LUNWRO, LUREP , NOUTP , NRVART, NBUFMX,
+      use output
+
+      INTEGER       LUNWRO, LUREP , NOUTP , NRVART, NBUFMX, NOSYS,
      +              IERR
       INTEGER       IOUTPS(7,*)   , IOPOIN(*)     , LUN(*)
       CHARACTER*(*) LCH           , LCHAR(*)
       CHARACTER*20  OUNAM(*)
+      CHARACTER*100 OUSNM(*)      , SYSNM(*)
+      CHARACTER*40  OUUNI(*)      , SYUNI(*)
+      CHARACTER*60  OUDSC(*)      , SYDSC(*)
 !
 !     Local declarations
 !
       PARAMETER   ( VERSI1 = 0.0 , VERSI2 = 0.1 )
-      PARAMETER   ( IMON = 1 , IMO2 = 2 , IDMP = 3 , IDM2 = 4 ,
-     +              IHIS = 5 , IHI2 = 6 , IMAP = 7 , IMA2 = 8 ,
-     +              IBAL = 9 , IHNF =10 , IHN2 =11 , IMNF =12 ,
-     +              IMN2 =13 , IMO3 =14 , IMO4 =15 , IHI3 =16 ,
-     +              IHI4 =17 , IHN3 =18 , IHN4 =19 , IBA2 =20 )
       PARAMETER   ( LUOFF = 18 )
       PARAMETER   ( LUOFF2= 36 )
       INTEGER       NOUTPD, NRVARD, NBUFMD
@@ -129,6 +136,14 @@
       IF (NRVART.GT.0) THEN
          READ (LUNWRO, ERR=900, END=900) ( IOPOIN(K)   , K = 1 , NRVART)
          READ (LUNWRO, ERR=900, END=900) ( OUNAM (K)   , K = 1 , NRVART)
+         READ (LUNWRO, ERR=900, END=900) ( OUSNM (K)   , K = 1 , NRVART)
+         READ (LUNWRO, ERR=900, END=900) ( OUUNI (K)   , K = 1 , NRVART)
+         READ (LUNWRO, ERR=900, END=900) ( OUDSC (K)   , K = 1 , NRVART)
+      ENDIF
+      IF (NOTOT.GT.0) THEN
+         READ (LUNWRO, ERR=900, END=900) ( SYSNM (K)   , K = 1 , NOTOT)
+         READ (LUNWRO, ERR=900, END=900) ( SYUNI (K)   , K = 1 , NOTOT)
+         READ (LUNWRO, ERR=900, END=900) ( SYDSC (K)   , K = 1 , NOTOT)
       ENDIF
 !
 !     Set initialize flag, open files: only on first subdomain

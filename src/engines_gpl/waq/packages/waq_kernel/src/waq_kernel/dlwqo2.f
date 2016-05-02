@@ -26,6 +26,7 @@
      +                    CONC  , CONS  , PARAM , FUNC  , SEGFUN,
      +                    VOLUME, NOCONS, NOFUN , IDT   , NOUTP ,
      +                    LCHAR , LUN   , IOUTPS, IOPOIN, RIOBUF,
+     +                    OUSNM , OUUNI , OUDSC , SYSNM , SYUNI , SYDSC ,
      +                    OUNAM , NX    , NY    , LGRID , CGRID ,
      +                    NOSYS , BOUND , IP    , AMASS , AMASS2,
      +                    ASMASS, NOFLUX, FLXINT, ISFLAG, IAFLAG,
@@ -164,6 +165,7 @@
 !
       use timers
       use m_couplib
+      use output
 !
       INTEGER       NOTOT , NOSEG , NOPA  , NOSFUN, ITIME ,
      +              NODUMP, NOCONS, NOFUN , IDT   , NOUTP ,
@@ -209,6 +211,10 @@
      +              RANAM(*)      , BNDTYP(*)     ,
      +              CONAME(*)     , PANAME(*)     ,
      +              FUNAME(*)     , SFNAME(*)
+      CHARACTER*100 OUSNM(*)      , SYSNM(*)
+      CHARACTER*40  OUUNI(*)      , SYUNI(*)
+      CHARACTER*60  OUDSC(*)      , SYDSC(*)
+
       CHARACTER*40  MONAME(4)
       CHARACTER*(*) LCHAR (*)
       LOGICAL       IMFLAG, IDFLAG, IHFLAG
@@ -223,12 +229,6 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( IMON = 1 , IMO2 = 2 , IDMP = 3 , IDM2 = 4 ,
-     +              IHIS = 5 , IHI2 = 6 , IMAP = 7 , IMA2 = 8 ,
-     +              IBAL = 9 , IHNF =10 , IHN2 =11 , IMNF =12 ,
-     +              IMN2 =13 , IMO3 =14 , IMO4 =15 , IHI3 =16 ,
-     +              IHI4 =17 , IHN3 =18 , IHN4 =19 , IBA2 =20 ,
-     +              IBA3 =21 )
       PARAMETER   ( IGSEG = 1, IGMON = 2, IGGRD = 3, IGSUB= 4 )
       PARAMETER   ( LUOFF = 18 )
       PARAMETER   ( LUOFF2= 36 )
@@ -239,8 +239,22 @@
       LOGICAL       LOFLAG, LMFIRS, LDFIRS, LHFIRS, LDUMMY
       LOGICAL       LGET  , LREAD
       REAL, ALLOCATABLE :: SURF(:)
+
+      INTEGER, SAVE ::       MNCREC = 0
+      INTEGER, SAVE ::       timeid, bndtimeid
+!      INTEGER, SAVE ::       idepth
+      INTEGER, ALLOCATABLE, SAVE ::  MNCWQID1(:,:), MNCWQID2(:,:)
+      LOGICAL       FIRST  /.TRUE./
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqo2", ithandl )
+
+      IF (FIRST) THEN
+         ALLOCATE(MNCWQID1(NOTOT,2) , MNCWQID2(NOVAR,2))
+         FIRST = .FALSE.
+
+         CALL ZOEKNS( 'LocalDepth', NOVAR, OUNAM, l0, IDEPTH )
+      ENDIF
 !
 !     Evaluate standard DELWAQ output timers
 !
@@ -538,7 +552,7 @@
 !
                CALL OUTMAP (LUNOUT   , LCHOUT, ITIME , MONAME, NOSEG ,
      +                      NOTOT    , CONC  , SYNAME, NRVAR , RIOBUF,
-     +                      OUNAM(K1), iknmrk, INIOUT)
+     +                      OUNAM(K1), IKNMRK, INIOUT)
 !
             ELSEIF ( ISRTOU .EQ. IMNF ) THEN
 !
@@ -547,6 +561,15 @@
      +                      NOTOT    , CONC  , SYNAME, NRVAR , RIOBUF     ,
      +                      OUNAM(K1), IOSTRT, IOSTOP, IOSTEP, RIOBUF(IOF),
      +                      INIOUT   )
+!
+            ELSEIF ( ISRTOU .EQ. IMNC ) THEN
+!
+               MNCREC = MNCREC + 1
+               CALL OUTMNC (LUN(49)  , LCHAR(49), LCHAR(46), timeid, bndtimeid, MNCREC ,
+     +                      ITIME    , MONAME   , NOSEG    , NOTOT  ,
+     +                      CONC     , SYNAME   , SYSNM, SYUNI, SYDSC, MNCWQID1 , NRVAR  ,
+     +                      RIOBUF   , OUNAM(K1), OUSNM(K1), OUUNI(K1), OUDSC(K1), MNCWQID2 ,
+     +                      VOLUME   , IKNMRK   , LUN(19))
 !
             ELSEIF ( ISRTOU .EQ. IMA2 ) THEN
 !
@@ -561,6 +584,15 @@
      +                      0        , CONC  , SYNAME, NRVAR , RIOBUF     ,
      +                      OUNAM(K1), IOSTRT, IOSTOP, IOSTEP, RIOBUF(IOF),
      +                      INIOUT   )
+!
+            ELSEIF ( ISRTOU .EQ. IMNC2 ) THEN
+!
+               MNCREC = MNCREC + 1
+               CALL OUTMNC (LUN(49)  , LCHAR(49), LCHAR(46), timeid, bndtimeid, MNCREC ,
+     +                      ITIME    , MONAME   , NOSEG    , 0      ,
+     +                      CONC     , SYNAME   , SYSNM, SYUNI, SYDSC, MNCWQID1 , NRVAR  ,
+     +                      RIOBUF   , OUNAM(K1), OUSNM(K1), OUUNI(K1), OUDSC(K1), MNCWQID2 ,
+     +                      IDEPTH   , IKNMRK   , LUN(19))
 !
             ELSEIF ( ISRTOU .EQ. IBAL ) THEN
 !

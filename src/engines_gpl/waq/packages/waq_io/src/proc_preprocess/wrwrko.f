@@ -21,7 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine wrwrko ( lunwro, noutp , nbufmx, ioutps, outputs)
+      subroutine wrwrko ( lunwro, noutp , nbufmx, ioutps, outputs,
+     &                    notot,  substdname, subunit, subdescr)
 
 !     Deltares Software Centre
 
@@ -41,6 +42,10 @@
       integer             , intent(in   ) :: nbufmx                 !< maximum buffer length
       integer             , intent(in   ) :: ioutps(7,*)            !< (old) output structure
       type(outputcoll)    , intent(in   ) :: outputs                !< output structure
+      integer             , intent(in   ) :: notot                  !< total number of substances
+      character*100       , intent(in   ) :: substdname(notot)      !< substance standard name
+      character*40        , intent(in   ) :: subunit(notot)         !< substance unit
+      character*60        , intent(in   ) :: subdescr(notot)        !< substance description
 
       ! local
 
@@ -66,6 +71,14 @@
       if (nrvart.gt.0) then
          write ( lunwro ) ( outputs%pointers(k)   , k = 1 , nrvart)
          write ( lunwro ) ( outputs%names   (k)   , k = 1 , nrvart)
+         write ( lunwro ) ( outputs%stdnames(k)   , k = 1 , nrvart)
+         write ( lunwro ) ( outputs%units   (k)   , k = 1 , nrvart)
+         write ( lunwro ) ( outputs%descrs  (k)   , k = 1 , nrvart)
+      end if
+      if (notot.gt.0) then
+         write ( lunwro ) ( substdname(k)   , k = 1 , notot)
+         write ( lunwro ) ( subunit   (k)   , k = 1 , notot)
+         write ( lunwro ) ( subdescr  (k)   , k = 1 , notot)
       end if
 
       if (timon) call timstop( ithndl )

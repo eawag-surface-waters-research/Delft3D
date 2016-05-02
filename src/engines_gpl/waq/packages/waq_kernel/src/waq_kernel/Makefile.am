@@ -16,6 +16,7 @@ AM_FFLAGS += $(OPENMP_FFLAGS)
 
 
 FMODULES += \
+        -I${NETCDFROOT}/include \
         -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/part/packages/data_f/src/ \
         -I$(top_builddir)/engines_gpl/part/packages/utils_f/src/ \
@@ -24,6 +25,7 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/ \
         -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
@@ -206,6 +208,7 @@ libWaqKernel_la_SOURCES = \
        outhnf.f \
        outmap.f \
        outmnf.f \
+       outmnc.f \
        outmo1.f \
        outmo2.f \
        outmo3.f \

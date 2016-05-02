@@ -23,8 +23,8 @@
 
       subroutine rdodef ( noutp  , nrvar  , nrvarm , isrtou , ounam  ,
      &                    infile , nx     , ny     , nodump , ibflag ,
-     &                    lmoutp , ldoutp , lhoutp , ierr   , igrdou ,
-     &                    ndmpar , vrsion )
+     &                    lmoutp , ldoutp , lhoutp , lncout , ierr   ,
+     &                    igrdou , ndmpar , vrsion )
 
 !       Deltares Software Centre
 
@@ -38,6 +38,7 @@
 
       use rd_token     !   for the reading of tokens
       use timers       !   performance timers
+      use output, enable_netcdf_output => lncout
 
       implicit none
 
@@ -58,6 +59,7 @@
       logical      , intent(in   ) :: lmoutp                !< Monitor output active
       logical      , intent(in   ) :: ldoutp                !< Dump output active
       logical      , intent(in   ) :: lhoutp                !< History output active
+      logical      , intent(in   ) :: lncout                !< NetCDF output active
       integer  ( 4), intent(inout) :: ierr                  !< Cumulative error count
       integer  ( 4), intent(in   ) :: igrdou(4)             !< Output grid indication
       integer  ( 4), intent(in   ) :: ndmpar                !< number of dump areas
@@ -65,11 +67,6 @@
 
 !     Local
 
-      integer, parameter :: imon = 1 , imo2 = 2 , idmp = 3 , idm2 = 4 ,
-     &                      ihis = 5 , ihi2 = 6 , imap = 7 , ima2 = 8 ,
-     &                      ibal = 9 , ihnf =10 , ihn2 =11 , imnf =12 ,
-     &                      imn2 =13 , imo3 =14 , imo4 =15 , ihi3 =16 ,
-     &                      ihi4 =17 , ihn3 =18 , ihn4 =19 , iba2 =20
       integer, parameter :: igseg= 1 , igmon= 2 , iggrd= 3 , igsub = 4
       integer               hissrt, hisnrv, mapsrt, mapnrv
       integer               io         !  loop variable
@@ -267,11 +264,21 @@
          if ( gettoken( ioptf, ierr2 ) .gt. 0 ) goto 100
          select case ( ioptf )
             case ( 0 )
+               if (.not. lncout) then
                write (lunut,3000) ' NEFIS map file switched off'
+               else
+                  write (lunut,3000) ' NetCDF map file switched off'
+               end if
             case ( 1 )
-               write (lunut,3000) ' NEFIS map file switched on'
-               if ( mapsrt .eq. imap ) isrtou(7) = imnf
-               if ( mapsrt .eq. ima2 ) isrtou(7) = imn2
+               if (.not. lncout) then
+                  write (lunut,3000) ' NEFIS map file switched on'
+                  if ( mapsrt .eq. imap ) isrtou(7) = imnf
+                  if ( mapsrt .eq. ima2 ) isrtou(7) = imn2
+               else
+                  write (lunut,3000) ' NetCDF map file switched on'
+                  if ( mapsrt .eq. imap ) isrtou(7) = imnc
+                  if ( mapsrt .eq. ima2 ) isrtou(7) = imnc2
+               end if
                nrvar(7)  = mapnrv
                do ivar = 1 , nrvar(7)
                   ounam(ivar,7) = ounam(ivar,4)

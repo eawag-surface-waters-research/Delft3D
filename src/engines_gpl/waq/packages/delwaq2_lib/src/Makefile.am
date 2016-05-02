@@ -55,6 +55,7 @@ libDelwaq2_la_LIBADD = \
     $(top_builddir)/engines_gpl/part/packages/data_f/src/libdata_f.la \
     $(top_builddir)/engines_gpl/part/packages/version_number/src/libpart_version_number.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
+    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf/libdlwq_netcdf.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.la \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDIOF90.la \
@@ -65,6 +66,7 @@ libDelwaq2_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
+    -luuid \
     -lpthread
 
 # To be added when using Intel 11:

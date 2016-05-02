@@ -188,6 +188,16 @@
 		<Filter Name="mod_timings">
 		<File RelativePath=".\src\mod_timings\m_timers_waq.f90"/>
 		<File RelativePath=".\src\mod_timings\m_timings.f90"/></Filter>
+		<Filter Name="dlwq_netcdf">
+		<File RelativePath=".\src\dlwq_netcdf\dlwq_netcdf.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration></File></Filter>
 		<Filter Name="waq_utils">
 		<File RelativePath=".\src\waq_utils\avundf.f"/>
 		<File RelativePath=".\src\waq_utils\cnvper.f"/>
