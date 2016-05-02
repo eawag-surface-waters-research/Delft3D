@@ -11,6 +11,13 @@ noinst_LTLIBRARIES = libWaqKernel.la
 AM_FCFLAGS += $(OPENMP_FCFLAGS)
 AM_FFLAGS += $(OPENMP_FFLAGS)
 
+AM_FCFLAGS += \
+    $(FINCLUDES) \
+    $(FMODULES)
+
+# NetCDF
+AM_FCFLAGS+=${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
+
 #-------------------------------------------------------------------------------
 #Includes
 
@@ -208,7 +215,7 @@ libWaqKernel_la_SOURCES = \
        outhnf.f \
        outmap.f \
        outmnf.f \
-       outmnc.f \
+       outmnc.F \
        outmo1.f \
        outmo2.f \
        outmo3.f \

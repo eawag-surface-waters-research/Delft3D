@@ -21,6 +21,13 @@ FMODULES += \
 	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
 	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
+AM_FCFLAGS += \
+    $(FINCLUDES) \
+    $(FMODULES)
+
+# NetCDF
+AM_FCFLAGS+=${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
+
 #-------------------------------------------------------------------------------
 #Sources
 libwaq_io_la_SOURCES = bound.f \

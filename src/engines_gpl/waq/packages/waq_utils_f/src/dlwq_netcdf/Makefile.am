@@ -14,10 +14,17 @@ FMODULES += \
         -I${NETCDFROOT}/include \
         -I$(top_builddir)/engines_gpl/waq/include 
 
+AM_FCFLAGS += \
+    $(FINCLUDES) \
+    $(FMODULES)
+
+# NetCDF
+AM_FCFLAGS+=${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
+
 #-------------------------------------------------------------------------------
 #Sources
 libdlwq_netcdf_la_SOURCES = \
-       dlwq_netcdf.f90
+       dlwq_netcdf.F90
 
 #-------------------------------------------------------------------------------
 # Libraries
