@@ -60,10 +60,6 @@
 !
       IFLUX = 0
       DO 9000 ISEG = 1 , NOSEG
-!!    CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!    IF (IKMRK1.EQ.1 .OR. IKMRK1.EQ.3) THEN
-      IF (BTEST(IKNMRK(ISEG),0)) THEN
-!
 
       VOLUME = PMSA(IP1 )
       SURF   = PMSA(IP2 )
@@ -80,8 +76,6 @@
       DEPTH = VOLUME / SURF
 !
       PMSA (IP3 ) = DEPTH
-!
-      ENDIF
 !
       IFLUX = IFLUX + NOFLUX
       IP1   = IP1   + INCREM (  1 )
