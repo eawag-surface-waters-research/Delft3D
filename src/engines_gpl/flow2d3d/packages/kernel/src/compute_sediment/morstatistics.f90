@@ -101,6 +101,7 @@ subroutine morstats_full(gdp, dbodsd, s1, dps, umean, vmean, sbuu, sbvv, ssuu, s
 !
 ! Local variables
 !
+    integer                              , pointer :: nstatqnt
     real(fp), dimension(:)               , pointer :: rhosol
     real(fp), dimension(:)               , pointer :: cdryb
     type (moroutputtype)                 , pointer :: moroutput  ! structure containing morphology output options
@@ -121,8 +122,11 @@ subroutine morstats_full(gdp, dbodsd, s1, dps, umean, vmean, sbuu, sbvv, ssuu, s
     rhosol         => gdp%gdsedpar%rhosol
     cdryb          => gdp%gdsedpar%cdryb
     moroutput      => gdp%gdmorpar%moroutput
+    nstatqnt       => gdp%gdmorpar%moroutput%nstatqnt
     statqnt        => gdp%gderosed%statqnt
     nmaxddb        =  gdp%d%nmax - 2*gdp%d%ddbound
+    !
+    if (nstatqnt == 0) return
     !
     do nm = nmlb, nmub
         nmd = nm - nmaxddb

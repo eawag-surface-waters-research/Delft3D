@@ -74,6 +74,7 @@ subroutine wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     type (datagroup)                    , pointer :: group
     integer                             , pointer :: nmaxgl
     integer                             , pointer :: mmaxgl
+    integer                             , pointer :: nstatqnt
     !
     type (moroutputtype)                , pointer :: moroutput  ! structure containing morphology output options
     real(fp), dimension(:,:)            , pointer :: statqnt
@@ -102,6 +103,8 @@ subroutine wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     nmaxgl    => gdp%gdparall%nmaxgl
     moroutput => gdp%gdmorpar%moroutput
     statqnt   => gdp%gderosed%statqnt
+    nstatqnt  => gdp%gdmorpar%moroutput%nstatqnt
+    ierror = 0
     !
     select case (irequest)
     case (REQUESTTYPE_DEFINE)
@@ -163,7 +166,9 @@ subroutine wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
             endif
         enddo
         !
-        statqnt(:, 1) = 0.0_fp
+        if (nstatqnt > 0) then
+           statqnt(:, 1) = 0.0_fp
+        endif
         !
  9999   continue
         if (ierror/= 0) error = .true.
