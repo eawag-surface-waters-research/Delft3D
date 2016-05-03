@@ -251,7 +251,6 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
          enddo
          do i = 1,nsrc
             tlocput_names(iloc+nsluv+i) = namsrc(i)
-            call str_lower(tlocput_names(iloc+nsluv+i))
          enddo
          !
          ! Collect parameters from all domains

@@ -152,7 +152,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
        if (rtc_domainnr == 1) then
           call datatortc(timsec, ifirstrtc, tparput, &
                        & tlocput_names, tnlocput, &
-                       & tparput_names, 2+lstsci, success)
+                       & tparput_names, tnparput, success)
        endif
        call timer_stop(timer_wait, gdp)
     endif
