@@ -195,6 +195,7 @@ subroutine tricom_init(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: alfas
     integer(pntrsize)                   , pointer :: ampbc
     integer(pntrsize)                   , pointer :: c
+    integer(pntrsize)                   , pointer :: cbuv
     integer(pntrsize)                   , pointer :: cgc
     integer(pntrsize)                   , pointer :: ctr
     integer(pntrsize)                   , pointer :: dircom
@@ -578,6 +579,7 @@ subroutine tricom_init(olv_handle, gdp)
     alfas               => gdp%gdr_i_ch%alfas
     ampbc               => gdp%gdr_i_ch%ampbc
     c                   => gdp%gdr_i_ch%c
+    cbuv                => gdp%gdr_i_ch%cbuv
     cgc                 => gdp%gdr_i_ch%cgc
     ctr                 => gdp%gdr_i_ch%ctr
     dircom              => gdp%gdr_i_ch%dircom
@@ -1584,6 +1586,7 @@ subroutine tricom_init(olv_handle, gdp)
     if (error) goto 9998
     call rtc_comm_put (i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                      & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
+                     & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &
                      & gdp)
     !
     ! End of synchronisation point 2

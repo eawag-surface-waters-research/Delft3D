@@ -2085,6 +2085,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     if (rtcact) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                        & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
+                       & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &
                        & gdp)
     endif
     if (sbkol) then

@@ -48,7 +48,8 @@ type sv_rtc
     integer :: rtc_domainnr   ! number of this domain in list of domains participating in RTC communication
     integer :: rtc_ndomains   ! number of domains that participate in RTC communication
     integer :: tnparget       ! total number of parameters to get from RTC module
-    integer :: tnlocput       ! total number of parameters to put to RTC module
+    integer :: tnparput       ! total number of parameters for which to put data to RTC module
+    integer :: tnlocput       ! total number of locations for which to put data to RTC module
     integer :: parget_offset  ! offset for parameters of this domain in tparget(_names)
     integer :: parput_offset  ! offset for parameters of this domain in tparput(_names)
     !

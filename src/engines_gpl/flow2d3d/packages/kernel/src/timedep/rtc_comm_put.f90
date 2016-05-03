@@ -1,5 +1,6 @@
 subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
                       & zk        ,s1        ,dps       ,r0        , &
+                      & nsluv     ,cbuv      ,nsrc      ,disch     , &
                       & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -59,6 +60,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     integer                       , pointer :: stacnt
     real(fp)                      , pointer :: timsec
     integer                       , pointer :: tnlocput
+    integer                       , pointer :: tnparput
     real(fp)     , dimension(:,:) , pointer :: tparput
     character(80), dimension(:)   , pointer :: tlocput_names
     character(80), dimension(:)   , pointer :: tparput_names
@@ -66,14 +68,18 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
 !
 ! Global variables
 !
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    integer                                                             , intent(in)  :: nsluv    !  Description and declaration in dimens.igs
+    integer                                                             , intent(in)  :: nsrc     !  Description and declaration in dimens.igs
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                        , intent(in)  :: kfsmax   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                        , intent(in)  :: kfsmin   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                        , intent(in)  :: kfs      !  Description and declaration in esm_alloc_int.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                        , intent(in)  :: dps      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, gdp%d%kmax, gdp%d%lstsci), intent(in)  :: r0
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: s1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(  gdp%d%kmax)         , intent(in) :: sig
-    real(fp)  , dimension(0:gdp%d%kmax)         , intent(in) :: zk
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                        , intent(in)  :: s1       !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(  gdp%d%kmax)                                 , intent(in)  :: sig
+    real(fp)  , dimension(0:gdp%d%kmax)                                 , intent(in)  :: zk
+    real(fp)  , dimension(4, nsluv)                                     , intent(in)  :: cbuv     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nsrc)                                         , intent(in)  :: disch    !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -98,6 +104,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     stacnt         => gdp%gdrtc%stacnt
     timsec         => gdp%gdinttim%timsec
     tnlocput       => gdp%gdrtc%tnlocput
+    tnparput       => gdp%gdrtc%tnparput
     tparput        => gdp%gdrtc%tparput
     tlocput_names  => gdp%gdrtc%tlocput_names
     tparput_names  => gdp%gdrtc%tparput_names
@@ -124,12 +131,20 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
              enddo
           enddo
        enddo
+       do i = 1,nsluv
+           iloc = iloc + 1
+           tparput(1,iloc) = cbuv(1,i)
+       enddo
+       do i = 1,nsrc
+           iloc = iloc + 1
+           tparput(lstsci+3,iloc) = disch(i)
+       enddo
        !
        ! Collect parameters from all domains
        !
        call timer_start(timer_wait, gdp)
        if (rtc_ndomains>1) then
-          call rtccommunicate(tparput, (2+lstsci)*tnlocput)
+          call rtccommunicate(tparput, tnparput*tnlocput)
        endif
        !
        ! Communication with RTC occurs only by the master domain

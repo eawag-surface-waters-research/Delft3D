@@ -74,6 +74,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
     integer                       , pointer :: stacnt
     real(fp)                      , pointer :: timsec
     integer                       , pointer :: tnparget
+    integer                       , pointer :: tnparput
     integer                       , pointer :: tnlocput
     real(fp)     , dimension(:,:) , pointer :: tparput
     character(80), dimension(:)   , pointer :: tlocget_names
@@ -133,6 +134,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
     stacnt         => gdp%gdrtc%stacnt
     timsec         => gdp%gdinttim%timsec
     tnparget       => gdp%gdrtc%tnparget
+    tnparput       => gdp%gdrtc%tnparput
     tnlocput       => gdp%gdrtc%tnlocput
     tparput        => gdp%gdrtc%tparput
     tlocget_names  => gdp%gdrtc%tlocget_names
@@ -154,13 +156,16 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
       ! Determine total number of parameters to be received
       ! and collect all parameter names
       !
+      tnparput = 0
       if (rtc_ndomains > 1) then
          allocate(nparams(2,rtc_ndomains),stat=istat)
          if (istat /= 0) goto 999
          nparams = 0.0_fp
          !
          nparams(1,rtc_domainnr) = real(nsluv+nsrc,fp) ! # parameters get
-         nparams(2,rtc_domainnr) = real(stacnt*kmax,fp) ! # parameters put
+         if (stacnt>0) then ! temporary compatibility solution: don't provide setpoints if there is no station in this domain ... :(
+            nparams(2,rtc_domainnr) = real(stacnt*kmax + nsluv+nsrc,fp) ! # parameters put
+         endif
          !
          call rtccommunicate(nparams, 2*rtc_ndomains)
          !
@@ -182,7 +187,10 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
       else
          tnparget = nsluv+nsrc
          parget_offset = 0
-         tnlocput = stacnt * kmax
+         if (stacnt>0) then ! temporary compatibility solution: don't provide setpoints if there is no station ... :(
+                            ! to do: check if RTC needs data and only put data to RTC if RTC asks for it
+            tnlocput = stacnt * kmax + nsluv+nsrc
+         endif
          parput_offset = 0
       endif
       anyRTCtoFLOW = tnparget > 0
@@ -210,11 +218,12 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
          !
          ! Collect parameters for this domain
          !
-         allocate(gdp%gdrtc%tparput(2+lstsci,tnlocput),stat=istat)
+         tnparput = 3+lstsci
+         allocate(gdp%gdrtc%tparput(tnparput,tnlocput),stat=istat)
          if (istat /= 0) goto 999
          allocate(gdp%gdrtc%tlocput_names(tnlocput),stat=istat)
          if (istat /= 0) goto 999
-         allocate(gdp%gdrtc%tparput_names(2+lstsci),stat=istat)
+         allocate(gdp%gdrtc%tparput_names(tnparput),stat=istat)
          if (istat /= 0) goto 999
          tparput => gdp%gdrtc%tparput
          tlocput_names => gdp%gdrtc%tlocput_names
@@ -227,6 +236,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
          do l = 1,lstsci
             tparput_names(2+l) = namcon(l)
          enddo
+         tparput_names(lstsci+3) = 'Flow Rate'
          !
          iloc = parput_offset
          tlocput_names = ' '
@@ -235,6 +245,13 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
                iloc = iloc + 1
                write(tlocput_names(iloc),'(2a,i0)') trim(namrtcsta(i)), '_', k
             enddo
+         enddo
+         do i = 1,nsluv
+            tlocput_names(iloc+i) = nambar(i)
+         enddo
+         do i = 1,nsrc
+            tlocput_names(iloc+nsluv+i) = namsrc(i)
+            call str_lower(tlocput_names(iloc+nsluv+i))
          enddo
          !
          ! Collect parameters from all domains
