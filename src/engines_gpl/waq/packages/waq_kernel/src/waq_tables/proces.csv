@@ -49,6 +49,7 @@ procid,procco,procfo,procnm
 "CalcRadDay",123,"CLCRAD    ","Actual radiation at segment boundaries            "
 "CalcRadUV ",123,"CLCRAD    ","UV-Radiation at segment upper and lower boundaries"
 "Daylength ",123,"DAYL      ","Daylength calculation                             "
+"Reflection",123,"REFL      ","Reflection calculation                            "
 "DepAve    ",123,"DEPAVE    ","Average depth for Bloom step                      "
 "vtrans    ",  3,"VTRANS    ","Vertical mixing distribution over a period        "
 "BLOOM_P   ",123,"D40BLO    ","BLOOM II algae module                             "

@@ -49,6 +49,7 @@
 "CalcRadDay", , ,A,A,
 "CalcRadUV ",A,A,A,A,
 "Daylength ",A,A,A,A,
+"Reflection",A,A,A,A,
 "DepAve    ", ,A,A,A,
 "vtrans    ", ,A,A,A,
 "BLOOM_P   ", ,A,A,A,

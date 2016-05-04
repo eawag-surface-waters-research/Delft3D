@@ -147,6 +147,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "CalcRadUV ","Rad_uv    ",   1,"x",1
 "CalcRadUV ","RadBot_uv ",   2,"x",1
 "Daylength ","DayL      ",   1,"x",1
+"Reflection","fRefl     ",   1,"x",1
 "DepAve    ","BloomDepth",   1,"x",1
 "DepAve    ","BlmDep_out",   2,"x",1
 "vtrans    ","SwVTRANS  ",   1,"x",1

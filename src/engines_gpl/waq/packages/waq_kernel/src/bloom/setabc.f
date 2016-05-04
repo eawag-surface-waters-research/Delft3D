@@ -141,22 +141,6 @@
       IF ( FLUSH .LT. 1.0D-6) GO TO 70
       WRITE (IOU(10),99998) FLUSH
    70 CONTINUE
-!
-!  Calculate solar radiation level for particular week.
-!
-!
-!  Determine surface reflectance and transmitted radiation
-!  -- average reflection modified according to WETZEL--
-!  Do not coreect for reflection when ID is negative: BLOOM model is
-!  is applied to a bottom segment.
-!
-      ALPHA=0.95
-      IF ((ID .LE. 17) .OR. (ID .GE. 32)) ALPHA=0.94
-      IF ((ID .LE. 13) .OR. (ID .GE. 36)) ALPHA=0.92
-      IF ((ID .LE.  4) .OR. (ID .GE. 45)) ALPHA=0.90
-      IF (ID .GT. 0) CSOL=ALPHA * CSOL
-!
-!
 !  Convert CSOL from:
 !  Joules per cm2 per week to Joules per m2 per day.
 !  Determine temperature correction, assuming that the nominal

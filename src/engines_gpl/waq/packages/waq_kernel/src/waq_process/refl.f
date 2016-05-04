@@ -21,19 +21,20 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine dayl   ( pmsa   , fl     , ipoint , increm , noseg  ,
+      subroutine refl   ( pmsa   , fl     , ipoint , increm , noseg  ,
      &                    noflux , iexpnt , iknmrk , noq1   , noq2   ,
      &                    noq3   , noq4   )
 !>\file
-!>       Daylength calculation in hours
+!>       Reflection calculation
 
 !
 !     Description of the module :
 !
-!        Computes daylength in hours.
-!        Formulea 6.2.7 from "Zonnestraling in Nederland",
-!        C.A.Velds, Thieme/KNMI, 1992, 1st imp., ISBN 90-5210-140-X
-!        General water quality module for DELWAQ:
+!        Computes fraction of radiation refelection according to BLOOM
+!
+!        With latitutes over 23. degree north gives the same seasonal result
+!        as originaly in BLOOM. Gives the right seasonal reflection at southern
+!        hemisphere and fixed reflection near equator (below 23 degrees N/S).
 !
 ! Name    T   L I/O   Description                                    Units
 ! ----    --- -  -    -------------------                            -----
@@ -55,14 +56,9 @@
       integer ip1,ip2,ip3,ip4,ip5
       integer in1,in2,in3,in4,in5
       real    time, tref, auxsys
-      real    latitudeg, daynr
-      double precision latitu, declin, temp, daylength
-      double precision sin50m, e     , pi
-      parameter ( sin50m = -1.454389765d-2 )
-      parameter ( e  = 1.721420632d-2 )
-      parameter ( pi = 3.141592654d0)
-      logical  varflg
-      integer  iseg
+      real    latitudeg, daynr, daynrrefl, reflec
+      logical varflg
+      integer weeknr , iseg
 
       in1  = increm( 1)
       in2  = increm( 2)
@@ -75,97 +71,76 @@
       ip3  = ipoint( 3)
       ip4  = ipoint( 4)
       ip5  = ipoint( 5)
-
+!
       varflg = .true.
-
       if ( in1 .eq. 0 .and. in2 .eq. 0 .and. in3 .eq. 0 .and.
      +     in4 .eq. 0                                        ) then
 
-!        Only constant inputs, so only single calculation of daylength needed to be set to all segments
+!        Only constant inputs, so only single calculation of reflec needed to be set to all segments
          varflg = .false.
+!
          time    = pmsa( ip1 )
-!        Conversion Latitude to rads
-         latitu  = pmsa( ip2 ) / 360 * 2 * pi
+         latitudeg = pmsa( ip2 )
          tref    = pmsa( ip3 )
          auxsys  = pmsa( ip4 )
 
 !        Conversion time to daynumbers relative to tref
-         daynr =  mod (time / auxsys + tref, 365.)
-
-!        Computes declination of sun on day DAYNR.
-         if (( daynr .lt. 0.) .or. ( daynr .gt. 365.)) then
-            declin = 9.9999d9
+         daynr =  mod (time / auxsys + tref, 365.) !- 1
+         
+         ! Compute reflection correction
+         if (abs(latitudeg).le.23.) then
+             reflec = 0.05
          else
-            declin = 6.918d-3 -
-     1               3.99912d-1 * dcos ( e * daynr) -
-     2               6.758d-3   * dcos ( 2.0d0 * e * daynr) -
-     3               2.697d-3   * dcos ( 3.0d0 * e * daynr) +
-     4               7.0257d-2  * dsin ( e * daynr) +
-     5               9.07d-4    * dsin ( 2.0d0 * e * daynr) +
-     6               1.480d-3   * dsin ( 3.0d0 * e * daynr)
+             if (latitudeg.gt.0.0) then
+                 daynrrefl = daynr
+             else
+                 daynrrefl = mod(daynr + 365./2.,365.)
+             endif
+             weeknr = int(daynrrefl/7.)+1
+             
+!            reflection as it was in setabc from (to be improved/expanded later on)
+             reflec = 0.05
+             if ((weeknr .le. 17) .or. (weeknr .ge. 32)) reflec=0.06
+             if ((weeknr .le. 13) .or. (weeknr .ge. 36)) reflec=0.08
+             if ((weeknr .le.  4) .or. (weeknr .ge. 45)) reflec=0.10
          endif
-
-!       Computes daylenth
-
-         temp = (( sin50m - dsin ( declin) * dsin ( latitu)) /
-     &                    ( dcos ( declin) * dcos ( latitu)))
-
-         if ( temp .gt. 1.0) then
-            temp   = 0.0
-         elseif ( temp .lt. -1.0) then
-            temp   = 24.0
-         else
-            temp   = 7.639437268d0 * acos ( temp)
-         endif
-         daylength = temp / 24.0
       endif
-
       do 9000 iseg = 1 , noseg
          if ( varflg ) then
             time    = pmsa( ip1 )
-!           Conversion Latitude to rads
-            latitu  = pmsa( ip2 ) / 360 * 2 * pi
+            latitudeg = pmsa( ip2 )
             tref    = pmsa( ip3 )
             auxsys  = pmsa( ip4 )
 
 !           Conversion time to daynumbers relative to tref
             daynr =  mod (time / auxsys + tref, 365.)
 
-!           Computes declination of sun on day DAYNR.
-            if (( daynr .lt. 0) .or. ( daynr .gt. 365.)) then
-               declin = 9.9999d9
+            ! Compute reflection correction
+            if (abs(latitudeg).le.23.) then
+                reflec = 0.05
             else
-               declin = 6.918d-3 -
-     1                  3.99912d-1 * dcos ( e * daynr) -
-     2                  6.758d-3   * dcos ( 2.0d0 * e * daynr) -
-     3                  2.697d-3   * dcos ( 3.0d0 * e * daynr) +
-     4                  7.0257d-2  * dsin ( e * daynr) +
-     5                  9.07d-4    * dsin ( 2.0d0 * e * daynr) +
-     6                  1.480d-3   * dsin ( 3.0d0 * e * daynr)
+                if (latitudeg.gt.0.0) then
+                    daynrrefl = daynr
+                else
+                    daynrrefl = mod(daynr + 365./2.,365.)
+                endif
+                weeknr = int(daynrrefl/7.)+1
+                
+!               reflection as in setabc (to be replaced)
+                reflec = 0.05
+                if ((weeknr .le. 17) .or. (weeknr .ge. 32)) reflec=0.06
+                if ((weeknr .le. 13) .or. (weeknr .ge. 36)) reflec=0.08
+                if ((weeknr .le.  4) .or. (weeknr .ge. 45)) reflec=0.10
             endif
-
-!           Computes daylenth
-
-            temp = (( sin50m - dsin ( declin) * dsin ( latitu)) /
-     &                       ( dcos ( declin) * dcos ( latitu)))
-
-            if ( temp .gt. 1.0) then
-               temp   = 0.0
-            elseif ( temp .lt. -1.0) then
-               temp   = 24.0
-            else
-               temp   = 7.639437268d0 * acos ( temp)
-            endif
-            daylength = temp / 24.0
          endif
-         pmsa (ip5) = daylength
+         
+         pmsa (ip5) = reflec
 
          ip1   = ip1   + in1
          ip2   = ip2   + in2
          ip3   = ip3   + in3
          ip4   = ip4   + in4
          ip5   = ip5   + in5
-
  9000 continue
 
       return

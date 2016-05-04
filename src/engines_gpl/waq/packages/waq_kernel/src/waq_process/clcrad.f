@@ -62,8 +62,8 @@
 
 !     local decalrations
 
-      INTEGER            :: IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP9 ! index pointers in PMSA array
-      INTEGER            :: IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9 ! increments in PMSA array
+      INTEGER            :: IP1,IP2,IP3,IP4,IP5,IP6,IP7,IP8,IP9,IP10 ! index pointers in PMSA array
+      INTEGER            :: IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10 ! increments in PMSA array
       INTEGER            :: ISEG           ! loop counter segment loop
       INTEGER            :: IKMRK1         ! first feature inactive(0)-active(1)-bottom(2) segment
       INTEGER            :: IK1VN          ! first feature inactive(0)-active(1)-bottom(2) VAN segment
@@ -84,6 +84,7 @@
       REAL               :: RADTOP         ! radiation at top
       REAL               :: TOTSURF        ! cummulated surface area
       REAL               :: RTMP           ! RTMP
+      REAL               :: REFLEC         ! Reflected fraction of incident sunlight
 
 
       IP1  = IPOINT(1)
@@ -95,6 +96,7 @@
       IP7  = IPOINT(7)
       IP8  = IPOINT(8)
       IP9  = IPOINT(9)
+      IP10  = IPOINT(10)
 
       IN1  = INCREM(1)
       IN2  = INCREM(2)
@@ -105,8 +107,11 @@
       IN7  = INCREM(7)
       IN8  = INCREM(8)
       IN9  = INCREM(9)
+      IN10  = INCREM(10)
 
-!.....2DH afhandeling
+!.....2DH mode
+
+      IF (NOQ3.EQ.0) THEN
 
       DO 1000 ISEG=1,NOSEG
 
@@ -115,29 +120,29 @@
 !........Segment is inactief
          IF      (IKMRK1 .EQ. 0) THEN
 
-!          RadTop = RadSurf
-           PMSA(IP8) = PMSA(IP3)
+!          RadTop = RadSurf corrected for reflection
+           PMSA(IP9) = PMSA(IP3)*(1.-PMSA(IP8))
 
-!          RadBot    = RadSurf
-           PMSA(IP9) = PMSA(IP3)
+!          RadBot    = RadSurf corrected for reflection
+           PMSA(IP10) = PMSA(IP3)*(1.-PMSA(IP8))
 
 !........Segment is actief watersegment
          ELSE IF (IKMRK1 .EQ. 1) THEN
 
-!          RadTop    = RadSurf
-           PMSA(IP8) = PMSA(IP3)
+!          RadTop    = RadSurf corrected for reflection
+           PMSA(IP9) = PMSA(IP3)*(1.-PMSA(IP8))
 
-!          RadBot    = RadSurf   * EXP( -ExtVl    *Depth     )
-           PMSA(IP9) = PMSA(IP3) * EXP( -PMSA(IP1)*PMSA(IP2) )
+!          RadBot    = RadSurf   * (1 - reflection) * EXP( -ExtVl    *Depth     )
+           PMSA(IP10) = PMSA(IP3) *(1.-PMSA(IP8)) * EXP( -PMSA(IP1)*PMSA(IP2) )
 
 !........Segment is actief bodemsegment
          ELSE IF (IKMRK1 .EQ. 3) THEN
 
 !          RadTop    = 0.0
-           PMSA(IP8) = 0.0
+           PMSA(IP9) = 0.0
 
 !          RadBot    = 0.0
-           PMSA(IP9) = 0.0
+           PMSA(IP10) = 0.0
 
          ENDIF
 
@@ -149,22 +154,13 @@
          IP6  = IP6  + IN6
          IP8  = IP8  + IN8
          IP9  = IP9  + IN9
+         IP10  = IP10  + IN10
 
  1000 CONTINUE
 
+      ELSE
 
-!.....3D afhandeling
-
-!.....Waterkolom
-
-      IP1  = IPOINT(1)
-      IP2  = IPOINT(2)
-      IP3  = IPOINT(3)
-      IP4  = IPOINT(4)
-      IP5  = IPOINT(5)
-      IP6  = IPOINT(6)
-      IP8  = IPOINT(8)
-      IP9  = IPOINT(9)
+!.....3D MODE
 
       DO 2000 IQ = NOQ1+NOQ2+1 , NOQ1+NOQ2+NOQ3
 
@@ -180,12 +176,13 @@
 !...........Van segment = inactief
             IF ( IK1VN .EQ. 0 ) THEN
 
-!              RadTop = RadSurf
-               PMSA(IP8 + (IVAN-1)  * IN8) = PMSA( IP3 + (IVAN-1)*IN3 )
-
-!              RadBot = Radsurf
-               PMSA(IP9 + (IVAN-1)  * IN9) = PMSA( IP3 + (IVAN-1)*IN3 )
-
+!              RadTop = RadSurf corrected for reflection
+               RADTOP = PMSA( IP3 + (IVAN-1)*IN3 ) 
+     +                  * (1. - PMSA( IP8 + (IVAN-1)*IN8 ) )
+               PMSA(IP9 + (IVAN-1)  * IN9) = RADTOP
+!              RadBot = RadTOP
+               PMSA(IP10 + (IVAN-1)  * IN10) = RADTOP
+               
 !...........Van segment = actief water segment
             ELSE IF (IK1VN .EQ. 1) THEN
 
@@ -195,11 +192,14 @@
                   EXTVL  = PMSA( IP1 + (IVAN-1) * IN1 )
                   DEPTH  = PMSA( IP2 + (IVAN-1) * IN2 )
                   RADTOP = PMSA( IP3 + (IVAN-1) * IN3 )
+                  REFLEC = PMSA( IP8 + (IVAN-1) * IN8 )
 
+                  RADTOP = RADTOP * (1. - REFLEC)
                   RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
 
-                  PMSA(IP8 + (INAAR-1) * IN8) = RADBOT
-                  PMSA(IP9 + (IVAN -1) * IN9) = RADBOT
+                  PMSA(IP9  + (IVAN -1) * IN9 ) = RADTOP
+                  PMSA(IP9  + (INAAR-1) * IN9 ) = RADBOT
+                  PMSA(IP10 + (IVAN -1) * IN10) = RADBOT
 
                ENDIF
 
@@ -208,12 +208,12 @@
 
                   EXTVL  = PMSA( IP1 + (IVAN -1) * IN1 )
                   DEPTH  = PMSA( IP2 + (IVAN -1) * IN2 )
-                  RADTOP = PMSA( IP8 + (IVAN -1) * IN8 )
+                  RADTOP = PMSA( IP9 + (IVAN -1) * IN9 )
 
                   RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
 
-                  PMSA(IP8 + (INAAR-1) * IN8) = RADBOT
-                  PMSA(IP9 + (IVAN -1) * IN9) = RADBOT
+                  PMSA(IP9 + (INAAR-1) * IN9) = RADBOT
+                  PMSA(IP10 + (IVAN -1) * IN10) = RADBOT
 
                ENDIF
 
@@ -223,10 +223,10 @@
             IF ( IK1NR .EQ. 0 ) THEN
 
 !              RadTop = RadSurf
-               PMSA(IP8 + (INAAR-1) * IN8) = PMSA( IP3 + (INAAR-1)*IN3 )
+               PMSA(IP9 + (INAAR-1) * IN9) = PMSA( IP3 + (INAAR-1)*IN3 )
 
 !              RadBot = Radsurf
-               PMSA(IP9 + (INAAR-1) * IN9) = PMSA( IP3 + (INAAR-1)*IN3 )
+               PMSA(IP10 + (INAAR-1) * IN10) = PMSA( IP3 + (INAAR-1)*IN3 )
 
 !...........Naar segment = actief water segment
             ELSE IF (IK1NR .EQ. 1) THEN
@@ -236,11 +236,11 @@
 
                   EXTVL  = PMSA( IP1 + (INAAR-1) * IN1 )
                   DEPTH  = PMSA( IP2 + (INAAR-1) * IN2 )
-                  RADTOP = PMSA( IP8 + (INAAR-1) * IN8 )
+                  RADTOP = PMSA( IP9 + (INAAR-1) * IN9 )
 
                   RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
 
-                  PMSA(IP9 + (INAAR-1) * IN9) = RADBOT
+                  PMSA(IP10 + (INAAR-1) * IN10) = RADBOT
 
                ENDIF
 
@@ -248,7 +248,8 @@
          ENDIF
 
  2000 CONTINUE
-
+      
+      ENDIF
 
 !     the sediment columns
 
@@ -269,7 +270,7 @@
              RADSURF    =      PMSA(IP3+(IWATER-1)*IN3)
              SURF       =      PMSA(IP5+(IWATER-1)*IN5)
              SWEMERSION = NINT(PMSA(IP6+(IWATER-1)*IN6))
-             RADBOT     =      PMSA(IP9+(IWATER-1)*IN9)
+             RADBOT     =      PMSA(IP10+(IWATER-1)*IN10)
              IF ( SWEMERSION .EQ. 1 ) THEN
                 RADTOP = RADTOP + RADSURF*SURF
              ELSE
@@ -291,8 +292,8 @@
               ELSE
                  RADBOT = RADTOP * EXP( -EXTVL * DEPTH )
               ENDIF
-              PMSA(IP8+(IBODEM-1)*IN8) = RADTOP
-              PMSA(IP9+(IBODEM-1)*IN9) = RADBOT
+              PMSA(IP9+(IBODEM-1)*IN9) = RADTOP
+              PMSA(IP10+(IBODEM-1)*IN10) = RADBOT
               RADTOP = RADBOT
           ENDDO
 

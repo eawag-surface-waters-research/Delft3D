@@ -689,6 +689,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "CalcRad   ","Surf      ",   5,"N","x",1
 "CalcRad   ","SwEmersion",   6,"Y","x",1
 "CalcRad   ","RadBot    ",   7,"N"," ",1
+"CalcRad   ","fRefl     ",   8,"Y","x",1
 "CalcRadDay","ExtVl     ",   1,"N","x",1
 "CalcRadDay","Depth     ",   2,"N","x",1
 "CalcRadDay","DayRadSurf",   3,"N","x",1
@@ -707,6 +708,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Daylength ","Latitude  ",   2,"Y","x",1
 "Daylength ","RefDay    ",   3,"Y","x",1
 "Daylength ","AuxSys    ",   4,"Y","x",1
+"Reflection","ITIME     ",   1,"N","x",1
+"Reflection","Latitude  ",   2,"Y","x",1
+"Reflection","RefDay    ",   3,"Y","x",1
+"Reflection","AuxSys    ",   4,"Y","x",1
 "DepAve    ","SWDepAve  ",   1,"Y","x",1
 "DepAve    ","TimMultBl ",   2,"Y","x",1
 "DepAve    ","Depth     ",   3,"N","x",1

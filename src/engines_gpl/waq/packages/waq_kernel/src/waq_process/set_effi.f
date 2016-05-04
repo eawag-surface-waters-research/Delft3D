@@ -88,11 +88,7 @@
          PMAX20(ITYPE) = PMAX(ITYPE)
       ENDDO
       CALL MAXPRD ( TEMP  )
-      ALPHA=0.95
-      IF ((ID .LE. 17) .OR. (ID .GE. 32)) ALPHA=0.94
-      IF ((ID .LE. 13) .OR. (ID .GE. 36)) ALPHA=0.92
-      IF ((ID .LE.  4) .OR. (ID .GE. 45)) ALPHA=0.90
-      IF (ID .GT. 0) CSOL=ALPHA * CSOL
+
       DSOL=1428.57*CSOL
       DO IGROUP = 1 , NGRO_3DL
          DO ITYPE = IT2(IGROUP,1),IT2(IGROUP,2)

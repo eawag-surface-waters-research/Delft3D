@@ -11091,3 +11091,4 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "TotNBLSA  ","x"," ",    0.00000    ,"(g/m3)              ","Total nitrogen for BLOOM stand alone              ","volume    ","volume    "," ","                              "
 "TotPBLSA  ","x"," ",    0.00000    ,"(g/m3)              ","Total phosphorous for BLOOM stand alone           ","volume    ","volume    "," ","                              "
 "TotSiBLSA ","x"," ",    0.00000    ,"(g/m3)              ","Total silicium for BLOOM stand alone              ","volume    ","volume    "," ","                              "
+"fRefl     ","x"," ",    0.00000    ,"(-)                 ","fraction of radiation reflected at water surface  ","volume    ","volume    "," ","                              "

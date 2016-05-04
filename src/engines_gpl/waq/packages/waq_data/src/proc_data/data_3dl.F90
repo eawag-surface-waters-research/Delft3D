@@ -215,7 +215,7 @@
       REAL*8   DER_D      ! derivative at sutface at dep
       REAL*8   EFFI       ! calculated efficiency
 
-      IF ( SURF .GT. 1.0 ) THEN
+      IF ( SURF .GT. 1.0 .AND. EXTTOT*DEP .GT. 1.0D-10) THEN
          PHI_S = - DLOG(SURF)
          CALL EBCALC(PHI_S,FUN_S,DER_S,IGROUP)
          PHI_D = EXTTOT*DEP - DLOG(SURF)
