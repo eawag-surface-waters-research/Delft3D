@@ -87,6 +87,7 @@ libwaq_process_la_SOURCES = \
        radalg.f \
        rdbalg.f \
        rear.f \
+       refl.f \
        resant.f \
        resdm.f \
        restim.f \
