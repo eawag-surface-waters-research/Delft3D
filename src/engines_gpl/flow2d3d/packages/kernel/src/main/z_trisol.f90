@@ -1114,7 +1114,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & icx       ,icy       ,i(kfsmn0) ,i(kfsmx0) , &
                  & ch(disint),ch(dismmt),i(itdis)  ,i(kcu)    ,i(kcv)    , &
                  & i(kfs)    ,i(ibuff)  ,i(mnksrc) ,r(alfas)  ,r(xcor)   , &
-                 & r(ycor)   ,r(dp)     ,r(disch)  , &
+                 & r(ycor)   ,r(dp)     ,r(disch)  ,r(voldis) , &
                  & r(disch0) ,r(disch1) ,r(rint)   ,r(rint0)  ,r(rint1)  , &
                  & r(umdis)  ,r(umdis0) ,r(umdis1) ,r(vmdis)  ,r(vmdis0) , &                 
                  & r(vmdis1) ,bubble    ,r(r0)     ,r(thick)  ,r(zwork)  , &
@@ -1974,7 +1974,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & icx       ,icy       ,i(kfsmn0) ,i(kfsmx0) , &
                  & ch(disint),ch(dismmt),i(itdis)  ,i(kcu)    ,i(kcv)    , &
                  & i(kfs)    ,i(ibuff)  ,i(mnksrc) ,r(alfas)  ,r(xcor)   , &
-                 & r(ycor)   ,r(dp)     ,r(disch)  , &
+                 & r(ycor)   ,r(dp)     ,r(disch)  ,r(voldis) , &
                  & r(disch0) ,r(disch1) ,r(rint)   ,r(rint0)  ,r(rint1)  , &
                  & r(umdis)  ,r(umdis0) ,r(umdis1) ,r(vmdis)  ,r(vmdis0) , &                 
                  & r(vmdis1) ,bubble    ,r(r0)     ,r(thick)  ,r(zwork)  , &

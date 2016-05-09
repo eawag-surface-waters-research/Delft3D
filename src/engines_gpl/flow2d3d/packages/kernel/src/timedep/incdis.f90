@@ -3,7 +3,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                 & icx       ,icy       ,kfsmin    ,kfsmx0    , &
                 & disint    ,dismmt    ,itdis     ,kcu       ,kcv       , &
                 & kfs       ,iwrk      ,mnksrc    ,alfas     ,xcor      , &
-                & ycor      ,dp        ,disch     , &
+                & ycor      ,dp        ,disch     ,voldis    , &
                 & disch0    ,disch1    ,rint      ,rint0     ,rint1     , &
                 & umdis     ,umdis0    ,umdis1    ,vmdis     ,vmdis0    , &
                 & vmdis1    ,bubble    ,r0        ,thick     ,relthk    , &
@@ -62,6 +62,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
     integer               , pointer :: ltem
     integer               , pointer :: nxbub
     real(fp)              , pointer :: tstop
+    real(fp)              , pointer :: hdt
     real(fp)              , pointer :: dt
     real(fp)              , pointer :: cp
     real(fp)              , pointer :: rhow
@@ -121,6 +122,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
     real(fp)    , dimension(nsrcd)                                            :: vmdis  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: vmdis0 !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nsrcd)                                            :: vmdis1 !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(nsrcd)                                            :: voldis !  Description and declaration in esm_alloc_real.f90   
     real(fp)    , dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(kmax)                                             :: relthk
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs0   !  Description and declaration in esm_alloc_real.f90
@@ -153,6 +155,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
 !! executable statements -------------------------------------------------------
 !
     tstop      => gdp%gdexttim%tstop
+    hdt        => gdp%gdnumeco%hdt
     dt         => gdp%gdexttim%dt
     itfinish   => gdp%gdinttim%itfinish
     lundis     => gdp%gdluntmp%lundis
@@ -347,5 +350,6 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
     !
     do isrc = 1, nst_nobub
        if (mnksrc(6, isrc) == -1 ) disch(isrc) = 0.0_fp
+       voldis(isrc) = voldis(isrc) + disch(isrc)*hdt
     enddo
 end subroutine incdis
