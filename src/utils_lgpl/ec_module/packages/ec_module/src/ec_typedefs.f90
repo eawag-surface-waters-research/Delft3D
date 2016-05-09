@@ -317,6 +317,10 @@ module m_ec_typedefs
       character(len=maxNameLen) :: units                    !< physical units of the quantity
       integer                   :: vectorMax = 1            !< number of dimensions (vector data) or 1 in case of scalar
       integer                   :: zInterpolationType       !< Vertical interpolation type ! TODO: Add initialization in the constructor. (4748)
+                                                            !< Intended for quantities from NetCDF:
+      real(hp)                  :: fillvalue = 0.d0         !<    default if NaN, missing value
+      real(hp)                  :: factor = 1.d0            !<    multiplication (scale) factor
+      real(hp)                  :: offset = 0.d0            !<    offset (new = raw*factor + offset)
    end type tEcQuantity
    
    type tEcQuantityPtr

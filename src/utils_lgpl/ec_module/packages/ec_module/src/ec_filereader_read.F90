@@ -644,11 +644,19 @@ contains
          integer                                 :: istat            !< allocation status
          real(hp)                                :: time_window      !< time window between times(i) and times(i+1)
          real(hp)                                :: dmiss_nc         !< local netcdf missing
+
+         real(hp)                                                :: add_offset            !< helper variable
+         real(hp)                                                :: scalefactor           !< helper variable
+         real(hp)                                                :: fillvalue             !< helper variable
+         logical                                 :: valid_field
+         
          !
          success = .false.
          fieldPtr => null()
 
-!        ierror = nf90_inq_varid(fileReaderPtr%fileHandle, trim(item%quantityPtr%name), varid)           ! inquire a varid, given the variable name in the quantityname 
+         dmiss_nc = item%quantityPtr%fillvalue
+         scalefactor = item%quantityPtr%factor           ! new = old * scalefactor + add_offset
+         add_offset = item%quantityPtr%offset
 
          ! With the the quantity name interpreted as a standard name, inquire from the filereader instance the varid 
          do varid=1,size(fileReaderPtr%standard_names)
@@ -660,7 +668,6 @@ contains
             return 
          endif 
          
-         ierror = nf90_get_att(fileReaderPtr%fileHandle, varid, "_FillValue", dmiss_nc)
          times_index = ec_undef_int
 
          if (t0t1 < 0) then
@@ -730,7 +737,7 @@ contains
          ! update source Field
          ! ===================
          !
-         ! - 1 - Determine the relevant time entry from the times array and its index.
+         ! - 1 - Determine the relevant time entry from the times array and its index (irrespective of the data recorded at this timelevel)
          if (fieldPtr%timesteps == ec_undef_hp) then
             times_index = 1
          else
@@ -744,75 +751,93 @@ contains
                end if
             end do
          end if
-         !
-         ! - 2 - Update the source Field's timesteps variable.
-         if (times_index /= ec_undef_int) then
-            fieldPtr%timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, times_index)
-         else
+         if (times_index == ec_undef_int) then
             call setECMessage("Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
             return
          end if
          !
-         ! - 3 - Read a scalar data block.
-         if (item%elementSetPtr%nCoordinates == 0) then
-            ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, fieldPtr%arr1dPtr, start=(/times_index/), count=(/1/))
-         end if
-         !
-         ! - 4 - Read a grid data block.
-         if (item%elementSetPtr%nCoordinates > 0) then
-            allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1 ), stat = istat)
-            ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
-            
-            ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
-            if (strcmpi(item%quantityPtr%name,'rainfall') .or. strcmpi(item%quantityPtr%name,'precipitation')) then
-               ! Data must be converted here to rainfall per day for FM.
-               time_window = 1.d0 
-               select case (item%quantityPtr%units)
-               case ('MM')
-                  if (comparereal(1.0_hp*times_index, fileReaderPtr%tframe%nr_timesteps) == 0) then
-                     time_window = fileReaderPtr%tframe%times(times_index) - fileReaderPtr%tframe%times(times_index - 1)
-                  else
-                     time_window = fileReaderPtr%tframe%times(times_index + 1) - fileReaderPtr%tframe%times(times_index)
-                  end if
-                  if (fileReaderPtr%tframe%ec_timestep_unit == ec_second) then
-                     time_window = time_window / (60.0_hp * 60.0_hp * 24.0_hp)
-                  else if (fileReaderPtr%tframe%ec_timestep_unit == ec_minute) then
-                     time_window = time_window / (60.0_hp * 24.0_hp)
-                  else if (fileReaderPtr%tframe%ec_timestep_unit == ec_hour) then
-                     time_window = time_window / 24.0_hp
-                  else
-                     call setECMessage("Unknown time unit encountered in "//trim(fileReaderPtr%filename)//".")
-                     return
-                  end if
-                  ! In future, this is the location for conversion from a variety of rainfall units to the only
-                  ! accepted unit for rainfal intensity mm/day  
-               end select 
-               if (comparereal(time_window, 0.0_hp) == 0) then
-                  call setECMessage("Empty time window leads to zero division error in "//trim(fileReaderPtr%filename)//".")
+         valid_field = .False.
+         do while (.not.valid_field)
+            ! - 3 - Read a scalar data block.
+            if (item%elementSetPtr%nCoordinates == 0) then
+               ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, fieldPtr%arr1dPtr, start=(/times_index/), count=(/1/))
+               if (ierror.ne.NF90_NOERR) then         ! handle exception
+                  call setECMessage("NetCDF:'"//trim(nf90_strerror(ierror))//"' in "//trim(fileReaderPtr%filename)//".")
                   return
                end if
-               do i=1, item%elementSetPtr%n_rows
-                  do j=1, item%elementSetPtr%n_cols
-                     if (data_block(j,i,1) == dmiss_nc) then 
-                        fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
-                     else                     
-                        fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1) / time_window
-                     endif
+               valid_field = (fieldPtr%arr1dPtr(1)/=dmiss_nc)
+            end if      ! reading scalar data block
+            !
+            ! - 4 - Read a grid data block.
+            valid_field = .False.
+            if (item%elementSetPtr%nCoordinates > 0) then
+               allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1 ), stat = istat)
+               ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
+               
+               ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
+               if (strcmpi(item%quantityPtr%name,'rainfall') .or. strcmpi(item%quantityPtr%name,'precipitation')) then
+                  ! Data must be converted here to rainfall per day for FM.
+                  time_window = 1.d0 
+                  select case (item%quantityPtr%units)
+                  case ('MM')
+                     if (comparereal(1.0_hp*times_index, fileReaderPtr%tframe%nr_timesteps) == 0) then
+                        time_window = fileReaderPtr%tframe%times(times_index) - fileReaderPtr%tframe%times(times_index - 1)
+                     else
+                        time_window = fileReaderPtr%tframe%times(times_index + 1) - fileReaderPtr%tframe%times(times_index)
+                     end if
+                     if (fileReaderPtr%tframe%ec_timestep_unit == ec_second) then
+                        time_window = time_window / (60.0_hp * 60.0_hp * 24.0_hp)
+                     else if (fileReaderPtr%tframe%ec_timestep_unit == ec_minute) then
+                        time_window = time_window / (60.0_hp * 24.0_hp)
+                     else if (fileReaderPtr%tframe%ec_timestep_unit == ec_hour) then
+                        time_window = time_window / 24.0_hp
+                     else
+                        call setECMessage("Unknown time unit encountered in "//trim(fileReaderPtr%filename)//".")
+                        return
+                     end if
+                     ! In future, this is the location for conversion from a variety of rainfall units to the only
+                     ! accepted unit for rainfal intensity mm/day  
+                  end select 
+                  if (comparereal(time_window, 0.0_hp) == 0) then
+                     call setECMessage("Empty time window leads to zero division error in "//trim(fileReaderPtr%filename)//".")
+                     return
+                  end if
+                  do i=1, item%elementSetPtr%n_rows
+                     do j=1, item%elementSetPtr%n_cols
+                        if (data_block(j,i,1) == dmiss_nc) then 
+                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
+                        else                     
+                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1) / time_window
+                           valid_field = .True.
+                        endif
+                     end do
                   end do
-               end do
-            else
-               do i=1, item%elementSetPtr%n_rows
-                  do j=1, item%elementSetPtr%n_cols
-                     if (data_block(j,i,1) == dmiss_nc) then 
-                        fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
-                     else                     
-                        fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1)
-                     endif
+               else
+                  do i=1, item%elementSetPtr%n_rows
+                     do j=1, item%elementSetPtr%n_cols
+                        if (data_block(j,i,1) == dmiss_nc) then 
+                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
+                        else                     
+                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1)
+                           valid_field = .True.
+                        endif
+                     end do
                   end do
-               end do
+               end if
+            end if                                        ! reading 2D data block
+            if (.not.valid_field) then
+               times_index = times_index+1
             end if
-            if (allocated(data_block)) deallocate(data_block, stat = istat)
-         end if
+         end do         ! loop while fields invalid            
+
+         ! - 2 - Update the source Field's timesteps variable.
+         fieldPtr%timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, times_index)
+
+         ! Apply offset and scale from the variables attributes
+         fieldPtr%arr1dPtr = fieldPtr%arr1dPtr*scalefactor + add_offset
+
+         ! Deallocate temporary datablock
+         if (allocated(data_block)) deallocate(data_block, stat = istat)
          !
          success = .true.
       end function ecNetcdfReadNextBlock

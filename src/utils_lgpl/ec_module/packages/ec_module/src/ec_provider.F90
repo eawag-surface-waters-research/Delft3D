@@ -2346,6 +2346,9 @@ module m_ec_provider
          real(hp)                                                :: sdg_miss              !< missing data value in second dimension
          character(len=NF90_MAX_NAME)                            :: grid_mapping          !< name of the applied grid mapping 
          character(len=NF90_MAX_NAME)                            :: units                 !< helper variable for variable's units
+         real(hp)                                                :: add_offset            !< helper variable
+         real(hp)                                                :: scalefactor           !< helper variable
+         real(hp)                                                :: fillvalue             !< helper variable
          character(len=NF90_MAX_NAME)                            :: coord_name            !< helper variable
          character(len=NF90_MAX_NAME)                            :: coord_name_tmp        !< helper variable
          character(len=NF90_MAX_NAME), dimension(:), allocatable :: coord_names           !< helper variable
@@ -2685,12 +2688,22 @@ module m_ec_provider
             ! Create the Quantity
             ! ===================
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            ierror = nf90_get_att(fileReaderPtr%fileHandle, idvar, 'units', units)
-            call str_upper(units)                                                ! make units attribute case-insensitive 
-            if (.not. (ecQuantitySetName(instancePtr, quantityId, ncstdnames(i)) .and. & 
-                       ecQuantitySetUnits(instancePtr, quantityId, units))) then
-                  return
+            add_offset = 0.d0
+            scalefactor = 1.d0
+            fillvalue = ec_undef_hp
+            if (nf90_get_att(fileReaderPtr%fileHandle, idvar, 'units', units)==NF90_NOERR) then 
+               call str_upper(units)                                                ! make units attribute case-insensitive 
+               if (.not.(ecQuantitySetUnits(instancePtr, quantityId, units))) return
             end if
+            if (nf90_get_att(fileReaderPtr%fileHandle, idvar, '_FillValue', fillvalue)==NF90_NOERR) then
+               if (.not.(ecQuantitySetFillValue(instancePtr, quantityId, fillvalue))) return
+            end if
+            if ((nf90_get_att(fileReaderPtr%fileHandle, idvar, 'scalefactor', scalefactor)==NF90_NOERR)         &
+                 .or. (nf90_get_att(fileReaderPtr%fileHandle, idvar, 'add_offset', add_offset)==NF90_NOERR)) then
+                 if (.not.(ecQuantitySetScaleOffset(instancePtr, quantityId, scalefactor, add_offset))) return
+            end if
+            if (.not.(ecQuantitySetName(instancePtr, quantityId, ncstdnames(i)))) return
+
             ! ========================
             ! Create the source Fields 
             ! ========================

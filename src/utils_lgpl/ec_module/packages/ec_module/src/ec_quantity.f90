@@ -47,6 +47,8 @@ module m_ec_quantity
    public :: ecQuantitySetName
    public :: ecQuantitySetUnits
    public :: ecQuantitySetVectorMax
+   public :: ecQuantitySetFillValue
+   public :: ecQuantitySetScaleOffset
    
    contains
       
@@ -146,7 +148,52 @@ module m_ec_quantity
       end function ecQuantitySet
       
       ! =======================================================================
-      
+      !> Change the FillValue of the Quantity corresponding to quantityId.
+      function ecQuantitySetFillValue(instancePtr, quantityId, fillvalue) result(success)
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: quantityId  !< unique Quantity id
+         real(hp),                  intent(in) :: fillvalue   !< to be used in the case of missing values (netcdf)
+         !
+         type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
+         !
+         success = .false.
+         quantityPtr => null()
+         !
+         quantityPtr => ecSupportFindQuantity(instancePtr, quantityId)
+         if (associated(quantityPtr)) then
+            quantityPtr%fillvalue = fillvalue
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_quantity::ecQuantitySetFillValue: Cannot find a Quantity with the supplied id.")
+         end if
+      end function ecQuantitySetFillValue
+
+      ! =======================================================================
+      !> Change the Scalefactor and Offset shift of the Quantity corresponding to quantityId.
+      function ecQuantitySetScaleOffset(instancePtr, quantityId, scale, offset) result(success)
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: quantityId  !< unique Quantity id
+         real(hp),                  intent(in) :: scale       !< multiplication factor to be applied to the raw data
+         real(hp),                  intent(in) :: offset      !< offset to be applied to the raw data
+                                                              !< order: new = (old*scale) + offset
+         !
+         type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
+         !
+         success = .false.
+         quantityPtr => null()
+         !
+         quantityPtr => ecSupportFindQuantity(instancePtr, quantityId)
+         if (associated(quantityPtr)) then
+            quantityPtr%factor = scale
+            quantityPtr%offset = offset
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_quantity::ecQuantitySetScaleOffset: Cannot find a Quantity with the supplied id.")
+         end if
+      end function ecQuantitySetScaleOffset
+
       !> Change the name of the Quantity corresponding to quantityId.
       function ecQuantitySetName(instancePtr, quantityId, newName) result(success)
          logical                               :: success     !< function status
