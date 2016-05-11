@@ -68,11 +68,13 @@ subroutine morstats_simple(gdp, dbodsd, nmlb, nmub, lsedtot)
     moroutput => gdp%gdmorpar%moroutput
     statqnt   => gdp%gderosed%statqnt
     !
-    do nm = nmlb, nmub
-        do lsed = 1, lsedtot
-            statqnt(nm,1+lsed) = statqnt(nm,1+lsed) + dbodsd(lsed, nm)
-        enddo
-    enddo
+    if (moroutput%nstatqnt > 0) then
+       do nm = nmlb, nmub
+           do lsed = 1, lsedtot
+               statqnt(nm,1+lsed) = statqnt(nm,1+lsed) + dbodsd(lsed, nm)
+           enddo
+       enddo
+    endif
 end subroutine morstats_simple
 
 
