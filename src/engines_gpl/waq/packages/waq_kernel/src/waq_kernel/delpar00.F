@@ -153,7 +153,7 @@
      &                    za       , locdep   , dpsp      , layt    , mmaxp    ,
      &                    tcktot   )
             call wrttrk ( lunut    , fout     , fnamep(16), itrakc  , nopart   ,
-     &                    xa       , ya       , za        , xyztrk  , npmax    )
+     &                    npmax    , xa       , ya        , za      , xyztrk   )
          endif
          oil    = modtyp == 4
          if ( ini_opt .eq. 1 .and. oil ) then

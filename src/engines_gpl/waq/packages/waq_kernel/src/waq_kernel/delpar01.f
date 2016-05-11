@@ -314,7 +314,7 @@
      &                 tcktot   )
                                   ! write actual particle tracks (file #16)
          call wrttrk ( lunut    , fout     , fnamep(16),itrakc   , nopart   ,
-     &                 xa       , ya       , za       , xyztrk   , npmax    )
+     &                 npmax    , xa       , ya       , za       , xyztrk   )
          itrakc = itrakc + itraki
       endif
 
