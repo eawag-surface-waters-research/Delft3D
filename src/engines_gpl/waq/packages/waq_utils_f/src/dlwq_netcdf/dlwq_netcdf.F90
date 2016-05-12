@@ -464,12 +464,14 @@ end function dlwqnc_copy_dims
 ! Returns:
 !     nf90_noerr if all okay, otherwise an error code
 !
-recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, attribute, &
-                                                   dimsizes, use_attrib )
+recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, attribute, &
+                                                   dimsizes, use_attrib ) result(dlwqnc_result)
     integer, intent(in)               :: ncidin, ncidout, meshidin, meshidout
     character(len=*), intent(in)      :: attribute
     integer, intent(in), dimension(:) :: dimsizes
     logical, intent(in), optional     :: use_attrib
+    
+    integer                               :: dlwqnc_result
 
     integer                               :: ierror
     integer                               :: ierr
@@ -487,7 +489,7 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
 
     logical, save                  :: suppress_message = .false. ! Because of the recursive call
 
-    dlwqnc_copy_associated = -1
+    dlwqnc_result = -1
 
     use_names_in_attrib = .true.
     if ( present( use_attrib ) ) then
@@ -500,7 +502,7 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
     !
     ierror = nf90_enddef( ncidout )
     if ( ierror /= nf90_noerr .and. ierror /= nf90_enotindefine ) then
-        dlwqnc_copy_associated = ierror
+        dlwqnc_result = ierror
         return
     endif
 
@@ -509,7 +511,7 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
         ierror   = nf90_get_att( ncidin, meshidin, attribute, attvalue )
         if ( ierror /= nf90_noerr .and. .not. suppress_message ) then
             if (dlwqnc_debug) write(*,*) 'Error retrieving attribute ', trim(attribute), ' -- ', ierror
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
     else
@@ -525,7 +527,7 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
 
         ierror = nf90_inq_varid( ncidin, trim(varname), varid = oldvarid )
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
@@ -535,13 +537,13 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
         ierror = nf90_inquire_variable( ncidin, oldvarid, xtype = xtype, ndims = ndims, dimids = dimids )
 
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
         ierror = nf90_redef( ncidout )
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
@@ -558,19 +560,19 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
         ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid )
 #endif
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
         ierror = dlwqnc_copy_var_atts( ncidin, ncidout, oldvarid, newvarid )
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
         ierror = nf90_enddef( ncidout )
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
@@ -585,7 +587,7 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
                 ierror = -1
         end select
         if ( ierror /= nf90_noerr ) then
-            dlwqnc_copy_associated = ierror
+            dlwqnc_result = ierror
             return
         endif
 
@@ -600,7 +602,7 @@ recursive integer function dlwqnc_copy_associated( ncidin, ncidout, meshidin, me
         endif
     enddo
 
-    dlwqnc_copy_associated = nf90_noerr
+    dlwqnc_result = nf90_noerr
 end function dlwqnc_copy_associated
 
 ! dlwqnc_copy_int_var, ... --
