@@ -579,7 +579,7 @@
  2591 format ( / ' Writing new NetCDF map output data failed' )
  2592 format ( / ' Sync on NetCDF file failed' )
  2593 format ( / ' Attribute "face_dimension" in mesh not found' )
- 2594 format ( / ' Dimension "',a,'" not found' )
- 2600 format ( / ' NetCDF error number: ', I )
+ 2594 format ( / ' Dimension "',A,'" not found' )
+ 2600 format ( / ' NetCDF error number: ', I6 )
  2610 format ( / ' NetCDF error message: ', A )
       end
