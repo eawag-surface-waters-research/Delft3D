@@ -6,17 +6,20 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-noinst_LTLIBRARIES = libwaq_utils_c.la
+noinst_LTLIBRARIES = libdlwq_netcdf.la
 
 #-------------------------------------------------------------------------------
 #Includes
-#FMODULES += \
-#        -I$(top_builddir)/...
+FMODULES += \
+        -I${NETCDFROOT}/include \
+        -I$(top_builddir)/engines_gpl/waq/include 
+
+AM_FCFLAGS += $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_utils_c_la_SOURCES = f902c.cpp \
-                            getuuid.c
+libdlwq_netcdf_la_SOURCES = \
+       dlwq_netcdf.F90
 
 #-------------------------------------------------------------------------------
 # Libraries

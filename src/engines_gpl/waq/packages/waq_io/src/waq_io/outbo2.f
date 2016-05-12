@@ -55,6 +55,7 @@
 !     Declaration of arguments
 !
       use timers       !   performance timers
+      use output
 
       INTEGER     NOUTP , NOSEG , NODUMP, NX    , NY    ,
      +            NRVART, NBUFMX, NDMPAR, NOTOT , NCBUFM,
@@ -63,12 +64,6 @@
 !
 !     Local
 !
-      PARAMETER   ( IMON = 1 , IMO2 = 2 , IDMP = 3 , IDM2 = 4 ,
-     +              IHIS = 5 , IHI2 = 6 , IMAP = 7 , IMA2 = 8 ,
-     +              IBAL = 9 , IHNF =10 , IHN2 =11 , IMNF =12 ,
-     +              IMN2 =13 , IMO3 =14 , IMO4 =15 , IHI3 =16 ,
-     +              IHI4 =17 , IHN3 =18 , IHN4 =19 , IBA2 =20 ,
-     +              IBA3 =21 )
       PARAMETER ( IGSEG = 1 , IGMON = 2 , IGGRD = 3 , IGSUB = 4 )
       INTEGER     IGRID , NOCEL , NBUFOU, ISRTO
       integer(4) :: ithndl = 0

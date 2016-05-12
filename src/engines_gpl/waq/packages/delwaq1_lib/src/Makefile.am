@@ -37,6 +37,7 @@ libDelwaq1_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/charon/libcharon.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/waq_io/libwaq_io.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
+    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/dlwq_netcdf/libdlwq_netcdf.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/ods/libods.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.la \
@@ -48,5 +49,6 @@ libDelwaq1_la_LIBADD = \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
+    $(NETCDF_LIBS) $(NETCDF_FORTRAN_LIBS) -lnetcdff \ 
     -lpthread
 

@@ -237,9 +237,10 @@
 
       IF ( NOUTP .GT. 0 ) THEN
          CALL DHOPNF ( LUN(25) , LCHAR(25), 25      , 2      , IERRD   )
-         CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART,
-     +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), LUN   ,
-     +                 LCHAR   , MYPART   , IERR    )
+         CALL DLWQIO ( LUN(25) , LCHAR(25), LUN(19) , NOUTP   , NRVART  ,
+     +                 NBUFMX  , J(IIOUT) , J(IIOPO), C(IONAM), C(IOSNM), 
+     +                 C(IOUNI), C(IODSC) , NOTOT   , C(ISSNM), C(ISUNI),
+     +                 C(ISDSC), LUN      , LCHAR   , MYPART  , IERR    )
          CLOSE ( LUN(25) )
       ENDIF
 !

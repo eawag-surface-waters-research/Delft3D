@@ -344,6 +344,7 @@ rem =======================
     call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
+    call :copyNetcdf
 goto :endproc
 
 
@@ -374,7 +375,7 @@ rem =======================
     call :makeDir !dest_bin!
     
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
-	
+    call :copyNetcdf
 
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -411,6 +412,7 @@ rem ==============================
     call :makeDir !dest_bin!
     
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
+    call :copyNetcdf
 	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.

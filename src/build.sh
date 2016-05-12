@@ -300,6 +300,9 @@ fi
  export PKG_CONFIG_PATH=$NETCDFROOT/lib/pkgconfig:$PKG_CONFIG_PATH
  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NETCDFROOT/lib
 
+#---------------------
+# uuid
+ export UUIDLIBS_ADDITIONAL="/lib64/libuuid.so.1"
 
 #===============================================================================
 echo "Current settings:"
