@@ -140,6 +140,9 @@
          call part06 ( lunut     , lgrid     , lgrid2    , nmaxp    , mmaxp    ,
      &                 xb        , yb        , nodye     , nocont   , xwaste   ,
      &                 ywaste    , nwaste    , mwaste    )
+
+         ltrack = notrak  /=  0
+
          call getdps ( lunut     , lunitp(17), fnamep(17), nmaxp    , mmaxp    ,
      &                 noseglp   , dpsp      , cellpntp  , ltrack   )
          call part03 ( lgrid     , volumep   , flow      , dx       , dy       ,
@@ -168,7 +171,6 @@
          npwndn   = 0
          acomp  = .false.
          accrjv = 1.0e-9 !_sp
-         ltrack = notrak  /=  0
          oil2dh = oil .and. layt == 1
          oil3d  = oil .and. layt  > 1
          if (oil2dh) hmin = const(noconsp ) ! 2dh: last par        =hmin
