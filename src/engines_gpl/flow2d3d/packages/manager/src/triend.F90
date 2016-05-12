@@ -280,5 +280,10 @@ subroutine triend(runid, gdp)
     do while (iocond == 0)
        read (lundia, '(a300)', iostat = iocond) recdia
     enddo
+    !
+    ! One backspace needed to avoid writing after EOF character
+    ! The GNU compiled version crashes on that
+    !
+    backspace (lundia)
  9999 continue
 end subroutine triend
