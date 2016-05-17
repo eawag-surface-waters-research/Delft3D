@@ -833,6 +833,9 @@ contains
          ! - 2 - Update the source Field's timesteps variable.
          fieldPtr%timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, times_index)
 
+         ! - 3 - Apply the scale factor and offset
+         fieldPtr%arr1dPtr = fieldPtr%arr1dPtr * item%quantityPtr%factor + item%quantityPtr%offset       
+
          ! Apply offset and scale from the variables attributes
          fieldPtr%arr1dPtr = fieldPtr%arr1dPtr*scalefactor + add_offset
 
