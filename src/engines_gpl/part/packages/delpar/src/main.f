@@ -53,7 +53,7 @@
                write(*,'(a)',iostat=ioerr) 'ERROR: No commandline argument, and "runid.par" does not contain a runid'
                write(9,'(a)',iostat=ioerr) 'ERROR: No commandline argument, and "runid.par" does not contain a runid'
                close(9)
-               stop(1)
+               call stop_exit(1)
             endif
             imdp=index(runid, ".mdp") 
             iinp=index(runid, ".inp")
@@ -70,14 +70,14 @@
                write(*,'(3a)',iostat=ioerr) 'ERROR: Input file from "runid.par" named "', trim(filename), '" was not found'
                write(9,'(3a)',iostat=ioerr) 'ERROR: Input file from "runid.par" named "', trim(filename), '" was not found'
                close(9)
-               stop(1)
+               call stop_exit(1)
             endif
          else
             open(9,file=fileerr,status='replace')
             write(*,'(a)',iostat=ioerr) 'ERROR: No commandline argument, and "runid.par" not found'
             write(9,'(a)',iostat=ioerr) 'ERROR: No commandline argument, and "runid.par" not found'
             close(9)
-            stop(1)
+            call stop_exit(1)
          endif
       else
          call get_command_argument(1, filename)
