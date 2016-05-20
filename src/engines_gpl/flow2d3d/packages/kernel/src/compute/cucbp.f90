@@ -347,21 +347,37 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              ! WEAKLY REFLECTIVE BOUNDARY
              !
              alfas   = sqrt(ag/(dep + sepu))
-             aa(nmf) = alfas*tetau(nmf)
-             bb(nmf) = 1.0
-             cc(nmf) = alfas*(1.0 - tetau(nmf))
-             dd(nmf) = circ2d(1, ic) + alfas*sepu - 2.*sqrt(ag*(dep + sepu))    &
+             if (dep<0) then
+                aa(nmf) = 0.0
+                bb(nmf) = 1.0
+                cc(nmf) = 0.0
+                dd(nmf) = 0.0
+                !
+                ! LAYER VELOCITIES ( VELOCITY PROFILE )
+                !
+                do k = k0f, k1f
+                   aak(nmf, k) = 0.0
+                   bbk(nmf, k) = 1.0
+                   cck(nmf, k) = 0.0
+                   ddk(nmf, k) = 0.0
+                enddo               
+             else
+                aa(nmf) = alfas*tetau(nmf)
+                bb(nmf) = 1.0
+                cc(nmf) = alfas*(1.0 - tetau(nmf))
+                dd(nmf) = circ2d(1, ic) + alfas*sepu - 2.*sqrt(ag*(dep + sepu))    &
                      & + 2.*sqrt(ag*dep)
-             !
-             ! LAYER VELOCITIES ( VELOCITY PROFILE )
-             !
-             do k = k0f, k1f
-                aak(nmf, k) = aa(nmf)
-                bbk(nmf, k) = 1.0
-                cck(nmf, k) = cc(nmf)
-                ddk(nmf, k) = circ3d(k, 1, ic) + alfas*sepu -                   &
-                            & 2.*sqrt(ag*(dep + sepu)) + 2.*sqrt(ag*dep)
-             enddo
+                !
+                ! LAYER VELOCITIES ( VELOCITY PROFILE )
+                !
+                do k = k0f, k1f
+                   aak(nmf, k) = aa(nmf)
+                   bbk(nmf, k) = 1.0
+                   cck(nmf, k) = cc(nmf)
+                   ddk(nmf, k) = circ3d(k, 1, ic) + alfas*sepu -                   &
+                               & 2.*sqrt(ag*(dep + sepu)) + 2.*sqrt(ag*dep)
+                enddo
+             endif
              !
              a(nmf) =  0.0
              b(nmf) =  1.0
@@ -545,21 +561,37 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              ! WEAKLY REFLECTIVE BOUNDARY
              !
              alfas = sqrt(ag/(dep + sepu))
-             aa(nml) = -alfas*tetau(nml)
-             bb(nml) = 1.0
-             cc(nml) = -alfas*(1.0 - tetau(nml))
-             dd(nml) = circ2d(2, ic) - alfas*sepu + 2.*sqrt(ag*(dep + sepu))    &
-                     & - 2.*sqrt(ag*dep)
-             !
-             ! LAYER VELOCITIES ( VELOCITY PROFILE )
-             !
-             do k = k0l, k1l
-                aak(nml, k) = aa(nml)
-                bbk(nml, k) = 1.0
-                cck(nml, k) = cc(nml)
-                ddk(nml, k) = circ3d(k, 2, ic) - alfas*sepu +                   &
-                            & 2.*sqrt(ag*(dep + sepu)) - 2.*sqrt(ag*dep)
-             enddo
+             if (dep < 0) then
+                aa(nml) = 0.0
+                bb(nml) = 1.0
+                cc(nml) = 0.0
+                dd(nml) = 0.0
+                !
+                ! LAYER VELOCITIES ( VELOCITY PROFILE )
+                !
+                do k = k0l, k1l
+                   aak(nml, k) = 0.0
+                   bbk(nml, k) = 1.0
+                   cck(nml, k) = 0.0
+                   ddk(nml, k) = 0.0
+                enddo
+             else
+                aa(nml) = -alfas*tetau(nml)
+                bb(nml) = 1.0
+                cc(nml) = -alfas*(1.0 - tetau(nml))
+                dd(nml) = circ2d(2, ic) - alfas*sepu + 2.*sqrt(ag*(dep + sepu))    &
+                        & - 2.*sqrt(ag*dep)
+                !
+                ! LAYER VELOCITIES ( VELOCITY PROFILE )
+                !
+                do k = k0l, k1l
+                   aak(nml, k) = aa(nml)
+                   bbk(nml, k) = 1.0
+                   cck(nml, k) = cc(nml)
+                   ddk(nml, k) = circ3d(k, 2, ic) - alfas*sepu +                   &
+                               & 2.*sqrt(ag*(dep + sepu)) - 2.*sqrt(ag*dep)
+                enddo
+             endif
              a(nmlu) = -1.0
              b(nmlu) =  1.0
              c(nmlu) =  0.0
