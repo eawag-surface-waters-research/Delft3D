@@ -223,7 +223,7 @@
                   DERVV(ISUB,IFROM) = CODIAG
                   CONCV(ISUB,IFROM) = RHS
 !                 row of the 'to  ' segment
-                  DERVV(ISUB,ITO)   = DERVV(ISUB,ITO) + E + E*CODIAG
+                  DERVV(ISUB,ITO)   = DERVV(ISUB,ITO) + (E + E*CODIAG)
                   CONCV(ISUB,ITO)   = CONCV(ISUB,ITO) + E*RHS
                ENDDO
             ENDIF
