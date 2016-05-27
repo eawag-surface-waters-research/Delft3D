@@ -177,12 +177,12 @@
             IF ( IK1VN .EQ. 0 ) THEN
 
 !              RadTop = RadSurf corrected for reflection
-               RADTOP = PMSA( IP3 + (IVAN-1)*IN3 ) 
+               RADTOP = PMSA( IP3 + (IVAN-1)*IN3 )
      +                  * (1. - PMSA( IP8 + (IVAN-1)*IN8 ) )
                PMSA(IP9 + (IVAN-1)  * IN9) = RADTOP
 !              RadBot = RadTOP
                PMSA(IP10 + (IVAN-1)  * IN10) = RADTOP
-               
+
 !...........Van segment = actief water segment
             ELSE IF (IK1VN .EQ. 1) THEN
 
@@ -248,7 +248,7 @@
          ENDIF
 
  2000 CONTINUE
-      
+
       ENDIF
 
 !     the sediment columns

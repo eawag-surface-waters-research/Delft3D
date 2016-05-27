@@ -103,10 +103,6 @@ c     LOGICAL First
             IBotSeg     = NINT(PMSA( IPNT(  9) ))
             smmax       = PMSA( IPNT( 10) )
 
-
-!!       if ( ibotseg == 47901 ) then
-!!           write(*,*) 'Hier!', ibotseg, iseg
-!!       endif
             ! get biomass from bottom segment
 
             SM          = PMSA(IPOINT(5)+(IBOTSEG-1)*INCREM(5))
