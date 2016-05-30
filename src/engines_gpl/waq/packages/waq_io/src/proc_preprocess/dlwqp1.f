@@ -170,10 +170,12 @@
       ! settings
 
       character*80   swinam
+      character*80   blmnam
       character*80   line
       character*256  pdffil
       character*10   config
       logical        lfound, laswi , swi_nopro, l3dmod, nolic
+      integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
       ! charon coupling
 
@@ -432,9 +434,27 @@
             write(line,'(a22,a58)') ' using eco input file:', blmfil
             call monsys(line,1)
          endif
-
+      else
+         blmnam = 'ACTIVE_BLOOM_P'
+         blm_act = dlwq_find(constants,blmnam)
+         if ( blm_act .gt. 0 .and. .not.swi_nopro) then
+            l_eco = .true.
+            line = ' '
+            call monsys(line,1)
+            write(line,'(a)' ) ' found constant ACTIVE_BLOOM_P without -eco command line switch'
+            call monsys(line,1)
+            blmfil = 'bloom.spe'
+            write(line,'(a39,a41)') ' will try using default eco input file:', blmfil
+            call monsys(line,1)
+         else
+            l_eco = .false.
+            noprot  = 0
+            nopralg = 0
+         endif
+      endif
          ! read the bloom-species database.
 
+      if ( l_eco ) then
          lunblm = 88
          open ( lunblm    , file=blmfil )
          read ( lunblm    , '(a)' ) line
@@ -452,10 +472,6 @@
      +                 abrgrp , algtyp , abrtyp , algdsc , cofnam ,
      +                 algcof , outgrp , outtyp , noprot , namprot,
      +                 nampact, nopralg, nampralg)
-      else
-         l_eco = .false.
-         noprot  = 0
-         nopralg = 0
       endif
 
       ! chem coupling
