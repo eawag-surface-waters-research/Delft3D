@@ -77,8 +77,8 @@
 
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       real     ( 4)    threshold       ! drying and flooding value
-      real     ( 4)    minvolume       ! minimum volume in a call
-      real     ( 4)    minarea         ! minimum area of a call
+      real     ( 4)    minvolume       ! minimum volume in a cell
+      real     ( 4)    minarea         ! minimum exhange area of a horizontal exchange
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable volumes
       integer  ( 4)    ivol            ! index for this computational volumes
@@ -97,13 +97,9 @@
       call zoek20 ( 'DRY_THRESH', nocons, coname, 10, idryfld )
       if ( idryfld .gt. 0 ) threshold = cons(idryfld)          ! or the given value
 
-      minvolume = 1.00                                         ! default value of 1 m3
+      minvolume = 0.001                                        ! default value of 0.001 m3 = 1 L
       call zoek20 ( 'MIN_VOLUME', nocons, coname, 10, idryfld )
       if ( idryfld .gt. 0 ) minvolume = cons(idryfld)          ! or the given value
-
-      minarea = 1.00                                         ! default value of 1 m2
-      call zoek20 ( 'MIN_AREA', nocons, coname, 10, idryfld )
-      if ( idryfld .gt. 0 ) minarea = cons(idryfld)            ! or the given value
 
       do iseg = 1, nosegl
          call dhkmrk( 1, iknmrk(iseg), ikm )
@@ -129,7 +125,11 @@
             enddo
          endif
       enddo
-      area = max( area, minarea )
+
+      minarea = 1.00E-04                                      ! default value of 1.00E-04 m2 = 1 cm2
+      call zoek20 ( 'MIN_AREA', nocons, coname, 8, idryfld )
+      if ( idryfld .gt. 0 ) minarea = cons(idryfld)           ! or the given value
+      area = max( area, minarea )                             ! set minimum area
 
       if ( timon ) call timstop ( ithandl )
 
@@ -179,8 +179,7 @@
 
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       real     ( 4)    threshold       ! drying and flooding value
-      real     ( 4)    minvolume       ! minimum volume in a call
-      real     ( 4)    minarea         ! minimum area of a call
+      real     ( 4)    minvolume       ! minimum volume in a cell
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable
       integer  ( 4)    ivol            ! this computational volume
@@ -197,7 +196,7 @@
       call zoek20 ( 'DRY_THRESH', nocons, coname, 10, idryfld )
       if ( idryfld .gt. 0 ) threshold = cons(idryfld)           ! or the given value
 
-      minvolume = 1.00                                         ! default value of 1 m3
+      minvolume = 0.001                                        ! default value of 0.001 m3 = 1 L
       call zoek20 ( 'MIN_VOLUME', nocons, coname, 10, idryfld )
       if ( idryfld .gt. 0 ) minvolume = cons(idryfld)          ! or the given value
 

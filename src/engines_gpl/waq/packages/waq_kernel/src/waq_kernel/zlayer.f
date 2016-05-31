@@ -100,6 +100,7 @@
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       integer  ( 4)    isurf           ! index to find horizontal surface area values
       real     ( 4)    threshold       ! drying and flooding value
+      real     ( 4)    minarea         ! minimum exhange area of a horizontal exchange
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable volumes
       integer  ( 4)    iq              ! loop variable exchanges
@@ -114,8 +115,12 @@
       call zoek20 ( 'Z_THRESH  ', nocons, coname, 10, idryfld )
       if ( idryfld .le. 0 ) then                                       ! constant not found
          iknmkv = iknmrk                                               ! set variable property to
-         area = max( area, 1.0 )                                       ! initial property, area at
-         return                                                        ! least at 1.0 and return
+
+         minarea = 1.00E-04                                            ! default value of 1.00E-04 m2 = 1 cm2
+         call zoek20 ( 'MIN_AREA', nocons, coname, 8, idryfld )
+         if ( idryfld .gt. 0 ) minarea = cons(idryfld)                 ! or the given value
+         area = max( area, minarea )                                   ! set minimum area
+         return                                                        ! and return
       endif
       threshold = cons(idryfld)                                        ! apply the given value
                                                                        ! and proceed with z-layer
@@ -221,7 +226,11 @@
       endif
 
       iknmkv = iknmrk
-      area = max( area, 1.0 )
+
+      minarea = 1.00E-04                                            ! default value of 1.00E-04 m2 = 1 cm2
+      call zoek20 ( 'MIN_AREA', nocons, coname, 8, idryfld )
+      if ( idryfld .gt. 0 ) minarea = cons(idryfld)                 ! or the given value
+      area = max( area, minarea )                                   ! set minimum area
 
 !          update the vertical exchange pointer
 !          this needs more sophisticated approach when atmosphere and bed
