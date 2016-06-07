@@ -53,12 +53,12 @@ module SyncRtcFlow
   character(len=DioMaxParLen), pointer, dimension(:) :: SignalRPars
   character(len=DioMaxLocLen), pointer, dimension(:) :: SignalRLocs
 !
-  integer, dimension(1,5) :: SignalXValues
+  integer, dimension(1,6) :: SignalXValues
   character*20, dimension(1) :: SignalXPars
-  character*20, dimension(5) :: SignalXLocs
+  character*20, dimension(6) :: SignalXLocs
 !
   data SignalXPars / 'Signal' /
-  data SignalXLocs / 'Status', 'Date', 'Time', 'Init1', 'Init2' /
+  data SignalXLocs / 'Status', 'Date', 'Time', 'Init1', 'Init2', 'Init3' /
 !
   logical :: commRTCtoFLOW = .false.
   logical :: commFLOWtoRTC = .false.
@@ -96,16 +96,17 @@ contains
 !!!
 
 ! Initialise communication between RTC and Flow
-subroutine SyncRtcFlow_Init(n2steps, error, flagFLOWtoRTC, idate, rdt)
+subroutine SyncRtcFlow_Init(n2steps, error, flagFLOWtoRTC, idate, itstart, rdt)
 
   integer :: n2steps
   logical :: error
   logical :: flagFLOWtoRTC
 
-  integer :: nRpar, nRLoc
+  integer :: nrpar, nrloc
   integer :: nDummyLocs
   integer :: FlowStatus
   integer :: idate
+  integer :: itstart
   double precision :: rdt  ! time step in seconds
 
   integer :: itest
@@ -126,8 +127,8 @@ subroutine SyncRtcFlow_Init(n2steps, error, flagFLOWtoRTC, idate, rdt)
   ! First to receive number of (half) time steps
   ! Then to receive status (< 0 = Quit), Date (I8) and Time (I6)
   SignalFlowToRtc = DioPltGetDataset('SignalToRtc')
-  nRPar = DioPltGetNPar(SignalFlowToRtc)
-  nRLoc = DioPltGetNLoc(SignalFlowToRtc)
+  nrpar = DioPltGetNPar(SignalFlowToRtc)
+  nrloc = DioPltGetNLoc(SignalFlowToRtc)
 
   if (DioPltGet(SignalFlowToRtc, SignalRValues)) then
     n2steps = SignalRValues(1,1)
@@ -135,6 +136,12 @@ subroutine SyncRtcFlow_Init(n2steps, error, flagFLOWtoRTC, idate, rdt)
     rdt     = transfer(SignalRValues(1,3:4),rdt)
     commFLOWtoRTC = btest(SignalRValues(1,5),0)
     commRTCtoFLOW = btest(SignalRValues(1,5),1)
+    ! Backward compatibility with Delft3D-FLOW version that doesn't pass itstart yet.
+    if (nrloc>=6) then
+       itstart = SignalRValues(1,6)
+    else
+       itstart = 0
+    endif
     if (commFLOWtoRTC .neqv. flagFLOWtoRTC) then
        n2steps = -3
     endif
