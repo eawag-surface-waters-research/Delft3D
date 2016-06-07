@@ -114,7 +114,6 @@
                ivol = iseg + (ilay-1)*nosegl
                call dhkmst(1, iknmkv(ivol), 0 )               ! zero the last bit
                call dhkmst(2, iknmkv(ivol), 0 )               ! and the second feature
-               call dhkmst(3, iknmkv(ivol), 0 )               ! and the third feature
                if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = minvolume
             enddo
          else
