@@ -62,8 +62,7 @@
       integer iseg        !    local loop counter for computational element loop
       real(4) z2          !    height bottom segment from bottom              (m)
       real(4) z1          !    height top segment from bottom                 (m)
-      integer ikmrk1
-      integer ikmrk2
+      integer ikmrk3
       real(4) zm          !    watersurface to top macropyte                  (-)
       real(4) a           !    lineair factor a (ax + b)                      (-)
       real(4) b           !    lineair factor b (ax + b)                      (-)
@@ -96,8 +95,8 @@
          hmax        = pmsa(ipnt(6))
          ffac        = pmsa(ipnt(7))
 
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
-         if (ikmrk1.lt.3) then ! also when dry!
+         call dhkmrk(3,iknmrk(iseg),ikmrk3)
+         if (ikmrk3.eq.1) then ! also when dry!
 
             ! active water segment
 
@@ -138,7 +137,7 @@
 
             endif
 
-         elseif (ikmrk1.eq.3) then
+         elseif (ikmrk3.eq.3) then
 
             ! delwaq-g segment
 

@@ -2646,7 +2646,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DecPOC5   ","b_su      ",  19,"Y","x",1
 "DecPOC5   ","b_poc5poc4",  20,"Y","x",1
 "DecPOC5   ","b_poc5doc ",  21,"Y","x",1
-"DecPOC5   ","Volume    ",  22,"N","x",1
+"DecPOC5   ","Depth     ",  22,"N","x",1
 "DecPOC5   ","SwEmersion",  23,"Y","x",1
 "DecPOC5   ","NatTemp   ",  24,"Y","x",1
 "Vivianit  ","PO4       ",   1,"N","x",1

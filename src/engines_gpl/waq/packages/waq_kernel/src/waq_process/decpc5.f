@@ -166,12 +166,11 @@
 !
       DO 9000 ISEG = 1 , NOSEG
 !
-!       In alle aktieve segmenten
+!       In all active dry or wet segments
 !
-        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
         CALL DHKMRK(3,IKNMRK(ISEG),IKMRK3)
 
-        IF (IKMRK3.EQ.1.OR.IKMRK1.EQ.2) THEN
+        IF (IKMRK3.EQ.1 .OR. IKMRK3.EQ.3) THEN
 !
 !          INPUT of subroutine
 !

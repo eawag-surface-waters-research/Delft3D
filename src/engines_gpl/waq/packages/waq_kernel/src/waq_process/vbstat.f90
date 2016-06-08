@@ -62,8 +62,8 @@
       real(4) SwVB01Gro   ! O  vegetation biomass growth allowed (0=no,1=yes)     (-)
       real(4) SwVB01Mrt   ! O  vegetation biomass dead (0=no,1=yes)               (-)
       integer, save       :: ifirst(1:18) = 0     !    for initialisation
-      integer             :: ikmrk1         ! first feature
       integer             :: ikmrk2         ! second feature
+      integer             :: ikmrk3         ! third feature
       integer             :: ip             ! base output location for bottom segement pointer output
       integer             :: inc            ! increment in output location for bottom segement pointer output
       integer             :: iq             ! counter for pointer loop
@@ -92,8 +92,8 @@
          ! set botseg equal to iseg for the segments which have a bottom
 
          do iseg = 1,noseg
-            call dhkmrk(1,iknmrk(iseg),ikmrk1)
-            if (ikmrk1.lt.3) then
+            call dhkmrk(3,iknmrk(iseg),ikmrk3)
+            if (ikmrk3.eq.1) then
                call dhkmrk(2,iknmrk(iseg),ikmrk2)
                if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
                   pmsa(ip + inc * (iseg - 1)) = real(iseg,4)
@@ -131,9 +131,9 @@
       do 9000 iseg = 1 , noseg
 !
 !        lowest water and 2d segments only
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
          call dhkmrk(2,iknmrk(iseg),ikmrk2)
-         if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+         call dhkmrk(3,iknmrk(iseg),ikmrk3)
+         if (ikmrk3.eq.1 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 
             SwEmersion = pmsa( ipnt(  1) )
             VBType     = NINT(pmsa( ipnt(  2) ))

@@ -79,10 +79,6 @@
 !
       PMSA (IP3 ) = DEPTH
 !
-!      ELSE
-!
-!      PMSA (IP3 ) = 0.0
-!
       ENDIF
 !
       IFLUX = IFLUX + NOFLUX

@@ -153,8 +153,8 @@
       integer IdMrtS1VB01 !    Pointer to the mortality stem VB01
       integer IdMrtS3VB01 !    Pointer to the mortality branch VB01
       integer IdMrtS4VB01 !    Pointer to the mortality root VB01
-      integer             :: ikmrk1         ! first feature
       integer             :: ikmrk2         ! second feature
+      integer             :: ikmrk3         ! third feature
 !
 !*******************************************************************************
 !
@@ -179,9 +179,9 @@
       do  iseg = 1 , noseg
 
 !        lowest water and 2d segments only
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
          call dhkmrk(2,iknmrk(iseg),ikmrk2)
-         if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+         call dhkmrk(3,iknmrk(iseg),ikmrk3)
+         if (ikmrk3.eq.1 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 !
          VB1        = pmsa( ipnt(  1) )
          F1VB01     = pmsa( ipnt(  2) )

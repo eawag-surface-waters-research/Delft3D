@@ -82,8 +82,7 @@
       integer iseg        !    local loop counter for computational element loop
       real(4) z2          !    height bottom segment from bottom              (m)
       real(4) z1          !    height top segment from bottom                 (m)
-      integer ikmrk1
-      integer ikmrk2
+      integer ikmrk3
       real(4) zm          !    watersurface to top macropyte                  (-)
       real(4) frlay       !    fraction witin layer                           (-)
       integer iq          !    loop counter
@@ -117,8 +116,8 @@
          fl_fs1vbxxupy =  0.0
          fl_fs2vbxxupy =  0.0
 
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
-!         if (ikmrk1.eq.1 .or. ikmrk1 .eq. 3) then !=> NO TESTING ON IKMRK1, PROCESS IS ALLWAYS ON!
+         call dhkmrk(3,iknmrk(iseg),ikmrk3)
+         if (ikmrk3.eq.1 .or. ikmrk3 .eq. 3) then
 
             ibotseg     = NINT(pmsa(ipnt(4)))
             inicovvbxx  = pmsa(ipoint( 13)+(ibotseg-1)*increm( 13)) / 100.
@@ -169,7 +168,7 @@
 !                 ps5vbxxup=0.0
                endif
 
-               if ( ikmrk1.eq.1 .and. hmax .gt. 0.0 ) then
+               if ( ikmrk3.eq.1 .and. hmax .gt. 0.0 ) then
 
                   ! active water segment
 
@@ -199,7 +198,7 @@
                      fS2vbxxupy = pSvbxxup*sud*depth/delt
                   endif
 
-               elseif (ikmrk1.eq.3 .and. hmax .lt. 0.0) then
+               elseif (ikmrk3.eq.3 .and. hmax .lt. 0.0) then
 
                   ! delwaq-g segment, distribution over the bottom segments
 
@@ -239,7 +238,7 @@
 
             endif
 
-!!         endif
+         endif
 
          pmsa(ipnt(20)) =  fn1vbxxupy
          pmsa(ipnt(21)) =  fn2vbxxupy

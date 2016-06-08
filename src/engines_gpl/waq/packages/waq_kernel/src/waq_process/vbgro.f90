@@ -76,8 +76,8 @@
       integer SWiniVB1    !    0=no init, 1=init.
       integer SWregro     !    0=no regrowth, 1=regrowth allowed
       logical, save       :: first = .true.      !
-      integer             :: ikmrk1         ! first feature
       integer             :: ikmrk2         ! second feature
+      integer             :: ikmrk3         ! third feature
       integer ILUMON
 !     integer, allocatable, save  ::  SWDying(:)     ! keep track off whether veg. is dying
       integer  SWDying
@@ -148,9 +148,9 @@
       do  iseg = 1 , noseg
 
 !        lowest water and 2d segments only (also when dry!)
-         call dhkmrk(1,iknmrk(iseg),ikmrk1)
          call dhkmrk(2,iknmrk(iseg),ikmrk2)
-         if (ikmrk1.lt.3 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
+         call dhkmrk(3,iknmrk(iseg),ikmrk3)
+         if (ikmrk3.eq.1 .and. (ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
 !
 
             VB1        = pmsa( ipnt(  1) )
