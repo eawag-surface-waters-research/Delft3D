@@ -7,7 +7,7 @@
 #ifdef WIN32
 #include <windows.h>
 #else
-#include <linux/uuid.h>
+#include <uuid/uuid.h>
 #endif
 
 /* getuuid --
