@@ -478,9 +478,9 @@ module time_module
          real(hp), optional, intent(out) :: frac
          integer                         :: jul
 
-         jul = int(days+2400001)
+         jul = int(days+2400001.0_hp) ! should use 2400000.5_hp ?
          if (present(frac)) then
-             frac = mod(days,1.0_hp)
+             frac = mod(days,1.0_hp)  ! should use days + 0.5_hp ?
          endif
       end function mjd2jul
 
@@ -491,7 +491,7 @@ module time_module
          real(hp), optional, intent(in)  :: frac
          real(hp)                        :: days
 
-         days = real(jul-2400001,hp)
+         days = real(jul,hp)-2400001.0_hp ! should use 2400000.5_hp ?
          if (present(frac)) then
              days = days + frac
          endif
