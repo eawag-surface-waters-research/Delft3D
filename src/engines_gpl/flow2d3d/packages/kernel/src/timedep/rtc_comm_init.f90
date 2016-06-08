@@ -267,7 +267,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
          !
          call syncflowrtc_init(error, tlocget_names, tnparget, 80, &
                              & itfinish - itstrt, anyFLOWtoRTC, &
-                             & anyRTCtoFLOW, iacdat, hdt)
+                             & anyRTCtoFLOW, iacdat, itstrt, hdt)
       endif
       call timer_stop(timer_wait, gdp)
       if (error) then

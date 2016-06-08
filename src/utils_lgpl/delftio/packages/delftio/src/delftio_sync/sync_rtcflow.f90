@@ -308,7 +308,7 @@ end subroutine syncflowrtc_quit
 !
 !==============================================================================
 subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, &
-                          & flagFLOWtoRTC, flagRTCtoFLOW, idate, dt)
+                          & flagFLOWtoRTC, flagRTCtoFLOW, idate, itstart, dt)
     use precision
 ! Initialise communication between Flow and RTC
 !
@@ -318,6 +318,7 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, &
 !
     integer                        ,intent (in)  :: charlen
     integer                        ,intent (in)  :: idate
+    integer                        ,intent (in)  :: itstart
     real(fp)                       ,intent (in)  :: dt
     integer                        ,intent (in)  :: nsluv
     integer                        ,intent (in)  :: nsteps
@@ -361,6 +362,8 @@ subroutine syncflowrtc_init(error, nambar, nsluv, charlen, nsteps, &
     signalxvalues(1, 5) = 0
     if (commFLOWtoRTC) signalxvalues(1, 5) = ibset(signalxvalues(1, 5),0)
     if (commRTCtoFLOW) signalxvalues(1, 5) = ibset(signalxvalues(1, 5),1)
+    ! Send start time (relative to idate) expressed as multiples of half time steps
+    signalxvalues(1, 6) = itstart*2
     !
     call diopltput(signalflowtortc, signalxvalues)
     !
