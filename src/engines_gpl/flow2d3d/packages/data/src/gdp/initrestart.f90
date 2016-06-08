@@ -61,7 +61,7 @@ subroutine initrestart(gdp)
     dp_from_map_file  = .true.
     kfuv_from_restart = .false.
     rst_dp            = .false.
-    i_restart         = 1
+    i_restart         = 0
     restid            = ' '
     rst_layer_model   = ' '
 end subroutine initrestart

@@ -64,6 +64,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer       , pointer :: itis
+    integer       , pointer :: i_restart
     character(16) , pointer :: rst_layer_model
     character*(10), pointer :: trans_unit      !  Unit of the variables ATR and DTR
     include 'pardef.igd'
@@ -164,6 +165,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !! executable statements -------------------------------------------------------
 !
     itis            => gdp%gdrdpara%itis
+    i_restart       => gdp%gdrestart%i_restart
     rst_layer_model => gdp%gdrestart%rst_layer_model
     trans_unit      => gdp%gdpostpr%trans_unit
     !
@@ -262,6 +264,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! locate 'Restid' record for restart run-identification
     !
     restid = ' '
+    call prop_get(gdp%mdfile_ptr, '*', 'Restid_timeindex', i_restart)
     call prop_get_string(gdp%mdfile_ptr, '*', 'Restid', restid)
     if (restid /= ' ') then
        !

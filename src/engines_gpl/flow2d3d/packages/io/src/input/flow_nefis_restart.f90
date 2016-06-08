@@ -40,7 +40,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    use time_module, only: ymd2jul
+    use time_module, only: ymd2jul, datetime_to_string
     use globaldata
     use string_module
     !
@@ -282,39 +282,50 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        goto 9999
     endif
     !
-    ! determine if there is a difference in reference dates (simulation vs restart file)
-    !
-    ierror         = getelt(fds, 'map-const', 'ITDATE', uindex, 1, 8, itdate)
-    julday_restart = ymd2jul(itdate(1))
-    rjuldiffs      = real(julday_restart - julday,fp)*86400.0_fp
-    !
-    ! look for restart time on nefis map file
-    !
-    found = .false.
-    write(lundia,'(a,f20.4)') 'looking for time ',tstart
-    do ii = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
-       uindex (1,1) = ii
-       uindex (2,1) = ii
-       ierror = getelt(fds, 'map-info-series', 'ITMAPC', uindex, 1, 4, itmapc)
-       if (ierror/= 0) then
-          ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string)
-          error = .true.
-          goto 9999
-       endif
-       ! compute t_restart in minutes relative to simulation reference date
-       t_restart = (dtm*itmapc*tunit + rjuldiffs) / 60.0_fp
-       if (abs(tstart-t_restart) < 0.5_fp*dtm) then
-          write(lundia, '(a,i5,a,f20.4)') 'using field ',ii,' associated with time T = ',t_restart
-          i_restart = ii
-          found     = .true.
-          exit ! restart time found on map file
-       end if
-    enddo
+    if (i_restart==0) then
+        !
+        ! if the restart time index hasn't been specified by the user, find the time
+        ! that corresponds to the start time of the simulation
+        !
+        ! determine if there is a difference in reference dates (simulation vs restart file)
+        !
+        ierror         = getelt(fds, 'map-const', 'ITDATE', uindex, 1, 8, itdate)
+        julday_restart = ymd2jul(itdate(1))
+        rjuldiffs      = real(julday_restart - julday,fp)*86400.0_fp
+        !
+        ! look for restart time on nefis map file
+        !
+        found = .false.
+        write(lundia,'(a,a)') 'Looking for time ',datetime_to_string(julday,real(tstart,hp)/1440.0_hp)
+        do ii = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
+           uindex (1,1) = ii
+           uindex (2,1) = ii
+           ierror = getelt(fds, 'map-info-series', 'ITMAPC', uindex, 1, 4, itmapc)
+           if (ierror/= 0) then
+              ierror = neferr(0,error_string)
+              call prterr(lundia    ,'P004'    , error_string)
+              error = .true.
+              goto 9999
+           endif
+           ! compute t_restart in minutes relative to simulation reference date
+           t_restart = (dtm*itmapc*tunit + rjuldiffs) / 60.0_fp
+           if (abs(tstart-t_restart) < 0.5_fp*dtm) then
+              write(lundia, '(a,i5,a,a)') 'Using time index ',ii,' associated with time ',datetime_to_string(julday,real(t_restart,hp)/1440.0_hp)
+              i_restart = ii
+              found     = .true.
+              exit ! restart time found on map file
+           end if
+        enddo
+    elseif (i_restart<0 .or. i_restart>max_index) then
+        write(lundia, '(a,i5,a,i5,a)') 'Invalid time index ',i_restart,' requested (should be in the range 1 to ',max_index,')'
+        found = .false.
+    else
+        write(lundia, '(a,i5,a)') 'Using time index ',i_restart,' as requested.'
+        found = .true.
+    endif
     !
     if (.not. found) then
-       call prterr(lundia    ,'P004'    , &
-            & 'Restart time not found on restart file ' // trim(dat_file))
+       call prterr(lundia, 'P004', 'Restart time not found on restart file.')
        error = .true.
        goto 9999
     else
