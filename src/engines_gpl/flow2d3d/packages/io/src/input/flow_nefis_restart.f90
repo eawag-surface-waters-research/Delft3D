@@ -40,7 +40,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-!
+    use time_module, only: ymd2jul
     use globaldata
     use string_module
     !
@@ -58,6 +58,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer        , pointer :: julday
     real(fp)       , pointer :: tstart
     real(fp)       , pointer :: dt
     logical        , pointer :: temp
@@ -110,7 +111,9 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer, external                     :: inqmxi
     integer, external                     :: neferr
     integer                               :: ii
+    integer, dimension(2)                 :: itdate
     integer                               :: itmapc
+    integer                               :: julday_restart
     integer                               :: l
     integer                               :: ll
     integer                               :: max_index
@@ -121,9 +124,12 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer, dimension(:,:,:,:), pointer  :: ibuff
     logical                               :: found
     integer                               :: has_umean
-    real(fp)                              :: dtm          ! time step in minutes (flexible precision)
+    real(fp)                              :: dtm          ! time step in tunits  (flexible precision)
+    real(fp)                              :: tunit        ! time unit in seconds (flexible precision)
     real(fp)                              :: t_restart
-    real(sp)                              :: dtms         ! time step in minutes (single precision)
+    real(fp)                              :: rjuldiffs    ! difference of Julian dates in seconds
+    real(sp)                              :: dtms         ! time step in tunits  (single precision)
+    real(sp)                              :: tunits       ! time unit in seconds (single precision)
     real(sp), dimension(:,:,:,:), pointer :: sbuff
     character(20), dimension(:), allocatable :: rst_namcon
     character(1024)                       :: error_string
@@ -165,6 +171,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
 !
 !! executable statements -------------------------------------------------------
 !
+    julday              => gdp%gdinttim%julday
     tstart              => gdp%gdexttim%tstart
     dt                  => gdp%gdexttim%dt
     temp                => gdp%gdprocs%temp
@@ -250,14 +257,15 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     if ( inode /= master ) goto 50 
     !
     ierror = getelt(fds, 'map-const', 'DT', cuindex, 1, 4, dtms)
-    !
-    dtm = dtms
-    if (ierror/= 0) then
+    if (ierror==0) ierror = getelt(fds, 'map-const', 'TUNIT', cuindex, 1, 4, tunits)
+    if (ierror/=0) then
        ierror = neferr(0,error_string)
        call prterr(lundia    ,'P004'    , error_string)
        error = .true.
        goto 9999
     endif
+    dtm   = real(dtms,fp)
+    tunit = real(tunits,fp)
     !
     ! Read the type of layer model from the map file. 
     ! Parameter LAYER_MODEL may not be present. Was initialized with value 'UNKNOWN' in RDIC.f90
@@ -274,9 +282,16 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        goto 9999
     endif
     !
+    ! determine if there is a difference in reference dates (simulation vs restart file)
+    !
+    ierror         = getelt(fds, 'map-const', 'ITDATE', uindex, 1, 8, itdate)
+    julday_restart = ymd2jul(itdate(1))
+    rjuldiffs      = real(julday_restart - julday,fp)*86400.0_fp
+    !
     ! look for restart time on nefis map file
     !
     found = .false.
+    write(lundia,'(a,f20.4)') 'looking for time ',tstart
     do ii = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
        uindex (1,1) = ii
        uindex (2,1) = ii
@@ -287,9 +302,10 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
           error = .true.
           goto 9999
        endif
-       t_restart = dtm*itmapc
+       ! compute t_restart in minutes relative to simulation reference date
+       t_restart = (dtm*itmapc*tunit + rjuldiffs) / 60.0_fp
        if (abs(tstart-t_restart) < 0.5_fp*dtm) then
-          write(lundia, '(a,i5,a,e20.4)') 'using field ',ii,' associated with time T = ',t_restart
+          write(lundia, '(a,i5,a,f20.4)') 'using field ',ii,' associated with time T = ',t_restart
           i_restart = ii
           found     = .true.
           exit ! restart time found on map file
