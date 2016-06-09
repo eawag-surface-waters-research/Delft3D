@@ -2698,7 +2698,7 @@ module m_ec_provider
             if (nf90_get_att(fileReaderPtr%fileHandle, idvar, '_FillValue', fillvalue)==NF90_NOERR) then
                if (.not.(ecQuantitySetFillValue(instancePtr, quantityId, fillvalue))) return
             end if
-            if ((nf90_get_att(fileReaderPtr%fileHandle, idvar, 'scalefactor', scalefactor)==NF90_NOERR)         &
+            if ((nf90_get_att(fileReaderPtr%fileHandle, idvar, 'scale_factor', scalefactor)==NF90_NOERR)         &
                  .or. (nf90_get_att(fileReaderPtr%fileHandle, idvar, 'add_offset', add_offset)==NF90_NOERR)) then
                  if (.not.(ecQuantitySetScaleOffset(instancePtr, quantityId, scalefactor, add_offset))) return
             end if
