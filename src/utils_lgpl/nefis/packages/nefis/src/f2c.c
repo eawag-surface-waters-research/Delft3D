@@ -56,7 +56,7 @@
 #  define DLLEXPORT
 #endif
 
-#if defined(WIN32) || defined (WIN64)
+#if defined(_WIN32)
 #  include <io.h>
 #  define strdup _strdup
 #elif defined (salford32)

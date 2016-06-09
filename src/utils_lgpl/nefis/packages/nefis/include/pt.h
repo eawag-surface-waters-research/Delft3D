@@ -48,6 +48,7 @@ extern BInt4  GP_inquire_grp     ( BInt4  , BInt4  , BInt4 *, BText  , BText  ,
                                   BInt4 *, BInt4 *, BInt4 *);
 extern BInt4  GP_variable_pointer( BInt4  , BUInt8 *, BUInt4 , BUInt8 *);
 extern BUInt8 GP_write_file      ( BInt4  , BText   , BUInt8 , BUInt8  );
+extern BUInt8 GP_read_file       ( BInt4  , BText   , BUInt8 , BUInt8  );
 extern BInt4  RT_retrieve        ( BInt4   , BText  , BText  ,
                                   BUInt8 *, BUInt4 *, BUInt4 *,
                                   BUInt4 *, BUInt4 *, BText,

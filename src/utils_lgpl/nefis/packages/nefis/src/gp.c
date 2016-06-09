@@ -47,7 +47,7 @@
 #include <math.h>
 #include <time.h>
 
-#if defined(WIN32) || defined(WIN64)
+#if defined(_WIN32)
 #  include <io.h>
 #elif defined (salford32)
 #  include <io.h>
@@ -61,17 +61,13 @@
 #include "nef-def.h"
 #include "gp.h"
 
-#if defined(WIN32)
-#  define FILE_READ  _read
-#  define FILE_SEEK  _lseek
-#  define FILE_WRITE _write
-#elif defined(WIN64)
+#if defined(_WIN32)
 #  define FILE_READ  _read
 #  define FILE_SEEK  _lseeki64
 #  define FILE_WRITE _write
 #elif defined(GNU_PC) || defined(HAVE_CONFIG_H) || defined(salford32)
 #  define FILE_READ  read
-#  define FILE_SEEK  lseek
+#  define FILE_SEEK  lseek64
 #  define FILE_WRITE write
 #elif defined(USE_SUN)
 #  define FILE_READ  read
@@ -119,7 +115,7 @@ static void FileSeek(
     BUInt8 startPos
     )
 {
-    BUInt8 retVal;
+    BInt8 retVal;
     BUInt8 rest;
 
     /* long domain (values >= 0) is a subset of unsigned long domain.
@@ -131,10 +127,10 @@ static void FileSeek(
     retVal = FILE_SEEK( fds, 0, SEEK_SET );
     assert( retVal != -1 );
     rest = startPos;
-    while (rest > ULONG_MAX)
+    while (rest > NEF_SEEK_MAX)
     {
-        retVal = FILE_SEEK( fds, (BUInt8) ULONG_MAX , SEEK_CUR );
-        rest -= ULONG_MAX;
+        retVal = FILE_SEEK( fds, NEF_SEEK_MAX, SEEK_CUR );
+        rest -= NEF_SEEK_MAX;
     }
     retVal = FILE_SEEK( fds, rest, SEEK_CUR );
     assert( retVal != -1 );
@@ -254,10 +250,10 @@ BUInt8 GP_write_file ( BInt4   fds     ,
         FileSeek( fds, start );
 
         rest = n_bytes;
-        while (rest > ULONG_MAX)
+        while (rest > UINT_MAX)
         {
-            n_written += (BUInt8) FILE_WRITE( fds, string, ULONG_MAX );
-            rest      -= ULONG_MAX;
+            n_written += (BUInt8) FILE_WRITE( fds, string, UINT_MAX );
+            rest      -= UINT_MAX;
         }
         tmp_rest  = (BUInt4) rest;
         n_written += (BUInt8) FILE_WRITE( fds, string, tmp_rest );
@@ -1198,7 +1194,7 @@ BInt4 GP_get_next_grp  ( BInt4   set        ,    /* I file set descriptor */
   static BInt4   hash_pointer;
          BUInt8  next_pointer=NIL;
   static BInt4   num_hash ;
-  static BUInt8  pointer = (BUInt8) ULONG_MAX;
+  static BUInt8  pointer = (BUInt8) BUINT8_MAX;
 
 /*
  * File description already in memory
@@ -1335,7 +1331,7 @@ BInt4 GP_get_next_elm  ( BInt4    set             ,/* I file set descriptor */
   static BInt4   hash_pointer;
   static BUInt8  next_pointer;
   static BInt4   num_hash ;
-  static BUInt8  pointer = (BUInt8)ULONG_MAX;
+  static BUInt8  pointer = (BUInt8)BUINT8_MAX;
 
 /*
  * Sort hash table in increasing order
@@ -1449,7 +1445,7 @@ BInt4 GP_get_next_cell ( BInt4    set             ,/* I file set descriptor */
   static BInt4   hash_pointer;
   static BUInt8  next_pointer;
   static BInt4   num_hash ;
-  static BUInt8  pointer = (BUInt8) ULONG_MAX;
+  static BUInt8  pointer = (BUInt8) BUINT8_MAX;
 
 /*
  * Sort hash table in increasing order
@@ -1561,7 +1557,7 @@ BInt4 GP_get_next_def_grp ( BInt4    set             ,/* I file set descriptor *
   static BInt4   hash_pointer;
   static BUInt8  next_pointer;
   static BInt4   num_hash ;
-  static BUInt8  pointer = (BUInt8) ULONG_MAX;
+  static BUInt8  pointer = (BUInt8) BUINT8_MAX;
 
 /*
  * Sort hash table in increasing order
@@ -1779,7 +1775,7 @@ BInt4 GP_variable_pointer ( BInt4    set        ,
  *  therefor a sequence of four pointer tables is at least written to the
  *  data file.
  */
-    if ( pointer_buf.ptr[where] == ULONG_MAX )
+    if ( pointer_buf.ptr[where] == BUINT8_MAX )
     {
 /*
  *    this pointer was never created, so creat a new pointer table (j!=0) at the end of the file
@@ -1825,7 +1821,7 @@ BInt4 GP_variable_pointer ( BInt4    set        ,
       {
         for ( i=0; i<256; i++ )
         {
-          pointer_buf.ptr[i] = (BUInt8) ULONG_MAX;
+          pointer_buf.ptr[i] = (BUInt8) BUINT8_MAX;
         }
         if (nefis[set].file_version == Version_1)
         {
@@ -1840,7 +1836,7 @@ BInt4 GP_variable_pointer ( BInt4    set        ,
       {
         if ( nefis[set].one_file == TRUE )
         {
-          if ( (end_file == ULONG_MAX)           ||
+          if ( (end_file == BUINT8_MAX)           ||
                (end_file < nefis[set].daf.fds[1])  )
           {
             nefis_errcnt += 1;
@@ -1855,7 +1851,7 @@ BInt4 GP_variable_pointer ( BInt4    set        ,
         }
         else
         {
-          if ( (end_file == ULONG_MAX)           ||
+          if ( (end_file == BUINT8_MAX)           ||
                (end_file < nefis[set].dat.fds[1])  )
           {
             nefis_errcnt += 1;
@@ -2081,7 +2077,7 @@ BInt4 GP_inquire_max( BInt4    set      ,
                 for ( k=255; k>-1; k-- )
                 {
                     start_table =0;
-                    if ( pointer_buf.ptr[k] != ULONG_MAX )
+                    if ( pointer_buf.ptr[k] != BUINT8_MAX )
                     {
                         start_table = pointer_buf.ptr[k];
                         *max_index  = *max_index*256+k;

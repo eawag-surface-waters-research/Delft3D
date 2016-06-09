@@ -45,7 +45,7 @@
 #include <math.h>
 #include <limits.h>
 
-#if defined(WIN64) || defined(GNU_PC)
+#if defined(_WIN32) || defined(GNU_PC)
 #  include <io.h>
 #elif defined(salford32)
 #  include <io.h>
@@ -108,7 +108,7 @@ BInt4 HS_check_ecg (BInt4    set       ,
     next_key[MAX_NAME] = '\0';
 
     *pnt_hash   = 0UL;
-    *pnt_bucket = (BUInt4) ULONG_MAX;
+    *pnt_bucket = (BUInt4) BUINT8_MAX;
 
     offset[ 0] = 0;
     offset[ 1] = offset[ 0] + SIZE_BINT8;

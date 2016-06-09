@@ -49,7 +49,7 @@
 #include <limits.h>
 #include <ctype.h>
 
-#if defined(WIN32) || defined(WIN64) || defined(GNU_PC)
+#if defined(_WIN32) || defined(GNU_PC)
 #  include <io.h>
 #elif defined(salford32)
 #  include <io.h>
@@ -841,7 +841,7 @@ BInt4 Define_group ( BInt4   set         ,
             nefis_errno = convert_ieee( &vp, &cp, 2*SIZE_BINT8, SIZE_BINT8, "INTEGER", from_xdr);
             for ( i=0; i<2; i++ )
             {
-                grp_buf.ptr[   i] = *( (BInt8 *) cp + i);
+                grp_buf.ptr[   i] = *( (BUInt8 *) cp + i);
             }
 
             index = offset[5]/SIZE_BINT4;

@@ -45,7 +45,7 @@
 #include <limits.h>
 #include <time.h>
 
-#if defined(WIN32) || defined(WIN64) || defined(GNU_PC)
+#if defined(_WIN32) || defined(GNU_PC)
 #  include <io.h>
 #elif defined(salford32)
 #  include <io.h>

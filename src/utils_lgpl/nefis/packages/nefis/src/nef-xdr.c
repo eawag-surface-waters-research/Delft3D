@@ -43,7 +43,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(WIN32) || defined(WIN64)
+#if defined(_WIN32)
 #  include <rpc\types.h>
 #  include <rpc\xdr.h>
 #endif

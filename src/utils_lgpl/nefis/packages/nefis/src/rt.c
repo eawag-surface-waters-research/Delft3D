@@ -454,7 +454,7 @@ BInt4 RT_retrieve_var  ( BInt4    set           ,
   BInt4   gd    = -1;    /*      group descriptor */
   BInt4   i         ;
 
-  *var_pointer = (BUInt8) ULONG_MAX;
+  *var_pointer = (BUInt8) BUINT8_MAX;
 
 /*
  *  search for first free group descriptor and for group descriptor if
@@ -469,7 +469,7 @@ BInt4 RT_retrieve_var  ( BInt4    set           ,
       break;
     }
     if ( ( fgd == -1                            ) &&
-         ( retrieve_var[set][i][0] == ULONG_MAX )    )
+         ( retrieve_var[set][i][0] == BUINT8_MAX )    )
     {
       fgd = i;
     }
@@ -520,7 +520,7 @@ static BInt4 RT_update_var_array( BInt4    set         ,
     BInt4   error     =  1;
     BInt4   level     =  0;
     BInt4   index     =  0;
-    BUInt4  max_index = (BUInt4) ULONG_MAX;
+    BUInt4  max_index = (BUInt4) BUINT8_MAX;
     BUInt8  start_table;
 
     start_table = *grp_pointer+(BUInt8)SIZE_DAT_BUF+SIZE_BINT8;
@@ -607,7 +607,7 @@ BInt4 RT_update_var_index_array( BInt4    set          ,
 /*
  *  Look for the first valid file pointer value which points to a data block
  */
-        if ( ( data.ptr[k] != ULONG_MAX) &&
+        if ( ( data.ptr[k] != BUINT8_MAX) &&
              ( found[gd]  == 0         )   )
         {
             index += k;
@@ -639,7 +639,7 @@ BInt4 RT_update_var_index_array( BInt4    set          ,
                  */
                 for ( i=0; i<*index_copy+3; i++ )
                 {
-                    retrieve_var[set][gd][i] = (BUInt8) ULONG_MAX;
+                    retrieve_var[set][gd][i] = (BUInt8) BUINT8_MAX;
                 }
                 retrieve_var[set][gd][index+2] = data.ptr[k];
             }
@@ -660,7 +660,7 @@ BInt4 RT_update_var_index_array( BInt4    set          ,
                 }
                 else if ( index == 0 )
                 {
-                    retrieve_var[set][gd][index+2] = (BUInt8) ULONG_MAX;
+                    retrieve_var[set][gd][index+2] = (BUInt8) BUINT8_MAX;
                 }
             }
         }

@@ -65,7 +65,7 @@
 #endif
 
 #if defined PTR8
-#if defined WIN64
+#if defined _WIN32
   typedef  __int64            BInt8    ;     /* long           :  8 bytes */
   typedef  unsigned __int64   BUInt8   ;     /* long           :  8 bytes */
 #elif defined GNU_PC
@@ -83,10 +83,12 @@
 #endif
 #endif
 
-#if defined PTR8
-# undef  ULONG_MAX
-# define ULONG_MAX (BUInt8) -1
-#endif
+# define BUINT8_MAX ((BUInt8) -1)
+
+// TODO: We can probably get rid of this, as every platform has a 64-bit seek
+// method available.
+#define NEF_SEEK_MAX (BUINT8_MAX >> 1)
+
 /*
  * TRUE and FALSE defined as enumerator
  */
