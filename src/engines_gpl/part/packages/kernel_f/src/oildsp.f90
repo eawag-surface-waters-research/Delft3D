@@ -801,7 +801,6 @@ module oildsp_mod
 
 !     This is the dispersion step in the model
                   rrand = rnd(rseed)
-!                  write(1972,*) i, rseed, rrand, fractdapp
                   if ( rrand .lt. fractdapp   ) then
                      if ( wpart(ioilt(ifrac),i) .gt. 0.0 ) then
                         wpart(ioild(ifrac),i) = wpart(ioilt(ifrac),i)
