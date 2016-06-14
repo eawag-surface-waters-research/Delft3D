@@ -5935,7 +5935,11 @@ src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_hooks.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_hooks_teamcity.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_store.f90 -text
+src/utils_lgpl/io_ugrid/Makefile.am -text
+src/utils_lgpl/io_ugrid/packages/Makefile.am -text
+src/utils_lgpl/io_ugrid/packages/io_ugrid/Makefile.am -text
 src/utils_lgpl/io_ugrid/packages/io_ugrid/io_netcdf.vfproj -text
+src/utils_lgpl/io_ugrid/packages/io_ugrid/src/Makefile.am -text
 src/utils_lgpl/io_ugrid/packages/io_ugrid/src/io_ugrid.f90 -text
 src/utils_lgpl/nefis/AUTHORS -text
 src/utils_lgpl/nefis/COPYING -text

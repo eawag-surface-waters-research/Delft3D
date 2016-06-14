@@ -5,6 +5,7 @@ SUBDIRS = \
          delftio \
          esmfsm \
          ftnunit \
+         io_ugrid \
          nefis \
          ec_module \
          d_hydro_lib \
