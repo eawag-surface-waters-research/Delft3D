@@ -592,7 +592,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "f90_netcdf", "third_party_o
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "io_netcdf", "io_netcdf", "{D7D19E8E-CECE-42A5-8B0D-16DB489BD0EA}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_netcdf", "utils_lgpl\io_ugrid\packages\io_ugrid\io_netcdf.vfproj", "{3D34F0B9-2711-4C1B-B59E-5AF94894264B}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_netcdf", "utils_lgpl\io_netcdf\packages\io_netcdf\io_netcdf.vfproj", "{3D34F0B9-2711-4C1B-B59E-5AF94894264B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5250F13E-C280-42FC-8CDF-74E96A500605} = {5250F13E-C280-42FC-8CDF-74E96A500605}
 		{C29AA190-5BE8-4674-AA8A-E858964D3C08} = {C29AA190-5BE8-4674-AA8A-E858964D3C08}

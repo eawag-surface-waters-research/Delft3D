@@ -1,3 +1,3 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
-         io_ugrid
+         io_netcdf
