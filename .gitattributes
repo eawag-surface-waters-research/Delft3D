@@ -5938,7 +5938,10 @@ src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/io_netcdf.vfproj -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/io_netcdf_dll.vfproj -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/Makefile.am -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf.f90 -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_api.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_ugrid.f90 -text
 src/utils_lgpl/nefis/AUTHORS -text
 src/utils_lgpl/nefis/COPYING -text

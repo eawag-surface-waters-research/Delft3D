@@ -95,13 +95,6 @@ type t_crs
    type(nc_attribute), allocatable :: attset(:)     !< General set with all/any attributes about this CRS.
 end type t_crs
 
-type t_ug_file
-   character(len=256)   :: fileName
-   integer                          :: numMesh
-   integer, allocatable             :: ids_meshtopo(:)
-   character(len=256), allocatable :: meshNames(:)
-end type t_ug_file
-
 !> Structure for storing all variable ids for an unstructured mesh.
 type t_ug_meshids
    !
@@ -165,6 +158,14 @@ type t_ug_meshgeom
 
    type(t_crs),  pointer :: crs           !< Map projection/coordinate transformation used for the coordinates of this mesh.
 end type t_ug_meshgeom
+
+type t_ug_file
+   character(len=256)   :: fileName
+   integer                          :: numMesh
+   integer, allocatable             :: ids_meshtopo(:) !< The var id for all mesh topologies in file.
+   type(t_ug_meshids), allocatable  :: meshids(:)      !< The struct with underlying variable IDs, one for each mesh topology.
+   character(len=256), allocatable  :: meshNames(:)    !< The variable names for all mesh topologies in file.
+end type t_ug_file
 
    contains
 
@@ -1043,5 +1044,19 @@ function ug_get_meshcount(ncid, numMesh) result(ierr)
    end do
 
 end function ug_get_meshcount
+
+!> Gets the x,y-coordinates for all nodes in the specified mesh.
+!! The output x,y arrays are supposed to be of exact correct length already.
+function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
+   type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   real(kind=dp),      intent(out) :: xn(:), yn(:) !< Arrays to store x,y-coordinates of the mesh nodes.
+   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   ierr = nf90_get_var(ncid, meshids%id_nodex, xn)
+   ierr = nf90_get_var(ncid, meshids%id_nodex, yn)
+   ! TODO: AvD: some more careful error handling
+
+end function ug_get_node_coordinates
 
 end module io_ugrid
