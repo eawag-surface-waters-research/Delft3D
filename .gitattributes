@@ -2557,7 +2557,6 @@ src/scripts_lgpl/win32/make_revision.bat -text
 src/scripts_lgpl/win32/oss-install.cmd -text
 src/scripts_lgpl/win32/oss-install_debug.cmd -text
 src/scripts_lgpl/win32/update_version.cmd -text
-src/scripts_lgpl/win64/change_sln_projs.py -text
 src/scripts_lgpl/win64/delft3d_open_template.sln -text
 src/scripts_lgpl/win64/oss-install_debug_x64.cmd -text
 src/scripts_lgpl/win64/oss-install_x64.cmd -text
