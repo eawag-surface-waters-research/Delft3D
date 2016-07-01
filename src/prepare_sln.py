@@ -136,6 +136,98 @@ platformtoolset[2015] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2016] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2017] = "    <PlatformToolset>v140</PlatformToolset>"
 
+#
+#
+# process_solution_file ====================================
+# process a VisualStudio Solution File (and underlying projects)
+# Pass only file names, no full path names. It assumed that both
+# files are in fixed locations (see below).
+def process_solution_file(sln, slntemplate):
+    global vs
+    global ifort
+    global libdir
+    global redistdir
+    global toolsversion
+    global platformtoolset
+
+    # Copy the solution template file to the solution file
+    sys.stdout.write("Creating file " + sln + " ...\n")
+    scriptdir = os.path.dirname(os.path.abspath(__file__))
+    topdir = scriptdir
+
+    # target file:
+    sln = os.path.join(topdir, sln)
+
+    # source template file:
+    slntemplate = os.path.join(topdir, "scripts_lgpl", "win64", slntemplate)
+
+    shutil.copyfile(slntemplate, sln)
+
+    # Collect the project files referenced in the solution file
+    projectfiles = []
+    # Read sln file:
+    # Put the full file contents in filin_contents
+    with open(sln, "r", encoding='utf-8') as filinhandle:
+        filin_contents = filinhandle.readlines()
+
+    # Scan the contents and rewrite the full solution file
+    with open(sln, "w", encoding='utf-8') as filouthandle:
+        for line in filin_contents:
+            # Search for project file references
+            pp = line.split('"')
+            for subline in pp:
+                if max(subline.find(".vfproj"), subline.find(".vcxproj"), subline.find(".vcproj")) != -1:
+                    projectfiles.append(subline)
+            # Changes to the sln file based on VS version
+            startpos = line.find("Microsoft Visual Studio Solution File, Format Version")
+            if startpos == 0:
+                if vs == 2010:
+                    line = "Microsoft Visual Studio Solution File, Format Version 11.00\n"
+                elif vs == 2012:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                elif vs == 2013:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                elif vs == 2014:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                elif vs == 2015:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                elif vs == 2016:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                elif vs == 2017:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                # else:
+                    # leave line unchanged
+            startpos = line.find("# Visual Studio")
+            if startpos == 0:
+                if vs == 2010:
+                    line = "# Visual Studio 2010\n"
+                elif vs == 2012:
+                    line = "# Visual Studio 2012\n"
+                elif vs == 2013:
+                    line = "# Visual Studio 2013\n"
+                elif vs == 2014:
+                    line = "# Visual Studio 2014\n"
+                elif vs == 2015:
+                    line = "# Visual Studio 2015\n"
+                elif vs == 2016:
+                    line = "# Visual Studio 2016\n"
+                elif vs == 2017:
+                    line = "# Visual Studio 2017\n"
+                # else:
+                    # leave line unchanged
+            filouthandle.write(line)
+
+    # Process all project files referenced in the sln file
+    for pfile in projectfiles:
+        pfile = os.path.join(topdir, pfile)
+        sys.stdout.write("Processing file " + pfile + " ...\n")
+        if os.path.isfile(pfile):
+            process_project_file(pfile)
+        else:
+            sys.stdout.write("ERROR: File does not exists:" + pfile + "\n")
+    sys.stdout.write("...Finished.\n")
+    sys.stdout.write('Ready to be used: "' + sln + '"\n')
+
 
 #
 #
@@ -293,80 +385,11 @@ def do_work():
     sys.stdout.write("Visual Studio Version : " + str(vs) + "\n")
     sys.stdout.write("Intel Fortran Version : " + str(ifort) + "\n")
 
-    # Copy the solution template file to the solution file
-    sln = "delft3d_open.sln"
-    sys.stdout.write("Creating file " + sln + " ...\n")
-    scriptdir = os.path.dirname(os.path.abspath(__file__))
-    topdir = scriptdir
-    sln = os.path.join(topdir, sln)
-    slntemplate = os.path.join(topdir, "scripts_lgpl", "win64", "delft3d_open_template.sln")
-    shutil.copyfile(slntemplate, sln)
+    process_solution_file("delft3d_open.sln", "delft3d_open_template.sln")
 
-    # Collect the project files referenced in the solution file
-    projectfiles = []
-    # Read sln file:
-    # Put the full file contents in filin_contents
-    with open(sln, "r", encoding='utf-8') as filinhandle:
-        filin_contents = filinhandle.readlines()
+    # TODO: Consider making this optional via cmdline args:
+    process_solution_file("io_netcdf.sln",    "io_netcdf_template.sln")
 
-    # Scan the contents and rewrite the full solution file
-    with open(sln, "w", encoding='utf-8') as filouthandle:
-        for line in filin_contents:
-            # Search for project file references
-            pp = line.split('"')
-            for subline in pp:
-                if max(subline.find(".vfproj"), subline.find(".vcxproj"), subline.find(".vcproj")) != -1:
-                    projectfiles.append(subline)
-            # Changes to the sln file based on VS version
-            startpos = line.find("Microsoft Visual Studio Solution File, Format Version")
-            if startpos == 0:
-                if vs == 2010:
-                    line = "Microsoft Visual Studio Solution File, Format Version 11.00\n"
-                elif vs == 2012:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
-                elif vs == 2013:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
-                elif vs == 2014:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
-                elif vs == 2015:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
-                elif vs == 2016:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
-                elif vs == 2017:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
-                # else:
-                    # leave line unchanged
-            startpos = line.find("# Visual Studio")
-            if startpos == 0:
-                if vs == 2010:
-                    line = "# Visual Studio 2010\n"
-                elif vs == 2012:
-                    line = "# Visual Studio 2012\n"
-                elif vs == 2013:
-                    line = "# Visual Studio 2013\n"
-                elif vs == 2014:
-                    line = "# Visual Studio 2014\n"
-                elif vs == 2015:
-                    line = "# Visual Studio 2015\n"
-                elif vs == 2016:
-                    line = "# Visual Studio 2016\n"
-                elif vs == 2017:
-                    line = "# Visual Studio 2017\n"
-                # else:
-                    # leave line unchanged
-            filouthandle.write(line)
-
-    # Process all project files referenced in the sln file
-    for pfile in projectfiles:
-        pfile = os.path.join(topdir, pfile)
-        sys.stdout.write("Processing file " + pfile + " ...\n")
-        if os.path.isfile(pfile):
-            process_project_file(pfile)
-        else:
-            sys.stdout.write("ERROR: File does not exists:" + pfile + "\n")
-    sys.stdout.write("...Finished.\n")
-    sys.stdout.write('Ready to be used: "' + sln + '"\n')
-    
     # Force reading GUI parameters next run
     vs = -999
     ifort = -999

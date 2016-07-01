@@ -25,6 +25,7 @@ call "%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
 
   rem The path to devenv.exe is now added to PATH: no full path specificitation needed on next line.
 devenv.exe delft3d_open.sln /Build "Release|x64" /Out build.log
+devenv.exe io_netcdf.sln /Build "Release|x64" /Out build_io_netcdf.log
 
   rem In build.log, replace "error" by TeamCity messages
 third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build.log 
