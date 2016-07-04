@@ -60,11 +60,15 @@ public :: ionc_inq_conventions
 !
 ! NetCDF conventions support. Based on the conventions used in the file,
 ! this library supports a bigger or smaller amount of intelligent inquiry functions.
+! Note: a data set may adhere to multiple conventions at the same time.
+! This is stored as an integer sum of the respective convention types. Therefore,
+! all types below must be powers of two, to allow all combinations in one number.
 !
-integer, parameter :: IONC_CONV_NULL  = 0  !< Dataset conventions not yet detected
-integer, parameter :: IONC_CONV_UGRID = 1  !< Dataset based on UGRID-conventions
-integer, parameter :: IONC_CONV_SGRID = 2  !< Dataset based on SGRID-conventions
-integer, parameter :: IONC_CONV_OTHER = 99 !< Dataset based on unknown or unsupported conventions (user should fall back to NetCDF native API calls)
+integer, parameter :: IONC_CONV_NULL  = 0   !< Dataset conventions not yet detected
+integer, parameter :: IONC_CONV_CF    = 1   !< Dataset conventions not yet detected
+integer, parameter :: IONC_CONV_UGRID = 2   !< Dataset based on UGRID-conventions
+integer, parameter :: IONC_CONV_SGRID = 4   !< Dataset based on SGRID-conventions
+integer, parameter :: IONC_CONV_OTHER = -99 !< Dataset based on unknown or unsupported conventions (user should fall back to NetCDF native API calls)
 
 integer, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inquiring attribute values.
 
@@ -119,6 +123,30 @@ function ionc_inq_conventions(ioncid, iconvtype) result(ierr)
 999 continue
    ! Some error (status was set earlier)
 end function ionc_inq_conventions
+
+
+!> Checks whether the specified data set adheres to a specific set of conventions.
+!! Datasets may adhere to multiple conventions at the same time, so use this method
+!! to check for individual conventions.
+function ionc_adheresto_conventions(ioncid, iconvtype) result(does_adhere)
+   integer, intent(in) :: ioncid      !< The IONC data set id.
+   integer, intent(in) :: iconvtype   !< The NetCDF conventions type to check for.
+   logical             :: does_adhere !< Whether or not the file adheres to the specified conventions.
+
+   if (ioncid < 1 .or. ioncid > ndatasets) then
+      does_adhere = .false.
+      goto 999
+   end if
+
+   ! Perform logical AND to determine whether locType is inside dataset's conventions 'set'.
+   does_adhere = iand(datasets(ioncid)%iconvtype, iconvtype) == iconvtype
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (return .false.)
+end function ionc_adheresto_conventions
 
 
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
@@ -214,6 +242,58 @@ function ionc_close(ioncid) result(ierr)
 end function ionc_close
 
 
+!> Gets the number of nodes in a single mesh from a data set.
+function ionc_get_node_count(ioncid, meshid, nnode) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer,             intent(  out) :: nnode   !< Number of nodes.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inquire_dimension(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), UG_LOC_NODE, nnode)
+
+end function ionc_get_node_count
+
+
+!> Gets the number of edges in a single mesh from a data set.
+function ionc_get_edge_count(ioncid, meshid, nedge) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer,             intent(  out) :: nedge   !< Number of edges.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inquire_dimension(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), UG_LOC_EDGE, nedge)
+
+end function ionc_get_edge_count
+
+
+!> Gets the number of faces in a single mesh from a data set.
+function ionc_get_face_count(ioncid, meshid, nface) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer,             intent(  out) :: nface   !< Number of faces.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inquire_dimension(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), UG_LOC_FACE, nface)
+
+end function ionc_get_face_count
+
+
+!> Gets the maximum number of nodes for any face in a single mesh from a data set.
+function ionc_get_max_face_nodes(ioncid, meshid, nmaxfacenodes) result(ierr)
+   integer,             intent(in)    :: ioncid        !< The IONC data set id.
+   integer,             intent(in)    :: meshid        !< The mesh id in the specified data set.
+   integer,             intent(  out) :: nmaxfacenodes !< Number of faces.
+   integer                            :: ierr          !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inquire_dimension(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), UG_DIM_MAXFACENODES, nmaxfacenodes)
+
+end function ionc_get_max_face_nodes
+
+
 !> Gets the x,y coordinates for all nodes in a single mesh from a data set.
 function ionc_get_node_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
    integer,             intent(in)  :: ioncid  !< The IONC data set id.
@@ -266,6 +346,7 @@ function detect_conventions(ioncid) result(ierr)
       goto 999
    end if
 
+   ! TODO: AvD: add support for detecting multiple conventions, and store as a sum of integer codes.
    if (index(convstring, 'UGRID') > 0) then
       datasets(ioncid)%iconvtype = IONC_CONV_UGRID
    else

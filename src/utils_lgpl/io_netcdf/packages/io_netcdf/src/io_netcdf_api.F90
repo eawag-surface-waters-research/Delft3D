@@ -57,6 +57,20 @@ implicit none
 
 end subroutine main
 
+!> Checks whether the specified data set adheres to a specific set of conventions.
+!! Datasets may adhere to multiple conventions at the same time, so use this method
+!! to check for individual conventions.
+function ionc_adheresto_conventions_dll(ioncid, iconvtype) result(does_adhere) bind(C, name="ionc_adheresto_conventions")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_adheresto_conventions_dll
+   integer(kind=c_int), intent(in)  :: ioncid      !< The IONC data set id.
+   integer(kind=c_int), intent(in)  :: iconvtype   !< The NetCDF conventions type to check for.
+   logical(kind=c_bool)             :: does_adhere !< Whether or not the file adheres to the specified conventions.
+
+   does_adhere = ionc_adheresto_conventions(ioncid, iconvtype)
+
+end function ionc_adheresto_conventions_dll
+
+
 !> Inquire the NetCDF conventions used in the dataset.
 function ionc_inq_conventions_dll(ioncid, iconvtype) result(ierr) bind(C, name="ionc_inq_conventions")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_conventions_dll
@@ -67,6 +81,7 @@ function ionc_inq_conventions_dll(ioncid, iconvtype) result(ierr) bind(C, name="
    ierr = ionc_inq_conventions(ioncid, iconvtype)
 
 end function ionc_inq_conventions_dll
+
 
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
 function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_open")
@@ -100,6 +115,58 @@ end function ionc_close_dll
 !
 ! UGRID specifics:
 !
+
+!> Gets the number of nodes in a single mesh from a data set.
+function ionc_get_node_count_dll(ioncid, meshid, nnode) result(ierr) bind(C, name="ionc_get_node_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_node_count_dll
+   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(  out) :: nnode   !< Number of nodes.
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_get_node_count(ioncid, meshid, nnode)
+
+end function ionc_get_node_count_dll
+
+
+!> Gets the number of edges in a single mesh from a data set.
+function ionc_get_edge_count_dll(ioncid, meshid, nedge) result(ierr) bind(C, name="ionc_get_edge_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_count_dll
+   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(  out) :: nedge   !< Number of edges.
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_get_edge_count(ioncid, meshid, nedge)
+
+end function ionc_get_edge_count_dll
+
+
+!> Gets the number of faces in a single mesh from a data set.
+function ionc_get_face_count_dll(ioncid, meshid, nface) result(ierr) bind(C, name="ionc_get_face_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_face_count_dll
+   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(  out) :: nface   !< Number of faces.
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_get_face_count(ioncid, meshid, nface)
+
+end function ionc_get_face_count_dll
+
+
+!> Gets the maximum number of nodes for any face in a single mesh from a data set.
+function ionc_get_max_face_nodes_dll(ioncid, meshid, nmaxfacenodes) result(ierr) bind(C, name="ionc_get_max_face_nodes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_max_face_nodes_dll
+   integer(kind=c_int),             intent(in)    :: ioncid        !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid        !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(  out) :: nmaxfacenodes !< Number of faces.
+   integer(kind=c_int)                            :: ierr          !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_get_max_face_nodes(ioncid, meshid, nmaxfacenodes)
+
+end function ionc_get_max_face_nodes_dll
+
 
 !> Inquire the NetCDF conventions used in the dataset.
 function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) result(ierr) bind(C, name="ionc_get_node_coordinates")

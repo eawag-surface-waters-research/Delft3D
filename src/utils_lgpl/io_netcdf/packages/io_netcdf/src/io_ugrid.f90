@@ -70,6 +70,9 @@ integer, parameter :: UG_LOC_FACE = 4 !< Mesh data location: mesh face
 integer, parameter :: UG_LOC_VOL  = 8 !< Mesh data location: mesh volume
 integer, parameter :: UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE !< All three possible 2D locations.
 
+!! Dimension types (form a supplement to the preceding location types)
+integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the max number of nodes in the face_node_connectivity table.
+
 !! Basics
 integer, parameter :: dp=kind(1.0d00)
 integer, parameter :: maxMessageLen = 1024
@@ -1225,6 +1228,41 @@ function ug_get_meshcount(ncid, numMesh) result(ierr)
    end do
 
 end function ug_get_meshcount
+
+
+!> Gets the size/count of items for the specified topological location.
+!! Use this to get the number of nodes/edges/faces/volumes.
+function ug_inquire_dimension(ncid, meshids, idimtype, len) result(ierr)
+   integer,            intent(in)    :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
+   type(t_ug_meshids), intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,            intent(in)    :: idimtype !< The location type to count (one of UG_LOC_NODE, UG_LOC_EDGE, UG_LOC_FACE, UG_LOC_VOL).
+   integer,            intent(  out) :: len      !< The number of items for that location.
+   integer                           :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
+
+   integer :: idim
+
+   select case (idimtype)
+   case (UG_LOC_NODE)
+      idim = meshids%id_nodedim
+   case (UG_LOC_EDGE)
+      idim = meshids%id_nodedim
+   case (UG_LOC_FACE)
+      idim = meshids%id_nodedim
+   case (UG_DIM_MAXFACENODES)
+      idim = meshids%id_maxfacenodesdim 
+   case default
+      ierr = UG_NOTIMPLEMENTED
+      goto 999
+   end select
+   
+   ierr = nf90_inquire_dimension(ncid, idim, len=len)
+
+   ! Success
+   return
+
+999 continue
+    ! Some error  
+end function ug_inquire_dimension
 
 
 !> Gets the x,y-coordinates for all nodes in the specified mesh.
