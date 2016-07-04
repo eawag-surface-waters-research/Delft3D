@@ -134,11 +134,11 @@ end type t_ug_meshids
 !> Structure for storing an entire mesh geometry (topology and coordinates and more).
 type t_ug_meshgeom
 ! TODO: AvD: extend this to 3D (volumes)
-   character(len=256) :: meshName           !< Name of this mesh ! TODO: AvD: should this be in this data type?
+   character(len=256) :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
    integer            :: dim                !< Dimensionality of the mesh (1/2/3)
-   integer            :: numNode            !< Number of mesh nodes.
-   integer            :: numEdge            !< Number of mesh edges.
-   integer            :: numFace            !< Number of mesh faces.
+   integer            :: numnode            !< Number of mesh nodes.
+   integer            :: numedge            !< Number of mesh edges.
+   integer            :: numface            !< Number of mesh faces.
 
    integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
    integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
@@ -160,11 +160,10 @@ type t_ug_meshgeom
 end type t_ug_meshgeom
 
 type t_ug_file
-   character(len=256)   :: fileName
-   integer                          :: numMesh
-   integer, allocatable             :: ids_meshtopo(:) !< The var id for all mesh topologies in file.
+   character(len=256)               :: filename
+   integer                          :: nummesh
    type(t_ug_meshids), allocatable  :: meshids(:)      !< The struct with underlying variable IDs, one for each mesh topology.
-   character(len=256), allocatable  :: meshNames(:)    !< The variable names for all mesh topologies in file.
+   character(len=256), allocatable  :: meshnames(:)    !< The variable names for all mesh topologies in file.
 end type t_ug_file
 
    contains
@@ -184,6 +183,9 @@ integer function ug_get_message(str) result(ierr)
 
 end function ug_get_message
 
+!
+! -- Writing-related routines ---------------------------------------------
+!
 
 !> Puts global attributes in an open NetCDF data set.
 !! This includes: institution, Conventions, etc.
@@ -1017,6 +1019,189 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 end function ug_write_mesh_arrays
 
 
+!
+! -- Reading-related routines ---------------------------------------------
+!
+
+!> Initialized all UGRID-specific meta information present in an open data set.
+function ug_init_dataset(ncid, ug_file) result(ierr)
+   integer,         intent(in   ) :: ncid    !< ID of already opened data set.
+   type(t_ug_file), intent(  out) :: ug_file !< UGRID file struct with cached meta information.
+   integer                        :: ierr    !< Result status (UG_NOERR if successful).
+   
+   integer :: iv, im, nmesh, numvar
+   logical :: is_mesh_topo
+   
+   ! Count nr of meshes present in the file
+   ierr = ug_get_meshcount(ncid, nmesh)
+   if (ierr /= UG_NOERR) then
+      goto 999
+   end if
+   ug_file%nummesh = nmesh
+   allocate(ug_file%meshids(nmesh))
+   allocate(ug_file%meshnames(nmesh))
+   
+
+   ! Now check all variables and if they're a mesh topology, read in all details.
+   ierr = nf90_inquire(ncid, nVariables = numVar)
+
+   im = 0
+   do iv=1,numVar
+      is_mesh_topo = ug_is_mesh_topology(ncid, iv)
+      if (is_mesh_topo) then
+         im = im + 1
+      end if
+      ierr = nf90_inquire_variable(ncid, iv, name = ug_file%meshnames(im))
+      ierr = ug_init_mesh_topology(ncid, iv, ug_file%meshids(im))
+      if (ierr /= UG_NOERR) then
+         goto 999
+      end if
+   end do
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+end function ug_init_dataset
+
+
+!> Reads the mesh_topology attributes from a NetCDF variable.
+function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
+   integer,         intent(in   ) :: ncid    !< ID of already opened data set.
+   integer,         intent(in   ) :: varid   !< NetCDF variable ID that contains the mesh topology information.
+   type(t_ug_meshids), intent(  out) :: meshids !< Structure in which all mesh topology variable ids will be stored.
+   integer                        :: ierr    !< Result status (UG_NOERR if successful).
+
+   character(len=255) :: varname
+
+   meshids%id_meshtopo        = varid              !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
+
+   !
+   ! Dimensions:
+   !
+   call att_to_dimid('node_dimension', meshids%id_nodedim)
+   call att_to_dimid('edge_dimension', meshids%id_edgedim)
+   call att_to_dimid('face_dimension', meshids%id_facedim)
+   
+   !
+   ! Coordinate variables
+   !
+   call att_to_coordvarids('node_coordinates', meshids%id_nodex, meshids%id_nodey, meshids%id_nodez)
+   call att_to_coordvarids('edge_coordinates', meshids%id_edgex, meshids%id_edgey)
+   !call att_to_varid('', id_edgexbnd        = -1 !<            variable ID for edge boundaries' x-coordinate.
+   !call att_to_varid('', id_edgeybnd        = -1 !<            variable ID for edge boundaries' y-coordinate.
+   call att_to_coordvarids('face_coordinates', meshids%id_facex, meshids%id_facey)
+   !call att_to_varid('', id_facexbnd        = -1 !<            variable ID for face boundaries' x-coordinate.
+   !call att_to_varid('', id_faceybnd        = -1 !<            variable ID for face boundaries' y-coordinate.
+
+   !
+   ! Topology variables
+   !
+   call att_to_varid('edge_node_connectivity', meshids%id_edgenodes) !< Variable ID for edge-to-node mapping table.
+   call att_to_varid('face_node_connectivity', meshids%id_facenodes) !< Variable ID for face-to-node mapping table.
+   call att_to_varid('edge_face_connectivity', meshids%id_edgefaces) !< Variable ID for edge-to-face mapping table (optional, can be -1).
+   call att_to_varid('face_edge_connectivity', meshids%id_faceedges) !< Variable ID for face-to-edge mapping table (optional, can be -1).
+   call att_to_varid('face_face_connectivity', meshids%id_facelinks) !< Variable ID for face-to-face mapping table (optional, can be -1).
+
+
+contains
+
+subroutine att_to_dimid(name, id)
+   character(len=*), intent(in   ) :: name
+   integer,          intent(  out) :: id
+
+   ierr = nf90_get_att(ncid, varid, name, varname)
+   if (ierr /= nf90_noerr) then
+      ierr = nf90_inq_dimid(ncid, trim(varname), id)
+   end if
+end subroutine att_to_dimid
+
+subroutine att_to_varid(name, id)
+   character(len=*), intent(in   ) :: name
+   integer,          intent(  out) :: id
+
+   ierr = nf90_get_att(ncid, varid, name, varname)
+   if (ierr /= nf90_noerr) then
+      ierr = nf90_inq_varid(ncid, trim(varname), id)
+   end if
+end subroutine att_to_varid
+
+subroutine att_to_coordvarids(name, idx, idy, idz)
+   character(len=*),  intent(in   ) :: name
+   integer,           intent(  out) :: idx, idy
+   integer, optional, intent(  out) :: idz
+
+   integer :: i1, i2, n
+
+   ierr = nf90_get_att(ncid, varid, name, varname)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   
+   i1 = 1
+   n = len_trim(varname)
+
+   ! TODO: AvD: I'd rather use a string tokenizer here.
+   i2 = index(varname(i1:n), ' ')
+   if (i2 == 0) then
+      i2 = n
+   else
+      i2 = i1 + i2 - 1
+   end if
+   ierr = nf90_inq_varid(ncid, varname(i1:i2-1), idx)
+   i1 = i2+1
+
+   i2 = index(varname(i1:n), ' ')
+   if (i2 == 0) then
+      i2 = n
+   else
+      i2 = i1 + i2 - 1
+   end if
+   ierr = nf90_inq_varid(ncid, varname(i1:i2-1), idy)
+   i1 = i2+1
+
+   if (present(idz)) then
+      i2 = index(varname(i1:n), ' ')
+      if (i2 == 0) then
+         i2 = n
+      else
+         i2 = i1 + i2 - 1
+      end if
+      ierr = nf90_inq_varid(ncid, varname(i1:i2-1), idz)
+      i1 = i2+1
+   end if
+
+   return
+
+999 continue
+    ! Some error  
+end subroutine att_to_coordvarids
+
+end function ug_init_mesh_topology
+
+!> Returns whether a given variable is a mesh topology variable.
+function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
+   integer,        intent(in)  :: ncid         !< NetCDF dataset id
+   integer,        intent(in)  :: varid        !< NetCDF variable id
+   logical                     :: is_mesh_topo !< Return value
+
+   integer :: ierr
+   character(len=13) :: buffer
+
+   is_mesh_topo = .false.
+
+   buffer = ' '
+   ierr = nf90_get_att(ncid, varid, 'cf_role', buffer)
+   if (ierr == nf90_noerr) then
+      if (trim(buffer) == 'mesh_topology') then
+         is_mesh_topo = .true.
+      end if
+   end if
+end function ug_is_mesh_topology
+
+
 !> Gets the number of mesh topologies in an open dataset.
 !! use this to determine on how many different meshes, data is defined in the dataset.
 !!
@@ -1027,23 +1212,20 @@ function ug_get_meshcount(ncid, numMesh) result(ierr)
    integer                     :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    integer :: numVar, i
-   character(len=13) :: buffer
+   logical :: is_mesh_topo
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
 
    numMesh = 0
    do i=1,numVar
-      buffer = ' '
-      ierr = nf90_get_att(ncid, i, 'cf_role', buffer)
-      if (ierr /= nf90_noerr) then
-         cycle
-      end if
-      if (trim(buffer) == 'mesh_topology') then
+      is_mesh_topo = ug_is_mesh_topology(ncid, i)
+      if (is_mesh_topo) then
          numMesh = numMesh + 1
       end if
    end do
 
 end function ug_get_meshcount
+
 
 !> Gets the x,y-coordinates for all nodes in the specified mesh.
 !! The output x,y arrays are supposed to be of exact correct length already.
@@ -1051,12 +1233,28 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
    integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    real(kind=dp),      intent(out) :: xn(:), yn(:) !< Arrays to store x,y-coordinates of the mesh nodes.
-   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_get_var(ncid, meshids%id_nodex, xn)
    ierr = nf90_get_var(ncid, meshids%id_nodex, yn)
    ! TODO: AvD: some more careful error handling
 
 end function ug_get_node_coordinates
+
+
+!> Gets the face-node connectvit table for all faces in the specified mesh.
+!! The output face_nodes array is supposed to be of exact correct size already.
+function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
+   type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,            intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
+   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERRif successful).
+
+   ierr = nf90_get_var(ncid, meshids%id_facenodes, face_nodes)
+   ! TODO: AvD: some more careful error handling
+   
+   ! TODO: AvD: also introduce 0-/1-based indexing handling.
+
+end function ug_get_face_nodes
 
 end module io_ugrid

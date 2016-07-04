@@ -68,6 +68,35 @@ function ionc_inq_conventions_dll(ioncid, iconvtype) result(ierr) bind(C, name="
 
 end function ionc_inq_conventions_dll
 
+!> Tries to open a NetCDF file and initialize based on its specified conventions.
+function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_open")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_open_dll
+   character(kind=c_char), intent(in   ) :: c_path(*)      !< File name for netCDF dataset to be opened.
+   integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
+   integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
+!   integer(kind=c_int), optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
+   integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
+
+  character(len=MAXSTRLEN) :: path
+   ! TODO: AvD: Handle string length
+  !path = char_array_to_string(c_path)
+  
+  ierr = ionc_open(path, mode, ioncid, iconvtype)
+
+end function ionc_open_dll
+
+
+!> Tries to close an open io_netcdf data set.
+function ionc_close_dll(ioncid) result(ierr) bind(C, name="ionc_close")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_close_dll
+   integer(kind=c_int),           intent(in   ) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
+
+   ierr = ionc_close(ioncid)
+end function ionc_close_dll
+
+
 !
 ! UGRID specifics:
 !
@@ -89,5 +118,24 @@ function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) re
 
 end function ionc_get_node_coordinates_dll
 
+
+!> Gets the face-node connectvit table for all faces in the specified mesh.
+!! The output face_nodes array is supposed to be of exact correct size already.
+function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfacenodes) result(ierr) bind(C, name="ionc_get_face_nodes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_face_nodes_dll
+   integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
+   type(c_ptr),         intent(  out) :: c_face_nodes_ptr !< Pointer to array for the face-node connectivity table.
+   integer(kind=c_int), intent(in)    :: nface  !< The number of faces in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int), intent(in)    :: nmaxfacenodes  !< The maximum number of nodes per face in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
+
+   integer, pointer :: face_nodes(:,:)
+
+   call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
+
+   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)
+
+end function ionc_get_face_nodes_dll
 
 end module io_netcdf_api

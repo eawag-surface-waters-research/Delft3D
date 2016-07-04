@@ -71,8 +71,13 @@ integer, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inquiring a
 !
 ! Error statuses
 !
-integer, parameter :: IONC_NOERR = 0 !< Successful.
-integer, parameter :: IONC_BADID = 1 !< Not a valid IONC dataset id.
+integer, parameter :: IONC_NOERR  = 0 !< Successful
+integer, parameter :: IONC_EBADID = 1 !< Not a valid IONC dataset id
+integer, parameter :: IONC_ENOPEN = 2 !< File could not be opened
+integer, parameter :: IONC_ENOMEM = 3 !< Memory allocation error
+integer, parameter :: IONC_ENONCOMPLIANT = 4 !< File is non-compliant with its specified conventions
+
+
 
 !> Data type with reference to a NetCDF dataset
 type t_ionc
@@ -95,13 +100,13 @@ function ionc_inq_conventions(ioncid, iconvtype) result(ierr)
    ierr = IONC_NOERR
 
    if (ioncid < 1 .or. ioncid > ndatasets) then
-      ierr = IONC_BADID
+      ierr = IONC_EBADID
       goto 999
    end if
 
    ! Either get conventions from previously detected value, or detect them now.
    if (datasets(ioncid)%iconvtype == IONC_CONV_NULL) then
-      ierr = detect_conventions(ioncid, datasets(ioncid)%iconvtype)
+      ierr = detect_conventions(ioncid)
       if (ierr /= IONC_NOERR) then
          goto 999
       end if
@@ -116,6 +121,99 @@ function ionc_inq_conventions(ioncid, iconvtype) result(ierr)
 end function ionc_inq_conventions
 
 
+!> Tries to open a NetCDF file and initialize based on its specified conventions.
+function ionc_open(path, mode, ioncid, iconvtype, chunksize) result(ierr)
+   character (len=*), intent(in   ) :: path      !< File name for netCDF dataset to be opened.
+   integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
+   integer,           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer, optional, intent(inout) :: iconvtype !< (optional) The detected conventions in the file.
+   integer, optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
+   integer                          :: ierr      !< Result status (IONC_NOERR if successful).
+
+   integer :: ncid, istat
+
+   if (present(chunksize)) then
+      ierr = nf90_open(path, mode, ncid, chunksize)
+   else
+      ierr = nf90_open(path, mode, ncid)
+   end if
+
+   if (ierr /= nf90_noerr) then
+      ierr = IONC_ENOPEN
+      goto 999
+   end if
+   
+   call realloc(datasets, ndatasets+1, keepExisting=.true., stat=istat) ! TODO: AvD: Add buffered growth here.
+   if (istat /= 0) then
+      ierr = IONC_ENOMEM
+      goto 999
+   end if
+   datasets(ndatasets + 1)%ncid = ncid
+   ndatasets = ndatasets + 1
+   ioncid = ndatasets
+
+   ierr = detect_conventions(ioncid)
+
+   select case (datasets(ioncid)%iconvtype)
+   !
+   ! UGRID initialization
+   !
+   case (IONC_CONV_UGRID)
+      allocate(datasets(ioncid)%ug_file)
+      datasets(ioncid)%ug_file%filename = trim(path)
+      ierr = ug_init_dataset(datasets(ioncid)%ncid, datasets(ioncid)%ug_file)
+      if (ierr /= UG_NOERR) then
+         ! Keep UG error code and exit
+         goto 999
+      end if
+   case default
+      ! We accept file with no specific conventions.
+   end select
+
+   if (present(iconvtype)) then
+      iconvtype = datasets(ioncid)%iconvtype
+   end if
+
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+
+end function ionc_open
+
+
+!> Tries to close an open io_netcdf data set.
+function ionc_close(ioncid) result(ierr)
+   integer,           intent(in   ) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer                          :: ierr      !< Result status (IONC_NOERR if successful).
+
+   integer :: ncid, istat
+
+   if (ioncid <= 0 .or. ioncid > ndatasets) then
+      ierr = IONC_EBADID
+      goto 999
+   end if
+
+   ierr = nf90_close(datasets(ioncid)%ncid)
+   datasets(ioncid)%ncid = 0 ! Mark as closed
+
+   select case (datasets(ioncid)%iconvtype)
+   case (IONC_CONV_UGRID)
+      deallocate(datasets(ioncid)%ug_file)
+   end select
+
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+
+end function ionc_close
+
+
 !> Gets the x,y coordinates for all nodes in a single mesh from a data set.
 function ionc_get_node_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
    integer,             intent(in)  :: ioncid  !< The IONC data set id.
@@ -128,6 +226,19 @@ function ionc_get_node_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
 
 end function ionc_get_node_coordinates
 
+
+!> Gets the face-node connectvit table for all faces in the specified mesh.
+!! The output face_nodes array is supposed to be of exact correct size already.
+function ionc_get_face_nodes(ioncid, meshid, face_nodes) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer,             intent(  out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)
+
+end function ionc_get_face_nodes
+
 !
 ! -- Private routines -----------------------------------------------------
 !
@@ -135,9 +246,9 @@ end function ionc_get_node_coordinates
 !> Detect the conventions used in the given dataset.
 !!
 !! Detection is based on the :Conventions attribute in the file/data set.
-function detect_conventions(ioncid, iconvtype) result(ierr)
+!! Detected type is stored in the global datasets's attribute.
+function detect_conventions(ioncid) result(ierr)
    integer, intent(in)  :: ioncid    !< The IONC data set id.
-   integer, intent(out) :: iconvtype !< The NetCDF conventions type of the dataset.
    integer              :: ierr      !< Result status, ionc_noerr if successful.
 
    character(len=MAXSTRLEN) :: convstring
@@ -145,7 +256,7 @@ function detect_conventions(ioncid, iconvtype) result(ierr)
    ierr = IONC_NOERR
 
    if (ioncid < 1 .or. ioncid > ndatasets) then
-      ierr = IONC_BADID
+      ierr = IONC_EBADID
       goto 999
    end if
 
@@ -156,9 +267,9 @@ function detect_conventions(ioncid, iconvtype) result(ierr)
    end if
 
    if (index(convstring, 'UGRID') > 0) then
-      iconvtype = IONC_CONV_UGRID
+      datasets(ioncid)%iconvtype = IONC_CONV_UGRID
    else
-      iconvtype = IONC_CONV_OTHER
+      datasets(ioncid)%iconvtype = IONC_CONV_OTHER
    end if
 
    ! Successful
