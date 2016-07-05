@@ -1036,7 +1036,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    logical :: is_mesh_topo
    
    ! Count nr of meshes present in the file
-   ierr = ug_get_meshcount(ncid, nmesh)
+   ierr = ug_get_mesh_count(ncid, nmesh)
    if (ierr /= UG_NOERR) then
       goto 999
    end if
@@ -1051,9 +1051,10 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    im = 0
    do iv=1,numVar
       is_mesh_topo = ug_is_mesh_topology(ncid, iv)
-      if (is_mesh_topo) then
-         im = im + 1
+      if (.NOT. is_mesh_topo) then
+         cycle
       end if
+      im = im + 1
       ierr = nf90_inquire_variable(ncid, iv, name = ug_file%meshnames(im))
       ierr = ug_init_mesh_topology(ncid, iv, ug_file%meshids(im))
       if (ierr /= UG_NOERR) then
@@ -1091,7 +1092,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    ! Coordinate variables
    !
-   call att_to_coordvarids('node_coordinates', meshids%id_nodex, meshids%id_nodey, meshids%id_nodez)
+   call att_to_coordvarids('node_coordinates', meshids%id_nodex, meshids%id_nodey)!, meshids%id_nodez
    call att_to_coordvarids('edge_coordinates', meshids%id_edgex, meshids%id_edgey)
    !call att_to_varid('', id_edgexbnd        = -1 !<            variable ID for edge boundaries' x-coordinate.
    !call att_to_varid('', id_edgeybnd        = -1 !<            variable ID for edge boundaries' y-coordinate.
@@ -1104,7 +1105,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    call att_to_varid('edge_node_connectivity', meshids%id_edgenodes) !< Variable ID for edge-to-node mapping table.
    call att_to_varid('face_node_connectivity', meshids%id_facenodes) !< Variable ID for face-to-node mapping table.
-   call att_to_varid('edge_face_connectivity', meshids%id_edgefaces) !< Variable ID for edge-to-face mapping table (optional, can be -1).
+   call att_to_varid('edge_face_connectivity', meshids%id_edgefaces) !< Variable ID for edge-to-face mapping table (optional, can be -1).   
    call att_to_varid('face_edge_connectivity', meshids%id_faceedges) !< Variable ID for face-to-edge mapping table (optional, can be -1).
    call att_to_varid('face_face_connectivity', meshids%id_facelinks) !< Variable ID for face-to-face mapping table (optional, can be -1).
 
@@ -1114,21 +1115,32 @@ contains
 subroutine att_to_dimid(name, id)
    character(len=*), intent(in   ) :: name
    integer,          intent(  out) :: id
-
+   
+   varname = ''
    ierr = nf90_get_att(ncid, varid, name, varname)
    if (ierr /= nf90_noerr) then
-      ierr = nf90_inq_dimid(ncid, trim(varname), id)
+      goto 999
    end if
+   ierr = nf90_inq_dimid(ncid, trim(varname), id)
+999 continue
+    ! Some error     
 end subroutine att_to_dimid
 
 subroutine att_to_varid(name, id)
    character(len=*), intent(in   ) :: name
    integer,          intent(  out) :: id
-
+   
+   varname = ''
    ierr = nf90_get_att(ncid, varid, name, varname)
    if (ierr /= nf90_noerr) then
-      ierr = nf90_inq_varid(ncid, trim(varname), id)
+      goto 999
    end if
+   ierr = nf90_inq_varid(ncid, trim(varname), id)
+   
+999 continue   
+   ierr = 0 ! because could be optional
+   id = -1   
+   ! Some error
 end subroutine att_to_varid
 
 subroutine att_to_coordvarids(name, idx, idy, idz)
@@ -1137,6 +1149,7 @@ subroutine att_to_coordvarids(name, idx, idy, idz)
    integer, optional, intent(  out) :: idz
 
    integer :: i1, i2, n
+   varname = ''
 
    ierr = nf90_get_att(ncid, varid, name, varname)
    if (ierr /= nf90_noerr) then
@@ -1144,8 +1157,8 @@ subroutine att_to_coordvarids(name, idx, idy, idz)
    end if
    
    i1 = 1
-   n = len_trim(varname)
-
+   n = len_trim(varname)   
+   
    ! TODO: AvD: I'd rather use a string tokenizer here.
    i2 = index(varname(i1:n), ' ')
    if (i2 == 0) then
@@ -1158,7 +1171,7 @@ subroutine att_to_coordvarids(name, idx, idy, idz)
 
    i2 = index(varname(i1:n), ' ')
    if (i2 == 0) then
-      i2 = n
+      i2 = n + 1
    else
       i2 = i1 + i2 - 1
    end if
@@ -1168,7 +1181,7 @@ subroutine att_to_coordvarids(name, idx, idy, idz)
    if (present(idz)) then
       i2 = index(varname(i1:n), ' ')
       if (i2 == 0) then
-         i2 = n
+         i2 = n + 1
       else
          i2 = i1 + i2 - 1
       end if
@@ -1209,7 +1222,7 @@ end function ug_is_mesh_topology
 !! use this to determine on how many different meshes, data is defined in the dataset.
 !!
 !! \see 
-function ug_get_meshcount(ncid, numMesh) result(ierr)
+function ug_get_mesh_count(ncid, numMesh) result(ierr)
    integer,        intent(in)  :: ncid     !< NetCDF dataset id
    integer,        intent(out) :: numMesh  !< Number of mesh topologies in the dataset (>= 0).
    integer                     :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -1227,7 +1240,7 @@ function ug_get_meshcount(ncid, numMesh) result(ierr)
       end if
    end do
 
-end function ug_get_meshcount
+end function ug_get_mesh_count
 
 
 !> Gets the size/count of items for the specified topological location.
@@ -1245,9 +1258,9 @@ function ug_inquire_dimension(ncid, meshids, idimtype, len) result(ierr)
    case (UG_LOC_NODE)
       idim = meshids%id_nodedim
    case (UG_LOC_EDGE)
-      idim = meshids%id_nodedim
+      idim = meshids%id_edgedim
    case (UG_LOC_FACE)
-      idim = meshids%id_nodedim
+      idim = meshids%id_facedim
    case (UG_DIM_MAXFACENODES)
       idim = meshids%id_maxfacenodesdim 
    case default
@@ -1295,4 +1308,4 @@ function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)
 
 end function ug_get_face_nodes
 
-end module io_ugrid
+    end module io_ugrid

@@ -54,6 +54,7 @@ subroutine main() bind(C, name="main")
    !DEC$ ATTRIBUTES DLLEXPORT :: main
    ! Somehow intel fortran compiler expects a main routine in the dll, it is required since interactor is used (and win calls)
 implicit none
+ 
 
 end subroutine main
 
@@ -86,7 +87,8 @@ end function ionc_inq_conventions_dll
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
 function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_open")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_open_dll
-   character(kind=c_char), intent(in   ) :: c_path(*)      !< File name for netCDF dataset to be opened.
+  use iso_c_binding
+   character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
    integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
    integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
@@ -94,9 +96,16 @@ function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, nam
    integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
 
   character(len=MAXSTRLEN) :: path
+  !character(len=strlen(c_path)) :: nc_file
+  
+  ! Store the name
+  !nc_file = char_array_to_string(c_path, strlen(c_path))
+  path = char_array_to_string(c_path, strlen(c_path))
+
    ! TODO: AvD: Handle string length
   !path = char_array_to_string(c_path)
   
+  !ierr = ionc_open(nc_file, mode, ioncid, iconvtype)
   ierr = ionc_open(path, mode, ioncid, iconvtype)
 
 end function ionc_open_dll
@@ -115,6 +124,18 @@ end function ionc_close_dll
 !
 ! UGRID specifics:
 !
+
+!> Gets the number of mesh from a data set.
+function ionc_get_mesh_count_dll(ioncid, nmesh) result(ierr) bind(C, name="ionc_get_mesh_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_count_dll
+   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int),             intent(  out) :: nmesh   !< Number of meshes.
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_get_mesh_count(ioncid, nmesh)
+
+end function ionc_get_mesh_count_dll
+
 
 !> Gets the number of nodes in a single mesh from a data set.
 function ionc_get_node_count_dll(ioncid, meshid, nnode) result(ierr) bind(C, name="ionc_get_node_count")
@@ -160,7 +181,7 @@ function ionc_get_max_face_nodes_dll(ioncid, meshid, nmaxfacenodes) result(ierr)
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_max_face_nodes_dll
    integer(kind=c_int),             intent(in)    :: ioncid        !< The IONC data set id.
    integer(kind=c_int),             intent(in)    :: meshid        !< The mesh id in the specified data set.
-   integer(kind=c_int),             intent(  out) :: nmaxfacenodes !< Number of faces.
+   integer(kind=c_int),             intent(  out) :: nmaxfacenodes !< The maximum number of nodes per face in the mesh.
    integer(kind=c_int)                            :: ierr          !< Result status, ionc_noerr if successful.
 
    ierr = ionc_get_max_face_nodes(ioncid, meshid, nmaxfacenodes)
@@ -168,7 +189,7 @@ function ionc_get_max_face_nodes_dll(ioncid, meshid, nmaxfacenodes) result(ierr)
 end function ionc_get_max_face_nodes_dll
 
 
-!> Inquire the NetCDF conventions used in the dataset.
+!> Gets the x,y coordinates for all nodes in a single mesh from a data set.
 function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) result(ierr) bind(C, name="ionc_get_node_coordinates")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_node_coordinates_dll
    integer(kind=c_int), intent(in)  :: ioncid !< The IONC data set id.
@@ -204,5 +225,29 @@ function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfa
    ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)
 
 end function ionc_get_face_nodes_dll
+
+! Utility functions, move these to interop module
+! Make functions pure so they can be used as input arguments.
+integer(c_int) pure function strlen(char_array)
+ character(c_char), intent(in) :: char_array(MAXSTRLEN)
+ integer :: inull, i
+ strlen = 0
+ do i = 1, size(char_array)
+    if (char_array(i) .eq. C_NULL_CHAR) then
+       strlen = i-1
+       exit
+    end if
+ end do
+end function strlen
+
+pure function char_array_to_string(char_array, length)
+ integer(c_int), intent(in) :: length
+ character(c_char),intent(in) :: char_array(length)
+ character(len=length) :: char_array_to_string
+ integer :: i
+ do i = 1, length
+    char_array_to_string(i:i) = char_array(i)
+ enddo
+end function char_array_to_string
 
 end module io_netcdf_api

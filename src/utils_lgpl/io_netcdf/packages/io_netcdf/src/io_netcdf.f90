@@ -150,8 +150,8 @@ end function ionc_adheresto_conventions
 
 
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
-function ionc_open(path, mode, ioncid, iconvtype, chunksize) result(ierr)
-   character (len=*), intent(in   ) :: path      !< File name for netCDF dataset to be opened.
+function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
+   character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
    integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer,           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
    integer, optional, intent(inout) :: iconvtype !< (optional) The detected conventions in the file.
@@ -161,9 +161,9 @@ function ionc_open(path, mode, ioncid, iconvtype, chunksize) result(ierr)
    integer :: ncid, istat
 
    if (present(chunksize)) then
-      ierr = nf90_open(path, mode, ncid, chunksize)
+      ierr = nf90_open(netCDFFile, mode, ncid, chunksize)
    else
-      ierr = nf90_open(path, mode, ncid)
+      ierr = nf90_open(netCDFFile, mode, ncid)
    end if
 
    if (ierr /= nf90_noerr) then
@@ -188,7 +188,7 @@ function ionc_open(path, mode, ioncid, iconvtype, chunksize) result(ierr)
    !
    case (IONC_CONV_UGRID)
       allocate(datasets(ioncid)%ug_file)
-      datasets(ioncid)%ug_file%filename = trim(path)
+      datasets(ioncid)%ug_file%filename = trim(netCDFFile)
       ierr = ug_init_dataset(datasets(ioncid)%ncid, datasets(ioncid)%ug_file)
       if (ierr /= UG_NOERR) then
          ! Keep UG error code and exit
@@ -240,6 +240,17 @@ function ionc_close(ioncid) result(ierr)
    ! Some error (status was set earlier)
 
 end function ionc_close
+
+!> Gets the number of mesh from a data set.
+function ionc_get_mesh_count(ioncid, nmesh) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(  out) :: nmesh   !< Number of meshes.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid is wrong
+   ierr = ug_get_mesh_count(datasets(ioncid)%ncid, nmesh)
+
+end function ionc_get_mesh_count
 
 
 !> Gets the number of nodes in a single mesh from a data set.
