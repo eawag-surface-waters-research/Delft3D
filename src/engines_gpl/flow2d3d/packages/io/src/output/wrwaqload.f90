@@ -218,7 +218,7 @@
                   if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
                   if ( mnksrc(7,isrc) .le. 1 ) cycle   ! not an intake - outfall or other construct
                   if ( mnksrc(6,isrc) .eq. 0 ) then    ! depth average loads
-                     iwp = iwpnt(isrc)
+                     iwp = iwpnt(isrc+nsrc)
                      write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp+ilay), &
      &                                  '    1.0  ; SOURCE:',nsr2
                      nsr2 = nsr2 + 1
