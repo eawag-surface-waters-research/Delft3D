@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-#   d_hydro top-level automake configutation
+#   dimr top-level automake configutation
 #   common.am (see also configure.ac)
 #
 #   Fedor.Baart@Deltares.NL
@@ -29,10 +29,11 @@ AM_CXXFLAGS = \
     -DWITH_DELFTONLINE
 
 STANDARD_C_INCLUDES = \
-    -I$(top_builddir)/engines_gpl/d_hydro/include \
+    -I$(top_builddir)/engines_gpl/dimr/packages/dimr/include \
+    -I$(top_builddir)/engines_gpl/dimr/packages/dimr_lib/include \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/include \
-    -I$(top_builddir)/utils_lgpl/d_hydro_lib/include \
     -I$(top_builddir)/utils_lgpl/delftonline/include \
+    -I$(top_builddir)/utils_lgpl/d_hydro_lib/include \
     -I$(top_builddir)/utils_lgpl/esmfsm/include \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/include
 
@@ -117,7 +118,7 @@ delftflow-dist: ds-install
 	( \
 	    export DEST=$(top_builddir)/dist/delftflow-linux ; \
 	    mkdir -p $$DEST ; \
-	    cp -p $(top_builddir)/bin/d_hydro.exe $$DEST ; \
+	    cp -p $(top_builddir)/bin/dimr.exe $$DEST ; \
 	    cd $$DEST/.. ; \
 	    tar czf delftflow-linux.tgz delftflow-linux ; \
 	    rm -rf delftflow-linux \
