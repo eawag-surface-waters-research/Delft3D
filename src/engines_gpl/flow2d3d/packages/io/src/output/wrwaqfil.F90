@@ -1,12 +1,12 @@
       subroutine wrwaqfil ( mmax   , kmax   , nlb    , nub    , mlb    , &
-     &                      mub    , nmaxus , nsrc   , kcs    , kcu, kcv, kfsmin , &
+     &                      mub    , nmaxus , nsrc   , kcs    , kcu    , kcv  , kfsmin , &
      &                      kfsmax , nst    , runid  , xcor   , ycor   , &
      &                      xz     , yz     , guv    , gvu    , guu    , &
      &                      gvv    , gsqs   , vol1   , dtsec  , itdate , &
      &                      tstart , tstop  , dt     , thick  , lsal   , &
      &                      ltem   , lsed   , r1     , areau  , areav  , &
-     &                      tau    , vdiff  , dps    , dp    , chezu  , chezv  , &
-     &                      chez   , mnksrc , namsrc , nto, nambnd, mnbnd, &
+     &                      tau    , vdiff  , dps    , dp     , chezu  , chezv , &
+     &                      chez   , mnksrc , namsrc , nto    , nambnd , mnbnd , &
      &                      zmodel , gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -159,7 +159,7 @@
       real(fp) tau                     !!  Tau's at the bottom
       real(fp) vdiff                   !!  vertical diffusivity
       real(hp) dps(nlb:nub,mlb:mub)    !!  depth of zeta points below ref layer
-      real(hp) dp(nlb:nub,mlb:mub)     !!  depth of corner points below ref layer
+      real(fp) dp(nlb:nub,mlb:mub)     !!  depth of corner points below ref layer
       real(fp) chezu                   !!  chezy values in u points
       real(fp) chezv                   !!  chezy values in v points
       logical  chez                    !!  if true, there is a chezy value

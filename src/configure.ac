@@ -340,13 +340,6 @@ AC_DEFINE_UNQUOTED(D3D_PLUGIN_EXT, ["$pluginext"], [Delft3D plugin extension])
 #   List of makefiles to generate.  This list can be created with the command:
 #   find . -name Makefile.am | egrep '/.+/' | sort | sed 's/.am$//'
 
-# engines_gpl/dimr/Makefile
-# engines_gpl/dimr/packages/dimr/Makefile
-# engines_gpl/dimr/packages/dimr/src/Makefile
-# engines_gpl/dimr/packages/dimr_lib/Makefile
-# engines_gpl/dimr/packages/dimr_lib/src/Makefile
-# engines_gpl/dimr/packages/Makefile
-
 AC_CONFIG_FILES([Makefile
 engines_gpl/d_hydro/Makefile
 engines_gpl/d_hydro/packages/d_hydro/Makefile

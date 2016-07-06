@@ -811,14 +811,14 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     !
     chez = gdp%gdtricom%rouflo .eq. 'CHEZ'
     call wrwaqfil( mmax      , kmax      , nlb       , nub       , mlb       ,  &
-                &  mub       , nmaxus    , nsrc      , i(kcs)    , i(kcu), i(kcv), i(kfsmin) ,  &
+                &  mub       , nmaxus    , nsrc      , i(kcs)    , i(kcu)    , i(kcv)    , i(kfsmin) ,  &
                 &  i(kfsmax) , nst       , runid     , r(xcor)   , r(ycor)   ,  &
                 &  r(xz)     , r(yz)     , r(guv)    , r(gvu)    , r(guu)    ,  &
                 &  r(gvv)    , r(gsqs)   , r(volum1) , dtsec     , itdate    ,  &
                 &  tstart    , tstop     , dt        , r(thick)  , lsal      ,  &
                 &  ltem      , lsed      , r(r1)     , r(areau)  , r(areav)  ,  &
-                &  r(taubmx) , r(dicww)  , d(dps)    , r(dp), r(cfurou) , r(cfvrou) ,  &
-                &  chez      , i(mnksrc) , ch(namsrc), nto , ch(nambnd), i(mnbnd), &
+                &  r(taubmx) , r(dicww)  , d(dps)    , r(dp)     , r(cfurou) , r(cfvrou) , &
+                &  chez      , i(mnksrc) , ch(namsrc), nto       , ch(nambnd), i(mnbnd)  , &
                 &  zmodel    , gdp       )
     !
     ! Create the stream for FLOW to get the answer from WAQ
