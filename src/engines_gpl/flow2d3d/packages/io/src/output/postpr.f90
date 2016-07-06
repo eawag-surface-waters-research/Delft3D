@@ -133,6 +133,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer          , dimension(:)      , pointer :: ipmap
     integer                              , pointer :: julday
     integer                              , pointer :: ntstep
+    integer                              , pointer :: nto
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
     integer                              , pointer :: itmor
@@ -324,6 +325,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: kfvz1
     integer(pntrsize)                    , pointer :: namcon
     integer(pntrsize)                    , pointer :: namsrc
+    integer(pntrsize)                    , pointer :: nambnd
+    integer(pntrsize)                    , pointer :: mnbnd
     include 'tri-dyn.igd'
     integer                              , pointer :: itdate
     real(fp)                             , pointer :: tstart
@@ -670,6 +673,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     kfsmax              => gdp%gdr_i_ch%kfsmax
     kfuz1               => gdp%gdr_i_ch%kfuz1
     kfvz1               => gdp%gdr_i_ch%kfvz1
+    nambnd              => gdp%gdr_i_ch%nambnd
+    mnbnd               => gdp%gdr_i_ch%mnbnd
     namcon              => gdp%gdr_i_ch%namcon
     namsrc              => gdp%gdr_i_ch%namsrc
     itdate              => gdp%gdexttim%itdate
@@ -691,6 +696,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     itwqff              => gdp%gdwaqpar%itwqff
     itwqfi              => gdp%gdwaqpar%itwqfi
     itwqfl              => gdp%gdwaqpar%itwqfl
+    nto                 => gdp%d%nto
+    
     !
     ! Initialisation
     !
@@ -804,14 +811,15 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     !
     chez = gdp%gdtricom%rouflo .eq. 'CHEZ'
     call wrwaqfil( mmax      , kmax      , nlb       , nub       , mlb       ,  &
-                &  mub       , nmaxus    , nsrc      , i(kcs)    , i(kfsmin) ,  &
+                &  mub       , nmaxus    , nsrc      , i(kcs)    , i(kcu), i(kcv), i(kfsmin) ,  &
                 &  i(kfsmax) , nst       , runid     , r(xcor)   , r(ycor)   ,  &
                 &  r(xz)     , r(yz)     , r(guv)    , r(gvu)    , r(guu)    ,  &
                 &  r(gvv)    , r(gsqs)   , r(volum1) , dtsec     , itdate    ,  &
                 &  tstart    , tstop     , dt        , r(thick)  , lsal      ,  &
                 &  ltem      , lsed      , r(r1)     , r(areau)  , r(areav)  ,  &
-                &  r(taubmx) , r(dicww)  , d(dps)    , r(cfurou) , r(cfvrou) ,  &
-                &  chez      , i(mnksrc) , ch(namsrc), zmodel    , gdp       )
+                &  r(taubmx) , r(dicww)  , d(dps)    , r(dp), r(cfurou) , r(cfvrou) ,  &
+                &  chez      , i(mnksrc) , ch(namsrc), nto , ch(nambnd), i(mnbnd), &
+                &  zmodel    , gdp       )
     !
     ! Create the stream for FLOW to get the answer from WAQ
     !

@@ -103,7 +103,9 @@
          write(*,*) '*** ERROR: wrwaqsrf: memory allocation error'
          return
       endif
-!                   write horizontal surface area and weighted depth
+!     
+! write horizontal surface area and weighted depth
+!
       cc   = 0.0
       dd   = 0.0
       surf = 0.0
@@ -127,13 +129,25 @@
       enddo
 !
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'srf', form='binary' )
+      open  ( lunout , file=trim(filnam)//'srfold', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'srf', form = 'unformatted', access='stream')
+      open  ( lunout , file=trim(filnam)//'srfold', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) nmax, mmax, nosegl, nosegl, nosegl, 0.0
       write ( lunout ) cc  (1:nosegl)
       close ( lunout )
+      
+#ifdef HAVE_FC_FORM_BINARY
+      open  ( lunout , file=trim(filnam)//'srf', form='binary' )
+#else
+      open  ( lunout , file=trim(filnam)//'srf', form = 'unformatted', access='stream')
+#endif
+      write ( lunout ) 0.0
+      write ( lunout ) (cc  (1:nosegl), i=1, nolay)
+      close ( lunout )
+!
+! write depth at cell centra (depth at zeta point (dps))
+!      
 #ifdef HAVE_FC_FORM_BINARY
       open  ( lunout , file=trim(filnam)//'dps', form='binary' )
 #else

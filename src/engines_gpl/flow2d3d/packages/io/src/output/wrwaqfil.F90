@@ -1,12 +1,13 @@
       subroutine wrwaqfil ( mmax   , kmax   , nlb    , nub    , mlb    , &
-     &                      mub    , nmaxus , nsrc   , kcs    , kfsmin , &
+     &                      mub    , nmaxus , nsrc   , kcs    , kcu, kcv, kfsmin , &
      &                      kfsmax , nst    , runid  , xcor   , ycor   , &
      &                      xz     , yz     , guv    , gvu    , guu    , &
      &                      gvv    , gsqs   , vol1   , dtsec  , itdate , &
      &                      tstart , tstop  , dt     , thick  , lsal   , &
      &                      ltem   , lsed   , r1     , areau  , areav  , &
-     &                      tau    , vdiff  , depth  , chezu  , chezv  , &
-     &                      chez   , mnksrc , namsrc , zmodel , gdp    )
+     &                      tau    , vdiff  , dps    , dp    , chezu  , chezv  , &
+     &                      chez   , mnksrc , namsrc , nto, nambnd, mnbnd, &
+     &                      zmodel , gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -46,6 +47,8 @@
 !!--declarations----------------------------------------------------------------
       use precision
       use dfparall
+      use io_ugrid, only: ug_meta
+      use m_write_waqgeom_curvilinear
 !
       use globaldata
       !
@@ -111,6 +114,7 @@
       character(256)          , pointer :: flaggr
       real(fp)                , pointer :: mtimstep  ! Maximum step size CFL criterion
       real(fp)                          :: dryflc2   ! Half of drying and flooding treshold (m) / kmax
+      logical                 , pointer :: sferic
 !
 !           Global variables
 !
@@ -123,9 +127,12 @@
       integer nmaxus                   !!  User nmax, may be odd, nmax is allways even
       integer nsrc                     !!  Number of sources and sinks
       integer kcs   (nlb:nub,mlb:mub)  !!  Fixed property of the computational volumes
+      integer kcu   (nlb:nub,mlb:mub)  !!  Fixed property of the computational volumes
+      integer kcv   (nlb:nub,mlb:mub)  !!  Fixed property of the computational volumes
       integer kfsmin(nlb:nub,mlb:mub)  !!  Variable lowest active layer (z-model-only)
       integer kfsmax(nlb:nub,mlb:mub)  !!  Variable upper  active layer (z-model-only)
       integer nst                      !!  Time step number
+      integer nto                      !!  Number of open boundaries (tidal openings)
       character(*) runid               !!  To make file names
       real(fp) xcor                    !!  X-coordinates of depth points
       real(fp) ycor                    !!  Y-coordinates of depth points
@@ -151,14 +158,16 @@
       real(fp) areav                   !!  Area's in the v points
       real(fp) tau                     !!  Tau's at the bottom
       real(fp) vdiff                   !!  vertical diffusivity
-      real(hp) depth(nlb:nub,mlb:mub)  !!  depth of zeta points below ref layer
+      real(hp) dps(nlb:nub,mlb:mub)    !!  depth of zeta points below ref layer
+      real(hp) dp(nlb:nub,mlb:mub)     !!  depth of corner points below ref layer
       real(fp) chezu                   !!  chezy values in u points
       real(fp) chezv                   !!  chezy values in v points
       logical  chez                    !!  if true, there is a chezy value
       integer       mnksrc(7,nsrc)     !!  location of sources and withdrawals
       character(20) namsrc(  nsrc)     !!  names of the wasteloads
+      character(20) nambnd(  nto)      !!  names of the open boundaries
+      integer mnbnd(7,nto)             !!  indices of the open boundaries
       logical  zmodel                  !!  true if z-model feature is used
-      character(30) runtxt(10)         !!  explanatory text
 !
 !           Local variables
 !
@@ -176,6 +185,7 @@
       character(8) ssrff               !!  character variable for s(ediment) s(edimentation and) r(esuspension) f(lux) f(iles)
       integer  (4) istat               !!  allocate return status
       integer, external :: newunit
+      type(ug_meta)     :: meta
 !
 !! executable statements -------------------------------------------------------
 !
@@ -236,6 +246,9 @@
       mtimstep   => gdp%gdwaqpar%mtimstep
 
       dryflc2    =  gdp%gdnumeco%dryflc/2.0/kmax
+      
+      sferic              => gdp%gdtricom%sferic
+    
 !
       if (     .not. waqfil ) return
       if ( nst .lt.  itwqff ) return
@@ -296,13 +309,14 @@
      &                   mlb    , mub    , kcs    , kfsmin , isaggr ,    &
      &                   ilaggr , iqaggr , ifrmto , aggre  , flaggr ,    &
      &                   noseg  , noq1   , noq2   , noq3   , noq    ,    &
-     &                   nobnd  , kmk    , zmodel , filnam , lundia )
+     &                   nobnd  , kmk    , zmodel , filnam , lundia)
 
+!
 !           allocate the real aggregation arrays that are needed:
 !                    sag for aggregation on segment basis (dimension 0:noseg)
 !                    qag for aggregation on flux    basis (dimension 0:noq  )
 !                    and 2 volume arrays
-
+!
          idim = (noseg+1)*max(lsed,1)
                        allocate ( gdp%gdwaqpar%vol    (0:noseg) , stat=istat)
          if (istat==0) allocate ( gdp%gdwaqpar%sag    (  idim ) , stat=istat)
@@ -337,21 +351,50 @@
          iwlk       => gdp%gdwaqpar%iwlk
          ksrwaq     => gdp%gdwaqpar%ksrwaq
 
+        !
 !           write the .hyd file
+        !
+        if (parll) then
+            write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode
+        else
+            filnam ='com-'//trim(runid)
+        endif
 
          nd = gdp%gdprognm%numdomains
          call wrwaqhyd ( filnam , itdate , tstart , tstop  , dt     ,    &
-     &                   itwqff , itwqfl , itwqfi , nmaxus , mmax   ,    &
-     &                   kmax   , thick  , lsal   , ltem   , lsed   ,    &
-     &                   chez   , nsrc   , mnksrc , namsrc , runid  ,    &
-     &                   nowalk , iwlk   , aggre  , flaggr , zmodel ,    &
-     &                   ilaggr , nd     , nlb    , nub    , mlb    ,    &
-     &                   mub    , kfsmin , ksrwaq )
+                        itwqff , itwqfl , itwqfi , nmaxus , mmax   ,    &
+                        kmax   , thick  , lsal   , ltem   , lsed   ,    &
+                        chez   , nsrc   , mnksrc , namsrc , runid  ,    &
+                        nowalk , iwlk   , aggre  , flaggr , zmodel ,    &
+                        ilaggr , nd     , nlb    , nub    , mlb    ,    &
+                        mub    , kfsmin , ksrwaq , noseg, noq1, noq2,   &
+                        noq3   , xz     , yz     )
+         if (parll) then
+            write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode, '.'
+         else
+            filnam ='com-'//trim(runid)//'.'
+         endif
 
 !           write the .cco file
 
          call wrwaqcco ( nmaxus , mmax, ilaggr(kmax), nlb  , nub    ,    &
      &                   mlb    , mub , xcor        , ycor , filnam )
+
+         !
+         !
+         ! global attributes
+         !
+         meta%institution = "Deltares"
+         meta%source      = "Delft3D-FLOW"   
+         meta%references  = "http://www.deltares.nl"    
+         call getfullversionstring_flow2d3d(meta%version)
+         meta%modelname   = runid
+         
+         call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , ilaggr(kmax), &
+                           kmax  , nlb   , nub    , mlb   , mub         , &
+                           xcor  , ycor  , xz     , yz    , dp          , &
+                           kcs   , kcu   , kcv    , sferic, aggre       , &
+                           isaggr, nto   , nambnd , mnbnd)
 
 !           open all files for time dependent write
 !           WARNING: WAQ input files must be written using form=binary
@@ -465,7 +508,7 @@
          call wrwaqsrf ( nmaxus , mmax   , kmax   , nlb    , nub    ,    &
      &                   mlb    , mub    , gsqs   , guv    , gvu    ,    &
      &                   guu    , gvv    , xcor   , ycor   , xz     ,    &
-     &                   yz     , depth  , chezu  , chezv  , chez   ,    &
+     &                   yz     , dps    , chezu  , chezv  , chez   ,    &
      &                   noseg  , noq1   , noq2   , noq3   , nobnd  ,    &
      &                   aggre  , isaggr , iqaggr , ilaggr , ifrmto ,    &
      &                   horsurf, itop   , filnam )

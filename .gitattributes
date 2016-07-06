@@ -5935,6 +5935,13 @@ src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_hooks.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_hooks_teamcity.f90 -text
 src/utils_lgpl/ftnunit/packages/ftnunit/src/ftnunit_store.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/Makefile.am -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/Makefile.am -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/Makefile.am -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/hyd_to_waq_part_lib.vfproj -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/Makefile.am -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/agwaqgeom.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/wrwaqgeomcl.f90 -text
 src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/Makefile.am -text

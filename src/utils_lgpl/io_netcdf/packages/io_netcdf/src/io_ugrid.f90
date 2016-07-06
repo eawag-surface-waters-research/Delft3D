@@ -70,6 +70,12 @@ integer, parameter :: UG_LOC_FACE = 4 !< Mesh data location: mesh face
 integer, parameter :: UG_LOC_VOL  = 8 !< Mesh data location: mesh volume
 integer, parameter :: UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE !< All three possible 2D locations.
 
+! The following edge type codes define for each netlink (UGRID 'edge') the type (or absence) of flowlink.
+integer, parameter :: UNC_EDGETYPE_INTERNAL_CLOSED = 0
+integer, parameter :: UNC_EDGETYPE_INTERNAL        = 1
+integer, parameter :: UNC_EDGETYPE_BND             = 2
+integer, parameter :: UNC_EDGETYPE_BND_CLOSED      = 3
+
 !! Dimension types (form a supplement to the preceding location types)
 integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the max number of nodes in the face_node_connectivity table.
 
@@ -1054,7 +1060,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
       if (.NOT. is_mesh_topo) then
          cycle
       end if
-      im = im + 1
+         im = im + 1
       ierr = nf90_inquire_variable(ncid, iv, name = ug_file%meshnames(im))
       ierr = ug_init_mesh_topology(ncid, iv, ug_file%meshids(im))
       if (ierr /= UG_NOERR) then
@@ -1121,7 +1127,7 @@ subroutine att_to_dimid(name, id)
    if (ierr /= nf90_noerr) then
       goto 999
    end if
-   ierr = nf90_inq_dimid(ncid, trim(varname), id)
+      ierr = nf90_inq_dimid(ncid, trim(varname), id)
 999 continue
     ! Some error     
 end subroutine att_to_dimid
@@ -1135,7 +1141,7 @@ subroutine att_to_varid(name, id)
    if (ierr /= nf90_noerr) then
       goto 999
    end if
-   ierr = nf90_inq_varid(ncid, trim(varname), id)
+      ierr = nf90_inq_varid(ncid, trim(varname), id)
    
 999 continue   
    ierr = 0 ! because could be optional
@@ -1308,4 +1314,46 @@ function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)
 
 end function ug_get_face_nodes
 
-    end module io_ugrid
+!> Writes the given edge type variable to the given netcdf file.
+subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
+    implicit none
+
+    integer, intent(in)            :: igeomfile    !< file pointer to netcdf file to write to.
+    type(t_ug_meshids), intent(in) :: meshids      !< Set of NetCDF-ids for all mesh geometry variables.
+    character(len=256), intent(in) :: meshName     !< Name of the mesh.
+    integer, intent(in)            :: edge_type(:) !< Edge type variable to be written to the NetCDF file.
+
+    integer                        :: id_edgetype !< Variable ID for edge type variable.
+    integer                        :: was_in_define_mode
+    integer                        :: ierr !< Result status (UG_NOERR==NF90_NOERR if successful).
+
+    ierr = UG_NOERR
+
+    ! Put netcdf file in define mode.
+    was_in_define_mode = 0
+    ierr = nf90_redef(igeomfile)
+    if (ierr == nf90_eindefine) then
+        was_in_define_mode = 1 ! If was still in define mode.
+    end if
+    ierr = UG_NOERR
+
+    ! Define edge type variable.
+    ierr = ug_def_var(igeomfile, meshids, id_edgetype, (/ meshids%id_edgedim /), nf90_int, UG_LOC_EDGE, &
+                      meshName, 'edge_type', '', 'edge type (relation between edge and flow geometry)', '', 'mean', ifill=-999)
+    ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_values',   (/ UNC_EDGETYPE_INTERNAL_CLOSED, UNC_EDGETYPE_INTERNAL, UNC_EDGETYPE_BND, UNC_EDGETYPE_BND_CLOSED /))
+    ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_meanings', 'internal_closed internal boundary boundary_closed')
+
+    ! Put netcdf file in write mode.
+    ierr = nf90_enddef(igeomfile)
+
+    ! Write edge type variable.
+    ierr = nf90_put_var(igeomfile, id_edgetype, edge_type)
+
+    ! Leave the dataset in the same mode as we got it.
+    if (was_in_define_mode == 1) then
+        ierr = nf90_redef(igeomfile)
+    end if
+
+end subroutine write_edge_type_variable
+
+end module io_ugrid

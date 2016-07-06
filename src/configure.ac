@@ -588,6 +588,10 @@ utils_lgpl/ftnunit/Makefile
 utils_lgpl/ftnunit/packages/ftnunit/Makefile
 utils_lgpl/ftnunit/packages/ftnunit/src/Makefile
 utils_lgpl/ftnunit/packages/Makefile
+utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/Makefile
+utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/Makefile
+utils_lgpl/hyd_to_waq_part_lib/packages/Makefile
+utils_lgpl/hyd_to_waq_part_lib/Makefile
 utils_lgpl/io_netcdf/packages/io_netcdf/src/Makefile
 utils_lgpl/io_netcdf/packages/io_netcdf/Makefile
 utils_lgpl/io_netcdf/packages/Makefile
