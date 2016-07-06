@@ -554,7 +554,7 @@ subroutine determine_elem_polygons(node_mask, mmax, nmax, elem_vol, elem_polygon
     integer, intent(in) :: mmax, nmax
     integer, dimension(:), intent(in) :: elem_vol    !!  grid aggregation pointer
     type(waq_polygon_t), dimension(:), pointer :: elem_polygon
-    type(edge_t)       , dimension(:), pointer :: edge => null()
+    type(edge_t)       , dimension(:), pointer :: edge
     integer, intent(out) :: nr_elems, nr_edges, max_vertex
 
     integer , dimension(:,:), allocatable :: kcd
@@ -566,7 +566,6 @@ subroutine determine_elem_polygons(node_mask, mmax, nmax, elem_vol, elem_polygon
     allocate(edge(2*mmax*nmax)) ! equal to number u- and v-points
     allocate(kcd(mmax, nmax)) ! mask array for depth points (i.e. cell corners)
     i_pol = 0
-    
     
 1000    continue        ! start search again
 

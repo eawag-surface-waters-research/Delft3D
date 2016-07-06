@@ -134,10 +134,10 @@
       integer nst                      !!  Time step number
       integer nto                      !!  Number of open boundaries (tidal openings)
       character(*) runid               !!  To make file names
-      real(fp) xcor                    !!  X-coordinates of depth points
-      real(fp) ycor                    !!  Y-coordinates of depth points
-      real(fp) xz                      !!  X-coordinates of zeta points
-      real(fp) yz                      !!  Y-coordinates of zeta points
+      real(fp) xcor(nlb:nub,mlb:mub)   !!  X-coordinates of depth points
+      real(fp) ycor(nlb:nub,mlb:mub)   !!  Y-coordinates of depth points
+      real(fp) xz(nlb:nub,mlb:mub)     !!  X-coordinates of zeta points
+      real(fp) yz(nlb:nub,mlb:mub)     !!  Y-coordinates of zeta points
       real(fp) guv                     !!  distance between zeta points over v points
       real(fp) gvu                     !!  distance between zeta points over u points
       real(fp) guu                     !!  distance between depth points over u points
