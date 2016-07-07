@@ -616,6 +616,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dimr", "dimr", "{38BC7BED-63A4-45D8-A06C-9D81AB916E9D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr_exe", "engines_gpl\dimr\packages\dimr\dimr_exe.vcxproj", "{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}"
+	ProjectSection(ProjectDependencies) = postProject
+		{40244765-8DC2-4247-B167-9B3A8D1EB30A} = {40244765-8DC2-4247-B167-9B3A8D1EB30A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dimr_lib", "engines_gpl\dimr\packages\dimr_lib\dimr_lib.vcxproj", "{40244765-8DC2-4247-B167-9B3A8D1EB30A}"
 EndProject

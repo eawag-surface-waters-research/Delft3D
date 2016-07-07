@@ -82,8 +82,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>echo "Correct content of this file has to be generated in the pre-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h
-call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -108,14 +107,12 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>rem de-activated, because the dimr exe project needs the dimr_lib_versrion.h
-rem echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>rem do not delete dimr_lib_version.h here: the dimr exe project needs it</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>echo "Correct content of this file has to be generated in the pre-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h
-call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -139,14 +136,12 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <DelayLoadDLLs>fmpich2.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>rem de-activated, because the dimr exe project needs the dimr_lib_versrion.h
-rem echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>rem do not delete dimr_lib_version.h here: the dimr exe project needs it</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>echo "Correct content of this file has to be generated in the pre-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h
-call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -173,14 +168,12 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <OutputFile>$(TargetPath)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>rem de-activated, because the dimr exe project needs the dimr_lib_versrion.h
-rem echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>rem do not delete dimr_lib_version.h here: the dimr exe project needs it</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>echo "Correct content of this file has to be generated in the pre-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h
-call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -207,8 +200,8 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <DelayLoadDLLs>fmpich2.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>rem de-activated, because the dimr exe project needs the dimr_lib_versrion.h
-rem echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>rem do not delete dimr_lib_version.h here: the dimr exe project needs it
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

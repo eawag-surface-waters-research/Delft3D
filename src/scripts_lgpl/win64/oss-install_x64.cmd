@@ -135,6 +135,7 @@ rem ===============
     echo "installing all open source projects . . ."
 
     call :d_hydro
+    call :dimr
     call :flow2d3d
     call :flow2d3d_openda
     call :delwaq1
@@ -175,6 +176,7 @@ rem ========================
     echo "installing delft3d-flow . . ."
 
     call :d_hydro
+    call :dimr
     call :flow2d3d
     call :flow2d3d_openda
     call :plugin_culvert
@@ -198,6 +200,25 @@ rem ===================
     
     call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe          !dest_bin!
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
+goto :endproc
+
+
+
+rem ================
+rem === INSTALL_DIMR
+rem ================
+:dimr
+    echo "installing dimr . . ."
+
+    set dest_bin="!dest_main!\win64\dimr\bin"
+    set dest_menu="!dest_main!\win64\menu\bin"
+
+    call :makeDir !dest_bin!
+    call :makeDir !dest_menu!
+    
+    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe          !dest_bin!
+    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll      !dest_bin!
+    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl  !dest_menu!
 goto :endproc
 
 

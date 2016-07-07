@@ -81,6 +81,7 @@ rem ===============
     echo "    installing all open source projects (debug) . . ."
 
     call :d_hydro
+    call :dimr
     call :flow2d3d
     call :flow2d3d_openda
 	call :delwaq1
@@ -108,6 +109,19 @@ rem ==========================
 :d_hydro
     echo "installing d_hydro . . ."
     set dest_bin="engines_gpl\d_hydro\bin\x64\Debug"
+
+    if not exist !dest_bin!     mkdir !dest_bin!
+    
+goto :endproc
+
+
+
+rem ==========================
+rem === INSTALL_DIMR
+rem ==========================
+:dimr
+    echo "installing dimr . . ."
+    set dest_bin="engines_gpl\dimr\bin\x64\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
     
