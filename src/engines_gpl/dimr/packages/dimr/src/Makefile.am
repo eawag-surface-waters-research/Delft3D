@@ -33,21 +33,13 @@ AM_CPPFLAGS = \
 
 dimr_exe_LDADD = \
     $(top_builddir)/engines_gpl/dimr/packages/dimr_lib/src/libdimr.la \
-    -ldl
+    -ldl \
+    $(FCLIBS)
 
-dimr_exe_LDFLAGS = -export-dynamic
+# dimr_exe_LDFLAGS = -export-dynamic
 
 #    -lmcheck
 
 
 #-------------------------------------------------------------------------------
 
-BUILT_SOURCES = \
-    ./always \
-    ../include/dimr_exe_version.h
-
-./always:
-	rm -f ../include/dimr_exe_version.h
-
-../include/dimr_exe_version.h:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/dimr_exe_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
