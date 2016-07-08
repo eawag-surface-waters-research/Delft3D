@@ -45,13 +45,13 @@ character(len=9), parameter :: UG_CONV_UGRID = 'UGRID-0.9'  !< Version of UGRID 
 
 !! Meta data
 integer, parameter :: ug_strLenMeta = 100
-type ug_meta
+type t_ug_meta
    character(len=ug_strLenMeta) :: institution    
    character(len=ug_strLenMeta) :: source         
    character(len=ug_strLenMeta) :: references     
    character(len=ug_strLenMeta) :: version        
    character(len=ug_strLenMeta) :: modelname      
-end type ug_meta
+end type t_ug_meta
 
 !! Error codes
 integer, parameter :: UG_NOERR                 = NF90_NOERR
@@ -95,6 +95,13 @@ type nc_attribute
    integer,          allocatable :: intvalue(:) !< Contains value if xtype==NF90_INT.
    ! TODO: AvD: support BYTE/short as well?
 end type nc_attribute
+
+!> Type t_face describes a 'netcell', a cell with net nodes as vertices.
+type t_face
+   integer                        :: n               !< nr of nodes
+   integer, allocatable           :: nod(:)          !< node nrs
+   integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)  
+end type t_face
 
 !> Container for information about coordinate reference system in NetCDF-file.
 type t_crs
@@ -148,6 +155,7 @@ type t_ug_meshgeom
    integer            :: numnode            !< Number of mesh nodes.
    integer            :: numedge            !< Number of mesh edges.
    integer            :: numface            !< Number of mesh faces.
+   integer            :: maxnumfacenodes    !< Maximum of number of face nodes.
 
    integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
    integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
@@ -200,7 +208,7 @@ end function ug_get_message
 !! This includes: institution, Conventions, etc.
 function ug_addglobalatts(ncid, meta) result(ierr)
    integer, intent(in)           :: ncid              !< Already opened NetCDF id to put global attributes into.
-   type (ug_meta), intent (in)   :: meta
+   type (t_ug_meta), intent (in)   :: meta
    integer          :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    character(len=8)  :: cdate
@@ -608,6 +616,7 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, addEd
    ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'topology_dimension',      dim)
    ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'node_coordinates', prefix//'_node_x '//prefix//'_node_y')
    ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'node_dimension', 'n'//prefix//'_node')
+   ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'max_face_nodes_dimension', 'max_n'//prefix//'_face_nodes') ! non ugrid standard!
 
    ! 1D: required, 2D: optionally required if data there
    if (dim == 1 .or. ug_checklocation(dataLocsCode, UG_LOC_EDGE)) then
@@ -748,7 +757,7 @@ function ug_write_mesh_struct(ncid, meshids, meshgeom) result(ierr)
    type(t_ug_meshgeom), intent(in) :: meshgeom !< The complete mesh geometry in a single struct.
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
-   ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, &
+   ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
                            meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
                            meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, meshgeom%crs, -999, -999d0)
 end function ug_write_mesh_struct
@@ -757,7 +766,7 @@ end function ug_write_mesh_struct
 !> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data..
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function requires all mesh arrays as input, for the derived type-based function, see ug_write_mesh_struct.
-function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, numEdge, numFace, &
+function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, numEdge, numFace, maxNumNodesPerFace, &
                               edge_nodes, face_nodes, edge_faces, face_edges, face_links, xn, yn, xe, ye, xf, yf, &
                               crs, imiss, dmiss) result(ierr)
    integer,          intent(in) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
@@ -768,6 +777,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer,          intent(in) :: numNode  !< Number of nodes in the mesh.
    integer,          intent(in) :: numEdge  !< Number of edges in the mesh.
    integer,          intent(in) :: numFace  !< Number of faces in the mesh.
+   integer,          intent(in) :: maxNumNodesPerFace  !< Maximum number of nodes per face in the mesh.
    integer,          intent(in) :: edge_nodes(:,:) !< Edge-to-node mapping array.
    integer,          intent(in) :: face_nodes(:,:) !< Face-to-node mapping array.
    integer, pointer             :: edge_faces(:,:) !< Edge-to-face mapping array (optional, can be null()).
@@ -805,11 +815,12 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Dimensions
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_node',        numNode,   meshids%id_nodedim)
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%id_edgedim)
+   !ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes',        maxNumNodesPerFace,   meshids%id_maxfacenodesdim)
    ierr = nf90_def_dim(ncid, 'Two',                         2,       id_twodim)! TODO: AvD: duplicates!
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       maxnv = size(face_nodes, 1)
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',        numFace,   meshids%id_facedim)
-      ierr = nf90_def_dim(ncid, 'nMax'//prefix//'_face_nodes', maxnv,   meshids%id_maxfacenodesdim)
+      ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes', maxnv,   meshids%id_maxfacenodesdim)
    end if
 
    ierr = ug_add_coordmapping(ncid, crs)
@@ -1094,6 +1105,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    call att_to_dimid('node_dimension', meshids%id_nodedim)
    call att_to_dimid('edge_dimension', meshids%id_edgedim)
    call att_to_dimid('face_dimension', meshids%id_facedim)
+   call att_to_dimid('max_face_nodes_dimension', meshids%id_maxfacenodesdim)
    
    !
    ! Coordinate variables
@@ -1142,6 +1154,7 @@ subroutine att_to_varid(name, id)
       goto 999
    end if
       ierr = nf90_inq_varid(ncid, trim(varname), id)
+   return
    
 999 continue   
    ierr = 0 ! because could be optional
@@ -1293,7 +1306,7 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_get_var(ncid, meshids%id_nodex, xn)
-   ierr = nf90_get_var(ncid, meshids%id_nodex, yn)
+   ierr = nf90_get_var(ncid, meshids%id_nodey, yn)
    ! TODO: AvD: some more careful error handling
 
 end function ug_get_node_coordinates
@@ -1356,4 +1369,217 @@ subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
 
 end subroutine write_edge_type_variable
 
-end module io_ugrid
+!> Creates and initializes mesh geometry that contains the 2D unstructured network and edge type array.
+!!
+!! NOTE: do not pass already filled mesh geometries to this function,
+!! since array pointers will become disassociated, possibly causing memory leaks.
+function ug_create_ugrid_geometry(meshgeom) result(ierr)   
+    type(t_ug_meshgeom), intent(out) :: meshgeom     !< The mesh geometry that is to be created and filled.
+    
+    type(t_crs), target :: crs  !< The mesh geometry that is to be created and filled.
+    
+    ! TODO why need save here?
+    integer, allocatable, target, save       :: edge_nodes(:,:), edge_faces(:,:), face_nodes(:,:), face_edges(:,:), face_links(:,:) !< Output arrays.
+    
+    type (t_face), allocatable        :: netcell(:) 
+    real(kind=dp), allocatable, target, save :: edgex(:), edgey(:) !< Output coordinate arrays.
+    integer                                  :: edge, face, maxNodesPerFace, nodesPerFace, nump !< Counters.
+    integer, parameter                       :: missing_value = -999
+    double precision, parameter              :: dmiss = -999.0
+    integer                                  :: ierr !< Result status (UG_NOERR==NF90_NOERR if successful).
+
+    ierr = UG_NOERR
+
+    ! Create 2D mesh geometry that contains all 2D faces, edges and nodes.
+    ierr = ug_new_meshgeom(meshgeom)
+    
+    meshgeom%meshName = 'mesh2d'
+    meshgeom%dim = 2
+        
+    crs%is_spherical = .FALSE.
+    crs%varname = "wgs84"
+    crs%varvalue = 1234
+    
+    meshgeom%crs => crs
+
+
+    ! Nodes.
+    meshgeom%numNode = 5
+    
+    ! Get node coordinates.
+    allocate(meshgeom%nodex(5))
+    meshgeom%nodex(1) = 0.
+    meshgeom%nodex(2) = 10.
+    meshgeom%nodex(3) = 15.
+    meshgeom%nodex(4) = 10.
+    meshgeom%nodex(5) = 5.
+    
+    allocate(meshgeom%nodey(5))
+    meshgeom%nodey(1) = 0.
+    meshgeom%nodey(2) = 0.
+    meshgeom%nodey(3) = 5.
+    meshgeom%nodey(4) = 10.
+    meshgeom%nodey(5) = 5.     
+
+    ! Edges.
+    ! Use only 2D net links (= edges).
+    meshgeom%numEdge = 6
+
+    ! Get edge nodes connectivity, edge types and edge coordinates (ordered as follows: first flow links, then closed edges).
+    allocate(edge_nodes(2, meshgeom%numEdge)) 
+    edge_nodes = missing_value
+    
+    allocate(edgex(meshgeom%numEdge))
+    allocate(edgey(meshgeom%numEdge))
+    edgex = dmiss
+    edgey = dmiss
+
+    edge_nodes(1,1) = 5
+    edge_nodes(2,1) = 2
+    edge_nodes(1,2) = 2
+    edge_nodes(2,2) = 1
+    edge_nodes(1,3) = 1
+    edge_nodes(2,3) = 5
+    edge_nodes(1,4) = 5
+    edge_nodes(2,4) = 4
+    edge_nodes(1,5) = 4
+    edge_nodes(2,5) = 3
+    edge_nodes(1,6) = 3
+    edge_nodes(2,6) = 2
+    
+    meshgeom%edge_nodes => edge_nodes
+    
+    meshgeom%edgex => edgex
+    meshgeom%edgey => edgey
+    ! Edge z coordinates are unknown.
+
+    ! Get edge faces connectivity.
+    allocate(edge_faces( 2, meshgeom%numEdge ))
+    ! Here need to use reverse_edge_mapping_table to map edges to net links, because edges are ordered as follows: first flow links, then closed edges.
+    edge_faces(1:2, 1) = (/ 1, 2/)
+    edge_faces(1:2, 2) = (/ 1, 0/)
+    edge_faces(1:2, 3) = (/ 1, 0/)
+    edge_faces(1:2, 4) = (/ 2, 0/)
+    edge_faces(1:2, 5) = (/ 2, 0/)
+    edge_faces(1:2, 6) = (/ 2, 0/)
+
+    do edge = 1,meshgeom%numEdge
+        ! 0 means no face, i.e. edge is on the boundary of the mesh.
+        ! Replace zeroes with missing values.
+        if (edge_faces(1, edge) == 0) edge_faces(1, edge) = missing_value
+        if (edge_faces(2, edge) == 0) edge_faces(2, edge) = missing_value
+    end do
+    meshgeom%edge_faces => edge_faces
+
+
+    ! Faces.
+    ! Use only 2D internal net cells = 2D internal flow nodes (= faces).
+    nump = 2 
+    meshgeom%numFace = nump
+
+    ! Get face coordinates.
+    allocate(meshgeom%facex(2))
+    meshgeom%facex(1) = 5
+    meshgeom%facex(2) = 10
+    
+    allocate(meshgeom%facey(2))
+    meshgeom%facey(1) = 2.5
+    meshgeom%facey(2) = 5
+        
+    ! Determine max nr of net nodes per 2D net cell = face.
+    maxNodesPerFace = 4
+    meshgeom%maxNumFaceNodes = maxNodesPerFace
+  
+    ! Get face nodes connectivity, face edges connectivity and face-face connectivity.
+    allocate(face_nodes(maxNodesPerFace, meshgeom%numFace))
+    face_nodes = missing_value
+    
+    allocate(face_edges(maxNodesPerFace, meshgeom%numFace))
+    face_edges = missing_value
+    
+    allocate(face_links(maxNodesPerFace, meshgeom%numFace))
+    face_links = missing_value
+    
+    allocate(netcell(2))
+    netcell(1)%n = 3
+    netcell(2)%n = 4
+    
+    allocate(netcell(1)%nod(3))
+    netcell(1)%nod(1) = 1
+    netcell(1)%nod(2) = 2
+    netcell(1)%nod(3) = 5
+    
+    allocate(netcell(2)%nod(4))
+    netcell(2)%nod(1) = 2
+    netcell(2)%nod(2) = 3
+    netcell(2)%nod(3) = 4
+    netcell(2)%nod(4) = 5
+    
+    do face = 1,nump
+        nodesPerFace = netcell(face)%n
+        face_nodes(1:nodesPerFace, face) = netcell(face)%nod        
+    end do
+    
+    meshgeom%face_nodes => face_nodes
+    meshgeom%face_edges => face_edges
+    meshgeom%face_links => face_links    
+
+end function ug_create_ugrid_geometry
+
+subroutine ug_create_ugrid_meta(meta)
+    type(t_ug_meta) :: meta  !< Meta information on file.
+        
+    meta%institution = "Deltares"
+    meta%source      = "DeltaShell"
+    meta%references  = "geen idee"    
+    meta%version     = "0"
+    meta%modelname   = "manual"
+    
+end subroutine ug_create_ugrid_meta
+
+!> Writes the unstructured network and edge type to an already opened netCDF dataset.
+function ug_write_geom_filepointer_ugrid(ioncid) result(ierr)
+    integer, intent(in)                :: ioncid !< file pointer to netcdf file to write to.
+
+    type(t_ug_meta)                    :: meta  !< Meta information on file.
+    type(t_ug_meshgeom)                :: meshgeom !< Mesh geometry to be written to the NetCDF file.
+    type(t_ug_meshids)                 :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
+    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
+    
+    ierr = UG_NOERR
+
+    ! create default meta
+    call ug_create_ugrid_meta(meta)
+    
+    ! Add global attributes to NetCDF file.
+    ierr = ug_addglobalatts(ioncid, meta)
+    
+    ! create mesh geometry
+    ierr = ug_create_ugrid_geometry(meshgeom)
+    
+    ! Write mesh geometry.
+    ierr = ug_write_mesh_struct(ioncid, meshids, meshgeom)
+    
+
+end function ug_write_geom_filepointer_ugrid
+
+!> Writes the unstructured network and edge type to a netCDF file.
+!! If file exists, it will be overwritten.
+function ug_write_geom_ugrid(filename) result(ierr)
+
+    character(len=*), intent(in) :: filename
+
+    integer :: ioncid, ierr
+    
+    ierr = nf90_create(filename, 0, ioncid)
+    if (ierr /= nf90_noerr) then
+        return
+    end if
+
+    ierr = ug_write_geom_filepointer_ugrid(ioncid)
+         
+    ierr = nf90_close(ioncid)
+        
+end function ug_write_geom_ugrid
+
+    end module io_ugrid
