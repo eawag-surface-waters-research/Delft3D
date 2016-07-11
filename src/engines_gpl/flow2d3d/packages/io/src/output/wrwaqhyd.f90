@@ -453,7 +453,7 @@
                write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), 0, trim(filstring)
             else
                write ( lunout1 , '(3(I0,3X),A)' ) n, m, ilaggr(mnksrc(6,i)), trim(filstring)
-               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), ilaggr(mnksrc(3,i)), trim(filstring)
+               write ( lunout2 , '(2es15.7,1x,i0,1x,a)' ) xz(n,m), yz(n,m), ilaggr(mnksrc(6,i)), trim(filstring)
             endif
          endif
       enddo
