@@ -1381,7 +1381,7 @@ function ug_create_ugrid_geometry(meshgeom) result(ierr)
     ! TODO why need save here?
     integer, allocatable, target, save       :: edge_nodes(:,:), edge_faces(:,:), face_nodes(:,:), face_edges(:,:), face_links(:,:) !< Output arrays.
     
-    type (t_face), allocatable        :: netcell(:) 
+    type (t_face), pointer        :: netcell(:) 
     real(kind=dp), allocatable, target, save :: edgex(:), edgey(:) !< Output coordinate arrays.
     integer                                  :: edge, face, maxNodesPerFace, nodesPerFace, nump !< Counters.
     integer, parameter                       :: missing_value = -999
