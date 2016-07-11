@@ -724,7 +724,7 @@
  1040 format ( /' ITEMs within the concentration blocks:'   )
  1045 format (  ' ERROR: Only one named DATA_ITEM allowed!' )
  1046 format (  ' WARNING: The DATA_ITEM does not reference to any valid ITEM! Data will be ignored.' )
- 1047 format (  ' WARNING: No USEDATA_ITEM was not found for DATA_ITEM! Data will be ignored.' )
+ 1047 format (  ' WARNING: No USEDATA_ITEM was found for DATA_ITEM! Data will be ignored.' )
  1050 format ( /' BLOCKED per CONCENTRATION:'   )
  1060 format ( /' CONCENTRATIONs within the item blocks:'   )
  1070 format ( /' ERROR: Second time CONCENs keyword in this block !' )
