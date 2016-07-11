@@ -199,17 +199,12 @@ function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) re
    integer(kind=c_int), intent(in)  :: nnode  !< The number of nodes in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
    integer(kind=c_int)              :: ierr   !< Result status, ionc_noerr if successful.
 
-   double precision, target, allocatable, save :: xptr(:), yptr(:)! i have no clue what i am doing!!!
-   !double precision, pointer :: xptr(:), yptr(:)! 
+   double precision, pointer :: xptr(:), yptr(:)! 
 
-   if (.not.allocated(xptr))  allocate(xptr(nnode))
-   if (.not.allocated(yptr))  allocate(yptr(nnode))
-   !call c_f_pointer(c_xptr, xptr, (/ nnode /))
-   !call c_f_pointer(c_yptr, yptr, (/ nnode /))
+   call c_f_pointer(c_xptr, xptr, (/ nnode /))
+   call c_f_pointer(c_yptr, yptr, (/ nnode /))
    
    ierr = ionc_get_node_coordinates(ioncid, meshid, xptr, yptr)
-   c_xptr = c_loc(xptr);
-   c_yptr = c_loc(yptr);
    
 end function ionc_get_node_coordinates_dll
 
@@ -225,15 +220,12 @@ function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfa
    integer(kind=c_int), intent(in)    :: nmaxfacenodes  !< The maximum number of nodes per face in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
    integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
 
-   integer, target, allocatable, save :: face_nodes(:,:)! again i have no clue what i am doing!!!
+   integer, pointer :: face_nodes(:,:)
 
-   !call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
-   if (.not.allocated(face_nodes))  allocate(face_nodes(nmaxfacenodes, nface))
+   call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
    
-   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)
+   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)   
    
-   c_face_nodes_ptr = c_loc(face_nodes)
-
 end function ionc_get_face_nodes_dll
 
 !> Writes a complete mesh geometry
