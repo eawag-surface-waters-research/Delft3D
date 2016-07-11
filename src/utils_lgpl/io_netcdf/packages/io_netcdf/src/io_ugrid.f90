@@ -483,7 +483,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
       ierr = nf90_put_att(ncid, id_crs, 'value',                       'value is equal to EPSG code')
    else
       ierr_missing = UG_INVALID_CRS
-      epsg      = 28992
+      epsg      = crs%varvalue
       epsgstring = 'EPSG:28992'
       ierr = nf90_put_att(ncid, id_crs, 'name',                        'Unknown projected' ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg                ) ! CF
@@ -1236,7 +1236,6 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    end if
 end function ug_is_mesh_topology
 
-
 !> Gets the number of mesh topologies in an open dataset.
 !! use this to determine on how many different meshes, data is defined in the dataset.
 !!
@@ -1376,7 +1375,7 @@ end subroutine write_edge_type_variable
 function ug_create_ugrid_geometry(meshgeom) result(ierr)   
     type(t_ug_meshgeom), intent(out) :: meshgeom     !< The mesh geometry that is to be created and filled.
     
-    type(t_crs), target :: crs  !< The mesh geometry that is to be created and filled.
+    type(t_crs), target, save :: crs  !< The coordinate system
     
     ! TODO why need save here?
     integer, allocatable, target, save       :: edge_nodes(:,:), edge_faces(:,:), face_nodes(:,:), face_edges(:,:), face_links(:,:) !< Output arrays.
@@ -1396,9 +1395,9 @@ function ug_create_ugrid_geometry(meshgeom) result(ierr)
     meshgeom%meshName = 'mesh2d'
     meshgeom%dim = 2
         
-    crs%is_spherical = .FALSE.
+    crs%is_spherical = .TRUE.
     crs%varname = "wgs84"
-    crs%varvalue = 1234
+    crs%varvalue = 4326
     
     meshgeom%crs => crs
 

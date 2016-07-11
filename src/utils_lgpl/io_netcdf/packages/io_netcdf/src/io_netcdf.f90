@@ -87,6 +87,7 @@ integer, parameter :: IONC_ENONCOMPLIANT = 4 !< File is non-compliant with its s
 type t_ionc
    integer                  :: ncid      =  0               !< The underlying native NetCDF data set id.
    integer                  :: iconvtype =  IONC_CONV_OTHER !< Detected type of the conventions used in this dataset.
+   integer                  :: epsg =  0 !< Detected type of the epsg code used in this dataset.
    type(t_ug_file), pointer :: ug_file   => null()          !< For UGRID-type files, the underlying file structure.
 end type t_ionc
 
@@ -202,6 +203,7 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
       iconvtype = datasets(ioncid)%iconvtype
    end if
 
+   ierr = detect_coordinate_system(ioncid)
 
    ! Successful
    return
@@ -330,6 +332,19 @@ function ionc_get_face_nodes(ioncid, meshid, face_nodes) result(ierr)
 
 end function ionc_get_face_nodes
 
+!> Gets the coordinate system from a data set.
+function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(  out) :: epsg_code   !< Number of epsg.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid is wrong   
+   ierr = nf90_noerr;
+   epsg_code = datasets(ioncid)%epsg
+   !is_spherical = datasets(ioncid)%crs%is_spherical
+   !epsg_code = datasets(ioncid)%crs%varvalue
+
+end function ionc_get_coordinate_system
 !
 ! -- Private routines -----------------------------------------------------
 !
@@ -370,6 +385,45 @@ function detect_conventions(ioncid) result(ierr)
 999 continue
    ! Some error (status was set earlier)
 end function detect_conventions
+
+!> Detect the coordinate system used in the given dataset.
+!!
+!! Detection is based on the :projected_coordinate_system attribute in the file/data set.
+!! Detected type is stored in the global datasets's attribute.
+function detect_coordinate_system(ioncid) result(ierr)
+   integer, intent(in)  :: ioncid    !< The IONC data set id.
+   integer              :: ierr      !< Result status, ionc_noerr if successful.
+   character(len=30)    :: varname  !< Name of the created grid mapping variable.
+   integer              :: epsg_code, id_crs
+
+   ierr = IONC_NOERR
+
+   if (ioncid < 1 .or. ioncid > ndatasets) then
+      ierr = IONC_EBADID
+      goto 999
+   end if
+   
+   ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'wgs84', id_crs)
+    
+   if (ierr == nf90_ebadid) then      
+      ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'projected_coordinate_system', id_crs)
+   end if
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   
+   ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', epsg_code)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   datasets(ioncid)%epsg = epsg_code
+   
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+end function detect_coordinate_system
 
 
 !> Re-allocates an array of datasets to a bigger size.

@@ -241,6 +241,19 @@ function ionc_write_geom_ugrid_dll(filename) result(ierr) bind(C, name="ionc_wri
 
 end function ionc_write_geom_ugrid_dll
 
+!> Gets the epsg code of coordinate system from a data set.
+function ionc_get_coordinate_system_dll(ioncid, epsg) result(ierr) bind(C, name="ionc_get_coordinate_system")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_coordinate_system_dll
+   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int),             intent(  out) :: epsg    !< Number of epsg code.
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
+     
+   ierr = ionc_get_coordinate_system(ioncid, epsg)
+
+end function ionc_get_coordinate_system_dll
+
+
+
 ! Utility functions, move these to interop module
 ! Make functions pure so they can be used as input arguments.
 integer(c_int) pure function strlen(char_array)
