@@ -68,7 +68,7 @@ contains
 !
 !   Global variables
 !
-    type(ug_meta), intent(in) :: meta
+    type(t_ug_meta), intent(in) :: meta
     integer   , intent(in) :: lundia
     integer(4), intent(in) :: nmax       !!  Dimension of first index in 2d arrays
     integer(4), intent(in) :: mmax       !!  Dimension of second index in 2d arrays
@@ -187,7 +187,7 @@ contains
     !
     ! Determine the waq-polygons, not yet aggregated
     !
-    call determine_elem_polygons(node_mask, mmax, nmax, flow_vol, waq_polygon, edge, nr_elems, nr_edges, max_vertex)
+!    call determine_elem_polygons(node_mask, mmax, nmax, flow_vol, waq_polygon, edge, nr_elems, nr_edges, max_vertex)
     !
     allocate(netelem    (4, nr_elems)) ! needed to write nc-file
     netelem = 0

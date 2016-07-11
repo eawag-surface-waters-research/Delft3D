@@ -47,7 +47,7 @@
 !!--declarations----------------------------------------------------------------
       use precision
       use dfparall
-      use io_ugrid, only: ug_meta
+      use io_ugrid, only: t_ug_meta
       use m_write_waqgeom_curvilinear
 !
       use globaldata
@@ -185,7 +185,7 @@
       character(8) ssrff               !!  character variable for s(ediment) s(edimentation and) r(esuspension) f(lux) f(iles)
       integer  (4) istat               !!  allocate return status
       integer, external :: newunit
-      type(ug_meta)     :: meta
+      type(t_ug_meta)     :: meta
 !
 !! executable statements -------------------------------------------------------
 !
