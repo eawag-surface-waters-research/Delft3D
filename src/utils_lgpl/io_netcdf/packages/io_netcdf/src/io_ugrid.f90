@@ -1311,6 +1311,21 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
 end function ug_get_node_coordinates
 
 
+!> Gets the edge-node connectvit table for all edges in the specified mesh.
+!! The output edge_nodes array is supposed to be of exact correct size already.
+function ug_get_edge_nodes(ncid, meshids, edge_nodes) result(ierr)
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
+   type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,            intent(out) :: edge_nodes(:,:) !< Array to the edge-node connectivity table.
+   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERRif successful).
+
+   ierr = nf90_get_var(ncid, meshids%id_edgenodes, edge_nodes)
+   ! TODO: AvD: some more careful error handling
+   
+   ! TODO: AvD: also introduce 0-/1-based indexing handling.
+
+end function ug_get_edge_nodes
+
 !> Gets the face-node connectvit table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
 function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)

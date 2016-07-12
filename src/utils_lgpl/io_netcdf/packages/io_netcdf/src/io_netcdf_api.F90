@@ -208,6 +208,22 @@ function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) re
    
 end function ionc_get_node_coordinates_dll
 
+!> Gets the edge-node connectivity table for all edges in the specified mesh.
+function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result(ierr) bind(C, name="ionc_get_edge_nodes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_nodes_dll
+   integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
+   type(c_ptr),         intent(  out) :: c_edge_nodes_ptr !< Pointer to array for the edge-node connectivity table.
+   integer(kind=c_int), intent(in)    :: nedge  !< The number of edges in the mesh.    
+   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
+
+   integer, pointer :: edge_nodes(:,:)
+
+   call c_f_pointer(c_edge_nodes_ptr, edge_nodes, (/ 2 , nedge /))
+   
+   ierr = ug_get_edge_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edge_nodes)   
+   
+end function ionc_get_edge_nodes_dll
 
 !> Gets the face-node connectvit table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
