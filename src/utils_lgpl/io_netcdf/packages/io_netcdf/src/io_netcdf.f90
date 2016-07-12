@@ -422,6 +422,8 @@ function detect_coordinate_system(ioncid) result(ierr)
    return
 
 999 continue
+   datasets(ioncid)%epsg = 0
+   ierr = nf90_noerr
    ! Some error (status was set earlier)
 end function detect_coordinate_system
 
