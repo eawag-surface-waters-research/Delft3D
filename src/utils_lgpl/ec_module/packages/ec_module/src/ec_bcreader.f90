@@ -748,6 +748,11 @@ contains
     integer   :: i
 
     success = .False.
+
+    !----------------------------------------
+    success = .True.        ! RL666 : This destructor needs fixing asap, disabled for now, crashes
+    return
+    !----------------------------------------
     if (associated(bcblock%ncptr)) then
        bcblock%ncptr => null()
        ! TODO: also clean up netcdf instance somewhere (or is this not necessary)
