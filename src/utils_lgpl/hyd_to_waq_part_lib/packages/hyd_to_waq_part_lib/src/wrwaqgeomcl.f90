@@ -34,31 +34,23 @@
 !   io_netcdf module to write to UGRID compliant NetCDF file    
 !!--declarations----------------------------------------------------------------
 module m_write_waqgeom_curvilinear
+    use precision
     implicit none
     integer, parameter   :: missing_value = -999
     type :: edge_t
-        integer               :: type    = 0 !< Can be UNC_EDGETYPE_INTERNAL_CLOSED, UNC_EDGETYPE_INTERNAL, UNC_EDGETYPE_BND or UNC_EDGETYPE_BND_CLOSED
-        integer               :: nmelm   = 0 !< Count of neighbouring elements (0, 1, or 2)
-        integer, dimension(2) :: vertex  = missing_value !< an edge is a straight line between two vertices
-        integer, dimension(2) :: element = missing_value !< an edge separates zero, one or two elements; their indices are stored here
+        integer               :: type    = 0             !< Can be UNC_EDGETYPE_INTERNAL_CLOSED, UNC_EDGETYPE_INTERNAL, UNC_EDGETYPE_BND or UNC_EDGETYPE_BND_CLOSED
+        integer               :: nmelm   = 0             !< Count of neighbouring elements (1 or 2)
+        real(hp)              :: edgex                   !< Mass centre of edge (x)
+        real(hp)              :: edgey                   !< Mass centre of edge (y)
+        integer, dimension(2) :: vertex  = missing_value !< an edge is a straight line between two nodes
+        integer, dimension(2) :: element = missing_value !< an edge separates one or two elements
     end type
-    type :: element_t
-        integer                        :: nvertex = 0       !< number of vertices for this element
-        integer, dimension(:), pointer :: vertex  => null() !< 
-        integer, dimension(:), pointer :: edge    => null() !< 
-    end type
-    type :: waq_polygon_t
-        integer                        :: nvertex
-        integer, dimension(:), pointer :: vertex  => null()
-        integer, dimension(:), pointer :: edge !< edge number
-    end type waq_polygon_t
 contains    
     subroutine wrwaqgeomcl ( meta     , lundia, nmax   , mmax   , kmax   , & 
-                             flow_kmax, nlb   , nub    , mlb    , mub    , &
+                             nlb      , nub   , mlb    , mub    ,          &
                              xcor     , ycor  , xz     , yz     , dep    , &
                              kcs      , kcu   , kcv    , sferic , aggre  , &
                              isaggr   , nto   , nambnd , mnbnd)
-    use precision
 
     use netcdf
     use io_ugrid
@@ -68,111 +60,108 @@ contains
 !
 !   Global variables
 !
-    type(t_ug_meta), intent(in) :: meta
-    integer   , intent(in) :: lundia
-    integer(4), intent(in) :: nmax       !!  Dimension of first index in 2d arrays
-    integer(4), intent(in) :: mmax       !!  Dimension of second index in 2d arrays
-    integer(4), intent(in) :: kmax       !!  number of waq layers
-    integer(4), intent(in) :: flow_kmax  !!  number of flow layers
-    integer(4), intent(in) :: nlb        !!  Lower bound of all n dimensions
-    integer(4), intent(in) :: nub        !!  Upper bound of all n dimensions
-    integer(4), intent(in) :: mlb        !!  Lower bound of all m dimensions
-    integer(4), intent(in) :: mub        !!  Upper bound of all m dimensions
-    integer   , intent(in) :: nto        !!  Number of open boundaries (tidal openings)
-    real(fp), dimension(nlb:nub,mlb:mub), intent(in) :: xcor !!  Array with x-values corners
-    real(fp), dimension(nlb:nub,mlb:mub), intent(in) :: ycor !!  Array with y-values corners
-    real(fp), dimension(nlb:nub,mlb:mub), intent(in) :: xz   !!  Array with x-values zeta point
-    real(fp), dimension(nlb:nub,mlb:mub), intent(in) :: yz   !!  Array with y-values zeta point
-    real(fp), dimension(nlb:nub,mlb:mub), intent(in) :: dep  !!  Array with depth-values at corners
-    integer , dimension(nlb:nub,mlb:mub), intent(in) :: kcs  !!   
-    integer , dimension(nlb:nub,mlb:mub), intent(in) :: kcu  !!  
-    integer , dimension(nlb:nub,mlb:mub), intent(in) :: kcv  !!  
-    logical, intent(in) :: sferic
-    integer, intent(in) :: aggre                             !! INPUT   0 means no-aggregation active cells only
-                                                             !<         1 means aggregation
-    integer, intent(in) :: isaggr(nmax*mmax*kmax)      !!  grid aggregation pointer
-    !                                                        
-    character(20), intent(in) :: nambnd(  nto)               !!  names of the open boundaries
-    integer      , intent(in) :: mnbnd(7,nto)                !!  indices of the open boundaries
-
-!   ugrid types
-    type(t_crs), target   :: crs
-    type(t_ug_meshids)    :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
-    type(t_ug_meshgeom)   :: meshgeom !< Mesh geometry to be written to the NetCDF file.
-    type(t_ug_meshgeom)   :: aggregated_meshgeom !< Mesh geometry to be written to the NetCDF file.
-
+    type(t_ug_meta)                            , intent(in) :: meta       !! metadata for grid file
+    integer                                    , intent(in) :: lundia     !! logical unit of diagnostic file
+    integer(4)                                 , intent(in) :: nmax       !! Dimension of first index in 2d arrays
+    integer(4)                                 , intent(in) :: mmax       !! Dimension of second index in 2d arrays
+    integer(4)                                 , intent(in) :: kmax       !! number of flow layers
+    integer(4)                                 , intent(in) :: nlb        !! Lower bound of all n dimensions
+    integer(4)                                 , intent(in) :: nub        !! Upper bound of all n dimensions
+    integer(4)                                 , intent(in) :: mlb        !! Lower bound of all m dimensions
+    integer(4)                                 , intent(in) :: mub        !! Upper bound of all m dimensions
+    integer                                    , intent(in) :: nto        !! Number of open boundaries (tidal openings)
+    real(fp)       , dimension(nlb:nub,mlb:mub), intent(in) :: xcor       !! Array with x-values corners
+    real(fp)       , dimension(nlb:nub,mlb:mub), intent(in) :: ycor       !! Array with y-values corners
+    real(fp)       , dimension(nlb:nub,mlb:mub), intent(in) :: xz         !! Array with x-values zeta point
+    real(fp)       , dimension(nlb:nub,mlb:mub), intent(in) :: yz         !! Array with y-values zeta point
+    real(fp)       , dimension(nlb:nub,mlb:mub), intent(in) :: dep        !! Array with depth-values at corners
+    integer        , dimension(nlb:nub,mlb:mub), intent(in) :: kcs        !! Cell type (0=inactive, 1=internal, 2=boundary)
+    integer        , dimension(nlb:nub,mlb:mub), intent(in) :: kcu        !! u-flowlink type (0=closed, 1=open)
+    integer        , dimension(nlb:nub,mlb:mub), intent(in) :: kcv        !! v-flowlink type (0=closed, 1=open)
+    logical                                    , intent(in) :: sferic     !! sferic grid
+    integer                                    , intent(in) :: aggre      !! aggregation type (0=no-aggregation, active cells only, 1=aggregation table)
+    integer        , dimension(nmax*mmax*kmax) , intent(in) :: isaggr     !! grid aggregation pointer
+    character(20)  , dimension(nto)            , intent(in) :: nambnd     !! names of the open boundaries
+    integer        , dimension(7,nto)          , intent(in) :: mnbnd      !! indices of the open boundaries
 !
 !           Local variables
 !
-    integer i, j                    !!  loop counters
-    integer, external :: newunit
+    type(t_crs), target                 :: crs
+    type(t_ug_meshids)                  :: meshids               !< Set of NetCDF-ids for all mesh geometry arrays.
+    type(t_ug_meshgeom)                 :: meshgeom              !< Mesh geometry to be written to the NetCDF file.
+    type(t_ug_meshgeom)                 :: aggregated_meshgeom   !< Mesh geometry to be written to the NetCDF file.
+                                        
+    integer                             :: i, j, i1, j1, k, m, n !  loop counters
+    integer                             :: md, nd, mu, nu        ! help variables
+    integer                             :: m_dir, n_dir          ! help variables
+    integer                             :: cellindex, pointindex ! help variables
+    integer                             :: elm, elm1, elm2       ! help variables
+    integer                             :: elm1_vol, elm2_vol    ! help variables
 
-    integer :: ierr
-    character(len=256) :: filename
-    integer :: inode, master
-    integer :: igeomfile
-    integer :: max_vertex
-    integer :: nr_nodes, nr_edges
-    integer :: nr_flowlinks
-    integer :: m, n
-    real(fp) :: xymiss
-    
-    real(hp), dimension(:), pointer :: xn, yn, zn ! coordinates of nodes
-    real(hp), dimension(:), pointer :: xe, ye ! coordinates of the middle of the edge (ie u-punt)
-    real(hp), dimension(:), pointer :: xf, yf ! coordinates of the mass centre of the elements
-    real(hp), dimension(:,:,:), pointer :: open_bnd
-    integer , dimension(:,:), pointer :: seg_nr
-    integer , dimension(:), pointer :: node_mask, flow_vol, edge_mask, node_tmp
-    integer , dimension(:), pointer :: nr_bnd_cells
-    integer , dimension(:,:), pointer :: netlink, netelem
-    integer , dimension(:,:), pointer :: flowlink, elemlink
-    integer , dimension(:), pointer :: iapnt !< Aggregation pointer
-    integer , dimension(:), pointer :: edge_type(:) !< Edge type variable to be written to the NetCDF file.
-    integer , dimension(:), pointer :: aggregated_edge_type(:) !< Aggregated edge type variable to be written to the NetCDF file.
-    integer :: elm_i, elm1, elm2, i1, j1, k
-    integer :: nr_elems, nr_bnd_elm, cellindex, pointindex
-    integer :: lunbnd, md, nd, mu, nu, m_dir, n_dir, total_bnd_cells
-    integer :: max_bnd_cells
-    logical :: found
+    integer                             :: nr_elems              ! number of elements
+    integer                             :: nr_elems_aggr         ! number of elements after aggregation
+    integer                             :: nr_nodes              ! number of nodes
+    integer                             :: nr_edges              ! number of edges
+    integer                             :: nr_flowlinks          ! number of open flow links
+    real(hp), dimension(:)    , pointer :: nodex, nodey, nodez   ! coordinates of nodes
+    real(hp), dimension(:)    , pointer :: edgex, edgey          ! coordinates of the middle of the edge (ie u-punt)
+    real(hp), dimension(:)    , pointer :: facex, facey          ! coordinates of the mass centre of the elements
+    integer , dimension(:)    , pointer :: node_mask             ! node pointer
+    integer , dimension(:)    , pointer :: flow_vol              ! no-aggregation segment pointer
+    type(edge_t), dimension(:), pointer :: edge                  ! collection of edges
+    integer , dimension(:,:)  , pointer :: edge_nodes            ! nodes that define an edge
+    integer , dimension(:,:)  , pointer :: face_nodes            ! nodes that define a face
+    integer , dimension(:,:)  , pointer :: edge_faces            ! faces that this edge is part of
+    integer , dimension(:)    , pointer :: edge_type             ! edge type variable to be written to the NetCDF file.
+    integer , dimension(:)    , pointer :: aggr_edge_type(:)     ! aggregated edge type variable to be written to the NetCDF file.
 
-    type(edge_t), dimension(:), pointer :: edge => null()
-    type(waq_polygon_t), dimension(:), pointer  :: waq_polygon
+    integer , dimension(:,:)  , pointer :: bnd_nr                ! boundary number
+    integer                             :: nr_bnd_elm
+    integer                             :: total_bnd_cells
+    integer                             :: max_bnd_cells
+    logical                             :: found
+    real(hp), dimension(:,:,:), pointer :: open_bnd              ! open boundary coordinates
+    integer , dimension(:)    , pointer :: nr_bnd_cells          
+    integer, external                   :: newunit
+    integer                             :: lunbnd                ! logical unit boundary file
+    character(len=256)                  :: bndfilename           ! boundary filename
+
+    integer , dimension(:)    , pointer :: iapnt                 ! no-aggregation segment to aggregation segment pointer
+
+    character(len=256)                  :: geomfilename          ! geomfilename
+    integer                             :: igeomfile             ! logical unit geomfile
+    integer                             :: ierr                  ! errorcode
 !
 !! executable statements -------------------------------------------------------
 !
-    allocate(waq_polygon(mmax*nmax)) ! maximum number of aggregated cells, reached when there is no aggregation
+    !
+    ! Determine no-agregation segment pointer
+    !
     allocate(node_mask((nmax-1)*(mmax-1)))
-    allocate(node_tmp((nmax-1)*(mmax-1)))
     allocate(flow_vol(mmax*nmax))
-    allocate(edge_mask(mmax*nmax))
-    
-    node_tmp = 0
     flow_vol = 0 
-    edge_mask = 0
-
-    max_vertex = 0
-    nr_edges = 0
-    nr_bnd_elm = 0
-
     nr_elems = 0
     do m = 1, mmax
         do n = 1, nmax
+            cellindex = func(m, n, nmax)
             if (kcs(n, m) == 1) then
                 if (kcu(n  ,m-1)==0 .and. kcu(n  ,m  )==0 .and. &
                     kcv(n-1,m  )==0 .and. kcv(n  ,m  )==0) then ! do not count active cells defined with four thin dams
                 else
                     ! Valid cell found
                     nr_elems = nr_elems + 1
-                    cellindex = func(m, n, nmax)
                     flow_vol(cellindex) = nr_elems
                 end if
+            else if (kcs(n, m) == 2) then
+                flow_vol(cellindex) = isaggr(cellindex)
             end if
         end do
     end do        
-     
+    !
+    ! Determine no-agregation active nodes
+    !
     nr_nodes = 0
     node_mask = 0
-    xymiss = 0.0
     do m = 1, mmax-1
         do n = 1, nmax-1
             if (kcs(n,m  )==1 .or. kcs(n+1,m  )==1 .or. &
@@ -185,122 +174,163 @@ contains
         end do
     end do    
     !
-    ! Determine the waq-polygons, not yet aggregated
+    ! Determine no-agregation polygons of each flow volume
     !
-!    call determine_elem_polygons(node_mask, mmax, nmax, flow_vol, waq_polygon, edge, nr_elems, nr_edges, max_vertex)
-    !
-    allocate(netelem    (4, nr_elems)) ! needed to write nc-file
-    netelem = 0
-    elm_i = 0
+    allocate(face_nodes(4, nr_elems))
+    face_nodes = 0
     do m = 2, mmax-1 ! outer columns have kcs==0
         do n = 2, nmax-1 ! outer rows have kcs==0
-            if (kcs(n, m) == 1) then
-                if (kcu(n  ,m-1)==0 .and. kcu(n  ,m  )==0 .and. &
-                    kcv(n-1,m  )==0 .and. kcv(n  ,m  )==0) then ! do not count active cells defined with four thin dams
-                else
-                    ! Valid cell found
-                    elm_i = elm_i + 1
-                    netelem(1, elm_i) = node_mask(func(m-1, n-1, nmax-1))
-                    netelem(2, elm_i) = node_mask(func(m  , n-1, nmax-1))
-                    netelem(3, elm_i) = node_mask(func(m  , n  , nmax-1))
-                    netelem(4, elm_i) = node_mask(func(m-1, n  , nmax-1))
-                end if
+            cellindex = func(m, n, nmax)
+            elm = flow_vol(cellindex)
+            if (elm .gt. 0) then
+                ! Active internal cell found
+                face_nodes(1, elm) = node_mask(func(m-1, n-1, nmax-1))
+                face_nodes(2, elm) = node_mask(func(m  , n-1, nmax-1))
+                face_nodes(3, elm) = node_mask(func(m  , n  , nmax-1))
+                face_nodes(4, elm) = node_mask(func(m-1, n  , nmax-1))
             end if
         end do
     end do        
     !
-    ! NetNode
+    ! Gather node coordinates
     !
-    allocate(xn(nr_nodes))
-    allocate(yn(nr_nodes))
-    allocate(zn(nr_nodes))
+    allocate(nodex(nr_nodes))
+    allocate(nodey(nr_nodes))
+    allocate(nodez(nr_nodes))
     nr_nodes = 0
     do m = 1, mmax-1
         do n = 1, nmax-1
             if (kcs(n,m  )==1 .or. kcs(n+1,m  )==1 .or. &
                 kcs(n,m+1)==1 .or. kcs(n+1,m+1)==1) then
-                !Valid point found
                 nr_nodes = nr_nodes + 1
-                xn(nr_nodes) = xcor(n,m)
-                yn(nr_nodes) = ycor(n,m)
-                zn(nr_nodes) =-dep (n,m)
+                nodex(nr_nodes) = xcor(n,m)
+                nodey(nr_nodes) = ycor(n,m)
+                nodez(nr_nodes) =-dep (n,m)
             end if
         end do
     end do    
     !
-    ! Netlink
+    ! Find all edges
     !
-    allocate(netlink(2, nr_edges))
-    allocate(elemlink(2, nr_edges)) ! adjacent cells
-    allocate(edge_type(nr_edges)) 
-    netlink = missing_value
-    elemlink = missing_value
-
-    do i = 1, nr_edges
-         netlink(1,i) = edge(i)%vertex(1)
-         netlink(2,i) = edge(i)%vertex(2)
-         elemlink(1, i) = edge(i)%element(1)
-         elemlink(2, i) = edge(i)%element(2)
-         edge_type(i) = edge(i)%type
-    end do
-    !
-    ! FlowLink
-    !
-    if (nr_bnd_elm > 0) then
-        !  add nr_elems to the virtual (negative) boundary cells number 
-        do i = 1, mmax*nmax ! size(cell_mask)
-            if (flow_vol(i) < 0) then
-                flow_vol(i) = abs(flow_vol(i)) + nr_elems
-            endif 
-        end do 
-    end if
-    allocate(flowlink(2, 2*mmax*nmax)) ! u- and v-flowlinks
-    allocate(xe(2*mmax*nmax))
-    allocate(ye(2*mmax*nmax))
-    flowlink = 0
+    nr_edges = 0
+    allocate(edge(2*mmax*nmax))
     nr_flowlinks = 0
     do m = 1, mmax-1
         do n = 1, nmax-1
             ! u-flowlink
             elm1 = func(m  ,n  , nmax)
             elm2 = func(m+1,n  , nmax)
-            elm1 = flow_vol(elm1)
-            elm2 = flow_vol(elm2)
-            if (elm1 /= elm2) then
-                if (elm1<0) elm1 = abs(elm1) + nr_elems
-                if (elm2<0) elm2 = abs(elm2) + nr_elems
-                if (kcu(n,m) == 1 ) then
-                    nr_flowlinks = nr_flowlinks + 1
-                    flowlink (1, nr_flowlinks) = elm1
-                    flowlink (2, nr_flowlinks) = elm2
-                    xe(nr_flowlinks) = 0.5*(xcor(n-1,m) + xcor(n,m))
-                    ye(nr_flowlinks) = 0.5*(ycor(n-1,m) + ycor(n,m))
+            elm1_vol = flow_vol(elm1)
+            elm2_vol = flow_vol(elm2)
+            if (elm1_vol /= elm2_vol .and. (elm1_vol.gt.0.or.elm2_vol.gt.0)) then
+                nr_edges = nr_edges + 1
+                edge(nr_edges)%edgex = 0.5*(xcor(n-1,m  ) + xcor(n  ,m  ))
+                edge(nr_edges)%edgey = 0.5*(ycor(n-1,m  ) + ycor(n  ,m  ))
+                edge(nr_edges)%vertex(1) = node_mask(func(m  , n-1, nmax-1))
+                edge(nr_edges)%vertex(2) = node_mask(func(m  , n  , nmax-1))
+                if (elm1_vol .gt. 0 .and. elm2_vol .gt. 0) then
+                   edge(nr_edges)%nmelm = 2
+                   edge(nr_edges)%element(1) = elm1_vol
+                   edge(nr_edges)%element(2) = elm2_vol
+                   if (kcu(n,m) == 1 ) then
+                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL
+                      nr_flowlinks = nr_flowlinks + 1
+                   else   
+                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL_CLOSED
+                   endif
+                else if(elm1_vol .lt. 0 .or. elm2_vol .lt. 0) then   
+                   edge(nr_edges)%nmelm = 2
+                   edge(nr_edges)%element(1) = elm1_vol
+                   edge(nr_edges)%element(2) = elm2_vol
+                   if (kcu(n,m) == 1 ) then
+                      edge(nr_edges)%type = UNC_EDGETYPE_BND
+                      nr_flowlinks = nr_flowlinks + 1
+                   else   
+                      edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                   endif
+                else if(elm2_vol .eq. 0) then   
+                   edge(nr_edges)%nmelm = 1
+                   edge(nr_edges)%element(1) = elm1_vol
+                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                else if(elm1_vol .eq. 0) then   
+                   edge(nr_edges)%nmelm = 1
+                   edge(nr_edges)%element(1) = elm2_vol
+                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
                 endif
             endif
             ! v-flowlink
             elm1 = func(m  ,n  , nmax)
             elm2 = func(m  ,n+1, nmax)
-            elm1 = flow_vol(elm1)
-            elm2 = flow_vol(elm2)
-            if (elm1 /= elm2) then
-                if (elm1<0) elm1 = abs(elm1) + nr_elems
-                if (elm2<0) elm2 = abs(elm2) + nr_elems
-                if (kcv(n, m) == 1) then
-                    nr_flowlinks = nr_flowlinks + 1
-                    flowlink (1, nr_flowlinks) = elm1
-                    flowlink (2, nr_flowlinks) = elm2
-                    xe(nr_flowlinks) = 0.5*(xcor(n,m-1) + xcor(n,m))
-                    ye(nr_flowlinks) = 0.5*(ycor(n,m-1) + ycor(n,m))
-                end if
-            end if
+            elm1_vol = flow_vol(elm1)
+            elm2_vol = flow_vol(elm2)
+            if (elm1_vol /= elm2_vol .and. (elm1_vol.gt.0.or.elm2_vol.gt.0)) then
+                nr_edges = nr_edges + 1 
+                edge(nr_edges)%edgex = 0.5*(xcor(n  ,m-1) + xcor(n  ,m  ))
+                edge(nr_edges)%edgey = 0.5*(ycor(n  ,m-1) + ycor(n  ,m  ))
+                edge(nr_edges)%vertex(1) = node_mask(func(m-1, n  , nmax-1))
+                edge(nr_edges)%vertex(2) = node_mask(func(m  , n  , nmax-1))
+                if (elm1_vol .gt. 0 .and. elm2_vol .gt. 0) then
+                   edge(nr_edges)%nmelm = 2
+                   edge(nr_edges)%element(1) = elm1_vol
+                   edge(nr_edges)%element(2) = elm2_vol
+                   if (kcv(n,m) == 1 ) then
+                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL
+                      nr_flowlinks = nr_flowlinks + 1
+                   else   
+                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL_CLOSED
+                   endif
+                else if(elm1_vol .lt. 0 .or. elm2_vol .lt. 0) then   
+                   edge(nr_edges)%nmelm = 2
+                   edge(nr_edges)%element(1) = elm1_vol
+                   edge(nr_edges)%element(2) = elm2_vol
+                   if (kcv(n,m) == 1 ) then
+                      edge(nr_edges)%type = UNC_EDGETYPE_BND
+                      nr_flowlinks = nr_flowlinks + 1
+                   else   
+                      edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                   endif
+                else if(elm2_vol .eq. 0) then   
+                   edge(nr_edges)%nmelm = 1
+                   edge(nr_edges)%element(1) = elm1_vol
+                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                else if(elm1_vol .eq. 0) then   
+                   edge(nr_edges)%nmelm = 1
+                   edge(nr_edges)%element(1) = elm2_vol
+                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                endif
+            endif
         end do
-    end do    
+    end do  
+    !
+    ! Determine edge_nodes and edge_faces
+    !
+    allocate(edge_nodes(2, nr_edges))
+    allocate(edge_faces(2, nr_edges))
+    allocate(edgex(nr_edges))
+    allocate(edgey(nr_edges))
+    allocate(edge_type(nr_edges)) 
+    edge_nodes = missing_value
+    edge_faces = missing_value
+
+    do i = 1, nr_edges
+         edgex(i) = edge(i)%edgex
+         edgey(i) = edge(i)%edgey
+         edge_nodes(1,i) = edge(i)%vertex(1)
+         edge_nodes(2,i) = edge(i)%vertex(2)
+         do j =1,edge(i)%nmelm
+            ! number boundary nodes just after the range of internal nodes
+            if (edge(i)%element(j).lt.0) edge(i)%element(j) = missing_value ! abs(edge(i)%element(j)) + nr_elems
+         end do
+         edge_faces(1, i) = edge(i)%element(1)
+         edge_faces(2, i) = edge(i)%element(2)
+         edge_type(i) = edge(i)%type
+    end do
     !
     ! Mass centre of elements
     !
-    allocate(xf(nr_elems))
-    allocate(yf(nr_elems))
-    elm_i = 0
+    allocate(facex(nr_elems))
+    allocate(facey(nr_elems))
+    elm = 0
     do m = 2, mmax-1 ! outer columns have kcs==0
         do n = 2, nmax-1 ! outer rows have kcs==0
             if (kcs(n, m) == 1) then
@@ -308,16 +338,16 @@ contains
                     kcv(n-1,m  )==0 .and. kcv(n  ,m  )==0) then ! do not count active cells defined with four thin dams
                 else
                     ! Valid cell found
-                    elm_i = elm_i + 1
-                    xf(elm_i) = xz(n,m)
-                    yf(elm_i) = yz(n,m)
+                    elm = elm + 1
+                    facex(elm) = xz(n,m)
+                    facey(elm) = yz(n,m)
                 end if
             end if
         end do
     end do            
-!   
-! Write the boundary file
-! 
+    !   
+    ! Determine the boundaries
+    ! 
     total_bnd_cells = 0
     max_bnd_cells = 0
     allocate(nr_bnd_cells(nto))
@@ -329,9 +359,10 @@ contains
         max_bnd_cells = max(max_bnd_cells, max(m_dir, n_dir))
     end do
     allocate(open_bnd(4,nto,max_bnd_cells))
-    allocate(seg_nr(max_bnd_cells, nto))
+    allocate(bnd_nr(max_bnd_cells, nto))
+    nr_bnd_elm = 0
+    bnd_nr = 0
     open_bnd = 0
-    seg_nr = 0
     nr_bnd_cells = 0
     do m = 1,  mmax
         do n = 1, nmax
@@ -358,7 +389,7 @@ contains
                     end do nto_loop1
                     if (found) then
                         nr_bnd_cells(i) = nr_bnd_cells(i)+1
-                        seg_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
+                        bnd_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
                         open_bnd(1, i, nr_bnd_cells(i)) = xcor(n-1,m-1)
                         open_bnd(2, i, nr_bnd_cells(i)) = ycor(n-1,m-1)
                         open_bnd(3 ,i, nr_bnd_cells(i)) = xcor(n-1,m  )
@@ -378,7 +409,7 @@ contains
                     end do nto_loop2
                     if (found) then
                         nr_bnd_cells(i) = nr_bnd_cells(i)+1
-                        seg_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
+                        bnd_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
                         open_bnd(1, i, nr_bnd_cells(i)) = xcor(n  ,m-1)
                         open_bnd(2, i, nr_bnd_cells(i)) = ycor(n  ,m-1)
                         open_bnd(3 ,i, nr_bnd_cells(i)) = xcor(n  ,m  )
@@ -398,7 +429,7 @@ contains
                     end do nto_loop3
                     if (found) then
                         nr_bnd_cells(i) = nr_bnd_cells(i)+1
-                        seg_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
+                        bnd_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
                         open_bnd(1, i, nr_bnd_cells(i)) = xcor(n-1,m-1)
                         open_bnd(2, i, nr_bnd_cells(i)) = ycor(n-1,m-1)
                         open_bnd(3 ,i, nr_bnd_cells(i)) = xcor(n  ,m-1)
@@ -418,7 +449,7 @@ contains
                     end do nto_loop4
                     if (found) then
                         nr_bnd_cells(i) = nr_bnd_cells(i)+1
-                        seg_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
+                        bnd_nr(nr_bnd_cells(i),i) = flow_vol(cellindex)
                         open_bnd(1, i, nr_bnd_cells(i)) = xcor(n-1,m  )
                         open_bnd(2, i, nr_bnd_cells(i)) = ycor(n-1,m  )
                         open_bnd(3 ,i, nr_bnd_cells(i)) = xcor(n  ,m  )
@@ -429,10 +460,12 @@ contains
             end if
         end do
     end do
-        
+    !   
+    ! Write the boundary file
+    ! 
     lunbnd = newunit()
-    filename = 'com-' // trim(meta%modelname) // '.bnd'
-    open(lunbnd, file= trim(filename))
+    bndfilename = 'com-' // trim(meta%modelname) // '.bnd'
+    open(lunbnd, file= trim(bndfilename))
 
     if (nto > 0) then
         write(lunbnd, '(i0.0)') nto
@@ -440,31 +473,28 @@ contains
             write(lunbnd, '(a)') nambnd(i)
             write(lunbnd, '(i0.0)') nr_bnd_cells(i)
             do j = 1, nr_bnd_cells(i)
-                write(lunbnd, '(i0.0, 4es25.17)') seg_nr(j,i), (open_bnd(k,i,j), k=1,4)
+                write(lunbnd, '(i0.0, 4es25.17)') bnd_nr(j,i), (open_bnd(k,i,j), k=1,4)
             end do 
         end do
     else
         write(lunbnd, '(i2)') nto
     endif
     close(lunbnd)  
-!
-!===============================================================================
-! Write the waqgeom netcdf file
-!===============================================================================
-!   
     !
-    inode = 0
-    master = 0
+    !===============================================================================
+    ! Write the waqgeom netcdf file
+    !===============================================================================
+    !   
     ierr = 0
-    filename = 'com-' // trim(meta%modelname) //'_waqgeom.nc' ! Should be equal to the name given in the hyd-file (that file is written in the routine wrwaqhyd)
+    geomfilename = 'com-' // trim(meta%modelname) //'_waqgeom.nc' ! Should be equal to the name given in the hyd-file (that file is written in the routine wrwaqhyd)
     !
     ! create or open the file
     !
-    ierr = nf90_create(filename, 0, igeomfile); 
-    call nc_check_err(lundia, ierr, "creating file", filename)
+    ierr = nf90_create(geomfilename, 0, igeomfile); 
+    call nc_check_err(lundia, ierr, "creating file", geomfilename)
     if (ierr/=0) goto 9999
     ierr = ug_addglobalatts(igeomfile, meta)
-    call nc_check_err(lundia, ierr, "global attributes", filename)
+    call nc_check_err(lundia, ierr, "global attributes", geomfilename)
     if (ierr/=0) goto 9999
     !
     ! Coordinates
@@ -478,337 +508,81 @@ contains
     meshgeom%crs => crs
 
     meshgeom%numNode = nr_nodes
-    meshgeom%nodex => xn 
-    meshgeom%nodey => yn 
-    meshgeom%nodez => zn 
+    meshgeom%nodex => nodex 
+    meshgeom%nodey => nodey 
+    meshgeom%nodez => nodez 
     
     meshgeom%numedge = nr_edges
-    meshgeom%edgex => xe 
-    meshgeom%edgey => ye 
+    meshgeom%edgex => edgex 
+    meshgeom%edgey => edgey 
 
-    meshgeom%edge_nodes => netlink
-    meshgeom%edge_faces => elemlink
+    meshgeom%edge_nodes => edge_nodes
+    meshgeom%edge_faces => edge_faces
     
     meshgeom%numFace = nr_elems 
-    meshgeom%facex => xf
-    meshgeom%facey => yf
+    meshgeom%facex => facex
+    meshgeom%facey => facey
     
-    meshgeom%face_nodes => netelem 
-    
-    allocate(iapnt(nr_elems))
-    do m = 1, mmax
-        do n = 1, nmax
-            cellindex = func(m, n, nmax)
-            elm_i = flow_vol(cellindex)
-            if (elm_i > 0) then
-                iapnt(elm_i) = isaggr(cellindex)
-            end if
-        end do
-    end do        
-       
-       
+    meshgeom%face_nodes => face_nodes 
+
+    !
+    ! Optionally aggregate the mesh
+    !
     if (aggre==1) then
-        call aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggregated_edge_type, iapnt)
-        meshgeom = aggregated_meshgeom
-        edge_type => aggregated_edge_type
-    end if
-    
-    !datalocs = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE ! todo: error in IO_UGRID module, you have to define UG_LOC_FACE if dim==2
-
-    ierr = ug_write_mesh_struct(igeomfile, meshids, meshgeom)
-    call nc_check_err(lundia, ierr, "writing mesh", filename)
-    ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
-    call write_edge_type_variable(igeomfile, meshids, meshgeom%meshName, edge_type)
-    call nc_check_err(lundia, ierr, "writing mesh", filename)
-    !
-9999 continue
-    ierr = nf90_sync(igeomfile); 
-    call nc_check_err(lundia, ierr, "sync file", filename)
-    ierr = nf90_close(igeomfile); 
-    call nc_check_err(lundia, ierr, "closing file", filename)
-    !
-    deallocate(xn)
-    deallocate(yn)
-    deallocate(zn)
-    deallocate(netlink)
-    deallocate(flowlink)
-    deallocate(xe)
-    deallocate(ye)
-    deallocate(xf)
-    deallocate(yf)
-    deallocate(node_mask)
-    deallocate(node_tmp)
-    deallocate(flow_vol)
-    deallocate(edge_mask)
-    deallocate(nr_bnd_cells)
-    deallocate(open_bnd)
-    deallocate(seg_nr)
-    
-end subroutine wrwaqgeomcl
-
-!> Determine the waq_polygons from waq_vol with the same volume-number
-subroutine determine_elem_polygons(node_mask, mmax, nmax, elem_vol, elem_polygon, edge, nr_elems, nr_edges, max_vertex)
-    use m_alloc
-    
-    integer, dimension(:), intent(in) :: node_mask
-    integer, intent(in) :: mmax, nmax
-    integer, dimension(:), intent(in) :: elem_vol    !!  grid aggregation pointer
-    type(waq_polygon_t), dimension(:), pointer :: elem_polygon
-    type(edge_t)       , dimension(:), pointer :: edge
-    integer, intent(out) :: nr_elems, nr_edges, max_vertex
-
-    integer , dimension(:,:), allocatable :: kcd
-    integer :: i, j, iinc, jinc, idim, m, n, k
-    integer :: p1, p2, elm1, elm2, i_edge, i_pol, edge_number
-    integer :: istat
-    logical :: closed
-    
-    allocate(edge(2*mmax*nmax)) ! equal to number u- and v-points
-    allocate(kcd(mmax, nmax)) ! mask array for depth points (i.e. cell corners)
-    i_pol = 0
-    
-1000    continue        ! start search again
-
-    kcd = 0 ! mask for the depth-points
-    i_pol = i_pol+1
-    allocate(elem_polygon(i_pol)%vertex(4)) ! no-aggregation
-    allocate(elem_polygon(i_pol)%edge(4))
-    do m = 2, mmax
-        do n = 2, nmax
-            k = func(m, n, nmax)
-            if (elem_vol(k)/=i_pol) cycle 
-            if (i_pol > 1) then
-                idim = elem_polygon(i_pol-1)%nvertex ! make it the size of the previous polygon
-                call reallocP(elem_polygon(i_pol)%vertex, idim, fill=0, stat=istat)
-                call reallocP(elem_polygon(i_pol)%edge  , idim, fill=0, stat=istat)
-            endif
-            elem_polygon(i_pol)%nvertex  = 0
-            elem_polygon(i_pol)%vertex  = 0
-
-            closed = .false.
-            i = m-1
-            j = n
-            iinc = 1
-            jinc = 0
-            i_edge = 0
-
-            p1 = func(i,j-1,nmax-1)
-            elem_polygon(i_pol)%nvertex = elem_polygon(i_pol)%nvertex + 1
-            elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex) = node_mask(p1)
-            kcd(i  ,j-1) = 1
-
-            do while (.not.closed)
-                i = i+iinc
-                j = j+jinc
-                elm1 = func(i  , j  , nmax)
-                elm2 = func(i  , j-1, nmax)
-                if (iinc == 1 .and. elem_vol(elm1) == i_pol .and. elem_vol(elm1)/=elem_vol(elm2)) then ! straight lower boundary
-                    p1 = func(i  , j-1, nmax-1)
-                    elem_polygon(i_pol)%nvertex = elem_polygon(i_pol)%nvertex + 1
-                    if (elem_polygon(i_pol)%nvertex > size(elem_polygon(i_pol)%vertex)) then
-                        call reallocP(elem_polygon(i_pol)%vertex, elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                        call reallocP(elem_polygon(i_pol)%edge  , elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                    endif
-                    elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex) = node_mask(p1)
-                    i_edge = i_edge+1
-                    p1 = node_mask(p1)
-                    p2 = elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex - 1)
-                    edge_number = which_edge(p2, p1, elem_vol(elm1), elem_vol(elm2), nr_edges, edge)
-                    elem_polygon(i_pol)%edge(i_edge) = edge_number
-                    kcd(i, j-1) = 1
-                end if
-                elm1 = func(i  , j  , nmax)
-                elm2 = func(i  , j+1, nmax)
-                if (iinc == -1 .and. elem_vol(elm1) == i_pol .and. elem_vol(elm1)/=elem_vol(elm2)) then ! straight upper boundary
-                    p1 = func(i-1, j  ,nmax-1)
-                    elem_polygon(i_pol)%nvertex = elem_polygon(i_pol)%nvertex + 1
-                    if (elem_polygon(i_pol)%nvertex > size(elem_polygon(i_pol)%vertex)) then
-                        call reallocP(elem_polygon(i_pol)%vertex, elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                        call reallocP(elem_polygon(i_pol)%edge  , elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                    endif
-                    elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex) = node_mask(p1)
-                    i_edge = i_edge+1
-                    p1 = node_mask(p1)
-                    p2 = elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex - 1)
-                    edge_number = which_edge(p2, p1, elem_vol(elm1), elem_vol(elm2), nr_edges, edge)
-                    elem_polygon(i_pol)%edge(i_edge) = edge_number
-                    kcd(i-1, j) = 1
-                end if
-                elm1 = func(i  , j  , nmax)
-                elm2 = func(i+1, j  , nmax)
-                if (jinc == 1 .and. elem_vol(elm1) == i_pol .and. elem_vol(elm1)/=elem_vol(elm2)) then ! straight right boundary
-                    p1 = func(i  ,j  ,nmax-1)
-                    elem_polygon(i_pol)%nvertex = elem_polygon(i_pol)%nvertex + 1
-                    if (elem_polygon(i_pol)%nvertex > size(elem_polygon(i_pol)%vertex)) then
-                        call reallocP(elem_polygon(i_pol)%vertex, elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                        call reallocP(elem_polygon(i_pol)%edge  , elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                    endif
-                    elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex) = node_mask(p1)
-                    i_edge = i_edge+1
-                    p1 = node_mask(p1)
-                    p2 = elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex - 1)
-                    edge_number = which_edge(p2, p1, elem_vol(elm1), elem_vol(elm2), nr_edges, edge)
-                    elem_polygon(i_pol)%edge(i_edge) = edge_number
-                    kcd(i, j)= 1
-                end if
-                elm1 = func(i  , j  , nmax)
-                elm2 = func(i-1, j  , nmax)
-                if (jinc == -1 .and. elem_vol(elm1) == i_pol .and. elem_vol(elm1)/=elem_vol(elm2)) then ! straight left boundary
-                    if (kcd(i-1, j-1) /= 1) then
-                        p1 = func(i-1,j-1,nmax-1)
-                        elem_polygon(i_pol)%nvertex = elem_polygon(i_pol)%nvertex + 1
-                        if (elem_polygon(i_pol)%nvertex > size(elem_polygon(i_pol)%vertex)) then
-                            call reallocP(elem_polygon(i_pol)%vertex, elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                            call reallocP(elem_polygon(i_pol)%edge  , elem_polygon(i_pol)%nvertex, fill=0, stat=istat)
-                        endif
-                        elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex) = node_mask(p1)
-                        i_edge = i_edge+1
-                        p1 = node_mask(p1)
-                        p2 = elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex - 1)
-                        edge_number = which_edge(p2, p1, elem_vol(elm1), elem_vol(elm2), nr_edges, edge)
-                        elem_polygon(i_pol)%edge(i_edge) = edge_number
-                        kcd(i-1, j-1) = 1
-                    else
-                        p1 = func(i-1,j-1,nmax-1)
-                        i_edge = i_edge+1
-                        p1 = node_mask(p1)
-                        p2 = elem_polygon(i_pol)%vertex(elem_polygon(i_pol)%nvertex)
-                        edge_number = which_edge(p2, p1, elem_vol(elm1), elem_vol(elm2), nr_edges, edge)
-                        elem_polygon(i_pol)%edge(i_edge) = edge_number
-                        i_edge = 0
-                        closed = .true.
-                        goto 1000
-                    end if
-                end if
-                !
-                ! Detect corner
-                !    
-                if (.not.closed) then
-                    if (iinc == 1) then
-                        elm1 = func(i  , j  , nmax)
-                        elm2 = func(i+1, j  , nmax)
-                        if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to left
-                            iinc = 0
-                            jinc = 1
-                            j = j-1
-                        else 
-                            elm1 = func(i  , j-1, nmax)
-                            elm2 = func(i+1, j-1, nmax)
-                            if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to right
-                                iinc = 0
-                                jinc = -1
-                                i = i+1
-                            end if
-                        end if
-                    else if (iinc == -1) then
-                        elm1 = func(i  , j  , nmax)
-                        elm2 = func(i-1, j  , nmax)
-                        if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to left
-                            iinc = 0
-                            jinc = -1
-                            j = j+1
-                        else 
-                            elm1 = func(i-1, j+1, nmax)
-                            elm2 = func(i  , j+1, nmax)
-                            if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol)  .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to right
-                                iinc = 0
-                                jinc = 1
-                                i = i-1
-                            end if
-                        end if
-                    else if (jinc == 1) then
-                        elm1 = func(i  , j  , nmax)
-                        elm2 = func(i  , j+1, nmax)
-                        if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to left
-                            iinc = -1
-                            jinc = 0
-                            i = i+1
-                        else 
-                            elm1 = func(i+1, j+1, nmax)
-                            elm2 = func(i+1, j  , nmax)
-                            if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to right
-                                iinc = 1
-                                jinc = 0
-                                j = j+1
-                            end if
-                        end if
-                    else if (jinc == -1) then
-                        elm1 = func(i  , j  , nmax)
-                        elm2 = func(i  , j-1, nmax)
-                        if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to left
-                            iinc = 1
-                            jinc = 0
-                            i = i-1
-                        else 
-                            elm1 = func(i-1, j  , nmax)
-                            elm2 = func(i-1, j-1, nmax)
-                            if ((elem_vol(elm1) == i_pol .or. elem_vol(elm2) == i_pol) .and. elem_vol(elm1)/=elem_vol(elm2)) then ! turn to right
-                                iinc = -1
-                                jinc = 0
-                                j = j-1
-                            end if
-                        end if
-                    end if
+        allocate(iapnt(nr_elems))
+!        allocate(iapnt(nr_elems+nr_bnd_elm))
+        do m = 1, mmax
+            do n = 1, nmax
+                cellindex = func(m, n, nmax)
+                elm = flow_vol(cellindex)
+                if (elm > 0) then
+                    iapnt(elm) = isaggr(cellindex)
                 end if
             end do
         end do
-    end do
+        ! added renumbering for boundary nodes
+!        nr_elems_aggr = maxval(isaggr(1:nmax*mmax))
+!        do elm = 1, nr_bnd_elm
+!           iapnt(nr_elems + elm) = nr_elems_aggr + elm
+!        enddo
+        call aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggr_edge_type, iapnt)
+        meshgeom = aggregated_meshgeom
+        edge_type => aggr_edge_type
+    end if
     !
-    nr_elems = i_pol-1
-    max_vertex = 0
-    do i = 1, nr_elems
-        max_vertex = max(max_vertex, elem_polygon(i)%nvertex)
-    end do
+    ! Write mesh as UGRID
+    !
+    ierr = ug_write_mesh_struct(igeomfile, meshids, meshgeom)
+    call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
+    !
+    ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
+    !
+    call write_edge_type_variable(igeomfile, meshids, meshgeom%meshName, edge_type)
+    call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
+    !
+9999 continue
+    ierr = nf90_sync(igeomfile); 
+    call nc_check_err(lundia, ierr, "sync file", geomfilename)
+    ierr = nf90_close(igeomfile); 
+    call nc_check_err(lundia, ierr, "closing file", geomfilename)
+    !
+    ! Deallocate temporary variables
+    !
+    deallocate(nodex)
+    deallocate(nodey)
+    deallocate(nodez)
+    deallocate(edge_nodes)
+    deallocate(edgex)
+    deallocate(edgey)
+    deallocate(facex)
+    deallocate(facey)
+    deallocate(node_mask)
+    deallocate(flow_vol)
+    deallocate(nr_bnd_cells)
+    deallocate(open_bnd)
+    deallocate(bnd_nr)
     
-    deallocate(kcd)
-end subroutine determine_elem_polygons
-
-
-integer function  which_edge(p1, p2, elm1, elm2, nr_edges, edge) result(res)
-   use io_netcdf
-   implicit none
-    
-    integer, intent(in)  :: p1
-    integer, intent(in)  :: p2
-    integer, intent(in)  :: elm1
-    integer, intent(in)  :: elm2
-    integer, intent(out) :: nr_edges
-    type(edge_t), dimension(:), pointer, intent(out) :: edge
-        
-    integer :: i
-
-    ! Check whether edge already exists.
-    do i = nr_edges, 1, -1
-        if (edge(i)%vertex(1) == p1 .and. edge(i)%vertex(2) == p2 .or. &
-            edge(i)%vertex(1) == p2 .and. edge(i)%vertex(2) == p1) then
-            res = i
-            return
-        end if
-    end do        
-
-    nr_edges = nr_edges+1
-    edge(nr_edges)%vertex(1) = p1
-    edge(nr_edges)%vertex(2) = p2
-    edge(nr_edges)%element(1) = elm1
-    edge(nr_edges)%element(2) = elm2
-    edge(nr_edges)%nmelm = 2
-    if (elm1==0 .or. elm2==0) then
-        edge(nr_edges)%nmelm = 1
-        edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
-            if (elm1==0) then
-                edge(nr_edges)%element(1) = missing_value
-            else
-                edge(nr_edges)%element(2) = missing_value
-            endif
-    else if (elm1<0 .or. elm2<0) then
-        edge(nr_edges)%type = UNC_EDGETYPE_BND
-    else
-        edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL
-    endif
-! can't determine if it is UNC_EDGETYPE_INTERNAL_CLOSED here
-    
-    res = nr_edges
-end function which_edge
+end subroutine wrwaqgeomcl
 
 integer function func(i, j, nmax) 
     integer i, j, nmax

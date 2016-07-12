@@ -390,10 +390,10 @@
          call getfullversionstring_flow2d3d(meta%version)
          meta%modelname   = runid
          
-         call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , ilaggr(kmax), &
-                           kmax  , nlb   , nub    , mlb   , mub         , &
-                           xcor  , ycor  , xz     , yz    , dp          , &
-                           kcs   , kcu   , kcv    , sferic, aggre       , &
+         call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , kmax  , &
+                           nlb   , nub    , mlb   , mub   ,         &
+                           xcor  , ycor  , xz     , yz    , dp    , &
+                           kcs   , kcu   , kcv    , sferic, aggre , &
                            isaggr, nto   , nambnd , mnbnd)
 
 !           open all files for time dependent write
