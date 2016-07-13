@@ -469,8 +469,8 @@ void Dimr::runParallelInit (dh_control_block * cb) {
                 if (cb->subBlocks[i].subBlocks[j].type != CT_START) {
                     dh_coupler   * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                     for (int k = 0 ; k < thisCoupler->numItems ; k++) {
-                        if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC) {
-                            // RTCTools: impossible to autodetect which partition will deliver this source var
+                        if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC || thisCoupler->sourceComponent->type == COMP_TYPE_WANDA) {
+                            // RTCTools/Wanda: impossible to autodetect which partition will deliver this source var
                             // Assumption: there is only one RTC-partition
                             thisCoupler->items[k].sourceProcess = thisCoupler->sourceComponent->processes[0];
                         } else {
@@ -524,7 +524,7 @@ void Dimr::runParallelInit (dh_control_block * cb) {
 
                         // Target variable
 
-                        if (thisCoupler->targetComponent->type == COMP_TYPE_RTC) {
+                        if (thisCoupler->targetComponent->type == COMP_TYPE_RTC || thisCoupler->targetComponent->type == COMP_TYPE_WANDA) {
                             // nothing
                         } else {
                             for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses; m++) {
@@ -666,11 +666,18 @@ void Dimr::runParallelUpdate (dh_control_block * cb) {
 										if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC || thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D) {
                                             // These components only returns a new pointer to a copy of the double value, so call it each time.
                                             (thisCoupler->sourceComponent->dllGetVar) (thisCoupler->items[k].sourceName, (void *)&thisCoupler->items[k].sourceVarPtr);
+                                        } else if (thisCoupler->sourceComponent->type == COMP_TYPE_WANDA) {
+                                            // Wanda does not use pointers to internal structures:
+                                            // - Use the DIMR-transfer array
+                                            // - Note the missing & in the dllGetVar call, when comparing with the dllGetVar call above
+                                            thisCoupler->items[k].sourceVarPtr = transfer;
+                                            (thisCoupler->sourceComponent->dllGetVar) (thisCoupler->items[k].sourceName, (void *)(thisCoupler->items[k].sourceVarPtr));
                                         } else {
                                             // Other components already have direct pointer access to the actual variable.
                                         }
                                         // The sourceVarPtr may be NULL for my_rank
-                                        if (thisCoupler->items[k].sourceVarPtr != NULL) {
+                                        // Wanda: the value is already in the transfer array
+                                        if (thisCoupler->items[k].sourceVarPtr != NULL && thisCoupler->sourceComponent->type != COMP_TYPE_WANDA) {
                                             transfer[m] = *(thisCoupler->items[k].sourceVarPtr);
                                         }
                                     } else {
@@ -696,7 +703,9 @@ void Dimr::runParallelUpdate (dh_control_block * cb) {
                                     for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses; m++) {
                                         if (my_rank == thisCoupler->targetComponent->processes[m]) {
                                             this->log->Write (Log::DETAIL, my_rank, "Receive(%s)", thisCoupler->items[k].targetName);
-											if (thisCoupler->targetComponent->type == COMP_TYPE_RTC || thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D) {
+											if (   thisCoupler->targetComponent->type == COMP_TYPE_RTC 
+                                                || thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D 
+                                                || thisCoupler->targetComponent->type == COMP_TYPE_WANDA) {
                                                 (thisCoupler->targetComponent->dllSetVar) (thisCoupler->items[k].targetName,(void *)&transfer[0]);
 												if (thisCoupler->targetComponent->type == COMP_TYPE_RTC) {
 													// target = rtc
@@ -830,7 +839,8 @@ void Dimr::scanUnits(XmlTree * rootXml) {
             if (this->componentsList.components == NULL) {
                 this->componentsList.components = (dh_component*)malloc(this->componentsList.numComponents * sizeof(dh_component));
             } else {
-                this->componentsList.components = (dh_component*)realloc(this->componentsList.components, this->componentsList.numComponents * sizeof(dh_component));
+                this->componentsList.components = (dh_component*)realloc(this->componentsList.components, 
+                                                                         this->componentsList.numComponents * sizeof(dh_component));
                 if (this->componentsList.components == NULL) {
                     throw new Exception (true, "Allocation error in scanUnits (component)");
                 }
@@ -1128,12 +1138,16 @@ void Dimr::connectLibs (void) {
 
 #if defined (HAVE_CONFIG_H)
         char * lib = new char[strlen (this->componentsList.components[i].library) + 3+3+1];
-        if (strchr (this->componentsList.components[i].library, '/') == NULL && strchr (this->componentsList.components[i].library, '\\') == NULL && strchr (this->componentsList.components[i].library, '.') == NULL) {
+        if (   strchr (this->componentsList.components[i].library, '/' ) == NULL 
+            && strchr (this->componentsList.components[i].library, '\\') == NULL 
+            && strchr (this->componentsList.components[i].library, '.' ) == NULL) {
             sprintf (lib, "lib%s%s", this->componentsList.components[i].library, D3D_PLUGIN_EXT);
         }
 #else
         char * lib = new char[strlen (this->componentsList.components[i].library) + 4+1];
-        if (strchr (this->componentsList.components[i].library, '/') == NULL && strchr (this->componentsList.components[i].library, '\\') == NULL && strchr (this->componentsList.components[i].library, '.') == NULL) {
+        if (   strchr (this->componentsList.components[i].library, '/' ) == NULL 
+            && strchr (this->componentsList.components[i].library, '\\') == NULL 
+            && strchr (this->componentsList.components[i].library, '.' ) == NULL) {
             sprintf (lib, "%s.dll", this->componentsList.components[i].library);
         }
 #endif
@@ -1203,7 +1217,9 @@ void Dimr::connectLibs (void) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetCurrentTimeEntryPoint, lib, GetLastError());
         }
 
-		if (this->componentsList.components[i].type == COMP_TYPE_RTC || this->componentsList.components[i].type == COMP_TYPE_FLOW1D) {
+        if (   this->componentsList.components[i].type == COMP_TYPE_RTC 
+            || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
+            || this->componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
             this->componentsList.components[i].dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);
             if (this->componentsList.components[i].dllSetVar == NULL) {
