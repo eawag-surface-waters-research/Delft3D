@@ -41,7 +41,8 @@ implicit none
 
 !! Conventions
 character(len=6), parameter :: UG_CONV_CF   = 'CF-1.6'      !< Version of CF conventions currently adopted.
-character(len=9), parameter :: UG_CONV_UGRID = 'UGRID-0.9'  !< Version of UGRID conventions currently adopted.
+character(len=9), parameter :: UG_CONV_UGRID = 'UGRID-1.0'  !< Version of UGRID conventions currently adopted.
+character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.8' !< Version of Deltares extension.
 
 !! Meta data
 integer, parameter :: ug_strLenMeta = 100
@@ -228,14 +229,14 @@ function ug_addglobalatts(ncid, meta) result(ierr)
 
    ierr = nf90_put_att(ncid, nf90_global,  'institution', trim(meta%institution))
    ierr = nf90_put_att(ncid, nf90_global,  'references',  trim(meta%references))
-   ierr = nf90_put_att(ncid, nf90_global,  'source',      trim(meta%source)//' '//trim(meta%version)//'. model: '//trim(meta%modelname))
+   ierr = nf90_put_att(ncid, nf90_global,  'source',      trim(meta%source)//' '//trim(meta%version)//'. Model: '//trim(meta%modelname))
 
    call date_and_time(cdate, ctime, czone)
    ierr = nf90_put_att(ncid, nf90_global,  'history', &
       'Created on '//cdate(1:4)//'-'//cdate(5:6)//'-'//cdate(7:8)//'T'//ctime(1:2)//':'//ctime(3:4)//':'//ctime(5:6)//czone(1:5)// &
       ', '//trim(meta%source))
 
-   ierr = nf90_put_att(ncid, nf90_global,  'Conventions', trim(UG_CONV_CF)//' '//trim(UG_CONV_UGRID))
+   ierr = nf90_put_att(ncid, nf90_global,  'Conventions', trim(UG_CONV_CF)//' '//trim(UG_CONV_UGRID)//'/'//trim(UG_CONV_DELTARES))
 
    ! Leave the dataset in the same mode as we got it.
    if (wasInDefine == 0) then
