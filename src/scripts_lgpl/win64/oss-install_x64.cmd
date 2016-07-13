@@ -216,9 +216,10 @@ rem ================
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
     
-    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe          !dest_bin!
-    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll      !dest_bin!
-    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl  !dest_menu!
+    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
+    call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
+    call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll" !dest_bin!
+    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 goto :endproc
 
 

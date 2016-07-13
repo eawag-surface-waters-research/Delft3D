@@ -218,6 +218,7 @@
     <ClInclude Include="include\clock.h" />
     <ClInclude Include="include\component.h" />
     <ClInclude Include="include\dimr.h" />
+    <ClInclude Include="include\dimr_lib_version.h" />
     <ClInclude Include="include\exception.h" />
     <ClInclude Include="include\getopt.h" />
     <ClInclude Include="include\log.h" />
