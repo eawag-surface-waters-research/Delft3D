@@ -320,7 +320,7 @@ function ionc_get_node_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
 end function ionc_get_node_coordinates
 
 
-!> Gets the face-node connectvit table for all faces in the specified mesh.
+!> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
 function ionc_get_face_nodes(ioncid, meshid, face_nodes) result(ierr)
    integer,             intent(in)    :: ioncid  !< The IONC data set id.

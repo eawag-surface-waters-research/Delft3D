@@ -1047,7 +1047,7 @@ end function ug_write_mesh_arrays
 !> Initialized all UGRID-specific meta information present in an open data set.
 function ug_init_dataset(ncid, ug_file) result(ierr)
    integer,         intent(in   ) :: ncid    !< ID of already opened data set.
-   type(t_ug_file), intent(  out) :: ug_file !< UGRID file struct with cached meta information.
+   type(t_ug_file), intent(inout) :: ug_file !< UGRID file struct with cached meta information.
    integer                        :: ierr    !< Result status (UG_NOERR if successful).
    
    integer :: iv, im, nmesh, numvar
@@ -1072,7 +1072,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
       if (.NOT. is_mesh_topo) then
          cycle
       end if
-         im = im + 1
+      im = im + 1
       ierr = nf90_inquire_variable(ncid, iv, name = ug_file%meshnames(im))
       ierr = ug_init_mesh_topology(ncid, iv, ug_file%meshids(im))
       if (ierr /= UG_NOERR) then
