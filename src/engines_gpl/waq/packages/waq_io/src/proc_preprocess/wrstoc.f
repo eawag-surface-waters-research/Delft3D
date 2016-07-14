@@ -261,8 +261,8 @@
       allocate(outputs%names(nrvarn))
       allocate(outputs%stdnames(nrvarn))
       allocate(outputs%pointers(nrvarn))
-      allocate(outputs%units(nrvarm))
-      allocate(outputs%descrs(nrvarm))
+      allocate(outputs%units(nrvarn))
+      allocate(outputs%descrs(nrvarn))
       outputs%cursize  = nrvarn
       outputs%names(1:nrvarn) = outputl%names(1:nrvarn)
       outputs%stdnames(1:nrvarn) = outputl%stdnames(1:nrvarn)
