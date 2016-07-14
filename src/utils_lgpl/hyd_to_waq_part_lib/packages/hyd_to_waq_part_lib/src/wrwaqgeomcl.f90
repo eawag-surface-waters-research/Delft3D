@@ -516,6 +516,7 @@ contains
     meshgeom%edgex => edgex 
     meshgeom%edgey => edgey 
 
+    meshgeom%maxnumfacenodes = 4
     meshgeom%edge_nodes => edge_nodes
     meshgeom%edge_faces => edge_faces
     

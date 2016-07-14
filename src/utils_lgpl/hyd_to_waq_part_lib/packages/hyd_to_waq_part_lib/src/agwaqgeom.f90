@@ -288,6 +288,7 @@ subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, i
     output_mesh_geometry%numNode = output_node_count
     output_mesh_geometry%numEdge = output_edge_count
     output_mesh_geometry%numFace = output_face_count
+    output_mesh_geometry%maxnumfacenodes = max_nodes_per_face
 
     output_mesh_geometry%nodex => output_nodex
     output_mesh_geometry%nodey => output_nodey
