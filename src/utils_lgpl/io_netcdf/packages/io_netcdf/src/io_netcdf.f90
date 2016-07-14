@@ -52,10 +52,22 @@ public :: t_ionc
 !
 ! Subroutines
 !
-! public :: ionc_open
 public :: ionc_inq_conventions
+public :: ionc_adheresto_conventions
+public :: ionc_open
+public :: ionc_close
+public :: ionc_get_mesh_count
+public :: ionc_get_node_count
+public :: ionc_get_edge_count
+public :: ionc_get_face_count
+public :: ionc_get_max_face_nodes
+public :: ionc_get_node_coordinates
+public :: ionc_get_edge_nodes
+public :: ionc_get_face_nodes
+public :: ionc_get_coordinate_system
+public :: ionc_write_geom_ugrid
 
-!private
+private
 
 !
 ! NetCDF conventions support. Based on the conventions used in the file,
@@ -70,7 +82,7 @@ integer, parameter :: IONC_CONV_UGRID = 2   !< Dataset based on UGRID-convention
 integer, parameter :: IONC_CONV_SGRID = 4   !< Dataset based on SGRID-conventions
 integer, parameter :: IONC_CONV_OTHER = -99 !< Dataset based on unknown or unsupported conventions (user should fall back to NetCDF native API calls)
 
-integer, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inquiring attribute values.
+integer, public, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inquiring attribute values.
 
 !
 ! Error statuses
@@ -322,6 +334,18 @@ end function ionc_get_node_coordinates
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
+function ionc_get_edge_nodes(ioncid, meshid, edge_nodes) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer,             intent(  out) :: edge_nodes(:,:) !< Array to the face-node connectivity table.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ug_get_edge_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edge_nodes)   
+
+end function ionc_get_edge_nodes
+
+!> Gets the face-node connectivity table for all faces in the specified mesh.
+!! The output face_nodes array is supposed to be of exact correct size already.
 function ionc_get_face_nodes(ioncid, meshid, face_nodes) result(ierr)
    integer,             intent(in)    :: ioncid  !< The IONC data set id.
    integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
@@ -345,6 +369,16 @@ function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
    !epsg_code = datasets(ioncid)%crs%varvalue
 
 end function ionc_get_coordinate_system
+
+!> Writes a complete mesh geometry
+function ionc_write_geom_ugrid(filename) result(ierr)
+   character(len=*), intent(in)       :: filename !< File name for netCDF dataset to be opened.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   ierr = ug_write_geom_ugrid(filename)
+
+end function ionc_write_geom_ugrid
+
 !
 ! -- Private routines -----------------------------------------------------
 !

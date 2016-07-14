@@ -221,8 +221,8 @@ function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result
 
    call c_f_pointer(c_edge_nodes_ptr, edge_nodes, (/ 2 , nedge /))
    
-   ierr = ug_get_edge_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edge_nodes)   
-   
+   ierr = ionc_get_edge_nodes(ioncid, meshid, edge_nodes)
+
 end function ionc_get_edge_nodes_dll
 
 !> Gets the face-node connectvit table for all faces in the specified mesh.
@@ -240,7 +240,7 @@ function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfa
 
    call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
    
-   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)   
+   ierr = ionc_get_face_nodes(ioncid, meshid, face_nodes)
    
 end function ionc_get_face_nodes_dll
 
@@ -253,7 +253,7 @@ function ionc_write_geom_ugrid_dll(filename) result(ierr) bind(C, name="ionc_wri
   
    ! Store the name
    file = char_array_to_string(filename, strlen(filename))
-   ierr = ug_write_geom_ugrid(file)
+   ierr = ionc_write_geom_ugrid(file)
 
 end function ionc_write_geom_ugrid_dll
 

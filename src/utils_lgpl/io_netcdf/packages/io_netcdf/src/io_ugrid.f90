@@ -1250,7 +1250,7 @@ function ug_get_mesh_count(ncid, numMesh) result(ierr)
    logical :: is_mesh_topo
 
    ierr = nf90_inquire(ncid, nVariables = numVar)
-
+  
    numMesh = 0
    do i=1,numVar
       is_mesh_topo = ug_is_mesh_topology(ncid, i)
