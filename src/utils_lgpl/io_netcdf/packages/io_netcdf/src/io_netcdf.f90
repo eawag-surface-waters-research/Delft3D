@@ -52,8 +52,10 @@ public :: t_ionc
 !
 ! Subroutines
 !
+public :: ionc_create
 public :: ionc_inq_conventions
 public :: ionc_adheresto_conventions
+public :: ionc_add_global_attributes
 public :: ionc_open
 public :: ionc_close
 public :: ionc_get_mesh_count
@@ -66,6 +68,7 @@ public :: ionc_get_edge_nodes
 public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
 public :: ionc_write_geom_ugrid
+public :: ionc_write_mesh_struct
 
 private
 
@@ -183,7 +186,55 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
       ierr = IONC_ENOPEN
       goto 999
    end if
+
+   ierr = set_datasets(ncid, netCDFFile, ioncid)
+
+   if (present(iconvtype)) then
+      iconvtype = datasets(ioncid)%iconvtype
+   end if
    
+999 continue
+    
+end function ionc_open
+
+!> Tries to open a NetCDF file and initialize based on its specified conventions.
+function ionc_create(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
+   character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
+   integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
+   integer,           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer,           intent(in   ) :: iconvtype !< (optional) The detected conventions in the file.
+   integer, optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
+   integer                          :: ierr      !< Result status (IONC_NOERR if successful).
+
+   integer :: ncid, istat
+
+   if (present(chunksize)) then
+      ierr = nf90_create(netCDFFile, mode, ncid, chunksize)
+   else
+      ierr = nf90_create(netCDFFile, mode, ncid)
+   end if
+
+   if (ierr /= nf90_noerr) then
+      ierr = IONC_ENOPEN
+      goto 999
+   end if
+
+   ierr = set_datasets(ncid, netCDFFile, ioncid, iconvtype)
+   
+999 continue
+   
+end function ionc_create
+
+
+function set_datasets(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
+   character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
+   integer, intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer, intent(in) :: ncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer, optional, intent(in) :: iconvtype    !<(optional) The detected conventions in the file..
+   integer             :: ierr      !< Result status (IONC_NOERR if successful).
+
+   integer :: istat
+
    call realloc(datasets, ndatasets+1, keepExisting=.true., stat=istat) ! TODO: AvD: Add buffered growth here.
    if (istat /= 0) then
       ierr = IONC_ENOMEM
@@ -193,7 +244,11 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
    ndatasets = ndatasets + 1
    ioncid = ndatasets
 
-   ierr = detect_conventions(ioncid)
+   if (.not. present(iconvtype)) then
+      ierr = detect_conventions(ioncid)
+   else 
+      datasets(ioncid)%iconvtype = iconvtype
+   endif
 
    select case (datasets(ioncid)%iconvtype)
    !
@@ -211,10 +266,6 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
       ! We accept file with no specific conventions.
    end select
 
-   if (present(iconvtype)) then
-      iconvtype = datasets(ioncid)%iconvtype
-   end if
-
    ierr = detect_coordinate_system(ioncid)
 
    ! Successful
@@ -223,7 +274,7 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
 999 continue
    ! Some error (status was set earlier)
 
-end function ionc_open
+end function set_datasets
 
 
 !> Tries to close an open io_netcdf data set.
@@ -379,6 +430,28 @@ function ionc_write_geom_ugrid(filename) result(ierr)
 
 end function ionc_write_geom_ugrid
 
+
+!> Gets the coordinate system from a data set. 
+function ionc_add_global_attributes(ioncid, meta) result(ierr)
+   integer,           intent(in) :: ioncid  !< The IONC data set id.
+   type (t_ug_meta), intent (in) :: meta
+   integer                       :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ug_addglobalatts(datasets(ioncid)%ncid, meta)
+
+end function ionc_add_global_attributes
+
+
+function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   type(t_ug_meshids),  intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, meshgeom)
+
+end function ionc_write_mesh_struct
+
 !
 ! -- Private routines -----------------------------------------------------
 !
@@ -474,6 +547,7 @@ subroutine realloc(arr, uindex, lindex, stat, keepExisting)
    type(t_ionc), allocatable :: b(:)
    integer        :: uind, lind, muind, mlind, lindex_
 
+   integer        :: i
    integer        :: localErr
    logical        :: docopy
    logical        :: equalSize
@@ -508,13 +582,15 @@ subroutine realloc(arr, uindex, lindex, stat, keepExisting)
       endif
       if (.not.equalSize) deallocate(arr, stat = localErr)
    endif
-   if (.not.allocated(arr) .and. localErr==0) then
-       allocate(arr(lindex_:uindex), stat = localErr)
-   endif
-   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
-      arr(mlind:muind) = b(mlind:muind)
-      deallocate(b, stat = localErr)
-   endif
+    if (.not.allocated(arr) .and. localErr==0) then
+        allocate(arr(lindex_:uindex), stat = localErr)
+    endif
+    if (allocated(b) .and. localErr==0) then
+        if (size(b)>0) then
+            arr(mlind:muind) = b(mlind:muind)
+        endif
+        deallocate(b, stat = localErr)
+    endif
 999 continue
    if (present(stat)) stat = localErr
 
