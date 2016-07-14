@@ -95,11 +95,12 @@ enum {
    };
 
 enum {
-   COMP_TYPE_FM     = 1, // Used to identify the type of a Component
-   COMP_TYPE_RTC    = 2,
-   COMP_TYPE_WAVE   = 3,
-   COMP_TYPE_FLOW1D = 4,
-   COMP_TYPE_WANDA  = 5
+   COMP_TYPE_FM        = 1, // Used to identify the type of a Component
+   COMP_TYPE_RTC       = 2,
+   COMP_TYPE_WAVE      = 3,
+   COMP_TYPE_FLOW1D    = 4,
+   COMP_TYPE_WANDA     = 5,
+   COMP_TYPE_FLOW2D3D  = 6
    };
 
 enum {
