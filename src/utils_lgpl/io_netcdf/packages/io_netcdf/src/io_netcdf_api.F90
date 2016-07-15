@@ -53,10 +53,30 @@ contains
 subroutine main() bind(C, name="main")
    !DEC$ ATTRIBUTES DLLEXPORT :: main
    ! Somehow intel fortran compiler expects a main routine in the dll, it is required since interactor is used (and win calls)
-implicit none
- 
-
+    implicit none
 end subroutine main
+
+
+!> Tries to create a NetCDF file and initialize based on its specified conventions.
+function ionc_create_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_create")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_dll
+  use iso_c_binding
+   character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
+   integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
+   integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
+!   integer(kind=c_int), optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
+   integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
+
+  character(len=MAXSTRLEN) :: path
+  !character(len=strlen(c_path)) :: nc_file
+  
+  ! Store the name
+  path = char_array_to_string(c_path, strlen(c_path))
+  
+  ierr = ionc_create(path, mode, ioncid, iconvtype)
+end function ionc_create_dll
+
 
 !> Checks whether the specified data set adheres to a specific set of conventions.
 !! Datasets may adhere to multiple conventions at the same time, so use this method
