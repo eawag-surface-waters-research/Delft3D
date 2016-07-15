@@ -45,7 +45,7 @@ subroutine initrtc(gdp)
     integer                       , pointer :: ifirstrtc
     integer                       , pointer :: stacnt
     integer                       , pointer :: rtcmod
-    logical                       , pointer :: rtcact
+    integer                       , pointer :: rtcact
     character(256)                , pointer :: filrtc
 !
 !! executable statements -------------------------------------------------------
@@ -64,7 +64,7 @@ subroutine initrtc(gdp)
     nullify(gdp%gdrtc%namrtcsta)
     nullify(gdp%gdrtc%zrtcsta)
     !
-    rtcact = .false.
+    rtcact = noRTC
     !
     filrtc = ' '
 end subroutine initrtc

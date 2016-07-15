@@ -453,7 +453,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer(pntrsize)                    , pointer :: tprofu
     integer(pntrsize)                    , pointer :: ubnd
     integer(pntrsize), dimension(:, :)   , pointer :: nprptr
-    logical                              , pointer :: rtcact
+    integer                              , pointer :: rtcact
     real(fp)      , dimension(:)         , pointer :: rhosol
     integer                              , pointer :: ifirst
     integer                              , pointer :: nubnd
@@ -1013,7 +1013,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     ! Some of the new features are not yet supported in ZMODEL
     ! (see routine CHKZMOD)!!!
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_get((nst+1)*dtsec, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (kc > 0 .or. nrcmp > 0) then
@@ -2082,7 +2082,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        call timer_stop(timer_f0isf1, gdp)
     endif
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                        & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
                        & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &

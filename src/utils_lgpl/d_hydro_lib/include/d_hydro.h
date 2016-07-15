@@ -123,6 +123,10 @@ class DeltaresHydro {
             char *  envp []
             );
     public:
+        DeltaresHydro (
+            void
+            );
+    public:
         ~DeltaresHydro (
             void
             );

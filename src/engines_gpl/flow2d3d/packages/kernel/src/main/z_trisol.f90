@@ -468,7 +468,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: tprofu
     integer                              , pointer :: nrcmp
 
-    logical                              , pointer :: rtcact
+    integer                              , pointer :: rtcact
     real(fp)      , dimension(:)         , pointer :: rhosol
     integer                              , pointer :: ifirst
     integer                              , pointer :: nubnd
@@ -1036,7 +1036,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     ! Some of the new features are not yet supported in ZMODEL
     ! (see routine CHKZMOD)!!!
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_get(((nst*2)+1) * hdt, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (kc > 0 .or. nrcmp > 0) then
@@ -1871,7 +1871,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call timer_stop(timer_f0isf1, gdp)
     endif
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                        & r(sig)    ,r(s1)     ,d(dps)    ,r(r1)     , &
                        & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &
@@ -1902,7 +1902,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     !
     ! Communicate with RTC for second half time step
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_get(((nst*2)+2) * hdt, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (wind) then
@@ -2824,7 +2824,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call timer_stop(timer_f0isf1, gdp)
     endif
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                        & r(sig)    ,r(s1)     ,d(dps)    ,r(r1)     , &
                        & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &

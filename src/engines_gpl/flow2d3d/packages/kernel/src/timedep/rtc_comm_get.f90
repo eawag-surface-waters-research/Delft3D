@@ -51,7 +51,7 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,qsrcrt    ,nsrc     ,gd
     integer                       , pointer :: parget_offset
     integer                       , pointer :: rtc_domainnr
     integer                       , pointer :: rtc_ndomains
-    logical                       , pointer :: rtcact
+    integer                       , pointer :: rtcact
     logical                       , pointer :: anyRTCtoFLOW
     integer                       , pointer :: rtcmod
     integer                       , pointer :: stacnt
@@ -89,6 +89,19 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,qsrcrt    ,nsrc     ,gd
     !
     ! RTC  -> FLOW : get steering parameters for current date and time
     !
+    if (rtcact == RTCviaBMI) then
+       do id = 1, nsluv
+          if (comparereal(cbuvrt(2,id), -998.0_fp) == 1) then
+             ! value set via BMI
+             cbuvrt(1,id) = 0.0_fp
+          endif
+       enddo
+       !
+       ! For BMI exchange, we are finished here
+       !
+       return
+    endif
+    !
     call timer_start(timer_wait, gdp)
     !
     ! get barrier levels
@@ -122,7 +135,7 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,qsrcrt    ,nsrc     ,gd
     call timer_stop(timer_wait, gdp)
     !
     if (rtcsta < 0) then
-       rtcact = .false.
+       rtcact = noRTC
        write (*, '(a)') ' '
        write (*, '(a)') ' Stop signal from RTC '
        call prterr(lundia, 'P004', 'Stop signal from RTC ')

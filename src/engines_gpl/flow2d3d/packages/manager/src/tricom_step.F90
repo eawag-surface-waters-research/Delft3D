@@ -323,7 +323,7 @@ subroutine tricom_step(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: namsrc
     character(256)                      , pointer :: restid
     integer                             , pointer :: rtcmod
-    logical                             , pointer :: rtcact
+    integer                             , pointer :: rtcact
     integer                             , pointer :: rtc_domainnr
     character(256)                      , pointer :: sbkConfigFile
     logical                             , pointer :: tstprt

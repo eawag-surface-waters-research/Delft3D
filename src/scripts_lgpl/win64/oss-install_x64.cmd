@@ -219,6 +219,9 @@ rem ================
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll" !dest_bin!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"             !dest_bin!
+    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"               !dest_bin!
+    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"               !dest_bin!
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 goto :endproc
 

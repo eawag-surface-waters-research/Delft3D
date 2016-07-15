@@ -300,7 +300,7 @@ subroutine tricom_finish(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: namsrc
     character(256)                      , pointer :: restid
     integer                             , pointer :: rtcmod
-    logical                             , pointer :: rtcact
+    integer                             , pointer :: rtcact
     integer                             , pointer :: rtc_domainnr
     character(256)                      , pointer :: sbkConfigFile
     logical                             , pointer :: tstprt
@@ -828,13 +828,13 @@ subroutine tricom_finish(olv_handle, gdp)
     !
     ! Close Communication with RTC if active after normal end
     !
-    if (rtcact .and. rtcmod == dataFromRTCToFLOW .and. rtc_domainnr == 1) then
+    if (rtcact==RTCmodule .and. rtcmod==dataFromRTCToFLOW .and. rtc_domainnr==1) then
        write(*,*) 'Sending close signal to  RTC ...'
        call timer_start(timer_wait, gdp)
        call syncflowrtc_close
        call timer_stop(timer_wait, gdp)
        write(*,*) '... continue'
-       rtcact = .false.
+       rtcact = noRTC
     endif
     !
     ! Close Communication with Couple if active after normal end    

@@ -193,7 +193,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     logical                              , pointer :: bubble
     logical                              , pointer :: lfsdu
     logical , dimension(:)               , pointer :: flbub
-    logical                              , pointer :: rtcact
+    integer                              , pointer :: rtcact
     integer(pntrsize)                    , pointer :: alfas
     integer(pntrsize)                    , pointer :: alpha
     integer(pntrsize)                    , pointer :: ampbc
@@ -1238,7 +1238,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     ! Communicate with RTC for first half time step
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_get(((nst*2)+1) * hdt, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (kc > 0 .or. nrcmp > 0) then
@@ -2241,7 +2241,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call timer_stop(timer_f0isf1, gdp)
     endif
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                        & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
                        & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &
@@ -2308,7 +2308,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     ! Communicate with RTC for second half time step
     !
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_get(((nst*2)+2) * hdt, r(cbuvrt), nsluv, r(qsrcrt) , nsrc, gdp)
     endif
     if (wind) then
@@ -3292,7 +3292,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! f0isf1 is now called at the START of the routine trisol.
        !
     endif
-    if (rtcact) then
+    if (rtcact /= noRTC) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                        & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
                        & nsluv     ,r(cbuv)   ,nsrc      ,r(disch)  , &

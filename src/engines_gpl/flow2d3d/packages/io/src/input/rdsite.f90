@@ -64,6 +64,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)       , dimension(:,:)  , pointer :: zrtcsta
     integer                          , pointer :: stacnt
     integer                          , pointer :: rtcmod
+    integer                          , pointer :: rtcact
     integer        , dimension(:,:)  , pointer :: mnrtcsta
     character(20)  , dimension(:)    , pointer :: namrtcsta
     character(256)                   , pointer :: filrtc
@@ -171,6 +172,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     zrtcsta    => gdp%gdrtc%zrtcsta
     stacnt     => gdp%gdrtc%stacnt
     rtcmod     => gdp%gdrtc%rtcmod
+    rtcact     => gdp%gdrtc%rtcact
     mnrtcsta   => gdp%gdrtc%mnrtcsta
     namrtcsta  => gdp%gdrtc%namrtcsta
     filrtc     => gdp%gdrtc%filrtc
@@ -1034,6 +1036,18 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        deallocate(nsd,ctemp,itmp1,itmp2,rtemp, stat=istat)
     endif
     !
+    rtcact = noRTC
+    call prop_get_string(gdp%mdfile_ptr, '*', 'RTCact', chulp)
+    call small(chulp, 999)
+    if (chulp == "bmi") then
+       rtcact = RTCviaBMI
+       write(lundia,'(a)') '*** MESSAGE Real Time Control via BMI interface'
+       ! Array cbuvrt must be set to -1 to flag that valid values are not set yet via BMI
+    elseif (chulp == "rtcmodule") then
+       rtcact = RTCmodule
+       write(lundia,'(a)') '*** MESSAGE Real Time Control via online RTC module'
+    endif
+    !
     !
     ! Read info of RTC input station from attribute file or md-file
     ! Initialize file name
@@ -1136,7 +1150,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! Create trigger file for TRISIM to indicate RTC running
     !
-    if (rtcmod /= noRTC) then
+    if (rtcmod/=noRTC .and. rtcact/=RTCviaBMI) then
        luntri = newlun(gdp)
        filsim = 'TMP_SYNC.RUN'
        inquire (file = filsim, exist = lexist)

@@ -55,6 +55,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     integer                       , pointer :: rtc_domainnr
     integer                       , pointer :: rtc_ndomains
     integer                       , pointer :: rtcmod
+    integer                       , pointer :: rtcact
     logical                       , pointer :: anyFLOWtoRTC
     real(fp)     , dimension(:)   , pointer :: s1rtcsta
     integer                       , pointer :: stacnt
@@ -99,6 +100,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     rtc_domainnr   => gdp%gdrtc%rtc_domainnr
     rtc_ndomains   => gdp%gdrtc%rtc_ndomains
     rtcmod         => gdp%gdrtc%rtcmod
+    rtcact         => gdp%gdrtc%rtcact
     anyFLOWtoRTC   => gdp%gdrtc%anyFLOWtoRTC
     s1rtcsta       => gdp%gdrtc%s1rtcsta
     stacnt         => gdp%gdrtc%stacnt
@@ -116,6 +118,8 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     if (anyFLOWtoRTC) then
        call zrtc(gdp%d%mlb, gdp%d%mub, gdp%d%nlb, gdp%d%nub, kfs, kfsmin, &
                & kfsmax, sig, zk, s1, dps, kmax, gdp)
+    endif
+    if (rtcact == RTCmodule) then
        !
        ! Collect parameters for this domain
        !
@@ -156,5 +160,4 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
        endif
        call timer_stop(timer_wait, gdp)
     endif
-
 end subroutine rtc_comm_put

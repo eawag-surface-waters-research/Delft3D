@@ -196,6 +196,7 @@ subroutine tricom_init(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: ampbc
     integer(pntrsize)                   , pointer :: c
     integer(pntrsize)                   , pointer :: cbuv
+    integer(pntrsize)                   , pointer :: cbuvrt
     integer(pntrsize)                   , pointer :: cgc
     integer(pntrsize)                   , pointer :: ctr
     integer(pntrsize)                   , pointer :: dircom
@@ -322,7 +323,7 @@ subroutine tricom_init(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: namsrc
     character(256)                      , pointer :: restid
     integer                             , pointer :: rtcmod
-    logical                             , pointer :: rtcact
+    integer                             , pointer :: rtcact
     integer                             , pointer :: rtc_domainnr
     character(256)                      , pointer :: sbkConfigFile
     logical                             , pointer :: tstprt
@@ -580,6 +581,7 @@ subroutine tricom_init(olv_handle, gdp)
     ampbc               => gdp%gdr_i_ch%ampbc
     c                   => gdp%gdr_i_ch%c
     cbuv                => gdp%gdr_i_ch%cbuv
+    cbuvrt              => gdp%gdr_i_ch%cbuvrt
     cgc                 => gdp%gdr_i_ch%cgc
     ctr                 => gdp%gdr_i_ch%ctr
     dircom              => gdp%gdr_i_ch%dircom
@@ -788,7 +790,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     maxmn     = max(mmax, nmax)
     !
-    rtcact    = .false.
+    rtcact    = noRTC
     lrdok     = .false.
     !
     ! Define pointers
@@ -1582,7 +1584,8 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! Initialize RTC-communication
     !
-    call rtc_comm_init(error     ,ch(nambar),ch(namcon),ch(namsrc),gdp)
+    call rtc_comm_init(error     ,ch(nambar),ch(namcon),ch(namsrc), &
+                     & r(cbuvrt) ,gdp)
     if (error) goto 9998
     call rtc_comm_put (i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
                      & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &

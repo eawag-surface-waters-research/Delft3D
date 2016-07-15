@@ -28,6 +28,9 @@
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
 integer, parameter :: noRTC              =  0    ! No coupling with rtc module
+integer, parameter :: RTCmodule          =  1    ! Coupling with rtc module
+integer, parameter :: RTCviaBMI          =  2    ! Real Time Control via BMI interface
+!
 integer, parameter :: dataFromRTCToFLOW  =  0    ! Coupling bit: RTC sends barrier heights to FLOW
 integer, parameter :: dataFromFLOWToRTC  =  1    ! Coupling bit: FLOW sends data to RTC
 !   
@@ -41,6 +44,10 @@ type sv_rtc
     !
     integer :: ifirstrtc  
     integer :: stacnt         ! number of stations to be communicated with RTC
+    integer :: rtcact         ! Online Real Time Control is active
+	                          ! = noRTC              : Real Time Control is not active
+							  ! = RTCmodule          : Real Time Control is done via online coupling with the RTC module
+							  ! = RTCviaBMI          : Real Time Control is done via the BMI interface
     integer :: rtcmod         ! Online Real Time Control together with Flow
                               ! = noRTC              : No coupling with RTC
                               ! = dataFromRTCToFLOW  : Coupling with time to RTC and barrier height to FLOW
@@ -67,7 +74,6 @@ type sv_rtc
     ! 
     ! logicals
     !
-    logical        :: rtcact  ! Online Real Time Control is active (initialisation has been done)
     logical        :: anyRTCtoFLOW ! Flag to verify whether any domain should receive data from RTC
     logical        :: anyFLOWtoRTC ! Flag to verify whether any domain should send data to RTC
     !

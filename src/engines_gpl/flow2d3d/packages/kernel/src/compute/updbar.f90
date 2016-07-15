@@ -53,6 +53,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
     !
     logical                       , pointer :: zmodel
     integer                       , pointer :: rtcmod
+    integer                       , pointer :: rtcact
     integer                       , pointer :: lundia
 !
 ! Global variables
@@ -120,6 +121,7 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
 !
     zmodel     => gdp%gdprocs%zmodel
     rtcmod     => gdp%gdrtc%rtcmod
+    rtcact     => gdp%gdrtc%rtcact
     lundia     => gdp%gdinout%lundia
     !
     do ibar = 1, nsluv
@@ -141,14 +143,21 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
        !
        if (btest(rtcmod,dataFromRTCToFLOW)) then
           !
-          ! barriers are updated by RTC
+          ! barriers are updated by RTC or via BMI
           !
           if (comparereal(cbuvrt(1,ibar),0.0_fp) == -1) then
-             write(errmsg,'(a,i0)') 'No valid value obtained from RTC for barrier number ', ibar
-             call prterr(lundia, 'P004', trim(errmsg))
-             call d3stop(1,gdp)
+             !
+             ! BMI interface: It's     allowed that no values are specified
+             ! RTCmodule    : It's NOT allowed that no values are specified
+             !
+             if (rtcact == RTCmodule) then
+                write(errmsg,'(a,i0)') 'No valid value obtained from RTC for barrier number ', ibar
+                call prterr(lundia, 'P004', trim(errmsg))
+                call d3stop(1,gdp)
+             endif
+          else
+             cbuv(1, ibar) = cbuvrt(2, ibar)
           endif
-          cbuv(1, ibar) = cbuvrt(2, ibar)
        else
           !
           ! Use constant barrier height as read from file

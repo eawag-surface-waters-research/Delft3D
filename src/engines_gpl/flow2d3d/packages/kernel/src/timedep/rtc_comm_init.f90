@@ -1,4 +1,5 @@
-subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
+subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    , &
+                       & cbuvrt    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -66,7 +67,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
     integer                       , pointer :: parput_offset
     integer                       , pointer :: rtc_domainnr
     integer                       , pointer :: rtc_ndomains
-    logical                       , pointer :: rtcact
+    integer                       , pointer :: rtcact
     logical                       , pointer :: anyRTCtoFLOW
     logical                       , pointer :: anyFLOWtoRTC
     integer                       , pointer :: rtcmod
@@ -84,11 +85,11 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
 !
 ! Global variables
 !
-    logical                                                                                                   :: error  ! Flag=TRUE if an error is encountered 
-    character(20) , dimension(gdp%d%nsluv)                                                                    :: nambar ! Names of barriers
-    character(20) , dimension(gdp%d%lstsci)                                                                   :: namcon ! Names of the constituents
-    character(20) , dimension(gdp%d%nsrc)                                                                     :: namsrc ! Names of discharge points
-
+    logical                                              :: error  ! Flag=TRUE if an error is encountered 
+    character(20) , dimension(gdp%d%nsluv)               :: nambar ! Names of barriers
+    character(20) , dimension(gdp%d%lstsci)              :: namcon ! Names of the constituents
+    character(20) , dimension(gdp%d%nsrc)                :: namsrc ! Names of discharge points
+    real(fp)      , dimension(2,gdp%d%nsluv)             :: cbuvrt ! Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -142,6 +143,20 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
     tparput_names  => gdp%gdrtc%tparput_names
     zrtcsta        => gdp%gdrtc%zrtcsta
     !
+    cbuvrt = -999.0_fp
+    if (rtcact == RTCviaBMI) then
+      anyRTCtoFLOW = .true.
+      anyFLOWtoRTC = .true.
+      if (numdomains > 1) then
+         !
+         ! Notify the rtc iterator that this subdomain
+         ! is not interested in rtc communication
+         ! If numdomains=1, there is no rtc iterator
+         !
+         call rtcnocommunication()
+      endif
+      return
+    endif
     if (rtcmod /= noRTC) then
       !
       call timer_start(timer_wait, gdp)
@@ -271,10 +286,10 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    ,gdp       )
       endif
       call timer_stop(timer_wait, gdp)
       if (error) then
-         rtcact = .false.
+         rtcact = noRTC
          call prterr(lundia    ,'J020'    ,'SyncFlowRtc_Init'   )
       else
-         rtcact = .true.
+         rtcact = RTCmodule
       endif
     else
       anyRTCtoFLOW = .false.

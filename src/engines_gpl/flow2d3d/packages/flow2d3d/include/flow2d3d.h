@@ -66,7 +66,65 @@ extern "C" {
         int *   contextID,
         int *   fsmFlags,
         const char *  runID,
+        int *   initOnly,
+        void *  gdp,
         size_t  runIDLen
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_UPDATE (
+        double  tstart,
+        void *  gdp
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_FINALIZE (
+        void *  gdp
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_GET_START_TIME (
+        double *   tstart,
+        void *  gdp
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_GET_END_TIME (
+        double *   tend,
+        void *  gdp
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_GET_TIME_STEP (
+        double *   tstep,
+        void *  gdp
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_GET_CURRENT_TIME (
+        double *   tcurrent,
+        void *  gdp
+        );
+    }
+
+extern "C" {
+    void STDCALL
+    TRISIM_GET_VAR (
+        const char * key,
+        void *       ref,
+        void *       gdp
         );
     }
 
@@ -92,6 +150,19 @@ extern "C" {
 #   define DllExport
 #endif
 
+// BMI interface
+extern "C" {
+    DllExport void set_logger(Log *);
+    DllExport int  initialize(char *);
+    DllExport void update    (double);
+    DllExport void finalize  (void);
+    DllExport void get_start_time (double *);
+    DllExport void get_end_time (double *);
+    DllExport void get_time_step (double *);
+    DllExport void get_current_time (double *);
+    DllExport void get_var (const char *, void *);
+    DllExport void set_var (const char *, void *);
+}
 
 
 extern "C" {
@@ -111,6 +182,11 @@ class Flow2D3D : public Component {
             DeltaresHydro * DHI
             );
 
+        Flow2D3D (
+            DeltaresHydro * DHI,
+            char          * configfile
+            );
+
         ~Flow2D3D (
             void
             );
@@ -128,6 +204,7 @@ class Flow2D3D : public Component {
         FlowOL *    flowol;         // Flow online (via DelftOnline)
         DD *        dd;             // domain decomposition object
         int         esm_flags;
+        void *      gdp;
 
     };
 
@@ -136,7 +213,9 @@ class Flow2D3D : public Component {
 
 
 #ifdef FLOW2D3D_MAIN
-    Flow2D3D * FLOW2D3D;    // global pointer to single object instance
+    DeltaresHydro * DH       = NULL;
+    Flow2D3D      * FLOW2D3D = NULL;    // global pointer to single object instance
 #else
+    extern DeltaresHydro * DH;
     extern Flow2D3D * FLOW2D3D;
 #endif
