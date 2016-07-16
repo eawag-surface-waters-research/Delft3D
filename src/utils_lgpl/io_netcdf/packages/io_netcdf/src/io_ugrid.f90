@@ -753,10 +753,10 @@ end function ug_def_var
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function accepts the mesh geometry derived type as input, for the arrays-based function, see ug_write_mesh_arrays
 function ug_write_mesh_struct(ncid, meshids, meshgeom) result(ierr)
-   integer,             intent(in) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
+   integer,             intent(in   ) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_meshids),  intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
-   type(t_ug_meshgeom), intent(in) :: meshgeom !< The complete mesh geometry in a single struct.
-   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   type(t_ug_meshgeom), intent(in   ) :: meshgeom !< The complete mesh geometry in a single struct.
+   integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
                            meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &

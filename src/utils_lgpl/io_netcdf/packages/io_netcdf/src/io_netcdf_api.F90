@@ -48,11 +48,14 @@ use io_netcdf
 use iso_c_binding
 implicit none
 
+!-------------------------------------------------------------------------------
 contains
+!-------------------------------------------------------------------------------
 
+!> Somehow intel fortran compiler expects a main routine in the dll, 
+!> it is required since interactor is used (and win calls)
 subroutine main() bind(C, name="main")
    !DEC$ ATTRIBUTES DLLEXPORT :: main
-   ! Somehow intel fortran compiler expects a main routine in the dll, it is required since interactor is used (and win calls)
     implicit none
 end subroutine main
 
@@ -60,22 +63,30 @@ end subroutine main
 !> Tries to create a NetCDF file and initialize based on its specified conventions.
 function ionc_create_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_create")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_dll
-  use iso_c_binding
-   character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
-   integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
-   integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-   integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
-!   integer(kind=c_int), optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
-   integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
+    character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
+    integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
+    integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+    integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
+    integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
 
-  character(len=MAXSTRLEN) :: path
-  !character(len=strlen(c_path)) :: nc_file
-  
-  ! Store the name
-  path = char_array_to_string(c_path, strlen(c_path))
-  
-  ierr = ionc_create(path, mode, ioncid, iconvtype)
+    character(len=MAXSTRLEN) :: path
+
+    ! Store the name
+    path = char_array_to_string(c_path, strlen(c_path))
+
+    ierr = ionc_create(path, mode, ioncid, iconvtype)
 end function ionc_create_dll
+
+
+!> Inquire the NetCDF conventions used in the dataset.
+function ionc_inq_conventions_dll(ioncid, iconvtype) result(ierr) bind(C, name="ionc_inq_conventions")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_conventions_dll
+   integer(kind=c_int), intent(in)  :: ioncid    !< The IONC data set id.
+   integer(kind=c_int), intent(out) :: iconvtype !< The NetCDF conventions type of the dataset.
+   integer(kind=c_int)              :: ierr      !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_inq_conventions(ioncid, iconvtype)
+end function ionc_inq_conventions_dll
 
 
 !> Checks whether the specified data set adheres to a specific set of conventions.
@@ -88,20 +99,7 @@ function ionc_adheresto_conventions_dll(ioncid, iconvtype) result(does_adhere) b
    logical(kind=c_bool)             :: does_adhere !< Whether or not the file adheres to the specified conventions.
 
    does_adhere = ionc_adheresto_conventions(ioncid, iconvtype)
-
 end function ionc_adheresto_conventions_dll
-
-
-!> Inquire the NetCDF conventions used in the dataset.
-function ionc_inq_conventions_dll(ioncid, iconvtype) result(ierr) bind(C, name="ionc_inq_conventions")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_conventions_dll
-   integer(kind=c_int), intent(in)  :: ioncid    !< The IONC data set id.
-   integer(kind=c_int), intent(out) :: iconvtype !< The NetCDF conventions type of the dataset.
-   integer(kind=c_int)              :: ierr      !< Result status, ionc_noerr if successful.
-
-   ierr = ionc_inq_conventions(ioncid, iconvtype)
-
-end function ionc_inq_conventions_dll
 
 
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
@@ -119,15 +117,9 @@ function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, nam
   !character(len=strlen(c_path)) :: nc_file
   
   ! Store the name
-  !nc_file = char_array_to_string(c_path, strlen(c_path))
   path = char_array_to_string(c_path, strlen(c_path))
 
-   ! TODO: AvD: Handle string length
-  !path = char_array_to_string(c_path)
-  
-  !ierr = ionc_open(nc_file, mode, ioncid, iconvtype)
   ierr = ionc_open(path, mode, ioncid, iconvtype)
-
 end function ionc_open_dll
 
 
@@ -141,10 +133,6 @@ function ionc_close_dll(ioncid) result(ierr) bind(C, name="ionc_close")
 end function ionc_close_dll
 
 
-!
-! UGRID specifics:
-!
-
 !> Gets the number of mesh from a data set.
 function ionc_get_mesh_count_dll(ioncid, nmesh) result(ierr) bind(C, name="ionc_get_mesh_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_count_dll
@@ -153,7 +141,6 @@ function ionc_get_mesh_count_dll(ioncid, nmesh) result(ierr) bind(C, name="ionc_
    integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
 
    ierr = ionc_get_mesh_count(ioncid, nmesh)
-
 end function ionc_get_mesh_count_dll
 
 
@@ -166,7 +153,6 @@ function ionc_get_node_count_dll(ioncid, meshid, nnode) result(ierr) bind(C, nam
    integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
 
    ierr = ionc_get_node_count(ioncid, meshid, nnode)
-
 end function ionc_get_node_count_dll
 
 
@@ -179,7 +165,6 @@ function ionc_get_edge_count_dll(ioncid, meshid, nedge) result(ierr) bind(C, nam
    integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
 
    ierr = ionc_get_edge_count(ioncid, meshid, nedge)
-
 end function ionc_get_edge_count_dll
 
 
@@ -192,7 +177,6 @@ function ionc_get_face_count_dll(ioncid, meshid, nface) result(ierr) bind(C, nam
    integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
 
    ierr = ionc_get_face_count(ioncid, meshid, nface)
-
 end function ionc_get_face_count_dll
 
 
@@ -205,7 +189,6 @@ function ionc_get_max_face_nodes_dll(ioncid, meshid, nmaxfacenodes) result(ierr)
    integer(kind=c_int)                            :: ierr          !< Result status, ionc_noerr if successful.
 
    ierr = ionc_get_max_face_nodes(ioncid, meshid, nmaxfacenodes)
-
 end function ionc_get_max_face_nodes_dll
 
 
@@ -225,7 +208,6 @@ function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) re
    call c_f_pointer(c_yptr, yptr, (/ nnode /))
    
    ierr = ionc_get_node_coordinates(ioncid, meshid, xptr, yptr)
-   
 end function ionc_get_node_coordinates_dll
 
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
@@ -242,7 +224,6 @@ function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result
    call c_f_pointer(c_edge_nodes_ptr, edge_nodes, (/ 2 , nedge /))
    
    ierr = ionc_get_edge_nodes(ioncid, meshid, edge_nodes)
-
 end function ionc_get_edge_nodes_dll
 
 !> Gets the face-node connectvit table for all faces in the specified mesh.
@@ -261,8 +242,19 @@ function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfa
    call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
    
    ierr = ionc_get_face_nodes(ioncid, meshid, face_nodes)
-   
 end function ionc_get_face_nodes_dll
+
+
+!> Gets the epsg code of coordinate system from a data set.
+function ionc_get_coordinate_system_dll(ioncid, epsg) result(ierr) bind(C, name="ionc_get_coordinate_system")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_coordinate_system_dll
+   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int),             intent(  out) :: epsg    !< Number of epsg code.
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
+     
+   ierr = ionc_get_coordinate_system(ioncid, epsg)
+end function ionc_get_coordinate_system_dll
+
 
 !> Writes a complete mesh geometry
 function ionc_write_geom_ugrid_dll(filename) result(ierr) bind(C, name="ionc_write_geom_ugrid")
@@ -274,21 +266,36 @@ function ionc_write_geom_ugrid_dll(filename) result(ierr) bind(C, name="ionc_wri
    ! Store the name
    file = char_array_to_string(filename, strlen(filename))
    ierr = ionc_write_geom_ugrid(file)
-
 end function ionc_write_geom_ugrid_dll
 
-!> Gets the epsg code of coordinate system from a data set.
-function ionc_get_coordinate_system_dll(ioncid, epsg) result(ierr) bind(C, name="ionc_get_coordinate_system")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_coordinate_system_dll
-   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
-   integer(kind=c_int),             intent(  out) :: epsg    !< Number of epsg code.
-   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
-     
-   ierr = ionc_get_coordinate_system(ioncid, epsg)
+! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
+!> Add the global attributes to a NetCDF file 
+!function ionc_add_global_attributes_dll(ioncid, meta) result(ierr)  bind(C, name="ionc_add_global_attributes")
+!!DEC$ ATTRIBUTES DLLEXPORT :: ionc_add_global_attributes_dll
+!   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+!   type (t_ug_meta), intent (in) :: meta
+!   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.!
+!
+!   ierr = ionc_add_global_attributes(ioncid, meta)
+!end function ionc_add_global_attributes
 
-end function ionc_get_coordinate_system_dll
+
+! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
+!> Writes the complete mesh geometry
+!function ionc_write_mesh_struct_dll(ioncid, meshids, meshgeom) result(ierr) bind(C, name="ionc_write_mesh_struct_dll")
+!!DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_mesh_struct_dll
+!   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
+!   type(t_ug_meshids),  intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+!   type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
+!   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.!
+!
+!   ierr = ionc_write_mesh_struct(ioncid, meshids, meshgeom)
+!end function ionc_write_mesh_struct_dll
 
 
+!
+! private routines/functions
+!
 
 ! Utility functions, move these to interop module
 ! Make functions pure so they can be used as input arguments.
