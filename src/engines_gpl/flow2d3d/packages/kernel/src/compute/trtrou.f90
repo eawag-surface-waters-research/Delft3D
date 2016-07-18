@@ -845,8 +845,8 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                          & drag*densit/hk*(cbed*cbed)/(ch_icode*ch_icode)
              endif
              !
-             rgh_type = ch_type
-             rgh_geom = area_rgh
+             !rgh_type = ch_type
+             !rgh_geom = area_rgh
           elseif (ircod==201) then
              !
              ! Get coefficients for hedges
