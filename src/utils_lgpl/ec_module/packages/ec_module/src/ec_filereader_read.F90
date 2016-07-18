@@ -648,7 +648,9 @@ contains
          real(hp)                                                :: add_offset            !< helper variable
          real(hp)                                                :: scalefactor           !< helper variable
          real(hp)                                                :: fillvalue             !< helper variable
+         real(hp)                                :: mintime, maxtime      !< range of kernel times that can be requested from this netcdf reader
          logical                                 :: valid_field
+         character(len=300) :: str
          
          !
          success = .false.
@@ -736,7 +738,18 @@ contains
          ! ===================
          ! update source Field
          ! ===================
-         !
+         !"Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
+         ! - 0 - Determine if the timesteps of the field to be updated are still below the last time in the file 
+         mintime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, 1)
+         maxtime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, int(fileReaderPtr%tframe%nr_timesteps))
+
+         if (comparereal(fieldPtr%timesteps, maxtime) /= -1) then
+            write(str, '(a,f10.2,a,f10.2,a,f10.2)') '   Valid range: ',mintime,' to ',maxtime
+            call setECMessage(str)
+            call setECMessage("Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
+            return
+         end if
+
          ! - 1 - Determine the relevant time entry from the times array and its index (irrespective of the data recorded at this timelevel)
          if (fieldPtr%timesteps == ec_undef_hp) then
             times_index = 1

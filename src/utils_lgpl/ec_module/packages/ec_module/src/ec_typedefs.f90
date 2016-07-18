@@ -345,10 +345,10 @@ module m_ec_typedefs
    type tEcTimeFrame
       real(hp)                            :: k_refdate        !< Kernel's reference date formatted as Modified Julian Date
       integer                             :: k_timestep_unit  !< Time unit of a timestep in the kernel.
-      real(hp)                            :: k_timezone       !< Timezone of the kernel.
+      real(hp)                            :: k_timezone = 0   !< Timezone of the kernel.
       real(hp)                            :: ec_refdate       !< EC file's reference date formatted as Modified Julian Date
       integer                             :: ec_timestep_unit !< Time unit of a timestep in the input data file.
-      real(hp)                            :: ec_timezone      !< Timezone of the EC file
+      real(hp)                            :: ec_timezone = 0  !< Timezone of the EC file
       real(hp)                            :: nr_timesteps     !< Total number of available timesteps [ec_timestep_unit].
       real(hp), dimension(:), allocatable :: times            !< The timesteps [ec_timestep_unit] at which data is available.
       real(hp)                            :: dtnodal          !< Nodal factors update interval

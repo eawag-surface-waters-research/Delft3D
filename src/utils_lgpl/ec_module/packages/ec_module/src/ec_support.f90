@@ -762,6 +762,7 @@ end subroutine ecInstanceListSourceItems
          character(len=maxFileNameLen), intent(in) :: filename    !< 
          !
          character(3000) :: message
+         integer         :: iostat
          !
          if (ierror /= nf90_noerr) then
             write (message,'(6a)') 'ERROR ', trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
@@ -777,7 +778,7 @@ end subroutine ecInstanceListSourceItems
       !> Extracts time unit and reference date from a standard time string.
       !! ASCII example: "TIME = 0 hours since 2006-01-01 00:00:00 +00:00"
       !! NetCDF example: "minutes since 1970-01-01 00:00:00.0 +0000"
-      function ecSupportTimestringToUnitAndRefdate(string, unit, ref_date) result(success)
+      function ecSupportTimestringToUnitAndRefdate(string, unit, ref_date, tzone) result(success)
          use netcdf
          use time_module
          !
@@ -785,6 +786,8 @@ end subroutine ecInstanceListSourceItems
          character(len=*),   intent(in)   :: string   !< units string
          integer,  optional, intent(out)  :: unit     !< time unit enumeration
          real(hp), optional, intent(out)  :: ref_date !< reference date formatted as Modified Julian Date
+         integer                          :: iostat
+         real(hp), optional, intent(out)  :: tzone    !< timezone
          !
          integer :: i        !< helper index
          integer :: temp     !< helper variable
@@ -834,6 +837,15 @@ end subroutine ecInstanceListSourceItems
                return
             end if
          end if
+
+         ! Determine the timezone
+         if (present(tzone)) then
+            tzone = 0
+            i = index(string, '+',BACK=.True.)           ! Timezone following a '+'
+            if (i>0) then
+               read(string(i+1:i+2),*,iostat=iostat) tzone
+            end if
+         end if
          !
          success = .true.
       end function ecSupportTimestringToUnitAndRefdate
@@ -870,8 +882,8 @@ end subroutine ecInstanceListSourceItems
          !
          timesteps = tframe%times(index) * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp
          !
-         ! Correct for Kernel's timzone.
-         timesteps = timesteps + tframe%k_timezone*3600.0_hp
+         ! Correct for Kernel's timzone in seconds
+         timesteps = timesteps + (tframe%k_timezone-tframe%ec_timezone) * 60.0_hp*60.0_hp
       end function ecSupportTimeToTimesteps
 
       ! =======================================================================
@@ -905,34 +917,44 @@ end subroutine ecInstanceListSourceItems
       
 
       !> Find the CF-compliant longitude and latitude dimensions and associated variables
-      function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid) result(success)
+      function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
+                                                    x_varid,   x_dimid,   y_varid,   y_dimid,      &
+                                                  tim_varid, tim_dimid) result(success)
       use netcdf
       logical              :: success
       integer, intent(in)  :: ncid           !< NetCDF file ID
       integer, intent(out) :: lon_varid      !< One dimensional coordinate variable recognized as longitude
       integer, intent(out) :: lat_varid      !< One dimensional coordinate variable recognized as latitude
+      integer, intent(out) ::   x_varid      !< One dimensional coordinate variable recognized as X
+      integer, intent(out) ::   y_varid      !< One dimensional coordinate variable recognized as Y
       integer, intent(out) :: tim_varid      !< One dimensional coordinate variable recognized as time
       integer, intent(out) :: lon_dimid      !< Longitude dimension
       integer, intent(out) :: lat_dimid      !< Latitude dimension
+      integer, intent(out) ::   x_dimid      !< X dimension
+      integer, intent(out) ::   y_dimid      !< Y dimension
       integer, intent(out) :: tim_dimid      !< Time dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
       integer :: dimids(1)
-      character(len=NF90_MAX_NAME)  :: units
+      character(len=NF90_MAX_NAME)  :: units, axis
 
       success = .False.
       lon_varid = -1
       lat_varid = -1
+      x_varid = -1
+      y_varid = -1
       tim_varid = -1
       lon_dimid = -1
       lat_dimid = -1
+      x_dimid = -1
+      y_dimid = -1
       tim_dimid = -1
       ierr = nf90_inquire(ncid, ndim, nvar, nglobatts, unlimdimid)
       do ivar=1,nvar
          ierr = nf90_inquire_variable(ncid, ivar, ndims=ndim)                      ! number of variables
+         units=''
+         ierr = nf90_get_att(ncid, ivar, 'units', units)
          if (ndim==1) then
-            units=''
             ierr = nf90_inquire_variable(ncid, ivar, dimids=dimids)                ! number of variables
-            ierr = nf90_get_att(ncid, ivar, 'units', units)
             select case (trim(units))
                case ('degrees_east','degree_east','degree_E','degrees_E','degreeE','degreesE')
                   lon_varid = ivar
@@ -940,6 +962,17 @@ end subroutine ecInstanceListSourceItems
                case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
                   lat_varid = ivar
                   lat_dimid = dimids(1)
+               case ('m','meters','km','kilometers')
+                  axis=''
+                  ierr = nf90_get_att(ncid, ivar, 'axis', axis)
+                  if (strcmpi(axis,'X')) then
+                     x_varid = ivar
+                     x_dimid = dimids(1)
+                  end if
+                  if (strcmpi(axis,'Y')) then
+                     y_varid = ivar
+                     y_dimid = dimids(1)
+                  end if
                case default
                   ! see if is the time dimension
                   if ((index(units,'seconds since')>0)   &
@@ -949,6 +982,14 @@ end subroutine ecInstanceListSourceItems
                      tim_varid = ivar
                      tim_dimid = dimids(1)
                   end if
+               end select
+         end if
+         if (ndim==2) then                ! Find lat and lon even if they are no coordinate axis
+            select case (trim(units))
+               case ('degrees_east','degree_east','degree_E','degrees_E','degreeE','degreesE')
+                  lon_varid = ivar
+               case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
+                  lat_varid = ivar
                end select
          end if
       end do   !ivar

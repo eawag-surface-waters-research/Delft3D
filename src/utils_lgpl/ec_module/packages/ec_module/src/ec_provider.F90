@@ -2371,6 +2371,7 @@ module m_ec_provider
          double precision                                        :: PI 
          character(len=NF90_MAX_NAME)                            :: expected_fgd, expected_sgd
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
+         integer                                                 :: x_varid, x_dimid, y_varid, y_dimid
 
          integer, dimension(:), allocatable                      :: first_coordinate_dimids, second_coordinate_dimids
          integer, dimension(:), allocatable                      :: first_coordinate_dimlen, second_coordinate_dimlen
@@ -2454,8 +2455,11 @@ module m_ec_provider
          ! ------------------------------------------------------------------------------------------------
          ! Inquiry of the dimids and the varids of lon/lat/time coordinate accoriding to the CF-convetion
          ! Lateron we can match the dimids to the dimids of the variable
+
          ! For now not sure yet if we need this call.
-         if (.not.ecSupportNCFindCFCoordinates(fileReaderPtr%fileHandle, lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid)) then
+         if (.not.ecSupportNCFindCFCoordinates(fileReaderPtr%fileHandle, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
+                                                                           x_varid,   x_dimid,   y_varid,   y_dimid,      &
+                                                                         tim_varid, tim_dimid)) then
             ! Exception: inquiry of id's of required coordinate variables failed 
              return
          end if
@@ -2503,17 +2507,12 @@ module m_ec_provider
             sgd_size = fileReaderPtr%dim_length(dimids(2))                                  ! var are the first two
             if (instancePtr%coordsystem == EC_COORDS_CARTHESIAN) then 
                grid_type = elmSetType_cartesian
+               fgd_id = x_varid
+               sgd_id = y_varid
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
                grid_type = elmSetType_spheric
-               if (((coordids(1)==lon_varid) .and. (coordids(2)==lat_varid))        &
-                  .or. ((coordids(2)==lon_varid) .and. (coordids(1)==lat_varid))) then 
-                  fgd_id = lon_varid
-                  sgd_id = lat_varid
-               else
-                  return
-                  ! todo: 
-
-               end if
+               fgd_id = lon_varid
+               sgd_id = lat_varid
             end if
 
             ! If we failed to read all coordinate variable id's from the dimension variable id's,
@@ -2583,7 +2582,7 @@ module m_ec_provider
                call realloc(first_coordinate_dimlen,ndims)
                ierror = nf90_inquire_variable(fileReaderPtr%fileHandle,coordids(1),dimids=first_coordinate_dimids)  ! count dimensions of the first coordinate variable
                do idims=1,ndims
-                  first_coordinate_dimlen(idims)=fileReaderPtr%dim_length(idims) 
+                     first_coordinate_dimlen(idims)=fileReaderPtr%dim_length(idims) 
                enddo
 
                ! Dimensions ID's and dimension lengths of the second coordinate variable
@@ -2658,7 +2657,7 @@ module m_ec_provider
                      if (.not.ecElementSetSetLongitudeArray(instancePtr, elementSetId, fgd_data_trans)) then
                         call setECMessage("Setting longitude array failed for "//trim(fileReaderPtr%filename)//".")
                         return
-                     endif 
+                        endif 
                      if (.not.ecElementSetSetDirectionArray(instancePtr, elementSetId, pdiri)) then
                         call setECMessage("Setting rotation array for vector for transformed vector quantities failed for "//trim(fileReaderPtr%filename)//".")
                         return
@@ -3060,6 +3059,7 @@ module m_ec_provider
          integer, dimension(1)        :: dimid      !< integer id of time variable's dimension variable
          integer                      :: length     !< number of time steps
          integer                      :: istat      !< status of allocation operation
+         integer                      :: tzone
          !
          success = .false.
          nVariables = 0
@@ -3092,7 +3092,7 @@ module m_ec_provider
          ! Surprisingly, the reference date is part of the "units" attribute.
          units = '' ! NetCDF does not completely overwrite a string, so re-initialize.
          if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, time_id, "units", units), "obtain units", fileReaderPtr%fileName)) return
-         if (.not. ecSupportTimestringToUnitAndRefdate(units, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate)) return
+         if (.not. ecSupportTimestringToUnitAndRefdate(units, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate,fileReaderPtr%tframe%ec_timezone)) return
          !
          ! Determine the total number of timesteps.
          if (.not. ecSupportNetcdfCheckError(nf90_inquire_variable(fileReaderPtr%fileHandle, time_id, dimids=dimid), "obtain time dimension ids", fileReaderPtr%fileName)) return
