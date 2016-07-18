@@ -529,11 +529,11 @@
      &                   cumresflx, lunsedflx, itwqfi*2    )
 
 !           write first part of the sources files where appropriate
-
-         call wrwaqld0 ( nsrc      , nmaxus , mmax   , kmax   , mnksrc , &
-     &                   discumwaq , loads  , nobrk  , nowalk , iwlk   , &
-     &                   itim      , mode   , isaggr , lunwlk )
-
+     if ( nsrc > 0 ) then
+            call wrwaqld0 ( nsrc      , nmaxus , mmax   , kmax   , mnksrc , &
+        &                   discumwaq , loads  , nobrk  , nowalk , iwlk   , &
+        &                   itim      , mode   , isaggr , lunwlk )
+     endif
          return
 !
 !        End of (firsttime), note the return
