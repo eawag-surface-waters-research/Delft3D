@@ -118,46 +118,46 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     if (anyFLOWtoRTC) then
        call zrtc(gdp%d%mlb, gdp%d%mub, gdp%d%nlb, gdp%d%nub, kfs, kfsmin, &
                & kfsmax, sig, zk, s1, dps, kmax, gdp)
-    endif
-    if (rtcact == RTCmodule) then
-       !
-       ! Collect parameters for this domain
-       !
-       tparput = 0.0_fp
-       iloc = parput_offset
-       do i = 1,stacnt
-          do k = 1,kmax
-             iloc = iloc + 1
-             tparput(1,iloc) = zrtcsta(k,i)
-             tparput(2,iloc) = s1rtcsta(i)
-             do l = 1,lstsci
-                tparput(2+l,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, l)
+       if (rtcact == RTCmodule) then
+          !
+          ! Collect parameters for this domain
+          !
+          tparput = 0.0_fp
+          iloc    = parput_offset
+          do i = 1,stacnt
+             do k = 1,kmax
+                iloc = iloc + 1
+                tparput(1,iloc) = zrtcsta(k,i)
+                tparput(2,iloc) = s1rtcsta(i)
+                do l = 1,lstsci
+                   tparput(2+l,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, l)
+                enddo
              enddo
           enddo
-       enddo
-       do i = 1,nsluv
-           iloc = iloc + 1
-           tparput(1,iloc) = cbuv(1,i)
-       enddo
-       do i = 1,nsrc
-           iloc = iloc + 1
-           tparput(lstsci+3,iloc) = disch(i)
-       enddo
-       !
-       ! Collect parameters from all domains
-       !
-       call timer_start(timer_wait, gdp)
-       if (rtc_ndomains>1) then
-          call rtccommunicate(tparput, tnparput*tnlocput)
+          do i = 1,nsluv
+              iloc = iloc + 1
+              tparput(1,iloc) = cbuv(1,i)
+          enddo
+          do i = 1,nsrc
+              iloc = iloc + 1
+              tparput(lstsci+3,iloc) = disch(i)
+          enddo
+          !
+          ! Collect parameters from all domains
+          !
+          call timer_start(timer_wait, gdp)
+          if (rtc_ndomains>1) then
+             call rtccommunicate(tparput, tnparput*tnlocput)
+          endif
+          !
+          ! Communication with RTC occurs only by the master domain
+          !
+          if (rtc_domainnr == 1) then
+             call datatortc(timsec, ifirstrtc, tparput, &
+                          & tlocput_names, tnlocput, &
+                          & tparput_names, tnparput, success)
+          endif
+          call timer_stop(timer_wait, gdp)
        endif
-       !
-       ! Communication with RTC occurs only by the master domain
-       !
-       if (rtc_domainnr == 1) then
-          call datatortc(timsec, ifirstrtc, tparput, &
-                       & tlocput_names, tnlocput, &
-                       & tparput_names, tnparput, success)
-       endif
-       call timer_stop(timer_wait, gdp)
     endif
 end subroutine rtc_comm_put
