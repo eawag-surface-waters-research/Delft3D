@@ -1,3 +1,37 @@
+module get_cloc_esm
+   use precision
+   real(fp), dimension(:,:), pointer    :: esm_array_pointer
+
+contains
+
+subroutine get_esm_pointer2d(dim1, dim2, array)
+   implicit none
+   integer                               , intent(in)    :: dim1
+   integer                               , intent(in)    :: dim2
+   real(fp), dimension(dim1,dim2), target, intent(in)    :: array
+
+   esm_array_pointer => array
+end subroutine get_esm_pointer2d
+    
+
+subroutine get_cloc_esm2d(index1, index2, cloc)
+   use iso_c_binding, only: c_ptr, c_loc
+   implicit none
+   !
+   ! parameters
+   integer                               , intent(in)    :: index1
+   integer                               , intent(in)    :: index2
+   type(c_ptr)                           , intent(inout) :: cloc           !< Pointer (by reference) to requested value data, NULL if not available.
+   !
+   ! body
+   cloc = c_loc(esm_array_pointer(index1,index2))
+end subroutine get_cloc_esm2d
+
+end module get_cloc_esm
+!
+!
+!
+!===============================================================================
 subroutine trisim (numdom, nummap, context_id, fsm_flags, runid, &
                  & initonly, gdpC)
 !----- GPL ---------------------------------------------------------------------
@@ -299,6 +333,7 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     use iso_c_binding, only: c_double, c_char, c_loc
     use iso_c_utils
     use string_module
+    use get_cloc_esm
     !
     implicit none
     !
@@ -358,7 +393,8 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
        case("gate_level")
            dim1 = 2
            dim2 = gdp%d%nsluv
-           call get_cloc_esm2D(dim1, dim2, r(cbuvrt), 2, item_index, c_var_ptr)
+           call get_esm_pointer2d(dim1, dim2, r(cbuvrt))
+           call get_cloc_esm2d(2, item_index, c_var_ptr)
            return
        end select
     case default
@@ -398,23 +434,4 @@ subroutine getStructureIndex(namlen, namdim, namarray, item_name, item_index)
       endif
    enddo
 end subroutine getStructureIndex
-!
-!
-!
-!===============================================================================
-subroutine get_cloc_esm2D(dim1, dim2, array, index1, index2, cloc)
-    use precision
-    use iso_c_binding, only: c_ptr, c_loc
-    implicit none
-    !
-    ! parameters
-    integer                               , intent(in)    :: dim1
-    integer                               , intent(in)    :: dim2
-    real(fp), dimension(dim1,dim2), target, intent(in)    :: array
-    integer                               , intent(in)    :: index1
-    integer                               , intent(in)    :: index2
-    type(c_ptr)                           , intent(inout) :: cloc           !< Pointer (by reference) to requested value data, NULL if not available.
-    !
-    ! body
-    cloc = c_loc(array(index1,index2))
-end subroutine get_cloc_esm2D
+
