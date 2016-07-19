@@ -100,8 +100,9 @@ enum {
    COMP_TYPE_WAVE      = 3,
    COMP_TYPE_FLOW1D    = 4,
    COMP_TYPE_WANDA     = 5,
-   COMP_TYPE_FLOW2D3D  = 6
-   };
+   COMP_TYPE_FLOW2D3D  = 6,
+   COMP_TYPE_FLOW1D2D  = 7,
+};
 
 enum {
    GLOBAL_PHASE_INIT   = 1, // Init   of first control block

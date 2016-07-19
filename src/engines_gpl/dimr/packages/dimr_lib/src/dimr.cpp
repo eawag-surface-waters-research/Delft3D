@@ -902,7 +902,11 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dh_component * newComp) {
         newComp->type = COMP_TYPE_WANDA;
     } else if (strstr(libNameLowercase, "flow2d3d") != NULL){
         newComp->type = COMP_TYPE_FLOW2D3D;
-    } else {
+    }
+    else if (strstr(libNameLowercase, "flow1d2d") != NULL){
+       newComp->type = COMP_TYPE_FLOW1D2D;
+    }
+    else {
         throw new Exception (true, "Name of library, \"%s\", is not recognized", newComp->library);
     }
     delete [] libNameLowercase;
