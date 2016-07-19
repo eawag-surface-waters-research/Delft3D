@@ -408,12 +408,12 @@ subroutine get_cloc_esm2D(dim1, dim2, array, index1, index2, cloc)
     implicit none
     !
     ! parameters
-    integer                       , intent(in)    :: dim1
-    integer                       , intent(in)    :: dim2
-    real(fp), dimension(dim1,dim2), intent(in)    :: array
-    integer                       , intent(in)    :: index1
-    integer                       , intent(in)    :: index2
-    type(c_ptr)                   , intent(inout) :: cloc           !< Pointer (by reference) to requested value data, NULL if not available.
+    integer                               , intent(in)    :: dim1
+    integer                               , intent(in)    :: dim2
+    real(fp), dimension(dim1,dim2), target, intent(in)    :: array
+    integer                               , intent(in)    :: index1
+    integer                               , intent(in)    :: index2
+    type(c_ptr)                           , intent(inout) :: cloc           !< Pointer (by reference) to requested value data, NULL if not available.
     !
     ! body
     cloc = c_loc(array(index1,index2))
