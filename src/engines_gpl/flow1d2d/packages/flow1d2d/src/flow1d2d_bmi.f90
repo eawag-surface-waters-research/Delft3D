@@ -23,39 +23,50 @@ module flow1d2d_bmi
    
    integer(c_int) function initialize(c_configfile) result(ierr) bind(C, name="initialize")
       !DEC$ ATTRIBUTES DLLEXPORT::initialize
-
+      use iterative_coupler_1d2d
+      
       implicit none
       
       ! Variables
       character(kind=c_char), intent(in) :: c_configfile(*)
 
+      call init_iterative_coupler()
       ierr = 0
    end function initialize
 
    !> Performs a single timestep with the current model.
    subroutine update(dt) bind(C,name="update")
       !DEC$ ATTRIBUTES DLLEXPORT::update
+      use iterative_coupler_1d2d
+      use dummy_api
  
       !< Custom timestep size, use -1 to use model default.
       real(c_double), value, intent(in) :: dt
-
-      !if (dt<= 0.00) then
-      !   nstep = 1
-      !else
-      !   nstep = nint(dt/modelTimeStepData%timeStep)
-      !endif   
-      !ierr = 0 
-      !do i = 1, nstep
-         !if ( ModelPerformTimeStep() ) then
-         !else
-         !   ierr = -1
-         !   return
-         !endif
-      !enddo
+      
+      double precision :: timestep
+      integer :: nstep
+      integer :: ierr
+      integer :: i
+      
+      if (dt<= 0.00) then
+         nstep = 1
+      else
+         call Flow1DModel_get_time_step(timestep)
+         nstep = nint(dt/timeStep)
+      endif   
+      ierr = 0 
+      do i = 1, nstep
+         call compute1d2d_user_timestep()
+      enddo
    end subroutine update
 
    subroutine finalize() bind(C, name="finalize")
       !DEC$ ATTRIBUTES DLLEXPORT::finalize
+      use iterative_coupler_1d2d
+      
+      implicit none
+      
+      call finalize_iterative_coupler()
 
    end subroutine finalize
  
