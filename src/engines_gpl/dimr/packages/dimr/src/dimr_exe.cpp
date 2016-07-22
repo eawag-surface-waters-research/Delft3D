@@ -39,7 +39,7 @@
 
 #include "dimr_exe.h"
 #include "dimr.h"
-#include "dimr_lib_version.h"
+#include "dimr_exe_version.h"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -115,6 +115,9 @@ int main (int     argc,
     try {
         DimrExe * DHE = new DimrExe (argc, argv, envp);
         if (! DHE->ready) return 1;
+
+		DHE->log->Write(Log::MAJOR, my_rank, getfullversionstring_dimr_exe());
+
         DHE->openLibrary();
         DHE->lib_initialize();
         DHE->lib_update();
@@ -149,8 +152,7 @@ int main (int     argc,
 //------------------------------------------------------------------------------
 void DimrExe::lib_initialize(void)
 {
-    int result;
-    this->log->Write (Log::MINOR, my_rank, "%s.SetVar(useMPI,%d)", this->library, use_mpi);
+	this->log->Write(Log::MINOR, my_rank, "%s.SetVar(useMPI,%d)", this->library, use_mpi);
     (this->dllSetVar) ("useMPI", &use_mpi);
     this->log->Write (Log::MINOR, my_rank, "%s.SetVar(numRanks,%d)", this->library, numranks);
     (this->dllSetVar) ("numRanks", &numranks);
@@ -159,7 +161,12 @@ void DimrExe::lib_initialize(void)
     this->log->Write (Log::MINOR, my_rank, "%s.SetVar(debugLevel,%d)", this->library, this->logMask);
     (this->dllSetVar) ("debugLevel", &(this->logMask));
     this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", this->library, this->configfile);
-    result = (this->dllInitialize) (this->configfile);
+	int result = (this->dllInitialize) (this->configfile);
+	if (result != 0) {
+		// Error occurred, but apparently no exception has been thrown.
+		// Throw one now
+		this->log->Write(Log::MAJOR, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -409,7 +416,7 @@ void DimrExe::openLibrary (void) {
         sprintf(this->library, "dimr_dll.dll\0");
 #endif
 
-        this->log->Write (Log::DETAIL, my_rank, "Loading library \"%s\"", this->library);
+        this->log->Write (Log::DETAIL, my_rank, "Loading dimr library \"%s\"", this->library);
 
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
@@ -530,15 +537,12 @@ void DimrExe::freeLib (void) {
 
 //------------------------------------------------------------------------------
 static void printAbout (char * exeName) {
-    char * strout = new char[256];
-    GETFULLVERSIONSTRING (strout, strlen (strout));
     printf ("\n\
 %s \n\
 Copyright (C)  Stichting Deltares, 2011-2016. \n\
 GNU General Public License, see <http://www.gnu.org/licenses/>. \n\n\
-sales@deltaressystems.nl \n", strout);
-    GETURLSTRING (strout, strlen (strout));
-    printf ("%s\n\n", strout);
+sales@deltaressystems.nl \n", getfullversionstring_dimr_exe());
+	printf("%s\n\n", geturlstring_dimr_exe());
  }
 
 
