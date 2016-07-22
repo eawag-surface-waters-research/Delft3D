@@ -319,9 +319,11 @@ src/engines_gpl/dimr/packages/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe.h -text
+src/engines_gpl/dimr/packages/dimr/include/dimr_exe_version.h.svn -text
+src/engines_gpl/dimr/packages/dimr/include/version_number.ini -text
 src/engines_gpl/dimr/packages/dimr/src/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe.cpp -text
-src/engines_gpl/dimr/packages/dimr/src/dimr_version.cpp -text
+src/engines_gpl/dimr/packages/dimr/src/dimr_exe_version.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text

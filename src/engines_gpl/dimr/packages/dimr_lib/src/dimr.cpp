@@ -37,6 +37,7 @@
 
 
 #include "dimr.h"
+#include "dimr_lib_version.h"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -109,7 +110,10 @@ DllExport int initialize(char * configfile) {
     if (DH == NULL) {
         DH = new Dimr();
     }
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:initialize");
+
+	DH->log->Write(Log::MAJOR, DH->my_rank, getfullversionstring_dimr_lib());
+	
+	DH->log->Write(Log::ALWAYS, DH->my_rank, "dimr_lib:initialize");
 
     //
     //

@@ -24,51 +24,34 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id: dimr_version.cpp 932 2011-10-25 09:41:59Z mourits $
+// $Id: dimr_exe_version.cpp 932 2011-10-25 09:41:59Z mourits $
 // $HeadURL: $
 #include <stdio.h>
-#include <string.h>
-
-#if defined(WIN32) || defined (WIN64)
-#  include <io.h>
-#  include <wtypes.h>
-#elif defined (salford32)
-#  include <io.h>
-#  include <windows.h>
-#endif
-
-#if HAVE_CONFIG_H
-#   include "config.h"
-#endif
-#include "dimr_lib_version.h"
+#include "dimr_exe_version.h"
 
 #ifndef min
 #  define min(a,b) (a)<(b) ? (a) : (b)
 #  define max(a,b) (a)>(b) ? (a) : (b)
 #endif
 
-static char modname_version_id [] = {"@(#)Deltares, "modname_program" Version "modname_major"."modname_minor"."modname_revision"."modname_build", "__DATE__", "__TIME__""};
+static char modname_version_id [] = {"@(#)Deltares, " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build ", " __DATE__ ", " __TIME__ ""};
 
-void STDCALL GETSHORTVERSIONSTRING( char * str, int length_str )
+char * getversionstring_dimr_exe(void)
 {
-  int i;
-  for (i=0; i<length_str; i++) {str[i] = ' ';}
-  i  = min((int) length_str, (int) strlen(modname_version_short));
-  strncpy(str, modname_version_short, i);
+    return modname_version;
 }
 
-void STDCALL GETFULLVERSIONSTRING( char * str, int length_str )
+char * getfullversionstring_dimr_exe(void)
 {
-  int i;
-  for (i=0; i<length_str; i++) {str[i] = ' ';}
-  i  = min((int) length_str, (int) strlen(modname_version_full));
-  strncpy(str, modname_version_full, i);
+    return modname_version_full;
 }
 
-void STDCALL GETURLSTRING( char * str, int length_str )
+char * getshortversionstring_dimr_exe(void)
 {
-  int i;
-  for (i=0; i<length_str; i++) {str[i] = ' ';}
-  i  = min((int) length_str, (int) strlen(modname_company_url));
-  strncpy(str, modname_company_url, i);
+    return modname_version_short;
+}
+
+char * geturlstring_dimr_exe(void)
+{
+    return modname_url;
 }

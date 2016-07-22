@@ -1,11 +1,11 @@
-#ifndef DIMR_LIB_VERSION
-#define DIMR_LIB_VERSION
+#ifndef DIMR_EXE_VERSION
+#define DIMR_EXE_VERSION
 
 #define CAT(a, b) a ## b
 #define FUNC_CAT(a, b) CAT(a, b)
 
-#define MOD_NAME         DIMR_LIB
-#define modname_program  "DIMR_LIB"
+#define MOD_NAME         DIMR_EXE
+#define modname_program  "DIMR_EXE"
 #if HAVE_CONFIG_H
 #   define F90_MOD_NAME   FC_FUNC(dimr, DIMR)
 #else
@@ -27,7 +27,10 @@ static char modname_version_short [] = {modname_major"."modname_minor};
 static char modname_version_full  [] = {modname_company", "modname_program" Version "modname_major"."modname_minor"."modname_revision"."modname_build", "__DATE__", "__TIME__""};
 static char modname_url           [] = {modname_company_url};
 
-char * getfullversionstring_dimr_lib(void);
+char * getversionstring_dimr_exe(void);
+char * getfullversionstring_dimr_exe(void);
+char * getshortversionstring_dimr_exe(void);
+char * geturlstring_dimr_exe(void);
 
-#endif /* DIMR_LIB_VERSION */
+#endif /* DIMR_EXE_VERSION */
 
