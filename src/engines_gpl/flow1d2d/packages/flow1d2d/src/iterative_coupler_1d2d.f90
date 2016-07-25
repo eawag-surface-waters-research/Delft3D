@@ -131,7 +131,7 @@ module iterative_coupler_1d2d
       call Flow1DModel_FinalizeUserTimeStep()
       call Flow2DModel_FinalizeUserTimeStep()
 
-   end
+   end subroutine compute1d2d_user_timestep
    
    logical function CheckConvergence()
       use messageHandling
