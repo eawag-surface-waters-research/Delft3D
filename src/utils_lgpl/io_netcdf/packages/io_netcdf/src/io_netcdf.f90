@@ -102,6 +102,7 @@ integer, parameter :: IONC_ENONCOMPLIANT = 4 !< File is non-compliant with its s
 type t_ionc
    integer                  :: ncid      =  0               !< The underlying native NetCDF data set id.
    integer                  :: iconvtype =  IONC_CONV_OTHER !< Detected type of the conventions used in this dataset.
+   double precision         :: convversion =  0 !< Detected version of the conventions used in this dataset.
    integer                  :: epsg =  0 !< Detected type of the epsg code used in this dataset.
    type(t_ug_file), pointer :: ug_file   => null()          !< For UGRID-type files, the underlying file structure.
 end type t_ionc
@@ -142,9 +143,10 @@ end function ionc_create
 
 
 !> Inquire the NetCDF conventions used in the dataset.
-function ionc_inq_conventions(ioncid, iconvtype) result(ierr)
+function ionc_inq_conventions(ioncid, iconvtype, convversion) result(ierr)
    integer, intent(in)  :: ioncid    !< The IONC data set id.
    integer, intent(out) :: iconvtype !< The NetCDF conventions type of the dataset.
+   double precision, intent(out) :: convversion !< The NetCDF conventions version of the dataset.
    integer              :: ierr      !< Result status, ionc_noerr if successful.
 
    ierr = IONC_NOERR
@@ -162,7 +164,8 @@ function ionc_inq_conventions(ioncid, iconvtype) result(ierr)
       end if
    end if
    iconvtype = datasets(ioncid)%iconvtype
-
+   convversion = datasets(ioncid)%convversion
+   
    ! Successful
    return
 
@@ -196,11 +199,12 @@ end function ionc_adheresto_conventions
 
 
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
-function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
+function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) result(ierr)
    character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
    integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer,           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
    integer, optional, intent(inout) :: iconvtype !< (optional) The detected conventions in the file.
+   double precision, optional, intent(inout) :: convversion !< (optional) The detected conventions in the file.
    integer, optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
    integer                          :: ierr      !< Result status (IONC_NOERR if successful).
 
@@ -223,6 +227,15 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)
       iconvtype = datasets(ioncid)%iconvtype
    end if
    
+   if (present(convversion)) then
+      convversion = datasets(ioncid)%convversion
+   end if
+
+   ierr = detect_coordinate_system(ioncid)
+
+   ! Successful
+   return
+
 999 continue
     
 end function ionc_open
@@ -401,6 +414,8 @@ function detect_conventions(ioncid) result(ierr)
    integer, intent(in)  :: ioncid    !< The IONC data set id.
    integer              :: ierr      !< Result status, ionc_noerr if successful.
 
+   integer              :: i         !< index of convention name
+   
    character(len=MAXSTRLEN) :: convstring
 
    ierr = IONC_NOERR
@@ -417,8 +432,11 @@ function detect_conventions(ioncid) result(ierr)
    end if
 
    ! TODO: AvD: add support for detecting multiple conventions, and store as a sum of integer codes.
-   if (index(convstring, 'UGRID') > 0) then
+   i = index(convstring, 'UGRID')
+   
+   if (i > 0) then
       datasets(ioncid)%iconvtype = IONC_CONV_UGRID
+      read (convstring(i+6:), *) datasets(ioncid)%convversion
    else
       datasets(ioncid)%iconvtype = IONC_CONV_OTHER
    end if

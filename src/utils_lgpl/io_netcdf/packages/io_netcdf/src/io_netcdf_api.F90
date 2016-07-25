@@ -79,13 +79,14 @@ end function ionc_create_dll
 
 
 !> Inquire the NetCDF conventions used in the dataset.
-function ionc_inq_conventions_dll(ioncid, iconvtype) result(ierr) bind(C, name="ionc_inq_conventions")
+function ionc_inq_conventions_dll(ioncid, iconvtype, convversion) result(ierr) bind(C, name="ionc_inq_conventions")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_conventions_dll
    integer(kind=c_int), intent(in)  :: ioncid    !< The IONC data set id.
    integer(kind=c_int), intent(out) :: iconvtype !< The NetCDF conventions type of the dataset.
+   real(kind=c_double), intent(out) :: convversion !< The NetCDF conventions version of the dataset.
    integer(kind=c_int)              :: ierr      !< Result status, ionc_noerr if successful.
 
-   ierr = ionc_inq_conventions(ioncid, iconvtype)
+   ierr = ionc_inq_conventions(ioncid, iconvtype, convversion)
 end function ionc_inq_conventions_dll
 
 
@@ -103,13 +104,14 @@ end function ionc_adheresto_conventions_dll
 
 
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
-function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_open")
+function ionc_open_dll(c_path, mode, ioncid, iconvtype, convversion) result(ierr) bind(C, name="ionc_open")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_open_dll
   use iso_c_binding
    character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
    integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
    integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
+   real(kind=c_double),           intent(inout) :: convversion !< The detected conventions in the file.
 !   integer(kind=c_int), optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
    integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
 
@@ -119,7 +121,7 @@ function ionc_open_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, nam
   ! Store the name
   path = char_array_to_string(c_path, strlen(c_path))
 
-  ierr = ionc_open(path, mode, ioncid, iconvtype)
+  ierr = ionc_open(path, mode, ioncid, iconvtype, convversion)
 end function ionc_open_dll
 
 
