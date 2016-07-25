@@ -43,3 +43,12 @@ dimr_exe_LDADD = \
 
 #-------------------------------------------------------------------------------
 
+BUILT_SOURCES = \
+    ./always \
+    ../include/dimr_exe_version.h
+
+./always:
+    rm -f ../include/dimr_exe_version.h
+
+../include/dimr_exe_version.h:
+    $(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/dimr_exe_version.h $(srcdir) ../include/version_number.ini $(top_builddir) 
