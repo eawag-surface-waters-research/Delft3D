@@ -21,6 +21,7 @@ module m_read_1d2d_data
       character(len=strlen(c_configfile)) :: filename
       character(len=charln)               :: log
       character(len=charln)               :: modeltype
+      character(len=charln)               :: inputfile
       type(tree_data), pointer            :: md_ptr
       integer :: istat
       integer :: juerr
