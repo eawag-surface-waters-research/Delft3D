@@ -1553,13 +1553,13 @@ subroutine ug_create_ugrid_meta(meta)
 end subroutine ug_create_ugrid_meta
 
 !> Writes the unstructured network and edge type to an already opened netCDF dataset.
-function ug_write_geom_filepointer_ugrid(ioncid) result(ierr)
-    integer, intent(in)                :: ioncid !< file pointer to netcdf file to write to.
+function ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids) result(ierr)
+    integer,             intent(in)    :: ncid !< file pointer to netcdf file to write to.
+    type(t_ug_meshgeom), intent(in)    :: meshgeom !< Mesh geometry to be written to the NetCDF file.
+    type(t_ug_meshids),  intent(  out) :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
+    integer                           :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
-    type(t_ug_meta)                    :: meta  !< Meta information on file.
-    type(t_ug_meshgeom)                :: meshgeom !< Mesh geometry to be written to the NetCDF file.
-    type(t_ug_meshids)                 :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
-    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
+    type(t_ug_meta)                    :: meta  !< Meta information on file. ! TODO: later also input arg
     
     ierr = UG_NOERR
 
@@ -1567,13 +1567,12 @@ function ug_write_geom_filepointer_ugrid(ioncid) result(ierr)
     call ug_create_ugrid_meta(meta)
     
     ! Add global attributes to NetCDF file.
-    ierr = ug_addglobalatts(ioncid, meta)
-    
-    ! create mesh geometry
-    ierr = ug_create_ugrid_geometry(meshgeom)
+    ierr = ug_addglobalatts(ncid, meta)
     
     ! Write mesh geometry.
-    ierr = ug_write_mesh_struct(ioncid, meshids, meshgeom)
+    ierr = ug_write_mesh_struct(ncid, meshids, meshgeom)
+    
+    
     
 
 end function ug_write_geom_filepointer_ugrid
@@ -1583,18 +1582,87 @@ end function ug_write_geom_filepointer_ugrid
 function ug_write_geom_ugrid(filename) result(ierr)
 
     character(len=*), intent(in) :: filename
+    integer :: ierr
 
-    integer :: ioncid, ierr
+    type(t_ug_meshgeom) :: meshgeom !< Mesh geometry to be written to the NetCDF file.
+    type(t_ug_meshids)  :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
+    integer :: ncid
     
-    ierr = nf90_create(filename, 0, ioncid)
+    ierr = nf90_create(filename, 0, ncid)
     if (ierr /= nf90_noerr) then
         return
     end if
 
-    ierr = ug_write_geom_filepointer_ugrid(ioncid)
+    ! create mesh geometry
+    ierr = ug_create_ugrid_geometry(meshgeom)
+
+    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids)
          
-    ierr = nf90_close(ioncid)
+    ierr = nf90_close(ncid)
         
 end function ug_write_geom_ugrid
+
+
+!> Writes the unstructured network and edge type AND time-dep output data to a netCDF file.
+!! If file exists, it will be overwritten.
+function ug_write_map_ugrid(filename) result(ierr)
+
+    character(len=*), intent(in) :: filename
+    integer :: ierr
+
+    type(t_ug_meshgeom)   :: meshgeom !< Mesh geometry to be written to the NetCDF file.
+    type(t_ug_meshids)    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
+    integer :: id_s1, id_u1, id_zk, itim ! example: water levels
+    integer :: ncid
+    double precision, allocatable :: workf(:), worke(:), workn(:)
+
+    ! TODO: some if, to only do this at first time step
+    ierr = nf90_create(filename, 0, ncid)
+    if (ierr /= nf90_noerr) then
+        return
+    end if
+
+    ! create mesh geometry
+    ierr = ug_create_ugrid_geometry(meshgeom)
+
+    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids)
+
+    ierr = nf90_redef(ncid)
+
+    ierr = ug_def_var(ncid, meshids, id_s1, (/ 2, meshids%id_facedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_height_above_geoid", "Water levels on cell centres", &
+                    "m", "average", meshgeom%crs, -1, -999d0)
+    
+    ierr = ug_def_var(ncid, meshids, id_u1, (/ 2, meshids%id_edgedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
+                    "m s-1", "average", meshgeom%crs, -1, -999d0)
+    
+    ierr = ug_def_var(ncid, meshids, id_zk, (/ 2, meshids%id_nodedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
+                    "m", "point", meshgeom%crs, -1, -999d0)
+    ! NOTE: zk is rarely time-dependent, but just as an example
+
+    ierr = nf90_enddef(ncid)
+
+    allocate(workf(meshgeom%numface))
+    workf = 1.23d0 ! TODO: make this hardcoded spatially varying.
+    allocate(worke(meshgeom%numedge))
+    worke = 3.45d-2
+    allocate(workn(meshgeom%numnode))
+    workn = -7.68d0
+    do itim=1,10
+        workf(:) = workf(:) + itim ! Dummy data time-dependent
+        ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
+
+        worke(:) = worke(:) + itim*.01d0 ! Dummy data time-dependent
+        ierr = nf90_put_var(ncid, id_u1, worke, count = (/ meshgeom%numedge, 1 /), start = (/ 1, itim /))
+
+        workn(:) = workn(:) + itim*.1d0 ! Dummy data time-dependent
+        ierr = nf90_put_var(ncid, id_zk, workn, count = (/ meshgeom%numnode, 1 /), start = (/ 1, itim /))
+
+    end do
+
+    ! ..
+    deallocate(workn, worke, workf)
+    ierr = nf90_close(ncid)
+        
+end function ug_write_map_ugrid
 
     end module io_ugrid

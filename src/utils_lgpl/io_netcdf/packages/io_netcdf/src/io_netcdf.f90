@@ -69,6 +69,7 @@ public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
 public :: ionc_write_geom_ugrid
 public :: ionc_write_mesh_struct
+public :: ionc_write_map_ugrid
 
 private
 
@@ -380,6 +381,15 @@ function ionc_write_geom_ugrid(filename) result(ierr)
 
    ierr = ug_write_geom_ugrid(filename)
 end function ionc_write_geom_ugrid
+
+
+!> Writes a complete map file
+function ionc_write_map_ugrid(filename) result(ierr)
+   character(len=*), intent(in)       :: filename !< File name for netCDF dataset to be opened.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   ierr = ug_write_map_ugrid(filename)
+end function ionc_write_map_ugrid
 
 
 !> Add the global attributes to a NetCDF file 

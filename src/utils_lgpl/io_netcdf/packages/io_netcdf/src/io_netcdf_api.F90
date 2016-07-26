@@ -270,6 +270,19 @@ function ionc_write_geom_ugrid_dll(filename) result(ierr) bind(C, name="ionc_wri
    ierr = ionc_write_geom_ugrid(file)
 end function ionc_write_geom_ugrid_dll
 
+
+!> Writes a complete map file
+function ionc_write_map_ugrid_dll(filename) result(ierr) bind(C, name="ionc_write_map_ugrid")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_map_ugrid_dll
+   character(kind=c_char), intent(in   ) :: filename(MAXSTRLEN)      !< File name for netCDF dataset to be created.
+   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
+   character(len=MAXSTRLEN) :: file
+  
+   ! Store the name
+   file = char_array_to_string(filename, strlen(filename))
+   ierr = ionc_write_map_ugrid(file)
+end function ionc_write_map_ugrid_dll
+
 ! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
 !> Add the global attributes to a NetCDF file 
 !function ionc_add_global_attributes_dll(ioncid, meta) result(ierr)  bind(C, name="ionc_add_global_attributes")
