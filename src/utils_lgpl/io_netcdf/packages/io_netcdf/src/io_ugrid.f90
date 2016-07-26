@@ -1612,7 +1612,7 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     type(t_ug_meshgeom)   :: meshgeom !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_meshids)    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
-    integer :: id_s1, id_u1, id_zk, itim ! example: water levels
+    integer :: id_s1, id_s2, id_u1, id_zk, itim ! example: water levels, water depth, edge speed, bed level and a timer
     integer :: ncid
     double precision, allocatable :: workf(:), worke(:), workn(:)
 
@@ -1630,6 +1630,9 @@ function ug_write_map_ugrid(filename) result(ierr)
     ierr = nf90_redef(ncid)
 
     ierr = ug_def_var(ncid, meshids, id_s1, (/ 2, meshids%id_facedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_height_above_geoid", "Water levels on cell centres", &
+                    "m", "average", meshgeom%crs, -1, -999d0)
+    
+    ierr = ug_def_var(ncid, meshids, id_s2, (/ 2, meshids%id_facedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
                     "m", "average", meshgeom%crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, meshids, id_u1, (/ 2, meshids%id_edgedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
@@ -1650,6 +1653,7 @@ function ug_write_map_ugrid(filename) result(ierr)
     do itim=1,10
         workf(:) = workf(:) + itim ! Dummy data time-dependent
         ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
+        ierr = nf90_put_var(ncid, id_s2, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
 
         worke(:) = worke(:) + itim*.01d0 ! Dummy data time-dependent
         ierr = nf90_put_var(ncid, id_u1, worke, count = (/ meshgeom%numedge, 1 /), start = (/ 1, itim /))

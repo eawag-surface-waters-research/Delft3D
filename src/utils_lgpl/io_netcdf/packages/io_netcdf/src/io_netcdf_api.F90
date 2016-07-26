@@ -283,6 +283,40 @@ function ionc_write_map_ugrid_dll(filename) result(ierr) bind(C, name="ionc_writ
    ierr = ionc_write_map_ugrid(file)
 end function ionc_write_map_ugrid_dll
 
+!> Reads the number of names at a location
+function ionc_get_var_count_dll(ioncid, meshid, loctype, nvar) result(ierr) bind(C, name="ionc_get_var_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_count_dll
+   integer(kind=c_int), intent(in   )  :: ioncid  !< The IONC data set id.
+   integer(kind=c_int), intent(in   )  :: meshid  !< The mesh id in the specified data set.
+   integer(kind=c_int), intent(in   )  :: loctype !< The location where the variables are at.
+   integer(kind=c_int), intent(  out)  :: nvar    !< The number of variables in the mesh at this location. 
+   integer(kind=c_int)                 :: ierr    !< Result status, ionc_noerr if successful.
+   
+   ierr = 0
+   nvar = 2
+end function ionc_get_var_count_dll
+
+!> Reads the variables names at a location
+function ionc_get_var_names_id_dll(ioncid, meshid, loctype, c_var_names_ptr, nvar) result(ierr) bind(C, name="ionc_get_var_names_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_names_id_dll
+   integer(kind=c_int), intent(in   )  :: ioncid         !< The IONC data set id.
+   integer(kind=c_int), intent(in   )  :: meshid         !< The mesh id in the specified data set.
+   integer(kind=c_int), intent(in   )  :: loctype        !< The location where the variables are at.
+   type(c_ptr),         intent(  out)  :: c_var_names_ptr !< Pointer to array for the varnames at this location.
+   integer(kind=c_int), intent(in   )  :: nvar           !< The number of variables in the mesh at this location. 
+   integer(kind=c_int)                 :: ierr           !< Result status, ionc_noerr if successful.
+   
+   integer, pointer :: var_names_id(:)
+
+   call c_f_pointer(c_var_names_ptr, var_names_id, (/nvar/))
+
+   ierr = 0
+   
+   var_names_id(1) = 801
+   var_names_id(2) = 802
+
+end function ionc_get_var_names_id_dll
+
 ! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
 !> Add the global attributes to a NetCDF file 
 !function ionc_add_global_attributes_dll(ioncid, meta) result(ierr)  bind(C, name="ionc_add_global_attributes")
