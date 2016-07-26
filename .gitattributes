@@ -352,6 +352,7 @@ src/engines_gpl/flow1d2d/packages/flow1d2d/dummy_api.f90 -text
 src/engines_gpl/flow1d2d/packages/flow1d2d/flow1d2d.vfproj -text
 src/engines_gpl/flow1d2d/packages/flow1d2d/src/flow1d2d_bmi.f90 -text
 src/engines_gpl/flow1d2d/packages/flow1d2d/src/iterative_coupler_1d2d.f90 -text
+src/engines_gpl/flow1d2d/packages/flow1d2d/src/read_1d2d_data.f90 -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
 src/engines_gpl/flow2d3d/default/files.def -text

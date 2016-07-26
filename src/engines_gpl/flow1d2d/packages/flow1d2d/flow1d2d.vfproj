@@ -48,5 +48,6 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\dummy_api.f90"/>
 		<File RelativePath=".\src\flow1d2d_bmi.f90"/>
-		<File RelativePath=".\src\iterative_coupler_1d2d.f90"/></Filter></Files>
+		<File RelativePath=".\src\iterative_coupler_1d2d.f90"/>
+		<File RelativePath=".\src\read_1d2d_data.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
