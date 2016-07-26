@@ -1,3 +1,21 @@
+module m_dflow1d2dError
+
+   public dflow1d2dError
+
+   contains
+
+   subroutine dflow1d2dError(errorLevel, message)
+      use MessageHandling
+      implicit none
+      integer, intent(in):: errorLevel
+      character(len=*), intent(in) :: message
+      if (errorLevel >= LEVEL_FATAL) then
+         call THROWEXCEPTION()
+      endif
+      
+   end subroutine dflow1d2dError
+end module m_dflow1d2dError
+   
 module flow1d2d_bmi
    use iso_c_binding
    use iso_c_utils
@@ -23,13 +41,26 @@ module flow1d2d_bmi
    
    integer(c_int) function initialize(c_configfile) result(ierr) bind(C, name="initialize")
       !DEC$ ATTRIBUTES DLLEXPORT::initialize
+      use messageHandling
       use iterative_coupler_1d2d
+      use m_read_1d2d_data
+      use m_dflow1d2dError
       
       implicit none
       
       ! Variables
       character(kind=c_char), intent(in) :: c_configfile(*)
 
+      call SetMessageHandling(write2screen = .true., &
+                        useLog = .true., &
+                        callback = dflow1d2dError, &
+                        reset_counters = .true., &
+                        thresholdLevel = LEVEL_INFO &
+                        )
+
+      
+      call read_1d2d_data(c_configfile)
+      
       call init_iterative_coupler()
       ierr = 0
    end function initialize
@@ -139,3 +170,4 @@ module flow1d2d_bmi
    end subroutine set_var
 
 end module flow1d2d_bmi
+   

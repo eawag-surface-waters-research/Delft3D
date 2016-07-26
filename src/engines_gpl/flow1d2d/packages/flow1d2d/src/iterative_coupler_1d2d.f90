@@ -1,5 +1,6 @@
 module iterative_coupler_1d2d
-
+   use messageHandling
+   
    implicit none
    private
 
@@ -7,25 +8,35 @@ module iterative_coupler_1d2d
    public init_iterative_coupler
    public finalize_iterative_coupler
    
+   type t_model
+      character(len=idLen)  :: name          !< name of the model, used as first item for incoming set_var and get_var calls
+      character(len=charln) :: working_dir   !< working directory for model
+      character(len=charln) :: md_file       !< name of the model definition file
+   end type t_model
+   
    type t_1d2d_data
-      integer                             :: iteration
-      integer                             :: max_iteration
-      double precision                    :: max_error
-      integer                             :: connections_count
-      integer, allocatable, dimension(:)  :: index2d
-      integer, allocatable, dimension(:)  :: index1d
-      double precision, allocatable, dimension(:)  :: q2d
-      double precision, allocatable, dimension(:)  :: s1sobek
-      double precision, allocatable, dimension(:)  :: width1d
-      double precision, allocatable, dimension(:)  :: q1d
-      double precision, allocatable, dimension(:)  :: qzetafm
-      double precision, allocatable, dimension(:)  :: qlatfm
-      double precision, allocatable, dimension(:)  :: qzetasbk
-      double precision, allocatable, dimension(:)  :: qlatsbk
-      double precision, allocatable, dimension(:)  :: qsobek
+      integer                             :: iteration               !< current iteration number
+      integer                             :: max_iteration           !< maximum number of allowable iterations
+      double precision                    :: max_error               !< stop criterium for iteration process
+      integer                             :: connections_count       !< number of connections in 1d2d model
+      integer, allocatable, dimension(:)  :: index2d                 !< index for 2d gridpoints
+      integer, allocatable, dimension(:)  :: index1d                 !< index for 1d gridpoints
+      double precision, allocatable, dimension(:)  :: q2d            !< discharge from 1d to 2d, calculated by FM
+      double precision, allocatable, dimension(:)  :: s1sobek        !< 1d water levels
+      double precision, allocatable, dimension(:)  :: width1d        !< 1d flow width
+      double precision, allocatable, dimension(:)  :: q1d            !< discharge from 2d to 1d, calculated by SOBEK: q1d = -qZetaFM(i) * s1Sobek(i) - qLatFM(i)
+      double precision, allocatable, dimension(:)  :: qzetafm        !< see q1d
+      double precision, allocatable, dimension(:)  :: qlatfm         !< see q1d
+      double precision, allocatable, dimension(:)  :: qzetasbk       !< see q1d in sobek administration
+      double precision, allocatable, dimension(:)  :: qlatsbk        !< see q1d in sobek administration
+      
+      type(t_model), dimension(2) :: model                           !< model information for dflow1d and dflowfm
    end type t_1d2d_data
    
-   type(t_1d2d_data), target :: d_1d2d
+   integer, public, parameter :: DFLOW1D = 1
+   integer, public, parameter :: DFLOWFM = 2
+   
+   type(t_1d2d_data), target, public :: d_1d2d
    contains
    
    subroutine init_iterative_coupler()
@@ -113,7 +124,7 @@ module iterative_coupler_1d2d
          ! ! mass conservation:
          ! MapDataFrom2Dto1DWithMassConvervation()
          ! successful = Flow1DModel.RunComputationalTimeStep(ref dt_flow1D)
-         ! qSobek = GetFromSobek('qtotal_2d1d')
+         ! q1d = GetFromSobek('qtotal_2d1d')
 
          success = success .and. Flow1DModel_FinalizeComputationalTimeStep()
          success = success .and. Flow2DModel_FinalizeComputationalTimeStep()
@@ -236,18 +247,18 @@ module iterative_coupler_1d2d
       double precision, pointer :: qlatfm(:)
       double precision, pointer :: qzetasbk(:)
       double precision, pointer :: qlatsbk(:)
-      double precision, pointer :: qsobek(:)
+      double precision, pointer :: q1d(:)
       double precision, pointer :: s1sobek(:)
       integer, pointer, dimension(:) :: ind
       integer :: i
       
       qzetafm => d_1d2d%qzetafm
       qlatfm  => d_1d2d%qlatfm
-      qsobek  => d_1d2d%qsobek
+      q1d  => d_1d2d%q1d
       s1sobek => d_1d2d%s1sobek 
      
       do i = 1, d_1d2d%connections_count
-         qSobek(i) = -qZetaFM(i) * s1Sobek(i) - qLatFM(i)
+         q1d(i) = -qZetaFM(i) * s1Sobek(i) - qLatFM(i)
       enddo
       
    end subroutine CalcQtotal_2d1d
