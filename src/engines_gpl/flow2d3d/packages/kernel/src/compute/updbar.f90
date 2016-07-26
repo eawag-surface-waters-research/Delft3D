@@ -141,27 +141,10 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
        m = m1 - incx
        n = n1 - incy
        !
-       if (btest(rtcmod,dataFromRTCToFLOW)) then
-          !
-          ! barriers are updated by RTC or via BMI
-          !
-          if (comparereal(cbuvrt(1,ibar),0.0_fp) == -1) then
-             !
-             ! BMI interface: It's     allowed that no values are specified
-             ! RTCmodule    : It's NOT allowed that no values are specified
-             !
-             if (rtcact == RTCmodule) then
-                write(errmsg,'(a,i0)') 'No valid value obtained from RTC for barrier number ', ibar
-                call prterr(lundia, 'P004', trim(errmsg))
-                call d3stop(1,gdp)
-             endif
-          else
-             cbuv(1, ibar) = cbuvrt(2, ibar)
-          endif
-       else
-          !
-          ! Use constant barrier height as read from file
-          !
+       ! Overrule barrier height if it has been set by RTC
+       !
+       if (btest(rtcmod,dataFromRTCToFLOW) .and. cbuvrt(1,ibar)>0) then
+          cbuv(1, ibar) = cbuvrt(2, ibar)
        endif
        hgate = cbuv(1, ibar)
        !

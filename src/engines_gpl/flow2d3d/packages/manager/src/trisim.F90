@@ -334,6 +334,7 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     use iso_c_utils
     use string_module
     use get_cloc_esm
+    use dfparall, only: d3df_comm_world
     !
     implicit none
     !
@@ -345,6 +346,8 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     include 'tri-dyn.igd'
     integer(pntrsize)             , pointer :: cbuvrt
     integer(pntrsize)             , pointer :: nambar
+    integer(pntrsize)             , pointer :: namsrc
+    integer(pntrsize)             , pointer :: qsrcrt
     !
     ! locals
     integer                           :: dim1
@@ -359,8 +362,6 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     character(len=strlen(c_var_name)) :: field_name   !< For parsing compound variable names.
     !
     ! body
-    cbuvrt => gdp%gdr_i_ch%cbuvrt
-    nambar => gdp%gdr_i_ch%nambar
     !
     var_name = char_array_to_string(c_var_name)
     ! Try to parse variable name as slash-separated id (e.g., 'weirs/Lith/crest_level')
@@ -369,7 +370,11 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     call str_token(tmp_var_name, set_name, DELIMS='/')
     call str_token(tmp_var_name, item_name, DELIMS='/')
     call str_token(tmp_var_name, field_name, DELIMS='/')
+    !
+    c_var_ptr = c_null_ptr
     select case(set_name)
+    case ("d3df_comm_world")
+       c_var_ptr = c_loc(d3df_comm_world)
     case ("filrtc")
        namlen = 20
        namdim = gdp%gdrtc%stacnt
@@ -383,6 +388,9 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
            return
        end select
     case ("filbar")
+       cbuvrt => gdp%gdr_i_ch%cbuvrt
+       nambar => gdp%gdr_i_ch%nambar
+       !
        namlen = 20
        namdim = gdp%d%nsluv
        call getStructureIndex(namlen, namdim, ch(nambar), item_name, item_index)
@@ -394,6 +402,24 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
            dim1 = 2
            dim2 = gdp%d%nsluv
            call get_esm_pointer2d(dim1, dim2, r(cbuvrt))
+           call get_cloc_esm2d(2, item_index, c_var_ptr)
+           return
+       end select
+    case ("filsrc")
+       namsrc => gdp%gdr_i_ch%namsrc
+       qsrcrt => gdp%gdr_i_ch%qsrcrt
+       !
+       namlen = 20
+       namdim = gdp%d%nsrc
+       call getStructureIndex(namlen, namdim, ch(namsrc), item_name, item_index)
+       if (item_index == 0) then
+           return
+       endif
+       select case(field_name)
+       case("discharge")
+           dim1 = 2
+           dim2 = gdp%d%nsrc
+           call get_esm_pointer2d(dim1, dim2, r(qsrcrt))
            call get_cloc_esm2d(2, item_index, c_var_ptr)
            return
        end select

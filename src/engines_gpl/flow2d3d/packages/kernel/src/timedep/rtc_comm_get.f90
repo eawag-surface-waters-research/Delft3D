@@ -90,10 +90,17 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,qsrcrt    ,nsrc     ,gd
     ! RTC  -> FLOW : get steering parameters for current date and time
     !
     if (rtcact == RTCviaBMI) then
+       !
+       ! set appropriate flag when values are set via BMI
+       !
        do id = 1, nsluv
           if (comparereal(cbuvrt(2,id), -998.0_fp) == 1) then
-             ! value set via BMI
-             cbuvrt(1,id) = 0.0_fp
+             cbuvrt(1,id) = 1.0_fp
+          endif
+       enddo
+       do id = 1, nsrc
+          if (comparereal(qsrcrt(2,id), -998.0_fp) == 1) then
+             qsrcrt(1,id) = 1.0_fp
           endif
        enddo
        !
