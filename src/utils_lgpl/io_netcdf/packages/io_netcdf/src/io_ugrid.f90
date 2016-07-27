@@ -32,6 +32,7 @@
 !! UGRID Conventions website: https://github.com/ugrid-conventions/ugrid-conventions
 module io_ugrid
 use netcdf
+use messagehandling
 implicit none
 
 ! TODO: AvD: GL2: add 'full_grid_output' support, to write 1. face_edge_connectivity; 2. edge_face_connectivity; and possibly more.
@@ -793,6 +794,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer                      :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    integer :: id_twodim
+   integer :: id_timedim
 
    real(kind=dp), allocatable :: edgexbnd(:,:), edgeybnd(:,:), facexbnd(:,:), faceybnd(:,:)
    integer :: maxnv, k, n
@@ -818,6 +820,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%id_edgedim)
    !ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes',        maxNumNodesPerFace,   meshids%id_maxfacenodesdim)
    ierr = nf90_def_dim(ncid, 'Two',                         2,       id_twodim)! TODO: AvD: duplicates!
+   ierr = nf90_def_dim(ncid, 'time',                        2,       id_timedim)! TODO: AvD: duplicates!
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       maxnv = size(face_nodes, 1)
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',        numFace,   meshids%id_facedim)
@@ -1306,6 +1309,9 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    ierr = nf90_get_var(ncid, meshids%id_nodex, xn)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read x coordinates')
+   end if 
    ierr = nf90_get_var(ncid, meshids%id_nodey, yn)
    ! TODO: AvD: some more careful error handling
 
@@ -1612,10 +1618,11 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     type(t_ug_meshgeom)   :: meshgeom !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_meshids)    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
-    integer :: id_s1, id_s2, id_u1, id_zk, itim ! example: water levels, water depth, edge speed, bed level and a timer
-    integer :: ncid
+    integer :: id_s1, id_s2, id_u1, id_zk, id_time, itim ! example: water levels, water depth, edge speed, bed level and a timer
+    integer :: ncid, id_timedim
     double precision, allocatable :: workf(:), worke(:), workn(:)
-
+    character(len=255) :: varnametime
+    varnametime = 'time'
     ! TODO: some if, to only do this at first time step
     ierr = nf90_create(filename, 0, ncid)
     if (ierr /= nf90_noerr) then
@@ -1627,18 +1634,20 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids)
 
-    ierr = nf90_redef(ncid)
+    ierr = nf90_inq_dimid(ncid, trim(varnametime), id_timedim)
 
-    ierr = ug_def_var(ncid, meshids, id_s1, (/ 2, meshids%id_facedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_height_above_geoid", "Water levels on cell centres", &
+    ierr = nf90_redef(ncid)    
+
+    ierr = ug_def_var(ncid, meshids, id_time, (/ id_timedim /), nf90_int, UG_LOC_NONE, "", "time", "time", "", &
+                    "seconds since 2008-01-09 00:00:00", "", meshgeom%crs, -1, -999d0)
+    
+    ierr = ug_def_var(ncid, meshids, id_s2, (/ meshids%id_facedim, id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
                     "m", "average", meshgeom%crs, -1, -999d0)
     
-    ierr = ug_def_var(ncid, meshids, id_s2, (/ 2, meshids%id_facedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
-                    "m", "average", meshgeom%crs, -1, -999d0)
-    
-    ierr = ug_def_var(ncid, meshids, id_u1, (/ 2, meshids%id_edgedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
+    ierr = ug_def_var(ncid, meshids, id_u1, (/ meshids%id_edgedim, id_timedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
                     "m s-1", "average", meshgeom%crs, -1, -999d0)
     
-    ierr = ug_def_var(ncid, meshids, id_zk, (/ 2, meshids%id_nodedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
+    ierr = ug_def_var(ncid, meshids, id_zk, (/ meshids%id_nodedim, id_timedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
                     "m", "point", meshgeom%crs, -1, -999d0)
     ! NOTE: zk is rarely time-dependent, but just as an example
 
@@ -1652,7 +1661,9 @@ function ug_write_map_ugrid(filename) result(ierr)
     workn = -7.68d0
     do itim=1,10
         workf(:) = workf(:) + itim ! Dummy data time-dependent
-        ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
+        ierr = nf90_put_var(ncid, id_time, 801d0)
+        
+        ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))        
         ierr = nf90_put_var(ncid, id_s2, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
 
         worke(:) = worke(:) + itim*.01d0 ! Dummy data time-dependent

@@ -103,6 +103,7 @@ module MessageHandling
    public getMaxErrorLevel
    public resetMaxerrorLevel
    public set_logger
+   public set_progress_c_callback
    public set_mh_callback
    public msg_flush
    public dbg_flush
@@ -226,7 +227,7 @@ end function stringtolevel
 !! its own threshold level. Note that the threshold level is only active if the
 !! output channel has been enabled. See the respective input arguments for enabling.
 !!
-subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel, thresholdLevel_stdout, thresholdLevel_log, thresholdLevel_file, reset_counters)
+subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel, thresholdLevel_stdout, thresholdLevel_log, thresholdLevel_file, reset_counters, thresholdLevel_callback)
    logical, optional, intent(in)       :: write2screen           !< Enable stdout: print messages to stdout.
    logical, optional, intent(in)       :: useLog                 !< Enable logging queue: store messages in buffer.
    integer, optional, intent(in)       :: lunMessages            !< Enable file output: nonzero file pointer whereto messages can be written.
@@ -235,6 +236,7 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    integer, optional, intent(in)       :: thresholdLevel_stdout  !< Threshold level specific for stdout channel.
    integer, optional, intent(in)       :: thresholdLevel_log     !< Threshold level specific for the logging queue channel.
    integer, optional, intent(in)       :: thresholdLevel_file    !< Threshold level specific for the file output channel.
+   integer, optional, intent(in)       :: thresholdLevel_callback!< Threshold level specific for the file output channel.
    logical, optional, intent(in)       :: reset_counters         !< If present and True then reset message counters.
                                                                  !< SetMessageHandling is called more than once.
 
@@ -263,6 +265,9 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    end if
    if (present(thresholdLevel_file) )  then
       thresholdLvl_file = thresholdLevel_file
+   end if
+   if (present(thresholdLevel_callback) )  then
+      thresholdLvl_callback = thresholdLevel_callback
    end if
 
    if (present(reset_counters)) then

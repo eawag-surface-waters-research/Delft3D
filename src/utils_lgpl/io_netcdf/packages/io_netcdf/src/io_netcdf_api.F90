@@ -283,6 +283,16 @@ function ionc_write_map_ugrid_dll(filename) result(ierr) bind(C, name="ionc_writ
    ierr = ionc_write_map_ugrid(file)
 end function ionc_write_map_ugrid_dll
 
+!> initialize
+function ionc_initialize_dll(c_msg_callback, c_prgs_callback) result(ierr) bind(C, name="ionc_initialize")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_initialize_dll
+   type(c_funptr), value    :: c_msg_callback   !< Set a callback that will be called with new messages
+   type(c_funptr), value    :: c_prgs_callback  !< Set a callback that will be called with new messages for progress
+   integer                  :: ierr             !< Result status, ionc_noerr if successful.
+   
+   ierr = ionc_initialize(c_msg_callback, c_prgs_callback)   
+end function ionc_initialize_dll
+
 !> Reads the number of names at a location
 function ionc_get_var_count_dll(ioncid, meshid, loctype, nvar) result(ierr) bind(C, name="ionc_get_var_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_count_dll

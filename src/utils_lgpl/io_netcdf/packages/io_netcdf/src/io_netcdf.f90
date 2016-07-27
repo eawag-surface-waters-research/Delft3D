@@ -70,6 +70,7 @@ public :: ionc_get_coordinate_system
 public :: ionc_write_geom_ugrid
 public :: ionc_write_mesh_struct
 public :: ionc_write_map_ugrid
+public :: ionc_initialize
 
 private
 
@@ -412,6 +413,30 @@ function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
    ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, meshgeom)
 end function ionc_write_mesh_struct
 
+
+!> Initialize
+function ionc_initialize(c_msg_callback,c_prgs_callback) result(ierr)
+   use messagehandling
+   use iso_c_binding
+   type(c_funptr), value    :: c_msg_callback   !< Set a callback that will be cauled with new messages
+   type(c_funptr), value    :: c_prgs_callback  !< Set a callback that will be cauled with new messages for progress
+   integer                  :: ierr             !< Result status, ionc_noerr if successful.
+   
+   call set_progress_c_callback(c_prgs_callback)
+   call progress("Finished initialization", 5.222d0);
+   call set_logger(c_msg_callback)   
+   call SetMessageHandling(write2screen = .false. , &
+                           useLog = .true., &
+                           callback = netcdferror, &
+                           thresholdLevel = LEVEL_INFO, &
+                           thresholdLevel_log = LEVEL_INFO, &
+                           thresholdLevel_callback = LEVEL_INFO, &
+                           reset_counters = .true.)
+   call SetMessage(LEVEL_INFO, 'Initialized with Rob')
+   call progress("Finished initialization", 100d0);
+   ierr = IONC_NOERR
+end function ionc_initialize
+
 !
 ! -- Private routines -----------------------------------------------------
 !
@@ -612,5 +637,14 @@ function set_datasets(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
 
 end function set_datasets
 
+subroutine netcdfError(errorLevel, message)
+    use MessageHandling
+    implicit none
+    integer, intent(in):: errorLevel
+    character(len=*), intent(in) :: message
+    if (errorLevel >= LEVEL_FATAL) then
+        !call closeall()
+    endif
+end subroutine netcdfError
 
 end module io_netcdf
