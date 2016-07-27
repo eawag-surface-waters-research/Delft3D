@@ -334,7 +334,7 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     use iso_c_utils
     use string_module
     use get_cloc_esm
-    use dfparall, only: d3df_comm_world
+    use dfparall, only: engine_comm_world
     !
     implicit none
     !
@@ -373,8 +373,8 @@ subroutine trisim_get_var(c_var_name, c_var_ptr, gdp)
     !
     c_var_ptr = c_null_ptr
     select case(set_name)
-    case ("d3df_comm_world")
-       c_var_ptr = c_loc(d3df_comm_world)
+    case ("engine_comm_world")
+       c_var_ptr = c_loc(engine_comm_world)
     case ("filrtc")
        namlen = 20
        namdim = gdp%gdrtc%stacnt

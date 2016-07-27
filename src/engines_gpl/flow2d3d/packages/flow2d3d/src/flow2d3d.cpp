@@ -201,9 +201,10 @@ Flow2D3D::Flow2D3D (
 
     XmlTree * dolconfig = this->DH->config->Lookup ("/deltaresHydro/delftOnline");
     if (dolconfig != NULL && this->DH->slaveArg == NULL ) {
-        // ToDo: Check enabled element
-        this->DH->log->Write (Log::MAJOR, "Initializing DelftOnline...");
-        this->flowol = new FlowOL (this->DH, dolconfig);
+		if (dolconfig->GetBoolElement ("enabled", true)) {
+            this->DH->log->Write (Log::MAJOR, "Initializing DelftOnline...");
+            this->flowol = new FlowOL (this->DH, dolconfig);
+		    }
         }
 
     // Initialize ESM/FSM
@@ -355,6 +356,9 @@ Flow2D3D::~Flow2D3D (
 
     if (this->runid != NULL)
         free (this->runid);
+	
+	if (this->flowol != NULL)
+		delete this->flowol;
 
     this->DH->log->Write (Log::MAJOR, "Flow2D3D instance destroyed");
     }

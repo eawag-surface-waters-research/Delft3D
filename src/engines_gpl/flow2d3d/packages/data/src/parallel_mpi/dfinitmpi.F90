@@ -134,9 +134,14 @@ subroutine dfinitmpi
        !
        ! early return if MPI was already initialized before...
        !
-       if (.not. mpi_is_initialized) then
+       if (mpi_is_initialized) then
+          mpi_initialized_by_engine = .FALSE.
+          ! external component should also have set engine_comm_world via BMI
+       else
+          mpi_initialized_by_engine = .TRUE.
 #ifdef HAVE_MPI
           call mpi_init ( ierr )
+          engine_comm_world = MPI_COMM_WORLD
 #endif
           if ( ierr /= MPI_SUCCESS ) then
              write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_init - return code is ',ierr

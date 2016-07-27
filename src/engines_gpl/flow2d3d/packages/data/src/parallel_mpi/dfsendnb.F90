@@ -77,7 +77,7 @@ subroutine dfsendnb ( iptr, ilen, itype, idest, itag, gdp )
     if (.not.parll) return
     !
 #ifdef HAVE_MPI
-    call mpi_isend ( iptr, ilen, itype, idest-1, itag, MPI_COMM_WORLD, request, ierr )
+    call mpi_isend ( iptr, ilen, itype, idest-1, itag, engine_comm_world, request, ierr )
     call mpi_wait(request, mpistatus, ierr)
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode

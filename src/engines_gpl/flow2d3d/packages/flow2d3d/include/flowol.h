@@ -70,6 +70,7 @@ class FlowOL {
 
     public:
         int     numSubdomains;
+		bool    mpiInitialized;
         DeltaresHydro * dh;     // DeltaresHydro object instance (only one)
 #ifdef WITH_DELFTONLINE
         DOL::Server *   dol;    // DOL server object reference (only one)

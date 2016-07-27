@@ -1642,7 +1642,7 @@ integer, dimension(:,:), allocatable      :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_I2e
 !
@@ -1769,7 +1769,7 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_R2e_sp2sp
 !
@@ -1936,7 +1936,7 @@ real(hp), dimension(:,:), allocatable  :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_R2e_hp2hp
 !
@@ -2069,7 +2069,7 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_R3e_sp2sp
 !
@@ -2241,7 +2241,7 @@ real(hp), dimension(:,:,:), allocatable :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_R3e_hp2hp
 !
@@ -2382,7 +2382,7 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_R4e_sp2sp
 !
@@ -2563,7 +2563,7 @@ real(hp), dimension(:,:,:,:), allocatable  :: inparr_slice
     endif
     deallocate(tmp)
 #ifdef HAVE_MPI
-call mpi_barrier(MPI_COMM_WORLD, ierr)
+call mpi_barrier(engine_comm_world, ierr)
 #endif
 end subroutine dfgather_R4e_hp2hp
 !

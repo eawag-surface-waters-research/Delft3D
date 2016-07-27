@@ -67,7 +67,7 @@ subroutine dfsync ( gdp )
     ! blocks until all nodes have called this routine
     !
 #ifdef HAVE_MPI
-    call mpi_barrier ( MPI_COMM_WORLD, ierr )
+    call mpi_barrier ( engine_comm_world, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
        call prterr(lundia, 'U021', trim(msgstr))

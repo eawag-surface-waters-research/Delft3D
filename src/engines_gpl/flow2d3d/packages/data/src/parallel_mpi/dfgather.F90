@@ -97,7 +97,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     ! gather the array sizes to the master
     !
 #ifdef HAVE_MPI
-    call mpi_gather( iilen, 1, dfint, icount, 1, dfint, master-1, MPI_COMM_WORLD, ierr )
+    call mpi_gather( iilen, 1, dfint, icount, 1, dfint, master-1, engine_comm_world, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
        call prterr(lundia, 'U021', trim(msgstr))
@@ -126,7 +126,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     ! gather different amounts of data from each processor to the master
     !
 #ifdef HAVE_MPI
-    call mpi_gatherv( iiptr, iilen, itype, ioptr, icount, idsplc, itype, master-1, MPI_COMM_WORLD, ierr )
+    call mpi_gatherv( iiptr, iilen, itype, ioptr, icount, idsplc, itype, master-1, engine_comm_world, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
        call prterr(lundia, 'U021', trim(msgstr))
@@ -143,8 +143,8 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !      !n = n - 1
 !      do onode = 1, nproc - 1
 !         if (icount(onode) /= 0) then
-!            !call mpi_recv ( ioptr(n+1:n+icount(onode)), icount(onode), itype, onode, itag, MPI_COMM_WORLD, istat, ierr )
-!            call mpi_recv ( ioptr, icount(onode), itype, onode, itag, MPI_COMM_WORLD, istat, ierr )
+!            !call mpi_recv ( ioptr(n+1:n+icount(onode)), icount(onode), itype, onode, itag, engine_comm_world, istat, ierr )
+!            call mpi_recv ( ioptr, icount(onode), itype, onode, itag, engine_comm_world, istat, ierr )
 !            if ( ierr /= MPI_SUCCESS ) then
 !               write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
 !               call prterr(lundia, 'U021', trim(msgstr))
@@ -155,7 +155,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !      enddo
 !   else
 !      if (iilen /= 0) then
-!         call mpi_send ( iiptr, iilen, itype, master-1, itag, MPI_COMM_WORLD, ierr )
+!         call mpi_send ( iiptr, iilen, itype, master-1, itag, engine_comm_world, ierr )
 !         if ( ierr /= MPI_SUCCESS ) then
 !            write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
 !            call prterr(lundia, 'U021', trim(msgstr))

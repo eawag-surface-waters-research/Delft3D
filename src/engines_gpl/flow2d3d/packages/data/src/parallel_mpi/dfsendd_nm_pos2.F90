@@ -136,14 +136,14 @@ subroutine dfsendd_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
        itag = tag
        !
 #ifdef HAVE_MPI
-       call mpi_isend ( work(1,inb,1), novlu*ksiz, MPI_DOUBLE_PRECISION, idom-1, itag, MPI_COMM_WORLD, request(inb,1), ierr )
+       call mpi_isend ( work(1,inb,1), novlu*ksiz, MPI_DOUBLE_PRECISION, idom-1, itag, engine_comm_world, request(inb,1), ierr )
        if ( ierr /= MPI_SUCCESS ) then
           write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
           call prterr(lundia, 'U021', trim(msgstr))
           call d3stop(1, gdp)
        endif
 
-       call mpi_irecv ( work(1,inb,2), novlu*ksiz, MPI_DOUBLE_PRECISION, idom-1, itag, MPI_COMM_WORLD, request(inb,2), ierr )
+       call mpi_irecv ( work(1,inb,2), novlu*ksiz, MPI_DOUBLE_PRECISION, idom-1, itag, engine_comm_world, request(inb,2), ierr )
        if ( ierr /= MPI_SUCCESS ) then
           write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
           call prterr(lundia, 'U021', trim(msgstr))
