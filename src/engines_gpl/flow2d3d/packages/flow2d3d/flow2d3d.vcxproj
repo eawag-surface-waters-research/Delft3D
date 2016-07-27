@@ -119,7 +119,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;src;src/dd;src/dd/iterators;src/dd/mapper;../../../../third_party_open/mpich2/include;../../../../third_party_open/pthreads/include/x64;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat_x64\x64\release;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl\deltares_common\packages\deltares_common_c\include\;../../../../utils_lgpl/delftonline/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WITH_DELFTONLINE;WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
