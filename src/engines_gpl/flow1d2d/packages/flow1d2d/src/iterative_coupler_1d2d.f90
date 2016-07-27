@@ -29,7 +29,10 @@ module iterative_coupler_1d2d
       double precision, allocatable, dimension(:)  :: qlatfm         !< see q1d
       double precision, allocatable, dimension(:)  :: qzetasbk       !< see q1d in sobek administration
       double precision, allocatable, dimension(:)  :: qlatsbk        !< see q1d in sobek administration
-      
+      double precision, allocatable, dimension(:)  :: x_1d           !< x-coordinate of 1d model
+      double precision, allocatable, dimension(:)  :: y_1d           !< y-coordinate of 1d model
+      double precision, allocatable, dimension(:)  :: x_2d           !< x-coordinate of 2d model
+      double precision, allocatable, dimension(:)  :: y_2d           !< y-coordinate of 2d model
       type(t_model), dimension(2) :: model                           !< model information for dflow1d and dflowfm
    end type t_1d2d_data
    
