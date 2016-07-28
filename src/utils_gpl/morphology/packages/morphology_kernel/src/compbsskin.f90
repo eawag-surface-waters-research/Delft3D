@@ -116,8 +116,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     !
     ! Set constants
     !
-    ar    = 0.26
-    as    = 0.22
+    ar    = 0.24
+    as    = 0.24
     rewcr = 1.5e5
     !
     ! Compute basic parameters
@@ -140,7 +140,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
        phiwr  = (teta - phicur) * degrad
        uorbm  = max( uorb , 0.01_fp )
        aorb   = uorbm * tper / 2.0 / pi
-       rew    = uorbm * aorb / vicmol
+       rew    = max(uorbm * aorb / vicmol, 1e3_fp) ! limit rew to avoid t1->1 and a1,a2->Inf in computation of taums 
        fws    = 0.0521 * rew**(-0.187)
        fwr    = 1.39 * (aorb/z0silt)**(-0.52)
     endif
