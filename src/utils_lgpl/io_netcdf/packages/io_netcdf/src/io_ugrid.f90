@@ -1100,6 +1100,8 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    integer                        :: ierr    !< Result status (UG_NOERR if successful).
 
    character(len=255) :: varname
+   integer :: id
+   integer ::dimids(2)
 
    meshids%id_meshtopo        = varid              !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
 
@@ -1109,7 +1111,24 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    call att_to_dimid('node_dimension', meshids%id_nodedim)
    call att_to_dimid('edge_dimension', meshids%id_edgedim)
    call att_to_dimid('face_dimension', meshids%id_facedim)
+
    call att_to_dimid('max_face_nodes_dimension', meshids%id_maxfacenodesdim)
+   if (ierr /= nf90_noerr) then
+      ! The non-UGRID max_face_nodes_dimension was not found. Detect it ourselves.
+      ierr = nf90_get_att(ncid, meshids%id_meshtopo, 'face_node_connectivity', varname)
+      id = 0
+      ierr = nf90_inq_varid(ncid, trim(varname), id)
+      ! Get the dimension ids from the face-nodes variable, and select the correct one from that.
+      ierr = nf90_inquire_variable(ncid, id, dimids=dimids)
+      if (ierr == nf90_noerr) then
+         if (dimids(1) == meshids%id_facedim) then
+            meshids%id_maxfacenodesdim = dimids(2) ! the other
+         else
+            meshids%id_maxfacenodesdim = dimids(1)
+         end if
+      end if
+   end if
+
    
    !
    ! Coordinate variables
