@@ -1139,6 +1139,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    call att_to_dimid('max_face_nodes_dimension', meshids%id_maxfacenodesdim)
    if (ierr /= nf90_noerr) then
       ! The non-UGRID max_face_nodes_dimension was not found. Detect it ourselves.
+      varname = ''
       ierr = nf90_get_att(ncid, meshids%id_meshtopo, 'face_node_connectivity', varname)
       id = 0
       ierr = nf90_inq_varid(ncid, trim(varname), id)
