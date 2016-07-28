@@ -61,6 +61,7 @@ integer, parameter :: UG_SOMEERR               = 10 !< Some unspecified error.
 integer, parameter :: UG_INVALID_MESHNAME      = 11
 integer, parameter :: UG_INVALID_MESHDIMENSION = 12
 integer, parameter :: UG_INVALID_DATALOCATION  = 13
+integer, parameter :: UG_ARRAY_TOOSMALL        = 14 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
 integer, parameter :: UG_INVALID_CRS           = 30 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_NOTIMPLEMENTED        = 99
 
@@ -575,6 +576,29 @@ function ug_checklocation(dataLocsCode, locType) result(is_used)
    ! Perform logical AND to determine whether locType is inside dataLocs 'set'.
    is_used = iand(dataLocsCode, locType) == locType
 end function ug_checklocation
+
+
+
+!> Translates the string name of a topological location into the integer location type.
+subroutine ug_location_to_loctype(locName, locType)
+   character(len=*), intent(in)    :: locName !< String name of the location, e.g., as read from a :location attribute value.
+   integer,          intent(  out) :: locType !< Integer location code (one of UG_LOC_NODE, UG_LOC_EDGE, UG_LOC_FACE, UG_LOC_VOL).
+
+   select case (trim(locName))
+   case ('face')
+      locType = UG_LOC_FACE
+   case ('edge')
+      locType = UG_LOC_EDGE
+   case ('node')
+      locType = UG_LOC_NODE
+   case ('volume')
+      locType = UG_LOC_VOL
+   case default
+      locType = UG_LOC_NONE
+   end select   
+
+end subroutine ug_location_to_loctype
+
 
 !> Write mesh topoplogy
 !! This only writes the mesh topology variable, not the other variables that are part of the mesh.
@@ -1366,6 +1390,129 @@ function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)
    ! TODO: AvD: also introduce 0-/1-based indexing handling.
 
 end function ug_get_face_nodes
+
+
+!> Returns the number of variables that are available in the specified dataset on the specified mesh.
+!! The location type allows to select on specific topological mesh locations
+!! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
+   integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,             intent(in)    :: iloctype !< The topological location on which to select data (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer,             intent(  out) :: nvar     !< Number of variables defined on the requested location type+mesh+dataset.
+   integer                            :: ierr     !< Result status, ug_noerr if successful.
+
+   integer :: numVar, iv, ivarloc
+   character(len=255) :: str, meshname
+
+   ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
+   if (ierr /= nf90_noerr) then
+      ierr = UG_INVALID_MESHNAME
+      goto 999
+   end if
+
+   ! Now check all variables and if they're data variables on the right mesh+location.
+   ierr = nf90_inquire(ncid, nVariables = numVar)
+
+   nvar = 0
+   do iv=1,numVar
+      ! Step 1 of 2: check mesh name
+      ierr = nf90_get_att(ncid, iv, 'mesh', str)
+      if (ierr /= nf90_noerr) then
+         ! No UGRID :mesh attribute, ignore this var.
+         cycle
+      end if
+      
+      if (trim(str) /= trim(meshname)) then
+         ! Mesh names do not match
+         cycle
+      end if
+
+      ! Step 2 of 2: check location name
+      ierr = nf90_get_att(ncid, iv, 'location', str)
+      if (ierr /= nf90_noerr) then
+         ! No UGRID :location attribute, ignore this var.
+         cycle
+      end if
+      call ug_location_to_loctype(str, ivarloc)
+      if (ug_checklocation(iloctype, ivarloc)) then
+         ! This variable is ok. Mesh matched, and now the location also matched.
+         nvar = nvar + 1
+      end if
+   end do
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+end function ug_get_var_count
+
+
+!> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
+!! The location type allows to select on specific topological mesh locations
+!! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
+function ug_inq_varids(ncid, meshids, iloctype, varids) result(ierr)
+   integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,             intent(in)    :: iloctype !< The topological location on which to select data variables (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer,             intent(  out) :: varids(:) !< Array to store the variable ids in.
+   integer                            :: ierr     !< Result status, ug_noerr if successful.
+
+   integer :: numVar, iv, ivarloc, nvar, maxvar
+   character(len=255) :: str, meshname
+
+   ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
+   if (ierr /= nf90_noerr) then
+      ierr = UG_INVALID_MESHNAME
+      goto 999
+   end if
+
+   ! Now check all variables and if they're data variables on the right mesh+location.
+   ierr = nf90_inquire(ncid, nVariables = numVar)
+
+   maxvar = size(varids)
+   nvar = 0
+   do iv=1,numVar
+      ! Step 1 of 2: check mesh name
+      ierr = nf90_get_att(ncid, iv, 'mesh', str)
+      if (ierr /= nf90_noerr) then
+         ! No UGRID :mesh attribute, ignore this var.
+         cycle
+      end if
+      
+      if (trim(str) /= trim(meshname)) then
+         ! Mesh names do not match
+         cycle
+      end if
+
+      ! Step 2 of 2: check location name
+      ierr = nf90_get_att(ncid, iv, 'location', str)
+      if (ierr /= nf90_noerr) then
+         ! No UGRID :location attribute, ignore this var.
+         cycle
+      end if
+      call ug_location_to_loctype(str, ivarloc)
+      if (ug_checklocation(iloctype, ivarloc)) then
+         ! This variable is ok. Mesh matched, and now the location also matched.
+         if (nvar >= maxvar) then
+            ierr = UG_ARRAY_TOOSMALL
+            goto 999
+         end if
+
+         nvar = nvar + 1
+         varids(nvar) = iv
+      end if
+   end do
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+end function ug_inq_varids
 
 !> Writes the given edge type variable to the given netcdf file.
 subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)

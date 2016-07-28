@@ -293,39 +293,43 @@ function ionc_initialize_dll(c_msg_callback, c_prgs_callback) result(ierr) bind(
    ierr = ionc_initialize(c_msg_callback, c_prgs_callback)   
 end function ionc_initialize_dll
 
-!> Reads the number of names at a location
-function ionc_get_var_count_dll(ioncid, meshid, loctype, nvar) result(ierr) bind(C, name="ionc_get_var_count")
+
+!> Returns the number of variables that are available in the specified dataset on the specified mesh.
+!! The location type allows to select on specific topological mesh locations
+!! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+function ionc_get_var_count_dll(ioncid, meshid, iloctype, nvar) result(ierr) bind(C, name="ionc_get_var_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_count_dll
-   integer(kind=c_int), intent(in   )  :: ioncid  !< The IONC data set id.
-   integer(kind=c_int), intent(in   )  :: meshid  !< The mesh id in the specified data set.
-   integer(kind=c_int), intent(in   )  :: loctype !< The location where the variables are at.
-   integer(kind=c_int), intent(  out)  :: nvar    !< The number of variables in the mesh at this location. 
-   integer(kind=c_int)                 :: ierr    !< Result status, ionc_noerr if successful.
-   
-   ierr = 0
-   nvar = 2
+   integer(kind=c_int),             intent(in)    :: ioncid   !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer(kind=c_int),             intent(  out) :: nvar     !< Number of variables defined on the requested location type+mesh+dataset.
+   integer(kind=c_int)                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   ierr = ionc_get_var_count(ioncid, meshid, iloctype, nvar)
+
 end function ionc_get_var_count_dll
 
-!> Reads the variables names at a location
-function ionc_get_var_names_id_dll(ioncid, meshid, loctype, c_var_names_ptr, nvar) result(ierr) bind(C, name="ionc_get_var_names_id")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_names_id_dll
-   integer(kind=c_int), intent(in   )  :: ioncid         !< The IONC data set id.
-   integer(kind=c_int), intent(in   )  :: meshid         !< The mesh id in the specified data set.
-   integer(kind=c_int), intent(in   )  :: loctype        !< The location where the variables are at.
-   type(c_ptr),         intent(  out)  :: c_var_names_ptr !< Pointer to array for the varnames at this location.
-   integer(kind=c_int), intent(in   )  :: nvar           !< The number of variables in the mesh at this location. 
-   integer(kind=c_int)                 :: ierr           !< Result status, ionc_noerr if successful.
-   
-   integer, pointer :: var_names_id(:)
 
-   call c_f_pointer(c_var_names_ptr, var_names_id, (/nvar/))
+!> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
+!! The location type allows to select on specific topological mesh locations
+!! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
+function ionc_inq_varids_dll(ioncid, meshid, iloctype, c_varids_ptr, nvar) result(ierr) bind(C, name="ionc_inq_varids")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_varids_dll
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer,             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   type(c_ptr),         intent(  out) :: c_varids_ptr !< Pointer to array for the variable ids.
+   integer,             intent(in)    :: nvar    !< The number of variables in the target array. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
 
-   ierr = 0
-   
-   var_names_id(1) = 801
-   var_names_id(2) = 802
+   integer, pointer :: varids(:)
 
-end function ionc_get_var_names_id_dll
+   call c_f_pointer(c_varids_ptr, varids, (/ nvar /))
+
+   ierr = ionc_inq_varids(ioncid, meshid, iloctype, varids)
+
+end function ionc_inq_varids_dll
+
 
 ! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
 !> Add the global attributes to a NetCDF file 

@@ -67,6 +67,8 @@ public :: ionc_get_node_coordinates
 public :: ionc_get_edge_nodes
 public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
+public :: ionc_get_var_count
+public :: ionc_inq_varids
 public :: ionc_write_geom_ugrid
 public :: ionc_write_mesh_struct
 public :: ionc_write_map_ugrid
@@ -189,7 +191,7 @@ function ionc_adheresto_conventions(ioncid, iconvtype) result(does_adhere)
       goto 999
    end if
 
-   ! Perform logical AND to determine whether locType is inside dataset's conventions 'set'.
+   ! Perform logical AND to determine whether iconvtype is inside dataset's conventions 'set'.
    does_adhere = iand(datasets(ioncid)%iconvtype, iconvtype) == iconvtype
 
    ! Successful
@@ -374,6 +376,40 @@ function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
    !is_spherical = datasets(ioncid)%crs%is_spherical
    !epsg_code = datasets(ioncid)%crs%varvalue
 end function ionc_get_coordinate_system
+
+
+!> Returns the number of variables that are available in the specified dataset on the specified mesh.
+!! The location type allows to select on specific topological mesh locations
+!! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+function ionc_get_var_count(ioncid, meshid, iloctype, nvar) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer,             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer,             intent(  out) :: nvar     !< Number of variables defined on the requested location type+mesh+dataset.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_get_var_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), iloctype, nvar)
+
+end function ionc_get_var_count
+
+
+!> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
+!! The location type allows to select on specific topological mesh locations
+!! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
+function ionc_inq_varids(ioncid, meshid, iloctype, varids) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer,             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer,             intent(  out) :: varids(:) !< Array to store the variable ids in.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inq_varids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), iloctype, varids)
+
+end function ionc_inq_varids
+
 
 !> Writes a complete mesh geometry
 function ionc_write_geom_ugrid(filename) result(ierr)
