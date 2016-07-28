@@ -1287,7 +1287,7 @@ end function ug_get_mesh_count
 !> Gets the size/count of items for the specified topological location.
 !! Use this to get the number of nodes/edges/faces/volumes.
 function ug_inquire_dimension(ncid, meshids, idimtype, len) result(ierr)
-   integer,            intent(in)    :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
+   integer,            intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_meshids), intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,            intent(in)    :: idimtype !< The location type to count (one of UG_LOC_NODE, UG_LOC_EDGE, UG_LOC_FACE, UG_LOC_VOL).
    integer,            intent(  out) :: len      !< The number of items for that location.
@@ -1322,7 +1322,7 @@ end function ug_inquire_dimension
 !> Gets the x,y-coordinates for all nodes in the specified mesh.
 !! The output x,y arrays are supposed to be of exact correct length already.
 function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
-   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
    type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    real(kind=dp),      intent(out) :: xn(:), yn(:) !< Arrays to store x,y-coordinates of the mesh nodes.
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
@@ -1340,7 +1340,7 @@ end function ug_get_node_coordinates
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
 !! The output edge_nodes array is supposed to be of exact correct size already.
 function ug_get_edge_nodes(ncid, meshids, edge_nodes) result(ierr)
-   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
    type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,            intent(out) :: edge_nodes(:,:) !< Array to the edge-node connectivity table.
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERRif successful).
@@ -1355,7 +1355,7 @@ end function ug_get_edge_nodes
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
 function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)
-   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open and ready for writing.
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
    type(t_ug_meshids), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,            intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERRif successful).
