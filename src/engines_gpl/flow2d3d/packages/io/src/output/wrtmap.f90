@@ -189,6 +189,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     integer                                       :: i             ! Help var.
     integer                                       :: ierror        ! Local error flag
     integer                                       :: istat
+    integer                                       :: k
     integer                                       :: km
     integer                                       :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
     integer                                       :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
@@ -686,7 +687,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_DUDT'
           !
           if (associated(gdp%gdflwpar%mom_m_velchange)) then
-             gdp%gdflwpar%mom_m_velchange = gdp%gdflwpar%mom_m_velchange / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_velchange(nm,k) = gdp%gdflwpar%mom_m_velchange(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', &
@@ -697,7 +702,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UDENSITY'
           !
           if (associated(gdp%gdflwpar%mom_m_densforce)) then
-             gdp%gdflwpar%mom_m_densforce = gdp%gdflwpar%mom_m_densforce / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_densforce(nm,k) = gdp%gdflwpar%mom_m_densforce(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', &
@@ -708,7 +717,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_URESISTANCE'
           !
           if (associated(gdp%gdflwpar%mom_m_flowresist)) then
-             gdp%gdflwpar%mom_m_flowresist = gdp%gdflwpar%mom_m_flowresist / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_flowresist(nm,k) = gdp%gdflwpar%mom_m_flowresist(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', &
@@ -719,7 +732,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UCORIOLIS'
           !
           if (associated(gdp%gdflwpar%mom_m_corioforce)) then
-             gdp%gdflwpar%mom_m_corioforce = gdp%gdflwpar%mom_m_corioforce / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_corioforce(nm,k) = gdp%gdflwpar%mom_m_corioforce(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', &
@@ -730,7 +747,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UVISCO'
           !
           if (associated(gdp%gdflwpar%mom_m_visco)) then
-             gdp%gdflwpar%mom_m_visco = gdp%gdflwpar%mom_m_visco / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_visco(nm,k) = gdp%gdflwpar%mom_m_visco(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', &
@@ -741,7 +762,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UPRESSURE'
           !
           if (associated(gdp%gdflwpar%mom_m_pressure)) then
-             gdp%gdflwpar%mom_m_pressure = gdp%gdflwpar%mom_m_pressure / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_m_pressure(nm) = gdp%gdflwpar%mom_m_pressure(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_m_pressure, 'MOM_UPRESSURE')
@@ -751,7 +774,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UTIDEGEN'
           !
           if (associated(gdp%gdflwpar%mom_m_tidegforce)) then
-             gdp%gdflwpar%mom_m_tidegforce = gdp%gdflwpar%mom_m_tidegforce / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_m_tidegforce(nm) = gdp%gdflwpar%mom_m_tidegforce(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_m_tidegforce, 'MOM_UTIDEGEN')
@@ -761,7 +786,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UWINDFORCE'
           !
           if (associated(gdp%gdflwpar%mom_m_windforce)) then
-             gdp%gdflwpar%mom_m_windforce = gdp%gdflwpar%mom_m_windforce / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_m_windforce(nm) = gdp%gdflwpar%mom_m_windforce(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_m_windforce, 'MOM_UWINDFORCE')
@@ -771,7 +798,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UBEDSHEAR'
           !
           if (associated(gdp%gdflwpar%mom_m_bedforce)) then
-             gdp%gdflwpar%mom_m_bedforce = gdp%gdflwpar%mom_m_bedforce / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_m_bedforce(nm) = gdp%gdflwpar%mom_m_bedforce(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_m_bedforce, 'MOM_UBEDSHEAR')
@@ -781,7 +810,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UWAVES'
           !
           if (associated(gdp%gdflwpar%mom_m_waveforce)) then
-             gdp%gdflwpar%mom_m_waveforce = gdp%gdflwpar%mom_m_waveforce / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_waveforce(nm,k) = gdp%gdflwpar%mom_m_waveforce(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', &
@@ -792,7 +825,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UDUDX'
           !
           if (associated(gdp%gdflwpar%mom_m_convec)) then
-             gdp%gdflwpar%mom_m_convec = gdp%gdflwpar%mom_m_convec / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_convec(nm,k) = gdp%gdflwpar%mom_m_convec(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', &
@@ -803,7 +840,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VDUDY'
           !
           if (associated(gdp%gdflwpar%mom_m_xadvec)) then
-             gdp%gdflwpar%mom_m_xadvec = gdp%gdflwpar%mom_m_xadvec / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_m_xadvec(nm,k) = gdp%gdflwpar%mom_m_xadvec(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', &
@@ -816,7 +857,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_DVDT'
           !
           if (associated(gdp%gdflwpar%mom_n_velchange)) then
-             gdp%gdflwpar%mom_n_velchange = gdp%gdflwpar%mom_n_velchange / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_velchange(nm,k) = gdp%gdflwpar%mom_n_velchange(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', &
@@ -827,7 +872,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VDENSITY'
           !
           if (associated(gdp%gdflwpar%mom_n_densforce)) then
-             gdp%gdflwpar%mom_n_densforce = gdp%gdflwpar%mom_n_densforce / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_densforce(nm,k) = gdp%gdflwpar%mom_n_densforce(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', &
@@ -838,7 +887,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VRESISTANCE'
           !
           if (associated(gdp%gdflwpar%mom_n_flowresist)) then
-             gdp%gdflwpar%mom_n_flowresist = gdp%gdflwpar%mom_n_flowresist / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_flowresist(nm,k) = gdp%gdflwpar%mom_n_flowresist(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', &
@@ -849,7 +902,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VCORIOLIS'
           !
           if (associated(gdp%gdflwpar%mom_n_corioforce)) then
-             gdp%gdflwpar%mom_n_corioforce = gdp%gdflwpar%mom_n_corioforce / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_corioforce(nm,k) = gdp%gdflwpar%mom_n_corioforce(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', &
@@ -860,7 +917,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VVISCO'
           !
           if (associated(gdp%gdflwpar%mom_n_visco)) then
-             gdp%gdflwpar%mom_n_visco = gdp%gdflwpar%mom_n_visco / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_visco(nm,k) = gdp%gdflwpar%mom_n_visco(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', &
@@ -871,7 +932,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VPRESSURE'
           !
           if (associated(gdp%gdflwpar%mom_n_pressure)) then
-             gdp%gdflwpar%mom_n_pressure = gdp%gdflwpar%mom_n_pressure / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_n_pressure(nm) = gdp%gdflwpar%mom_n_pressure(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_n_pressure, 'MOM_VPRESSURE')
@@ -881,7 +944,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VTIDEGEN'
           !
           if (associated(gdp%gdflwpar%mom_n_tidegforce)) then
-             gdp%gdflwpar%mom_n_tidegforce = gdp%gdflwpar%mom_n_tidegforce / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_n_tidegforce(nm) = gdp%gdflwpar%mom_n_tidegforce(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_n_tidegforce, 'MOM_VTIDEGEN')
@@ -891,7 +956,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VWINDFORCE'
           !
           if (associated(gdp%gdflwpar%mom_n_windforce)) then
-             gdp%gdflwpar%mom_n_windforce = gdp%gdflwpar%mom_n_windforce / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_n_windforce(nm) = gdp%gdflwpar%mom_n_windforce(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_n_windforce, 'MOM_VWINDFORCE')
@@ -901,7 +968,9 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VBEDSHEAR'
           !
           if (associated(gdp%gdflwpar%mom_n_bedforce)) then
-             gdp%gdflwpar%mom_n_bedforce = gdp%gdflwpar%mom_n_bedforce / mom_accum
+             do nm = 1,nmmax
+                 gdp%gdflwpar%mom_n_bedforce(nm) = gdp%gdflwpar%mom_n_bedforce(nm) / mom_accum
+             enddo
              call wrtarray_nm_2d(fds, filename, filetype, grnam3, celidt, &
                           & nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, lundia, gdp%gdflwpar%mom_n_bedforce, 'MOM_VBEDSHEAR')
@@ -911,7 +980,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VWAVES'
           !
           if (associated(gdp%gdflwpar%mom_n_waveforce)) then
-             gdp%gdflwpar%mom_n_waveforce = gdp%gdflwpar%mom_n_waveforce / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_waveforce(nm,k) = gdp%gdflwpar%mom_n_waveforce(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', &
@@ -922,7 +995,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_VDVDY'
           !
           if (associated(gdp%gdflwpar%mom_n_convec)) then
-             gdp%gdflwpar%mom_n_convec = gdp%gdflwpar%mom_n_convec / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_convec(nm,k) = gdp%gdflwpar%mom_n_convec(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', &
@@ -933,7 +1010,11 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           ! element 'MOM_UDVDX'
           !
           if (associated(gdp%gdflwpar%mom_n_xadvec)) then
-             gdp%gdflwpar%mom_n_xadvec = gdp%gdflwpar%mom_n_xadvec / mom_accum
+             do k = 1,kmax
+                 do nm = 1,nmmax
+                     gdp%gdflwpar%mom_n_xadvec(nm,k) = gdp%gdflwpar%mom_n_xadvec(nm,k) / mom_accum
+                 enddo
+             enddo
              call wrtarray_nmk(fds, filename, filetype, grnam3, celidt, &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, ierror, lundia, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', &
