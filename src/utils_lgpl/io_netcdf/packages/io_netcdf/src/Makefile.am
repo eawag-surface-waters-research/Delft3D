@@ -14,7 +14,8 @@ noinst_LTLIBRARIES = libIONetcdf.la
 AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 
 FMODULES += \
-	-I$(NETCDFROOT)/include
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+    -I$(NETCDFROOT)/include
 
 #-------------------------------------------------------------------------------
 #Sources
