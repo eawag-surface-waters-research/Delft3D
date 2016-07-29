@@ -82,17 +82,17 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, error, msgstr )
         allocate(ibuff(ilen), stat = istat)
         if (istat /= 0) goto 999
         ibuff = 0
-        call mpi_allreduce ( iptr, ibuff, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+        call mpi_allreduce ( iptr, ibuff, ilen, itype, ityprd, engine_comm_world, ierr )
     else if ( itype == dfreal ) then
         allocate(sbuff(ilen), stat = istat)
         if (istat /= 0) goto 999
         sbuff = 0.0_sp
-        call mpi_allreduce ( iptr, sbuff, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+        call mpi_allreduce ( iptr, sbuff, ilen, itype, ityprd, engine_comm_world, ierr )
     else if ( itype == dfdble ) then
         allocate(dbuff(ilen), stat = istat)
         if (istat /= 0) goto 999
         dbuff = 0.0_hp
-        call mpi_allreduce ( iptr, dbuff, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
+        call mpi_allreduce ( iptr, dbuff, ilen, itype, ityprd, engine_comm_world, ierr )
     endif
     !
     if ( ierr /= MPI_SUCCESS ) then

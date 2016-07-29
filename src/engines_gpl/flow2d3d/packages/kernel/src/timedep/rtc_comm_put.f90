@@ -40,6 +40,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     use flow2d3d_timers
     use SyncRtcFlow
     use globaldata
+    use dfparall, only: dfloat, dfsum
     !
     implicit none
     !
@@ -47,25 +48,26 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer                       , pointer :: ifirstrtc
-    integer                       , pointer :: kmax
-    integer                       , pointer :: lstsci
-    integer      , dimension(:,:) , pointer :: mnrtcsta
-    integer                       , pointer :: parput_offset
-    integer                       , pointer :: rtc_domainnr
-    integer                       , pointer :: rtc_ndomains
-    integer                       , pointer :: rtcmod
-    integer                       , pointer :: rtcact
-    logical                       , pointer :: anyFLOWtoRTC
-    real(fp)     , dimension(:)   , pointer :: s1rtcsta
-    integer                       , pointer :: stacnt
-    real(fp)                      , pointer :: timsec
-    integer                       , pointer :: tnlocput
-    integer                       , pointer :: tnparput
-    real(fp)     , dimension(:,:) , pointer :: tparput
-    character(80), dimension(:)   , pointer :: tlocput_names
-    character(80), dimension(:)   , pointer :: tparput_names
-    real(fp)     , dimension(:,:) , pointer :: zrtcsta
+    integer                         , pointer :: ifirstrtc
+    integer                         , pointer :: kmax
+    integer                         , pointer :: lstsci
+    integer      , dimension(:,:)   , pointer :: mnrtcsta
+    integer                         , pointer :: parput_offset
+    integer                         , pointer :: rtc_domainnr
+    integer                         , pointer :: rtc_ndomains
+    integer                         , pointer :: rtcmod
+    integer                         , pointer :: rtcact
+    logical                         , pointer :: anyFLOWtoRTC
+    integer                         , pointer :: stacnt
+    real(fp)                        , pointer :: timsec
+    integer                         , pointer :: tnlocput
+    integer                         , pointer :: tnparput
+    real(fp)     , dimension(:,:)   , pointer :: tparput
+    character(80), dimension(:)     , pointer :: tlocput_names
+    character(80), dimension(:)     , pointer :: tparput_names
+    real(fp)     , dimension(:,:,:) , pointer :: r0rtcsta
+    real(fp)     , dimension(:)     , pointer :: s1rtcsta
+    real(fp)     , dimension(:,:)   , pointer :: zrtcsta
 !
 ! Global variables
 !
@@ -102,7 +104,6 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     rtcmod         => gdp%gdrtc%rtcmod
     rtcact         => gdp%gdrtc%rtcact
     anyFLOWtoRTC   => gdp%gdrtc%anyFLOWtoRTC
-    s1rtcsta       => gdp%gdrtc%s1rtcsta
     stacnt         => gdp%gdrtc%stacnt
     timsec         => gdp%gdinttim%timsec
     tnlocput       => gdp%gdrtc%tnlocput
@@ -110,14 +111,27 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     tparput        => gdp%gdrtc%tparput
     tlocput_names  => gdp%gdrtc%tlocput_names
     tparput_names  => gdp%gdrtc%tparput_names
+    r0rtcsta       => gdp%gdrtc%r0rtcsta
+    s1rtcsta       => gdp%gdrtc%s1rtcsta
     zrtcsta        => gdp%gdrtc%zrtcsta
     !
     ! FLOW -> RTC  : send parameters (salinity levels)
     ! RTC  -> FLOW : no communication
     !
     if (anyFLOWtoRTC) then
+       !
+       ! fill the r0rtcsta, s1rtcsta, zrtcsta arrays
+       !
        call zrtc(gdp%d%mlb, gdp%d%mub, gdp%d%nlb, gdp%d%nub, kfs, kfsmin, &
-               & kfsmax, sig, zk, s1, dps, kmax, gdp)
+               & kfsmax, sig, zk, s1, dps, r0, kmax, lstsci, gdp)
+       !
+       ! for parallel simulations: collect data on master node
+       !
+       if (lstsci>0) then
+           call dfreduce_gdp (r0rtcsta, lstsci*kmax*stacnt, dfloat, dfsum, gdp)
+       endif
+       call dfreduce_gdp (s1rtcsta,             stacnt, dfloat, dfsum, gdp)
+       call dfreduce_gdp ( zrtcsta,        kmax*stacnt, dfloat, dfsum, gdp)
        if (rtcact == RTCmodule) then
           !
           ! Collect parameters for this domain
@@ -130,7 +144,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
                 tparput(1,iloc) = zrtcsta(k,i)
                 tparput(2,iloc) = s1rtcsta(i)
                 do l = 1,lstsci
-                   tparput(2+l,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, l)
+                   tparput(2+l,iloc) = r0rtcsta(l,k,i)
                 enddo
              enddo
           enddo

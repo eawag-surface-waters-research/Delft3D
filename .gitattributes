@@ -765,6 +765,7 @@ src/engines_gpl/flow2d3d/packages/io/src/input/restart_lyrs.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/roller_nefis_restart.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rstfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/search2.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/split_stations.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/srcfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/stafil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/strfil.f90 -text

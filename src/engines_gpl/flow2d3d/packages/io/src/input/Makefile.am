@@ -35,6 +35,7 @@ FMODULES += \
 #Sources
 libIOInput_la_SOURCES = \
          restart_lyrs.f90 \
+         split_stations.f90 \
          barfil.f90 \
          bndfil.f90 \
          bubfil.f90 \

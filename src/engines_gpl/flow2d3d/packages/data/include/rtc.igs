@@ -62,15 +62,18 @@ type sv_rtc
     !
     ! pointers
     !
-    real(fp)     , dimension(:,:), pointer :: zrtcsta         ! elevation of layer centres at the stations to be communicated to RTC
-    real(fp)     , dimension(:)  , pointer :: s1rtcsta        ! water level at the stations to be communicated to RTC
-    real(fp)     , dimension(:,:), pointer :: tparget         ! array for all parameters to get from RTC
-    real(fp)     , dimension(:,:), pointer :: tparput         ! array for all parameters to put to RTC
-    integer      , dimension(:,:), pointer :: mnrtcsta        ! array for m,n indices of stations to be communicated with RTC
-    character(20), dimension(:)  , pointer :: namrtcsta       ! array for names of stations to be communicated with RTC
-    character(80), dimension(:)  , pointer :: tlocget_names   ! array for names of all parameters to get from RTC
-    character(80), dimension(:)  , pointer :: tlocput_names   ! array for names of all locations to put to RTC
-    character(80), dimension(:)  , pointer :: tparput_names   ! array for names of all parameters to put to RTC
+    real(fp)     , dimension(:,:,:), pointer :: r0rtcsta        ! concentrations at the stations to be communicated to RTC
+    real(fp)     , dimension(:)    , pointer :: s1rtcsta        ! water level at the stations to be communicated to RTC
+    real(fp)     , dimension(:,:)  , pointer :: zrtcsta         ! elevation of layer centres at the stations to be communicated to RTC
+    real(fp)     , dimension(:,:)  , pointer :: tparget         ! array for all parameters to get from RTC
+    real(fp)     , dimension(:,:)  , pointer :: tparput         ! array for all parameters to put to RTC
+    integer      , dimension(:)    , pointer :: inodertcsta     ! partition index of monitoring stations for RTC
+    integer      , dimension(:,:)  , pointer :: mnrtcsta        ! m,n indices of monitoring stations for RTC (local grid indices)
+    integer      , dimension(:,:)  , pointer :: mnrtcsta_gl     ! m,n indices of monitoring stations for RTC (global grid indices)
+    character(20), dimension(:)    , pointer :: namrtcsta       ! names of stations to be communicated with RTC
+    character(80), dimension(:)    , pointer :: tlocget_names   ! names of all parameters to get from RTC
+    character(80), dimension(:)    , pointer :: tlocput_names   ! names of all locations to put to RTC
+    character(80), dimension(:)    , pointer :: tparput_names   ! names of all parameters to put to RTC
     ! 
     ! logicals
     !

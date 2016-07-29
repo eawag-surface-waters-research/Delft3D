@@ -296,10 +296,13 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdpostpr , STAT = istat)
     deallocate (gdp%gdrestart, STAT = istat)
     if (gdp%gdrtc%rtcmod /= noRTC) then
-       if (associated(gdp%gdrtc%mnrtcsta))   deallocate (gdp%gdrtc%mnrtcsta  , STAT = istat)
-       if (associated(gdp%gdrtc%namrtcsta))  deallocate (gdp%gdrtc%namrtcsta , STAT = istat)
-       if (associated(gdp%gdrtc%zrtcsta))    deallocate (gdp%gdrtc%zrtcsta   , STAT = istat)
-       if (associated(gdp%gdrtc%s1rtcsta))   deallocate (gdp%gdrtc%s1rtcsta  , STAT = istat)
+       if (associated(gdp%gdrtc%mnrtcsta))    deallocate (gdp%gdrtc%mnrtcsta   , STAT = istat)
+       if (associated(gdp%gdrtc%mnrtcsta_gl)) deallocate (gdp%gdrtc%mnrtcsta_gl, STAT = istat)
+       if (associated(gdp%gdrtc%inodertcsta)) deallocate (gdp%gdrtc%inodertcsta, STAT = istat)
+       if (associated(gdp%gdrtc%namrtcsta))   deallocate (gdp%gdrtc%namrtcsta  , STAT = istat)
+       if (associated(gdp%gdrtc%r0rtcsta))    deallocate (gdp%gdrtc%r0rtcsta   , STAT = istat)
+       if (associated(gdp%gdrtc%s1rtcsta))    deallocate (gdp%gdrtc%s1rtcsta   , STAT = istat)
+       if (associated(gdp%gdrtc%zrtcsta))     deallocate (gdp%gdrtc%zrtcsta    , STAT = istat)
     endif
     deallocate (gdp%gdrtc, STAT = istat)
     if (localscour) then

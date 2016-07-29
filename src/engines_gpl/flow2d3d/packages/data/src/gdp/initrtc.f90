@@ -61,7 +61,11 @@ subroutine initrtc(gdp)
     rtcmod = noRTC
     !
     nullify(gdp%gdrtc%mnrtcsta)
+    nullify(gdp%gdrtc%mnrtcsta_gl)
+    nullify(gdp%gdrtc%inodertcsta)
     nullify(gdp%gdrtc%namrtcsta)
+    nullify(gdp%gdrtc%r0rtcsta)
+    nullify(gdp%gdrtc%s1rtcsta)
     nullify(gdp%gdrtc%zrtcsta)
     !
     rtcact = noRTC

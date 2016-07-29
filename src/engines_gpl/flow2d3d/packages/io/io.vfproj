@@ -143,6 +143,7 @@
 		<File RelativePath="src\input\roller_nefis_restart.f90"/>
 		<File RelativePath="src\input\rstfil.f90"/>
 		<File RelativePath="src\input\search2.f90"/>
+		<File RelativePath="src\input\split_stations.f90"/>
 		<File RelativePath="src\input\srcfil.f90"/>
 		<File RelativePath="src\input\stafil.f90"/>
 		<File RelativePath="src\input\strfil.f90"/>
