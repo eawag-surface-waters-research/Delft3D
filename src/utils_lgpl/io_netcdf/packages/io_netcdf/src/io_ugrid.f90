@@ -818,7 +818,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer                      :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    integer :: id_twodim
-   integer :: id_timedim
 
    real(kind=dp), allocatable :: edgexbnd(:,:), edgeybnd(:,:), facexbnd(:,:), faceybnd(:,:)
    integer :: maxnv, k, n
@@ -844,7 +843,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%id_edgedim)
    !ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes',        maxNumNodesPerFace,   meshids%id_maxfacenodesdim)
    ierr = nf90_def_dim(ncid, 'Two',                         2,       id_twodim)! TODO: AvD: duplicates!
-   ierr = nf90_def_dim(ncid, 'time',                        2,       id_timedim)! TODO: AvD: duplicates!
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       maxnv = size(face_nodes, 1)
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',        numFace,   meshids%id_facedim)
@@ -972,8 +970,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 !> 		:geospatial_lon_resolution = "on average     370.50 meters" ;
 
    ierr = nf90_enddef(ncid)
-   wasindefine = 0
-   
+
 ! -- end of header --
    
    ! Write the actual data
@@ -1558,6 +1555,7 @@ subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
 end subroutine write_edge_type_variable
 
 !> Creates and initializes mesh geometry that contains the 2D unstructured network and edge type array.
+!! NOTE: this routine is currently only a TEST GEOMETRY CREATOR
 !!
 !! NOTE: do not pass already filled mesh geometries to this function,
 !! since array pointers will become disassociated, possibly causing memory leaks.
@@ -1788,8 +1786,9 @@ function ug_write_map_ugrid(filename) result(ierr)
     integer :: id_s1, id_s2, id_u1, id_zk, id_time, itim ! example: water levels, water depth, edge speed, bed level and a timer
     integer :: ncid, id_timedim
     double precision, allocatable :: workf(:), worke(:), workn(:)
-    character(len=255) :: varnametime
-    varnametime = 'time'
+
+    ! NOTE: this routine is currently only a TEST FILE WRITER
+
     ! TODO: some if, to only do this at first time step
     ierr = nf90_create(filename, 0, ncid)
     if (ierr /= nf90_noerr) then
@@ -1801,12 +1800,14 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids)
 
-    ierr = nf90_inq_dimid(ncid, trim(varnametime), id_timedim)
+    ierr = nf90_def_dim(ncid, 'time', nf90_unlimited, id_timedim)
 
-    ierr = nf90_redef(ncid)    
+    ierr = nf90_def_var(ncid, 'time', nf90_double, id_timedim, id_time)
+    ierr = nf90_put_att(ncid, id_time, 'standard_name', 'time')
+    ierr = nf90_put_att(ncid, id_time, 'units'        , 'seconds since 2008-01-09 00:00:00')
 
-    ierr = ug_def_var(ncid, meshids, id_time, (/ id_timedim /), nf90_int, UG_LOC_NONE, "", "time", "time", "", &
-                    "seconds since 2008-01-09 00:00:00", "", meshgeom%crs, -1, -999d0)
+    ierr = ug_def_var(ncid, meshids, id_s1, (/ meshids%id_facedim, id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_level_above_geoid", "Water level on cell centres", &
+                    "m", "average", meshgeom%crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, meshids, id_s2, (/ meshids%id_facedim, id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
                     "m", "average", meshgeom%crs, -1, -999d0)
@@ -1827,11 +1828,12 @@ function ug_write_map_ugrid(filename) result(ierr)
     allocate(workn(meshgeom%numnode))
     workn = -7.68d0
     do itim=1,10
+       
         workf(:) = workf(:) + itim ! Dummy data time-dependent
-        ierr = nf90_put_var(ncid, id_time, 801d0)
-        
+        ierr = nf90_put_var(ncid, id_time, dble(itim))
+
         ierr = nf90_put_var(ncid, id_s1, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))        
-        ierr = nf90_put_var(ncid, id_s2, workf, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
+        ierr = nf90_put_var(ncid, id_s2, workf+5d0, count = (/ meshgeom%numface, 1 /), start = (/ 1, itim /))
 
         worke(:) = worke(:) + itim*.01d0 ! Dummy data time-dependent
         ierr = nf90_put_var(ncid, id_u1, worke, count = (/ meshgeom%numedge, 1 /), start = (/ 1, itim /))
