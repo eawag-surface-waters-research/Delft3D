@@ -1394,6 +1394,7 @@ end function ug_get_face_nodes
 !! The location type allows to select on specific topological mesh locations
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
 function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
+   use string_module
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,             intent(in)    :: iloctype !< The topological location on which to select data (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
@@ -1402,7 +1403,8 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
 
    integer :: numVar, iv, ivarloc
    character(len=255) :: str, meshname
-
+   str = ''
+   meshname = ''
    ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
    if (ierr /= nf90_noerr) then
       ierr = UG_INVALID_MESHNAME
@@ -1415,18 +1417,20 @@ function ug_get_var_count(ncid, meshids, iloctype, nvar) result(ierr)
    nvar = 0
    do iv=1,numVar
       ! Step 1 of 2: check mesh name
+      str = ''
       ierr = nf90_get_att(ncid, iv, 'mesh', str)
       if (ierr /= nf90_noerr) then
          ! No UGRID :mesh attribute, ignore this var.
          cycle
       end if
       
-      if (trim(str) /= trim(meshname)) then
+      if (.not.strcmpi(str,meshname)) then
          ! Mesh names do not match
          cycle
       end if
 
       ! Step 2 of 2: check location name
+      str = ''
       ierr = nf90_get_att(ncid, iv, 'location', str)
       if (ierr /= nf90_noerr) then
          ! No UGRID :location attribute, ignore this var.
@@ -1452,6 +1456,7 @@ end function ug_get_var_count
 !! The location type allows to select on specific topological mesh locations
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
 function ug_inq_varids(ncid, meshids, iloctype, varids) result(ierr)
+   use string_module
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,             intent(in)    :: iloctype !< The topological location on which to select data variables (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
@@ -1460,6 +1465,8 @@ function ug_inq_varids(ncid, meshids, iloctype, varids) result(ierr)
 
    integer :: numVar, iv, ivarloc, nvar, maxvar
    character(len=255) :: str, meshname
+   str = ''
+   meshname = ''
 
    ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
    if (ierr /= nf90_noerr) then
@@ -1474,18 +1481,20 @@ function ug_inq_varids(ncid, meshids, iloctype, varids) result(ierr)
    nvar = 0
    do iv=1,numVar
       ! Step 1 of 2: check mesh name
+      str = ''
       ierr = nf90_get_att(ncid, iv, 'mesh', str)
       if (ierr /= nf90_noerr) then
          ! No UGRID :mesh attribute, ignore this var.
          cycle
       end if
       
-      if (trim(str) /= trim(meshname)) then
+      if (.not.strcmpi(str,meshname)) then
          ! Mesh names do not match
          cycle
       end if
 
       ! Step 2 of 2: check location name
+      str = ''
       ierr = nf90_get_att(ncid, iv, 'location', str)
       if (ierr /= nf90_noerr) then
          ! No UGRID :location attribute, ignore this var.
