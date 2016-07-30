@@ -74,10 +74,10 @@ integer, parameter :: UG_LOC_VOL  = 8 !< Mesh data location: mesh volume
 integer, parameter :: UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE !< All three possible 2D locations.
 
 ! The following edge type codes define for each netlink (UGRID 'edge') the type (or absence) of flowlink.
-integer, parameter :: UNC_EDGETYPE_INTERNAL_CLOSED = 0
-integer, parameter :: UNC_EDGETYPE_INTERNAL        = 1
-integer, parameter :: UNC_EDGETYPE_BND             = 2
-integer, parameter :: UNC_EDGETYPE_BND_CLOSED      = 3
+integer, parameter :: UG_EDGETYPE_INTERNAL_CLOSED = 0
+integer, parameter :: UG_EDGETYPE_INTERNAL        = 1
+integer, parameter :: UG_EDGETYPE_BND             = 2
+integer, parameter :: UG_EDGETYPE_BND_CLOSED      = 3
 
 !! Dimension types (form a supplement to the preceding location types)
 integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the max number of nodes in the face_node_connectivity table.
@@ -487,7 +487,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
    else
       ierr_missing = UG_INVALID_CRS
       epsg      = crs%varvalue
-      epsgstring = 'EPSG:28992'
+      write (epsgstring, '("EPSG:",I0)') crs%varvalue
       ierr = nf90_put_att(ncid, id_crs, 'name',                        'Unknown projected' ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg                ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',           'Unknown projected' ) ! CF
@@ -844,6 +844,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    !ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes',        maxNumNodesPerFace,   meshids%id_maxfacenodesdim)
    ierr = nf90_def_dim(ncid, 'Two',                         2,       id_twodim)! TODO: AvD: duplicates!
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
+      ! TODO: AvD: the new maxNumNodesPerFace dummy variable overlaps with this nv here, but they may be different. Remove one.
       maxnv = size(face_nodes, 1)
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',        numFace,   meshids%id_facedim)
       ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes', maxnv,   meshids%id_maxfacenodesdim)
@@ -869,7 +870,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ id_twodim, meshids%id_edgedim /) , meshids%id_edgenodes)
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'cf_role',   'edge_node_connectivity')
-      ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'long_name',  'Maps every edge to the two nodes that it connects')
+      ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'long_name',  'Mapping from every edge to the two nodes that it connects')
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'start_index',  1)
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, '_FillValue',  imiss)
    end if
@@ -877,8 +878,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_def_var(ncid, prefix//'_edge_x', nf90_double, meshids%id_edgedim, meshids%id_edgex)
       ierr = nf90_def_var(ncid, prefix//'_edge_y', nf90_double, meshids%id_edgedim, meshids%id_edgey)
       ierr = ug_addcoordatts(ncid, meshids%id_edgex, meshids%id_edgey, crs)
-      ierr = nf90_put_att(ncid, meshids%id_edgex, 'long_name',    'x-coordinate of the midpoint of the mesh edge')
-      ierr = nf90_put_att(ncid, meshids%id_edgey, 'long_name',    'y-coordinate of the midpoint of the mesh edge')
+      ierr = nf90_put_att(ncid, meshids%id_edgex, 'long_name',    'characteristic x-coordinate of the mesh edge (e.g., midpoint)')
+      ierr = nf90_put_att(ncid, meshids%id_edgey, 'long_name',    'characteristic y-coordinate of the mesh edge (e.g., midpoint)')
 
       ierr = nf90_put_att(ncid, meshids%id_edgex, 'bounds',    prefix//'_edge_x_bnd')
       ierr = nf90_put_att(ncid, meshids%id_edgey, 'bounds',    prefix//'_edge_y_bnd')
@@ -906,7 +907,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ierr = nf90_def_var(ncid, prefix//'_face_nodes', nf90_int, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /) , meshids%id_facenodes)
       ierr = nf90_put_att(ncid, meshids%id_facenodes, 'cf_role',   'face_node_connectivity')
-      ierr = nf90_put_att(ncid, meshids%id_facenodes, 'long_name',  'Maps every face to its corner nodes (counterclockwise)')
+      ierr = nf90_put_att(ncid, meshids%id_facenodes, 'long_name',  'Mapping from every face to its corner nodes (counterclockwise)')
       ierr = nf90_put_att(ncid, meshids%id_facenodes, 'start_index',  1)
       ierr = nf90_put_att(ncid, meshids%id_facenodes, '_FillValue',  imiss)
 
@@ -914,7 +915,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (ASSOCIATED(face_edges)) then
          ierr = nf90_def_var(ncid, prefix//'_face_edges', nf90_int, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /) , meshids%id_faceedges)
          ierr = nf90_put_att(ncid, meshids%id_faceedges, 'cf_role',     'face_edge_connectivity')
-         ierr = nf90_put_att(ncid, meshids%id_faceedges, 'long_name',   'Maps every face to its edges (in counterclockwise order)')
+         ierr = nf90_put_att(ncid, meshids%id_faceedges, 'long_name',   'Mapping from every face to its edges (in counterclockwise order)')
          ierr = nf90_put_att(ncid, meshids%id_faceedges, 'start_index', 1)
          ierr = nf90_put_att(ncid, meshids%id_faceedges, '_FillValue',  imiss)
       end if
@@ -923,7 +924,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (ASSOCIATED(face_links)) then
          ierr = nf90_def_var(ncid, prefix//'_face_links', nf90_int, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /) , meshids%id_facelinks)
          ierr = nf90_put_att(ncid, meshids%id_facelinks, 'cf_role',     'face_face_connectivity')
-         ierr = nf90_put_att(ncid, meshids%id_facelinks, 'long_name',   'Maps every face to its neighboring faces (in counterclockwise order)')
+         ierr = nf90_put_att(ncid, meshids%id_facelinks, 'long_name',   'Mapping from every face to its neighboring faces (in counterclockwise order)')
          ierr = nf90_put_att(ncid, meshids%id_facelinks, 'start_index', 1)
          ierr = nf90_put_att(ncid, meshids%id_facelinks, '_FillValue',  imiss)
          !TODO add flag for "out-of-mesh" value. AK
@@ -934,7 +935,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (ASSOCIATED(edge_faces)) then
          ierr = nf90_def_var(ncid, prefix//'_edge_faces', nf90_int, (/ id_twodim, meshids%id_edgedim /) , meshids%id_edgefaces)
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'cf_role',     'edge_face_connectivity')
-         ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'long_name',   'Maps every edge to the two faces that it separates')
+         ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'long_name',   'Mapping from every edge to the two faces that it separates')
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'start_index', 1)
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, '_FillValue',  imiss)
          !TODO add flag for "out-of-mesh" value. AK
@@ -1527,7 +1528,7 @@ subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
 
     integer, intent(in)            :: igeomfile    !< file pointer to netcdf file to write to.
     type(t_ug_meshids), intent(in) :: meshids      !< Set of NetCDF-ids for all mesh geometry variables.
-    character(len=256), intent(in) :: meshName     !< Name of the mesh.
+    character(len=*),   intent(in) :: meshName     !< Name of the mesh.
     integer, intent(in)            :: edge_type(:) !< Edge type variable to be written to the NetCDF file.
 
     integer                        :: id_edgetype !< Variable ID for edge type variable.
@@ -1547,7 +1548,7 @@ subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
     ! Define edge type variable.
     ierr = ug_def_var(igeomfile, meshids, id_edgetype, (/ meshids%id_edgedim /), nf90_int, UG_LOC_EDGE, &
                       meshName, 'edge_type', '', 'edge type (relation between edge and flow geometry)', '', 'mean', ifill=-999)
-    ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_values',   (/ UNC_EDGETYPE_INTERNAL_CLOSED, UNC_EDGETYPE_INTERNAL, UNC_EDGETYPE_BND, UNC_EDGETYPE_BND_CLOSED /))
+    ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_values',   (/ UG_EDGETYPE_INTERNAL_CLOSED, UG_EDGETYPE_INTERNAL, UG_EDGETYPE_BND, UG_EDGETYPE_BND_CLOSED /))
     ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_meanings', 'internal_closed internal boundary boundary_closed')
 
     ! Put netcdf file in write mode.

@@ -40,9 +40,19 @@ implicit none
 ! Parameters
 !
 public :: IONC_CONV_NULL
+public :: IONC_CONV_CF
 public :: IONC_CONV_UGRID
 public :: IONC_CONV_SGRID
 public :: IONC_CONV_OTHER
+
+!
+! Error codes
+!
+public :: IONC_NOERR
+public :: IONC_EBADID
+public :: IONC_ENOPEN
+public :: IONC_ENOMEM
+public :: IONC_ENONCOMPLIANT
 
 !
 ! Types
@@ -207,9 +217,9 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) 
    character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
    integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer,           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-   integer, optional, intent(inout) :: iconvtype !< (optional) The detected conventions in the file.
-   double precision, optional, intent(inout) :: convversion !< (optional) The detected conventions in the file.
-   integer, optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
+   integer, optional, intent(  out) :: iconvtype !< (optional) The detected conventions in the file.
+   double precision, optional, intent(  out) :: convversion !< (optional) The detected conventions in the file.
+   integer, optional, intent(  out) :: chunksize !< (optional) NetCDF chunksize parameter.
    integer                          :: ierr      !< Result status (IONC_NOERR if successful).
 
    integer :: ncid, istat
