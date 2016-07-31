@@ -460,7 +460,7 @@ function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
 end function ionc_write_mesh_struct
 
 
-!> Initialize
+!> Initializes the io_netcdf library, setting up the logger.
 function ionc_initialize(c_msg_callback,c_prgs_callback) result(ierr)
    use messagehandling
    use iso_c_binding

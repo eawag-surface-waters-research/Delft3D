@@ -52,13 +52,6 @@ implicit none
 contains
 !-------------------------------------------------------------------------------
 
-!> Somehow intel fortran compiler expects a main routine in the dll, 
-!> it is required since interactor is used (and win calls)
-subroutine main() bind(C, name="main")
-   !DEC$ ATTRIBUTES DLLEXPORT :: main
-    implicit none
-end subroutine main
-
 
 !> Tries to create a NetCDF file and initialize based on its specified conventions.
 function ionc_create_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_create")
@@ -283,7 +276,7 @@ function ionc_write_map_ugrid_dll(filename) result(ierr) bind(C, name="ionc_writ
    ierr = ionc_write_map_ugrid(file)
 end function ionc_write_map_ugrid_dll
 
-!> initialize
+!> Initializes the io_netcdf library, setting up the logger.
 function ionc_initialize_dll(c_msg_callback, c_prgs_callback) result(ierr) bind(C, name="ionc_initialize")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_initialize_dll
    type(c_funptr), value    :: c_msg_callback   !< Set a callback that will be called with new messages
