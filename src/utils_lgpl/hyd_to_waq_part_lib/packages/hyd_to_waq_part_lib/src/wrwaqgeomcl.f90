@@ -38,7 +38,7 @@ module m_write_waqgeom_curvilinear
     implicit none
     integer, parameter   :: missing_value = -999
     type :: edge_t
-        integer               :: type    = 0             !< Can be UNC_EDGETYPE_INTERNAL_CLOSED, UNC_EDGETYPE_INTERNAL, UNC_EDGETYPE_BND or UNC_EDGETYPE_BND_CLOSED
+        integer               :: type    = 0             !< Can be UG_EDGETYPE_INTERNAL_CLOSED, UG_EDGETYPE_INTERNAL, UG_EDGETYPE_BND or UG_EDGETYPE_BND_CLOSED
         integer               :: nmelm   = 0             !< Count of neighbouring elements (1 or 2)
         real(hp)              :: edgex                   !< Mass centre of edge (x)
         real(hp)              :: edgey                   !< Mass centre of edge (y)
@@ -233,29 +233,29 @@ contains
                    edge(nr_edges)%element(1) = elm1_vol
                    edge(nr_edges)%element(2) = elm2_vol
                    if (kcu(n,m) == 1 ) then
-                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL
+                      edge(nr_edges)%type = UG_EDGETYPE_INTERNAL
                       nr_flowlinks = nr_flowlinks + 1
                    else   
-                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL_CLOSED
+                      edge(nr_edges)%type = UG_EDGETYPE_INTERNAL_CLOSED
                    endif
                 else if(elm1_vol .lt. 0 .or. elm2_vol .lt. 0) then   
                    edge(nr_edges)%nmelm = 2
                    edge(nr_edges)%element(1) = elm1_vol
                    edge(nr_edges)%element(2) = elm2_vol
                    if (kcu(n,m) == 1 ) then
-                      edge(nr_edges)%type = UNC_EDGETYPE_BND
+                      edge(nr_edges)%type = UG_EDGETYPE_BND
                       nr_flowlinks = nr_flowlinks + 1
                    else   
-                      edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                      edge(nr_edges)%type = UG_EDGETYPE_BND_CLOSED
                    endif
                 else if(elm2_vol .eq. 0) then   
                    edge(nr_edges)%nmelm = 1
                    edge(nr_edges)%element(1) = elm1_vol
-                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                   edge(nr_edges)%type = UG_EDGETYPE_BND_CLOSED
                 else if(elm1_vol .eq. 0) then   
                    edge(nr_edges)%nmelm = 1
                    edge(nr_edges)%element(1) = elm2_vol
-                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                   edge(nr_edges)%type = UG_EDGETYPE_BND_CLOSED
                 endif
             endif
             ! v-flowlink
@@ -274,29 +274,29 @@ contains
                    edge(nr_edges)%element(1) = elm1_vol
                    edge(nr_edges)%element(2) = elm2_vol
                    if (kcv(n,m) == 1 ) then
-                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL
+                      edge(nr_edges)%type = UG_EDGETYPE_INTERNAL
                       nr_flowlinks = nr_flowlinks + 1
                    else   
-                      edge(nr_edges)%type = UNC_EDGETYPE_INTERNAL_CLOSED
+                      edge(nr_edges)%type = UG_EDGETYPE_INTERNAL_CLOSED
                    endif
                 else if(elm1_vol .lt. 0 .or. elm2_vol .lt. 0) then   
                    edge(nr_edges)%nmelm = 2
                    edge(nr_edges)%element(1) = elm1_vol
                    edge(nr_edges)%element(2) = elm2_vol
                    if (kcv(n,m) == 1 ) then
-                      edge(nr_edges)%type = UNC_EDGETYPE_BND
+                      edge(nr_edges)%type = UG_EDGETYPE_BND
                       nr_flowlinks = nr_flowlinks + 1
                    else   
-                      edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                      edge(nr_edges)%type = UG_EDGETYPE_BND_CLOSED
                    endif
                 else if(elm2_vol .eq. 0) then   
                    edge(nr_edges)%nmelm = 1
                    edge(nr_edges)%element(1) = elm1_vol
-                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                   edge(nr_edges)%type = UG_EDGETYPE_BND_CLOSED
                 else if(elm1_vol .eq. 0) then   
                    edge(nr_edges)%nmelm = 1
                    edge(nr_edges)%element(1) = elm2_vol
-                   edge(nr_edges)%type = UNC_EDGETYPE_BND_CLOSED
+                   edge(nr_edges)%type = UG_EDGETYPE_BND_CLOSED
                 endif
             endif
         end do
