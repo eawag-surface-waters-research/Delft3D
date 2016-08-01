@@ -81,6 +81,7 @@ integer, parameter :: UG_EDGETYPE_BND_CLOSED      = 3
 
 !! Dimension types (form a supplement to the preceding location types)
 integer, parameter :: UG_DIM_MAXFACENODES = 128 !< The dimension containing the max number of nodes in the face_node_connectivity table.
+! TODO: AvD: the above is not a dimension. At most it is a dimension type.
 
 !! Basics
 integer, parameter :: dp=kind(1.0d00)
@@ -602,15 +603,17 @@ end subroutine ug_location_to_loctype
 
 !> Write mesh topoplogy
 !! This only writes the mesh topology variable, not the other variables that are part of the mesh.
-function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, addEdgeFaceConnectivity, addFaceEdgeConnectivity, addFaceFaceConnectivity) result(ierr)
+function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity) result(ierr)
+   implicit none
+
    integer,          intent(in) :: ncid         !< NetCDF dataset id
    type(t_ug_meshids), intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*), intent(in) :: meshName     !< Name for the mesh variable, also used as prefix for all related entities.
    integer,          intent(in) :: dim          !< Dimensionality of the mesh (1/2/3)
    integer,          intent(in) :: dataLocsCode !< Specifies at which mesh locations data may be specified.
-   logical,          intent(in) :: addEdgeFaceConnectivity !< Specifies whether edge_face_connectivity should be added.
-   logical,          intent(in) :: addFaceEdgeConnectivity !< Specifies whether face_edge_connectivity should be added.
-   logical,          intent(in) :: addFaceFaceConnectivity !< Specifies whether face_face_connectivity should be added.
+   logical,          intent(in) :: add_edge_face_connectivity !< Specifies whether edge_face_connectivity should be added.
+   logical,          intent(in) :: add_face_edge_connectivity !< Specifies whether face_edge_connectivity should be added.
+   logical,          intent(in) :: add_face_face_connectivity !< Specifies whether face_face_connectivity should be added.
    integer                      :: ierr         !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    character(len=len_trim(meshName)) :: prefix
@@ -659,14 +662,14 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, addEd
    if (dim == 2 .or. ug_checklocation(dataLocsCode, UG_LOC_FACE)) then
       ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'face_node_connectivity', prefix//'_face_nodes')
       ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'face_dimension', 'n'//prefix//'_face')
-      if (addFaceEdgeConnectivity) then
+      if (add_face_edge_connectivity) then
          ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'face_edge_connectivity', prefix//'_face_edges')
       end if
-      if (addFaceFaceConnectivity) then
+      if (add_face_face_connectivity) then
          ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'face_face_connectivity', prefix//'_face_links')
       end if
       ! Note that edge_face_connectivity is not officially part of the UGRID conventions, however it is very similar to e.g. face_edge_connectivity, which is part of the UGRID conventions.
-      if (addEdgeFaceConnectivity) then
+      if (add_edge_face_connectivity) then
          ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'edge_face_connectivity', prefix//'_edge_faces')
       end if
    end if
@@ -806,9 +809,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer,          intent(in) :: maxNumNodesPerFace  !< Maximum number of nodes per face in the mesh.
    integer,          intent(in) :: edge_nodes(:,:) !< Edge-to-node mapping array.
    integer,          intent(in) :: face_nodes(:,:) !< Face-to-node mapping array.
-   integer, pointer             :: edge_faces(:,:) !< Edge-to-face mapping array (optional, can be null()).
-   integer, pointer             :: face_edges(:,:) !< Face-to-edge mapping array (optional, can be null()).
-   integer, pointer             :: face_links(:,:) !< Face-to-face mapping array (optional, can be null()).
+   integer, pointer, intent(in) :: edge_faces(:,:) !< Edge-to-face mapping array (optional, can be null()).
+   integer, pointer, intent(in) :: face_edges(:,:) !< Face-to-edge mapping array (optional, can be null()).
+   integer, pointer, intent(in) :: face_links(:,:) !< Face-to-face mapping array (optional, can be null()).
    real(kind=dp),    intent(in) :: xn(:), yn(:) !< x,y-coordinates of the mesh nodes.
    real(kind=dp),    intent(in) :: xe(:), ye(:) !< representative x,y-coordinates of the mesh edges.
    real(kind=dp),    intent(in) :: xf(:), yf(:) !< representative x,y-coordinates of the mesh faces.
@@ -823,6 +826,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer :: maxnv, k, n
    character(len=len_trim(meshName)) :: prefix
    integer :: wasInDefine
+   logical :: add_edge_face_connectivity !< Specifies whether edge_face_connectivity should be added.
+   logical :: add_face_edge_connectivity !< Specifies whether face_edge_connectivity should be added.
+   logical :: add_face_face_connectivity !< Specifies whether face_face_connectivity should be added.
 
    ierr = UG_SOMEERR
    wasInDefine = 0
@@ -832,7 +838,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    prefix=trim(meshName)
 
-   ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, ASSOCIATED(edge_faces), ASSOCIATED(face_edges), ASSOCIATED(face_links))
+   add_edge_face_connectivity = associated(edge_faces)
+   add_face_edge_connectivity = associated(face_edges)
+   add_face_face_connectivity = associated(face_links)
+   ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity)
    if (ierr /= UG_NOERR) then
       goto 888
    end if
@@ -912,7 +921,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%id_facenodes, '_FillValue',  imiss)
 
       ! Face edge connectivity.
-      if (ASSOCIATED(face_edges)) then
+      if (add_face_edge_connectivity) then
          ierr = nf90_def_var(ncid, prefix//'_face_edges', nf90_int, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /) , meshids%id_faceedges)
          ierr = nf90_put_att(ncid, meshids%id_faceedges, 'cf_role',     'face_edge_connectivity')
          ierr = nf90_put_att(ncid, meshids%id_faceedges, 'long_name',   'Mapping from every face to its edges (in counterclockwise order)')
@@ -921,24 +930,22 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
 
       ! Face face connectivity.
-      if (ASSOCIATED(face_links)) then
+      if (add_face_face_connectivity) then
          ierr = nf90_def_var(ncid, prefix//'_face_links', nf90_int, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /) , meshids%id_facelinks)
          ierr = nf90_put_att(ncid, meshids%id_facelinks, 'cf_role',     'face_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%id_facelinks, 'long_name',   'Mapping from every face to its neighboring faces (in counterclockwise order)')
          ierr = nf90_put_att(ncid, meshids%id_facelinks, 'start_index', 1)
          ierr = nf90_put_att(ncid, meshids%id_facelinks, '_FillValue',  imiss)
-         !TODO add flag for "out-of-mesh" value. AK
       end if
 
       ! Edge face connectivity.
       ! Note that edge_face_connectivity is not officially part of the UGRID conventions, however it is very similar to e.g. face_edge_connectivity, which is part of the UGRID conventions.
-      if (ASSOCIATED(edge_faces)) then
+      if (add_edge_face_connectivity) then
          ierr = nf90_def_var(ncid, prefix//'_edge_faces', nf90_int, (/ id_twodim, meshids%id_edgedim /) , meshids%id_edgefaces)
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'cf_role',     'edge_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'long_name',   'Mapping from every edge to the two faces that it separates')
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'start_index', 1)
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, '_FillValue',  imiss)
-         !TODO add flag for "out-of-mesh" value. AK
       end if
    end if
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
@@ -1009,15 +1016,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_var(ncid, meshids%id_facenodes, face_nodes)
 
       ! Face edge connectivity:
-      if (ASSOCIATED(face_edges)) then
+      if (add_face_edge_connectivity) then
          ierr = nf90_put_var(ncid, meshids%id_faceedges, face_edges, count=(/ maxnv, numFace /))
       end if
       ! Face face connectivity:
-      if (ASSOCIATED(face_links)) then
+      if (add_face_face_connectivity) then
          ierr = nf90_put_var(ncid, meshids%id_facelinks, face_links, count=(/ maxnv, numFace /))
       end if
       ! Edge face connectivity:
-      if (ASSOCIATED(edge_faces)) then
+      if (add_edge_face_connectivity) then
          ierr = nf90_put_var(ncid, meshids%id_edgefaces, edge_faces, count=(/ 2, numEdge /))
       end if
 
@@ -1262,6 +1269,7 @@ end subroutine att_to_coordvarids
 
 end function ug_init_mesh_topology
 
+
 !> Returns whether a given variable is a mesh topology variable.
 function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: ncid         !< NetCDF dataset id
@@ -1342,6 +1350,88 @@ function ug_inquire_dimension(ncid, meshids, idimtype, len) result(ierr)
 end function ug_inquire_dimension
 
 
+!> Gets the dimension of the mesh topology for the specified mesh in a UGRID data set.
+function ug_get_topology_dimension(ncid, meshids, dim) result(ierr)
+   integer,            intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   type(t_ug_meshids), intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,            intent(  out) :: dim      !< The topology dimension for the requested mesh.
+   integer                           :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
+
+
+   ierr = UG_NOERR
+   ierr = nf90_get_att(ncid, meshids%id_meshtopo, 'topology_dimension', dim)
+
+   ! Success
+   return
+
+999 continue
+    ! Some error  
+end function ug_get_topology_dimension
+
+
+!> Reads the actual mesh geometry from the specified mesh in a UGRID dataset.
+!! By default only reads in the dimensions (face/edge/node counts).
+!! Optionally, also all coordinate arrays + connectivity tables can be read.
+function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays) result(ierr)
+   use m_alloc
+
+   integer,             intent(in   ) :: ncid          !< ID of already opened data set.
+   type(t_ug_meshids),  intent(in   ) :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
+   type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
+   logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
+   integer                            :: ierr      !< Result status (UG_NOERR if successful).
+
+   logical :: includeArrays_
+   character(len=255) :: varname
+   integer :: id
+   integer ::dimids(2)
+
+   ierr = UG_NOERR
+
+   if (present(includeArrays)) then
+      includeArrays_ = includeArrays
+   else
+      includeArrays_ = .false.
+   end if
+
+   !
+   ! Topology dimension:
+   !
+   ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name = meshgeom%meshname)
+   ierr = ug_get_topology_dimension(ncid, meshids, meshgeom%dim)
+
+   !
+   ! Dimensions/location counts:
+   !
+   ierr = ug_inquire_dimension(ncid, meshids, UG_LOC_NODE, meshgeom%numnode)
+   ierr = ug_inquire_dimension(ncid, meshids, UG_LOC_EDGE, meshgeom%numedge)
+   if (meshgeom%dim >= 2) then
+      ierr = ug_inquire_dimension(ncid, meshids, UG_LOC_FACE, meshgeom%numface)
+      ierr = ug_inquire_dimension(ncid, meshids, UG_DIM_MAXFACENODES, meshgeom%maxnumfacenodes)
+   end if
+   ! TODO: AvD: extend to 3D
+
+   if (includeArrays_) then
+      ! TODO: AvD: inquire proper fillvalue as dmiss from file.
+
+      !
+      ! Nodes
+      !
+      call reallocP(meshgeom%nodex, meshgeom%numnode, keepExisting = .false., fill = -999d0)
+      call reallocP(meshgeom%nodey, meshgeom%numnode, keepExisting = .false., fill = -999d0)
+      call reallocP(meshgeom%nodez, meshgeom%numnode, keepExisting = .false., fill = -999d0)
+      
+      ierr = ug_get_node_coordinates(ncid, meshids, meshgeom%nodex, meshgeom%nodey)
+      ! TODO: AvD: include zk coordinates
+
+      !
+      ! Edges
+      !
+      ! TODO: AvD: introduce ug_read_mesh_arrays( .. intent out arrays ..)
+   end if
+end function ug_get_meshgeom
+
+   
 !> Gets the x,y-coordinates for all nodes in the specified mesh.
 !! The output x,y arrays are supposed to be of exact correct length already.
 function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)

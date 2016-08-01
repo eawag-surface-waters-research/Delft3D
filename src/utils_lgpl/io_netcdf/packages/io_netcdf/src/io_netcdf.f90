@@ -53,6 +53,7 @@ public :: IONC_EBADID
 public :: IONC_ENOPEN
 public :: IONC_ENOMEM
 public :: IONC_ENONCOMPLIANT
+public :: IONC_ENOTAVAILABLE
 
 !
 ! Types
@@ -69,6 +70,8 @@ public :: ionc_add_global_attributes
 public :: ionc_open
 public :: ionc_close
 public :: ionc_get_mesh_count
+public :: ionc_get_topology_dimension
+public :: ionc_get_meshgeom
 public :: ionc_get_node_count
 public :: ionc_get_edge_count
 public :: ionc_get_face_count
@@ -104,11 +107,12 @@ integer, public, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inq
 !
 ! Error statuses
 !
-integer, parameter :: IONC_NOERR  = 0 !< Successful
-integer, parameter :: IONC_EBADID = 1 !< Not a valid IONC dataset id
-integer, parameter :: IONC_ENOPEN = 2 !< File could not be opened
-integer, parameter :: IONC_ENOMEM = 3 !< Memory allocation error
+integer, parameter :: IONC_NOERR         = 0 !< Successful
+integer, parameter :: IONC_EBADID        = 1 !< Not a valid IONC dataset id
+integer, parameter :: IONC_ENOPEN        = 2 !< File could not be opened
+integer, parameter :: IONC_ENOMEM        = 3 !< Memory allocation error
 integer, parameter :: IONC_ENONCOMPLIANT = 4 !< File is non-compliant with its specified conventions
+integer, parameter :: IONC_ENOTAVAILABLE = 5 !< Requested function is not available, because the file has different conventions.
 
 
 
@@ -122,7 +126,7 @@ type t_ionc
 end type t_ionc
 
 type(t_ionc), allocatable :: datasets(:) !< List of available datasets, maintained in global library state, indexed by the unique ionc_id.
-   integer                :: ndatasets   !< Number of available datasets. May be smaller than array size of datasets(:).
+integer                   :: ndatasets   !< Number of available datasets. May be smaller than array size of datasets(:).
 
 !-------------------------------------------------------------------------------
 contains
@@ -133,7 +137,7 @@ function ionc_create(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr
    character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
    integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer,           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-   integer,           intent(in   ) :: iconvtype !< (optional) The detected conventions in the file.
+   integer,           intent(in   ) :: iconvtype !< (optional) The desired conventions for the new file.
    integer, optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
    integer                          :: ierr      !< Result status (IONC_NOERR if successful).
 
@@ -150,7 +154,7 @@ function ionc_create(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr
       goto 999
    end if
 
-   ierr = set_datasets(ncid, netCDFFile, ioncid, iconvtype)
+   ierr = add_dataset(ncid, netCDFFile, ioncid, iconvtype)
    
 999 continue
 end function ionc_create
@@ -212,7 +216,7 @@ function ionc_adheresto_conventions(ioncid, iconvtype) result(does_adhere)
 end function ionc_adheresto_conventions
 
 
-!> Tries to open a NetCDF file and initialize based on its specified conventions.
+!> Tries to open a NetCDF file and initialize based on the file's conventions.
 function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) result(ierr)
    character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
    integer,           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
@@ -223,6 +227,8 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) 
    integer                          :: ierr      !< Result status (IONC_NOERR if successful).
 
    integer :: ncid, istat
+
+   ierr = IONC_NOERR
 
    if (present(chunksize)) then
       ierr = nf90_open(netCDFFile, mode, ncid, chunksize)
@@ -235,7 +241,7 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) 
       goto 999
    end if
 
-   ierr = set_datasets(ncid, netCDFFile, ioncid)
+   ierr = add_dataset(ncid, netCDFFile, ioncid)
 
    if (present(iconvtype)) then
       iconvtype = datasets(ioncid)%iconvtype
@@ -274,12 +280,15 @@ function ionc_close(ioncid) result(ierr)
    case (IONC_CONV_UGRID)
       deallocate(datasets(ioncid)%ug_file)
    end select
+
    ! Successful
+   return
 
 999 continue
    ! Some error (status was set earlier)
    return
 end function ionc_close
+
 
 !> Gets the number of mesh from a data set.
 function ionc_get_mesh_count(ioncid, nmesh) result(ierr)
@@ -290,6 +299,63 @@ function ionc_get_mesh_count(ioncid, nmesh) result(ierr)
    ! TODO: AvD: some error handling if ioncid is wrong
    ierr = ug_get_mesh_count(datasets(ioncid)%ncid, nmesh)
 end function ionc_get_mesh_count
+
+
+!> Gets the dimension of the mesh topology for the specified mesh in a UGRID data set.
+function ionc_get_topology_dimension(ioncid, meshid, dim) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer,             intent(  out) :: dim     !< The dimension of the mesh topology in case of a UGRID file.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid is wrong
+   if (datasets(ioncid)%iconvtype /= IONC_CONV_UGRID) then
+      ierr = IONC_ENOTAVAILABLE
+      goto 999
+   end if
+
+   ierr = ug_get_topology_dimension(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), dim)
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+   return
+
+end function ionc_get_topology_dimension
+
+
+!> Reads the actual mesh geometry from the specified mesh in a IONC/UGRID dataset.
+!! By default only reads in the dimensions (face/edge/node counts).
+!! Optionally, also all coordinate arrays + connectivity tables can be read.
+function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays) result(ierr)
+   integer,             intent(in   ) :: ioncid        !< The IONC data set id.
+   integer,             intent(in   ) :: meshid        !< The mesh id in the specified data set.
+   type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
+   logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
+   integer                            :: ierr          !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   if (datasets(ioncid)%iconvtype /= IONC_CONV_UGRID) then
+      ierr = IONC_ENOTAVAILABLE
+      goto 999
+   end if
+
+   if (present(includeArrays)) then
+      ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
+   else
+      ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom)
+   end if
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+   return
+
+end function ionc_get_meshgeom
 
 
 !> Gets the number of nodes in a single mesh from a data set.
@@ -633,12 +699,13 @@ subroutine realloc(arr, uindex, lindex, stat, keepExisting)
 end subroutine realloc
 
 
-function set_datasets(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
-   character (len=*), intent(in   ) :: netCDFFile!< File name for netCDF dataset to be opened.
-   integer, intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-   integer, intent(in) :: ncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-   integer, optional, intent(in) :: iconvtype    !<(optional) The detected conventions in the file..
-   integer             :: ierr      !< Result status (IONC_NOERR if successful).
+!> Adds an open NetCDF file to the datasets array, initiazing this dataset's metadata.
+function add_dataset(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
+   integer,           intent(in)    :: ncid       !< The NetCDF dataset id.
+   character (len=*), intent(in   ) :: netCDFFile !< File name for netCDF dataset to be opened.
+   integer,           intent(  out) :: ioncid     !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+   integer, optional, intent(in)    :: iconvtype  !<(optional) The detected conventions in the file.
+   integer                          :: ierr       !< Result status (IONC_NOERR if successful).
 
    integer :: istat
 
@@ -647,8 +714,8 @@ function set_datasets(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
       ierr = IONC_ENOMEM
       goto 999
    end if
-   datasets(ndatasets + 1)%ncid = ncid
    ndatasets = ndatasets + 1
+   datasets(ndatasets)%ncid = ncid
    ioncid = ndatasets
 
    if (.not. present(iconvtype)) then
@@ -681,7 +748,7 @@ function set_datasets(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
 999 continue
    ! Some error (status was set earlier)
 
-end function set_datasets
+end function add_dataset
 
 subroutine netcdfError(errorLevel, message)
     use MessageHandling
