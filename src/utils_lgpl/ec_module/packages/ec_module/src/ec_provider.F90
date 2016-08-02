@@ -2524,6 +2524,7 @@ module m_ec_provider
             ! inspect the coordinate attribute string
             if (any(coordids(1:ndims)<0)) then
                ! Try if this variable has a coordinate attribute ...             
+               coord_name = ''
                ierror = nf90_get_att(fileReaderPtr%fileHandle, idvar, "coordinates", coord_name)      ! get coordinates attribute 
                if (len_trim(coord_name)>0) then
                   if (allocated(coord_names)) deallocate(coord_names)
@@ -2533,6 +2534,10 @@ module m_ec_provider
                   ! The coord_names array contains references to variables associated with dimensions
                   !   of the requested variable 
                   ! Match these coordinate names to variables to fgd 
+               else 
+                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)//' requires a ''coordinates'' attribute.'
+                  call setECMessage(message)
+                  return
                end if
             end if
 
@@ -3340,7 +3345,8 @@ module m_ec_provider
    implicit none
    type (tECFileReader), pointer    ::    fileReaderPtr
    logical                          ::    success
-   integer                          ::    nvar, ivar, ierror, ndim, name_len
+   integer                          ::    ivar, idim, ierror
+   integer                          ::    nvar, ndim, name_len
    integer                          ::    dimid(1), dim_size
    character(len=NF90_MAX_NAME)     ::    dim_name  
    ! Make a list of standard names of variables available in the netcdf file 
@@ -3357,6 +3363,12 @@ module m_ec_provider
       allocate(fileReaderPtr%dim_varids(ndim))
       fileReaderPtr%dim_varids = -1
       fileReaderPtr%dim_length = -1
+      do idim = 1,ndim
+         ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,idim,len=fileReaderPtr%dim_length(idim))
+      end do   ! idim
+   else 
+      ! no dimensions in the file or netcdf inquiry error .... handle exception 
+      return
    end if
 
    ! Collects names and standard names of variables in the netcdf as well as the varids associated with dimids 
@@ -3369,17 +3381,17 @@ module m_ec_provider
       fileReaderPtr%standard_names = ''
       fileReaderPtr%variable_names = ''
       do ivar = 1,nvar 
+         fileReaderPtr%standard_names(ivar) = ''
          ierror = nf90_get_att(fileReaderPtr%fileHandle, ivar, 'standard_name', fileReaderPtr%standard_names(ivar))
          ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, name=fileReaderPtr%variable_names(ivar))
          ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, nDims=ndim)
-         if (ndim==1) then                     ! variable potentially associated with a dimension 
+         dim_name=''
+         name_len=0
+         ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,dimid(1),name=dim_name,len=dim_size)
+         if (ndim==1) then                     ! Is this variable a coordinate variable
              ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, dimids=dimid)
-             dim_name=''
-             name_len=0
-             ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,dimid(1),name=dim_name,len=dim_size)
              if (trim(dim_name)==trim(fileReaderPtr%variable_names(ivar))) then
                 fileReaderPtr%dim_varids(dimid(1)) = ivar      ! connects a varid to a dimid 
-                fileReaderPtr%dim_length(dimid(1)) = dim_size  ! sets dimension extent
              end if
          end if
       enddo 
