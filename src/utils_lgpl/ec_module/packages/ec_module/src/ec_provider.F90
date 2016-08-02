@@ -980,7 +980,12 @@ module m_ec_provider
          success = .false.
          ! Find and open the curvilinear grid file.
          rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'grid_file')
-         read(rec, *) grid_file
+         read(rec, *, iostat = istat) grid_file
+         if (istat /= 0) then
+            call setECMessage("ERROR: ec_provider::ecProviderCreateCurviElementSet: Unable to read 'grid_file=' entry in curvilinear grid file header.")
+            success = .false.
+            return
+         end if
          success = ecSupportOpenExistingFile(minp, grid_file)
          if (.not. success) return
          ! Read the file header.
