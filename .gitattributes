@@ -5743,6 +5743,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/include/util_mf.h -tex
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/win32/pthread.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/win32/sched.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/Makefile.am -text
+src/utils_lgpl/deltares_common/packages/deltares_common_c/src/bmi_shared_lib_fortran_api.c -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/cpuinfo.cpp -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/cutil.c -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/getopt.cpp -text
