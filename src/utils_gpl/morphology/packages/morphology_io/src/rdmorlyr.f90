@@ -1196,13 +1196,6 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
           ! Check validity of input data
           !
           do nm = 1, nmmax
-             !
-             ! Do not check the ghost cells: if (abs(dims%celltype(nm)) == 1) then
-             ! Reason: Open boundaries in the ghost areas currently have kcs=-1 and will be included in this extended check
-             !         But invalid data on open boundaries is allowed
-             ! Motivation: Introduction of kcs=-2 (or 2) in ghost areas on these locations will have more impact
-             !             And a value in a ghost cell will be checked in the other partition, where this value is in an active cell
-             !
              if (dims%celltype(nm) == 1) then
                 !
                 ! At an internal point the composition is important.
@@ -1217,6 +1210,18 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                       error = .true.
                       return
                    endif
+                enddo
+             elseif (dims%celltype(nm) == -1) then
+                !
+                ! At a ghost point the composition is also important
+                ! since it determines the fractions and hence the
+                ! the grain sizes and transport rates. We don't need
+                ! to raise an error since the owning partition will do
+                ! so and because of complications with open boundaries
+                ! located in ghost areas.
+                !
+                do ised = 1, lsedtot
+                   bodsed(ised, nm) = max(0.0_fp, bodsed(ised, nm))
                 enddo
              elseif (dims%celltype(nm) == 2) then
                 !
@@ -1475,13 +1480,6 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                    ! Check validity of input data.
                    !
                    do nm = 1, nmmax
-                      !
-                      ! Do not check the ghost cells: if (abs(dims%celltype(nm)) == 1) then
-                      ! Reason: Open boundaries in the ghost areas currently have kcs=-1 and will be included in this extended check
-                      !         But invalid data on open boundaries is allowed
-                      ! Motivation: Introduction of kcs=-2 (or 2) in ghost areas on these locations will have more impact
-                      !             And a value in a ghost cell will be checked in the other partition, where this value is in an active cell
-                      !
                       if (dims%celltype(nm) == 1) then
                          !
                          ! At an internal point the composition of all layers is important.
@@ -1528,6 +1526,29 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                             enddo
                             rtemp(nm, lsedtot) = 1.0_fp - totfrac
                          endif
+                      elseif (dims%celltype(nm) == -1) then
+                         !
+                         ! At a ghost point the composition is also important
+                         ! since it determines the fractions and hence the
+                         ! the grain sizes and transport rates. We don't need
+                         ! to raise an error since the owning partition will do
+                         ! so and because of complications with open boundaries
+                         ! located in ghost areas. However, we still need to
+                         ! process it just like an internal point.
+                         !
+                         ! Arguments: The bed stratigraphy provides critical fraction information
+                         !            which we don't want to exchange.
+                         !            Open boundaries in ghost cell area cannot be distinguished
+                         !            and may not have valid data.
+                         !            The other partition will raise errors if necessary.
+                         !
+                         thtemp(nm) = max(0.0_fp, thtemp(nm))
+                         totfrac = 0.0_fp
+                         do ised = 1, lsedtot-1
+                            rtemp(nm, ised) = max(0.0_fp, min(rtemp(nm, ised), 1.0_fp - totfrac))
+                            totfrac = totfrac + rtemp(nm, ised)
+                         enddo
+                         rtemp(nm, lsedtot) = 1.0_fp - totfrac
                       elseif (dims%celltype(nm) == 2 .and. ilyr == 1) then
                          !
                          ! At an open boundary only the composition of the transport layer
@@ -1742,13 +1763,6 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                    ! Check validity of input data.
                    !
                    do nm = 1, nmmax
-                      !
-                      ! Do not check the ghost cells: if (abs(dims%celltype(nm)) == 1) then
-                      ! Reason: Open boundaries in the ghost areas currently have kcs=-1 and will be included in this extended check
-                      !         But invalid data on open boundaries is allowed
-                      ! Motivation: Introduction of kcs=-2 (or 2) in ghost areas on these locations will have more impact
-                      !             And a value in a ghost cell will be checked in the other partition, where this value is in an active cell
-                      !
                       if (dims%celltype(nm) == 1) then
                          !
                          ! At an internal point the composition of all layers is important.
@@ -1763,6 +1777,18 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                                error = .true.
                                return
                             endif
+                         enddo
+                      elseif (dims%celltype(nm) == -1) then
+                         !
+                         ! At a ghost point the composition is also important
+                         ! since it determines the fractions and hence the
+                         ! the grain sizes and transport rates. We don't need
+                         ! to raise an error since the owning partition will do
+                         ! so and because of complications with open boundaries
+                         ! located in ghost areas.
+                         !
+                         do ised = 1, lsedtot
+                            rtemp(nm, ised) = max(0.0_fp, rtemp(nm, ised))
                          enddo
                       elseif (dims%celltype(nm) == 2 .and. ilyr == 1) then
                          !
