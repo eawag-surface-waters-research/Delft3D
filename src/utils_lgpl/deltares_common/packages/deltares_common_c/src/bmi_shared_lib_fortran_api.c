@@ -128,7 +128,6 @@ double DllGetBmiTime(long * sharedDLLHandle, char * function_name)
 	return time;
 }
 
-
 long STDCALL BMI_INITIALIZE(long * sharedDLLHandle,
 	char   * config_file,
 	int      config_file_len)
@@ -174,6 +173,54 @@ void STDCALL BMI_GET_TIME_STEP(long * sharedDLLHandle,
 	double * time_step)
 {
 	*time_step = DllGetBmiTime(sharedDLLHandle, "get_time_step");
+}
+
+void STDCALL BMI_GET_VAR(long * sharedDLLHandle,
+	char   * var_name,
+	double * values,
+	int    * num_values,
+	int      var_name_len)
+{
+	char * c_var_name = strFcpy(var_name, var_name_len);
+	RemoveTrailingBlanks_dll(c_var_name);
+
+	typedef void * (STDCALL * MyProc)(double*);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
+
+	if (proc != NULL)
+	{
+		double * bmi_values;
+		(void *)(*proc)(c_var_name, &bmi_values);
+		for (int i = 0; i < *num_values; i++) {
+			values[i] = bmi_values[i];
+		}
+		return 0;
+	}
+
+	free(c_var_name); c_var_name = NULL;
+}
+
+
+void STDCALL BMI_SET_VAR(long * sharedDLLHandle,
+	char   * var_name,
+	double * values,
+	int    * num_values,
+	int      var_name_len)
+{
+	char * c_var_name = strFcpy(var_name, var_name_len);
+	RemoveTrailingBlanks_dll(c_var_name);
+
+	typedef void * (STDCALL * MyProc)(double*);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "set_var");
+
+	if (proc != NULL)
+	{
+		double * bmi_values;
+		(void *)(*proc)(c_var_name, values);
+		return 0;
+	}
+
+	free(c_var_name); c_var_name = NULL;
 }
 
 long STDCALL BMI_UPDATE(long * sharedDLLHandle,
