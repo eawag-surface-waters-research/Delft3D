@@ -269,8 +269,8 @@ class Dimr {
         bool use_mpi; // Whether MPI-mode is active for this run.
         int my_rank;  // Rank# of current process
         int numranks; // Total nr of MPI processes for dimr main.
-        unsigned int   logMask;
-        char    *     configfile;             // name of configuration file
+        unsigned int       logMask;
+        const char *       configfile;             // name of configuration file
         bool          done;                   // set to true when it's time to stop
 
 
@@ -314,13 +314,11 @@ class Dimr {
 #else
     extern Dimr * DH;
 #endif
+	
 
-//void printAbout          (char * exeName);
-//void printUsage          (char * exeName);
-//
 extern "C" {
 DllExport void set_logger(Log *);
-DllExport int  initialize(char *);
+DllExport int  initialize(const char *);
 DllExport void update    (double);
 DllExport void finalize  (void);
 DllExport void get_start_time (double *);
@@ -329,4 +327,5 @@ DllExport void get_time_step (double *);
 DllExport void get_current_time (double *);
 DllExport void get_var (const char *, void *);
 DllExport void set_var (const char *, void *);
+DllExport void set_logger_callback(WriteCallback);
 }

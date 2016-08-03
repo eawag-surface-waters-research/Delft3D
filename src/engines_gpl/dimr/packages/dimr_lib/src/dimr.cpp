@@ -95,9 +95,18 @@ Dimr::Dimr(void) {
     this->done = false;
 }
 
+
 extern "C" {
 //------------------------------------------------------------------------------
-	DllExport void set_logger(Log * loggerFromDimrExe) {
+DllExport void set_logger_callback(WriteCallback writeCallBack) {
+	if (DH == NULL) {
+		DH = new Dimr();
+	}
+	DH->log->SetWriteCallBack(writeCallBack);
+}
+	
+//------------------------------------------------------------------------------
+DllExport void set_logger(Log * loggerFromDimrExe) {
 	if (DH == NULL) {
 		DH = new Dimr();
 	}
@@ -106,7 +115,7 @@ extern "C" {
 
 
 //------------------------------------------------------------------------------
-DllExport int initialize(char * configfile) {
+DllExport int initialize(const char * configfile) {
     if (DH == NULL) {
         DH = new Dimr();
     }
@@ -114,6 +123,8 @@ DllExport int initialize(char * configfile) {
 	DH->log->Write(Log::MAJOR, DH->my_rank, getfullversionstring_dimr_lib());
 	
 	DH->log->Write(Log::ALWAYS, DH->my_rank, "dimr_lib:initialize");
+
+	DH->log->Write(Log::ALWAYS, DH->my_rank, configfile);
 
     //
     //
@@ -124,15 +135,18 @@ DllExport int initialize(char * configfile) {
         conf = stdin;
     else {
         conf = fopen (DH->configfile, "r");
-        if (conf == NULL)
-            throw new Exception (true, "Cannot open configuration file \"%s\"", DH->configfile);
+		if (conf == NULL){
+			DH->log->Write(Log::ALWAYS, DH->my_rank, "Cannot open configuration file \"%s\"", DH->configfile);
+			throw new Exception(true, "Cannot open configuration file \"%s\"", DH->configfile);
+		}
     }
 
     DH->config = new XmlTree (conf);
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
-    DH->scanConfigFile();
+	DH->log->Write(Log::ALWAYS, DH->my_rank, "Build controlBlock administration by scanning the XmlTree");
+	DH->scanConfigFile();
     //
     // ToDo: check whether a core dump is requested on abort; if so set global variable for Dimr_CoreDump
     //

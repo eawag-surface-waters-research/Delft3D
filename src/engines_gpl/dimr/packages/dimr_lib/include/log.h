@@ -35,9 +35,12 @@
 
 
 #pragma once
-
+#include "Windows.h"
+extern "C" {
+	#define DLL __declspec(dllexport)
+	typedef void(__stdcall * WriteCallback)(char* message);
+}
 #include "dimr.h"
-
 
 class Log {
     public:
@@ -122,6 +125,11 @@ class Log {
             const char * format,
             ...
             );
+		
+		void
+		SetWriteCallBack(
+			WriteCallback writeCallback
+			);
 
     private:
         FILE *      output;
@@ -129,6 +137,5 @@ class Log {
         Log::Mask   mask;
 
         pthread_key_t   thkey;      // contains key for thread-specific log data
-
+		WriteCallback writeCallback;
     };
-

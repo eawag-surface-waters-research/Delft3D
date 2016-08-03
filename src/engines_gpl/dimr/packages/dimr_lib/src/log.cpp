@@ -65,7 +65,7 @@ Log::Log (
 Log::~Log (
     void
     ) {
-
+	this->writeCallback = NULL;
     // nothing to do
     }
 
@@ -133,8 +133,7 @@ Log::Write (
     const char *  format,
     ...
     ) {
-
-    if ((mask & this->mask) == 0)
+	if ((mask & this->mask) == 0)
         return false;
 
     const int bufsize = 256*1024;
@@ -161,6 +160,19 @@ Log::Write (
                         );
 
     fflush (this->output);
-    delete [] buffer;
+	if (this->writeCallback){
+		this->writeCallback(buffer);
+	}
+	delete[] buffer;
     return true;
     }
+
+void
+Log::SetWriteCallBack(
+WriteCallback writeCallback
+) {
+
+	this->writeCallback = writeCallback;
+	this->Write(Log::ALWAYS, 0, "WriteCallBack is set");
+}
+
