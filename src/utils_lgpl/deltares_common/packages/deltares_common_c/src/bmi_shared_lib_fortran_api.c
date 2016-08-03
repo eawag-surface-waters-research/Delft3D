@@ -61,18 +61,18 @@
 #  define STDCALL
 #elif defined(HAVE_CONFIG_H)
 #   include "config.h"
-#  define BMI_INITIALIZE        FC_FUNC(initialize,BMI_INITIALIZE)
-#  define BMI_UPDATE            FC_FUNC(update,BMI_UPDATE)
-#  define BMI_FINALIZE          FC_FUNC(finalize,BMI_FINALIZE)
-#  define BMI_GET_START_TIME    FC_FUNC(get_start_time,BMI_GET_START_TIME)
-#  define BMI_GET_END_TIME      FC_FUNC(get_end_time,BMI_GET_END_TIME)
-#  define BMI_GET_CURRENT_TIME  FC_FUNC(get_current_time,BMI_GET_CURRENT_TIME)
+#  define BMI_INITIALIZE        FC_FUNC(bmi_initialize,BMI_INITIALIZE)
+#  define BMI_UPDATE            FC_FUNC(bmi_update,BMI_UPDATE)
+#  define BMI_FINALIZE          FC_FUNC(bmi_finalize,BMI_FINALIZE)
+#  define BMI_GET_START_TIME    FC_FUNC(bmi_get_start_time,BMI_GET_START_TIME)
+#  define BMI_GET_END_TIME      FC_FUNC(bmi_get_end_time,BMI_GET_END_TIME)
+#  define BMI_GET_CURRENT_TIME  FC_FUNC(bmi_get_current_time,BMI_GET_CURRENT_TIME)
 #  define BMI_GET_TIME_STEP     FC_FUNC(bmi_get_time_step,BMI_GET_TIME_STEP)
-#  define BMI_GET_VAR_TYPE      FC_FUNC(get_var_type,BMI_GET_VAR_TYPE)
-#  define BMI_GET_VAR_RANK      FC_FUNC(get_var_rank,BMI_GET_VAR_RANK)
-#  define BMI_GET_VAR_SHAPE     FC_FUNC(get_var_shape,BMI_GET_VAR_SHAPE)
-#  define BMI_SET_VAR           FC_FUNC(set_var,BMI_SET_VAR)
-#  define BMI_GET_VAR           FC_FUNC(get_var,BMI_GET_VAR)
+#  define BMI_GET_VAR_TYPE      FC_FUNC(bmi_get_var_type,BMI_GET_VAR_TYPE)
+#  define BMI_GET_VAR_RANK      FC_FUNC(bmi_get_var_rank,BMI_GET_VAR_RANK)
+#  define BMI_GET_VAR_SHAPE     FC_FUNC(bmi_get_var_shape,BMI_GET_VAR_SHAPE)
+#  define BMI_SET_VAR           FC_FUNC(bmi_set_var,BMI_SET_VAR)
+#  define BMI_GET_VAR           FC_FUNC(bmi_get_var,BMI_GET_VAR)
 #  define STDCALL
 #endif
 
