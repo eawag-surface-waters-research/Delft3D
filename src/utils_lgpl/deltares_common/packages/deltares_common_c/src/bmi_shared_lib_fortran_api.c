@@ -52,6 +52,7 @@
 #  define BMI_GET_START_TIME    BMI_GET_START_TIME
 #  define BMI_GET_END_TIME      BMI_GET_END_TIME
 #  define BMI_GET_CURRENT_TIME  BMI_GET_CURRENT_TIME
+#  define BMI_GET_TIME_STEP     BMI_GET_TIME_STEP
 #  define BMI_GET_VAR_TYPE      BMI_GET_VAR_TYPE
 #  define BMI_GET_VAR_RANK      BMI_GET_VAR_RANK
 #  define BMI_GET_VAR_SHAPE     BMI_GET_VAR_SHAPE
@@ -66,6 +67,7 @@
 #  define BMI_GET_START_TIME    FC_FUNC(get_start_time,BMI_GET_START_TIME)
 #  define BMI_GET_END_TIME      FC_FUNC(get_end_time,BMI_GET_END_TIME)
 #  define BMI_GET_CURRENT_TIME  FC_FUNC(get_current_time,BMI_GET_CURRENT_TIME)
+#  define BMI_GET_TIME_STEP     FC_FUNC(bmi_get_time_step,BMI_GET_TIME_STEP)
 #  define BMI_GET_VAR_TYPE      FC_FUNC(get_var_type,BMI_GET_VAR_TYPE)
 #  define BMI_GET_VAR_RANK      FC_FUNC(get_var_rank,BMI_GET_VAR_RANK)
 #  define BMI_GET_VAR_SHAPE     FC_FUNC(get_var_shape,BMI_GET_VAR_SHAPE)
@@ -86,8 +88,10 @@
 
 #if defined(WIN32)
 typedef HMODULE DllHandle;
+typedef WINBASEAPI FARPROC WINAPI DllProcedureAddress;
 #elif defined(HAVE_CONFIG_H)
 typedef void * DllHandle;
+typedef void * DllProcedureAddress;
 #endif
 
 typedef struct {
@@ -95,34 +99,106 @@ typedef struct {
 } SharedDLL;
 
 
+DllProcedureAddress GetDllProcedure(
+	long * sharedDLLHandle,
+	char * fun_name)
+{
+	SharedDLL * sharedDLL = (SharedDLL *)(*sharedDLLHandle);
+
+	DllProcedureAddress procedure;
+#if defined(WIN32)
+	procedure = GetProcAddress(sharedDLL->dllHandle, fun_name);
+#elif defined(HAVE_CONFIG_H)
+	proc = (MyProc)dlsym(sharedDLL->dllHandle, fun_name);
+#endif
+	return procedure;
+}
+
+double DllGetBmiTime(long * sharedDLLHandle, char * function_name)
+{
+	double time = -1;
+
+	typedef void * (STDCALL * MyProc)(double *);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, function_name);
+
+	if (proc != NULL)
+	{
+		(void *)(*proc)(&time);
+	}
+	return time;
+}
+
+
 long STDCALL BMI_INITIALIZE(long * sharedDLLHandle,
 	char   * config_file,
 	int      config_file_len)
 {
-
 	long error = -1;
 
 	char * c_config_file = strFcpy(config_file, config_file_len);
 	RemoveTrailingBlanks_dll(c_config_file);
 
-	char * fun_name = "initialize";
-	SharedDLL * sharedDLL = (SharedDLL *)(*sharedDLLHandle);
-
 	typedef void * (STDCALL * MyProc)(char *);
-	MyProc proc;
-
-#if defined(WIN32)
-	proc = (MyProc)GetProcAddress(sharedDLL->dllHandle, fun_name);
-#elif defined(HAVE_CONFIG_H)
-	proc = (MyProc)dlsym(sharedDLL->dllHandle, fun_name);
-#endif
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "initialize");
 
 	if (proc != NULL)
 	{
 		error = 0;
 		(void *)(*proc)(c_config_file);
 	}
+
 	free(c_config_file); c_config_file = NULL;
 
 	return error;
+}
+
+void STDCALL BMI_GET_START_TIME(long * sharedDLLHandle,
+	double * start_time)
+{
+	*start_time = DllGetBmiTime(sharedDLLHandle, "get_start_time");
+}
+
+void STDCALL BMI_GET_END_TIME(long * sharedDLLHandle,
+	double * end_time)
+{
+	*end_time = DllGetBmiTime(sharedDLLHandle, "get_end_time");
+}
+
+void STDCALL BMI_GET_CURRENT_TIME(long * sharedDLLHandle,
+	double * current_time)
+{
+	*current_time = DllGetBmiTime(sharedDLLHandle, "get_current_time");
+}
+
+void STDCALL BMI_GET_TIME_STEP(long * sharedDLLHandle,
+	double * time_step)
+{
+	*time_step = DllGetBmiTime(sharedDLLHandle, "get_time_step");
+}
+
+long STDCALL BMI_UPDATE(long * sharedDLLHandle,
+	double * dt)
+{
+	typedef void * (STDCALL * MyProc)(double);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "update");
+
+	if (proc != NULL)
+	{
+		(void *)(*proc)(*dt);
+		return 0;
+	}
+	return -1;
+}
+
+long STDCALL BMI_FINALIZE(long * sharedDLLHandle)
+{
+	typedef void * (STDCALL * MyProc)();
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "finalize");
+
+	if (proc != NULL)
+	{
+		(void *)(*proc)();
+		return 0;
+	}
+	return -1;
 }
