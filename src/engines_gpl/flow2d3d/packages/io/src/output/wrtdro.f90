@@ -53,6 +53,7 @@ subroutine wrtdro(lundia    ,error     ,filename  ,itdroc    ,itdrof    , &
     integer                         , pointer :: celidt
     type (datagroup)                , pointer :: group2
     type (datagroup)                , pointer :: group3
+    integer                         , pointer :: io_prec
 !
 ! Global variables
 !
@@ -106,7 +107,8 @@ subroutine wrtdro(lundia    ,error     ,filename  ,itdroc    ,itdrof    , &
 !
     call getdatagroup(gdp, FILOUT_DRO, grnam2, group2)
     call getdatagroup(gdp, FILOUT_DRO, grnam3, group3)
-    celidt     => group2%celidt
+    celidt              => group2%celidt
+    io_prec             => gdp%gdpostpr%io_prec
     !
     filetype = getfiletype(gdp, FILOUT_DRO)
     ierror = 0
@@ -138,16 +140,16 @@ subroutine wrtdro(lundia    ,error     ,filename  ,itdroc    ,itdrof    , &
           month = (itdate - year*10000) / 100
           day   = itdate - year*10000 - month*100
           write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
-          call addelm(gdp, lundia, FILOUT_DRO, grnam2, 'time'  , 'time', IO_REAL4 , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
+          call addelm(gdp, lundia, FILOUT_DRO, grnam2, 'time'  , 'time', io_prec  , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
        endif
        !
        ! dro-series
        !
        if (filetype == FTYPE_NEFIS) then
-          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'XYDRO', ' ', IO_REAL4, 2, dimids=(/iddim_2, iddim_ndro/), longname='x- and y-coordinates of drogue tracks', unit=xcoordunit)
+          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'XYDRO', ' ', io_prec , 2, dimids=(/iddim_2, iddim_ndro/), longname='x- and y-coordinates of drogue tracks', unit=xcoordunit)
        else
-          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'XDRO', ' ', IO_REAL4, 1, dimids=(/iddim_ndro/), longname='x-coordinates of drogue tracks', unit=xcoordunit)
-          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'YDRO', ' ', IO_REAL4, 1, dimids=(/iddim_ndro/), longname='y-coordinates of drogue tracks', unit=ycoordunit)
+          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'XDRO', ' ', io_prec , 1, dimids=(/iddim_ndro/), longname='x-coordinates of drogue tracks', unit=xcoordunit)
+          call addelm(gdp, lundia, FILOUT_DRO, grnam3, 'YDRO', ' ', io_prec , 1, dimids=(/iddim_ndro/), longname='y-coordinates of drogue tracks', unit=ycoordunit)
        endif
        !
        group2%grp_dim = iddim_time

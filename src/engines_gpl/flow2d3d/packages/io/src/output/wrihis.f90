@@ -68,6 +68,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
     integer       , dimension(:, :) , pointer :: elmdms
+    integer                         , pointer :: io_prec
     integer       , dimension(:)    , pointer :: shlay
     real(fp)      , dimension(:, :) , pointer :: xystat
     character(20) , dimension(:)    , pointer :: namst
@@ -187,6 +188,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     nfg         => gdp%gdparall%nfg
     mnit        => gdp%gdstations%mnit
     mnstat      => gdp%gdstations%mnstat
+    io_prec     => gdp%gdpostpr%io_prec
     shlay       => gdp%gdpostpr%shlay
     xystat      => gdp%gdstations%xystat
     namst       => gdp%gdstations%namst
@@ -260,9 +262,9 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
        !
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ITDATE', ' ', IO_INT4       , 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TZONE', ' ', IO_REAL4       , 0, longname='Local time zone', unit='h')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TUNIT', ' ', IO_REAL4       , 0, longname='Time scale related to seconds', unit='s')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DT', ' ', IO_REAL4          , 0, longname='Time step (DT*TUNIT sec)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TZONE', ' ', io_prec        , 0, longname='Local time zone', unit='h')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TUNIT', ' ', io_prec        , 0, longname='Time scale related to seconds', unit='s')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DT', ' ', io_prec           , 0, longname='Time step (DT*TUNIT sec)')
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIMDAT', ' ', 16            , 0, longname='Simulation date and time [YYYYMMDD  HHMMSS]') !CHARACTER
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SELHIS', ' ', 23            , 0, longname='Selection flag for time histories') !CHARACTER
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NOSTAT', ' ', IO_INT4       , 0, longname='Number of monitoring stations')
@@ -272,27 +274,27 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAX', ' ', IO_INT4         , 0, longname='Number of layers')
           if (nostatgl > 0) then
              call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'MNSTAT', ' ', IO_INT4    , 2, dimids=(/iddim_2, iddim_nostat/), longname='(M,N) indices of monitoring stations')
-             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYSTAT', ' ', IO_REAL4   , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit)
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYSTAT', ' ', io_prec    , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit)
           endif
        endif
        if (nostatgl > 0) then
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMST', ' ', 20          , 1, dimids=(/iddim_nostat/), longname='Name of monitoring station') !CHARACTER
        endif
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'GRDANG', ' ', IO_REAL4      , 0, longname='Edge between y-axis and real north', unit='arc_degrees')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'GRDANG', ' ', io_prec       , 0, longname='Edge between y-axis and real north', unit='arc_degrees')
        endif
        if (nostatgl > 0) then
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ALFAS', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Orientation ksi-axis w.r.t. pos.x-axis at water level point', unit='arc_degrees')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ALFAS', ' ', io_prec     , 1, dimids=(/iddim_nostat/), longname='Orientation ksi-axis w.r.t. pos.x-axis at water level point', unit='arc_degrees')
           if (filetype /= FTYPE_NETCDF) then ! for NetCDF just store the time-dependent version
-             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DPS', ' ', IO_REAL4      , 1, dimids=(/iddim_nostat/), longname='Depth in station', unit='m')
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DPS', ' ', io_prec       , 1, dimids=(/iddim_nostat/), longname='Depth in station', unit='m')
           endif
        endif
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'THICK', ' ', IO_REAL4       , 1, dimids=(/iddim_kmax/), longname='Fraction part of layer thickness of total water-height', unit='[ .01*% ]')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'THICK', ' ', io_prec        , 1, dimids=(/iddim_kmax/), longname='Fraction part of layer thickness of total water-height', unit='[ .01*% ]')
        endif
        if (ntruvgl > 0) then
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'MNTRA', ' ', IO_INT4     , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(M1,N1)-(M2,N2) indices of monitoring cross-sections')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYTRA', ' ', IO_REAL4    , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(X1,Y1)-(X2,Y2) coordinates of monitoring cross-sections', unit=xcoordunit)
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYTRA', ' ', io_prec     , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(X1,Y1)-(X2,Y2) coordinates of monitoring cross-sections', unit=xcoordunit)
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMTRA', ' ', 20         , 1, dimids=(/iddim_ntruv/), longname='Name of monitoring cross-section') !CHARACTER
        endif
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
@@ -309,12 +311,12 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
        endif
        if (zmodel) then
           if (filetype /= FTYPE_NEFIS) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ZK_LYR', ' ', IO_REAL4   , 1, dimids=(/iddim_kmax/) , longname='Vertical coordinates of layer centres'   , unit='m', attribs=(/idatt_up/) )
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ZK_LYR', ' ', io_prec    , 1, dimids=(/iddim_kmax/) , longname='Vertical coordinates of layer centres'   , unit='m', attribs=(/idatt_up/) )
           endif
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ZK', ' ', IO_REAL4          , 1, dimids=(/iddim_kmax1/), longname='Vertical coordinates of layer interfaces', unit='m', attribs=(/idatt_up/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ZK', ' ', io_prec           , 1, dimids=(/iddim_kmax1/), longname='Vertical coordinates of layer interfaces', unit='m', attribs=(/idatt_up/) )
        elseif (filetype /= FTYPE_NEFIS) then
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIG_LYR' , 'ocean_sigma_coordinate', IO_REAL4       , 1, dimids=(/iddim_kmax/) , longname='Sigma coordinates of layer centres'   , attribs=(/idatt_sigfc/) )
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIG_INTF', 'ocean_sigma_coordinate', IO_REAL4       , 1, dimids=(/iddim_kmax1/), longname='Sigma coordinates of layer interfaces', attribs=(/idatt_sigfi/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIG_LYR' , 'ocean_sigma_coordinate', io_prec        , 1, dimids=(/iddim_kmax/) , longname='Sigma coordinates of layer centres'   , attribs=(/idatt_sigfc/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIG_INTF', 'ocean_sigma_coordinate', io_prec        , 1, dimids=(/iddim_kmax1/), longname='Sigma coordinates of layer interfaces', attribs=(/idatt_sigfi/) )
        endif
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'COORDINATES', ' ', 16       , 0, longname='Cartesian or Spherical coordinates') !CHARACTER

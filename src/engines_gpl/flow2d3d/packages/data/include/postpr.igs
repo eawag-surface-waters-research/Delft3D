@@ -37,7 +37,7 @@ type sv_postpr
     !
     integer :: nuprpg  !  Current page number print file
     integer :: nuprln  !  Current line number in print page
-    integer :: nc_prec !  NetCDF precision identifier (nf90_float or nf90_double)
+    integer :: io_prec !  Output precision (IO_REAL4 or IO_REAL8)
     !
     ! pointers
     !

@@ -44,7 +44,6 @@ subroutine wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
     use globaldata
     use dfparall, only: inode, master, nproc
     use wrtarray, only: wrtarray_nm, wrtvar
-    use dffunctionals, only: dfcleanup_glbarrs
     use netcdf
     !
     implicit none
@@ -58,6 +57,7 @@ subroutine wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
     type (datagroup)                , pointer :: group2
     integer                         , pointer :: nmaxgl
     integer                         , pointer :: mmaxgl
+    integer                         , pointer :: io_prec
 !
 ! Global variables
 !
@@ -121,10 +121,11 @@ subroutine wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
 !
     call getdatagroup(gdp, FILOUT_MAP, grnam1, group1)
     call getdatagroup(gdp, FILOUT_MAP, grnam2, group2)
-    celidt         => group1%celidt
+    celidt              => group1%celidt
     !
-    mmaxgl         => gdp%gdparall%mmaxgl
-    nmaxgl         => gdp%gdparall%nmaxgl
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl
+    io_prec             => gdp%gdpostpr%io_prec
     !
     filetype = getfiletype(gdp, FILOUT_MAP)
     !
@@ -150,17 +151,17 @@ subroutine wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
        !
        ! map-rol-series
        !
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'HS', ' ', IO_REAL4    , 2, dimids=(/iddim_n, iddim_m/), longname='Significant wave height', unit='m', acl='z')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'EWAVE1', ' ', IO_REAL4, 2, dimids=(/iddim_n, iddim_m/), longname='Short-wave energy', unit='J/m2', acl='z')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'EROLL1', ' ', IO_REAL4, 2, dimids=(/iddim_n, iddim_m/), longname='Roller energy', unit='J/m2', acl='z')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QXKR', ' ', IO_REAL4  , 2, dimids=(/iddim_n, iddim_mc/), longname='Transport velocity of roller energy in ksi direction', unit='m/s', acl='u')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QYKR', ' ', IO_REAL4  , 2, dimids=(/iddim_nc, iddim_m/), longname='Transport velocity of roller energy in eta direction', unit='m/s', acl='v')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QXKW', ' ', IO_REAL4  , 2, dimids=(/iddim_n, iddim_mc/), longname='Transport velocity of wave energy in ksi direction', unit='m/s', acl='u')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QYKW', ' ', IO_REAL4  , 2, dimids=(/iddim_nc, iddim_m/), longname='Transport velocity of wave energy in eta direction', unit='m/s', acl='v')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'FXW', ' ', IO_REAL4   , 2, dimids=(/iddim_n, iddim_mc/), longname='Component of wave force in ksi direction', unit='N/m2', acl='u')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'FYW', ' ', IO_REAL4   , 2, dimids=(/iddim_nc, iddim_m/), longname='Component of wave force in eta direction', unit='N/m2', acl='v')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'WSU', ' ', IO_REAL4   , 2, dimids=(/iddim_n, iddim_mc/), longname='Component of roller force in ksi direction', unit='N/m2', acl='u')
-       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'WSV', ' ', IO_REAL4   , 2, dimids=(/iddim_nc, iddim_m/), longname='Component of roller force in eta direction', unit='N/m2', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'HS', ' ', io_prec     , 2, dimids=(/iddim_n, iddim_m/), longname='Significant wave height', unit='m', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'EWAVE1', ' ', io_prec , 2, dimids=(/iddim_n, iddim_m/), longname='Short-wave energy', unit='J/m2', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'EROLL1', ' ', io_prec , 2, dimids=(/iddim_n, iddim_m/), longname='Roller energy', unit='J/m2', acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QXKR', ' ', io_prec   , 2, dimids=(/iddim_n, iddim_mc/), longname='Transport velocity of roller energy in ksi direction', unit='m/s', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QYKR', ' ', io_prec   , 2, dimids=(/iddim_nc, iddim_m/), longname='Transport velocity of roller energy in eta direction', unit='m/s', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QXKW', ' ', io_prec   , 2, dimids=(/iddim_n, iddim_mc/), longname='Transport velocity of wave energy in ksi direction', unit='m/s', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'QYKW', ' ', io_prec   , 2, dimids=(/iddim_nc, iddim_m/), longname='Transport velocity of wave energy in eta direction', unit='m/s', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'FXW', ' ', io_prec    , 2, dimids=(/iddim_n, iddim_mc/), longname='Component of wave force in ksi direction', unit='N/m2', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'FYW', ' ', io_prec    , 2, dimids=(/iddim_nc, iddim_m/), longname='Component of wave force in eta direction', unit='N/m2', acl='v')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'WSU', ' ', io_prec    , 2, dimids=(/iddim_n, iddim_mc/), longname='Component of roller force in ksi direction', unit='N/m2', acl='u')
+       call addelm(gdp, lundia, FILOUT_MAP, grnam2, 'WSV', ' ', io_prec    , 2, dimids=(/iddim_nc, iddim_m/), longname='Component of roller force in eta direction', unit='N/m2', acl='v')
        !
        group1%grp_dim = iddim_time
        group2%grp_dim = iddim_time

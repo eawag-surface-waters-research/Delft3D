@@ -67,6 +67,7 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
     real(fp)                        , pointer :: morfac
     integer                         , pointer :: nmaxgl
     integer                         , pointer :: mmaxgl
+    integer                         , pointer :: io_prec
 !
 ! Global variables
 !
@@ -117,6 +118,7 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
     sbvv           => gdp%gdr_i_ch%sbvv
     ws             => gdp%gdr_i_ch%ws
     dps            => gdp%gdr_i_ch%dps
+    io_prec        => gdp%gdpostpr%io_prec
     !
     filetype = getfiletype(gdp, FILOUT_MAP)
     !
@@ -134,7 +136,7 @@ subroutine wrsedmgrp(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
           call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'ITMAPS', ' ', IO_INT4    , 0, longname='timestep number (ITMAPC*DT*TUNIT := time in sec from ITDATE)')
        endif
        if (lsedtot > 0) then
-          call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'MORFAC', ' ', IO_REAL4, 0, longname='morphological acceleration factor (MORFAC)')
+          call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'MORFAC', ' ', io_prec , 0, longname='morphological acceleration factor (MORFAC)')
           call addelm(gdp, lundia, FILOUT_MAP, grnam4, 'MORFT' , ' ', IO_REAL8, 0, longname='morphological time (days since start of simulation)', unit='days')
        endif
        !

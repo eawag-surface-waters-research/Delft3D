@@ -64,7 +64,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     integer, dimension(:), pointer :: smlay
     integer, dimension(:), pointer :: shlay
     logical,               pointer :: htur2d
-    integer,               pointer :: nc_prec
+    integer,               pointer :: io_prec
     logical,               pointer :: mergemap
 !
 ! Global variables
@@ -112,7 +112,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 !
     htur2d     => gdp%gdprocs%htur2d
     itis       => gdp%gdrdpara%itis
-    nc_prec    => gdp%gdpostpr%nc_prec
+    io_prec    => gdp%gdpostpr%io_prec
     mergemap   => gdp%gdpostpr%mergemap
     newkw = .true.
     cdef  = 'YYYYYYYYYY'
@@ -124,7 +124,6 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     selhis = 'YYYYYYYYYYYYYYYYYYYYYYY'
     selmap = 'YYYYYYYYYYYYYYYYYYYYN'
     tstprt = .false.
-    nc_prec= nf90_float
     !
     ! locate 'FLNcdf' record for print flag of output in NETCDF format
     !
@@ -154,6 +153,29 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        call prterr(lundia, 'U021', "All files in NetCDF format is currently not supported.")
        call d3stop(1, gdp)
     endif
+    !
+    ! set the numerical precision of the output to the map and his files.
+    !
+    i = 4
+    call prop_get(gdp%mdfile_ptr, '*', 'PrecOut', i)
+    select case (i)
+    case (4)
+        io_prec= IO_REAL4
+        if (fp==hp) then
+            write (lundia, '(a)') '*** MESSAGE All output files written in single precision.'
+        endif
+    case (8)
+        if (fp==sp) then
+            io_prec= IO_REAL4
+            write (lundia, '(a)') '*** WARNING Double precision output requested for single precision simulation. All output files still written in single precision.'
+        else
+            io_prec= IO_REAL8
+            write (lundia, '(a)') '*** MESSAGE His, map, drogue, and fourier files written in double precision (if written at all).'
+        endif
+    case default
+       call prterr(lundia, 'U021', "Invalid output precision specified. PrecOut should be set to 4 or 8.")
+       call d3stop(1, gdp)
+    end select
     !
     ! merge map files into one trim-file in case of parallel simulation (default: true)
     ! mergemap should be true for serial simulations

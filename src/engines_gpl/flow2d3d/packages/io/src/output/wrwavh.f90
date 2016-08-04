@@ -54,9 +54,10 @@ subroutine wrwavh(lundia    ,error     ,filename  ,ithisc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer              , pointer :: celidt
-    type (datagroup)     , pointer :: group4
-    type (datagroup)     , pointer :: group5
+    integer                         , pointer :: celidt
+    type (datagroup)                , pointer :: group4
+    type (datagroup)                , pointer :: group5
+    integer                         , pointer :: io_prec
 !
 ! Global variables
 !
@@ -106,6 +107,7 @@ subroutine wrwavh(lundia    ,error     ,filename  ,ithisc    , &
     call getdatagroup(gdp, FILOUT_HIS, grnam5, group5)
     celidt  => group4%celidt
     filetype = getfiletype(gdp, FILOUT_HIS)
+    io_prec             => gdp%gdpostpr%io_prec
     !
     ierror = 0
     select case (irequest)
@@ -127,11 +129,11 @@ subroutine wrwavh(lundia    ,error     ,filename  ,ithisc    , &
        ! his-sed-series: stations
        !
        if (nostat>0) then
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZHS', ' ', IO_REAL4   , 1, dimids=(/iddim_nostat/), longname='Significant wave height at station', unit='m', attribs=(/idatt_sta/) )
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZTP', ' ', IO_REAL4   , 1, dimids=(/iddim_nostat/), longname='Peak wave period at station', unit='s', attribs=(/idatt_sta/) )
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDIR', ' ', IO_REAL4  , 1, dimids=(/iddim_nostat/), longname='Direction waves are coming from at station (CW from North)', unit='arc_degrees', attribs=(/idatt_sta/) )
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRLABD', ' ', IO_REAL4, 1, dimids=(/iddim_nostat/), longname='Wave length at station', unit='m', attribs=(/idatt_sta/) )
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZUWB', ' ', IO_REAL4  , 1, dimids=(/iddim_nostat/), longname='Peak near-bed orbital speed at station (Hs, linear theory)', unit='m/s', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZHS', ' ', io_prec    , 1, dimids=(/iddim_nostat/), longname='Significant wave height at station', unit='m', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZTP', ' ', io_prec    , 1, dimids=(/iddim_nostat/), longname='Peak wave period at station', unit='s', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDIR', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Direction waves are coming from at station (CW from North)', unit='arc_degrees', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRLABD', ' ', io_prec , 1, dimids=(/iddim_nostat/), longname='Wave length at station', unit='m', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZUWB', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Peak near-bed orbital speed at station (Hs, linear theory)', unit='m/s', attribs=(/idatt_sta/) )
        endif
        !
        group4%grp_dim = iddim_time

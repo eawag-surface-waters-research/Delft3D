@@ -57,6 +57,7 @@ subroutine wrihisdad(lundia    ,error     ,filename  ,itdate    , &
     integer       , dimension(:,:) , pointer :: link_def
     character( 80), dimension(:)   , pointer :: dredge_areas
     character( 80), dimension(:)   , pointer :: dump_areas
+    integer                        , pointer :: io_prec
 !
 ! Global variables
 !
@@ -104,6 +105,7 @@ subroutine wrihisdad(lundia    ,error     ,filename  ,itdate    , &
     link_def          => gdp%gddredge%link_def
     dredge_areas      => gdp%gddredge%dredge_areas
     dump_areas        => gdp%gddredge%dump_areas
+    io_prec           => gdp%gdpostpr%io_prec
     !
     ! Initialize local variables
     !
@@ -122,14 +124,14 @@ subroutine wrihisdad(lundia    ,error     ,filename  ,itdate    , &
        !
        if (filetype /= FTYPE_NETCDF) then ! don't store duplicates for NetCDF       
           call addelm(gdp, lundia, FILOUT_HIS, grnam, 'ITDATE', ' ', IO_INT4           , 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'TUNIT', ' ', IO_REAL4           , 0, longname='Time scale related to seconds', unit='s')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DT', ' ', IO_REAL4              , 0, longname='Time step (DT*TUNIT sec)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'TUNIT', ' ', io_prec            , 0, longname='Time scale related to seconds', unit='s')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DT', ' ', io_prec               , 0, longname='Time step (DT*TUNIT sec)')
        endif
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DREDGE_AREAS', ' ', 80          , 1, dimids=(/iddim_nsource/), longname='Names identifying dredge areas/dredge polygons') !CHARACTER
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DUMP_AREAS', ' ', 80            , 1, dimids=(/iddim_ndump/), longname='Names identifying dump areas/dump polygons') !CHARACTER
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_DEF', ' ', IO_INT4         , 2, dimids=(/iddim_nalink, iddim_2/), longname='Actual transports from dredge(1st col) to dump(2nd col) areas')
-       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_PERCENTAGES', ' ', IO_REAL4, 2, dimids=(/iddim_nalink, iddim_lsedtot/), longname='Distribution of dredged material from dredge to dump areas', unit='percent')
-       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_DISTANCE', ' ', IO_REAL4   , 2, dimids=(/iddim_nalink, iddim_1/), longname='Link Distance between dredge and dump areas', unit='m')
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_PERCENTAGES', ' ', io_prec , 2, dimids=(/iddim_nalink, iddim_lsedtot/), longname='Distribution of dredged material from dredge to dump areas', unit='percent')
+       call addelm(gdp, lundia, FILOUT_HIS, grnam, 'LINK_DISTANCE', ' ', io_prec    , 2, dimids=(/iddim_nalink, iddim_1/), longname='Link Distance between dredge and dump areas', unit='m')
        !
     case (REQUESTTYPE_WRITE)
        !

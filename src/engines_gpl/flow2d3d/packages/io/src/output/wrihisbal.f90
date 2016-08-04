@@ -53,6 +53,7 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
     integer      , dimension(:,:)  , pointer :: neighb
     character(80), dimension(:)    , pointer :: volnames
     real(fp)     , dimension(:)    , pointer :: horareas
+    integer                        , pointer :: io_prec
 !
 ! Global variables
 !
@@ -90,6 +91,7 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
     neighb         => gdp%gdmassbal%neighb
     volnames       => gdp%gdmassbal%volnames
     horareas       => gdp%gdmassbal%horareas
+    io_prec        => gdp%gdpostpr%io_prec
     !
     ! Initialize local variables
     !
@@ -114,7 +116,7 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
           call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALVOLNAMESE', ' ', 80   , 1, dimids=(/iddim_nbalpole/), longname='Volume/polygon names') !CHARACTER
           call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALVOLNAMES' , ' ', 80   , 1, dimids=(/iddim_nbalpol/) , longname='Volume/polygon names') !CHARACTER
        endif
-       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALAREAS', ' ', IO_REAL4, 1, dimids=(/iddim_nbalpol/), longname='Volume/polygon surface areas', unit='m2', attribs=(/idatt_coord/) )
+       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALAREAS', ' ', io_prec , 1, dimids=(/iddim_nbalpol/), longname='Volume/polygon surface areas', unit='m2', attribs=(/idatt_coord/) )
        call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALNEIGHB', ' ', IO_INT4, 2, dimids=(/iddim_2,iddim_nneighb/), longname='Neighbouring volumes/polygons')
        !
     case (REQUESTTYPE_WRITE)

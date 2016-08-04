@@ -65,6 +65,7 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
     !
     integer                        , pointer :: lstsci
     integer                        , pointer :: lsedtot
+    integer                        , pointer :: io_prec
 !
 ! Global variables
 !
@@ -118,6 +119,7 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
     !
     lstsci         => gdp%d%lstsci
     lsedtot        => gdp%d%lsedtot
+    io_prec        => gdp%gdpostpr%io_prec
     !
     ierror = 0
     select case (irequest)
@@ -137,15 +139,15 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
        if (filetype /= FTYPE_NETCDF) then ! don't store duplicate times
           call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'ITHISC', ' ', IO_INT4       , 0, longname='timestep number (ITHISC*DT*TUNIT := time in sec from ITDATE)')
        endif
-       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALVOLUME', ' ', IO_REAL4   , 1, dimids=(/iddim_nbalpol/), longname='Volume within polygon', unit='m3', attribs=(/idatt_coord/) )
-       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALFLUX', ' ', IO_REAL4     , 2, dimids=(/iddim_2, iddim_nneighb/), longname='Accumulated flux between polygons', unit='m3')
+       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALVOLUME', ' ', io_prec    , 1, dimids=(/iddim_nbalpol/), longname='Volume within polygon', unit='m3', attribs=(/idatt_coord/) )
+       call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALFLUX', ' ', io_prec      , 2, dimids=(/iddim_2, iddim_nneighb/), longname='Accumulated flux between polygons', unit='m3')
        if (lstsci>0) then
-          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALR1CONC', ' ', IO_REAL4, 2, dimids=(/iddim_nbalpol, iddim_lstsci/), longname='Average concentration within polygon', attribs=(/idatt_coord/) )
-          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALR1FLUX', ' ', IO_REAL4, 3, dimids=(/iddim_2, iddim_nneighb, iddim_lstsci/), longname='Accumulated constituent flux between polygons')
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALR1CONC', ' ', io_prec , 2, dimids=(/iddim_nbalpol, iddim_lstsci/), longname='Average concentration within polygon', attribs=(/idatt_coord/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALR1FLUX', ' ', io_prec , 3, dimids=(/iddim_2, iddim_nneighb, iddim_lstsci/), longname='Accumulated constituent flux between polygons')
        endif
        if (lsedtot>0) then
-          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALDPS', ' ', IO_REAL4   , 1, dimids=(/iddim_nbalpol/), longname='Average bottom depth within polygon', unit='m', attribs=(/idatt_coord/) )
-          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALSDFLUX', ' ', IO_REAL4, 3, dimids=(/iddim_2, iddim_nneighb, iddim_lsedtot/), longname='Accumulated sediment flux between polygons')
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALDPS', ' ', io_prec    , 1, dimids=(/iddim_nbalpol/), longname='Average bottom depth within polygon', unit='m', attribs=(/idatt_coord/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grpnam, 'BALSDFLUX', ' ', io_prec , 3, dimids=(/iddim_2, iddim_nneighb, iddim_lsedtot/), longname='Accumulated sediment flux between polygons')
        endif
        !
        group%grp_dim = iddim_time

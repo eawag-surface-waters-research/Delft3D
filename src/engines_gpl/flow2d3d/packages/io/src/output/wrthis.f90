@@ -68,6 +68,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     integer       , dimension(:, :) , pointer :: mnstat
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
+    integer                         , pointer :: io_prec
     integer       , dimension(:)    , pointer :: shlay
     logical                         , pointer :: temp
     real(fp)      , dimension(:, :) , pointer :: xystat
@@ -204,6 +205,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     namst      => gdp%gdstations%namst
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
+    io_prec    => gdp%gdpostpr%io_prec
     shlay      => gdp%gdpostpr%shlay
     temp       => gdp%gdprocs%temp
     xystat     => gdp%gdstations%xystat
@@ -276,7 +278,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
           month = (itdate - year*10000) / 100
           day   = itdate - year*10000 - month*100
           write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
-          call addelm(gdp, lundia, FILOUT_HIS, grnam1, 'time'  , 'time', IO_REAL4 , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam1, 'time'  , 'time', io_prec  , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
        endif
        !
        ! his-series
@@ -286,80 +288,80 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
              call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZKFS', ' ', IO_INT4    , 1, dimids=(/iddim_nostat/), longname='Non-active (0) or active (1) zeta point (time-dependent)')
           endif
           if (selhis(1:1)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWL', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Water-level in station (zeta point)', unit='m', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWL', ' ', io_prec     , 1, dimids=(/iddim_nostat/), longname='Water-level in station (zeta point)', unit='m', attribs=(/idatt_sta/))
           endif
           if (index(selhis(2:3), 'Y')>0) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZCURU', ' ', IO_REAL4  , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='U-velocity per layer in station (zeta point, '//velt//')', unit='m/s', attribs=(/idatt_sta/))
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZCURV', ' ', IO_REAL4  , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='V-velocity per layer in station (zeta point, '//velt//')', unit='m/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZCURU', ' ', io_prec   , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='U-velocity per layer in station (zeta point, '//velt//')', unit='m/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZCURV', ' ', io_prec   , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='V-velocity per layer in station (zeta point, '//velt//')', unit='m/s', attribs=(/idatt_sta/))
           endif
           if (selhis(4:4)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZCURW', ' ', IO_REAL4  , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='W-velocity per layer in station (zeta point)', unit='m/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZCURW', ' ', io_prec   , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='W-velocity per layer in station (zeta point)', unit='m/s', attribs=(/idatt_sta/))
           endif
           if (selhis(20:20)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQXK', ' ', IO_REAL4   , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='U-discharge per layer in station (zeta point)', unit='m3/s', attribs=(/idatt_sta/))
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQYK', ' ', IO_REAL4   , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='V-discharge per layer in station (zeta point)', unit='m3/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQXK', ' ', io_prec    , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='U-discharge per layer in station (zeta point)', unit='m3/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZQYK', ' ', io_prec    , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='V-discharge per layer in station (zeta point)', unit='m3/s', attribs=(/idatt_sta/))
           endif
           if (index(selhis(5:12), 'Y')/=0) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'GRO', ' ', IO_REAL4    , 3, dimids=(/iddim_nostat, iddim_kmaxout_restr, iddim_lstsci/), longname='Concentrations per layer in station (zeta point)', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'GRO', ' ', io_prec     , 3, dimids=(/iddim_nostat, iddim_kmaxout_restr, iddim_lstsci/), longname='Concentrations per layer in station (zeta point)', attribs=(/idatt_sta/))
           endif
           if (index(selhis(13:14), 'Y')/=0) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZTUR', ' ', IO_REAL4   , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_ltur/), longname='Turbulent quantity per layer in station (zeta point)', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZTUR', ' ', io_prec    , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_ltur/), longname='Turbulent quantity per layer in station (zeta point)', attribs=(/idatt_sta/))
           endif
           if (index(selhis(15:16), 'Y')>0) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZTAUKS', ' ', IO_REAL4 , 1, dimids=(/iddim_nostat/), longname='Bottom stress U in station (zeta point)', unit='N/m2', attribs=(/idatt_sta/))
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZTAUET', ' ', IO_REAL4 , 1, dimids=(/iddim_nostat/), longname='Bottom stress V in station (zeta point)', unit='N/m2', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZTAUKS', ' ', io_prec  , 1, dimids=(/iddim_nostat/), longname='Bottom stress U in station (zeta point)', unit='N/m2', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZTAUET', ' ', io_prec  , 1, dimids=(/iddim_nostat/), longname='Bottom stress V in station (zeta point)', unit='N/m2', attribs=(/idatt_sta/))
           endif
           if (selhis(17:17)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZVICWW', ' ', IO_REAL4 , 2, dimids=(/iddim_nostat, iddim_kmaxout/), longname='Vertical eddy viscosity-3D in station (zeta point)', unit='m2/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZVICWW', ' ', io_prec  , 2, dimids=(/iddim_nostat, iddim_kmaxout/), longname='Vertical eddy viscosity-3D in station (zeta point)', unit='m2/s', attribs=(/idatt_sta/))
           endif
           if (selhis(18:18)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZDICWW', ' ', IO_REAL4 , 2, dimids=(/iddim_nostat, iddim_kmaxout/), longname='Vertical eddy diffusivity-3D in station (zeta point)', unit='m2/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZDICWW', ' ', io_prec  , 2, dimids=(/iddim_nostat, iddim_kmaxout/), longname='Vertical eddy diffusivity-3D in station (zeta point)', unit='m2/s', attribs=(/idatt_sta/))
           endif
           if (index(selhis(17:18), 'Y')>0) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZRICH', ' ', IO_REAL4  , 2, dimids=(/iddim_nostat, iddim_kmaxout/), longname='Richardson number in station (zeta point)', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZRICH', ' ', io_prec   , 2, dimids=(/iddim_nostat, iddim_kmaxout/), longname='Richardson number in station (zeta point)', attribs=(/idatt_sta/))
           endif
           if (selhis(19:19)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZRHO', ' ', IO_REAL4   , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='Density per layer in station (zeta point)', unit='kg/m3', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZRHO', ' ', io_prec    , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='Density per layer in station (zeta point)', unit='kg/m3', attribs=(/idatt_sta/))
           endif
           if (wind .and. flwoutput%air) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWNDSPD', ' ', IO_REAL4, 1, dimids=(/iddim_nostat/), longname='Wind-speed in station', unit='m/s', attribs=(/idatt_sta/))
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWNDDIR', ' ', IO_REAL4, 1, dimids=(/iddim_nostat/), longname='Wind-direction in station', unit='degrees_Celsius', attribs=(/idatt_sta/))
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'PATM', ' ', IO_REAL4   , 1, dimids=(/iddim_nostat/), longname='Air pressure', unit='N/m2', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWNDSPD', ' ', io_prec , 1, dimids=(/iddim_nostat/), longname='Wind-speed in station', unit='m/s', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZWNDDIR', ' ', io_prec , 1, dimids=(/iddim_nostat/), longname='Wind-direction in station', unit='degrees_Celsius', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'PATM', ' ', io_prec    , 1, dimids=(/iddim_nostat/), longname='Air pressure', unit='N/m2', attribs=(/idatt_sta/))
           endif
           if (flwoutput%air .and. temp) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZPRECP', ' ', IO_REAL4 , 1, dimids=(/iddim_nostat/), longname='Instantaneous precipitation rate in station', unit='mm/h', attribs=(/idatt_sta/))
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZEVAP', ' ', IO_REAL4  , 1, dimids=(/iddim_nostat/), longname='Instantaneous evaporation rate in station', unit='mm/h', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZPRECP', ' ', io_prec  , 1, dimids=(/iddim_nostat/), longname='Instantaneous precipitation rate in station', unit='mm/h', attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZEVAP', ' ', io_prec   , 1, dimids=(/iddim_nostat/), longname='Instantaneous evaporation rate in station', unit='mm/h', attribs=(/idatt_sta/))
           endif
           if (zmodel) then
              if (selhis(2:2)=='Y') then
-                call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'HYDPRES', ' ', IO_REAL4, 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='Non-hydrostatic pressure at station (zeta point)', unit='N/m2', attribs=(/idatt_sta/))
+                call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'HYDPRES', ' ', io_prec , 2, dimids=(/iddim_nostat, iddim_kmaxout_restr/), longname='Non-hydrostatic pressure at station (zeta point)', unit='N/m2', attribs=(/idatt_sta/))
              endif
           endif
           if (filetype == FTYPE_NEFIS) then ! for NEFIS only
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XYSTAT', ' ', IO_REAL4       , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit, attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XYSTAT', ' ', io_prec        , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit, attribs=(/idatt_sta/))
           else
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XSTAT', xcoordname, IO_REAL4 , 1, dimids=(/iddim_nostat/), longname='X coordinates of monitoring stations', unit=xcoordunit)
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'YSTAT', ycoordname, IO_REAL4 , 1, dimids=(/iddim_nostat/), longname='Y coordinates of monitoring stations', unit=ycoordunit)
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XSTAT', xcoordname, io_prec  , 1, dimids=(/iddim_nostat/), longname='X coordinates of monitoring stations', unit=xcoordunit)
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'YSTAT', ycoordname, io_prec  , 1, dimids=(/iddim_nostat/), longname='Y coordinates of monitoring stations', unit=ycoordunit)
           endif
           call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'MNSTAT', ' ', IO_INT4        , 2, dimids=(/iddim_2, iddim_nostat/), longname='(M,N) indices of monitoring stations', attribs=(/idatt_sta/))
-          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'DPS', ' ', IO_REAL4          , 1, dimids=(/iddim_nostat/), longname='Depth in station', unit='m', attribs=(/idatt_sta/))
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'DPS', ' ', io_prec           , 1, dimids=(/iddim_nostat/), longname='Depth in station', unit='m', attribs=(/idatt_sta/))
        endif
        if (ntruvgl > 0) then
           if (selhis(20:20)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'FLTR', ' ', IO_REAL4      , 1, dimids=(/iddim_ntruv/), longname='Total discharge through cross section (velocity points)', unit='m3', attribs=(/idatt_tra/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'FLTR', ' ', io_prec       , 1, dimids=(/iddim_ntruv/), longname='Total discharge through cross section (velocity points)', unit='m3', attribs=(/idatt_tra/))
           endif
           if (selhis(21:21)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'CTR', ' ', IO_REAL4       , 1, dimids=(/iddim_ntruv/), longname='Momentary discharge through cross section (velocity points)', unit='m3/s', attribs=(/idatt_tra/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'CTR', ' ', io_prec        , 1, dimids=(/iddim_ntruv/), longname='Momentary discharge through cross section (velocity points)', unit='m3/s', attribs=(/idatt_tra/))
           endif
           if (selhis(22:22)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ATR', ' ', IO_REAL4       , 2, dimids=(/iddim_ntruv, iddim_lstsci/), longname='Advective transport through cross section (velocity points)', attribs=(/idatt_tra/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ATR', ' ', io_prec        , 2, dimids=(/iddim_ntruv, iddim_lstsci/), longname='Advective transport through cross section (velocity points)', attribs=(/idatt_tra/))
           endif
           if (selhis(23:23)=='Y') then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'DTR', ' ', IO_REAL4       , 2, dimids=(/iddim_ntruv, iddim_lstsci/), longname='Dispersive transport through cross section (velocity points)', attribs=(/idatt_tra/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'DTR', ' ', io_prec        , 2, dimids=(/iddim_ntruv, iddim_lstsci/), longname='Dispersive transport through cross section (velocity points)', attribs=(/idatt_tra/))
           endif
        endif
        if (nsluv > 0 .and. flwoutput%hisbar) then
-          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZBAR', ' ', IO_REAL4       , 1, dimids=(/iddim_nsluv/), longname='Barrier height', unit='m', attribs=(/idatt_bar/))
+          call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'ZBAR', ' ', io_prec        , 1, dimids=(/iddim_nsluv/), longname='Barrier height', unit='m', attribs=(/idatt_bar/))
        endif
        !
        group1%grp_dim = iddim_time

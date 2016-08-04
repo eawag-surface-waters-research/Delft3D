@@ -74,6 +74,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     type (datagroup)                    , pointer :: group
     integer                             , pointer :: nmaxgl
     integer                             , pointer :: mmaxgl
+    integer                             , pointer :: io_prec
     !
     integer                             , pointer :: iporos
     integer                             , pointer :: iunderlyr
@@ -113,6 +114,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     cdryb               => gdp%gdsedpar%cdryb
     rhosol              => gdp%gdsedpar%rhosol
     moroutput           => gdp%gdmorpar%moroutput
+    io_prec             => gdp%gdpostpr%io_prec
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iunderlyr',iunderlyr)
     if (istat/=0) then
@@ -161,16 +163,16 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        ! Define elements
        !
        if (moroutput%msed) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MSED', ' ', IO_REAL4     , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Mass of sediment in layer', unit='kg/m2', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MSED', ' ', io_prec      , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Mass of sediment in layer', unit='kg/m2', acl='z')
        endif
        if (moroutput%lyrfrac) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'LYRFRAC', ' ', IO_REAL4  , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Volume fraction of sediment in layer', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'LYRFRAC', ' ', io_prec   , 4, dimids=(/iddim_n, iddim_m, iddim_nlyr, iddim_lsedtot/), longname='Volume fraction of sediment in layer', acl='z')
        endif
        if (moroutput%dpbedlyr) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DP_BEDLYR', ' ', IO_REAL4  , 3, dimids=(/iddim_n, iddim_m, iddim_nlyrp1/), longname='Vertical position of sediment layer interface', unit='m', attribs=(/idatt_z,idatt_down/), acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DP_BEDLYR', ' ', io_prec   , 3, dimids=(/iddim_n, iddim_m, iddim_nlyrp1/), longname='Vertical position of sediment layer interface', unit='m', attribs=(/idatt_z,idatt_down/), acl='z')
        endif
        if (iporos>0 .and. moroutput%poros) then
-          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'EPSPOR', ' ', IO_REAL4, 3, dimids=(/iddim_n, iddim_m, iddim_nlyr/), longname='Porosity coefficient', acl='z')
+          call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'EPSPOR', ' ', io_prec , 3, dimids=(/iddim_n, iddim_m, iddim_nlyr/), longname='Porosity coefficient', acl='z')
        endif
     case (REQUESTTYPE_WRITE)
        !

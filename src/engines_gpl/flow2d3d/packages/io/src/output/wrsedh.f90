@@ -59,6 +59,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                              , pointer :: celidt
+    integer                              , pointer :: io_prec
     integer       , dimension(:)         , pointer :: shlay
     real(hp)                             , pointer :: morft
     real(fp)                             , pointer :: morfac
@@ -148,6 +149,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
     celidt     => group4%celidt
     filetype = getfiletype(gdp, FILOUT_HIS)
     !
+    io_prec     => gdp%gdpostpr%io_prec
     shlay       => gdp%gdpostpr%shlay
     morft       => gdp%gdmorpar%morft
     morfac      => gdp%gdmorpar%morfac
@@ -195,7 +197,7 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
           call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'ITHISS', ' ', IO_INT4       , 0, longname='timestep number (ITHISS*DT*TUNIT := time in sec from ITDATE)')
        endif
        if (lsedtot > 0) then
-          call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFAC', ' ', IO_REAL4      , 0, longname='morphological acceleration factor (MORFAC)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFAC', ' ', io_prec       , 0, longname='morphological acceleration factor (MORFAC)')
           call addelm(gdp, lundia, FILOUT_HIS, grnam4, 'MORFT', ' ', IO_REAL8       , 0, longname='morphological time (days since start of simulation)', unit='days')
        endif
        !
@@ -203,25 +205,25 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        !
        if (nostat > 0) then
          if (lsed > 0) then
-           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZWS', ' ', IO_REAL4     , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_lsed/), longname='Settling velocity in station', unit='m/s', attribs=(/idatt_sta/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZWS', ' ', io_prec      , 3, dimids=(/iddim_nostat, iddim_kmaxout, iddim_lsed/), longname='Settling velocity in station', unit='m/s', attribs=(/idatt_sta/) )
            if (kmax == 1) then
-             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRSDEQ', ' ', IO_REAL4, 3, dimids=(/iddim_nostat, iddim_kmax, iddim_lsed/), longname='Equilibrium concentration of sediment at station (2D only)', unit='kg/m3', attribs=(/idatt_sta/) )
+             call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRSDEQ', ' ', io_prec , 3, dimids=(/iddim_nostat, iddim_kmax, iddim_lsed/), longname='Equilibrium concentration of sediment at station (2D only)', unit='kg/m3', attribs=(/idatt_sta/) )
            endif
          endif
          if (lsedtot > 0) then
-            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZBDSED', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Available mass of sediment at bed at station', unit='kg/m2', attribs=(/idatt_sta/) )
-            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPSED', ' ', IO_REAL4    , 1, dimids=(/iddim_nostat/), longname='Sediment thickness at bed at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZBDSED', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Available mass of sediment at bed at station', unit='kg/m2', attribs=(/idatt_sta/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPSED', ' ', io_prec     , 1, dimids=(/iddim_nostat/), longname='Sediment thickness at bed at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
          endif
-         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPS', ' ', IO_REAL4      , 1, dimids=(/iddim_nostat/), longname='Morphological depth at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
+         call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZDPS', ' ', io_prec       , 1, dimids=(/iddim_nostat/), longname='Morphological depth at station (zeta point)', unit='m', attribs=(/idatt_sta/) )
          if (lsedtot > 0) then
             transpunit = sedunit // '/(s m)'
-            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBU', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
-            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBV', ' ', IO_REAL4      , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBU', ' ', io_prec       , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSBV', ' ', io_prec       , 2, dimids=(/iddim_nostat, iddim_lsedtot/), longname='Bed load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
          endif
          if (lsed > 0) then
-           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSU', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
-           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSV', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
-           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRCA', ' ', IO_REAL4    , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Near-bed reference concentration of sediment at station', unit='kg/m3', attribs=(/idatt_sta/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSU', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in u-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZSSV', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Susp. load transport in v-direction at station (zeta point)', unit=transpunit, attribs=(/idatt_sta/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'ZRCA', ' ', io_prec     , 2, dimids=(/iddim_nostat, iddim_lsed/), longname='Near-bed reference concentration of sediment at station', unit='kg/m3', attribs=(/idatt_sta/) )
          endif
        endif
        !
@@ -230,17 +232,17 @@ subroutine wrsedh(lundia    ,error     ,filename  ,ithisc    , &
        if (ntruv > 0) then
          transpunit = sedunit // '/s'
          if (lsedtot > 0) then
-            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTR', ' ', IO_REAL4      , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Instantaneous bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTR', ' ', io_prec       , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Instantaneous bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
          if (lsed > 0) then         
-           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTR', ' ', IO_REAL4    , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Instantaneous susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTR', ' ', io_prec     , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Instantaneous susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
          transpunit = sedunit
          if (lsedtot > 0) then
-            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTRC', ' ', IO_REAL4     , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Cumulative bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+            call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SBTRC', ' ', io_prec      , 2, dimids=(/iddim_ntruv, iddim_lsedtot/), longname='Cumulative bed load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
          if (lsed > 0) then
-           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTRC', ' ', IO_REAL4   , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Cumulative susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
+           call addelm(gdp, lundia, FILOUT_HIS, grnam5, 'SSTRC', ' ', io_prec    , 2, dimids=(/iddim_ntruv, iddim_lsed/), longname='Cumulative susp. load transport through section', unit=transpunit, attribs=(/idatt_tra/) )
          endif
        endif
        !

@@ -55,6 +55,7 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
     real(fp)        , dimension(:,:)     , pointer :: mfluff
     integer                              , pointer :: nmaxgl
     integer                              , pointer :: mmaxgl
+    integer                              , pointer :: io_prec
 !
 ! Global variables
 !
@@ -96,9 +97,10 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
     if (lsed == 0) return
     !
     call getdatagroup(gdp, FILOUT_MAP, grpnam, group)
-    celidt    => group%celidt
-    mmaxgl         => gdp%gdparall%mmaxgl
-    nmaxgl         => gdp%gdparall%nmaxgl
+    celidt              => group%celidt
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl
+    io_prec             => gdp%gdpostpr%io_prec
     !
     select case (irequest)
     case (REQUESTTYPE_DEFINE)
@@ -114,7 +116,7 @@ subroutine wrmfluff(lundia    ,error     ,mmax      ,nmaxus    ,lsed      , &
        !
        ! Define elements
        !
-       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MFLUFF', ' ', IO_REAL4, 3, longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', dimids=(/iddim_n, iddim_m, iddim_lsed/), acl='z')
+       call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'MFLUFF', ' ', io_prec , 3, longname='Sediment mass in fluff layer (kg/m2)', unit='kg/m2', dimids=(/iddim_n, iddim_m, iddim_lsed/), acl='z')
        ierror = 0
     case (REQUESTTYPE_WRITE)
        !

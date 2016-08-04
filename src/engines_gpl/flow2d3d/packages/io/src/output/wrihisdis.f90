@@ -48,6 +48,7 @@ subroutine wrihisdis(lundia    ,error     ,filename  ,itdate    ,tunit     , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                         , pointer :: io_prec
 !
 ! Global variables
 !
@@ -79,6 +80,7 @@ subroutine wrihisdis(lundia    ,error     ,filename  ,itdate    ,tunit     , &
 !
 !! executable statements -------------------------------------------------------
 !
+    io_prec             => gdp%gdpostpr%io_prec
     ierror = 0
     filetype = getfiletype(gdp, FILOUT_HIS)
     select case (irequest)
@@ -91,8 +93,8 @@ subroutine wrihisdis(lundia    ,error     ,filename  ,itdate    ,tunit     , &
        !
        if (filetype /= FTYPE_NETCDF) then ! don't store duplicates for NetCDF       
           call addelm(gdp, lundia, FILOUT_HIS, grnam, 'ITDATE', ' ', IO_INT4, 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'TUNIT', ' ', IO_REAL4, 0, longname='Time scale related to seconds', unit='s')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DT', ' ', IO_REAL4   , 0, longname= 'Time step (DT*TUNIT sec)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'TUNIT', ' ', io_prec , 0, longname='Time scale related to seconds', unit='s')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DT', ' ', io_prec    , 0, longname= 'Time step (DT*TUNIT sec)')
        endif
        call addelm(gdp, lundia, FILOUT_HIS, grnam, 'DISCHARGES', ' ', 20 , 1, dimids=(/iddim_nsrc/), longname='Names identifying discharges') !CHARACTER
        !

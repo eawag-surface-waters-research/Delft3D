@@ -700,8 +700,6 @@ subroutine tricom_finish(olv_handle, gdp)
     ! End of synchronisation point 3
     ! ==============================
     !
-    write (*, *)
-    !
     ! Test routine print at last time step:
     !
     if (tstprt) then

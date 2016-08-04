@@ -70,40 +70,42 @@ subroutine wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !
 ! Local variables
 !
-    integer                             , pointer :: celidt
-    type (datagroup)                    , pointer :: group
-    integer                             , pointer :: nmaxgl
-    integer                             , pointer :: mmaxgl
-    integer                             , pointer :: nstatqnt
+    integer                              , pointer :: celidt
+    type (datagroup)                     , pointer :: group
+    integer                              , pointer :: nmaxgl
+    integer                              , pointer :: mmaxgl
+    integer                              , pointer :: nstatqnt
+    integer                              , pointer :: io_prec
     !
-    type (moroutputtype)                , pointer :: moroutput  ! structure containing morphology output options
-    real(fp), dimension(:,:)            , pointer :: statqnt
-    integer                                       :: iddim_n
-    integer                                       :: iddim_m
-    integer                                       :: iddim_lsedtot
-    integer                                       :: ierror    ! Local error flag
-    integer                                       :: iq
-    integer                                       :: lsed
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: nm
-    real(fp)   , dimension(:,:)    , allocatable  :: rbuff2
-    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
-    character(256)                                :: errmsg
-    character(64)                                 :: name
-    character(10)                                 :: transpunit
+    type (moroutputtype)                 , pointer :: moroutput  ! structure containing morphology output options
+    real(fp), dimension(:,:)             , pointer :: statqnt
+    integer                                        :: iddim_n
+    integer                                        :: iddim_m
+    integer                                        :: iddim_lsedtot
+    integer                                        :: ierror    ! Local error flag
+    integer                                        :: iq
+    integer                                        :: lsed
+    integer                                        :: m
+    integer                                        :: n
+    integer                                        :: nm
+    real(fp)   , dimension(:,:)     , allocatable  :: rbuff2
+    real(fp)   , dimension(:,:,:)   , allocatable  :: rbuff3
+    character(256)                                 :: errmsg
+    character(64)                                  :: name
+    character(10)                                  :: transpunit
 !
 !! executable statements -------------------------------------------------------
 !
     if (lsedtot == 0) return
     !
     call getdatagroup(gdp, FILOUT_MAP, grpnam, group)
-    celidt    => group%celidt
-    mmaxgl    => gdp%gdparall%mmaxgl
-    nmaxgl    => gdp%gdparall%nmaxgl
-    moroutput => gdp%gdmorpar%moroutput
-    statqnt   => gdp%gderosed%statqnt
-    nstatqnt  => gdp%gdmorpar%moroutput%nstatqnt
+    celidt              => group%celidt
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl
+    moroutput           => gdp%gdmorpar%moroutput
+    statqnt             => gdp%gderosed%statqnt
+    nstatqnt            => gdp%gdmorpar%moroutput%nstatqnt
+    io_prec             => gdp%gdpostpr%io_prec
     ierror = 0
     !
     select case (irequest)
@@ -118,7 +120,7 @@ subroutine wrmorst(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
         ! Define elements
         !
         if (moroutput%dmsedcum) then
-           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DMSEDCUM', ' ', IO_REAL4     , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Accumulated net sedimentation flux', unit='kg/m2', acl='z')
+           call addelm(gdp, lundia, FILOUT_MAP, grpnam, 'DMSEDCUM', ' ', io_prec      , 3, dimids=(/iddim_n, iddim_m, iddim_lsedtot/), longname='Accumulated net sedimentation flux', unit='kg/m2', acl='z')
         endif
         !
         select case(moroutput%transptype)
@@ -187,22 +189,22 @@ contains
     if (iand(idx(1),MOR_STAT_MIN)>0) then
         var = 'MIN_'//trim(qnt)
         descr  = 'minimum '//trim(name)
-        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', IO_REAL4     , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
+        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', io_prec      , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
     endif
     if (iand(idx(1),MOR_STAT_MAX)>0) then
         var = 'MAX_'//trim(qnt)
         descr  = 'maximum '//trim(name)
-        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', IO_REAL4     , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
+        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', io_prec      , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
     endif
     if (iand(idx(1),MOR_STAT_MEAN)>0) then
         var = 'MEAN_'//trim(qnt)
         descr  = 'mean '//trim(name)
-        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', IO_REAL4     , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
+        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', io_prec      , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
     endif
     if (iand(idx(1),MOR_STAT_STD)>0) then
         var = 'STD_'//trim(qnt)
         descr  = 'standard deviation of '//trim(name)
-        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', IO_REAL4     , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
+        call addelm(gdp, lundia, FILOUT_MAP, grpnam, var, ' ', io_prec      , 2, dimids=(/iddim_n, iddim_m/), longname=descr, unit=unt, acl='z')
     endif
     end subroutine local_def
 
