@@ -119,6 +119,9 @@ subroutine zrtc(mlb, mub, nlb, nub, kfs, kfsmin, kfsmax, sig, zk, s1, dps, r0, k
              else
                 zrtcsta(k, i) = -999.0_sp
              endif
+             do l = 1,lstsci
+                r0rtcsta(l, k, i) = r0(n, m, k, l)
+             enddo
           enddo
        endif
        s1rtcsta(i) = s1(n,m)
