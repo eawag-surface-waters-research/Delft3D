@@ -65,8 +65,10 @@ Log::Log (
 Log::~Log (
     void
     ) {
+#ifdef WIN32
 	this->writeCallback = NULL;
-    // nothing to do
+#endif
+	// nothing to do
     }
 
 
@@ -160,13 +162,16 @@ Log::Write (
                         );
 
     fflush (this->output);
+#ifdef WIN32
 	if (this->writeCallback){
 		this->writeCallback(buffer);
 	}
+#endif
 	delete[] buffer;
     return true;
     }
 
+#ifdef WIN32
 void
 Log::SetWriteCallBack(
 WriteCallback writeCallback
@@ -175,4 +180,4 @@ WriteCallback writeCallback
 	this->writeCallback = writeCallback;
 	this->Write(Log::ALWAYS, 0, "WriteCallBack is set");
 }
-
+#endif

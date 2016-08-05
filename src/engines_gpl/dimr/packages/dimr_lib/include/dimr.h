@@ -327,5 +327,7 @@ DllExport void get_time_step (double *);
 DllExport void get_current_time (double *);
 DllExport void get_var (const char *, void *);
 DllExport void set_var (const char *, void *);
+#ifdef WIN32
 DllExport void set_logger_callback(WriteCallback);
+#endif
 }
