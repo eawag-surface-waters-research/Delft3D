@@ -2099,6 +2099,7 @@ module m_ec_provider
          integer                   :: n_rows          !< helper variable
          real(hp)                  :: missingValue    !< helper variable
          real(hp)                  :: radius          !< helper variable
+         real(hp)                  :: spw_merge_frac  !< helper variable
          character(len=maxNameLen) :: radius_unit     !< helper variable
          type(tEcItem), pointer    :: item1           !< Item containing quantity1
          type(tEcItem), pointer    :: item2           !< Item containing quantity2
@@ -2122,11 +2123,14 @@ module m_ec_provider
          read(rec, *) radius
          rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'spw_rad_unit')
          read(rec, *) radius_unit
+         spw_merge_frac = 0.5
+         rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'spw_merge_frac')
+         if (len_trim(rec)>0) read(rec, *) spw_merge_frac
          !
          ! One common ElementSet.
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not. (ecElementSetSetType(instancePtr, elementSetId, elmSetType_spw) .and. &
-                    ecElementSetSetRadius(instancePtr, elementSetId, radius, radius_unit) .and. &
+                    ecElementSetSetRadius(instancePtr, elementSetId, radius, spw_merge_frac, radius_unit) .and. &
                     ecElementSetSetRowsCols(instancePtr, elementSetId, n_rows, n_cols))) then
             success = .false.
          end if

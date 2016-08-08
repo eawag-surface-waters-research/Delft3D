@@ -851,11 +851,12 @@ module m_ec_elementSet
       ! =======================================================================
       
       !> Set the spiderweb radius and its unit.
-      function ecElementSetSetRadius(instancePtr, elementSetId, radius, newUnits) result(success)
+      function ecElementSetSetRadius(instancePtr, elementSetId, radius, spw_merge_frac, newUnits) result(success)
          logical                               :: success      !< function status
          type(tEcInstance), pointer            :: instancePtr  !< intent(in)
          integer,                   intent(in) :: elementSetId !< unique ElementSet id
          real(hp),                  intent(in) :: radius       !< radius of the spiderweb
+         real(hp),                  intent(in) :: spw_merge_frac   !< range for blending a spiderweb field against the backgound fields, relative to radius
          character(*),              intent(in) :: newUnits     !< units of the radius
          !
          type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
@@ -874,6 +875,7 @@ module m_ec_elementSet
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_spw) then
                elementSetPtr%radius = radius
+               elementSetPtr%spw_merge_frac = spw_merge_frac
                elementSetPtr%radius_unit = units
                success = .true.
             else

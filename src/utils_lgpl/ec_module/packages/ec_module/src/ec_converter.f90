@@ -1822,6 +1822,7 @@ module m_ec_converter
          real(hp) :: h1, h2
          real(hp) :: fa, fi
          real(hp) :: earthrad
+         real(hp) :: rcycl, yy, spwf, spw_merge_frac          !< temporary variables used for blending spiderwebdata with the background
          real(hp) :: tmp !< helper temporary
          integer :: n_rows, n_cols
          integer :: n !< loop counter
@@ -1840,6 +1841,7 @@ module m_ec_converter
          ! Calculate the basic spiderweb grid settings
          spwdphi = 360.0_hp / (n_cols - 1) ! 0 == 360 degrees, so -1
          spwdrad = connection%sourceItemsPtr(1)%ptr%elementSetPtr%radius / (n_rows - 1)
+         spw_merge_frac = connection%sourceItemsPtr(1)%ptr%elementSetPtr%spw_merge_frac
          !
          ! Determine the (x,y) coordinate pair of the cyclone eye at t=timesteps.
          t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
@@ -1944,12 +1946,25 @@ module m_ec_converter
                   connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
                   connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
                case(operand_add)
-                  connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) + uintp
-                  connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) = connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) + vintp
-                  connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) = connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) + pintp
-                  connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
-                  connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
-                  connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
+                  rcycl = connection%sourceItemsPtr(1)%ptr%elementSetPtr%radius
+                  yy = spwradhat
+                  spwf = 0.d0 
+                  if (yy<rcycl) then
+                     spwf   = min((1.0_hp - yy/rcycl)/spw_merge_frac,1.0_hp)
+                     ! spwf is the weightfactor for the spiderweb! Differs from the Delft3D implementation
+                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      & 
+                         +         spwf  * uintp
+                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      & 
+                         +         spwf  * vintp
+                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      &
+                         +         spwf  * pintp
+                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
+                     connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
+                     connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
+                  end if
                case default
                   call setECMessage("ERROR: ec_converter::ecConverterSpiderweb: Unsupported operand type requested.")
                   return

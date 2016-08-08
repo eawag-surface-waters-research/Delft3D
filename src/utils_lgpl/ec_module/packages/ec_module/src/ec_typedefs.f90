@@ -231,6 +231,7 @@ module m_ec_typedefs
       real(hp)                            :: latsp          !< latitude of south pole (rotated spherical coordinates)
       real(hp)                            :: lonsp          !< longitude of south pole (rotated spherical coordinates)
       real(hp)                            :: radius         !< radius of a spiderweb
+      real(hp)                            :: spw_merge_frac !< relative range of merging spiderweb with background (see Delft3D)
       character(len=maxNameLen)           :: radius_unit    !< unit of the radius of a spiderweb
       character(len=maxNameLen), dimension(:),   pointer :: ids  => null() !< string array with locations
       real(hp),                  dimension(:,:), pointer :: xyen => null() !< 
