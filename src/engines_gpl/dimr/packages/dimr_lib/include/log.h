@@ -35,14 +35,16 @@
 
 
 #pragma once
-
 #ifdef WIN32
-#include "Windows.h"
-extern "C" {
-	typedef void(__stdcall * WriteCallback)(char* message);
-}
+	#include "Windows.h"
+	#define STDCALL __stdcall
+#else
+#define STDCALL
 #endif
 
+extern "C" {
+	typedef void(STDCALL * WriteCallback)(char* message);
+}
 #include "dimr.h"
 
 class Log {
@@ -129,21 +131,16 @@ class Log {
             ...
             );
 		
-#ifdef WIN32
 		void
 		SetWriteCallBack(
 			WriteCallback writeCallback
 			);
-#endif
 
-	private:
+    private:
         FILE *      output;
         Clock *     clock;
         Log::Mask   mask;
 
         pthread_key_t   thkey;      // contains key for thread-specific log data
-#ifdef WIN32
 		WriteCallback writeCallback;
-#endif
-
-};
+    };

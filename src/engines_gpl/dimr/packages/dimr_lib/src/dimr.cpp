@@ -97,7 +97,6 @@ Dimr::Dimr(void) {
 
 
 extern "C" {
-#ifdef WIN32
 //------------------------------------------------------------------------------
 DllExport void set_logger_callback(WriteCallback writeCallBack) {
 	if (DH == NULL) {
@@ -105,8 +104,7 @@ DllExport void set_logger_callback(WriteCallback writeCallBack) {
 	}
 	DH->log->SetWriteCallBack(writeCallBack);
 }
-#endif
-
+	
 //------------------------------------------------------------------------------
 DllExport void set_logger(Log * loggerFromDimrExe) {
 	if (DH == NULL) {
