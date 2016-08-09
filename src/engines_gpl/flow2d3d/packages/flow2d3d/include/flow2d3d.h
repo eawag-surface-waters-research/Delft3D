@@ -50,11 +50,24 @@ class Flow2D3D;
 #   include "config.h"
 #   define STDCALL  /* nothing */
 #   define TRISIM FC_FUNC(trisim,TRISIM)
-
+#   define TRISIM_UPDATE FC_FUNC(trisim_update,TRISIM_UPDATE)
+#   define TRISIM_FINALIZE FC_FUNC(trisim_finalize,TRISIM_FINALIZE)
+#   define TRISIM_GET_START_TIME FC_FUNC(trisim_get_start_time,TRISIM_GET_START_TIME)
+#   define TRISIM_GET_END_TIME FC_FUNC(trisim_get_end_time,TRISIM_GET_END_TIME)
+#   define TRISIM_GET_TIME_STEP FC_FUNC(trisim_get_time_step,TRISIM_GET_TIME_STEP)
+#   define TRISIM_GET_CURRENT_TIME FC_FUNC(trisim_get_current_time,TRISIM_GET_CURRENT_TIME)
+#   define TRISIM_GET_VAR FC_FUNC(trisim_get_var,TRISIM_GET_VAR)
 #else
 // WIN32
 #   define STDCALL  /* nothing */
 #   define TRISIM TRISIM
+#   define TRISIM_UPDATE TRISIM_UPDATE
+#   define TRISIM_FINALIZE TRISIM_FINALIZE
+#   define TRISIM_GET_START_TIME TRISIM_GET_START_TIME
+#   define TRISIM_GET_END_TIME TRISIM_GET_END_TIME
+#   define TRISIM_GET_TIME_STEP TRISIM_GET_TIME_STEP
+#   define TRISIM_GET_CURRENT_TIME TRISIM_GET_CURRENT_TIME
+#   define TRISIM_GET_VAR TRISIM_GET_VAR
 #endif
 
 
