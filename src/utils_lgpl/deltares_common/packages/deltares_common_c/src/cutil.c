@@ -333,7 +333,11 @@ int STDCALL
 CUTIL_MF_SETMAXSTDIO(
 int* max_size
 ) {
-	return _setmaxstdio(*max_size);
+#if !defined (WIN32)
+	return -1;
+#else
+    return _setmaxstdio(*max_size);
+#endif
 }
 
 long long int STDCALL
