@@ -329,6 +329,13 @@ CUTIL_SLEEP (
 
 #define _MAX_LENGTH_ 6666
 
+int STDCALL
+CUTIL_MF_SETMAXSTDIO(
+int* max_size
+) {
+	return _setmaxstdio(*max_size);
+}
+
 long long int STDCALL
 CUTIL_MF_OPEN (
     char* fname

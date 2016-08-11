@@ -304,7 +304,9 @@ module m_ec_bccollect
                       count = count + 1 
                       iostat = EC_NOERR
                    else 
-                      call mf_close(bcBlockPtr%fhandle)
+                      if (bcBlockPtr%fhandle /= 0) then
+                         call mf_close(bcBlockPtr%fhandle)
+                      endif
                       iostat = EC_DATA_NOTFOUND
                    end if
                    jaheader = .false.
