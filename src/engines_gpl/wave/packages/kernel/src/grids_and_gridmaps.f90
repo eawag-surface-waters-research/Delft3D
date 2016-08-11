@@ -75,7 +75,7 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
       ! If flow results are used
       !
       if (sr%useflowdata .or. sr%swwav) then
-         n_flow_grids = 1
+         n_flow_grids = num_subdomains
       else
          n_flow_grids = 0
       endif

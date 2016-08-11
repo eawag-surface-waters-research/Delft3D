@@ -53,6 +53,7 @@ subroutine flow_init (mode, it01, tscale)
    use swan_input    ! Needed when running stand_alone
    use sync_flowwave
    use wave_data
+   use string_module, only: str_token, count_words
    !
    implicit none
 !
@@ -77,11 +78,22 @@ subroutine flow_init (mode, it01, tscale)
    subdom_names = ' '
    if (mode == stand_alone) then
       if (swan_run%useflowdata .or. swan_run%swwav) then
-         num_subdomains = 1
+         if (swan_run%comfile == ' ') then
+            swan_run%comfile = swan_run%casl
+            num_subdomains = 1
+         else
+            num_subdomains = count_words(swan_run%comfile)
+         endif
+         !
          allocate (runids(num_subdomains))
-         runids(1) = swan_run%casl
-         write(*,'(a,i0,a)') '*** MESSAGE: Using data from the following FLOW domain:'
-         write(*,'(13x,a)') trim(runids(1))
+         write(*,'(a,i0,a)') '*** MESSAGE: Using data from the following FLOW domain(s):'
+         do idom = 1,num_subdomains
+            call str_token(swan_run%comfile,runids(idom))
+            write(*,'(13x,a)') trim(runids(idom))
+         enddo
+         !
+         ! Obtain time settings from first com file
+         !
          write(filnam,'(2a)') 'com-',trim(runids(1))
          call get_params(tscale, dummy, filnam)
          flow_data_initialized = .true.

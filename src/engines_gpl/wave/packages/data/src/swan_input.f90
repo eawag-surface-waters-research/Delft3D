@@ -320,9 +320,9 @@ module swan_input
        character(72)                            :: title2
        character(72)                            :: title3
        character(256)                           :: casl
-       character(256)                           :: filcom
        character(256)                           :: filnam
        character(256)                           :: specfile
+       character(1024)                          :: comfile
        character(15)                            :: usehottime    = '00000000.000000'       ! Time in the name of the hotfile that has to be used by SWAN
        character(15)                            :: writehottime  = '00000000.000000'       ! Time in the name of the hotfile that has to be written by SWAN
        character(15)                            :: keephottime   = '00000000.000000'       ! Time in the name of the hotfile that should not be deleted
@@ -415,6 +415,7 @@ subroutine read_swan (filnam, sr, wavedata)
    sr%title1        = ''
    sr%title2        = ''
    sr%title3        = ''
+   sr%comfile       = ''
    sr%useflowdata   = .false.
    sr%swmor         = .false.
    sr%swwlt         = .false.
@@ -485,7 +486,7 @@ subroutine read_swan (filnam, sr, wavedata)
       call read_swan_mdw(sr%casl     ,wavedata   , &
                        & sr%swmor    ,sr%swwlt   ,sr%swuvt   , &
                        & sr%swwav    ,sr%swuvi   ,sr%corht   ,sr%curvi  , &
-                       & sr%swbot    ,sr%swflux  ,sr%filcom  ,sr%rgfout ,sr%prname , &
+                       & sr%swbot    ,sr%swflux  ,sr%rgfout  ,sr%prname , &
                        & sr%prnumb   ,sr%title1  ,sr%title2  ,sr%title3 , &
                        & sr%nnest    ,sr%nttide  ,sr%itest   ,sr%itrace , &
                        & sr%zeta     ,sr%ux0     ,sr%uy0     ,sr%css    ,sr%cdd    , &
@@ -1199,6 +1200,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        if (parname /= ' ') then
           call setmode(wavedata, flow_mud_online)
        endif
+    else
+       call prop_get_string (mdw_ptr, 'General', 'ComFile', sr%comfile)
     endif
     select case (wavedata%mode)
     case (stand_alone)
@@ -2191,6 +2194,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        goto 999
     endif
     !
+    sr%specfile    = ' '
     do i = 1, nbound
        bnd => sr%bnd(i)
        !
@@ -2208,7 +2212,6 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        bnd%gamma0     = 3.3
        bnd%sigfr      = -999.0
        bnd%name       = ' '
-       sr%specfile    = ' '
        nullify(bnd%distance)
        nullify(bnd%waveheight)
        nullify(bnd%period)
@@ -2679,7 +2682,7 @@ end subroutine read_keyw_mdw
 subroutine read_swan_mdw(casl      ,wavedata  , &
                        & swmor     ,swwlt     ,swuvt     , &
                        & swwav     ,swuvi     ,corht     ,curvi     , &
-                       & swbot     ,swflux    ,filcom    ,rgfout    ,prname    , &
+                       & swbot     ,swflux    ,rgfout    ,prname    , &
                        & prnumb    ,title1    ,title2    ,title3    , &
                        & nnest     ,nttide    ,itest     ,itrace    , &
                        & zeta      ,ux0       ,uy0       ,css       ,cdd       , &
@@ -2752,7 +2755,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     character(*)                                 :: casl
     character(4)                    ,intent(out) :: prnumb
     character(16)                   ,intent(out) :: prname
-    character(*)                    ,intent(out) :: filcom
     character(37)                   ,intent(out) :: rgfout
     character(37)                                :: wfil
     character(37)                                :: ffil
@@ -3608,9 +3610,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !
     ind=index(filnam,'.mdw')
     casl=filnam(1:ind-1)
-    filcom      = ' '
-    filcom(1:4) = 'com-'
-    filcom(5:)  = casl
     inrhog      = 1
     sr%nbound   = nbound    !  number of boundaries
     sr%npoints  = npoints
