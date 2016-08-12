@@ -143,8 +143,8 @@ typedef void (CDECLOPT *BMI_SETVAR)         (const char *, void *);
 
 // A component is an instance of D-FlowFM, RTC-Tools, WAQ, WAVE or Delft3D-FLOW(flow2d3d)
 // Corresponds with a component block in config.xml
-typedef struct dh_component dh_component;
-struct dh_component {
+typedef struct dimr_component dimr_component;
+struct dimr_component {
     const char    *    name;              // Component name: must be unique in the config.xml file (e.g. myNameFlow)
     char          *    library;           // Component library name, without extension/prefix
     int                type;              // COMP_TYPE_FM, COMP_TYPE_RTC or COMP_TYPE_WAVE
@@ -172,16 +172,16 @@ struct dh_component {
     int                result;            // return value when calling an entry point in dll
 };
 // Array of all components
-typedef struct DH_COMPONENTS {
+typedef struct DIMR_COMPONENTS {
     unsigned int   numComponents;
-    dh_component * components;
-} dh_components;
+    dimr_component * components;
+} dimr_components;
 
 
 // Each item to be communicated between components
 // Corresponds with an item in config.xml
-typedef struct dh_couple_item dh_couple_item;
-struct dh_couple_item {
+typedef struct dimr_couple_item dimr_couple_item;
+struct dimr_couple_item {
     const char * sourceName;         // as written in config.xml
     const char * targetName;         // idem
     int          sourceProcess;
@@ -192,28 +192,28 @@ struct dh_couple_item {
 
 // A coupler defines the communication between two components, one coupler for each direction
 // Corresponds with a coupler block in config.xml
-typedef struct dh_coupler dh_coupler;
-struct dh_coupler {
-    const char     *   name;                // Coupler name: must be unique in the config.xml file (e.g. rtc2flow)
-    char           *   sourceComponentName; // Name of the component providing data to be communicated by the coupler
-    char           *   targetComponentName; // Name of the component receiving data to be communicated by the coupler
-    dh_component   *   sourceComponent;     // Pointer to the related component
-    dh_component   *   targetComponent;     // idem
-    unsigned int       numItems;
-    dh_couple_item *   items;               // Array of items defining this coupler
+typedef struct dimr_coupler dimr_coupler;
+struct dimr_coupler {
+    const char       *   name;                // Coupler name: must be unique in the config.xml file (e.g. rtc2flow)
+    char             *   sourceComponentName; // Name of the component providing data to be communicated by the coupler
+    char             *   targetComponentName; // Name of the component receiving data to be communicated by the coupler
+    dimr_component   *   sourceComponent;     // Pointer to the related component
+    dimr_component   *   targetComponent;     // idem
+    unsigned int         numItems;
+    dimr_couple_item *   items;               // Array of items defining this coupler
 };
 // Array of all couplers
-typedef struct DH_COUPLERS {
+typedef struct DIMR_COUPLERS {
     unsigned int numCouplers;
-    dh_coupler * couplers;
-} dh_couplers;
+    dimr_coupler * couplers;
+} dimr_couplers;
 
 
 // OR the component pointer is defined (coupler pointer is NULL) OR the other way around
-typedef struct dh_unit dh_unit;
-struct dh_unit {
-    dh_component * component;
-    dh_coupler   * coupler;
+typedef struct dimr_unit dimr_unit;
+struct dimr_unit {
+    dimr_component * component;
+    dimr_coupler   * coupler;
 };
 
 
@@ -224,13 +224,13 @@ struct dh_unit {
 // <start>      : 0         subBlocks, unit.component=defined, unit.coupler=NULL, timeVars=NULL   , type=CT_START
 // <startGroup> : 1 or more subBlocks, unit=NULL,                                 timeVars=defined, type=CT_STARTGROUP
 // <coupler>    : 0         subBlocks, unit.component=NULL, unit.coupler=defined, timeVars=NULL   , type=CT_COUPLER
-typedef struct dh_control_block dh_control_block;
-struct dh_control_block {
+typedef struct dimr_control_block dimr_control_block;
+struct dimr_control_block {
     int                numSubBlocks;     // total number of sub blocks
-    dh_control_block * subBlocks;
+    dimr_control_block * subBlocks;
     int                masterSubBlockId; // Identifying the unique subBlock of this controlBlock acting as the master
     int                type;
-    dh_unit            unit;             // pointer to the actual units (in case of no further subblocks)
+    dimr_unit            unit;             // pointer to the actual units (in case of no further subblocks)
     double             tStart;
     double             tStep;
     double             tEnd;
@@ -250,9 +250,9 @@ class Dimr {
         void           connectLibs(void);
         void           freeLibs(void);
         void           processWaitFile(void);
-        void		   runControlBlock  (dh_control_block *, double, int);
-        void		   runParallelInit  (dh_control_block *);
-        void		   runParallelFinish(dh_control_block *);
+        void		   runControlBlock  (dimr_control_block *, double, int);
+        void		   runParallelInit  (dimr_control_block *);
+        void		   runParallelFinish(dimr_control_block *);
 
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run
@@ -263,9 +263,9 @@ class Dimr {
         XmlTree *          config;         // top of entire XML configuration tree
         char *             mainArgs;       // reassembled command-line arguments (argv[1...])
         char *             slaveArg;       // command-line argument for slave mode
-        dh_control_block * control;        // structure containing all information from the control block in the config.xml file
-        dh_components      componentsList; // Array of all components
-        dh_couplers        couplersList;   // Array of all couplers
+        dimr_control_block * control;        // structure containing all information from the control block in the config.xml file
+        dimr_components    componentsList; // Array of all components
+        dimr_couplers      couplersList;   // Array of all couplers
         bool use_mpi; // Whether MPI-mode is active for this run.
         int my_rank;  // Rank# of current process
         int numranks; // Total nr of MPI processes for dimr main.
@@ -284,36 +284,28 @@ class Dimr {
 
     private:
         // Additional destructor routine
-        void		   deleteControlBlock(dh_control_block);
+        void		   deleteControlBlock(dimr_control_block);
 
         // Additional run routines
-        void		   runStartBlock    (dh_control_block *, int);
-        void		   runParallelUpdate(dh_control_block *);
+        void		   runStartBlock    (dimr_control_block *, int);
+        void		   runParallelUpdate(dimr_control_block *);
 
 
-        void           scanControl(XmlTree *, dh_control_block *);
+        void           scanControl(XmlTree *, dimr_control_block *);
 
         void           scanUnits(XmlTree *);
-        void           scanComponent(XmlTree *, dh_component *);
-        void           scanCoupler  (XmlTree *, dh_coupler *);
+        void           scanComponent(XmlTree *, dimr_component *);
+        void           scanCoupler  (XmlTree *, dimr_coupler *);
 
-        dh_component * getComponent(const char *);
+        dimr_component * getComponent(const char *);
 
-        dh_coupler *   getCoupler(const char *);
+        dimr_coupler *   getCoupler(const char *);
 
         void           char_to_ints(char *, int **, int *);
     };
 
 
 //------------------------------------------------------------------------------
-
-
-#ifdef DIMR_LIB
-    Dimr * DH = NULL;     // global pointer to single object instance
-
-#else
-    extern Dimr * DH;
-#endif
 	
 
 extern "C" {

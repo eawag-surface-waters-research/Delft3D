@@ -73,6 +73,8 @@ using namespace std;
 #  include <unistd.h>
 #endif
 
+// static added to prevent name conflicts on Linux.
+static Dimr * thisDimr = NULL;     // global pointer to single object instance
 
 Dimr::Dimr(void) {
     FILE *      logFile = stdout;
@@ -99,184 +101,184 @@ Dimr::Dimr(void) {
 extern "C" {
 //------------------------------------------------------------------------------
 DllExport void set_logger_callback(WriteCallback writeCallBack) {
-	if (DH == NULL) {
-		DH = new Dimr();
+	if (thisDimr == NULL) {
+		thisDimr = new Dimr();
 	}
-	DH->log->SetWriteCallBack(writeCallBack);
+	thisDimr->log->SetWriteCallBack(writeCallBack);
 }
 	
 //------------------------------------------------------------------------------
 DllExport void set_logger(Log * loggerFromDimrExe) {
-	if (DH == NULL) {
-		DH = new Dimr();
+	if (thisDimr == NULL) {
+		thisDimr = new Dimr();
 	}
-	DH->log = loggerFromDimrExe;
+	thisDimr->log = loggerFromDimrExe;
 }
 
 
 //------------------------------------------------------------------------------
 DllExport int initialize(const char * configfile) {
-    if (DH == NULL) {
-        DH = new Dimr();
+    if (thisDimr == NULL) {
+        thisDimr = new Dimr();
     }
 
-	DH->log->Write(Log::MAJOR, DH->my_rank, getfullversionstring_dimr_lib());
+	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
 	
-	DH->log->Write(Log::ALWAYS, DH->my_rank, "dimr_lib:initialize");
+	thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, "dimr_lib:initialize");
 
-	DH->log->Write(Log::ALWAYS, DH->my_rank, configfile);
+	thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, configfile);
 
     //
     //
     // Read XML configuration file into tree structure
-    DH->configfile = configfile;
+    thisDimr->configfile = configfile;
     FILE * conf;
-    if (strcmp (DH->configfile, "-") == 0)
+    if (strcmp (thisDimr->configfile, "-") == 0)
         conf = stdin;
     else {
-        conf = fopen (DH->configfile, "r");
+        conf = fopen (thisDimr->configfile, "r");
 		if (conf == NULL){
-			DH->log->Write(Log::ALWAYS, DH->my_rank, "Cannot open configuration file \"%s\"", DH->configfile);
-			throw new Exception(true, "Cannot open configuration file \"%s\"", DH->configfile);
+			thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
+			throw new Exception(true, "Cannot open configuration file \"%s\"", thisDimr->configfile);
 		}
     }
 
-    DH->config = new XmlTree (conf);
+    thisDimr->config = new XmlTree (conf);
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
-	DH->log->Write(Log::ALWAYS, DH->my_rank, "Build controlBlock administration by scanning the XmlTree");
-	DH->scanConfigFile();
+	thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
+	thisDimr->scanConfigFile();
     //
     // ToDo: check whether a core dump is requested on abort; if so set global variable for Dimr_CoreDump
     //
     // This is a good time to attach to the processes in case you want to debug
-    DH->processWaitFile();
+    thisDimr->processWaitFile();
     //
     // Build connection with dlls
-    DH->connectLibs();
+    thisDimr->connectLibs();
     //
     // Initialize the components in the first controlBlock only
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        DH->runParallelInit(&(DH->control->subBlocks[0]));
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        thisDimr->runParallelInit(&(thisDimr->control->subBlocks[0]));
     } else {
         // Start block
 
         // Hack for WAVE:
-        if (DH->control->subBlocks[0].unit.component->type == COMP_TYPE_WAVE) {
+        if (thisDimr->control->subBlocks[0].unit.component->type == COMP_TYPE_WAVE) {
             int *waveModePtr        = NULL;
             const char *key = "mode";
-            (DH->control->subBlocks[0].unit.component->dllGetVar) (key, &waveModePtr);
+            (thisDimr->control->subBlocks[0].unit.component->dllGetVar) (key, &waveModePtr);
             *waveModePtr = 0;
         }
-        chdir(DH->control->subBlocks[0].unit.component->workingDir);
-        DH->log->Write (Log::MAJOR, DH->my_rank, "%s.Initialize(%s)", DH->control->subBlocks[0].unit.component->name, DH->control->subBlocks[0].unit.component->inputFile);
-        DH->control->subBlocks[0].unit.component->result = (DH->control->subBlocks[0].unit.component->dllInitialize) (DH->control->subBlocks[0].unit.component->inputFile);
-        (DH->control->subBlocks[0].unit.component->dllGetStartTime) (&DH->control->subBlocks[0].tStart);
-        (DH->control->subBlocks[0].unit.component->dllGetEndTime) (&DH->control->subBlocks[0].tEnd);
-        (DH->control->subBlocks[0].unit.component->dllGetTimeStep) (&DH->control->subBlocks[0].tStep);
-        (DH->control->subBlocks[0].unit.component->dllGetCurrentTime) (&DH->control->subBlocks[0].tCur);
+        chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
+        thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
+        (thisDimr->control->subBlocks[0].unit.component->dllGetStartTime) (&thisDimr->control->subBlocks[0].tStart);
+        (thisDimr->control->subBlocks[0].unit.component->dllGetEndTime) (&thisDimr->control->subBlocks[0].tEnd);
+        (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
+        (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void update (double tStep) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:update");
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:update");
     // Execute update on the first controlBlock only
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        DH->runControlBlock(&(DH->control->subBlocks[0]), tStep, GLOBAL_PHASE_UPDATE);
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        thisDimr->runControlBlock(&(thisDimr->control->subBlocks[0]), tStep, GLOBAL_PHASE_UPDATE);
     } else {
         // Start block
-        chdir(DH->control->subBlocks[0].unit.component->workingDir);
-        DH->log->Write (Log::MAJOR, DH->my_rank, "%s.Update(%6.1f)", DH->control->subBlocks[0].unit.component->name, tStep);
-        (DH->control->subBlocks[0].unit.component->dllUpdate) (tStep);
-        (DH->control->subBlocks[0].unit.component->dllGetCurrentTime) (&DH->control->subBlocks[0].tCur);
+        chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
+        (thisDimr->control->subBlocks[0].unit.component->dllUpdate) (tStep);
+        (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void finalize (void) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:finalize");
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:finalize");
     // Execute finalize on the first controlBlock and
     // initialize, step, finalize on all other controlBlocks
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        DH->runParallelFinish(&(DH->control->subBlocks[0]));
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        thisDimr->runParallelFinish(&(thisDimr->control->subBlocks[0]));
     } else {
         // Start block
-        chdir(DH->control->subBlocks[0].unit.component->workingDir);
-        DH->log->Write (Log::MAJOR, DH->my_rank, "%s.Finalize()", DH->control->subBlocks[0].unit.component->name);
-        (DH->control->subBlocks[0].unit.component->dllFinalize) ();
+        chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Finalize()", thisDimr->control->subBlocks[0].unit.component->name);
+        (thisDimr->control->subBlocks[0].unit.component->dllFinalize) ();
         fflush(stdout);
     }
-    for (int i = 1 ; i < DH->control->numSubBlocks ; i++) {
-        DH->runControlBlock(&(DH->control->subBlocks[i]),999999999.0, GLOBAL_PHASE_FINISH);
+    for (int i = 1 ; i < thisDimr->control->numSubBlocks ; i++) {
+        thisDimr->runControlBlock(&(thisDimr->control->subBlocks[i]),999999999.0, GLOBAL_PHASE_FINISH);
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void get_start_time (double * tStart) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:get_start_time");
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        *tStart = DH->control->subBlocks[0].subBlocks[DH->control->subBlocks[0].masterSubBlockId].tStart;
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_start_time");
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        *tStart = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStart;
     } else {
         // Start block
-        *tStart = DH->control->subBlocks[0].tStart;
+        *tStart = thisDimr->control->subBlocks[0].tStart;
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void get_end_time (double * tEnd) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:get_end_time");
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        *tEnd = DH->control->subBlocks[0].subBlocks[DH->control->subBlocks[0].masterSubBlockId].tEnd;
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_end_time");
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        *tEnd = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tEnd;
     } else {
         // Start block
-        *tEnd = DH->control->subBlocks[0].tEnd;
+        *tEnd = thisDimr->control->subBlocks[0].tEnd;
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void get_time_step (double * tStep) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:get_time_step");
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        *tStep = DH->control->subBlocks[0].subBlocks[DH->control->masterSubBlockId].tStep;
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_time_step");
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        *tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->masterSubBlockId].tStep;
     } else {
         // Start block
-        *tStep = DH->control->subBlocks[0].tStep;
+        *tStep = thisDimr->control->subBlocks[0].tStep;
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void get_current_time (double * tCur) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:get_current_time");
-    if (DH->control->subBlocks[0].type == CT_PARALLEL) {
-        *tCur = DH->control->subBlocks[0].subBlocks[DH->control->masterSubBlockId].tCur;
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_current_time");
+    if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
+        *tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->masterSubBlockId].tCur;
     } else {
         // Start block
-        *tCur = DH->control->subBlocks[0].tCur;
+        *tCur = thisDimr->control->subBlocks[0].tCur;
     }
 }
 
 //------------------------------------------------------------------------------
 DllExport void get_var (const char * key, void * ref) {
-    DH->log->Write (Log::ALWAYS, DH->my_rank, "dimr_lib:get_var");
+    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_var");
     throw new Exception(true, "dimr::get_var is not implemented yet\n");
 }
 
 //------------------------------------------------------------------------------
 DllExport void set_var (const char * key, void * value) {
-    // DH->log is not initialized when set_var is called before initialize
-    if (DH == NULL) {
-        DH = new Dimr();
+    // thisDimr->log is not initialized when set_var is called before initialize
+    if (thisDimr == NULL) {
+        thisDimr = new Dimr();
     }
     if (strcmp(key, "useMPI") == 0) {
-        DH->use_mpi = *(bool *)value;
+        thisDimr->use_mpi = *(bool *)value;
     } else if (strcmp(key, "numRanks") == 0) {
-        DH->numranks = *(int *)value;
+        thisDimr->numranks = *(int *)value;
     } else if (strcmp(key, "myRank") == 0) {
-        DH->my_rank = *(int *)value;
+        thisDimr->my_rank = *(int *)value;
     } else if (strcmp(key, "debugLevel") == 0) {
-        DH->logMask = *(Log::Mask *)value;
+        thisDimr->logMask = *(Log::Mask *)value;
     } else {
         throw new Exception(true, "dimr::set_var: Unrecognized keyword \"%s\"\n", key);
     }
@@ -326,7 +328,7 @@ Dimr::~Dimr (void) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::deleteControlBlock (dh_control_block cb) {
+void Dimr::deleteControlBlock (dimr_control_block cb) {
     if (cb.numSubBlocks > 0) {
         for (int i = 0 ; i < cb.numSubBlocks ; i++) {
             // Recursively delete all subBlocks
@@ -342,7 +344,7 @@ void Dimr::deleteControlBlock (dh_control_block cb) {
 // WARNING: dimr is not BMI compliant yet!
 // tStep is not used in runControlBlock
 //------------------------------------------------------------------------------
-void Dimr::runControlBlock (dh_control_block * cb, double tStep, int phase) {
+void Dimr::runControlBlock (dimr_control_block * cb, double tStep, int phase) {
     if (cb->type == CT_PARALLEL) {
         this->log->Write (Log::MAJOR, my_rank, "PARALLEL:");
         //
@@ -370,7 +372,7 @@ void Dimr::runControlBlock (dh_control_block * cb, double tStep, int phase) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::runStartBlock (dh_control_block * cb, int phase) {
+void Dimr::runStartBlock (dimr_control_block * cb, int phase) {
     this->log->Write (Log::MAJOR, my_rank, "START:");
 
     chdir(cb->unit.component->workingDir);
@@ -394,7 +396,7 @@ void Dimr::runStartBlock (dh_control_block * cb, int phase) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::runParallelInit (dh_control_block * cb) {
+void Dimr::runParallelInit (dimr_control_block * cb) {
     int ierr;
     MPI_Group mpiGroupWorld;
     MPI_Group mpiGroupComp;
@@ -424,7 +426,7 @@ void Dimr::runParallelInit (dh_control_block * cb) {
     // Hack:
     // The masterComponent must be initialized first
     // Wave can only be initialized after the flow component
-    dh_component * masterComponent = cb->subBlocks[cb->masterSubBlockId].unit.component;
+    dimr_component * masterComponent = cb->subBlocks[cb->masterSubBlockId].unit.component;
 
     // Create an MPI subgroup and subcommunicator and pass it on to the component.
     if (use_mpi && masterComponent->mpiCommVar != NULL  && masterComponent->numProcesses > 1) { // TODO: consider removing the numproc>1 check.
@@ -464,7 +466,7 @@ void Dimr::runParallelInit (dh_control_block * cb) {
             // First all components
             for (int j = 0 ; j < cb->subBlocks[i].numSubBlocks ; j++) {
                 if (cb->subBlocks[i].subBlocks[j].type == CT_START) {
-                    dh_component * thisComponent = cb->subBlocks[i].subBlocks[j].unit.component;
+                    dimr_component * thisComponent = cb->subBlocks[i].subBlocks[j].unit.component;
 
                     if (thisComponent->onThisRank) { // TODO: AvD/AM: if FM is not start, but startblock, we need all the MPI stuff here as well: make a generic initializeComponent helper routine.
 
@@ -485,7 +487,7 @@ void Dimr::runParallelInit (dh_control_block * cb) {
             // Then all couplers
             for (int j = 0 ; j < cb->subBlocks[i].numSubBlocks ; j++) {
                 if (cb->subBlocks[i].subBlocks[j].type != CT_START) {
-                    dh_coupler   * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
+                    dimr_coupler   * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                     for (int k = 0 ; k < thisCoupler->numItems ; k++) {
                         if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC || thisCoupler->sourceComponent->type == COMP_TYPE_WANDA) {
                             // RTCTools/Wanda: impossible to autodetect which partition will deliver this source var
@@ -562,8 +564,8 @@ void Dimr::runParallelInit (dh_control_block * cb) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::runParallelUpdate (dh_control_block * cb) {
-    dh_control_block * masterComponent = &cb->subBlocks[cb->masterSubBlockId];
+void Dimr::runParallelUpdate (dimr_control_block * cb) {
+    dimr_control_block * masterComponent = &cb->subBlocks[cb->masterSubBlockId];
     if (!masterComponent->unit.component->onThisRank) {
         throw new Exception (true, "runParallelUpdate: not supported yet: master component \"%s\" should run on all processes.", masterComponent->unit.component->name);
         // TODO: AvD/AM: is this allowed: master component not on *all* dimr processes? NOT YET, but yes we want it, e.g. 3xFM, 7xWAVE. Rethink.
@@ -648,7 +650,7 @@ void Dimr::runParallelUpdate (dh_control_block * cb) {
                     for (int j = 0 ; j < cb->subBlocks[i].numSubBlocks ; j++) {
                         if (cb->subBlocks[i].subBlocks[j].type == CT_START) {
                             // Component
-                            dh_component * thisComponent = cb->subBlocks[i].subBlocks[j].unit.component;
+                            dimr_component * thisComponent = cb->subBlocks[i].subBlocks[j].unit.component;
                             if (!thisComponent->onThisRank) {
                                 continue;
                             }
@@ -667,7 +669,7 @@ void Dimr::runParallelUpdate (dh_control_block * cb) {
                             (thisComponent->dllUpdate) (tUpdate);
                         } else {
                             // Coupler
-                            dh_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
+                            dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                             this->log->Write (Log::MINOR, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
                             for (int k = 0 ; k < thisCoupler->numItems ; k++) {
                                 this->log->Write (Log::DETAIL, my_rank, "    %s -> %s", thisCoupler->items[k].sourceName, thisCoupler->items[k].targetName);
@@ -771,7 +773,7 @@ void Dimr::runParallelUpdate (dh_control_block * cb) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::runParallelFinish (dh_control_block * cb) {
+void Dimr::runParallelFinish (dimr_control_block * cb) {
     if (use_mpi) {
         int ierr = MPI_Barrier(MPI_COMM_WORLD);
     }
@@ -830,7 +832,7 @@ void Dimr::scanConfigFile (void) {
         throw new Exception (true, "Configuration file \"%s\": Version number (%3.2f) must have main version 2", this->configfile,versionnumber);
 
     // Allocate the control structure and check its size
-    this->control = (dh_control_block *) malloc(sizeof(dh_control_block));
+    this->control = (dimr_control_block *) malloc(sizeof(dimr_control_block));
     this->control->numSubBlocks = 0;
     this->control->subBlocks    = NULL;
     this->control->masterSubBlockId = -1;
@@ -855,10 +857,10 @@ void Dimr::scanUnits(XmlTree * rootXml) {
         if (strcmp(rootXml->children[i]->name, "component") == 0) {
             this->componentsList.numComponents++;
             if (this->componentsList.components == NULL) {
-                this->componentsList.components = (dh_component*)malloc(this->componentsList.numComponents * sizeof(dh_component));
+                this->componentsList.components = (dimr_component*)malloc(this->componentsList.numComponents * sizeof(dimr_component));
             } else {
-                this->componentsList.components = (dh_component*)realloc(this->componentsList.components, 
-                                                                         this->componentsList.numComponents * sizeof(dh_component));
+                this->componentsList.components = (dimr_component*)realloc(this->componentsList.components, 
+                                                                          this->componentsList.numComponents * sizeof(dimr_component));
                 if (this->componentsList.components == NULL) {
                     throw new Exception (true, "Allocation error in scanUnits (component)");
                 }
@@ -868,9 +870,9 @@ void Dimr::scanUnits(XmlTree * rootXml) {
         if (strcmp(rootXml->children[i]->name, "coupler") == 0) {
             this->couplersList.numCouplers++;
             if (this->couplersList.couplers == NULL) {
-                this->couplersList.couplers = (dh_coupler*)malloc(this->couplersList.numCouplers * sizeof(dh_coupler));
+                this->couplersList.couplers = (dimr_coupler*)malloc(this->couplersList.numCouplers * sizeof(dimr_coupler));
             } else {
-                this->couplersList.couplers = (dh_coupler*)realloc(this->couplersList.couplers, this->couplersList.numCouplers * sizeof(dh_coupler));
+                this->couplersList.couplers = (dimr_coupler*)realloc(this->couplersList.couplers, this->couplersList.numCouplers * sizeof(dimr_coupler));
                 if (this->couplersList.couplers == NULL) {
                     throw new Exception (true, "Allocation error in scanUnits (coupler)");
                 }
@@ -883,7 +885,7 @@ void Dimr::scanUnits(XmlTree * rootXml) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::scanComponent(XmlTree * xmlComponent, dh_component * newComp) {
+void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     // Needed for path handling
 #if defined(HAVE_CONFIG_H)
     const char *dirSeparator = "/";
@@ -935,7 +937,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dh_component * newComp) {
         // Store process rank numbers in component's processes array.
         char_to_ints(processElement->charData, &(newComp->processes), &(newComp->numProcesses));
 
-        // Check whether DH's my_rank is also in components configured processes array.
+        // Check whether this process' rank is also in components configured processes array.
         newComp->onThisRank = false;         // Not found (yet): only active on other ranks.
         for (int i=0; i < newComp->numProcesses; i++) {
             if (newComp->processes[i] >= numranks) {
@@ -1009,7 +1011,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dh_component * newComp) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::scanCoupler(XmlTree * xmlCoupler, dh_coupler * newCoup) {
+void Dimr::scanCoupler(XmlTree * xmlCoupler, dimr_coupler * newCoup) {
     newCoup->name = xmlCoupler->GetAttrib("name");
     // Element sourceComponent
     XmlTree * sourceComponent = xmlCoupler->Lookup ("sourceComponent");
@@ -1033,14 +1035,14 @@ void Dimr::scanCoupler(XmlTree * xmlCoupler, dh_coupler * newCoup) {
             // Create the item
             newCoup->numItems++;
             if (newCoup->items == NULL) {
-                newCoup->items = (dh_couple_item*)malloc(newCoup->numItems * sizeof(dh_couple_item));
+                newCoup->items = (dimr_couple_item*)malloc(newCoup->numItems * sizeof(dimr_couple_item));
             } else {
-                newCoup->items = (dh_couple_item*)realloc(newCoup->items, newCoup->numItems * sizeof(dh_couple_item));
+                newCoup->items = (dimr_couple_item*)realloc(newCoup->items, newCoup->numItems * sizeof(dimr_couple_item));
                 if (newCoup->items == NULL) {
                     throw new Exception (true, "Allocation error in scanUnits (couple unit)");
                 }
             }
-            dh_couple_item *newItem = &(newCoup->items[newCoup->numItems - 1]);
+            dimr_couple_item *newItem = &(newCoup->items[newCoup->numItems - 1]);
 
             // Read sourceName
             XmlTree * xmlSource = xmlCoupler->children[j]->Lookup ("sourceName");
@@ -1067,7 +1069,7 @@ void Dimr::scanCoupler(XmlTree * xmlCoupler, dh_coupler * newCoup) {
 
 
 //------------------------------------------------------------------------------
-void Dimr::scanControl(XmlTree * controlBlockXml, dh_control_block * controlBlock) {
+void Dimr::scanControl(XmlTree * controlBlockXml, dimr_control_block * controlBlock) {
     if (strcmp(controlBlockXml->name, "control") == 0) {
         controlBlock->type = CT_SEQUENTIAL;
     } else if (strcmp(controlBlockXml->name, "parallel") == 0) {
@@ -1099,9 +1101,9 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dh_control_block * controlBloc
             || strcmp(controlBlockXml->children[i]->name, "coupler"   ) == 0) {
             controlBlock->numSubBlocks++;
             if (controlBlock->subBlocks == NULL) {
-                controlBlock->subBlocks = (dh_control_block*)malloc(controlBlock->numSubBlocks * sizeof(dh_control_block));
+                controlBlock->subBlocks = (dimr_control_block*)malloc(controlBlock->numSubBlocks * sizeof(dimr_control_block));
             } else {
-                controlBlock->subBlocks = (dh_control_block*)realloc(controlBlock->subBlocks, controlBlock->numSubBlocks * sizeof(dh_control_block));
+                controlBlock->subBlocks = (dimr_control_block*)realloc(controlBlock->subBlocks, controlBlock->numSubBlocks * sizeof(dimr_control_block));
                 if (controlBlock->subBlocks == NULL) {
                     throw new Exception (true, "Allocation error in scanControl");
                 }
@@ -1116,7 +1118,7 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dh_control_block * controlBloc
 
 //------------------------------------------------------------------------------
 // Search for a named component in the list of components
-dh_component * Dimr::getComponent(const char * compName) {
+dimr_component * Dimr::getComponent(const char * compName) {
     for (int i = 0 ; i < this->componentsList.numComponents ; i++) {
         if (strcmp(this->componentsList.components[i].name, compName) == 0) {
             return &(this->componentsList.components[i]);
@@ -1128,7 +1130,7 @@ dh_component * Dimr::getComponent(const char * compName) {
 
 //------------------------------------------------------------------------------
 // Search for a named coupler in the list of couplers
-dh_coupler * Dimr::getCoupler(const char * coupName) {
+dimr_coupler * Dimr::getCoupler(const char * coupName) {
     for (int i = 0 ; i < this->couplersList.numCouplers ; i++) {
         if (strcmp(this->couplersList.couplers[i].name, coupName) == 0) {
             return &(this->couplersList.couplers[i]);
