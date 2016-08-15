@@ -51,9 +51,10 @@ Log::Log (
     Mask    mask
     ) {
 
-    this->output    = output;
-    this->clock     = clock;
-    this->mask      = mask;
+    this->output        = output;
+    this->clock         = clock;
+    this->mask          = mask;
+	this->writeCallback = NULL;
 
     if (pthread_key_create (&this->thkey, NULL) != 0)
         throw new Exception (true, "Pthreads error in Log: Cannot create thread-specific key: %s", strerror (errno));
