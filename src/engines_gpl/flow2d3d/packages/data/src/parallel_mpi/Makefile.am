@@ -66,7 +66,7 @@ libDataParallelMPI_la_SOURCES = \
 	 dfstrip.F90 \
 	 dfmassc.F90 \
 	 dffunctionals.F90 \
-	 dfgather.F90 \
+	 dfgather_lowlevel.F90 \
 	 dfgather_grddim.F90 \
 	 adjlin.F90 \
 	 rdencl.F90 \
