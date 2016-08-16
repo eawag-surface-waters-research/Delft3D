@@ -179,6 +179,8 @@ DllExport int initialize(const char * configfile) {
         (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
     }
+	// all ok (no exceptions)
+	return 0;
 }
 
 //------------------------------------------------------------------------------
