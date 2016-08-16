@@ -520,7 +520,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
              !
              ! global attributes
              !
-             ierror = nf90_put_att(fds, nf90_global,  'Conventions', 'CF-1.6'); call nc_check_err(lundia, ierror, "put_att global Conventions", filename)
+             ierror = nf90_put_att(fds, nf90_global,  'Conventions', 'CF-1.6 SGRID-0.3'); call nc_check_err(lundia, ierror, "put_att global Conventions", filename)
              ierror = nf90_put_att(fds, nf90_global,  'institution', trim('Deltares')); call nc_check_err(lundia, ierror, "put_att global institution", filename)
              ierror = nf90_put_att(fds, nf90_global,  'references', trim('www.deltares.nl')); call nc_check_err(lundia, ierror, "put_att global references", filename)
              ierror = nf90_put_att(fds, nf90_global,  'source', trim(version_full)); call nc_check_err(lundia, ierror, "put_att global source", filename)
