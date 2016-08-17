@@ -125,6 +125,7 @@ libIOInput_la_SOURCES = \
          strfil.f90 \
          tdfil.f90 \
          trafil.f90 \
+         rdarray.f90 \
          search2.f90
 
 #-------------------------------------------------------------------------------

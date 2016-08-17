@@ -46,26 +46,26 @@ subroutine dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
 !
 ! Global variables
 !
-integer                                   :: lundia !  Description and declaration in inout.igs
-integer, intent(in)                       :: mfg
-integer, intent(in)                       :: mlg
-integer, intent(in)                       :: nfg
-integer, intent(in)                       :: nlg
-integer, intent(in)                       :: mmaxgl
-integer, intent(in)                       :: nmaxgl
+    integer                                      :: lundia !  Description and declaration in inout.igs
+    integer                        , intent(in)  :: mfg
+    integer                        , intent(in)  :: mlg
+    integer                        , intent(in)  :: nfg
+    integer                        , intent(in)  :: nlg
+    integer                        , intent(in)  :: mmaxgl
+    integer                        , intent(in)  :: nmaxgl
+    integer, dimension(4,0:nproc-1), intent(out) :: iarrc  ! array containing collected grid indices 
+    integer                        , intent(out) :: lenlo  ! length of field of current subdomain
+    integer                        , intent(out) :: lengl  ! length of field containing collected data
+    integer, dimension(0:nproc-1)  , intent(out) :: mf     ! first index w.r.t. global grid in x-direction
+    integer, dimension(0:nproc-1)  , intent(out) :: ml     ! last index w.r.t. global grid in x-direction
+    integer, dimension(0:nproc-1)  , intent(out) :: nf     ! first index w.r.t. global grid in y-direction
+    integer, dimension(0:nproc-1)  , intent(out) :: nl     ! last index w.r.t. global grid in y-direction
 !
 ! Local variables
 !
-    integer, dimension(4,0:nproc-1)       :: iarrc  ! array containing collected grid indices 
-    integer                               :: ip     ! node number 
-    integer                               :: lenlo  ! length of field of current subdomain
-    integer                               :: lengl  ! length of field containing collected data
-    integer, dimension(0:nproc-1)         :: mf     ! first index w.r.t. global grid in x-direction
-    integer, dimension(0:nproc-1)         :: ml     ! last index w.r.t. global grid in x-direction
-    integer                               :: msiz   ! size of present subdomain in x-direction
-    integer, dimension(0:nproc-1)         :: nf     ! first index w.r.t. global grid in y-direction
-    integer, dimension(0:nproc-1)         :: nl     ! last index w.r.t. global grid in y-direction
-    integer                               :: nsiz   ! size of present subdomain in y-direction
+    integer                                      :: ip     ! node number 
+    integer                                      :: msiz   ! size of present subdomain in x-direction
+    integer                                      :: nsiz   ! size of present subdomain in y-direction
     !
     !
     ! gather grid indices of all subdomains

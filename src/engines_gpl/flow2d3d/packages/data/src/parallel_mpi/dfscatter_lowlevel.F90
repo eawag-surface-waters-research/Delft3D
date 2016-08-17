@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
+subroutine dfscatter_lowlevel ( iiptr, iilen, ioptr, iolen, itype, gdp )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2016.
@@ -32,15 +32,13 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!   Gathers different amounts of data from each processor to the master
+!   Scatters different amounts of data from the master to each processor
 !
 !!--pseudo code and references--------------------------------------------------
 !
 !   gather the array sizes to the master
-!   check whether enough space has been allocated for gathered data
 !   calculate starting address of each local array with respect to the global array
-!   gather different amounts of data from each processor to the master
-!
+!   scatter different amounts of data from the master to each processor
 !
 !!--declarations----------------------------------------------------------------
 #ifdef HAVE_MPI
@@ -91,22 +89,13 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     ! gather the array sizes to the master
     !
 #ifdef HAVE_MPI
-    call mpi_gather( iilen, 1, dfint, icount, 1, dfint, master-1, engine_comm_world, ierr )
+    call mpi_gather( iolen, 1, dfint, icount, 1, dfint, master-1, engine_comm_world, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
        call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 #endif
-    !
-    ! check whether enough space has been allocated for gathered data
-    !
-    if (inode == master) then
-       if ( sum(icount) > iolen ) then
-          call prterr(lundia, 'U021', 'Not enough space allocated for gathered data')
-          call d3stop(1, gdp)
-       endif
-    endif
     !
     ! calculate starting address of each local array with respect to the global array
     !
@@ -117,10 +106,10 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
        enddo
     endif
     !
-    ! gather different amounts of data from each processor to the master
+    ! scatter different amounts of data from the master to each processor
     !
 #ifdef HAVE_MPI
-    call mpi_gatherv( iiptr, iilen, itype, ioptr, icount, idsplc, itype, master-1, engine_comm_world, ierr )
+    call mpi_scatterv( iiptr, icount, idsplc, itype, ioptr, iolen, itype, master-1, engine_comm_world, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
        call prterr(lundia, 'U021', trim(msgstr))
@@ -130,4 +119,4 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 
     deallocate(icount,idsplc)
 
-end subroutine dfgather_lowlevel
+end subroutine dfscatter_lowlevel

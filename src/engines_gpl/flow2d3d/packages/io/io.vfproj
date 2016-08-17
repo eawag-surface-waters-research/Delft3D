@@ -82,10 +82,11 @@
 		<File RelativePath="src\input\icfil.f90"/>
 		<File RelativePath="src\input\inicut.f90"/>
 		<File RelativePath="src\input\inimet.f90"/>
-		<File RelativePath=".\src\input\inimorlyr.f90"/>
+		<File RelativePath="src\input\inimorlyr.f90"/>
 		<File RelativePath="src\input\morbndfill.f90"/>
 		<File RelativePath="src\input\numcmp.f90"/>
 		<File RelativePath="src\input\polygon_module.f90"/>
+		<File RelativePath="src\input\rdarray.f90"/>
 		<File RelativePath="src\input\rdbcg.f90"/>
 		<File RelativePath="src\input\rdbedformpar.f90"/>
 		<File RelativePath="src\input\rdbndd.f90"/>
@@ -114,7 +115,7 @@
 		<File RelativePath="src\input\rdroll.f90"/>
 		<File RelativePath="src\input\rdrund.f90"/>
 		<File RelativePath="src\input\rdscour.f90"/>
-		<File RelativePath=".\src\input\rdsedmortra.f90"/>
+		<File RelativePath="src\input\rdsedmortra.f90"/>
 		<File RelativePath="src\input\rdsite.f90"/>
 		<File RelativePath="src\input\rdspec.f90"/>
 		<File RelativePath="src\input\rdstru.f90"/>
@@ -202,7 +203,7 @@
 		<File RelativePath="src\output\wrcomt.f90"/>
 		<File RelativePath="src\output\wrcomwind.f90"/>
 		<File RelativePath="src\output\wrcurt.f90"/>
-		<File RelativePath=".\src\output\wrd_main.f90">
+		<File RelativePath="src\output\wrd_main.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
@@ -212,7 +213,7 @@
 		<File RelativePath="src\output\wrfous.f90"/>
 		<File RelativePath="src\output\wrfouv.f90"/>
 		<File RelativePath="src\output\wrgrid.f90"/>
-		<File RelativePath=".\src\output\wrh_main.f90">
+		<File RelativePath="src\output\wrh_main.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -221,7 +222,7 @@
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
-		<File RelativePath=".\src\output\wrhfluff.f90"/>
+		<File RelativePath="src\output\wrhfluff.f90"/>
 		<File RelativePath="src\output\wribot.f90"/>
 		<File RelativePath="src\output\wridoc.f90"/>
 		<File RelativePath="src\output\wridro.f90"/>
@@ -233,7 +234,7 @@
 		<File RelativePath="src\output\wrirst.f90"/>
 		<File RelativePath="src\output\wrkenc.f90"/>
 		<File RelativePath="src\output\wrkent.f90"/>
-		<File RelativePath=".\src\output\wrm_main.f90">
+		<File RelativePath="src\output\wrm_main.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">

@@ -220,9 +220,10 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
     integer        , dimension(:)       , allocatable :: smlay_restr   ! copy of smlay, excluding layer zero
     real(fp)       , dimension(:)       , allocatable :: rbuff1      ! local work array for gathering reals (1 dim)
     !
-    character(8)   , dimension(1)                     :: cdum8     ! Help array to read/write Nefis files 
-    character(16)  , dimension(1)                     :: cdum16    ! Help array to read/write Nefis files
-    character(21)  , dimension(1)                     :: cdum21    ! Help array to read/write Nefis files
+    character(8)   , dimension(1)                     :: cdum8     ! Help array to write Nefis files 
+    character(16)  , dimension(1)                     :: layermode ! Help array to write LAYER_MODEL
+    character(16)  , dimension(1)                     :: cdum16    ! Help array to write Nefis files
+    character(21)  , dimension(1)                     :: cdum21    ! Help array to write Nefis files
     character(20)  , dimension(:)       , allocatable :: csbuff2   ! work array for gathering names of stations (exc. duplicates)
     character(11)                                     :: epsgstring
     character(16)                                     :: grnam2    ! Data-group name defined for the NEFIS-files
@@ -231,7 +232,6 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
     character(64)                                     :: xcoordunit  ! Unit of X coordinate: M or DEGREES_EAST
     character(64)                                     :: ycoordname  ! Name of Y coordinate: PROJECTION_Y_COORDINATE or LATITUDE
     character(64)                                     :: ycoordunit  ! Unit of Y coordinate: M or DEGREES_NORTH
-    character(256)                                    :: string
 !
 ! Data statements
 !
@@ -274,6 +274,16 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
     endif
     filetype = getfiletype(gdp, ifile)
     lsedbl  = lsedtot - lsed
+    !
+    if (zmodel) then
+       if (ztbml) then
+          layermode(1) = 'Z-MODEL, ZTBML'
+       else
+          layermode(1) = 'Z-MODEL'
+       endif
+    else
+       layermode(1) = 'SIGMA-MODEL'
+    endif
     !
     mfg    => gdp%gdparall%mfg
     nfg    => gdp%gdparall%nfg
@@ -349,7 +359,7 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
        if (index(selmap(6:13), 'Y')/=0) lhlp = lhlp + lstsci
        if (index(selmap(14:15), 'Y')/=0) lhlp = lhlp + ltur
        lhlp = max(1, lhlp)
-                       iddim_x      = adddim(gdp, lundia, ifile, 'length_x'          , lhlp    )
+       iddim_x      = adddim(gdp, lundia, ifile, 'length_x'          , lhlp    )
        !
        if (lsedtot>0) then
           idatt_sigfc   = addatt(gdp, lundia, ifile, 'formula_terms', 'sigma: SIG_LYR eta: S1 depth: DPS')
@@ -419,6 +429,13 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
           if (lsedtot>0) then
              call addelm(gdp, lundia, ifile, grnam2, 'NAMSED', ' ', 20         , 1, dimids=(/iddim_lsedtot/), longname='Name of sediment fraction') !CHARACTER
           endif
+       else
+          if (lstsci>0) then
+             call addelm(gdp, lundia, ifile, grnam2, 'NAMCON', ' ', 20           , 1, dimids=(/iddim_lstsci/), longname='Name of constituent quantity') !CHARACTER
+          endif
+          if (ltur>0) then
+             call addelm(gdp, lundia, ifile, grnam2, 'NAMTUR', ' ', 20           , 1, dimids=(/iddim_ltur/)  , longname='Name of turbulent quantity'  ) !CHARACTER
+          endif
        endif
        if (zmodel) then
           if (filetype /= FTYPE_NEFIS) then
@@ -432,6 +449,9 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
           call addelm(gdp, lundia, ifile, grnam2, 'COORDINATES', ' ', 16       , 0, longname='Cartesian or Spherical coordinates') !CHARACTER
           call addelm(gdp, lundia, ifile, grnam2, 'LAYER_MODEL', ' ', 16       , 0, longname='Sigma-model or Z-model') !CHARACTER
+       elseif (filetype == FTYPE_NETCDF) then
+           ierror = nf90_put_att(fds, nf90_global,  'LAYER_MODEL', layermode(1));
+           call nc_check_err(lundia, ierror, "put_att global LAYER_MODEL", filename)
        endif
        call addelm(gdp, lundia, ifile, grnam2, 'GSQS', ' ', io_prec         , 2, dimids=(/iddim_n, iddim_m/), longname='Horizontal area of computational cell', unit='m2', acl='z')
        call addelm(gdp, lundia, ifile, grnam2, 'PPARTITION', ' ', IO_INT4   , 2, dimids=(/iddim_n, iddim_m/), longname='Partition', acl='z')
@@ -851,6 +871,33 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
                        & gdp, ierror, lundia, namsed, 'NAMSED')
              if (ierror/=0) goto 9999
           endif
+       else
+          !
+          ! element 'NAMCON'
+          !
+          if (lstsci>0) then
+             allocate(namhlp(lstsci), stat=istat)
+             do l = 1, lstsci
+                namhlp(l) = namcon(l)
+             enddo
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                       & gdp, ierror, lundia, namhlp, 'NAMCON')
+             if (ierror/=0) goto 9999
+             deallocate(namhlp, stat=istat)
+          endif
+          !
+          ! element 'NAMTUR'
+          !
+          if (ltur>0) then
+             allocate(namhlp(ltur), stat=istat)
+             do l = 1, ltur
+                namhlp(l) = namcon(lstsci+l)
+             enddo
+             call wrtvar(fds, filename, filetype, grnam2, 1, &
+                       & gdp, ierror, lundia, namhlp, 'NAMTUR')
+             if (ierror/=0) goto 9999
+             deallocate(namhlp, stat=istat)
+          endif
        endif
        !
        ! element 'ZK'
@@ -894,25 +941,14 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
           else
              cdum16(1) = 'CARTESIAN'
           endif
-          string = cdum16(1)
           call wrtvar(fds, filename, filetype, grnam2, 1, &
                    & gdp, ierror, lundia, cdum16, 'COORDINATES')
           if (ierror/=0) goto 9999
           !
           ! element 'LAYER_MODEL'
           !
-          if (zmodel) then
-             if (ztbml) then
-                cdum16(1) = 'Z-MODEL, ZTBML'
-             else
-                cdum16(1) = 'Z-MODEL'
-             endif
-          else
-             cdum16(1) = 'SIGMA-MODEL'
-          endif
-          string = cdum16(1)
           call wrtvar(fds, filename, filetype, grnam2, 1, &
-                   & gdp, ierror, lundia, cdum16, 'LAYER_MODEL')
+                   & gdp, ierror, lundia, layermode, 'LAYER_MODEL')
           if (ierror/=0) goto 9999
        endif
        !

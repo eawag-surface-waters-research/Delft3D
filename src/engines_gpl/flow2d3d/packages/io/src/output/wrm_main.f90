@@ -472,10 +472,10 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        call dfsync(gdp)
        call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
        !
-       ! When order_tra points to tra_orgline, both partition-related and re-ordering-related stuff is taken care of
+       ! When order_tra points to tra_orgline, both partition-related and re-ordering-related stuff are taken care of
        !
        order_tra => gdp%gdstations%tra_orgline
-    else
+    elseif (part_nr == '') then
        nostatto = nostat
        nostatgl = nostat
        ntruvto  = ntruv

@@ -1,4 +1,4 @@
-module wrtarray
+module rdarray
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -38,62 +38,59 @@ use dffunctionals, only: FILTER_LAST, FILTER_SUM
 private FILTER_LAST
 private FILTER_SUM
 
-interface wrtvar
-    module procedure wrtarray_int_0d
-    module procedure wrtarray_int_1d
-    module procedure wrtarray_int_2d
-    module procedure wrtarray_int_3d
-    module procedure wrtarray_hp_0d
-    module procedure wrtarray_hp_1d
-    module procedure wrtarray_hp_2d
-    module procedure wrtarray_hp_3d
-    module procedure wrtarray_hp_4d
-    module procedure wrtarray_sp_0d
-    module procedure wrtarray_sp_1d
-    module procedure wrtarray_sp_2d
-    module procedure wrtarray_sp_3d
-    module procedure wrtarray_sp_4d
-    module procedure wrtarray_char_0d
-    module procedure wrtarray_char_1d
-end interface wrtvar
+interface rdvar
+    module procedure rdarray_int_0d
+    module procedure rdarray_int_1d
+    module procedure rdarray_int_2d
+    module procedure rdarray_int_3d
+    module procedure rdarray_hp_0d
+    module procedure rdarray_hp_1d
+    module procedure rdarray_hp_2d
+    module procedure rdarray_hp_3d
+    module procedure rdarray_hp_4d
+    module procedure rdarray_sp_0d
+    module procedure rdarray_sp_1d
+    module procedure rdarray_sp_2d
+    module procedure rdarray_sp_3d
+    module procedure rdarray_sp_4d
+    module procedure rdarray_char_0d
+    module procedure rdarray_char_1d
+end interface rdvar
 
-interface wrtarray_n
-    module procedure wrtarray_n_char
-    module procedure wrtarray_n_fp
-    module procedure wrtarray_nk_fp
-    module procedure wrtarray_nl_int
-    module procedure wrtarray_nl_fp
-    module procedure wrtarray_nkl_fp
-end interface wrtarray_n
+interface rdarray_n
+    module procedure rdarray_n_char
+    module procedure rdarray_n_fp
+    module procedure rdarray_nk_fp
+    module procedure rdarray_nl_int
+    module procedure rdarray_nl_fp
+    module procedure rdarray_nkl_fp
+end interface rdarray_n
 
-interface wrtarray_nm
-    module procedure wrtarray_nm_sp
-    module procedure wrtarray_nm_hp
-    module procedure wrtarray_nm_int
-end interface wrtarray_nm
+interface rdarray_nm
+    module procedure rdarray_nm_sp
+    module procedure rdarray_nm_hp
+    module procedure rdarray_nm_int
+end interface rdarray_nm
 
-interface wrtarray_nm_ptr
-    module procedure wrtarray_nm_sp_1d_ptr
-    module procedure wrtarray_nm_hp_1d_ptr
-    module procedure wrtarray_nm_sp_2d_ptr
-    module procedure wrtarray_nm_hp_2d_ptr
-end interface wrtarray_nm_ptr
+interface rdarray_nm_ptr
+    module procedure rdarray_nm_sp_1d_ptr
+    module procedure rdarray_nm_hp_1d_ptr
+    module procedure rdarray_nm_sp_2d_ptr
+    module procedure rdarray_nm_hp_2d_ptr
+end interface rdarray_nm_ptr
 
-interface wrtarray_nml_ptr
-    module procedure wrtarray_nml_2d_ptr
-    module procedure wrtarray_nml_3d_ptr
-end interface wrtarray_nml_ptr
-
-integer, parameter :: station = FILTER_LAST
-integer, parameter :: transec = FILTER_SUM
+interface rdarray_nml_ptr
+    module procedure rdarray_nml_2d_ptr
+    module procedure rdarray_nml_3d_ptr
+end interface rdarray_nml_ptr
 
 contains
 
-subroutine wrtarray_int_0d(fds, filename, filetype, grpnam, &
+subroutine rdarray_int_0d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -105,7 +102,7 @@ subroutine wrtarray_int_0d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    integer                                                                      , intent(in)  :: var
+    integer                                                                      , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -118,7 +115,7 @@ subroutine wrtarray_int_0d(fds, filename, filetype, grpnam, &
     character(16)                                 :: grpnam_nfs
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     ! body
     !
@@ -135,8 +132,7 @@ subroutine wrtarray_int_0d(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             !ierr= inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+             ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4, var)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -144,24 +140,24 @@ subroutine wrtarray_int_0d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ itime /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ itime /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_int_0d
+end subroutine rdarray_int_0d
 
 
-subroutine wrtarray_int_1d(fds, filename, filetype, grpnam, &
+subroutine rdarray_int_1d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -173,7 +169,7 @@ subroutine wrtarray_int_1d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    integer, dimension(:)                                                        , intent(in)  :: var
+    integer, dimension(:)                                                        , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -187,7 +183,7 @@ subroutine wrtarray_int_1d(fds, filename, filetype, grpnam, &
     character(16)                                 :: grpnam_nfs
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     ! body
     !
@@ -206,8 +202,7 @@ subroutine wrtarray_int_1d(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             !ierr= inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+             ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1, var)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -215,24 +210,24 @@ subroutine wrtarray_int_1d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_int_1d
+end subroutine rdarray_int_1d
 
 
-subroutine wrtarray_int_2d(fds, filename, filetype, grpnam, &
+subroutine rdarray_int_2d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -244,7 +239,7 @@ subroutine wrtarray_int_2d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    integer, dimension(:,:)                                                      , intent(in)  :: var
+    integer, dimension(:,:)                                                      , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -259,7 +254,7 @@ subroutine wrtarray_int_2d(fds, filename, filetype, grpnam, &
     character(16)                                 :: grpnam_nfs
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     ! body
     !
@@ -279,8 +274,7 @@ subroutine wrtarray_int_2d(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             !ierr= inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+             ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2, var)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -290,24 +284,24 @@ subroutine wrtarray_int_2d(fds, filename, filetype, grpnam, &
              u2 = size(var,2)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_int_2d
+end subroutine rdarray_int_2d
 
 
-subroutine wrtarray_int_3d(fds, filename, filetype, grpnam, &
+subroutine rdarray_int_3d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -319,7 +313,7 @@ subroutine wrtarray_int_3d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    integer, dimension(:,:,:)                                                    , intent(in)  :: var
+    integer, dimension(:,:,:)                                                    , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -335,7 +329,7 @@ subroutine wrtarray_int_3d(fds, filename, filetype, grpnam, &
     character(16)                                 :: grpnam_nfs
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     ! body
     !
@@ -356,8 +350,7 @@ subroutine wrtarray_int_3d(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             !ierr= inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-             ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+             ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2*u3, var)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -367,24 +360,24 @@ subroutine wrtarray_int_3d(fds, filename, filetype, grpnam, &
              u2 = size(var,2)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_int_3d
+end subroutine rdarray_int_3d
 
 
-subroutine wrtarray_hp_0d(fds, filename, filetype, grpnam, &
+subroutine rdarray_hp_0d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -396,7 +389,7 @@ subroutine wrtarray_hp_0d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(hp)                                                                     , intent(in)  :: var
+    real(hp)                                                                     , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -411,7 +404,7 @@ subroutine wrtarray_hp_0d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -440,10 +433,10 @@ subroutine wrtarray_hp_0d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==hp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8, var)
                 else
-                   lvar = real(var,sp)
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4, lvar)
+                   var  = real(lvar,hp)
                 endif
              endif
              if (ierr /= 0) then
@@ -453,24 +446,24 @@ subroutine wrtarray_hp_0d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ itime /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ itime /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_hp_0d
+end subroutine rdarray_hp_0d
 
 
-subroutine wrtarray_hp_1d(fds, filename, filetype, grpnam, &
+subroutine rdarray_hp_1d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -482,7 +475,7 @@ subroutine wrtarray_hp_1d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(hp)     , dimension(:)                                                  , intent(in)  :: var
+    real(hp)     , dimension(:)                                                  , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -499,7 +492,7 @@ subroutine wrtarray_hp_1d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -530,13 +523,13 @@ subroutine wrtarray_hp_1d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==hp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1, var)
                 else
                    allocate(lvar(u1))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1, lvar)
                    do i1 = 1,u1
-                      lvar(i1) = real(var(i1),sp)
+                      var(i1) = real(lvar(i1),hp)
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -547,24 +540,24 @@ subroutine wrtarray_hp_1d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_hp_1d
+end subroutine rdarray_hp_1d
 
 
-subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
+subroutine rdarray_hp_2d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -576,7 +569,7 @@ subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(hp)     , dimension(:,:)                                                , intent(in)  :: var
+    real(hp)     , dimension(:,:)                                                , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -595,7 +588,7 @@ subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -627,15 +620,15 @@ subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==hp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1*u2, var)
                 else
                    allocate(lvar(u1,u2))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2, lvar)
                    do i2 = 1,u2
                       do i1 = 1,u1
-                         lvar(i1,i2) = real(var(i1,i2),sp)
+                         var(i1,i2) = real(lvar(i1,i2),hp)
                       enddo
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -646,24 +639,24 @@ subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
+             read (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_hp_2d
+end subroutine rdarray_hp_2d
 
 
-subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
+subroutine rdarray_hp_3d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -675,7 +668,7 @@ subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(hp)     , dimension(:,:,:)                                              , intent(in)  :: var
+    real(hp)     , dimension(:,:,:)                                              , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -696,7 +689,7 @@ subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -729,17 +722,17 @@ subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==hp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1*u2*u3, var)
                 else
                    allocate(lvar(u1,u2,u3))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2*u3, lvar)
                    do i3 = 1,u3
                       do i2 = 1,u2
                          do i1 = 1,u1
-                            lvar(i1,i2,i3) = real(var(i1,i2,i3),sp)
+                            var(i1,i2,i3) = real(lvar(i1,i2,i3),hp)
                          enddo
                       enddo
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -750,26 +743,26 @@ subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
              do i3 = 1,u3
-                write (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+                read (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
              enddo
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_hp_3d
+end subroutine rdarray_hp_3d
 
-                       
-subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
+
+subroutine rdarray_hp_4d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -781,7 +774,7 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(hp)     , dimension(:,:,:,:)                                            , intent(in)  :: var
+    real(hp)     , dimension(:,:,:,:)                                            , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -804,7 +797,7 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
     character(256)                                  :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                          , external     :: inqelm
     integer                          , external     :: neferr
-    integer                          , external     :: putelt
+    integer                          , external     :: getelt
     !
     character(8)                                    :: elmtyp
     integer                                         :: nbytsg
@@ -838,19 +831,19 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==hp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1*u2*u3*u4, var)
                 else
                    allocate(lvar(u1,u2,u3,u4))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2*u3*u4, lvar)
                    do i4 = 1,u4
                       do i3 = 1,u3
                          do i2 = 1,u2
                             do i1 = 1,u1
-                               lvar(i1,i2,i3,i4) = real(var(i1,i2,i3,i4),sp)
+                               var(i1,i2,i3,i4) = real(lvar(i1,i2,i3,i4),hp)
                             enddo
                          enddo
                       enddo
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -861,13 +854,13 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
              do i4 = 1,u4
                 do i3 = 1,u3
-                   write (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                   read (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
                 enddo
              enddo
              ierr = 0
@@ -875,14 +868,13 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
     else
        ierr = 0
     endif
-end subroutine wrtarray_hp_4d
+end subroutine rdarray_hp_4d
 
-
-subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
+subroutine rdarray_sp_0d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -894,7 +886,7 @@ subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(sp)                                                                     , intent(in)  :: var
+    real(sp)                                                                     , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -909,7 +901,7 @@ subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -938,10 +930,10 @@ subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==sp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4, var)
                 else
-                   lvar = real(var,hp)
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8, lvar)
+                   var = real(lvar,sp)
                 endif
              endif
              if (ierr /= 0) then
@@ -951,24 +943,24 @@ subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ itime /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ itime /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_sp_0d
+end subroutine rdarray_sp_0d
 
 
-subroutine wrtarray_sp_1d(fds, filename, filetype, grpnam, &
+subroutine rdarray_sp_1d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -980,7 +972,7 @@ subroutine wrtarray_sp_1d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(sp)     , dimension(:)                                                  , intent(in)  :: var
+    real(sp)     , dimension(:)                                                  , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -997,7 +989,7 @@ subroutine wrtarray_sp_1d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -1028,13 +1020,13 @@ subroutine wrtarray_sp_1d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==sp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1, var)
                 else
                    allocate(lvar(u1))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1, lvar)
                    do i1 = 1,u1
-                      lvar(i1) = real(var(i1),hp)
+                      var(i1) = real(lvar(i1),sp)
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -1045,24 +1037,24 @@ subroutine wrtarray_sp_1d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_sp_1d
+end subroutine rdarray_sp_1d
 
 
-subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
+subroutine rdarray_sp_2d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -1074,7 +1066,7 @@ subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(sp)     , dimension(:,:)                                                , intent(in)  :: var
+    real(sp)     , dimension(:,:)                                                , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -1093,7 +1085,7 @@ subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -1125,15 +1117,15 @@ subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==sp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2, var)
                 else
                    allocate(lvar(u1,u2))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1*u2, lvar)
                    do i2 = 1,u2
                       do i1 = 1,u1
-                         lvar(i1,i2) = real(var(i1,i2),hp)
+                         var(i1,i2) = real(lvar(i1,i2),sp)
                       enddo
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -1144,24 +1136,24 @@ subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
+             read (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_sp_2d
+end subroutine rdarray_sp_2d
 
 
-subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
+subroutine rdarray_sp_3d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -1173,7 +1165,7 @@ subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(sp)     , dimension(:,:,:)                                              , intent(in)  :: var
+    real(sp)     , dimension(:,:,:)                                              , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -1194,7 +1186,7 @@ subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: inqelm
     integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    integer                        , external     :: getelt
     !
     character(8)                                  :: elmtyp
     integer                                       :: nbytsg
@@ -1227,17 +1219,17 @@ subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==sp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2*u3, var)
                 else
                    allocate(lvar(u1,u2,u3))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1*u2*u3, lvar)
                    do i3 = 1,u3
                       do i2 = 1,u2
                          do i1 = 1,u1
-                            lvar(i1,i2,i3) = real(var(i1,i2,i3),hp)
+                            var(i1,i2,i3) = real(lvar(i1,i2,i3),sp)
                          enddo
                       enddo
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -1248,26 +1240,26 @@ subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
              do i3 = 1,u3
-                write (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+                read (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
              enddo
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_sp_3d
+end subroutine rdarray_sp_3d
 
 
-subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
+subroutine rdarray_sp_4d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -1279,7 +1271,7 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    real(sp)     , dimension(:,:,:,:)                                            , intent(in)  :: var
+    real(sp)     , dimension(:,:,:,:)                                            , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -1302,7 +1294,7 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
     character(256)                                  :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                          , external     :: inqelm
     integer                          , external     :: neferr
-    integer                          , external     :: putelt
+    integer                          , external     :: getelt
     !
     character(8)                                    :: elmtyp
     integer                                         :: nbytsg
@@ -1336,19 +1328,19 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
              ierr = inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
              if (ierr == 0) then
                 if (nbytsg==sp) then
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2*u3*u4, var)
                 else
                    allocate(lvar(u1,u2,u3,u4))
+                   ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 8*u1*u2*u3*u4, lvar)
                    do i4 = 1,u4
                       do i3 = 1,u3
                          do i2 = 1,u2
                             do i1 = 1,u1
-                               lvar(i1,i2,i3,i4) = real(var(i1,i2,i3,i4),hp)
+                               var(i1,i2,i3,i4) = real(lvar(i1,i2,i3,i4),sp)
                             enddo
                          enddo
                       enddo
                    enddo
-                   ierr = putelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, lvar)
                    deallocate(lvar)
                 endif
              endif
@@ -1359,13 +1351,13 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
              do i4 = 1,u4
                 do i3 = 1,u3
-                   write (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                   read (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
                 enddo
              enddo
              ierr = 0
@@ -1373,14 +1365,14 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
     else
        ierr = 0
     endif
-end subroutine wrtarray_sp_4d
+end subroutine rdarray_sp_4d
 
 
-subroutine wrtarray_char_0d(fds, filename, filetype, grpnam, &
+subroutine rdarray_char_0d(fds, filename, filetype, grpnam, &
                           & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -1392,7 +1384,7 @@ subroutine wrtarray_char_0d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    character(*)                                                                 , intent(in)  :: var
+    character(*)                                                                 , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -1405,7 +1397,7 @@ subroutine wrtarray_char_0d(fds, filename, filetype, grpnam, &
     character(16)                                 :: grpnam_nfs
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: neferr
-    integer                        , external     :: putels
+    integer                        , external     :: getels
     !
     ! body
     !
@@ -1422,8 +1414,7 @@ subroutine wrtarray_char_0d(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             !ierr= inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-             ierr = putels(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+             ierr = getels(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -1431,24 +1422,24 @@ subroutine wrtarray_char_0d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/len(var), 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/len(var), 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_char_0d
+end subroutine rdarray_char_0d
 
 
-subroutine wrtarray_char_1d(fds, filename, filetype, grpnam, &
+subroutine rdarray_char_1d(fds, filename, filetype, grpnam, &
                        & itime, gdp, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master
-    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_put_var
+    use netcdf, only: nf90_inq_varid, nf90_noerr, nf90_get_var
     use globaldata
     !
     implicit none
@@ -1460,7 +1451,7 @@ subroutine wrtarray_char_1d(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(out) :: ierr
     integer                                                                      , intent(in)  :: itime
     integer                                                                      , intent(in)  :: lundia
-    character(*), dimension(:)                                                   , intent(in)  :: var
+    character(*), dimension(:)                                                   , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
@@ -1474,7 +1465,7 @@ subroutine wrtarray_char_1d(fds, filename, filetype, grpnam, &
     character(16)                                 :: grpnam_nfs
     character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
     integer                        , external     :: neferr
-    integer                        , external     :: putels
+    integer                        , external     :: getels
     !
     ! body
     !
@@ -1493,8 +1484,7 @@ subroutine wrtarray_char_1d(fds, filename, filetype, grpnam, &
              namlen = min (16,len(grpnam))
              grpnam_nfs = grpnam(1:namlen)
              !
-             !ierr= inqelm (fds, varnam_nfs, elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-             ierr = putels(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
+             ierr = getels(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
              if (ierr /= 0) then
                 ierr = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
@@ -1502,25 +1492,25 @@ subroutine wrtarray_char_1d(fds, filename, filetype, grpnam, &
           case (FTYPE_NETCDF)
              ierr = nf90_inq_varid(fds, varnam, idvar)
              if (ierr == nf90_noerr) then
-                 ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/len(var), u1, 1 /))
+                 ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/len(var), u1, 1 /))
              endif
-             call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
+             call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
           case (FTYPE_UNFORM)
-             write (fds) var
+             read (fds) var
              ierr = 0
        endselect
     else
        ierr = 0
     endif
-end subroutine wrtarray_char_1d
+end subroutine rdarray_char_1d
 
 
-subroutine wrtarray_n_char(fds, filename, filetype, grpnam, &
+subroutine rdarray_n_char(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
                     & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    !use dffunctionals, only: dfscatter_filter
     use globaldata
     !
     implicit none
@@ -1528,7 +1518,7 @@ subroutine wrtarray_n_char(fds, filename, filetype, grpnam, &
     type(globdat),target :: gdp
     !
     integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! output (time) index
+    integer                                         :: itime      ! input (time) index
     character(*)                                    :: filename   ! file name
     integer                                         :: filetype   ! NEFIS or NetCDF
     integer                                         :: ub1        ! upperbound dim1 (local)
@@ -1549,27 +1539,27 @@ subroutine wrtarray_n_char(fds, filename, filetype, grpnam, &
     else
        allocate( rbuff1gl(1) )
     endif
+    if (inode == master) then
+       call rdvar(fds, filename, filetype, grpnam, itime, &
+                 & gdp, ierr, lundia, rbuff1gl, varnam)
+    endif
     if (parll) then
-       call dfgather_filter(lundia, ub1, ub1sum, ub1global, order, var, rbuff1gl, gdp)
+       ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, order, var, rbuff1gl, gdp)
     else
        do i = 1,ub1
           rbuff1gl(order(i)) = var(i)
        enddo
     endif  
-    if (inode == master) then
-       call wrtvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff1gl, varnam)
-    endif
     deallocate(rbuff1gl)
-end subroutine wrtarray_n_char
+end subroutine rdarray_n_char
 
 
-subroutine wrtarray_n_fp(fds, filename, filetype, grpnam, &
+subroutine rdarray_n_fp(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
                     & ierr, lundia, var, varnam, operation)
     use precision
     use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    !use dffunctionals, only: dfscatter_filter
     use globaldata
     !
     implicit none
@@ -1577,7 +1567,7 @@ subroutine wrtarray_n_fp(fds, filename, filetype, grpnam, &
     type(globdat),target :: gdp
     !
     integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! output (time) index
+    integer                                         :: itime      ! input (time) index
     character(*)                                    :: filename   ! file name
     integer                                         :: filetype   ! NEFIS or NetCDF
     integer                                         :: operation  ! FILTER_SUM (cross sec) / FILTER_LAST (station)
@@ -1590,37 +1580,41 @@ subroutine wrtarray_n_fp(fds, filename, filetype, grpnam, &
     character(*)                                    :: grpnam     ! name of data group
     character(*)                                    :: varnam     ! name of variable
     integer                                         :: lundia     ! Description and declaration in inout.igs
+    !
     ! local
-    integer                                           :: i
+    !
+    integer                                         :: i
     real(fp)       , dimension(:)       , allocatable :: rbuff1gl      ! work array
+    !
     ! body
+    !
     if (inode == master) then
        allocate( rbuff1gl(ub1global) )
     else
        allocate( rbuff1gl(1) )
     endif
+    if (inode == master) then
+       call rdvar(fds, filename, filetype, grpnam, itime, &
+                 & gdp, ierr, lundia, rbuff1gl, varnam)
+    endif
     if (parll) then
-       call dfgather_filter(lundia, ub1, ub1sum, ub1global, order, var, rbuff1gl, gdp, filter_op=operation)
+       ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, order, var, rbuff1gl, gdp, filter_op=operation)
     else
        do i = 1,ub1
           rbuff1gl(order(i)) = var(i)
        enddo
     endif  
-    if (inode == master) then
-       call wrtvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff1gl, varnam)
-    endif
     deallocate(rbuff1gl)
-end subroutine wrtarray_n_fp
+end subroutine rdarray_n_fp
 
 
-subroutine wrtarray_nk_fp(fds, filename, filetype, grpnam, &
+subroutine rdarray_nk_fp(fds, filename, filetype, grpnam, &
                    & itime, ub1, ub1sum, ub1global, order, gdp, &
-                   & shlay, kmaxout, lb2, ub2, &
+                   & lb2, ub2, &
                    & ierr, lundia, var, varnam, operation)
     use precision
     use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    !use dffunctionals, only: dfscatter_filter
     use globaldata
     !
     implicit none
@@ -1628,7 +1622,7 @@ subroutine wrtarray_nk_fp(fds, filename, filetype, grpnam, &
     type(globdat),target :: gdp
     !
     integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! output (time) index
+    integer                                         :: itime      ! input (time) index
     character(*)                                    :: filename   ! file name
     integer                                         :: filetype   ! NEFIS or NetCDF
     integer                                         :: operation  ! FILTER_SUM (cross sec) / FILTER_LAST (station)
@@ -1643,49 +1637,47 @@ subroutine wrtarray_nk_fp(fds, filename, filetype, grpnam, &
     character(*)                                    :: grpnam     ! name of data group
     character(*)                                    :: varnam     ! name of variable
     integer                                         :: lundia     ! Description and declaration in inout.igs
-    integer                                         :: kmaxout    ! number of output layers
-    integer       , dimension(kmaxout)              :: shlay      ! indices of output layers
+    !
     ! local
+    !
     integer                                           :: i
+    integer                                           :: kmax
     real(fp)       , dimension(:,:)     , allocatable :: rbuff2        ! work array
     real(fp)       , dimension(:,:)     , allocatable :: rbuff2gl      ! work array
+    !
     ! body
     !
     ! filter only the requested layers
     !
-    allocate(rbuff2(ub1, 1:kmaxout))
-    do i = 1,kmaxout
-       rbuff2(:,i) = var(:,shlay(i))
-    enddo
-    !
+    allocate(rbuff2(ub1, 1:kmax))
     if (inode == master) then
-       allocate( rbuff2gl(ub1global, 1:kmaxout) )
+       allocate( rbuff2gl(ub1global, 1:kmax) )
     else
        allocate( rbuff2gl(1, 1) )
     endif
+    if (inode == master) then
+       call rdvar(fds, filename, filetype, grpnam, itime, &
+                 & gdp, ierr, lundia, rbuff2gl, varnam)
+    endif
     if (parll) then
-       call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, kmaxout, order, rbuff2, rbuff2gl, gdp, filter_op=operation)
+       ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, kmax, order, rbuff2, rbuff2gl, gdp, filter_op=operation)
     else
        do i = 1,ub1
           rbuff2gl(order(i),:) = rbuff2(i,:)
        enddo
     endif
-    if (inode == master) then
-       call wrtvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff2gl, varnam)
-    endif
     deallocate(rbuff2gl)
     deallocate(rbuff2)
-end subroutine wrtarray_nk_fp
+end subroutine rdarray_nk_fp
 
 
-subroutine wrtarray_nl_int(fds, filename, filetype, grpnam, &
+subroutine rdarray_nl_int(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
                     & ub2, &
                     & ierr, lundia, var, varnam, operation, mergedim)
     use precision
     use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    !use dffunctionals, only: dfscatter_filter
     use globaldata
     !
     implicit none
@@ -1693,7 +1685,7 @@ subroutine wrtarray_nl_int(fds, filename, filetype, grpnam, &
     type(globdat),target :: gdp
     !
     integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! output (time) index
+    integer                                         :: itime      ! input (time) index
     character(*)                                    :: filename   ! file name
     integer                                         :: filetype   ! NEFIS or NetCDF
     integer                                         :: operation  ! FILTER_SUM (cross sec) / FILTER_LAST (station)
@@ -1708,21 +1700,29 @@ subroutine wrtarray_nl_int(fds, filename, filetype, grpnam, &
     character(*)                                    :: varnam     ! name of variable
     integer                                         :: lundia     ! Description and declaration in inout.igs
     integer                              , optional :: mergedim
+    !
     ! local
+    !
     integer                                         :: i
     integer      , dimension(:,:)     , allocatable :: ibuff2gl      ! work array
     integer                                         :: dim1
+    !
     ! body
+    !
     if (inode /= master) allocate( ibuff2gl(1, 1) )
     if (present(mergedim)) then
        dim1 = mergedim
     else
        dim1 = 1
     endif
+    if (inode == master) then
+       call rdvar(fds, filename, filetype, grpnam, itime, &
+                 & gdp, ierr, lundia, ibuff2gl, varnam)
+    endif
     if (dim1==1) then ! var(ub1,ub2)
        if (inode == master) allocate( ibuff2gl(ub1global, ub2) )
        if (parll) then
-          call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, ibuff2gl, gdp, filter_op=operation, dim=dim1)
+          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, ibuff2gl, gdp, filter_op=operation, dim=dim1)
        else
           do i = 1,ub1
              ibuff2gl(order(i),:) = var(i,:)
@@ -1731,28 +1731,24 @@ subroutine wrtarray_nl_int(fds, filename, filetype, grpnam, &
     else ! var(ub2,ub1)
        if (inode == master) allocate( ibuff2gl(ub2, ub1global) )
        if (parll) then
-          call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, ibuff2gl, gdp, filter_op=operation, dim=dim1)
+          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, ibuff2gl, gdp, filter_op=operation, dim=dim1)
        else
           do i = 1,ub1
              ibuff2gl(:,order(i)) = var(:,i)
           enddo
        endif
     endif
-    if (inode == master) then
-       call wrtvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, ibuff2gl, varnam)
-    endif
     deallocate(ibuff2gl)
-end subroutine wrtarray_nl_int
+end subroutine rdarray_nl_int
 
 
-subroutine wrtarray_nl_fp(fds, filename, filetype, grpnam, &
+subroutine rdarray_nl_fp(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
                     & ub2, &
                     & ierr, lundia, var, varnam, operation, mergedim)
     use precision
     use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    !use dffunctionals, only: dfscatter_filter
     use globaldata
     !
     implicit none
@@ -1760,7 +1756,7 @@ subroutine wrtarray_nl_fp(fds, filename, filetype, grpnam, &
     type(globdat),target :: gdp
     !
     integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! output (time) index
+    integer                                         :: itime      ! input (time) index
     character(*)                                    :: filename   ! file name
     integer                                         :: filetype   ! NEFIS or NetCDF
     integer                                         :: operation  ! FILTER_SUM (cross sec) / FILTER_LAST (station)
@@ -1775,21 +1771,29 @@ subroutine wrtarray_nl_fp(fds, filename, filetype, grpnam, &
     character(*)                                    :: varnam     ! name of variable
     integer                                         :: lundia     ! Description and declaration in inout.igs
     integer                              , optional :: mergedim
+    !
     ! local
+    !
     integer                                         :: i
     real(fp)     , dimension(:,:)     , allocatable :: rbuff2gl      ! work array
     integer                                         :: dim1
+    !
     ! body
+    !
     if (inode /= master) allocate( rbuff2gl(1, 1) )
     if (present(mergedim)) then
        dim1 = mergedim
     else
        dim1 = 1
     endif
+    if (inode == master) then
+       call rdvar(fds, filename, filetype, grpnam, itime, &
+                 & gdp, ierr, lundia, rbuff2gl, varnam)
+    endif
     if (dim1==1) then ! var(ub1,ub2)
        if (inode == master) allocate( rbuff2gl(ub1global, ub2) )
        if (parll) then
-          call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
+          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
        else
           do i = 1,ub1
              rbuff2gl(order(i),:) = var(i,:)
@@ -1798,28 +1802,24 @@ subroutine wrtarray_nl_fp(fds, filename, filetype, grpnam, &
     else
        if (inode == master) allocate( rbuff2gl(ub2, ub1global) )
        if (parll) then
-          call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
+          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
        else
           do i = 1,ub1
              rbuff2gl(:,order(i)) = var(:,i)
           enddo
        endif  
     endif
-    if (inode == master) then
-       call wrtvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff2gl, varnam)
-    endif
     deallocate(rbuff2gl)
-end subroutine wrtarray_nl_fp
+end subroutine rdarray_nl_fp
 
     
-subroutine wrtarray_nkl_fp(fds, filename, filetype, grpnam, &
+subroutine rdarray_nkl_fp(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
-                    & shlay, kmaxout, lb2, ub2, ub3, &
+                    & lb2, ub2, ub3, &
                     & ierr, lundia, var, varnam, operation)
     use precision
     use dfparall, only: inode, master, parll
-    use dffunctionals, only: dfgather_filter
+    !use dffunctionals, only: dfscatter_filter
     use globaldata
     !
     implicit none
@@ -1827,7 +1827,7 @@ subroutine wrtarray_nkl_fp(fds, filename, filetype, grpnam, &
     type(globdat),target :: gdp
     !
     integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! output (time) index
+    integer                                         :: itime      ! input (time) index
     character(*)                                    :: filename   ! file name
     integer                                         :: filetype   ! NEFIS or NetCDF
     integer                                         :: operation  ! FILTER_SUM (cross sec) / FILTER_LAST (station)
@@ -1843,46 +1843,43 @@ subroutine wrtarray_nkl_fp(fds, filename, filetype, grpnam, &
     character(*)                                    :: grpnam     ! name of data group
     character(*)                                    :: varnam     ! name of variable
     integer                                         :: lundia     ! Description and declaration in inout.igs
-    integer                                         :: kmaxout    ! number of output layers
-    integer       , dimension(kmaxout)              :: shlay      ! indices of output layers
+    !
     ! local
+    !
     integer                                           :: i
+    integer                                           :: kmax
     real(fp)       , dimension(:,:,:)   , allocatable :: rbuff3        ! work array
     real(fp)       , dimension(:,:,:)   , allocatable :: rbuff3gl      ! work array
+    !
     ! body
     !
     ! filter only the requested layers
     !
-    allocate(rbuff3(ub1, 1:kmaxout, 1:ub3))
-    do i = 1,kmaxout
-       rbuff3(:,i,:) = var(:,shlay(i),:)
-    enddo
-    !
+    allocate(rbuff3(ub1, 1:kmax, 1:ub3))
     if (inode == master) then
-       allocate( rbuff3gl(ub1global, 1:kmaxout, 1:ub3) )
+       call rdvar(fds, filename, filetype, grpnam, itime, &
+                 & gdp, ierr, lundia, rbuff3gl, varnam)
+    endif
+    if (inode == master) then
+       allocate( rbuff3gl(ub1global, 1:kmax, 1:ub3) )
     else
        allocate( rbuff3gl(1, 1, 1) )
     endif
     if (parll) then
-       call dfgather_filter(lundia, ub1, ub1sum, ub1global, 1, kmaxout, 1, ub3, order, rbuff3, rbuff3gl, gdp, filter_op=operation)
+       ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, kmax, 1, ub3, order, rbuff3, rbuff3gl, gdp, filter_op=operation)
     else
        do i = 1,ub1
           rbuff3gl(order(i),:,:) = rbuff3(i,:,:)
        enddo
     endif
-    if (inode == master) then
-       call wrtvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff3gl, varnam)
-    endif
     deallocate(rbuff3gl)
     deallocate(rbuff3)
-end subroutine wrtarray_nkl_fp
+end subroutine rdarray_nkl_fp
 
 
-subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nmkl_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ul, ierr, lundia, varptr, varnam, &
-                     & smlay, kmaxout, kfmin, kfmax)
+                     & lk, uk, ul, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -1898,56 +1895,38 @@ subroutine wrtarray_nmkl_ptr(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(in)  :: lundia
     integer                                                                      , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
     integer                                                                      , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                      , intent(in)  :: kmaxout       ! length of smlay
     integer                                                                      , intent(in)  :: ul            ! upperbound dim4
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(:)                                                  , intent(in)  :: smlay
-    integer      , dimension(:,:)                                                , intent(in)  :: kfmin
-    integer      , dimension(:,:)                                                , intent(in)  :: kfmax
     real(fp)     , dimension(:,:,:)                                              , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nmkl(fds, filename, filetype, grpnam, &
+       call rdarray_nmkl(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ul, ierr, lundia, varptr, varnam, &
-                     & smlay, kmaxout, kfmin, kfmax)
-    elseif (inode==master) then
-       allocate( rbuff4gl(1:gdp%gdparall%nmaxgl, 1:gdp%gdparall%mmaxgl, 1:kmaxout, 1:ul), stat = istat )
-       rbuff4gl(:,:,:,:) = -999.0_fp
-       call wrtvar(fds, filename, filetype, grpnam, &
-                 & itime, gdp, ierr, lundia, rbuff4gl, varnam)
-       deallocate(rbuff4gl)
+                     & lk, uk, ul, ierr, lundia, varptr, varnam)
     else
-       ierr = 0
+       ! not allowed!
     endif
-end subroutine wrtarray_nmkl_ptr
+end subroutine rdarray_nmkl_ptr
 
-                     
-subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
+subroutine rdarray_nmkl(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ul,ierr, lundia, var, varnam, &
-                     & smlay, kmaxout, kfmin, kfmax)
+                     & lk, uk, ul,ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -1962,81 +1941,40 @@ subroutine wrtarray_nmkl(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(in)            :: lk            ! lowerbound dim3(0 or 1)
     integer                                                                      , intent(in)            :: uk            ! upperbound dim3(kmax or kmax+1)
     integer                                                                      , intent(in)            :: ul            ! upperbound dim4
-    integer                                                                      , intent(in), optional  :: kmaxout       ! length of smlay
     integer      , dimension(0:nproc-1)                                          , intent(in)            :: mf            ! first index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)            :: ml            ! last index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)            :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)            :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)            :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(:)                                                  , intent(in), optional  :: smlay
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in), optional  :: kfmin
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in), optional  :: kfmax
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul), intent(in)            :: var
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul), intent(out)           :: var
     character(*)                                                                 , intent(in)            :: varnam
     character(*)                                                                 , intent(in)            :: grpnam
     character(*)                                                                 , intent(in)            :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: k
-    integer                                       :: l
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
+    !
     real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
     !
     ! body
     !
-    if (present(smlay)) then
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout, ul ), stat = istat )
-       rbuff4(:,:,:,:) = -999.0_fp
-       do l = 1, ul
-          do k = 1, kmaxout
-             do m = 1, gdp%d%mmax
-                do n = 1, gdp%d%nmaxus
-                   if (gdp%gdprocs%zmodel) then
-                      if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m)) then
-                         cycle
-                      endif
-                   endif
-                   rbuff4(n,m,k,l) = var(n,m,smlay(k),l)
-                enddo
-             enddo
-          enddo
-       enddo
-       if (parll) then
-          call dfgather(rbuff4, rbuff4gl, nf, nl, mf, ml, iarrc, gdp)
-       else 
-          call dfgather_seq(rbuff4, rbuff4gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-       endif
-       deallocate(rbuff4)
-    else
-       if (parll) then
-          call dfgather(var, rbuff4gl, nf, nl, mf, ml, iarrc, gdp)
-       else 
-          call dfgather_seq(var, rbuff4gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-       endif
-    endif
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(rbuff4gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,lk:uk,ul))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff4gl, varnam)
-    if (allocated(rbuff4gl)) deallocate(rbuff4gl)
-end subroutine wrtarray_nmkl
+    if (parll) then
+       call dfscatter(rbuff4gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(rbuff4gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(rbuff4gl)
+end subroutine rdarray_nmkl
 
 
-subroutine wrtarray_nmll(fds, filename, filetype, grpnam, &
+subroutine rdarray_nmll(fds, filename, filetype, grpnam, &
                     & itime, nf, nl, mf, ml, iarrc, gdp, &
                     & u3, u4, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -2055,42 +1993,32 @@ subroutine wrtarray_nmll(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                       , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                       , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                     , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, u3, u4), intent(in)  :: var
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, u3, u4), intent(out) :: var
     character(*)                                                              , intent(in)  :: varnam
     character(*)                                                              , intent(in)  :: grpnam
     character(*)                                                              , intent(in)  :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
+    !
     real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
     !
     ! body
     !
-    if (parll) then
-       call dfgather(var, rbuff4gl, nf, nl, mf, ml, iarrc, gdp)
-    else
-       call dfgather_seq(var, rbuff4gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif   
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(rbuff4gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,u3,u4))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff4gl, varnam)
-    if (allocated(rbuff4gl)) deallocate(rbuff4gl)
-end subroutine wrtarray_nmll
+    if (parll) then
+       call dfscatter(rbuff4gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(rbuff4gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(rbuff4gl)
+end subroutine rdarray_nmll
 
 
-subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nmk_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ierr, lundia, varptr, varnam, &
-                     & smlay, kmaxout, kfmin, kfmax)
+                     & lk, uk, ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
     use globaldata
@@ -2106,55 +2034,37 @@ subroutine wrtarray_nmk_ptr(fds, filename, filetype, grpnam, &
     integer                                                                      , intent(in)  :: lundia
     integer                                                                      , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
     integer                                                                      , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                      , intent(in)  :: kmaxout       ! length of smlay
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(:)                                                  , intent(in)  :: smlay
-    integer      , dimension(:,:)                                                , intent(in)  :: kfmin
-    integer      , dimension(:,:)                                                , intent(in)  :: kfmax
     real(fp)     , dimension(:,:,:)                                              , pointer     :: varptr
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nmk(fds, filename, filetype, grpnam, &
+       call rdarray_nmk(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & lk, uk, ierr, lundia, varptr, varnam, &
-                     & smlay, kmaxout, kfmin, kfmax)
-    elseif (inode==master) then
-       allocate( rbuff3gl(1:gdp%gdparall%nmaxgl, 1:gdp%gdparall%mmaxgl, 1:kmaxout), stat = istat )
-       rbuff3gl(:,:,:) = -999.0_fp
-       call wrtvar(fds, filename, filetype, grpnam, &
-                 & itime, gdp, ierr, lundia, rbuff3gl, varnam)
-       deallocate(rbuff3gl)
+                     & lk, uk, ierr, lundia, varptr, varnam)
     else
-       ierr = 0
+       ! not allowed!
     endif
-end subroutine wrtarray_nmk_ptr
+end subroutine rdarray_nmk_ptr
 
-                     
-subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
+subroutine rdarray_nmk(fds, filename, filetype, grpnam, &
                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                    & lk, uk, ierr, lundia, var, varnam, &
-                    & smlay, kmaxout, kfmin, kfmax)
+                    & lk, uk, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -2168,72 +2078,35 @@ subroutine wrtarray_nmk(fds, filename, filetype, grpnam, &
     integer                                                                  , intent(in)            :: lundia
     integer                                                                  , intent(in)            :: lk            ! lowerbound dim3(0 or 1)
     integer                                                                  , intent(in)            :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                  , intent(in), optional  :: kmaxout       ! length of smlay
     integer      , dimension(0:nproc-1)                                      , intent(in)            :: mf            ! first index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                      , intent(in)            :: ml            ! last index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)                                      , intent(in)            :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                      , intent(in)            :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                    , intent(in)            :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(:)                                              , intent(in), optional  :: smlay
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in), optional  :: kfmin
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in), optional  :: kfmax
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(in)            :: var
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(out)           :: var
     character(*)                                                             , intent(in)            :: varnam
     character(*)                                                             , intent(in)            :: grpnam
     character(*)                                                             , intent(in)            :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: k
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
+    !
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
     !
     ! body
     !
-    if (present(smlay)) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout), stat = istat )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = var(:,:,smlay(k))
-       enddo
-       if (gdp%gdprocs%zmodel) then
-          do m = 1, gdp%d%mmax
-             do n = 1, gdp%d%nmaxus
-                do k = 1, kmaxout
-                   if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m))  rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3, rbuff3gl, nf, nl, mf, ml, iarrc, gdp)
-       else
-          call dfgather_seq(rbuff3, rbuff3gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-       endif   
-       deallocate(rbuff3)
-    else
-       if (parll) then
-          call dfgather(var, rbuff3gl, nf, nl, mf, ml, iarrc, gdp)
-       else
-          call dfgather_seq(var, rbuff3gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-       endif   
-    endif
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(rbuff3gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,lk:uk))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff3gl, varnam)
-    if (allocated(rbuff3gl)) deallocate(rbuff3gl)
-end subroutine wrtarray_nmk
+    if (parll) then
+       call dfscatter(rbuff3gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(rbuff3gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(rbuff3gl)
+end subroutine rdarray_nmk
 
 
-subroutine wrtarray_nml_2d_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nml_2d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ul, ierr, lundia, varptr, varnam)
     use precision
@@ -2259,22 +2132,23 @@ subroutine wrtarray_nml_2d_ptr(fds, filename, filetype, grpnam, &
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    real(fp)   , dimension(:,:,:)  , pointer  :: dummy
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nml(fds, filename, filetype, grpnam, &
+       call rdarray_nml(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ul, ierr, lundia, varptr, varnam)
     else
-       call wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ul, ierr, lundia, dummy, varnam)
+       ! not allowed!
     endif
-end subroutine wrtarray_nml_2d_ptr
+end subroutine rdarray_nml_2d_ptr
 
-                     
-subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ul, ierr, lundia, varptr, varnam)
     use precision
@@ -2300,40 +2174,28 @@ subroutine wrtarray_nml_3d_ptr(fds, filename, filetype, grpnam, &
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nml(fds, filename, filetype, grpnam, &
+       call rdarray_nml(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ul, ierr, lundia, varptr, varnam)
-    elseif (inode==master) then
-       allocate( rbuff3gl(1:gdp%gdparall%nmaxgl, 1:gdp%gdparall%mmaxgl, 1:ul), stat = istat )
-       rbuff3gl(:,:,:) = -999.0_fp
-       call wrtvar(fds, filename, filetype, grpnam, &
-                 & itime, gdp, ierr, lundia, rbuff3gl, varnam)
-       deallocate(rbuff3gl)
     else
-       ierr = 0
+       ! not allowed!
     endif
-end subroutine wrtarray_nml_3d_ptr
+end subroutine rdarray_nml_3d_ptr
 
-
-subroutine wrtarray_nml(fds, filename, filetype, grpnam, &
+subroutine rdarray_nml(fds, filename, filetype, grpnam, &
                     & itime, nf, nl, mf, ml, iarrc, gdp, &
                     & ul, ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -2351,39 +2213,29 @@ subroutine wrtarray_nml(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                      , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                      , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                    , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, ul)   , intent(in)  :: var
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, ul)   , intent(out) :: var
     character(*)                                                             , intent(in)  :: varnam
     character(*)                                                             , intent(in)  :: grpnam
     character(*)                                                             , intent(in)  :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
+    !
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
     !
     ! body
     !
-    if (parll) then
-       call dfgather(var, rbuff3gl, nf, nl, mf, ml, iarrc, gdp)
-    else
-       call dfgather_seq(var, rbuff3gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif   
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(rbuff3gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl,ul))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff3gl, varnam)
-    if (allocated(rbuff3gl)) deallocate(rbuff3gl)
-end subroutine wrtarray_nml
+    if (parll) then
+       call dfscatter(rbuff3gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(rbuff3gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(rbuff3gl)
+end subroutine rdarray_nml
 
-                    
-subroutine wrtarray_nm_sp_1d_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_sp_1d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
     use precision
@@ -2408,22 +2260,23 @@ subroutine wrtarray_nm_sp_1d_ptr(fds, filename, filetype, grpnam, &
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    real(sp)   , dimension(:,:)    , pointer  :: dummy
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nm_sp(fds, filename, filetype, grpnam, &
+       call rdarray_nm_sp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
     else
-       call wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, dummy, varnam)
+       ! not allowed!
     endif
-end subroutine wrtarray_nm_sp_1d_ptr
+end subroutine rdarray_nm_sp_1d_ptr
 
-                     
-subroutine wrtarray_nm_hp_1d_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_hp_1d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
     use precision
@@ -2448,27 +2301,27 @@ subroutine wrtarray_nm_hp_1d_ptr(fds, filename, filetype, grpnam, &
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    real(hp)   , dimension(:,:)    , pointer  :: dummy
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nm_hp(fds, filename, filetype, grpnam, &
+       call rdarray_nm_hp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
     else
-       call wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
-                     & itime, nf, nl, mf, ml, iarrc, gdp, &
-                     & ierr, lundia, dummy, varnam)
+       ! not allowed!
     endif
-end subroutine wrtarray_nm_hp_1d_ptr
+end subroutine rdarray_nm_hp_1d_ptr
 
-                     
-subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
     use globaldata
     !
     implicit none
@@ -2489,35 +2342,23 @@ subroutine wrtarray_nm_sp_2d_ptr(fds, filename, filetype, grpnam, &
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(sp)   , dimension(:,:)    , allocatable  :: rbuff2gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nm_sp(fds, filename, filetype, grpnam, &
+       call rdarray_nm_sp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
-    elseif (inode==master) then
-       allocate( rbuff2gl(1:gdp%gdparall%nmaxgl, 1:gdp%gdparall%mmaxgl), stat = istat )
-       rbuff2gl(:,:) = -999.0_sp
-       call wrtvar(fds, filename, filetype, grpnam, &
-                 & itime, gdp, ierr, lundia, rbuff2gl, varnam)
-       deallocate(rbuff2gl)
     else
-       ierr = 0
+       ! not allowed!
     endif
-end subroutine wrtarray_nm_sp_2d_ptr
+end subroutine rdarray_nm_sp_2d_ptr
 
-                     
-subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
     use precision
@@ -2542,35 +2383,23 @@ subroutine wrtarray_nm_hp_2d_ptr(fds, filename, filetype, grpnam, &
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
+    !
     ! local
-    integer                                       :: idvar
-    integer                                       :: istat
-    integer                                       :: namlen
-    integer    , dimension(3,5)                   :: uindex
-    real(hp)   , dimension(:,:)    , allocatable  :: rbuff2gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    !
+    ! --NONE--
+    !
     ! body
+    !
     if (associated(varptr)) then
-       call wrtarray_nm_hp(fds, filename, filetype, grpnam, &
+       call rdarray_nm_hp(fds, filename, filetype, grpnam, &
                      & itime, nf, nl, mf, ml, iarrc, gdp, &
                      & ierr, lundia, varptr, varnam)
-    elseif (inode==master) then
-       allocate( rbuff2gl(1:gdp%gdparall%nmaxgl, 1:gdp%gdparall%mmaxgl), stat = istat )
-       rbuff2gl(:,:) = -999.0_hp
-       call wrtvar(fds, filename, filetype, grpnam, &
-                 & itime, gdp, ierr, lundia, rbuff2gl, varnam)
-       deallocate(rbuff2gl)
     else
-       ierr = 0
+       ! not allowed!
     endif
-end subroutine wrtarray_nm_hp_2d_ptr
+end subroutine rdarray_nm_hp_2d_ptr
 
-                     
-subroutine wrtarray_nm_2d(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_2d(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, var, varnam)
     use precision
@@ -2591,26 +2420,28 @@ subroutine wrtarray_nm_2d(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: var
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
     !
     ! local
     !
+    ! --NONE--
+    !
     ! body
-    call wrtarray_nm(fds, filename, filetype, grpnam, &
+    !
+    call rdarray_nm(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, var, varnam)
-end subroutine wrtarray_nm_2d
+end subroutine rdarray_nm_2d
 
-                   
-subroutine wrtarray_nm_sp(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_sp(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -2627,41 +2458,34 @@ subroutine wrtarray_nm_sp(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(sp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: var
+    real(sp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: namlen
-    integer      , dimension(3,5)                 :: uindex
+    !
     real(sp)   , dimension(:,:)    , allocatable  :: rbuff2gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
     !
     ! body
     !
-    if (parll) then
-       call dfgather(var, rbuff2gl, nf, nl, mf, ml, iarrc, gdp)
-    else
-       call dfgather_seq(var, rbuff2gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif       
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(rbuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff2gl, varnam)
-    if (allocated(rbuff2gl)) deallocate(rbuff2gl)
-end subroutine wrtarray_nm_sp
+    if (parll) then
+       call dfscatter(rbuff2gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(rbuff2gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(rbuff2gl)
+end subroutine rdarray_nm_sp
 
-                   
-subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_hp(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -2678,41 +2502,34 @@ subroutine wrtarray_nm_hp(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    real(hp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: var
+    real(hp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: namlen
-    integer      , dimension(3,5)                 :: uindex
+    !
     real(hp)   , dimension(:,:)    , allocatable  :: rbuff2gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
     !
     ! body
     !
-    if (parll) then
-       call dfgather(var, rbuff2gl, nf, nl, mf, ml, iarrc, gdp)
-    else
-       call dfgather_seq(var, rbuff2gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(rbuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, rbuff2gl, varnam)
-    if (allocated(rbuff2gl)) deallocate(rbuff2gl)
-end subroutine wrtarray_nm_hp
-
+    if (parll) then
+       call dfscatter(rbuff2gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(rbuff2gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(rbuff2gl)
+end subroutine rdarray_nm_hp
                    
-subroutine wrtarray_nm_int(fds, filename, filetype, grpnam, &
+subroutine rdarray_nm_int(fds, filename, filetype, grpnam, &
                    & itime, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, var, varnam)
     use precision
     use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: dfgather, dfgather_seq
+    use dffunctionals, only: dfscatter, dfscatter_seq
     use globaldata
     !
     implicit none
@@ -2729,32 +2546,26 @@ subroutine wrtarray_nm_int(fds, filename, filetype, grpnam, &
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
     integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: var
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(out) :: var
     character(*)                                                                 , intent(in)  :: varnam
     character(*)                                                                 , intent(in)  :: grpnam
     character(*)                                                                 , intent(in)  :: filename
     !
     ! local
-    integer                                       :: idvar
-    integer                                       :: namlen
-    integer      , dimension(3,5)                 :: uindex
-    integer      , dimension(:,:)  , allocatable  :: ibuff2gl
-    character(16)                                 :: varnam_nfs
-    character(16)                                 :: grpnam_nfs
-    character(256)                                :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
-    integer                        , external     :: neferr
-    integer                        , external     :: putelt
+    !
+    integer    , dimension(:,:)    , allocatable  :: ibuff2gl
     !
     ! body
     !
-    if (parll) then
-       call dfgather(var, ibuff2gl, nf, nl, mf, ml, iarrc, gdp)
-    else
-       call dfgather_seq(var, ibuff2gl, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif
-    call wrtvar(fds, filename, filetype, grpnam, &
+    if (inode==master) allocate(ibuff2gl(gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl))
+    call rdvar(fds, filename, filetype, grpnam, &
               & itime, gdp, ierr, lundia, ibuff2gl, varnam)
-    if (allocated(ibuff2gl)) deallocate(ibuff2gl)
-end subroutine wrtarray_nm_int
+    if (parll) then
+       call dfscatter(ibuff2gl, var, nf, nl, mf, ml, iarrc, gdp)
+    else
+       call dfscatter_seq(ibuff2gl, var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
+    endif
+    if (inode==master) deallocate(ibuff2gl)
+end subroutine rdarray_nm_int
 
-end module wrtarray
+end module rdarray

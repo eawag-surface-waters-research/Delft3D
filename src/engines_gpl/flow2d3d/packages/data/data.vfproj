@@ -105,9 +105,9 @@
 		<File RelativePath="include\rdpara.igs"/>
 		<File RelativePath="include\restart.igs"/>
 		<File RelativePath="include\rivpro.igs"/>
-		<File RelativePath=".\include\rtc.igs"/>
+		<File RelativePath="include\rtc.igs"/>
 		<File RelativePath="include\scour.igs"/>
-		<File RelativePath=".\include\sdu.igs"/>
+		<File RelativePath="include\sdu.igs"/>
 		<File RelativePath="include\snel.igs"/>
 		<File RelativePath="include\stations.igs"/>
 		<File RelativePath="include\tablefile.igs"/>
@@ -227,7 +227,7 @@
 		<File RelativePath="src\gdp\initrtc.f90"/>
 		<File RelativePath="src\gdp\initsafe.f90"/>
 		<File RelativePath="src\gdp\initscour.f90"/>
-		<File RelativePath=".\src\gdp\initsdu.f90"/>
+		<File RelativePath="src\gdp\initsdu.f90"/>
 		<File RelativePath="src\gdp\initsnel.f90"/>
 		<File RelativePath="src\gdp\initsobek.f90"/>
 		<File RelativePath="src\gdp\initstations.f90"/>
@@ -252,7 +252,7 @@
 		<File RelativePath="src\general\nc_check_err.f90"/>
 		<File RelativePath="src\general\nc_def_var.f90"/></Filter>
 		<Filter Name="parallel_mpi">
-		<File RelativePath=".\src\parallel_mpi\adjlin.F90">
+		<File RelativePath="src\parallel_mpi\adjlin.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -261,7 +261,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfbladm.F90">
+		<File RelativePath="src\parallel_mpi\dfbladm.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -270,8 +270,8 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfbroadc_gdp.f90"/>
-		<File RelativePath=".\src\parallel_mpi\dfdecomp.F90">
+		<File RelativePath="src\parallel_mpi\dfbroadc_gdp.f90"/>
+		<File RelativePath="src\parallel_mpi\dfdecomp.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -280,7 +280,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfexchg.F90">
+		<File RelativePath="src\parallel_mpi\dfexchg.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -289,7 +289,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfexitmpi.F90">
+		<File RelativePath="src\parallel_mpi\dfexitmpi.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -298,7 +298,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dffunctionals.F90">
+		<File RelativePath="src\parallel_mpi\dffunctionals.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -307,7 +307,16 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfgather_lowlevel.F90">
+        <File RelativePath="src\parallel_mpi\dfgather_module.F90">
+            <FileConfiguration Name="Debug|Win32">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Release|x64">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Debug|x64">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Release|Win32">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="src\parallel_mpi\dfgather_lowlevel.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -316,7 +325,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfgather_grddim.F90">
+		<File RelativePath="src\parallel_mpi\dfgather_grddim.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -325,7 +334,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfinitmpi.F90">
+		<File RelativePath="src\parallel_mpi\dfinitmpi.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -334,7 +343,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfmassc.F90">
+		<File RelativePath="src\parallel_mpi\dfmassc.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -343,7 +352,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dforb.F90">
+		<File RelativePath="src\parallel_mpi\dforb.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -352,7 +361,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfpartit.F90">
+		<File RelativePath="src\parallel_mpi\dfpartit.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -361,7 +370,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfrecvnb.F90">
+		<File RelativePath="src\parallel_mpi\dfrecvnb.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -370,8 +379,26 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfreduce_gdp.f90"/>
-		<File RelativePath=".\src\parallel_mpi\dfsendd_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfreduce_gdp.f90"/>
+        <File RelativePath="src\parallel_mpi\dfscatter_module.F90">
+            <FileConfiguration Name="Debug|Win32">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Release|x64">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Debug|x64">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Release|Win32">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+        <File RelativePath="src\parallel_mpi\dfscatter_lowlevel.F90">
+            <FileConfiguration Name="Debug|Win32">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Release|x64">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Debug|x64">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+            <FileConfiguration Name="Release|Win32">
+                <Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="src\parallel_mpi\dfsendd_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -380,7 +407,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsendd_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfsendd_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -389,7 +416,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsendi_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfsendi_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -398,7 +425,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsendi_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfsendi_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -407,7 +434,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsendnb.F90">
+		<File RelativePath="src\parallel_mpi\dfsendnb.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -416,7 +443,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsendr_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfsendr_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -425,7 +452,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsendr_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfsendr_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -434,7 +461,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfstrip.F90">
+		<File RelativePath="src\parallel_mpi\dfstrip.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -443,7 +470,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfsync.F90">
+		<File RelativePath="src\parallel_mpi\dfsync.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -452,21 +479,21 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdd_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfupdd_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdd_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfupdd_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdgeo.F90">
+		<File RelativePath="src\parallel_mpi\dfupdgeo.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -475,35 +502,35 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdi_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfupdi_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdi_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfupdi_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdr_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfupdr_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfupdr_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfupdr_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwaitd_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfwaitd_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -512,7 +539,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwaitd_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfwaitd_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -521,7 +548,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwaiti_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfwaiti_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -530,7 +557,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwaiti_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfwaiti_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -539,7 +566,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwaitr_nm_pos1.F90">
+		<File RelativePath="src\parallel_mpi\dfwaitr_nm_pos1.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -548,7 +575,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfwaitr_nm_pos2.F90">
+		<File RelativePath="src\parallel_mpi\dfwaitr_nm_pos2.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -557,7 +584,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\initdfparall.F90">
+		<File RelativePath="src\parallel_mpi\initdfparall.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -566,7 +593,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\rdencl.F90">
+		<File RelativePath="src\parallel_mpi\rdencl.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -575,8 +602,8 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\removeDuplicateDDBFiles.f90"/>
-		<File RelativePath=".\src\parallel_mpi\strgrd.F90">
+		<File RelativePath="src\parallel_mpi\removeDuplicateDDBFiles.f90"/>
+		<File RelativePath="src\parallel_mpi\strgrd.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
@@ -585,7 +612,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\wrscr.F90">
+		<File RelativePath="src\parallel_mpi\wrscr.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
