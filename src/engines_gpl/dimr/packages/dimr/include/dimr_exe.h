@@ -66,20 +66,18 @@
 #include <string>
 #include <mpi.h>
 
-
 class DimrExe;
 class Clock;
 class Exception;
-class Log;
+//class Log;
 
 
-#include "clock.h"
+//#include "clock.h"
 //#include "component.h"
 #include "exception.h"
-#include "log.h"
 #include "stringutils.h"
+#include "dimr_bmi.h"
 //#include "xmltree.h"
-#include "dimr.h"
 
 //#ifdef WIN32
 //#   define DllExport   __declspec( dllexport )
@@ -132,13 +130,13 @@ class DimrExe {
         void lib_initialize(void);
         void lib_update(void);
         void lib_finalize(void);
+		void writemsg(const char * format, ...);
 
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run
         char *             exePath;        // name of running dimr executable (argv[0])
         char *             exeName;        // short name of executable
         Clock *            clock;          // timing facility
-        Log *              log;            // logging facility
         //XmlTree *          config;         // top of entire XML configuration tree
         char *             mainArgs;       // reassembled command-line arguments (argv[1...])
         char *             slaveArg;       // command-line argument for slave mode
@@ -170,7 +168,7 @@ class DimrExe {
     BMI_GETCURRENTTIME dllGetCurrentTime; // entry point in dll
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
-    Log::Mask   logMask;
+    unsigned int       logMask;
     private:
     };
 

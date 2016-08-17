@@ -36,6 +36,7 @@
 #define DIMR_LIB
 
 
+//#include "dimr_bmi.h"
 #include "dimr.h"
 #include "dimr_lib_version.h"
 
@@ -107,14 +108,6 @@ DllExport void set_logger_callback(WriteCallback writeCallBack) {
 	thisDimr->log->SetWriteCallBack(writeCallBack);
 }
 	
-//------------------------------------------------------------------------------
-DllExport void set_logger(Log * loggerFromDimrExe) {
-	if (thisDimr == NULL) {
-		thisDimr = new Dimr();
-	}
-	thisDimr->log = loggerFromDimrExe;
-}
-
 
 //------------------------------------------------------------------------------
 DllExport int initialize(const char * configfile) {
