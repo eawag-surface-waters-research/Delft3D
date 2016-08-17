@@ -331,7 +331,6 @@ src/engines_gpl/dimr/packages/dimr_lib/include/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/include/clock.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/component.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr.h -text
-src/engines_gpl/dimr/packages/dimr_lib/include/dimr_bmi.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.h.svn -text
 src/engines_gpl/dimr/packages/dimr_lib/include/exception.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/getopt.h -text

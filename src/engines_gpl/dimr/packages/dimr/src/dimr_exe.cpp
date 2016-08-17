@@ -37,9 +37,9 @@
 #define DIMR_MAIN
 //#define MEMCHECK
 
-//#include "dimr_exe.h"
-//#include "dimr_exe_version.h"
-//#include "clock.h"
+#include "dimr_exe.h"
+#include "dimr.h"
+#include "dimr_exe_version.h"
 
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
@@ -61,6 +61,7 @@ using namespace std;
 #include <string>
 #include <sstream>
 #include <math.h>
+#include <mpi.h>
 
 #if defined (WIN32)
 #  include "getopt.h"
@@ -73,10 +74,6 @@ using namespace std;
 #else
 #  include <unistd.h>
 #endif
-
-#include "dimr_exe.h"
-#include "dimr_exe_version.h"
-#include "clock.h"
 
 
 //------------------------------------------------------------------------------
@@ -113,11 +110,13 @@ int main (int     argc,
 
     int ireturn = -1;
 
+    initialize_parallel(argc, argv);
+
     try {
         DimrExe * DHE = new DimrExe (argc, argv, envp);
         if (! DHE->ready) return 1;
 
-		DHE->writemsg(getfullversionstring_dimr_exe());
+		DHE->log->Write(Log::MAJOR, my_rank, getfullversionstring_dimr_exe());
 
         DHE->openLibrary();
         DHE->lib_initialize();
@@ -129,18 +128,23 @@ int main (int     argc,
     catch (exception& ex) {
         printf ("dimr ABORT: C++ Exception: %s\n", ex.what());
         fflush(stdout);
+        abort_parallel();
         ireturn = 1;
     }
     catch (Exception *ex) {
         printf ("dimr ABORT: %s\n", ex->message);
         fflush(stdout);
+        abort_parallel();
         ireturn = 1;
     }
     catch (char * str) {
         printf ("#### dimr ABORT: %s\n", str);
         fflush(stdout);
+        abort_parallel();
         ireturn = 1;
     }
+
+    finalize_parallel();
 
     return ireturn;
 }
@@ -148,20 +152,20 @@ int main (int     argc,
 //------------------------------------------------------------------------------
 void DimrExe::lib_initialize(void)
 {
-	writemsg("%s.SetVar(useMPI,%d)", this->library, use_mpi);
+	this->log->Write(Log::MINOR, my_rank, "%s.SetVar(useMPI,%d)", this->library, use_mpi);
     (this->dllSetVar) ("useMPI", &use_mpi);
-    writemsg("%s.SetVar(numRanks,%d)", this->library, numranks);
+    this->log->Write (Log::MINOR, my_rank, "%s.SetVar(numRanks,%d)", this->library, numranks);
     (this->dllSetVar) ("numRanks", &numranks);
-    writemsg("%s.SetVar(myRank,%d)", this->library, my_rank);
+    this->log->Write (Log::MINOR, my_rank, "%s.SetVar(myRank,%d)", this->library, my_rank);
     (this->dllSetVar) ("myRank", &my_rank);
-    writemsg("%s.SetVar(debugLevel,%d)", this->library, this->logMask);
+    this->log->Write (Log::MINOR, my_rank, "%s.SetVar(debugLevel,%d)", this->library, this->logMask);
     (this->dllSetVar) ("debugLevel", &(this->logMask));
-    writemsg("%s.Initialize(%s)", this->library, this->configfile);
+    this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", this->library, this->configfile);
 	int result = (this->dllInitialize) (this->configfile);
 	if (result != 0) {
 		// Error occurred, but apparently no exception has been thrown.
 		// Throw one now
-		writemsg("%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
+		this->log->Write(Log::MAJOR, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
 	}
 }
 
@@ -178,33 +182,75 @@ void DimrExe::lib_update(void)
     (this->dllUpdate) (tStep);
 }
 
-void DimrExe::writemsg(
-	    const char *  format,
-        ...
-		) {
-    const int bufsize = 256*1024;
-    char * buffer = new char [bufsize]; // really big temporary buffer, just in case
-
-    va_list arguments;
-    va_start (arguments, format);
-    int len = vsnprintf (buffer, bufsize-1, format, arguments);
-    va_end (arguments);
-    buffer[bufsize-1] = '\0';
-    fprintf (stdout, "Dimr [%s] #%d >> %s\n",
-                        clock,
-                        0,
-                        buffer
-                        );
-
-    fflush (stdout);
-	delete[] buffer;
-}
-
 //------------------------------------------------------------------------------
 void DimrExe::lib_finalize(void)
 {
-    writemsg("    %s.Finalize()", this->library);
+    this->log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", this->library);
     (this->dllFinalize) ();
+}
+
+//------------------------------------------------------------------------------
+void initialize_parallel(int argc, char *  argv [])
+{
+    int ierr;
+    if (    getenv("PMI_RANK")             == NULL &&    // MPICH2
+            getenv("OMPI_COMM_WORLD_RANK") == NULL &&    // OpenMPI 1.3
+            getenv("OMPI_MCA_ns_nds_vpid") == NULL &&    // OpenMPI 1.2
+            getenv("MPIRUN_RANK")          == NULL &&    // MVAPICH 1.1
+            getenv("MV2_COMM_WORLD_RANK")  == NULL &&    // MVAPICH 1.9
+            getenv("MP_CHILD")             == NULL ) {   // POE (IBM)
+        use_mpi = false;
+    } else {
+        use_mpi = true;
+    }
+
+    if (use_mpi) {
+        ierr = MPI_Init(&argc, &argv);
+        if (ierr != 0) {
+            throw new Exception (true, "MPI_Init returns error code \"%d\"", ierr);
+        }
+        ierr = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+        if (ierr != 0) {
+            throw new Exception (true, "MPI_Comm_rank returns error code \"%d\"", ierr);
+        }
+        ierr = MPI_Comm_size(MPI_COMM_WORLD, &numranks);
+        if (ierr != 0) {
+            throw new Exception (true, "MPI_Comm_size returns error code \"%d\"", ierr);
+        }
+        printf("#%d: Running parallel with %d partitions\n", my_rank, numranks);
+        fflush(stdout);
+    } else {
+        numranks = 1;
+        my_rank  = 0;
+    }
+}
+
+//------------------------------------------------------------------------------
+void finalize_parallel()
+{
+    int ierr;
+
+    if (use_mpi) {
+        // NOTE: this barrier works, but only if all processes take the same route.
+        // What didn't work: miprun -np 4, but only 3 FM master processes.
+        // The fourth process (#3) then directly falls through to this finalize
+        // barrier, which succeeds once in the first ParallelUpdate timestep
+        // the other three processes have a barrier for the next timestep.
+        // This problem is now avoided by NOT supporting less master processes than np.
+        // (Exception thrown)
+        ierr = MPI_Barrier(MPI_COMM_WORLD);
+        ierr = MPI_Finalize();
+    }
+}
+
+//------------------------------------------------------------------------------
+void abort_parallel()
+{
+    int ierr;
+
+    if (use_mpi) {
+        ierr = MPI_Abort(MPI_COMM_WORLD, 1);
+    }
 }
 
 
@@ -234,7 +280,7 @@ DimrExe::DimrExe (int     argc,
     this->slaveArg  = NULL;
     this->done      = false;
 
-    this->logMask = -1;					// selector of debugging/trace information
+    this->logMask = Log::MAJOR;  // selector of debugging/trace information
                                         // minLog: Log::SILENT  maxLog: Log::TRACE
     FILE *      logFile = stdout;       // log file descriptor
 
@@ -309,6 +355,7 @@ DimrExe::DimrExe (int     argc,
         throw new Exception (true, "Improper usage.  Execute \"%s -?\" for command-line syntax", this->exeName);
 
     this->clock = new Clock ();
+    this->log = new Log (logFile, this->clock, this->logMask);
     this->configfile = argv[optind];
 
 	this->ready = true;
@@ -326,8 +373,7 @@ DimrExe::~DimrExe (void) {
     // to do:  (void) FreeLibrary(handle);
     freeLib();
 
-	// to do: write to stdout
-    //this->log->Write (Log::ALWAYS, my_rank, "dimr shutting down normally");
+    this->log->Write (Log::ALWAYS, my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
     free (this->exeName);
@@ -337,6 +383,7 @@ DimrExe::~DimrExe (void) {
 
     delete this->clock;
     free (this->exePath);
+    delete this->log;
     delete [] this->mainArgs;
     delete [] this->library;
     this->done = true;
@@ -369,7 +416,7 @@ void DimrExe::openLibrary (void) {
         sprintf(this->library, "dimr_dll.dll\0");
 #endif
 
-        writemsg("Loading dimr library \"%s\"", this->library);
+        this->log->Write (Log::DETAIL, my_rank, "Loading dimr library \"%s\"", this->library);
 
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
@@ -397,6 +444,13 @@ void DimrExe::openLibrary (void) {
                 throw new Exception (true, "Cannot load component library \"%s\". Return code: %d", this->library, GetLastError());
 #endif
         }
+
+		// Get entry point for set_logger
+		BMI_DIMR_SET_LOGGER set_logger_entry = (BMI_DIMR_SET_LOGGER) GETPROCADDRESS(dllhandle, BmiDimrSetLogger);
+		if (set_logger_entry == NULL) {
+			throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiDimrSetLogger, this->library, GetLastError());
+		}
+		(set_logger_entry)(this->log);
 
 		// Collect BMI entry points
         this->dllInitialize = (BMI_INITIALIZE) GETPROCADDRESS (dllhandle, BmiInitializeEntryPoint);
@@ -461,7 +515,7 @@ void DimrExe::freeLib (void) {
     char *err;
 #endif
 
-        writemsg("Freeing library \"%s\"", this->library);
+        this->log->Write (Log::DETAIL, my_rank, "Freeing library \"%s\"", this->library);
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
         int ierr = dlclose(this->libHandle);

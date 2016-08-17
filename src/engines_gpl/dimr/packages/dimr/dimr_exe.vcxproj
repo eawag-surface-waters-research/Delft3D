@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,11 +21,9 @@
   <ItemGroup>
     <ClCompile Include="..\dimr_lib\src\clock.cpp" />
     <ClCompile Include="..\dimr_lib\src\exception.cpp" />
+    <ClCompile Include="..\dimr_lib\src\log.cpp" />
     <ClCompile Include="src\dimr_exe.cpp" />
     <ClCompile Include="src\dimr_exe_version.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\dimr_lib\include\dimr_bmi.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}</ProjectGuid>
@@ -176,7 +174,7 @@
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project dimr" &gt; .\include\dimr_exe_version.h
-..\..\..\..\scripts_lgpl\win32\oss-install.cmd dimr ..\bin "$(IFORT_COMPILER14)redist\ia32\compiler\"
+..\..\..\..\scripts_lgpl\win32\oss-install.cmd dimr ..\bin "$(IFORT_COMPILER13)redist\ia32\compiler\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -208,7 +206,7 @@
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project dimr" &gt; .\include\dimr_exe_version.h
-..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd dimr ..\bin "$(IFORT_COMPILER14)redist\intel64\compiler\"
+..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd dimr ..\bin "$(IFORT_COMPILER13)redist\intel64\compiler\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

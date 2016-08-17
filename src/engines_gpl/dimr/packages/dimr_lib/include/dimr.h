@@ -111,8 +111,34 @@ enum {
    };
 
 
-# include "dimr_bmi.h"
+// Store the exact name of the entry points in the dlls
+const char BmiDimrSetLogger            [] = "set_logger";
+const char BmiInitializeEntryPoint     [] = "initialize";
+const char BmiUpdateEntryPoint         [] = "update";
+const char BmiFinalizeEntryPoint       [] = "finalize";
+const char BmiGetStartTimeEntryPoint   [] = "get_start_time";
+const char BmiGetEndTimeEntryPoint     [] = "get_end_time";
+const char BmiGetTimeStepEntryPoint    [] = "get_time_step";
+const char BmiGetCurrentTimeEntryPoint [] = "get_current_time";
+const char BmiGetVarEntryPoint         [] = "get_var";
+const char BmiSetVarEntryPoint         [] = "set_var";
+
+// Define the exact api of the entry points in the dlls
+#if HAVE_CONFIG_H
+#define CDECLOPT
+#else
+#define CDECLOPT __cdecl
+#endif
 typedef int  (CDECLOPT *BMI_DIMR_SET_LOGGER)(Log *);
+typedef int  (CDECLOPT *BMI_INITIALIZE)     (const char *);
+typedef void (CDECLOPT *BMI_UPDATE)         (double);
+typedef void (CDECLOPT *BMI_FINALIZE)       (void);
+typedef void (CDECLOPT *BMI_GETSTARTTIME)   (double *);
+typedef void (CDECLOPT *BMI_GETENDTIME)     (double *);
+typedef void (CDECLOPT *BMI_GETTIMESTEP)    (double *);
+typedef void (CDECLOPT *BMI_GETCURRENTTIME) (double *);
+typedef void (CDECLOPT *BMI_GETVAR)         (const char *, void *);
+typedef void (CDECLOPT *BMI_SETVAR)         (const char *, void *);
 
 
 // A component is an instance of D-FlowFM, RTC-Tools, WAQ, WAVE or Delft3D-FLOW(flow2d3d)
@@ -283,6 +309,7 @@ class Dimr {
 	
 
 extern "C" {
+DllExport void set_logger(Log *);
 DllExport int  initialize(const char *);
 DllExport void update    (double);
 DllExport void finalize  (void);

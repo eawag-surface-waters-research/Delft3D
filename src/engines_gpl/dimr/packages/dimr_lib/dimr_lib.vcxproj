@@ -222,7 +222,6 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
     <ClInclude Include="include\clock.h" />
     <ClInclude Include="include\component.h" />
     <ClInclude Include="include\dimr.h" />
-    <ClInclude Include="include\dimr_bmi.h" />
     <ClInclude Include="include\exception.h" />
     <ClInclude Include="include\getopt.h" />
     <ClInclude Include="include\log.h" />
