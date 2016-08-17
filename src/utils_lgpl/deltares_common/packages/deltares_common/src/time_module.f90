@@ -49,6 +49,7 @@ module time_module
    public :: date2mjd
    public :: mjd2date
    public :: datetime_to_string
+   public :: parse_ud_timeunit
 
    interface ymd2jul
       module procedure GregorianDateToJulianDateNumber
