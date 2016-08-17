@@ -595,9 +595,9 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if (mnbnd(1, n) == mnbnd(3, n)) then
              if (idir == 1) then
-                isSameOrien = .true.
+                isSameOrien = .false.
              else
-                isSameOrien = .false. 
+                isSameOrien = .true. 
              endif 
           elseif (mnbnd(2, n) == mnbnd(4, n)) then
              if (idir == 1) then
