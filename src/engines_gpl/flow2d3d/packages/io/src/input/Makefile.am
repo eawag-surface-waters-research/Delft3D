@@ -34,6 +34,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libIOInput_la_SOURCES = \
+         rdarray.f90 \
          restart_lyrs.f90 \
          split_stations.f90 \
          barfil.f90 \
@@ -125,7 +126,6 @@ libIOInput_la_SOURCES = \
          strfil.f90 \
          tdfil.f90 \
          trafil.f90 \
-         rdarray.f90 \
          search2.f90
 
 #-------------------------------------------------------------------------------
