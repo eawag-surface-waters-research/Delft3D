@@ -54,7 +54,7 @@ integer, parameter :: ihalon = 3   ! width of halo area in y-direction
 ! Module variables
 !
 logical, save  :: mpi_initialized_by_engine
-integer, save  :: engine_comm_world
+integer, target, save  :: engine_comm_world
 integer, save  :: inode  = 0       ! rank of present node
 integer, save  :: idir   = 0       ! direction of domain cutting  
                                    ! 1(row n) or 2(column m)
