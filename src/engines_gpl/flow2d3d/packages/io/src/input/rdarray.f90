@@ -60,7 +60,6 @@ end interface rdvar
 interface rdarray_n
     module procedure rdarray_n_char
     module procedure rdarray_n_fp
-    module procedure rdarray_nk_fp
     module procedure rdarray_nl_int
     module procedure rdarray_nl_fp
     module procedure rdarray_nkl_fp
@@ -1608,69 +1607,6 @@ subroutine rdarray_n_fp(fds, filename, filetype, grpnam, &
 end subroutine rdarray_n_fp
 
 
-subroutine rdarray_nk_fp(fds, filename, filetype, grpnam, &
-                   & itime, ub1, ub1sum, ub1global, order, gdp, &
-                   & lb2, ub2, &
-                   & ierr, lundia, var, varnam, operation)
-    use precision
-    use dfparall, only: inode, master, parll
-    !use dffunctionals, only: dfscatter_filter
-    use globaldata
-    !
-    implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    integer                                         :: fds        ! file handle
-    integer                                         :: itime      ! input (time) index
-    character(*)                                    :: filename   ! file name
-    integer                                         :: filetype   ! NEFIS or NetCDF
-    integer                                         :: operation  ! FILTER_SUM (cross sec) / FILTER_LAST (station)
-    integer                                         :: ub1        ! upperbound dim1 (local)
-    integer                                         :: ub1sum     ! upperbound dim1 (sum of locals)
-    integer                                         :: ub1global  ! upperbound dim1 (global)
-    integer                                         :: lb2        ! lowerbound dim2 (layer numbers)
-    integer                                         :: ub2        ! upperbound dim2 (layer numbers)
-    integer      , dimension(ub1)                   :: order      ! order dim1 (local)
-    integer                                         :: ierr       ! error flag
-    real(fp)     , dimension(ub1, lb2:ub2)          :: var        ! actual data
-    character(*)                                    :: grpnam     ! name of data group
-    character(*)                                    :: varnam     ! name of variable
-    integer                                         :: lundia     ! Description and declaration in inout.igs
-    !
-    ! local
-    !
-    integer                                           :: i
-    integer                                           :: kmax
-    real(fp)       , dimension(:,:)     , allocatable :: rbuff2        ! work array
-    real(fp)       , dimension(:,:)     , allocatable :: rbuff2gl      ! work array
-    !
-    ! body
-    !
-    ! filter only the requested layers
-    !
-    allocate(rbuff2(ub1, 1:kmax))
-    if (inode == master) then
-       allocate( rbuff2gl(ub1global, 1:kmax) )
-    else
-       allocate( rbuff2gl(1, 1) )
-    endif
-    if (inode == master) then
-       call rdvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff2gl, varnam)
-    endif
-    if (parll) then
-       ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, kmax, order, rbuff2, rbuff2gl, gdp, filter_op=operation)
-    else
-       do i = 1,ub1
-          rbuff2gl(order(i),:) = rbuff2(i,:)
-       enddo
-    endif
-    deallocate(rbuff2gl)
-    deallocate(rbuff2)
-end subroutine rdarray_nk_fp
-
-
 subroutine rdarray_nl_int(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
                     & ub2, &
@@ -1744,7 +1680,7 @@ end subroutine rdarray_nl_int
 
 subroutine rdarray_nl_fp(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
-                    & ub2, &
+                    & lb2, ub2, &
                     & ierr, lundia, var, varnam, operation, mergedim)
     use precision
     use dfparall, only: inode, master, parll
@@ -1763,10 +1699,11 @@ subroutine rdarray_nl_fp(fds, filename, filetype, grpnam, &
     integer                                         :: ub1        ! upperbound dim1 (local)
     integer                                         :: ub1sum     ! upperbound dim1 (sum of locals)
     integer                                         :: ub1global  ! upperbound dim1 (global)
+    integer                                         :: lb2        ! lowerbound dim2
     integer                                         :: ub2        ! upperbound dim2
     integer      , dimension(ub1)                   :: order      ! order dim1 (local)
     integer                                         :: ierr       ! error flag
-    real(fp)     , dimension(:,:)                   :: var        ! actual data
+    real(fp)     , dimension(:,:)                   :: var        ! actual data - var(1:ub1,1:ub2-lb2+1) or var(1:ub2-lb2+1,1:ub1)
     character(*)                                    :: grpnam     ! name of data group
     character(*)                                    :: varnam     ! name of variable
     integer                                         :: lundia     ! Description and declaration in inout.igs
@@ -1786,23 +1723,21 @@ subroutine rdarray_nl_fp(fds, filename, filetype, grpnam, &
     else
        dim1 = 1
     endif
-    if (inode == master) then
-       call rdvar(fds, filename, filetype, grpnam, itime, &
-                 & gdp, ierr, lundia, rbuff2gl, varnam)
-    endif
-    if (dim1==1) then ! var(ub1,ub2)
-       if (inode == master) allocate( rbuff2gl(ub1global, ub2) )
+    call rdvar(fds, filename, filetype, grpnam, itime, &
+              & gdp, ierr, lundia, rbuff2gl, varnam)
+    if (dim1==1) then ! var(1:ub1,1:ub2-lb2+1)
+       if (inode == master) allocate( rbuff2gl(ub1global, ub2-lb2+1) )
        if (parll) then
-          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
+          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, lb2, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
        else
           do i = 1,ub1
              rbuff2gl(order(i),:) = var(i,:)
           enddo
        endif  
-    else
-       if (inode == master) allocate( rbuff2gl(ub2, ub1global) )
+    else ! var(1:ub2-lb2+1,1:ub1)
+       if (inode == master) allocate( rbuff2gl(ub2-lb2+1, ub1global) )
        if (parll) then
-          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, 1, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
+          ! call dfscatter_filter(lundia, ub1, ub1sum, ub1global, lb2, ub2, order, var, rbuff2gl, gdp, filter_op=operation, dim=dim1)
        else
           do i = 1,ub1
              rbuff2gl(:,order(i)) = var(:,i)
@@ -1812,7 +1747,7 @@ subroutine rdarray_nl_fp(fds, filename, filetype, grpnam, &
     deallocate(rbuff2gl)
 end subroutine rdarray_nl_fp
 
-    
+                    
 subroutine rdarray_nkl_fp(fds, filename, filetype, grpnam, &
                     & itime, ub1, ub1sum, ub1global, order, gdp, &
                     & lb2, ub2, ub3, &
