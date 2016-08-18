@@ -176,7 +176,7 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
     filetype = getfiletype(gdp, FILOUT_FOU)
     !
     if (mergemap) then
-        part_nr = '';
+        part_nr = ''
     else
         bck_inode = inode
         bck_nproc = nproc
