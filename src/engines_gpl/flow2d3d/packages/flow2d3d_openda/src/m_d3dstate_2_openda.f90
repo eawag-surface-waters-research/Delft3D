@@ -112,7 +112,7 @@ function d3da_create_instance() result(instance_id)
            call CTA_CORE_INITIALISE(ierr)
            if (ierr .ne. 0) then
                print *,'ERROR initializing COSTA! '
-               stop
+               call throwexception()
            endif
            cta_core_initialised = .true.
        endif

@@ -132,7 +132,7 @@ contains
   else
       if (quantity_id /= windgu .and. quantity_id /=windgv) then
         print *,'ERROR: set_openda_buffer: number of noise parameters should be 1 if no noise grid is present'
-        stop
+        call throwexception()
       endif
       ! specific situation of a noise grid. The array vals in fact consists of triples
       ! (xloc, yloc, value)

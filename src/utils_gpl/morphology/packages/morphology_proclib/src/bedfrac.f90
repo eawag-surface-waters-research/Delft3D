@@ -190,7 +190,7 @@
          istat = inibedcomp(bed%comp, noseg, numIS, sedtyp, d50, logstd, rhosol, swUnderLyr, swPorosity)
          if (istat /= 0) then
             write(*,'(A)') 'An error occurred in BEDFRAC. Program stops.'
-            stop
+            call throwexception()
          endif
          deallocate(d50,logstd,rhosol)
          !

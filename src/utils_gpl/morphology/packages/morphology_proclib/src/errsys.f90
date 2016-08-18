@@ -37,5 +37,5 @@ subroutine errsys(string,ierr)
     write(*,*) string
     write(*,*) 'The program stopped because of this'
 
-    stop
+    call throwexception()
 end subroutine errsys

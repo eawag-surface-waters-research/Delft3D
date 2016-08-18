@@ -115,13 +115,13 @@ subroutine osmom(hrms      ,depth     ,tp        ,g         ,cr        , &
        call getmp(error, pathd)
        if (error) then
           write (*, '(a)') "ERROR: Directory ""default"" not found"
-          stop
+          call throwexception()
        endif
        utab = newunit()
        open (utab, file = trim(pathd) // 'tabmom', status='old', action='read', iostat=ierr)
        if (ierr /= 0) then
           write (*, '(3a)') "ERROR: File """,trim(pathd) // 'tabmom', """ not found"
-          stop
+          call throwexception()
        endif
        read (utab, *) iih, iit, dh, tstep
        do it = 1, iit

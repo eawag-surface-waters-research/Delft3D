@@ -109,11 +109,13 @@ int main (int     argc,
 #endif
 
     int ireturn = -1;
+    DimrExe * DHE;
+    bool finalizeReached = 0;
 
     initialize_parallel(argc, argv);
 
     try {
-        DimrExe * DHE = new DimrExe (argc, argv, envp);
+        DHE = new DimrExe (argc, argv, envp);
         if (! DHE->ready) return 1;
 
 		DHE->log->Write(Log::MAJOR, my_rank, getfullversionstring_dimr_exe());
@@ -121,24 +123,55 @@ int main (int     argc,
         DHE->openLibrary();
         DHE->lib_initialize();
         DHE->lib_update();
+        finalizeReached = 1;
         DHE->lib_finalize();
         delete DHE;
         ireturn = 0;
     }
     catch (exception& ex) {
-        printf ("dimr ABORT: C++ Exception: %s\n", ex.what());
+        printf ("#### ERROR: dimr ABORT: C++ Exception: %s\n", ex.what());
+        if (! finalizeReached) {
+            printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
+            try {
+                DHE->lib_finalize();
+            }
+            catch (...) {
+                printf("#### ERROR: dimr ABORT: Finalize aborted\n");
+            }
+        }
+        printf ("#### ERROR: dimr ABORT: See messages above\n");
         fflush(stdout);
         abort_parallel();
         ireturn = 1;
     }
     catch (Exception *ex) {
-        printf ("dimr ABORT: %s\n", ex->message);
+        printf ("#### ERROR: dimr ABORT: %s\n", ex->message);
+        if (! finalizeReached) {
+            printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
+            try {
+                DHE->lib_finalize();
+            }
+            catch (...) {
+                printf("#### ERROR: dimr ABORT: Finalize aborted\n");
+            }
+        }
+        printf ("#### ERROR: dimr ABORT: See messages above\n");
         fflush(stdout);
         abort_parallel();
         ireturn = 1;
     }
     catch (char * str) {
-        printf ("#### dimr ABORT: %s\n", str);
+        printf ("#### ERROR: dimr ABORT: %s\n", str);
+        if (! finalizeReached) {
+            printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
+            try {
+                DHE->lib_finalize();
+            }
+            catch (...) {
+                printf("#### ERROR: dimr ABORT: Finalize aborted\n");
+            }
+        }
+        printf ("#### ERROR: dimr ABORT: See messages above\n");
         fflush(stdout);
         abort_parallel();
         ireturn = 1;

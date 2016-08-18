@@ -241,7 +241,7 @@ subroutine m_d3d_dump_d3d_state(d3d_state,lun,fname)
   allocate (d3d_one_state%core%u (nlb:nub, mlb:mub, kmax), stat=ierr)
   if (ierr .ne. 0) then
     print *,'error allocating u1'
-    stop
+    call throwexception()
   endif
   allocate (d3d_one_state%core%v (nlb:nub, mlb:mub, kmax), stat = ierr)   
   allocate (d3d_one_state%core%dp (nlb:nub, mlb:mub) )  
@@ -261,7 +261,7 @@ subroutine m_d3d_dump_d3d_state(d3d_state,lun,fname)
   allocate (d3d_one_state%pseudo%w (nlb:nub, mlb:mub, 0:kmax), stat = ierr)   
   if (ierr .ne. 0) then
     print *,'error allocating w'
-    stop
+    call throwexception()
   endif
 
   allocate (d3d_one_state%pseudo%vicuv (nlb:nub, mlb:mub, 1:kmax+2), stat = ierr)
@@ -302,7 +302,7 @@ integer :: ierr
    deallocate(d3d_one_state%core%u, stat = ierr)
      if (ierr .ne. 0) then
       print *,'error de-allocating '
-      stop
+      call throwexception()
     endif
    deallocate(d3d_one_state%core%v, stat = ierr)   
 

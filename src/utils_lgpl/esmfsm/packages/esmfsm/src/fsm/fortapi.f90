@@ -416,5 +416,5 @@ subroutine alignment_error (type)
 
     write (*,*) 'FATAL ERROR, Program Aborting...'
     write (*,*) trim(error)
-    stop
+    call throwexception()
 end

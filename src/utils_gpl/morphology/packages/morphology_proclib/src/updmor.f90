@@ -155,7 +155,7 @@
       call getbedcomp(bed,1,1) 
       if (updmorlyr(bed%comp, dbodsd, depchg, bed%messages) /= 0) then
           call writemessages(bed%messages, 6)
-          stop
+          call throwexception()
       endif
 !
 !     Reset pointers

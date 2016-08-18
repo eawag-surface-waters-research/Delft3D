@@ -165,5 +165,6 @@ subroutine d3stop(iexit, gdp)
     !
     ! Terminate now
     !
-    call cstop(iexit, char(0))
+    ! call cstop(iexit, char(0))
+    call throwexception()
 end subroutine d3stop
