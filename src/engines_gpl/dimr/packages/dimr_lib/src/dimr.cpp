@@ -665,6 +665,14 @@ void Dimr::runParallelUpdate (dimr_control_block * cb) {
                             if (cb->subBlocks[i].subBlocks[j].unit.component->type == COMP_TYPE_RTC) {
                                 tUpdate = -1.0;
                             }
+                            // Hack: Wanda: The first time that WANDA.update(tUpdate) is called, tUpdate must be 0.0
+                            //              Otherwise, WANDA will hang in case tUpdate is very big (FLOW start time big, related to ref time)
+                            //              It doesn't matter for the WANDA results; with this coupling, WANDA doesn't have a time knowledge at all
+                            if (cb->subBlocks[i].subBlocks[j].unit.component->type == COMP_TYPE_WANDA) {
+                                if (cb->subBlocks[i].tCur == 0.0) {
+                                    tUpdate = 0.0;
+                                }
+                            }
                             // Update
                             chdir(thisComponent->workingDir);
                             this->log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
