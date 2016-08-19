@@ -60,7 +60,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
     use flow_tables
     use bedcomposition_module
     use globaldata
