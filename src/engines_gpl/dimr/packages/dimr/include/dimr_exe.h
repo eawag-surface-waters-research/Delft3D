@@ -120,13 +120,13 @@ class Log;
 
 class DimrExe {
     public:
-        DimrExe (
+        DimrExe(void);
+        void initialize(
             int     argc,
             char *  argv [],
             char *  envp []
             );
-    public:
-        ~DimrExe (void);
+        ~DimrExe(void);
         void openLibrary(void);
         void freeLib (void);
         void lib_initialize(void);

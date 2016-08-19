@@ -115,7 +115,8 @@ int main (int     argc,
     initialize_parallel(argc, argv);
 
     try {
-        DHE = new DimrExe (argc, argv, envp);
+        DHE = new DimrExe();
+        DHE->initialize(argc, argv, envp);
         if (! DHE->ready) return 1;
 
 		DHE->log->Write(Log::MAJOR, my_rank, getfullversionstring_dimr_exe());
@@ -130,7 +131,7 @@ int main (int     argc,
     }
     catch (exception& ex) {
         printf ("#### ERROR: dimr ABORT: C++ Exception: %s\n", ex.what());
-        if (! finalizeReached) {
+        if (DHE->ready && ! finalizeReached) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -146,7 +147,7 @@ int main (int     argc,
     }
     catch (Exception *ex) {
         printf ("#### ERROR: dimr ABORT: %s\n", ex->message);
-        if (! finalizeReached) {
+        if (DHE->ready && ! finalizeReached) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -162,7 +163,7 @@ int main (int     argc,
     }
     catch (char * str) {
         printf ("#### ERROR: dimr ABORT: %s\n", str);
-        if (! finalizeReached) {
+        if (DHE->ready && ! finalizeReached) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -286,16 +287,21 @@ void abort_parallel()
     }
 }
 
+//------------------------------------------------------------------------------
+//  Constructor. Just create the object. Delay initialization actions in
+//  initialization method
+DimrExe::DimrExe (void) {
+	this->ready = false;
+}
 
 //------------------------------------------------------------------------------
 //  Constructor.  Initialize the object, read the configuration file and load
 //  and invoke the start component's entry function.  All of the work is done
 //  by the start component, including loading other components if necessary.
 //  ToDo: make load-and-start a generic function available to any component.
-DimrExe::DimrExe (int     argc,
+void DimrExe::initialize (int     argc,
                               char *  argv [],
                               char *  envp []) {
-	this->ready = false;
     this->exePath = strdup (argv[0]);
 
 #if defined(HAVE_CONFIG_H)
