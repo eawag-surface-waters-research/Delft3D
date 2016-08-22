@@ -165,7 +165,7 @@ Component::GetEndTime (
 
 
 double
-Component::GetCurrentTime (
+Component::GetCurrTime (
     void
     ) {
 

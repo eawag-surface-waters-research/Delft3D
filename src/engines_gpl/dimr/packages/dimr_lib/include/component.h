@@ -79,7 +79,7 @@ class Component {
             );
 
         virtual double
-        GetCurrentTime (
+        GetCurrTime (
             void
             );
 
