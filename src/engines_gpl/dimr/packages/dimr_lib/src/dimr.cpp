@@ -823,16 +823,15 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
 
 //------------------------------------------------------------------------------
 void Dimr::scanConfigFile (void) {
-    XmlTree * rootXml     = this->config->Lookup ("/deltaresHydro");
-    XmlTree * controlXml  = rootXml->Lookup ("control");
-    XmlTree * fileversion = rootXml->Lookup ("documentation/fileVersion");
+
+	XmlTree * rootXml     = this->config->Lookup ("/dimrConfig");
     if (rootXml == NULL)
-        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro root element", this->configfile);
-    if (controlXml == NULL)
-        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro control element", this->configfile);
-    // Check version number
+        throw new Exception (true, "Configuration file \"%s\" does not have a <dimrConfig> root element", this->configfile);
+    XmlTree * fileversion = rootXml->Lookup ("documentation/fileVersion");
     if (fileversion == NULL)
         throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro documentation->fileVersion element", this->configfile);
+
+	// Check version number
     const char * versionnr = fileversion->charData;
     float versionnumber;
     int intRead = sscanf(versionnr, "%f", &versionnumber);
@@ -841,6 +840,9 @@ void Dimr::scanConfigFile (void) {
     if ((int)floor(versionnumber) != 1)
         throw new Exception (true, "Configuration file \"%s\": Version number (%3.2f) must have main version 2", this->configfile,versionnumber);
 
+	XmlTree * controlXml  = rootXml->Lookup ("control");
+    if (controlXml == NULL)
+        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro control element", this->configfile);
     // Allocate the control structure and check its size
     this->control = (dimr_control_block *) malloc(sizeof(dimr_control_block));
     this->control->numSubBlocks = 0;
@@ -1321,7 +1323,7 @@ void Dimr::processWaitFile (void) {
     // The following waitFile code is introduced for
     // debugging parallel runs. It should NOT be used for any other purpose!
 
-    XmlTree * rootXml     = this->config->Lookup ("/deltaresHydro");
+    XmlTree * rootXml     = this->config->Lookup ("/dimrConfig");
     const char * waitFile = rootXml->GetElement ("waitFile");
     if (waitFile != NULL) {
         this->log->Write (Log::MAJOR, my_rank, "Waiting for file \"%s\" to appear...", waitFile);

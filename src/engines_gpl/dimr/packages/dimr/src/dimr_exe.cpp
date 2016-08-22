@@ -110,7 +110,7 @@ int main (int     argc,
 
     int ireturn = -1;
     DimrExe * DHE;
-    bool finalizeReached = 0;
+    int finalizeReached = -1;
 
     initialize_parallel(argc, argv);
 
@@ -123,7 +123,11 @@ int main (int     argc,
 
         DHE->openLibrary();
         DHE->lib_initialize();
-        DHE->lib_update();
+
+		finalizeReached = 0; // initialization passed OK, lib_finalize
+		                     // can be called in case of exceptions
+
+		DHE->lib_update();
         finalizeReached = 1;
         DHE->lib_finalize();
         delete DHE;
@@ -131,7 +135,7 @@ int main (int     argc,
     }
     catch (exception& ex) {
         printf ("#### ERROR: dimr ABORT: C++ Exception: %s\n", ex.what());
-        if (DHE->ready && ! finalizeReached) {
+        if (finalizeReached == 1) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -147,7 +151,7 @@ int main (int     argc,
     }
     catch (Exception *ex) {
         printf ("#### ERROR: dimr ABORT: %s\n", ex->message);
-        if (DHE->ready && ! finalizeReached) {
+        if (finalizeReached == 0) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -163,7 +167,7 @@ int main (int     argc,
     }
     catch (char * str) {
         printf ("#### ERROR: dimr ABORT: %s\n", str);
-        if (DHE->ready && ! finalizeReached) {
+        if (finalizeReached == 0) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -564,8 +568,8 @@ void DimrExe::freeLib (void) {
 #else
         DWORD ierr;
         SetLastError(0); /* clear error code */
-        bool success = FreeLibrary(this->libHandle);
-        if ((ierr = GetLastError()) != 0) {
+        BOOL success = FreeLibrary(this->libHandle);
+        if (success == 0 || (ierr = GetLastError()) != 0) {
             throw new Exception (true, "Cannot free component library \"%s\". Return code: %d.", this->library, ierr);
         }
 #endif
