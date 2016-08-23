@@ -189,7 +189,7 @@
          ptlay  = 1.0 - pblay
          nstep = 1 + (itstopp - itstrtp)/idelt
          itrakc = 0
-         itraki = 1
+         itraki = notrak  ! timestep for writing trackinformation to the track file, if notrack =0 then no track file
          if ( ltrack) itrakc = itrakc + itraki
          call exit_alloc ( i2 )
       endif

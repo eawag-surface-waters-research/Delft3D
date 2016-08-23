@@ -313,9 +313,11 @@
      &                 za       , locdep   , dpsp     , nolayp   , mmaxp    ,
      &                 tcktot   )
                                   ! write actual particle tracks (file #16)
-         call wrttrk ( lunut    , fout     , fnamep(16),itrakc   , nopart   ,
+         if (itime.eq.(itstrtp+idelt*itrakc)) then                        
+            call wrttrk ( lunut   , fout     , fnamep(16), itrakc   , nopart  ,
      &                 npmax    , xa       , ya       , za       , xyztrk   )
          itrakc = itrakc + itraki
+      endif
       endif
 
       if ( noudef .gt. 0 )  then
