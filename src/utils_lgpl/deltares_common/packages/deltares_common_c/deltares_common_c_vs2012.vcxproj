@@ -133,6 +133,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\bmi_shared_lib_fortran_api.c" />
     <ClCompile Include="src\cpuinfo.cpp" />
     <ClCompile Include="src\cutil.c" />
     <ClCompile Include="src\getopt.cpp" />
