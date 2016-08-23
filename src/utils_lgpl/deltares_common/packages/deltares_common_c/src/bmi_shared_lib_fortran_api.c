@@ -109,17 +109,17 @@ DllProcedureAddress GetDllProcedure(
 #if defined(WIN32)
 	procedure = GetProcAddress(sharedDLL->dllHandle, fun_name);
 #elif defined(HAVE_CONFIG_H)
-	proc = (MyProc)dlsym(sharedDLL->dllHandle, fun_name);
+	proc = (DllProcedureAddress)dlsym(sharedDLL->dllHandle, fun_name);
 #endif
 	return procedure;
 }
 
 double DllGetBmiTime(long * sharedDLLHandle, char * function_name)
 {
-	double time = -1;
-
 	typedef void * (STDCALL * MyProc)(double *);
 	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, function_name);
+
+	double time = -1;
 
 	if (proc != NULL)
 	{
@@ -132,13 +132,13 @@ long STDCALL BMI_INITIALIZE(long * sharedDLLHandle,
 	char   * config_file,
 	int      config_file_len)
 {
+	typedef void * (STDCALL * MyProc)(char *);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "initialize");
+
 	long error = -1;
 
 	char * c_config_file = strFcpy(config_file, config_file_len);
 	RemoveTrailingBlanks_dll(c_config_file);
-
-	typedef void * (STDCALL * MyProc)(char *);
-	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "initialize");
 
 	if (proc != NULL)
 	{
@@ -181,20 +181,21 @@ void STDCALL BMI_GET_VAR(long * sharedDLLHandle,
 	int    * num_values,
 	int      var_name_len)
 {
+	typedef void * (STDCALL * MyProc)(char *, double**);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
+
+	int  i;					// vs2102 and lower do not support typedefs in combination
+	double * bmi_values;    // with local variable declaration, hence declare at start of function
+
 	char * c_var_name = strFcpy(var_name, var_name_len);
 	RemoveTrailingBlanks_dll(c_var_name);
 
-	typedef void * (STDCALL * MyProc)(double*);
-	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
-
 	if (proc != NULL)
 	{
-		double * bmi_values;
 		(void *)(*proc)(c_var_name, &bmi_values);
-		for (int i = 0; i < *num_values; i++) {
+		for (i = 0; i < *num_values; i++) {
 			values[i] = bmi_values[i];
 		}
-		return 0;
 	}
 
 	free(c_var_name); c_var_name = NULL;
@@ -207,17 +208,15 @@ void STDCALL BMI_SET_VAR(long * sharedDLLHandle,
 	int    * num_values,
 	int      var_name_len)
 {
+	typedef void * (STDCALL * MyProc)(char*, double*);
+	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "set_var");
+
 	char * c_var_name = strFcpy(var_name, var_name_len);
 	RemoveTrailingBlanks_dll(c_var_name);
 
-	typedef void * (STDCALL * MyProc)(double*);
-	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "set_var");
-
 	if (proc != NULL)
 	{
-		double * bmi_values;
 		(void *)(*proc)(c_var_name, values);
-		return 0;
 	}
 
 	free(c_var_name); c_var_name = NULL;
