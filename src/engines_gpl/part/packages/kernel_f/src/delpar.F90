@@ -553,7 +553,7 @@
 !     particles not yet released will be written as default (999.999)
 
       itrakc = 0
-      itraki = 1
+      itraki = notrak  ! timestep for writing trackinformation to the track file, if notrack =0 then no track file
 
 !     get bathymetry depths (w.r.t. reference level)
 
@@ -818,10 +818,12 @@
                           nopart   , npwndw   , lgrid2   , kpart    , zpart    ,    &
                           za       , locdep   , dpsp     , nolayp   , mmaxp    ,    &
                           tcktot   )
-                                     ! write actual particle tracks (file #16)
-            call wrttrk ( lun(2)   , fout     , fname(16), itrakc   , nopart  ,    &
-                          npmax    , xa       , ya       , za       , xyztrk  )
-            itrakc = itrakc + itraki
+!           write actual particle tracks (file #16)
+            if (itime.eq.(itstrtp+idelt*itrakc)) then                        
+               call wrttrk ( lun(2)   , fout     , fname(16), itrakc   , nopart  ,    &
+                             npmax    , xa       , ya       , za       , xyztrk  )
+               itrakc = itrakc + itraki
+            endif
          endif
 
          if ( noudef .gt. 0 )  then
