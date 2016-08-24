@@ -126,7 +126,10 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ! Try restart
     !
     error = .false.
-    if (restid /= ' ') then
+    if (gdp%gdrestart%rst_dp) then
+       !
+       ! restarting from file containing bed levels, so let's check other quantities as well
+       !
        if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
            mfluff => gdp%gdmorpar%flufflyr%mfluff
            !

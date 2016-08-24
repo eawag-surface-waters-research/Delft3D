@@ -484,6 +484,13 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                    endif
                endif
                !
+               ! The flag rst_dp is used to set DPSOPT=DP.
+               ! This ensures that the DP values are copied into DPS in subroutine caldps
+               ! Differences may occur when DPU/DPV depend on (the original) DP
+               ! The flag rst_dp is also used to check whether 
+               !
+               rst_dp = dp_from_map_file
+               !
                if (ierror == 0) then
                    ierror = nf90_inq_varid(fds, 'UMNLDF', idvar)
                    if (ierror/= 0) has_umean = 0

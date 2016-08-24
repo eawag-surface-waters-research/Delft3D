@@ -39,29 +39,18 @@ subroutine initrestart(gdp)
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer        , pointer :: i_restart
-    logical        , pointer :: dp_from_map_file
-    logical        , pointer :: kfuv_from_restart
-    logical        , pointer :: rst_dp
-    character(256) , pointer :: restid
-    character(16)  , pointer :: rst_layer_model
 !
 !! executable statements -------------------------------------------------------
 !
-    i_restart          => gdp%gdrestart%i_restart
-    dp_from_map_file   => gdp%gdrestart%dp_from_map_file
-    kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
-    rst_dp             => gdp%gdrestart%rst_dp
-    restid             => gdp%gdrestart%restid
-    rst_layer_model    => gdp%gdrestart%rst_layer_model
+    gdp%gdrestart%fds               = -999
+    gdp%gdrestart%filetype          = -999
+    gdp%gdrestart%i_restart         = 0
     !
-    dp_from_map_file  = .true.
-    kfuv_from_restart = .false.
-    rst_dp            = .false.
-    i_restart         = 0
-    restid            = ' '
-    rst_layer_model   = ' '
+    gdp%gdrestart%dp_from_map_file  = .true.
+    gdp%gdrestart%kfuv_from_restart = .false.
+    gdp%gdrestart%rst_dp            = .false.
+    !
+    gdp%gdrestart%filename          = ' '
+    gdp%gdrestart%restid            = ' '
+    gdp%gdrestart%rst_layer_model   = 'UNKNOWN'
 end subroutine initrestart

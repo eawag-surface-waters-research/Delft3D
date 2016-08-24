@@ -84,6 +84,8 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     bdfhread = .false.
     bdflread = .false.
     !
+    if (filetype == -999) return
+    !
     ! element 'DUNEHEIGHT'
     !
     grnam = 'map-sed-series'

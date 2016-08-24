@@ -129,6 +129,8 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     success      = .false.
     layerfrac    = 0
     !
+    if (filetype == -999) return
+    !
     if (inode==master) then
        if (filetype==FTYPE_NEFIS) then
           elmndm = 5

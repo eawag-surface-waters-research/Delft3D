@@ -85,6 +85,8 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
     !
     rst_fluff = .false.
     !
+    if (filetype == -999) return
+    !
     if (inode==master) then
        if (filetype==FTYPE_NEFIS) then
           !
