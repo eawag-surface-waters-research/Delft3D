@@ -491,7 +491,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                 if (cb->subBlocks[i].subBlocks[j].type != CT_START) {
                     dimr_coupler   * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                     for (int k = 0 ; k < thisCoupler->numItems ; k++) {
-                        if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC || thisCoupler->sourceComponent->type == COMP_TYPE_WANDA) {
+                        if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC   ||
+							thisCoupler->sourceComponent->type == COMP_TYPE_WANDA ||
+							thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D2D) {
                             // RTCTools/Wanda: impossible to autodetect which partition will deliver this source var
                             // Assumption: there is only one RTC-partition
                             thisCoupler->items[k].sourceProcess = thisCoupler->sourceComponent->processes[0];
@@ -546,7 +548,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 
                         // Target variable
 
-                        if (thisCoupler->targetComponent->type == COMP_TYPE_RTC || thisCoupler->targetComponent->type == COMP_TYPE_WANDA) {
+                        if (thisCoupler->targetComponent->type == COMP_TYPE_RTC     ||
+							thisCoupler->targetComponent->type == COMP_TYPE_WANDA   ||
+							thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D) {
                             // nothing
                         } else {
                             for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses; m++) {
@@ -693,7 +697,9 @@ void Dimr::runParallelUpdate (dimr_control_block * cb) {
                                 for (int m = 0 ; m < thisCoupler->sourceComponent->numProcesses; m++) {
                                     if (my_rank == thisCoupler->sourceComponent->processes[m]) {
                                         this->log->Write (Log::DETAIL, my_rank, "Send(%s)", thisCoupler->items[k].sourceName);
-										if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC || thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D) {
+										if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC     ||
+											thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D  ||
+											thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D2D) {
                                             // These components only returns a new pointer to a copy of the double value, so call it each time.
                                             (thisCoupler->sourceComponent->dllGetVar) (thisCoupler->items[k].sourceName, (void *)&thisCoupler->items[k].sourceVarPtr);
                                         } else if (thisCoupler->sourceComponent->type == COMP_TYPE_WANDA) {
@@ -934,8 +940,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
         newComp->type = COMP_TYPE_WANDA;
     } else if (strstr(libNameLowercase, "flow2d3d") != NULL){
         newComp->type = COMP_TYPE_FLOW2D3D;
-    }
-    else if (strstr(libNameLowercase, "flow1d2d") != NULL){
+    } else if (strstr(libNameLowercase, "flow1d2d") != NULL){
        newComp->type = COMP_TYPE_FLOW1D2D;
     }
     else {
