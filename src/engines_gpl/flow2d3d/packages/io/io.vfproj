@@ -71,11 +71,6 @@
 		<File RelativePath="src\input\edyfil.f90"/>
 		<File RelativePath="src\input\expblk.f90"/>
 		<File RelativePath="src\input\fbcorr.f90"/>
-		<File RelativePath="src\input\flow_nefis_restart.f90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\input\flsfil.f90"/>
 		<File RelativePath="src\input\grdfil.f90"/>
 		<File RelativePath="src\input\hybfil.f90"/>
@@ -138,10 +133,15 @@
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\input\reafou.f90"/>
-		<File RelativePath="src\input\restart_bdf_from_trim.f90"/>
-		<File RelativePath="src\input\restart_bodsed.f90"/>
-		<File RelativePath="src\input\restart_lyrs.f90"/>
-		<File RelativePath="src\input\roller_nefis_restart.f90"/>
+		<File RelativePath=".\src\input\restart_trim_bdf.f90"/>
+		<File RelativePath=".\src\input\restart_trim_flow.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
+		<File RelativePath=".\src\input\restart_trim_fluff.f90"/>
+		<File RelativePath=".\src\input\restart_trim_lyrs.f90"/>
+		<File RelativePath=".\src\input\restart_trim_roller.f90"/>
 		<File RelativePath="src\input\rstfil.f90"/>
 		<File RelativePath="src\input\search2.f90"/>
 		<File RelativePath="src\input\split_stations.f90"/>

@@ -36,7 +36,7 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     use precision
     use bedcomposition_module
     use m_rdmorlyr, only: rdinimorlyr
-    use m_restart_lyrs
+    use m_restart_lyrs, only: restart_trim_lyrs
     use globaldata
     !
     implicit none
@@ -130,18 +130,14 @@ subroutine inimorlyr(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        if (gdp%gdmorpar%flufflyr%iflufflyr>0) then
            mfluff => gdp%gdmorpar%flufflyr%mfluff
            !
-           call restart_bodsed ( &
-                  & error     ,restid    ,i_restart ,mfluff    , &
-                  & lsedtot   ,nmaxus    ,mmax      ,rst_fluff , &
-                  & 'MFLUFF'  ,gdp       )
+           call restart_trim_fluff ( &
+                  & lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp       )
        endif
        !
-       call restart_lyrs ( &
-              & error     ,restid    ,i_restart ,msed      , &
-              & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
-              & mmax      ,nlyr      ,rst_bedcmp,svfrac    , &
-              & iporosity ,iunderlyr ,bodsed    ,dpsed     , &
-              & gdp       )
+       call restart_trim_lyrs ( &
+              & msed      ,thlyr     ,lsedtot   ,cdryb     , &
+              & nlyr      ,rst_bedcmp,svfrac    ,iporosity , &
+              & iunderlyr ,bodsed    ,dpsed     ,gdp       )
     endif
     !
     ! Any parameters not obtained from restart file will be initialized using

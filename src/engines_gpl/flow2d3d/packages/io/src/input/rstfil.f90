@@ -157,11 +157,11 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           ! Use restid, because flow_nefis_restart will put it's value in gdp%gdrestart%restid
           !
           write (restid, '(2a)') trim(filpath), trim(restid)
-          call flow_nefis_restart(lundia    ,error     ,restid    ,lturi     ,mmax      , &
-                                & nmaxus    ,kmax      ,lstsci    ,ltur      , &
-                                & s1        ,u1        ,v1        ,r1        ,rtur1     , &
-                                & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                                & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
+          call restart_trim_flow(lundia    ,error     ,restid    ,lturi     ,mmax      , &
+                               & nmaxus    ,kmax      ,lstsci    ,ltur      , &
+                               & s1        ,u1        ,v1        ,r1        ,rtur1     , &
+                               & umnldf    ,vmnldf    ,kfu       ,kfv       , &
+                               & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
              & trim(filtmp) // trim(datetime) // ', ' // trim(filtmp) // ' and ' // trim(restid) // '.dat/.def')

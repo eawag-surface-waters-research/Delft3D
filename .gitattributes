@@ -701,7 +701,6 @@ src/engines_gpl/flow2d3d/packages/io/src/input/dryfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/edyfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/expblk.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/fbcorr.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/flow_nefis_restart.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/flsfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/grdfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/hybfil.f90 -text
@@ -758,10 +757,11 @@ src/engines_gpl/flow2d3d/packages/io/src/input/reacmp.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/read_triana.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/readmd.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/reafou.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/restart_bdf_from_trim.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/restart_bodsed.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/restart_lyrs.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/input/roller_nefis_restart.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/restart_trim_bdf.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/restart_trim_flow.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/restart_trim_fluff.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/restart_trim_lyrs.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/restart_trim_roller.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rstfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/search2.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/split_stations.f90 -text

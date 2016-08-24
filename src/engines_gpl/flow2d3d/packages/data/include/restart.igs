@@ -37,7 +37,9 @@ type sv_restart
     !
     ! integers
     !
-    integer        :: i_restart !  Restart index
+    integer        :: fds               !  NEFIS or NetCDF handle of restart file
+    integer        :: filetype          !  Type of restart file
+    integer        :: i_restart         !  Restart index
     !
     ! pointers
     !
@@ -53,6 +55,7 @@ type sv_restart
     !
     ! characters
     !
+    character(256) :: filename          !  Name of restart file
     character(256) :: restid            !  Identification restart file
     character(16)  :: rst_layer_model   !  Layer type of the restart/map file, options:
                                         !  1) SIGMA-MODEL     (restarting from a map-file with sigma-layering)

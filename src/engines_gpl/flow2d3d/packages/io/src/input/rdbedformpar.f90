@@ -649,8 +649,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     !---------------------------
     ! Reading initial dune height/dune length
     !
-    call restart_bdf_from_trim(lundia   ,nmaxus   ,mmax     ,duneheight, &
-                             & hdread   ,dunelength,ldread  ,gdp      )
+    call restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,duneheight, &
+                        & hdread   ,dunelength,ldread  ,gdp      )
     !
     if (.not.hdread) then
        !

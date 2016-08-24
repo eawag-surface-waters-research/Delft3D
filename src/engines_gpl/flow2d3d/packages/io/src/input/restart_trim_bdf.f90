@@ -1,5 +1,5 @@
-subroutine restart_bdf_from_trim(lundia   ,nmaxus   ,mmax     ,bdfh     , &
-                              &  bdfhread ,bdfl     ,bdflread ,gdp      )
+subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
+                          & bdfhread ,bdfl     ,bdflread ,gdp      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -29,20 +29,29 @@ subroutine restart_bdf_from_trim(lundia   ,nmaxus   ,mmax     ,bdfh     , &
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-! Reads initial field condition records from a NEFIS flow output map file
-!
+! Reads initial field condition records from a trim-file
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use properties
-    !
     use globaldata
-    use string_module
+    use rdarray, only: rdarray_nm
+    use nan_check_module
     !
     implicit none
     !
     type(globdat),target :: gdp
+    !
+    integer       , dimension(:,:)       , pointer :: iarrc
+    integer       , dimension(:)         , pointer :: mf
+    integer       , dimension(:)         , pointer :: ml
+    integer       , dimension(:)         , pointer :: nf
+    integer       , dimension(:)         , pointer :: nl
+    !
+    integer                              , pointer :: i_restart
+    integer                              , pointer :: fds
+    integer                              , pointer :: filetype
+    character(256)                       , pointer :: filename
     !
     ! Global variables
     !
@@ -56,85 +65,53 @@ subroutine restart_bdf_from_trim(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     !
     ! Local variables
     !
-    integer                               :: lrid        ! character variables for files Help var., length of restid
-    integer, external                     :: crenef
-    integer, external                     :: getelt
-    integer, external                     :: clsnef
-    integer                               :: error
-    integer                               :: fds
-    integer, dimension(3,5)               :: cuindex
-    integer, dimension(3,5)               :: uindex
-    real(sp), dimension(:,:,:,:), pointer :: sbuff
-    character(len=256)                    :: dat_file
-    character(len=256)                    :: def_file
-    !
-    integer                             , pointer :: i_restart
-    character(256)                      , pointer :: restid
+    integer                               :: ierror
+    character(16)                         :: grnam
     !
     !! executable statements -------------------------------------------------------
     !
-    i_restart          => gdp%gdrestart%i_restart
-    restid             => gdp%gdrestart%restid
+    mf                  => gdp%gdparall%mf
+    ml                  => gdp%gdparall%ml
+    nf                  => gdp%gdparall%nf
+    nl                  => gdp%gdparall%nl
+    iarrc               => gdp%gdparall%iarrc
     !
-    nullify(sbuff)
+    i_restart           => gdp%gdrestart%i_restart
+    fds                 => gdp%gdrestart%fds
+    filetype            => gdp%gdrestart%filetype
+    filename            => gdp%gdrestart%filename
+    !
     bdfhread = .false.
     bdflread = .false.
-    fds      = -1
-    call remove_leading_spaces(restid    ,lrid      )
     !
-    ! open NEFIS trim-<restid> file
+    ! element 'DUNEHEIGHT'
     !
-    dat_file = restid(1:lrid)//'.dat'
-    def_file = restid(1:lrid)//'.def'
-    error    = crenef(fds, dat_file, def_file, ' ', 'r')
-    if (error /= 0) goto 9999
-    !
-    ! initialize group index time dependent data
-    !
-    cuindex (3,1) = 1 ! increment in time
-    cuindex (1,1) = 1
-    cuindex (2,1) = 1
-    !
-    ! initialize group index time dependent data
-    !
-    uindex (3,1) = 1 ! increment in time
-    uindex (1,1) = i_restart
-    uindex (2,1) = i_restart
-    !
-    allocate(sbuff(nmaxus, mmax, 1, 1))
-    !
-    ! Read DUNEHEIGHT
-    !
-    error = getelt( fds , 'map-sed-series', 'DUNEHEIGHT', uindex, 1, mmax*nmaxus*4, sbuff )
-    if (error /= 0) then
+    grnam = 'map-sed-series'
+    call rdarray_nm(fds, filename, filetype, grnam, i_restart, &
+                 & nf, nl, mf, ml, iarrc, gdp, &
+                 & ierror, lundia, bdfh, 'DUNEHEIGHT')
+    if (ierror /= 0) then
        !
        ! In the research version, DUNEHEIGHT was stored in the map-series group.
        ! For the time being remain compatible with that version.
        !
-       error = getelt( fds , 'map-series', 'DUNEHEIGHT', uindex, 1, mmax*nmaxus*4, sbuff )
+       grnam = 'map-series'
+       call rdarray_nm(fds, filename, filetype, grnam, i_restart, &
+                    & nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, lundia, bdfh, 'DUNEHEIGHT')
     endif
-    if (error == 0) then
+    if (ierror == 0) then
        write(lundia, '(a)') 'Bed form height read from restart file.'
-       bdfh(1:nmaxus,1:mmax) = real(sbuff(1:nmaxus,1:mmax,1,1),fp)
        bdfhread = .true.
     endif
     !
-    ! Read DUNELENGTH
+    ! element 'DUNELENGTH'
     !
-    error = getelt( fds , 'map-sed-series', 'DUNELENGTH', uindex, 1, mmax*nmaxus*4, sbuff )
-    if (error /= 0) then
-       !
-       ! In the research version, DUNELENGTH was stored in the map-series group.
-       ! For the time being remain compatible with that version.
-       !
-       error = getelt( fds , 'map-series', 'DUNELENGTH', uindex, 1, mmax*nmaxus*4, sbuff )
-    endif
-    if (error == 0) then
+    call rdarray_nm(fds, filename, filetype, grnam, i_restart, &
+                 & nf, nl, mf, ml, iarrc, gdp, &
+                 & ierror, lundia, bdfl, 'DUNELENGTH')
+    if (ierror == 0) then
        write(lundia, '(a)') 'Bed form length read from restart file.'
-       bdfl(1:nmaxus,1:mmax) = real(sbuff(1:nmaxus,1:mmax,1,1),fp)
        bdflread = .true.
     endif
-9999 continue
-    if (associated(sbuff)) deallocate (sbuff)
-    error = clsnef(fds) 
-end subroutine restart_bdf_from_trim
+end subroutine restart_trim_bdf

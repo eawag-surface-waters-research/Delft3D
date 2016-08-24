@@ -1,8 +1,8 @@
-subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax      , &
-                            & nmaxus    ,kmax      ,lstsci    ,ltur      , &
-                            & s1        ,u1        ,v1        ,r1        ,rtur1     , &
-                            & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                            & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
+subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax      , &
+                           & nmaxus    ,kmax      ,lstsci    ,ltur      , &
+                           & s1        ,u1        ,v1        ,r1        ,rtur1     , &
+                           & umnldf    ,vmnldf    ,kfu       ,kfv       , &
+                           & dp        ,ex_nfs    ,namcon    ,coninit   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -32,30 +32,24 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-! Reads initial field condition records from an
-! NEFIS flow output map file
-!
+! Reads initial field condition records from a trim-file
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use properties
+    use properties, only: prop_get_logical
     use time_module, only: ymd2jul, datetime_to_string, parse_ud_timeunit, date2mjd, jul2mjd
     use globaldata
-    use string_module
-    use netcdf
+    use string_module, only: remove_leading_spaces
+    use netcdf, only: nf90_open, nf90_inq_dimid, nf90_inquire_dimension, nf90_get_var, nf90_inquire_variable, nf90_nowrite, nf90_inq_varid, nf90_get_att, nf90_global, nf90_max_var_dims
     use system_utils, only: exifil
     use rdarray, only: rdvar, rdarray_nm, rdarray_nmk, rdarray_nmkl
-    !
-    use dfparall
-    !
+    use dfparall, only: inode, master, dfint, dfdble, dfmax
     use nan_check_module
     !
     implicit none
     !
     type(globdat),target :: gdp
-    
-    
     include 'fsm.i'
     include 'tri-dyn.igd'
     !
@@ -73,6 +67,9 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     character(16)  , pointer :: rst_layer_model
     logical        , pointer :: rst_dp
     logical        , pointer :: roller
+    integer        , pointer :: fds
+    integer        , pointer :: filetype
+    character(256) , pointer :: filename
     character(256) , pointer :: restid
     real(hp)       , pointer :: morft
     real(hp)       , pointer :: morft0
@@ -119,8 +116,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer                               :: iddim
     integer                               :: idvar
     integer                               :: ierror
-    integer                               :: fds
-    integer                               :: filetype
     integer, external                     :: inqmxi
     integer, external                     :: neferr
     integer                               :: ii
@@ -149,7 +144,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     real(fp)                              :: rjuldiffs    ! difference of Julian dates in seconds
     real(fp), dimension(:,:,:,:), pointer :: rst_r1
     real(fp), dimension(:,:,:,:), pointer :: rst_rtur1
-    real(sp), dimension(:,:,:,:), pointer :: sbuff
     character(16)                         :: grnam1
     character(16)                         :: grnam2
     character(16)                         :: grnam3
@@ -157,7 +151,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     character(1024)                       :: error_string
     character(256)                        :: dat_file
     character(256)                        :: def_file
-    character(256)                        :: filename
     character(256)                        :: nc_file
     character(256)                        :: timeunitstr
     integer(pntrsize)           , pointer :: eroll1
@@ -210,6 +203,9 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     kfuv_from_restart   => gdp%gdrestart%kfuv_from_restart
     rst_layer_model     => gdp%gdrestart%rst_layer_model
     rst_dp              => gdp%gdrestart%rst_dp
+    fds                 => gdp%gdrestart%fds
+    filetype            => gdp%gdrestart%filetype
+    filename            => gdp%gdrestart%filename
     restid              => gdp%gdrestart%restid
     morft               => gdp%gdmorpar%morft
     morft0              => gdp%gdmorpar%morft0
@@ -245,7 +241,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'dp_from_map_file', dp_from_map_file)
     restid       = restid1
-    nullify(sbuff)
     error        = .false.
     error_string = ' '
     fds          = -1
@@ -407,6 +402,8 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
             found = .true.
         endif
         !
+        rst_lstsci = 0
+        rst_ltur   = 0
         if (.not. found) then
            call prterr(lundia, 'P004', 'Restart time not found on restart file.')
            ierror = 1
@@ -419,8 +416,8 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
            !
            if (filetype==FTYPE_NEFIS) then
                ierror = getelt(fds, 'map-const', 'LAYER_MODEL', cuindex, 1, 16, rst_layer_model)
-               if (ierror == 0) ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstsci)       
-               if (ierror == 0) ierror = getelt(fds, 'map-const', 'LTUR', cuindex, 1, 4, rst_ltur)
+               ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstsci)       
+               ierror = getelt(fds, 'map-const', 'LTUR', cuindex, 1, 4, rst_ltur)
                !
                if (dp_from_map_file) then
                   ierror = inqelm (fds, 'DPS', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
@@ -634,12 +631,12 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
            lturi = -2
        endif
        !
-       allocate(rst_rtur1(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, rst_ltur), stat = ierror)
+       allocate(rst_rtur1(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, rst_ltur), stat = ierror)
        call rdarray_nmkl(fds, filename, filetype, grnam3, i_restart, &
                      & nf, nl, mf, ml, iarrc, gdp, &
                      & 0, kmax, rst_ltur, ierror, lundia, rst_rtur1, 'RTUR1')
        if (ierror /= 0) goto 9999
-        do l = 1,rst_ltur
+        do l = 1,min(ltur,rst_ltur)
             rtur1(:,:,:,l) = rst_rtur1(:,:,:,l)
         enddo
        deallocate(rst_rtur1)
@@ -647,15 +644,38 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        ! no turbulent parameter initialized
        lturi = ltur
     endif
-
+    !
+    ! Check restart data for not-a-numbers
+    !
+    if (.not. nan_check(s1    , 'S1 (restart-file)', lundia)) ierror = 1
+    if (dp_from_map_file) then
+       if (.not. nan_check(dp    , 'DPS (restart-file)', lundia)) ierror = 1
+    endif
+    if (.not. nan_check(u1    , 'U1 (restart-file)', lundia)) ierror = 1
+    if (.not. nan_check(v1    , 'V1 (restart-file)', lundia)) ierror = 1
+    if (has_umean /= 0) then
+       if (.not. nan_check(umnldf, 'UMNLDF (restart-file)', lundia)) ierror = 1
+       if (.not. nan_check(vmnldf, 'VMNLDF (restart-file)', lundia)) ierror = 1
+    endif
+    if (rst_lstsci>0 .and. lstsci>0) then
+       if (.not. nan_check(r1    , 'R1 (restart-file)', lundia)) ierror = 1
+    endif
+    if (rst_ltur>0 .and. ltur) then
+       if (.not. nan_check(rtur1 , 'RTUR1 (restart-file)', lundia)) ierror = 1
+    endif
+    call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
+    if (ierror /= 0) goto 9999
+    !
+    ! restart ROLLER model
+    !
     if (roller) then
-       call roller_nefis_restart(lundia    ,error     ,restid1,   &
-               & i_restart, r(ewave1) ,r(eroll1) ,r(qxkr)   , &
-                          & r(qykr)   ,r(qxkw)   ,r(qykw)   ,r(fxw)    ,r(fyw)    , &
-                          & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    , &
-                          & r(hrms)   ,gdp       )  
-    endif   
-                
+       call restart_trim_roller(lundia    ,error     ,restid1,   &
+                              & i_restart ,r(ewave1) ,r(eroll1) ,r(qxkr)   , &
+                              & r(qykr)   ,r(qxkw)   ,r(qykw)   ,r(fxw)    ,r(fyw)    , &
+                              & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    , &
+                              & r(hrms)   ,gdp       )
+    endif
+    !
 9999 continue
     if (ierror /= 0) error = .true.
-end subroutine flow_nefis_restart
+end subroutine restart_trim_flow
