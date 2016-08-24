@@ -110,7 +110,7 @@ int main (int     argc,
 
     int ireturn = -1;
     DimrExe * DHE;
-    int finalizeReached = -1;
+    bool doFinalize = false;
 
     initialize_parallel(argc, argv);
 
@@ -124,18 +124,19 @@ int main (int     argc,
         DHE->openLibrary();
         DHE->lib_initialize();
 
-		finalizeReached = 0; // initialization passed OK, lib_finalize
-		                     // can be called in case of exceptions
+		doFinalize = true;
 
 		DHE->lib_update();
-        finalizeReached = 1;
-        DHE->lib_finalize();
+		
+		doFinalize = false;
+
+		DHE->lib_finalize();
         delete DHE;
         ireturn = 0;
     }
     catch (exception& ex) {
         printf ("#### ERROR: dimr ABORT: C++ Exception: %s\n", ex.what());
-        if (finalizeReached == 1) {
+        if (doFinalize) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -151,7 +152,7 @@ int main (int     argc,
     }
     catch (Exception *ex) {
         printf ("#### ERROR: dimr ABORT: %s\n", ex->message);
-        if (finalizeReached == 0) {
+        if (doFinalize) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
@@ -167,7 +168,7 @@ int main (int     argc,
     }
     catch (char * str) {
         printf ("#### ERROR: dimr ABORT: %s\n", str);
-        if (finalizeReached == 0) {
+        if (doFinalize) {
             printf("#### ERROR: dimr ABORT: Trying to finalize...\n");
             try {
                 DHE->lib_finalize();
