@@ -667,7 +667,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     if (rst_lstsci>0 .and. lstsci>0) then
        if (.not. nan_check(r1    , 'R1 (restart-file)', lundia)) ierror = 1
     endif
-    if (rst_ltur>0 .and. ltur) then
+    if (rst_ltur>0 .and. ltur>0) then
        if (.not. nan_check(rtur1 , 'RTUR1 (restart-file)', lundia)) ierror = 1
     endif
     call dfreduce_gdp( ierror, 1, dfint, dfmax, gdp )
