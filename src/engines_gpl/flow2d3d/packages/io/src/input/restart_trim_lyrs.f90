@@ -109,6 +109,7 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     character(len=64)                         :: elmdes
     character(len=1024)                       :: errmsg
     integer                                   :: layerfrac
+    integer                                   :: layerthk
 !
 !! executable statements -------------------------------------------------------
 !
@@ -128,6 +129,7 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     !
     success      = .false.
     layerfrac    = 0
+    layerthk     = 0
     !
     if (filetype == -999) return
     !
@@ -155,6 +157,22 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
                   endif
               endif
           endif
+          !
+          if (layerfrac == 2 .or. ierror /= 0) then
+              layerthk = 0
+          else
+              ierror  = inqelm(fds , 'DP_BEDLYR', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+              if (ierror == 0) then
+                  layerthk = 2
+              else
+                  ierror  = inqelm(fds , 'THLYR', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+                  if (ierror == 0) then
+                      layerthk = 1
+                  else
+                      ! ierror /= 0
+                  endif
+              endif
+          endif
        else
           ierror = nf90_inq_varid(fds, 'MSED', idvar)
           if (ierror == 0) then
@@ -176,6 +194,22 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
                       rst_nlyr = 1
                       ierror = nf90_inquire_variable(fds, idvar, dimids=dimids)
                       if (ierror==0) ierror = nf90_inquire_dimension(fds, dimids(3), len=rst_lsedtot)
+                  else
+                      ! ierror /= 0
+                  endif
+              endif
+          endif
+          !
+          if (layerfrac == 2 .or. ierror /= 0) then
+              layerthk = 0
+          else
+              ierror = nf90_inq_varid(fds, 'DP_BEDLYR', idvar)
+              if (ierror == 0) then
+                  layerthk = 2
+              else
+                  ierror = nf90_inq_varid(fds, 'THLYR', idvar)
+                  if (ierror == 0) then
+                      layerthk = 1
                   else
                       ! ierror /= 0
                   endif
@@ -214,26 +248,10 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
                       & nf, nl, mf, ml, iarrc, gdp, &
                       & 1, rst_nlyr, lsedtot, ierror, lundia, rst_msed, 'BODSED')
     end select
+    if (ierror/=0) goto 9999
     !
-    select case (layerfrac)
-    case (0,1)
-        call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
-                      & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'DP_BEDLYR')
-        if (ierror == 0) then
-            do k = 1, rst_nlyr
-                do m = gdp%d%mlb, gdp%d%mub
-                    do n = gdp%d%nlb, gdp%d%nub
-                        rst_thlyr(n,m,k) = rst_thlyr(n,m,k+1) - rst_thlyr(n,m,k)
-                    enddo
-                enddo
-            enddo
-        else
-           call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
-                         & nf, nl, mf, ml, iarrc, gdp, &
-                         & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'THLYR')
-        endif
-    case (2)
+    select case (layerthk)
+    case (0)
         !
         ! The DPSED value is not always consistent with the BODSED quantity, so don't
         ! use it (otherwise this will trigger instantaneous consolidation/expansion at
@@ -257,7 +275,25 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
             ierror = 1
             goto 9999
         endif
+    case (1)
+        call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
+                      & nf, nl, mf, ml, iarrc, gdp, &
+                      & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'THLYR')
+    case (2)
+        call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
+                      & nf, nl, mf, ml, iarrc, gdp, &
+                      & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'DP_BEDLYR')
+        if (ierror == 0) then
+            do k = 1, rst_nlyr
+                do m = gdp%d%mlb, gdp%d%mub
+                    do n = gdp%d%nlb, gdp%d%nub
+                        rst_thlyr(n,m,k) = rst_thlyr(n,m,k+1) - rst_thlyr(n,m,k)
+                    enddo
+                enddo
+            enddo
+        endif
     end select
+    if (ierror/=0) goto 9999
     !
     ! correct msed if it contains volume fractions
     !

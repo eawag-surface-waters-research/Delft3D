@@ -100,6 +100,7 @@ subroutine rdarray_int_0d(fds, filename, filetype, grpnam, &
     !
     ! local
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -125,7 +126,7 @@ subroutine rdarray_int_0d(fds, filename, filetype, grpnam, &
              !
              ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4, var)
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -168,6 +169,7 @@ subroutine rdarray_int_1d(fds, filename, filetype, grpnam, &
     ! local
     integer                                       :: u1
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -195,7 +197,7 @@ subroutine rdarray_int_1d(fds, filename, filetype, grpnam, &
              !
              ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1, var)
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -239,6 +241,7 @@ subroutine rdarray_int_2d(fds, filename, filetype, grpnam, &
     integer                                       :: u1
     integer                                       :: u2
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -267,7 +270,7 @@ subroutine rdarray_int_2d(fds, filename, filetype, grpnam, &
              !
              ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2, var)
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -314,6 +317,7 @@ subroutine rdarray_int_3d(fds, filename, filetype, grpnam, &
     integer                                       :: u2
     integer                                       :: u3
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -343,7 +347,7 @@ subroutine rdarray_int_3d(fds, filename, filetype, grpnam, &
              !
              ierr = getelt(fds, grpnam_nfs, varnam_nfs, uindex, 1, 4*u1*u2*u3, var)
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -388,6 +392,7 @@ subroutine rdarray_hp_0d(fds, filename, filetype, grpnam, &
     ! local
     real(sp)                                      :: lvar
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -431,7 +436,7 @@ subroutine rdarray_hp_0d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -476,6 +481,7 @@ subroutine rdarray_hp_1d(fds, filename, filetype, grpnam, &
     real(sp)     , dimension(:)    , allocatable  :: lvar
     integer                                       :: i1
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -525,7 +531,7 @@ subroutine rdarray_hp_1d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -572,6 +578,7 @@ subroutine rdarray_hp_2d(fds, filename, filetype, grpnam, &
     integer                                       :: i1
     integer                                       :: i2
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -624,7 +631,7 @@ subroutine rdarray_hp_2d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -673,6 +680,7 @@ subroutine rdarray_hp_3d(fds, filename, filetype, grpnam, &
     integer                                       :: i2
     integer                                       :: i3
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -728,7 +736,7 @@ subroutine rdarray_hp_3d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -781,6 +789,7 @@ subroutine rdarray_hp_4d(fds, filename, filetype, grpnam, &
     integer                                         :: i3
     integer                                         :: i4
     integer                                         :: idvar
+    integer                                         :: ierrdum
     integer                                         :: namlen
     integer      , dimension(3,5)                   :: uindex
     character(16)                                   :: varnam_nfs
@@ -839,7 +848,7 @@ subroutine rdarray_hp_4d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -885,6 +894,7 @@ subroutine rdarray_sp_0d(fds, filename, filetype, grpnam, &
     ! local
     real(hp)                                      :: lvar
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -928,7 +938,7 @@ subroutine rdarray_sp_0d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -973,6 +983,7 @@ subroutine rdarray_sp_1d(fds, filename, filetype, grpnam, &
     real(hp)     , dimension(:)    , allocatable  :: lvar
     integer                                       :: i1
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -1022,7 +1033,7 @@ subroutine rdarray_sp_1d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -1069,6 +1080,7 @@ subroutine rdarray_sp_2d(fds, filename, filetype, grpnam, &
     integer                                       :: i1
     integer                                       :: i2
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -1121,7 +1133,7 @@ subroutine rdarray_sp_2d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -1170,6 +1182,7 @@ subroutine rdarray_sp_3d(fds, filename, filetype, grpnam, &
     integer                                       :: i2
     integer                                       :: i3
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -1225,7 +1238,7 @@ subroutine rdarray_sp_3d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -1278,6 +1291,7 @@ subroutine rdarray_sp_4d(fds, filename, filetype, grpnam, &
     integer                                         :: i3
     integer                                         :: i4
     integer                                         :: idvar
+    integer                                         :: ierrdum
     integer                                         :: namlen
     integer      , dimension(3,5)                   :: uindex
     character(16)                                   :: varnam_nfs
@@ -1336,7 +1350,7 @@ subroutine rdarray_sp_4d(fds, filename, filetype, grpnam, &
                 endif
              endif
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -1382,6 +1396,7 @@ subroutine rdarray_char_0d(fds, filename, filetype, grpnam, &
     !
     ! local
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -1407,7 +1422,7 @@ subroutine rdarray_char_0d(fds, filename, filetype, grpnam, &
              !
              ierr = getels(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)
@@ -1450,6 +1465,7 @@ subroutine rdarray_char_1d(fds, filename, filetype, grpnam, &
     ! local
     integer                                       :: u1
     integer                                       :: idvar
+    integer                                       :: ierrdum
     integer                                       :: namlen
     integer      , dimension(3,5)                 :: uindex
     character(16)                                 :: varnam_nfs
@@ -1477,7 +1493,7 @@ subroutine rdarray_char_1d(fds, filename, filetype, grpnam, &
              !
              ierr = getels(fds, grpnam_nfs, varnam_nfs, uindex, 1, var)
              if (ierr /= 0) then
-                ierr = neferr(0, errmsg)
+                ierrdum = neferr(0, errmsg)
                 call prterr(lundia, 'P004', errmsg)
              endif
           case (FTYPE_NETCDF)

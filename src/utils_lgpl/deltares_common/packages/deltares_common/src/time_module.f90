@@ -414,7 +414,50 @@ module time_module
          
          ierr_ = -1
          if (mjd2datetime(days,iyear,imonth,iday,ihour,imin,second)/=0) then
-            isec = int(second)
+            isec = nint(second) ! unfortunately rounding instead of truncating requires all of the following checks
+            if (isec == 60) then
+               imin = imin+1
+               isec = 0
+            endif
+            if (imin == 60) then
+               ihour = ihour+1
+               imin = 0
+            endif
+            if (ihour == 24) then
+               iday = iday+1
+               ihour = 0
+            endif
+            select case(imonth)
+            case (1,3,5,7,8,10) ! 31 days
+               if (iday == 32) then
+                  imonth = imonth+1
+                  iday = 1
+               endif
+            case (12) ! 31 days
+               if (iday == 32) then
+                  iyear = iyear+1
+                  imonth = 1
+                  iday = 1
+               endif
+            case (4,6,9,11) ! 30 days
+               if (iday == 31) then
+                  imonth = imonth+1
+                  iday = 1
+               endif
+            case default ! February
+                if ((iyear/4)*4==iyear .and. (.not.(iyear/100)*100==iyear .or. &
+                                              &    (iyear/400)*400==iyear)) then ! leap year, 29 days
+                   if (iday == 30) then
+                      imonth = 3
+                      iday = 1
+                   endif
+                else ! 28 days
+                   if (iday == 29) then
+                      imonth = 3
+                      iday = 1
+                   endif
+                endif
+            end select
             datetimestr = datetime2string(iyear, imonth, iday, ihour, imin, isec, ierr_)
          else
             ierr_ = -1

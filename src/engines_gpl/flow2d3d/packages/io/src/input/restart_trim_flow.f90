@@ -135,7 +135,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     integer                               :: rst_lstsci
     integer                               :: rst_ltur
     integer, dimension(3,5)               :: cuindex
-    integer, dimension(3,5)               :: uindex
     logical                               :: found
     integer                               :: has_umean
     real(fp)                              :: dtm          ! time step in tunits  (flexible precision)
@@ -147,6 +146,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     character(16)                         :: grnam1
     character(16)                         :: grnam2
     character(16)                         :: grnam3
+    character(16)                         :: grnam4
     character(20), dimension(:), allocatable :: rst_namcon
     character(1024)                       :: error_string
     character(256)                        :: dat_file
@@ -188,6 +188,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     data grnam1/'map-const'/
     data grnam2/'map-info-series'/
     data grnam3/'map-series'/
+    data grnam4/'map-sed-series'/
 !
 !! executable statements -------------------------------------------------------
 !
@@ -282,12 +283,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     kfuv_from_restart = .true.
     !
-    ! initialize group index time dependent data
-    !
-    uindex (3,1) = 1 ! increment in time
-    uindex (1,1) = 1
-    uindex (2,1) = 1
-    !
     ! initialize group index constant data
     !
     cuindex (3,1) = 1 ! increment in time
@@ -339,10 +334,8 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
             found = .false.
             write(lundia,'(a,a)') 'Looking for time ',datetime_to_string(julday,real(tstart,hp)/1440.0_hp)
             do ii = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
-               uindex (1,1) = ii
-               uindex (2,1) = ii
                call rdvar(fds, filename, filetype, grnam2, &
-                        & 1, gdp, ierror, lundia, itmapc, 'ITMAPC')
+                        & ii, gdp, ierror, lundia, itmapc, 'ITMAPC')
                if (ierror/= 0) then
                   ierror = neferr(0,error_string)
                   call prterr(lundia    ,'P004'    , error_string)
@@ -420,6 +413,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                ierror = getelt(fds, 'map-const', 'LTUR', cuindex, 1, 4, rst_ltur)
                !
                if (dp_from_map_file) then
+                  elmndm = 5
                   ierror = inqelm (fds, 'DPS', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
                   if (ierror/= 0) then
                      write(lundia, '(a)') 'No bed level data on restart file available:'
@@ -430,6 +424,13 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                      write(lundia, '(a)') 'Bed level data read from restart file.'
                   endif
                endif
+               !
+               ! The flag rst_dp is used to set DPSOPT=DP.
+               ! This ensures that the DP values are copied into DPS in subroutine caldps
+               ! Differences may occur when DPU/DPV depend on (the original) DP
+               ! The flag rst_dp is also used to check whether 
+               !
+               rst_dp = dp_from_map_file
                !
                has_umean = 1
                ierror = inqelm (fds, 'UMNLDF', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
@@ -560,7 +561,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     ! element 'DPS'
     !
     if (dp_from_map_file) then
-       call rdarray_nm(fds, filename, filetype, grnam3, i_restart, &
+       call rdarray_nm(fds, filename, filetype, grnam4, i_restart, &
                     & nf, nl, mf, ml, iarrc, gdp, &
                     & ierror, lundia, dp, 'DPS')
        if (ierror /= 0) goto 9999
