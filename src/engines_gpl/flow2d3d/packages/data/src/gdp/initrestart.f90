@@ -52,5 +52,5 @@ subroutine initrestart(gdp)
     !
     gdp%gdrestart%filename          = ' '
     gdp%gdrestart%restid            = ' '
-    gdp%gdrestart%rst_layer_model   = 'UNKNOWN'
+    gdp%gdrestart%rst_layer_model   = 'NO TRIM RESTART'
 end subroutine initrestart
