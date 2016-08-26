@@ -41,7 +41,7 @@ module partmem
       character(len=256)                :: fnamep(nfilesp) = ' '  ! file names for in-/output files
       character(len=20) , dimension(2)  :: ftypep          = ' '  ! file types, i.e. unformatted or binary
       logical                           :: alone                  ! if .false. coupled with Delwaq
-      integer(ip)   :: itrakc  , itraki  , npwndn  , npwndw  , nstep
+      integer(ip)   :: itrakc  , itraki  , npwndn  , npwndw  , nstep  , nstept
       real   (sp)   :: defang  , hmin    , ptlay   , accrjv
       logical       :: oil     , oil2dh  , oil3d   , ltrack  , acomp  , fout
 
