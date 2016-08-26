@@ -27,6 +27,7 @@
       use partmem      !   for PARTicle tracking
       use filtyp_mod   !   for PARTicle tracking
       use alloc_mod    !   for PARTicle tracking
+      use writrk_mod   !   for PARTicle tracking
       use timers
 
       implicit none
@@ -52,6 +53,7 @@
       integer(ip) i, i2, itime, indx, ierr
       integer     lunut         ! report file
       real   (rp) depmin
+      real   (sp) dtstep
       logical update
 
       integer(4) ithandl /0/
@@ -150,6 +152,14 @@
      &                 layt      , area      , depth     , dpsp     , locdep   ,
      &                 zlevel    , tcktot    , ltrack)
          if (ltrack) then
+!     write initial information to track file
+            dtstep = float(idelt*itraki)
+            nstept = 1 + ((itstopp - itstrtp)/idelt)/itraki
+      
+            call writrk ( lunut    , fout     , fname(16), nopart   , title(4) ,
+     &                    dtstep   , nstept   , ibuff    , rbuff    , cbuff    ,
+     &                    track    , npmax    )
+
             call part11 ( lgrid    , xb       , yb        , nmaxp   , npart    ,
      &                    mpart    , xpart    , ypart     , xa      , ya       ,
      &                    nopart   , npwndw   , lgrid2    , kpart   , zpart    ,

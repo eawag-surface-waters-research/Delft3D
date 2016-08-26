@@ -571,12 +571,19 @@
 
       if (ltrack) then
 !
+!     write initial information to track file
+         dtstep = float(idelt*itraki)
+         nstept = 1 + ((itstopp - itstrtp)/idelt)/itraki
+
+         call writrk ( lun(2)   , fout     , fname(16), nopart   , title(4) ,    &
+                       dtstep   , nstept   , ibuff    , rbuff    , cbuff    ,    &
+                       track    , npmax    )
+
          call part11 ( lgrid   , xb      , yb      , nmaxp   , npart   ,    &
                        mpart   , xpart   , ypart   , xa      , ya      ,    &
                        nopart  , npwndw  , lgrid2  , kpart   , zpart   ,    &
                        za      , locdep  , dpsp    , layt    , mmaxp   ,    &
                        tcktot  )
-
 !          write actual particle tracks (file #16)
 
          call wrttrk ( lun(2)  , fout    ,fname(16), itrakc  , nopart  ,    &
@@ -812,18 +819,17 @@
 
 !        write particle tracks
 
-         if (ltrack) then            ! get the absolute x,y,z's of the particles
+         if (ltrack.and.itime.eq.(itstrtp+idelt*itrakc-idelt)) then
+            ! get the absolute x,y,z's of the particles
             call part11 ( lgrid    , xb       , yb       , nmaxp    , npart    ,    &
                           mpart    , xpart    , ypart    , xa       , ya       ,    &
                           nopart   , npwndw   , lgrid2   , kpart    , zpart    ,    &
                           za       , locdep   , dpsp     , nolayp   , mmaxp    ,    &
                           tcktot   )
 !           write actual particle tracks (file #16)
-            if (itime.eq.(itstrtp+idelt*itrakc)) then                        
-               call wrttrk ( lun(2)   , fout     , fname(16), itrakc   , nopart  ,    &
-                             npmax    , xa       , ya       , za       , xyztrk  )
-               itrakc = itrakc + itraki
-            endif
+            call wrttrk ( lun(2)   , fout     , fname(16), itrakc   , nopart  ,    &
+                          npmax    , xa       , ya       , za       , xyztrk  )
+            itrakc = itrakc + itraki
          endif
 
          if ( noudef .gt. 0 )  then
@@ -901,14 +907,6 @@
 
       enddo
 
-!     write initial information to track file
-
-      if (ltrack) then
-         dtstep = float(idelt)
-         call writrk ( lun(2)   , fout     , fname(16), nopart   , title(4) ,    &
-                       dtstep   , nstep    , ibuff    , rbuff    , cbuff    ,    &
-                       track    , npmax    )
-      endif
       call exit_alloc ( nstep )
 
       call delete_file ( "particle.wrk", ierror )
