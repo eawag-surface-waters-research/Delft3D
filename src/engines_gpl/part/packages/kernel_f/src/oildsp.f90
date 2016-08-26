@@ -805,8 +805,8 @@ module oildsp_mod
                      if ( wpart(ioilt(ifrac),i) .gt. 0.0 ) then
                         wpart(ioild(ifrac),i) = wpart(ioilt(ifrac),i)
                         wpart(ioilt(ifrac),i) = 0.0
+                        ndisp = ndisp + 1
                      endif
-                     ndisp = ndisp + 1
                   endif
                endif
 
