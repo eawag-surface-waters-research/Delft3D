@@ -151,23 +151,6 @@
      &                 nmaxp     , mmaxp     , mnmaxk    , lgrid2   , velo     ,
      &                 layt      , area      , depth     , dpsp     , locdep   ,
      &                 zlevel    , tcktot    , ltrack)
-         if (ltrack) then
-!     write initial information to track file
-            dtstep = float(idelt*itraki)
-            nstept = 1 + ((itstopp - itstrtp)/idelt)/itraki
-      
-            call writrk ( lunut    , fout     , fname(16), nopart   , title(4) ,
-     &                    dtstep   , nstept   , ibuff    , rbuff    , cbuff    ,
-     &                    track    , npmax    )
-
-            call part11 ( lgrid    , xb       , yb        , nmaxp   , npart    ,
-     &                    mpart    , xpart    , ypart     , xa      , ya       ,
-     &                    nopart   , npwndw   , lgrid2    , kpart   , zpart    ,
-     &                    za       , locdep   , dpsp      , layt    , mmaxp    ,
-     &                    tcktot   )
-            call wrttrk ( lunut    , fout     , fnamep(16), itrakc  , nopart   ,
-     &                    npmax    , xa       , ya        , za      , xyztrk   )
-         endif
          oil    = modtyp == 4
          if ( ini_opt .eq. 1 .and. oil ) then
             call inipart( lgrid    , lgrid2   , nmaxp     , mmaxp   , xb       ,
@@ -200,7 +183,22 @@
          nstep = 1 + (itstopp - itstrtp)/idelt
          itrakc = 0
          itraki = notrak  ! timestep for writing trackinformation to the track file, if notrack =0 then no track file
-         if ( ltrack) itrakc = itrakc + itraki
+         if (ltrack) then
+!     write initial information to track file
+            dtstep = float(idelt*itraki)
+            nstept = 1 + ((itstopp - itstrtp)/idelt)/itraki
+            call writrk ( lunut    , fout     , fnamep(16), nopart   , title(4) ,
+     &                    dtstep   , nstept   , ibuff     , rbuff    , cbuff    ,
+     &                    track    , npmax    )
+            call part11 ( lgrid    , xb       , yb        , nmaxp   , npart    ,
+     &                    mpart    , xpart    , ypart     , xa      , ya       ,
+     &                    nopart   , npwndw   , lgrid2    , kpart   , zpart    ,
+     &                    za       , locdep   , dpsp      , layt    , mmaxp    ,
+     &                    tcktot   )
+            call wrttrk ( lunut    , fout     , fnamep(16), itrakc  , nopart   ,
+     &                    npmax    , xa       , ya        , za      , xyztrk   )
+            itrakc = itrakc + itraki
+         endif
          call exit_alloc ( i2 )
       endif
 
