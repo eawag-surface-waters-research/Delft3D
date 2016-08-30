@@ -790,7 +790,6 @@ contains
                ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                if (strcmpi(item%quantityPtr%name,'rainfall') .or. strcmpi(item%quantityPtr%name,'precipitation')) then
                   ! Data must be converted here to rainfall per day for FM.
-                  time_window = 1.d0 
                   select case (item%quantityPtr%units)
                   case ('MM')
                      if (comparereal(1.0_hp*times_index, fileReaderPtr%tframe%nr_timesteps) == 0) then
@@ -808,8 +807,12 @@ contains
                         call setECMessage("Unknown time unit encountered in "//trim(fileReaderPtr%filename)//".")
                         return
                      end if
-                     ! In future, this is the location for conversion from a variety of rainfall units to the only
-                     ! accepted unit for rainfal intensity mm/day  
+                  case ('MM PER DAY','MM/DAY','MMPERDAY')
+                     time_window = 1.d0 
+                  case default
+                     call setECMessage("Unrecognized rainfall unit '"//item%quantityPtr%units//     &
+                                       "' in file "//trim(fileReaderPtr%filename)//".")
+                     return
                   end select 
                   if (comparereal(time_window, 0.0_hp) == 0) then
                      call setECMessage("Empty time window leads to zero division error in "//trim(fileReaderPtr%filename)//".")

@@ -2701,20 +2701,7 @@ module m_ec_provider
             ! Create the Quantity
             ! ===================
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            add_offset = 0.d0
-            scalefactor = 1.d0
-            fillvalue = ec_undef_hp
-            if (nf90_get_att(fileReaderPtr%fileHandle, idvar, 'units', units)==NF90_NOERR) then 
-               call str_upper(units)                                                ! make units attribute case-insensitive 
-               if (.not.(ecQuantitySetUnits(instancePtr, quantityId, units))) return
-            end if
-            if (nf90_get_att(fileReaderPtr%fileHandle, idvar, '_FillValue', fillvalue)==NF90_NOERR) then
-               if (.not.(ecQuantitySetFillValue(instancePtr, quantityId, fillvalue))) return
-            end if
-            if ((nf90_get_att(fileReaderPtr%fileHandle, idvar, 'scale_factor', scalefactor)==NF90_NOERR)         &
-                 .or. (nf90_get_att(fileReaderPtr%fileHandle, idvar, 'add_offset', add_offset)==NF90_NOERR)) then
-                 if (.not.(ecQuantitySetScaleOffset(instancePtr, quantityId, scalefactor, add_offset))) return
-            end if
+            if (.not.(ecQuantitySetUnitsFillScaleOffsetFromNcidVarid(instancePtr, quantityId, fileReaderPtr%fileHandle, idvar))) return
             if (.not.(ecQuantitySetName(instancePtr, quantityId, ncstdnames(i)))) return
 
             ! ========================

@@ -49,6 +49,7 @@ module m_ec_quantity
    public :: ecQuantitySetVectorMax
    public :: ecQuantitySetFillValue
    public :: ecQuantitySetScaleOffset
+   public :: ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
    
    contains
       
@@ -172,6 +173,7 @@ module m_ec_quantity
       ! =======================================================================
       !> Change the Scalefactor and Offset shift of the Quantity corresponding to quantityId.
       function ecQuantitySetScaleOffset(instancePtr, quantityId, scale, offset) result(success)
+         implicit none
          logical                               :: success     !< function status
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
          integer,                   intent(in) :: quantityId  !< unique Quantity id
@@ -191,9 +193,53 @@ module m_ec_quantity
             success = .true.
          else
             call setECMessage("ERROR: ec_quantity::ecQuantitySetScaleOffset: Cannot find a Quantity with the supplied id.")
+            return
          end if
+         success = .true.
       end function ecQuantitySetScaleOffset
 
+      !> Change the Units, Fillvalue, Scalefactor and Offset shift of the Quantity corresponding to quantityId
+      !> obtained from the variable varid in the netcdf file ncid 
+      !> all in try-catch fashion: if not available, leave empty or use default
+      function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid(instancePtr, quantityId, ncid, varid) result(success)
+      use netcdf
+      use string_module
+         implicit none
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: quantityId  !< unique Quantity id
+         integer,                   intent(in) :: ncid        !< id of the nc-file 
+         integer,                   intent(in) :: varid       !< id of the variable
+                                                              !< order: new = (old*scale) + offset
+         character(len=:), allocatable  :: units
+         integer  :: ierr
+         integer  :: attriblen
+         real(hp) :: add_offset, scalefactor, fillvalue
+
+         success = .false.
+         add_offset = 0.d0
+         scalefactor = 1.d0
+         fillvalue = ec_undef_hp
+         attriblen=0
+         ierr = nf90_inquire_attribute(ncid, varid, 'units', len=attriblen)
+         if (attriblen>0) then
+            allocate(character(len=attriblen) :: units) 
+            units(1:len(units)) = ''
+            if (nf90_get_att(ncid, varid, 'units', units)==NF90_NOERR) then 
+               call str_upper(units) ! make units attribute case-insensitive 
+               if (.not.(ecQuantitySetUnits(instancePtr, quantityId, units))) return
+            end if
+         end if
+         if (nf90_get_att(ncid, varid, '_FillValue', fillvalue)==NF90_NOERR) then
+            if (.not.(ecQuantitySetFillValue(instancePtr, quantityId, fillvalue))) return
+         end if
+         if ((nf90_get_att(ncid, varid, 'scale_factor', scalefactor)==NF90_NOERR)         &
+              .or. (nf90_get_att(ncid, varid, 'add_offset', add_offset)==NF90_NOERR)) then
+              if (.not.(ecQuantitySetScaleOffset(instancePtr, quantityId, scalefactor, add_offset))) return
+         end if
+         success = .true.
+      end function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
+     
       !> Change the name of the Quantity corresponding to quantityId.
       function ecQuantitySetName(instancePtr, quantityId, newName) result(success)
          logical                               :: success     !< function status

@@ -167,6 +167,10 @@ module m_ec_module
       module procedure ecQuantitySetVectorMax
    end interface ecSetQuantityVectorMax
 
+   interface ecSetQuantityUnitsFillScaleOffsetFromNcidVarid
+      module procedure ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
+   end interface ecSetQuantityUnitsFillScaleOffsetFromNcidVarid
+
    
    ! ElementSet
    
