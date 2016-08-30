@@ -454,7 +454,7 @@ module oildsp_mod
                viso   ( ifrac, i ) = visotmp(ifrac)  !  kin. viscosity
             enddo
    10    continue
-         hmin = const ((nfract-1)*nfcons*nfract+npadd+ 11)
+         hmin = const ((nfract-1)*nfcons+npadd+ 11)
 
 !        calculate and report the release radius (Fay-Holt formula) per release
 
