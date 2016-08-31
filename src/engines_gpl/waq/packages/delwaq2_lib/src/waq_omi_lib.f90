@@ -711,7 +711,11 @@ logical function DefineWQSchematisation(number_segments, pointer_table, number_e
     noq3   = number_exchanges(3)
     noq4   = number_exchanges(4)
     nolay  = number_layers
-    nobnd  = -minval(pointer_table(:,1:noq))
+    if (noq.gt.0) then
+        nobnd  = -minval(pointer_table(:,1:noq))
+    else
+        nobnd  = 0
+    end if
     nobtyp = nobnd
 
     !

@@ -140,7 +140,7 @@ subroutine delwaq2_global_data_initialize(runid_given)
                   '.adf         ' , '-kenmerk.wrk ' , &
                   '-filenaam.wrk' , '-stat.map    ' , &
                   '-stat.mon    ' , '             ' , &
-                  '<delparfile> ' , '<ncgridfile> ' , &
+                  '             ' , '<ncgridfile> ' , &
                   '-his.nc      ' , '-bal-his.nc  ' , &
                   '-map.nc      ' , '-stat-map.nc '/)
 

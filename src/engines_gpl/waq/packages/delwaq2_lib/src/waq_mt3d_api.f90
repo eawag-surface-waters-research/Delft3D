@@ -227,7 +227,7 @@
          success = SetValuePriv( DLWQ_CONCENTRATION, isub, ODA_ALL_SEGMENTS, substance_concentrations(1:number_segments, isub), dlwq_set )
       end do
       if(.not.success) return
-      success = ModelPerformTimeStep()
+      success_int = ModelPerformTimeStep()
       if(.not.success_int.eq.0) return
       do isub = 1, number_substances
          success = GetValuePriv( DLWQ_CONCENTRATION, isub, ODA_ALL_SEGMENTS, substance_concentrations(1:number_segments, isub) )
