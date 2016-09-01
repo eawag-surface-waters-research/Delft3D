@@ -649,8 +649,8 @@ module oildsp_mod
       end if
 
 !$OMP PARALLEL DO PRIVATE   ( wsum, isub, ifrac, volfracw, fracte, ic, wevap, cdelv, qentr,        &
-!$OMP                         cfloat, ix, iy, ilay, fractd, rrand, rseed, dfwatoil, dviso ,        &
-!$OMP                         fw, tp, fbw, h0wav, hrms, de, wfact, inside, fractdapp ),                       &
+!$OMP                         cfloat, ix, iy, ilay, fractd, rrand, dfwatoil, dviso, fw, tp, fbw,   &
+!$OMP                         h0wav, hrms, de, wfact, inside, fractdapp, tmpevap, tmpevapold ),    &
 !$OMP             REDUCTION ( + : wsums, wevapt, ndisp, wsumt, wsumd, viscsurf, fwatoilsurf,       &
 !$OMP                             densurf, isurf ),                                                &
 !$OMP             SCHEDULE  ( DYNAMIC, max((nopart-npwndw)/100,1)           )
