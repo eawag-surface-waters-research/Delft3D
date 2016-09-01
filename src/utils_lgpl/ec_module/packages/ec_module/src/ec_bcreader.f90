@@ -136,13 +136,13 @@ contains
        reclen = len_trim(rec)                                  ! duplicate with strip_comment in ec_filereader_read, but otherwise circular dependency
        commentpos = index(rec(1:reclen),'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),'%')
+       commentpos = index(rec(1:reclen),' %')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),'#')
+       commentpos = index(rec(1:reclen),' #')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),'*')
+       commentpos = index(rec(1:reclen),' *')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),'!')
+       commentpos = index(rec(1:reclen),' !')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
 
        if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines

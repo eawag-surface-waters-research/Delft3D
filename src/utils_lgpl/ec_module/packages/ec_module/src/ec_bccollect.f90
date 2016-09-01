@@ -74,13 +74,13 @@ module m_ec_bccollect
        reclen = len_trim(rec)                                  ! deal with various comment delimiters 
        commentpos = index(rec,'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'%')
+       commentpos = index(rec,' %')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'#')
+       commentpos = index(rec,' #')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'*')
+       commentpos = index(rec,' *')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'!')
+       commentpos = index(rec,' !')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
 
        if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines 
@@ -229,13 +229,13 @@ module m_ec_bccollect
        reclen = len_trim(rec)                                  ! deal with various comment delimiters 
        commentpos = index(rec,'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'%')
+       commentpos = index(rec,' %')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'#')
+       commentpos = index(rec,' #')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'*')
+       commentpos = index(rec,' *')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec,'!')
+       commentpos = index(rec,' !')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
        
        if (reclen < 3) cycle
