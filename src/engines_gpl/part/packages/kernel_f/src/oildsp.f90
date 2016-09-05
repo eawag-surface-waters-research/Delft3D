@@ -250,7 +250,9 @@ module oildsp_mod
       real   (rp), pointer     :: visowat    (:)         ! kinetic viscosity (constant 10)
       real   (rp), pointer     :: tmpevap    (:)         ! temporary storage of evaporation
       real   (rp)              :: fracte     (nfract)    ! evaporated part, per fraction
+      real   (rp)              :: tmpfracte  (nfract)    ! evaporated part, per fraction
       real   (rp)              :: fractd     (nfract)    ! workarray only used for the fraction of dispersed oil
+      real   (rp)              :: tmpfractd  (nfract)    ! workarray only used for the fraction of dispersed oil
       integer(ip), pointer     :: luncsv     (:)         ! unit numbers for the csv files of the fractions
       integer(ip), pointer     :: ioptd      (:)         ! dispersion option 0 = fraction / day ; 1 = delvigne/sweeny
       real   (rp), pointer     :: ioptev     (:)         ! evaporatio option 0 = fraction / day ; other is first order process
@@ -648,8 +650,8 @@ module oildsp_mod
          end if
       end if
 
-!$OMP PARALLEL DO PRIVATE   ( wsum, isub, ifrac, volfracw, fracte, ic, wevap, cdelv, qentr,        &
-!$OMP                         cfloat, ix, iy, ilay, fractd, rrand, dfwatoil, dviso, fw, tp, fbw,   &
+!$OMP PARALLEL DO PRIVATE   ( wsum, isub, ifrac, volfracw, tmpfracte, ic, wevap, cdelv, qentr,     &
+!$OMP                         cfloat, ix, iy, ilay, tmpfractd, rrand, dfwatoil, dviso, fw, tp, fbw,&
 !$OMP                         h0wav, hrms, de, wfact, inside, fractdapp, tmpevap, tmpevapold ),    &
 !$OMP             REDUCTION ( + : wsums, wevapt, ndisp, wsumt, wsumd, viscsurf, fwatoilsurf,       &
 !$OMP                             densurf, isurf ),                                                &
@@ -657,6 +659,8 @@ module oildsp_mod
       do 100 i = npwndw, nopart
 
 !     sticky part of a fraction does not evaporate (but is accumulated in wsums(ifrac)
+         tmpfractd = fractd
+         tmpfracte = fracte
 
          if ( nstick .gt. 0 ) then
             wsum = 0.0
@@ -685,9 +689,9 @@ module oildsp_mod
 !   volfracw=volfrac(ifrac)*(c2-fwatoil)/c2, this is not relevant if the log or sqrt (Fingas) evaporation is used.
 !   this will need to change since the emulsification process will affect evaporation
             volfracw      = volfrac(ifrac) * ( c2(ifrac) - fwatoil(ifrac,i) ) / c2(ifrac)
-            fracte(ifrac) = ( volfracw - totfe(ifrac,i) ) / ( 1.0 - totfe(ifrac,i) ) *            &
+            tmpfracte(ifrac) = ( volfracw - totfe(ifrac,i) ) / ( 1.0 - totfe(ifrac,i) ) *            &
                             ( 1.0 - exp( -ioptev(ifrac)/86400.0 * idelt) )
-            if ( fracte(ifrac) .lt. 0.0 ) fracte(ifrac)   = 0.0
+            if ( tmpfracte(ifrac) .lt. 0.0 ) tmpfracte(ifrac)   = 0.0
             if (ioptev(ifrac).lt.-0.5) totfe(ifrac,i)=tmpevap(ifrac)/100.
             !if evaporation option (Fingas) is used then the Fingas rate can be scaled using the oil fraction (ie 1-waterfraction)
 
@@ -721,7 +725,7 @@ module oildsp_mod
                if  (kpart(i) .eq. 1) then 
 !     This is the evaporation step in the model
                   if (ioptev(ifrac).ge.0)then
-                     wevap                 = wpart(ioilt(ifrac),i) * fracte(ifrac)
+                     wevap                 = wpart(ioilt(ifrac),i) * tmpfracte(ifrac)
                      wpart(ioilt(ifrac),i) = wpart(ioilt(ifrac),i) - wevap
                      wevapt(ifrac)         = wevapt(ifrac) + wevap
                   else
@@ -750,13 +754,13 @@ module oildsp_mod
                      endif
                      wevap                 = wpartini(ifrac, i)*tmpevap(ifrac)/100. 
                      if (ioptev(ifrac).le.-0.5)then
-                        fracte(ifrac)         = (tmpevap(ifrac)-tmpevapold)/100.    !fraction evaporated this timestep, not scaled with the water content           
+                        tmpfracte(ifrac)         = (tmpevap(ifrac)-tmpevapold)/100.    !fraction evaporated this timestep, not scaled with the water content           
                      elseif (ioptev(ifrac).lt.-1.5) then
-                        fracte(ifrac)         = (1.0-fwatoil(ifrac,i))*(tmpevap(ifrac)-tmpevapold)/100.    !fraction evaporated this timestep, scaled with the water content           
+                        tmpfracte(ifrac)         = (1.0-fwatoil(ifrac,i))*(tmpevap(ifrac)-tmpevapold)/100.    !fraction evaporated this timestep, scaled with the water content           
                      endif
                      
-                     wpart(ioilt(ifrac),i) = max( 0.0 , wpart(ioilt(ifrac),i)-fracte(ifrac)*wpartini(ifrac, i))
-                     wevapt(ifrac)         = wevapt(ifrac) + min(wpart(ioilt(ifrac),i) , fracte(ifrac)*wpartini(ifrac, i)) !dble(wpart(ioilt(ifrac),i))
+                     wpart(ioilt(ifrac),i) = max( 0.0 , wpart(ioilt(ifrac),i)-tmpfracte(ifrac)*wpartini(ifrac, i))
+                     wevapt(ifrac)         = wevapt(ifrac) + min(wpart(ioilt(ifrac),i) , tmpfracte(ifrac)*wpartini(ifrac, i)) !dble(wpart(ioilt(ifrac),i))
                   endif
 !     This is the Delvigne/Sweeny formula for entrainment in the model
 
@@ -782,20 +786,20 @@ module oildsp_mod
                         endif
                      endif
                      if ( cfloat .gt. 0.0 ) then
-                        fractd(ifrac)   = qentr*idelt / rhooilv(ifrac,i) / hmin
-                        if ( fractd(ifrac) .gt. 1.0 ) fractd(ifrac) = 1.0
+                        tmpfractd(ifrac)   = qentr*idelt / rhooilv(ifrac,i) / hmin
+                        if ( tmpfractd(ifrac) .gt. 1.0 ) tmpfractd(ifrac) = 1.0
                      else
-                        fractd(ifrac)   = 0.0
+                        tmpfractd(ifrac)   = 0.0
                      endif
                   endif
 
 !     Extra effect of dispersant?
-                  fractdapp = fractd(ifrac)
+                  fractdapp = tmpfractd(ifrac)
                   if (disapp) then
                      call pinpok(xa(i), ya(i), nrowsdis(idisapp), xpoldis(1:nrowsdis(idisapp), idisapp), &
                                  ypoldis(1:nrowsdis(idisapp), idisapp), inside)
                      if (inside .eq. 1) then
-                        fractdapp = 1.0 - ((1.0 - fractd(ifrac)) * (1.0 - pdisapp(ifrac)))
+                        fractdapp = 1.0 - ((1.0 - tmpfractd(ifrac)) * (1.0 - pdisapp(ifrac)))
                      end if
                   end if
 
@@ -838,7 +842,7 @@ module oildsp_mod
                     visowat(ifrac)
 !            if ( ioptd(ifrac) .eq. 1 ) then          ! this is only done when the dispersion option is  1 (Delvigne&Sweeney)
                if (ioptev(ifrac).ge.0)then
-                  totfe(ifrac,i) = totfe(ifrac,i) + fracte(ifrac) * ( 1.0 - totfe(ifrac,i) )  ! when fixed firt order constant for evap is used
+                  totfe(ifrac,i) = totfe(ifrac,i) + tmpfracte(ifrac) * ( 1.0 - totfe(ifrac,i) )  ! when fixed firt order constant for evap is used
                elseif (ioptev(ifrac).lt.-0.5) then
                   totfe(ifrac,i) = tmpevap(ifrac)/100. ! when ln or sqrt function for evaporation is used
                endif
