@@ -133,7 +133,8 @@ contains
           return ! beter break?
        endif
        lineno = lineno + 1
-       reclen = len_trim(rec)                                  ! duplicate with strip_comment in ec_filereader_read, but otherwise circular dependency
+       if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
+       reclen = len_trim(rec)                                  ! deal with various comment delimiters 
        commentpos = index(rec(1:reclen),'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
        commentpos = index(rec(1:reclen),' %')

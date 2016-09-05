@@ -71,6 +71,7 @@ module m_ec_bccollect
           return ! beter break?
        endif  
        lineno = lineno + 1 
+       if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
        reclen = len_trim(rec)                                  ! deal with various comment delimiters 
        commentpos = index(rec,'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
@@ -226,6 +227,7 @@ module m_ec_bccollect
           return ! beter break?
        endif  
        lineno = lineno + 1 
+       if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
        reclen = len_trim(rec)                                  ! deal with various comment delimiters 
        commentpos = index(rec,'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
