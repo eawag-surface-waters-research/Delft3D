@@ -572,7 +572,7 @@
       if (ltrack) then
 !
 !     write initial information to track file
-         dtstep = float(idelt*itraki)
+         dtstep = float(idelt)
          nstept = 1 + ((itstopp - itstrtp)/idelt)/itraki
 
          call writrk ( lun(2)   , fout     , fname(16), nopart   , title(4) ,    &
