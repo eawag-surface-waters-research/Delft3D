@@ -1663,6 +1663,7 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
       goto 999
    end if
 
+   varid = iv
    ierr = UG_NOERR
    return ! Return with success
 
