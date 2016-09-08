@@ -69,6 +69,7 @@ public :: ionc_adheresto_conventions
 public :: ionc_add_global_attributes
 public :: ionc_open
 public :: ionc_close
+public :: ionc_get_ncid
 public :: ionc_get_mesh_count
 public :: ionc_get_topology_dimension
 public :: ionc_get_meshgeom
@@ -82,6 +83,7 @@ public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
 public :: ionc_get_var_count
 public :: ionc_inq_varids
+public :: ionc_inq_varid
 public :: ionc_write_geom_ugrid
 public :: ionc_write_mesh_struct
 public :: ionc_write_map_ugrid
@@ -290,6 +292,33 @@ function ionc_close(ioncid) result(ierr)
 end function ionc_close
 
 
+!> Gets the native NetCDF ID for the specified dataset.
+!! Intended for use in subsequent calls to nf90_* primitives outside of this library.
+!! Use this routine as little as possible, and try and do all via ionc API functions.
+function ionc_get_ncid(ioncid, ncid) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(  out) :: ncid     !< The NetCDF ID, if data set ioncid was valid.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   ierr = IONC_NOERR
+
+   if (ioncid > 0 .or. ioncid <= ndatasets) then
+      ncid = datasets(ioncid)%ncid
+   else
+      ierr = IONC_EBADID
+      goto 999
+   end if
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+   return
+
+end function ionc_get_ncid
+
+
 !> Gets the number of mesh from a data set.
 function ionc_get_mesh_count(ioncid, nmesh) result(ierr)
    integer,             intent(in)    :: ioncid  !< The IONC data set id.
@@ -474,17 +503,33 @@ end function ionc_get_var_count
 !! The location type allows to select on specific topological mesh locations
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
 function ionc_inq_varids(ioncid, meshid, iloctype, varids) result(ierr)
-   integer,             intent(in)    :: ioncid   !< The IONC data set id.
-   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
-   integer,             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer,             intent(in)    :: ioncid    !< The IONC data set id.
+   integer,             intent(in)    :: meshid    !< The mesh id in the specified data set.
+   integer,             intent(in)    :: iloctype  !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
    integer,             intent(  out) :: varids(:) !< Array to store the variable ids in.
-   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+   integer                            :: ierr      !< Result status, ionc_noerr if successful.
 
 
    ! TODO: AvD: some error handling if ioncid or meshid is wrong
    ierr = ug_inq_varids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), iloctype, varids)
 
 end function ionc_inq_varids
+
+
+!> Gets the variable ID for a data variable that is defined in the specified dataset on the specified mesh.
+!! The variable is searched based on variable name (without any "meshnd_" prefix), and which :mesh it is defined on.
+function ionc_inq_varid(ioncid, meshid, varname, varid) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   character(len=*),    intent(in)    :: varname  !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+   integer,             intent(  out) :: varid    !< The resulting variable id, if found.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inq_varid(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), varname, varid)
+
+end function ionc_inq_varid
 
 
 !> Writes a complete mesh geometry

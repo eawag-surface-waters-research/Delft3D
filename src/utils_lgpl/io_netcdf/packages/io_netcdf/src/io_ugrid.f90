@@ -62,6 +62,7 @@ integer, parameter :: UG_INVALID_MESHNAME      = 11
 integer, parameter :: UG_INVALID_MESHDIMENSION = 12
 integer, parameter :: UG_INVALID_DATALOCATION  = 13
 integer, parameter :: UG_ARRAY_TOOSMALL        = 14 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
+integer, parameter :: UG_VAR_NOTFOUND          = 15 !< Some variable was not found.
 integer, parameter :: UG_INVALID_CRS           = 30 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_NOTIMPLEMENTED        = 99
 
@@ -1611,6 +1612,65 @@ function ug_inq_varids(ncid, meshids, iloctype, varids) result(ierr)
     ! Some error (status was set earlier)
 
 end function ug_inq_varids
+
+
+!> Gets the variable ID for a data variable that is defined in the specified dataset on the specified mesh.
+!! The variable is searched based on variable name (without any "meshnd_" prefix), and which :mesh it is defined on.
+function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
+   use string_module
+   integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   character(len=*),    intent(in)    :: varname  !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+   integer,             intent(  out) :: varid    !< The resulting variable id, if found.
+   integer                            :: ierr     !< Result status, ug_noerr if successful.
+
+   integer :: numVar, iv, ivarloc, nvar, maxvar
+   character(len=255) :: str, meshname
+   str = ''
+   meshname = ''
+
+   ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
+   if (ierr /= nf90_noerr) then
+      ierr = UG_INVALID_MESHNAME
+      goto 999
+   end if
+
+   ! Now check variable with user-specified name and if it's a data variable on the right mesh.
+   ierr = nf90_inq_varid(ncid, trim(meshname)//'_'//trim(varname), iv)
+   if (ierr /= nf90_noerr) then
+      ! Do a second try with the varname without the meshname prefix.
+      ierr = nf90_inq_varid(ncid, trim(varname), iv)
+   end if
+   if (ierr /= nf90_noerr) then
+      ug_messagestr = 'ug_inc_varid: no candidate variable could be found for name'''//trim(varname)//'''.'
+      ierr = UG_VAR_NOTFOUND
+      goto 999
+   end if
+
+   str = ''
+   ierr = nf90_get_att(ncid, iv, 'mesh', str)
+   if (ierr /= nf90_noerr) then
+      ! No UGRID :mesh attribute, discard this var.
+      ug_messagestr = 'ug_inc_varid: candidate variable for name '''//trim(varname)//''' has no :mesh attribute.'
+      ierr = UG_INVALID_MESHNAME
+      goto 999
+   end if
+      
+   if (.not.strcmpi(str,meshname)) then
+      ! Mesh names do not match
+      ug_messagestr = 'ug_inc_varid: candidate variable for name '''//trim(varname)//''' on mesh '''//trim(meshname)//''' has different :mesh attribute '''//trim(str)//'''.'
+      ierr = UG_INVALID_MESHNAME
+      goto 999
+   end if
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+end function ug_inq_varid
+
 
 !> Writes the given edge type variable to the given netcdf file.
 subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
