@@ -516,7 +516,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
        elseif (filetype == FTYPE_NETCDF) then
           if (first .and. irequest == REQUESTTYPE_DEFINE) then              
              write(lundia,*) 'Creating new '//trim(filename)
-             ierror = nf90_create(filename, 0, fds); call nc_check_err(lundia, ierror, "creating file", filename)
+             ierror = nf90_create(filename, or(nf90_clobber,nf90_64bit_offset), fds); call nc_check_err(lundia, ierror, "creating file", filename)
              !
              ! global attributes
              !
