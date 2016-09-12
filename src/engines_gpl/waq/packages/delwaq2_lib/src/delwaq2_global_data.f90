@@ -141,8 +141,8 @@ subroutine delwaq2_global_data_initialize(runid_given)
                   '-filenaam.wrk' , '-stat.map    ' , &
                   '-stat.mon    ' , '             ' , &
                   '             ' , '<ncgridfile> ' , &
-                  '-his.nc      ' , '-bal-his.nc  ' , &
-                  '-map.nc      ' , '-stat-map.nc '/)
+                  '_his.nc      ' , '_bal_his.nc  ' , &
+                  '_map.nc      ' , '_stat_map.nc '/)
 
     filtype = 0
 

@@ -215,8 +215,8 @@
      *                   '-filenaam.wrk' , '-stat.map    ' ,     !           41, 42
      *                   '-stat.mon    ' , '             ' ,     !           43, 44
      *                   '<delparfile> ' , '<ncgridfile> ' ,     !           45, 46
-     *                   '-his.nc      ' , '-bal-his.nc  ' ,     !           47, 48
-     *                   '-map.nc      ' , '-stat-map.nc ' /     !           49, 50
+     *                   '_his.nc      ' , '_bal_his.nc  ' ,     !           47, 48
+     *                   '_map.nc      ' , '_stat_map.nc ' /     !           49, 50
 *                    /
       data    iopt / 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 ,
      *               20 , 21 , 22 , 23 , 24 , 25 , 26 , 27 ,
