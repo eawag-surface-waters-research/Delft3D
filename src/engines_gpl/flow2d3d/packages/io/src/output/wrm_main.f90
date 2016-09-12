@@ -133,6 +133,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     integer(pntrsize)                    , pointer :: vmnldf
     integer(pntrsize)                    , pointer :: vortic
     integer(pntrsize)                    , pointer :: w1
+    integer(pntrsize)                    , pointer :: windcd
     integer(pntrsize)                    , pointer :: windu
     integer(pntrsize)                    , pointer :: windv
     integer(pntrsize)                    , pointer :: wphy
@@ -317,6 +318,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     vmnldf              => gdp%gdr_i_ch%vmnldf
     vortic              => gdp%gdr_i_ch%vortic
     w1                  => gdp%gdr_i_ch%w1
+    windcd              => gdp%gdr_i_ch%windcd
     windu               => gdp%gdr_i_ch%windu
     windv               => gdp%gdr_i_ch%windv
     wphy                => gdp%gdr_i_ch%wphy
@@ -563,7 +565,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
                     & nsrc      ,zmodel    ,i(kcs)    ,i(kfs)    ,i(kfu)    , &
                     & i(kfv)    ,i(kfumin) ,i(kfvmin) ,i(kfumax) ,i(kfvmax) , &
                     & i(kfsmin) ,i(kfsmax) ,i(mnksrc) ,r(s1)     , &
-                    & d(dps)    ,r(dzs1)   ,r(thick)  , &
+                    & d(dps)    ,r(dzs1)   ,r(thick)  ,r(windcd)  , &
                     & r(velu)   ,r(velv)   ,r(w1)     ,r(wphy)   ,r(r1)     , &
                     & r(rtur1)  ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv) , &
                     & r(vicww)  ,r(dicww)  ,r(rich)   ,r(rho)    ,r(p1)     , &

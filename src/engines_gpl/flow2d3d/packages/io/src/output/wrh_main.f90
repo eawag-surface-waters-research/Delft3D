@@ -129,6 +129,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
     integer(pntrsize)                    , pointer :: zwl
     integer(pntrsize)                    , pointer :: zws
     integer(pntrsize)                    , pointer :: zwndsp
+    integer(pntrsize)                    , pointer :: zwndcd
     integer(pntrsize)                    , pointer :: zwnddr
     integer(pntrsize)                    , pointer :: zairp
     integer(pntrsize)                    , pointer :: zprecp
@@ -269,6 +270,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
     zwl                 => gdp%gdr_i_ch%zwl
     zws                 => gdp%gdr_i_ch%zws
     zwndsp              => gdp%gdr_i_ch%zwndsp
+    zwndcd              => gdp%gdr_i_ch%zwndcd
     zwnddr              => gdp%gdr_i_ch%zwnddr
     zairp               => gdp%gdr_i_ch%zairp
     zprecp              => gdp%gdr_i_ch%zprecp
@@ -434,7 +436,7 @@ subroutine wrh_main(lundia    ,error     ,selhis    ,grdang    ,dtsec     , &
                     & r(zwndsp) ,r(zwnddr) ,r(zairp)  ,wind      ,sferic    , &
                     & r(zprecp) ,r(zevap)  ,itdate    ,dtsec     ,irequest  , &
                     & fds       ,nostatto  ,nostatgl  ,order_sta ,ntruvto   , &
-                    & ntruvgl   ,order_tra ,nsluv     ,r(cbuv)   ,gdp       )
+                    & ntruvgl   ,order_tra ,nsluv     ,r(cbuv)   ,r(zwndcd) ,gdp       )
           if (error) goto 9999
           !
           if (nsrc>0 .and. gdp%gdflwpar%flwoutput%hisdis) then

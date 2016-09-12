@@ -114,6 +114,12 @@ type gd_heat
                           !  keva>=1: maseva=1
                           !  keva=0 and ktemp=3: maseva=0 (warning generated)
                           !  keva=0 and ktemp=1,2,4 or 5: maseva is set by keyword evamas/maseva
+    integer :: wslake     !  Flag for wind stress curve
+                          !  1=on can only be set when KTEMP = 5
+                          !  0=off Default 
+    integer :: sdlake     !  Flag for stanton and dalton equal to cd
+                          !  1=on can only be set when KTEMP = 5
+                          !  0=off Default
 !
 ! pointers
 !

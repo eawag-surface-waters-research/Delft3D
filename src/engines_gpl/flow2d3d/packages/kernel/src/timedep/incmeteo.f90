@@ -1,5 +1,5 @@
 subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
-                    kcs    ,alfas ,         &
+                    kcs    ,alfas  ,windcd ,                &
                     windsu ,windsv ,w10mag ,gdp   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -73,6 +73,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     real(fp)                                                        , intent(in)  :: timhr
     real(fp)                                                        , intent(in)  :: grdang
     real(fp)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: alfas
+    real(fp)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: windcd
     real(fp)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: windu
     real(fp)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: windv
     real(fp)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: windsu
@@ -189,7 +190,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     call dfexchg(patm,  1, 1, dfloat, nm_pos, gdp)    
     call dfexchg(windu, 1, 1, dfloat, nm_pos, gdp)    
     call dfexchg(windv, 1, 1, dfloat, nm_pos, gdp)    
-    call windtostress(mmax ,nmax ,nmaxus, grdang, kcs, w10mag, windu, windv, windsu, windsv, gdp)
+    call windtostress(mmax ,nmax ,nmaxus, grdang, kcs, w10mag, windu, windv, windsu, windsv, windcd, gdp)
     !
     ! Exchange data between partitions
     !

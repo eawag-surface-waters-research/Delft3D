@@ -310,6 +310,7 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: wenfm
     integer(pntrsize), pointer :: wenl
     integer(pntrsize), pointer :: wenlm
+    integer(pntrsize), pointer :: windcd
     integer(pntrsize), pointer :: windsu
     integer(pntrsize), pointer :: windsv
     integer(pntrsize), pointer :: windu
@@ -379,6 +380,7 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: zwl
     integer(pntrsize), pointer :: zws
     integer(pntrsize), pointer :: zwndsp
+    integer(pntrsize), pointer :: zwndcd
     integer(pntrsize), pointer :: zwnddr
     integer(pntrsize), pointer :: zairp
     integer(pntrsize), pointer :: drhodx
@@ -786,6 +788,7 @@ subroutine gtptrs(gdp)
     wenlm      => gdp%gdr_i_ch%wenlm
     windsu     => gdp%gdr_i_ch%windsu
     windsv     => gdp%gdr_i_ch%windsv
+    windcd     => gdp%gdr_i_ch%windcd
     windu      => gdp%gdr_i_ch%windu
     windv      => gdp%gdr_i_ch%windv
     wlen       => gdp%gdr_i_ch%wlen
@@ -853,6 +856,7 @@ subroutine gtptrs(gdp)
     zwl        => gdp%gdr_i_ch%zwl
     zws        => gdp%gdr_i_ch%zws
     zwndsp     => gdp%gdr_i_ch%zwndsp
+    zwndcd     => gdp%gdr_i_ch%zwndcd
     zwnddr     => gdp%gdr_i_ch%zwnddr
     zairp      => gdp%gdr_i_ch%zairp
     zprecp     => gdp%gdr_i_ch%zprecp
@@ -1331,6 +1335,7 @@ subroutine gtptrs(gdp)
     wenlm      = gtrpnt('wenlm' , gdp)
     windsu     = gtrpnt('windsu', gdp)
     windsv     = gtrpnt('windsv', gdp)
+    windcd     = gtrpnt('windcd' , gdp)
     windu      = gtrpnt('windu' , gdp)
     windv      = gtrpnt('windv' , gdp)
     wlen       = gtrpnt('wlen'  , gdp)
@@ -1398,6 +1403,7 @@ subroutine gtptrs(gdp)
     zwl        = gtrpnt('zwl'   , gdp)
     zws        = gtrpnt('zws'   , gdp)
     zwndsp     = gtrpnt('zwndsp', gdp)
+    zwndcd     = gtrpnt('zwndcd', gdp)
     zwnddr     = gtrpnt('zwnddr', gdp)
     zairp      = gtrpnt('zairp' , gdp)
     zprecp     = gtrpnt('zprecp', gdp)    

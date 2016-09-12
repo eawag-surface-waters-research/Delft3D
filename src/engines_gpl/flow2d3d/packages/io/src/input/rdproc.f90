@@ -39,7 +39,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
 !                model, rigid wall, tidal forces, density &
 !                wind: KTEMP, FCLOU, SAREA, IVAPOP, SECCHI,
 !                      STANTON, DALTON ,IROV, Z0V, TGFCMP,
-!                      TEMPW, SALW, WSTRES, RHOA
+!                      TEMPW, SALW, WSTRES, RHOA , SDlake, Wslake
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -66,6 +66,8 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     real(fp)                   , pointer :: dalton
     real(fp)                   , pointer :: qtotmx
     real(fp)                   , pointer :: lambda
+    integer                    , pointer :: wslake
+    integer                    , pointer :: sdlake
     integer                    , pointer :: ivapop
     integer                    , pointer :: maseva
     logical                    , pointer :: free_convec
@@ -177,6 +179,8 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     sarea               => gdp%gdheat%sarea
     fclou               => gdp%gdheat%fclou
     gapres              => gdp%gdheat%gapres
+    wslake              => gdp%gdheat%wslake
+    sdlake              => gdp%gdheat%sdlake
     stanton             => gdp%gdheat%stanton
     dalton              => gdp%gdheat%dalton
     qtotmx              => gdp%gdheat%qtotmx
@@ -524,6 +528,30 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
              dalton = rdef
              write(message, '(a,e14.5)') 'Ocean heat model: Using default Dalton number ', dalton
              call prterr(lundia, 'G051', trim(message))
+          endif
+          !
+          ! Locate and read 'Wslake'
+          ! 
+          Wslake = 0
+          call prop_get_integer(gdp%mdfile_ptr, '*', 'Wslake', Wslake)
+          !
+          ! test constistency
+          !
+          if (Wslake<0 .or. Wslake>1) then
+             call prterr(lundia    ,'U061'    ,' '       )
+             Wslake = 0
+          endif
+          !
+          ! Locate and read 'SDlake'
+          !
+          SDlake = 0
+          call prop_get_integer(gdp%mdfile_ptr, '*', 'SDlake', SDlake)
+          !
+          ! test constistency
+          !
+          if (SDlake<0 .or. SDlake>1) then
+             call prterr(lundia    ,'U061'    ,' '       )
+             SDlake = 0
           endif
           !
           ! reset RDEF

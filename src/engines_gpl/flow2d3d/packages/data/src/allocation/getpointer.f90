@@ -288,6 +288,7 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: vsus
     integer(pntrsize) , pointer :: w1
     integer(pntrsize) , pointer :: w10mag
+    integer(pntrsize) , pointer :: windcd
     integer(pntrsize) , pointer :: windsu
     integer(pntrsize) , pointer :: windsv
     integer(pntrsize) , pointer :: windu
@@ -342,6 +343,7 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: zwl
     integer(pntrsize) , pointer :: zws
     integer(pntrsize) , pointer :: zwndsp
+    integer(pntrsize) , pointer :: zwndcd
     integer(pntrsize) , pointer :: zwnddr
     integer(pntrsize) , pointer :: zairp
     integer(pntrsize) , pointer :: zevap
@@ -643,6 +645,7 @@ function getpointer(pntnam, gdp)
     w10mag     => gdp%gdr_i_ch%w10mag
     windsu     => gdp%gdr_i_ch%windsu
     windsv     => gdp%gdr_i_ch%windsv
+    windcd     => gdp%gdr_i_ch%windcd
     windu      => gdp%gdr_i_ch%windu
     windv      => gdp%gdr_i_ch%windv
     wlen       => gdp%gdr_i_ch%wlen
@@ -695,6 +698,7 @@ function getpointer(pntnam, gdp)
     zwl        => gdp%gdr_i_ch%zwl
     zws        => gdp%gdr_i_ch%zws
     zwndsp     => gdp%gdr_i_ch%zwndsp
+    zwndcd     => gdp%gdr_i_ch%zwndcd
     zwnddr     => gdp%gdr_i_ch%zwnddr
     zairp      => gdp%gdr_i_ch%zairp
     zevap      => gdp%gdr_i_ch%zevap
@@ -1235,6 +1239,8 @@ function getpointer(pntnam, gdp)
        returnval = windsu
     case ('windsv')
        returnval = windsv
+    case ('windcd')
+       returnval = windcd
     case ('windu')
        returnval = windu
     case ('windv')
@@ -1339,6 +1345,8 @@ function getpointer(pntnam, gdp)
        returnval = zws
     case ('zwndsp')
        returnval = zwndsp
+    case ('zwndcd')
+       returnval = zwndcd
     case ('zwnddr')
        returnval = zwnddr
     case ('zairp')

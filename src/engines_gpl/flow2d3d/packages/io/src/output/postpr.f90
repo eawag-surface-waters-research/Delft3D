@@ -249,6 +249,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: volum1
     integer(pntrsize)                    , pointer :: vortic
     integer(pntrsize)                    , pointer :: w1
+    integer(pntrsize)                    , pointer :: windcd
     integer(pntrsize)                    , pointer :: windu
     integer(pntrsize)                    , pointer :: windv
     integer(pntrsize)                    , pointer :: wphy
@@ -292,6 +293,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: zwl
     integer(pntrsize)                    , pointer :: zws
     integer(pntrsize)                    , pointer :: zwndsp
+    integer(pntrsize)                    , pointer :: zwndcd
     integer(pntrsize)                    , pointer :: zwnddr
     integer(pntrsize)                    , pointer :: zairp
     integer(pntrsize)                    , pointer :: zprecp
@@ -597,6 +599,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     voldis              => gdp%gdr_i_ch%voldis
     volum1              => gdp%gdr_i_ch%volum1
     vortic              => gdp%gdr_i_ch%vortic
+    windcd              => gdp%gdr_i_ch%windcd
     w1                  => gdp%gdr_i_ch%w1
     windu               => gdp%gdr_i_ch%windu
     windv               => gdp%gdr_i_ch%windv
@@ -642,6 +645,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     zwl                 => gdp%gdr_i_ch%zwl
     zws                 => gdp%gdr_i_ch%zws
     zwndsp              => gdp%gdr_i_ch%zwndsp
+    zwndcd              => gdp%gdr_i_ch%zwndcd
     zwnddr              => gdp%gdr_i_ch%zwnddr
     zairp               => gdp%gdr_i_ch%zairp
     zprecp              => gdp%gdr_i_ch%zprecp
@@ -954,9 +958,9 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 & r(zssv)   ,r(sbuu)   ,r(sbvv)   , &
                 & r(wrka1)  ,r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  , &
                 & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
-                & wave      ,r(zrca)   ,r(windu)  ,r(windv)  , &
+                & wave      ,r(zrca)   ,r(windu)  ,r(windv)  ,r(windcd) , &
                 & r(zwndsp) ,r(zwnddr) ,r(patm)   ,r(zairp)  ,wind      , &
-                & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,gdp       )
+                & r(precip) ,r(evap)   ,r(zprecp) ,r(zevap)  ,r(zwndcd) ,gdp       )
        ftstat = .true.
     endif
     !

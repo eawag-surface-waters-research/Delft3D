@@ -17,9 +17,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & zssv      ,sbuu      ,sbvv      , &
                & zhs       ,ztp       ,zdir      ,zrlabd    ,zuorb     , &
                & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
-               & wave      ,zrca      ,windu     ,windv     , &
+               & wave      ,zrca      ,windu     ,windv     ,windcd    , &
                & zwndsp    ,zwnddr    ,patm      ,zairp     ,wind      , &
-               & precip    ,evap      ,zprecp    ,zevap     ,gdp       )
+               & precip    ,evap      ,zprecp    ,zevap     ,zwndcd    , gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2016.                                
@@ -134,6 +134,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windcd !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windu  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windv  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
@@ -150,6 +151,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(nostat)                                                , intent(out) :: ztp
     real(fp)  , dimension(nostat)                                                , intent(out) :: zuorb
     real(fp)  , dimension(nostat)                                                , intent(out) :: zwndsp
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zwndcd
     real(fp)  , dimension(nostat)                                                , intent(out) :: zwnddr
     real(fp)  , dimension(nostat)                                                , intent(out) :: zairp
     real(fp)  , dimension(nostat)                                                , intent(out) :: zprecp !  Description and declaration in esm_alloc_real.f90
@@ -655,6 +657,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
        zwndsp = -999.0_fp
        zwnddr = -999.0_fp
        zairp  = -999.0_fp
+       zwndcd = -999.0_fp
        do ii = 1, nostat
           m = mnstat(1, ii)
           if (m<0) cycle
@@ -670,6 +673,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           if (zwnddr(ii)>=360.0_fp) zwnddr(ii) = zwnddr(ii) - 360.0_fp
           !
           zairp(ii) = patm(n, m)
+          zwndcd(ii)= windcd(n,m)
           !
        enddo
     endif

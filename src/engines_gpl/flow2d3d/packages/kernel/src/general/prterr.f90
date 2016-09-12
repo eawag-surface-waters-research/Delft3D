@@ -350,6 +350,8 @@ subroutine prterr(lundia, msgno, filtxt)
        msg = '*** ERROR Blank label/identifier not accepted'
     case ('U060')
        msg = '*** ERROR Consecutive times in # must increase'
+    case ('U061')
+       msg = '*** ERROR Invalid Heat module parameters CD/Stanton/Dalton option (only 0 or 1 allowed)'
     case ('U062')
        msg = '*** ERROR Consecutive times on file # should increase'
     case ('U063')
