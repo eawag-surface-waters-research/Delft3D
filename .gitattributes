@@ -4782,6 +4782,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_bothfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_botmfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_comfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_hwgxyfil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_simfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_trahfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_tramfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_tridfil.m -text
