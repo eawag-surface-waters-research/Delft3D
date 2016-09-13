@@ -102,7 +102,7 @@ subroutine windtostress(mmax      ,nmax      ,nmaxus    ,grdang    ,kcs       , 
        do n = 1, nmaxus
           if (kcs(n,m) > 0) then
              if (windu(n, m)==0. .and. windv(n, m)==0.) then
-                wangle = 0.0
+                wangle = 0.0_fp
              else
                 !
                 ! GRDANG allows for y-axis not pointing to the north
@@ -127,7 +127,11 @@ subroutine windtostress(mmax      ,nmax      ,nmaxus    ,grdang    ,kcs       , 
              !
              ! Wuest & Lorke (2003)
              !
-             if(wslake == 1) cdwl  = 0.0044/wsp**1.15
+             if(wslake == 1) then
+                 cdwl  = 0.0044_fp/wsp**1.15_fp
+             else
+                 cdwl = 0.0_fp
+             endif
              !
              ! find the max.
              !
