@@ -4790,7 +4790,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_trihfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_trimfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/d3d_waqfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/dbase.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/deblank2.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/default_quantities.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/delwaqt0.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/delwaqtimfile.m -text
