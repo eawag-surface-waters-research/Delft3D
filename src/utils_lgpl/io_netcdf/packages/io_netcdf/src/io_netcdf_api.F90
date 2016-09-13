@@ -327,7 +327,7 @@ end function ionc_inq_varids_dll
 !> Gets the values for a named variable in the specified dataset on the specified mesh.
 !! The location type allows to select the specific topological mesh location.
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
-function ionc_get_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, c_values_ptr, nval) result(ierr) bind(C, name="ionc_get_var")
+function ionc_get_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, c_values_ptr, nval, c_fillvalue) result(ierr) bind(C, name="ionc_get_var")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_1D_EightByteReal_dll
    integer,                intent(in)    :: ioncid    !< The IONC data set id.
    integer,                intent(in)    :: meshid    !< The mesh id in the specified data set.
@@ -335,6 +335,7 @@ function ionc_get_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, 
    character(kind=c_char), intent(in)    :: c_varname(MAXSTRLEN)   !< The name of the variable to be found. Should be without any "meshnd_" prefix.
    type(c_ptr),            intent(  out) :: c_values_ptr !< Pointer to array for the values.
    integer,                intent(in)    :: nval      !< The number of values in the target array. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   real(c_double),         intent(  out) :: c_fillvalue  !< Scalar for getting the fill value parameter for the requested variable.
    integer                               :: ierr      !< Result status, ionc_noerr if successful.
 
    character(len=MAXSTRLEN) :: varname
@@ -345,7 +346,7 @@ function ionc_get_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, 
 
    call c_f_pointer(c_values_ptr, values, (/ nval /))
 
-   ierr = ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values)
+   ierr = ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values, c_fillvalue)
 
 end function ionc_get_var_1D_EightByteReal_dll
 

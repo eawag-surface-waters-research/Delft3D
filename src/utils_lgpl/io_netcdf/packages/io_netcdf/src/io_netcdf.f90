@@ -537,13 +537,14 @@ end function ionc_inq_varid
 !> Gets the values for a named variable in the specified dataset on the specified mesh.
 !! The location type allows to select the specific topological mesh location.
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
-function ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values) result(ierr) ! TODO (?): AvD: support start, count, stride, map
+function ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values, fillvalue) result(ierr) ! TODO (?): AvD: support start, count, stride, map
    integer,             intent(in)    :: ioncid    !< The IONC data set id.
    integer,             intent(in)    :: meshid    !< The mesh id in the specified data set.
    integer,             intent(in)    :: iloctype  !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
    character(len=*),    intent(in)    :: varname   !< The name of the variable to be found. Should be without any "meshnd_" prefix.
    real (kind = kind(1d0)), &
       dimension(:),     intent(inout) :: values    !< Array to store the values in.
+   real (kind = kind(1d0)), intent(  out) :: fillvalue !< Scalar for getting the fill value parameter for the requested variable.
    integer                            :: ierr      !< Result status, ionc_noerr if successful.
 
    integer :: varid
@@ -558,6 +559,11 @@ function ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values
    ierr = nf90_get_var(datasets(ioncid)%ncid, varid, values)
    if (ierr /= nf90_noerr) then
       goto 999
+   end if
+
+   ierr = nf90_get_att(datasets(ioncid)%ncid, varid, '_FillValue', fillvalue)
+   if (ierr /= nf90_noerr) then
+      fillvalue = nf90_fill_real8
    end if
 
    ierr = UG_NOERR
