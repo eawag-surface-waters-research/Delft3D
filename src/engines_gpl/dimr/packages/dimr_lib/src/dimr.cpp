@@ -1181,17 +1181,19 @@ void Dimr::connectLibs (void) {
 
 #if defined (HAVE_CONFIG_H)
         char * lib = new char[strlen (this->componentsList.components[i].library) + 3+3+1];
-        if (   strchr (this->componentsList.components[i].library, '/' ) == NULL 
-            && strchr (this->componentsList.components[i].library, '\\') == NULL 
-            && strchr (this->componentsList.components[i].library, '.' ) == NULL) {
-            sprintf (lib, "lib%s%s", this->componentsList.components[i].library, D3D_PLUGIN_EXT);
+        sprintf (lib, "lib%s%s", this->componentsList.components[i].library, D3D_PLUGIN_EXT);
+        if (   strchr (this->componentsList.components[i].library, '/' ) != NULL 
+            || strchr (this->componentsList.components[i].library, '\\') != NULL 
+            || strchr (this->componentsList.components[i].library, '.' ) != NULL) {
+            throw new Exception (true, "Invalid component library name \"%s\"\n", lib, -1);
         }
 #else
         char * lib = new char[strlen (this->componentsList.components[i].library) + 4+1];
-        if (   strchr (this->componentsList.components[i].library, '/' ) == NULL 
-            && strchr (this->componentsList.components[i].library, '\\') == NULL 
-            && strchr (this->componentsList.components[i].library, '.' ) == NULL) {
-            sprintf (lib, "%s.dll", this->componentsList.components[i].library);
+        sprintf (lib, "%s.dll", this->componentsList.components[i].library);
+        if (   strchr (this->componentsList.components[i].library, '/' ) != NULL 
+            || strchr (this->componentsList.components[i].library, '\\') != NULL 
+            || strchr (this->componentsList.components[i].library, '.' ) != NULL) {
+            throw new Exception (true, "Invalid component library name \"%s\"\n", lib, -1);
         }
 #endif
 
