@@ -112,7 +112,7 @@ end type t_face
 type t_crs
    logical                         :: is_spherical  !< Whether or not spherical (otherwise some projected crs)
    character(len=64)               :: varname = ' ' !< Name of the NetCDF variable containing this CRS
-   integer                         :: varvalue      !< Integer value (==epsg code)
+   integer                         :: epsg_code     !< EPSG code (more info: http://spatialreference.org/)
    type(nc_attribute), allocatable :: attset(:)     !< General set with all/any attributes about this CRS.
 end type t_crs
 
@@ -488,8 +488,9 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
       ierr = nf90_put_att(ncid, id_crs, 'value',                       'value is equal to EPSG code')
    else
       ierr_missing = UG_INVALID_CRS
-      epsg      = crs%varvalue
-      write (epsgstring, '("EPSG:",I0)') crs%varvalue
+      epsg      = crs%epsg_code
+      ! TODO: remove hardcoded defaults below. Replace by cloning the crs%attset  into this new NetCDF var.
+      write (epsgstring, '("EPSG:",I0)') epsg
       ierr = nf90_put_att(ncid, id_crs, 'name',                        'Unknown projected' ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg                ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',           'Unknown projected' ) ! CF
@@ -1745,7 +1746,7 @@ function ug_create_ugrid_geometry(meshgeom) result(ierr)
         
     crs%is_spherical = .TRUE.
     crs%varname = "wgs84"
-    crs%varvalue = 4326
+    crs%epsg_code = 4326
     
     meshgeom%crs => crs
 

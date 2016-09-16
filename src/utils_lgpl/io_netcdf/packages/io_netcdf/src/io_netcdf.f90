@@ -125,8 +125,8 @@ type t_ionc
    integer                  :: ncid      =  0               !< The underlying native NetCDF data set id.
    integer                  :: iconvtype =  IONC_CONV_OTHER !< Detected type of the conventions used in this dataset.
    double precision         :: convversion =  0 !< Detected version of the conventions used in this dataset.
-   integer                  :: epsg =  0 !< Detected type of the epsg code used in this dataset.
    type(t_ug_file), pointer :: ug_file   => null()          !< For UGRID-type files, the underlying file structure.
+   type(t_crs),     pointer :: crs           !< Map projection/coordinate transformation used for the coordinates of this mesh.
 end type t_ionc
 
 type(t_ionc), allocatable :: datasets(:) !< List of available datasets, maintained in global library state, indexed by the unique ionc_id.
@@ -254,8 +254,6 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) 
    if (present(convversion)) then
       convversion = datasets(ioncid)%convversion
    end if
-
-   ierr = detect_coordinate_system(ioncid)
 
    ! Successful
    return
@@ -478,10 +476,9 @@ function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
    integer                            :: ierr    !< Result status, ionc_noerr if successful.
 
    ! TODO: AvD: some error handling if ioncid is wrong   
-   ierr = nf90_noerr;
-   epsg_code = datasets(ioncid)%epsg
+   ierr = nf90_noerr 
+   epsg_code = datasets(ioncid)%crs%epsg_code
    !is_spherical = datasets(ioncid)%crs%is_spherical
-   !epsg_code = datasets(ioncid)%crs%varvalue
 end function ionc_get_coordinate_system
 
 
@@ -727,8 +724,7 @@ end function detect_conventions
 function detect_coordinate_system(ioncid) result(ierr)
    integer, intent(in)  :: ioncid    !< The IONC data set id.
    integer              :: ierr      !< Result status, ionc_noerr if successful.
-   character(len=30)    :: varname  !< Name of the created grid mapping variable.
-   integer              :: epsg_code, id_crs
+   integer              :: id_crs
 
    ierr = IONC_NOERR
 
@@ -746,17 +742,36 @@ function detect_coordinate_system(ioncid) result(ierr)
       goto 999
    end if
    
-   ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', epsg_code)
-   if (ierr /= nf90_noerr) then
+   if (ierr == nf90_noerr) then
+      ierr = nf90_inquire_variable(datasets(ioncid)%ncid, id_crs, name = datasets(ioncid)%crs%varname)
+      ierr = nf90_get_var(datasets(ioncid)%ncid, id_crs, datasets(ioncid)%crs%epsg_code) ! NOTE: this is Deltares-convention only
+
+      ! BELOW: add fallback detectin mechanisms to read the epsg codew (e.g. from :EPSG_code attribute (==ADAGUC), see: https://publicwiki.deltares.nl/display/NETCDF/Coordinates
+      !ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', datasets(ioncid)%crs%epsg_code)
+      ! TODO: MK: Check below has to be improve so we use a defaultInteger like in the netcdf
+      if (ierr /= nf90_noerr .or. datasets(ioncid)%crs%epsg_code < 0) then 
+         ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', datasets(ioncid)%crs%epsg_code)
+         !if (ierr /= nf90_noerr) then
+         !   ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg_code', tmpstring)
+         !   read(tmpstring, '(a,i0)') dummy, datasets(ioncid)%crs%epsg_code
+         !end if
+      end if
+            
+            
+      !if (ierr /= nf90_noerr) then
+      !   goto 999
+      !end if
+      !!datasets(ioncid)%epsg = epsg_code
+      ierr = ug_get_var_attset(datasets(ioncid)%ncid, id_crs, datasets(ioncid)%crs%attset)
+   else 
       goto 999
    end if
-   datasets(ioncid)%epsg = epsg_code
    
    ! Successful
    return
 
 999 continue
-   datasets(ioncid)%epsg = 0
+   datasets(ioncid)%crs%epsg_code = 0
    ierr = nf90_noerr
    ! Some error (status was set earlier)
 end function detect_coordinate_system
@@ -861,6 +876,9 @@ function add_dataset(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
          ! Keep UG error code and exit
          goto 999
       end if
+
+      allocate(datasets(ioncid)%crs)
+
    case default
       ! We accept file with no specific conventions.
    end select
