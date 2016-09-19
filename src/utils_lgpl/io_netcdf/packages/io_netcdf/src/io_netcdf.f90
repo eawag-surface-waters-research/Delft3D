@@ -748,8 +748,7 @@ function detect_coordinate_system(ioncid) result(ierr)
 
       ! BELOW: add fallback detectin mechanisms to read the epsg codew (e.g. from :EPSG_code attribute (==ADAGUC), see: https://publicwiki.deltares.nl/display/NETCDF/Coordinates
       !ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', datasets(ioncid)%crs%epsg_code)
-      ! TODO: MK: Check below has to be improve so we use a defaultInteger like in the netcdf
-      if (ierr /= nf90_noerr .or. datasets(ioncid)%crs%epsg_code < 0) then 
+      if (ierr /= nf90_noerr .or. datasets(ioncid)%crs%epsg_code == nf90_fill_int) then 
          ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', datasets(ioncid)%crs%epsg_code)
          !if (ierr /= nf90_noerr) then
          !   ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg_code', tmpstring)
@@ -877,12 +876,12 @@ function add_dataset(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
          goto 999
       end if
 
-      allocate(datasets(ioncid)%crs)
-
    case default
       ! We accept file with no specific conventions.
    end select
 
+   allocate(datasets(ioncid)%crs)
+   
    ierr = detect_coordinate_system(ioncid)
 
    ! Successful
