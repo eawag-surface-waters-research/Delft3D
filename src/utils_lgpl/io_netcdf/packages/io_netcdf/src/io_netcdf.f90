@@ -766,7 +766,7 @@ function detect_coordinate_system(ioncid) result(ierr)
             if (ierr /= nf90_noerr) then
                ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'EPSG_code', tmpstring)
             endif
-            read(tmpstring, '(5x ,i0)') datasets(ioncid)%crs%epsg_code ! 'EPSG:99999'
+            read(tmpstring(index(tmpstring,':') + 1 : len_trim(tmpstring)),*) datasets(ioncid)%crs%epsg_code ! 'EPSG:99999'   
          end if
       end if
             
