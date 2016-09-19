@@ -247,6 +247,11 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) 
 
    ierr = add_dataset(ncid, netCDFFile, ioncid)
 
+   if (ierr /= ionc_noerr) then
+      ierr = IONC_ENOPEN
+      goto 999
+   end if
+
    if (present(iconvtype)) then
       iconvtype = datasets(ioncid)%iconvtype
    end if
@@ -724,7 +729,9 @@ end function detect_conventions
 function detect_coordinate_system(ioncid) result(ierr)
    integer, intent(in)  :: ioncid    !< The IONC data set id.
    integer              :: ierr      !< Result status, ionc_noerr if successful.
-   integer              :: id_crs
+
+   integer            :: id_crs
+   character(len=255) :: tmpstring
 
    ierr = IONC_NOERR
 
@@ -750,10 +757,17 @@ function detect_coordinate_system(ioncid) result(ierr)
       !ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', datasets(ioncid)%crs%epsg_code)
       if (ierr /= nf90_noerr .or. datasets(ioncid)%crs%epsg_code == nf90_fill_int) then 
          ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg', datasets(ioncid)%crs%epsg_code)
-         !if (ierr /= nf90_noerr) then
-         !   ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg_code', tmpstring)
-         !   read(tmpstring, '(a,i0)') dummy, datasets(ioncid)%crs%epsg_code
-         !end if
+         if (ierr /= nf90_noerr) then 
+            ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'EPSG', datasets(ioncid)%crs%epsg_code)
+         end if
+
+         if (ierr /= nf90_noerr) then
+            ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'epsg_code', tmpstring)
+            if (ierr /= nf90_noerr) then
+               ierr = nf90_get_att(datasets(ioncid)%ncid, id_crs, 'EPSG_code', tmpstring)
+            endif
+            read(tmpstring, '(5x ,i0)') datasets(ioncid)%crs%epsg_code ! 'EPSG:99999'
+         end if
       end if
             
             
