@@ -176,29 +176,51 @@ void STDCALL BMI_GET_TIME_STEP(long * sharedDLLHandle,
 }
 
 void STDCALL BMI_GET_VAR(long * sharedDLLHandle,
-	char   * var_name,
-	double * values,
-	int    * num_values,
-	int      var_name_len)
+   char   * var_name,
+   double * values,
+   int    * num_values,
+   int      var_name_len)
 {
-	typedef void * (STDCALL * MyProc)(char *, double**);
-	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
+   typedef void * (STDCALL * MyProc)(char *, double**);
+   MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var");
 
-	int  i;					// vs2102 and lower do not support typedefs in combination
-	double * bmi_values;    // with local variable declaration, hence declare at start of function
+   int  i;					// vs2102 and lower do not support typedefs in combination
+   double * bmi_values;    // with local variable declaration, hence declare at start of function
 
-	char * c_var_name = strFcpy(var_name, var_name_len);
-	RemoveTrailingBlanks_dll(c_var_name);
+   char * c_var_name = strFcpy(var_name, var_name_len);
+   RemoveTrailingBlanks_dll(c_var_name);
 
-	if (proc != NULL)
-	{
-		(void *)(*proc)(c_var_name, &bmi_values);
-		for (i = 0; i < *num_values; i++) {
-			values[i] = bmi_values[i];
-		}
-	}
+   if (proc != NULL)
+   {
+      (void *)(*proc)(c_var_name, &bmi_values);
+      for (i = 0; i < *num_values; i++) {
+         values[i] = bmi_values[i];
+      }
+   }
 
-	free(c_var_name); c_var_name = NULL;
+   free(c_var_name); c_var_name = NULL;
+}
+
+void STDCALL BMI_GET_VAR_SHAPE(long * sharedDLLHandle,
+   char   * var_name,
+   int    * values,
+   int      var_name_len)
+{
+   typedef void * (STDCALL * MyProc)(char *, double**);
+   MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "get_var_shape");
+
+   int  i;					// vs2102 and lower do not support typedefs in combination
+   int * bmi_values;    // with local variable declaration, hence declare at start of function
+
+   char * c_var_name = strFcpy(var_name, var_name_len);
+   RemoveTrailingBlanks_dll(c_var_name);
+
+   if (proc != NULL)
+   {
+      (void *)(*proc)(c_var_name, values);
+   }
+
+   free(c_var_name); c_var_name = NULL;
 }
 
 
