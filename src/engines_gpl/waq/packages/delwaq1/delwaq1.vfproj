@@ -50,7 +50,6 @@
 		<File RelativePath="..\delwaq1_version_number\include\resource.h"/>
 		<File RelativePath="..\delwaq1_version_number\include\version_number.rc"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\block.f"/>
 		<File RelativePath=".\src\dlwq00.f"/>
 		<File RelativePath=".\src\getidentification.f"/></Filter></Files>
 	<Globals/></VisualStudioProject>

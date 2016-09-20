@@ -1513,13 +1513,11 @@ src/engines_gpl/waq/packages/delwaq1/delwaq1.vfproj -text
 src/engines_gpl/waq/packages/delwaq1/include/delwaq1.rc -text
 src/engines_gpl/waq/packages/delwaq1/include/resource.h -text
 src/engines_gpl/waq/packages/delwaq1/src/Makefile.am -text
-src/engines_gpl/waq/packages/delwaq1/src/block.f -text
 src/engines_gpl/waq/packages/delwaq1/src/dlwq00.f -text
 src/engines_gpl/waq/packages/delwaq1/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq1_lib/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1_lib/delwaq1_lib.vfproj -text
 src/engines_gpl/waq/packages/delwaq1_lib/src/Makefile.am -text
-src/engines_gpl/waq/packages/delwaq1_lib/src/block.f -text
 src/engines_gpl/waq/packages/delwaq1_lib/src/delwaq1.f -text
 src/engines_gpl/waq/packages/delwaq1_lib/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq1_version_number/Makefile.am -text
@@ -1537,14 +1535,11 @@ src/engines_gpl/waq/packages/delwaq2/delwaq2.vfproj -text
 src/engines_gpl/waq/packages/delwaq2/include/delwaq2.rc -text
 src/engines_gpl/waq/packages/delwaq2/include/resource.h -text
 src/engines_gpl/waq/packages/delwaq2/src/Makefile.am -text
-src/engines_gpl/waq/packages/delwaq2/src/block.f -text
 src/engines_gpl/waq/packages/delwaq2/src/dlwq2.f -text
 src/engines_gpl/waq/packages/delwaq2/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq2_lib/delwaq2_lib.vfproj -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/Makefile.am -text
-src/engines_gpl/waq/packages/delwaq2_lib/src/block.f -text
-src/engines_gpl/waq/packages/delwaq2_lib/src/d_tr_d3d.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/delwaq2_global_data.f90 -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/dlwqmain.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/getidentification.f -text
@@ -2013,6 +2008,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqtb.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqtc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqtd.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqtk.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqtr.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqtr_template.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqwq.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqwx.f -text

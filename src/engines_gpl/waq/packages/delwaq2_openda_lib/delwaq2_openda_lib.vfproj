@@ -49,7 +49,6 @@
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath="..\delwaq2_lib\src\block.f"/>
-		<File RelativePath="..\delwaq2_lib\src\d_tr_d3d.f"/>
 		<File RelativePath="..\delwaq2_lib\src\delwaq2_global_data.f90"/>
 		<File RelativePath="..\delwaq2_lib\src\dlwqmain.f"/>
 		<File RelativePath="..\delwaq2_lib\src\getidentification.f"/>

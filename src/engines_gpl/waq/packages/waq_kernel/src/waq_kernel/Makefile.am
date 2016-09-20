@@ -42,6 +42,7 @@ libWaqKernel_la_SOURCES = \
        oil2waq.f \
        wqparcom.F90 \
        wqhbcom.f90 \
+       dlwqtr.f \
        actloc.f \
        baldmp.f \
        dmpsurf.f \

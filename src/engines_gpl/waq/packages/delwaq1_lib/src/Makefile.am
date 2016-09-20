@@ -23,7 +23,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libDelwaq1_la_SOURCES = block.f \
+libDelwaq1_la_SOURCES = \
        delwaq1.f \
        getidentification.f
 

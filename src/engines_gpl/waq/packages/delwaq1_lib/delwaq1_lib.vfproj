@@ -48,7 +48,6 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\block.f"/>
 		<File RelativePath=".\src\delwaq1.f"/>
 		<File RelativePath=".\src\getidentification.f"/></Filter></Files>
 	<Globals/></VisualStudioProject>

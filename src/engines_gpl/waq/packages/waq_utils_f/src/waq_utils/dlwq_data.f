@@ -948,6 +948,14 @@
 
       integer                                 :: jj, kk
 
+      ! It is a constant/single breakpoint time series
+      if (dlwqdata%no_brk .eq. 1) then
+         it1c = 0
+         it2c = 1
+         idtc = 1
+         return
+      endif
+
       ! search backward for the first valid point
 
       do 10 jj = ibrk , 1 , -1

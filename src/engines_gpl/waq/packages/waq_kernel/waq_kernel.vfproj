@@ -485,6 +485,7 @@
 		<File RelativePath=".\src\waq_kernel\dlwqtc.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqtd.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqtk.f"/>
+		<File RelativePath=".\src\waq_kernel\dlwqtr.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqwq.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqwx.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqwy.f"/>
