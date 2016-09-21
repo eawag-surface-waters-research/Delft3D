@@ -5,27 +5,20 @@
 #
 #   There are command-line options to select Fortran compiler and debug or not.
 #
-#   ToDo:  Remove stripping of executables when the debug flag is set.
-#   It's even debatable whether stripping belongs in the build.  I think not.
-#
-#   ToDo: Don't preintialize the compiler, the user should do this himself
-#   so that he's aware exactly which version he's using.  Besides, we can't
-#   keep up with every new compiler update.  This script should be ultra-low
-#   maintanence.
-#
-#   irv.elshoff@deltares.nl
 #   adri.mourits@deltares.nl
-#   04 Feb 2015
+#   02 Sep 2016
 #
 #   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 #
-#   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#   WARNINGS WARNINGS WARNINGS WARNINGS WARNINGS WARNINGS WARNINGS WARNINGS
 #
 #   This script contains references to Deltares specific systems.
 #   Use this script as an example and modify it to fit to your system.
 #   See file README for compiling without using this script.
 #
+#   This script does not work on Mac
+#   
 #-------------------------------------------------------------------------------
 
 # This script must be executed in the directory where it resides
