@@ -328,10 +328,10 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             ! First read the first dataset
             ! This must be placed in output%count-1
             !
-            call setoutputcount(wavedata%output, wavedata%output%count - 1)
             DeleteSWANFile = .false.
             call read_swan_output(swan_output_fields, swan_run, offset, DeleteSWANFile)
-            if (dom%cgnum) then
+            if (dom%cgnum .and. wavedata%output%write_wavm) then
+               call setoutputcount(wavedata%output, wavedata%output%count - 1)
                !
                ! Write output to WAVE map file
                !
