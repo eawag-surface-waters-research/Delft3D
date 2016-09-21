@@ -78,6 +78,7 @@ public :: ionc_get_edge_count
 public :: ionc_get_face_count
 public :: ionc_get_max_face_nodes
 public :: ionc_get_node_coordinates
+public :: ionc_put_node_coordinates
 public :: ionc_get_edge_nodes
 public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
@@ -450,6 +451,18 @@ function ionc_get_node_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
 
    ierr = ug_get_node_coordinates(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), xarr, yarr)
 end function ionc_get_node_coordinates
+
+
+!> Puts the x,y coordinates for all nodes in a single mesh from a data set.
+function ionc_put_node_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
+   integer,             intent(in)  :: ioncid  !< The IONC data set id.
+   integer,             intent(in)  :: meshid  !< The mesh id in the specified data set.
+   double precision,    intent(in)  :: xarr(:) !< Array containing the x-coordinates
+   double precision,    intent(in)  :: yarr(:) !< Array containing the y-coordinates
+   integer                          :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ug_put_node_coordinates(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), xarr, yarr)
+end function ionc_put_node_coordinates
 
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.

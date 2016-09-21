@@ -205,6 +205,26 @@ function ionc_get_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) re
    ierr = ionc_get_node_coordinates(ioncid, meshid, xptr, yptr)
 end function ionc_get_node_coordinates_dll
 
+
+!> Puts the x,y coordinates for all nodes in a single mesh from a data set.
+function ionc_put_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) result(ierr) bind(C, name="ionc_put_node_coordinates")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_node_coordinates_dll
+   integer(kind=c_int), intent(in)  :: ioncid !< The IONC data set id.
+   integer(kind=c_int), intent(in)  :: meshid !< The mesh id in the specified data set.
+   type(c_ptr),         intent(out) :: c_xptr !< Pointer to array containing x-coordinates
+   type(c_ptr),         intent(out) :: c_yptr !< Pointer to array containing y-coordinates
+   integer(kind=c_int), intent(in)  :: nnode  !< The number of nodes in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int)              :: ierr   !< Result status, ionc_noerr if successful.
+
+   double precision, pointer :: xptr(:), yptr(:)! 
+
+   call c_f_pointer(c_xptr, xptr, (/ nnode /))
+   call c_f_pointer(c_yptr, yptr, (/ nnode /))
+   
+   ierr = ionc_put_node_coordinates(ioncid, meshid, xptr, yptr)
+end function ionc_put_node_coordinates_dll
+
+
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
 function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result(ierr) bind(C, name="ionc_get_edge_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_nodes_dll
