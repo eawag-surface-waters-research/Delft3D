@@ -562,8 +562,6 @@ contains
     call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
     !
 9999 continue
-    ierr = nf90_sync(igeomfile); 
-    call nc_check_err(lundia, ierr, "sync file", geomfilename)
     ierr = nf90_close(igeomfile); 
     call nc_check_err(lundia, ierr, "closing file", geomfilename)
     !
