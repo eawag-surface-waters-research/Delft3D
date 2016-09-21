@@ -102,6 +102,17 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       if (wavedata%output%write_wavm) then
          call setoutputcount(wavedata%output, wavedata%output%count + 1)
       endif
+      if (wavedata%time%calccount == 1 .and. swan_run%modsim == 3) then
+         !
+         ! SWANFile is going to contain two datasets: from tstart and tend
+         ! Output from tend will always be written
+         ! Output from tstart will only be written when calccount=1
+         ! In this case: increase output%count one more (indexing the tend field)
+         !               on writing the tstart field: decrease output%count, write field and increase output%count
+         ! This is necessary, because the increase of output%count must be done outside the "do i_swan"-loop
+         !
+         call setoutputcount(wavedata%output, wavedata%output%count + 1)
+      endif          
       !
       ! Set time in case of standalone run
       !
@@ -315,6 +326,9 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
          if (wavedata%time%calccount == 1 .and. swan_run%modsim == 3) then
             ! SWANFile contains two datasets: from tstart and tend
             ! First read the first dataset
+            ! This must be placed in output%count-1
+            !
+            call setoutputcount(wavedata%output, wavedata%output%count - 1)
             DeleteSWANFile = .false.
             call read_swan_output(swan_output_fields, swan_run, offset, DeleteSWANFile)
             if (dom%cgnum) then
