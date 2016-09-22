@@ -1319,14 +1319,14 @@ end function ug_get_mesh_count
 !> Gets the name of the mesh topology in an open dataset.
 !!
 !! \see 
-function ug_get_mesh_name(ncid, meshid, meshname) result(ierr)
+function ug_get_mesh_name(ncid, meshids, meshname) result(ierr)
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
-   integer,             intent(in)    :: meshid   !< NetCDF-id for the mesh geometry.
+   type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*),    intent(  out) :: meshname !< The name of the mesh geometry.
    integer                            :: ierr     !< Result status, ug_noerr if successful.
    
    meshname = ''
-   ierr = nf90_inquire_variable(ncid, meshid, name=meshname)
+   ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
    if (ierr /= nf90_noerr) then
       ug_messagestr = 'ug_get_mesh_name: could not find meshname.'            
       ierr = UG_INVALID_MESHNAME   

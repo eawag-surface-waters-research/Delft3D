@@ -343,7 +343,7 @@ function ionc_get_mesh_name(ioncid, meshid, meshname) result(ierr)
    character(len=*),    intent(  out) :: meshname !< The name of the mesh geometry.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
    
-   ierr = ug_get_mesh_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid)%id_meshtopo, meshname)
+   ierr = ug_get_mesh_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshname)
    
 end function ionc_get_mesh_name
 
