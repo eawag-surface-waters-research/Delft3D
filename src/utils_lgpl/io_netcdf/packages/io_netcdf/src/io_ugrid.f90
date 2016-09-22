@@ -1316,6 +1316,23 @@ function ug_get_mesh_count(ncid, numMesh) result(ierr)
 
 end function ug_get_mesh_count
 
+!> Gets the name of the mesh topology in an open dataset.
+!!
+!! \see 
+function ug_get_mesh_name(ncid, meshid, meshname) result(ierr)
+   integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   integer,             intent(in)    :: meshid   !< NetCDF-id for the mesh geometry.
+   character(len=*),    intent(  out) :: meshname !< The name of the mesh geometry.
+   integer                            :: ierr     !< Result status, ug_noerr if successful.
+   
+   meshname = ''
+   ierr = nf90_inquire_variable(ncid, meshid, name=meshname)
+   if (ierr /= nf90_noerr) then
+      ug_messagestr = 'ug_get_mesh_name: could not find meshname.'            
+      ierr = UG_INVALID_MESHNAME   
+      Call SetMessage(Level_Fatal, ug_messagestr)
+   end if
+end function ug_get_mesh_name
 
 !> Gets the size/count of items for the specified topological location.
 !! Use this to get the number of nodes/edges/faces/volumes.

@@ -138,6 +138,24 @@ function ionc_get_mesh_count_dll(ioncid, nmesh) result(ierr) bind(C, name="ionc_
    ierr = ionc_get_mesh_count(ioncid, nmesh)
 end function ionc_get_mesh_count_dll
 
+!> Gets the name of the mesh topology in an open dataset.
+function ionc_get_mesh_name_dll(ioncid, meshid, c_meshname) result(ierr) bind(C, name="ionc_get_mesh_name")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_name_dll
+   use iso_c_binding
+   integer,             intent(in)    :: ioncid     !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   character(kind=c_char,len=1),   intent(  out) :: c_meshname(MAXSTRLEN) !< The name of the mesh geometry.
+   character(len=MAXSTRLEN) :: meshname !< The name of the mesh geometry.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.   
+   
+   
+   meshname = ''
+   ierr = ionc_get_mesh_name(ioncid, meshid, meshname)
+   !c_meshname = char_array_to_string(meshname, len_trim(meshname))
+   !c_meshname = meshname(1:len_trim(meshname))//C_NULL_CHAR   
+   c_meshname= string_to_char_array(meshname,len_trim(meshname))
+   
+end function ionc_get_mesh_name_dll
 
 !> Gets the number of nodes in a single mesh from a data set.
 function ionc_get_node_count_dll(ioncid, meshid, nnode) result(ierr) bind(C, name="ionc_get_node_count")
@@ -451,4 +469,14 @@ pure function char_array_to_string(char_array, length)
  enddo
 end function char_array_to_string
 
+function string_to_char_array(string, length) result(char_array)
+   character(len=length), intent(in) :: string
+   integer, intent(in) :: length
+   character(kind=c_char,len=1) :: char_array(MAXSTRLEN)
+   integer :: i
+   do i = 1, len(string)
+       char_array(i) = string(i:i)
+   enddo
+   char_array(len(string)+1) = C_NULL_CHAR
+end function string_to_char_array
 end module io_netcdf_api

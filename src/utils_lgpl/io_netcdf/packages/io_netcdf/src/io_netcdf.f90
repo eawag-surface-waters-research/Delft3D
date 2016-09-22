@@ -71,6 +71,7 @@ public :: ionc_open
 public :: ionc_close
 public :: ionc_get_ncid
 public :: ionc_get_mesh_count
+public :: ionc_get_mesh_name
 public :: ionc_get_topology_dimension
 public :: ionc_get_meshgeom
 public :: ionc_get_node_count
@@ -335,6 +336,16 @@ function ionc_get_mesh_count(ioncid, nmesh) result(ierr)
    ierr = ug_get_mesh_count(datasets(ioncid)%ncid, nmesh)
 end function ionc_get_mesh_count
 
+!> Gets the name of the mesh topology in an open dataset.
+function ionc_get_mesh_name(ioncid, meshid, meshname) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   character(len=*),    intent(  out) :: meshname !< The name of the mesh geometry.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+   
+   ierr = ug_get_mesh_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid)%id_meshtopo, meshname)
+   
+end function ionc_get_mesh_name
 
 !> Gets the dimension of the mesh topology for the specified mesh in a UGRID data set.
 function ionc_get_topology_dimension(ioncid, meshid, dim) result(ierr)
@@ -664,7 +675,6 @@ function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
 
    ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, meshgeom)
 end function ionc_write_mesh_struct
-
 
 !> Initializes the io_netcdf library, setting up the logger.
 function ionc_initialize(c_msg_callback,c_prgs_callback) result(ierr)
