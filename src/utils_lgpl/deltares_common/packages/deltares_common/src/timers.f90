@@ -315,10 +315,10 @@
       character*(*) afile
 
       open  ( 912, file=afile, recl=100+maxlvl*5 )
-      write ( 912, '(a,98(a ))' ) ' nr.     times     cpu time      cpu    wall clock      wc',
-     &                            '  level',('     ',i=3,maxlvl),' routine name'
-      write ( 912, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %',
-     &                            ( i, i=2,maxlvl)
+      write ( 912, '(a,98(a ))' ) ' nr.     times     cpu time      cpu    wall clock      wc', &
+                                  '  level',('     ',i=3,maxlvl),' routine name'
+      write ( 912, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %', &
+                                  ( i, i=2,maxlvl)
       do i = 1, nohandl
          if ( level(i) .eq. -1 ) cycle
          call timline ( i )
@@ -342,10 +342,10 @@
 
       cpfact = 100.0d00/cptime(1)
       wcfact = 100.0d00/wctime(1)
-      write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' )
-     &                                   (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
-      write ( 912, forchr ) ihandl,ntimcal(ihandl),cptime(ihandl),cptime(ihandl)*cpfact,
-     &                                    wctime(ihandl),wctime(ihandl)*wcfact,tmsubnm(ihandl)
+      write ( forchr(32:), '(i4,''x,f6.2,'',i4,''x,a40)'')' ) &
+                                         (level(ihandl)-1)*5+2,(maxlvl-level(ihandl))*5+1
+      write ( 912, forchr ) ihandl,ntimcal(ihandl),cptime(ihandl),cptime(ihandl)*cpfact, &
+                                          wctime(ihandl),wctime(ihandl)*wcfact,tmsubnm(ihandl)
       level(ihandl) = -1
 
       do i = ihandl+1, nohandl

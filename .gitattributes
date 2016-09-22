@@ -5721,7 +5721,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/system_utils.F90 -te
 src/utils_lgpl/deltares_common/packages/deltares_common/src/table_handles.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/tables.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/time_module.f90 -text
-src/utils_lgpl/deltares_common/packages/deltares_common/src/timers.f -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/timers.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/tree_struct.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/util.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/wavenr.f90 -text
