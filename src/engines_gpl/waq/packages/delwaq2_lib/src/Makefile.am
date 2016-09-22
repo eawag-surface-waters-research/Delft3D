@@ -25,7 +25,7 @@ MPILIBS += $(MPILIBS_ADDITIONAL)
 
 #-------------------------------------------------------------------------------
 #Sources
-libDelwaq2_la_SOURCES = \
+libDelwaq2_la_SOURCES = block.f \
        delwaq2_global_data.f90 \
        waq_omi_lib.f90 \
        waq_omi_api.f90 \

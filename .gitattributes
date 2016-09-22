@@ -1518,6 +1518,7 @@ src/engines_gpl/waq/packages/delwaq1/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq1_lib/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq1_lib/delwaq1_lib.vfproj -text
 src/engines_gpl/waq/packages/delwaq1_lib/src/Makefile.am -text
+src/engines_gpl/waq/packages/delwaq1_lib/src/block.f -text
 src/engines_gpl/waq/packages/delwaq1_lib/src/delwaq1.f -text
 src/engines_gpl/waq/packages/delwaq1_lib/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq1_version_number/Makefile.am -text
@@ -1540,6 +1541,7 @@ src/engines_gpl/waq/packages/delwaq2/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq2_lib/delwaq2_lib.vfproj -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/Makefile.am -text
+src/engines_gpl/waq/packages/delwaq2_lib/src/block.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/delwaq2_global_data.f90 -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/dlwqmain.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/getidentification.f -text
