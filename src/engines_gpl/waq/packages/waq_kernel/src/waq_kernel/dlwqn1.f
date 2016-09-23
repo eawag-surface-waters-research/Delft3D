@@ -512,6 +512,7 @@
 
  9999 if ( timon ) call timstop ( ithandl )
 
+      dlwqd%iaflag = iaflag
       dlwqd%itime = itime
 
       RETURN
