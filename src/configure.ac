@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.59)
+AC_PREREQ(2.68)
 AC_INIT(Delft3D, 0.0, delft3d.support@deltares.nl)
 dnl Store generated files in config dir
 AC_CONFIG_AUX_DIR(config)
