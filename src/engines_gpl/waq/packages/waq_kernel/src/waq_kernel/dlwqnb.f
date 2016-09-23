@@ -189,7 +189,8 @@
 !     for the rhs-matrix, in stead of the DERIV-array as in method 6.
 !     (JvG, May 8 1992)
 
-      if ( action == action_finalisation ) then
+      if ( action == ACTION_FINALISATION ) then
+          if ( timon ) call timstrt ( "dlwqnb", ithandl )
           include 'dlwqdata_restore.inc'
           goto 50
       endif

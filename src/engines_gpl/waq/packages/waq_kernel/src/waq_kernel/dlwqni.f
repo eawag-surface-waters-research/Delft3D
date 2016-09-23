@@ -159,8 +159,8 @@
 
       include 'state_data.inc'
 
-      if ( action == action_initialisation  .or.
-     &     action == action_finalisation           ) then
+      if ( action == ACTION_INITIALISATION  .or.
+     &     action == ACTION_FINALISATION           ) then
           return
       endif
 

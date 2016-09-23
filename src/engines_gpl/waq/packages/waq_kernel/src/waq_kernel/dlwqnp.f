@@ -165,7 +165,8 @@ C
 
       include 'state_data.inc'
 
-      if ( action == action_finalisation ) then
+      if ( action == ACTION_FINALISATION ) then
+          if ( timon ) call timstrt ( "dlwqnp", ithandl )
           include 'dlwqdata_restore.inc'
           goto 20
       endif
@@ -214,7 +215,7 @@ C     Note: the handle to the timer (ithandl) needs to be
 C     properly initialised and restored
 C
       IF ( ACTION == ACTION_INITIALISATION ) THEN
-          if ( timon ) call timstrt ( "dlwqnd", ithandl )
+          if ( timon ) call timstrt ( "dlwqnp", ithandl )
           INCLUDE 'dlwqdata_save.inc'
           if ( timon ) call timstop ( ithandl )
           RETURN

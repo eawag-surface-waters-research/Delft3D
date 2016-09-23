@@ -205,7 +205,8 @@
 ! IN TRISULA Z-DIRECTION IS POSITIVE UPWARDS; IN DELWAQ POSITIVE DOWNWARDS
 ! ====================================================================
 !
-      if ( action == action_finalisation ) then
+      if ( action == ACTION_FINALISATION ) then
+          if ( timon ) call timstrt ( "dlwqnj", ithandl )
           include 'dlwqdata_restore.inc'
           goto 20
       endif

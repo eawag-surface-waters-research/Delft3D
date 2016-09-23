@@ -101,6 +101,7 @@
       INCLUDE 'state_data.inc'
 
       if ( ACTION == ACTION_FINALISATION ) then
+          if ( timon ) call timstrt ( "dlwqn0", ithandl )
           include 'dlwqdata_restore.inc'
           goto 20
       endif
@@ -164,7 +165,7 @@
 !     properly initialised and restored
 !
       IF ( ACTION == ACTION_INITIALISATION ) THEN
-          if ( timon ) call timstrt ( "dlwqn1", ithandl )
+          if ( timon ) call timstrt ( "dlwqn0", ithandl )
           INCLUDE 'dlwqdata_save.inc'
           if ( timon ) call timstop ( ithandl )
           RETURN
@@ -175,7 +176,7 @@
           call apply_operations( dlwqd )
       ENDIF
 
-      if ( timon ) call timstrt ( "dlwqn1", ithandl )
+      if ( timon ) call timstrt ( "dlwqn0", ithandl )
 
 !======================= simulation loop ============================
 

@@ -27,10 +27,10 @@
 
 !> Main program steering the computation
 program delwaq_test_dimr
-    use iso_c_binding
+   use iso_c_binding
 
-    implicit none
-    interface
+   implicit none
+   interface
       integer(c_int) function initialize(c_config_file) bind(C, name="initialize")
          use iso_c_binding
          character,intent(in)    :: c_config_file
@@ -66,55 +66,63 @@ program delwaq_test_dimr
          use iso_c_binding, only: c_double
          real(c_double), intent(out) :: t
       end subroutine get_current_time
-    end interface
+   end interface
 
-    integer :: dummy
+   integer :: dummy
 
-    character(len=200)     :: version_string
-    character(len=200)     :: runid
-    character(len=200)     :: resfile
-    integer                :: itimestamp
-    real(kind=kind(1.0d0)) :: startTime, stopTime, currentTime
-    integer                :: i ,status, found
+   character(len=200)     :: version_string
+   character(len=200)     :: runid
+   character(len=200)     :: resfile
+   integer                :: itimestamp
+   real(kind=kind(1.0d0)) :: startTime, stopTime, currentTime
+   integer                :: i ,status, found
+   logical                :: log = .false.
 
-    open(10, file='dimr_test.log')
+   if (log) open(10, file='dimr_test.log',status='replace')
     
-    call get_version_string(version_string)
-    write(10,*) 'dll version string:'
-    write(10,*) version_string
+   version_string = ' '
+   call get_version_string(version_string)
+   if (log) write(10,'(A)') 'dll version string:'
+   if (log) write(10,'(A200)') trim(version_string)
 
-    call get_command_argument( 1, runid, status )
-    if ( runid == ' ' ) then
-        write(10,*) 'Please specify the run-ID!'
-        stop
-    endif
-    write(10,*) 'run id:'
-    write(10,*) runid
+   runid = ' '
+   call get_command_argument(1,runid,status)
+   if ( runid == ' ' ) then
+      if (log) write(10,'(A)') 'Please specify the run-ID!'
+      stop
+   endif
+   if (log) write(10,'(A)') 'run id:'
+   if (log) write(10,'(A200)') trim(runid)
 
-    dummy = initialize( runid )
+   dummy = initialize(runid)
 
-    call get_start_time(startTime)
-    write(10,*) 'run id:'
-    write(10,*) runid
+   call get_start_time(startTime)
+   if (log) write(10,'(A)') 'run id:'
+   if (log) write(10,'(A)') runid
 
-    call get_end_time(stopTime)
-    write(10,*) 'run id:'
-    write(10,*) runid
+   call get_end_time(stopTime)
+   if (log) write(10,'(A)') 'run id:'
+   if (log) write(10,'(A)') runid
     
-    call get_current_time(currentTime)
-    write(10,*) 'currentTime:'
-    write(10,*) currentTime
+   call get_current_time(currentTime)
+   if (log) write(10,'(A)') 'currentTime:'
+   if (log) write(10,'(E17.6)') currentTime
 
-    dummy = update((stopTime-startTime)/2.0)
-    call get_current_time(currentTime)
-    write(10,*) 'currentTime:'
-    write(10,*) currentTime
-    dummy = update((stopTime-startTime)/2.0)
-    call get_current_time(currentTime)
-    write(10,*) 'currentTime:'
-    write(10,*) currentTime
+   dummy = update(stopTime-startTime)
+   call get_current_time(currentTime)
+   if (log) write(10,'(A)') 'currentTime:'
+   if (log) write(10,'(E17.6)') currentTime
 
-    dummy = finalize()
+!    dummy = update((stopTime-startTime)/2.0)
+!    call get_current_time(currentTime)
+!    if (log) write(10,'(A)') 'currentTime:'
+!    if (log) write(10,'(E17.6)') currentTime
+!    dummy = update((stopTime-startTime)/2.0)
+!    call get_current_time(currentTime)
+!    if (log) write(10,'(A)') 'currentTime:'
+!    if (log) write(10,'(E17.6)') currentTime
 
-    stop(0)
+   dummy = finalize()
+
+   stop(0)
 end program delwaq_test_dimr
