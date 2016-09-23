@@ -206,8 +206,8 @@
 ! ====================================================================
 !
       if ( action == ACTION_FINALISATION ) then
-          if ( timon ) call timstrt ( "dlwqnj", ithandl )
           include 'dlwqdata_restore.inc'
+          if ( timon ) call timstrt ( "dlwqnj", ithandl )
           goto 20
       endif
 

@@ -142,8 +142,8 @@
       INCLUDE 'state_data.inc'
 
       if ( ACTION == ACTION_FINALISATION ) then
-          if ( timon ) call timstrt ( "dlwqn1", ithandl )
           include 'dlwqdata_restore.inc'
+          if ( timon ) call timstrt ( "dlwqn1", ithandl )
           goto 20
       endif
 

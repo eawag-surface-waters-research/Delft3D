@@ -228,8 +228,8 @@
 !                                                              (KHT, 13/11/96)
 
       if ( action == ACTION_FINALISATION ) then
-          if ( timon ) call timstrt ( "dlwqnm", ithandl )
           include 'dlwqdata_restore.inc'
+          if ( timon ) call timstrt ( "dlwqnm", ithandl )
           goto 50
       endif
 

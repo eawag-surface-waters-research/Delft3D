@@ -190,8 +190,8 @@
 !     (JvG, May 8 1992)
 
       if ( action == ACTION_FINALISATION ) then
-          if ( timon ) call timstrt ( "dlwqnb", ithandl )
           include 'dlwqdata_restore.inc'
+          if ( timon ) call timstrt ( "dlwqnb", ithandl )
           goto 50
       endif
 

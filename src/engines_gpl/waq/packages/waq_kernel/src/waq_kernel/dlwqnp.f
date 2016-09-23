@@ -166,8 +166,8 @@ C
       include 'state_data.inc'
 
       if ( action == ACTION_FINALISATION ) then
-          if ( timon ) call timstrt ( "dlwqnp", ithandl )
           include 'dlwqdata_restore.inc'
+          if ( timon ) call timstrt ( "dlwqnp", ithandl )
           goto 20
       endif
 
