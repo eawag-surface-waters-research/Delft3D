@@ -56,7 +56,7 @@
       REAL(4) SM          ! I  macrophyte submerged                       (gC/m2)
       REAL(4) smmax       ! I  Maximum biomass macrophyte submerged       (gC/m2)
       REAL(4) SwDisSM     ! I  macrophyt distr. function (1: lin, 2:Exp)      (-)
-      REAL(4) Hmax        ! I  Maxmimum Lenght Macrophytes                    (m)
+      REAL(4) Hmax        ! I  Maxmimum Length Macrophytes                    (m)
       REAL(4) Ffac        ! I  Form factor lin: F = M(mean)/(M/Hmax)          (-)
       REAL(4) BmLaySM     ! O  Biomass Layer macrophyt submerged 01       (gC/m2)
       REAL(4) Hact        ! O  Actual Length Macrophytes                      (m)
@@ -67,12 +67,14 @@
       REAL(4) Hactd       !    Actual Length Macrophytes - relative to top    (-)
       REAL(4) Z2ad        !    Height Bottom Segment from Bottom - relative   (-)
       REAL(4) Z1ad        !    Height Top Segment from Bottom - relative      (-)
+      REAL(4) absHmax     !    Absolute maxmimum Length Macrophytes           (m)
       INTEGER IKMRK1
-!     INTEGER IKMRK2
+      INTEGER IKMRK2
       REAL(4) FrBmLay     !    Fraction BM per layer                          (-)
       REAL(4) Zm          !    Watersurface to top Macropyte                  (-)
       REAL(4) A           !    Lineair factor A (Ax + B)                      (-)
       REAL(4) B           !    Lineair factor B (Ax + B)                      (-)
+      REAL(4) OriginalDepth
 c     INTEGER IQ          !    Loop counter
 c     INTEGER Ifrom       !    From Segment
 c     INTEGER Ito         !    From Segment
@@ -108,17 +110,26 @@ c     LOGICAL First
             SM          = PMSA(IPOINT(5)+(IBOTSEG-1)*INCREM(5))
 
 !           Limit the maximum height of the plants to the water depth
-            Hmax        = min( Hmax, TotalDepth )
+            absHmax     = min( abs(Hmax), TotalDepth )
 
             ! actual height is fraction of maximum height
 
             if ( smmax .gt. 1e-20 ) then
-               Hact        = min( Hmax * SM/smmax , TotalDepth - 0.001 )
+               Hact        = min( absHmax * SM/smmax , TotalDepth - 0.001 )
                Hact        = max(Hact,0.01)
             else
                Hact        = 0.01
             endif
             Hactd = 1.0 ! Represents the entire length of the plants
+
+            !
+            ! Hmax > 0: the macrophytes grow from the bottom upwards
+            ! Hmax < 0: the macrophytes grow from the surface downwards
+            !
+            OriginalDepth = TotalDepth
+            if ( hmax < 0.0 ) then
+               TotalDepth = Hact
+            endif
 
             Zm = TotalDepth - Hact
             Z1 = LocalDepth - Depth
@@ -142,8 +153,8 @@ c     LOGICAL First
                   STOP 'Input error in process MACDIS'
                Endif
 
-               A = (SM / Hact) * (2 - (2 * Ffac)) / (TotalDepth - Zm)
-               B = (SM / Hact) * (Ffac * (Zm + TotalDepth) -2 * Zm) / (TotalDepth - Zm)
+               A = (SM / Hact) * (2 - (2 * Ffac)) / Hact
+               B = (SM / Hact) * (Ffac * (Zm + TotalDepth) -2 * Zm) / Hact
 
 !              Macrophyte is not in segment:
                If (Zm .GT. Z2) Then
@@ -187,6 +198,17 @@ c     LOGICAL First
 
             ENDIF
 
+            !
+            ! One complication: we need to set the top segment explicitly
+            ! if we start at the top
+            !
+            If ( Hmax < 0.0 ) Then
+                CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+                If ( IKMRK2 .EQ. 0 .OR. IKMRK2 .EQ. 1 ) Then
+                    PMSA(IPOINT(14)+(IBotSeg-1)*INCREM(14   )) = ISEG
+                Endif
+            Endif
+
             If (SM .GT. 0) Then
                FrBmLay = BmLaySm / SM
             Else
@@ -197,7 +219,11 @@ c     LOGICAL First
 
             PMSA( IPNT(11) ) = FrBmLay
             PMSA( IPNT(12) ) = BmLaySM / Depth
-            PMSA( IPNT(13) ) = Hact
+            If ( Hmax > 0.0 ) Then
+                PMSA( IPNT(13) ) = Hact
+            Else
+                PMSA( IPNT(13) ) = OriginalDepth
+            Endif
 
         ENDIF
 
