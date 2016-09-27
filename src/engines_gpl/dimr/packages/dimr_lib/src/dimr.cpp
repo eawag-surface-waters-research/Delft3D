@@ -741,6 +741,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb) {
                                             this->log->Write (Log::DETAIL, my_rank, "Receive(%s)", thisCoupler->items[k].targetName);
 											if (   thisCoupler->targetComponent->type == COMP_TYPE_RTC 
                                                 || thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D 
+												|| thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D
                                                 || thisCoupler->targetComponent->type == COMP_TYPE_WANDA) {
                                                 (thisCoupler->targetComponent->dllSetVar) (thisCoupler->items[k].targetName,(void *)&transfer[0]);
 												if (thisCoupler->targetComponent->type == COMP_TYPE_RTC) {
@@ -1264,6 +1265,7 @@ void Dimr::connectLibs (void) {
 
         if (   this->componentsList.components[i].type == COMP_TYPE_RTC 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
+            || this->componentsList.components[i].type == COMP_TYPE_FLOW1D2D
             || this->componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
             this->componentsList.components[i].dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);
