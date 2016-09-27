@@ -765,7 +765,7 @@ function detect_coordinate_system(ioncid) result(ierr)
    
    ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'wgs84', id_crs)
     
-   if (ierr == nf90_ebadid) then      
+   if (ierr /= nf90_noerr) then
       ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'projected_coordinate_system', id_crs)
    end if
    if (ierr /= nf90_noerr) then
