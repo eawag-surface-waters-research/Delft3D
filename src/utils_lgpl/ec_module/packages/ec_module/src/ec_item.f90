@@ -170,6 +170,9 @@ module m_ec_item
          !
          integer                :: i       !< loop counter
          type(tEcItem), pointer :: itemPtr !< Item under consideration
+
+         ! write(666,'(a,i5,a,f18.10,a,f18.10,a,f18.10,a)')  'GetValues   , ',itemId,', ',timesteps
+         
          !
          success = .false.
          !
@@ -300,6 +303,9 @@ module m_ec_item
          !
          integer :: i, j !< loop variables
          character(len=1000)              :: message
+         
+         ! write(666,'(a,i5,a,f18.10,a,f18.10,a,f18.10,a)') 'UpdateTarget, ',item%id,', ',timesteps,', ',item%targetFieldPtr%timesteps
+         
          !
          success = .true.
          !
@@ -360,6 +366,7 @@ module m_ec_item
          integer                        :: j                       !< loop counter
          type(tEcFileReader), pointer   :: fileReaderPtr           !< helper pointer for a file reader 
          character(len=300) :: str
+         
          !
          success = .false.
          fileReaderPtr => null()
@@ -372,6 +379,9 @@ module m_ec_item
             success = .true.
             return
          end if
+         
+         ! write(666,'(a,i5,a,f18.10,a,f18.10,a,f18.10,a)') 'UpdateSource, ',item%id,', ',timesteps,', ',item%sourceT0FieldPtr%timesteps,', ',item%sourceT1FieldPtr%timesteps 
+      
          !
          if (item%accessType==accessType_fileReader) then 
             ! Find the FileReader which can update this source Item.
