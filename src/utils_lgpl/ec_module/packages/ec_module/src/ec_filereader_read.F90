@@ -1492,8 +1492,6 @@ contains
          !
          jaar = jdatum(1)
          !
-         ! write(*,*) ' Asc is called', idate, itime 
-         
          call datumi(jaar, jdatum, t)
          call hulpgr(jaar      ,t         ,v         ,f         )
          call bewvuf(ierrs     ,kcmp      ,mxkc      ,component ,knaam     , &

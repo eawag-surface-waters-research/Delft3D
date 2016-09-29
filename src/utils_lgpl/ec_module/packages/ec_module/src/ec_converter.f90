@@ -782,7 +782,8 @@ module m_ec_converter
          allocate(valuesT(maxlay*n_data), stat=istat)
          valuesT=ec_undef_hp
          do i=1, size(valuesT0,dim=1)
-            ! valuesT(i) = valuesT0(i)*a0 + valuesT1(i)*a1
+            ! "val0+(val1-val0)*a1" is more precise than "val0*a0+val1*a1" when val0 and val1 are huge
+            !
             valuesT(i) = valuesT0(i)  + ( valuesT1(i)-valuesT0(i) )*a1
          end do
          !
@@ -1099,7 +1100,7 @@ module m_ec_converter
                      call setECMessage("ERROR: ec_converter::ecConverterPolytim: Unsupported operand type requested.")
                      return
                   end select
-            case (interpolate_spacetimeSaveWeightFactors, interpolate_spacetime) ! this is method == 3 isnt it? hk
+            case (interpolate_spacetimeSaveWeightFactors, interpolate_spacetime)
                !! RL: Deze check kan eruit, is al bij de aanleg van de items vastgesteld 
                !if (connection%targetItemsPtr(1)%ptr%vectorMax /= connection%sourceItemsPtr(1)%ptr%vectorMax) then
                !   write(errormsg, '(a,i0,a,i0,a,i0,a,i0,a)') &
