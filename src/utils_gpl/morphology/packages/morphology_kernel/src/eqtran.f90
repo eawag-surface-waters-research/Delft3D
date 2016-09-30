@@ -50,6 +50,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     use precision
     use message_module, only: write_error
     use mathconsts, only: pi, ee
+    use iso_c_binding, only: c_char
     use morphology_data_module
     !
     implicit none
@@ -120,6 +121,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
 !
 ! Local variables
 !
+    integer                     :: i
     integer(pntrsize)           :: ierror_ptr
     integer                     :: k
     integer(pntrsize), external :: perf_function_eqtran
@@ -173,21 +175,24 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
     !
     ! Interface to dll is in High precision!
     !
-    real(hp)          :: cesus_dll
-    real(hp)          :: sbc_dll
-    real(hp)          :: sbcu_dll
-    real(hp)          :: sbcv_dll
-    real(hp)          :: sbwu_dll
-    real(hp)          :: sbwv_dll
-    real(hp)          :: ssus_dll
-    real(hp)          :: sswu_dll
-    real(hp)          :: sswv_dll
-    real(hp)          :: t_relax_dll
-    character(1024)   :: errmsg
-    character(256)    :: message     ! Contains message from internal or external transport formula
-    logical           :: equi_conc   ! equilibrium concentration given (instead of susp. transport rate)
-    logical           :: sbc_total   ! total bed load given (instead of m,n components)
-    logical           :: sus_total   ! total suspended load given (instead of m,n components)
+    real(hp)               :: cesus_dll
+    real(hp)               :: sbc_dll
+    real(hp)               :: sbcu_dll
+    real(hp)               :: sbcv_dll
+    real(hp)               :: sbwu_dll
+    real(hp)               :: sbwv_dll
+    real(hp)               :: ssus_dll
+    real(hp)               :: sswu_dll
+    real(hp)               :: sswv_dll
+    real(hp)               :: t_relax_dll
+    character(1024)        :: errmsg
+    character(256)         :: message        ! Contains message from internal or external transport formula
+    character(kind=c_char) :: message_c(257) ! C- version of "message", including C_NULL_CHAR
+                                             ! Calling perf_function_eqtran with "message" caused problems
+                                             ! Solved by using "message_c"
+    logical                :: equi_conc      ! equilibrium concentration given (instead of susp. transport rate)
+    logical                :: sbc_total      ! total bed load given (instead of m,n components)
+    logical                :: sus_total      ! total suspended load given (instead of m,n components)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -525,6 +530,10 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        sswv_dll    = 0.0_hp
        t_relax_dll = 0.0_hp
        message     = ' '
+       do i=1,256
+          message_c(i) = message(i:i)
+       enddo
+       message_c(257) = C_NULL_CHAR
        !
        ! psem/vsem is used to be sure this works fine in DD calculations
        !
@@ -537,7 +546,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
                                          sbcv_dll , sbwu_dll , sbwv_dll      , &
                                          equi_conc, cesus_dll, ssus_dll      , &
                                          sswu_dll , sswv_dll , t_relax_dll   , &
-                                         message)
+                                         message_c)
+       message = transfer(message_c(1:256), message)
        call vsemlun
        if (ierror_ptr /= 0) then
           errmsg = 'Cannot find function "'//trim(dllfunc)//'" in dynamic library.'

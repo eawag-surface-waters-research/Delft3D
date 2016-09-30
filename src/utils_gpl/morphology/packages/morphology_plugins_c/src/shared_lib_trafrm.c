@@ -104,8 +104,8 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                               double * t_relax            ,
                               char   * message            ,
                               long     length_function    ,
-                              long     length_dll_strings ,
-                              long     length_message     )
+                              long     length_dll_strings )
+                              // message is a c-string: no length specification added
 #elif defined(salford32)
 extern "C" PERFORM_FUNCTION_EQTRAN(  long   * sharedDLLHandle    ,
                               char   * function           ,
@@ -129,8 +129,8 @@ extern "C" PERFORM_FUNCTION_EQTRAN(  long   * sharedDLLHandle    ,
                               double * t_relax            ,
                               char   * message            ,
                               long     length_function    ,
-                              long     length_dll_strings ,
-                              long     length_message     )
+                              long     length_dll_strings )
+                              // message is a c-string: no length specification added
 #elif defined (HAVE_CONFIG_H)
 long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                               char   * function           ,
@@ -154,27 +154,29 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                               double * t_relax            ,
                               char   * message            ,
                               long     length_function    ,
-                              long     length_dll_strings ,
-                              long     length_message     )
+                              long     length_dll_strings )
+                              // message is a c-string: no length specification added
 #endif
 {
 
   long error = 1;
   long len = -1;
 #if defined(WIN32)
-  typedef void * (STDCALL * MyProc)(long   *, long   *,
-                                    double *, long   *,
-                                    char   *, long   *,
-                                    long   *, double *, double *, double *, double *, double *,
-                                    long   *, double *, double *, double *, double *, double *,
-                                    char   *, long    , long    );
+  typedef void  (STDCALL * MyProc)(long   *, long   *,
+                                   double *, long   *,
+                                   char   *, long   *,
+                                   long   *, double *, double *, double *, double *, double *,
+                                   long   *, double *, double *, double *, double *, double *,
+                                   char   *, long    );
+                                   // message is a c-string: no length specification added
 #elif defined (HAVE_CONFIG_H)
   typedef void * (STDCALL * MyProc)(long   *, long   *,
                                     double *, long   *,
                                     char   *, long   *,
                                     long   *, double *, double *, double *, double *, double *,
                                     long   *, double *, double *, double *, double *, double *,
-                                    char   *, long    , long    );
+                                    char   *, long    );
+                                    // message is a c-string: no length specification added
 #endif
   MyProc proc;
   char * fun_name;
@@ -195,23 +197,24 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
   {
      error = 0;
 #if defined(WIN32)
-     (void *) (*proc)(dll_integers, max_integers,
-                      dll_reals   , max_reals   ,
-                      dll_strings , max_strings ,
-                      sbc_total   ,
-                      sbc         ,
-                      sbcu        ,
-                      sbcv        ,
-                      sbwu        ,
-                      sbwv        ,
-                      equi_conc   ,
-                      cesus       ,
-                      ssus        ,
-                      sswu        ,
-                      sswv        ,
-                      t_relax     ,
-                      message     ,
-                      length_dll_strings, length_message );
+      (*proc)(dll_integers, max_integers,
+              dll_reals   , max_reals   ,
+              dll_strings , max_strings ,
+              sbc_total   ,
+              sbc         ,
+              sbcu        ,
+              sbcv        ,
+              sbwu        ,
+              sbwv        ,
+              equi_conc   ,
+              cesus       ,
+              ssus        ,
+              sswu        ,
+              sswv        ,
+              t_relax     ,
+              message     ,
+              length_dll_strings);
+              // message is a c-string: no length specification added
 #elif defined (HAVE_CONFIG_H)
      (void *) (*proc)(dll_integers, max_integers,
                       dll_reals   , max_reals   ,
@@ -228,7 +231,8 @@ long STDCALL PERFORM_FUNCTION_EQTRAN(long   * sharedDLLHandle    ,
                       sswu        ,
                       sswv        ,
                       t_relax     ,
-                      message     , length_dll_strings, length_message );
+                      message     , length_dll_strings);
+                      // message is a c-string: no length specification added
 #endif
   }
   free(fun_name); fun_name = NULL;
