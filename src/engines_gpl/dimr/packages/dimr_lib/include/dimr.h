@@ -102,6 +102,7 @@ enum {
    COMP_TYPE_WANDA     = 5,
    COMP_TYPE_FLOW2D3D  = 6,
    COMP_TYPE_FLOW1D2D  = 7,
+   COMP_TYPE_DELWAQ    = 8,
 };
 
 enum {

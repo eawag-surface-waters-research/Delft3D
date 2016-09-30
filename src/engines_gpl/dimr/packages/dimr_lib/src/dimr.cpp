@@ -943,6 +943,8 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
         newComp->type = COMP_TYPE_FLOW2D3D;
     } else if (strstr(libNameLowercase, "flow1d2d") != NULL){
        newComp->type = COMP_TYPE_FLOW1D2D;
+    } else if (strstr(libNameLowercase, "delwaq2_lib") != NULL){
+       newComp->type = COMP_TYPE_DELWAQ;
     }
     else {
         throw new Exception (true, "Name of library, \"%s\", is not recognized", newComp->library);
@@ -1276,9 +1278,12 @@ void Dimr::connectLibs (void) {
             this->componentsList.components[i].dllSetVar = NULL;
 		}
 
-        this->componentsList.components[i].dllGetVar = (BMI_GETVAR) GETPROCADDRESS (dllhandle, BmiGetVarEntryPoint);
-        if (this->componentsList.components[i].dllGetVar == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarEntryPoint, lib, GetLastError());
+        // Not implemented yet in Delwaq:
+        if (this->componentsList.components[i].type != COMP_TYPE_DELWAQ) { 
+            this->componentsList.components[i].dllGetVar = (BMI_GETVAR) GETPROCADDRESS (dllhandle, BmiGetVarEntryPoint);
+            if (this->componentsList.components[i].dllGetVar == NULL) {
+                throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarEntryPoint, lib, GetLastError());
+            }
         }
 
         delete [] lib;

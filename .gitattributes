@@ -348,6 +348,10 @@ src/engines_gpl/dimr/packages/dimr_lib/src/exception.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/log.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/stringutils.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/xmltree.cpp -text
+src/engines_gpl/dimr/scripts/flow2d3d/dimr_config.xml -text
+src/engines_gpl/dimr/scripts/flow2d3d/run_dimr.bat -text
+src/engines_gpl/dimr/scripts/waq/dimr_config.xml -text
+src/engines_gpl/dimr/scripts/waq/run_dimr.bat -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
 src/engines_gpl/flow2d3d/default/files.def -text
