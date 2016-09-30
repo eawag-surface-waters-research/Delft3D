@@ -148,7 +148,7 @@ subroutine chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
        ndm  = ndm  + 1
        nmu  = nmu  + 1
        ndmu = ndmu + 1
-       if (kfu(nm)==1 .and. kcs(nm)/=3) then
+       if (kfu(nm)==1 .and. kcs(nm)/=3 .and. kcs(nmu)/=3 .and. kcs(nm)/=-1 .and. kcs(nmu)/=-1) then
           do k = 1, kmax
              !
              ! Flow from cell nm to nmu

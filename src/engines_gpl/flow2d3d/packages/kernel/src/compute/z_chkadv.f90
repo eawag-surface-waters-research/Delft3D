@@ -185,7 +185,7 @@ subroutine z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
        ndm  = ndm  + 1
        nmu  = nmu  + 1
        ndmu = ndmu + 1
-       if (kfu(nm)==1 .and. kcs(nm)/=3 .and. kcs(nmu)/=3) then
+       if (kfu(nm)==1 .and. kcs(nm)/=3 .and. kcs(nmu)/=3 .and. kcs(nm)/=-1 .and. kcs(nmu)/=-1 ) then
           do k = kfumin(nm), kfumx0(nm)
              if (kfuz0(nm,k) > 0) then
                 if (u0(nm,k) > 0.0_fp) then
