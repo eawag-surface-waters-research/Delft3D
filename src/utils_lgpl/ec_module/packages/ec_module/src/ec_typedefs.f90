@@ -101,7 +101,7 @@ module m_ec_typedefs
         character(len=50)                          ::  timeunit            !< netcdf-convention time unit definition 
         integer                                    ::  timeint             !< Type of time interpolation 
         integer                                    ::  vptyp               !< Type of specification of vertical position
-        real(hp), allocatable                      ::  vp(:)               !< vertical positions  
+        real(hp), pointer                          ::  vp(:) => null()     !< vertical positions  
         integer                                    ::  numlay = 1          !< number of vertical layers 
         integer                                    ::  zInterpolationType  !< Type of vertical interpolation 
         real(hp)                                   ::  missing             !< Missing value 
@@ -117,6 +117,8 @@ module m_ec_typedefs
         integer                                    ::  ncvarndx = -1       !< varid in the associated netcdf for the requested quantity 
         integer                                    ::  nclocndx = -1       !< index in the timeseries_id dimension for the requested location 
         integer                                    ::  nctimndx =  1       !< record number to be read 
+        integer, dimension(:), allocatable         ::  ncdimvector         !< List of dimensions in NetCDF describing the chosen variable
+        integer, allocatable, dimension(:)         ::  dimvector           !< dimension ID's indexing the variable of interest
         !
         integer                 ::  astro_component_column = -1  !< number of the column, containing astronomic components
         integer                 ::  astro_amplitude_column = -1  !< number of the column, containing astronomic amplitudes
@@ -137,19 +139,22 @@ module m_ec_typedefs
         integer                                      ::  ncid            !< unique NetCDF ncid 
         character(len=maxFileNameLen)                ::  ncname          !< netCDF filename
         integer, allocatable, dimension(:)           ::  dimlen          !< lengths of dimensions 
-        character(len=maxFileNameLen), allocatable, dimension(:)       ::  standard_names          !< list of standard names
-        character(len=maxFileNameLen), allocatable, dimension(:)       ::  variable_names          !< list of variable names
+        character(len=maxFileNameLen), allocatable, dimension(:)  ::  standard_names   !< list of standard names
+        character(len=maxFileNameLen), allocatable, dimension(:)  ::  variable_names   !< list of variable names
         integer                                      ::  nDims = 0       !< Number of dimensions 
         integer                                      ::  nTims = 0       !< Number of timeseries 
+        integer                                      ::  nLayer = -1     !< Number of vertical layers, default single layer
         integer                                      ::  nVars = 0       !< Number of variables 
         character(len=maxNameLen), allocatable, dimension(:)  ::  tsid   !< list of timeseries identifiers
-        integer                                      ::  tsidid = -1     !< var_id for the timeseries ID variable 
+        integer                                      ::  tsidvarid = -1  !< var_id for the timeseries ID variable 
         integer                                      ::  tsiddimid = -1  !< dim_id for the timeseries IDs coordinate
-        integer                                      ::  timeid = -1     !< var_id for the designated time variable 
+        integer                                      ::  timevarid = -1  !< var_id for the designated time variable 
         integer                                      ::  timedimid = -1  !< dim_id for the time coordinate 
-        integer                                      ::  layerid = -1    !< var_id for the verical layer variable 
+        integer                                      ::  layervarid = -1 !< var_id for the verical layer variable 
         integer                                      ::  layerdimid = -1 !< dim_id for the vertical coordinate
         character(len=50)                            ::  timeunit        !< netcdf-convention time unit definition 
+        integer                                      ::  vptyp = -1      !< vertical coordinate type
+        real(hp), allocatable, dimension(:)          ::  vp              !< vertical coordinate (layers)
    end type 
 
    type tEcNetCDFPtr
@@ -219,7 +224,7 @@ module m_ec_typedefs
       integer                             :: nCoordinates   !< number of coordinate pairs
       integer                             :: n_cols         !< number of columns in a data field
       integer                             :: n_rows         !< number of rows in a data field
-      integer                             :: itype3D        !< sigma (0) or z (1)
+      integer                             :: vptyp = -1     !< sigma (0) or z (1)
       real(hp)                            :: x0             !< seed coordinate for equidistant x-coordinates
       real(hp)                            :: y0             !< seed coordinate for equidistant x-coordinates
       real(hp)                            :: dx             !< step size in x for equidistant x-coordinates
@@ -235,6 +240,8 @@ module m_ec_typedefs
       character(len=maxNameLen)           :: radius_unit    !< unit of the radius of a spiderweb
       character(len=maxNameLen), dimension(:),   pointer :: ids  => null() !< string array with locations
       real(hp),                  dimension(:,:), pointer :: xyen => null() !< 
+      real(hp),                  dimension(:),   pointer :: zmin => null() !< vertical min
+      real(hp),                  dimension(:),   pointer :: zmax => null() !< vertical max
    end type tEcElementSet
 
    type tEcElementSetPtr

@@ -194,9 +194,9 @@ module m_ec_module
       module procedure ecElementSetSetZArray
    end interface ecSetElementSetZArray
 
-   interface ecSetElementSetItype3D
-      module procedure ecElementSetSetItype3D
-   end interface ecSetElementSetItype3D
+   interface ecSetElementSetvptyp
+      module procedure ecElementSetSetvptyp
+   end interface ecSetElementSetvptyp
    
    interface ecSetElementSetX0Dx
       module procedure ecElementSetSetX0Dx

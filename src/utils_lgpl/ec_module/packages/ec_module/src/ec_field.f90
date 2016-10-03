@@ -27,7 +27,7 @@
 !  $HeadURL$
 
 !> This module contains all the methods for the datatype tEcField.
-!! @author arjen.markus@deltares.nl
+!! @author arthur.vanDam@deltares.nl		test
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
 !! @author edwin.bos@deltares.nl

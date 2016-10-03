@@ -125,6 +125,11 @@ module m_ec_provider
                 endif 
             endif
             bcBlockPtr%ftype=BC_FTYPE_NETCDF
+            bcBlockPtr%vptyp=bcBlockPtr%ncptr%vptyp
+            if (allocated(bcBlockPtr%ncptr%vp)) then
+               bcBlockPtr%vp => bcBlockPtr%ncptr%vp
+               bcBlockPtr%numlay = bcBlockPtr%ncptr%nLayer
+            endif
          else
            call setECMessage("Forcing file ("//trim(fileName)//") should either have extension .nc (netcdf timeseries file) or .bc (ascii BC-file).")
            return
@@ -1202,7 +1207,7 @@ module m_ec_provider
          integer                             :: field0Id      !< id of new Field
          integer                             :: field1Id      !< id of new Field
          integer                             :: itemId        !< id of new Item
-         integer                             :: layer_type    !< type of layer
+         integer                             :: vptyp         !< type of layer
          integer                             :: zInterpolationType    !< vertical interpolation type
          type(tEcItem), pointer              :: valueptr      !< Item containing z/sigma-dependent values
          type(tEcBCBlock), pointer           :: bcptr
@@ -1240,9 +1245,9 @@ module m_ec_provider
             !
             call str_lower(rec)
             if ( index(rec,'sigma') /= 0  ) then
-               layer_type = 0
+               vptyp = BC_VPTYP_PERCBED
             else if ( index(rec,'z') /= 0 ) then
-               layer_type = 1
+               vptyp = BC_VPTYP_ZBED             ! rl666, or should this be BC_VPTYP_ZDATUM
             else
                call setECMessage("Invalid LAYER_TYPE specified in header.")
                return
@@ -1295,27 +1300,8 @@ module m_ec_provider
                return 
             endif 
             bcptr => fileReaderPtr%bc
-            select case (bcptr%vptyp)
-              case (BC_VPTYP_PERCBED)
-                 layer_type = 0
-              case (BC_VPTYP_ZBED)
-                 layer_type = 1
-              case default
-                 ! Invalid vertical position specification type 
-                 call setECMessage("Invalid or missing vertical position type.")
-		           return
-              end select 
-              zInterpolationType = bcptr%zInterpolationType
-	     !   Defined types (yet to be implemented):
-	     !   integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed 
-	     !   integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum 
-	     !   integer, parameter :: BC_VPTYP_BEDSURF     = 3   !< bedsurface 
-	     !   integer, parameter :: BC_VPTYP_PERCSURF    = 4   !< percentage from surface 
-	     !   integer, parameter :: BC_VPTYP_ZBED        = 5   !< z from bed 
-	     !   integer, parameter :: BC_VPTYP_ZSURF       = 6   !< z from surface 
-        !   Acquire the number of layers, 
-        !   Corresponds with the number of matching quantity blocks in a bc-header
-
+            vptyp = bcptr%vptyp
+            zInterpolationType = bcptr%zInterpolationType
             numlay = bcptr%numlay
             vectormax = bcptr%quantity%vectormax
 
@@ -1351,12 +1337,15 @@ module m_ec_provider
          if (.not.ecElementSetSetXArray(instancePtr, elementSetId, xws))                 return
          if (.not.ecElementSetSetYArray(instancePtr, elementSetId, yws))                 return
          if (.not.ecElementSetSetZArray(instancePtr, elementSetId, zws))                 return 
-         if (.not.ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, 1))      return 
+!        if (.not.ecElementSetSetVType(instancePtr, elementSetId, vptyp))           return 
+!        if (.not.ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, 1))      return 
+         if (.not.ecElementSetSetProperties(instancePtr, elementSetId, vptyp=vptyp, &
+                                                                       ncoords=1   ))    return
 
          field0Id = ecInstanceCreateField(instancePtr)
-         if (.not.(ecFieldCreate1dArray(instancePtr, field0Id, numlay*vectormax)))        return
+         if (.not.(ecFieldCreate1dArray(instancePtr, field0Id, numlay*vectormax)))       return
          field1Id = ecInstanceCreateField(instancePtr)
-         if (.not.(ecFieldCreate1dArray(instancePtr, field1Id, numlay*vectormax)))        return
+         if (.not.(ecFieldCreate1dArray(instancePtr, field1Id, numlay*vectormax)))       return
          itemId = ecInstanceCreateItem(instancePtr)
          if (.not.ecItemSetRole(instancePtr, itemId, itemType_source))       return
          if (.not.ecItemSetType(instancePtr, itemId, accessType_fileReader)) return
@@ -1422,10 +1411,10 @@ module m_ec_provider
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
           
-         logical		                     ::	is_tim, is_cmp, is_tim3d, is_qh
+         logical		                        ::	is_tim, is_cmp, is_tim3d, is_qh
          logical                             :: has_label 
          integer                             :: lblstart, lblend                
-         type(tEcFileReader), pointer	     :: fileReaderPtr2
+         type(tEcFileReader), pointer	      :: fileReaderPtr2
          !
 
 !        initialization         
@@ -1930,6 +1919,7 @@ module m_ec_provider
       type(tEcItem), pointer              :: itemt3D, itemSRC
       integer                             :: elementSetId
       integer                             :: fieldId
+      integer                             :: vptyp
       integer   :: iconn, isrc
       vectormax = 1
       zInterpolationType = 0
@@ -1946,9 +1936,13 @@ module m_ec_provider
             if ( magnitude /= ec_undef_int ) then
                Itemt3D => ecSupportFindItem(instancePtr, magnitude)
                zs((i-1)*maxlay+1:(i-1)*maxlay+size(itemt3D%elementSetPtr%z)) = itemt3D%elementSetPtr%z
+               vptyp = itemt3D%elementSetPtr%vptyp
             end if
          end do
          if (success) success = ecElementSetSetZArray(instancePtr, elementSetId, zs)
+
+         if (.not. ecElementSetSetProperties(instancePtr, elementSetId, vptyp=vptyp)) return
+
          if (.not. ecFieldCreate1dArray(instancePtr, fieldId, n_points*maxlay)) then
             success = .false.
          end if

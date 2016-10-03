@@ -49,7 +49,7 @@ module m_ec_elementSet
    public :: ecElementSetSetXArray
    public :: ecElementSetSetYArray
    public :: ecElementSetSetZArray
-   public :: ecElementSetSetItype3D
+   public :: ecElementSetSetvptyp
    public :: ecElementSetSetX0Dx
    public :: ecElementSetSetY0Dy
    public :: ecElementSetSetLatitudeArray
@@ -60,12 +60,21 @@ module m_ec_elementSet
    public :: ecElementSetSetMaskPointer
    public :: ecElementSetSetMaskArray
    public :: ecElementSetSetNumberOfCoordinates
+   public :: ecElementSetSetVType
+   public :: ecElementSetSetProperties
+   public :: ecElementSetGetProperties
    public :: ecElementSetSetSouthPoleLatitude
    public :: ecElementSetSetSouthPoleLongitude
    public :: ecElementSetSetLocations
    public :: ecElementSetSetRadius
    public :: ecElementSetSetRowsCols
    public :: ecElementSetSetXyen
+   public :: ecElementSetGetAbsZ
+
+   interface ecElementSetGetAbsZ
+      module procedure ecElementSetGetAbsZbyPtr
+      module procedure ecElementSetGetAbsZbyId
+   end interface ecElementSetGetAbsZ
    
    contains
       
@@ -105,7 +114,7 @@ module m_ec_elementSet
          elementSetPtr%lonsp = ec_undef_hp
          elementSetPtr%radius = ec_undef_hp
          elementSetPtr%radius_unit = ' '
-         elementSetPtr%itype3D = ec_undef_int
+         elementSetPtr%vptyp = ec_undef_int
       end function ecElementSetCreate
       
       ! =======================================================================
@@ -128,7 +137,7 @@ module m_ec_elementSet
             deallocate(elementSet%y, stat = istat)
             if (istat /= 0) success = .false.
          end if
-         if ( elementSet%itype3D.ne.ec_undef_int ) then
+         if ( elementSet%vptyp.ne.ec_undef_int ) then
             elementSet%z => null()
          else
             if (associated(elementSet%z)) then
@@ -354,12 +363,14 @@ module m_ec_elementSet
       ! =======================================================================
       
       !> Create and fill the array of z/sigma-coordinates and infer nCoordinates.
-      function ecElementSetSetZArray(instancePtr, elementSetId, zArray, Lpointer_) result(success)
+      function ecElementSetSetZArray(instancePtr, elementSetId, zArray, pzmin, pzmax, Lpointer_) result(success)
          logical                               :: success      !< function status
          type(tEcInstance), pointer            :: instancePtr  !< intent(in)
          integer,                   intent(in) :: elementSetId !< unique ElementSet id
-         real(hp), dimension(:),    intent(in), target :: zArray       !< new z-coordinates of the ElementSet
-         logical,                   intent(in), optional :: Lpointer_    !< zArray is pointer to the new z-coordinates of the ElementSet (.true.) or not (.false.)
+         real(hp), dimension(:),    intent(in), target  :: zArray       !< new z-coordinates of the ElementSet
+         real(hp), dimension(:),    optional,   pointer :: pzmin
+         real(hp), dimension(:),    optional,   pointer :: pzmax
+         logical,                   optional, intent(in):: Lpointer_    !< zArray is pointer to the new z-coordinates of the ElementSet (.true.) or not (.false.)
          !
          type(tEcElementSet),    pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
          integer                         :: newSize       !< size of zArray
@@ -380,7 +391,9 @@ module m_ec_elementSet
          elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
-                elementSetPtr%ofType == elmSetType_polytim) then
+               elementSetPtr%ofType == elmSetType_polytim) then
+               if (present(pzmin)) elementSetPtr%zmin => pzmin
+               if (present(pzmax)) elementSetPtr%zmax => pzmax
                if ( Lpointer ) then
                   elementSetPtr%z => zArray
                   success = .true.
@@ -388,9 +401,7 @@ module m_ec_elementSet
                   newSize = size(zArray)
                   call reallocP(elementSetPtr%z, newSize, stat = istat, keepExisting = .false.)
                   if (istat == 0) then
-                     do i=1, newSize
-                        elementSetPtr%z(i) = zArray(i)
-                     end do
+                     elementSetPtr%z(1:newSize) = zArray(1:newSize)
                      success = .true.
                   end if
                end if ! if ( Lpointer) 
@@ -716,6 +727,105 @@ module m_ec_elementSet
       end function ecElementSetSetMaskArray
       
       ! =======================================================================
+      !> Getter for a variety of fields of the ElementSet.
+      function ecElementSetGetProperties(instancePtr, elementSetId, ncoords, vptyp) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: elementSetId !< unique ElementSet id
+         integer, optional, intent(out)        :: ncoords      !< new number of coordinates of the ElementSet
+         integer, optional, intent(out)        :: vptyp        !< type of vertical coordinate
+         type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
+
+         success = .false.
+         elementSetPtr => null()
+         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
+         if (.not.associated(elementSetPtr)) then
+            call setECMessage("ElementSet not found.")
+            return
+         end if
+
+         if (present(ncoords)) ncoords=elementSetPtr%nCoordinates
+         if (present(vptyp)) vptyp=elementSetPtr%vptyp
+         success = .true.
+      end function ecElementSetGetProperties
+
+
+      !> Setter for a variety of fields of the ElementSet.
+      function ecElementSetSetProperties(instancePtr, elementSetId, ncoords, vptyp) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: elementSetId !< unique ElementSet id
+         integer, optional, intent(in)         :: ncoords      !< new number of coordinates of the ElementSet
+         integer, optional, intent(in)         :: vptyp        !< type of vertical coordinate
+         !
+         type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
+         !
+         success = .false.
+         elementSetPtr => null()
+         !
+         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
+         if (.not.associated(elementSetPtr)) then
+            call setECMessage("ElementSet not found.")
+            return
+         end if
+
+         if (present(ncoords)) then
+            if (associated(elementSetPtr)) then
+               if (elementSetPtr%ofType == elmSetType_cartesian .or. &
+                   elementSetPtr%ofType == elmSetType_cartesian_equidistant .or. &
+                   elementSetPtr%ofType == elmSetType_spheric .or. &
+                   elementSetPtr%ofType == elmSetType_spheric_equidistant .or. &
+                   elementSetPtr%ofType == elmSetType_Grib .or. &
+                   elementSetPtr%ofType == elmSetType_scalar .or. &
+                   elementSetPtr%ofType == elmSetType_Ids .or. &
+                   elementSetPtr%ofType == elmSetType_samples) then
+                  elementSetPtr%nCoordinates = ncoords
+                  success = .true.
+               else
+                  call setECMessage("WARNING: ec_elementSet::ecElementSetSetNumberOfCoordinates: Won't set the number of coordinates for this ElementSet type.")
+               end if
+            else
+               call setECMessage("ERROR: ec_elementSet::ecElementSetSetNumberOfCoordinates: Cannot find an ElementSet with the supplied id.")
+            end if
+         end if
+         if (present(vptyp)) then
+            select case (vptyp)
+            case (BC_VPTYP_PERCBED:BC_VPTYP_ZSURF)
+               elementSetPtr%vptyp = vptyp
+            case default
+               call setECMessage("Invalid type of vertical coordinate")
+            end select
+         end if
+         success = .true.
+      end function ecElementSetSetProperties
+      
+      
+      !> Set type of vertical coordinate
+      function ecElementSetSetVType(instancePtr, elementSetId, vptyp) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: elementSetId !< unique ElementSet id
+         integer, optional, intent(in)         :: vptyp        !< type of vertical coordinate
+         !
+         type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
+         !
+         success = .false.
+         elementSetPtr => null()
+         !
+         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
+
+         if (present(vptyp)) then
+            select case (vptyp)
+            case (BC_VPTYP_PERCBED:BC_VPTYP_ZSURF)
+               elementSetPtr%vptyp = vptyp
+            case default
+               call setECMessage("Invalid type of vertical coordinate")
+            end select
+         end if
+         success = .true.
+      end function ecElementSetSetVType
+
+      
       
       !> Set the number of coordinates which are available in this ElementSet.
       function ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, nCoordinates) result(success)
@@ -915,11 +1025,11 @@ module m_ec_elementSet
       ! =======================================================================
       
       !> Set the type of the 3D mesh.
-      function ecElementSetSetItype3D(instancePtr, elementSetId, itype3D) result(success)
+      function ecElementSetSetvptyp(instancePtr, elementSetId, vptyp) result(success)
          logical                               :: success      !< function status
          type(tEcInstance), pointer            :: instancePtr  !< intent(in)
          integer,                   intent(in) :: elementSetId !< unique ElementSet id
-         integer,                   intent(in) :: iType3D      !< type of the 3D mesh, sigma (0) or z (1)
+         integer,                   intent(in) :: vptyp        !< type of the 3D mesh, sigma (0) or z (1)
          !
          type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
          !
@@ -928,11 +1038,66 @@ module m_ec_elementSet
          !
          elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
          if (associated(elementSetPtr)) then
-            elementSetPtr%itype3D = itype3D
+            elementSetPtr%vptyp = vptyp
             success = .true.
          else
-            call setECMessage("ERROR: ec_elementSet::ecElementSetSetItype3D: Cannot find an ElementSet with the supplied id.")
+            call setECMessage("ERROR: ec_elementSet::ecElementSetSetvptyp: Cannot find an ElementSet with the supplied id.")
          end if
-      end function ecElementSetSetItype3D
+      end function ecElementSetSetvptyp
+
+      function ecElementSetGetAbsZbyPtr(elementSetPtr, kbegin, kend, zmin, zmax, zArray) result(success)
+         logical                                :: success      !< function status
+         type(tEcElementSet),       pointer     :: elementSetPtr!< intent(in)
+         integer,                   intent(in)  :: kbegin       !< unique ElementSet id
+         integer,                   intent(in)  :: kend         !< unique ElementSet id
+         real(hp),                  intent(in)  :: zmin         !< returned array
+         real(hp),                  intent(in)  :: zmax         !< returned array
+         real(hp), dimension(:),    intent(out) :: zArray       !< returned array
+         !
+         success = .false.
+         !
+         select case (elementSetPtr%vptyp)
+         case(BC_VPTYP_PERCBED)     ! positive percentage from bed
+               zArray = elementSetPtr%z(kbegin:kend) * (zmax-zmin) + zmin
+         case(BC_VPTYP_PERCSURF)    ! negative percentage from surface
+               zArray = elementSetPtr%z(kbegin:kend) * (zmin-zmax) + zmax
+         case(BC_VPTYP_ZBED)        ! absolute positive distance from bed
+               zArray = elementSetPtr%z(kbegin:kend) + zmin
+         case(BC_VPTYP_ZSURF)       ! absolute negative distance from surface
+               zArray = elementSetPtr%z(kbegin:kend)*(-1) + zmax
+         case(BC_VPTYP_ZDATUM)      ! absolute positive distance from datum, nothing to be done, just copy!
+               zArray = elementSetPtr%z(kbegin:kend)
+         case default
+               call setECMessage("ERROR: ec_elementSet::ecElementSetGetAbsZ: Unknown vertical coordinate type.")
+               return
+         end select
+         success = .true.
+      end function ecElementSetGetAbsZbyPtr
+
+      function ecElementSetGetAbsZbyId(instancePtr, elementSetId, kbegin, kend, zmin, zmax, zArray) result(success)
+         logical                                :: success      !< function status
+         type(tEcInstance), pointer             :: instancePtr  !< intent(in)
+         integer,                   intent(in)  :: elementSetId !< unique ElementSet id
+         integer,                   intent(in)  :: kbegin       !< unique ElementSet id
+         integer,                   intent(in)  :: kend         !< unique ElementSet id
+         real(hp),                  intent(in)  :: zmin         !< returned array
+         real(hp),                  intent(in)  :: zmax         !< returned array
+         real(hp), dimension(:),    intent(out) :: zArray       !< returned array
+         !
+         type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
+         !
+         success = .false.
+         elementSetPtr => null()
+         !
+         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
+         if (associated(elementSetPtr)) then
+            success = ecElementSetGetAbsZbyPtr(elementSetPtr, kbegin, kend, zmin, zmax, zArray)
+            return
+         else
+            call setECMessage("ERROR: ec_elementSet::ecElementSetGetAbsZ: Cannot find an ElementSet with the supplied id.")
+            return
+         end if
+      end function ecElementSetGetAbsZbyId
+      
 end module m_ec_elementSet
 

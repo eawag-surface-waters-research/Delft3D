@@ -121,6 +121,10 @@ module m_ec_parameters
    integer, parameter :: zinterpolate_linear                    = 1 !< linear interpolation
    integer, parameter :: zinterpolate_block                     = 2 !< piecewise constant interpolation (block-from)
    integer, parameter :: zinterpolate_log                       = 3 !< logarithmic
+
+   ! enumeration for vertical coordinate types
+   integer, parameter :: ztype_sigma                            = 0 !< sigma coordinates
+   integer, parameter :: ztype_z                                = 1 !< z (absolute) coordinates
    !
    ! enumeration for operand types
    integer, parameter :: operand_undefined       = 0

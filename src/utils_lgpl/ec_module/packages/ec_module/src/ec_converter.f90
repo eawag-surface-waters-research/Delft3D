@@ -1065,6 +1065,7 @@ module m_ec_converter
       !> Execute the Converters in the Connection sequentially.
       !! meteo1 : polyint
       function ecConverterPolytim(connection, timesteps) result (success)
+      use m_ec_elementset, only:ecElementSetGetAbsZ
       use m_ec_message
          logical                            :: success    !< function status
          type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
@@ -1079,9 +1080,12 @@ module m_ec_converter
          integer  :: maxlay_srcR      !< number of layers at the RIGHT interpolation support point
          real(hp) :: fieldValue       !< 
          integer  :: kbegin, kend, kbeginL, kendL, kbeginR, kendR, idxL1, idxR1, idxL2, idxR2 !< 
-         real(hp) :: sigma, wwL, wwR  !< 
+         real(hp) :: wwL, wwR  !< 
          real(hp), dimension(:), allocatable :: valL1, valL2, valR1, valR2, val !< 
-         real(hp), dimension(:), allocatable :: sigmaL, sigmaR !< 
+         real(hp), dimension(:), allocatable :: sigmaL, sigmaR, sigma !< 
+         real(hp), dimension(:),     pointer :: zmin => null() !< vertical min
+         real(hp), dimension(:),     pointer :: zmax => null() !< vertical max
+
          integer  :: idx              !< helper variable
          integer  :: vectormax
          integer  :: from, thru       !< contiguous range of indices in the target array 
@@ -1128,6 +1132,9 @@ module m_ec_converter
                else
                   maxlay_tgt = 1 
                end if
+				   ! zmax and zmin are absolute top and bottom at target point coordinates
+				   zmax => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmax
+				   zmin => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmin
                !
                ! The polytim FileReader's source Item is actually a target Item, containing the time-interpolated wind_magnitude from the subFileReaders.
                do i=1, connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
@@ -1143,6 +1150,8 @@ module m_ec_converter
                            ! 3D subproviders
                            maxlay_src = size(connection%sourceItemsPtr(1)%ptr%ElementSetPtr%z) /   &
                                         size(connection%sourceItemsPtr(1)%ptr%ElementSetPtr%x)
+                           allocate(sigma(maxlay_tgt))                                               ! is now a copy, not ptr
+                           sigma = connection%targetItemsPtr(1)%ptr%elementSetPtr%z
                            if (allocated(sigmaL)) deallocate(sigmaL)
                            allocate(sigmaL(maxlay_src))
                            if (allocated(sigmaR)) deallocate(sigmaR)
@@ -1168,7 +1177,23 @@ module m_ec_converter
                                  kbeginR = maxlay_src*(kR-1)+1                       ! refers to source right column 
                                  kendR   = maxlay_src*kR
                                  sigmaR  = connection%sourceItemsPtr(1)%ptr%ElementSetPtr%z(kbeginR:kendR)
-                                 !
+                                 
+				                     ! Convert Z-coordinate to absolute z wrt datum
+                                 ! For the time being, let's assume that both support points have the same 
+                                 ! zmin and zmax as the support points. This way interpolation from sigma->sigma
+                                 ! and z->z gives the same result. 
+                                 ! Convert target elementset 
+                                 if (.not.ecElementSetGetAbsZ (connection%targetItemsPtr(1)%ptr%ElementSetPtr,   &
+                                                                                                  kbegin,kend,   &
+                                                                                        zmin(i),zmax(i),sigma))  return
+                                 ! Convert source elementset, first point 
+                                 if (.not.ecElementSetGetAbsZ (connection%sourceItemsPtr(1)%ptr%ElementSetPtr,   &
+                                                                                                  kbeginR,kendR, &
+                                                                                       zmin(i),zmax(i),sigmaR))  return
+                                 ! Convert source elementset, second point 
+                                 if (.not.ecElementSetGetAbsZ (connection%sourceItemsPtr(1)%ptr%ElementSetPtr,   &
+                                                                                                  kbeginL,kendL, &
+                                                                                       zmin(i),zmax(i),sigmaL))  return
                                  do maxlay_srcL=maxlay_src,1,-1
                                     if (sigmaL(maxlay_srcL)>0.5*ec_undef_hp) exit
                                  enddo 
@@ -1190,10 +1215,9 @@ module m_ec_converter
                                  !
                                  do k=kbegin,kend
                                     ! RL: BUG!!! z(k) not initialised if the model is not 3D !!! TO BE FIXED !!!!!!!!!!!!!!
-                                    sigma = connection%targetItemsPtr(1)%ptr%elementSetPtr%z(k)
-                                    if ( sigma < 0.5*ec_undef_hp ) cycle
+                                    if ( sigma(k) < 0.5*ec_undef_hp ) cycle
                                     do kkL=0, maxlay_srcL-1                       ! find vertical indices and weights for the LEFT point
-                                       if (sigma<=sigmaL(kkL+1)) exit 
+                                       if (sigma(k)<=sigmaL(kkL+1)) exit 
                                     enddo
                                     if (kkL==0) then                              ! only use upper of idxL1 and idxL2
                                        wwL = 0.5d0
@@ -1204,13 +1228,13 @@ module m_ec_converter
                                        idxL1 = maxlay_src*(kL-1) + kkL 
                                        idxL2 = idxL1
                                     else                                          ! save to use both idxL1 AND idxL2
-                                       wwL = (sigmaL(kkL+1)-sigma) / (sigmaL(kkL+1)-sigmaL(kkL))
+                                       wwL = (sigmaL(kkL+1)-sigma(k)) / (sigmaL(kkL+1)-sigmaL(kkL))
                                        idxL1 = maxlay_src*(kL-1) + kkL
                                        idxL2 = maxlay_src*(kL-1) + kkL + 1
                                     endif 
 
                                     do kkR=0, maxlay_srcR-1                       ! find vertical indices and weights for the RIGHT point
-                                       if (sigma<=sigmaR(kkR+1)) exit 
+                                       if (sigma(k)<=sigmaR(kkR+1)) exit 
                                     enddo
                                     if (kkR==0) then
                                        wwR = 0.5d0
@@ -1221,7 +1245,7 @@ module m_ec_converter
                                        idxR1 = maxlay_src*(kR-1) + kkR
                                        idxR2 = idxR1
                                     else 
-                                       wwR = (sigmaR(kkR+1)-sigma) / (sigmaR(kkR+1)-sigmaR(kkR))
+                                       wwR = (sigmaR(kkR+1)-sigma(k)) / (sigmaR(kkR+1)-sigmaR(kkR))
                                        idxR1 = maxlay_src*(kR-1) + kkR
                                        idxR2 = maxlay_src*(kR-1) + kkR + 1
                                     endif 
@@ -1296,6 +1320,9 @@ module m_ec_converter
                call setECMessage("ERROR: ec_converter::ecConverterPolytim: Unsupported interpolation type requested.")
                return
          end select
+         if (allocated(sigma)) deallocate(sigma)
+         if (allocated(sigmaL)) deallocate(sigmaL)
+         if (allocated(sigmaR)) deallocate(sigmaR)
          success = .true.   
       end function ecConverterPolytim
 !     maxlaysource 
@@ -1957,11 +1984,11 @@ module m_ec_converter
                      connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
                            (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      & 
                          +         spwf  * uintp
-                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      & 
+                     connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n)      & 
                          +         spwf  * vintp
-                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      &
+                     connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n)      &
                          +         spwf  * pintp
                      connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
                      connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
