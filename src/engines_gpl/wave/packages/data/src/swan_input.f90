@@ -4573,8 +4573,10 @@ subroutine write_swan_inp (wavedata, calccount, &
     endif
     if (sr%triads) then
        line(1:6) = 'TRIAD '
-       write (line(15:29), '(F7.4,1X,F7.4)') sr%cftriad1, sr%cftriad2
-       line(33:42)= ' 0.2  0.01'
+       !write (line(15:29), '(F7.4,1x,F7.4)') sr%cftriad1, sr%cftriad2
+       write (line(15:41), '(a,F7.4,a,F7.4)') 'trfac=',sr%cftriad1, ' cutfr=', sr%cftriad2
+       !line(33:42)= ' 0.2  0.01'
+       line(44:66)= ' urcrit=0.2 urslim=0.01'
        write (luninp, '(1X,A)') line
        line(1:79) = ' '
     endif
