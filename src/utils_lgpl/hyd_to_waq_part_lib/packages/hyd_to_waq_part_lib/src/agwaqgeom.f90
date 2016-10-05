@@ -43,116 +43,100 @@ contains
 !! So if the edges in the un-aggregated mesh are ordered (first flow links, then closed edges),
 !! then the edges in the aggregated mesh will still be ordered (first flow links, then closed edges).
 !!
-!! NOTE: this subroutine uses pointers as dynamic aliases.
-!!
-!! NOTE: do not pass already filled output mesh geometries or output_edge_type arrays to this function,
 !! since array pointers will become disassociated, possibly causing memory leaks.
-subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, input_edge_type, output_edge_type, face_mapping_table)
+function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_type, face_mapping_table) result(success)
     use io_ugrid
     use m_alloc
 
     implicit none
 
-    type(t_ug_meshgeom), intent(in)    :: input_mesh_geometry   !< The mesh geometry to be aggregated.
-    type(t_ug_meshgeom), intent(inout) :: output_mesh_geometry  !< Aggregated mesh geometry.
-    integer, pointer, intent(in)       :: input_edge_type(:)    !< The edge type variable to be aggregated.
-    integer, pointer, intent(out)      :: output_edge_type(:)   !< Aggregated edge type variable.
-    integer, intent(in)                :: face_mapping_table(:) !< Mapping table flow cell -> waq cell.
+    type(t_ug_meshgeom), intent(in)                 :: input !< The mesh geometry to be aggregated.
+    type(t_ug_meshgeom), intent(inout)              :: output !< Aggregated mesh geometry.
+    integer, dimension(:), intent(in)               :: input_edge_type !< The edge type array to be aggregated.
+    integer, dimension(:), allocatable, intent(out) :: output_edge_type !< Aggregated edge type array.
+    integer, dimension(:), intent(in)               :: face_mapping_table !< Mapping table flow cells -> waq cells.
+    logical                                         :: success !< Result status, true if successful.
 
     character(len=255)                       :: message !< Temporary variable for writing log messages.
     integer, parameter                       :: missing_value = -999
-    integer, allocatable, target             :: node_mapping_table(:), reverse_node_mapping_table(:), edge_mapping_table(:), temp_reverse_edge_mapping_table(:) !< Mapping table arrays.
-    integer, pointer                         :: reverse_edge_mapping_table(:) !< Mapping table pointers.
-    integer, pointer                         :: input_edge_nodes(:,:), input_face_nodes(:,:), input_edge_faces(:,:) !< Input pointers.
+    integer, dimension(:), allocatable       :: node_mapping_table, reverse_node_mapping_table, reverse_edge_mapping_table !< Mapping tables.
     integer                                  :: input_edge_count, output_edge_count, output_node_count, output_face_count, max_nodes_per_face, node_count !< Counters.
     integer                                  :: i, j, input_edge, output_edge, input_node, output_node, output_face !< Counters.
-    integer                                  :: faces(2) !< Helper arrays.
-    integer, allocatable                     :: input_edge_output_faces(:,:), face_edge_count(:), nodes(:) !< Helper arrays.
+    integer, dimension(2)                    :: faces !< Helper array.
+    integer, dimension(:,:), allocatable     :: input_edge_output_faces !< Helper array.
+    integer, dimension(:), allocatable       :: face_edge_count, nodes !< Helper arrays.
     double precision                         :: area !< Output of subroutine comp_masscenter (not used here).
     integer                                  :: counterclockwise !< Output of subroutine comp_masscenter (not used here).
-    real(kind=dp), allocatable, target, save :: output_nodex(:), output_nodey(:), output_nodez(:), output_edgex(:), output_edgey(:), output_facex(:), output_facey(:) !< Output coordinate arrays.
-    integer, allocatable, target, save       :: temp_output_edge_nodes(:,:), temp_output_edge_faces(:,:), output_face_nodes(:,:), output_face_edges(:,:), output_face_links(:,:), temp_output_edge_type(:) !< Output arrays.
-    integer, pointer                         :: output_edge_nodes(:,:), output_edge_faces(:,:) !< Output pointers.
 
-
-    ! Get local pointers to input arrays.
-    input_edge_count = input_mesh_geometry%numEdge
-    input_edge_nodes => input_mesh_geometry%edge_nodes
-    input_face_nodes => input_mesh_geometry%face_nodes
-    input_edge_faces => input_mesh_geometry%edge_faces
+    success = .false.
 
 
     ! 1. Determine output edge_faces and edge_nodes.
     ! Apply face mapping table to edge faces.
+    input_edge_count = input%numEdge
     call realloc(input_edge_output_faces, (/ 2, input_edge_count /), fill=missing_value)
     do input_edge = 1,input_edge_count
         do i = 1,2
-            if (input_edge_faces(i, input_edge) /= missing_value) then
-                input_edge_output_faces(i, input_edge) = face_mapping_table(input_edge_faces(i, input_edge))
+            if (input%edge_faces(i, input_edge) /= missing_value) then
+                input_edge_output_faces(i, input_edge) = face_mapping_table(input%edge_faces(i, input_edge))
             end if
         end do ! i
     end do ! input_edge
     ! Create edge mapping table and output edge_faces and edge_nodes.
-    call realloc(edge_mapping_table, input_edge_count, fill=missing_value)
-    call realloc(temp_reverse_edge_mapping_table, input_edge_count)
-    call realloc(temp_output_edge_faces, (/ 2, input_edge_count /))
-    call realloc(temp_output_edge_nodes, (/ 2, input_edge_count /))
+    call realloc(reverse_edge_mapping_table, input_edge_count)
+    call reallocP(output%edge_faces, (/ 2, input_edge_count /))
+    call reallocP(output%edge_nodes, (/ 2, input_edge_count /))
     output_edge = 0
     do input_edge = 1,input_edge_count
         ! If edge points to the same aggregated face on either side, then edge is not needed anymore in the aggregated mesh.
         if (input_edge_output_faces(1, input_edge) /= input_edge_output_faces(2, input_edge)) then ! Edge that should stay.
             ! The remaining output edges have a different numbering.
             output_edge = output_edge + 1
-            edge_mapping_table(input_edge) = output_edge
-            temp_reverse_edge_mapping_table(output_edge) = input_edge
-            temp_output_edge_faces(1:2, output_edge) = input_edge_output_faces(1:2, input_edge)
-            temp_output_edge_nodes(1:2, output_edge) = input_edge_nodes(1:2, input_edge)
+            reverse_edge_mapping_table(output_edge) = input_edge
+            output%edge_faces(1:2, output_edge) = input_edge_output_faces(1:2, input_edge)
+            output%edge_nodes(1:2, output_edge) = input%edge_nodes(1:2, input_edge)
         end if
     end do
     output_edge_count = output_edge
     if (output_edge_count < 3) then
         call mess(LEVEL_ERROR, 'Edge count in aggregated mesh < 3. Mesh will not be aggregated.')
-        output_mesh_geometry = input_mesh_geometry
-        output_edge_type => input_edge_type
         return
     end if
     ! At this point edges have been renumbered automatically from input edge numbers to output edge numbers.
     ! Truncate arrays.
-    reverse_edge_mapping_table => temp_reverse_edge_mapping_table(1:output_edge_count)
-    output_edge_faces => temp_output_edge_faces(1:2, 1:output_edge_count)
-    output_edge_nodes => temp_output_edge_nodes(1:2, 1:output_edge_count)
+    call realloc(reverse_edge_mapping_table, output_edge_count, keepExisting=.true.)
+    call reallocP(output%edge_faces, (/ 2, output_edge_count /), keepExisting=.true.)
+    call reallocP(output%edge_nodes, (/ 2, output_edge_count /), keepExisting=.true.)
 
 
     ! 2. Determine output edge coordinates and types.
-    call realloc(output_edgex, output_edge_count)
-    call realloc(output_edgey, output_edge_count)
-    call realloc(temp_output_edge_type, output_edge_count)
+    call reallocP(output%edgex, output_edge_count)
+    call reallocP(output%edgey, output_edge_count)
+    call realloc(output_edge_type, output_edge_count)
     do output_edge = 1,output_edge_count
-        output_edgex(output_edge) = input_mesh_geometry%edgex(reverse_edge_mapping_table(output_edge))
-        output_edgey(output_edge) = input_mesh_geometry%edgey(reverse_edge_mapping_table(output_edge))
+        output%edgex(output_edge) = input%edgex(reverse_edge_mapping_table(output_edge))
+        output%edgey(output_edge) = input%edgey(reverse_edge_mapping_table(output_edge))
         ! Edge z coordinates are unknown.
-        temp_output_edge_type(output_edge) = input_edge_type(reverse_edge_mapping_table(output_edge))
+        output_edge_type(output_edge) = input_edge_type(reverse_edge_mapping_table(output_edge))
     end do
 
 
     ! 3. Create node mapping table.
-    call realloc(node_mapping_table, input_mesh_geometry%numNode, fill=missing_value)
+    call realloc(node_mapping_table, input%numNode, fill=missing_value)
     ! All nodes that are present in output edge_nodes should remain, all other nodes are not needed anymore in the aggregated mesh.
     ! First create mask of remaining nodes in node_mapping_table.
     do output_edge = 1,output_edge_count
-        node_mapping_table(output_edge_nodes(1:2, output_edge)) = 1
+        node_mapping_table(output%edge_nodes(1:2, output_edge)) = 1
     end do
     output_node_count = count(node_mapping_table == 1)
     if (output_node_count < 3) then
         call mess(LEVEL_ERROR, 'Node count in aggregated mesh < 3. Mesh will not be aggregated.')
-        output_mesh_geometry = input_mesh_geometry
-        output_edge_type => input_edge_type
         return
     end if
     ! Change mask into mapping table.
     call realloc(reverse_node_mapping_table, output_node_count)
     output_node = 0
-    do input_node = 1,input_mesh_geometry%numNode
+    do input_node = 1,input%numNode
         if (node_mapping_table(input_node) == 1) then ! Node that should stay.
             ! The remaining output nodes have a different numbering.
             output_node = output_node + 1
@@ -162,19 +146,19 @@ subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, i
     end do
     ! Renumber input node numbers to output node numbers in output edge_nodes, using node_mapping_table.
     do output_edge = 1,output_edge_count
-        output_edge_nodes(1, output_edge) = node_mapping_table(output_edge_nodes(1, output_edge))
-        output_edge_nodes(2, output_edge) = node_mapping_table(output_edge_nodes(2, output_edge))
+        output%edge_nodes(1, output_edge) = node_mapping_table(output%edge_nodes(1, output_edge))
+        output%edge_nodes(2, output_edge) = node_mapping_table(output%edge_nodes(2, output_edge))
     end do
 
 
     ! 4. Determine output node coordinates.
-    call realloc(output_nodex, output_node_count)
-    call realloc(output_nodey, output_node_count)
-    call realloc(output_nodez, output_node_count)
+    call reallocP(output%nodex, output_node_count)
+    call reallocP(output%nodey, output_node_count)
+    call reallocP(output%nodez, output_node_count)
     do output_node = 1,output_node_count
-        output_nodex(output_node) = input_mesh_geometry%nodex(reverse_node_mapping_table(output_node))
-        output_nodey(output_node) = input_mesh_geometry%nodey(reverse_node_mapping_table(output_node))
-        output_nodez(output_node) = input_mesh_geometry%nodez(reverse_node_mapping_table(output_node))
+        output%nodex(output_node) = input%nodex(reverse_node_mapping_table(output_node))
+        output%nodey(output_node) = input%nodey(reverse_node_mapping_table(output_node))
+        output%nodez(output_node) = input%nodez(reverse_node_mapping_table(output_node))
     end do
 
 
@@ -187,7 +171,7 @@ subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, i
 !    end forall
 !    faces_column = reshape(output_edge_faces, (/ output_edge_count * 2 /))
 !    ! Sort table on faces column.
-!    !TODO use quicksort? AK
+!    ! TODO use quicksort? AK
 !    qsort(faces_column, sorted_faces_column, sorted_indices)
 !    sorted_edges_column = edges_column(sorted_indices)
     ! This code assumes that output faces are numbered 1, 2, 3, etc. without gaps.
@@ -195,14 +179,12 @@ subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, i
     output_face_count = maxval(face_mapping_table)
     if (output_face_count < 1) then
         call mess(LEVEL_ERROR, 'Face count in aggregated mesh < 1. Mesh will not be aggregated.')
-        output_mesh_geometry = input_mesh_geometry
-        output_edge_type => input_edge_type
         return
     end if
     ! Count edges for each face.
     call realloc(face_edge_count, output_face_count, fill=0)
     do output_edge = 1,output_edge_count
-        faces = output_edge_faces(1:2, output_edge)
+        faces = output%edge_faces(1:2, output_edge)
         ! Add 1 edge for both faces.
         do i=1,2
             if (faces(i) == missing_value) then
@@ -216,19 +198,17 @@ subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, i
         if (face_edge_count(output_face) < 3) then
             write(message, *) 'Face edge count in aggregated mesh < 3 for face ', output_face, '. Mesh will not be aggregated.'
             call mess(LEVEL_ERROR, trim(message))
-            output_mesh_geometry = input_mesh_geometry
-            output_edge_type => input_edge_type
             return
         end if
     end do
     ! Determine max_nodes_per_face.
     max_nodes_per_face = maxval(face_edge_count)
     ! Determine nodes, edges and faces for each output face.
-    call realloc(output_face_edges, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
-    ! Re-use face_edge_count array to put edges in the next available spot in the output_face_edges array.
+    call reallocP(output%face_edges, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
+    ! Re-use face_edge_count array to put edges in the next available spot in the output%face_edges array.
     face_edge_count = 0
     do output_edge = 1,output_edge_count
-        faces = output_edge_faces(1:2, output_edge)
+        faces = output%edge_faces(1:2, output_edge)
         do i = 1,2
             if (faces(i) == missing_value) then
                 cycle
@@ -236,83 +216,64 @@ subroutine aggregate_ugrid_geometry(input_mesh_geometry, output_mesh_geometry, i
 
             ! Keep track of current number of edges for this face.
             face_edge_count(faces(i)) = face_edge_count(faces(i)) + 1
-            ! Put current edge in the next available spot in output_face_edges for this face.
-            output_face_edges(face_edge_count(faces(i)), faces(i)) = output_edge
+            ! Put current edge in the next available spot in output%face_edges for this face.
+            output%face_edges(face_edge_count(faces(i)), faces(i)) = output_edge
         end do ! i
     end do ! output_edge
     ! At this point the edges for each face are in random order.
 
 
     ! 6. Sort edges for each face in counter clockwise order.
-    ! At the same time store sorted nodes of sorted edges in output_face_nodes array.
-    call realloc(output_face_nodes, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
+    ! At the same time store sorted nodes of sorted edges in output%face_nodes array.
+    call reallocP(output%face_nodes, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
     do output_face = 1,output_face_count
         ! Sort edges for current output face.
-        call sort_edges(output_face, output_face_edges(1:face_edge_count(output_face), output_face), output_face_nodes(1:face_edge_count(output_face), output_face), &
-                input_edge_nodes, input_face_nodes, input_edge_faces, face_mapping_table, reverse_edge_mapping_table, node_mapping_table, output_edge_nodes)
+        call sort_edges(output_face, output%face_edges(1:face_edge_count(output_face), output_face), output%face_nodes(1:face_edge_count(output_face), output_face), &
+                input%edge_nodes, input%face_nodes, input%edge_faces, face_mapping_table, reverse_edge_mapping_table, node_mapping_table, output%edge_nodes)
     end do
 
 
     ! 7. Determine output face_links.
-    call realloc(output_face_links, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
+    call reallocP(output%face_links, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
     do output_face = 1,output_face_count
         ! Get output faces that are adjacent to the current output_face.
-        call get_adjacent_faces(output_face, output_face_edges, output_edge_faces, output_face_links(1:face_edge_count(output_face), output_face))
+        call get_adjacent_faces(output_face, output%face_edges, output%edge_faces, output%face_links(1:face_edge_count(output_face), output_face))
     end do
 
 
     ! 8. Determine output face coordinates.
     ! Here calculate the cell centroids (cell "centers of mass").
     call realloc(nodes, max_nodes_per_face)
-    call realloc(output_facex, output_face_count)
-    call realloc(output_facey, output_face_count)
+    call reallocP(output%facex, output_face_count)
+    call reallocP(output%facey, output_face_count)
     do output_face = 1,output_face_count
         node_count = face_edge_count(output_face)
 
         ! Reset nodes.
         nodes = missing_value
-        nodes(1:node_count) = output_face_nodes(1:node_count, output_face)
+        nodes(1:node_count) = output%face_nodes(1:node_count, output_face)
 
         ! Note that passed xs and ys arrays are larger than the passed polygon size (extra elements are not used in subroutine comp_masscenter).
-        call comp_masscenter(node_count, output_nodex(nodes(1:node_count)), output_nodey(nodes(1:node_count)), &
-                output_facex(output_face), output_facey(output_face), area, counterclockwise)
+        call comp_masscenter(node_count, output%nodex(nodes(1:node_count)), output%nodey(nodes(1:node_count)), &
+                output%facex(output_face), output%facey(output_face), area, counterclockwise)
+        ! Face z coordinates are unknown.
     end do
-    ! Face z coordinates are unknown.
 
 
-    ! Store output mesh in output_mesh_geometry.
-    output_mesh_geometry%meshName = trim(input_mesh_geometry%meshName)//'_agg'
-    output_mesh_geometry%dim = input_mesh_geometry%dim
-    output_mesh_geometry%crs => input_mesh_geometry%crs
+    ! Store remaining output variables in output mesh geometry.
+    output%meshName = trim(input%meshName)//'_agg'
+    output%dim = input%dim
+    output%crs => input%crs
 
-    output_mesh_geometry%numNode = output_node_count
-    output_mesh_geometry%numEdge = output_edge_count
-    output_mesh_geometry%numFace = output_face_count
-    output_mesh_geometry%maxnumfacenodes = max_nodes_per_face
-
-    output_mesh_geometry%nodex => output_nodex
-    output_mesh_geometry%nodey => output_nodey
-    output_mesh_geometry%nodez => output_nodez
-
-    output_mesh_geometry%edgex => output_edgex
-    output_mesh_geometry%edgey => output_edgey
-    ! Edge z coordinates are unknown.
-
-    output_mesh_geometry%facex => output_facex
-    output_mesh_geometry%facey => output_facey
-    ! Face z coordinates are unknown.
-
-    output_mesh_geometry%edge_nodes => output_edge_nodes
-    output_mesh_geometry%edge_faces => output_edge_faces
-    output_mesh_geometry%face_nodes => output_face_nodes
-    output_mesh_geometry%face_edges => output_face_edges
-    output_mesh_geometry%face_links => output_face_links
-
-    output_edge_type => temp_output_edge_type
+    output%numNode = output_node_count
+    output%numEdge = output_edge_count
+    output%numFace = output_face_count
 
     !TODO deallocate temporary arrays
 
-end subroutine aggregate_ugrid_geometry
+    success = .true.
+
+end function aggregate_ugrid_geometry
 
 !> Sorts the given edges of the current face in counter clockwise order.
 !! At the same time stores the sorted nodes of the current face in the given nodes array.
@@ -321,16 +282,16 @@ subroutine sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_n
 
     implicit none
 
-    integer, intent(in)    :: current_face !< Current face.
-    integer, intent(inout) :: edges(:)     !< Edges of the current face.
-    integer, intent(out)   :: nodes(:)     !< Array to store the nodes of the current face.
-    integer, intent(in)    :: input_edge_nodes(:,:), input_face_nodes(:,:), input_edge_faces(:,:), output_edge_nodes(:,:) !< Connectivity arrays.
-    integer, intent(in)    :: face_mapping_table(:), reverse_edge_mapping_table(:), node_mapping_table(:) !< Mapping table arrays.
+    integer, intent(in)                  :: current_face !< Current face.
+    integer, dimension(:), intent(inout) :: edges !< Edges of the current face.
+    integer, dimension(:), intent(out)   :: nodes !< Array to store the nodes of the current face.
+    integer, dimension(:,:), intent(in)  :: input_edge_nodes, input_face_nodes, input_edge_faces, output_edge_nodes !< Connectivity arrays.
+    integer, dimension(:), intent(in)    :: face_mapping_table, reverse_edge_mapping_table, node_mapping_table !< Mapping tables.
 
-    character(len=255) :: message !< Temporary variable for writing log messages.
-    integer            :: first_node, current_node, number_of_edges, k, i !< Counters.
-    integer            :: next_nodes(2) !< Helper array.
-    logical            :: found
+    character(len=255)    :: message !< Temporary variable for writing log messages.
+    integer               :: first_node, current_node, number_of_edges, k, i !< Counters.
+    integer, dimension(2) :: next_nodes !< Helper array.
+    logical               :: found
 
     ! Start with the edge that happens to be listed first, this will stay in the first position.
     ! First sort the two nodes of the first edge in CCW order, so that all subsequent edges will also be sorted in CCW order.
@@ -401,18 +362,19 @@ function sort_first_two_nodes(output_face, output_edge, input_edge_nodes, input_
 
     implicit none
 
-    integer, intent(in) :: output_face !< Current face.
-    integer, intent(in) :: output_edge !< First edge of the current face.
-    integer, intent(in) :: input_edge_nodes(:,:), input_face_nodes(:,:), input_edge_faces(:,:) !< Connectivity arrays.
-    integer, intent(in) :: face_mapping_table(:), reverse_edge_mapping_table(:), node_mapping_table(:) !< Mapping table arrays.
+    integer, intent(in)                 :: output_face !< Current face.
+    integer, intent(in)                 :: output_edge !< First edge of the current face.
+    integer, dimension(:,:), intent(in) :: input_edge_nodes, input_face_nodes, input_edge_faces !< Connectivity arrays.
+    integer, dimension(:), intent(in)   :: face_mapping_table, reverse_edge_mapping_table, node_mapping_table !< Mapping tables.
 
-    character(len=255)   :: message !< Temporary variable for writing log messages.
-    integer, parameter   :: missing_value = -999
-    integer              :: input_edge, input_nodes(2), input_faces(2), input_face, max_nodes_per_face, nodes_per_face, node, next_node, previous_node
-    integer, allocatable :: nodes(:)
-    integer              :: i !< Counter.
-    logical              :: sorted
-    integer              :: sorted_output_nodes(2) !< The two nodes of the first edge of the current face in sorted order.
+    character(len=255)                 :: message !< Temporary variable for writing log messages.
+    integer, parameter                 :: missing_value = -999
+    integer                            :: input_edge, input_face, max_nodes_per_face, nodes_per_face, node, next_node, previous_node
+    integer, dimension(2)              :: input_nodes, input_faces
+    integer, dimension(:), allocatable :: nodes
+    integer                            :: i !< Counter.
+    logical                            :: sorted
+    integer, dimension(2)              :: sorted_output_nodes !< The two nodes of the first edge of the current face in sorted order.
 
     ! Get input edge, nodes and faces that correspond to the given output edge.
     input_edge = reverse_edge_mapping_table(output_edge)
@@ -491,13 +453,13 @@ subroutine get_adjacent_faces(face, face_edges, edge_faces, adjacent_faces)
 
     implicit none
 
-    integer, intent(in)    :: face !< Input face.
-    integer, intent(in)    :: face_edges(:,:) !< Face edge connectivity.
-    integer, intent(in)    :: edge_faces(:,:) !< Edge face connectivity.
-    integer, intent(out)   :: adjacent_faces(:) !< Output array.
+    integer, intent(in)                 :: face !< Input face.
+    integer, dimension(:,:), intent(in) :: face_edges !< Face edge connectivity.
+    integer, dimension(:,:), intent(in) :: edge_faces !< Edge face connectivity.
+    integer, dimension(:), intent(out)  :: adjacent_faces !< Output array.
 
-    integer :: edge, faces(2) !< Helper variables.
-    integer :: i !< Counter.
+    integer               :: edge, i
+    integer, dimension(2) :: faces
 
     ! Determine faces that are adjacent to the current face.
     do i = 1,size(adjacent_faces)

@@ -113,7 +113,7 @@ contains
     integer , dimension(:,:)  , pointer :: face_nodes            ! nodes that define a face
     integer , dimension(:,:)  , pointer :: edge_faces            ! faces that this edge is part of
     integer , dimension(:)    , pointer :: edge_type             ! edge type variable to be written to the NetCDF file.
-    integer , dimension(:)    , pointer :: aggr_edge_type(:)     ! aggregated edge type variable to be written to the NetCDF file.
+    integer , dimension(:), allocatable, target :: aggr_edge_type(:)     ! aggregated edge type variable to be written to the NetCDF file.
 
     integer , dimension(:,:)  , pointer :: bnd_nr                ! boundary number
     integer                             :: nr_bnd_elm
@@ -131,6 +131,7 @@ contains
     character(len=256)                  :: geomfilename          ! geomfilename
     integer                             :: igeomfile             ! logical unit geomfile
     integer                             :: ierr                  ! errorcode
+    logical                             :: success               ! success (true/false)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -546,9 +547,11 @@ contains
 !        do elm = 1, nr_bnd_elm
 !           iapnt(nr_elems + elm) = nr_elems_aggr + elm
 !        enddo
-        call aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggr_edge_type, iapnt)
-        meshgeom = aggregated_meshgeom
-        edge_type => aggr_edge_type
+        success = aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggr_edge_type, iapnt)
+        if(success) then
+            meshgeom = aggregated_meshgeom
+            edge_type => aggr_edge_type
+        end if 
     end if
     !
     ! Write mesh as UGRID
