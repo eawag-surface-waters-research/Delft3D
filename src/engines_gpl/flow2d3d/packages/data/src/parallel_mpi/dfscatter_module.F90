@@ -624,6 +624,9 @@ integer                                 :: jjf
 integer                                 :: jjl
 integer                                 :: kf
 integer                                 :: kl
+integer                                 :: kf_in
+integer                                 :: k_in
+integer                                 :: kl_in
 integer                                 :: ip
 integer                                 :: ierr
 integer                                 :: k
@@ -656,6 +659,20 @@ real(sp), dimension(:,:,:), allocatable :: ouparr_slice
     jjl   = gdp%d%mmax+2-gdp%d%mlb+1
     !
     if (inode == master) then
+       ! inparr must be passed through with the "allocatable" attribute, 
+       ! because it is only allocated on the master thread.
+       ! inparr does not loose the dimension offset: kf_in can be zero.
+       ! ouparr can not be passed through with the "allocatable" attribute,
+       ! because it doesn't have to be allocated.
+       ! ouparr DOES loose the dimension offset: kf is always 1.
+       ! Solution:
+       ! - Define kf_in as the lbound of inparr (inside "inode==master": it's only defined on the master thread!)
+       ! - Map (the output) k to (the input) k_in: k_in = k - kf + kf_in
+       ! Assumption:
+       ! - "kl_in - kf_in" is equal to "kl - kf"
+       !
+       kf_in = lbound(inparr,3)
+       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -679,8 +696,9 @@ real(sp), dimension(:,:,:), allocatable :: ouparr_slice
           do k = kf, kl
              do n = max(1,iarrc(3,ip)), min(iarrc(4,ip),size(inparr,1))
                 do m = max(1,iarrc(1,ip)), min(iarrc(2,ip),size(inparr,2))
-                   nm = is + (k - kf)*nsiz*msiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                   tmp(nm) = inparr(n, m, k)
+                   nm      = is + (k - kf)*nsiz*msiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
+                   k_in    = k - kf + kf_in
+                   tmp(nm) = inparr(n, m, k_in)
                 enddo
              enddo
           enddo
@@ -785,6 +803,9 @@ integer                                 :: jjf
 integer                                 :: jjl
 integer                                 :: kf
 integer                                 :: kl
+integer                                 :: kf_in
+integer                                 :: k_in
+integer                                 :: kl_in
 integer                                 :: ip
 integer                                 :: ierr
 integer                                 :: k
@@ -817,6 +838,20 @@ real(hp), dimension(:,:,:), allocatable :: ouparr_slice
     jjl   = gdp%d%mmax+2-gdp%d%mlb+1
     !
     if (inode == master) then
+       ! inparr must be passed through with the "allocatable" attribute, 
+       ! because it is only allocated on the master thread.
+       ! inparr does not loose the dimension offset: kf_in can be zero.
+       ! ouparr can not be passed through with the "allocatable" attribute,
+       ! because it doesn't have to be allocated.
+       ! ouparr DOES loose the dimension offset: kf is always 1.
+       ! Solution:
+       ! - Define kf_in as the lbound of inparr (inside "inode==master": it's only defined on the master thread!)
+       ! - Map (the output) k to (the input) k_in: k_in = k - kf + kf_in
+       ! Assumption:
+       ! - "kl_in - kf_in" is equal to "kl - kf"
+       !
+       kf_in = lbound(inparr,3)
+       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -841,7 +876,8 @@ real(hp), dimension(:,:,:), allocatable :: ouparr_slice
              do n = max(1,iarrc(3,ip)), min(iarrc(4,ip),size(inparr,1))
                 do m = max(1,iarrc(1,ip)), min(iarrc(2,ip),size(inparr,2))
                    nm = is + (k - kf)*nsiz*msiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                   tmp(nm) = inparr(n, m, k)
+                   k_in    = k - kf + kf_in
+                   tmp(nm) = inparr(n, m, k_in)
                 enddo
              enddo
           enddo
@@ -907,6 +943,9 @@ integer                                    :: jjf
 integer                                    :: jjl
 integer                                    :: kf
 integer                                    :: kl
+integer                                    :: kf_in
+integer                                    :: k_in
+integer                                    :: kl_in
 integer                                    :: lf
 integer                                    :: ll
 integer                                    :: ip
@@ -945,6 +984,20 @@ real(sp), dimension(:,:,:,:), allocatable  :: ouparr_slice
     jjl = gdp%d%mmax+2-gdp%d%mlb+1
     !
     if (inode == master) then
+       ! inparr must be passed through with the "allocatable" attribute, 
+       ! because it is only allocated on the master thread.
+       ! inparr does not loose the dimension offset: kf_in can be zero.
+       ! ouparr can not be passed through with the "allocatable" attribute,
+       ! because it doesn't have to be allocated.
+       ! ouparr DOES loose the dimension offset: kf is always 1.
+       ! Solution:
+       ! - Define kf_in as the lbound of inparr (inside "inode==master": it's only defined on the master thread!)
+       ! - Map (the output) k to (the input) k_in: k_in = k - kf + kf_in
+       ! Assumption:
+       ! - "kl_in - kf_in" is equal to "kl - kf"
+       !
+       kf_in = lbound(inparr,3)
+       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -967,8 +1020,9 @@ real(sp), dimension(:,:,:,:), allocatable  :: ouparr_slice
           do k = kf, kl
              do n = max(1,iarrc(3,ip)), min(iarrc(4,ip),size(inparr,1))
                 do m = max(1,iarrc(1,ip)), min(iarrc(2,ip),size(inparr,2))
-                   nm = is + (l - lf)*msiz*nsiz*(kl-kf+1) + (k - kf)*msiz*nsiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                   tmp(nm) = inparr(n, m, k, l)
+                   nm      = is + (l - lf)*msiz*nsiz*(kl-kf+1) + (k - kf)*msiz*nsiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
+                   k_in    = k - kf + kf_in
+                   tmp(nm) = inparr(n, m, k_in, l)
                 enddo
              enddo
           enddo
@@ -1076,6 +1130,9 @@ integer                                    :: jjf
 integer                                    :: jjl
 integer                                    :: kf
 integer                                    :: kl
+integer                                    :: kf_in
+integer                                    :: k_in
+integer                                    :: kl_in
 integer                                    :: lf
 integer                                    :: ll
 integer                                    :: ip
@@ -1114,6 +1171,20 @@ real(hp), dimension(:,:,:,:), allocatable  :: ouparr_slice
     jjl = gdp%d%mmax+2-gdp%d%mlb+1
     !
     if (inode == master) then
+       ! inparr must be passed through with the "allocatable" attribute, 
+       ! because it is only allocated on the master thread.
+       ! inparr does not loose the dimension offset: kf_in can be zero.
+       ! ouparr can not be passed through with the "allocatable" attribute,
+       ! because it doesn't have to be allocated.
+       ! ouparr DOES loose the dimension offset: kf is always 1.
+       ! Solution:
+       ! - Define kf_in as the lbound of inparr (inside "inode==master": it's only defined on the master thread!)
+       ! - Map (the output) k to (the input) k_in: k_in = k - kf + kf_in
+       ! Assumption:
+       ! - "kl_in - kf_in" is equal to "kl - kf"
+       !
+       kf_in = lbound(inparr,3)
+       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -1136,8 +1207,9 @@ real(hp), dimension(:,:,:,:), allocatable  :: ouparr_slice
           do k = kf, kl
              do n = max(1,iarrc(3,ip)), min(iarrc(4,ip),size(inparr,1))
                 do m = max(1,iarrc(1,ip)), min(iarrc(2,ip),size(inparr,2))
-                   nm = is + (l - lf)*msiz*nsiz*(kl-kf+1) + (k - kf)*msiz*nsiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
-                   tmp(nm) = inparr(n, m, k, l)
+                   nm      = is + (l - lf)*msiz*nsiz*(kl-kf+1) + (k - kf)*msiz*nsiz + (m - iarrc(1,ip))*nsiz + (n - iarrc(3,ip)) + 1
+                   k_in    = k - kf + kf_in
+                   tmp(nm) = inparr(n, m, k_in, l)
                 enddo
              enddo
           enddo
