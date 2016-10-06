@@ -1897,8 +1897,9 @@ module m_ec_converter
             else
                spwphihat = 0d0
             end if
-            if ((dlat < 0.0_hp .and. dlon <= 0.0_hp .and. spwphihat >= 0.0_hp) .or. &
-                (dlat < 0.0_hp .and. dlon >= 0.0_hp .and. spwphihat <= 0.0_hp) ) then
+!            if ((dlon <= 0.0_hp .and. spwphihat >= 0.0_hp) .or. &
+!                (dlon >= 0.0_hp .and. spwphihat <= 0.0_hp) ) then
+            if (dlon*spwphihat<0) then
                spwphihat = spwphihat + 180.0_hp
             endif
             spwphihat = modulo(spwphihat, 360.0_hp)
