@@ -546,6 +546,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     call dfbroadc_gdp ( has_umean, 1, dfint, gdp)
     !
     call dfbroadc_gdp ( dp_from_map_file, 1, dfint, gdp )
+    rst_dp = dp_from_map_file
     if (dp_from_map_file) then
         call dfbroadc_gdp ( morft0, 1, dfdble, gdp )
         morft = morft0

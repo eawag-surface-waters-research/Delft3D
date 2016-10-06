@@ -221,6 +221,7 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     if (ierror /= 0) goto 9999
     !
     call dfbroadc_gdp(layerfrac  , 1, dfint, gdp)
+    call dfbroadc_gdp(layerthk   , 1, dfint, gdp)
     call dfbroadc_gdp(rst_nlyr   , 1, dfint, gdp)
     call dfbroadc_gdp(rst_lsedtot, 1, dfint, gdp)
     if (rst_lsedtot /= lsedtot) then
