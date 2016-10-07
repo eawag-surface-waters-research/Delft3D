@@ -626,7 +626,6 @@ integer                                 :: kf
 integer                                 :: kl
 integer                                 :: kf_in
 integer                                 :: k_in
-integer                                 :: kl_in
 integer                                 :: ip
 integer                                 :: ierr
 integer                                 :: k
@@ -672,7 +671,6 @@ real(sp), dimension(:,:,:), allocatable :: ouparr_slice
        ! - "kl_in - kf_in" is equal to "kl - kf"
        !
        kf_in = lbound(inparr,3)
-       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -805,7 +803,6 @@ integer                                 :: kf
 integer                                 :: kl
 integer                                 :: kf_in
 integer                                 :: k_in
-integer                                 :: kl_in
 integer                                 :: ip
 integer                                 :: ierr
 integer                                 :: k
@@ -851,7 +848,6 @@ real(hp), dimension(:,:,:), allocatable :: ouparr_slice
        ! - "kl_in - kf_in" is equal to "kl - kf"
        !
        kf_in = lbound(inparr,3)
-       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -945,7 +941,6 @@ integer                                    :: kf
 integer                                    :: kl
 integer                                    :: kf_in
 integer                                    :: k_in
-integer                                    :: kl_in
 integer                                    :: lf
 integer                                    :: ll
 integer                                    :: ip
@@ -997,7 +992,6 @@ real(sp), dimension(:,:,:,:), allocatable  :: ouparr_slice
        ! - "kl_in - kf_in" is equal to "kl - kf"
        !
        kf_in = lbound(inparr,3)
-       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
@@ -1132,7 +1126,6 @@ integer                                    :: kf
 integer                                    :: kl
 integer                                    :: kf_in
 integer                                    :: k_in
-integer                                    :: kl_in
 integer                                    :: lf
 integer                                    :: ll
 integer                                    :: ip
@@ -1184,7 +1177,6 @@ real(hp), dimension(:,:,:,:), allocatable  :: ouparr_slice
        ! - "kl_in - kf_in" is equal to "kl - kf"
        !
        kf_in = lbound(inparr,3)
-       kl_in = ubound(inparr,3)
        !
        ! determine total length of the data for all nodes and allocate the tmp array
        !
