@@ -1610,6 +1610,7 @@ integer, dimension(:,:), allocatable      :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl) )
+       ouparr = -999
        is = 0
        do ip = 0, nproc-1
           msiz = iarrc(2,ip)-iarrc(1,ip)+1
@@ -1735,6 +1736,7 @@ integer, dimension(:,:,:), allocatable    :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl, kf:kl) )
+       ouparr = -999
        is = 0
        do ip = 0, nproc-1
           !
@@ -1857,6 +1859,7 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl) )
+       ouparr = -999.0_sp
        is = 0
        do ip = 0, nproc-1
           !
@@ -2019,6 +2022,7 @@ real(hp), dimension(:,:), allocatable  :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl) )
+       ouparr = -999.0_hp
        is = 0
        do ip = 0, nproc-1
           !
@@ -2147,6 +2151,7 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl, kf:kl) )
+       ouparr = -999.0_sp
        is = 0
        do ip = 0, nproc-1
           !
@@ -2314,6 +2319,7 @@ real(hp), dimension(:,:,:), allocatable :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl, kf:kl) )
+       ouparr = -999.0_hp
        is = 0
        do ip = 0, nproc-1
           !
@@ -2449,6 +2455,7 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl, kf:kl, lf:ll) , stat=istat)
+       ouparr = -999.0_sp
        if (istat /= 0) write(gdp%gdinout%lundia,*)'dffunctionals.f90-gather_R4e allocation problem for ouparr array'
        is = 0
        do ip = 0, nproc-1
@@ -2625,6 +2632,7 @@ real(hp), dimension(:,:,:,:), allocatable  :: inparr_slice
        mmaxgl => gdp%gdparall%mmaxgl
        if (allocated(ouparr)) deallocate(ouparr)
        allocate( ouparr(nmaxgl, mmaxgl, kf:kl, lf:ll) , stat=istat)
+       ouparr = -999.0_hp
        if (istat /= 0) write(gdp%gdinout%lundia,*)'dffunctionals.f90-gather_R4e allocation problem for ouparr array'
        is = 0
        do ip = 0, nproc-1
