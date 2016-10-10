@@ -1126,12 +1126,37 @@ module m_ec_converter
                allocate(valR2(vectormax))
                if (allocated(val)) deallocate(val)
                allocate(val(vectormax))
+
                if (associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then
                   maxlay_tgt = size(connection%targetItemsPtr(1)%ptr%elementSetPtr%z) /   &
                                size(connection%targetItemsPtr(1)%ptr%elementSetPtr%x)
                else
                   maxlay_tgt = 1 
                end if
+               if (associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then
+                  maxlay_tgt = size(connection%targetItemsPtr(1)%ptr%elementSetPtr%z) /   &
+                               size(connection%targetItemsPtr(1)%ptr%elementSetPtr%x)
+               else
+                  maxlay_tgt = 1 
+               end if
+               if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z)) then
+                  maxlay_src = size(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) /   &
+                               size(connection%sourceItemsPtr(1)%ptr%elementSetPtr%x)
+               else
+                  maxlay_src = 1 
+               end if
+
+               if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) .and. &     ! source has sigma
+                         associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then    ! target has sigma
+                  if (allocated(sigma)) deallocate(sigma)
+                  allocate(sigma(maxlay_tgt*connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates))
+                  sigma = connection%targetItemsPtr(1)%ptr%elementSetPtr%z
+                  if (allocated(sigmaL)) deallocate(sigmaL)
+                  allocate(sigmaL(maxlay_src))
+                  if (allocated(sigmaR)) deallocate(sigmaR)
+                  allocate(sigmaR(maxlay_src))
+               end if
+
 				   ! zmax and zmin are absolute top and bottom at target point coordinates
 				   zmax => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmax
 				   zmin => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmin
@@ -1147,15 +1172,6 @@ module m_ec_converter
                         ! Are the subproviders 3D or 2D?
                         if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) .and. &     ! source has sigma
                                associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then    ! target has sigma
-                           ! 3D subproviders
-                           maxlay_src = size(connection%sourceItemsPtr(1)%ptr%ElementSetPtr%z) /   &
-                                        size(connection%sourceItemsPtr(1)%ptr%ElementSetPtr%x)
-                           allocate(sigma(maxlay_tgt))                                               ! is now a copy, not ptr
-                           sigma = connection%targetItemsPtr(1)%ptr%elementSetPtr%z
-                           if (allocated(sigmaL)) deallocate(sigmaL)
-                           allocate(sigmaL(maxlay_src))
-                           if (allocated(sigmaR)) deallocate(sigmaR)
-                           allocate(sigmaR(maxlay_src))
                            ! deal with one-sided interpolation
                            if ( kL == 0 .and. kR /= 0 ) then
                               kL = kR
@@ -1185,7 +1201,7 @@ module m_ec_converter
                                  ! Convert target elementset 
                                  if (.not.ecElementSetGetAbsZ (connection%targetItemsPtr(1)%ptr%ElementSetPtr,   &
                                                                                                   kbegin,kend,   &
-                                                                                        zmin(i),zmax(i),sigma))  return
+                                                                                        zmin(i),zmax(i),sigma(kbegin:kend)))  return
                                  ! Convert source elementset, first point 
                                  if (.not.ecElementSetGetAbsZ (connection%sourceItemsPtr(1)%ptr%ElementSetPtr,   &
                                                                                                   kbeginR,kendR, &
