@@ -1872,9 +1872,6 @@ module m_ec_converter
          integer :: n_rows, n_cols
          integer :: n !< loop counter
          integer :: mf, nf
-         ! TODO : get from MDU
-         real(hp) :: paver !< average absolute pressure, to which p_drop is relative.
-         paver = 101325.0_hp
          !
          success = .false.
          fa = pi / 180.0_hp
@@ -1926,7 +1923,7 @@ module m_ec_converter
             if (nf >= connection%sourceItemsPtr(1)%ptr%elementSetPtr%n_rows .or. (dlat == 0.0_hp .and. dlon == 0.0_hp)) then
                uintp = 0.0_hp
                vintp = 0.0_hp
-               pintp = paver ! TODO : obtain the average ambient pressure from the kernel.
+               pintp = 0.0_hp
             else
                ! Get data from stencil (mf (+1), nf (+1))
                spwr1 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a0 + &
@@ -1981,13 +1978,14 @@ module m_ec_converter
                dintp =  modulo(dintp, 360.0_hp)    ! for debug purposes
                uintp = -rintp*cos(dintp*fa)     ! minus sign: wind from N points to S
                vintp = -rintp*sin(dintp*fa)     ! minus sign: wind from N points to S
-               pintp =  paver - pintp           ! relate pressure drop to actual pressure
             endif
             select case(connection%converterPtr%operandType)
                case(operand_replace)
                   connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = uintp
                   connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) = vintp
-                  connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) = pintp
+                  ! Only pressure is considered relative here, so we don't averwrite the background pressure 
+                  connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) =                            &
+                       connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) - pintp
                   connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
                   connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
                   connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
@@ -1998,15 +1996,14 @@ module m_ec_converter
                   if (yy<rcycl) then
                      spwf   = min((1.0_hp - yy/rcycl)/spw_merge_frac,1.0_hp)
                      ! spwf is the weightfactor for the spiderweb! Differs from the Delft3D implementation
-                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)      & 
+                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) =                         &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)     & 
                          +         spwf  * uintp
-                     connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n)      & 
+                     connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) =                         &
+                           (1.0_hp-spwf) * connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n)     & 
                          +         spwf  * vintp
-                     connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) = 	                        &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n)      &
-                         +         spwf  * pintp
+                     connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) =                         &
+                           connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) - spwf * pintp
                      connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
                      connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
                      connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
