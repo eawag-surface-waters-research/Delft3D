@@ -27,7 +27,8 @@ dist-hook:
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+	-I$(NETCDF_FORTRAN_LIBS)
 
 #-------------------------------------------------------------------------------
 #   Fortran 90 flags

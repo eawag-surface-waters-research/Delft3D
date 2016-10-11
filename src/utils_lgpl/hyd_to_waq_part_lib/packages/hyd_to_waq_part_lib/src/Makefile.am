@@ -15,7 +15,8 @@ AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
-    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src
+    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+    -I$(NETCDF_FORTRAN_LIBS)
 
 #-------------------------------------------------------------------------------
 #Sources
