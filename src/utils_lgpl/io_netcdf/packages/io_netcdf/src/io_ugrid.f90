@@ -190,39 +190,6 @@ end type t_ug_file
 
    contains
 
-!> Initialize meshgeom
-!!
-!! Pointers must be nullified
-subroutine ug_init(meshgeom)
-   type (t_ug_meshgeom) :: meshgeom
-   
-   meshgeom%meshname        = ' '
-   meshgeom%dim             = -999
-   meshgeom%numnode         = -999
-   meshgeom%numedge         = -999
-   meshgeom%numface         = -999
-   meshgeom%maxnumfacenodes = -999
-
-   nullify(meshgeom%edge_nodes)
-   nullify(meshgeom%face_nodes)
-   nullify(meshgeom%edge_faces)
-   nullify(meshgeom%face_edges)
-   nullify(meshgeom%face_links)
-
-   nullify(meshgeom%nodex)
-   nullify(meshgeom%nodey)
-   nullify(meshgeom%nodez)
-   nullify(meshgeom%edgex)
-   nullify(meshgeom%edgey)
-   nullify(meshgeom%edgez)
-   nullify(meshgeom%facex)
-   nullify(meshgeom%facey)
-   nullify(meshgeom%facez)
-
-   nullify(meshgeom%crs)
-end subroutine ug_init
-
-
 !> Returns the latest message string from this module.
 !!
 !! Use this when a previous function call has returned a nonzero error status.
