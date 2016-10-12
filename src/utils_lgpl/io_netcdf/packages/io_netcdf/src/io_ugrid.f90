@@ -63,8 +63,13 @@ integer, parameter :: UG_INVALID_MESHDIMENSION = 12
 integer, parameter :: UG_INVALID_DATALOCATION  = 13
 integer, parameter :: UG_ARRAY_TOOSMALL        = 14 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
 integer, parameter :: UG_VAR_NOTFOUND          = 15 !< Some variable was not found.
+integer, parameter :: UG_INVALID_LAYERS        = 16
 integer, parameter :: UG_INVALID_CRS           = 30 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_NOTIMPLEMENTED        = 99
+
+!! Geometry options
+integer, parameter :: LAYERTYPE_OCEANSIGMA = 1 !< Dimensionless vertical ocean sigma coordinate.
+integer, parameter :: LAYERTYPE_Z          = 2 !< Vertical coordinate for fixed z-layers.
 
 !! Location types
 integer, parameter :: UG_LOC_NONE = 0 !< Mesh data location: nowhere at all (include only required mesh locations)
@@ -125,6 +130,8 @@ type t_ug_meshids
    integer :: id_edgedim         = -1 !< Dimension ID for edges.
    integer :: id_facedim         = -1 !< Dimension ID for faces.
    integer :: id_maxfacenodesdim = -1 !< Dimension ID for max nr of nodes per face.
+   integer :: id_layerdim        = -1 !< Dimension ID for layer centers.
+   integer :: id_interfacedim    = -1 !< Dimension ID for layer interfaces.
 
    !
    ! Coordinate variables
@@ -140,7 +147,9 @@ type t_ug_meshids
    integer :: id_facey           = -1 !< Coordinate variable ID for face y-coordinate.
    integer :: id_facexbnd        = -1 !<            variable ID for face boundaries' x-coordinate.
    integer :: id_faceybnd        = -1 !<            variable ID for face boundaries' y-coordinate.
-   
+   integer :: id_layer_zs        = -1 !< Coordinate variable ID for fixed z/sigma layer center vertical coordinate (either z or sigma).
+   integer :: id_interface_zs    = -1 !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).
+
    !
    ! Topology variables
    !
@@ -161,6 +170,8 @@ type t_ug_meshgeom
    integer            :: numedge            !< Number of mesh edges.
    integer            :: numface            !< Number of mesh faces.
    integer            :: maxnumfacenodes    !< Maximum of number of face nodes.
+   integer            :: numlayer           !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
+   integer            :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
 
    integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
    integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
@@ -177,6 +188,9 @@ type t_ug_meshgeom
    real(kind=dp), pointer :: facex(:)       !< x-coordinates of the mesh faces.
    real(kind=dp), pointer :: facey(:)       !< y-coordinates of the mesh faces.
    real(kind=dp), pointer :: facez(:)       !< z-coordinates of the mesh faces.
+
+   real(kind=dp), pointer :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma).
+   real(kind=dp), pointer :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma).
 
    type(t_crs),  pointer :: crs           !< Map projection/coordinate transformation used for the coordinates of this mesh.
 end type t_ug_meshgeom
@@ -361,6 +375,7 @@ end function ug_put_var_attset
 
 
 !> Creates/initializes an empty mesh geometry.
+!! This function could also have been called ug_init_meshgeom.
 !!
 !! NOTE: do not pass already filled mesh geometries to this function,
 !! since array pointers will become disassociated, possibly causing
@@ -375,6 +390,8 @@ function ug_new_meshgeom(meshgeom) result(ierr)
    meshgeom%numNode = 0 
    meshgeom%numEdge = 0 
    meshgeom%numFace = 0 
+   meshgeom%numlayer = 0
+   meshgeom%layertype = -1
 
    meshgeom%edge_nodes => null()
    meshgeom%face_nodes => null()
@@ -393,6 +410,9 @@ function ug_new_meshgeom(meshgeom) result(ierr)
    meshgeom%facex => null()
    meshgeom%facey => null()
    meshgeom%facez => null()
+
+   meshgeom%layer_zs     => null()
+   meshgeom%interface_zs => null()
 
    meshgeom%crs   => null()
 
@@ -605,7 +625,7 @@ end subroutine ug_location_to_loctype
 
 !> Write mesh topoplogy
 !! This only writes the mesh topology variable, not the other variables that are part of the mesh.
-function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity) result(ierr)
+function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers) result(ierr)
    implicit none
 
    integer,          intent(in) :: ncid         !< NetCDF dataset id
@@ -616,6 +636,7 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_e
    logical,          intent(in) :: add_edge_face_connectivity !< Specifies whether edge_face_connectivity should be added.
    logical,          intent(in) :: add_face_edge_connectivity !< Specifies whether face_edge_connectivity should be added.
    logical,          intent(in) :: add_face_face_connectivity !< Specifies whether face_face_connectivity should be added.
+   logical,          intent(in) :: add_layers   !< Specifies whether layer and interface vertical dimensions should be added.
    integer                      :: ierr         !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    character(len=len_trim(meshName)) :: prefix
@@ -679,6 +700,12 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_e
    ! Optionally required if data there:
    if (ug_checklocation(dataLocsCode, UG_LOC_FACE)) then
       ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'face_coordinates', prefix//'_face_x '//prefix//'_face_y')
+   end if
+
+   ! Optionally required if layers present (1D or 2D layered mesh topology):
+   if (add_layers) then
+      ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'layer_dimension',     'n'//prefix//'_layer')
+      ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'interface_dimension', 'n'//prefix//'_interface')
    end if
 
    if (dim >= 3) then
@@ -782,6 +809,7 @@ end function ug_def_var
 !> Writes a complete mesh geometry to an open NetCDF data set.
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function accepts the mesh geometry derived type as input, for the arrays-based function, see ug_write_mesh_arrays
+!! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
 function ug_write_mesh_struct(ncid, meshids, meshgeom) result(ierr)
    integer,             intent(in   ) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_meshids),  intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
@@ -789,17 +817,18 @@ function ug_write_mesh_struct(ncid, meshids, meshgeom) result(ierr)
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
-                           meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
-                           meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, meshgeom%crs, -999, -999d0)
+                               meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
+                               meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, &
+                               meshgeom%crs, -999, -999d0, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs)
 end function ug_write_mesh_struct
 
-
-!> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data..
+!> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data.
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function requires all mesh arrays as input, for the derived type-based function, see ug_write_mesh_struct.
+!! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
 function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, numEdge, numFace, maxNumNodesPerFace, &
                               edge_nodes, face_nodes, edge_faces, face_edges, face_links, xn, yn, xe, ye, xf, yf, &
-                              crs, imiss, dmiss) result(ierr)
+                              crs, imiss, dmiss, numLayer, layerType, layer_zs, interface_zs) result(ierr)
    integer,          intent(in) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_meshids), intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*), intent(in) :: meshName !< Name for the mesh variable, also used as prefix for all related entities.
@@ -820,6 +849,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    type(t_crs),      intent(in) :: crs      !< Coordinate reference system for input coordinates
    integer,          intent(in) :: imiss    !< Fill value used for integer values (e.g. in edge/face_nodes arrays).
    real(kind=dp),    intent(in) :: dmiss    !< Fill value used for double precision values (e.g. in face_x_bnd variable).
+   integer, optional,       intent(in) :: numLayer  !< Number of vertical layers in the mesh. Optional.
+   integer, optional,       intent(in) :: layerType !< Type of vertical layering in the mesh. One of LAYERTYPE_* parameters. Optional, only used if numLayer >= 1.
+   real(kind=dp), optional, intent(in) :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma). Optional, only used if numLayer >= 1.
+   real(kind=dp), optional, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
    integer                      :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    integer :: id_twodim
@@ -831,6 +864,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    logical :: add_edge_face_connectivity !< Specifies whether edge_face_connectivity should be added.
    logical :: add_face_edge_connectivity !< Specifies whether face_edge_connectivity should be added.
    logical :: add_face_face_connectivity !< Specifies whether face_face_connectivity should be added.
+   logical :: add_layers                 !< Specifies whether layer and interface vertical dimensions should be added.
 
    ierr = UG_SOMEERR
    wasInDefine = 0
@@ -843,7 +877,11 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    add_edge_face_connectivity = associated(edge_faces)
    add_face_edge_connectivity = associated(face_edges)
    add_face_face_connectivity = associated(face_links)
-   ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity)
+   add_layers = .false.
+   if (present(numLayer) .and. present(layerType) .and. present(layer_zs) .and. present(interface_zs)) then
+      add_layers = numLayer >= 1
+   end if
+   ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers)
    if (ierr /= UG_NOERR) then
       goto 888
    end if
@@ -859,6 +897,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       maxnv = size(face_nodes, 1)
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',        numFace,   meshids%id_facedim)
       ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes', maxnv,   meshids%id_maxfacenodesdim)
+   end if
+   if (add_layers) then
+      if (dim >= 3) then
+         ! Only 1D and 2D mesh topologies can be layered.
+         ierr = UG_INVALID_LAYERS
+         goto 888
+      end if
+      ierr = nf90_def_dim(ncid, 'n'//prefix//'_layer',     numLayer,     meshids%id_layerdim)
+      ierr = nf90_def_dim(ncid, 'n'//prefix//'_interface', numLayer + 1, meshids%id_interfacedim)
    end if
 
    ierr = ug_add_coordmapping(ncid, crs)
@@ -969,6 +1016,37 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    end if
 
+   ! Layers
+   if (add_layers) then
+      ! Write mesh layer distribution (mesh-global, not per face)
+      select case(layerType)
+      case (LAYERTYPE_OCEANSIGMA)
+         ierr = nf90_def_var(ncid, prefix//'_layer_sigma',     nf90_double, meshids%id_layerdim,     meshids%id_layer_zs)
+         ierr = nf90_def_var(ncid, prefix//'_interface_sigma', nf90_double, meshids%id_interfacedim, meshids%id_interface_zs)
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'standard_name', 'ocean_sigma_coordinate')
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'standard_name', 'ocean_sigma_coordinate')
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'long_name',     'Sigma coordinate of layer centres')
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'long_name',     'Sigma coordinate of layer interfaces')
+         ! See http://cfconventions.org/cf-conventions/cf-conventions.html#dimensionless-vertical-coordinate
+         ! and http://cfconventions.org/cf-conventions/cf-conventions.html#_ocean_sigma_coordinate for info about formula_terms attribute for sigma coordinates.
+         ! TODO this code assumes that the data variables with values for eta and depth are always called s1 and depth. AK
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'formula_terms', 'sigma: '//prefix//'_layer_sigma eta: s1 depth: depth') ! TODO: AvD: do we define this only on faces?
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'formula_terms', 'sigma: '//prefix//'_interface_sigma eta: s1 depth: depth') ! TODO: AvD: do we define this only on faces?
+      case (LAYERTYPE_Z)
+         ierr = nf90_def_var(ncid, prefix//'_layer_z',     nf90_double, meshids%id_layerdim,     meshids%id_layer_zs)
+         ierr = nf90_def_var(ncid, prefix//'_interface_z', nf90_double, meshids%id_interfacedim, meshids%id_interface_zs)
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'standard_name', 'altitude')
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'standard_name', 'altitude')
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'long_name',     'Vertical coordinate of layer centres')
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'long_name',     'Vertical coordinate of layer interfaces')
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'unit',          'm')
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'unit',          'm')
+      case default
+         ierr = UG_INVALID_LAYERS
+         goto 888
+      end select
+   end if
+
 ! TODO: AvD: add the following (resolution may be difficult)
 !> 		:geospatial_lat_min = 52.9590188916822 ;
 !> 		:geospatial_lat_max = 53.8746171549558 ;
@@ -1053,6 +1131,13 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ierr = nf90_put_var(ncid, meshids%id_facex,    xf(1:numFace))
       ierr = nf90_put_var(ncid, meshids%id_facey,    yf(1:numFace))
+   end if
+
+   ! Layers
+   if (add_layers) then
+      ! Write mesh layer distribution (mesh-global, not per face)
+      ierr = nf90_put_var(ncid, meshids%id_layer_zs,     layer_zs(1:numLayer))
+      ierr = nf90_put_var(ncid, meshids%id_interface_zs, interface_zs(1:numLayer + 1))
    end if
 
    ! Check for any remaining native NetCDF errors
@@ -1939,9 +2024,6 @@ function ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids) result(ierr)
     
     ! Write mesh geometry.
     ierr = ug_write_mesh_struct(ncid, meshids, meshgeom)
-    
-    
-    
 
 end function ug_write_geom_filepointer_ugrid
 
@@ -2046,4 +2128,5 @@ function ug_write_map_ugrid(filename) result(ierr)
         
 end function ug_write_map_ugrid
 
-    end module io_ugrid
+
+end module io_ugrid
