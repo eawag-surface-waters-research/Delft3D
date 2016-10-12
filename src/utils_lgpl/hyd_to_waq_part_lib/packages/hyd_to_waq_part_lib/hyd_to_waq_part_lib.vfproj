@@ -73,6 +73,7 @@
 		<File RelativePath=".\src\write_hyd_init.f90"/>
 		<File RelativePath=".\src\write_hyd_step.f90"/>
 		<File RelativePath=".\src\write_lga.f90"/>
+		<File RelativePath=".\src\write_lgt.f90"/>
 		<File RelativePath=".\src\write_poi.f90"/>
 		<File RelativePath=".\src\write_rfl.f90"/>
 		<File RelativePath=".\src\write_src.f90"/>

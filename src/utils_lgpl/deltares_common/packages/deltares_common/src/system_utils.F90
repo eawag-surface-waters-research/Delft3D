@@ -146,7 +146,37 @@ subroutine split_filename(name, path, file, ext)
     endif
 end subroutine split_filename
 
-
+subroutine remove_path(name, file)
+!!--description-----------------------------------------------------------------
+!
+!    Function: A subroutine to remove the path from a full file name and return
+!              a file name with extension.
+!
+!!--declarations----------------------------------------------------------------
+    !
+    implicit none
+    !
+    ! Call variables
+    !
+    character(*)          , intent(in)  :: name   ! Full name of file (path,file,ext)
+    character(*)          , intent(out) :: file   ! File name (including extension if ext is present)
+    !
+    ! Local variables
+    !
+    integer    :: ifilesep   ! index of last file separator
+!
+!! executable statements -------------------------------------------------------
+!
+    ! find last file separator
+    ifilesep = index(name, FILESEP, back=.true.)
+#ifndef HAVE_CONFIG_H
+    ! on Windows also check forward slash
+    ifilesep = max(ifilesep,index(name, '/', back=.true.))
+#endif
+    !
+    ! file name with extention
+    file = name(ifilesep+1:len_trim(name))
+end subroutine remove_path
 
 function exifil(name, unit)
 !!--description-----------------------------------------------------------------

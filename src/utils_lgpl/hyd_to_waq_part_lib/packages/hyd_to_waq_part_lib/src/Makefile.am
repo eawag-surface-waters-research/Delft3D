@@ -50,13 +50,14 @@ libHydToWaqPartLib_la_SOURCES = \
          write_grd.f90 \
          write_hyd.f90 \
          write_lga.f90 \
+         write_lgt.f90 \
          write_poi.f90 \
          write_rfl.f90 \
          write_src.f90 \
          write_srf.f90 \    
          write_hyd_init.f90 \
          write_hyd_step.f90
-
+         
 #-------------------------------------------------------------------------------
 #Libraries
 

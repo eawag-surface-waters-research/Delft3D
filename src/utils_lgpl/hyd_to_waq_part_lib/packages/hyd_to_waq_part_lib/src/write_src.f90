@@ -34,6 +34,7 @@
       ! global declarations
 
       use hydmod                   ! module contains everything for the hydrodynamics
+      use time_module              ! time conversion
       implicit none
 
       ! declaration of the arguments
@@ -57,7 +58,7 @@
       real                                   :: flow                  ! flow for one wasteload
       integer                                :: iwaste                ! wasteload index
       integer                                :: ibrk                  ! breakpoint index
-      character(len=10)                      :: ctime                 ! time in ddddhhmmss format
+      integer                                :: itime                 ! time in ddddhhmmss format
 
       call getmlu(lunrep)
 
@@ -120,8 +121,8 @@
          if ( hyd%wasteload_coll%l_seconds ) then
             write(lunsrc,*) hyd%wasteload_data%times(ibrk),' ; breakpoint time'
          else
-            call ddhhmmss(hyd%wasteload_data%times(ibrk),ctime)
-            write(lunsrc,*) ctime,' ; breakpoint time'
+            itime = sec2ddhhmmss(hyd%wasteload_data%times(ibrk))
+            write(lunsrc,'(i11.7,a)') itime,' ; breakpoint time'
          endif
 
          ! loop over the wasteloads write flow and dummy concentration

@@ -34,6 +34,7 @@
       ! global declarations
 
       use hydmod
+      use system_utils
       implicit none
 
       ! declaration of the arguments
@@ -186,65 +187,65 @@
       write(lunhyd,'(a,'' '',i10)') key(71), hyd%noq3
       write(lunhyd,'(a,'' '',i10)') key(72), hyd%nosegl
       write(lunhyd,'(a,'' '',i10)') key(19), hyd%nolay
-      call dh_rempath(hyd%file_com%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(20), trim(filename)
-      call dh_rempath(hyd%file_dwq%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(21), trim(filename)
+      call remove_path(hyd%file_com%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(20), trim(filename)
+      call remove_path(hyd%file_dwq%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(21), trim(filename)
       if (hyd%geometry .eq. HYD_GEOM_CURVI) then
-         call dh_rempath(hyd%file_lga%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(22), trim(filename)
-         call dh_rempath(hyd%file_cco%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(23), trim(filename)
+         call remove_path(hyd%file_lga%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(22), trim(filename)
+         call remove_path(hyd%file_cco%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(23), trim(filename)
       else if (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
-         call dh_rempath(hyd%file_bnd%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(74), trim(filename)
-         call dh_rempath(hyd%file_geo%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(75), trim(filename)
-         call dh_rempath(hyd%file_bnd%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(22), trim(filename)
-         call dh_rempath(hyd%file_geo%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(23), trim(filename)
+         call remove_path(hyd%file_bnd%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(74), trim(filename)
+         call remove_path(hyd%file_geo%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(75), trim(filename)
+         call remove_path(hyd%file_bnd%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(22), trim(filename)
+         call remove_path(hyd%file_geo%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(23), trim(filename)
       endif
-      call dh_rempath(hyd%file_vol%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(24), trim(filename)
-      call dh_rempath(hyd%file_are%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(25), trim(filename)
-      call dh_rempath(hyd%file_flo%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(26), trim(filename)
-      call dh_rempath(hyd%file_poi%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(27), trim(filename)
-      call dh_rempath(hyd%file_len%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(28), trim(filename)
+      call remove_path(hyd%file_vol%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(24), trim(filename)
+      call remove_path(hyd%file_are%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(25), trim(filename)
+      call remove_path(hyd%file_flo%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(26), trim(filename)
+      call remove_path(hyd%file_poi%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(27), trim(filename)
+      call remove_path(hyd%file_len%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(28), trim(filename)
       if ( hyd%sal_present ) then
-         call dh_rempath(hyd%file_sal%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(29), trim(filename)
+         call remove_path(hyd%file_sal%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(29), trim(filename)
       else
          write(lunhyd,'(a,''     '',a)') key(29), 'none'
       endif
       if ( hyd%tem_present ) then
-         call dh_rempath(hyd%file_tem%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(30), trim(filename)
+         call remove_path(hyd%file_tem%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(30), trim(filename)
       else
          write(lunhyd,'(a,''     '',a)') key(30), 'none'
       endif
       if ( hyd%vdf_present ) then
-         call dh_rempath(hyd%file_vdf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(31), trim(filename)
+         call remove_path(hyd%file_vdf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(31), trim(filename)
       else
          write(lunhyd,'(a,''     '',a)') key(31), 'none'
       endif
       if (hyd%geometry .eq. HYD_GEOM_CURVI) then
-         call dh_rempath(hyd%file_srf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(32), trim(filename)
+         call remove_path(hyd%file_srf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(32), trim(filename)
       else if (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
-         call dh_rempath(hyd%file_hsrf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(73), trim(filename)
+         call remove_path(hyd%file_hsrf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(73), trim(filename)
          ! temporary for old user interface
-         call dh_rempath(hyd%file_srf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(32), trim(filename)
+         call remove_path(hyd%file_srf%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(32), trim(filename)
       endif
       if (hyd%geometry .eq. HYD_GEOM_CURVI) then
-         call dh_rempath(hyd%file_lgt%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(33), trim(filename)
-         call dh_rempath(hyd%file_src%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(34), trim(filename)
-         call dh_rempath(hyd%file_chz%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(35), trim(filename)
+         call remove_path(hyd%file_lgt%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(33), trim(filename)
+         call remove_path(hyd%file_src%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(34), trim(filename)
+         call remove_path(hyd%file_chz%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(35), trim(filename)
       endif
       if ( hyd%tau_present ) then
-         call dh_rempath(hyd%file_tau%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(36), trim(filename)
+         call remove_path(hyd%file_tau%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(36), trim(filename)
       else
          write(lunhyd,'(a,''     '',a)') key(36), 'none'
       endif
       if (hyd%geometry .eq. HYD_GEOM_CURVI) then
-         call dh_rempath(hyd%file_wlk%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(37), trim(filename)
+         call remove_path(hyd%file_wlk%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(37), trim(filename)
       endif
-      call dh_rempath(hyd%file_atr%name,filename)
+      call remove_path(hyd%file_atr%name,filename)
       if ( filename .eq. ' ' ) then
          write(lunhyd,'(a,''     '',a)') key(63), 'none'
       else
-         call dh_rempath(hyd%file_atr%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(63), trim(filename)
+         call remove_path(hyd%file_atr%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(63), trim(filename)
       endif
       if (hyd%geometry .eq. HYD_GEOM_CURVI) then
-         call dh_rempath(hyd%file_dps%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(64), trim(filename)
+         call remove_path(hyd%file_dps%name,filename) ; write(lunhyd,'(a,'' '''''',a,'''''''')') key(64), trim(filename)
       endif
 
       ! hydrodynamic-layers
