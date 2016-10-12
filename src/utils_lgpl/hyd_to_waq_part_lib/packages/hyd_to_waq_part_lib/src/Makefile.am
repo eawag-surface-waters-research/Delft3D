@@ -22,7 +22,7 @@ FMODULES += \
 #Sources
 libHydToWaqPartLib_la_SOURCES = \
          agwaqgeom.f90 \
-         wrwaqgeomcl.f90
+         wrwaqgeomcl.f90 \
          domain_mod.f90 \
          dlwqgrid_mod.f90 \
          filmod.f90 \
@@ -56,24 +56,7 @@ libHydToWaqPartLib_la_SOURCES = \
          write_srf.f90 \    
          write_hyd_init.f90 \
          write_hyd_step.f90
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
-         
+
 #-------------------------------------------------------------------------------
 #Libraries
 
