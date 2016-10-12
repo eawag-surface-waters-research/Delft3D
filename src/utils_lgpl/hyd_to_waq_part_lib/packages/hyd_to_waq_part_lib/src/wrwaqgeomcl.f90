@@ -135,6 +135,8 @@ contains
 !
 !! executable statements -------------------------------------------------------
 !
+    call ug_init(meshgeom)
+    call ug_init(aggregated_meshgeom)
     !
     ! Determine no-agregation segment pointer
     !
