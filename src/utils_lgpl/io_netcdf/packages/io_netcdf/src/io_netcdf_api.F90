@@ -138,21 +138,20 @@ function ionc_get_mesh_count_dll(ioncid, nmesh) result(ierr) bind(C, name="ionc_
    ierr = ionc_get_mesh_count(ioncid, nmesh)
 end function ionc_get_mesh_count_dll
 
-!> Gets the name of the mesh topology in an open dataset.
+!> Gets the name of the mesh topology variable in an open dataset.
 function ionc_get_mesh_name_dll(ioncid, meshid, c_meshname) result(ierr) bind(C, name="ionc_get_mesh_name")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_name_dll
    use iso_c_binding
-   integer,             intent(in)    :: ioncid     !< The IONC data set id.
-   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
-   character(kind=c_char,len=1),   intent(  out) :: c_meshname(MAXSTRLEN) !< The name of the mesh geometry.
+   integer,                      intent(in)    :: ioncid   !< The IONC data set id.
+   integer,                      intent(in)    :: meshid   !< The mesh id in the specified data set.
+   character(kind=c_char,len=1), intent(  out) :: c_meshname(MAXSTRLEN) !< The name of the mesh topology variable.
+
    character(len=MAXSTRLEN) :: meshname !< The name of the mesh geometry.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.   
    
    
    meshname = ''
    ierr = ionc_get_mesh_name(ioncid, meshid, meshname)
-   !c_meshname = char_array_to_string(meshname, len_trim(meshname))
-   !c_meshname = meshname(1:len_trim(meshname))//C_NULL_CHAR   
    c_meshname= string_to_char_array(meshname,len_trim(meshname))
    
 end function ionc_get_mesh_name_dll

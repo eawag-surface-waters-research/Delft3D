@@ -336,11 +336,11 @@ function ionc_get_mesh_count(ioncid, nmesh) result(ierr)
    ierr = ug_get_mesh_count(datasets(ioncid)%ncid, nmesh)
 end function ionc_get_mesh_count
 
-!> Gets the name of the mesh topology in an open dataset.
+!> Gets the name of the mesh topology variable in an open dataset.
 function ionc_get_mesh_name(ioncid, meshid, meshname) result(ierr)
    integer,             intent(in)    :: ioncid   !< The IONC data set id.
    integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
-   character(len=*),    intent(  out) :: meshname !< The name of the mesh geometry.
+   character(len=*),    intent(  out) :: meshname !< The name of the mesh topology variable.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
    
    ierr = ug_get_mesh_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshname)

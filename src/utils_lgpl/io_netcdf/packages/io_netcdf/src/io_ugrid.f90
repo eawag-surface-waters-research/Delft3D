@@ -48,11 +48,11 @@ character(len=16), parameter :: UG_CONV_DELTARES = 'Deltares-0.8' !< Version of 
 !! Meta data
 integer, parameter :: ug_strLenMeta = 100
 type t_ug_meta
-   character(len=ug_strLenMeta) :: institution    
-   character(len=ug_strLenMeta) :: source         
-   character(len=ug_strLenMeta) :: references     
-   character(len=ug_strLenMeta) :: version        
-   character(len=ug_strLenMeta) :: modelname      
+   character(len=ug_strLenMeta) :: institution
+   character(len=ug_strLenMeta) :: source
+   character(len=ug_strLenMeta) :: references
+   character(len=ug_strLenMeta) :: version
+   character(len=ug_strLenMeta) :: modelname
 end type t_ug_meta
 
 !! Error codes
@@ -1401,20 +1401,20 @@ function ug_get_mesh_count(ncid, numMesh) result(ierr)
 
 end function ug_get_mesh_count
 
-!> Gets the name of the mesh topology in an open dataset.
+!> Gets the name of the mesh topology variable in an open dataset.
 !!
 !! \see 
 function ug_get_mesh_name(ncid, meshids, meshname) result(ierr)
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_meshids),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
-   character(len=*),    intent(  out) :: meshname !< The name of the mesh geometry.
+   character(len=*),    intent(  out) :: meshname !< The name of the mesh topology variable.
    integer                            :: ierr     !< Result status, ug_noerr if successful.
    
    meshname = ''
    ierr = nf90_inquire_variable(ncid, meshids%id_meshtopo, name=meshname)
    if (ierr /= nf90_noerr) then
-      ug_messagestr = 'ug_get_mesh_name: could not find meshname.'            
-      ierr = UG_INVALID_MESHNAME   
+      write (ug_messagestr, '(a,i0)') 'ug_get_mesh_name: could not find meshname for topology var id ', meshids%id_meshtopo
+      ierr = UG_INVALID_MESHNAME
       Call SetMessage(Level_Fatal, ug_messagestr)
    end if
 end function ug_get_mesh_name
