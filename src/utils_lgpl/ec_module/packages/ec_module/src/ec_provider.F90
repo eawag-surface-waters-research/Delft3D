@@ -192,14 +192,13 @@ module m_ec_provider
          real(kind=hp),    optional, intent(in) :: dtnodal      !< Nodal factors update interval
          !
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader corresponding to fileReaderId
-         character(maxFileNameLen)    :: fName          !< relative path of data file, converted to the correct length
          integer                      :: i              !< loop counter
          character(maxNameLen)        :: l_quantityName !< explicit length version of quantityName
          integer                      :: iostat         !< status returned from various file operations 
+         logical                      :: exist, opened  !< status of the file obtained by inquire
          !
          success = .false.
          fileReaderPtr => null()
-         fName = ''
          l_quantityName = ''
          !
          if (len_trim(fileName) > maxFileNameLen) then
@@ -207,11 +206,10 @@ module m_ec_provider
             return
          end if
          !
-         fName = fileName
          fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)         
          if (associated(fileReaderPtr)) then
             fileReaderPtr%ofType = fileType
-            fileReaderPtr%fileName = fName
+            fileReaderPtr%fileName = fileName
             fileReaderPtr%fileHandle = -1                      ! The filereader itself has now an invalid filehandle 
 
             if (.not. ecSupportOpenExistingFile(fileReaderPtr%fileHandle, fileReaderPtr%fileName)) return

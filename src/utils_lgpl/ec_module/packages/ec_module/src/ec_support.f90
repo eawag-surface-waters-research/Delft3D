@@ -56,6 +56,7 @@ module m_ec_support
    public :: ecSupportFindConnection
    public :: ecSupportFindConverter
    public :: ecSupportFindFileReader
+   public :: ecSupportFindFileReaderByFilename
    public :: ecSupportFindBCBlock
    public :: ecSupportFindNetCDF
    public :: ecSupportFindNetCDFByFilename
@@ -678,6 +679,34 @@ end subroutine ecInstanceListSourceItems
          end if
       end function ecSupportFindFileReader
       
+      ! =======================================================================
+      !> Retrieve the pointer to the FileReader with id == converterId.
+      function ecSupportFindFileReaderByFilename(instancePtr, filename) result(fileReaderPtr)
+         type(tEcFileReader), pointer            :: fileReaderPtr !< FileReader corresponding to fileReaderId
+         type(tEcInstance),   pointer            :: instancePtr   !< intent(in)
+         character(*),        intent(in)         :: filename      !< relative path of data file
+         !
+         integer :: i !< loop counter
+         !
+         fileReaderPtr => null()
+         !
+         if (associated(instancePtr)) then
+            do i=1, instancePtr%nFileReaders
+               if (associated(instancePtr%ecFileReadersPtr(i)%ptr%bc)) then                  ! if filereader has bc-block
+                  if (strcmpi(instancePtr%ecFileReadersPtr(i)%ptr%bc%fName, fileName)) then  ! this bc-block has the filename
+                     fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
+                  end if
+               else                                                                          ! else
+                  if (strcmpi(instancePtr%ecFileReadersPtr(i)%ptr%fileName, fileName)) then  ! the filereader has the filename
+                     fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
+                  end if
+               end if
+            end do
+         else
+            call setECMessage("ERROR: ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
+         end if
+      end function ecSupportFindFileReaderByFilename
+
       ! =======================================================================
 
       !> Retrieve the pointer to the BCBlock with id == bcBlockId.

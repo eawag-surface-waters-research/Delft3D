@@ -1824,6 +1824,7 @@ module m_ec_converter
          type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
          real(hp),            intent(in)    :: timesteps  !< convert to this number of timesteps past the kernel's reference date
          !
+         integer  :: i
          real(hp) :: spwdphi !< angular increment: 2pi/#colums
          real(hp) :: spwdrad !< radial increment: radius/#rows
          real(hp) :: a0, a1
@@ -1872,6 +1873,9 @@ module m_ec_converter
          integer :: n_rows, n_cols
          integer :: n !< loop counter
          integer :: mf, nf
+         integer :: twx, twy, twp                             !< numbering of target items
+         integer :: swr, swd, swp                             !< numbering of source items
+
          !
          success = .false.
          fa = pi / 180.0_hp
@@ -1879,6 +1883,45 @@ module m_ec_converter
          earthrad = 6378137.0_hp
          n_rows = connection%sourceItemsPtr(1)%ptr%elementSetPtr%n_rows
          n_cols = connection%sourceItemsPtr(1)%ptr%elementSetPtr%n_cols
+         !
+         ! Which quantities should be updated and in what target items ?
+         twx = 0
+         twy = 0
+         twp = 0
+         swr = 0
+         swd = 0
+         swp = 0
+         select case(connection%targetItemsPtr(1)%ptr%quantityPtr%name)
+            case ('airpressure_windx_windy')
+               twx = 1
+               twy = 2
+               twp = 3
+            case ('atmosphericpressure')
+               twp = 1
+            case ('windx')
+               twx = 1
+            case ('windy')
+               twy = 1
+            case ('windxy')
+               twx = 1
+               twy = 2
+            case default
+               call setECMessage("ERROR: ec_converter::ecConverterSpiderweb: '"     &
+                  // trim(connection%targetItemsPtr(1)%ptr%quantityPtr%name)         &
+                  // "' is not a known spiderweb quantity.")
+               return
+            end select
+            do i = 1, connection%nSourceItems
+              select case (connection%sourceItemsPtr(i)%ptr%quantityPtr%name) 
+                 case ('windspeed')
+                    swr = i
+                 case ('winddirection')
+                    swd = i
+                 case ('p_drop')
+                    swp = i
+              end select
+            end do
+      
          !
          ! Calculate the basic spiderweb grid settings
          spwdphi = 360.0_hp / (n_cols - 1) ! 0 == 360 degrees, so -1
@@ -1910,8 +1953,6 @@ module m_ec_converter
             else
                spwphihat = 0d0
             end if
-!            if ((dlon <= 0.0_hp .and. spwphihat >= 0.0_hp) .or. &
-!                (dlon >= 0.0_hp .and. spwphihat <= 0.0_hp) ) then
             if (dlon*spwphihat<0) then
                spwphihat = spwphihat + 180.0_hp
             endif
@@ -1926,69 +1967,82 @@ module m_ec_converter
                pintp = 0.0_hp
             else
                ! Get data from stencil (mf (+1), nf (+1))
-               spwr1 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a0 + &
-                       connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a1 ! linear time interp of magnitude
-               spwd1 = cyclic_interpolation(connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1)), &
-                       connection%sourceItemsPtr(2)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*(nf-1)), a0, a1) ! cyclic time interp of direction
-               spwp1 = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a0 + &
-                       connection%sourceItemsPtr(3)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a1 ! linear time interp of pressure
-               spwr2 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a0 + &
-                       connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a1 ! linear time interp of magnitude  
-               spwd2 = cyclic_interpolation(connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1)), &
-                       connection%sourceItemsPtr(2)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1)), a0, a1) ! cyclic time interp of direction
-               spwp2 = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a0 + &
-                       connection%sourceItemsPtr(3)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a1 ! linear time interp of pressure
-               spwr3 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*nf)*a0 + &
-                       connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*nf)*a1 ! linear time interp of magnitude
-               spwd3 =  cyclic_interpolation(connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*nf), &
-                       connection%sourceItemsPtr(2)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*nf), a0, a1) ! cyclic time interp of direction
-               spwp3 = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*nf)*a0 + &
-                       connection%sourceItemsPtr(3)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*nf)*a1 ! linear time interp of pressure
-               spwr4 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a0 + &
-                       connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a1 ! linear time interp of magnitude
-               spwd4 = cyclic_interpolation(connection%sourceItemsPtr(2)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*nf), &
-                       connection%sourceItemsPtr(2)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*nf), a0, a1) ! cyclic time interp of direction
-               spwp4 = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a0 + &
-                       connection%sourceItemsPtr(3)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a1 ! linear time interp of pressure
-               ! Safety at center
-               if (nf == 1) then
-                  spwr1 = 0.0_hp
-                  spwd1 = spwd3
-               endif
+               if ((twx>0).or.(twy>0)) then
+                  spwr1 = connection%sourceItemsPtr(swr)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a0 + &
+                          connection%sourceItemsPtr(swr)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a1 ! linear time interp of magnitude
+                  spwr2 = connection%sourceItemsPtr(swr)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a0 + &
+                          connection%sourceItemsPtr(swr)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a1 ! linear time interp of magnitude  
+                  spwr3 = connection%sourceItemsPtr(swr)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*nf)*a0 + &
+                          connection%sourceItemsPtr(swr)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*nf)*a1 ! linear time interp of magnitude
+                  spwr4 = connection%sourceItemsPtr(swr)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a0 + &
+                          connection%sourceItemsPtr(swr)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a1 ! linear time interp of magnitude
+
+                  spwd1 = cyclic_interpolation(connection%sourceItemsPtr(swd)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1)), &
+                          connection%sourceItemsPtr(swd)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*(nf-1)), a0, a1) ! cyclic time interp of direction
+                  spwd2 = cyclic_interpolation(connection%sourceItemsPtr(swd)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1)), &
+                          connection%sourceItemsPtr(swd)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1)), a0, a1) ! cyclic time interp of direction
+                  spwd3 =  cyclic_interpolation(connection%sourceItemsPtr(swd)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*nf), &
+                          connection%sourceItemsPtr(swd)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*nf), a0, a1) ! cyclic time interp of direction
+                  spwd4 = cyclic_interpolation(connection%sourceItemsPtr(swd)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*nf), &
+                          connection%sourceItemsPtr(swd)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*nf), a0, a1) ! cyclic time interp of direction
+                  ! Safety at center
+                  if (nf == 1) then
+                     spwr1 = 0.0_hp
+                     spwd1 = spwd3
+                  endif
+               end if
+               if (twp>0) then
+                  spwp1 = connection%sourceItemsPtr(swp)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a0 + &
+                          connection%sourceItemsPtr(swp)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*(nf-1))*a1 ! linear time interp of pressure
+                  spwp2 = connection%sourceItemsPtr(swp)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a0 + &
+                          connection%sourceItemsPtr(swp)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*(nf-1))*a1 ! linear time interp of pressure
+                  spwp3 = connection%sourceItemsPtr(swp)%ptr%sourceT0FieldPtr%arr1dPtr(mf+n_cols*nf)*a0 + &
+                          connection%sourceItemsPtr(swp)%ptr%sourceT1FieldPtr%arr1dPtr(mf+n_cols*nf)*a1 ! linear time interp of pressure
+                  spwp4 = connection%sourceItemsPtr(swp)%ptr%sourceT0FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a0 + &
+                          connection%sourceItemsPtr(swp)%ptr%sourceT1FieldPtr%arr1dPtr(mf+1+n_cols*nf)*a1 ! linear time interp of pressure
+               end if
                !
-               ! Interpolate over wind direction
                wphi  = 1.0_hp - (spwphihat - (mf-1)*spwdphi)/(spwdphi)   ! weightfactor for the direction
                wrad  = 1.0_hp - (spwradhat - (nf-1)*spwdrad)/(spwdrad)   ! weightfactor for the radius
-               spwrA = spwr1*wphi + spwr2*(1.0_hp-wphi)                  ! space interp magnitude (direction)
-               spwrB = spwr3*wphi + spwr4*(1.0_hp-wphi)                  ! space interp magnitude (direction)
-               tmp = 1.0_hp-wphi
-               spwdA = cyclic_interpolation(spwd1, spwd2, wphi, tmp) ! space interp direction (direction)
-               spwdB = cyclic_interpolation(spwd3, spwd4, wphi, tmp) ! space interp direction (direction)
-               spwpA = spwp1*wphi + spwp2*(1.0_hp-wphi)                  ! space interp pressure (direction)
-               spwpB = spwp3*wphi + spwp4*(1.0_hp-wphi)                  ! space interp pressure (direction)
-               !
-               ! Interpolate over radial direction                     
-               rintp = spwrA*wrad + spwrB*(1.0_hp-wrad)                  ! space interp (radius)
-               tmp = 1.0_hp-wrad
-               dintp = cyclic_interpolation(spwdA, spwdB, wrad, tmp) ! space interp (radius)
-               pintp = spwpA*wrad + spwpB*(1.0_hp-wrad)                  ! space interp (radius)
-               !
-               ! Final treatment of the data
-               dintp =  90.0_hp - dintp         ! revert from nautical conventions
-               dintp =  modulo(dintp, 360.0_hp)    ! for debug purposes
-               uintp = -rintp*cos(dintp*fa)     ! minus sign: wind from N points to S
-               vintp = -rintp*sin(dintp*fa)     ! minus sign: wind from N points to S
+   
+               if ((twx>0).or.(twy>0)) then
+                  spwrA = spwr1*wphi + spwr2*(1.0_hp-wphi)                  ! space interp magnitude (direction)
+                  spwrB = spwr3*wphi + spwr4*(1.0_hp-wphi)                  ! space interp magnitude (direction)
+                  tmp = 1.0_hp-wphi
+                  spwdA = cyclic_interpolation(spwd1, spwd2, wphi, tmp) ! space interp direction (direction)
+                  spwdB = cyclic_interpolation(spwd3, spwd4, wphi, tmp) ! space interp direction (direction)
+                  rintp = spwrA*wrad + spwrB*(1.0_hp-wrad)              ! space interp (radius)
+                  tmp = 1.0_hp-wrad
+                  dintp = cyclic_interpolation(spwdA, spwdB, wrad, tmp) ! space interp (radius)
+                  dintp =  90.0_hp - dintp         ! revert from nautical conventions
+                  dintp =  modulo(dintp, 360.0_hp) ! for debug purposes
+                  uintp = -rintp*cos(dintp*fa)     ! minus sign: wind from N points to S
+                  vintp = -rintp*sin(dintp*fa)     ! minus sign: wind from N points to S
+               end if
+
+               if (twp>0) then
+                  spwpA = spwp1*wphi + spwp2*(1.0_hp-wphi)                  ! space interp pressure (direction)
+                  spwpB = spwp3*wphi + spwp4*(1.0_hp-wphi)                  ! space interp pressure (direction)
+                  pintp = spwpA*wrad + spwpB*(1.0_hp-wrad)                  ! space interp (radius)
+               end if
+
             endif
             select case(connection%converterPtr%operandType)
                case(operand_replace)
-                  connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) = uintp
-                  connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) = vintp
-                  ! Only pressure is considered relative here, so we don't averwrite the background pressure 
-                  connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) =                            &
-                       connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) - pintp
-                  connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
-                  connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
-                  connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
+                  if (twx>0) then
+                     connection%targetItemsPtr(twx)%ptr%targetFieldPtr%arr1dPtr(n) = uintp
+                     connection%targetItemsPtr(twx)%ptr%targetFieldPtr%timesteps = timesteps
+                  end if
+                  if (twy>0) then
+                     connection%targetItemsPtr(twy)%ptr%targetFieldPtr%arr1dPtr(n) = vintp
+                     connection%targetItemsPtr(twy)%ptr%targetFieldPtr%timesteps = timesteps
+                  end if
+                  if (twp>0) then
+                     ! Only pressure is considered relative here, so we don't overwrite the background pressure 
+                     connection%targetItemsPtr(twp)%ptr%targetFieldPtr%arr1dPtr(n) =                          &
+                                   connection%targetItemsPtr(twp)%ptr%targetFieldPtr%arr1dPtr(n) - pintp
+                     connection%targetItemsPtr(twp)%ptr%targetFieldPtr%timesteps = timesteps
+                  end if
                case(operand_add)
                   rcycl = connection%sourceItemsPtr(1)%ptr%elementSetPtr%radius
                   yy = spwradhat
@@ -1996,17 +2050,23 @@ module m_ec_converter
                   if (yy<rcycl) then
                      spwf   = min((1.0_hp - yy/rcycl)/spw_merge_frac,1.0_hp)
                      ! spwf is the weightfactor for the spiderweb! Differs from the Delft3D implementation
-                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n) =                         &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)     & 
-                         +         spwf  * uintp
-                     connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n) =                         &
-                           (1.0_hp-spwf) * connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n)     & 
-                         +         spwf  * vintp
-                     connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) =                         &
-                           connection%targetItemsPtr(3)%ptr%targetFieldPtr%arr1dPtr(n) - spwf * pintp
-                     connection%targetItemsPtr(1)%ptr%targetFieldPtr%timesteps = timesteps
-                     connection%targetItemsPtr(2)%ptr%targetFieldPtr%timesteps = timesteps
-                     connection%targetItemsPtr(3)%ptr%targetFieldPtr%timesteps = timesteps
+                     if (twx>0) then
+                        connection%targetItemsPtr(twx)%ptr%targetFieldPtr%arr1dPtr(n) =                       &
+                              (1.0_hp-spwf) * connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(n)     & 
+                            +         spwf  * uintp
+                        connection%targetItemsPtr(twx)%ptr%targetFieldPtr%timesteps = timesteps
+                     end if
+                     if (twy>0) then
+                        connection%targetItemsPtr(twy)%ptr%targetFieldPtr%arr1dPtr(n) =                       &
+                              (1.0_hp-spwf) * connection%targetItemsPtr(2)%ptr%targetFieldPtr%arr1dPtr(n)     & 
+                            +         spwf  * vintp
+                        connection%targetItemsPtr(twy)%ptr%targetFieldPtr%timesteps = timesteps
+                     end if
+                     if (twp>0) then
+                        connection%targetItemsPtr(twp)%ptr%targetFieldPtr%arr1dPtr(n) =                       &
+                              connection%targetItemsPtr(twp)%ptr%targetFieldPtr%arr1dPtr(n) - spwf * pintp
+                        connection%targetItemsPtr(twp)%ptr%targetFieldPtr%timesteps = timesteps
+                     end if
                   end if
                case default
                   call setECMessage("ERROR: ec_converter::ecConverterSpiderweb: Unsupported operand type requested.")

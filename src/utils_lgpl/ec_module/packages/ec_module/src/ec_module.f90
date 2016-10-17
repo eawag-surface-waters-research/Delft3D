@@ -361,4 +361,8 @@ module m_ec_module
    interface ecFindItemByQuantityLocation
       module procedure ecSupportFindItemByQuantityLocation
    end interface ecFindItemByQuantityLocation
+   interface ecFindFileReader
+      module procedure ecSupportFindFileReader
+      module procedure ecSupportFindFileReaderByFileName
+   end interface ecFindFileReader
 end module m_ec_module

@@ -462,6 +462,8 @@ contains
                return
             end if
             item1%sourceT0FieldPtr%x_spw_eye = x_spw_eye
+            item2%sourceT0FieldPtr%x_spw_eye = x_spw_eye
+            item3%sourceT0FieldPtr%x_spw_eye = x_spw_eye
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'y_spw_eye', .false.)  
             if (len_trim(rec) == 0) then
                call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword", "y_spw_eye")
@@ -477,6 +479,8 @@ contains
                return
             end if
             item1%sourceT0FieldPtr%y_spw_eye = y_spw_eye
+            item2%sourceT0FieldPtr%y_spw_eye = y_spw_eye
+            item3%sourceT0FieldPtr%y_spw_eye = y_spw_eye
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'pdrop_spw_eye', .false.) 
             if (len_trim(rec) == 0) then
                call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword", "pdrop_spw_eye")
@@ -550,6 +554,8 @@ contains
             end if
 
             item1%sourceT1FieldPtr%x_spw_eye = x_spw_eye
+            item2%sourceT1FieldPtr%x_spw_eye = x_spw_eye
+            item3%sourceT1FieldPtr%x_spw_eye = x_spw_eye
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'y_spw_eye', .false.) 
             
             read(rec, *, IOSTAT = istat) y_spw_eye
@@ -561,6 +567,8 @@ contains
             end if
             
             item1%sourceT1FieldPtr%y_spw_eye = y_spw_eye
+            item2%sourceT1FieldPtr%y_spw_eye = y_spw_eye
+            item3%sourceT1FieldPtr%y_spw_eye = y_spw_eye
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'pdrop_spw_eye', .false.)  
             
             read(rec, *, IOSTAT = istat) p_drop_spw_eye
