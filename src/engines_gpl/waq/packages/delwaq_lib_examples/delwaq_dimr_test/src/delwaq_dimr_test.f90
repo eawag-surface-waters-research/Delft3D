@@ -31,6 +31,12 @@ program delwaq_test_dimr
 
    implicit none
    interface
+      integer(c_int) function set_var(c_key, c_value) bind(C, name="set_var")
+         use iso_c_binding
+         character,intent(in)    :: c_key
+         character,intent(in)    :: c_value
+      end function  set_var
+
       integer(c_int) function initialize(c_config_file) bind(C, name="initialize")
          use iso_c_binding
          character,intent(in)    :: c_config_file
@@ -70,9 +76,11 @@ program delwaq_test_dimr
 
    integer :: dummy
 
-   character(len=200)     :: version_string
-   character(len=200)     :: runid
-   character(len=200)     :: resfile
+   character(len=1023)     :: version_string
+   character(len=1023)     :: key
+   character(len=1023)     :: value
+   character(len=1023)     :: runid
+   character(len=1023)     :: resfile
    integer                :: itimestamp
    real(kind=kind(1.0d0)) :: startTime, stopTime, currentTime
    integer                :: i ,status, found
@@ -84,6 +92,14 @@ program delwaq_test_dimr
    call get_version_string(version_string)
    if (log) write(10,'(A)') 'dll version string:'
    if (log) write(10,'(A200)') trim(version_string)
+
+   key = '-waq'
+   value = ' '
+   dummy = set_var( key, value)
+   key = '-p'
+!   value = 'c:\Program Files\Deltares\Delft3D 4.02.00.01\win64\waq\default\proc_def.dat'
+   value = '..\..\bin\win64\waq\default\proc_def.dat'
+   dummy = set_var( key, value)
 
    runid = ' '
    call get_command_argument(1,runid,status)

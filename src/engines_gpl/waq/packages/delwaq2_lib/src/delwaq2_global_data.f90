@@ -46,6 +46,7 @@ module delwaq2_global_data
     ! Intermediate arrays for dealing with the set-up
     !
     character(len=256), dimension(:),   allocatable :: argv
+    character(len=256), dimension(:),   allocatable :: argv_tmp
 
     character(len=20),  dimension(:),   allocatable :: substance_name
     real,               dimension(:,:), allocatable :: substance_conc
