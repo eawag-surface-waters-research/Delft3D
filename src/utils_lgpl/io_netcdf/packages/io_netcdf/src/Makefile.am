@@ -30,6 +30,10 @@ io_netcdf_version.F90: io_netcdf_version.F90.svn .FORCE
 io_netcdf_version.F90:
  endif
 
+.FORCE: 
+
+.PHONY: .FORCE
+
 #-------------------------------------------------------------------------------
 #Includes
 AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
