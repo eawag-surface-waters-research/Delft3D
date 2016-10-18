@@ -320,6 +320,8 @@ src/engines_gpl/dimr/packages/dimr/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe.h -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe_version.h.svn -text
+src/engines_gpl/dimr/packages/dimr/include/dimr_exe_version.rc.svn -text
+src/engines_gpl/dimr/packages/dimr/include/resource.h -text
 src/engines_gpl/dimr/packages/dimr/include/version_number.ini -text
 src/engines_gpl/dimr/packages/dimr/src/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/src/dimr_exe.cpp -text
@@ -332,9 +334,11 @@ src/engines_gpl/dimr/packages/dimr_lib/include/clock.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/component.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.h.svn -text
+src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.rc.svn -text
 src/engines_gpl/dimr/packages/dimr_lib/include/exception.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/getopt.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/log.h -text
+src/engines_gpl/dimr/packages/dimr_lib/include/resource.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/stringutils.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/version_number.ini -text
 src/engines_gpl/dimr/packages/dimr_lib/include/xmltree.h -text

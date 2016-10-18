@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -24,6 +24,12 @@
     <ClCompile Include="..\dimr_lib\src\log.cpp" />
     <ClCompile Include="src\dimr_exe.cpp" />
     <ClCompile Include="src\dimr_exe_version.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="include\dimr_exe_version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\version_number.ini" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}</ProjectGuid>
@@ -84,7 +90,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -117,7 +124,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -147,7 +155,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -180,7 +189,9 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_exe_version.rc .\ .\include\version_number.ini
+</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>

@@ -82,7 +82,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -113,7 +114,8 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -143,7 +145,8 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -176,7 +179,8 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.h .\ .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_version.rc .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
@@ -227,6 +231,12 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
     <ClInclude Include="include\log.h" />
     <ClInclude Include="include\stringutils.h" />
     <ClInclude Include="include\xmltree.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\version_number.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="include\dimr_lib_version.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
