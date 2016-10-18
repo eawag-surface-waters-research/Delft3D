@@ -62,6 +62,8 @@
 
 
 !     Created             : October   2014 by Leo Postma
+!                           October   2016    Jos van Gils vertical transport added to calculation of baskets
+!                                                          optional upwind treatment of vertical 
 
 !     Modified            :
 
@@ -201,6 +203,7 @@
       logical   , save :: report           ! write iteation reports in monitoring file
       integer          :: ierr2         !
       real(4)     acc_remained, acc_changed ! For reporting: accumulated/averaged reporting parameters
+      logical          :: vertical_upwind  ! Set .true. for upwind sceme in the vertical
       integer  ( 4)          ithandl /0/
       integer  ( 4)          ithand1 /0/
       integer  ( 4)          ithand2 /0/
@@ -220,9 +223,15 @@
       disp0bnd = btest( iopt , 1 )
       loword   = btest( iopt , 2 )
       fluxes   = btest( iopt , 3 )
+      vertical_upwind = .not. btest(iopt,18)
 
       if ( init .eq. 0 ) then
          write ( lunut, '(A)' ) ' Using local flexible time step method (scheme 24 - beta functionality)'
+         if ( vertical_upwind ) then
+            write ( lunut, '(A)' ) ' Using upwind discretisation for vertical advection.'
+         else
+            write ( lunut, '(A)' ) ' Using central discretisation for vertical advection.'
+         endif
          call getcom('-settling_backwards', 0 , sw_settling, idummy, rdummy, cdummy, ierr2)
          if ( sw_settling ) write( lunut, * ) ' option -settling_backwards found'
          call zoek ( 'Number_of_baskets   ', nocons, coname, 20, i )
@@ -341,10 +350,13 @@
       work = 0.0d0
       d    = disp (1)
       al   = aleng(1,1)
-      do iq = 1, noqh
+      do iq = 1, noq
          if ( iq .eq. noq1+1 ) then
             d  = disp (2)
             al = aleng(2,1)
+         elseif ( iq .eq. noqh+1 ) then
+            d  = disp (3)
+            al = aleng(1,2)
          endif
          ifrom = ipoint(1,iq)
          ito   = ipoint(2,iq)
@@ -435,7 +447,7 @@
                endif
             enddo
          endif
-      enddo
+         enddo
 
 !          1d: give each cell of a column the highest basket nr. of the column
 
@@ -572,6 +584,7 @@
 !      The backpointer became obsolete, ibas can be reused directly
 
 !         1j: Fill the off-diagonals of the matrix for the vertical advection of water only
+!             (Note that the variable work is reused with a different meaning (JvG 2016)
 
       work = 0.0
       do ibox = nob, lbox , -1         ! Fill the off-diagonals only once per time step
@@ -579,12 +592,11 @@
          if2 = itf  (ibox)
          do i = if1, if2
             iq = iordf(i)
-            q  = flow(iq)*dt(ibox)/2.0d0       !  Watch out! Central differences here.
-!           q  = flow(iq)*dt(ibox)             !  Watch out! Upwind  differences here.
+            q  = flow(iq)*dt(ibox)             
             ifrom = ipoint(1,iq)               !  The diagonal now is the sum of the
             ito   = ipoint(2,iq)               !  new volume that increments with each step
-            work(3,ifrom) =  q                 !  Different approach needed for upwinding
-            work(1,ito  ) = -q                 !  This one belongs to 'central'
+            work(3,ifrom) = q                 ! flow through lower surface (central or upwind now arranged in one spot, further down)
+            work(1,ito  ) = q                 ! flow through upper surface                 
          enddo
       enddo
       if ( timon ) call timstop ( ithand1 )
@@ -1205,11 +1217,25 @@
                   low  = 0.0d0  ;  dia  =  0.0d0   ;  upr  = 0.0d0          ! Span the tridiagonal system for this column
                   do j = ih1, ih2-1
                      iseg = ivert(j)
-                     volint(iseg) = volint(iseg) - 2*(work(3,iseg)+work(1,iseg))
+                     volint(iseg) = volint(iseg) -work(3,iseg) +work(1,iseg)    ! Valid for Upwind AND Central (JvG)
                      ilay = ilay + 1
-                     upr(ilay) =                work(3,iseg)
-                     dia(ilay) = volint(iseg) + work(3,iseg) + work(1,iseg)
-                     low(ilay) =                               work(1,iseg)
+                     if (vertical_upwind) then
+                         dia(ilay) = volint(iseg)
+                         if (work(1,iseg).gt.0.0d0) then
+                             low(ilay) = low(ilay) - work(1,iseg)
+                         else
+                             dia(ilay) = dia(ilay) - work(1,iseg)
+                         endif
+                         if (work(3,iseg).gt.0.0d0) then
+                             dia(ilay) = dia(ilay) + work(3,iseg)
+                         else
+                             upr(ilay) = upr(ilay) + work(3,iseg)
+                         endif
+                     else
+                       upr(ilay) =               work(3,iseg)/2.0d0
+                       dia(ilay) = volint(iseg) +work(3,iseg)/2.0d0 -work(1,iseg)/2.0d0
+                       low(ilay) =                                  -work(1,iseg)/2.0d0
+                     endif
                   enddo
 
 !              The forward sweep of the double sweep procedure
@@ -1299,17 +1325,32 @@
                if ( ipb .eq. 0 ) cycle
                ifrom = ipoint(1,iq)
                ito   = ipoint(2,iq)
-               q     = flow(iq) * dt(ibox) / 2.0d0                      ! This is the central differences version
-               if ( q .gt. 0. 0 ) then
-                  do isys = 1, nosys
-                     dq = q * ( dconc2(isys,ifrom) + dconc2(isys,ito) )
-                     dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
-                  enddo
+               if (vertical_upwind) then
+                  q     = flow(iq) * dt(ibox)                      ! This is the upwind differences version
+                  if ( q .gt. 0. 0 ) then
+                     do isys = 1, nosys
+                        dq = q * dconc2(isys,ifrom) 
+                        dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
+                     enddo
+                  else
+                     do isys = 1, nosys
+                        dq = q * dconc2(isys,ito)
+                        dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
+                     enddo
+                  endif
                else
-                  do isys = 1, nosys
-                     dq = q * ( dconc2(isys,ifrom) + dconc2(isys,ito) )
-                     dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
-                  enddo
+                  q     = flow(iq) * dt(ibox) / 2.0d0              ! This is the central differences version
+                  if ( q .gt. 0. 0 ) then
+                     do isys = 1, nosys
+                        dq = q * ( dconc2(isys,ifrom) + dconc2(isys,ito) )
+                        dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
+                     enddo
+                  else
+                     do isys = 1, nosys
+                        dq = q * ( dconc2(isys,ifrom) + dconc2(isys,ito) )
+                        dmpq(isys,ipb,2) = dmpq(isys,ipb,2) - dq
+                     enddo
+                  endif
                endif
             enddo
          enddo
@@ -1409,7 +1450,7 @@
          a  = area(iq)
          q  = 0.0
          e  = disp (3)
-         al = aleng(2,1)
+         al = aleng(1,2)
          if ( ilflag .eq. 1 ) then
             al = aleng(1,iq) + aleng(2,iq)
          endif
@@ -1449,9 +1490,19 @@
                   q1 = 0.0d0
                   q2 = q
                endif
-            else                         ! central velocities in the water phase
-               q1 = q*f1
-               q2 = q*f2
+            else       
+               if (vertical_upwind) then
+                  if ( q .gt. 0.0d0 ) then  ! upwind
+                     q1 = q
+                     q2 = 0.0d0
+                  else
+                     q1 = 0.0d0
+                     q2 = q
+                  endif
+               else
+                  q1 = q*f1                 ! central velocities in the water phase
+                  q2 = q*f2
+               endif
             endif
 
 !           diffusion
@@ -1597,7 +1648,7 @@
          endif
          a    = area(iq)
          e    = disp (3)
-         al   = aleng(2,1)
+         al   = aleng(1,2)
          if ( ilflag .eq. 1 ) al = aleng(1,iq) + aleng(2,iq)
          f1 = 0.5
          f2 = 0.5
@@ -1635,9 +1686,19 @@
                   q1 = 0.0d0
                   q2 = q
                endif
-            else                         ! central velocities in the water phase
-               q1 = q*f1
-               q2 = q*f2
+            else              
+               if (vertical_upwind) then
+                  if ( q .gt. 0.0d0 ) then    ! Upwind
+                     q1 = q
+                     q2 = 0.0d0
+                  else
+                     q1 = 0.0d0
+                     q2 = q
+                  endif
+               else
+                  q1 = q*f1                 ! central velocities in the water phase
+                  q2 = q*f2
+               endif
             endif
 
 !           diffusion
