@@ -355,7 +355,7 @@
             d  = disp (2)
             al = aleng(2,1)
          elseif ( iq .eq. noqh+1 ) then
-            d  = disp (3)
+            d  = 0.0d0
             al = aleng(1,2)
          endif
          ifrom = ipoint(1,iq)
