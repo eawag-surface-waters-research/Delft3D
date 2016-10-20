@@ -22,7 +22,10 @@
 !!  rights reserved.
 
       module delwaq_user_wasteloads
+
       use delwaq_loads
+      use waq_plugin_wasteload_version_module
+
       contains
       subroutine delwaq_user_wasteload ( nowst , wasteloads, notot , nosys , noseg ,
      +                                   itime , conc      , syname)
@@ -43,6 +46,7 @@
       integer                             :: itime                  ! system time
       real                                :: conc(notot,noseg)      ! concentration array
       character(len=*)                    :: syname(notot)          ! substance names
+      character(len=120)                  :: idstr                  ! waq_plugin_wasteload version number
 
       ! local declarations
 
@@ -61,6 +65,10 @@
             call srstop(1)
          endif
       endif
+
+      ! waq_plugin_wasteload version number
+      call getfullversionstring_waq_plugin_wasteload(idstr)
+      write ( lunrep , * ) idstr
 
       call delwaq_user_inlet_outlet ( nowst , wasteloads, notot , nosys , noseg ,
      +                                itime , conc      , syname, lunrep)
