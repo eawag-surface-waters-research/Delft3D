@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_waq_plugin_wasteload.rc $(SolutionDir) $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\waq_plugin_wasteload_version.F90 $(SolutionDir) $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd waq_plugin_wasteload"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="../../bin/$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
@@ -21,7 +21,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_waq_plugin_wasteload.rc $(SolutionDir) $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\waq_plugin_wasteload_version.F90 $(SolutionDir) $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd waq_plugin_wasteload ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
@@ -31,7 +31,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_waq_plugin_wasteload.rc $(SolutionDir) $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\waq_plugin_wasteload_version.F90 $(SolutionDir) $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
@@ -41,14 +41,26 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_waq_plugin_wasteload.rc $(SolutionDir) $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\waq_plugin_wasteload_version.F90 $(SolutionDir) $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd waq_plugin_wasteload ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>
-		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+		<File RelativePath="..\..\version\resource.h"/>
+		<File RelativePath="..\..\version\version_number_waq_plugin_wasteload.rc"/>
+		<File RelativePath="..\..\version\waq_icon.rc"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\delwaq_user_wasteloads.f"/>
 		<File RelativePath=".\src\srstop.f"/>
+		<File RelativePath=".\src\waq_plugin_wasteload_version.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\zoekns.f"/></Filter></Files>
 	<Globals/></VisualStudioProject>

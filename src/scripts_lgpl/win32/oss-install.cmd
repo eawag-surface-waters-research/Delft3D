@@ -136,10 +136,9 @@ rem ===============
     call :flow2d3d
     call :flow2d3d_openda
     call :delwaq1
-    call :delwaq1_lib
     call :delwaq2
-    call :delwaq2_lib
-    call :delwaq2_openda_lib
+    call :delwaq_dll
+rem     call :delwaq2_openda_lib
     call :waq_plugin_wasteload
     call :part
     call :wave
@@ -351,29 +350,6 @@ goto :endproc
 
 
 
-rem =======================
-rem === INSTALL_DELWAQ1_LIB
-rem =======================
-:delwaq1_lib
-    echo "installing delwaq1_lib . . ."
-
-    set dest_bin="!dest_main!\win32\waq\bin"
-    set dest_default="!dest_main!\win32\waq\default"
-    
-    call :makeDir !dest_bin!
-    call :makeDir !dest_default!
-
-    call :copyFile engines_gpl\waq\bin\Release\delwaq1_lib.dll         	       !dest_bin!
-	
-    call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
-    call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
-    call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
-    call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
-    call :copyNetcdf
-goto :endproc
-
-
-
 rem ===================
 rem === INSTALL_DELWAQ2
 rem ===================
@@ -389,17 +365,17 @@ goto :endproc
 
 
 
-rem =======================
-rem === INSTALL_DELWAQ2_LIB
-rem =======================
-:delwaq2_lib
-    echo "installing delwaq2_lib . . ."
+rem ======================
+rem === INSTALL_DELWAQ_DLL
+rem ======================
+:delwaq_dll
+    echo "installing delwaq dll . . ."
 
     set dest_bin="!dest_main!\win32\waq\bin"
     
     call :makeDir !dest_bin!
     
-    call :copyFile engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
+    call :copyFile engines_gpl\waq\bin\Release\delwaq.dll                 !dest_bin!
     call :copyNetcdf
 
     rem

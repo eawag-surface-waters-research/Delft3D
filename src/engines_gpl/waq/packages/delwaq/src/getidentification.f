@@ -21,37 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      program dlwq2
+      subroutine getidentification(idstr)
+         !
+         ! Get the ident-string and version number for DELWAQ2
+         !
+         use delwaq_version_module
+         implicit none
+         
+         character(len=*) :: idstr
 
-      use delwaq2_version_module
+         call getfullversionstring_delwaq(idstr)
 
-      implicit none
-
-      integer                          :: argc
-      character(len=256), allocatable  :: argv(:)
-      character(len=120)               :: idstr
-      integer(4)                       :: errorcode
-      integer(4)                       :: i
-
-      call getfullversionstring_delwaq2(idstr)
-
-      argc = iargc() + 1
-
-      allocate ( argv (argc))
-      do i = 1, argc
-          call getarg(i - 1, argv(i))
-      end do
-
-      call delwaq2(argc, argv, errorcode)
-
-      if (errorcode == 0) then
-        write (*,*) ' Normal end'
-      else
-        write (*,*) ' Error code:', errorcode
-      end if
-
-      open  ( 2222 , file = 'delwaq.rtn' )
-      write ( 2222 , * ) errorcode
-      close ( 2222 )
-
-      end program
+      end subroutine

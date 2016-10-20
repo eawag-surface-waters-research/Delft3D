@@ -321,9 +321,11 @@
                ENDIF
             ENDIF
 
-            WRITE(*,*)
-            WRITE(*,*) ' runid : ',TRIM(RUNID)
-            WRITE(*,*)
+            IF (ACTION .EQ. ACTION_FULLCOMPUTATION) THEN
+               WRITE(*,*)
+               WRITE(*,'(A9,A)') '  runid: ',TRIM(RUNID)
+               WRITE(*,*)
+            ENDIF
 
             if ( nolic .and. noseg > 150 ) then
                write(*,'(//a)') 'Error: Authorisation problem'

@@ -21,19 +21,19 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      program dlwq2
+      program dlwq1
 
-      use delwaq2_version_module
+      use delwaq1_version_module
 
       implicit none
-
+      
       integer                          :: argc
       character(len=256), allocatable  :: argv(:)
       character(len=120)               :: idstr
       integer(4)                       :: errorcode
       integer(4)                       :: i
-
-      call getfullversionstring_delwaq2(idstr)
+      
+      call getfullversionstring_delwaq1(idstr)
 
       argc = iargc() + 1
 
@@ -41,8 +41,8 @@
       do i = 1, argc
           call getarg(i - 1, argv(i))
       end do
-
-      call delwaq2(argc, argv, errorcode)
+      
+      call delwaq1(argc, argv, errorcode)
 
       if (errorcode == 0) then
         write (*,*) ' Normal end'
@@ -50,8 +50,8 @@
         write (*,*) ' Error code:', errorcode
       end if
 
-      open  ( 2222 , file = 'delwaq.rtn' )
-      write ( 2222 , * ) errorcode
-      close ( 2222 )
+      open  ( 1111 , file = 'delwaq.rtn' )
+      write ( 1111 , * ) errorcode
+      close ( 1111 )
 
       end program

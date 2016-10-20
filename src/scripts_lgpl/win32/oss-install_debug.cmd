@@ -86,10 +86,9 @@ rem ===============
     call :flow2d3d
     call :flow2d3d_openda
 	call :delwaq1
-	call :delwaq1_lib
 	call :delwaq2
-	call :delwaq2_lib
-	call :delwaq2_openda_lib
+	call :delwaq_dll
+rem 	call :delwaq2_openda_lib
 	call :waq_plugin_wasteload
     call :wave
     call :plugin_culvert
@@ -211,25 +210,6 @@ goto :endproc
 
 
 
-rem =======================
-rem === INSTALL_DELWAQ1_LIB
-rem =======================
-:delwaq1_lib
-    echo "installing delwaq1_lib . . ."
-
-    set dest_bin="engines_gpl\waq\bin\debug"
-    
-    if not exist !dest_bin!     mkdir !dest_bin!
-    call :copyNetcdf
-	
-    copy engines_gpl\waq\default\bloom.spe                           !dest_bin!
-    copy engines_gpl\waq\default\bloominp.d09                        !dest_bin!
-    copy engines_gpl\waq\default\proc_def.dat                        !dest_bin!
-    copy engines_gpl\waq\default\proc_def.def                        !dest_bin!
-goto :endproc
-
-
-
 rem ===================
 rem === INSTALL_DELWAQ2
 rem ===================
@@ -240,11 +220,11 @@ goto :endproc
 
 
 
-rem =======================
-rem === INSTALL_DELWAQ2_LIB
-rem =======================
-:delwaq2_lib
-    echo "installing delwaq2_lib . . ."
+rem ======================
+rem === INSTALL_DELWAQ_DLL
+rem ======================
+:delwaq_dll
+    echo "installing delwaq . . ."
 
     set dest_bin="engines_gpl\waq\bin\debug"
     

@@ -1,8 +1,6 @@
 #-------------------------------------------------------------------------------
-#   Makefile for delwaq
+#   Makefile for delwaq 2
 #
-#   arjen.markus@deltares.nl
-#   26 aug 10
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
@@ -19,21 +17,20 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_builddir)/engines_gpl/waq/packages/delwaq2_lib/src
+        -I$(top_builddir)/engines_gpl/waq/packages/delwaq/src
 
 #-------------------------------------------------------------------------------
 #Sources
 delwaq2_SOURCES = \
-       getidentification.f \
+       delwaq2_version.F90 \
        dlwq2.f
 
 #-------------------------------------------------------------------------------
 # Libraries
 delwaq2_LDADD = \
-    $(top_builddir)/engines_gpl/waq/packages/delwaq2_lib/src/libDelwaq2.la \
+    $(top_builddir)/engines_gpl/waq/packages/delwaq/src/libDelwaq.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/libRDToken.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-    $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/libWaqKernel.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_process/libwaq_process.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/libwaq_plugin_wasteload.la \
@@ -58,7 +55,6 @@ delwaq2_LDADD = \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
-    $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
     -lpthread  -luuid \
     -ldl
 
@@ -66,3 +62,12 @@ delwaq2_LDFLAGS = -export-dynamic
 
 # To be added when using Intel 11:
 #    $(FCLIBS)
+
+BUILT_SOURCES = ./always \
+	./delwaq2_version.F90
+
+./always:
+	rm -rf ./delwaq2_version.F90
+
+./delwaq2_version.F90:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/delwaq2_version.F90 $(srcdir) $(top_srcdir)/engines_gpl/waq/version/version_number.ini $(top_builddir)

@@ -71,6 +71,7 @@
       integer       ihour   ! hour of delayed reference time
       integer       imin    ! minute of delayed reference time
       integer       isec    ! second of delayed reference time
+      real(8)       dummy   ! second in double precision (not used)
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "read_time_delay", ithndl )
 
@@ -88,7 +89,7 @@
 !     convert Julian time offset of the system time to integers
 
       call gregor ( otime  , iyear  , imonth , iday   , ihour  ,
-     &              imin   , isec   )
+     &              imin   , isec   , dummy)
 
 !     subtract the time delay
 

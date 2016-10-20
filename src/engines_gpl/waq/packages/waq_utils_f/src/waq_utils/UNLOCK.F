@@ -42,10 +42,9 @@
       character*20  rundat
       character*120 idstr
       logical       first
-      character*10  verwaq
       character*3   os
       integer (4)   i, j
-
+      save          first
       character*75  opkom(13)
 
       data     first /.true./
@@ -73,14 +72,14 @@
 
          ! set idstr
 
-         call getidentification(idstr, verwaq)
+         call getidentification(idstr)
 
          call getenv('OS',os)
          call dhucas(os,os,len(os))
          
          do i = 1 , size(opkom)
             if ( opkom(i)(3:15) .eq. 'Version xx.xx' ) then
-               write(opkom(i)(3:72),'(a)') idstr(5:74)
+               write(opkom(i)(3:72),'(a)') idstr(1:70)
             end if
             if ( os .ne. 'WIN' ) then
                do j = 1,len(opkom(i))
