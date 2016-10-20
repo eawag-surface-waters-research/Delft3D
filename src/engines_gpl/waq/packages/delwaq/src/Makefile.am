@@ -30,11 +30,11 @@ libDelwaq_la_SOURCES = \
        getidentification.f \
        delwaq1.f \
        delwaq2.f \
-       waq_bmi.F90 \
-       waq_mt3d_api.f90 \
-       waq_omi_api.f90 \
        waq_omi_lib.f90 \
-       waq_omi_substances.f90
+       waq_omi_api.f90 \
+       waq_omi_substances.f90 \
+       waq_bmi.F90 \
+       waq_mt3d_api.f90
 
 #-------------------------------------------------------------------------------
 # Libraries
