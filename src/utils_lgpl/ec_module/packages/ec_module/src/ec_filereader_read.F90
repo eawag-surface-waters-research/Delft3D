@@ -481,7 +481,11 @@ contains
             item1%sourceT0FieldPtr%y_spw_eye = y_spw_eye
             item2%sourceT0FieldPtr%y_spw_eye = y_spw_eye
             item3%sourceT0FieldPtr%y_spw_eye = y_spw_eye
-            rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'pdrop_spw_eye', .false.) 
+            rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'p_drop_spw_eye', .false.) 
+            if (len_trim(rec) == 0) then
+               ! For backwards compatibility, also check the OLD keyword with one underscore less.
+               rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'pdrop_spw_eye', .false.) 
+            end if
             if (len_trim(rec) == 0) then
                call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword", "pdrop_spw_eye")
                success = .false.
@@ -569,8 +573,12 @@ contains
             item1%sourceT1FieldPtr%y_spw_eye = y_spw_eye
             item2%sourceT1FieldPtr%y_spw_eye = y_spw_eye
             item3%sourceT1FieldPtr%y_spw_eye = y_spw_eye
-            rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'pdrop_spw_eye', .false.)  
-            
+            rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'p_drop_spw_eye', .false.) 
+            if (len_trim(rec) == 0) then
+               ! For backwards compatibility, also check the OLD keyword with one underscore less.
+               rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'pdrop_spw_eye', .false.) 
+            end if
+
             read(rec, *, IOSTAT = istat) p_drop_spw_eye
             if(istat /= 0) then
                call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
