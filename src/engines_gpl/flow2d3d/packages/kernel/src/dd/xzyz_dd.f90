@@ -108,39 +108,77 @@ subroutine xzyz_dd(xz        ,yz        ,kcs       ,nmax      ,mmax      ,&
              !
              ! Inner corners; 4 possible orientations
              ! Each orientation has two choices for implementation
+             ! Choose a useful one (allow kcs to be zero at one of the two needed sides)
              !
-             elseif (kcs(n, mu)==3 .and. kcs(nd, m)==3 .and. &
-                   & kcs(n, md)==1 .and. kcs(nu, m)==1        ) then
+             elseif (kcs(n, mu)==3 .and. kcs(nd, m)==3) then
                 !
                 ! Upper left inner corner
-                ! right boundary is choosen
                 !
-                xz(n, m) = (xcor(n, md) + xcor(nd, md)) - xz(n, md)
-                yz(n, m) = (ycor(n, md) + ycor(nd, md)) - yz(n, md)
-             elseif (kcs(n, md)==3 .and. kcs(nd, m)==3 .and. &
-                   & kcs(n, mu)==1 .and. kcs(nu, m)==1        ) then
+                if (kcs(n, md) == 1) then
+                   !
+                   ! right boundary is choosen
+                   !
+                   xz(n, m) = (xcor(n, md) + xcor(nd, md)) - xz(n, md)
+                   yz(n, m) = (ycor(n, md) + ycor(nd, md)) - yz(n, md)
+                elseif (kcs(nu, m) == 1) then
+                   !
+                   ! lower boundary is choosen
+                   !
+                   xz(n, m) = (xcor(n, m) + xcor(n, md)) - xz(nu, m)
+                   yz(n, m) = (ycor(n, m) + ycor(n, md)) - yz(nu, m)
+                endif
+             elseif (kcs(n, md)==3 .and. kcs(nd, m)==3) then
                 !
                 ! Upper right corner
                 ! left boundary is choosen
                 !
-                xz(n, m) = (xcor(n, m) + xcor(nd, m)) - xz(n, mu)
-                yz(n, m) = (ycor(n, m) + ycor(nd, m)) - yz(n, mu)
-             elseif (kcs(n, mu)==3 .and. kcs(nu, m)==3 .and. &
-                   & kcs(n, md)==1 .and. kcs(nd, m)==1        ) then
+                if (kcs(n, mu) == 1) then
+                   !
+                   ! left boundary is choosen
+                   !
+                   xz(n, m) = (xcor(n, m) + xcor(nd, m)) - xz(n, mu)
+                   yz(n, m) = (ycor(n, m) + ycor(nd, m)) - yz(n, mu)
+                elseif (kcs(nu, m) == 1) then
+                   !
+                   ! lower boundary is choosen
+                   !
+                   xz(n, m) = (xcor(n, m) + xcor(n, md)) - xz(nu, m)
+                   yz(n, m) = (ycor(n, m) + ycor(n, md)) - yz(nu, m)
+                endif
+             elseif (kcs(n, mu)==3 .and. kcs(nu, m)==3) then
                 !
                 ! Lower left corner
-                ! right boundary is choosen
                 !
-                xz(n, m) = (xcor(n, md) + xcor(nd, md)) - xz(n, md)
-                yz(n, m) = (ycor(n, md) + ycor(nd, md)) - yz(n, md)
-             elseif (kcs(n, md)==3 .and. kcs(nu, m)==3 .and. &
-                   & kcs(n, mu)==1 .and. kcs(nd, m)==1        ) then
+                if (kcs(n, md) == 1) then
+                   !
+                   ! right boundary is choosen
+                   !
+                   xz(n, m) = (xcor(n, md) + xcor(nd, md)) - xz(n, md)
+                   yz(n, m) = (ycor(n, md) + ycor(nd, md)) - yz(n, md)
+                elseif (kcs(nd, m) == 1) then
+                   !
+                   ! upper boundary is choosen
+                   !
+                   xz(n, m) = (xcor(nd, m) + xcor(nd, md)) - xz(nd, m)
+                   yz(n, m) = (ycor(nd, m) + ycor(nd, md)) - yz(nd, m)
+                endif
+             elseif (kcs(n, md)==3 .and. kcs(nu, m)==3) then
                 !
                 ! Lower right corner
-                ! left boundary is choosen
                 !
-                xz(n, m) = (xcor(n, m) + xcor(nd, m)) - xz(n, mu)
-                yz(n, m) = (ycor(n, m) + ycor(nd, m)) - yz(n, mu)
+                if (kcs(n, mu) == 1) then
+                   !
+                   ! left boundary is choosen
+                   !
+                   xz(n, m) = (xcor(n, m) + xcor(nd, m)) - xz(n, mu)
+                   yz(n, m) = (ycor(n, m) + ycor(nd, m)) - yz(n, mu)
+                elseif (kcs(nd, m) == 1) then
+                   !
+                   ! upper boundary is choosen
+                   !
+                   xz(n, m) = (xcor(nd, m) + xcor(nd, md)) - xz(nd, m)
+                   yz(n, m) = (ycor(nd, m) + ycor(nd, md)) - yz(nd, m)
+                endif
              endif
           endif
        enddo
