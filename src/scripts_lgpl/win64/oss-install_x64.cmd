@@ -357,11 +357,18 @@ rem ======================
     echo "installing delwaq dll . . ."
 
     set dest_bin="!dest_main!\win64\waq\bin"
+    set dest_default="!dest_main!\win64\waq\default"
     
     call :makeDir !dest_bin!
+    call :makeDir !dest_default!
     
-    call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll           !dest_bin!
+    call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
     call :copyNetcdf
+
+    call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
+    call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
+    call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
+    call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
