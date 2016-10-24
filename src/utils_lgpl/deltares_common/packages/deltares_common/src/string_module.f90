@@ -55,6 +55,7 @@ module string_module
    public :: count_words
    public :: remove_substr
    public :: replace_char
+   public :: splitstr
 
    contains
 
@@ -578,5 +579,26 @@ module string_module
             first = index(r,substr)
          enddo 
       end subroutine remove_substr
-    
+      
+      !> Split String at Separator
+      function splitstr(string, strlen, separator) result(split)
+
+         character(len=*), intent(inout)   :: string
+         character(len=1), intent(in)      :: separator
+         integer, intent(in)               :: strlen
+         character(len=strlen)             :: split
+      
+         integer islash
+      
+         islash = index(string, separator)
+         
+         if (islash > 1) then
+            split  = string(1:islash-1)
+            string = string(islash+1:)
+         else
+            split = string
+         endif
+         
+      end function splitstr
+
 end module string_module
