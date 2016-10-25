@@ -23,8 +23,9 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libutils_f_la_SOURCES = \
-         stop_exit.f90 \
+         part_version.F90 \
          write_version.f90 \
+         stop_exit.f90 \
          normal_mod.f90 \
          lower_case.f90 \
          get_key.f90 \
@@ -44,4 +45,13 @@ libutils_f_la_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+BUILT_SOURCES = ./always \
+	./part_version.F90
+
+./always:
+	rm -rf ./part_version.F90
+
+./part_version.F90:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/part_version.F90 $(srcdir) $(top_srcdir)/engines_gpl/part/version/version_number.ini $(top_builddir)
 

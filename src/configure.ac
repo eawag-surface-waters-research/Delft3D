@@ -408,8 +408,6 @@ engines_gpl/part/packages/kernel_f/src/Makefile
 engines_gpl/part/packages/Makefile
 engines_gpl/part/packages/utils_f/Makefile
 engines_gpl/part/packages/utils_f/src/Makefile
-engines_gpl/part/packages/version_number/Makefile
-engines_gpl/part/packages/version_number/src/Makefile
 engines_gpl/waq/Makefile
 engines_gpl/waq/packages/delwaq/Makefile
 engines_gpl/waq/packages/delwaq/src/Makefile

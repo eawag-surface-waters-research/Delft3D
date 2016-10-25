@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\part\version\version_number.rc $(SolutionDir) $(SolutionDir)engines_gpl\part\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
@@ -21,7 +21,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\part\version\version_number.rc $(SolutionDir) $(SolutionDir)engines_gpl\part\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd part ..\bin &quot;$(IFORT_COMPILER13)redist\ia32\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
@@ -31,7 +31,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\part\version\version_number.rc $(SolutionDir) $(SolutionDir)engines_gpl\part\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
@@ -41,9 +41,15 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\part\version\version_number.rc $(SolutionDir) $(SolutionDir)engines_gpl\part\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd part ..\bin &quot;$(IFORT_COMPILER13)redist\intel64\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
-		<File RelativePath=".\src\main.f"/></Files>
+		<Filter Name="Header files"/>
+		<Filter Name="Resource Files">
+		<File RelativePath="..\..\version\part_icon.rc"/>
+		<File RelativePath="..\..\version\resource.h"/>
+		<File RelativePath="..\..\version\version_number.rc"/></Filter>
+		<Filter Name="Source Files">
+		<File RelativePath=".\src\main.f"/></Filter></Files>
 	<Globals/></VisualStudioProject>
