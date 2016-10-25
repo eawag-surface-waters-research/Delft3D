@@ -53,7 +53,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unordered_map>
 #if HAVE_CONFIG_H
 #   include <sys/wait.h>
 #   include <unistd.h>

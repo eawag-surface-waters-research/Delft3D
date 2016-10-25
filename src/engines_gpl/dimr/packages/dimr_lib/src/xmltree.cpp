@@ -77,7 +77,6 @@
 #include <stdio.h>
 #include <expat.h>
 #include <string.h>
-#include <unordered_map>
 
 #include "exception.h"
 //------------------------------------------------------------------------------
