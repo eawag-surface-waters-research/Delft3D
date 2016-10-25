@@ -352,6 +352,9 @@ src/engines_gpl/dimr/packages/dimr_lib/src/exception.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/log.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/stringutils.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/xmltree.cpp -text
+src/engines_gpl/dimr/packages/dimr_testcomponent/ReadMe.txt -text
+src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.f90 -text
+src/engines_gpl/dimr/packages/dimr_testcomponent/dimr_testcomponent.vfproj -text
 src/engines_gpl/dimr/schemas/dimr-1.0.xsd -text
 src/engines_gpl/dimr/schemas/dimr-1.1.xsd -text
 src/engines_gpl/dimr/scripts/flow2d3d/dimr_config.xml -text

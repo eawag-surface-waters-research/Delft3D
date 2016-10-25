@@ -53,6 +53,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unordered_map>
 #if HAVE_CONFIG_H
 #   include <sys/wait.h>
 #   include <unistd.h>
@@ -103,6 +104,7 @@ enum {
    COMP_TYPE_FLOW2D3D  = 6,
    COMP_TYPE_FLOW1D2D  = 7,
    COMP_TYPE_DELWAQ    = 8,
+   COMP_TYPE_TEST  = 9,
 };
 
 enum {
@@ -171,13 +173,18 @@ struct dimr_component {
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
     int                result;            // return value when calling an entry point in dll
+	keyValueLL      *   settings;	      // list of settings
+	keyValueLL      *   parameters;	      // list of parameters
+	//keyValueList      settings;	      // std::list of settings
+	//keyValueList      parameters;	      // std::list of parameters
+	int					dllSetParams();   // pass parameters to the component
+	int					dllSetSettings(); // pass settings to the component
 };
 // Array of all components
 typedef struct DIMR_COMPONENTS {
     unsigned int   numComponents;
     dimr_component * components;
 } dimr_components;
-
 
 // Each item to be communicated between components
 // Corresponds with an item in config.xml
@@ -189,7 +196,6 @@ struct dimr_couple_item {
     double     * sourceVarPtr;       // Pointer to the related variable inside the component instance (result of getVar)
     double     * targetVarPtr;       // idem
 };
-
 
 // A coupler defines the communication between two components, one coupler for each direction
 // Corresponds with a coupler block in config.xml

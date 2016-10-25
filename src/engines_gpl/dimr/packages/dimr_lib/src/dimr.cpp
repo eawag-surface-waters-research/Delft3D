@@ -178,6 +178,24 @@ DllExport int initialize(const char * configfile) {
         (thisDimr->control->subBlocks[0].unit.component->dllGetEndTime) (&thisDimr->control->subBlocks[0].tEnd);
         (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
+
+		// Pass settings for the first controll block's component: parameters
+	    keyValueLL * kv;
+		kv = thisDimr->control->subBlocks[0].unit.component->parameters;
+	    while(kv){
+		   (thisDimr->control->subBlocks[0].unit.component->dllSetVar) (kv->key,(void*)kv->val);
+           kv = kv->nextkv;
+        }
+
+		// Pass all settings for the first controll block's component: settings
+		kv = thisDimr->control->subBlocks[0].unit.component->settings;
+	    while(kv){
+		   (thisDimr->control->subBlocks[0].unit.component->dllSetVar) (kv->key,(void*)kv->val);
+           kv = kv->nextkv;
+        }
+		//TODO: Replace passing settings&parameters by the calls below
+		//int nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetParams();
+		//int nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetSettings();
     }
 	// all ok (no exceptions)
 	return 0;
@@ -288,6 +306,44 @@ DllExport void set_var (const char * key, void * value) {
 
 
 } // extern "C"
+
+int dimr_component::dllSetParams () {
+		// Pass parameters for the first controll block's component: parameters
+	    keyValueLL * kv;
+		int count = 0;
+		char * buffer; 
+		kv = this->parameters;
+	    while(kv){
+//        (this->dllSetVar) (kv->key,(void*)kv->val);
+   		   buffer = (char*) calloc(6+strlen(kv->key),sizeof(char));
+	       strcpy(buffer,"param_");
+	       strcpy(buffer+6,kv->key);
+		   (this->dllSetVar) (kv->key,(void*)buffer);
+		   free(buffer);
+
+           kv = kv->nextkv;
+		   count++;
+        }
+		return count;
+}
+
+int dimr_component::dllSetSettings () {
+		// Pass settings for the first controll block's component: parameters
+	    keyValueLL * kv;
+		int count = 0;
+		char* buffer;
+		kv = this->settings;
+	    while(kv){
+//		   (this->dllSetVar) (kv->key,(void*)kv->val);
+   		   buffer = (char*) calloc(8+strlen(kv->key),sizeof(char));
+	       strcpy(buffer,"setting_");
+	       strcpy(buffer+8,kv->key);
+		   (this->dllSetVar) (kv->key,(void*)buffer);
+		   free(buffer);
+           kv = kv->nextkv;
+        }
+		return count;
+}
 
 
 //
@@ -976,6 +1032,29 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
 
         newComp->onThisRank = (my_rank==0);
     }
+
+    // parameter (optional)
+    int nparameter = xmlComponent->Lookup ("parameter",0,newComp->parameters);
+
+    // setting (optional)
+    int nsetting = xmlComponent->Lookup ("setting",0,newComp->settings);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Test section, print settings and parameters to screen:
+	keyValueLL * kv;
+	kv = newComp->parameters;
+	printf("Parameters:\n",kv->key,kv->val);
+	while(kv){
+		printf("   %s -> %s\n",kv->key,kv->val);
+		kv = kv->nextkv;
+	}
+	kv = newComp->settings;
+	printf("Settings:\n",kv->key,kv->val);
+	while(kv){
+		printf("   %s -> %s\n",kv->key,kv->val);
+		kv = kv->nextkv;
+	}
+	////////////////////////////////////////////////////////////////////////////////
 
     // Element mpiCommunicator (optional)
     XmlTree * commElement = xmlComponent->Lookup ("mpiCommunicator");

@@ -1,3 +1,13 @@
+src/engines_gpl/dimr/packages/dimr_testcomponent/*.aps
+src/engines_gpl/dimr/packages/dimr_testcomponent/*.eto
+src/engines_gpl/dimr/packages/dimr_testcomponent/*.user
+src/engines_gpl/dimr/packages/dimr_testcomponent/ClientBin
+src/engines_gpl/dimr/packages/dimr_testcomponent/GeneratedArtifacts
+src/engines_gpl/dimr/packages/dimr_testcomponent/[Bb]in
+src/engines_gpl/dimr/packages/dimr_testcomponent/[Dd]ebug
+src/engines_gpl/dimr/packages/dimr_testcomponent/[Rr]elease
+src/engines_gpl/dimr/packages/dimr_testcomponent/_Pvt_Extensions
+src/engines_gpl/dimr/packages/dimr_testcomponent/obj
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/*.aps
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/*.eto
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/*.user

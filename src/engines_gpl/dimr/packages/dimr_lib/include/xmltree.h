@@ -25,8 +25,9 @@
 //
 //------------------------------------------------------------------------------
 // $Id: xmltree.h 932 2011-10-25 09:41:59Z mourits $
-// $HeadURL: $
+// $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110420_OnlineVisualisation/src/utils_lgpl/d_hydro_lib/include/xmltree.h $
 //------------------------------------------------------------------------------
+//  d_hydro
 //  Tree-representation of an XML file - DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
@@ -39,9 +40,21 @@
 #include <stdio.h>
 #include <expat.h>
 #include <string.h>
+#include <list>
 
 #include "exception.h"
+struct keyValueLL{
+	char * key;
+	char * val;
+	keyValueLL * nextkv;
+};
 
+struct keyValue{
+	char * key;
+	char * val;
+};
+
+typedef std::list<keyValue>	keyValueList;
 
 class XmlTree {
     public:
@@ -93,6 +106,13 @@ class XmlTree {
             int instance
             );
 
+        int
+        Lookup (
+            const char * pathname,
+            int instance,
+	        keyValueLL * &kvlist 					// key-value pairs linked list
+            );
+
         const char *
         GetAttrib (
             const char * name
@@ -126,10 +146,10 @@ class XmlTree {
             );
 
     public:
-        static const int maxCharData = 1000000;  // maximum size of an XML character data block
-        static const int maxAttrib   = 100;      // maximum number of attributes a start tag can have
-        static const int maxChildren = 1000;     // maximum number of children a tag can have
-        static const int maxPathname = 2560;     // maximum length of a full path name
+        static const int maxCharData = 100000;  // maximum size of an XML character data block
+        static const int maxAttrib   = 10;      // maximum number of attributes a start tag can have
+        static const int maxChildren = 100;     // maximum number of children a tag can have
+        static const int maxPathname = 256;     // maximum length of a full path name
 
         XmlTree *   parent;
         char *      name;

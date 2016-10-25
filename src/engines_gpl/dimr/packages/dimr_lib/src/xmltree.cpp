@@ -34,17 +34,64 @@
 //------------------------------------------------------------------------------
 
 
+//------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2016.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id: xmltree.h 932 2011-10-25 09:41:59Z mourits $
+// $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110420_OnlineVisualisation/src/utils_lgpl/d_hydro_lib/include/xmltree.h $
+//------------------------------------------------------------------------------
+//  d_hydro
+//  Tree-representation of an XML file - DEFINITIONS
+//
+//  Irv.Elshoff@Deltares.NL
+//  6 mar 13
+//------------------------------------------------------------------------------
+
+
+#pragma once
+
+#include <stdio.h>
+#include <expat.h>
+#include <string.h>
+#include <unordered_map>
+
+#include "exception.h"
+//------------------------------------------------------------------------------
 #include "xmltree.h"
+
+//------------------------------------------------------------------------------
 
 #if defined (WIN32)
 #   define strdup _strdup
 #endif
 
-
 static void starttag (void *, const XML_Char *, const XML_Char **);
 static void endtag   (void *, const XML_Char *);
 static void chardata (void *, const XML_Char *, int);
-
 
 static char CharDataBuffer [XmlTree::maxCharData];
 static int  CharDataLen = 0;
@@ -257,6 +304,8 @@ XmlTree::Lookup (
     int instance
     ) {
 
+	keyValue *newkv;
+
     if (pathname[0] == '/') {
         if (this->name[0] != '\0')
             return NULL;
@@ -284,7 +333,6 @@ XmlTree::Lookup (
                 }
             else
                 node = this->children[i]->Lookup (remainder, instance);
-
             break;
             }
         }
@@ -295,6 +343,67 @@ XmlTree::Lookup (
 
 
 //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Modified lookup aimed at finding ALL matches (list of nodes) satisfying the given node name
+
+int
+XmlTree::Lookup (
+    const char * pathname,
+    int instance,
+	keyValueLL* &kvlist		  // key-value pairs linked list
+    ){
+
+    if (pathname[0] == '/') {
+        if (this->name[0] != '\0')
+            return(NULL);
+
+        pathname++;          // skip leading slash
+        }
+
+    //  Copy pathname and split first component and the remainder
+    //  (think of a backwards dirname/basename)
+
+    char * path = new char [strlen (pathname) + 1];
+    strcpy (path, pathname);
+    char * remainder = strchr (path, '/');
+    if (remainder == NULL)
+        remainder = (char *) "";
+    else
+        *remainder++ = '\0';
+
+    XmlTree * node = NULL;
+	int ncount = 0;
+	kvlist = NULL;
+    for (int i = 0 ; i < this->numChildren ; i++) {
+        if (strcmp (path, this->children[i]->name) == 0) {
+            if (remainder[0] == '\0') {
+                if (instance-- > 0) continue;
+                node = this->children[i];								// found a node
+				const char * key = node->GetAttrib("key");
+				const char * val = node->GetAttrib("value");
+          		keyValueLL * newkv = (keyValueLL *) calloc(1,sizeof(keyValueLL));
+				newkv->key = (char*) calloc(strlen(key),sizeof(char));
+				newkv->val = (char*) calloc(strlen(val),sizeof(char));
+				strcpy(newkv->key,key);
+				strcpy(newkv->val,val);
+				if (kvlist){
+				   newkv->nextkv = kvlist;
+				}
+				kvlist = newkv;
+				ncount++;
+            }
+            else
+                this->children[i]->Lookup (remainder, instance);		// found a path to descend
+            }
+        }
+
+    delete [] path;
+    return (ncount);
+    }
+
+//------------------------------------------------------------------------------
+// Modified lookup aimed at finding ALL matches (list of nodes) satisfying the given node name
 
 
 const char *
