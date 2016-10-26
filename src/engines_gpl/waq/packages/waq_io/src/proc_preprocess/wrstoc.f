@@ -265,9 +265,9 @@
       allocate(outputs%descrs(nrvarn))
       outputs%cursize  = nrvarn
       outputs%names(1:nrvarn) = outputl%names(1:nrvarn)
-      outputs%stdnames(1:nrvarn) = outputl%stdnames(1:nrvarn)
-      outputs%units(1:nrvarn) = outputl%units(1:nrvarn)
-      outputs%descrs(1:nrvarn) = outputl%descrs(1:nrvarn)
+      outputs%stdnames(1:nrvarn) = ' ' ! outputl%stdnames(1:nrvarn)
+      outputs%units(1:nrvarn) =    ' ' ! outputl%units(1:nrvarn)
+      outputs%descrs(1:nrvarn) =   ' ' ! outputl%descrs(1:nrvarn)
       outputs%pointers(1:nrvarn) = outputl%pointers(1:nrvarn)
 
       ! deallocate local output structure
