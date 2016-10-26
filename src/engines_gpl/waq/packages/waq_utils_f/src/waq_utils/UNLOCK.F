@@ -88,7 +88,7 @@
             endif
             write(*,*) opkom(i)
          enddo
-         write (lunrep,'(1x,a)') trim(idstr(5:))
+         write (lunrep,'(1x,a)') trim(idstr)
          call dattim(rundat)
          write (lunrep,'(2a)') ' Execution start: ',rundat
       endif
