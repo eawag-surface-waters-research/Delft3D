@@ -1039,23 +1039,6 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     // setting (optional)
     int nsetting = xmlComponent->Lookup ("setting",0,newComp->settings);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Test section, print settings and parameters to screen:
-	keyValueLL * kv;
-	kv = newComp->parameters;
-	printf("Parameters:\n",kv->key,kv->val);
-	while(kv){
-		printf("   %s -> %s\n",kv->key,kv->val);
-		kv = kv->nextkv;
-	}
-	kv = newComp->settings;
-	printf("Settings:\n",kv->key,kv->val);
-	while(kv){
-		printf("   %s -> %s\n",kv->key,kv->val);
-		kv = kv->nextkv;
-	}
-	////////////////////////////////////////////////////////////////////////////////
-
     // Element mpiCommunicator (optional)
     XmlTree * commElement = xmlComponent->Lookup ("mpiCommunicator");
     if (commElement != NULL) {
