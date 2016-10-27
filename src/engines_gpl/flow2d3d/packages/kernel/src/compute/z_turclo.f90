@@ -299,28 +299,26 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        call dfexchg(dvdz, 0, kmax, dfloat, nm_pos, gdp)
        !
        do nm = 1, nmmax
-          do k = kfsmin(nm), kfsmax(nm) - 1
-             kup = k + 1
+          if (kfs(nm)==1) then
              nmd = nm - icx
              ndm = nm - icy
-             if (kfs(nm)==1) then
-                h0     = max(s1(nm) + real(dps(nm),fp), 0.01_fp)
+             h0     = max(s1(nm) + real(dps(nm),fp), 0.01_fp)
+             if (kcs(nm)==3) then
+                maskval = kcs(nm) - 2
+             else
+                maskval = kcs(nm)
+             endif
+             do k = kfsmin(nm), kfsmax(nm) - 1
+                kup = k + 1
                 dz     = 0.5_fp*(dzs1(nm, k) + dzs1(nm, kup))
                 drhodz = (rho(nm, kup) - rho(nm, k))/dz
-                if (kcs(nm)==3) then
-                   maskval = kcs(nm) - 2
-                else
-                   maskval = kcs(nm)
-                endif
                 shear = maskval*0.5_fp*(  dudz(nm, k)**2 + dudz(nmd, k)**2         &
                       &                 + dvdz(nm, k)**2 + dvdz(ndm, k)**2)
-                if (shear<1E-8) then
-                   shear = 1E-8
-                endif
+                shear = max(1E-8, shear)
                 bruvai(nm, k) = -ag*drhodz/rho(nm, k)
                 rich  (nm, k) = bruvai(nm, k)/shear
-             endif
-          enddo
+             enddo
+          endif
        enddo
        !=======================================================================
        !
