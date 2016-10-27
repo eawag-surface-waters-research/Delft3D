@@ -1953,7 +1953,12 @@ module m_ec_converter
             else
                spwphihat = 0d0
             end if
-            if (dlon*spwphihat<0) then
+            if (comparereal(dlon, 0d0) == 0) then     ! exceptional case of being excatly SOUTH of the eye, phi should be 180 degrees 
+               if (dlat<0) then
+                  spwphihat = 180.0d0
+               endif 
+            endif
+            if (dlon*spwphihat<0) then                ! relative longitude should have the same sign as phi
                spwphihat = spwphihat + 180.0_hp
             endif
             spwphihat = modulo(spwphihat, 360.0_hp)
