@@ -1029,9 +1029,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'long_name',     'Sigma coordinate of layer interfaces')
          ! See http://cfconventions.org/cf-conventions/cf-conventions.html#dimensionless-vertical-coordinate
          ! and http://cfconventions.org/cf-conventions/cf-conventions.html#_ocean_sigma_coordinate for info about formula_terms attribute for sigma coordinates.
-         ! TODO this code assumes that the data variables with values for eta and depth are always called s1 and depth. AK
-         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'formula_terms', 'sigma: '//prefix//'_layer_sigma eta: s1 depth: depth') ! TODO: AvD: do we define this only on faces?
-         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'formula_terms', 'sigma: '//prefix//'_interface_sigma eta: s1 depth: depth') ! TODO: AvD: do we define this only on faces?
+         ! TODO this code assumes that the data variables with values for eta and depth are always called s1 and waterdepth. AK
+         ierr = nf90_put_att(ncid, meshids%id_layer_zs,     'formula_terms', 'sigma: '//prefix//'_layer_sigma eta: '//prefix//'_s1 depth: '//prefix//'_waterdepth') ! TODO: AvD: do we define this only on faces?
+         ierr = nf90_put_att(ncid, meshids%id_interface_zs, 'formula_terms', 'sigma: '//prefix//'_interface_sigma eta: '//prefix//'_s1 depth: '//prefix//'_waterdepth') ! TODO: AvD: do we define this only on faces?
       case (LAYERTYPE_Z)
          ierr = nf90_def_var(ncid, prefix//'_layer_z',     nf90_double, meshids%id_layerdim,     meshids%id_layer_zs)
          ierr = nf90_def_var(ncid, prefix//'_interface_z', nf90_double, meshids%id_interfacedim, meshids%id_interface_zs)
