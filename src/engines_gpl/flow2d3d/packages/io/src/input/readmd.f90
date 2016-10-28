@@ -809,7 +809,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
               & nprttm    ,itfinish  ,iphisf    ,iphisi    ,iphisl    , &
               & itmapf    ,itmapi    ,itmapl    ,ithisf    ,ithisi    , &
               & ithisl    ,itcomf    ,itcomi    ,itcoml    ,itrsti    , &
-              & itnflf    ,itnfli    ,itnfll    ,gdp       )
+              & itnflf    ,itnfli    ,itnfll    ,lstsci    ,gdp       )
     if (error) goto 9999
     !
     ! Read waq parameters, such as output flag for writing binary waq files
