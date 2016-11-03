@@ -108,6 +108,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                            , pointer :: iro
     real(fp)                           , pointer :: paver
     real(fp)                           , pointer :: thetqh
+    real(fp)                           , pointer :: thetqt
     logical                            , pointer :: use_zavg_for_qtot
     logical                            , pointer :: pcorr
     real(fp), dimension(:,:,:)         , pointer :: rttfu
@@ -275,11 +276,14 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                             :: nobcto         ! total number of open boundaries (including "duplicate" open boudnaries located in halo regions)
     integer                             :: istat
 !
+    real(fp), dimension(nrob)           :: qtfrc2         ! Temporary array for old values of qtfrac for relaxation
+!
 !! executable statements -------------------------------------------------------
 !
     relxqh                => gdp%gdincbc%relxqh
     paver                 => gdp%gdnumeco%paver
     thetqh                => gdp%gdnumeco%thetqh
+    thetqt                => gdp%gdnumeco%thetqt
     use_zavg_for_qtot     => gdp%gdnumeco%use_zavg_for_qtot
     pcorr                 => gdp%gdnumeco%pcorr
     rhow                  => gdp%gdphysco%rhow
@@ -307,6 +311,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     ! initialize local parameters
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
     ! TIMSCL will not been used in UPDBCC
+    !
+    qtfrc2 = qtfrac
     !
     first   = .false.
     horiz   = .false.
@@ -546,6 +552,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              !  This leads to oscillations parallel to the open boundary:
              ! 
              qtfrac(n)  = (dpvel**1.5_fp) * width * czeff
+             qtfrac(n)  = qtfrac(n)*(1.0 - thetqt) + qtfrc2(n)*thetqt
              !
              !  Alternative (more robust?) implementation is switched off
              !
