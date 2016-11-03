@@ -43,6 +43,7 @@ type gd_numeco
    real(fp)     :: paver             !  Average atmosferic pressure in Pa (N/m2)
    real(fp)     :: rmincf            !  Minimal curvature for Coriolis force (used with secondary flow)
    real(fp)     :: thetqh            !  Relaxation parameter QH boundaries
+   real(fp)     :: thetqt            !  Relaxation parameter total discharge boundaries
    integer      :: ibaroc            !  Bracoline pressure on open boundary points
                                      !  0 = No
                                      !  1 = Yes default
