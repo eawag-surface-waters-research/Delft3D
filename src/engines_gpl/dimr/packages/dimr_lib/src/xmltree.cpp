@@ -614,7 +614,7 @@ XmlTree::ExpandEnvironmentVariables(
         outstr = SubstEnvVar(instr);
 		this->attribValues[iattrib] = &outstr[0];
 	}
-	if (this->charData!=nullptr){
+	if (this->charData!=NULL){
 	   orgstr = this->charData;
 	   instr = orgstr;
        outstr = SubstEnvVar(instr);
