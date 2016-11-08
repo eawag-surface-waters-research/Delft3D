@@ -6,7 +6,7 @@
         <xs:annotation>
             <xs:documentation>information on the present DIMR configuration file</xs:documentation>
         </xs:annotation>
-        <xs:sequence>
+        <xs:all>
             <xs:element name="fileVersion">
                 <xs:annotation>
                     <xs:documentation>DIMR configuration file version</xs:documentation>
@@ -17,33 +17,17 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
-            <xs:choice minOccurs="0">
-                <xs:sequence>
-                    <xs:element name="creationDate" type="xs:dateTime">
-                        <xs:annotation>
-                            <xs:documentation>Date/time when the file was created/edited</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
-                    <xs:element name="createdBy" type="xs:string">
-                        <xs:annotation>
-                            <xs:documentation>Tool that created the file</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
-                </xs:sequence>
-                <xs:sequence>
-                    <xs:element name="createdBy" type="xs:string">
-                        <xs:annotation>
-                            <xs:documentation>Tool that created the file</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
-                    <xs:element name="creationDate" type="xs:dateTime">
-                        <xs:annotation>
-                            <xs:documentation>Date/time when the file was created/edited</xs:documentation>
-                        </xs:annotation>
-                    </xs:element>
-                </xs:sequence>
-            </xs:choice>
-        </xs:sequence>
+            <xs:element name="creationDate" type="xs:dateTime" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Date/time when the file was created/edited</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="createdBy" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Tool that created the file</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
     </xs:complexType>
     <xs:complexType name="dimrControlXML">
         <xs:annotation>
