@@ -103,7 +103,8 @@ enum {
    COMP_TYPE_FLOW2D3D  = 6,
    COMP_TYPE_FLOW1D2D  = 7,
    COMP_TYPE_DELWAQ    = 8,
-   COMP_TYPE_TEST  = 9,
+   COMP_TYPE_RR        = 9,
+   COMP_TYPE_TEST      = 10,
 };
 
 enum {

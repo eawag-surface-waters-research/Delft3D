@@ -754,6 +754,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb) {
                                     if (my_rank == thisCoupler->sourceComponent->processes[m]) {
                                         this->log->Write (Log::DETAIL, my_rank, "Send(%s)", thisCoupler->items[k].sourceName);
 										if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC     ||
+											thisCoupler->sourceComponent->type == COMP_TYPE_RR      ||
 											thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D  ||
 											thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D2D) {
                                             // These components only returns a new pointer to a copy of the double value, so call it each time.
@@ -796,6 +797,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb) {
                                         if (my_rank == thisCoupler->targetComponent->processes[m]) {
                                             this->log->Write (Log::DETAIL, my_rank, "Receive(%s)", thisCoupler->items[k].targetName);
 											if (   thisCoupler->targetComponent->type == COMP_TYPE_RTC 
+                                                || thisCoupler->targetComponent->type == COMP_TYPE_RR 
                                                 || thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D 
 												|| thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D
                                                 || thisCoupler->targetComponent->type == COMP_TYPE_WANDA) {
@@ -993,6 +995,8 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
         newComp->type = COMP_TYPE_FM;
     } else if (strstr(libNameLowercase, "cf_dll") != NULL){
         newComp->type = COMP_TYPE_FLOW1D;
+    } else if (strstr(libNameLowercase, "rr_dll") != NULL){
+        newComp->type = COMP_TYPE_RR;
     } else if (strstr(libNameLowercase, "wandaengine_native") != NULL){
         newComp->type = COMP_TYPE_WANDA;
     } else if (strstr(libNameLowercase, "flow2d3d") != NULL){
@@ -1328,6 +1332,7 @@ void Dimr::connectLibs (void) {
         }
 
         if (   this->componentsList.components[i].type == COMP_TYPE_RTC 
+            || this->componentsList.components[i].type == COMP_TYPE_RR 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D2D
             || this->componentsList.components[i].type == COMP_TYPE_WANDA) {
