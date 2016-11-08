@@ -118,6 +118,7 @@ DllExport void set_logger(Log * loggerFromDimrExe) {
 
 //------------------------------------------------------------------------------
 DllExport int initialize(const char * configfile) {
+	int nSettingsSet, nParamsSet;
     if (thisDimr == NULL) {
         thisDimr = new Dimr();
     }
@@ -144,6 +145,7 @@ DllExport int initialize(const char * configfile) {
     }
 
     thisDimr->config = new XmlTree (conf);
+	thisDimr->config->ExpandEnvironmentVariables();
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
@@ -171,31 +173,17 @@ DllExport int initialize(const char * configfile) {
             (thisDimr->control->subBlocks[0].unit.component->dllGetVar) (key, &waveModePtr);
             *waveModePtr = 0;
         }
+
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
         thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
+		nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetSettings();
         thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
+		nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetParams();
         (thisDimr->control->subBlocks[0].unit.component->dllGetStartTime) (&thisDimr->control->subBlocks[0].tStart);
         (thisDimr->control->subBlocks[0].unit.component->dllGetEndTime) (&thisDimr->control->subBlocks[0].tEnd);
         (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
 
-		// Pass settings for the first controll block's component: parameters
-	    keyValueLL * kv;
-		kv = thisDimr->control->subBlocks[0].unit.component->parameters;
-	    while(kv){
-		   (thisDimr->control->subBlocks[0].unit.component->dllSetVar) (kv->key,(void*)kv->val);
-           kv = kv->nextkv;
-        }
-
-		// Pass all settings for the first controll block's component: settings
-		kv = thisDimr->control->subBlocks[0].unit.component->settings;
-	    while(kv){
-		   (thisDimr->control->subBlocks[0].unit.component->dllSetVar) (kv->key,(void*)kv->val);
-           kv = kv->nextkv;
-        }
-		//TODO: Replace passing settings&parameters by the calls below
-		//int nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetParams();
-		//int nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetSettings();
     }
 	// all ok (no exceptions)
 	return 0;
@@ -311,16 +299,9 @@ int dimr_component::dllSetParams () {
 		// Pass parameters for the first controll block's component: parameters
 	    keyValueLL * kv;
 		int count = 0;
-		char * buffer; 
 		kv = this->parameters;
 	    while(kv){
-//        (this->dllSetVar) (kv->key,(void*)kv->val);
-   		   buffer = (char*) calloc(6+strlen(kv->key),sizeof(char));
-	       strcpy(buffer,"param_");
-	       strcpy(buffer+6,kv->key);
-		   (this->dllSetVar) (kv->key,(void*)buffer);
-		   free(buffer);
-
+           (this->dllSetVar) (kv->key,(void*)kv->val);
            kv = kv->nextkv;
 		   count++;
         }
@@ -334,12 +315,7 @@ int dimr_component::dllSetSettings () {
 		char* buffer;
 		kv = this->settings;
 	    while(kv){
-//		   (this->dllSetVar) (kv->key,(void*)kv->val);
-   		   buffer = (char*) calloc(8+strlen(kv->key),sizeof(char));
-	       strcpy(buffer,"setting_");
-	       strcpy(buffer+8,kv->key);
-		   (this->dllSetVar) (kv->key,(void*)buffer);
-		   free(buffer);
+		   (this->dllSetVar) (kv->key,(void*)kv->val);
            kv = kv->nextkv;
         }
 		return count;
@@ -1005,6 +981,8 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
        newComp->type = COMP_TYPE_FLOW1D2D;
     } else if (strstr(libNameLowercase, "delwaq2_lib") != NULL){
        newComp->type = COMP_TYPE_DELWAQ;
+    } else if (strstr(libNameLowercase, "dimr_testcomponent") != NULL){
+       newComp->type = COMP_TYPE_TEST;
     }
     else {
         throw new Exception (true, "Name of library, \"%s\", is not recognized", newComp->library);
@@ -1335,6 +1313,7 @@ void Dimr::connectLibs (void) {
             || this->componentsList.components[i].type == COMP_TYPE_RR 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D2D
+            || this->componentsList.components[i].type == COMP_TYPE_TEST
             || this->componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
             this->componentsList.components[i].dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);

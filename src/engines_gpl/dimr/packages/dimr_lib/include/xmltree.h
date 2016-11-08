@@ -40,6 +40,11 @@
 #include <stdio.h>
 #include <expat.h>
 #include <string.h>
+#include <string>
+#include <cstdlib>
+
+
+using namespace std;
 #include <list>
 
 #include "exception.h"
@@ -79,6 +84,15 @@ class XmlTree {
         AddChild (
             XmlTree * child
             );
+
+		void
+		ExpandEnvironmentVariables (
+		);
+
+		void
+		ExpandEnvironmentVariables (
+		   int instance
+		);
 
         bool
         GetBoolAttrib (
@@ -144,6 +158,16 @@ class XmlTree {
         print (
             int level
             );
+
+        string 
+        SubstEnvVar(
+            string instr 
+        );
+
+		static string
+        EnvSubst(
+	       std::string instr
+	    );
 
     public:
         static const int maxCharData = 100000;  // maximum size of an XML character data block

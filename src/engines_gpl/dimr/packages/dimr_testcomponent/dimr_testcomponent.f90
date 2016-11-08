@@ -79,19 +79,49 @@ contains
      !DEC$ ATTRIBUTES DLLEXPORT :: set_var
      ! Return a pointer to the variable
      use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
+     integer   :: slen
    
      character(kind=c_char), intent(in) :: c_var_name(*)
-     type(c_ptr), value, intent(in) :: xptr
-     character(len=strlen(c_var_name)) :: var_name
-     character(kind=c_char), pointer :: valuestr
+     type(c_ptr), value, intent(in)     :: xptr
+     character(len=strlen(c_var_name))  :: var_name
+     character(len=1024), pointer       :: valuestr
    
      ! Store the name and pointer to the value
      var_name = char_array_to_string(c_var_name, strlen(c_var_name))
      call c_f_pointer(xptr, valuestr)
+     slen = index(valuestr, c_null_char) - 1
+     write(*,*) "set_var: "//var_name//" = '"//valuestr(1:slen)//"'"
      
    end subroutine set_var
    
    
+   subroutine get_start_time(t) bind(C, name="get_start_time")
+     !DEC$ ATTRIBUTES DLLEXPORT :: get_start_time
+     use iso_c_binding, only: c_double
+     real(c_double), intent(out) :: t
+ 
+   end subroutine get_start_time
+ 
+   subroutine get_end_time(t) bind(C, name="get_end_time")
+     !DEC$ ATTRIBUTES DLLEXPORT :: get_end_time
+     use iso_c_binding, only: c_double
+     real(c_double), intent(out) :: t
+ 
+   end subroutine get_end_time
+ 
+   subroutine get_time_step(dt) bind(C, name="get_time_step")
+     !DEC$ ATTRIBUTES DLLEXPORT :: get_time_step
+     use iso_c_binding, only: c_double
+     real(c_double), intent(out) :: dt
+ 
+   end subroutine get_time_step
+ 
+   subroutine get_current_time(t) bind(C, name="get_current_time")
+     !DEC$ ATTRIBUTES DLLEXPORT :: get_current_time
+     use iso_c_binding, only: c_double
+     real(c_double), intent(out) :: t
+ 
+   end subroutine get_current_time
    
    subroutine dimr_testcomponent
    
