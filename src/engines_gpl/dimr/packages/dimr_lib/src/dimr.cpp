@@ -979,7 +979,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
         newComp->type = COMP_TYPE_FLOW2D3D;
     } else if (strstr(libNameLowercase, "flow1d2d") != NULL){
        newComp->type = COMP_TYPE_FLOW1D2D;
-    } else if (strstr(libNameLowercase, "delwaq2_lib") != NULL){
+    } else if (strstr(libNameLowercase, "delwaq") != NULL){
        newComp->type = COMP_TYPE_DELWAQ;
     } else if (strstr(libNameLowercase, "dimr_testcomponent") != NULL){
        newComp->type = COMP_TYPE_TEST;
@@ -1313,6 +1313,7 @@ void Dimr::connectLibs (void) {
             || this->componentsList.components[i].type == COMP_TYPE_RR 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D2D
+            || this->componentsList.components[i].type == COMP_TYPE_DELWAQ
             || this->componentsList.components[i].type == COMP_TYPE_TEST
             || this->componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
