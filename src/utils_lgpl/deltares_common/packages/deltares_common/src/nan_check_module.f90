@@ -72,7 +72,7 @@ logical function nan_check_1D_sp(field, fieldnam, lundia) result (retval)
        if (isnan(field(i))) then
           write(message,*) 'NaN found in ', fieldnam, &
                ' at (i) = (', i, ')'
-          write(lundia,*) 'U021', trim(message)
+          write(lundia,*) '*** ERROR', trim(message)
           retval = .false.
           return
        endif
@@ -105,7 +105,7 @@ logical function nan_check_2D_sp(field, fieldnam, lundia) result (retval)
           if (isnan(field(n,m))) then
              write(message,*) 'NaN found in ', fieldnam, &
               ' at (n,m) = (', n, ',' , m, ')'
-             write(lundia,*) 'U021', trim(message)
+             write(lundia,*) '*** ERROR', trim(message)
              retval = .false.
              return
           endif
@@ -140,7 +140,7 @@ logical function nan_check_3D_sp(field, fieldnam, lundia) result (retval)
             if (isnan(field(n,m,k))) then
               write(message,*) 'NaN found in ', fieldnam, &
                   ' at (n,m,k) = (', n, ',', m, ',', k, ')'
-              write(lundia,*) 'U021', trim(message)
+              write(lundia,*) '*** ERROR', trim(message)
               retval = .false.
               return
             endif
@@ -177,7 +177,7 @@ logical function nan_check_4D_sp(field, fieldnam, lundia) result (retval)
                 if (isnan(field(n,m,k,l))) then
                    write(message,*) 'NaN found in ', fieldnam, &
                       ' at (n,m,k,l) = (', n, ',', m, ',', k, ',', l, ')'
-                   write(lundia,*) 'U021', trim(message)
+                   write(lundia,*) '*** ERROR', trim(message)
                    retval = .false.
                    return
                 endif
@@ -212,7 +212,7 @@ logical function nan_check_1D_dp(field, fieldnam, lundia) result (retval)
        if (isnan(field(i))) then
           write(message,*) 'NaN found in ', fieldnam, &
                ' at (i) = (', i, ')'
-          write(lundia,*) 'U021', trim(message)
+          write(lundia,*) '*** ERROR', trim(message)
           retval = .false.
           return
        endif
@@ -245,7 +245,7 @@ logical function nan_check_2D_dp(field, fieldnam, lundia) result (retval)
           if (isnan(field(n,m))) then
              write(message,*) 'NaN found in ', fieldnam, &
               ' at (n,m) = (', n, ',' , m, ')'
-             write(lundia,*) 'U021', trim(message)
+             write(lundia,*) '*** ERROR', trim(message)
              retval = .false.
              return
           endif
@@ -280,7 +280,7 @@ logical function nan_check_3D_dp(field, fieldnam, lundia) result (retval)
             if (isnan(field(n,m,k))) then
               write(message,*) 'NaN found in ', fieldnam, &
                   ' at (n,m,k) = (', n, ',', m, ',', k, ')'
-              write(lundia,*) 'U021', trim(message)
+              write(lundia,*) '*** ERROR', trim(message)
               retval = .false.
               return
             endif
@@ -317,7 +317,7 @@ logical function nan_check_4D_dp(field, fieldnam, lundia) result (retval)
                 if (isnan(field(n,m,k,l))) then
                    write(message,*) 'NaN found in ', fieldnam, &
                       ' at (n,m,k,l) = (', n, ',', m, ',', k, ',', l, ')'
-                   write(lundia,*) 'U021', trim(message)
+                   write(lundia,*) '*** ERROR', trim(message)
                    retval = .false.
                    return
                 endif
