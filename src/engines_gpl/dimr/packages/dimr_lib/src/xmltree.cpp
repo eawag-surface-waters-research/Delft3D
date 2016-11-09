@@ -588,11 +588,12 @@ XmlTree::SubstEnvVar(
       env_value=getenv(env_name);
       string rest_in = instr.substr(pos1+1);
       rest_out = SubstEnvVar(rest_in);
-   }
-   if (env_value!=NULL){
-     env_string = string(env_value);
-   }
-   return (string(instr.substr(0,pos0))+env_string+rest_out);
+      if (env_value!=NULL){
+        env_string = string(env_value);
+      }
+      return (string(instr.substr(0,pos0))+env_string+rest_out);
+   } else 
+      return string(instr);
 }
 
 void
@@ -611,14 +612,18 @@ XmlTree::ExpandEnvironmentVariables(
 	for (int iattrib = 0; iattrib<this->numAttrib;iattrib++){
 		orgstr = this->attribValues[iattrib];
 		instr = orgstr;
-        outstr = SubstEnvVar(instr);
-		this->attribValues[iattrib] = &outstr[0];
+        outstr = SubstEnvVar(instr)+'\0';		
+	    free(this->attribValues[iattrib]);
+	    this->attribValues[iattrib] = (char*) calloc(outstr.length(),sizeof(char));
+	    outstr.copy(this->attribValues[iattrib],outstr.length());
 	}
 	if (this->charData!=NULL){
 	   orgstr = this->charData;
 	   instr = orgstr;
-       outstr = SubstEnvVar(instr);
-	   this->charData = &outstr[0];
+       outstr = SubstEnvVar(instr)+'\0';
+	   free(this->charData);
+	   this->charData = (char*) calloc(outstr.length(),sizeof(char));
+	   outstr.copy(this->charData,outstr.length());
 	}
 
     for (int i = 0 ; i < this->numChildren ; i++) {

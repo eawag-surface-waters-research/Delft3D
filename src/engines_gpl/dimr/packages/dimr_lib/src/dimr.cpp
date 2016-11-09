@@ -145,7 +145,7 @@ DllExport int initialize(const char * configfile) {
     }
 
     thisDimr->config = new XmlTree (conf);
-//	thisDimr->config->ExpandEnvironmentVariables();     // TODO: RL666: Transfer of the result of substitutions back into the xmltree needs fixing !
+	thisDimr->config->ExpandEnvironmentVariables();
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
