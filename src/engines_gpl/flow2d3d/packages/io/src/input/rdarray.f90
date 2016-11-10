@@ -135,9 +135,8 @@ subroutine rdarray_int_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ itime /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -206,9 +205,8 @@ subroutine rdarray_int_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -281,9 +279,8 @@ subroutine rdarray_int_2d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -358,9 +355,8 @@ subroutine rdarray_int_3d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -445,9 +441,11 @@ subroutine rdarray_hp_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ itime /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32)
+             read (fds, iostat=ierr) lvar
+             var = real(lvar,hp)
+          case (FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -540,9 +538,15 @@ subroutine rdarray_hp_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32)
+             allocate(lvar(u1))
+             read (fds, iostat=ierr) lvar
+             do i1 = 1,u1
+                 var(i1) = real(lvar(i1),hp)
+             enddo
+             deallocate(lvar)
+          case (FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -640,9 +644,17 @@ subroutine rdarray_hp_2d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
-             ierr = 0
+          case (FTYPE_UNFORM32)
+             allocate(lvar(u1,u2))
+             read (fds, iostat=ierr) ((lvar(i1,i2), i2 = 1,u2), i1 = 1,u1)
+             do i2 = 1,u2
+                 do i1 = 1,u1
+                     var(i1,i2) = real(lvar(i1,i2),hp)
+                 enddo
+             enddo
+             deallocate(lvar)
+          case (FTYPE_UNFORM64)
+             read (fds, iostat=ierr) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
        endselect
     else
        ierr = 0
@@ -745,11 +757,23 @@ subroutine rdarray_hp_3d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
+             allocate(lvar(u1,u2,1))
              do i3 = 1,u3
-                read (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+                read (fds, iostat=ierr) ((lvar(i1,i2,1), i2 = 1,u2), i1 = 1,u1)
+                if (ierr /= 0) return
+                do i2 = 1,u2
+                    do i1 = 1,u1
+                        var(i1,i2,i3) = real(lvar(i1,i2,1),hp)
+                    enddo
+                enddo
              enddo
-             ierr = 0
+             deallocate(lvar)
+          case (FTYPE_UNFORM64)
+             do i3 = 1,u3
+                read (fds, iostat=ierr) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+                if (ierr /= 0) return
+             enddo
        endselect
     else
        ierr = 0
@@ -857,13 +881,27 @@ subroutine rdarray_hp_4d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
+             allocate(lvar(u1,u2,1,1))
              do i4 = 1,u4
                 do i3 = 1,u3
-                   read (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                   read (fds, iostat=ierr) ((lvar(i1,i2,1,1), i2 = 1,u2), i1 = 1,u1)
+                   if (ierr /= 0) return
+                   do i2 = 1,u2
+                       do i1 = 1,u1
+                           var(i1,i2,i3,i4) = lvar(i1,i2,1,1)
+                       enddo
+                   enddo
                 enddo
              enddo
-             ierr = 0
+             deallocate(lvar)
+          case (FTYPE_UNFORM64)
+             do i4 = 1,u4
+                do i3 = 1,u3
+                   read (fds, iostat=ierr) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                   if (ierr /= 0) return
+                enddo
+             enddo
        endselect
     else
        ierr = 0
@@ -947,9 +985,11 @@ subroutine rdarray_sp_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ itime /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32)
+             read (fds, iostat=ierr) var
+          case (FTYPE_UNFORM64)
+             read (fds, iostat=ierr) lvar
+             var = real(lvar,sp)
        endselect
     else
        ierr = 0
@@ -1042,9 +1082,15 @@ subroutine rdarray_sp_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32)
+             read (fds, iostat=ierr) var
+          case (FTYPE_UNFORM64)
+             allocate(lvar(u1))
+             read (fds, iostat=ierr) lvar
+             do i1 = 1,u1
+                 var(i1) = real(lvar(i1),sp)
+             enddo
+             deallocate(lvar)
        endselect
     else
        ierr = 0
@@ -1142,9 +1188,17 @@ subroutine rdarray_sp_2d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
-             ierr = 0
+          case (FTYPE_UNFORM32)
+             read (fds, iostat=ierr) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
+          case (FTYPE_UNFORM64)
+             allocate(lvar(u1,u2))
+             read (fds, iostat=ierr) ((lvar(i1,i2), i2 = 1,u2), i1 = 1,u1)
+             do i2 = 1,u2
+                 do i1 = 1,u1
+                     var(i1,i2) = real(lvar(i1,i2),sp)
+                 enddo
+             enddo
+             deallocate(lvar)
        endselect
     else
        ierr = 0
@@ -1247,11 +1301,23 @@ subroutine rdarray_sp_3d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              do i3 = 1,u3
-                read (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+                read (fds, iostat=ierr) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+                if (ierr /= 0) return
              enddo
-             ierr = 0
+          case (FTYPE_UNFORM64)
+             allocate(lvar(u1,u2,1))
+             do i3 = 1,u3
+                read (fds, iostat=ierr) ((lvar(i1,i2,1), i2 = 1,u2), i1 = 1,u1)
+                if (ierr /= 0) return
+                do i2 = 1,u2
+                    do i1 = 1,u1
+                        var(i1,i2,i3) = real(lvar(i1,i2,1),sp)
+                    enddo
+                enddo
+             enddo
+             deallocate(lvar)
        endselect
     else
        ierr = 0
@@ -1359,13 +1425,27 @@ subroutine rdarray_sp_4d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              do i4 = 1,u4
                 do i3 = 1,u3
-                   read (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                   read (fds, iostat=ierr) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                   if (ierr /= 0) return
                 enddo
              enddo
-             ierr = 0
+          case (FTYPE_UNFORM64)
+             allocate(lvar(u1,u2,1,1))
+             do i4 = 1,u4
+                do i3 = 1,u3
+                   read (fds, iostat=ierr) ((lvar(i1,i2,1,1), i2 = 1,u2), i1 = 1,u1)
+                   if (ierr /= 0) return
+                   do i2 = 1,u2
+                       do i1 = 1,u1
+                           var(i1,i2,i3,i4) = real(lvar(i1,i2,1,1),sp)
+                       enddo
+                   enddo
+                enddo
+             enddo
+             deallocate(lvar)
        endselect
     else
        ierr = 0
@@ -1431,9 +1511,8 @@ subroutine rdarray_char_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, itime /), count = (/len(var), 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0
@@ -1502,9 +1581,8 @@ subroutine rdarray_char_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_get_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/len(var), u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'reading '//varnam, filename)
-          case (FTYPE_UNFORM)
-             read (fds) var
-             ierr = 0
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
+             read (fds, iostat=ierr) var
        endselect
     else
        ierr = 0

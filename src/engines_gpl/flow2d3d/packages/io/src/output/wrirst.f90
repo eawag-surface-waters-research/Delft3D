@@ -83,6 +83,7 @@ subroutine wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
 !
 ! Local variables
 !
+    integer        :: ftype    ! File type FTYPE_UNFORM32 or FTYPE_UNFORM64
     integer        :: idate    ! Absolute date related to ITDATE and TIMSEC 
     integer        :: ierr     ! Error flag
     integer        :: itime    ! Absolute time related to ITDATE and TIMSEC 
@@ -154,35 +155,37 @@ subroutine wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
        !
     endif
     !
+    ftype = FTYPE_UNFORM32 ! switch to FTYPE_UNFORM64 for double precision
+    !
     !-----write restart values S1, U1, V1, R1 and RTUR1
     !
-    call wrtarray_nm(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nm(lunrst, filrst, ftype, 'DUMMY', &
                    & 0, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, s1, 'DUMMY')
     !
-    call wrtarray_nmk(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nmk(lunrst, filrst, ftype, 'DUMMY', &
                     & 0, nf, nl, mf, ml, iarrc, gdp, &
                     & 1, kmax, ierr, lundia, u1, 'DUMMY')
     !
-    call wrtarray_nmk(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nmk(lunrst, filrst, ftype, 'DUMMY', &
                     & 0, nf, nl, mf, ml, iarrc, gdp, &
                     & 1, kmax, ierr, lundia, v1, 'DUMMY')
     !
-    call wrtarray_nmkl(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nmkl(lunrst, filrst, ftype, 'DUMMY', &
                     & 0, nf, nl, mf, ml, iarrc, gdp, &
                     & 1, kmax, lstsci, ierr, lundia, r1, 'DUMMY')
     !
-    call wrtarray_nmkl(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nmkl(lunrst, filrst, ftype, 'DUMMY', &
                     & 0, nf, nl, mf, ml, iarrc, gdp, &
                     & 0, kmax, ltur, ierr, lundia, rtur1, 'DUMMY')
     !
     !-----write filtered velocities to restart file to allow for
     !     restarts using subgrid viscosity model
     !
-    call wrtarray_nm(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nm(lunrst, filrst, ftype, 'DUMMY', &
                    & 0, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, umnldf, 'DUMMY')
-    call wrtarray_nm(lunrst, filrst, FTYPE_UNFORM, 'DUMMY', &
+    call wrtarray_nm(lunrst, filrst, ftype, 'DUMMY', &
                    & 0, nf, nl, mf, ml, iarrc, gdp, &
                    & ierr, lundia, vmnldf, 'DUMMY')
     !

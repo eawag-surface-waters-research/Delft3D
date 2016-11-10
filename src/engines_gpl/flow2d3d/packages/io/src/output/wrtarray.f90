@@ -147,7 +147,7 @@ subroutine wrtarray_int_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ itime /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
@@ -218,7 +218,7 @@ subroutine wrtarray_int_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
@@ -293,7 +293,7 @@ subroutine wrtarray_int_2d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
@@ -370,7 +370,7 @@ subroutine wrtarray_int_3d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
@@ -456,7 +456,10 @@ subroutine wrtarray_hp_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ itime /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
+             write (fds) real(var,sp)
+             ierr = 0
+          case (FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
@@ -550,8 +553,11 @@ subroutine wrtarray_hp_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
-             write (fds) var
+          case (FTYPE_UNFORM32)
+             write (fds) (real(var(i1),sp), i1 = 1,u1)
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             write (fds) (var(i1), i1 = 1,u1)
              ierr = 0
        endselect
     else
@@ -649,7 +655,10 @@ subroutine wrtarray_hp_2d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
+             write (fds) ((real(var(i1,i2),sp), i2 = 1,u2), i1 = 1,u1)
+             ierr = 0
+          case (FTYPE_UNFORM64)
              write (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
              ierr = 0
        endselect
@@ -753,7 +762,12 @@ subroutine wrtarray_hp_3d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
+             do i3 = 1,u3
+                write (fds) ((real(var(i1,i2,i3),sp), i2 = 1,u2), i1 = 1,u1)
+             enddo
+             ierr = 0
+          case (FTYPE_UNFORM64)
              do i3 = 1,u3
                 write (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
              enddo
@@ -864,7 +878,14 @@ subroutine wrtarray_hp_4d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
+             do i4 = 1,u4
+                do i3 = 1,u3
+                   write (fds) ((real(var(i1,i2,i3,i4),sp), i2 = 1,u2), i1 = 1,u1)
+                enddo
+             enddo
+             ierr = 0
+          case (FTYPE_UNFORM64)
              do i4 = 1,u4
                 do i3 = 1,u3
                    write (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
@@ -954,8 +975,11 @@ subroutine wrtarray_sp_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ itime /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              write (fds) var
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             write (fds) real(var,hp)
              ierr = 0
        endselect
     else
@@ -1048,8 +1072,11 @@ subroutine wrtarray_sp_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              write (fds) var
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             write (fds) (real(var(i1),hp), i1 = 1,u1)
              ierr = 0
        endselect
     else
@@ -1147,8 +1174,11 @@ subroutine wrtarray_sp_2d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/u1, u2, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              write (fds) ((var(i1,i2), i2 = 1,u2), i1 = 1,u1)
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             write (fds) ((real(var(i1,i2),hp), i2 = 1,u2), i1 = 1,u1)
              ierr = 0
        endselect
     else
@@ -1251,9 +1281,14 @@ subroutine wrtarray_sp_3d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, itime /), count = (/u1, u2, u3, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              do i3 = 1,u3
                 write (fds) ((var(i1,i2,i3), i2 = 1,u2), i1 = 1,u1)
+             enddo
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             do i3 = 1,u3
+                write (fds) ((real(var(i1,i2,i3),hp), i2 = 1,u2), i1 = 1,u1)
              enddo
              ierr = 0
        endselect
@@ -1362,10 +1397,17 @@ subroutine wrtarray_sp_4d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, 1, 1, itime /), count = (/u1, u2, u3, u4, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32)
              do i4 = 1,u4
                 do i3 = 1,u3
                    write (fds) ((var(i1,i2,i3,i4), i2 = 1,u2), i1 = 1,u1)
+                enddo
+             enddo
+             ierr = 0
+          case (FTYPE_UNFORM64)
+             do i4 = 1,u4
+                do i3 = 1,u3
+                   write (fds) ((real(var(i1,i2,i3,i4),hp), i2 = 1,u2), i1 = 1,u1)
                 enddo
              enddo
              ierr = 0
@@ -1434,7 +1476,7 @@ subroutine wrtarray_char_0d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, itime /), count = (/len(var), 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
@@ -1505,7 +1547,7 @@ subroutine wrtarray_char_1d(fds, filename, filetype, grpnam, &
                  ierr = nf90_put_var  (fds, idvar, var, start=(/ 1, 1, itime /), count = (/len(var), u1, 1 /))
              endif
              call nc_check_err(lundia, ierr, 'writing '//varnam, filename)
-          case (FTYPE_UNFORM)
+          case (FTYPE_UNFORM32,FTYPE_UNFORM64)
              write (fds) var
              ierr = 0
        endselect
