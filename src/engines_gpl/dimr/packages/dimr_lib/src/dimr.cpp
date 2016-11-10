@@ -1309,6 +1309,15 @@ void Dimr::connectLibs (void) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetCurrentTimeEntryPoint, lib, GetLastError());
         }
 
+        this->componentsList.components[i].dllGetAttribute = (BMI_GETATTRIBUTE) GETPROCADDRESS (dllhandle, BmiGetAttributeEntryPoint);
+        if (this->componentsList.components[i].dllGetAttribute == NULL) {
+            this->log->Write (Log::DETAIL, my_rank, "No GetAttribute entry point in %s !", this->componentsList.components[i].library);
+		}	
+//      If GetAttribute is optional in a lib, no need to throw an exception
+//      if (this->componentsList.components[i].dllGetStartTime == NULL) {
+//          throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
+//        }
+
         if (   this->componentsList.components[i].type == COMP_TYPE_RTC 
             || this->componentsList.components[i].type == COMP_TYPE_RR 
             || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
@@ -1334,8 +1343,26 @@ void Dimr::connectLibs (void) {
         }
 
         delete [] lib;
-
     }
+    this->printComponentVersionStrings(Log::MAJOR);			// List component version to log 
+}
+
+//void Dimr::printComponentVersionStrings (Log::Mask my_mask) {
+void Dimr::printComponentVersionStrings (unsigned int my_mask) {
+	char * versionstr = new char[MAXSTRING];
+    this->log->Write (my_mask, my_rank, "");
+    this->log->Write (my_mask, my_rank, "Version Information of Components");
+    this->log->Write (my_mask, my_rank, "=================================");
+	for (int i=0;i<this->componentsList.numComponents;i++){
+	   strcpy(versionstr,"");
+	   if (this->componentsList.components[i].dllGetAttribute!=NULL){
+          this->componentsList.components[i].dllGetAttribute("verssion",versionstr);
+	   } 
+	   if (strlen(versionstr)==0){
+	      strcpy(versionstr,"Unknown");
+	   }
+       this->log->Write (my_mask, my_rank, "%-35s: %s", this->componentsList.components[i].name, versionstr);
+	}
 }
 
 //------------------------------------------------------------------------------

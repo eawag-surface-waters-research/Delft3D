@@ -125,6 +125,7 @@ const char BmiGetTimeStepEntryPoint    [] = "get_time_step";
 const char BmiGetCurrentTimeEntryPoint [] = "get_current_time";
 const char BmiGetVarEntryPoint         [] = "get_var";
 const char BmiSetVarEntryPoint         [] = "set_var";
+const char BmiGetAttributeEntryPoint   [] = "get_attribute";
 
 // Define the exact api of the entry points in the dlls
 #if HAVE_CONFIG_H
@@ -140,6 +141,7 @@ typedef void (CDECLOPT *BMI_GETSTARTTIME)   (double *);
 typedef void (CDECLOPT *BMI_GETENDTIME)     (double *);
 typedef void (CDECLOPT *BMI_GETTIMESTEP)    (double *);
 typedef void (CDECLOPT *BMI_GETCURRENTTIME) (double *);
+typedef void (CDECLOPT *BMI_GETATTRIBUTE)   (const char *, char *);
 typedef void (CDECLOPT *BMI_GETVAR)         (const char *, void *);
 typedef void (CDECLOPT *BMI_SETVAR)         (const char *, void *);
 
@@ -172,6 +174,7 @@ struct dimr_component {
     BMI_GETCURRENTTIME dllGetCurrentTime; // entry point in dll
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
+	BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll 
     int                result;            // return value when calling an entry point in dll
 	keyValueLL      *   settings;	      // list of settings
 	keyValueLL      *   parameters;	      // list of parameters
@@ -255,6 +258,9 @@ class Dimr {
         ~Dimr (void);
         void           scanConfigFile(void);
         void           connectLibs(void);
+
+		void           printComponentVersionStrings (unsigned int);
+
         void           freeLibs(void);
         void           processWaitFile(void);
         void		   runControlBlock  (dimr_control_block *, double, int);
