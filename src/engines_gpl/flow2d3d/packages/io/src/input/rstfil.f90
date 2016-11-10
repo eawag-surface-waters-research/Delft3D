@@ -321,7 +321,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                ierror = 1
            endif
        endif
-       if (ierror) error = .true.
+       if (ierror /= 0) error = .true.
     endif
     write (lundia, '(a)') '*** End   of restart messages'
     write (lundia, *)
