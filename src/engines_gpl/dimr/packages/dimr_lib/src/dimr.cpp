@@ -301,7 +301,13 @@ int dimr_component::dllSetParams () {
 		int count = 0;
 		kv = this->parameters;
 	    while(kv){
-           (this->dllSetVar) (kv->key,(void*)kv->val);
+			if (this->dllSetVar!=NULL){
+		       (this->dllSetVar) (kv->key,(void*)kv->val);
+			} else {
+			   if (this->dllGetVar!=NULL){
+		          (this->dllGetVar) (kv->key,(void*)kv->val);
+			   }
+			}
            kv = kv->nextkv;
 		   count++;
         }
@@ -315,8 +321,15 @@ int dimr_component::dllSetSettings () {
 		char* buffer;
 		kv = this->settings;
 	    while(kv){
-		   (this->dllSetVar) (kv->key,(void*)kv->val);
+			if (this->dllSetVar!=NULL){
+		       (this->dllSetVar) (kv->key,(void*)kv->val);
+			} else {
+			   if (this->dllGetVar!=NULL){
+		          (this->dllGetVar) (kv->key,(void*)kv->val);
+			   }
+			}
            kv = kv->nextkv;
+		   count++;
         }
 		return count;
 }
@@ -1356,7 +1369,7 @@ void Dimr::printComponentVersionStrings (unsigned int my_mask) {
 	for (int i=0;i<this->componentsList.numComponents;i++){
 	   strcpy(versionstr,"");
 	   if (this->componentsList.components[i].dllGetAttribute!=NULL){
-          this->componentsList.components[i].dllGetAttribute("verssion",versionstr);
+          this->componentsList.components[i].dllGetAttribute("version",versionstr);
 	   } 
 	   if (strlen(versionstr)==0){
 	      strcpy(versionstr,"Unknown");
