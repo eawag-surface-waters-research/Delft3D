@@ -283,7 +283,7 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     case (2)
         call rdarray_nmk(fds, filename, filetype, 'map-sed-series', i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
-                      & 1, rst_nlyr, ierror, lundia, rst_thlyr, 'DP_BEDLYR')
+                      & 1, rst_nlyr+1, ierror, lundia, rst_thlyr, 'DP_BEDLYR')
         if (ierror == 0) then
             do k = 1, rst_nlyr
                 do m = gdp%d%mlb, gdp%d%mub
