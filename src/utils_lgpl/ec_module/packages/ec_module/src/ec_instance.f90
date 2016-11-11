@@ -42,6 +42,7 @@ module m_ec_instance
    use m_ec_filereader
    use m_ec_bcreader
    use m_ec_netcdf_timeseries
+   use multi_file_io
    
    implicit none
    
@@ -61,6 +62,7 @@ module m_ec_instance
    public :: ecInstancePrintState
    public :: ecInstanceListSourceItems
    public :: ecInstanceListFileReaders
+   public :: ecIncreaseMaxOpenFiles
 
    
    contains
@@ -518,10 +520,20 @@ module m_ec_instance
             if (targetItemPtr%role == itemType_target) then
                write(line,'(a,i4.4,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
                call messenger(lvl, line)
+               write(line,'(a,i4.4,a,i1,a)') 'Element Set ', targetItemPtr%elementSetPtr%id
+               call messenger(lvl, line)
+               if (targetItemPtr%nConnections==0) then
+                  write(line,'(a)') '   TARGET ITEM HAS NO CONNECTIONS !!!'
+                  call messenger(lvl, line)
+               end if
                do ic=1, targetItemPtr%nConnections
                   connectionPtr => targetItemPtr%connectionsPtr(ic)%ptr
                   write(line,'(a,i4.4)') '   Connection ',connectionPtr%id 
                   call messenger(lvl, line)
+                  if (connectionPtr%nSourceItems==0) then
+                     write(line,'(a)') '   CONNECTION HAS NO SOURCE ITEMS !!!'
+                     call messenger(lvl, line)
+                  end if
                   do js=1, connectionPtr%nSourceItems
                      sourceItemPtr => connectionPtr%sourceItemsPtr(js)%ptr
                      write(line,'(a,i4.4,a,i1,a)') '      Source Item ',sourceItemPtr%id, ' (name='//trim(sourceItemPtr%quantityPtr%name)//', vectormax=',sourceItemPtr%quantityPtr%vectormax,')'
@@ -559,10 +571,26 @@ module m_ec_instance
                         end do
                      end do frs
                   enddo ! SOURCE ITEMS 
-               enddo	! CONNECTIONS  
+               enddo ! CONNECTIONS  
             endif 
          enddo ! TARGET ITEMS OF INSTANCE 
          call messenger(lvl,'.')
       end subroutine ecInstancePrintState
+
+
+      function ecIncreaseMaxOpenFiles(max_open_files) result(success)
+      implicit none
+      logical                     :: success
+      integer(kind=4), intent(in) :: max_open_files
+      integer (kind=4)            :: ret
+      success = .false.
+      ret = mf_increase_max_open(max_open_files)
+      if (ret<max_open_files) then
+         call setECMessage("ERROR: ec_instance::ecIncreaseMaxOpenFiles: Increasing the max number of open files failed.")
+         return
+      end if
+      success = .true.
+      end function ecIncreaseMaxOpenFiles
+
 
 end module m_ec_instance
