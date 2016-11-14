@@ -1374,8 +1374,10 @@ void Dimr::printComponentVersionStrings (unsigned int my_mask) {
 	   if (strlen(versionstr)==0){
 	      strcpy(versionstr,"Unknown");
 	   }
-       this->log->Write (my_mask, my_rank, "%-35s: %s", this->componentsList.components[i].name, versionstr);
+       this->log->Write (my_mask, my_rank, "%-35s: %s", this->componentsList.components[i].library, versionstr);
 	}
+    this->log->Write (my_mask, my_rank, "---------------------------------");
+    this->log->Write (my_mask, my_rank, "");
 }
 
 //------------------------------------------------------------------------------
