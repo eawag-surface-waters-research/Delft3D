@@ -154,6 +154,44 @@ contains
     c_version_string = string_to_char_array(trim(name))
   end subroutine get_version_string
 
+!> Returns a static attribute (i.e. an attribute that does not change
+!! from one model application to the next) of the model (as a string)
+!! when passed any attribute name from the following list:
+!! * model_name
+!! * version      (e.g. 2.0.1)
+!! * author_name
+!! * grid_type
+!! * time_step_type
+!! * step_method   (explicit, implicit, semi_implicit, iterative)
+
+subroutine get_attribute(c_att_name, c_att_value) bind(C, name="get_attribute")
+!DEC$ ATTRIBUTES DLLEXPORT :: get_attribute
+    use delwaq_version_module
+    use iso_c_binding, only: c_char
+    use iso_c_utils
+    character(kind=c_char), intent(in)    :: c_att_name(MAXSTRLEN)  !< Attribute name as C-delimited character string.
+    character(kind=c_char), intent(  out) :: c_att_value(MAXSTRLEN) !< Returned attribute value as C-delimited character string.
+
+    character(len=strlen(c_att_name)) :: att_name
+    character(len=MAXSTRLEN)          :: att_value
+ 
+    ! Store the name
+    att_name = char_array_to_string(c_att_name)
+
+    select case (att_name)
+    case ('model_name')
+       att_value = delwaq_program
+    case ('version')
+       att_value = delwaq_version
+    case ('author_name')
+       att_value = delwaq_company
+    case default
+       att_value = 'unknown attribute'
+    end select
+
+    c_att_value = string_to_char_array(trim(att_value))
+end subroutine get_attribute
+
   integer function update(dt) bind(C, name="update")
     !DEC$ ATTRIBUTES DLLEXPORT :: update
     use delwaq2_global_data
