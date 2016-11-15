@@ -647,9 +647,7 @@ contains
          real(hp)                                :: time_window      !< time window between times(i) and times(i+1)
          real(hp)                                :: dmiss_nc         !< local netcdf missing
 
-         real(hp)                                                :: add_offset            !< helper variable
-         real(hp)                                                :: scalefactor           !< helper variable
-         real(hp)                                                :: fillvalue             !< helper variable
+         real(hp)                                :: fillvalue             !< helper variable
          real(hp)                                :: mintime, maxtime      !< range of kernel times that can be requested from this netcdf reader
          logical                                 :: valid_field
          character(len=300) :: str
@@ -659,8 +657,6 @@ contains
          fieldPtr => null()
 
          dmiss_nc = item%quantityPtr%fillvalue
-         scalefactor = item%quantityPtr%factor           ! new = old * scalefactor + add_offset
-         add_offset = item%quantityPtr%offset
 
          ! With the the quantity name interpreted as a standard name, inquire from the filereader instance the varid 
          do varid=1,size(fileReaderPtr%standard_names)
@@ -853,9 +849,6 @@ contains
 
          ! - 3 - Apply the scale factor and offset
          fieldPtr%arr1dPtr = fieldPtr%arr1dPtr * item%quantityPtr%factor + item%quantityPtr%offset       
-
-         ! Apply offset and scale from the variables attributes
-         fieldPtr%arr1dPtr = fieldPtr%arr1dPtr*scalefactor + add_offset
 
          ! Deallocate temporary datablock
          if (allocated(data_block)) deallocate(data_block, stat = istat)
