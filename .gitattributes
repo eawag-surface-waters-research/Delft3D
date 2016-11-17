@@ -3897,6 +3897,7 @@ src/third_party_open/netcdf/src/win32/2005/getopt.c -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf.cpp -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf.vcproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf.vcxproj -text
+src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf_vs2012.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf_vs2013.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/nfconfig.inc -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/stdafx.cpp -text
