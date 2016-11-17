@@ -242,6 +242,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                         & nf, nl, mf, ml, iarrc, gdp, &
                         & 1, kmax, lstsci, ierror, lundia, r1, 'DUMMY')
           if (ierror /= 0) goto 9999
+          coninit = 1
        endif
        !
        ! Per turbulence l: 0:kmax nmaxus mmax values in rtur1 array
@@ -311,13 +312,13 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        if (inode == master) close (luntmp)
        !
        if (ierror == 0) then
-           if ( nan_check(s1, 's1 (restart-file)', lundia) .or. &
-              & nan_check(u1, 'u1 (restart-file)', lundia) .or. &
-              & nan_check(v1, 'v1 (restart-file)', lundia) .or. &
-              & nan_check(r1, 'r1 (restart-file)', lundia) .or. &
-              & nan_check(rtur1, 'rtur1 (restart-file)', lundia) .or. &
-              & nan_check(umnldf, 'umnldf (restart-file)', lundia) .or. &
-              & nan_check(umnldf, 'vmnldf (restart-file)', lundia)) then
+           if ( .not. nan_check(s1    , 's1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(u1    , 'u1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(v1    , 'v1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(r1    , 'r1 (restart-file)'    , lundia) .or. &
+              & .not. nan_check(rtur1 , 'rtur1 (restart-file)' , lundia) .or. &
+              & .not. nan_check(umnldf, 'umnldf (restart-file)', lundia) .or. &
+              & .not. nan_check(umnldf, 'vmnldf (restart-file)', lundia)      ) then
                ierror = 1
            endif
        endif
