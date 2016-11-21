@@ -919,6 +919,13 @@ module m_ec_provider
                            ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
+            else if (index(fileReaderPtr%fileName, '.amr') /= 0) then
+               ! ===== quantity: wind component p =====
+               quantityId = ecInstanceCreateQuantity(instancePtr)
+               if (.not. (ecQuantitySetName(instancePtr, quantityId, 'rainfall') .and. &
+                           ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+                  success = .false.
+               end if
             end if
             field0Id = ecInstanceCreateField(instancePtr)
             if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, n_cols*n_rows) .and. &
