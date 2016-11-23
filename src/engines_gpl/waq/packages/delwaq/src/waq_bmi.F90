@@ -40,29 +40,40 @@ module bmi
 
 contains
 
-  integer(c_int) function set_var(c_key, c_value) bind(C, name="set_var")
+  integer(c_int) function set_var(c_key, xptr) bind(C, name="set_var")
     !DEC$ ATTRIBUTES DLLEXPORT::SET_VAR
-    use iso_c_binding, only: c_char
+    use iso_c_binding, only: c_char, c_ptr
     use iso_c_utils
     use delwaq2_global_data
     use dhcommand
     implicit none
     character(kind=c_char),intent(in)    :: c_key(MAXSTRLEN)
-    character(kind=c_char),intent(in)    :: c_value(MAXSTRLEN)
-    character(len=strlen(c_key))         :: key_given
-    character(len=strlen(c_value))       :: value_given
-    integer                          :: argc
-    integer                          :: argnew
-    integer                          :: iarg
-    integer                          :: errorcode
+    type(c_ptr), value    ,intent(in)    :: xptr
+    !
+    character(kind=c_char),dimension(:), pointer :: c_value => null()
+    character(MAXSTRLEN)                         :: key_given
+    character(MAXSTRLEN)                         :: value_given
+    integer                                      :: argc
+    integer                                      :: argnew
+    integer                                      :: iarg
+    integer                                      :: errorcode
+    integer                                      :: i
 
     ! Store the key and value
     key_given = char_array_to_string(c_key)
-    value_given = char_array_to_string(c_value)
+    call c_f_pointer(xptr, c_value,[MAXSTRLEN])
+    value_given = " "
+    if (associated(c_value)) then
+       do i=1,MAXSTRLEN
+          if (c_value(i) == c_null_char) exit
+          value_given(i:i) = c_value(i)
+       enddo
+    endif
+    !
     argnew = 2
     if (value_given(1:1) .eq. ' ')  argnew = 1
     if (key_given(1:1) .eq. ' ')    argnew = 0
-
+    !
     if (argnew .gt. 0) then
        ! Add new arguments to argv
        if ( allocated( argv_tmp ) ) deallocate( argv_tmp )

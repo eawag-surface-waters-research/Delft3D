@@ -178,10 +178,7 @@ struct dimr_component {
     int                result;            // return value when calling an entry point in dll
 	keyValueLL      *   settings;	      // list of settings
 	keyValueLL      *   parameters;	      // list of parameters
-	//keyValueList      settings;	      // std::list of settings
-	//keyValueList      parameters;	      // std::list of parameters
-	int					dllSetParams();   // pass parameters to the component
-	int					dllSetSettings(); // pass settings to the component
+	int					dllSetKeyVals(keyValueLL * kv);   // pass parameters/settings to the component
 };
 // Array of all components
 typedef struct DIMR_COMPONENTS {
@@ -288,7 +285,7 @@ class Dimr {
 
 
         enum {
-            MAXSTRING = 1000    // max string length in bytes
+            MAXSTRING = 1024    // max string length in bytes, use same value as used in the kernels
             };
 
         // String constants; initialized below, outside class definition

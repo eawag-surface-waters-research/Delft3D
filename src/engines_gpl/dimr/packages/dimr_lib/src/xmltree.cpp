@@ -382,9 +382,9 @@ XmlTree::Lookup (
                 node = this->children[i];								// found a node
 				const char * key = node->GetAttrib("key");
 				const char * val = node->GetAttrib("value");
-          		keyValueLL * newkv = (keyValueLL *) calloc(1,sizeof(keyValueLL));
-				newkv->key = (char*) calloc(strlen(key),sizeof(char));
-				newkv->val = (char*) calloc(strlen(val),sizeof(char));
+          		keyValueLL * newkv = (keyValueLL *) calloc(1, sizeof(keyValueLL));
+				newkv->key = (char*) calloc(strlen(key)+1, sizeof(char));
+				newkv->val = (char*) calloc(strlen(val)+1, sizeof(char));
 				strcpy(newkv->key,key);
 				strcpy(newkv->val,val);
 				if (kvlist){
@@ -631,11 +631,3 @@ XmlTree::ExpandEnvironmentVariables(
     }
     return ;
     }
-
-
-
-
-
-
-
-

@@ -191,7 +191,12 @@ int main (int     argc,
 //------------------------------------------------------------------------------
 void DimrExe::lib_initialize(void)
 {
-	this->log->Write(Log::MINOR, my_rank, "%s.SetVar(useMPI,%d)", this->library, use_mpi);
+    double tStart;
+    double tEnd;
+    double tStep;
+    double tCurrent;
+
+    this->log->Write(Log::MINOR, my_rank, "%s.SetVar(useMPI,%d)", this->library, use_mpi);
     (this->dllSetVar) ("useMPI", &use_mpi);
     this->log->Write (Log::MINOR, my_rank, "%s.SetVar(numRanks,%d)", this->library, numranks);
     (this->dllSetVar) ("numRanks", &numranks);
@@ -206,6 +211,15 @@ void DimrExe::lib_initialize(void)
 		// Throw one now
 		this->log->Write(Log::MAJOR, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
 	}
+    // Some basic tests
+    (this->dllGetStartTime) (&tStart);
+    (this->dllGetEndTime) (&tEnd);
+    (this->dllGetTimeStep) (&tStep);
+    (this->dllGetCurrentTime) (&tCurrent);
+    this->log->Write(Log::MINOR, my_rank, "DimrExe::lib_initialize:tStart  : %20.10f", tStart);
+    this->log->Write(Log::MINOR, my_rank, "DimrExe::lib_initialize:tCurrent: %20.10f", tCurrent);
+    this->log->Write(Log::MINOR, my_rank, "DimrExe::lib_initialize:tStep   : %20.10f", tStep);
+    this->log->Write(Log::MINOR, my_rank, "DimrExe::lib_initialize:tEnd    : %20.10f", tEnd);
 }
 
 //------------------------------------------------------------------------------

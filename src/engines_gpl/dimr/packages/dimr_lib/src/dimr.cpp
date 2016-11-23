@@ -176,9 +176,9 @@ DllExport int initialize(const char * configfile) {
 
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
         thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
-		nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetSettings();
+        nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->settings);
         thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
-		nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetParams();
+        nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->parameters );
         (thisDimr->control->subBlocks[0].unit.component->dllGetStartTime) (&thisDimr->control->subBlocks[0].tStart);
         (thisDimr->control->subBlocks[0].unit.component->dllGetEndTime) (&thisDimr->control->subBlocks[0].tEnd);
         (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
@@ -295,31 +295,9 @@ DllExport void set_var (const char * key, void * value) {
 
 } // extern "C"
 
-int dimr_component::dllSetParams () {
+int dimr_component::dllSetKeyVals (keyValueLL * kv) {
 		// Pass parameters for the first controll block's component: parameters
-	    keyValueLL * kv;
 		int count = 0;
-		kv = this->parameters;
-	    while(kv){
-			if (this->dllSetVar!=NULL){
-		       (this->dllSetVar) (kv->key,(void*)kv->val);
-			} else {
-			   if (this->dllGetVar!=NULL){
-		          (this->dllGetVar) (kv->key,(void*)kv->val);
-			   }
-			}
-           kv = kv->nextkv;
-		   count++;
-        }
-		return count;
-}
-
-int dimr_component::dllSetSettings () {
-		// Pass settings for the first controll block's component: parameters
-	    keyValueLL * kv;
-		int count = 0;
-		char* buffer;
-		kv = this->settings;
 	    while(kv){
 			if (this->dllSetVar!=NULL){
 		       (this->dllSetVar) (kv->key,(void*)kv->val);
@@ -346,7 +324,7 @@ Dimr::~Dimr (void) {
     // to do:  (void) FreeLibrary(handle);
     freeLibs();
 
-    this->log->Write (Log::ALWAYS, my_rank, "dimr shutting down normally");
+    this->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
     free (this->exeName);
@@ -1362,22 +1340,24 @@ void Dimr::connectLibs (void) {
 
 //void Dimr::printComponentVersionStrings (Log::Mask my_mask) {
 void Dimr::printComponentVersionStrings (unsigned int my_mask) {
+    const char * version = "version";
 	char * versionstr = new char[MAXSTRING];
-    this->log->Write (my_mask, my_rank, "");
-    this->log->Write (my_mask, my_rank, "Version Information of Components");
-    this->log->Write (my_mask, my_rank, "=================================");
+    this->log->Write (my_mask, thisDimr->my_rank, "");
+    this->log->Write (my_mask, thisDimr->my_rank, "Version Information of Components");
+    this->log->Write (my_mask, thisDimr->my_rank, "=================================");
 	for (int i=0;i<this->componentsList.numComponents;i++){
 	   strcpy(versionstr,"");
 	   if (this->componentsList.components[i].dllGetAttribute!=NULL){
-          this->componentsList.components[i].dllGetAttribute("version",versionstr);
+          this->componentsList.components[i].dllGetAttribute(version, versionstr);
 	   } 
 	   if (strlen(versionstr)==0){
 	      strcpy(versionstr,"Unknown");
 	   }
-       this->log->Write (my_mask, my_rank, "%-35s: %s", this->componentsList.components[i].library, versionstr);
+       this->log->Write (my_mask, thisDimr->my_rank, "%-35s: %s", this->componentsList.components[i].library, versionstr);
 	}
     this->log->Write (my_mask, my_rank, "---------------------------------");
     this->log->Write (my_mask, my_rank, "");
+    delete[] versionstr;
 }
 
 //------------------------------------------------------------------------------
