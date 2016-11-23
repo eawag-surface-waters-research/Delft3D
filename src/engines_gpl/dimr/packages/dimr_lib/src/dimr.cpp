@@ -249,7 +249,7 @@ DllExport void get_end_time (double * tEnd) {
 DllExport void get_time_step (double * tStep) {
     thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_time_step");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
-        *tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->masterSubBlockId].tStep;
+        *tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStep;
     } else {
         // Start block
         *tStep = thisDimr->control->subBlocks[0].tStep;
@@ -260,7 +260,7 @@ DllExport void get_time_step (double * tStep) {
 DllExport void get_current_time (double * tCur) {
     thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_current_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
-        *tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->masterSubBlockId].tCur;
+        *tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tCur;
     } else {
         // Start block
         *tCur = thisDimr->control->subBlocks[0].tCur;
@@ -479,6 +479,8 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
         (masterComponent->dllGetStartTime) (&cb->subBlocks[cb->masterSubBlockId].tStart);
         (masterComponent->dllGetEndTime) (&cb->subBlocks[cb->masterSubBlockId].tEnd);
+        (masterComponent->dllGetTimeStep) (&cb->subBlocks[cb->masterSubBlockId].tStep);
+        (masterComponent->dllGetCurrentTime) (&cb->subBlocks[cb->masterSubBlockId].tCur);
     }
 
 
