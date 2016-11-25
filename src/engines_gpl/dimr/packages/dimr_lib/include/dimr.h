@@ -142,8 +142,8 @@ typedef void (CDECLOPT *BMI_GETENDTIME)     (double *);
 typedef void (CDECLOPT *BMI_GETTIMESTEP)    (double *);
 typedef void (CDECLOPT *BMI_GETCURRENTTIME) (double *);
 typedef void (CDECLOPT *BMI_GETATTRIBUTE)   (const char *, char *);
-typedef void (CDECLOPT *BMI_GETVAR)         (const char *, void *);
-typedef void (CDECLOPT *BMI_SETVAR)         (const char *, void *);
+typedef void (CDECLOPT *BMI_GETVAR)         (const char *, void **);
+typedef void (CDECLOPT *BMI_SETVAR)         (const char *, const void *);
 
 
 // A component is an instance of D-FlowFM, RTC-Tools, WAQ, WAVE or Delft3D-FLOW(flow2d3d)
@@ -263,6 +263,8 @@ class Dimr {
         void		   runControlBlock  (dimr_control_block *, double, int);
         void		   runParallelInit  (dimr_control_block *);
         void		   runParallelFinish(dimr_control_block *);
+        double *       send             (const char *, int, BMI_GETVAR, double **, int *, int, int);
+        void           receive          (const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, const void *);
 
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run
@@ -291,27 +293,28 @@ class Dimr {
         // String constants; initialized below, outside class definition
 
     private:
+        double transferValue;
 
     private:
         // Additional destructor routine
         void		   deleteControlBlock(dimr_control_block);
 
         // Additional run routines
-        void		   runStartBlock    (dimr_control_block *, int);
-        void		   runParallelUpdate(dimr_control_block *);
+        void		   runStartBlock    (dimr_control_block *, double, int);
+        void		   runParallelUpdate(dimr_control_block *, double);
 
 
-        void           scanControl(XmlTree *, dimr_control_block *);
+        void           scanControl      (XmlTree *, dimr_control_block *);
 
-        void           scanUnits(XmlTree *);
-        void           scanComponent(XmlTree *, dimr_component *);
-        void           scanCoupler  (XmlTree *, dimr_coupler *);
+        void           scanUnits        (XmlTree *);
+        void           scanComponent    (XmlTree *, dimr_component *);
+        void           scanCoupler      (XmlTree *, dimr_coupler *);
 
-        dimr_component * getComponent(const char *);
+        dimr_component * getComponent   (const char *);
 
-        dimr_coupler *   getCoupler(const char *);
+        dimr_coupler *   getCoupler     (const char *);
 
-        void           char_to_ints(char *, int **, int *);
+        void           char_to_ints     (char *, int **, int *);
     };
 
 
@@ -327,7 +330,7 @@ DllExport void get_start_time (double *);
 DllExport void get_end_time (double *);
 DllExport void get_time_step (double *);
 DllExport void get_current_time (double *);
-DllExport void get_var (const char *, void *);
-DllExport void set_var (const char *, void *);
+DllExport void get_var (const char *, void **);
+DllExport void set_var (const char *, const void *);
 DllExport void set_logger_callback(WriteCallback);
 }

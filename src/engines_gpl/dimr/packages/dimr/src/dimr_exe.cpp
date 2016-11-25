@@ -126,7 +126,7 @@ int main (int     argc,
 
 		doFinalize = true;
 
-		DHE->lib_update();
+		DHE->lib_update_test();
 		
 		doFinalize = false;
 
@@ -233,6 +233,51 @@ void DimrExe::lib_update(void)
     (this->dllGetEndTime) (&tEnd);
     tStep = tEnd - tStart;
     (this->dllUpdate) (tStep);
+}
+
+//------------------------------------------------------------------------------
+// Test get_var/set_var subroutines in dimr.dll
+// Specially written for testcase e105_dflowfm-drtc\f01_general\c010_weir_timeseries
+// - Run the testcase in the normal way. Check that the waterlevel downstream changes in time (history plot)
+// - In dimr.xml, remove the following two lines in the control block:
+//   <coupler name="flow2rtc"/>
+//   <coupler name="rtc2flow"/>
+// - In DimrExe::main: call "DHE->lib_update_test()" instead of "DHE->lib_update()"
+//   Now the waterlevel downstream still changes, but there are differences compared with the original run:
+//   The order of executing the coupler steps and the update steps is changed.
+void DimrExe::lib_update_test(void)
+{
+    double tStart;
+    double tEnd;
+    double tStep;
+    double tCur;
+    double * transfer = NULL;
+    double value;
+
+    (this->dllGetStartTime) (&tStart);
+    (this->dllGetEndTime) (&tEnd);
+    (this->dllGetTimeStep) (&tStep);
+    (this->dllGetCurrentTime) (&tCur);
+    do {
+        (this->dllUpdate) (tStep);
+        (this->dllGetCurrentTime) (&tCur);
+
+        (this->dllGetVar) ("myNameDFlowFM/observations/Upstream/water_level", (void**)(&transfer));
+        this->log->Write (Log::MAJOR, my_rank, "DimrExe::lib_update_test:waterlevel: %20.10f", *transfer);
+        // IMPORTANT: the value that "transfer" points to must be copied into another memory location ("value")
+        // Inside dllSetVar, Dimr::send might be called to obtain the pointer to the variable inside the kernel that has to be set
+        // This will reset the value that "transfer" points to into the current value.
+        value = *transfer;
+        (this->dllSetVar) ("myNameRTC/input_ObservationPoint01_water_level", (void*)(&value));
+
+        (this->dllGetVar) ("myNameRTC/output_weir_crest_level", (void**)(&transfer));
+        this->log->Write (Log::MAJOR, my_rank, "DimrExe::lib_update_test:crestlevel: %20.10f", *transfer);
+        // IMPORTANT: the value that "transfer" points to must be copied into another memory location ("value")
+        // Inside dllSetVar, Dimr::send might be called to obtain the pointer to the variable inside the kernel that has to be set
+        // This will reset the value that "transfer" points to into the current value.
+        value = *transfer;
+        (this->dllSetVar) ("myNameDFlowFM/weirs/weir01/crest_level", (void*)(&value));
+    } while (tCur < tEnd);
 }
 
 //------------------------------------------------------------------------------

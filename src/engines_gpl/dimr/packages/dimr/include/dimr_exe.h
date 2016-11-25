@@ -131,6 +131,7 @@ class DimrExe {
         void freeLib (void);
         void lib_initialize(void);
         void lib_update(void);
+        void lib_update_test(void);
         void lib_finalize(void);
 
     public:
