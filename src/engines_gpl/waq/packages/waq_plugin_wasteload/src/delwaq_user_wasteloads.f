@@ -59,16 +59,18 @@
       ! the inlet outlet coupling
 
       if (ifirst == 1) then
+         ifirst = 0
+
          call dhopnf (lunrep, 'delwaq_user_wasteloads.mon', 19, 1, ierr)
          if (ierr .ne. 0) then
             write(*,'(A)') 'Could not open delwaq_user_wasteloads.mon for writing.'
             call srstop(1)
          endif
-      endif
 
-      ! waq_plugin_wasteload version number
-      call getfullversionstring_waq_plugin_wasteload(idstr)
-      write ( lunrep , * ) idstr
+         ! waq_plugin_wasteload version number
+         call getfullversionstring_waq_plugin_wasteload(idstr)
+         write ( lunrep , * ) idstr
+      endif
 
       call delwaq_user_inlet_outlet ( nowst , wasteloads, notot , nosys , noseg ,
      +                                itime , conc      , syname, lunrep)
@@ -82,8 +84,6 @@
 
       call delwaq_user_bubble_bath  ( nowst , wasteloads, notot , nosys , noseg ,
      &                                itime , conc      , syname, lunrep)
-
-      ifirst = 0
 
       return
       end subroutine delwaq_user_wasteload
