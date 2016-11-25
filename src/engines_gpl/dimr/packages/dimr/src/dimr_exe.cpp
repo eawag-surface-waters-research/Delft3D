@@ -126,7 +126,7 @@ int main (int     argc,
 
 		doFinalize = true;
 
-		DHE->lib_update_test();
+		DHE->lib_update();
 		
 		doFinalize = false;
 
