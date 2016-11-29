@@ -91,8 +91,8 @@ Dimr::Dimr(void) {
     this->componentsList.numComponents = 0;
     this->couplersList.numCouplers = 0;
     this->use_mpi = false;
-    this->my_rank = -1;
-    this->numranks = 0;
+    this->my_rank = 0;
+    this->numranks = 1;
     this->configfile = NULL;
     this->done = false;
 }
@@ -122,13 +122,8 @@ DllExport int initialize(const char * configfile) {
     if (thisDimr == NULL) {
         thisDimr = new Dimr();
     }
-
 	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
-	
-	thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, "dimr_lib:initialize");
-
-	thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, configfile);
-
+	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
     //
     //
     // Read XML configuration file into tree structure
@@ -139,7 +134,7 @@ DllExport int initialize(const char * configfile) {
     else {
         conf = fopen (thisDimr->configfile, "r");
 		if (conf == NULL){
-			thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
+			thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
 			throw new Exception(true, "Cannot open configuration file \"%s\"", thisDimr->configfile);
 		}
     }
@@ -149,7 +144,7 @@ DllExport int initialize(const char * configfile) {
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
-	thisDimr->log->Write(Log::ALWAYS, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
+	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
 	thisDimr->scanConfigFile();
     //
     // ToDo: check whether a core dump is requested on abort; if so set global variable for Dimr_CoreDump
@@ -191,7 +186,7 @@ DllExport int initialize(const char * configfile) {
 
 //------------------------------------------------------------------------------
 DllExport void update (double tStep) {
-    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:update");
+    thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:update");
     // Execute update on the first controlBlock only
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         thisDimr->runControlBlock(&(thisDimr->control->subBlocks[0]), tStep, GLOBAL_PHASE_UPDATE);
@@ -206,7 +201,7 @@ DllExport void update (double tStep) {
 
 //------------------------------------------------------------------------------
 DllExport void finalize (void) {
-    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:finalize");
+    thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:finalize");
     // Execute finalize on the first controlBlock and
     // initialize, step, finalize on all other controlBlocks
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
@@ -225,7 +220,7 @@ DllExport void finalize (void) {
 
 //------------------------------------------------------------------------------
 DllExport void get_start_time (double * tStart) {
-    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_start_time");
+    thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_start_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tStart = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStart;
     } else {
@@ -236,7 +231,7 @@ DllExport void get_start_time (double * tStart) {
 
 //------------------------------------------------------------------------------
 DllExport void get_end_time (double * tEnd) {
-    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_end_time");
+    thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_end_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tEnd = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tEnd;
     } else {
@@ -247,7 +242,7 @@ DllExport void get_end_time (double * tEnd) {
 
 //------------------------------------------------------------------------------
 DllExport void get_time_step (double * tStep) {
-    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_time_step");
+    thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_time_step");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStep;
     } else {
@@ -258,7 +253,7 @@ DllExport void get_time_step (double * tStep) {
 
 //------------------------------------------------------------------------------
 DllExport void get_current_time (double * tCur) {
-    thisDimr->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr_lib:get_current_time");
+    thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_current_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tCur;
     } else {
@@ -415,7 +410,7 @@ Dimr::~Dimr (void) {
     // to do:  (void) FreeLibrary(handle);
     freeLibs();
 
-    this->log->Write (Log::ALWAYS, thisDimr->my_rank, "dimr shutting down normally");
+    this->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
     free (this->exeName);
@@ -1190,7 +1185,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     // Element inputFile (optional?)
     XmlTree * inputFileElement = xmlComponent->Lookup ("inputFile");
     if (inputFileElement == NULL) {
-        this->log->Write (Log::ALWAYS, my_rank, "WARNING: No inputFile specified for component %s.", newComp->name);
+        this->log->Write (Log::MAJOR, my_rank, "WARNING: No inputFile specified for component %s.", newComp->name);
         }
     else {
         newComp->inputFile = inputFileElement->charData;
@@ -1199,8 +1194,8 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     XmlTree * workingDirElement = xmlComponent->Lookup ("workingDir");
     if (workingDirElement == NULL) {
         newComp->workingDir = (char *) &curPath;
-        this->log->Write (Log::ALWAYS, my_rank, "WARNING: No workingDir specified for component %s.", newComp->name);
-        this->log->Write (Log::ALWAYS, my_rank, "         workingDir is set to %s", newComp->workingDir);
+        this->log->Write (Log::MAJOR, my_rank, "WARNING: No workingDir specified for component %s.", newComp->name);
+        this->log->Write (Log::MAJOR, my_rank, "         workingDir is set to %s", newComp->workingDir);
         }
     else {
         newComp->workingDir = workingDirElement->charData;

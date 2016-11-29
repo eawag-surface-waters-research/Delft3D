@@ -89,7 +89,7 @@ Log::SetMask (
     ) {
 
     this->mask = mask;
-    this->Write (Log::ALWAYS, 0, "Log mask set to 0x%08x", this->mask);
+    this->Write (Log::MAJOR, 0, "Log mask set to 0x%08x", this->mask);
     }
 
 
@@ -174,6 +174,6 @@ WriteCallback writeCallback
 ) {
 
 	this->writeCallback = writeCallback;
-	this->Write(Log::ALWAYS, 0, "WriteCallBack is set");
+	this->Write(Log::MAJOR, 0, "WriteCallBack is set");
 }
 
