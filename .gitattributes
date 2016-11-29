@@ -317,6 +317,11 @@ src/engines_gpl/d_hydro/scripts/create_config_xml.tcl -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.bat -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.tcl -text
 src/engines_gpl/dimr/Makefile.am -text
+src/engines_gpl/dimr/packages/DimrTesting/DimrDllNative.cs -text
+src/engines_gpl/dimr/packages/DimrTesting/DimrTesting.csproj -text
+src/engines_gpl/dimr/packages/DimrTesting/IBasicModelInterface.cs -text
+src/engines_gpl/dimr/packages/DimrTesting/Program.cs -text
+src/engines_gpl/dimr/packages/DimrTesting/Sobek3ModelWrapper.cs -text
 src/engines_gpl/dimr/packages/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj -text
