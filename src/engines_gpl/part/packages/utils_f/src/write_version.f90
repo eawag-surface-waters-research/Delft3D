@@ -165,7 +165,7 @@
 !        print uitvoer
          write(lun,'(//13x,a)')   'PART - Particle tracking'
          write(lun,'(   6x,a)')   ' Water quality simulation in 2D/3D models      '
-         write(lun,'(    a//)')   cident(5:)
+         write(lun,'(    a//)')   trim(cident)
       end if
 !
 !     end of routine
