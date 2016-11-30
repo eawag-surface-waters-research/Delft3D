@@ -253,6 +253,17 @@
 
 !     the sediment columns
 
+      IP1  = IPOINT(1)
+      IP2  = IPOINT(2)
+      IP3  = IPOINT(3)
+      IP4  = IPOINT(4)
+      IP5  = IPOINT(5)
+      IP6  = IPOINT(6)
+      IP7  = IPOINT(7)
+      IP8  = IPOINT(8)
+      IP9  = IPOINT(9)
+      IP10  = IPOINT(10)
+
       DO IK = 1 , Coll%cursize
 
           IWA1 = Coll%set(IK)%fstwatsed

@@ -157,18 +157,18 @@
             CS3 = 0.0
             CS4 = 0.0
 !
-            IF (PON1.GT.0.0) CN1 = POC1/PON1
-            IF (PON2.GT.0.0) CN2 = POC2/PON2
-            IF (PON3.GT.0.0) CN3 = POC3/PON3
-            IF (PON4.GT.0.0) CN4 = POC4/PON4
-            IF (POP1.GT.0.0) CP1 = POC1/POP1
-            IF (POP2.GT.0.0) CP2 = POC2/POP2
-            IF (POP3.GT.0.0) CP3 = POC3/POP3
-            IF (POP4.GT.0.0) CP4 = POC4/POP4
-            IF (POS1.GT.0.0) CS1 = POC1/POS1
-            IF (POS2.GT.0.0) CS2 = POC2/POS2
-            IF (POS3.GT.0.0) CS3 = POC3/POS3
-            IF (POS4.GT.0.0) CS4 = POC4/POS4
+            CN1 = RATIO(POC1, PON1)
+            CN2 = RATIO(POC2, PON2)
+            CN3 = RATIO(POC3, PON3)
+            CN4 = RATIO(POC4, PON4)
+            CP1 = RATIO(POC1, POP1)
+            CP2 = RATIO(POC2, POP2)
+            CP3 = RATIO(POC3, POP3)
+            CP4 = RATIO(POC4, POP4)
+            CS1 = RATIO(POC1, POS1)
+            CS2 = RATIO(POC2, POS2)
+            CS3 = RATIO(POC3, POS3)
+            CS4 = RATIO(POC4, POS4)
 !
             PMSA (IP(44)) = TIM + AlgDM + POMnoa
             PMSA (IP(45)) = TIM + POMnoa
@@ -223,4 +223,22 @@
 !
       RETURN
 !
+      CONTAINS
+      REAL FUNCTION RATIO( X, Y )
+          REAL :: X, Y
+
+          RATIO = 0.0
+          IF ( Y > 0.0 .AND. X > 0.0 ) THEN
+              IF ( X < Y ) THEN
+                  RATIO = X / Y
+              ELSE
+                  RATIO = Y / X
+                  IF ( RATIO > TINY(RATIO) ) THEN
+                      RATIO = 1.0 / RATIO
+                  ELSE
+                      RATIO = HUGE(RATIO)
+                  ENDIF
+              ENDIF
+          ENDIF
+      END FUNCTION RATIO
       END
