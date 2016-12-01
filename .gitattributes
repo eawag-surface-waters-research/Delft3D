@@ -317,6 +317,7 @@ src/engines_gpl/d_hydro/scripts/create_config_xml.tcl -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.bat -text
 src/engines_gpl/d_hydro/scripts/test_xml_creation.tcl -text
 src/engines_gpl/dimr/Makefile.am -text
+src/engines_gpl/dimr/doc/use_dimr_dll_example.c -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrDllNative.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrTesting.csproj -text
 src/engines_gpl/dimr/packages/DimrTesting/IBasicModelInterface.cs -text

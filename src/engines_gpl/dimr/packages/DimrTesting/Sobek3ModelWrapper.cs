@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace DimrTesting
 {
@@ -48,9 +49,12 @@ namespace DimrTesting
 
         public Array GetValues(string variable)
         {
-            double[] retval = new double[1];
-            DimrDllNative.get_var(new StringBuilder(variable), variable.Length, retval);
+            double[] retval = new double[1] { 0.0 };
+            IntPtr bufptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(double)));
+            DimrDllNative.get_var(variable, ref bufptr);
+            Marshal.Copy(bufptr, retval, 0, 1);
             return retval;
+
         }
 
         public void SetValues(string variable, Array values)
@@ -59,7 +63,7 @@ namespace DimrTesting
             if (retval == null)
                 throw new ArgumentNullException("Argument type is not double");
             else
-                DimrDllNative.get_var(new StringBuilder(variable), variable.Length, retval);
+                DimrDllNative.set_var(variable, retval);
         }
     }
 }

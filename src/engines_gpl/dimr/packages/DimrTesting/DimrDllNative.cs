@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace DimrTesting
@@ -25,10 +26,10 @@ namespace DimrTesting
         [DllImport(dllName)]
         public static extern void get_current_time(ref double dt);
 
-        [DllImport(dllName)]
-        public static extern void get_var(StringBuilder locationId, int LocationIdLength, double[] value);
+        [DllImport(dllName, EntryPoint = "get_var", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void get_var([In] string variable, [In, Out] ref IntPtr ptr);
 
-        [DllImport(dllName)]
-        public static extern void set_var(StringBuilder locationId, int LocationIdLength, double[] value);
+        [DllImport(dllName, EntryPoint = "set_var", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void set_var([In] string variable, [In, Out] double[] values);
     }
 }
