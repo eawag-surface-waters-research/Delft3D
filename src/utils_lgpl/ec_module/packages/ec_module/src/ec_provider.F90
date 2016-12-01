@@ -2513,7 +2513,7 @@ module m_ec_provider
             ! in spherical coordinates they can be lon/lat or lat/lon
             fgd_size = fileReaderPtr%dim_length(dimids(1))                                  ! assume the spatial dimensions of the 
             sgd_size = fileReaderPtr%dim_length(dimids(2))                                  ! var are the first two
-            if (instancePtr%coordsystem == EC_COORDS_CARTHESIAN) then 
+            if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
                grid_type = elmSetType_cartesian
                fgd_id = x_varid
                sgd_id = y_varid
