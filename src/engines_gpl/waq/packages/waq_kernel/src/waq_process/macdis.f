@@ -107,6 +107,7 @@ c     LOGICAL First
 
             ! get biomass from bottom segment
 
+            !SM          = max( 1.0e-10, PMSA(IPOINT(5)+(IBOTSEG-1)*INCREM(5)) )
             SM          = PMSA(IPOINT(5)+(IBOTSEG-1)*INCREM(5))
 
 !           Limit the maximum height of the plants to the water depth
@@ -182,7 +183,7 @@ c     LOGICAL First
                   STOP 'Input error in process MACDIS'
                Endif
 
-               A = SM / Hact / ((exp(Ffac * Hactd) - 1.0)/ Ffac - Hactd)
+               A = SM / Hactd / ((exp(Ffac * Hactd) - 1.0)/ Ffac - Hactd)
 !              Macrophyte is not in segment:
                If (Hact .LT. Z1a) Then
                   BmLaySM = 0
@@ -212,7 +213,11 @@ c     LOGICAL First
             If (SM .GT. 0) Then
                FrBmLay = BmLaySm / SM
             Else
-               FrBmLay = 0
+               If ( iseg .eq. IBotseg ) Then
+                  FrBmLay = 1.0
+               Else
+                  FrBmLay = 0.0
+               Endif
             Endif
 
 !           Return Outputparameters to delwaq

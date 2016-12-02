@@ -11092,3 +11092,8 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "TotPBLSA  ","x"," ",    0.00000    ,"(g/m3)              ","Total phosphorous for BLOOM stand alone           ","volume    ","volume    "," ","                              "
 "TotSiBLSA ","x"," ",    0.00000    ,"(g/m3)              ","Total silicium for BLOOM stand alone              ","volume    ","volume    "," ","                              "
 "fRefl     ","x"," ",    0.00000    ,"(-)                 ","fraction of radiation reflected at water surface  ","volume    ","volume    "," ","                              "
+"MeanTemp01","x"," ",   -999.000    ,"(oC)                ","depth/biomass-averaged temperature for SM01       ","volume    ","volume    "," ","                              "
+"MeanTemp02","x"," ",   -999.000    ,"(oC)                ","depth/biomass-averaged temperature for SM01       ","volume    ","volume    "," ","                              "
+"MeanTemp03","x"," ",   -999.000    ,"(oC)                ","depth/biomass-averaged temperature for SM01       ","volume    ","volume    "," ","                              "
+"MeanTemp04","x"," ",   -999.000    ,"(oC)                ","depth/biomass-averaged temperature for SM01       ","volume    ","volume    "," ","                              "
+"MeanTemp05","x"," ",   -999.000    ,"(oC)                ","depth/biomass-averaged temperature for SM01       ","volume    ","volume    "," ","                              "

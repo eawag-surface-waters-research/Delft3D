@@ -12098,6 +12098,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM01","CHCO3SM01 ",  27,"N"," ",1
 "MACNUTSM01","CDINSM01B ",  28,"N"," ",1
 "MACNUTSM01","CPO4SM01B ",  29,"N"," ",1
+"MACNUTSM01","Temp      ",  30,"Y","x",1
 "MACNUTSM02","Depth     ",   1,"N","x",1
 "MACNUTSM02","TotalDepth",   2,"N","x",1
 "MACNUTSM02","LocalDepth",   3,"N","x",1
@@ -12127,6 +12128,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM02","CHCO3SM02 ",  27,"N"," ",1
 "MACNUTSM02","CDINSM02B ",  28,"N"," ",1
 "MACNUTSM02","CPO4SM02B ",  29,"N"," ",1
+"MACNUTSM02","Temp      ",  30,"Y","x",1
 "MACNUTSM03","Depth     ",   1,"N","x",1
 "MACNUTSM03","TotalDepth",   2,"N","x",1
 "MACNUTSM03","LocalDepth",   3,"N","x",1
@@ -12156,6 +12158,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM03","CHCO3SM03 ",  27,"N"," ",1
 "MACNUTSM03","CDINSM03B ",  28,"N"," ",1
 "MACNUTSM03","CPO4SM03B ",  29,"N"," ",1
+"MACNUTSM03","Temp      ",  30,"Y","x",1
 "MACNUTSM04","Depth     ",   1,"N","x",1
 "MACNUTSM04","TotalDepth",   2,"N","x",1
 "MACNUTSM04","LocalDepth",   3,"N","x",1
@@ -12185,6 +12188,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM04","CHCO3SM04 ",  27,"N"," ",1
 "MACNUTSM04","CDINSM04B ",  28,"N"," ",1
 "MACNUTSM04","CPO4SM04B ",  29,"N"," ",1
+"MACNUTSM04","Temp      ",  30,"Y","x",1
 "MACNUTSM05","Depth     ",   1,"N","x",1
 "MACNUTSM05","TotalDepth",   2,"N","x",1
 "MACNUTSM05","LocalDepth",   3,"N","x",1
@@ -12214,6 +12218,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM05","CHCO3SM05 ",  27,"N"," ",1
 "MACNUTSM05","CDINSM05B ",  28,"N"," ",1
 "MACNUTSM05","CPO4SM05B ",  29,"N"," ",1
+"MACNUTSM05","Temp      ",  30,"Y","x",1
 "MacroPhyt1","EM01      ",   1,"Y","x",1
 "MacroPhyt1","SM01      ",   2,"Y","x",1
 "MacroPhyt1","RH01      ",   3,"Y","x",1
@@ -12246,7 +12251,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt1","TcPMxEM01 ",  30,"Y","x",1
 "MacroPhyt1","TcritSM01 ",  31,"Y","x",1
 "MacroPhyt1","TcPMxSM01 ",  32,"Y","x",1
-"MacroPhyt1","Temp      ",  33,"Y","x",1
+"MacroPhyt1","MeanTemp01",  33,"N"," ",1
 "MacroPhyt1","K1DecaEM01",  34,"Y","x",1
 "MacroPhyt1","TcDecaEM01",  35,"Y","x",1
 "MacroPhyt1","K1DecaSM01",  36,"Y","x",1
@@ -12329,7 +12334,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt2","TcPMxEM02 ",  30,"Y","x",1
 "MacroPhyt2","TcritSM02 ",  31,"Y","x",1
 "MacroPhyt2","TcPMxSM02 ",  32,"Y","x",1
-"MacroPhyt2","Temp      ",  33,"Y","x",1
+"MacroPhyt2","MeanTemp02",  33,"N"," ",1
 "MacroPhyt2","K1DecaEM02",  34,"Y","x",1
 "MacroPhyt2","TcDecaEM02",  35,"Y","x",1
 "MacroPhyt2","K1DecaSM02",  36,"Y","x",1
@@ -12412,7 +12417,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt3","TcPMxEM03 ",  30,"Y","x",1
 "MacroPhyt3","TcritSM03 ",  31,"Y","x",1
 "MacroPhyt3","TcPMxSM03 ",  32,"Y","x",1
-"MacroPhyt3","Temp      ",  33,"Y","x",1
+"MacroPhyt3","MeanTemp03",  33,"N"," ",1
 "MacroPhyt3","K1DecaEM03",  34,"Y","x",1
 "MacroPhyt3","TcDecaEM03",  35,"Y","x",1
 "MacroPhyt3","K1DecaSM03",  36,"Y","x",1
@@ -12495,7 +12500,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt4","TcPMxEM04 ",  30,"Y","x",1
 "MacroPhyt4","TcritSM04 ",  31,"Y","x",1
 "MacroPhyt4","TcPMxSM04 ",  32,"Y","x",1
-"MacroPhyt4","Temp      ",  33,"Y","x",1
+"MacroPhyt4","MeanTemp04",  33,"N"," ",1
 "MacroPhyt4","K1DecaEM04",  34,"Y","x",1
 "MacroPhyt4","TcDecaEM04",  35,"Y","x",1
 "MacroPhyt4","K1DecaSM04",  36,"Y","x",1
@@ -12578,7 +12583,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt5","TcPMxEM05 ",  30,"Y","x",1
 "MacroPhyt5","TcritSM05 ",  31,"Y","x",1
 "MacroPhyt5","TcPMxSM05 ",  32,"Y","x",1
-"MacroPhyt5","Temp      ",  33,"Y","x",1
+"MacroPhyt5","MeanTemp05",  33,"N"," ",1
 "MacroPhyt5","K1DecaEM05",  34,"Y","x",1
 "MacroPhyt5","TcDecaEM05",  35,"Y","x",1
 "MacroPhyt5","K1DecaSM05",  36,"Y","x",1

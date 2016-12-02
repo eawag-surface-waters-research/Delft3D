@@ -33,8 +33,8 @@
 !
       real(4) pmsa(*)     !i/o process manager system array, window of routine to process library
       real(4) fl(*)       ! o  array of fluxes made by this process in mass/volume/time
-      integer ipoint( 43) ! i  array of pointers in pmsa to get and store the data
-      integer increm( 43) ! i  increments in ipoint for segment loop, 0=constant, 1=spatially varying
+      integer ipoint( 45) ! i  array of pointers in pmsa to get and store the data
+      integer increm( 45) ! i  increments in ipoint for segment loop, 0=constant, 1=spatially varying
       integer noseg       ! i  number of computational elements in the whole model schematisation
       integer noflux      ! i  number of fluxes, increment in the fl array
       integer iexpnt(4,*) ! i  from, to, from-1 and to+1 segment numbers of the exchange surfaces
@@ -43,7 +43,7 @@
       integer noq2        ! i  nr of exchanges in 2nd direction, noq1+noq2 gives hor. dir. reg. grid
       integer noq3        ! i  nr of exchanges in 3rd direction, vertical direction, pos. downward
       integer noq4        ! i  nr of exchanges in the bottom (bottom layers, specialist use only)
-      integer ipnt( 43)   !    local work array for the pointering
+      integer ipnt( 45)   !    local work array for the pointering
       integer iseg        !    local loop counter for computational element loop
 !
 !*******************************************************************************
@@ -72,6 +72,7 @@
       real(4) kmhco3sm01  ! i  half-saturation value hc03 sm01                    (gc/m3)
       real(4) kmdinsm01b  ! i  half-saturation value n sm01 in bottom             (gn/m3)
       real(4) kmpsm01b    ! i  half-saturation value p sm01 in bottom             (gp/m3)
+      real(4) temp        ! i  ambient water temperature                         (oC)
       real(4) limnsm01w   ! o  nitrogen limitation function sm01 <0-1> water      (-)
       real(4) limpsm01w   ! o  phosphorus limitation function sm01 <0-1> water    (-)
       real(4) lco2sm01    ! o  co2+h2c03 limitation function sm01 <0-1>           (-)
@@ -102,12 +103,13 @@
 
       ipnt  = ipoint
       do iseg = 1 , noseg
-         pmsa(ipnt(38)) = 0.0
          pmsa(ipnt(39)) = 0.0
          pmsa(ipnt(40)) = 0.0
          pmsa(ipnt(41)) = 0.0
          pmsa(ipnt(42)) = 0.0
          pmsa(ipnt(43)) = 0.0
+         pmsa(ipnt(44)) = 0.0
+         pmsa(ipnt(45)) = 0.0
          ipnt  = ipnt + increm
       enddo
 
@@ -132,6 +134,7 @@
          dish2co3   = max(pmsa( ipnt( 15) ),0.0)
          dishco3    = max(pmsa( ipnt( 16) ),0.0)
          prfnh4sm01 = pmsa( ipnt( 17) )
+         temp       = pmsa( ipnt( 30) )
 
          ! convert co2 to carbon and add h2co3, calculated din with preference
          ! adjust for porosity
@@ -148,17 +151,18 @@
 
             fr_avg = FrBmLay
 
-            pmsa(botidx(38)) = pmsa(botidx(38)) + din*fr_avg
-            pmsa(botidx(39)) = pmsa(botidx(39)) + po4*fr_avg
-            pmsa(botidx(40)) = pmsa(botidx(40)) + disco2*fr_avg
-            pmsa(botidx(41)) = pmsa(botidx(41)) + dishco3*fr_avg
+            pmsa(botidx(39)) = pmsa(botidx(39)) + din*fr_avg
+            pmsa(botidx(40)) = pmsa(botidx(40)) + po4*fr_avg
+            pmsa(botidx(41)) = pmsa(botidx(41)) + disco2*fr_avg
+            pmsa(botidx(42)) = pmsa(botidx(42)) + dishco3*fr_avg
+            pmsa(botidx(45)) = pmsa(botidx(45)) + temp*fr_avg
 
             ! S12 sediment concentration
 
             call dhkmrk(2,iknmrk(iseg),ikmrk2)
             if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-              if (nh4s12.gt.0.0) pmsa(botidx(42)) = nh4s12
-              if (po4s12.gt.0.0) pmsa(botidx(43)) = po4s12
+              if (nh4s12.gt.0.0) pmsa(botidx(43)) = nh4s12
+              if (po4s12.gt.0.0) pmsa(botidx(44)) = po4s12
             endif
 
          elseif (ikmrk1.eq.3) then
@@ -179,8 +183,9 @@
                fr_avg = 0.0
             endif
 
-            pmsa(botidx(42)) = pmsa(botidx(42)) + din*fr_avg
-            pmsa(botidx(43)) = pmsa(botidx(43)) + po4*fr_avg
+            pmsa(botidx(43)) = pmsa(botidx(43)) + din*fr_avg
+            pmsa(botidx(44)) = pmsa(botidx(44)) + po4*fr_avg
+            pmsa(botidx(45)) = pmsa(botidx(45)) + temp*fr_avg
 
          endif
 
@@ -291,14 +296,14 @@
 
                limnutsm01 = min(limn,limp,lco2sm01)
 
-               pmsa( ipnt( 30)   ) = limnsm01w
-               pmsa( ipnt( 31)   ) = limpsm01w
-               pmsa( ipnt( 32)   ) = lco2sm01
-               pmsa( ipnt( 33)   ) = limnsm01b
-               pmsa( ipnt( 34)   ) = limpsm01b
-               pmsa( ipnt( 35)   ) = limnutsm01
-               pmsa( ipnt( 36)   ) = frootuptn
-               pmsa( ipnt( 37)   ) = frootuptp
+               pmsa( ipnt( 31)   ) = limnsm01w
+               pmsa( ipnt( 32)   ) = limpsm01w
+               pmsa( ipnt( 33)   ) = lco2sm01
+               pmsa( ipnt( 34)   ) = limnsm01b
+               pmsa( ipnt( 35)   ) = limpsm01b
+               pmsa( ipnt( 36)   ) = limnutsm01
+               pmsa( ipnt( 37)   ) = frootuptn
+               pmsa( ipnt( 38)   ) = frootuptp
 
             endif
          endif

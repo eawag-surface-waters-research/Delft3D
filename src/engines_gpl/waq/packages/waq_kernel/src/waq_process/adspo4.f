@@ -398,7 +398,7 @@
 !
 !     Calculate free sorption capacity (mol/l)
 !
-           CADS  = CADST - (AAP / (31000.0 * POROS) )
+           CADS  = MAX( 0.0, CADST - (AAP / (31000.0 * POROS) ) )
 !
 !     Calculate temperature corrected KADS
 !

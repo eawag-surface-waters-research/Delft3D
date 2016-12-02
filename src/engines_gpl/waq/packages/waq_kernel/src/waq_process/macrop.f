@@ -197,10 +197,10 @@
 
       INTEGER       :: LUNREP
       INTEGER, SAVE :: NR_MSG = 0
+
 !
 !*******************************************************************************
 !
-      IPNT        = IPOINT
       IdGrowEM01  = 1
       IdGrowSM01  = 2
       IdDecayEM01 = 3
@@ -233,6 +233,11 @@
       IdPrPOP3M01 = 30
       IdSM01OXY   = 31
       IdSM01CO2   = 32
+
+      !
+      ! Loop over (essentially) the columns
+      !
+      IPNT        = IPOINT
 
       DO 9000 ISEG = 1 , NOSEG
 
@@ -277,7 +282,12 @@
                TcPMxEM01  = PMSA( IPNT( 30) )
                TcritSM01  = PMSA( IPNT( 31) )
                TcPMxSM01  = PMSA( IPNT( 32) )
+
+               !
+               ! Use the vertically averaged temperature (prepared by MACNUT)
+               !
                Temp       = PMSA( IPNT( 33) )
+
                K1DecaEM01 = PMSA( IPNT( 34) )
                TcDecaEM01 = PMSA( IPNT( 35) )
                K1DecaSM01 = PMSA( IPNT( 36) )
@@ -331,6 +341,7 @@
 
                SUMFR = FrPOC1EM01+FrPOC2EM01+FrPOC3EM01
                IF ( ABS(SUMFR-1.0) > 0.01 ) THEN
+                  NR_MSG = NR_MSG + 1
                   CALL GETMLU( LUNREP )
                   IF ( NR_MSG <= 25 ) THEN
                      WRITE(LUNREP,*) 'MACROP: WARNING - sum of fractions for POC (emerged) not close to 1'
@@ -347,6 +358,7 @@
 
                SUMFR = FrPOC1SM01+FrPOC2SM01+FrPOC3SM01
                IF ( ABS(SUMFR-1.0) > 0.01 ) THEN
+                  NR_MSG = NR_MSG + 1
                   CALL GETMLU( LUNREP )
                   IF ( NR_MSG <= 25 ) THEN
                      WRITE(LUNREP,*) 'MACROP: WARNING - sum of fractions for POC (submerged) not close to 1'

@@ -3648,6 +3648,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "MACNUTSM01","CHCO3SM01 ",  12,"x",1
 "MACNUTSM01","CDINSM01B ",  13,"x",1
 "MACNUTSM01","CPO4SM01B ",  14,"x",1
+"MACNUTSM01","MeanTemp01",  15,"x",1
 "MACNUTSM02","LimNSM02W ",   1,"x",1
 "MACNUTSM02","LimPSM02W ",   2,"x",1
 "MACNUTSM02","LCO2SM02  ",   3,"x",1
@@ -3662,6 +3663,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "MACNUTSM02","CHCO3SM02 ",  12,"x",1
 "MACNUTSM02","CDINSM02B ",  13,"x",1
 "MACNUTSM02","CPO4SM02B ",  14,"x",1
+"MACNUTSM02","MeanTemp02",  15,"x",1
 "MACNUTSM03","LimNSM03W ",   1,"x",1
 "MACNUTSM03","LimPSM03W ",   2,"x",1
 "MACNUTSM03","LCO2SM03  ",   3,"x",1
@@ -3676,6 +3678,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "MACNUTSM03","CHCO3SM03 ",  12,"x",1
 "MACNUTSM03","CDINSM03B ",  13,"x",1
 "MACNUTSM03","CPO4SM03B ",  14,"x",1
+"MACNUTSM03","MeanTemp03",  15,"x",1
 "MACNUTSM04","LimNSM04W ",   1,"x",1
 "MACNUTSM04","LimPSM04W ",   2,"x",1
 "MACNUTSM04","LCO2SM04  ",   3,"x",1
@@ -3690,6 +3693,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "MACNUTSM04","CHCO3SM04 ",  12,"x",1
 "MACNUTSM04","CDINSM04B ",  13,"x",1
 "MACNUTSM04","CPO4SM04B ",  14,"x",1
+"MACNUTSM04","MeanTemp04",  15,"x",1
 "MACNUTSM05","LimNSM05W ",   1,"x",1
 "MACNUTSM05","LimPSM05W ",   2,"x",1
 "MACNUTSM05","LCO2SM05  ",   3,"x",1
@@ -3704,6 +3708,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "MACNUTSM05","CHCO3SM05 ",  12,"x",1
 "MACNUTSM05","CDINSM05B ",  13,"x",1
 "MACNUTSM05","CPO4SM05B ",  14,"x",1
+"MACNUTSM05","MeanTemp05",  15,"x",1
 "MacroPhyt1","EM01M2    ",   1,"x",1
 "MacroPhyt1","SM01M2    ",   2,"x",1
 "MacroPhyt1","RH01M2    ",   3,"x",1

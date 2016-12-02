@@ -84,12 +84,13 @@
 !
 !  Check whether a selective dump for periods and/or segments is requested for this period.
       IDUMP = 0
+      IGDUMP = -1
       IF (ISDUMP .EQ. 1) THEN
-         IF ((ID .GE. ISDPER(1) .AND. ID .LE. ISDPER(2)) .AND. 
+         IF ((ID .GE. ISDPER(1) .AND. ID .LE. ISDPER(2)) .AND.
      &       (IGDUMP .EQ. 0 .OR. IGDUMP .EQ. ISEG)) THEN
             IDUMP = 1
          END IF
-      ELSE 
+      ELSE
          IF  (IGDUMP .EQ. ISEG) THEN
             IDUMP = 1
          END IF
@@ -146,7 +147,7 @@
 99980 FORMAT(2X,'The following species have reduced relative depth',/,
      1       2X,'for buoyancy control: ')
 99970 FORMAT(2X,'Species ',A8,' has relative depth of ',F5.2)
-99960 FORMAT (/,23X,'******',2X,' SEGMENT ',I8,' WEEK ', 
+99960 FORMAT (/,23X,'******',2X,' SEGMENT ',I8,' WEEK ',
      1       I2, 2X,'******',/)
 99950 FORMAT(2X,'Important parameter values for this week:',/,
      1       2X,'Temperature =',F5.1,4X,'Solar radiation =',F8.1,
