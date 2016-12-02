@@ -723,12 +723,12 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
              do nm = 1, nmmax
                 if (kfs(nm) == 1) then
                    h0           = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                   pkwav(nm, 0) =  2.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
+                   pkwav(nm, 0) =  4.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
                    zw = 0.0_fp
                    do k = 1, kmax
                       zw = zw+thick(k)*h0
                       if (hrms(nm) > zw) then
-                         pkwav(nm,k) = pkwav(nm,0)*(1.0_fp - zw/(hrms(nm)))
+                         pkwav(nm,k) = pkwav(nm,0)*(1.0_fp - 2.0_fp*zw/(hrms(nm)))
                          ddk(nm,k)   = ddk(nm,k) + pkwav(nm, k)
                       else
                          kdismx(nm) = k-1
