@@ -182,7 +182,11 @@ contains
                ntot = ntot + nplay(ilay)
             enddo                               !.. round off in layer 1
             nplay(1) =  nplay(1) + ndprt(id) - ntot
-            if ( nplay(1) .lt. 0 ) stop 'Neg. dye release in top layer '
+            if ( nplay(1) .lt. 0 ) then
+               write (*,*) ' Neg. dye release in top layer '
+               write( lun2,*) ' Neg. dye release in top layer '
+               call stop_exit(1)
+            endif
          else                                   !.. for one layer only
             nplay = 0
             nplay(kwaste(id)) = ndprt(id)
@@ -213,7 +217,9 @@ contains
                goto 10
             endif
             if ( nulay .gt. nolay ) then
-               stop ' Nulay > nolay in part09 '
+               write (*,*) ' Nulay > nolay in part09 '
+               write( lun2,*) ' Nulay > nolay in part09 '
+               call stop_exit(1)
             endif
    20       continue
             kpart(i) = nulay

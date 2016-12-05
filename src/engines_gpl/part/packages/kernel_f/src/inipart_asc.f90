@@ -212,31 +212,31 @@
       write(*,'(a)')           ' Could not open/find ini-file ??'
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(a,a)')     ' Could not open/find ini-file ??'
-      stop  ' Part aborted'
+      call stop_exit(1)
 
   910 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(a,a)')         ' Could not find key ',key
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(a,a)')     ' Could not find key ',key
-      stop  ' Part aborted'
+      call stop_exit(1)
 
   920 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a,a)')       ' End-of-file found on ini-file '
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a,a)')   ' End-of-file found on ini-file '
-      stop  ' Part aborted'
+      call stop_exit(1)
 
   930 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a,a)')       ' Error while reading ini-file'
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a,a)')   ' Error while reading ini-file'
-      stop  ' Part aborted'
+      call stop_exit(1)
 
   940 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a,a)')       ' Could not find substance ',fract
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a,a)')   ' Could not find substance ',fract
-      stop  ' Part aborted'
+      call stop_exit(1)
 
   950 write(*,'(//a,a)')       ' Error: problem with ini-file ',ini_file(:len_file)
       write(*,'(//a)')         ' Couldn''t find cells for the initial oil particles.'
@@ -244,7 +244,7 @@
       write(lunpr,'(//a,a)')   ' Error: problem with ini-file ',ini_file(:len_file)
       write(lunpr,'(//a)')     ' Couldn''t find cells for the initial oil particles.'
       write(lunpr,'(//a)')     ' Is (part of) the polygon within the grid range?'
-      stop  ' Part aborted'
+      call stop_exit(1)
       
       end subroutine inipart_asc
 

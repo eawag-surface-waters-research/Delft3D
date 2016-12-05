@@ -172,5 +172,4 @@
 !
       if ( timon ) call timstop ( ithndl )
       return
-      stop ' Part aborted'
       end subroutine

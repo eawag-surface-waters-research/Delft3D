@@ -592,7 +592,9 @@ contains
             elseif ( kp .eq. 2 ) then
                dred = pblay
             else
-               stop ' The layer-number is too large for modtyp=2'
+               write (*,*) ' The layer-number is too large for modtyp=2'
+               write( lun2,*) ' The layer-number is too large for modtyp=2'
+               call stop_exit(1)
             endif
          endif
 

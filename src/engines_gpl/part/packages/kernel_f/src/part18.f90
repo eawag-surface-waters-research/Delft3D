@@ -186,7 +186,9 @@ contains
 !
 !3d
       if ( layt /= 1 ) then
-         stop 'Hydrodynamics should be based on 1 layer for part18'
+         write (*,*) ' Hydrodynamics should be based on 1 layer for part18'
+         write( lun2,*) ' Hydrodynamics should be based on 1 layer for part18'
+         call stop_exit(1)
       endif
 !3d
 !

@@ -719,7 +719,10 @@ module oildsp_mod
             endif
             if ( kpart(i) .le. 0 .or. kpart(i) .gt. nolay ) then
                write( *, * ) ' ipart = ', i, ' k = ', kpart(i)
-               stop ' k is out of range in partwr '
+               write( *, * ) ' k is out of range in partwr '
+               write( lun2, * ) ' ipart = ', i, ' k = ', kpart(i)
+               write( lun2, * ) ' k is out of range in partwr '
+               call stop_exit(1)
             endif
             do 40 ifrac = 1, nfract
                if  (kpart(i) .eq. 1) then 

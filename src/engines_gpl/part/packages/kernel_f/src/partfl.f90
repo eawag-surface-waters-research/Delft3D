@@ -252,8 +252,10 @@ contains
       if (first) then
         first = .false.
         if(nolay /= 2) then
-           write(*,*) ' Nolay = ',nolay
-           stop ' Part presently works only for 2 layer model'
+          write(*,*) ' Nolay = ',nolay
+          write (*,*) ' Part presently works only for 2 layer model'
+          write( lun2,*) ' Part presently works only for 2 layer model'
+          call stop_exit(1)
         endif
 !
 !       either initialize pblay here,

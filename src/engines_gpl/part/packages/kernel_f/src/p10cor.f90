@@ -197,7 +197,8 @@ contains
 !
 !               tmingo = 0.5*(chi0+chi1)*tmin1
              else
-                stop ' This option for ipc is not implemented '
+                write (*,*) ' This option for ipc is not implemented '
+                call stop_exit(1)
              endif
 !
 !     corrected position differs from predicted one and becomes:

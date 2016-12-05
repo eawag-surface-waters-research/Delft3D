@@ -169,7 +169,9 @@
                if (ic  >  0) then
                   if(kpart(ipart) <= 0.or.kpart(ipart) > nolay) then
                      write(*,*) ' ipart = ',ipart,' k = ',kpart(ipart)
-                     stop ' K is out of range in partwr '
+                     write (*,*) ' K is out of range in partwr '
+                     write( lun2,*) ' K is out of range in partwr '
+                     call stop_exit(1)
                   endif
                   iseg = (kpart(ipart) - 1)*noseglp + ic
                   vsfact1 = plshapefactor(isub) * 2.0e0 / 9.0e0 * (rhopart(isub,ipart) - rhowatc(iseg)) / &

@@ -21,6 +21,10 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
+      module exeption_part
+      logical :: useexeption_part = .false.
+      end module exeption_part
+
       subroutine stop_exit( iexit )
 !
 !     function           : stops execution if possible with return value
@@ -34,6 +38,8 @@
 !     iexit   integer    1         input   return value
 !     ---------------------------------------------------------
 !
+      use exeption_part
+
       implicit none
 
       integer           :: iexit
@@ -47,6 +53,8 @@
       open  ( 13 , file = 'delpar.rtn' )
       write ( 13 , * ) iexit
       close ( 13 )
+
+      if (useexeption_part) call throwexception()
 
       select case ( iexit )
          case ( :0 )

@@ -147,7 +147,7 @@
          write(lun2,'(2x,a  )') ' Obsolete input file '
          write(lun2,'(2x,a  )') ' Version found             : ',filvers(1:19)
          write(lun2,'(2x,a  )') ' Lowest version requested  : ','V3.66.00'
-         stop
+         call stop_exit(1)
       endif
 
 !       read titles
