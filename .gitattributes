@@ -3897,6 +3897,7 @@ src/third_party_open/netcdf/src/win32/2005/examples/tst_netcdf.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/f77_netcdf/f77_netcdf.vcproj -text
 src/third_party_open/netcdf/src/win32/2005/f77_netcdf/f77_netcdf.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/f77_netcdf/f77_netcdf_vs2013.vcxproj -text
+src/third_party_open/netcdf/src/win32/2005/f77_netcdf/f77_netcdf_vs2015.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/f77_netcdf_test/ReadMe.txt -text
 src/third_party_open/netcdf/src/win32/2005/f77_netcdf_test/f77_netcdf_test.vfproj -text
 src/third_party_open/netcdf/src/win32/2005/f77_netcdf_test/simple_xy_wr.f -text
@@ -3910,6 +3911,7 @@ src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf.vcproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf_vs2012.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf_vs2013.vcxproj -text
+src/third_party_open/netcdf/src/win32/2005/libsrc/netcdf_vs2015.vcxproj -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/nfconfig.inc -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/stdafx.cpp -text
 src/third_party_open/netcdf/src/win32/2005/libsrc/stdafx.h -text
@@ -3932,6 +3934,7 @@ src/third_party_open/netcdf/src/win32/2005/nctest/run_tests.bat -text
 src/third_party_open/netcdf/src/win32/2005/netcdf_vs2008.sln -text
 src/third_party_open/netcdf/src/win32/2005/netcdf_vs2010.sln -text
 src/third_party_open/netcdf/src/win32/2005/netcdf_vs2013.sln -text
+src/third_party_open/netcdf/src/win32/2005/netcdf_vs2015.sln -text
 src/third_party_open/netcdf/src/win32/CVF/config.h -text
 src/third_party_open/netcdf/src/win32/CVF/libsrc/netcdf.dsp -text
 src/third_party_open/netcdf/src/win32/CVF/libsrc/netcdf.plg -text
