@@ -20,7 +20,11 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-
+      
+      module exeption
+      logical :: useexeption = .false.
+      end module exeption
+      
       subroutine srstop ( iexit )
 
 !     Deltares Software Centre
@@ -38,6 +42,8 @@
 
 !     kind           function         name                 description
 
+      use exeption
+
       integer  ( 4), intent(in   ) :: iexit             !< return value
       if ( iexit .ne. 0 ) then
          write (*,*) 'Stopped with error code :',iexit
@@ -48,6 +54,8 @@
       open  ( 13 , file = 'delwaq.rtn' )
       write ( 13 , * ) iexit
       close ( 13 )
+
+      if (useexeption) call throwexception()
 
       select case ( iexit )
          case ( :0 )
