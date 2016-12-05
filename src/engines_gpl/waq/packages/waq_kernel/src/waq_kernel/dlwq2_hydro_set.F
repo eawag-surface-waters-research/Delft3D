@@ -196,7 +196,7 @@
              write(*,*) 'Error: times in two consecutive records are equal!'
              write(*,*) 'File in question: ',trim(aPropPnt%name)
              write(*,*) 'Stopping the program'
-             stop
+             call srstop(1)
          endif
 
          return

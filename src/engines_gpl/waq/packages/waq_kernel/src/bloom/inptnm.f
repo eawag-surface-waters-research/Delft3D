@@ -48,7 +48,7 @@
       INPTNM = 0
 1     CONTINUE
       GO TO (10,20,30), TYPE
-      STOP
+      CALL SRSTOP(6)
    10 IF (STOD(LINE,POSIT,80,DNUM) .EQ. 0) RETURN
       GO TO 2
    20 IF (STOI(LINE,POSIT,80,INUM) .EQ. 0) RETURN
@@ -66,5 +66,5 @@
       GO TO 5
  999  WRITE (IOU(6),1004) INUNI
 1004  FORMAT (' Hit end of file on unit ',I5)
-      STOP
+      CALL SRSTOP(6)
       END

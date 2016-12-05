@@ -141,7 +141,7 @@
      J              IFLUX , IDUMP , IPQ   , ISYS2 , ITEL  , IINIT ,
      J              ITEL1 , IP1   , ITEL2 , NQC   , IQC   , IQ    ,
      J              IPOIN , NOOUT , IERR  , IOUT  , ISUM  , NOSUM ,
-     J              NSC   , ISC
+     J              NSC   , ISC   , LUNREP
       PARAMETER    (NOSUM=2)
       real   ,      allocatable : : SFACTO(:,:),
      J                              STOCHL(:,:),
@@ -196,6 +196,7 @@
 
       IF ( INIOUT .EQ. 1 ) THEN
           IFIRST = .TRUE.
+          CALL GETMLU(LUNREP)
 
 !         Process flags
 
@@ -930,10 +931,14 @@
       INIOUT = 0
 
       if ( timon ) call timstop ( ithandl )
-      RETURN
- 9000 STOP 'Error allocating memory'
- 9010 STOP 'Error deallocating memory'
-      END
+      return
+ 9000 write (lunrep,*) 'Error allocating memory'
+      write (*,*) 'Error allocating memory'
+      call srstop(1)
+ 9010 write (lunrep,*) 'Error deallocating memory'
+      write (*,*) 'Error deallocating memory'
+      call srstop(1)
+      end
       SUBROUTINE OUTBAI (IOBALI, MONAME, IMSTRT, IMSTOP, NOOUT ,
      J                   NOTOT , NDMPAR, DANAMP, OUNAME, SYNAME,
      J                   IMASSA, IEMISS, NEMISS, ITRANS, NTRANS,
@@ -1178,7 +1183,11 @@
 !     Compose sum parameters
 !     LOCAL FUNCTIONALITY NOSUM = 2, CHECK!!!!!!!!!!!!!
 
-      IF ( NOSUM .NE. 2 ) STOP 'BUG IN COMSUM!'
+      IF ( NOSUM .NE. 2 ) then
+         write (lunrep,*) 'BUG IN COMSUM!'
+         write (*,*) 'BUG IN COMSUM!'
+         call srstop(1)
+      end if
 
 !     Initialise substance shares in sum parameters as well as totals
 !     (totals are used to find out if sum parameter is active)

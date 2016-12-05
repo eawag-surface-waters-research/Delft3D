@@ -460,7 +460,7 @@
      1                     'high grazing pressure.'
                 WRITE(*,*) '        Please adapt the grazing pressure ',
      1                     'in the input.'
-                STOP 1
+                CALL SRSTOP(6)
               ENDIF
               GRADET(I) = GRADET(I) - DLOG(1.0D0 + (DETFLX(I+1)+
      1                    BOTFLX(I+1))/(CDETR(I+1))) / PERIOD

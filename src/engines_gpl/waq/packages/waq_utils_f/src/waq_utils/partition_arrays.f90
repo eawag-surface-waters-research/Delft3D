@@ -84,7 +84,7 @@ integer function makptr( part, arrnam, vtype, number )
             write(*,*) &
             'Fatal error in MAKPTR: variable type not implemented: ', &
             vtype
-            stop
+            call srstop(1)
     end select
 
 end function makptr

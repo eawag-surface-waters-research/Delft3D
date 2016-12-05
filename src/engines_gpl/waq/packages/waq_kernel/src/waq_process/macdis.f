@@ -147,11 +147,13 @@ c     LOGICAL First
 !              Check Ffac: 0,1 or 2
 
                If (Ffac  .LT.  0 .OR. Ffac . GT. 2) Then
-                  CALL GETMLU( LUNREP )
-                  WRITE (LUNREP,*) 'MACDIS: Illegal option for Macrophyte form factor - should be between 0 and 2'
-                  WRITE (LUNREP,*) '   Value now: ', ffac
-                  WRITE (LUNREP,*) '   Input error (linear biomass distribution)'
-                  STOP 'Input error in process MACDIS'
+                  call getmlu( lunrep )
+                  write (lunrep,*) 'MACDIS: Illegal option for Macrophyte form factor - should be between 0 and 2'
+                  write (lunrep,*) '   Value now: ', ffac
+                  write (lunrep,*) '   Input error (linear biomass distribution)'
+                  write (lunrep,*) 'Input error in process MACDIS'
+                  write (*,*) 'Input error in process MACDIS'
+                  call srstop(1)
                Endif
 
                A = (SM / Hact) * (2 - (2 * Ffac)) / Hact
@@ -175,12 +177,14 @@ c     LOGICAL First
             ElseIf (SwDisSM .EQ. 2) Then
 
                If (Ffac  .LE.  0 .OR. Ffac .GT. 50.0 ) Then
-                  CALL GETMLU( LUNREP )
-                  WRITE (LUNREP,*) 'MACDIS: Incorrect value for Macrophyte form factor - ',
+                  call getmlu( lunrep )
+                  write (lunrep,*) 'MACDIS: Incorrect value for Macrophyte form factor - ',
      &                             'should be positive and lower than or equal to 50'
-                  WRITE (LUNREP,*) '   Value now: ', ffac
-                  WRITE (LUNREP,*) '   Input error (exponential biomass distribution)'
-                  STOP 'Input error in process MACDIS'
+                  write (lunrep,*) '   Value now: ', ffac
+                  write (lunrep,*) '   Input error (exponential biomass distribution)'
+                  write (lunrep,*) 'Input error in process MACDIS'
+                  write (*,*) 'Input error in process MACDIS'
+                  call srstop(1)
                Endif
 
                A = SM / Hactd / ((exp(Ffac * Hactd) - 1.0)/ Ffac - Hactd)

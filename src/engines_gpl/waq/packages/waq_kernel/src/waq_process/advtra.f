@@ -818,6 +818,10 @@
       INTEGER  IK    , IQ    , ivan  , inaar , ikmrkv, ikmrkn, ik1   ,
      j         lenkol , nkolom
       DATA FIRST / .true. /
+      INTEGER lunrep, errorcode
+      
+      call getmlu(lunrep)
+      errorcode = 0
 
 !     Check for bottom collumns anyway
       if ( NOQ4 .eq. 0 ) return
@@ -900,13 +904,16 @@
       Coll%cursize = nkolom/2
       RETURN
 !
- 9000 STOP 'MAKKOL(9000): Illegal structure of pointer table'
- 9001 STOP 'MAKKOL(9001): Illegal structure of pointer table'
- 9002 STOP 'MAKKOL(9002): Illegal structure of pointer table'
- 9003 STOP 'MAKKOL(9003): Illegal structure of pointer table'
- 9004 STOP 'MAKKOL(9004): Illegal structure of pointer table'
- 9005 STOP 'MAKKOL(9005): Illegal structure of pointer table'
- 9006 STOP 'MAKKOL(9006): Illegal structure of pointer table'
+ 9000 if (errorcode==0) errorcode = 9000
+ 9001 if (errorcode==0) errorcode = 9001
+ 9002 if (errorcode==0) errorcode = 9002
+ 9003 if (errorcode==0) errorcode = 9003
+ 9004 if (errorcode==0) errorcode = 9004
+ 9005 if (errorcode==0) errorcode = 9005
+ 9006 if (errorcode==0) errorcode = 9006
+      write (lunrep, *)'Illegal structure of pointer table MAKKOL: ', errorcode
+      write (*, *)'Illegal structure of pointer table MAKKOL: ', errorcode
+      call srstop(1)
 !
       END
 

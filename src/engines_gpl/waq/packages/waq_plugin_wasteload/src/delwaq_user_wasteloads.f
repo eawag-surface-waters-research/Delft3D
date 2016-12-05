@@ -638,7 +638,7 @@
             read( 84, *, iostat = ierr ) dummy, dummy, dummy, dummy
             if ( ierr /= 0 ) then
                write( lunrep, 2004 ) next_time
-               stop
+               call srstop(1)
             endif
          enddo
 

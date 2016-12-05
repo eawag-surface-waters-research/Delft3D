@@ -856,9 +856,15 @@
 
       RETURN
 !
-  901 STOP 'ERROR D40BLO: DIMENSION NTYP_M TOO SMALL'
+  901 call getmlu(lunrep)
+      write (lunrep, *) 'ERROR D40BLO: DIMENSION NTYP_M TOO SMALL'
+      write (*, *) 'ERROR D40BLO: DIMENSION NTYP_M TOO SMALL'
+      call srstop (1)
 ! 902 STOP 'ERROR D40BLO: DIMENSION NGRO_M TOO SMALL'
-  903 STOP 'ERROR D40BLO: DAYLEN > 1.0 DAY'
+  903 call getmlu(lunrep)
+      write (lunrep, *) 'ERROR D40BLO: DAYLEN > 1.0 DAY'
+      write (*, *) 'ERROR D40BLO: DAYLEN > 1.0 DAY'
+      call srstop (1)
       END
 
       SUBROUTINE BLSTOP(MES,I)

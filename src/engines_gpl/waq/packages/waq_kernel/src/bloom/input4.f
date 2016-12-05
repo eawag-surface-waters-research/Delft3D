@@ -111,7 +111,7 @@
       RETURN
 
    40 WRITE(*,*) 'Hit end of file at unit: ',INPU
-      STOP
+      CALL SRSTOP(6)
 
 99999 FORMAT (40F10.0)
       END

@@ -56,5 +56,5 @@
       GO TO 4
  999  WRITE (IOU(6),1004) INUNI
 1004  FORMAT (' Hit end of file on unit ',I5)
-      STOP
+      CALL SRSTOP(6)
       END

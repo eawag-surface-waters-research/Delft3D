@@ -954,7 +954,8 @@
        !
          if ( iter .ge. 50 ) then                  ! special WAQ version
             write ( lundia, * ) 'max number of iterations exceeded'
-            stop                'max number of iterations exceeded'
+            write ( * , * )     'max number of iterations exceeded'
+            call srstop(1)
          endif
        !
        ! DD code added:

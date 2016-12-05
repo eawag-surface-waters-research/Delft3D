@@ -227,6 +227,6 @@
       write(lundia,'(A)') 'ddkl'
       write(lundia,'(10e13.6)') (((ddkl(i,k,j),i=jstart,nmmaxj),
      +                            k=1,kmax),j=1,nosys)
-      stop
+      call srstop(1)
       return
       end

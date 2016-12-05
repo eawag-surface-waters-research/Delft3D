@@ -84,19 +84,19 @@
       ENDIF
       IF (NUSPEC .GT. MT) THEN
          WRITE (OUUNI,99985) NUSPEC,MT
-         STOP
+         CALL SRSTOP(6)
       END IF
       IF (NUECOG .GT. MS) THEN
          WRITE (OUUNI,99983) NUECOG,MS
-         STOP
+         CALL SRSTOP(6)
       END IF
       IF (NUNUCO .GT. MN) THEN
          WRITE (OUUNI,99981) NUNUCO,MN
-         STOP
+         CALL SRSTOP(6)
       END IF
       IF (NUGRAZ .GT. MG) THEN
          WRITE (OUUNI,99979) NUGRAZ,MG
-         STOP
+         CALL SRSTOP(6)
       END IF
       DO 260 J=1,NUGRAZ
         BZOOD(J) = 1.D0
@@ -216,7 +216,7 @@
    90 CONTINUE
       IF (WMODE .EQ. CONTRO(7)) GO TO 110
       WRITE (OUUNI,99986) WMODE
-      STOP
+      CALL SRSTOP(6)
   110 CONTINUE
       LCAL=4
   120 CONTINUE
@@ -286,7 +286,7 @@
                 LPMAX(I) = 1
              ELSE
                 WRITE (OUUNI,99984) PWORD
-                STOP
+                CALL SRSTOP(6)
              END IF
           END IF
         ENDIF
@@ -297,7 +297,7 @@
 !
       IF (LCOUPL.EQ.0) THEN
         CALL SPINDI (LSPIND)
-        IF (LSPIND .EQ. 1) STOP
+        IF (LSPIND .EQ. 1) CALL SRSTOP(6)
       ENDIF
 !
 !  Read data for the integrated photosynthetic efficiency curves

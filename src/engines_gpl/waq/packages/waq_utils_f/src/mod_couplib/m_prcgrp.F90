@@ -154,7 +154,7 @@ integer           :: supported_level
       call mpi_init_thread(mpi_thread_funneled, supported_level, ierr)
       if ( supported_level < mpi_thread_funneled ) then
           write(*,*) 'MPI and OpenMP do not mix! Sorry!'
-          stop
+          call srstop(1)
       endif
 
 !     Determine total number of processes

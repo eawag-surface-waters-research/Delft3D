@@ -197,7 +197,7 @@ character(len=STRLEN) :: namtmr
    if (max_timers.lt.1) then
       write(LOUT,*) 'couplib_timers_init: Error: the number of timers ', &
          'assigned to CouPLib (', max_timers,') should be >= 1.'
-      stop
+      call srstop(1)
    endif
    if (max_timers.lt.numtimers_couplib) then
       write(LOUT,*) 'couplib_timers_init: Warning: the number of timers ', &

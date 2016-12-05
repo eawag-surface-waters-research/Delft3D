@@ -167,7 +167,7 @@ function DetermineIndex( dlwqtype, parid, locid )
 
         case ( DLWQ_BOUNDARY_SECTION )
             write(*,*) 'Not implemented yet!'
-            stop
+            call srstop(1)
 
         case ( DLWQ_DISCHARGE )
             idx    = iwste+parid+(locid-1)*(notot+1)
@@ -352,7 +352,7 @@ subroutine CheckParameterId( dlwqtype, parid, success )
 
         case ( DLWQ_BOUNDARY_SECTION )
             write(*,*) 'Not implemented yet!'
-            stop
+            call srstop(1)
 
         case ( DLWQ_DISCHARGE )
             success = parid >= 1 .and. parid <= notot   ! Allow for Flow rate?
@@ -390,7 +390,7 @@ subroutine CheckLocationId(  dlwqtype, locid, success )
 
         case ( DLWQ_BOUNDARY_SECTION )
             write(*,*) 'Not implemented yet!'
-            stop
+            call srstop(1)
 
         case ( DLWQ_DISCHARGE )
             success = locid >= 1 .and. locid <= nowst
@@ -445,7 +445,7 @@ integer function GetLocationCountPriv( type )
 
         case ( DLWQ_BOUNDARY_SECTION )
             write(*,*) 'Not implemented yet!'
-            stop
+            call srstop(1)
 
         case ( DLWQ_MONITOR_POINT )
             GetLocationCountPriv = nodump
@@ -612,7 +612,7 @@ integer function GetLocationIndexPriv( type, name )
 
         case ( DLWQ_BOUNDARY_SECTION )
             write(*,*) 'Not implemented yet!'
-            stop
+            call srstop(1)
 
         case ( DLWQ_MONITOR_POINT )
             call find_index( name, monitor_name, idx )

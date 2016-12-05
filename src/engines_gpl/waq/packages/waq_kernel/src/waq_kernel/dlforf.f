@@ -109,7 +109,7 @@
          if (nosys .gt. 100) then
             write (lundia,*)  ' INCREASE DIMENSION OF ARRAY RMNEG'
             write (lundia,*)  ' ASK FOR A NEW VERSION'
-            stop
+            call srstop(1)
          endif
 !
 !-----------------------------------------------------------------------

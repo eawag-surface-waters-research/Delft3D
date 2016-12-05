@@ -124,6 +124,7 @@
      H        GRZMC (NTOGRZ) 
       INTEGER BENTHS(NTOGRZ)
       INTEGER IKMRK1, IKMRK2
+      integer lunrep
       REAL    GEM, MaxFiltration, MaxUptake, POSFLX, GrowthResp,
      j        DetrGrazing
 
@@ -179,8 +180,12 @@
      j          problem = .true.
           ENDDO
         ENDDO
-        if (problem)
-     j  stop 'Error Memory Management CONSBL - Consult system manager'
+        if (problem) then
+          call getmlu(lunrep)
+          write (lunrep, *) 'Error Memory Management CONSBL - Consult system manager'
+          write (*, *) 'Error Memory Management CONSBL - Consult system manager'
+          call srstop (1)
+        endif
       endif
 
       IFLUX = 0

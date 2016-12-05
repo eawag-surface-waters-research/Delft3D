@@ -996,7 +996,7 @@ integer                                    :: my_idebug
       write(LOUT,*) 'sendrecv_data: Error: precisely one of the arguments ', &
          'iarray, rarray and darray must be specified; actual number of ', &
          'arguments is',nargs
-      stop
+      call srstop(1)
    endif
 
 !  Get optional argument lladd; overwrite or add to contents of [ird]array
@@ -1240,7 +1240,7 @@ integer                                    :: my_idebug
       if (.not.found) then
          write(LOUT,*) 'sendrecv: Error: obtained message from process',iprc,&
                 ', which does not occur in interface "',trim(namitf),'"'
-         stop
+         call srstop(1)
       endif
 
       if (my_idebug.ge.3) write(LOUT,'(2(a,i3),a)') ' recv_data: obtained iprc=',&
@@ -1260,7 +1260,7 @@ integer                                    :: my_idebug
          write(LOUT,'(a,i5,a,i3,a,i5,a)') 'recv_data: Error: expected',nexpct,&
                 ' items in message of process',iprc,', obtained',&
                 rcvbuf(2),' items instead.'
-         stop
+         call srstop(1)
       endif
       if (my_idebug.ge.2) write(LOUT,'(a,i6,a,i3)') ' recv_data: received', &
          nexpct,' items of process',iprc
