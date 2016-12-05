@@ -52,8 +52,8 @@ module m_ec_elementSet
    public :: ecElementSetSetvptyp
    public :: ecElementSetSetX0Dx
    public :: ecElementSetSetY0Dy
-   public :: ecElementSetSetLatitudeArray
-   public :: ecElementSetSetLongitudeArray
+   !public :: ecElementSetSetLatitudeArray
+   !public :: ecElementSetSetLongitudeArray
    public :: ecElementSetSetDirectionArray
    public :: ecElementSetSetLat0Dlat
    public :: ecElementSetSetLon0Dlon
@@ -144,14 +144,6 @@ module m_ec_elementSet
                deallocate(elementSet%z, stat = istat)
                if (istat /= 0) success = .false.
             end if
-         end if
-         if (associated(elementSet%lat)) then
-            deallocate(elementSet%lat, stat = istat)
-            if (istat /= 0) success = .false.
-         end if
-         if (associated(elementSet%lon)) then
-            deallocate(elementSet%lon, stat = istat)
-            if (istat /= 0) success = .false.
          end if
          if (associated(elementSet%ids)) then
             deallocate(elementSet%ids, stat = istat)
@@ -302,6 +294,7 @@ module m_ec_elementSet
          elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
+                elementSetPtr%ofType == elmSetType_spheric .or. &
                 elementSetPtr%ofType == elmSetType_polytim .or. &
                 elementSetPtr%ofType == elmSetType_samples) then
                newSize = size(xArray)
@@ -341,6 +334,7 @@ module m_ec_elementSet
          elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
+                elementSetPtr%ofType == elmSetType_spheric .or. &
                 elementSetPtr%ofType == elmSetType_polytim .or. &
                 elementSetPtr%ofType == elmSetType_samples) then
                newSize = size(yArray)
@@ -470,83 +464,6 @@ module m_ec_elementSet
             call setECMessage("ERROR: ec_elementSet::ecElementSetSetY0Dy: Cannot find an ElementSet with the supplied id.")
          end if
       end function ecElementSetSetY0Dy
-      
-      ! =======================================================================
-      
-      !> Create and fill the array of longitude coordinates and infer nCoordinates.
-      function ecElementSetSetLongitudeArray(instancePtr, elementSetId, lonArray) result(success)
-         logical                               :: success      !< function status
-         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
-         integer,                   intent(in) :: elementSetId !< unique ElementSet id
-         real(hp), dimension(:),    intent(in) :: lonArray     !< new longitude coordinates of the ElementSet
-         !
-         type(tEcElementSet),    pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
-         integer                         :: newSize       !< size of lonArray
-         integer                         :: istat         !< reallocate status
-         integer                         :: i             !< loop counter
-         !
-         success = .false.
-         elementSetPtr => null()
-         !
-         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
-         if (associated(elementSetPtr)) then
-            if (elementSetPtr%ofType == elmSetType_spheric) then
-               newSize = size(lonArray)
-               call reallocP(elementSetPtr%lon, newSize, stat = istat, keepExisting = .false.)
-               if (istat == 0) then
-                  do i=1, newSize
-                     elementSetPtr%lon(i) = lonArray(i)
-                  end do
-                  elementSetPtr%nCoordinates = newSize
-                  success = .true.
-               end if
-            else
-               call setECMessage("WARNING: ec_elementSet::ecElementSetSetLongitudeArray: Won't set longitude coordinate array for this ElementSet type.")
-            end if
-         else
-            call setECMessage("ERROR: ec_elementSet::ecElementSetSetLongitudeArray: Cannot find an ElementSet with the supplied id.")
-         end if
-      end function ecElementSetSetLongitudeArray
-      
-      ! =======================================================================
-      
-      !> Create and fill the array of latitude coordinates and infer nCoordinates.
-      function ecElementSetSetLatitudeArray(instancePtr, elementSetId, latArray) result(success)
-         logical                               :: success      !< function status
-         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
-         integer,                   intent(in) :: elementSetId !< unique ElementSet id
-         real(hp), dimension(:),    intent(in) :: latArray     !< new latitude coordinates of the ElementSet
-         !
-         type(tEcElementSet),    pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
-         integer                         :: newSize       !< size of latArray
-         integer                         :: istat         !< reallocate status
-         integer                         :: i             !< loop counter
-         !
-         success = .false.
-         elementSetPtr => null()
-         !
-         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
-         if (associated(elementSetPtr)) then
-            if (elementSetPtr%ofType == elmSetType_spheric) then
-               newSize = size(latArray)
-               call reallocP(elementSetPtr%lat, newSize, stat = istat, keepExisting = .false.)
-               if (istat == 0) then
-                  do i=1, newSize
-                     elementSetPtr%lat(i) = latArray(i)
-                  end do
-                  elementSetPtr%nCoordinates = newSize
-                  success = .true.
-               end if
-            else
-               call setECMessage("WARNING: ec_elementSet::ecElementSetSetLatitudeArray: Won't set latitude coordinate array for this ElementSet type.")
-            end if
-         else
-            call setECMessage("ERROR: ec_elementSet::ecElementSetSetLatitudeArray: Cannot find an ElementSet with the supplied id.")
-         end if
-      end function ecElementSetSetLatitudeArray
-      
-      ! =======================================================================
-      ! =======================================================================
       
       !> Create and fill the array of angles resulting from a pole-shift transformation
       function ecElementSetSetDirectionArray(instancePtr, elementSetId, dirArray) result(success)

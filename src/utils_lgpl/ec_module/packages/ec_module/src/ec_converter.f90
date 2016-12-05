@@ -321,13 +321,8 @@ module m_ec_converter
                allocate(weight%weightFactors(4, n_points))
                weight%weightFactors = ec_undef_hp
                do i=1, n_points
-                  if (sourceElementSet%ofType == elmSetType_cartesian) then
-                     call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%x, sourceElementSet%y, &
+                  call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%x, sourceElementSet%y, &
                               n_cols, n_rows, n_cols, n_rows, inside, mp, np, in, jn, wf)
-                  elseif (sourceElementSet%ofType == elmSetType_spheric) then
-                     call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%lon, sourceElementSet%lat, &
-                              n_cols, n_rows, n_cols, n_rows, inside, mp, np, in, jn, wf)
-                  endif 
                   if (inside == 1) then
                      if (allocated(srcmask%msk)) then
                         fmask(1) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
@@ -1940,8 +1935,8 @@ module m_ec_converter
          yeye = cyclic_interpolation(yeye0, yeye1, a0, a1) ! cyclic inteprolation (spheric coord)
          !
          do n=1, connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
-            xc = connection%targetItemsPtr(1)%ptr%elementSetPtr%lat(n)
-            yc = connection%targetItemsPtr(1)%ptr%elementSetPtr%lon(n)
+            xc = connection%targetItemsPtr(1)%ptr%elementSetPtr%x(n)
+            yc = connection%targetItemsPtr(1)%ptr%elementSetPtr%y(n)
             dlat = modulo(yc, 360.0_hp) - yeye
             dlon = modulo(xc, 360.0_hp) - xeye
             h1 = (sin(dlat/2.0_hp*fa))**2 + cos(yeye*fa)*cos(yc*fa)*(sin(dlon/2.0_hp*fa))**2
@@ -2108,8 +2103,8 @@ module m_ec_converter
          type(tEcIndexWeight), pointer :: indexWeight !< helper pointer, saved index weights
          type(tEcElementSet), pointer :: sourceElementSet !< source ElementSet
          integer :: n_cols, mp, np, n_points
-         type(tEcItem), pointer  :: windxPtr => null() ! pointer to item for windx     
-         type(tEcItem), pointer  :: windyPtr => null() ! pointer to item for windy
+         type(tEcItem), pointer  :: windxPtr ! pointer to item for windx     
+         type(tEcItem), pointer  :: windyPtr ! pointer to item for windy
          real(hp), dimension(:), allocatable :: targetValues
          double precision        :: PI, phi, xtmp
          !
@@ -2121,6 +2116,8 @@ module m_ec_converter
          indexWeight => null()
          sourceElementSet => null()
          ! ===== preprocessing: rotate windx and windy of the source fields if the array of rotations exists in the filereader =====
+         windxPtr => null()
+         windyPtr => null()
          do i=1, connection%nSourceItems
             if (connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='eastward_wind') then 
                windxPtr => connection%SourceItemsPtr(i)%ptr

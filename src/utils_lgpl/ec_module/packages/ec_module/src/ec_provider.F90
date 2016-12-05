@@ -2663,11 +2663,11 @@ module m_ec_provider
                      allocate(pdiri(fgd_size*sgd_size))
                      call gb2lla(fgd_data_1d, sgd_data_1d, fgd_data_trans, sgd_data_trans, pdiri, fgd_size*sgd_size, &
                           gsplon, gsplat, 0.0_hp, 0.0_hp, -90.0_hp, 0.0_hp) 
-                     if (.not.ecElementSetSetLatitudeArray(instancePtr, elementSetId, sgd_data_trans)) then 
+                     if (.not.ecElementSetSetXArray(instancePtr, elementSetId, sgd_data_trans)) then 
                         call setECMessage("Setting latitude array failed for "//trim(fileReaderPtr%filename)//".")
                         return
                      endif 
-                     if (.not.ecElementSetSetLongitudeArray(instancePtr, elementSetId, fgd_data_trans)) then
+                     if (.not.ecElementSetSetYArray(instancePtr, elementSetId, fgd_data_trans)) then
                         call setECMessage("Setting longitude array failed for "//trim(fileReaderPtr%filename)//".")
                         return
                         endif 
@@ -2676,11 +2676,11 @@ module m_ec_provider
                         return
                      endif 
                   else 
-                     if (.not.ecElementSetSetLatitudeArray(instancePtr, elementSetId, sgd_data_1d)) then 
+                     if (.not.ecElementSetSetXArray(instancePtr, elementSetId, fgd_data_1d)) then 
                         call setECMessage("Setting latitude array failed for "//trim(fileReaderPtr%filename)//".")
                         return
                      endif 
-                     if (.not.ecElementSetSetLongitudeArray(instancePtr, elementSetId, fgd_data_1d)) then
+                     if (.not.ecElementSetSetYArray(instancePtr, elementSetId, sgd_data_1d)) then
                         call setECMessage("Setting longitude array failed for "//trim(fileReaderPtr%filename)//".")
                         return
                      endif 

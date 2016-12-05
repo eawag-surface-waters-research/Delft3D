@@ -206,14 +206,6 @@ module m_ec_module
       module procedure ecElementSetSetY0Dy
    end interface ecSetElementSetY0Dy
    
-   interface ecSetElementSetLatitudeArray
-      module procedure ecElementSetSetLatitudeArray
-   end interface ecSetElementSetLatitudeArray
-   
-   interface ecSetElementSetLongitudeArray
-      module procedure ecElementSetSetLongitudeArray
-   end interface ecSetElementSetLongitudeArray
-   
    interface ecSetElementSetDirectionArray
       module procedure ecElementSetSetDirectionArray
    end interface ecSetElementSetDirectionArray

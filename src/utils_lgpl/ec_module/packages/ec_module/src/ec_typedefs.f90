@@ -216,8 +216,8 @@ module m_ec_typedefs
       real(hp), dimension(:), pointer     :: x    => null() !< array of x-coordinates
       real(hp), dimension(:), pointer     :: y    => null() !< array of y-coordinates
       real(hp), dimension(:), pointer     :: z    => null() !< array of z/sigma-coordinates
-      real(hp), dimension(:), pointer     :: lat  => null() !< array of latitude coordinates
-      real(hp), dimension(:), pointer     :: lon  => null() !< array of longitude coordinates
+      !real(hp), dimension(:), pointer     :: lat  => null() !< array of latitude coordinates
+      !real(hp), dimension(:), pointer     :: lon  => null() !< array of longitude coordinates
       real(hp), dimension(:), pointer     :: dir  => null() !< array of directions (angles) related to a poleshift coordinate transformation 
       integer,  dimension(:), pointer     :: mask => null() !< points to a 1-dim array field, stored in maskArray OR in a kernel
       integer,  dimension(:), allocatable :: maskArray      !< value = 0: invalid point; value /= 0: valid point
