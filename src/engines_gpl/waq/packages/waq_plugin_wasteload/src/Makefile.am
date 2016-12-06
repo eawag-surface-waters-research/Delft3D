@@ -18,7 +18,6 @@ FMODULES += \
 libwaq_plugin_wasteload_la_SOURCES = \
        waq_plugin_wasteload_version.F90 \
        delwaq_user_wasteloads.f \
-       srstop.f \
        zoekns.f
 
 #-------------------------------------------------------------------------------

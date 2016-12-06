@@ -29,7 +29,8 @@ module part16_mod
 !  data definition module(s)
 !
 use precision_part              ! single and double precision
-      use timers
+use timers
+use openfl_mod
 use fileinfo               ! file information for all input/output files
 !
 !  module procedure(s)

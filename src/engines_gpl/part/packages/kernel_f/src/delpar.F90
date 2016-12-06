@@ -366,6 +366,7 @@
       !
       !  module procedure(s)
       !
+      use openfl_mod
       use delete_file_mod            ! explicit interface
       use oildsp_mod                 ! explicit interface
       use part09_mod                 ! explicit interface

@@ -28,11 +28,10 @@ libio_f_la_SOURCES = \
          filldm.f90 \
          dlpr12.f90 \
          dlwqbl.f90 \
-         dlwqtd.f90 \
+         parttd.f90 \
          dlwqfl.f90 \
          filtyp.F90 \
          m_sferic.f90 \
-         malloc.f90 \
          meteo1temphelpers.f90 \
          meteo1.f90 \
          rdwnd.f90 \

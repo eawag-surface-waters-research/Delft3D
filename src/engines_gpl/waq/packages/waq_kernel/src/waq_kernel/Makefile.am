@@ -239,7 +239,6 @@ libWaqKernel_la_SOURCES = \
        usolve.f \
        values.f \
        wascal.f \
-       wqparcom.F90 \
        xerbla.f \
        zercum.f \
        zlayer.f \

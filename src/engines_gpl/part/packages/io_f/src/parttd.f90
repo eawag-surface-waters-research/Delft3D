@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine dlwqtd ( lunin  , lunout , itime  , idtime , itime1 ,   &
+      subroutine parttd ( lunin  , lunout , itime  , idtime , itime1 ,   &
                           itime2 , nftot  , nrtot  , array1 , array2 ,   &
                           result , ipnt   , lblock , luntxt , isflag ,   &
                           ifflag , update )

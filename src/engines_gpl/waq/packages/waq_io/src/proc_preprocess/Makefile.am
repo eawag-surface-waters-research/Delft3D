@@ -84,7 +84,6 @@ libproc_preprocess_la_SOURCES = partab.f90 \
        setqtl.f \
        setvat.f \
        tabdim.f \
-       timers.f \
        valpoi.f \
        vxlpoi.f \
        wr_proceswrk.f \

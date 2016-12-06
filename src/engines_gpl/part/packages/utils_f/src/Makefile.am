@@ -40,8 +40,7 @@ libutils_f_la_SOURCES = \
          part11.f90 \
          part11sp.f90 \
          grid_search.f90 \
-         skip_comments.f90 \
-         leng_string.f90
+         skip_comments.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

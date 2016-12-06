@@ -9,5 +9,4 @@ include $(top_srcdir)/common.am
 
 SUBDIRS = waq_kernel \
           waq_process \
-          charon \
           bloom

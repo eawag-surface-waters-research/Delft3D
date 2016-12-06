@@ -47,7 +47,6 @@ libbloom_la_SOURCES = blclmort.f \
        getal.f \
        getcoe.f \
        getnam.f \
-       graph.f \
        grazin.f \
        hdrblm.f \
        headin.f \
@@ -69,7 +68,6 @@ libbloom_la_SOURCES = blclmort.f \
        nutfea.f \
        ophelp.f \
        option.f \
-       plotgr.f \
        pools.f \
        prinma.f \
        prinsu.f \

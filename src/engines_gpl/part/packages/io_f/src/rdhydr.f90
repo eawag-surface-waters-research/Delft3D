@@ -66,7 +66,7 @@ module rdhydr_mod
 !
 !
 !     subroutines called    : stop_exit
-!                             dlwqtd.
+!                             parttd.
 !                             dlwqbl.
 !
 !     functions   called    : none.
@@ -207,7 +207,7 @@ module rdhydr_mod
 !.. volumes
 
          lblock = .false.
-         call dlwqtd ( lunit(6), lunut   , itime   , idtimv  , itimv1  ,   &
+         call parttd ( lunit(6), lunut   , itime   , idtimv  , itimv1  ,   &
                        itimv2  , noseg   , mnmaxk  , vol1    , vol2    ,   &
                        volume  , cellpnt , lblock  , fname(6), isflag  ,   &
                        ifflag  , updatv  )

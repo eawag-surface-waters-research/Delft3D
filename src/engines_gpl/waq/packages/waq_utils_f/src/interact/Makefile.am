@@ -27,7 +27,6 @@ libinteract_la_SOURCES = alarm.f \
        cursor.f \
        date.f \
        datype.f \
-       delay.f \
        delstr.f \
        dosarg.f \
        formfe.f \

@@ -428,7 +428,6 @@ engines_gpl/waq/packages/waq_io/src/proc_preprocess/Makefile
 engines_gpl/waq/packages/waq_io/src/waq_io/Makefile
 engines_gpl/waq/packages/waq_kernel/Makefile
 engines_gpl/waq/packages/waq_kernel/src/bloom/Makefile
-engines_gpl/waq/packages/waq_kernel/src/charon/Makefile
 engines_gpl/waq/packages/waq_kernel/src/Makefile
 engines_gpl/waq/packages/waq_kernel/src/waq_kernel/Makefile
 engines_gpl/waq/packages/waq_kernel/src/waq_process/Makefile

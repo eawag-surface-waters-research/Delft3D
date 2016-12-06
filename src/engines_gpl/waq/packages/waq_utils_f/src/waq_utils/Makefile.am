@@ -17,7 +17,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libwaq_utils_la_SOURCES =  \
-       gregor.f \
        julian.f \
        waqmem.f90 \
        progress.f90 \
@@ -27,9 +26,6 @@ libwaq_utils_la_SOURCES =  \
        dwq_proces_set.f \
        dhcommand.f90 \
        DHGARG.F \
-       DHHASP.F \
-       DHSTOP.F \
-       DHTIME.F \
        SRSTOP.F \
        UNLOCK.F \
        avundf_linux.f \
