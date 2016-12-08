@@ -414,7 +414,7 @@ def build_gui():
     
     Label(text="Visual Studio Version:", relief=RIDGE, width=20).grid(row=0, column=0)
     
-    Radiobutton(root, text="VS 2017 (not tested yet)              ", variable=vs_gui, value=2015).grid(row=1, column=0, sticky=W)
+    Radiobutton(root, text="VS 2017 (not tested yet)              ", variable=vs_gui, value=2017).grid(row=1, column=0, sticky=W)
     Radiobutton(root, text="VS 2015, Update 1 + .Net Framework 4.6", variable=vs_gui, value=2015).grid(row=2, column=0, sticky=W)
     Radiobutton(root, text="VS 2013           + .Net Framework 4.5", variable=vs_gui, value=2013).grid(row=3, column=0, sticky=W)
     Radiobutton(root, text="VS 2012           + .Net Framework 4.5", variable=vs_gui, value=2012).grid(row=4, column=0, sticky=W)
