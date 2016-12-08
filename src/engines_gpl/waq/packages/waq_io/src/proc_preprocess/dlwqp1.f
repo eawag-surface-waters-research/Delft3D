@@ -70,7 +70,7 @@
 
       ! local declarations
 
-      real, parameter           :: versip = 4.52   ! version process system
+      real, parameter           :: versip = 5.06   ! version process system
       real                      :: verspe = 1.0    ! version bloom.spe file
       integer, parameter        :: novarm = 15000  ! max number of variables overall
       integer, parameter        :: nbprm  = 1750   ! max number of processes

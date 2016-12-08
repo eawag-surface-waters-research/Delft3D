@@ -267,7 +267,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACDIS01  ","SwDisSM01 ",   6,"Y","x",1
 "MACDIS01  ","HmaxSM01  ",   7,"Y","x",1
 "MACDIS01  ","FfacSM01  ",   8,"Y","x",1
-"MACDIS01  ","IbotSeg   ",   9,"Y","x",1
+"MACDIS01  ","IBotSeg   ",   9,"N","x",1
 "MACDIS01  ","MaxSM01   ",  10,"N","x",1
 "MACDIS02  ","Surf      ",   1,"N","x",1
 "MACDIS02  ","Depth     ",   2,"N","x",1
@@ -277,7 +277,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACDIS02  ","SwDisSM02 ",   6,"Y","x",1
 "MACDIS02  ","HmaxSM02  ",   7,"Y","x",1
 "MACDIS02  ","FfacSM02  ",   8,"Y","x",1
-"MACDIS02  ","IbotSeg   ",   9,"Y","x",1
+"MACDIS02  ","IBotSeg   ",   9,"N","x",1
 "MACDIS02  ","MaxSM02   ",  10,"N","x",1
 "MACDIS03  ","Surf      ",   1,"N","x",1
 "MACDIS03  ","Depth     ",   2,"N","x",1
@@ -287,7 +287,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACDIS03  ","SwDisSM03 ",   6,"Y","x",1
 "MACDIS03  ","HmaxSM03  ",   7,"Y","x",1
 "MACDIS03  ","FfacSM03  ",   8,"Y","x",1
-"MACDIS03  ","IbotSeg   ",   9,"Y","x",1
+"MACDIS03  ","IBotSeg   ",   9,"N","x",1
 "MACDIS03  ","MaxSM03   ",  10,"N","x",1
 "MACDIS04  ","Surf      ",   1,"N","x",1
 "MACDIS04  ","Depth     ",   2,"N","x",1
@@ -297,7 +297,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACDIS04  ","SwDisSM04 ",   6,"Y","x",1
 "MACDIS04  ","HmaxSM04  ",   7,"Y","x",1
 "MACDIS04  ","FfacSM04  ",   8,"Y","x",1
-"MACDIS04  ","IbotSeg   ",   9,"Y","x",1
+"MACDIS04  ","IBotSeg   ",   9,"N","x",1
 "MACDIS04  ","MaxSM04   ",  10,"N","x",1
 "MACDIS05  ","Surf      ",   1,"N","x",1
 "MACDIS05  ","Depth     ",   2,"N","x",1
@@ -307,7 +307,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACDIS05  ","SwDisSM05 ",   6,"Y","x",1
 "MACDIS05  ","HmaxSM05  ",   7,"Y","x",1
 "MACDIS05  ","FfacSM05  ",   8,"Y","x",1
-"MACDIS05  ","IbotSeg   ",   9,"Y","x",1
+"MACDIS05  ","IBotSeg   ",   9,"N","x",1
 "MACDIS05  ","MaxSM05   ",  10,"N","x",1
 "pH_simp   ","Salinity  ",   1,"Y","x",1
 "pH_simp   ","TIC       ",   2,"N","x",1
@@ -12075,7 +12075,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM01","LocSedDept",   4,"N","x",1
 "MACNUTSM01","NH4S12    ",   5,"O","x",1
 "MACNUTSM01","PO4S12    ",   6,"O","x",1
-"MACNUTSM01","IbotSeg   ",   7,"Y","x",1
+"MACNUTSM01","IBotSeg   ",   7,"N","x",1
 "MACNUTSM01","FrBmSM01  ",   8,"N","x",1
 "MACNUTSM01","RootDeSM01",   9,"Y","x",1
 "MACNUTSM01","Poros     ",  10,"Y","x",1
@@ -12105,7 +12105,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM02","LocSedDept",   4,"N","x",1
 "MACNUTSM02","NH4S12    ",   5,"O","x",1
 "MACNUTSM02","PO4S12    ",   6,"O","x",1
-"MACNUTSM02","IbotSeg   ",   7,"Y","x",1
+"MACNUTSM02","IBotSeg   ",   7,"N","x",1
 "MACNUTSM02","FrBmSM02  ",   8,"N","x",1
 "MACNUTSM02","RootDeSM02",   9,"Y","x",1
 "MACNUTSM02","Poros     ",  10,"Y","x",1
@@ -12135,7 +12135,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM03","LocSedDept",   4,"N","x",1
 "MACNUTSM03","NH4S12    ",   5,"O","x",1
 "MACNUTSM03","PO4S12    ",   6,"O","x",1
-"MACNUTSM03","IbotSeg   ",   7,"Y","x",1
+"MACNUTSM03","IBotSeg   ",   7,"N","x",1
 "MACNUTSM03","FrBmSM03  ",   8,"N","x",1
 "MACNUTSM03","RootDeSM03",   9,"Y","x",1
 "MACNUTSM03","Poros     ",  10,"Y","x",1
@@ -12165,7 +12165,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM04","LocSedDept",   4,"N","x",1
 "MACNUTSM04","NH4S12    ",   5,"O","x",1
 "MACNUTSM04","PO4S12    ",   6,"O","x",1
-"MACNUTSM04","IbotSeg   ",   7,"Y","x",1
+"MACNUTSM04","IBotSeg   ",   7,"N","x",1
 "MACNUTSM04","FrBmSM04  ",   8,"N","x",1
 "MACNUTSM04","RootDeSM04",   9,"Y","x",1
 "MACNUTSM04","Poros     ",  10,"Y","x",1
@@ -12195,7 +12195,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MACNUTSM05","LocSedDept",   4,"N","x",1
 "MACNUTSM05","NH4S12    ",   5,"O","x",1
 "MACNUTSM05","PO4S12    ",   6,"O","x",1
-"MACNUTSM05","IbotSeg   ",   7,"Y","x",1
+"MACNUTSM05","IBotSeg   ",   7,"N","x",1
 "MACNUTSM05","FrBmSM05  ",   8,"N","x",1
 "MACNUTSM05","RootDeSM05",   9,"Y","x",1
 "MACNUTSM05","Poros     ",  10,"Y","x",1
@@ -12251,7 +12251,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt1","TcPMxEM01 ",  30,"Y","x",1
 "MacroPhyt1","TcritSM01 ",  31,"Y","x",1
 "MacroPhyt1","TcPMxSM01 ",  32,"Y","x",1
-"MacroPhyt1","MeanTemp01",  33,"N"," ",1
+"MacroPhyt1","MnTempSM01",  33,"N"," ",1
 "MacroPhyt1","K1DecaEM01",  34,"Y","x",1
 "MacroPhyt1","TcDecaEM01",  35,"Y","x",1
 "MacroPhyt1","K1DecaSM01",  36,"Y","x",1
@@ -12277,7 +12277,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SM01_Upt3D","TotalDepth",   2,"N","x",1
 "SM01_Upt3D","NH4S12    ",   3,"O","x",1
 "SM01_Upt3D","LocSedDept",   4,"N","x",1
-"SM01_Upt3D","IbotSeg   ",   5,"Y","x",1
+"SM01_Upt3D","IBotSeg   ",   5,"N","x",1
 "SM01_Upt3D","FrBmSM01  ",   6,"N","x",1
 "SM01_Upt3D","RootDeSM01",   7,"Y","x",1
 "SM01_Upt3D","Poros     ",   8,"Y","x",1
@@ -12334,7 +12334,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt2","TcPMxEM02 ",  30,"Y","x",1
 "MacroPhyt2","TcritSM02 ",  31,"Y","x",1
 "MacroPhyt2","TcPMxSM02 ",  32,"Y","x",1
-"MacroPhyt2","MeanTemp02",  33,"N"," ",1
+"MacroPhyt2","MnTempSM02",  33,"N"," ",1
 "MacroPhyt2","K1DecaEM02",  34,"Y","x",1
 "MacroPhyt2","TcDecaEM02",  35,"Y","x",1
 "MacroPhyt2","K1DecaSM02",  36,"Y","x",1
@@ -12360,7 +12360,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SM02_Upt3D","TotalDepth",   2,"N","x",1
 "SM02_Upt3D","NH4S12    ",   3,"O","x",1
 "SM02_Upt3D","LocSedDept",   4,"N","x",1
-"SM02_Upt3D","IbotSeg   ",   5,"Y","x",1
+"SM02_Upt3D","IBotSeg   ",   5,"N","x",1
 "SM02_Upt3D","FrBmSM02  ",   6,"N","x",1
 "SM02_Upt3D","RootDeSM02",   7,"Y","x",1
 "SM02_Upt3D","Poros     ",   8,"Y","x",1
@@ -12417,7 +12417,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt3","TcPMxEM03 ",  30,"Y","x",1
 "MacroPhyt3","TcritSM03 ",  31,"Y","x",1
 "MacroPhyt3","TcPMxSM03 ",  32,"Y","x",1
-"MacroPhyt3","MeanTemp03",  33,"N"," ",1
+"MacroPhyt3","MnTempSM03",  33,"N"," ",1
 "MacroPhyt3","K1DecaEM03",  34,"Y","x",1
 "MacroPhyt3","TcDecaEM03",  35,"Y","x",1
 "MacroPhyt3","K1DecaSM03",  36,"Y","x",1
@@ -12443,7 +12443,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SM03_Upt3D","TotalDepth",   2,"N","x",1
 "SM03_Upt3D","NH4S12    ",   3,"O","x",1
 "SM03_Upt3D","LocSedDept",   4,"N","x",1
-"SM03_Upt3D","IbotSeg   ",   5,"Y","x",1
+"SM03_Upt3D","IBotSeg   ",   5,"N","x",1
 "SM03_Upt3D","FrBmSM03  ",   6,"N","x",1
 "SM03_Upt3D","RootDeSM03",   7,"Y","x",1
 "SM03_Upt3D","Poros     ",   8,"Y","x",1
@@ -12500,7 +12500,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt4","TcPMxEM04 ",  30,"Y","x",1
 "MacroPhyt4","TcritSM04 ",  31,"Y","x",1
 "MacroPhyt4","TcPMxSM04 ",  32,"Y","x",1
-"MacroPhyt4","MeanTemp04",  33,"N"," ",1
+"MacroPhyt4","MnTempSM04",  33,"N"," ",1
 "MacroPhyt4","K1DecaEM04",  34,"Y","x",1
 "MacroPhyt4","TcDecaEM04",  35,"Y","x",1
 "MacroPhyt4","K1DecaSM04",  36,"Y","x",1
@@ -12526,7 +12526,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SM04_Upt3D","TotalDepth",   2,"N","x",1
 "SM04_Upt3D","NH4S12    ",   3,"O","x",1
 "SM04_Upt3D","LocSedDept",   4,"N","x",1
-"SM04_Upt3D","IbotSeg   ",   5,"Y","x",1
+"SM04_Upt3D","IBotSeg   ",   5,"N","x",1
 "SM04_Upt3D","FrBmSM04  ",   6,"N","x",1
 "SM04_Upt3D","RootDeSM04",   7,"Y","x",1
 "SM04_Upt3D","Poros     ",   8,"Y","x",1
@@ -12583,7 +12583,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MacroPhyt5","TcPMxEM05 ",  30,"Y","x",1
 "MacroPhyt5","TcritSM05 ",  31,"Y","x",1
 "MacroPhyt5","TcPMxSM05 ",  32,"Y","x",1
-"MacroPhyt5","MeanTemp05",  33,"N"," ",1
+"MacroPhyt5","MnTempSM05",  33,"N"," ",1
 "MacroPhyt5","K1DecaEM05",  34,"Y","x",1
 "MacroPhyt5","TcDecaEM05",  35,"Y","x",1
 "MacroPhyt5","K1DecaSM05",  36,"Y","x",1
@@ -12609,7 +12609,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SM05_Upt3D","TotalDepth",   2,"N","x",1
 "SM05_Upt3D","NH4S12    ",   3,"O","x",1
 "SM05_Upt3D","LocSedDept",   4,"N","x",1
-"SM05_Upt3D","IbotSeg   ",   5,"Y","x",1
+"SM05_Upt3D","IBotSeg   ",   5,"N","x",1
 "SM05_Upt3D","FrBmSM05  ",   6,"N","x",1
 "SM05_Upt3D","RootDeSM05",   7,"Y","x",1
 "SM05_Upt3D","Poros     ",   8,"Y","x",1

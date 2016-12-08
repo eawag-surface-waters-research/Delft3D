@@ -106,7 +106,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( VERSI1 = 4.51  , VERSI2 = 5.05 )
+      PARAMETER   ( VERSI1 = 5.06  , VERSI2 = 5.06 )
       INTEGER       NIPMSD, NPROCD, NOLOCD, NFLUXD, NODEFD,
      +              NOTOTD, IOFF
       REAL          VERSIO
