@@ -339,6 +339,7 @@ DllExport void set_var (const char * key, const void * value) {
         thisDimr->my_rank = *(int *)value;
     } else if (strcmp(key, "debugLevel") == 0) {
         thisDimr->logMask = *(Log::Mask *)value;
+        thisDimr->log->SetMask(thisDimr->logMask);
     } else {
         // Assumption: "key" has the structure "componentName/group/id/parameter"
         if (slash == NULL) {
