@@ -656,12 +656,12 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
              do nm = 1, nmmax
                 if (kfs(nm) == 1) then
                    h0                    = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                   pkwav(nm, kfsmax(nm)) =  4.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
+                   pkwav(nm, kfsmax(nm)) =  2.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
                    zw  = 0.0_fp
                    do k = kfsmax(nm)-1, kfsmin(nm), -1
                       zw  = zw  + dzs1(nm,k+1)
                       if (hrms(nm) > zw) then
-                         pkwav(nm,k) = pkwav(nm,kfsmax(nm))*(1.0_fp - 2.0_fp*zw/(hrms(nm)))
+                         pkwav(nm,k) = pkwav(nm,kfsmax(nm))*(1.0_fp - zw/(hrms(nm)))
                          ddk(nm,k)   = ddk(nm,k) + pkwav(nm, k)   
                       else
                          kdismx(nm)=k+1
