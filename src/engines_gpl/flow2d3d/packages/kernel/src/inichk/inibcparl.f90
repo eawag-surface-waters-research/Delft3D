@@ -170,7 +170,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! The master partition broadcasts this guu array to all partitions
     !
-    call dfbroadc_gdp (guu_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
+    call dfbroadc_gdp (guu_global, (nmaxgl)*(mmaxgl), dfloat, gdp )
     !
     ! Collect all gvv values from all partitions in the array gvv_global in the master partition
     ! NOTE: the dfgather call will reallocate gvv_global on the master
@@ -179,7 +179,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! The master partition broadcasts this gvv array to all partitions
     !
-    call dfbroadc_gdp (gvv_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
+    call dfbroadc_gdp (gvv_global, (nmaxgl)*(mmaxgl), dfloat, gdp )
     !
     ! loop over all boundaries that are (partly) inside this partition
     !
