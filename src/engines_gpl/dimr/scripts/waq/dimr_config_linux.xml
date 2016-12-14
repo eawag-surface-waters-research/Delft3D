@@ -11,7 +11,7 @@
     </control>
 
     <component name="myNameDelwaq">
-        <setting key="-p" value="${proc_def_dir}/proc_def.dat"/>
+        <setting key="-p" value="../../bin/lnx64/waq/default/proc_def.dat"/>
         <library>delwaq</library>
         <workingDir>.</workingDir>
         <inputFile>com-tut_fti_waq.inp</inputFile>

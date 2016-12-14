@@ -373,9 +373,12 @@ src/engines_gpl/dimr/scripts/fm/fm_parameters_for_waves.txt -text
 src/engines_gpl/dimr/scripts/fm/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/fm/run_dimr.sh -text
 src/engines_gpl/dimr/scripts/waq/dimr_config.xml -text
+src/engines_gpl/dimr/scripts/waq/dimr_config_linux.xml -text
 src/engines_gpl/dimr/scripts/waq/parameter_substitution/dimr_config.xml -text
 src/engines_gpl/dimr/scripts/waq/parameter_substitution/run_dimr.bat -text
+src/engines_gpl/dimr/scripts/waq/parameter_substitution/run_dimr.sh -text
 src/engines_gpl/dimr/scripts/waq/run_dimr.bat -text
+src/engines_gpl/dimr/scripts/waq/run_dimr.sh -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
 src/engines_gpl/flow2d3d/default/files.def -text
