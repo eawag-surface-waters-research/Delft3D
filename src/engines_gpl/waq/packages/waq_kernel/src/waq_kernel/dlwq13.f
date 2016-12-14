@@ -93,6 +93,7 @@
 !
 !     write restart file in .map format
 !
+      LCHARMAP = ' '
       LCHARMAP(1:248) = LCHAR(23)(1:248)
       DO 10 I=248,1,-1
          IF ( LCHARMAP(I:I) .EQ. '.' ) THEN
