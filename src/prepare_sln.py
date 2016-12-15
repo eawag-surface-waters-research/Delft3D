@@ -1,5 +1,6 @@
 import argparse
 import os
+import glob
 import sys
 import shutil
 if sys.version_info<(3,0,0):
@@ -11,6 +12,7 @@ if sys.version_info<(3,0,0):
    from Tkinter import *
 else:
    from tkinter import *
+
 
 #
 # This script can be used to convert the VisualStudio solution and project files
@@ -138,6 +140,20 @@ platformtoolset[2017] = "    <PlatformToolset>v140</PlatformToolset>"
 
 #
 #
+# Since VisualStudio2015 (Update 3?), it is sometimes necessary to add the location of ucrt.lib
+# to the AdditionalLibaryDirectories of the projects linking with Fortran
+# The string "$(OSS_UCRTLIBDIR)" is added at these locations by default (it doesn't harm when
+# it is not defined), and will be replaced by this prepare_sln.py script to get the proper value vor VS2015 and up
+# "UCRTLIBDIRVERSIONNUMBER" is a place holder that will be replaced in getUCRTVersionNumber()
+ucrtlibdir = {}
+ucrtlibdir["-1"] = "$(OSS_UCRTLIBDIR)"
+ucrtlibdir["201532"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
+ucrtlibdir["201564"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
+ucrtlibdir["201732"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
+ucrtlibdir["201764"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
+
+#
+#
 # process_solution_file ====================================
 # process a VisualStudio Solution File (and underlying projects)
 # Pass only file names, no full path names. It assumed that both
@@ -240,6 +256,7 @@ def process_project_file(pfile):
     global redistdir
     global toolsversion
     global platformtoolset
+    global ucrtlibdir
     # Type (F/C/C#) and related flags are set based on the file extension
     ptype = "unknown"
     config_tag = "unknown"
@@ -355,8 +372,63 @@ def process_project_file(pfile):
                             i += 1
                     del parts[i:]
                     line = split_char.join(parts)
+            #
+            # UCRTlibdir
+            # Search string to be replaced: two options: "$(OSS_UCRTLIBDIR)" and "$(UniversalCRTSdkDir)lib\..."
+            #
+            # $(OSS_UCRTLIBDIR) => $(UniversalCRTSdkDir)lib\...
+            startpos = line.find(ucrtlibdir["-1"])
+            if startpos != -1:
+                endpos = startpos + len(ucrtlibdir["-1"])
+            else:
+                # $(UniversalCRTSdkDir)lib\... => $(OSS_UCRTLIBDIR)
+                startpos = line.find(ucrtlibdir["201532"][:21])
+                if startpos != -1:
+                    quotepos = line[startpos:].find('"')
+                    if quotepos == -1:
+                        quotepos = 999
+                    colonpos = line[startpos:].find(";")
+                    if colonpos == -1:
+                        colonpos = 999
+                    endpos = startpos + min(quotepos, colonpos)
+            # Replace by the correct string. Assumption: "UCRTLIBDIRVERSIONNUMBER" is replaced by the correct
+            # versionnumber when applicable, by executing getUCRTVersionNumber
+            if startpos != -1:
+                if vs >= 2015:
+                    key = str(vs) + str(configuration)
+                else:
+                    key = "-1"
+                line = line[:startpos] + ucrtlibdir[key] + line[endpos:]
             filouthandle.write(line)
 
+
+#
+#
+# getUCRTVersionNumber ===================================
+def getUCRTVersionNumber():
+    global vs
+    global ucrtlibdir
+    # Only for VS2015 or higher
+    if vs >= 2015:
+        # Try to use $(UniversalCRTSdkDir)
+        ucrtdir = os.environ.get("UniversalCRTSdkDir")
+        if ucrtdir == None:
+            # Fallback: it should be this:
+            ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib\\"
+        # Search in subdir Lib for directories starting with a digit and containing at least one "."
+        searchstring = os.path.join(ucrtdir, "Lib", "[0-9]*.*")
+        versions = glob.glob(searchstring)
+        if len(versions) <= 0:
+            # Fallback: it should be this:
+            ucrtversion = "10.0.10586.0"
+        else:
+            # Choose the highest version number
+            versions.sort(reverse=True)
+            ucrtversion = versions[0]
+            ucrtversion = os.path.basename(ucrtversion)
+        # Inside ucrtlibdir, replace all occurences of UCRTLIBDIRVERSIONNUMBER by ucrtversion
+        for key in ucrtlibdir.iterkeys():
+            ucrtlibdir[key] = str(ucrtlibdir[key]).replace("UCRTLIBDIRVERSIONNUMBER", ucrtversion)
 
 #
 #
@@ -384,6 +456,9 @@ def do_work():
         ifort = ifort_gui.get()
     sys.stdout.write("Visual Studio Version : " + str(vs) + "\n")
     sys.stdout.write("Intel Fortran Version : " + str(ifort) + "\n")
+
+    # Needed for VS2015 and higher:
+    getUCRTVersionNumber()
 
     process_solution_file("delft3d_open.sln", "delft3d_open_template.sln")
 
@@ -415,7 +490,7 @@ def build_gui():
     Label(text="Visual Studio Version:", relief=RIDGE, width=20).grid(row=0, column=0)
     
     Radiobutton(root, text="VS 2017 (not tested yet)              ", variable=vs_gui, value=2017).grid(row=1, column=0, sticky=W)
-    Radiobutton(root, text="VS 2015, Update 1 + .Net Framework 4.6", variable=vs_gui, value=2015).grid(row=2, column=0, sticky=W)
+    Radiobutton(root, text="VS 2015, Update 3 + .Net Framework 4.6", variable=vs_gui, value=2015).grid(row=2, column=0, sticky=W)
     Radiobutton(root, text="VS 2013           + .Net Framework 4.5", variable=vs_gui, value=2013).grid(row=3, column=0, sticky=W)
     Radiobutton(root, text="VS 2012           + .Net Framework 4.5", variable=vs_gui, value=2012).grid(row=4, column=0, sticky=W)
     Radiobutton(root, text="VS 2010           + .Net Framework 4.0", variable=vs_gui, value=2010).grid(row=5, column=0, sticky=W)
