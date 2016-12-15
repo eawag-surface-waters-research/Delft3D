@@ -38,6 +38,8 @@
 
 #pragma once
 
+// The following definition is needed since VisualStudio2015 before including <pthread.h>:
+#define HAVE_STRUCT_TIMESPEC
 
 #include <pthread.h>
 #include <stdio.h>

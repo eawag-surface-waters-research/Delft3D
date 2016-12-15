@@ -41,6 +41,9 @@
 
 #include <platformst.h>
 
+// The following definition is needed since VisualStudio2015 before including <pthread.h>:
+#define HAVE_STRUCT_TIMESPEC
+
 #include <pthread.h>
 
 #if !defined (IRIX)

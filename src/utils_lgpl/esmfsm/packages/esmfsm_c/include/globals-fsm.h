@@ -35,6 +35,8 @@
 //
 //------------------------------------------------------------------------------
 
+// The following definition is needed since VisualStudio2015 before including <pthread.h>:
+#define HAVE_STRUCT_TIMESPEC
 
 #ifndef FSM_H
 #define FSM_H

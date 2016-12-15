@@ -36,6 +36,8 @@
 
 #pragma once
 
+// The following definition is needed since VisualStudio2015 before including <pthread.h>:
+#define HAVE_STRUCT_TIMESPEC
 
 #if HAVE_CONFIG_H
 #   include "config.h"
@@ -174,7 +176,7 @@ struct dimr_component {
     BMI_GETCURRENTTIME dllGetCurrentTime; // entry point in dll
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
-	BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll 
+	BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll
     int                result;            // return value when calling an entry point in dll
 	keyValueLL      *   settings;	      // list of settings
 	keyValueLL      *   parameters;	      // list of parameters
@@ -319,7 +321,7 @@ class Dimr {
 
 
 //------------------------------------------------------------------------------
-	
+
 
 extern "C" {
 DllExport void set_logger(Log *);
