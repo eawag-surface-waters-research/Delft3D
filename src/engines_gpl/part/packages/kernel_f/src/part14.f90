@@ -413,10 +413,10 @@ module part14_mod
 !     formats
 
  1000 format(6x,'Continuous release ',a)
- 1010 format(10x,'Total mass to be added for this run        : ',es15.7/   &
-             10x,'Mass per particle                          : ',es15.7/   &
-             10x,'Actual mass added this step                : ',es15.7/   &
-             10x,'Actual rest mass (round off)               : ',es15.7)
+ 1010 format(10x,'Total m3 of water to be added for this run : ',es15.7/   &
+             10x,'m3 of water per particle                   : ',es15.7/   &
+             10x,'Actual m3 of water added this step         : ',es15.7/   &
+             10x,'Actual rest m3 of water (round off)        : ',es15.7)
  1020 format(10x,'Total number of particles to be added      : ',i12/     &
              10x,'Actual number of particles added this step : ',i12/     &
              10x,'Total number of particles added until now  : ',i12)
