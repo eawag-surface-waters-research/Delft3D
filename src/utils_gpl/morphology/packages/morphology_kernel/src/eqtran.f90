@@ -630,7 +630,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
              alphaspir = 0.0_fp
           else
              alphaspir = sqrt(ag) / 0.4_fp / chezy
-             alphaspir = 12.5_fp * espir * (1.0_fp-0.5_fp*alphaspir)
+             alphaspir = 12.5_fp * espir * (1.0_fp-alphaspir) ! 12.5 = 2.0_fp/(von Karman)^2
              alphaspir = alphaspir * spirint / umod
           endif
           txg  = ust2 * (uuu + alphaspir*vvv) / umod
