@@ -190,8 +190,11 @@
 !    J              NPROCS, FL2BAL, LUMPTR, B_AREA, B_VOLU, SEGDMP
       SAVE
       integer(4) ithandl /0/
-      if ( timon ) call timstrt ( "sobbal", ithandl )
 
+!     Skip this routine when there are no balance area's
+      IF (NDMPAR.EQ.0) RETURN
+
+      if ( timon ) call timstrt ( "sobbal", ithandl )
 !**************** INITIALIZATION **************************************
 
       IF ( INIOUT .EQ. 1 ) THEN
