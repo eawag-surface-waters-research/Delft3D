@@ -123,6 +123,12 @@ rem ==========================
     set dest_bin="engines_gpl\dimr\bin\x64\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
+
+    copy third_party_open\pthreads\bin\x64\*.dll                                             !dest_bin!
+
+    copy third_party_open\mpich2\x64\bin\*.exe                                               !dest_bin!
+    copy third_party_open\mpich2\x64\lib\*.dll                                               !dest_bin!
+    copy third_party_open\expat\x64\x64\Debug\libexpat.dll                                   !dest_bin!
     
 goto :endproc
 
