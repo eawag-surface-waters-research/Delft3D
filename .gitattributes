@@ -3148,6 +3148,10 @@ src/third_party_open/libsigwatch/sigwatch.html.in -text svneol=unset#application
 src/third_party_open/libsigwatch/style.css -text
 src/third_party_open/microsoft_redist/ms_redist_license_info.txt -text
 src/third_party_open/microsoft_redist/vcredist_x86[!!-~](2008[!!-~]SP1).exe -text
+src/third_party_open/microsoft_redist/vs2015/concrt140.dll -text
+src/third_party_open/microsoft_redist/vs2015/msvcp140.dll -text
+src/third_party_open/microsoft_redist/vs2015/vccorlib140.dll -text
+src/third_party_open/microsoft_redist/vs2015/vcruntime140.dll -text
 src/third_party_open/mpich2/COPYRIGHT.rtf -text
 src/third_party_open/mpich2/README.winbin.rtf -text
 src/third_party_open/mpich2/bin/mpiexec.exe -text
