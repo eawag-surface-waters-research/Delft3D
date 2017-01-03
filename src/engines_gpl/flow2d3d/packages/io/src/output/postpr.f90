@@ -215,7 +215,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: rbuff
     integer(pntrsize)                    , pointer :: rho
     integer(pntrsize)                    , pointer :: rich
-    integer(pntrsize)                    , pointer :: rint
     integer(pntrsize)                    , pointer :: rlabda
     integer(pntrsize)                    , pointer :: rsed
     integer(pntrsize)                    , pointer :: rtur1
@@ -566,7 +565,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     rbuff               => gdp%gdr_i_ch%rbuff
     rho                 => gdp%gdr_i_ch%rho
     rich                => gdp%gdr_i_ch%rich
-    rint                => gdp%gdr_i_ch%rint
     rlabda              => gdp%gdr_i_ch%rlabda
     rsed                => gdp%gdr_i_ch%rsed
     rtur1               => gdp%gdr_i_ch%rtur1

@@ -186,6 +186,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: dpv
     integer(pntrsize)                    , pointer :: rint0
     integer(pntrsize)                    , pointer :: rint1
+    integer(pntrsize)                    , pointer :: sink
+    integer(pntrsize)                    , pointer :: sour
     integer(pntrsize)                    , pointer :: umdis0
     integer(pntrsize)                    , pointer :: umdis1
     integer(pntrsize)                    , pointer :: vmdis0
@@ -238,6 +240,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: rhowat
     integer(pntrsize)                    , pointer :: rich
     integer(pntrsize)                    , pointer :: rint
+    integer(pntrsize)                    , pointer :: rintsm
     integer(pntrsize)                    , pointer :: rlabda
     integer(pntrsize)                    , pointer :: rnpl
     integer(pntrsize)                    , pointer :: rob
@@ -549,6 +552,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     dpv                 => gdp%gdr_i_ch%dpv
     rint0               => gdp%gdr_i_ch%rint0
     rint1               => gdp%gdr_i_ch%rint1
+    sink                => gdp%gdr_i_ch%sink
+    sour                => gdp%gdr_i_ch%sour
     umdis0              => gdp%gdr_i_ch%umdis0
     umdis1              => gdp%gdr_i_ch%umdis1
     vmdis0              => gdp%gdr_i_ch%vmdis0
@@ -600,6 +605,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     rhowat              => gdp%gdr_i_ch%rhowat
     rich                => gdp%gdr_i_ch%rich
     rint                => gdp%gdr_i_ch%rint
+    rintsm              => gdp%gdr_i_ch%rintsm
     rlabda              => gdp%gdr_i_ch%rlabda
     rnpl                => gdp%gdr_i_ch%rnpl
     rob                 => gdp%gdr_i_ch%rob
@@ -1017,9 +1023,10 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
               & r(s1)     ,d(dps)    ,r(gsqs)   ,r(guu)    ,r(gvv)    , &
               & r(hu)     ,r(hv)     ,r(dzs1)   ,r(dzu1)   ,r(dzv1)   , &
               & r(volum1) ,r(porosu) ,r(porosv) ,r(areau)  ,r(areav)  ,gdp       )
-    call updmassbal(.true.   ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
-                  & r(volum1),r(sbuu)   ,r(sbvv)   ,&
-                  & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
+    call updmassbal(1         ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                  & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
+                  & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
+                  & r(gvv)    ,d(dps)    ,r(rintsm) ,gdp       )
     !
     ! F0ISF1: copy old (1) in new arrays (0)
     ! N.B.:

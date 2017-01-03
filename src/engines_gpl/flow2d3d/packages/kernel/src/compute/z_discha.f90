@@ -2,7 +2,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                   & nmmaxj    ,icx       ,icy       ,namsrc    ,mnksrc    , &
                   & kfs       ,kcs       ,kfsmin    ,kfsmx0    ,sour      , &
                   & sink      ,dps       ,s0        ,dzs0      ,r0        , &
-                  & disch     ,rint      ,relthkin  ,relthkout ,bubble    , &
+                  & disch     ,rint      ,rintsm    ,relthkin  ,relthkout ,bubble    , &
                   & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -88,6 +88,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
     real(fp), dimension(kmax)                                             :: relthkin
     real(fp), dimension(kmax)                                             :: relthkout
     real(fp), dimension(lstsc, nsrc)                        , intent(in)  :: rint   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc, nsrc)                        , intent(out) :: rintsm !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nsrc)                               , intent(in)  :: disch  !  Description and declaration in esm_alloc_real.f90
     character(20), dimension(nsrc)                                        :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
@@ -110,7 +111,6 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
     integer          :: kk
     integer          :: offset
     real(fp)         :: concin
-    real(fp)         :: concinWrite
     real(fp)         :: sumrelthk
     character(20)    :: chulp       ! Help character string
     character(200)   :: filename
@@ -167,7 +167,6 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
              ! concentration at outfall is prescribed in rint
              !
              concin = rint(lcon, isrc)
-             concinWrite = concin
           else
              !
              ! discharge with intake (culverts, power station)
@@ -203,7 +202,6 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                    if (kkin < kfsmin(nmin)) kkin = kfsmin(nmin)
                    concin = r0(nmin, kkin, lcon)
                 endif
-                concinWrite = concin
                 if (mnksrc(7,isrc)==6 .and. lcon==ltem) then
                    !
                    ! Q-type power station and this is constituent 'temperature'
@@ -226,13 +224,12 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                       call prterr(lundia, 'S100', namsrc(isrc))
                    endif
                 endif
-             else
-                concinWrite = -1.0_fp
              endif
           endif
           !
           ! source/sink addition at outfall
           !
+          rintsm(lcon, isrc) = concin
           if (disch(isrc) > 0.0_fp) then
              !
              ! positive discharge; addition to sour

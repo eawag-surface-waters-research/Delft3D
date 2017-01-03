@@ -1178,9 +1178,10 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        disch (nsrc  )
     !                        disch0(nsrc  )
     !                        disch1(nsrc  )
-    !                        rint  (lstsc ,nsrc      )
-    !                        rint0 (lstsc ,nsrc      )
-    !                        rint1 (lstsc ,nsrc      )
+    !                        rint   (lstsc ,nsrc      )
+    !                        rintsm (lstsc ,nsrc      )
+    !                        rint0  (lstsc ,nsrc      )
+    !                        rint1  (lstsc ,nsrc      )
     !                        umdis (nsrc  )
     !                        umdis0(nsrc  )
     !                        umdis1(nsrc  )
@@ -1217,15 +1218,19 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ierr = mkfpnt(pntnam, nsrc, gdp)
     if (ierr <= -9) goto 9999
     !
-    pntnam = 'rint'          !  Concentration at discharge points
+    pntnam = 'rint'          !  Concentration at discharge points (as obtained from BCC file)
     ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
     if (ierr <= -9) goto 9999
     !
-    pntnam = 'rint0'         !  Old concentration value at discharge points
+    pntnam = 'rintsm'        !  Concentration at discharge points (actual values as used in simulation)
     ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
     if (ierr <= -9) goto 9999
     !
-    pntnam = 'rint1'         !  New concentration value at discharge points
+    pntnam = 'rint0'         !  Old concentration value at discharge points (as obtained from BCC file)
+    ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'rint1'         !  New concentration value at discharge points (as obtained from BCC file)
     ierr = mkfpnt(pntnam, lstsc*nsrc, gdp)
     if (ierr <= -9) goto 9999
     !

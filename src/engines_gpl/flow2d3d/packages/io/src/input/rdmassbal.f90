@@ -63,6 +63,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     real(fp)     , dimension(:,:,:), pointer :: fluxes_sd
     integer                        , pointer :: lundia
     integer                        , pointer :: lstsci
+    integer                        , pointer :: nsrc
     integer                        , pointer :: nbalpol
     integer                        , pointer :: nneighb
 !
@@ -96,6 +97,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     integer                                 :: ni
     integer                                 :: firstpnt
     integer                                 :: nbalpnt
+    integer                                 :: nbalpole
     integer                                 :: vol1
     integer                                 :: vol2
     character(256)                          :: filbal
@@ -113,6 +115,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     nneighb           => gdp%gdmassbal%nneighb
     lundia            => gdp%gdinout%lundia
     lstsci            => gdp%d%lstsci
+    nsrc              => gdp%d%nsrc
     nmaxddb = gdp%d%nmax + 2*gdp%d%ddbound
     !
     ! Get value of Filbal. If no file name specified, then no balance output requested.
@@ -154,11 +157,13 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
                            & 'balance', .true., gdp)
        maxnpnt = max(maxnpnt,nbalpnt)
     enddo
-    nbalpol = nbalpol+1 ! add one for default volume
+    nbalpol  = nbalpol+1 ! add one for default volume
+    nbalpole = nbalpol+1 ! add one for open boundaries
+    if (nsrc>0) nbalpole = nbalpole+1 ! add one for discharges
     !
                   allocate(xdr(maxnpnt),ydr(maxnpnt), stat=istat)
     if (istat==0) allocate(gdp%gdmassbal%horareas(nbalpol), stat=istat)
-    if (istat==0) allocate(gdp%gdmassbal%volnames(nbalpol+1), stat=istat)
+    if (istat==0) allocate(gdp%gdmassbal%volnames(nbalpole), stat=istat)
     if (istat==0) allocate(gdp%gdmassbal%volnr(gdp%d%nmlb:gdp%d%nmub), stat=istat)
     if (istat==0) allocate(gdp%gdmassbal%exchnr(2,gdp%d%nmlb:gdp%d%nmub), stat=istat)
     !
@@ -204,6 +209,9 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     !
     volnames(nbalpol) = 'Other Grid Cells'
     volnames(nbalpol+1) = 'Open Boundaries'
+    if (nsrc>0) then
+       volnames(nbalpol+2) = 'Discharges'
+    endif
     do nm = 1, nmmax
        if (kcs(nm) == 1) then
           if (volnr(nm) == 0) then
@@ -281,6 +289,34 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
           endif
        enddo
     enddo
+    !
+    ! Exchanges with intakes/outfalls
+    !
+    if (nsrc>0) then
+       !
+       ! add exchanges for each polygon - discharge combination
+       ! we could limit this to only the polygons in which discharges are
+       ! located, but for walking discharges this is dynamic. Therefore, we
+       ! simply add an exchange for every polygon.
+       !
+       if (nneighb+nbalpol>size(neighb,2)) then
+          call reallocP(neighb,(/2,nneighb+nbalpol/),stat = istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'RdMassBal: memory alloc error')
+             call d3stop(1, gdp)
+          endif
+       endif
+       !
+       ! all fluxes are defined positive INTO the model:
+       ! from dummy polygon "Discharges" to user polygon VOL2
+       !
+       vol1 = nbalpol+2
+       do vol2 = 1,nbalpol
+          neighb(1,nneighb+vol2) = vol1
+          neighb(2,nneighb+vol2) = vol2
+       enddo
+       nneighb = nneighb+nbalpol
+    endif
     !
     ! TODO: synchronize neighbour information across partitions and domains
     !

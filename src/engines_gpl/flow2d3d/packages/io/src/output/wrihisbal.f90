@@ -103,7 +103,7 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
        !
        ! Set up the element chracteristics
        !
-       iddim_nbalpole = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygonse', nbalpol+1) ! balance polygons extended with label "open boundaries"
+       iddim_nbalpole = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygonse', nbalpol+2) ! balance polygons extended with label "open boundaries" and "discharges"
        iddim_nbalpol  = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygons', nbalpol)
        iddim_nneighb  = adddim(gdp, lundia, FILOUT_HIS, 'nbalneighbrs', nneighb)
        iddim_2        = adddim(gdp, lundia, FILOUT_HIS, 'length_2', 2)

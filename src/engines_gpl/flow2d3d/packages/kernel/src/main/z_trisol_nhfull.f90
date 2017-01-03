@@ -292,6 +292,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer(pntrsize)                    , pointer :: rhowat
     integer(pntrsize)                    , pointer :: rich
     integer(pntrsize)                    , pointer :: rint
+    integer(pntrsize)                    , pointer :: rintsm
     integer(pntrsize)                    , pointer :: rlabda
     integer(pntrsize)                    , pointer :: rmneg
     integer(pntrsize)                    , pointer :: rnpl
@@ -740,6 +741,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     rhowat              => gdp%gdr_i_ch%rhowat
     rich                => gdp%gdr_i_ch%rich
     rint                => gdp%gdr_i_ch%rint
+    rintsm              => gdp%gdr_i_ch%rintsm
     rlabda              => gdp%gdr_i_ch%rlabda
     rmneg               => gdp%gdr_i_ch%rmneg
     rnpl                => gdp%gdr_i_ch%rnpl
@@ -1639,7 +1641,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                       & nmmaxj    ,icx       ,icy       ,ch(namsrc)   ,i(mnksrc) , &
                       & i(kfs)    ,i(kcs)    ,i(kfsmn0) ,i(kfsmx0) ,r(sour)   , &
                       & r(sink)   ,d(dps)    ,r(s0)     ,r(dzs0)      ,r(r0)     , &
-                      & r(disch)  ,r(rint)   ,r(zwork)  ,r(zwork+kmax),bubble    ,gdp       )
+                      & r(disch)  ,r(rint)   ,r(rintsm) ,r(zwork)  ,r(zwork+kmax),bubble    ,gdp       )
           call timer_stop(timer_discha, gdp)
        endif
        !
