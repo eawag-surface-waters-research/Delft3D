@@ -299,7 +299,7 @@ module m_ec_provider
                      case ("rainfall","airpressure_windx_windy","windxy","windx","windy","atmosphericpressure",    &
                                      "dewpoint_airtemperature_cloudiness","dewpoint_airtemperature_cloudiness_solarradiation")
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
-                     case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my") 
+                     case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case default
                         call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
