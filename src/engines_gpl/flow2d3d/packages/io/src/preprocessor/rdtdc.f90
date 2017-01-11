@@ -49,7 +49,6 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
     !
     include 'pardef.igd'
     integer                    , pointer :: itdate
-    real(fp)                   , pointer :: tstop
     real(fp)                   , pointer :: dt
     character*20, dimension(:) , pointer :: keywrd
     character*37, dimension(:) , pointer :: fmtbcc
@@ -115,7 +114,6 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
     fmtbcc  => gdp%gdfmtbcc%fmtbcc
     keywrd  => gdp%gdkeywtd%keywrd
     itdate  => gdp%gdexttim%itdate
-    tstop   => gdp%gdexttim%tstop
     dt      => gdp%gdexttim%dt
     !
     quote = char(39)

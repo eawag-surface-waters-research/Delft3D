@@ -51,7 +51,6 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                    , pointer :: itdate
-    real(fp)                   , pointer :: tstop
     real(fp)                   , pointer :: dt
     real(fp)                   , pointer :: tunit
     character*20, dimension(:) , pointer :: keywrd
@@ -124,7 +123,6 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     fmtdis  => gdp%gdfmtdis%fmtdis
     keywrd  => gdp%gdkeywtd%keywrd
     itdate  => gdp%gdexttim%itdate
-    tstop   => gdp%gdexttim%tstop
     dt      => gdp%gdexttim%dt
     tunit   => gdp%gdexttim%tunit
     !

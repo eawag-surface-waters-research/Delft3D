@@ -53,7 +53,6 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     !
     include 'pardef.igd'
     integer                    , pointer :: itdate
-    real(fp)                   , pointer :: tstop
     real(fp)                   , pointer :: dt
     real(fp)                   , pointer :: tunit
     character*20, dimension(:) , pointer :: keywrd
@@ -136,7 +135,6 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     fmtbct  => gdp%gdfmtbct%fmtbct
     keywrd  => gdp%gdkeywtd%keywrd
     itdate  => gdp%gdexttim%itdate
-    tstop   => gdp%gdexttim%tstop
     dt      => gdp%gdexttim%dt
     tunit   => gdp%gdexttim%tunit
     !

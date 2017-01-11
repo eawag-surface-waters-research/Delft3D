@@ -56,7 +56,6 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     integer                    , pointer :: itis
     integer                    , pointer :: itdate
-    real(fp)                   , pointer :: tstop
     real(fp)                   , pointer :: dt
     character*20, dimension(:) , pointer :: keywrd
     character*37, dimension(:) , pointer :: fmtbct
@@ -145,7 +144,6 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     fmtbct      => gdp%gdfmtbct%fmtbct
     keywrd      => gdp%gdkeywtd%keywrd
     itdate      => gdp%gdexttim%itdate
-    tstop       => gdp%gdexttim%tstop
     dt          => gdp%gdexttim%dt
     itis        => gdp%gdrdpara%itis
     julday      => gdp%gdinttim%julday
