@@ -1460,9 +1460,9 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        sinkw (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
     !                        sourw (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
     !                        sinkr (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
-    !                        sourr (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
-    !                        fxw   (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
-    !                        fyw   (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
+    !                        sourr (nmaxddb  ,mmaxddb) * kfacwv
+    !                        fxw   (nmaxddb  ,mmaxddb) * kfacwv
+    !                        fyw   (nmaxddb  ,mmaxddb) * kfacwv
     !                        dfu   (nmaxddb  ,mmaxddb)
     !                        dfv   (nmaxddb  ,mmaxddb)
     !                        deltau(nmaxddb  ,mmaxddb)
@@ -1484,7 +1484,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
     if (ierr <= -9) goto 9999
     !
-    pntnam = 'teta'          !  Angle waves
+    pntnam = 'teta'          !  Angle between wave direction and local grid orientation
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
     if (ierr <= -9) goto 9999
     !
