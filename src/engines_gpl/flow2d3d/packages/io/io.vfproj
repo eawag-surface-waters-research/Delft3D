@@ -316,7 +316,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\output\wrwaqvol.f90"/>
 		<File RelativePath="src\output\wrwavh.f90"/>
-		<File RelativePath="src\output\wrxbm.f90"/>
 		<File RelativePath="src\output\zrtc.f90"/></Filter>
 		<Filter Name="preprocessor">
 		<File RelativePath="src\preprocessor\asc.f90"/>

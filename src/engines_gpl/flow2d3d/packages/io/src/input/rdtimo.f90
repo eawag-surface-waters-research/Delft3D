@@ -503,6 +503,10 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'CflMsg' , flwoutput%cflmsg)
     !
+    ! Flag for writing wave quantities to the trim-file
+    !
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'MapWav' , flwoutput%waveqnt)
+    !
     ! smax
     !
     sval = smiss

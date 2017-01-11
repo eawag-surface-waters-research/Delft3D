@@ -137,7 +137,6 @@ libIOOutput_la_SOURCES = \
          wrwaqsrf.F90 \
          wrwaqvol.f90 \
          wrwavh.f90 \
-         wrxbm.f90 \
          zrtc.f90
 
 #-------------------------------------------------------------------------------

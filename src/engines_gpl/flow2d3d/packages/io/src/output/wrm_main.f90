@@ -116,6 +116,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     integer(pntrsize)                    , pointer :: rbuff
     integer(pntrsize)                    , pointer :: rho
     integer(pntrsize)                    , pointer :: rich
+    integer(pntrsize)                    , pointer :: rlabda
     integer(pntrsize)                    , pointer :: rtur1
     integer(pntrsize)                    , pointer :: s1
     integer(pntrsize)                    , pointer :: sig
@@ -124,9 +125,12 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     integer(pntrsize)                    , pointer :: taubpv
     integer(pntrsize)                    , pointer :: taubsu
     integer(pntrsize)                    , pointer :: taubsv
+    integer(pntrsize)                    , pointer :: teta
     integer(pntrsize)                    , pointer :: thick
+    integer(pntrsize)                    , pointer :: tp
     integer(pntrsize)                    , pointer :: u1
     integer(pntrsize)                    , pointer :: umnldf
+    integer(pntrsize)                    , pointer :: uorb
     integer(pntrsize)                    , pointer :: v1
     integer(pntrsize)                    , pointer :: vicuv
     integer(pntrsize)                    , pointer :: vicww
@@ -301,6 +305,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     rbuff               => gdp%gdr_i_ch%rbuff
     rho                 => gdp%gdr_i_ch%rho
     rich                => gdp%gdr_i_ch%rich
+    rlabda              => gdp%gdr_i_ch%rlabda
     rtur1               => gdp%gdr_i_ch%rtur1
     s1                  => gdp%gdr_i_ch%s1
     sig                 => gdp%gdr_i_ch%sig
@@ -309,9 +314,12 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     taubpv              => gdp%gdr_i_ch%taubpv
     taubsu              => gdp%gdr_i_ch%taubsu
     taubsv              => gdp%gdr_i_ch%taubsv
+    teta                => gdp%gdr_i_ch%teta
     thick               => gdp%gdr_i_ch%thick
+    tp                  => gdp%gdr_i_ch%tp
     u1                  => gdp%gdr_i_ch%u1
     umnldf              => gdp%gdr_i_ch%umnldf
+    uorb                => gdp%gdr_i_ch%uorb
     v1                  => gdp%gdr_i_ch%v1
     vicuv               => gdp%gdr_i_ch%vicuv
     vicww               => gdp%gdr_i_ch%vicww
@@ -595,22 +603,15 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
              endif
           endif
           !
-          if (roller) then
+          write(lundia,*) 'WaveQnt = ',gdp%gdflwpar%flwoutput%waveqnt
+          if (gdp%gdflwpar%flwoutput%waveqnt .or. roller .or. xbeach) then
              call wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
                        & mmax      ,nmaxus    ,r(ewave1) ,r(eroll1) ,r(qxkr)   , &
                        & r(qykr)   ,r(qxkw)   ,r(qykw)   ,r(fxw)    ,r(fyw)    , &
                        & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    ,r(rbuff)  , &
-                       & r(hrms)   ,irequest  ,fds       ,iarrc     ,mf        , &
-                       & ml        ,nf        ,nl        ,gdp       )
-             if (error) goto 9999
-          endif
-          !
-          if (xbeach) then
-             call wrxbm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
-                      & mmax      ,nmaxus    ,r(fxw)    ,r(fyw)    , &
-                      & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    ,r(rbuff)  , &
-                      & r(hrms)   ,irequest  ,fds       ,iarrc     ,mf        , &
-                      & ml        ,nf        ,nl        ,gdp       )
+                       & r(hrms)   ,r(tp)     ,r(teta)   ,r(rlabda) ,r(uorb)   , &
+                       & irequest  ,fds       ,iarrc     ,mf        ,ml        , &
+                       & nf        ,nl        ,roller    ,xbeach    ,gdp       )
              if (error) goto 9999
           endif
        endif

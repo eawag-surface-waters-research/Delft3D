@@ -47,6 +47,7 @@ type flwoutputtype
     logical :: temperature
     logical :: veuler
     logical :: vortic              ! Vorticity and enstrophy calculation and writing to output
+	logical :: waveqnt             ! Flag for writing wave quantities to map file
     logical :: z0cur
     logical :: z0rou
 end type flwoutputtype
