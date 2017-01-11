@@ -87,14 +87,8 @@ function mkcpnt(pntnam    ,length    ,gdp       )
     
     
     if (mkcpnt /= 0) then
-       if (gdp%gdtricom%initi /= 3) then
-          call chnull(chbuf(mkcpnt)         ,length    )
-          mkcpnt = 1
-       else
-
-       ! return the value -1 (used in Mor)
-         mkcpnt = -1
-       endif   
+       call chnull(chbuf(mkcpnt)         ,length    )
+       mkcpnt = 1
 
     else
        !

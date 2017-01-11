@@ -84,14 +84,8 @@ function mklpnt(pntnam    ,length    ,gdp       )
     !
     mklpnt = getptr(pntnam(:ind - 1))
     if (mklpnt /= 0) then
-       if (gdp%gdtricom%initi /= 3) then
-          call lnull(lbuf(mklpnt)         ,length    )
-          mklpnt = 1
-       else
-
-       ! return the value -1 (used in Mor)
-         mklpnt = -1
-       endif   
+       call lnull(lbuf(mklpnt)         ,length    )
+       mklpnt = 1
 
     else
        !

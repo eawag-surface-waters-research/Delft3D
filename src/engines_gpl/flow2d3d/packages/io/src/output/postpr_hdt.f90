@@ -62,7 +62,6 @@ subroutine postpr_hdt(nst, gdp)
     character(256)                      , pointer :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
     character(256)                      , pointer :: trifil  !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
     character(5)                        , pointer :: versio  !!  Version nr. of the current package
-    integer                             , pointer :: initi   ! Control parameter 
     integer                             , pointer :: iphisc  ! Current time counter for printing history data 
     integer                             , pointer :: itcomc  ! Current time counter for the communication file 
     integer                             , pointer :: itcur   ! Current time counter for the communication file, where starting point depend on CYCLIC 
@@ -98,7 +97,6 @@ subroutine postpr_hdt(nst, gdp)
     runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
     versio              => gdp%gdtricom%versio
-    initi               => gdp%gdtricom%initi
     iphisc              => gdp%gdtricom%iphisc
     itcomc              => gdp%gdtricom%itcomc
     itcur               => gdp%gdtricom%itcur
@@ -119,7 +117,7 @@ subroutine postpr_hdt(nst, gdp)
     call timer_start(timer_postpr, gdp)
     call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
               & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
-              & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
+              & selhis    ,rhow      ,grdang    ,dtsec     , &
               & nst+1     ,iphisc    ,npmap     ,itcomc    ,itimc     , &
               & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
               & itrstc    ,ktemp     ,.true.    ,gdp       )

@@ -1,4 +1,4 @@
-subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     , &
+subroutine rwbotc_double(comfil    ,lundia    ,error     ,itima     , &
                        & itcomi    ,mmax      ,nmax      ,nmaxus    ,dp        , &
                        & rbuff     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -53,12 +53,6 @@ subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     ,
 !
 ! Global variables
 !
-    integer                                                , intent(in)  :: initi  !!  Control parameter
-                                                                                   !!  =1 initialization
-                                                                                   !!  =2 initialization and read restart
-                                                                                   !!     information from the communication
-                                                                                   !!     file
-                                                                                   !!  =3 no initialization
     integer                                                , intent(in)  :: itcomi !  Description and declaration in inttim.igs
     integer                                                , intent(in)  :: itima  !!  Time to start simulation (N * tscale)
                                                                                    !!  according to DELFT3D conventions
@@ -114,10 +108,9 @@ subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     ,
        celidt = celidt + 1
     endif
     !
-    ! write nrcel, dp and itstrt to communication file for initi=1
-    ! if itcomi > 0
+    ! write nrcel, dp and itstrt to communication file for if itcomi > 0
     !
-    if (initi==1 .and. itcomi>0) then
+    if (itcomi>0) then
        ierror = open_datdef(comfil, fds, .false.)
        if (ierror /= 0) goto 9999
        !
@@ -155,16 +148,6 @@ subroutine rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     ,
        !
        ierror = clsnef(fds)
        if (ierror/= 0) goto 9999
-    endif
-    !
-    !-----Read nrcel from communication file for initi=2 or 3
-    !
-    if (initi==2 .or. initi==3) then
-    endif
-    !
-    !-----Read nrcel from communication file for initi.ge.4
-    !
-    if (initi>=4 .and. itcomi>0) then
     endif
     !
     ! write error message if error occured and set error= .true.

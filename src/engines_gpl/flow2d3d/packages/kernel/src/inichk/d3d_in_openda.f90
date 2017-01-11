@@ -560,8 +560,6 @@ subroutine compute_secundary_state(gdp       )
     character*4                          , pointer :: rouflo
     character*4                          , pointer :: rouwav
     character*8                          , pointer :: dischy
-    integer                              , pointer :: initia
-    integer                              , pointer :: initi
     integer                                        :: nmaxddb
     integer                                        :: nst
 
@@ -843,9 +841,6 @@ subroutine compute_secundary_state(gdp       )
     rouflo              => gdp%gdtricom%rouflo
     rouwav              => gdp%gdtricom%rouwav
     dischy              => gdp%gdtricom%dischy
-    initia              => gdp%gdtricom%initia
-    initi               => gdp%gdtricom%initi
-
 
     lundia              => gdp%gdinout%lundia
     
@@ -937,7 +932,7 @@ subroutine compute_secundary_state(gdp       )
        icy = 1
        call chkdry(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
                  & lsecfl    ,lstsci    ,ltur      ,icx       ,icy       , &
-                 & initia    ,i(kcu)    ,i(kcv)    ,i(kcs)    ,i(kfu)    , &
+                 & i(kcu)    ,i(kcv)    ,i(kcs)    ,i(kfu)    , &
                  & i(kfv)    ,i(kfs)    ,i(kspu)   ,i(kspv)   ,r(dpu)    , &
                  & r(dpv)    ,r(hu)     ,r(hv)     ,r(hkru)   ,r(hkrv)   , &
                  & r(thick)  ,r(s1)     ,d(dps)    ,r(u1)     ,r(v1)     , &
@@ -947,7 +942,7 @@ subroutine compute_secundary_state(gdp       )
        icx = nmaxddb
        icy = 1
        call z_chkdry(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-                   & ltur      ,icx       ,icy       ,initia    ,i(kcu)    , &
+                   & ltur      ,icx       ,icy       ,i(kcu)    , &
                    & i(kcv)    ,i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    , &
                    & i(kspu)   ,i(kspv)   ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmin) , &

@@ -352,7 +352,6 @@ subroutine tricom_finish(olv_handle, gdp)
     integer                             , pointer :: itrstc        ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
     integer                             , pointer :: itwav         ! Current time counter for executation of a wave computation (online coupling with wave)
     integer                             , pointer :: itrw          ! Time to read the wave information in case of online wave coupling
-    integer                             , pointer :: initi         ! Control parameter 
     integer                             , pointer :: iphisc        ! Current time counter for printing history data 
     integer                             , pointer :: maxmn         ! Maximum of MMAX and NMAX 
     integer                             , pointer :: npmap         ! Current array counter for printing map data 
@@ -382,7 +381,6 @@ subroutine tricom_finish(olv_handle, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    initi               => gdp%gdtricom%initi
     iphisc              => gdp%gdtricom%iphisc
     itima               => gdp%gdtricom%itima
     itlen               => gdp%gdtricom%itlen
@@ -716,17 +714,9 @@ subroutine tricom_finish(olv_handle, gdp)
     itimc  = modlen(itfinish*itp, itlen)
     !
     ! Write (conditionaly) updated bathymetry to com-file
-    ! The local parameter initi is improperly used. Fortunately it is
-    ! not needed in the rest of this subroutine.
     !
     if (lsed > 0) then
-       if (initi == 3) then
-          initi = 5
-       else
-          initi = 4
-       endif
-       !
-       call rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
+       call rwbotc(comfil    ,lundia    ,error     ,itima     , &
                  & itcomi    ,mmax      ,nmax      ,nmaxus    ,r(dp)     , &
                  & r(rbuff)  ,gdp       )
        if (error) goto 9999
@@ -736,7 +726,7 @@ subroutine tricom_finish(olv_handle, gdp)
     !
     call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
               & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
-              & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
+              & selhis    ,rhow      ,grdang    ,dtsec     , &
               & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
               & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
               & itrstc    ,ktemp     ,.false.   ,gdp       )
@@ -747,11 +737,11 @@ subroutine tricom_finish(olv_handle, gdp)
        !
        if (nst == itwav) then
           if (prec == hp) then
-             call rwbotc_double(comfil    ,lundia    ,error     ,initi     ,itima     , &
+             call rwbotc_double(comfil    ,lundia    ,error     ,itima     , &
                               & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)    , &
                               & r(rbuff)  ,gdp       )
           else
-             call rwbotc(comfil    ,lundia    ,error     ,initi     ,itima     , &
+             call rwbotc(comfil    ,lundia    ,error     ,itima     , &
                        & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)    , &
                        & r(rbuff)  ,gdp       )
           endif

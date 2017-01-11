@@ -92,11 +92,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     integer                             :: i
     integer                             :: ic           ! Length of character parameter CASE 
     integer                             :: icheck
-    integer        , pointer            :: initia
-    integer        , pointer            :: initi        ! Control parameter 
-                                                        ! = 1 initialization
-                                                        ! = 2 initialization and read restart information from the communication file
-                                                        ! = 3 no initialization 
     integer        , pointer            :: it01         ! Reference date in yymmdd 
     integer        , pointer            :: it02         ! Reference time in hhmmss 
     integer        , pointer            :: itima        ! Time to start simulation (N * tscale) according to DELFT3D conventions 
@@ -161,8 +156,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     nummappers   => gdp%gdprognm%nummappers
     prognm       => gdp%gdprognm%prognm
     rtcmod       => gdp%gdrtc%rtcmod
-    initia       => gdp%gdtricom%initia
-    initi        => gdp%gdtricom%initi 
     it01         => gdp%gdtricom%it01
     it02         => gdp%gdtricom%it02
     itima        => gdp%gdtricom%itima
@@ -275,8 +268,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     !
     ! Initialize time frame parameters for stand alone program
     !
-    initi  = 1
-    !
     it01   = 0
     it02   = 0
     !
@@ -302,11 +293,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     if ( parll ) then
        write(comfil(5+ic:5+ic+4),'(a,i3.3)') '-',inode
     endif
-    !
-    ! The following is necessary; originally, tricom was called with parameter initi
-    ! while its n-th argument was initia. Confusing. (VT)
-    !
-    initia = initi
     !
     ! Start FLOW simulation
     !

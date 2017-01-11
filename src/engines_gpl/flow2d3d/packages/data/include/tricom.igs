@@ -213,16 +213,10 @@
 !
 !  NEWLY ADDED because of splitting trisim,tricom (VT):
 !
-       integer                            :: initia          ! if < 0: iteration process of morsys
-                                                             ! else  : equal to INITI
-                                                             ! =1 initialization
-                                                             ! =2 initialization and read restart information from the communication file
-                                                             ! =3 no initialization
        integer                            :: it01            ! Description and declaration in esm_alloc_int.f90
        integer                            :: it02            ! Description and declaration in esm_alloc_int.f90
        integer                            :: itima           ! Time to start simulation (N * tscale) according to DELFT3D conventions
        integer                            :: itlen           ! Description and declaration in esm_alloc_int.f90
-       integer                            :: initi           ! Control parameter 
        integer                            :: iphisc          ! Current time counter for printing history data 
        integer                            :: itcomc          ! Current time counter for the com- munication file 
        integer                            :: itcur           ! Current time counter for the com- munication file, where starting point depend on CYCLIC 

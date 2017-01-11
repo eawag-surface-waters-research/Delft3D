@@ -363,7 +363,6 @@ subroutine tricom_step(olv_handle, gdp)
     character(256)                      , pointer :: runid           ! Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
     character(256)                      , pointer :: trifil          ! File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
     character(5)                        , pointer :: versio          ! Version nr. of the current package
-    integer                             , pointer :: initi           ! Control parameter 
     integer                             , pointer :: iphisc          ! Current time counter for printing history data 
     integer                             , pointer :: itcomc          ! Current time counter for the communication file 
     integer                             , pointer :: itcur           ! Current time counter for the communication file, where starting point depend on CYCLIC 
@@ -715,7 +714,6 @@ subroutine tricom_step(olv_handle, gdp)
     runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
     versio              => gdp%gdtricom%versio
-    initi               => gdp%gdtricom%initi
     iphisc              => gdp%gdtricom%iphisc
     itcomc              => gdp%gdtricom%itcomc
     itcur               => gdp%gdtricom%itcur
@@ -801,7 +799,7 @@ subroutine tricom_step(olv_handle, gdp)
        call timer_start(timer_postpr, gdp)
        call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                  & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
-                 & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
+                 & selhis    ,rhow      ,grdang    ,dtsec     , &
                  & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
                  & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
                  & itrstc    ,ktemp     ,.false.   ,gdp       )
@@ -830,11 +828,11 @@ subroutine tricom_step(olv_handle, gdp)
           if (nst == itwav) then
              call timer_start(timer_tricom_rest, gdp)
              if (prec == hp) then
-                call rwbotc_double(comfil    ,lundia    ,error     ,initi     ,nst     , &
+                call rwbotc_double(comfil    ,lundia    ,error     ,nst       , &
                                  & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)  , &
                                  & r(rbuff)  ,gdp       )
              else
-                call rwbotc(comfil    ,lundia    ,error     ,initi     ,nst     , &
+                call rwbotc(comfil    ,lundia    ,error     ,nst       , &
                           & itcomi    ,mmax      ,nmax      ,nmaxus    ,d(dps)  , &
                           & r(rbuff)  ,gdp       )
              endif

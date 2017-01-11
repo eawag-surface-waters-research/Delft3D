@@ -1,6 +1,6 @@
 subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 & trifil    ,runid     ,prsmap    ,prshis    ,selmap    , &
-                & selhis    ,rhow      ,grdang    ,initi     ,dtsec     , &
+                & selhis    ,rhow      ,grdang    ,dtsec     , &
                 & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
                 & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
                 & itrstc    ,ktemp     ,halftime  ,gdp       )
@@ -351,7 +351,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
 !
 ! Global variables
 !
-    integer                                    :: initi
     integer                                    :: iphisc !!  Current time counter for printing history data
     integer                                    :: itcomc
     integer                                    :: itcur  !!  Current time counter for the communication file, where starting point depend on CYCLIC
@@ -1040,8 +1039,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     if (itmapi > 0) then
        if (nst == itmapc) then
           call wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
-                      & itmapc    ,runtxt    ,trifil    ,.false.   ,initi     , &
-                      & gdp       )
+                      & itmapc    ,runtxt    ,trifil    ,.false.   ,gdp       )
           if (error) goto 9999
        endif
 

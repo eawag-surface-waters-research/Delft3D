@@ -1,7 +1,7 @@
 subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                 & cyclic    ,sferic    ,grdang    ,temeqs    ,saleqs    , &
                 & lturi     ,rouflo    ,rouwav    ,ktemp     ,temint    , &
-                & evaint    ,initia    ,gdp       )
+                & evaint    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2017.
@@ -379,8 +379,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
 !
 ! Global variables
 !
-    integer              :: initia      !!  if < 0: iteration process of morsys
-                                        !!  else  : equal to initi
     integer              :: ktemp       !  Description and declaration in tricom.igs
     integer              :: lturi       !  Description and declaration in tricom.igs
     integer              :: lundia      !  Description and declaration in inout.igs
@@ -917,7 +915,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! INISED: set initial array values for sediment
     ! only initialise sediment at beginning of morsys simulation
     !
-    if (sedim .and. initia/=3) then
+    if (sedim) then
        call inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                  & nmmax     ,lsed      ,lsedtot   ,i(kcs)    ,gdp       )
        if (error) goto 9999
@@ -964,7 +962,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
        icy = 1
        call chkdry(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
                  & lsecfl    ,lstsci    ,ltur      ,icx       ,icy       , &
-                 & initia    ,i(kcu)    ,i(kcv)    ,i(kcs)    ,i(kfu)    , &
+                 & i(kcu)    ,i(kcv)    ,i(kcs)    ,i(kfu)    , &
                  & i(kfv)    ,i(kfs)    ,i(kspu)   ,i(kspv)   ,r(dpu)    , &
                  & r(dpv)    ,r(hu)     ,r(hv)     ,r(hkru)   ,r(hkrv)   , &
                  & r(thick)  ,r(s1)     ,d(dps)    ,r(u1)     ,r(v1)     , &
@@ -974,7 +972,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
        icx = nmaxddb
        icy = 1
        call z_chkdry(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-                   & ltur      ,icx       ,icy       ,initia    ,i(kcu)    , &
+                   & ltur      ,icx       ,icy       ,i(kcu)    , &
                    & i(kcv)    ,i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    , &
                    & i(kspu)   ,i(kspv)   ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmin) , &

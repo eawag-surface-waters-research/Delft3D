@@ -1,6 +1,5 @@
 subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
-                  & itmapc    ,runtxt    ,trifil    ,wrifou    ,initi     , &
-                  & gdp       )
+                  & itmapc    ,runtxt    ,trifil    ,wrifou    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -53,6 +52,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                              , pointer :: itmapl
     integer                              , pointer :: nmax
     integer                              , pointer :: nmaxus
     integer                              , pointer :: mmax
@@ -199,7 +199,6 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
     character(30) , dimension(10)                :: runtxt !!  Textual description of model input
     character(*)                   , intent(in)  :: trifil !  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
     logical                                      :: wrifou
-    integer                                      :: initi
 !
 ! Local variables
 !
@@ -243,6 +242,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
 !
     wrkb3               => gdp%gdaddress%wrkb3
     wrkb4               => gdp%gdaddress%wrkb4
+    itmapl              => gdp%gdinttim%itmapl
     nmax                => gdp%d%nmax
     nmaxus              => gdp%d%nmaxus
     mmax                => gdp%d%mmax
@@ -594,7 +594,7 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
           endif
           !
           if (lsedtot > 0) then
-             if (initi>=4 .or. gdp%gdmorpar%moroutput%cumavg .or. irequest==REQUESTTYPE_DEFINE) then
+             if (itmapc==itmapl .or. gdp%gdmorpar%moroutput%cumavg .or. irequest==REQUESTTYPE_DEFINE) then
                 call wrsedmavg(lundia    ,error     ,filename  ,itmapc    ,mmax      , &
                              & nmaxus    ,lsed      ,lsedtot   ,irequest  ,fds       , &
                              & iarrc     ,mf        ,ml        ,nf        ,nl        , &
