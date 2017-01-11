@@ -2,7 +2,7 @@ subroutine check  (lundia,fout  ,mnstat,mnes ,nnes   ,weight , &
                    mcbsp ,ncbsp ,iwet  ,nostat               )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2016.                                
+!  Copyright (C)  Stichting Deltares, 2011-2017.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
