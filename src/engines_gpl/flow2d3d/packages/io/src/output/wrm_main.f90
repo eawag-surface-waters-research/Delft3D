@@ -603,7 +603,6 @@ subroutine wrm_main(lundia    ,error     ,selmap    ,grdang    ,dtsec     , &
              endif
           endif
           !
-          write(lundia,*) 'WaveQnt = ',gdp%gdflwpar%flwoutput%waveqnt
           if (gdp%gdflwpar%flwoutput%waveqnt .or. roller .or. xbeach) then
              call wrrolm(lundia    ,error     ,filename  ,itmapc    ,nmax      , &
                        & mmax      ,nmaxus    ,r(ewave1) ,r(eroll1) ,r(qxkr)   , &
