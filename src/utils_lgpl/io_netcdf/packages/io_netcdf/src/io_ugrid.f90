@@ -891,7 +891,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_node',        numNode,   meshids%id_nodedim)
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%id_edgedim)
    !ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes',        maxNumNodesPerFace,   meshids%id_maxfacenodesdim)
-   ierr = nf90_def_dim(ncid, 'Two',                         2,       id_twodim)! TODO: AvD: duplicates!
+   ierr = nf90_def_dim(ncid, 'n'//prefix//'_Two',                         2,       id_twodim)
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ! TODO: AvD: the new maxNumNodesPerFace dummy variable overlaps with this nv here, but they may be different. Remove one.
       maxnv = size(face_nodes, 1)

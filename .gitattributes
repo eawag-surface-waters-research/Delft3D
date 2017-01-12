@@ -6054,6 +6054,7 @@ src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/wstmod.f90 -
 src/utils_lgpl/io_netcdf/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/Makefile.am -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/include/io_netcdf.h -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/include/resource.h -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/include/version_number.ini -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/include/version_number.rc.svn -text
@@ -6064,6 +6065,8 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf.f90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_api.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_version.F90.svn -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_ugrid.f90 -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf_matlab/test_io_netcfd_matlab.m -text
+src/utils_lgpl/io_netcdf/packages/test_data/hex7_ugrid_net.nc -text
 src/utils_lgpl/nefis/AUTHORS -text
 src/utils_lgpl/nefis/COPYING -text
 src/utils_lgpl/nefis/ChangeLog -text
