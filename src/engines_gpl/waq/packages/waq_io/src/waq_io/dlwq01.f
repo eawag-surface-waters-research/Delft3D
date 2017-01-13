@@ -345,7 +345,7 @@
  2130 format ( /' ERROR. system name not unique')
  2140 format (      I5 , 5X , A20 )
  2150 format ( /' ERROR. End of file on unit:',I3,/' Filename = ',A )
- 2160 format ( /' ERROR reading file on unit:',I3,/' Filename = ',A )
+ 2160 format ( /' ERROR reading file on unit:',I3,' - first line invalid. Please check',/' Filename = ',A )
  2170 format ( /' ERROR encountered invalid repeat count - should start with an asterisk (*): ',A )
 
       end
