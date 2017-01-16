@@ -663,9 +663,16 @@ contains
             if (strcmpi(fileReaderPtr%standard_names(varid),item%quantityPtr%name)) exit
          enddo 
          if (varid>size(fileReaderPtr%standard_names)) then 
-            ! ERROR: standard name not found in this filereader, TODO: handle exception 
+            ! ERROR: standard name not found in this filereader, Try the variable names
             call setECMessage("No standard_name='"//trim(item%quantityPtr%name)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
-            return 
+            do varid=1,size(fileReaderPtr%variable_names)
+               if (strcmpi(fileReaderPtr%variable_names(varid),item%quantityPtr%name)) exit
+            enddo 
+            if (varid>size(fileReaderPtr%standard_names)) then 
+               ! ERROR: variable name not found in this filereader, TODO: handle exception 
+               call setECMessage("No variable_name='"//trim(item%quantityPtr%name)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
+               return
+            endif 
          endif 
          
          times_index = ec_undef_int
