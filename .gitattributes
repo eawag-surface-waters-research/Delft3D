@@ -3992,7 +3992,11 @@ src/third_party_open/openda/tests/test_dll_noise/test_dll_noise.vfproj -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.F90 -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.vfproj -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls_exe.F90 -text
+src/third_party_open/polypack/Copyright -text
+src/third_party_open/polypack/Makefile.am -text
+src/third_party_open/polypack/README -text
 src/third_party_open/polypack/polypack.vfproj -text
+src/third_party_open/polypack/src/Makefile.am -text
 src/third_party_open/polypack/src/ppdipo.f -text
 src/third_party_open/polypack/src/ppditr.f -text
 src/third_party_open/polypack/src/ppinpo.f -text
