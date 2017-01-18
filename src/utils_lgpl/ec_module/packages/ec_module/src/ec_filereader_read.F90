@@ -657,24 +657,7 @@ contains
          fieldPtr => null()
 
          dmiss_nc = item%quantityPtr%fillvalue
-
-         ! With the the quantity name interpreted as a standard name, inquire from the filereader instance the varid 
-         do varid=1,size(fileReaderPtr%standard_names)
-            if (strcmpi(fileReaderPtr%standard_names(varid),item%quantityPtr%name)) exit
-         enddo 
-         if (varid>size(fileReaderPtr%standard_names)) then 
-            ! ERROR: standard name not found in this filereader, Try the variable names
-            call setECMessage("No standard_name='"//trim(item%quantityPtr%name)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
-            do varid=1,size(fileReaderPtr%variable_names)
-               if (strcmpi(fileReaderPtr%variable_names(varid),item%quantityPtr%name)) exit
-            enddo 
-            if (varid>size(fileReaderPtr%standard_names)) then 
-               ! ERROR: variable name not found in this filereader, TODO: handle exception 
-               call setECMessage("No variable_name='"//trim(item%quantityPtr%name)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
-               return
-            endif 
-         endif 
-         
+         varid = item%quantityPtr%ncid
          times_index = ec_undef_int
 
          if (t0t1 < 0) then

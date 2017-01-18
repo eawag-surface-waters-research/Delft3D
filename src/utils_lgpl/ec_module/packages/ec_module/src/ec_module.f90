@@ -155,18 +155,6 @@ module m_ec_module
       module procedure ecQuantitySet
    end interface ecSetQuantity
    
-   interface ecSetQuantityName
-      module procedure ecQuantitySetName
-   end interface ecSetQuantityName
-   
-   interface ecSetQuantityUnits
-      module procedure ecQuantitySetUnits
-   end interface ecSetQuantityUnits
-
-   interface ecSetQuantityVectorMax
-      module procedure ecQuantitySetVectorMax
-   end interface ecSetQuantityVectorMax
-
    interface ecSetQuantityUnitsFillScaleOffsetFromNcidVarid
       module procedure ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
    end interface ecSetQuantityUnitsFillScaleOffsetFromNcidVarid

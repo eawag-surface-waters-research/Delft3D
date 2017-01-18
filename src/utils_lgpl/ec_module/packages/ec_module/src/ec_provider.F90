@@ -372,7 +372,7 @@ module m_ec_provider
                quantityName = 'water_discharge'
             endif
          endif
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, quantityName))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name=quantityName))) then
             success = .false.
          end if
 
@@ -410,7 +410,7 @@ module m_ec_provider
                quantityName = 'water_level'
             endif
          endif
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, quantityName))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name=quantityName))) then
             success = .false.
          end if
          elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -440,7 +440,7 @@ module m_ec_provider
          end if
          ! Create the item 'slope'.
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'slope'))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='slope'))) then
             success = .false.
          end if
          if (.not. (ecElementSetSetName(instancePtr, elementSetId, elementSetName) .and. &
@@ -470,7 +470,7 @@ module m_ec_provider
          !
          ! Create the item 'crossing'.
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'crossing'))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='crossing'))) then
             success = .false.
          end if
          elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -577,8 +577,7 @@ module m_ec_provider
          if (ecFourierReadAll(fileReaderPtr, periods, components, magnitudes, phases, nPeriods)) then
             ! ===== all periods =====
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            if (.not. (ecQuantitySetName(instancePtr, quantityId, 'period') .and. &
-                        ecQuantitySetUnits(instancePtr, quantityId, 'minute'))) then
+            if (.not.ecQuantitySet(instancePtr, quantityId, name='period', units='minute')) then
                success = .false.
             end if
             elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -617,8 +616,7 @@ module m_ec_provider
             end if
             ! ===== magnitude =====
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            if (.not. (ecQuantitySetName(instancePtr, quantityId, 'magnitude') .and. &
-                        ecQuantitySetUnits(instancePtr, quantityId, 'm'))) then
+            if (.not. (ecQuantitySet(instancePtr, quantityId, name='magnitude', units='m'))) then
                success = .false.
             end if
             elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -647,8 +645,7 @@ module m_ec_provider
             end if
             ! ===== phase =====
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            if (.not. (ecQuantitySetName(instancePtr, quantityId, 'phase') .and. &
-                        ecQuantitySetUnits(instancePtr, quantityId, 'degree'))) then
+            if (.not. (ecQuantitySet(instancePtr, quantityId, name='phase', units='degree'))) then
                success = .false.
             end if
             elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -787,7 +784,7 @@ module m_ec_provider
          quantityId = ecInstanceCreateQuantity(instancePtr)
          select case (fileReaderPtr%ofType)
             case (provFile_uniform, provFile_unimagdir)
-               if (.not. ecQuantitySetName(instancePtr, quantityId, 'uniform_item')) then
+               if (.not. ecQuantitySet(instancePtr, quantityId, name='uniform_item')) then
                   return
                end if
                elementSetName = fileReaderPtr%fileName
@@ -795,7 +792,7 @@ module m_ec_provider
                   elementSetName = elementSetName(1:index(elementSetName,'.'))
                end if 
             case (provFile_bc)
-               if (.not. ecQuantitySetName(instancePtr, quantityId, fileReaderPtr%bc%quantity%name)) then ! trim(fileReaderPtr%bc%qname))) then
+               if (.not. ecQuantitySet(instancePtr, quantityId, name=fileReaderPtr%bc%quantity%name)) then ! trim(fileReaderPtr%bc%qname))) then
                   return
                end if
                elementSetName = fileReaderPtr%bc%bcname
@@ -901,29 +898,29 @@ module m_ec_provider
             if (index(fileReaderPtr%fileName, '.amu') /= 0) then
                ! ===== quantity: wind component u (usually == x) =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
-               if (.not. (ecQuantitySetName(instancePtr, quantityId, 'wind_u') .and. &
-                           ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='wind_u', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
             else if (index(fileReaderPtr%fileName, '.amv') /= 0) then
                ! ===== quantity: wind component v (usually == y) =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
-               if (.not. (ecQuantitySetName(instancePtr, quantityId, 'wind_v') .and. &
-                           ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='wind_v', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
             else if (index(fileReaderPtr%fileName, '.amp') /= 0) then
                ! ===== quantity: wind component p =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
-               if (.not. (ecQuantitySetName(instancePtr, quantityId, 'wind_p') .and. &
-                           ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='wind_p', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
             else if (index(fileReaderPtr%fileName, '.amr') /= 0) then
                ! ===== quantity: wind component p =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
-               if (.not. (ecQuantitySetName(instancePtr, quantityId, 'rainfall') .and. &
-                           ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='rainfall', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
             end if
@@ -1103,7 +1100,7 @@ module m_ec_provider
             write(postfix, '(I1)') i
             ! Quantity.
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            if (.not. ecQuantitySetName(instancePtr, quantityId, 'curvi_source_item_'//postfix)) return
+            if (.not. ecQuantitySet(instancePtr, quantityId, name='curvi_source_item_'//postfix)) return
             ! Field for T0.
             field0Id = ecInstanceCreateField(instancePtr)
             if (.not.      ecFieldCreate1dArray(instancePtr, field0Id, n_cols*n_rows)) return
@@ -1163,7 +1160,7 @@ module m_ec_provider
 
          ! Construct the samples Item.
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'samples_item'))) return
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='samples_item'))) return
 
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not. ecElementSetSetType(instancePtr, elementSetId, elmSetType_samples)) return
@@ -1333,9 +1330,7 @@ module m_ec_provider
          !
          ! ===== single quantity: quant ===== (Further code in this sub independent of file type)
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not.ecQuantitySetName(instancePtr, quantityId, 'quant'))                   return 
-         if (.not.ecQuantitySetUnits(instancePtr, quantityId, ' '))                      return 
-         if (.not.ecQuantitySetVectorMax(instancePtr, quantityId, vectormax))            return 
+         if (.not.ecQuantitySet(instancePtr, quantityId, name='quant', units=' ', vectormax=vectormax))    return 
 
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not.ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian))  return
@@ -1490,7 +1485,7 @@ module m_ec_provider
          
          ! Construct the poly_tim Item.
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'polytim_item'))) return
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='polytim_item'))) return
 
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not. ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
@@ -1764,7 +1759,7 @@ module m_ec_provider
 
          ! Construct the poly_tim Item
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'polytim_item'))) return
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='polytim_item'))) return
 
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not. ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
@@ -2136,8 +2131,8 @@ module m_ec_provider
          !
          ! ===== quantity1: wind_speed =====
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'windspeed') .and. &
-                    ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='windspeed',      &
+                                                           units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
             success = .false.
          end if
          field0Id = ecInstanceCreateField(instancePtr)
@@ -2163,8 +2158,8 @@ module m_ec_provider
          end if
          ! ===== quantity2: wind_from_direction =====
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'winddirection') .and. &
-                    ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit2'))))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='winddirection',   &
+                                                           units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit2'))))) then
             success = .false.
          end if
          field0Id = ecInstanceCreateField(instancePtr)
@@ -2190,8 +2185,8 @@ module m_ec_provider
          end if
          ! ===== quantity3: p_drop =====
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, 'p_drop') .and. &
-                    ecQuantitySetUnits(instancePtr, quantityId, trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit3'))))) then
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name='p_drop',    &
+                                                           units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit3'))))) then
             success = .false.
          end if
          field0Id = ecInstanceCreateField(instancePtr)
@@ -2236,7 +2231,7 @@ module m_ec_provider
           use m_ec_converter,  only: ecConverterSetType, ecConverterSetInterpolation, ecConverterSetOperand, ecConverterSetElement
           use m_ec_instance,   only: ecInstanceCreateConverter, ecInstanceCreateConnection, ecInstanceCreateItem, ecInstanceCreateField, ecInstanceCreateQuantity
           use m_ec_connection, only: ecConnectionAddTargetItem, ecConnectionAddSourceItem, ecConnectionSetConverter 
-          use m_ec_quantity,   only: ecQuantitySetName
+          use m_ec_quantity,   only: ecQuantitySet
           use m_ec_field,      only: ecFieldCreate1dArray
           use m_ec_item
 
@@ -2281,7 +2276,7 @@ module m_ec_provider
           quantityId = ecInstanceCreateQuantity(instancePtr)
           quantityName = trim(sourceItemPtr%quantityPtr%name)
           if (.not. ecItemSetQuantity(instancePtr, targetItemId, quantityId)) return
-          if (.not. (ecQuantitySetName(instancePtr, quantityId, quantityName//'_interpolated'))) return
+          if (.not. (ecQuantitySet(instancePtr, quantityId, name=quantityName//'_interpolated'))) return
           elementSetId = sourceItemPtr%elementSetPtr%id
           if (.not. ecItemSetElementSet(instancePtr, targetItemId, elementSetId)) return
 
@@ -2474,27 +2469,22 @@ module m_ec_provider
 
          nvar = size(fileReaderPtr%standard_names,dim=1)
          do i = 1, count(ncstdnames>' ')
-            do ivar = 1,nvar
-               if (strcmpi(fileReaderPtr%standard_names(ivar),ncstdnames(i))) then     ! Match standard names ...
-                  idvar = ivar
-                  exit
-               endif 
+            do idvar = 1,nvar
+               if (strcmpi(fileReaderPtr%standard_names(ivar),ncstdnames(i))) exit     ! Match standard names ...
             enddo 
-            if (ivar>nvar) then                                                        ! Variable not found among standard names
-               do ivar = 1,nvar                                                        ! Find the varid 
-                  if (strcmpi(fileReaderPtr%variable_names(ivar),ncvarnames(i))) then  ! Match variable names ...
-                     fileReaderPtr%standard_names(ivar)=ncstdnames(i)                  ! overwrite the stanadardname by the one rquired
-                     idvar = ivar
-                     exit
-                  endif 
+            if (idvar>nvar) then                                                       ! Variable not found among standard names
+               ! ERROR: standard name not found in this filereader, Try the variable names
+               do idvar = 1,nvar                                                       ! Find the varid 
+                  if (strcmpi(fileReaderPtr%variable_names(idvar),ncvarnames(i))) exit ! Match variable names ...
                enddo 
-               if (ivar>nvar) then                                                     ! Variable not found among variable names either
-                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' not found in NetCDF file '"//trim(fileReaderPtr%filename)
-                  call setECMessage(message)
+               if (idvar>nvar) then                                                    ! Variable not found among variable names either
+                  ! ERROR: variable name not found in this filereader, TODO: handle exception 
+                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' not found in NetCDF file '"//trim(fileReaderPtr%filename))
                   return
                endif
             endif 
-            
+            fileReaderPtr%standard_names(idvar)=ncstdnames(i)                 ! overwrite the stanadardname by the one rquired
+
             ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, idvar, ndims=ndims)  ! get the number of dimensions
             if (allocated(coordids)) deallocate(coordids)                                 ! allocate space for the variable id's 
             allocate(coordids(ndims))                                                     ! .. representing the var's coordinates
@@ -2700,8 +2690,8 @@ module m_ec_provider
             ! Create the Quantity
             ! ===================
             quantityId = ecInstanceCreateQuantity(instancePtr)
+            if (.not.(ecQuantitySet(instancePtr, quantityId, name=ncstdnames(i), ncid=idvar))) return
             if (.not.(ecQuantitySetUnitsFillScaleOffsetFromNcidVarid(instancePtr, quantityId, fileReaderPtr%fileHandle, idvar))) return
-            if (.not.(ecQuantitySetName(instancePtr, quantityId, ncstdnames(i)))) return
 
             ! ========================
             ! Create the source Fields 
@@ -2816,12 +2806,29 @@ module m_ec_provider
          !
          string = ' '
          ierror     = nf90_inq_varid(fileReaderPtr%fileHandle, quantityName, idvar_q); success = ecSupportNetcdfCheckError(ierror, "inq_varid " // quantityName, fileReaderPtr%filename)
+         ! With the the quantity name interpreted as a standard name, inquire from the filereader instance the idvar_q 
+         do idvar_q=1,size(fileReaderPtr%standard_names)
+            if (strcmpi(fileReaderPtr%standard_names(idvar_q),quantityName)) exit
+         enddo 
+         if (idvar_q>size(fileReaderPtr%standard_names)) then 
+            ! ERROR: standard name not found in this filereader, Try the variable names
+            call setECMessage("No standard_name='"//trim(quantityName)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
+            do idvar_q=1,size(fileReaderPtr%variable_names)
+               if (strcmpi(fileReaderPtr%variable_names(idvar_q),quantityName)) exit
+            enddo 
+            if (idvar_q>size(fileReaderPtr%standard_names)) then 
+               ! ERROR: variable name not found in this filereader, TODO: handle exception 
+               call setECMessage("No variable_name='"//trim(quantityName)//"' found in file '"//trim(fileReaderPtr%filename)//"'.")
+               return
+            endif 
+         endif 
+
          ierror     = nf90_get_att(fileReaderPtr%fileHandle, idvar_q, 'units', string); success = ecSupportNetcdfCheckError(ierror, "inq_att " // quantityName, fileReaderPtr%filename)
          if (.not.success) return
          !
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not. (ecQuantitySetName(instancePtr, quantityId, quantityName) .and. &
-                    ecQuantitySetUnits(instancePtr, quantityId, trim(string)))) then
+
+         if (.not. (ecQuantitySet(instancePtr, quantityId, name=quantityName, units=trim(string), ncid=idvar_q ))) then
             success = .false.
          endif
          field0Id = ecInstanceCreateField(instancePtr)
@@ -3377,9 +3384,9 @@ module m_ec_provider
          ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, nDims=ndim)
          dim_name=''
          name_len=0
-         ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,dimid(1),name=dim_name,len=dim_size)
          if (ndim==1) then                     ! Is this variable a coordinate variable
              ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, dimids=dimid)
+             ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,dimid(1),name=dim_name,len=dim_size)
              if (trim(dim_name)==trim(fileReaderPtr%variable_names(ivar))) then
                 fileReaderPtr%dim_varids(dimid(1)) = ivar      ! connects a varid to a dimid 
              end if
