@@ -57,7 +57,7 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use mathconsts, only: pi_sp, sqrt2_sp
+    use mathconsts, only: pi_sp, sqrt2_sp, degrad_sp
     implicit none
 !
 ! Global variables
