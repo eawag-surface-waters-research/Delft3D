@@ -196,7 +196,6 @@
 		<File RelativePath="src\gdp\gdp_alloc.f90"/>
 		<File RelativePath="src\gdp\gdp_alloc_arrays.f90"/>
 		<File RelativePath="src\gdp\gdp_dealloc.f90"/>
-		<File RelativePath="src\gdp\gdp_dump.f90"/>
 		<File RelativePath="src\gdp\gdp_for_dll.f90"/>
 		<File RelativePath="src\gdp\initadv2d.f90"/>
 		<File RelativePath="src\gdp\initarrays.f90"/>
