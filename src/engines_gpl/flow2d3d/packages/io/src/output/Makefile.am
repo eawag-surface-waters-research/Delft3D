@@ -65,7 +65,6 @@ libIOOutput_la_SOURCES = \
          rdtimc.f90 \
          rdtimw.f90 \
          realfileversion.f90 \
-         rstcom.f90 \
          rwbotc.f90 \
          rwbotc_double.f90 \
          setwav.f90 \

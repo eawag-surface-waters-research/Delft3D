@@ -248,5 +248,5 @@
        character(256)                     :: filmd           ! File name for MD FLOW file 
        character(256)                     :: trifil          ! File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
        character(5)                       :: versio          ! Version nr. of the current package
-       integer        , dimension(1500)   :: timwav          ! Array with time steps on comm. file for wave results 
+       integer , dimension(:)  , pointer  :: timwav          ! Array with time steps on comm. file for wave results 
     end type sv_tricom

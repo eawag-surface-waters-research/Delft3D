@@ -46,6 +46,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
+    use string_module, only: str_lower
     !
     use globaldata
     !
@@ -104,7 +105,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     logical        , intent(out) :: temp    !  Description and declaration in procs.igs
     logical        , intent(out) :: wavcmp
     logical        , intent(out) :: wave    !  Description and declaration in procs.igs
-    logical        , intent(out) :: waveol  !  Description and declaration in procs.igs
+    integer        , intent(out) :: waveol  !  Description and declaration in procs.igs
     logical        , intent(out) :: wind    !  Description and declaration in procs.igs
     character(6)   , intent(in)  :: prgnm   !! Help var. determining the prog. name currently active
     character(256)               :: filbar
@@ -116,21 +117,12 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
 ! Local variables
 !
     integer                   :: istof  ! Flag to detect if any constituent has been specified 
-    integer                   :: isdu   ! Flag to detect if subsidence/uplift should affect water level 
     integer                   :: lconst ! number of constituents, including sediments
-    integer                   :: lenc   ! Help variable 
     integer        , external :: newlun
-    integer                   :: nlook  ! Nr. of values to look for in a record 
-    integer                   :: ntrec  ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
     integer                   :: uw
-    logical                   :: lerror ! Flag=TRUE if an local error is encountered
-    logical                   :: found
-    logical                   :: newkw  ! Flag to specify if the keyword to look for is a new keyword 
-    character(20)             :: cdef   ! Default value for chulp 
+    logical                   :: lhulp  ! Help variable to read logical from MD-file
     character(20)             :: chulp  ! Help variable to read character from MD-file 
     character(256)            :: filrol
-    character(300)            :: mdfrec ! Record read from the MD-file 300 = 256 + a bit (field, =, ##, etc.) 
-    character(6)              :: keyw   ! Keyword to look for in the MD-file 
 !
 !! executable statements -------------------------------------------------------
 !
@@ -146,19 +138,10 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     rolcorr           => gdp%gdbetaro%rolcorr
     sbkConfigFile     => gdp%gdsobek%sbkConfigFile
     !
-    ! initialize local parameters
-    !
-    mdfrec = ' '
-    nlook  = 1
-    cdef   = ' '
-    chulp  = cdef
-    lerror = .false.
-    newkw  = .true.
-    !
     ! calculate LSTSC
     ! locate 'Sub1' record for 'S'alinity, 'T'emperaure, 'I'secondary flow and 'W'ind
     !
-    chulp = cdef
+    chulp = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'Sub1', chulp)
     !
     ! test for 'S'
@@ -197,7 +180,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     !
     ! locate 'Sub2' record for 'P'articles, 'W'ave, 'C'onstituents
     !
-    chulp = cdef
+    chulp = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'Sub2', chulp)
     !
     ! test for 'P'
@@ -231,8 +214,20 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,lsts      , &
     ! locate 'WaveOL' for online wave computation parallel to flow, outside MOR
     ! default = no ('N') which means waveol = .false.
     !
-    waveol = .false.
-    call prop_get_logical(gdp%mdfile_ptr, '*', 'WaveOL', waveol)
+    chulp = ' '
+    call prop_get(gdp%mdfile_ptr, '*', 'WaveOL', chulp)
+    call str_lower(chulp)
+    if (chulp == 'mimic') then
+        waveol = 1
+    else
+        lhulp = .false.
+        call prop_get_logical(gdp%mdfile_ptr, '*', 'WaveOL', lhulp)
+        if (lhulp) then
+            waveol = 2
+        else
+            waveol = 0
+        endif
+    endif
     !
     ! Determine number for secondary flow (+LSTSCI)
     !

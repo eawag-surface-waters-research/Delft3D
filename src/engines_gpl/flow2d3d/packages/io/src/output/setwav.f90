@@ -8,7 +8,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
                 & msvcom    ,ubcom     ,wlcom      ,rlabda     , &
                 & dircos    ,dirsin    ,ewave0    ,roller     ,wavcmp     , &
                 & ewabr0    ,wsbodyu   ,wsbodyv   ,wsbodyucom ,wsbodyvcom , &
-                & gdp       )
+                & waveol    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -82,6 +82,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     integer                                                          , intent(in)  :: norow      !  Description and declaration in esm_alloc_int.f90
     integer                                                          , intent(in)  :: ntwav      !!  Total number of timesteps on com-
                                                                                                  !!  munication file (to read from)
+    integer                                                          , intent(in)  :: waveol     !  Wave setting (0 = offline, 1 = offline mimicking online, 2 = online)
     integer   , dimension(2)                                                       :: ifcore     !!  Time indices (cell id's) of the wave
                                                                                                  !!  functions which are in core available
     integer   , dimension(5, noroco)                                 , intent(in)  :: irocol     !  Description and declaration in esm_alloc_int.f90
@@ -277,8 +278,20 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
     ! determination of reduced time and extrapolation coefficient
     !
     nready = 0
+    tact   = itimc
     if (ntwav == 1) then
        ntimwa = 1
+       ntimwb = 0
+       atimw  = 1.0_fp
+       btimw  = 0.0_fp
+    elseif (waveol>0) then
+       ntimwa = 1
+       do i = ntwav, 2, -1
+          if (tact>timwav(i)) then
+             ntimwa = i
+             exit
+          endif
+       enddo
        ntimwb = 0
        atimw  = 1.0_fp
        btimw  = 0.0_fp
@@ -287,7 +300,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
           !
           ! periodic functions
           !
-          tact = itimc
           if (tact>=timwav(ntwav)) then
              nhulp = (tact - timwav(ntwav))/itlen + 1
              tact = tact - nhulp*itlen
@@ -314,7 +326,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
           !
           ! a-periodic functions
           !
-          tact = itimc
           if (tact <= timwav(1)) then
              ntimwa = 1
              ntimwb = 2

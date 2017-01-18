@@ -338,7 +338,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
                write(*,'(a,i10,a,f15.3)') '  Write WAVE map file, nest ',i_swan,' time ',wavedata%time%timmin
                DataFromPreviousTimestep = .true.
                call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
-                                  & wavedata, swan_run%casl, DataFromPreviousTimestep)
+                                  & wavedata, swan_run%casl, DataFromPreviousTimestep, &
+                                  & swan_run%gamma0)
                call setoutputcount(wavedata%output, wavedata%output%count + 1)
             endif
             offset = 1
@@ -368,7 +369,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             write(*,'(a,i10,a,f15.3)') '  Write WAVE map file, nest ',i_swan,' time ',wavedata%time%timmin
             DataFromPreviousTimestep = .false.
             call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
-                               & wavedata, swan_run%casl, DataFromPreviousTimestep)
+                               & wavedata, swan_run%casl, DataFromPreviousTimestep, &
+                               & swan_run%gamma0)
          endif
          call dealloc_output_fields (swan_output_fields)
          !

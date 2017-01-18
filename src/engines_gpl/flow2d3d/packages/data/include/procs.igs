@@ -36,7 +36,6 @@ type gd_procs
    logical :: dredge               = .false. ! Dredge and Dump
    logical :: drogue               = .false. ! Drogue(s)
    logical :: wave                 = .false. ! Waves
-   logical :: waveol               = .false. ! Waves computed by Delft3D-WAVES online
    logical :: threed               = .false. ! KMAX > 1
    logical :: secflo               = .false. ! Secondary flow
    logical :: iweflg               = .false. ! Internal Wave Energy
@@ -75,4 +74,8 @@ type gd_procs
    logical :: xbeach               = .false. ! XBeach wave driver is used   
    logical :: lfsdu                = .false. ! Subsidence and Uplift included  
    logical :: lfsdus1              = .false. ! Subsidence and Uplift effects waterlevel  
+   !
+   integer :: waveol               = 0       ! 0 = Waves from existing COM-file (linear interpolation)
+                                             ! 1 = Waves from existing COM-file (constant like when online)
+											 ! 2 = Waves computed by Delft3D-WAVES online
 end type gd_procs

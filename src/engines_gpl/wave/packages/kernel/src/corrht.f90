@@ -47,13 +47,8 @@ subroutine corrht(hrm       ,deph      ,tp        ,wavel     ,wavek     , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+    use mathconsts, only: twopi_sp, sqrt2_sp
     implicit none
-    !
-    !
-    ! COMMON variables
-    !
-    real ::         pi, twopi, wort2, gamma
-    common /const / pi, twopi, wort2, gamma
 !
 ! Global variables
 !
@@ -80,24 +75,9 @@ subroutine corrht(hrm       ,deph      ,tp        ,wavel     ,wavek     , &
     ldep   = .false.
     dismax = 0.0
     if (deph>0.05 .and. hrm>=0.01 .and. tp>0.0) then
-       if (choice) then
-          !
-          ! Adjust wave-coefficients
-          !
-          call wavenr_htk(deph, tp, wavek)
-          !
-          hmax   = 0.88/wavek*tanh(gamma*wavek*deph/0.88)
-          hrm    = min(hrm, hmax)
-          hs     = hrm*wort2
-          tpmin  = 14.09*sqrt(hs/grav)
-          dismax = 0.25*rho*grav*hmax*hmax/tp
-          dish   = min(dish, dismax)
-          tp     = min(tp, tpmin)
-       endif
-       !
        call wavenr_htk(deph, tp, wavek)
        !
-       wavel = twopi/wavek
+       wavel = twopi_sp/wavek
     else
        !
        ! Too shallow water or waves too small

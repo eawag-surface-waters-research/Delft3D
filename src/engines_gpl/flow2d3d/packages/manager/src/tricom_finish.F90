@@ -158,7 +158,7 @@ subroutine tricom_finish(olv_handle, gdp)
     logical                             , pointer :: dredge
     logical                             , pointer :: drogue
     logical                             , pointer :: wave
-    logical                             , pointer :: waveol
+    integer                             , pointer :: waveol
     logical                             , pointer :: threed
     logical                             , pointer :: secflo
     logical                             , pointer :: struct
@@ -730,7 +730,7 @@ subroutine tricom_finish(olv_handle, gdp)
               & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
               & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
               & itrstc    ,ktemp     ,.false.   ,gdp       )
-    if (waveol) then
+    if (waveol==2) then
        !
        ! Perform (last) wave computation (if required) and close communication with
        ! wave module

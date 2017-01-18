@@ -170,7 +170,7 @@ subroutine tricom_init(olv_handle, gdp)
     logical                             , pointer :: dredge
     logical                             , pointer :: drogue
     logical                             , pointer :: wave
-    logical                             , pointer :: waveol
+    integer                             , pointer :: waveol
     logical                             , pointer :: threed
     logical                             , pointer :: secflo
     logical                             , pointer :: struct
@@ -391,10 +391,6 @@ subroutine tricom_init(olv_handle, gdp)
     real(fp)                            , pointer :: dtsec         ! DT in seconds 
     real(fp)                            , pointer :: timnow        ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
 !
-! Local parameters
-!
-    integer, parameter :: maxtim = 1500
-!
 ! Global variables
 !
     type(olvhandle) :: olv_handle
@@ -418,7 +414,6 @@ subroutine tricom_init(olv_handle, gdp)
     integer                                       :: timrst        ! Restart time in combination with restart option from comm. file 
     integer                                       :: trilen        ! Length of trifil 
     integer        , dimension(2)                 :: ifcore        ! Time indices (cell id's) of the wave functions which are in core available 
-    integer        , dimension(maxtim)            :: timcur        ! Array with time steps on comm. file for restart option 
     integer(pntrsize)                  , external :: gtcpnt
     integer(pntrsize)                  , external :: gtipnt
     integer(pntrsize)                  , external :: gtrpnt
@@ -882,7 +877,7 @@ subroutine tricom_init(olv_handle, gdp)
        !
        if (.not.commrd) then
           tscale = dt*tunit
-          if (.not.waveol) then
+          if (waveol==0) then
              itlen  = itfinish + 1
           endif
        else
@@ -1091,9 +1086,19 @@ subroutine tricom_init(olv_handle, gdp)
     !
     waverd = wave .and. commrd
     if (waverd) then
-       call rdtimw(comfil    ,lundia    ,error     ,ntwav     ,timwav    , &
-                 & maxtim    ,waverd    ,nmaxus    ,mmax      ,gdp       )
+       !
+       ! Initialize NTWAV = 0 (this is the number of wave times read so far).
+       !
+       ntwav = 0
+       call rdtimw(comfil    ,lundia    ,error     ,ntwav     , &
+                 & waverd    ,nmaxus    ,mmax      ,gdp       )
        if (error) goto 9996
+       !
+       ! Don't read waves during first time step when online coupling to wave (WAVEOL=2) (or mimicking that; WAVEOL=1)
+       ! If WAVEOL=2 we probably have COMMRD=FALSE, but in case an old com-file exists we don't want the program to read it (unless we are restarting?).
+       ! If WAVEOL=1 the com-file will exist, but we shouldn't read it yet for consistency.
+       !
+       if (waveol>0) waverd = .false.
     endif
     !
     ! Wave is true and not able to read wave information from comm-file:
@@ -1102,7 +1107,7 @@ subroutine tricom_init(olv_handle, gdp)
     ! - Continue when online coupling with waves is applied
     !
     if (wave .and. .not.waverd) then
-       if (.not. (cnstwv .or. snelli) .and. .not. waveol .and. .not. xbeach) then
+       if (.not. (cnstwv .or. snelli) .and. waveol==0 .and. .not. xbeach) then
           error = .true.
           call prterr(lundia    ,'D007'    ,' '       )
           goto 9996
@@ -1132,7 +1137,7 @@ subroutine tricom_init(olv_handle, gdp)
     icy = 1
     call caldps(nmmax     ,nfltyp    ,icx       , &
               & icy       ,i(kcs)    ,r(dp)     ,d(dps)    ,gdp       )
-    if (waveol) then
+    if (waveol>0) then
        !
        ! In case of wave online: write DPS to comm-file instead of DP
        !
@@ -1267,7 +1272,7 @@ subroutine tricom_init(olv_handle, gdp)
                  & r(msvcom) ,r(ubcom)   ,r(wlcom)   ,r(rlabda)     , &
                  & r(dircos) ,r(dirsin)  ,r(ewave1)  ,roller        ,wavcmp        , &
                  & r(ewabr1) ,r(wsbodyu) ,r(wsbodyv) ,r(wsbodyucom) ,r(wsbodyvcom) , &
-                 & gdp       )
+                 & waveol    ,gdp       )
        if (error) goto 9997
     endif
     !
@@ -1429,7 +1434,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! DD code added end
     !
-    if (wave .and. waveol) then
+    if (wave .and. waveol==2) then
        !
        ! Onlinecoupling with waves
        ! Initialise communication with Waves

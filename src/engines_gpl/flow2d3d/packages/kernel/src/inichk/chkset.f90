@@ -68,7 +68,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: temp
     logical                       , pointer :: dredge
     logical                       , pointer :: wave
-    logical                       , pointer :: waveol
+    integer                       , pointer :: waveol
     logical                       , pointer :: xbeach
     logical                       , pointer :: iweflg
     logical                       , pointer :: struct
@@ -417,7 +417,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        ierror = ierror+ 1
     endif
     !
-    if (wave .and. waveol .and. (.not.xbeach) .and. itcomi==1) then
+    if (wave .and. waveol>0 .and. (.not.xbeach) .and. itcomi==1) then
        !
        ! Calling wave every timestep is not supported (yet).
        ! If tried, FLOW does not read wave information at all.

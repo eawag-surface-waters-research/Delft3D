@@ -92,9 +92,6 @@ subroutine prterr(lundia, msgno, filtxt)
             & ' the Delft3D input !!'
     case ('D007')
        msg = '*** ERROR Waves activated but no COM-file present !!'
-    case ('D008')
-       msg = '*** ERROR Number of Timesteps on COM-file too ' //                &
-            & 'large. Contact Deltares'
     case ('F001')
        msg = '*** ERROR Variable # not known'
     case ('F002')

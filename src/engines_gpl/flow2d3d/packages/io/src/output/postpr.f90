@@ -147,7 +147,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical                              , pointer :: dredge
     logical                              , pointer :: drogue
     logical                              , pointer :: wave
-    logical                              , pointer :: waveol
+    integer                              , pointer :: waveol
     logical                              , pointer :: sedim
     logical                              , pointer :: coupleact
     logical                              , pointer :: couplemod
@@ -760,7 +760,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           else
              icel = itcur
           endif
-          if(wave .and. waveol) then
+          if (wave .and. waveol>0) then
              !
              ! keep overwriting first record to avoid huge com-file
              !
@@ -1043,7 +1043,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           if (error) goto 9999
        endif
 
-       if (wave .and. waveol .and. nst==itmapc) then
+       if (wave .and. waveol==2 .and. nst==itmapc) then
           !
           ! Create file TMP_write_wavm
           ! waves.exe will only write wave maps if file TMP_write_wavm exists 

@@ -101,7 +101,7 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
     logical                         , pointer :: dredge 
     logical                         , pointer :: drogue 
     logical                         , pointer :: wave 
-    logical                         , pointer :: waveol 
+    integer                         , pointer :: waveol 
     logical                         , pointer :: threed 
     logical                         , pointer :: secflo 
     logical                         , pointer :: iweflg 
@@ -385,7 +385,7 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
     threed      = .false. 
     wavcmp      = .false. 
     wave        = .false. 
-    waveol      = .false. 
+    waveol      = 0
     wind        = .false. 
     nfl         = .false. 
     !

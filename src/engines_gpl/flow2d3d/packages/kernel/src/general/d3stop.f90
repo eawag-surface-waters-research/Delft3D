@@ -56,7 +56,7 @@ subroutine d3stop(iexit, gdp)
     !
     integer                       , pointer :: lundia
     logical                       , pointer :: wave
-    logical                       , pointer :: waveol
+    integer                       , pointer :: waveol
     logical                       , pointer :: mudlay
     logical                       , pointer :: mudwave
     logical                       , pointer :: coupleact
@@ -128,7 +128,7 @@ subroutine d3stop(iexit, gdp)
     ! Check if Wave-connection is active and if so send (negative) status
     ! to shut down Wave.
     !
-    if (waveol) then
+    if (waveol==2) then
        ierror = flow_to_wave_command(flow_wave_comm_finalize, &
                                    & numdomains, mudlay, -1)
     endif

@@ -197,7 +197,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     integer :: ndm
     integer :: nm
     integer :: nmd
-    real(fp):: sqrt2
 !
 !! executable statements -------------------------------------------------------
 !
@@ -700,7 +699,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     ! Store quantities specific for waves in defined stations
     !
     if (wave) then
-       sqrt2 = sqrt(2.0_fp)
        zhs    = -999.0_fp
        ztp    = -999.0_fp
        zdir   = -999.0_fp

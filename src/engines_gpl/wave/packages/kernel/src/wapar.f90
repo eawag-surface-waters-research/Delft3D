@@ -51,10 +51,6 @@ subroutine wapar(hrm       ,dir       ,deph      ,tp        ,fxhis     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     implicit none
-    !
-! Common variables
-    real            ::  pi, twopi, wort2, gamma
-    common /const /     pi, twopi, wort2, gamma
 !
 ! Global variables
 !

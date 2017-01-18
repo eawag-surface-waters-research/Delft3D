@@ -57,11 +57,8 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+    use mathconsts, only: pi_sp, sqrt2_sp
     implicit none
-    !
-! Common variables
-    real            ::  pi, twopi, wort2, gamma
-    common /const /     pi, twopi, wort2, gamma
 !
 ! Global variables
 !
@@ -101,7 +98,6 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
     real                           :: dish
     real                           :: diss
     real                           :: dismax
-    real                           :: dr
     real                           :: fxhis
     real                           :: fxx
     real                           :: fyhis
@@ -118,11 +114,6 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
 !! executable statements -------------------------------------------------------
 !
     corht  = .false.
-    pi     = 4.0*atan(1.0E0)
-    dr     = pi/180.
-    twopi  = 2.0*pi
-    wort2  = sqrt(2.0E0)
-    gamma  = 0.8
     perfac = 1.
     call perpar(gamma0, perfac, ierr)
     if (ierr < 0) then
@@ -136,7 +127,7 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
     l     = 0
  1000 continue
     l     = l + 1
-    hrm   = hs(l)/wort2
+    hrm   = hs(l)/sqrt2_sp
     dirh  = dir(l)
     deph  = depth(l)
     tpp   = period(l)*perfac
@@ -169,8 +160,8 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
     distot(l)  = dish
     if (.not.ldep) then
        if (wavel>1.0E-6 .and. swflux) then
-          mx(l) = .125*grav*hrm*hrm*tpp/wavel*cos(dirh*dr)
-          my(l) = .125*grav*hrm*hrm*tpp/wavel*sin(dirh*dr)
+          mx(l) = .125*grav*hrm*hrm*tpp/wavel*cos(dirh*degrad_sp)
+          my(l) = .125*grav*hrm*hrm*tpp/wavel*sin(dirh*degrad_sp)
        else
           mx(l) = 0.
           my(l) = 0.

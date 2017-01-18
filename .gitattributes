@@ -826,7 +826,6 @@ src/engines_gpl/flow2d3d/packages/io/src/output/prtmap.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/rdtimc.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/rdtimw.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/realfileversion.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/output/rstcom.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/rwbotc.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/rwbotc_double.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/setwav.f90 -text

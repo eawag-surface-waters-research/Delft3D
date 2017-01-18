@@ -171,7 +171,7 @@ subroutine tricom_step(olv_handle, gdp)
     logical                             , pointer :: dredge
     logical                             , pointer :: drogue
     logical                             , pointer :: wave
-    logical                             , pointer :: waveol
+    integer                             , pointer :: waveol
     logical                             , pointer :: threed
     logical                             , pointer :: secflo
     logical                             , pointer :: struct
@@ -386,10 +386,6 @@ subroutine tricom_step(olv_handle, gdp)
     real(fp)                            , pointer :: anglon          ! Angle of longitude of the model centre (used to determine solar radiation) 
     real(fp)                            , pointer :: dtsec           ! DT in seconds 
     real(fp)                            , pointer :: timnow          ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
-!
-! Local parameters
-!
-    integer, parameter :: maxtim = 1500
 !
 ! Global variables: NONE
 !
@@ -820,12 +816,12 @@ subroutine tricom_step(olv_handle, gdp)
           !                   r(hrms+iofset),r(rlabda+iofset),                            &
           !                    mmax,nmax,nmaxus,2*timnow*hdt)
        endif
-       if (wave .and. waveol .and. (.not.xbeach)) then
+       if (wave .and. waveol>0 .and. (.not.xbeach)) then
           !
           ! Command to wave module to execute wave computation on
           ! times for writing to com file
           !
-          if (nst == itwav) then
+          if (nst == itwav .and. waveol==2) then
              call timer_start(timer_tricom_rest, gdp)
              if (prec == hp) then
                 call rwbotc_double(comfil    ,lundia    ,error     ,nst       , &
@@ -894,10 +890,15 @@ subroutine tricom_step(olv_handle, gdp)
                 call d3stop(1, gdp)
              endif
              itrw = nst + 1
+          elseif (nst == itwav .and. waveol==1) then
+             itrw = nst + 1
           endif
           if (nst == itrw) then
-             call rdtimw(comfil    ,lundia    ,error     ,ntwav     ,timwav    , &
-                       & maxtim    ,waverd    ,nmaxus    ,mmax      ,gdp       )
+             write(lundia,*) 'WAVEOL = ',waveol
+             if (waveol==2) then ! wave times can only be updated in online coupled mode
+                call rdtimw(comfil    ,lundia    ,error     ,ntwav     , &
+                          & waverd    ,nmaxus    ,mmax      ,gdp       )
+             endif
              waverd = .true.
              ifcore(1) = 0
              ifcore(2) = 0
@@ -946,7 +947,7 @@ subroutine tricom_step(olv_handle, gdp)
                     & r(msvcom) ,r(ubcom)   ,r(wlcom)   ,r(rlabda)     , &
                     & r(dircos) ,r(dirsin)  ,r(ewave1)  ,roller        ,wavcmp        , &
                     & r(ewabr1) ,r(wsbodyu) ,r(wsbodyv) ,r(wsbodyucom) ,r(wsbodyvcom) , &
-                    & gdp       )
+                    & waveol    ,gdp       )
           call timer_stop(timer_tricom_rest, gdp)
           if (error) goto 9998
        endif

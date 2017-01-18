@@ -69,7 +69,7 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     , &
     logical          , pointer :: dredge
     logical          , pointer :: drogue
     logical          , pointer :: wave
-    logical          , pointer :: waveol
+    integer          , pointer :: waveol
     logical          , pointer :: threed
     logical          , pointer :: secflo
     logical          , pointer :: iweflg
@@ -181,7 +181,7 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     , &
     wind      = .false.
     snelli    = .false.
     cnstwv    = .false.
-    waveol    = .false.
+    waveol    = 0
     sbkol     = .false.
     bubble    = .false.
     nfl       = .false.

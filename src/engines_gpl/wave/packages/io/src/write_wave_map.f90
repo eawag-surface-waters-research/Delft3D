@@ -1,4 +1,4 @@
-subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
+subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime, gamma0)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -39,7 +39,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 29
+    integer, parameter :: nelmx = 30
 !
 ! Global variables
 !
@@ -49,6 +49,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
     type (output_fields)      :: sof          ! output fields defined on swan grid
     type (wave_data_type)     :: wavedata
     logical                   :: prevtime     ! true: the time to be written is the "previous time"
+    real        , intent(in)  :: gamma0       ! JONSWAP peak enhancement factor
 !
 ! Local variables
 !
@@ -58,6 +59,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
     integer                                     :: ind
     integer                                     :: idum
     integer                                     :: ierror
+    integer                                     :: j
     integer                                     :: nelems
     integer                                     :: nelems2
     integer       , dimension(6, nelmx)         :: elmdms
@@ -84,6 +86,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
     integer                                     :: itlen
     !
     integer       , dimension(1)                :: idummy ! Help array to read/write Nefis files 
+    real                                        :: perfac
     real          , dimension(:,:), allocatable :: rbuf
     !
     !     Define data structure; element dimensions are required only
@@ -93,7 +96,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
     data elmnms/'TIME', 'CODE ', 'HSIGN ', 'DIR ', 'PDIR ', 'PERIOD', 'RTP ', &
         & 'DEPTH', 'VELOC-X','VELOC-Y', 'TRANSP-X', 'TRANSP-Y', 'DSPR',       &
         & 'DISSIP ', 'LEAK', 'QB','XP', 'YP ', 'UBOT', 'STEEPW', 'WLENGTH',   &
-        & 'TPS', 'TM02', 'TMM10', 'DHSIGN', 'DRTM01', 'SETUP', 'FX', 'FY' /
+        & 'TPS', 'TM02', 'TMM10', 'DHSIGN', 'DRTM01', 'SETUP', 'FX', 'FY', 'TP' /
     data elmdes/'time',                                                         &
         & 'code for HISWA output grid                                    ',      &
         & 'significant wave height                                       ',      &
@@ -122,17 +125,18 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
         & 'difference in average wave period (last iterations)           ',      &
         & 'set-up due to waves                                           ',      &
         & 'x-component of wave induced force                             ',      &
-        & 'y-component of wave induced force                             '       /
-    data elmqty/29*' '/
+        & 'y-component of wave induced force                             ',      &
+        & 'peak wave period                                              '       /
+    data elmqty/30*' '/
     data elmunt/'[TSCALE] ', '[ - ]    ', '[ M ]    ', '[ DEG ]  ', '[ DEG ]  ', &
               & '[ SEC ]  ', '[ SEC ]  ',&
               & '[ M ]    ', '[ M/S ]  ', '[ M/S ]  ', '[ W/M  ] ', '[ W/M  ] ', &
               & '[ DEG ]  ', '[N/M/SEC]', '[J/M2/S] ', '[ - ]    ', '[ M ]    ', &
               & '[ M ]    ', '[ M/S ]  ', '[ - ]    ', '[ M ]    ', &
               & '[ SEC ]  ', '[ SEC ]  ', '[ SEC ]  ', '[ M ]    ', '[ SEC ]  ', &
-              & '[ M ]    ', '[ N/M2 ] ', '[ N/M2 ]'                             /
-    data elmtps/2*'INTEGER', 27*'REAL'/
-    data nbytsg/29*4/
+              & '[ M ]    ', '[ N/M2 ] ', '[ N/M2 ] ', '[ SEC ]  '               /
+    data elmtps/2*'INTEGER', 28*'REAL'/
+    data nbytsg/30*4/
 !
 !! executable statements -------------------------------------------------------
 !
@@ -210,68 +214,16 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
     !
     call filldm(elmdms    ,1     ,1    ,1         ,0         , &
               & 0         ,0     ,0    )
-    call filldm(elmdms    ,2     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,3     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,4     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,5     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,6     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,7     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,8     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,9     ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,10    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,11    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,12    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,13    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,14    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,15    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,16    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,17    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,18    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,19    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,20    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,21    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,22    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,23    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,24    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,25    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,26    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,27    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,28    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
-    call filldm(elmdms    ,29    ,2    ,sof%mmax  ,sof%nmax  , &
-              & 0         ,0     ,0    )
+    do i = 2, 30
+       call filldm(elmdms    ,i     ,2    ,sof%mmax  ,sof%nmax  , &
+                 & 0         ,0     ,0    )
+    enddo
     !
     ! Write all elements to file; all
     ! definition and creation of files, data groups, cells and
     ! elements is handled by PUTGET
     !
-    nelems = 29
+    nelems = 30
     celidt=wavedata%output%count
     if (prevtime) then
        idummy(1) = wavedata%time%calctimtscale_prev
@@ -355,8 +307,6 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
               & elmnms(18),celidt    ,wrswch    ,error     ,rbuf      )
 
-    deallocate( rbuf , stat=ierror)
-
     call putgtr(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
               & elmnms(19),celidt    ,wrswch    ,error     ,sof%ubot   )
@@ -400,6 +350,18 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime)
     call putgtr(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
               & elmnms(29),celidt    ,wrswch    ,error     ,sof%fy     )
+    !
+    call perpar(gamma0, perfac, ierror)
+    if (ierror < 0) then
+       write(*,'(a,f10.5)') 'ERROR: gamma0 = ',gamma0,' lies outside allowed range [1,20]'
+       stop
+    endif
+    rbuf = sof%period(i,j)*perfac
+    call putgtr(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
+              & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
+              & elmnms(30),celidt    ,wrswch    ,error     ,rbuf       )
+
+    deallocate( rbuf , stat=ierror)
     !
     ! Also write the possible additional output parameters to the map file
     !
