@@ -469,8 +469,8 @@ pure function char_array_to_string(char_array, length)
 end function char_array_to_string
 
 function string_to_char_array(string, length) result(char_array)
-   character(len=length), intent(in) :: string
    integer, intent(in) :: length
+   character(len=length), intent(in) :: string
    character(kind=c_char,len=1) :: char_array(MAXSTRLEN)
    integer :: i
    do i = 1, len(string)
