@@ -51,8 +51,8 @@ contains
     bc%qname = quantityName
     bc%bcname = plilabel
     bc%fname = fname                                  ! store original filename for later referece (?)
-    if (associated(bc%quantity)) then                 ! allocate quantity struct attached to the bc-block 
-       deallocate(bc%quantity)
+    if (associated(bc%quantity)) then
+       nullify(bc%quantity)
     endif
     allocate(bc%quantity)
     call str_upper(bc%qname,len(trim(bc%qname)))
@@ -139,7 +139,7 @@ contains
        endif
        lineno = lineno + 1
        if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
-       reclen = len_trim(rec)                                  ! deal with various comment delimiters 
+       reclen = len_trim(rec)                                  ! deal with various comment delimiters
        commentpos = index(rec(1:reclen),'//')
        if (commentpos>0) reclen = min(reclen,commentpos-1)
        commentpos = index(rec(1:reclen),' %')
@@ -582,7 +582,7 @@ contains
           reclen = len_trim(rec(1:reclen))                                 ! Finally remove trailing spaces
           if (index(rec,'[forcing]'         )>0 .or. &
               index(rec,'[Boundary]'        )>0 .or. &
-              index(rec,'[LateralDischarge]')>0) then ! new boundary chapter       
+              index(rec,'[LateralDischarge]')>0) then ! new boundary chapter
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
@@ -817,7 +817,7 @@ contains
     end if
     nBCBlocks = 0
 end function ecBCBlockFree1dArray
-      
+
       ! =======================================================================
 
   ! BCQuantity destructor
