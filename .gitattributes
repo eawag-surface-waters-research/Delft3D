@@ -4021,6 +4021,7 @@ src/third_party_open/proj4/makefile.vc -text
 src/third_party_open/proj4/nmake.opt -text
 src/third_party_open/proj4/proj.pc.in -text
 src/third_party_open/proj4/proj.spec -text
+src/third_party_open/proj4/readme.txt -text
 src/third_party_open/proj4/src/Makefile.am -text
 src/third_party_open/proj4/src/PJ_aea.c -text
 src/third_party_open/proj4/src/PJ_aeqd.c -text
@@ -4205,7 +4206,10 @@ src/third_party_open/proj4/src/pj_utils.c -text
 src/third_party_open/proj4/src/pj_zpoly1.c -text
 src/third_party_open/proj4/src/proj.c -text
 src/third_party_open/proj4/src/proj.def -text
+src/third_party_open/proj4/src/proj.vcxproj -text
+src/third_party_open/proj4/src/proj.vcxproj.filters -text
 src/third_party_open/proj4/src/proj_api.h -text
+src/third_party_open/proj4/src/proj_config.h -text
 src/third_party_open/proj4/src/proj_config.h.wince -text
 src/third_party_open/proj4/src/proj_etmerc.c -text
 src/third_party_open/proj4/src/proj_mdist.c -text
