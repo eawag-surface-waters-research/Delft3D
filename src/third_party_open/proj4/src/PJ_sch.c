@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ *
  *
  * Project:  SCH Coordinate system
  * Purpose:  Implementation of SCH Coordinate system
