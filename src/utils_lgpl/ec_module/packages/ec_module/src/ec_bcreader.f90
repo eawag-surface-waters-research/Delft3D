@@ -154,7 +154,7 @@ contains
        if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines
           if (index(rec,'[forcing]')>0) then                   ! new boundary chapter
              jaheader = .true.                                 ! switching to header mode
-             keyvaluestr = ','
+             keyvaluestr = '***,'
              jablock=.false.
              nfld = 0                                          ! count the number of fields in this header block
              nq = 0                                            ! count the (maximum) number of quantities in this block

@@ -111,7 +111,7 @@ module m_ec_typedefs
         integer(kind=8)                            ::  fhandle= -1         !< (C) filehandle to open file 
         logical                                    ::  isLateral = .false. !< Lateral discharge? (otherwise: boundary condition)
         integer                                    ::  ftype  = -1         !< ASCII, NetCDF, ....
-        type (tEcBCQuantity), pointer              ::  quantity            !< Quantity object 
+        type (tEcBCQuantity), pointer              ::  quantity => null()  !< Quantity object 
         type (tEcBCQuantity), allocatable          ::  quantities(:)       !< Array of quantity objects for each quantity with the same name  
         type (tEcNetCDF), pointer                  ::  ncptr => null()     !< pointer to a NetCDF instance, responsible for a connected NetCDF file 
         integer                                    ::  ncvarndx = -1       !< varid in the associated netcdf for the requested quantity 
