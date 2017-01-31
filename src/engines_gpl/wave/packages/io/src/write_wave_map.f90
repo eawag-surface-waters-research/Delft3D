@@ -356,7 +356,11 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime, gamm
        write(*,'(a,f10.5)') 'ERROR: gamma0 = ',gamma0,' lies outside allowed range [1,20]'
        stop
     endif
-    rbuf = sof%period(i,j)*perfac
+    do j = 1,size(sg%x,2)
+       do i = 1,size(sg%x,1)
+          rbuf(i,j) = sof%period(i,j) * perfac
+       enddo
+    enddo
     call putgtr(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
               & elmnms(30),celidt    ,wrswch    ,error     ,rbuf       )
