@@ -43,7 +43,7 @@ module mathconsts
    implicit none
    
    !
-   ! high precision constants
+   ! single precision constants
    !
    real(sp), save :: ee_sp      = exp(1.0_sp)                      !< ee = 2.718281...
    real(sp), save :: pi_sp      = 4.0_sp*atan(1.0_sp)              !< pi = 3.141592...
@@ -52,6 +52,7 @@ module mathconsts
    real(sp), save :: degrad_sp  = 4.0_sp*atan(1.0_sp)/180.0_sp     !< conversion factor from degrees to radians (pi/180)
    real(sp), save :: raddeg_sp  = 180.0_sp/(4.0_sp*atan(1.0_sp))   !< conversion factor from radians to degrees (180/pi)
    real(sp), save :: daysec_sp  = 24.0_sp*60.0_sp*60.0_sp          !< conversion factor from earth day to seconds
+   real(sp), save :: yearsec_sp = 365.0_sp*24.0_sp*60.0_sp*60.0_sp !< conversion factor from earth year to seconds (non-leap)
    real(sp), save :: eps_sp     = epsilon(1.0_sp)                  !< epsilon for sp
    
    !
@@ -64,6 +65,7 @@ module mathconsts
    real(fp), save :: degrad     = 4.0_fp*atan(1.0_fp)/180.0_fp     !< conversion factor from degrees to radians (pi/180)
    real(fp), save :: raddeg     = 180.0_fp/(4.0_fp*atan(1.0_fp))   !< conversion factor from radians to degrees (180/pi)
    real(fp), save :: daysec     = 24.0_fp*60.0_fp*60.0_fp          !< conversion factor from earth day to seconds
+   real(fp), save :: yearsec    = 365.0_fp*24.0_fp*60.0_fp*60.0_fp !< conversion factor from earth year to seconds (non-leap)
    real(fp), save :: eps_fp     = epsilon(1.0_fp)                  !< epsilon for fp
    
    !
