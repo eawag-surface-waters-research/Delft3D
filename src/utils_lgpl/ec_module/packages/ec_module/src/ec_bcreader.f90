@@ -154,7 +154,7 @@ contains
        if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines
           if (index(rec,'[forcing]')>0) then                   ! new boundary chapter
              jaheader = .true.                                 ! switching to header mode
-             keyvaluestr = '***,'
+             keyvaluestr = ''
              jablock=.false.
              nfld = 0                                          ! count the number of fields in this header block
              nq = 0                                            ! count the (maximum) number of quantities in this block
@@ -241,7 +241,8 @@ contains
     character(len=*),    intent(in)  :: keyvaluestr
     character(len=*),    intent(in)  :: key
     character(len=*),    intent(in)  :: value
-    jafound = (index(keyvaluestr,','''//trim(key)//''','''//trim(value)//''',')>0)            ! like 'keyword1','value1','keyword',.....
+!   jafound = (index(keyvaluestr,','''//trim(key)//''','''//trim(value)//''',')>0)            ! like 'keyword1','value1','keyword',.....
+    jafound = (index(keyvaluestr,''''//trim(key)//''','''//trim(value)//'''')>0)            ! like 'keyword1','value1','keyword',.....
   end function jakeyvalue
 
   !> Given a character string of key-value pairs gathered from a header block,
@@ -261,7 +262,6 @@ contains
     character(len=maxNameLen),  allocatable   ::     hdrkeys(:)     !< All keys from header
     character(len=maxRecordLen),  allocatable ::     hdrvals(:)     !< All values from header
     integer, allocatable             ::     iv(:), il(:), perm_vpos(:)
-    character(len=maxRecordLen)      ::     dumstr
 
     integer                          ::     ipos, npos, posfs
     integer                          ::     iq, iq_sel, idim
@@ -297,7 +297,8 @@ contains
     hdrvals=''
     hdrkeys=''
     vectordefinition = ''
-    read(keyvaluestr,*,iostat=iostat) dumstr,(hdrkeys(ifld),hdrvals(ifld),ifld=1,nfld)
+
+    read(keyvaluestr,*,iostat=iostat) (hdrkeys(ifld),hdrvals(ifld),ifld=1,nfld)
     iq = 0
     iq_sel = 0
     do ifld=1,nfld
