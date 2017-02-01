@@ -382,7 +382,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
           s0(nm) = s1(nm)
        endif
        if (kcu(nm) /= 0) then
-         hu0(nm) = hu(nm)
+          hu0(nm) = hu(nm)
        endif
        if (kcv(nm) /= 0) then
           hv0(nm) = hv(nm)

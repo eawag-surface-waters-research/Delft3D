@@ -182,7 +182,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           goto 1100
        endif
        !
-       ! Define boundary coniditions
+       ! Define boundary conditions
        ! Loop over boundary for rows
        ! The definition of the open boundary has already been checked
        ! previously therefore the outcome of error in INCREM will

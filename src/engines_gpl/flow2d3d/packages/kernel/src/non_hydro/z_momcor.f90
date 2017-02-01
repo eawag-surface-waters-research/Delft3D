@@ -220,7 +220,7 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
        if (kenm/=0 .or. disch(i)>=0.0_fp) then
           if (k/=0) then
              !
-             ! The order is inportant at dry points (kfsmax=-1)
+             ! The order is important at dry points (kfsmax=-1)
              !
              if (k>kfsmax(nm)) then
                 k = kfsmax(nm)
@@ -255,7 +255,7 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
           if (kenm/=0 .or. -disch(i)>=0.0_fp) then
              if (k /= 0) then
                 !
-                ! The order is inportant at dry points (kfsmax=-1)
+                ! The order is important at dry points (kfsmax=-1)
                 !
                 if (k>kfsmax(nm)) then
                    k = kfsmax(nm)

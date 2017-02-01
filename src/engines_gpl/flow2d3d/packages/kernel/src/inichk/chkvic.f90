@@ -35,7 +35,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 !    Function: Checkes stability criterion for horizontal viscosity and
 !              diffusivity according to "first2d.doc"
-!              (R.E. Uittenboogaard 24-12-99)
+!              (R.E. Uittenbogaard 24-12-99)
 !              NOTE: changes to incorporate HLES in DD
 ! Method used:
 !     Comment: The HLES contribution to vicuv/dicuv is stored in array element
