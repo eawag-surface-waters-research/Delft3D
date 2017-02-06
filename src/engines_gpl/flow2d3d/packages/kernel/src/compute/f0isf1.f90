@@ -264,12 +264,12 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
        ! if (abs(v0(nm,k)-v1(nm,k)) >= velmax) then warning
        !
        do nm = 1, nmmax
-          if (kcu(nm) /= 0) then
+          if (kcu(nm) > 0) then
              do k = 1, kmax
                 u01max = max(u01max, abs(u0(nm, k) - u1(nm, k)))
              enddo
           endif
-          if (kcv(nm) /= 0) then
+          if (kcv(nm) > 0) then
              do k = 1, kmax
                 v01max = max(v01max, abs(v0(nm, k) - v1(nm, k)))
              enddo
@@ -281,7 +281,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                & ' m/s (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
           call prterr(lundia, 'U190', trim(message))
           do nm = 1, nmmax
-             if (kcu(nm) /= 0) then
+             if (kcu(nm) > 0) then
                 do k = 1, kmax
                    suvval = abs(u0(nm, k) - u1(nm, k))
                    if (suvval >= velmax) then
@@ -301,7 +301,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                & ' m/s (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
           call prterr(lundia, 'U190', trim(message))
           do nm = 1, nmmax
-             if (kcv(nm) /= 0) then
+             if (kcv(nm) > 0) then
                 do k = 1, kmax
                    suvval = abs(v0(nm, k) - v1(nm, k))
                    if (suvval >= velmax) then
