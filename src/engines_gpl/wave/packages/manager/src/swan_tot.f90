@@ -205,7 +205,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             !
             write(*,'(a)') '  Write SWAN depth file'
             sumvars      = .true.
-            positiveonly = .false.
+            positiveonly = .true.
             extr_var1 = dom%qextnd(q_bath) == 2
             extr_var2 = dom%qextnd(q_wl)   == 2
             call write_swan_datafile (swan_input_fields%dps         , &
@@ -214,7 +214,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
                                     & swan_input_fields%nmax        , &
                                     & swan_grids(i_swan)%covered    , &
                                     & 'BOTNOW', extr_var1, extr_var2, &
-                                    & sumvars , positiveonly        )
+                                    & sumvars , positiveonly        , &
+                                    & swan_run%depmin)
          endif
          if (dom%qextnd(q_cur)>0 .or. swan_run%swuvi) then
             !
@@ -283,7 +284,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
                                     & swan_input_fields%nmax        , &
                                     & swan_grids(i_swan)%covered    , &
                                     & 'VEGNOW', extr_var1, extr_var2, &
-                                    & sumvars , positiveonly        )
+                                    & sumvars , positiveonly        , &
+                                    & 0.0)
          endif
 
          write(*,'(a)') '  Deallocate input fields'
