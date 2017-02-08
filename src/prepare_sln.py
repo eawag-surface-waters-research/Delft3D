@@ -427,7 +427,7 @@ def getUCRTVersionNumber():
             ucrtversion = versions[0]
             ucrtversion = os.path.basename(ucrtversion)
         # Inside ucrtlibdir, replace all occurences of UCRTLIBDIRVERSIONNUMBER by ucrtversion
-        for key in ucrtlibdir.iterkeys():
+        for key in iter(ucrtlibdir):
             ucrtlibdir[key] = str(ucrtlibdir[key]).replace("UCRTLIBDIRVERSIONNUMBER", ucrtversion)
 
 #
