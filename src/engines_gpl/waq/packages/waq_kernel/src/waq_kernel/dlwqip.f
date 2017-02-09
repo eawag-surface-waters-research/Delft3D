@@ -126,7 +126,6 @@
 !
       IF ( VERSIO .LT. VERSI1 ) THEN
          WRITE ( LUREP, 2000 ) VERSIO , VERSI1
-         CALL SRSTOP(1)
       ENDIF
 !
 !     greater than this version, WARNING
@@ -296,8 +295,10 @@
 !
 !     output formats
 !
- 2000 FORMAT ( ' ERROR  : version proces intput ',F5.2,' NOT supported'
-     &        /'          by PROCES system version,',F5.2)
+ 2000 FORMAT ( ' WARNING: version proces input ',F5.2,' less than'
+     &        /'          PROCES system version,',F5.2,
+     &        /'          Please upgrade the proc_def when you are not'
+     &        /'          using an OpenPLCT proc_def')
  2010 FORMAT ( ' WARNING: version proces input ',F5.2,' greater than'
      &        /'          PROCES system version,',F5.2)
  2020 FORMAT ( ' ERROR  : Proces work file doesn''t match dimensions in'
