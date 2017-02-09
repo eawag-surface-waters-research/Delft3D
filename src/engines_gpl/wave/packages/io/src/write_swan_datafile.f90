@@ -1,6 +1,6 @@
 subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
                               & filnam, extr_var1, extr_var2, &
-                              & sumvars, positiveonly, depmin)
+                              & sumvars, positiveonly, minval)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -46,7 +46,7 @@ subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
     integer                       , intent(in)  :: mmax
     integer                       , intent(in)  :: nmax
     integer, dimension(mmax, nmax), intent(in)  :: covered
-    real   , optional             , intent(in)  :: depmin
+    real   , optional             , intent(in)  :: minval
     real   , dimension(mmax, nmax)              :: var1
     real   , dimension(mmax, nmax)              :: var2
     logical                       , intent(in)  :: extr_var1
@@ -72,9 +72,15 @@ subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
     integer                                :: sweepStep
     real   , dimension(:,:)  , allocatable :: cpDistance
     real                                   :: distance
+    real                                   :: minval_
 !
 !! executable statements -------------------------------------------------------
 !
+    if (present(minval)) then
+        minval_ = minval
+    else
+        minval_ = 0.0
+    endif
     if (extr_var1 .or. extr_var2) then
        allocate(closestPoint(mmax, nmax, max(iindex,jindex)))
        allocate(cpDistance  (mmax, nmax))
@@ -226,14 +232,14 @@ subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
     !
     if (sumvars) then
        if (positiveonly) then
-          write (lunfil,'(4(3X,E13.6))') ( ( max(var1(i,j)+var2(i,j),depmin), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( ( max(var1(i,j)+var2(i,j),minval_), i=1,mmax), j=1,nmax )
        else
           write (lunfil,'(4(3X,E13.6))') ( (var1(i,j)+var2(i,j), i=1,mmax), j=1,nmax )
        endif
     else
        if (positiveonly) then
-          write (lunfil,'(4(3X,E13.6))') ( ( max(var1(i,j),0.0), i=1,mmax), j=1,nmax )
-          write (lunfil,'(4(3X,E13.6))') ( ( max(var2(i,j),0.0), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( ( max(var1(i,j),minval_), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( ( max(var2(i,j),minval_), i=1,mmax), j=1,nmax )
        else
           write (lunfil,'(4(3X,E13.6))') ( (var1(i,j), i=1,mmax), j=1,nmax )
           write (lunfil,'(4(3X,E13.6))') ( (var2(i,j), i=1,mmax), j=1,nmax )
