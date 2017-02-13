@@ -252,7 +252,7 @@
 
       write(lunhyd,'(a)') key(48)
       do ilay = 1 , hyd%kmax
-         write(lunhyd,'(''      '',F15.3)') hyd%hyd_layers(ilay)
+         write(lunhyd,'(''      '',F15.8)') hyd%hyd_layers(ilay)
       enddo
       write(lunhyd,'(a)') key(49)
 
