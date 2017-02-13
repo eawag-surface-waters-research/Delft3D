@@ -338,8 +338,8 @@
       write ( lunout1 , '(A      )' ) 'hydrodynamic-layers'
       write ( lunout2 , '(A      )' ) 'hydrodynamic-layers'
       do i = 1,kmax
-         write ( lunout1 , '(F15.3  )' ) thick(i)
-         write ( lunout2 , '(F15.3  )' ) thick(i)
+         write ( lunout1 , '(F15.8  )' ) thick(i)
+         write ( lunout2 , '(F15.8  )' ) thick(i)
       enddo
       write ( lunout1 , '(A      )' ) 'end-hydrodynamic-layers'
       write ( lunout2 , '(A      )' ) 'end-hydrodynamic-layers'
@@ -348,15 +348,15 @@
       anl = 1.000
       do i = 1,kmax-1
          if ( ilaggr(i+1) .ne. ilaggr(i) ) then
-            write ( lunout1 , '(F13.3  )' ) anl
-            write ( lunout2 , '(F13.3  )' ) anl
+            write ( lunout1 , '(F13.1  )' ) anl
+            write ( lunout2 , '(F13.1  )' ) anl
             anl = 1.000
          else
             anl = anl + 1.000
          endif
       enddo
-      write ( lunout1 , '(F13.3  )' ) anl
-      write ( lunout2 , '(F13.3  )' ) anl
+      write ( lunout1 , '(F13.1  )' ) anl
+      write ( lunout2 , '(F13.1  )' ) anl
       write ( lunout1 , '(A      )' ) 'end-water-quality-layers'
       write ( lunout2 , '(A      )' ) 'end-water-quality-layers'
       write ( lunout1 , '(A      )' ) 'discharges'
