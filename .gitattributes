@@ -5564,9 +5564,6 @@ src/utils_lgpl/delftio/packages/delftio_dll/resource.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcxproj -text
-src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm_vs2012.vcxproj -text
-src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm_vs2013.vcxproj -text
-src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm_vs2015.vcxproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/checkDiff -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/dio-sync-ux.h -text
@@ -5991,10 +5988,6 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/wavenr.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c.vcxproj -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_2012.vcxproj -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_vs2012.vcxproj -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_vs2013.vcxproj -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/deltares_common_c_vs2015.vcxproj -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/cpuinfo.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/getputarray.h -text
