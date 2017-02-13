@@ -6337,9 +6337,6 @@ src/utils_lgpl/nefis/packages/nefis/nefis.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis5.dsp -text
 src/utils_lgpl/nefis/packages/nefis/nefis_dll.vcproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis_dll.vcxproj -text
-src/utils_lgpl/nefis/packages/nefis/nefis_dll_vs2012.vcxproj -text
-src/utils_lgpl/nefis/packages/nefis/nefis_dll_vs2013.vcxproj -text
-src/utils_lgpl/nefis/packages/nefis/nefis_vs2012.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis_vs2013.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/src/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/src/c2c.c -text
