@@ -37,6 +37,7 @@ else:
 # 5. If this script does not behave as expected: Please report the problem and help to improve this script.
 #
 
+chooseIfort = 1
 
 vs = -999
 ifort = -999
@@ -328,6 +329,8 @@ def process_project_file(pfile):
             # IFORT_COMPILER ...
             startpos = line.find("$(IFORT_COMPILER")
             if startpos != -1:
+                if ifort == -999:
+                    sys.exit("ERROR: Fortran compiler specification is being used while not defined.")
                 split_char = ";"
                 if line.find("oss-install") != -1:
                     #
@@ -480,6 +483,7 @@ def build_gui():
     global vs_gui
     global ifort_gui
     global root
+    global chooseIfort
 
     root = Tk(className="Choose IDE and compiler")
     root.geometry("600x300")
@@ -497,18 +501,24 @@ def build_gui():
     # default value
     vs_gui.set(2012)
     
-    Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
-    Radiobutton(root, text="IFORT17: (not tested yet)                      ", variable=ifort_gui, value=17).grid(row=1, column=2, sticky=W)
-    Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 1", variable=ifort_gui, value=16).grid(row=2, column=2, sticky=W)
-    Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015         ", variable=ifort_gui, value=15).grid(row=3, column=2, sticky=W)
-    Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=4, column=2, sticky=W)
-    Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=5, column=2, sticky=W)
-    Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=6, column=2, sticky=W)
-    # default value
-    ifort_gui.set(13)
+    if chooseIfort == 1:
+        Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
+        Radiobutton(root, text="IFORT17: (not tested yet)                      ", variable=ifort_gui, value=17).grid(row=1, column=2, sticky=W)
+        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 1", variable=ifort_gui, value=16).grid(row=2, column=2, sticky=W)
+        Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015         ", variable=ifort_gui, value=15).grid(row=3, column=2, sticky=W)
+        Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=4, column=2, sticky=W)
+        Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=5, column=2, sticky=W)
+        Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=6, column=2, sticky=W)
+        # default value
+        ifort_gui.set(13)
+    else:
+        ifort_gui.set(-999)
     
     Label(text=" ").grid(row=7)
-    Label(text="Choose your Visual Studio version and IFORT version and click 'Apply'").grid(row=8, column=0, columnspan=3)
+    if chooseIfort == 1:
+        Label(text="Choose your Visual Studio version and IFORT version and click 'Apply'").grid(row=8, column=0, columnspan=3)
+    else:
+        Label(text="Choose your Visual Studio version and click 'Apply'").grid(row=8, column=0, columnspan=3)
     
     b1 = Button(root, text="Apply", width=20, command=do_work).grid(row=9, column=0, sticky=W)
     b2 = Button(root, text="Exit", width=20, command=exit_button_pressed).grid(row=9, column=2, sticky=E)
