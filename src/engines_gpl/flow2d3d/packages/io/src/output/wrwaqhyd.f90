@@ -6,8 +6,9 @@
      &                      chez   , nsrc   , mnksrc , namsrc , runid  , &
      &                      nowalk , iwlk   , aggre  , flaggr , zmodel , &
      &                      ilaggr , nd     , nlb    , nub    , mlb    , &
-     &                      mub    , kfsmin , ksrwaq , noseg, noq1, noq2, &
-     &                      noq3   , xz     , yz )
+     &                      mub    , kfsmin , ksrwaq , noseg  , noq1   , &
+     &                      noq2   , noq3   , xz     , yz     , zbot   , &
+     &                      ztop )
 !----- GPL ---------------------------------------------------------------------
 !
 !  Copyright (C)  Stichting Deltares, 2011-2017.
@@ -85,6 +86,8 @@
       integer(4)    noq3               !<  Exchanges in third direction
       real(fp) , dimension(nlb:nub,mlb:mub) , intent(in) :: xz     !  Description and declaration in esm_alloc_real.f90
       real(fp) , dimension(nlb:nub,mlb:mub) , intent(in) :: yz     !  Description and declaration in esm_alloc_real.f90
+      real(fp)      zbot               !<  Maximum depth in the model (relative to the reference level; unit: metres; positive upwards).
+      real(fp)      ztop               !<  The ‘imaginary’ maximum water level in the model (relative to the reference level; unit: metres; positive upwards).
 !
 !           Local  variables
 !
@@ -312,6 +315,11 @@
       filstring = ''''//trim(filnam)//'.atr'''
       write ( lunout1 , '(A,A    )' ) 'attributes-file          ',trim(filstring)
       write ( lunout2 , '(A,A    )' ) 'attributes-file          ',trim(filstring)
+
+      if (zmodel) then
+         write ( lunout2 , '(A, F15.6 )' ) 'z-layers-ztop ', ztop
+         write ( lunout2 , '(A, F15.6 )' ) 'z-layers-zbot ', zbot
+      endif
 
       if ( ilaggr(kmax) .gt. 1 ) then
          write ( lunout1 , '(A,A    )' ) 'minimum-vert-diffusion   '

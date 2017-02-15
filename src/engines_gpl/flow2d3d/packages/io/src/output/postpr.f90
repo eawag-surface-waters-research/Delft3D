@@ -348,6 +348,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                              , pointer :: itwqff
     integer                              , pointer :: itwqfi
     integer                              , pointer :: itwqfl
+    real(fp)                             , pointer :: zbot
+    real(fp)                             , pointer :: ztop
 !
 ! Global variables
 !
@@ -698,6 +700,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     itwqfi              => gdp%gdwaqpar%itwqfi
     itwqfl              => gdp%gdwaqpar%itwqfl
     nto                 => gdp%d%nto
+    zbot                => gdp%gdzmodel%zbot
+    ztop                => gdp%gdzmodel%ztop
     
     !
     ! Initialisation
@@ -820,7 +824,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 &  ltem      , lsed      , r(r1)     , r(areau)  , r(areav)  ,  &
                 &  r(taubmx) , r(dicww)  , d(dps)    , r(dp)     , r(cfurou) , r(cfvrou) , &
                 &  chez      , i(mnksrc) , ch(namsrc), nto       , ch(nambnd), i(mnbnd)  , &
-                &  zmodel    , gdp       )
+                &  zmodel    , ztop      , zbot      , gdp       )
     !
     ! Create the stream for FLOW to get the answer from WAQ
     !

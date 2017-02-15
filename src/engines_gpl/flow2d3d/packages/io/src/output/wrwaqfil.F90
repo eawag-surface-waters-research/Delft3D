@@ -7,7 +7,7 @@
      &                      ltem   , lsed   , r1     , areau  , areav  , &
      &                      tau    , vdiff  , dps    , dp     , chezu  , chezv , &
      &                      chez   , mnksrc , namsrc , nto    , nambnd , mnbnd , &
-     &                      zmodel , gdp    )
+     &                      zmodel , ztop   , zbot   , gdp    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -168,6 +168,10 @@
       character(20) nambnd(  nto)      !!  names of the open boundaries
       integer mnbnd(7,nto)             !!  indices of the open boundaries
       logical  zmodel                  !!  true if z-model feature is used
+      real(fp) zbot                    !!  Maximum depth in the model (relative to the reference level; unit: metres; positive upwards).
+                                       !!  It marks the lower boundary of the grid.
+      real(fp) ztop                    !!  The ‘imaginary’ maximum water level in the model (relative to the reference level; unit: metres; positive upwards).
+                                       !!  This imaginary level is used only to determine the grid distribution. It does not mark the maximum surface level.
 !
 !           Local variables
 !
@@ -361,14 +365,15 @@
         endif
 
          nd = gdp%gdprognm%numdomains
-         call wrwaqhyd ( filnam , itdate , tstart , tstop  , dt     ,    &
+         call wrwaqhyd (filnam , itdate , tstart , tstop  , dt     ,    &
                         itwqff , itwqfl , itwqfi , nmaxus , mmax   ,    &
                         kmax   , thick  , lsal   , ltem   , lsed   ,    &
                         chez   , nsrc   , mnksrc , namsrc , runid  ,    &
                         nowalk , iwlk   , aggre  , flaggr , zmodel ,    &
                         ilaggr , nd     , nlb    , nub    , mlb    ,    &
-                        mub    , kfsmin , ksrwaq , noseg, noq1, noq2,   &
-                        noq3   , xz     , yz     )
+                        mub    , kfsmin , ksrwaq , noseg  , noq1   ,    &
+                        noq2   , noq3   , xz     , yz     , zbot   ,    &
+                        ztop )
          if (parll) then
             write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode, '.'
          else
