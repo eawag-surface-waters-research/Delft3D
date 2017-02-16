@@ -59,4 +59,6 @@ subroutine clrtrachy(istat, gdp)
     if (associated(gdp%gdtrachy%rttdef)) deallocate (gdp%gdtrachy%rttdef, STAT = istat)
     if (associated(gdp%gdtrachy%rttfu))  deallocate (gdp%gdtrachy%rttfu , STAT = istat)
     if (associated(gdp%gdtrachy%rttfv))  deallocate (gdp%gdtrachy%rttfv , STAT = istat)
+    if (associated(gdp%gdtrachy%itrt_list)) deallocate (gdp%gdtrachy%itrt_list , STAT = istat)
+    if (associated(gdp%gdtrachy%fraccu_list)) deallocate (gdp%gdtrachy%fraccu_list , STAT = istat)
 end subroutine clrtrachy

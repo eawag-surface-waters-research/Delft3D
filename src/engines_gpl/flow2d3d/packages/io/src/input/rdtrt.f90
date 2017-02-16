@@ -56,12 +56,15 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     integer                    , pointer :: nttaru
     integer                    , pointer :: nttarv
     integer                    , pointer :: ntrt
+    integer                    , pointer :: max_cl
     integer                    , pointer :: mfg
     integer                    , pointer :: nfg
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
+    integer , dimension(:)     , pointer :: itrt_list
     real(fp)                   , pointer :: dryflc
+    real(fp), dimension(:)     , pointer :: fraccu_list
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -140,11 +143,14 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     nttaru         => gdp%gdtrachy%nttaru
     nttarv         => gdp%gdtrachy%nttarv
     ntrt           => gdp%gdtrachy%ntrt
+    max_cl         => gdp%gdtrachy%max_cl
     dryflc         => gdp%gdnumeco%dryflc
     mfg            => gdp%gdparall%mfg
     nfg            => gdp%gdparall%nfg
     waqol          => gdp%gdwaqpar%waqol
     gdtrachy       => gdp%gdtrachy
+    itrt_list      => gdp%gdtrachy%itrt_list
+    fraccu_list    => gdp%gdtrachy%fraccu_list
     !
     ! Allocate trachytope arrays that are used in main routines
     !
@@ -737,6 +743,19 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        write (lundia, '(a,a,f7.3)') txtput1,': ',alf_area_ser
        !
     endif
+    !
+    max_cl = 8
+    keyw    = 'TrtMxR'
+    call prop_get(gdp%mdfile_ptr, '*', keyw, max_cl)
+    if (istat==0) then 
+       if (istat==0) allocate(gdtrachy%fraccu_list(max_cl)  , stat = istat)
+       if (istat==0) allocate(gdtrachy%itrt_list(max_cl)    , stat = istat)
+       !
+       if (istat/=0) then
+          call prterr(lundia, 'U021', 'RDTRT: memory alloc error (step 2)')
+          call d3stop(1, gdp)
+       endif
+    endif    
     !
     write (lundia, '(a)') '*** End    of trachytopes input'
     write (lundia, *)
