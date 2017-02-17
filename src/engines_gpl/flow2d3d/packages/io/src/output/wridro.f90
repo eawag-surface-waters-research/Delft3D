@@ -50,6 +50,7 @@ subroutine wridro(lundia    ,error     ,filename  ,ndro      ,itdrof    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                         , pointer :: io_fp
     integer                         , pointer :: io_prec
 !
 ! Global variables
@@ -95,6 +96,7 @@ subroutine wridro(lundia    ,error     ,filename  ,ndro      ,itdrof    , &
     filetype = getfiletype(gdp, FILOUT_DRO)
     ierror = 0
     !
+    io_fp               => gdp%gdpostpr%io_fp
     io_prec             => gdp%gdpostpr%io_prec
     !
     select case (irequest)
@@ -108,7 +110,7 @@ subroutine wridro(lundia    ,error     ,filename  ,ndro      ,itdrof    , &
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only
           call addelm(gdp, lundia, FILOUT_DRO, grnam1, 'ITDATE', ' ', IO_INT4 , 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
           call addelm(gdp, lundia, FILOUT_DRO, grnam1, 'TUNIT', ' ', io_prec  , 0, longname='Time scale related to seconds', unit='s')
-          call addelm(gdp, lundia, FILOUT_DRO, grnam1, 'DT', ' ', io_prec     , 0, longname='Time step (DT*TUNIT sec)')
+          call addelm(gdp, lundia, FILOUT_DRO, grnam1, 'DT', ' ', io_fp       , 0, longname='Time step (DT*TUNIT sec)')
           call addelm(gdp, lundia, FILOUT_DRO, grnam1, 'SIMDAT', ' ', 16      , 0, longname='Simulation date and time [YYYYMMDD  HHMMSS]') !CHARACTER
           call addelm(gdp, lundia, FILOUT_DRO, grnam1, 'NDRO', ' ', IO_INT4   , 0, longname='Number of drogues released')
        endif

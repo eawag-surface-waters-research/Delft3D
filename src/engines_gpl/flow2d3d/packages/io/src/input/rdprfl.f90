@@ -64,6 +64,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     integer, dimension(:), pointer :: smlay
     integer, dimension(:), pointer :: shlay
     logical,               pointer :: htur2d
+    integer,               pointer :: io_fp
     integer,               pointer :: io_prec
     logical,               pointer :: mergemap
 !
@@ -112,6 +113,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 !
     htur2d     => gdp%gdprocs%htur2d
     itis       => gdp%gdrdpara%itis
+    io_fp      => gdp%gdpostpr%io_fp
     io_prec    => gdp%gdpostpr%io_prec
     mergemap   => gdp%gdpostpr%mergemap
     newkw = .true.
@@ -158,19 +160,26 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     i = 4
     call prop_get(gdp%mdfile_ptr, '*', 'PrecOut', i)
+    if (fp==sp) then
+        io_fp = IO_REAL4
+    else
+        io_fp = IO_REAL8
+    endif
     select case (i)
     case (4)
         io_prec= IO_REAL4
-        if (fp==hp) then
-            write (lundia, '(a)') '*** MESSAGE All output files written in single precision.'
+        if (fp==sp) then
+            write (lundia, '(a)') '*** MESSAGE His, map, drogue, and fourier files written in single precision.'
+        else
+            write (lundia, '(a)') '*** MESSAGE His, map, drogue, and fourier files written in single precision (except for time and horizontal coordinates).'
         endif
     case (8)
         if (fp==sp) then
             io_prec= IO_REAL4
-            write (lundia, '(a)') '*** WARNING Double precision output requested for single precision simulation. All output files still written in single precision.'
+            write (lundia, '(a)') '*** WARNING Double precision output requested for single precision simulation. His, map, drogue, and fourier files still written in single precision.'
         else
             io_prec= IO_REAL8
-            write (lundia, '(a)') '*** MESSAGE His, map, drogue, and fourier files written in double precision (if written at all).'
+            write (lundia, '(a)') '*** MESSAGE His, map, drogue, and fourier files written in double precision.'
         endif
     case default
        call prterr(lundia, 'U021', "Invalid output precision specified. PrecOut should be set to 4 or 8.")

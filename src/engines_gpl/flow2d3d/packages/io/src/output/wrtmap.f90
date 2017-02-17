@@ -74,6 +74,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     integer                         , pointer :: nmmax
     integer                         , pointer :: celidt
     integer                         , pointer :: keva
+    integer                         , pointer :: io_fp
     integer                         , pointer :: io_prec
     integer  , dimension(:)         , pointer :: smlay
     logical                         , pointer :: temp
@@ -249,6 +250,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
     nmaxgl         => gdp%gdparall%nmaxgl
     nmmax          => gdp%d%nmmax
     keva           => gdp%gdtricom%keva
+    io_fp          => gdp%gdpostpr%io_fp
     io_prec        => gdp%gdpostpr%io_prec
     smlay          => gdp%gdpostpr%smlay
     temp           => gdp%gdprocs%temp
@@ -328,7 +330,7 @@ subroutine wrtmap(lundia    ,error     ,filename  ,selmap    ,itmapc    , &
           month = (itdate - year*10000) / 100
           day   = itdate - year*10000 - month*100
           write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
-          call addelm(gdp, lundia, FILOUT_MAP, grnam1, 'time'  , 'time', io_prec , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
+          call addelm(gdp, lundia, FILOUT_MAP, grnam1, 'time'  , 'time', io_fp   , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
        endif
        !
        ! map-series

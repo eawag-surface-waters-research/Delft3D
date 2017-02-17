@@ -37,6 +37,7 @@ type sv_postpr
     !
     integer :: nuprpg  !  Current page number print file
     integer :: nuprln  !  Current line number in print page
+    integer :: io_fp   !  Output precision matching simulation precision (IO_REAL4 or IO_REAL8)
     integer :: io_prec !  Output precision (IO_REAL4 or IO_REAL8)
     !
     ! pointers

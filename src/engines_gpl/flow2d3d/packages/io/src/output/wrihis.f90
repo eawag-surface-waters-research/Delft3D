@@ -68,6 +68,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
     integer       , dimension(:, :) , pointer :: elmdms
+    integer                         , pointer :: io_fp
     integer                         , pointer :: io_prec
     integer       , dimension(:)    , pointer :: shlay
     real(fp)      , dimension(:, :) , pointer :: xystat
@@ -188,6 +189,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
     nfg         => gdp%gdparall%nfg
     mnit        => gdp%gdstations%mnit
     mnstat      => gdp%gdstations%mnstat
+    io_fp       => gdp%gdpostpr%io_fp
     io_prec     => gdp%gdpostpr%io_prec
     shlay       => gdp%gdpostpr%shlay
     xystat      => gdp%gdstations%xystat
@@ -264,7 +266,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'ITDATE', ' ', IO_INT4       , 1, dimids=(/iddim_2/), longname='Initial date (input) & time (default 00:00:00)', unit='[YYYYMMDD]')
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TZONE', ' ', io_prec        , 0, longname='Local time zone', unit='h')
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'TUNIT', ' ', io_prec        , 0, longname='Time scale related to seconds', unit='s')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DT', ' ', io_prec           , 0, longname='Time step (DT*TUNIT sec)')
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'DT', ' ', io_fp             , 0, longname='Time step (DT*TUNIT sec)')
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SIMDAT', ' ', 16            , 0, longname='Simulation date and time [YYYYMMDD  HHMMSS]') !CHARACTER
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'SELHIS', ' ', 23            , 0, longname='Selection flag for time histories') !CHARACTER
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NOSTAT', ' ', IO_INT4       , 0, longname='Number of monitoring stations')
@@ -274,7 +276,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'KMAX', ' ', IO_INT4         , 0, longname='Number of layers')
           if (nostatgl > 0) then
              call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'MNSTAT', ' ', IO_INT4    , 2, dimids=(/iddim_2, iddim_nostat/), longname='(M,N) indices of monitoring stations')
-             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYSTAT', ' ', io_prec    , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit)
+             call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYSTAT', ' ', io_fp      , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit)
           endif
        endif
        if (nostatgl > 0) then
@@ -294,7 +296,7 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
        endif
        if (ntruvgl > 0) then
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'MNTRA', ' ', IO_INT4     , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(M1,N1)-(M2,N2) indices of monitoring cross-sections')
-          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYTRA', ' ', io_prec     , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(X1,Y1)-(X2,Y2) coordinates of monitoring cross-sections', unit=xcoordunit)
+          call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'XYTRA', ' ', io_fp       , 2, dimids=(/iddim_4, iddim_ntruv/), longname='(X1,Y1)-(X2,Y2) coordinates of monitoring cross-sections', unit=xcoordunit)
           call addelm(gdp, lundia, FILOUT_HIS, grnam2, 'NAMTRA', ' ', 20         , 1, dimids=(/iddim_ntruv/), longname='Name of monitoring cross-section') !CHARACTER
        endif
        if (filetype == FTYPE_NEFIS) then ! for NEFIS only

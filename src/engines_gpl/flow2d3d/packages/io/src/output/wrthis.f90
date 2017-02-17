@@ -68,6 +68,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     integer       , dimension(:, :) , pointer :: mnstat
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
+    integer                         , pointer :: io_fp
     integer                         , pointer :: io_prec
     integer       , dimension(:)    , pointer :: shlay
     logical                         , pointer :: temp
@@ -206,6 +207,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
     namst      => gdp%gdstations%namst
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
+    io_fp      => gdp%gdpostpr%io_fp
     io_prec    => gdp%gdpostpr%io_prec
     shlay      => gdp%gdpostpr%shlay
     temp       => gdp%gdprocs%temp
@@ -279,7 +281,7 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
           month = (itdate - year*10000) / 100
           day   = itdate - year*10000 - month*100
           write(string,'(a,i0.4,a,i0.2,a,i0.2,a)') 'seconds since ', year, '-', month, '-', day,' 00:00:00'
-          call addelm(gdp, lundia, FILOUT_HIS, grnam1, 'time'  , 'time', io_prec  , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
+          call addelm(gdp, lundia, FILOUT_HIS, grnam1, 'time'  , 'time', io_fp    , 0, longname='time', unit=trim(string), attribs=(/idatt_cal/) )
        endif
        !
        ! his-series
@@ -340,10 +342,10 @@ subroutine wrthis(lundia    ,error     ,filename  ,selhis    ,ithisc    , &
              endif
           endif
           if (filetype == FTYPE_NEFIS) then ! for NEFIS only
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XYSTAT', ' ', io_prec        , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit, attribs=(/idatt_sta/))
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XYSTAT', ' ', io_fp          , 2, dimids=(/iddim_2, iddim_nostat/), longname='(X,Y) coordinates of monitoring stations', unit=xcoordunit, attribs=(/idatt_sta/))
           else
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XSTAT', xcoordname, io_prec  , 1, dimids=(/iddim_nostat/), longname='X coordinates of monitoring stations', unit=xcoordunit)
-             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'YSTAT', ycoordname, io_prec  , 1, dimids=(/iddim_nostat/), longname='Y coordinates of monitoring stations', unit=ycoordunit)
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'XSTAT', xcoordname, io_fp    , 1, dimids=(/iddim_nostat/), longname='X coordinates of monitoring stations', unit=xcoordunit)
+             call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'YSTAT', ycoordname, io_fp    , 1, dimids=(/iddim_nostat/), longname='Y coordinates of monitoring stations', unit=ycoordunit)
           endif
           call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'MNSTAT', ' ', IO_INT4        , 2, dimids=(/iddim_2, iddim_nostat/), longname='(M,N) indices of monitoring stations', attribs=(/idatt_sta/))
           call addelm(gdp, lundia, FILOUT_HIS, grnam3, 'DPS', ' ', io_prec           , 1, dimids=(/iddim_nostat/), longname='Depth in station', unit='m', attribs=(/idatt_sta/))
