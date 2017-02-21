@@ -4862,6 +4862,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/revhot.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/sedconc.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/spring.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/summer.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colormaps/white_jet.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/winter.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/wjet.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/xhsv.clrmap -text
