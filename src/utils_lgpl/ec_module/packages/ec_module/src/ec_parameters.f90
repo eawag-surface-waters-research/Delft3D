@@ -116,6 +116,15 @@ module m_ec_parameters
    integer, parameter :: interpolate_intdiffusion               = 12 !< Not yet supported: only spatial, internal diffusion
    integer, parameter :: interpolate_vertprofile                = 13 !< Not yet supported: only initial vertical profiles
 
+   ! enumeration for time interpolation types
+   integer, parameter :: timeint_lin                           = 1   !< linear
+   integer, parameter :: timeint_bto                           = 2   !< block-to 
+   integer, parameter :: timeint_bfrom                         = 3   !< block-from 
+   integer, parameter :: timeint_lin_extrapol                  = 4   !< linear
+   integer, parameter :: timeint_rainfall                      = 5   !< specific type of interpolation dividing the t1-value by t1-t0
+                                                                     !< effectively from rainfall amount to intensity
+ 
+
    ! enumeration for vertical interpolation types
    integer, parameter :: zinterpolate_unknown                   = 0 !< type is uninitialized
    integer, parameter :: zinterpolate_linear                    = 1 !< linear interpolation

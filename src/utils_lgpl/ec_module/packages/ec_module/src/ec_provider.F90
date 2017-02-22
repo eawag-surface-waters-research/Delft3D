@@ -50,6 +50,7 @@ module m_ec_provider
    use precision
    use string_module
    use netcdf
+!  use proj
    use multi_file_io
    
    implicit none
@@ -2304,6 +2305,7 @@ module m_ec_provider
       
       !> Create source Items and their contained types, based on a NetCDF file's header.
       function ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityName) result(success)
+!     use proj                         ! projtest
       use transform_poleshift
       use m_ec_message
       use m_alloc 
@@ -2378,6 +2380,20 @@ module m_ec_provider
 
          integer, dimension(:), allocatable                      :: first_coordinate_dimids, second_coordinate_dimids
          integer, dimension(:), allocatable                      :: first_coordinate_dimlen, second_coordinate_dimlen
+         integer                                                 :: timeint
+
+   ! Projtest ------------------------------------------------------------------             -
+   !TYPE(pj_object) :: src !< source coordinate system
+   !TYPE(pj_object) :: dst !< destination coordinate system
+   !REAL(kind=c_double), allocatable :: x(:) !< array of x coordinates
+   !REAL(kind=c_double), allocatable :: y(:) !< array 
+   !
+   !REAL(kind=c_double), allocatable :: z(:) !< optional array of z coordinates
+   !INTEGER(kind=c_int) :: output
+   !
+   !output = pj_transform(src, dst, 10, 10, x, y, z);
+   !output = pj_transform_f(src, dst, x, y, z);
+   ! Projtest ------------------------------------------------------------------             -
          
          !
          success = .false.
@@ -2412,7 +2428,7 @@ module m_ec_provider
          select case (trim(quantityName))
          case ('rainfall') 
             ncvarnames(1) = 'rainfall' 
-            ncstdnames(1) = 'precipitation' 
+            ncstdnames(1) = 'precipitation_amount' 
          case ('windx') 
             ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
@@ -2470,7 +2486,7 @@ module m_ec_provider
          nvar = size(fileReaderPtr%standard_names,dim=1)
          do i = 1, count(ncstdnames>' ')
             do idvar = 1,nvar
-               if (strcmpi(fileReaderPtr%standard_names(ivar),ncstdnames(i))) exit     ! Match standard names ...
+               if (strcmpi(fileReaderPtr%standard_names(idvar),ncstdnames(i))) exit     ! Match standard names ...
             enddo 
             if (idvar>nvar) then                                                       ! Variable not found among standard names
                ! ERROR: standard name not found in this filereader, Try the variable names
@@ -2589,7 +2605,7 @@ module m_ec_provider
                enddo
 
                ! Dimensions ID's and dimension lengths of the second coordinate variable
-               ierror = nf90_inquire_variable(fileReaderPtr%fileHandle,coordids(1),ndims=ndims)  
+               ierror = nf90_inquire_variable(fileReaderPtr%fileHandle,sgd_id,ndims=ndims)  
                call realloc(second_coordinate_dimids,ndims)
                call realloc(second_coordinate_dimlen,ndims)
                ierror = nf90_inquire_variable(fileReaderPtr%fileHandle,coordids(1),dimids=second_coordinate_dimids)  ! count dimensions of the first coordinate variable
@@ -2690,7 +2706,13 @@ module m_ec_provider
             ! Create the Quantity
             ! ===================
             quantityId = ecInstanceCreateQuantity(instancePtr)
-            if (.not.(ecQuantitySet(instancePtr, quantityId, name=ncstdnames(i), ncid=idvar))) return
+            select case (quantityName)
+            case ('rainfall')
+               timeint = timeint_rainfall
+            case default
+               timeint = timeint_lin
+            end select
+            if (.not.(ecQuantitySet(instancePtr, quantityId, name=ncstdnames(i), ncid=idvar, timeint=timeint))) return
             if (.not.(ecQuantitySetUnitsFillScaleOffsetFromNcidVarid(instancePtr, quantityId, fileReaderPtr%fileHandle, idvar))) return
 
             ! ========================
@@ -2752,6 +2774,7 @@ module m_ec_provider
       
       !> Create source Items and their contained types, based on NetCDF file header.
       function ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityName) result(success)
+!        use proj
          logical                      :: success       !< function status
          type(tEcInstance),   pointer :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(inout)

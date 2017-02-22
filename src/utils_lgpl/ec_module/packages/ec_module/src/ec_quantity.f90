@@ -103,25 +103,28 @@ module m_ec_quantity
       
       ! =======================================================================
       
-      function ecQuantitySet(instancePtr, quantityId, name,                     &
-                                                      units,                    &
-                                                      vectormax,                &
-                                                      factor,                   &
-                                                      offset,                   &
-                                                      fillvalue,                &
-                                                      ncid                      &
-                                                    ) result(success)
+       function ecQuantitySet(instancePtr, quantityId, name,                     &
+                                                       units,                    &
+                                                       vectormax,                &
+                                                       factor,                   &
+                                                       offset,                   &
+                                                       fillvalue,                &
+                                                       timeint,                  &
+                                                       ncid                      &
+                                                     ) result(success)
+
          logical                               :: success     !< function status
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
          integer,                   intent(in) :: quantityId  !< unique Quantity id
 
-         character(len=*),optional, intent(in) :: name
-         character(len=*),optional, intent(in) :: units
-         integer         ,optional, intent(in) :: vectormax
-         real(hp)        ,optional, intent(in) :: factor
-         real(hp)        ,optional, intent(in) :: offset
-         real(hp)        ,optional, intent(in) :: fillvalue
-         integer         ,optional, intent(in) :: ncid
+         character(len=*),optional :: name
+         character(len=*),optional :: units
+         integer         ,optional :: vectormax
+         real(hp)        ,optional :: factor
+         real(hp)        ,optional :: offset
+         real(hp)        ,optional :: fillvalue
+         integer         ,optional :: timeint
+         integer         ,optional :: ncid
          !
          type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
          !
@@ -139,11 +142,13 @@ module m_ec_quantity
                quantityPtr%name = name  
             end if
          end if
+
          if (present(units)) quantityPtr%units = units  
          if (present(vectormax)) quantityPtr%vectormax = vectormax  
          if (present(factor)) quantityPtr%factor = factor  
          if (present(offset)) quantityPtr%offset = offset  
          if (present(fillvalue)) quantityPtr%fillvalue = fillvalue  
+         if (present(timeint)) quantityPtr%timeint = timeint  
          if (present(ncid)) quantityPtr%ncid = ncid  
          success = .true.
       end function ecQuantitySet

@@ -698,38 +698,60 @@ module m_ec_converter
       ! =======================================================================
       
       !> Calculate weight factors from times.
-      subroutine time_weight_factors(a0, a1, timesteps, t0, t1, extrapolated)
+      subroutine time_weight_factors(a0, a1, timesteps, t0, t1, extrapolated, timeint)
          !
          ! parameters
          real(hp), intent(inout) :: a0, a1
          real(hp), intent(in)    :: t1, t0, timesteps
-         logical, optional       :: extrapolated
+         logical,  intent(out), optional  :: extrapolated
+         integer,  intent(in),  optional  :: timeint
          !
          ! locals
          logical :: l_extrapolated
+         integer :: l_timeint
          !
          ! body
-         l_extrapolated = .false.
-         if (comparereal(timesteps,t0) == -1) then
-            l_extrapolated = .true.
-            a0 = 1.0_hp
-            a1 = 0.0_hp
+         l_timeint = timeint_lin
+         if (present(timeint)) then
+            l_timeint = timeint
          endif
-         if (comparereal(timesteps,t1) == 1) then
-            l_extrapolated = .true.
-            a0 = 0.0_hp
-            a1 = 1.0_hp
-         endif
-         if (.not. l_extrapolated) then    
-            a0 = 1.0_hp
-            a1 = 0.0_hp
-            !
-            if (comparereal(t0, t1) /= 0) then
-               a1 = real((timesteps-t0)/(t1-t0), hp)
-               a0 = a0 - a1
+         select case (l_timeint)
+         case (timeint_lin)
+            l_extrapolated = .false.
+            if (comparereal(timesteps,t0) == -1) then
+               l_extrapolated = .true.
+               a0 = 1.0_hp
+               a1 = 0.0_hp
             endif
-         endif
-         if (present(extrapolated)) extrapolated = l_extrapolated
+            if (comparereal(timesteps,t1) == 1) then
+               l_extrapolated = .true.
+               a0 = 0.0_hp
+               a1 = 1.0_hp
+            endif
+            if (.not. l_extrapolated) then    
+               a0 = 1.0_hp
+               a1 = 0.0_hp
+               !
+               if (comparereal(t0, t1) /= 0) then
+                  a1 = real((timesteps-t0)/(t1-t0), hp)
+                  a0 = a0 - a1
+               endif
+            endif
+            if (present(extrapolated)) extrapolated = l_extrapolated
+         case (timeint_bto)   
+            a0 = 0.0d0
+            a1 = 1.0d0
+         case (timeint_bfrom)   
+            a0 = 1.0d0
+            a1 = 0.0d0
+         case (timeint_rainfall)  ! constant rainfall intensity from time-integrated amount
+            a0 = 0.0d0
+            a1 = 1.d0/(t1-t0)
+         case default
+            ! invalid interpolation method  
+            return
+         end select
+
       end subroutine time_weight_factors
       
       ! =======================================================================
@@ -2107,6 +2129,7 @@ module m_ec_converter
          type(tEcItem), pointer  :: windyPtr ! pointer to item for windy
          real(hp), dimension(:), allocatable :: targetValues
          double precision        :: PI, phi, xtmp
+         integer                 :: time_interpolation
          !
          PI = datan(1.d0)*4.d0
          success = .false.
@@ -2148,6 +2171,7 @@ module m_ec_converter
                do i=1, connection%nSourceItems
                   sourceT0Field => connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr
                   sourceT1Field => connection%sourceItemsPtr(i)%ptr%sourceT1FieldPtr
+                  time_interpolation = connection%sourceItemsPtr(i)%ptr%quantityptr%timeint
                   indexWeight => connection%converterPtr%indexWeight
                   sourceElementSet => connection%sourceItemsPtr(i)%ptr%elementSetPtr
 
@@ -2161,7 +2185,7 @@ module m_ec_converter
                   n_cols = sourceElementSet%n_cols
                   t0 = sourceT0Field%timesteps
                   t1 = sourceT1Field%timesteps
-                  call time_weight_factors(a0, a1, timesteps, t0, t1)
+                  call time_weight_factors(a0, a1, timesteps, t0, t1, timeint=time_interpolation)
                   do j=1, n_points
                      mp = indexWeight%indices(1,j)
                      np = indexWeight%indices(2,j)
