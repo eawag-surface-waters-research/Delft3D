@@ -34,8 +34,8 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
 !!--declarations----------------------------------------------------------------
     use precision 
     use globaldata
-    use dfparall
-    use netcdf, only: nf90_inq_varid, nf90_inquire_variable, nf90_inquire_dimension, NF90_MAX_VAR_DIMS
+    use dfparall, only: inode, master, dfint
+    use netcdf, only: nf90_close, nf90_open, nf90_sync, NF90_NOWRITE, nf90_inq_varid, nf90_inquire_variable, nf90_inquire_dimension, NF90_MAX_VAR_DIMS
     use rdarray, only:rdarray_nml
     !
     implicit none
@@ -49,9 +49,9 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
     integer       , dimension(:)         , pointer :: nl
     !
     integer                              , pointer :: i_restart
-    integer                              , pointer :: fds
     integer                              , pointer :: filetype
     character(256)                       , pointer :: filename
+    character(256)                       , pointer :: restid
 !
 ! Global variables
 !
@@ -62,13 +62,19 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
 !
 ! Local variables
 !
-    integer, external                     :: getelt
-    integer, dimension(3,5)               :: cuindex
-    integer                               :: idvar
-    integer                               :: rst_lsed
-    integer                               :: ierror
-    integer, dimension(NF90_MAX_VAR_DIMS) :: dimids
-    character(16)                         :: grnam
+    integer, external                         :: clsnef
+    integer, external                         :: crenef
+    integer, external                         :: getelt
+    !
+    integer                                   :: fds
+    integer, dimension(3,5)                   :: cuindex
+    integer                                   :: idvar
+    integer                                   :: rst_lsed
+    integer                                   :: ierror
+    integer, dimension(NF90_MAX_VAR_DIMS)     :: dimids
+    character(len=16)                         :: grnam
+    character(len=256)                        :: dat_file
+    character(len=256)                        :: def_file
 !
 !! executable statements -------------------------------------------------------
 !
@@ -79,13 +85,26 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
     iarrc               => gdp%gdparall%iarrc
     !
     i_restart           => gdp%gdrestart%i_restart
-    fds                 => gdp%gdrestart%fds
     filetype            => gdp%gdrestart%filetype
     filename            => gdp%gdrestart%filename
+    restid              => gdp%gdrestart%restid
     !
     rst_fluff = .false.
     !
     if (filetype == -999) return
+    if (inode == master) then
+        if (filetype == FTYPE_NEFIS) then
+            dat_file = trim(restid)//'.dat'
+            def_file = trim(restid)//'.def'
+            ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
+        elseif (filetype == FTYPE_NETCDF) then
+            ierror   = nf90_open(filename, NF90_NOWRITE, fds)
+        else
+            ierror = -999
+        endif
+    endif
+    call dfbroadc_gdp ( ierror  , 1, dfint, gdp )
+    if (ierror /= 0) return
     !
     if (inode==master) then
        if (filetype==FTYPE_NEFIS) then
@@ -106,7 +125,7 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
        endif
     endif
     call dfbroadc_gdp(rst_lsed, 1, dfint, gdp)
-    if (rst_lsed /= lsed) return
+    if (rst_lsed /= lsed) goto 9999
     !
     ! element 'MFLUFF'
     !
@@ -117,5 +136,16 @@ subroutine restart_trim_fluff (lundia    ,mfluff    ,rst_fluff ,lsed      ,gdp  
     if (ierror == 0) then
        write(lundia, '(a)') 'Fluff layer content read from restart file.'
        rst_fluff = .true.
+    endif
+    !
+9999 continue
+    !
+    if (inode == master) then
+       if (filetype == FTYPE_NETCDF) then
+          ierror = nf90_sync(fds); call nc_check_err(lundia, ierror, "sync file", filename)
+          ierror = nf90_close(fds); call nc_check_err(lundia, ierror, "closing file", filename)
+       elseif (filetype == FTYPE_NEFIS) then
+          ierror = clsnef(fds)
+       endif
     endif
 end subroutine restart_trim_fluff

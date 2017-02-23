@@ -42,7 +42,6 @@ subroutine initrestart(gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    gdp%gdrestart%fds               = -999
     gdp%gdrestart%filetype          = -999
     gdp%gdrestart%i_restart         = 0
     !

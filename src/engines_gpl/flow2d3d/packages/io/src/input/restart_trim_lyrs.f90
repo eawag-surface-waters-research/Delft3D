@@ -40,10 +40,10 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
 !!--declarations----------------------------------------------------------------
     use precision 
     use globaldata
-    use netcdf
+    use netcdf, only: nf90_close, nf90_open, nf90_sync, NF90_NOWRITE, nf90_inq_varid, nf90_inquire_variable, nf90_inquire_dimension, NF90_MAX_VAR_DIMS
     use bedcomposition_module
     use rdarray, only:rdarray_nmk, rdarray_nmkl
-    use dfparall
+    use dfparall, only: inode, master, dfint
     !
     implicit none
     !
@@ -61,9 +61,9 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     integer       , dimension(:)         , pointer :: nl
     !
     integer                              , pointer :: i_restart
-    integer                              , pointer :: fds
     integer                              , pointer :: filetype
     character(256)                       , pointer :: filename
+    character(256)                       , pointer :: restid
 !
 ! Global variables
 !
@@ -82,7 +82,11 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
 !
 ! Local variables
 !
+    integer, external                         :: clsnef
+    integer, external                         :: crenef
     integer                      , external   :: inqelm
+    !
+    integer                                   :: fds
     integer                                   :: rst_lsedtot
     integer                                   :: rst_nlyr
     integer                                   :: ierror
@@ -107,6 +111,8 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     character(len=16)                         :: elmqty
     character(len=16)                         :: elmunt
     character(len=64)                         :: elmdes
+    character(len=256)                        :: dat_file
+    character(len=256)                        :: def_file
     character(len=1024)                       :: errmsg
     integer                                   :: layerfrac
     integer                                   :: layerthk
@@ -123,15 +129,28 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     iarrc               => gdp%gdparall%iarrc
     !
     i_restart           => gdp%gdrestart%i_restart
-    fds                 => gdp%gdrestart%fds
     filetype            => gdp%gdrestart%filetype
     filename            => gdp%gdrestart%filename
+    restid              => gdp%gdrestart%restid
     !
     success      = .false.
     layerfrac    = 0
     layerthk     = 0
     !
     if (filetype == -999) return
+    if (inode == master) then
+        if (filetype == FTYPE_NEFIS) then
+            dat_file = trim(restid)//'.dat'
+            def_file = trim(restid)//'.def'
+            ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
+        elseif (filetype == FTYPE_NETCDF) then
+            ierror   = nf90_open(filename, NF90_NOWRITE, fds)
+        else
+            ierror = -999
+        endif
+    endif
+    call dfbroadc_gdp ( ierror  , 1, dfint, gdp )
+    if (ierror /= 0) return
     !
     if (inode==master) then
        if (filetype==FTYPE_NEFIS) then
@@ -444,6 +463,15 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
     success = .true.
     !
 9999 continue
+    !
+    if (inode == master) then
+       if (filetype == FTYPE_NETCDF) then
+          ierror = nf90_sync(fds); call nc_check_err(lundia, ierror, "sync file", filename)
+          ierror = nf90_close(fds); call nc_check_err(lundia, ierror, "closing file", filename)
+       elseif (filetype == FTYPE_NEFIS) then
+          ierror = clsnef(fds)
+       endif
+    endif
 end subroutine restart_trim_lyrs
 
 end module m_restart_lyrs

@@ -37,6 +37,8 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     use globaldata
     use rdarray, only: rdarray_nm
     use nan_check_module
+    use netcdf, only: nf90_close, nf90_open, nf90_sync, NF90_NOWRITE
+    use dfparall, only: inode, master, dfint
     !
     implicit none
     !
@@ -49,9 +51,9 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     integer       , dimension(:)         , pointer :: nl
     !
     integer                              , pointer :: i_restart
-    integer                              , pointer :: fds
     integer                              , pointer :: filetype
     character(256)                       , pointer :: filename
+    character(256)                       , pointer :: restid
     !
     ! Global variables
     !
@@ -65,8 +67,14 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     !
     ! Local variables
     !
-    integer                               :: ierror
-    character(16)                         :: grnam
+    integer, external                         :: clsnef
+    integer, external                         :: crenef
+    !
+    integer                                   :: fds
+    integer                                   :: ierror
+    character(len=16)                         :: grnam
+    character(len=256)                        :: dat_file
+    character(len=256)                        :: def_file
     !
     !! executable statements -------------------------------------------------------
     !
@@ -77,14 +85,27 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     iarrc               => gdp%gdparall%iarrc
     !
     i_restart           => gdp%gdrestart%i_restart
-    fds                 => gdp%gdrestart%fds
     filetype            => gdp%gdrestart%filetype
     filename            => gdp%gdrestart%filename
+    restid              => gdp%gdrestart%restid
     !
     bdfhread = .false.
     bdflread = .false.
     !
     if (filetype == -999) return
+    if (inode == master) then
+        if (filetype == FTYPE_NEFIS) then
+            dat_file = trim(restid)//'.dat'
+            def_file = trim(restid)//'.def'
+            ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
+        elseif (filetype == FTYPE_NETCDF) then
+            ierror   = nf90_open(filename, NF90_NOWRITE, fds)
+        else
+            ierror = -999
+        endif
+    endif
+    call dfbroadc_gdp ( ierror  , 1, dfint, gdp )
+    if (ierror /= 0) return
     !
     ! element 'DUNEHEIGHT'
     !
@@ -115,5 +136,14 @@ subroutine restart_trim_bdf(lundia   ,nmaxus   ,mmax     ,bdfh     , &
     if (ierror == 0) then
        write(lundia, '(a)') 'Bed form length read from restart file.'
        bdflread = .true.
+    endif
+    !
+    if (inode == master) then
+       if (filetype == FTYPE_NETCDF) then
+          ierror = nf90_sync(fds); call nc_check_err(lundia, ierror, "sync file", filename)
+          ierror = nf90_close(fds); call nc_check_err(lundia, ierror, "closing file", filename)
+       elseif (filetype == FTYPE_NEFIS) then
+          ierror = clsnef(fds)
+       endif
     endif
 end subroutine restart_trim_bdf

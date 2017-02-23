@@ -41,7 +41,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     use time_module, only: ymd2jul, datetime_to_string, parse_ud_timeunit, date2mjd, jul2mjd
     use globaldata
     use string_module, only: remove_leading_spaces
-    use netcdf, only: nf90_open, nf90_inq_dimid, nf90_inquire_dimension, nf90_get_var, nf90_inquire_variable, nf90_nowrite, nf90_inq_varid, nf90_get_att, nf90_global, nf90_max_var_dims
+    use netcdf, only: nf90_open, nf90_inq_dimid, nf90_inquire_dimension, nf90_get_var, nf90_inquire_variable, NF90_NOWRITE, nf90_inq_varid, nf90_get_att, NF90_GLOBAL, NF90_MAX_VAR_DIMS, nf90_sync, nf90_close
     use system_utils, only: exifil
     use rdarray, only: rdvar, rdarray_nm, rdarray_nmk, rdarray_nmkl
     use dfparall, only: inode, master, dfint, dfdble, dfmax
@@ -67,7 +67,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     character(16)  , pointer :: rst_layer_model
     logical        , pointer :: rst_dp
     logical        , pointer :: roller
-    integer        , pointer :: fds
     integer        , pointer :: filetype
     character(256) , pointer :: filename
     character(256) , pointer :: restid
@@ -108,6 +107,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
 !
 ! Local variables
 !
+    integer                               :: fds
     integer                               :: lrid        ! character variables for files Help var., length of restid
     integer, external                     :: crenef
     integer, external                     :: getelt
@@ -204,7 +204,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     kfuv_from_restart   => gdp%gdrestart%kfuv_from_restart
     rst_layer_model     => gdp%gdrestart%rst_layer_model
     rst_dp              => gdp%gdrestart%rst_dp
-    fds                 => gdp%gdrestart%fds
     filetype            => gdp%gdrestart%filetype
     filename            => gdp%gdrestart%filename
     restid              => gdp%gdrestart%restid
@@ -687,4 +686,13 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
 9999 continue
     if (ierror /= 0) error = .true.
+    if (inode == master) then
+       if (filetype == FTYPE_NETCDF) then
+          ierror = nf90_sync(fds); call nc_check_err(lundia, ierror, "sync file", filename)
+          ierror = nf90_close(fds); call nc_check_err(lundia, ierror, "closing file", filename)
+       elseif (filetype == FTYPE_NEFIS) then
+          ierror = clsnef(fds)
+       endif
+       if (ierror/= 0) error = .true.
+    endif
 end subroutine restart_trim_flow

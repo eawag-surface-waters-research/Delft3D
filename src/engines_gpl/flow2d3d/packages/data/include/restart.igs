@@ -37,7 +37,6 @@ type sv_restart
     !
     ! integers
     !
-    integer        :: fds               !  NEFIS or NetCDF handle of restart file
     integer        :: filetype          !  Type of restart file
     integer        :: i_restart         !  Restart index
     !
