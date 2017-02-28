@@ -744,18 +744,25 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        !
     endif
     !
-    max_cl = 8
+    max_cl  = -1
     keyw    = 'TrtMxR'
+    txtput1 = keyw
     call prop_get(gdp%mdfile_ptr, '*', keyw, max_cl)
-    if (istat==0) then 
-       if (istat==0) allocate(gdtrachy%fraccu_list(max_cl)  , stat = istat)
-       if (istat==0) allocate(gdtrachy%itrt_list(max_cl)    , stat = istat)
+    if (max_cl == -1) then
+       ! Not specified, use default value
        !
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'RDTRT: memory alloc error (step 2)')
-          call d3stop(1, gdp)
-       endif
-    endif    
+       max_cl = 8
+       write (lundia, '(a,a,i0,a)') txtput1,': ',max_cl, ' (default value)'
+    else
+       write (lundia, '(a,a,i0)') txtput1,': ',max_cl
+    endif
+    if (istat==0) allocate(gdtrachy%fraccu_list(max_cl)  , stat = istat)
+    if (istat==0) allocate(gdtrachy%itrt_list(max_cl)    , stat = istat)
+    !
+    if (istat/=0) then
+       call prterr(lundia, 'U021', 'RDTRT: memory alloc error (step 2)')
+       call d3stop(1, gdp)
+    endif
     !
     write (lundia, '(a)') '*** End    of trachytopes input'
     write (lundia, *)

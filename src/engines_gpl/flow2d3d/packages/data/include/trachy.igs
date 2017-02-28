@@ -53,22 +53,20 @@ type gd_trachy
     !
     ! pointers
     !
-    real(fp), dimension(:,:)  , pointer :: vegh2d !  Vegetation height on 2D grid (coming from WAQ)
-    real(fp), dimension(:,:)  , pointer :: vden2d !  Vegetation density (nD/m2) on 2D grid (coming from WAQ)
-    integer , dimension(:,:)  , pointer :: ittaru !  Trachytope areas in M-direction (integer data)
-    integer , dimension(:,:)  , pointer :: ittarv !  Trachytope areas in N-direction (integer data)
-    integer , dimension(:,:)  , pointer :: ittdef !  Trachytope definitions (integer data)
-    real(fp), dimension(:,:)  , pointer :: rgcalu !  Calibration matrix for trachytope roughness
-                                                  !  in M-direction
-    real(fp), dimension(:,:)  , pointer :: rgcalv !  Calibration matrix for trachytope roughness
-                                                  !  in N-direction
-    real(fp), dimension(:)    , pointer :: rttaru !  Trachytope areas in M-direction (real data)
-    real(fp), dimension(:)    , pointer :: rttarv !  Trachytope areas in N-direction (real data)
-    real(fp), dimension(:,:)  , pointer :: rttdef !  Trachytope definitions (real data)
-    real(fp), dimension(:,:,:), pointer :: rttfu  !  Trachytope resistance 3D in M-direction
-    real(fp), dimension(:,:,:), pointer :: rttfv  !  Trachytope resistance 3D in N-direction
-	real(fp), dimension(:)    , pointer :: fraccu_list !  Relative fraction (used for combined definitions)
-	integer , dimension(:)    , pointer :: itrt_list   !  Roughness definition or roughness definition index
+    integer , dimension(:)    , pointer :: itrt_list   !  Roughness definition or roughness definition index
+    integer , dimension(:,:)  , pointer :: ittaru      !  Trachytope areas in M-direction (integer data)
+    integer , dimension(:,:)  , pointer :: ittarv      !  Trachytope areas in N-direction (integer data)
+    integer , dimension(:,:)  , pointer :: ittdef      !  Trachytope definitions (integer data)
+    real(fp), dimension(:)    , pointer :: fraccu_list !  Relative fraction (used for combined definitions)
+    real(fp), dimension(:,:)  , pointer :: rgcalu      !  Calibration matrix for trachytope roughness in M-direction
+    real(fp), dimension(:,:)  , pointer :: rgcalv      !  Calibration matrix for trachytope roughness in N-direction
+    real(fp), dimension(:)    , pointer :: rttaru      !  Trachytope areas in M-direction (real data)
+    real(fp), dimension(:)    , pointer :: rttarv      !  Trachytope areas in N-direction (real data)
+    real(fp), dimension(:,:)  , pointer :: rttdef      !  Trachytope definitions (real data)
+    real(fp), dimension(:,:,:), pointer :: rttfu       !  Trachytope resistance 3D in M-direction
+    real(fp), dimension(:,:,:), pointer :: rttfv       !  Trachytope resistance 3D in N-direction
+    real(fp), dimension(:,:)  , pointer :: vegh2d      !  Vegetation height on 2D grid (coming from WAQ)
+    real(fp), dimension(:,:)  , pointer :: vden2d      !  Vegetation density (nD/m2) on 2D grid (coming from WAQ)
     ! 
     ! logicals
     !

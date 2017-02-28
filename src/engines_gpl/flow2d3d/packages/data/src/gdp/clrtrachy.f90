@@ -45,20 +45,20 @@ subroutine clrtrachy(istat, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    if (associated(gdp%gdtrachy%ittaru)) deallocate (gdp%gdtrachy%ittaru, STAT = istat)
-    if (associated(gdp%gdtrachy%ittarv)) deallocate (gdp%gdtrachy%ittarv, STAT = istat)
-    if (associated(gdp%gdtrachy%ittdef)) deallocate (gdp%gdtrachy%ittdef, STAT = istat)
+    if (associated(gdp%gdtrachy%ittaru))      deallocate (gdp%gdtrachy%ittaru      , STAT = istat)
+    if (associated(gdp%gdtrachy%ittarv))      deallocate (gdp%gdtrachy%ittarv      , STAT = istat)
+    if (associated(gdp%gdtrachy%ittdef))      deallocate (gdp%gdtrachy%ittdef      , STAT = istat)
+    if (associated(gdp%gdtrachy%itrt_list))   deallocate (gdp%gdtrachy%itrt_list   , STAT = istat)
     !
-    if (associated(gdp%gdtrachy%vegh2d)) deallocate (gdp%gdtrachy%vegh2d, STAT = istat)
-    if (associated(gdp%gdtrachy%vden2d)) deallocate (gdp%gdtrachy%vden2d, STAT = istat)
-    !
-    if (associated(gdp%gdtrachy%rgcalu)) deallocate (gdp%gdtrachy%rgcalu, STAT = istat)
-    if (associated(gdp%gdtrachy%rgcalv)) deallocate (gdp%gdtrachy%rgcalv, STAT = istat)
-    if (associated(gdp%gdtrachy%rttaru)) deallocate (gdp%gdtrachy%rttaru, STAT = istat)
-    if (associated(gdp%gdtrachy%rttarv)) deallocate (gdp%gdtrachy%rttarv, STAT = istat)
-    if (associated(gdp%gdtrachy%rttdef)) deallocate (gdp%gdtrachy%rttdef, STAT = istat)
-    if (associated(gdp%gdtrachy%rttfu))  deallocate (gdp%gdtrachy%rttfu , STAT = istat)
-    if (associated(gdp%gdtrachy%rttfv))  deallocate (gdp%gdtrachy%rttfv , STAT = istat)
-    if (associated(gdp%gdtrachy%itrt_list)) deallocate (gdp%gdtrachy%itrt_list , STAT = istat)
     if (associated(gdp%gdtrachy%fraccu_list)) deallocate (gdp%gdtrachy%fraccu_list , STAT = istat)
+    if (associated(gdp%gdtrachy%rgcalu))      deallocate (gdp%gdtrachy%rgcalu      , STAT = istat)
+    if (associated(gdp%gdtrachy%rgcalv))      deallocate (gdp%gdtrachy%rgcalv      , STAT = istat)
+    if (associated(gdp%gdtrachy%rttaru))      deallocate (gdp%gdtrachy%rttaru      , STAT = istat)
+    if (associated(gdp%gdtrachy%rttarv))      deallocate (gdp%gdtrachy%rttarv      , STAT = istat)
+    if (associated(gdp%gdtrachy%rttdef))      deallocate (gdp%gdtrachy%rttdef      , STAT = istat)
+    if (associated(gdp%gdtrachy%rttfu))       deallocate (gdp%gdtrachy%rttfu       , STAT = istat)
+    if (associated(gdp%gdtrachy%rttfv))       deallocate (gdp%gdtrachy%rttfv       , STAT = istat)
+    !
+    if (associated(gdp%gdtrachy%vegh2d))      deallocate (gdp%gdtrachy%vegh2d      , STAT = istat)
+    if (associated(gdp%gdtrachy%vden2d))      deallocate (gdp%gdtrachy%vden2d      , STAT = istat)
 end subroutine clrtrachy
