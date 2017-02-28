@@ -393,7 +393,7 @@
          meta%source      = "Delft3D-FLOW"   
          meta%references  = "http://www.deltares.nl"    
          call getfullversionstring_flow2d3d(meta%version)
-         meta%modelname   = runid
+         meta%modelname   = filnam(1:(len(trim(filnam))-1))
          
          call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , kmax  , &
                            nlb   , nub    , mlb   , mub   ,         &

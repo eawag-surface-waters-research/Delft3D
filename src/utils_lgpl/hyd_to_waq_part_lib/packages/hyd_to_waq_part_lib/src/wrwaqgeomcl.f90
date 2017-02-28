@@ -467,7 +467,7 @@ contains
     ! Write the boundary file
     ! 
     lunbnd = newunit()
-    bndfilename = 'com-' // trim(meta%modelname) // '.bnd'
+    bndfilename = trim(meta%modelname) // '.bnd'
     open(lunbnd, file= trim(bndfilename))
 
     if (nto > 0) then
@@ -489,7 +489,7 @@ contains
     !===============================================================================
     !   
     ierr = 0
-    geomfilename = 'com-' // trim(meta%modelname) //'_waqgeom.nc' ! Should be equal to the name given in the hyd-file (that file is written in the routine wrwaqhyd)
+    geomfilename = trim(meta%modelname) //'_waqgeom.nc' ! Should be equal to the name given in the hyd-file (that file is written in the routine wrwaqhyd)
     !
     ! create or open the file
     !
