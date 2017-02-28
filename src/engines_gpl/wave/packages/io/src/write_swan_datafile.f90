@@ -1,6 +1,4 @@
-subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
-                              & filnam, extr_var1, extr_var2, &
-                              & sumvars, positiveonly, minval)
+module write_swan_datafile
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -29,9 +27,17 @@ subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
+!!--module description----------------------------------------------------------
+!
+!!--module declarations---------------------------------------------------------
+public write_swan_file
+    
+contains
+
+subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
+                          & filnam, extr_var1, extr_var2, &
+                          & sumvars, positiveonly, minval)
 !!--description-----------------------------------------------------------------
-! NONE
-!!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     implicit none
@@ -246,4 +252,6 @@ subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
        endif
     endif
     close (lunfil)
-end subroutine write_swan_datafile
+end subroutine write_swan_file
+
+end module write_swan_datafile
