@@ -50,7 +50,6 @@ module m_ec_provider
    use precision
    use string_module
    use netcdf
-!  use proj
    use multi_file_io
    
    implicit none
@@ -2305,7 +2304,6 @@ module m_ec_provider
       
       !> Create source Items and their contained types, based on a NetCDF file's header.
       function ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityName) result(success)
-!     use proj                         ! projtest
       use transform_poleshift
       use m_ec_message
       use m_alloc 
@@ -2382,19 +2380,6 @@ module m_ec_provider
          integer, dimension(:), allocatable                      :: first_coordinate_dimlen, second_coordinate_dimlen
          integer                                                 :: timeint
 
-   ! Projtest ------------------------------------------------------------------             -
-   !TYPE(pj_object) :: src !< source coordinate system
-   !TYPE(pj_object) :: dst !< destination coordinate system
-   !REAL(kind=c_double), allocatable :: x(:) !< array of x coordinates
-   !REAL(kind=c_double), allocatable :: y(:) !< array 
-   !
-   !REAL(kind=c_double), allocatable :: z(:) !< optional array of z coordinates
-   !INTEGER(kind=c_int) :: output
-   !
-   !output = pj_transform(src, dst, 10, 10, x, y, z);
-   !output = pj_transform_f(src, dst, x, y, z);
-   ! Projtest ------------------------------------------------------------------             -
-         
          !
          success = .false.
          itemPtr => null()
@@ -2774,7 +2759,6 @@ module m_ec_provider
       
       !> Create source Items and their contained types, based on NetCDF file header.
       function ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityName) result(success)
-!        use proj
          logical                      :: success       !< function status
          type(tEcInstance),   pointer :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(inout)
