@@ -33,12 +33,12 @@ compiler=''
 configureArgs=''
 debug=0
 noMake=0
-platform='ia32'
+platform='64bit'
 useSp=0
 
 #-------------------------------------------------------------------------------
 function usage {
-    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-64bit] [-sp] [-configure <args>] [-?]"
+    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-32bit|-64bit] [-sp] [-configure <args>] [-?]"
     echo "Compiler is one of:"
     echo "    -gnu"
     echo "    -intel10"
@@ -87,6 +87,9 @@ function witch {
 
 while [ $# -gt 0 ]; do
     case $1 in
+        -32bit)
+            platform='ia32'
+            ;;
         -64bit)
             platform='intel64'
             ;;

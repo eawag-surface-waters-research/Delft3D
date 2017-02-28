@@ -32,7 +32,7 @@ Compiling on Linux
          make ds-install
      Option B):
          Use script build.sh. Executing "./build.sh" will show the usage. The following example line is used to create the latest fully tested version:
-         ./build.sh -intel11.1 -64bit
+         ./build.sh -intel14
          WARNING: build.sh is system dependent. You have to modify it to fit to your site!
   2) The binaries are installed in directory:
      - "src/bin" and "src/lib" (due to "--prefix=`pwd`" and default "install")
