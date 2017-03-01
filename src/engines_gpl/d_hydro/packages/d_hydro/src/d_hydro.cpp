@@ -130,6 +130,10 @@ main (
         printf ("d_hydro ABORT: %s\n", ex->message);
         return 1;
         }
+    catch (char * str) {
+        printf ("ABORT in FLOW2D3D: %s\n", str);
+        return 1;
+        }
     }
 
 
