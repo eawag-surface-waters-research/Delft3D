@@ -15,9 +15,25 @@
 !     public :: mf_inquire              ! mimics fortran's inquire
       public :: mf_eof                  ! end-of_file reached ??
       public :: mf_increase_max_open    ! set the maximum number of open files 
+      public :: mf_get_number_of_handles! get the actual net number of filehandles created by this module
+      public :: mf_set_number_of_handles! set the actual net number of filehandles from outside (to put it to zero)
       
+      integer :: nfptr = 0              ! counter keeping track of the number of opened filehandles 
+
       contains 
 
+        function mf_get_number_of_handles() result (number_of_handles)
+        implicit none 
+        integer :: number_of_handles
+        number_of_handles = nfptr
+        end function mf_get_number_of_handles
+
+        subroutine mf_set_number_of_handles(number_of_handles)
+        implicit none
+        integer, intent(in) :: number_of_handles
+        nfptr = number_of_handles
+        end subroutine mf_set_number_of_handles
+        
         function mf_increase_max_open(max_open_files) result (ret_val)
         implicit none
         integer(kind=4)                 :: ret_val
@@ -41,6 +57,7 @@
         if (exist) then 
           fptr = CUTIL_MF_OPEN(trim(fname)//achar(0)) 
         endif 
+        if (fptr>0) nfptr = nfptr + 1
         end function mf_open
 
         subroutine mf_rewind(fptr)
@@ -94,6 +111,7 @@
         integer :: res 
         integer :: CUTIL_MF_CLOSE
         res = CUTIL_MF_CLOSE(fptr)
+        if (res==0) nfptr = nfptr - 1
         end subroutine mf_close
 
 
