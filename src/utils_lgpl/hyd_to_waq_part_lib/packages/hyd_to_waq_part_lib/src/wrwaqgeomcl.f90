@@ -356,7 +356,7 @@ contains
     allocate(nr_bnd_cells(nto))
     do i = 1, nto
         m_dir = max(mnbnd(1,i),mnbnd(3,i)) - min(mnbnd(1,i),mnbnd(3,i)) + 1
-        n_dir = max(mnbnd(4,i),mnbnd(4,i)) - min(mnbnd(2,i),mnbnd(2,i)) + 1
+        n_dir = max(mnbnd(2,i),mnbnd(4,i)) - min(mnbnd(2,i),mnbnd(4,i)) + 1
         nr_bnd_cells(i) = max(m_dir, n_dir)
         total_bnd_cells = total_bnd_cells + max(m_dir, n_dir)
         max_bnd_cells = max(max_bnd_cells, max(m_dir, n_dir))
