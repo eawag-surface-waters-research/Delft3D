@@ -3094,9 +3094,11 @@ src/third_party_open/intel_fortran/intel_fortran_license_info.txt -text
 src/third_party_open/intel_fortran/lib/win32/libifcoremd.dll -text
 src/third_party_open/intel_fortran/lib/win32/libifportmd.dll -text
 src/third_party_open/intel_fortran/lib/win32/libmmd.dll -text
+src/third_party_open/intel_fortran/lib/win32/svml_dispmd.dll -text
 src/third_party_open/intel_fortran/lib/x64/libifcoremd.dll -text
 src/third_party_open/intel_fortran/lib/x64/libifportmd.dll -text
 src/third_party_open/intel_fortran/lib/x64/libmmd.dll -text
+src/third_party_open/intel_fortran/lib/x64/svml_dispmd.dll -text
 src/third_party_open/kdtree2/LICENSE -text
 src/third_party_open/kdtree2/Makefile.am -text
 src/third_party_open/kdtree2/README -text
