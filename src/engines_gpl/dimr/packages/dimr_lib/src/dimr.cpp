@@ -1506,7 +1506,7 @@ void Dimr::connectLibs (void) {
 //void Dimr::printComponentVersionStrings (Log::Mask my_mask) {
 void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     const char * version = "version";
-	char * versionstr = new char[MAXSTRING];
+	char * versionstr = new char[thisDimr->MAXSTRING];
     this->log->Write (my_mask, thisDimr->my_rank, "");
     this->log->Write (my_mask, thisDimr->my_rank, "Version Information of Components");
     this->log->Write (my_mask, thisDimr->my_rank, "=================================");
