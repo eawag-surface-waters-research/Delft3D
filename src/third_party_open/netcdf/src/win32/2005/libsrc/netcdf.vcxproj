@@ -143,7 +143,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>.;$(SolutionDir);..;..\..\..\libsrc;..\..\..\fortran;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NETCDF_EXPORTS;VERSION=3.6.1-beta1;DLL_NETCDF;DLL_EXPORT;VISUAL_CPLUSPLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <ProgramDataBaseFileName>$(IntDir)vc70_netcdf.pdb</ProgramDataBaseFileName>
@@ -168,7 +168,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>.;$(SolutionDir);..;..\..\..\libsrc;..\..\..\fortran;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NETCDF_EXPORTS;VERSION=3.6.1-beta1;DLL_NETCDF;DLL_EXPORT;VISUAL_CPLUSPLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <ProgramDataBaseFileName>$(IntDir)vc70_netcdf.pdb</ProgramDataBaseFileName>
