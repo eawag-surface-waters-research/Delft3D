@@ -544,7 +544,7 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
    !
    if ( comparereal(real(meteoitem%field(meteoitem%it0)%time,fp), tim) == 1 ) then
       write(meteomessage,'(3a,2(g16.8,a))') 'In file ',trim(meteoitem%filename), &
-           & ': Start time of data (',meteoitem%field(meteoitem%it0)%time,') is behind start time of simulation (',tim,')'
+           & ': Start time of forcing data (',meteoitem%field(meteoitem%it0)%time,') should precede start time of simulation (',tim,')'
       success = .false.
    else
       !meteomessage = ' '
