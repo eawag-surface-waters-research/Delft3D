@@ -668,7 +668,7 @@ procid,procco,procfo,procnm
 "HRVMAC04  ",123,"GRZMAC    ","Harvesting on macrophyte 04                       "
 "HRVMAC05  ",123,"GRZMAC    ","Harvesting on macrophyte 05                       "
 "DEBGRZ_M  ",123,"DEBGRZ    ","Dynamics of DEB Mussel (def: benthic V1-morphs)   "
-"DEBGRZ_Z  ",123,"DEBGRZ    ","Dynamics of DEB Zooplankton (def: active V1morphs)"
+"DEBGRZ_Z  ",123,"DEBGRZ    ","Dynamics of DEB Zooplankton (def: Active V1morphs)"
 "DEBGRZ_G3 ",123,"DEBGRZ    ","Dynamics of DEB Grazer3 (def: passive isomorphs)  "
 "DEBGRZ_G4 ",123,"DEBGRZ    ","Dynamics of DEB Grazer4 (def: passive isomorphs)  "
 "DEBGRZ_G5 ",123,"DEBGRZ    ","Dynamics of DEB Grazer5 (def: passive isomorphs)  "
