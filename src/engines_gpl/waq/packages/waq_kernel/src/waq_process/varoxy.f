@@ -36,7 +36,7 @@
 !     Logical Units : -
 
 !     Modules called : -
-
+      implicit none
 !     Name     Type   Library
 !     ------   -----  ------------
 
@@ -45,15 +45,18 @@
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8 , IP9 ,
-     J         IP10, IP11, IP12, I
+     J         IP10, IP11, IP12, I, IFLUX, ISEG
       REAL     TIMSIM, DELTAT, TIMNUL, T1MXPP, T2MXPP, DAYLEN, FPPTOT,
      J         FRESPI, DEPTHW, T1    , T2    , PPMAX , TRISE ,
      J         TSET  , TOTAL , V1    , V2
-      REAL     INTEGR(0:12*24), PPLAST, RELAST
+      REAL     INTEGR(0:12*24), PPLAST, RELAST, DAYLLAST
       LOGICAL  FIRST
-      SAVE     FIRST, PPLAST, RELAST, INTEGR
+      SAVE     FIRST, PPLAST, RELAST, DAYLLAST, INTEGR
       DATA     FIRST /.TRUE./
-      DATA     PPLAST, RELAST /-999.,-999./
+      DATA     PPLAST, RELAST, DAYLLAST /-999.,-999.,-999./
+      INTEGER  NR_MES
+      SAVE     NR_MES
+      DATA     NR_MES / 0 /
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -77,8 +80,7 @@
      J         (INCREM(3) .GT. 0) .OR.
      J         (INCREM(4) .GT. 0) .OR.
      J         (INCREM(5) .GT. 0) .OR.
-     J         (INCREM(6) .GT. 0) .OR.
-     J         (INCREM(7) .GT. 0) ) THEN
+     J         (INCREM(6) .GT. 0) ) THEN
 
               WRITE (*,*)
      J        ' VAROXY: Time parameters function(x) not ALLOWED'
@@ -104,51 +106,58 @@
 !         Initialize light variation curve for present cycle
 !         ONLY if fluxes have changed
 
-          IF ( ISEG .EQ. 1 ) THEN
-
-              IF ( (ABS(FPPTOT-PPLAST) .GT. 1E-3) .OR.
+          IF ( (ISEG .EQ. 1) .OR. 
+     J             (ABS(DAYLEN-DAYLLAST) .GT. 1E-3) .OR.
+     J             (ABS(FPPTOT-PPLAST) .GT. 1E-3) .OR.
      J             (ABS(FRESPI-RELAST) .GT. 1E-3) ) THEN
 
-!                 WRITE (*,*) ' INITIALIZE ', TIMSIM
-                  PPLAST = FPPTOT
-                  RELAST = FRESPI
+              PPLAST = FPPTOT
+              RELAST = FRESPI
+              DAYLLAST = DAYLEN
 
-!                 Check on conditions for daylength
+!             Check on conditions for daylength
 
-                  IF ( T1MXPP .LT. TRISE .OR.
-     J                 T2MXPP .GT. TSET ) THEN
-                      WRITE (*,*)
-     J                ' VAROXY: Illegal definition of T1MXPP/T2MXPP'
-                      CALL SRSTOP(1)
-                  ENDIF
-
-                  PPMAX = 48.0/(T2MXPP-T1MXPP+DAYLEN)
-!                 PPMAX = 48.0*(FPPTOT+FRESPI)/(T2MXPP-T1MXPP+DAYLEN)
-
-!                 Compute normalized integral Flux.dt in of (gC/m2/d)*h
-!                 from t=0 to t=T every 5 minutes
-
-                  TOTAL = 0.0
-                  INTEGR(0) = 0.0
-                  T1 = 0.0
-                  V1 = 0.0
-                  DO 100 I = 1,12*24
-                      T2 = REAL(I)/12.
-                      IF ( T2 .LE. TRISE .OR. T2 .GE. TSET ) THEN
-                          V2 = 0.0
-                      ELSEIF ( T2.GT.TRISE .AND. T2.LT.T1MXPP ) THEN
-                          V2 = PPMAX*(T2-TRISE)/(T1MXPP-TRISE)
-                      ELSEIF ( T2.GE.T1MXPP .AND. T2.LE.T2MXPP ) THEN
-                          V2 = PPMAX
-                      ELSEIF ( T2.GT.T2MXPP .AND. T2.LT.TSET ) THEN
-                          V2 = PPMAX*(1.0-(T2-T2MXPP)/(TSET- T2MXPP) )
-                      ENDIF
-                      TOTAL = TOTAL + ((V1+V2)/2.0) * (T2-T1)
-                      INTEGR(I) = TOTAL
-                      V1 = V2
-                      T1 = T2
-  100             CONTINUE
+              IF ( T1MXPP .LT. TRISE .OR.
+     J             T2MXPP .GT. TSET ) THEN
+                 IF ( NR_MES .LT. 25 ) THEN
+                    NR_MES = NR_MES + 1
+                    WRITE(*,*) ' WARNING: VAROXY limited values of T1MXPP/T2MXPP to daylight range'
+                 ENDIF
+                 IF ( NR_MES .EQ. 25 ) THEN
+                    NR_MES = NR_MES + 1
+                    WRITE(*,*) ' 25 WARNINGS on limiting T1MXPP/T2MXPP'
+                    WRITE(*,*) ' Further messages on extinction surpressed'
+                 ENDIF
+                 T1MXPP = MAX(T1MXPP, TRISE)
+                 T2MXPP = MIN(T2MXPP, TSET )
               ENDIF
+
+              PPMAX = 48.0/(T2MXPP-T1MXPP+DAYLEN)
+!             PPMAX = 48.0*(FPPTOT+FRESPI)/(T2MXPP-T1MXPP+DAYLEN)
+
+!             Compute normalized integral Flux.dt in of (gC/m2/d)*h
+!             from t=0 to t=T every 5 minutes
+
+              TOTAL = 0.0
+              INTEGR(0) = 0.0
+              T1 = 0.0
+              V1 = 0.0
+              DO 100 I = 1,12*24
+                  T2 = REAL(I)/12.
+                  IF ( T2 .LE. TRISE .OR. T2 .GE. TSET ) THEN
+                      V2 = 0.0
+                  ELSEIF ( T2.GT.TRISE .AND. T2.LT.T1MXPP ) THEN
+                      V2 = PPMAX*(T2-TRISE)/(T1MXPP-TRISE)
+                  ELSEIF ( T2.GE.T1MXPP .AND. T2.LE.T2MXPP ) THEN
+                      V2 = PPMAX
+                  ELSEIF ( T2.GT.T2MXPP .AND. T2.LT.TSET ) THEN
+                      V2 = PPMAX*(1.0-(T2-T2MXPP)/(TSET- T2MXPP) )
+                  ENDIF
+                  TOTAL = TOTAL + ((V1+V2)/2.0) * (T2-T1)
+                  INTEGR(I) = TOTAL
+                  V1 = V2
+                  T1 = T2
+  100         CONTINUE
           ENDIF
 
 !!        CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
