@@ -33,6 +33,7 @@
 module io_ugrid
 use netcdf
 use messagehandling
+use coordinate_reference_system
 implicit none
 
 ! TODO: AvD: GL2: add 'full_grid_output' support, to write 1. face_edge_connectivity; 2. edge_face_connectivity; and possibly more.
@@ -94,32 +95,12 @@ integer, parameter :: dp=kind(1.0d00)
 integer, parameter :: maxMessageLen = 1024
 character(len=maxMessageLen) :: ug_messagestr !< Placeholder string for storing diagnostic messages. /see{ug_get_message}
 
-!> Container for information for a NetCDF attribute. Used inside t_crs.
-type nc_attribute
-   character(len=64) :: attname  !< Name of the attribute.
-   integer           :: xtype    !< Type: one of NF90_CHAR, NF90_INT, NF90_FLOAT, NF90_DOUBLE, NF90_BYTE, NF90_SHORT.
-   integer           :: len      !< Length of the attribute value (string length/array length)
-   character(len=1), allocatable :: strvalue(:) !< Contains value if xtype==NF90_CHAR.
-   double precision, allocatable :: dblvalue(:) !< Contains value if xtype==NF90_DOUBLE.
-   real,             allocatable :: fltvalue(:) !< Contains value if xtype==NF90_FLOAT.
-   integer,          allocatable :: intvalue(:) !< Contains value if xtype==NF90_INT.
-   ! TODO: AvD: support BYTE/short as well?
-end type nc_attribute
-
 !> Type t_face describes a 'netcell', a cell with net nodes as vertices.
 type t_face
    integer                        :: n               !< nr of nodes
    integer, allocatable           :: nod(:)          !< node nrs
    integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)  
 end type t_face
-
-!> Container for information about coordinate reference system in NetCDF-file.
-type t_crs
-   logical                         :: is_spherical  !< Whether or not spherical (otherwise some projected crs)
-   character(len=64)               :: varname = ' ' !< Name of the NetCDF variable containing this CRS
-   integer                         :: epsg_code     !< EPSG code (more info: http://spatialreference.org/)
-   type(nc_attribute), allocatable :: attset(:)     !< General set with all/any attributes about this CRS.
-end type t_crs
 
 !> Structure for storing all variable ids for an unstructured mesh.
 type t_ug_meshids
