@@ -1507,9 +1507,9 @@ void Dimr::connectLibs (void) {
 void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     const char * version = "version";
 	char * versionstr = new char[thisDimr->MAXSTRING];
-    this->log->Write (my_mask, thisDimr->my_rank, "");
-    this->log->Write (my_mask, thisDimr->my_rank, "Version Information of Components");
-    this->log->Write (my_mask, thisDimr->my_rank, "=================================");
+    this->log->Write (my_mask, my_rank, "");
+    this->log->Write (my_mask, my_rank, "Version Information of Components");
+    this->log->Write (my_mask, my_rank, "=================================");
 	for (int i=0;i<this->componentsList.numComponents;i++){
 	   strcpy(versionstr,"");
 	   if (this->componentsList.components[i].dllGetAttribute!=NULL){
@@ -1518,7 +1518,7 @@ void Dimr::printComponentVersionStrings (unsigned int my_mask) {
 	   if (strlen(versionstr)==0){
 	      strcpy(versionstr,"Unknown");
 	   }
-       this->log->Write (my_mask, thisDimr->my_rank, "%-35s: %s", this->componentsList.components[i].library, versionstr);
+       this->log->Write (my_mask, my_rank, "%-35s: %s", this->componentsList.components[i].library, versionstr);
 	}
     this->log->Write (my_mask, my_rank, "---------------------------------");
     this->log->Write (my_mask, my_rank, "");
