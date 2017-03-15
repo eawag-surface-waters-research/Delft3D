@@ -127,6 +127,7 @@
       <ProgramDataBaseFileName>$(IntDir)vc70_netcdf.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)netcdf.dll</OutputFile>
