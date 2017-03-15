@@ -46,5 +46,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\swan_tot.f90"/></Filter></Files>
+		<File RelativePath=".\src\swan_tot.f90">
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" WarnInterfaces="false"/></FileConfiguration></File></Filter></Files>
 	<Globals/></VisualStudioProject>
