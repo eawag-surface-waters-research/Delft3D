@@ -118,6 +118,8 @@
       integer ip_dredge_im2                    !
       integer ip_dredge_im3                    !
       integer ipoff                            !
+      
+      integer lunrep                           ! unit number of output file
 
       ! pointers in the flux array
 
@@ -188,13 +190,19 @@
          no_basin    = 0
          ip_basin_no = ipoint(2)
          do iseg = 1 , noseg
-            basin_no = pmsa(ip_basin_no)
+            basin_no = nint(pmsa(ip_basin_no))
             if ( basin_no .gt. max_basin ) then
+               call getmlu( lunrep )
+               write (lunrep,*) 'ERROR in dredge process'
+               write (lunrep,*) 'basin_no is greater than max_basin in dredge process'
+               write (*,*) 'ERROR in dredge process'
+               write (*,*) 'basin_no is greater than max_basin in dredge process'
+               call srstop(1)
             endif
             no_basin = max(no_basin,basin_no)
             ip_basin_no = ip_basin_no + increm(2)
          enddo
-         pmsa(ipoint(3)) = no_basin
+         pmsa(ipoint(3)) = real(no_basin)
       endif
 
       ! if no basins then return
@@ -208,8 +216,8 @@
       allocate(dredge_moment(no_basin))
       dredge_moment = .false.
       do i_basin = 1 , no_basin
-         it_start_dredge = pmsa(ip_it_start_dredge+i_basin-1)
-         it_freq_dredge  = pmsa(ip_it_freq_dredge+i_basin-1)
+         it_start_dredge = nint(pmsa(ip_it_start_dredge+i_basin-1))
+         it_freq_dredge  = max(nint(pmsa(ip_it_freq_dredge+i_basin-1)),1)
          if ( itime .ge. it_start_dredge .and. mod(itime-it_start_dredge,it_freq_dredge) .lt. idt ) then
             dredge_moment(i_basin) = .true.
          endif
@@ -229,7 +237,7 @@
          if (btest(iknmrk(iseg),0)) then
             call dhkmrk(2,iknmrk(iseg),ikmrk2)
             if ((ikmrk2.eq.0).or.(ikmrk2.eq.3)) then
-               basin_no = pmsa(ip_basin_no)
+               basin_no = nint(pmsa(ip_basin_no))
                if ( basin_no .gt. 0 ) then
                   if ( dredge_moment(basin_no) ) then
                      dredge_criterium    = pmsa(ip_dredge_criterium+basin_no-1)
