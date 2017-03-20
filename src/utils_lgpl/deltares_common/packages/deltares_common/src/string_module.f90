@@ -611,7 +611,7 @@ module string_module
       character(len=*), intent(inout), dimension(:), allocatable   ::  pcs
       character(len=:), allocatable    ::  pce, tmp
       allocate(tmp,source=tgt)
-      allocate(pce,mold=pcs)
+      allocate(character(len=len(pcs))::pce)
       tmp=adjustl(tgt)
       read(tmp,*) pce
       if (tgt(1:1)=="'" .or. tgt(1:1)=='"') then
