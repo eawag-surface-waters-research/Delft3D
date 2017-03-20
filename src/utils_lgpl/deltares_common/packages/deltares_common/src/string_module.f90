@@ -56,6 +56,7 @@ module string_module
    public :: remove_substr
    public :: replace_char
    public :: splitstr
+   public :: strsplit
 
    contains
 
@@ -600,5 +601,33 @@ module string_module
          endif
          
       end function splitstr
+
+      !> Fill allocatable string array with elements of a space-delimited string
+      !> The incoming string array must be unallocated
+      recursive subroutine strsplit(tgt, pcs, npc)
+      implicit none
+      integer,          intent(in)                                 ::  npc
+      character(len=*), intent(in)                                 ::  tgt
+      character(len=*), intent(inout), dimension(:), allocatable   ::  pcs
+      character(len=:), allocatable    ::  pce, tmp
+      allocate(tmp,source=tgt)
+      allocate(pce,mold=pcs)
+      tmp=adjustl(tgt)
+      read(tmp,*) pce
+      if (tgt(1:1)=="'" .or. tgt(1:1)=='"') then
+         tmp = tmp(len_trim(pce)+3:len_trim(tmp))
+      else
+         tmp = tmp(len_trim(pce)+1:len_trim(tmp))
+      endif
+      tmp=adjustl(tmp)
+      if (len_trim(tmp)>0) then
+         call strsplit(tmp, pcs, npc+1)
+      else
+         allocate(pcs(npc))
+      endif
+      pcs(npc) = pce                       ! fill array of strings from end to begin
+      deallocate(tmp)
+      deallocate(pce)
+      end subroutine strsplit
 
 end module string_module
