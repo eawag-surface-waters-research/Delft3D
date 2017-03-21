@@ -402,6 +402,39 @@ end function ug_new_meshgeom
 
 
 ! -- COORDINATES ------------
+!> Adds coordinate variables according to CF conventions.
+!! Non-standard attributes (such as bounds) should be set elsewhere.
+function ug_addcoordvars(ncid, id_varx, id_vary, id_dimension, name_varx, name_vary, longname_varx, longname_vary, mesh, location, crs) result(ierr)
+   integer,               intent(in)    :: ncid          !< NetCDF dataset id
+   integer,               intent(inout) :: id_varx       !< NetCDF 'x' variable id
+   integer,               intent(inout) :: id_vary       !< NetCDF 'y' variable id
+   integer, dimension(:), intent(in)    :: id_dimension  !< NetCDF dimension id
+   character(len=*),      intent(in)    :: name_varx     !< NetCDF 'x' variable name
+   character(len=*),      intent(in)    :: name_vary     !< NetCDF 'y' variable name
+   character(len=*),      intent(in)    :: longname_varx !< NetCDF 'x' variable long name
+   character(len=*),      intent(in)    :: longname_vary !< NetCDF 'y' variable long name
+   character(len=*),      intent(in)    :: mesh          !< Name of the mesh that contains the coordinate variables to add
+   character(len=*),      intent(in)    :: location      !< location on the mesh of the coordinate variables to add
+   type(t_crs),           intent(in)    :: crs           !< Coordinate reference system for the x/y-coordinates variables.
+   integer                              :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   ierr = UG_NOERR
+
+   ierr = nf90_def_var(ncid, name_varx, nf90_double, id_dimension, id_varx)
+   ierr = nf90_def_var(ncid, name_vary, nf90_double, id_dimension, id_vary)
+   ierr = ug_addcoordatts(ncid, id_varx, id_vary, crs)
+   ierr = nf90_put_att(ncid, id_varx, 'mesh',      mesh)
+   ierr = nf90_put_att(ncid, id_vary, 'mesh',      mesh)
+   ierr = nf90_put_att(ncid, id_varx, 'location',  location)
+   ierr = nf90_put_att(ncid, id_vary, 'location',  location)
+   ierr = nf90_put_att(ncid, id_varx, 'long_name', longname_varx)
+   ierr = nf90_put_att(ncid, id_vary, 'long_name', longname_vary)
+
+   ! Add mandatory lon/lat coords too (only if jsferic==0)
+   ! TODO: AvD ierr = ug_add_lonlat_vars(inetfile, 'NetNode', '', (/ id_netnodedim /), id_netnodelon, id_netnodelat, jsferic)
+
+end function ug_addcoordvars
+
 !> Adds coordinate attributes according to CF conventions, based on given coordinate projection type.
 !! Non-standard attributes (such as long_name) should be set elsewhere.
 function ug_addcoordatts(ncid, id_varx, id_vary, crs) result(ierr)
@@ -413,14 +446,9 @@ function ug_addcoordatts(ncid, id_varx, id_vary, crs) result(ierr)
 
    ierr = UG_NOERR
 
-   if (crs%is_spherical) then
-      ierr = nf90_put_att(ncid, id_varx, 'units',       'degrees_east')
-      ierr = nf90_put_att(ncid, id_vary, 'units',       'degrees_north')
-      ierr = nf90_put_att(ncid, id_varx, 'standard_name', 'longitude')
-      ierr = nf90_put_att(ncid, id_vary, 'standard_name', 'latitude')
-      ierr = nf90_put_att(ncid, id_varx, 'long_name'   , 'longitude')
-      ierr = nf90_put_att(ncid, id_vary, 'long_name'   , 'latitude')
-   else
+   if (crs%is_spherical) then ! If WGS84 system.
+      ierr = ug_addlonlatcoordatts(ncid, id_varx, id_vary)
+   else ! If projected crs.
       ierr = nf90_put_att(ncid, id_varx, 'units',       'm')
       ierr = nf90_put_att(ncid, id_vary, 'units',       'm')
       ierr = nf90_put_att(ncid, id_varx, 'standard_name', 'projection_x_coordinate')
@@ -429,6 +457,23 @@ function ug_addcoordatts(ncid, id_varx, id_vary, crs) result(ierr)
       ierr = nf90_put_att(ncid, id_vary, 'long_name'   , 'y')
    end if
 end function ug_addcoordatts
+
+!> Adds coordinate attributes according to CF conventions for WGS84 system.
+function ug_addlonlatcoordatts(ncid, id_varlon, id_varlat) result(ierr)
+   integer, intent(in) :: ncid      !< NetCDF dataset id
+   integer, intent(in) :: id_varlon !< NetCDF 'longitude' variable id
+   integer, intent(in) :: id_varlat !< NetCDF 'latitude' variable id
+   integer             :: ierr      !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   ierr = UG_NOERR
+
+   ierr = nf90_put_att(ncid, id_varlon, 'units',       'degrees_east')
+   ierr = nf90_put_att(ncid, id_varlat, 'units',       'degrees_north')
+   ierr = nf90_put_att(ncid, id_varlon, 'standard_name', 'longitude')
+   ierr = nf90_put_att(ncid, id_varlat, 'standard_name', 'latitude')
+   ierr = nf90_put_att(ncid, id_varlon, 'long_name'   , 'longitude')
+   ierr = nf90_put_att(ncid, id_varlat, 'long_name'   , 'latitude')
+end function ug_addlonlatcoordatts
 
 !> Adds coordinate mapping attributes according to CF conventions, based on jsferic.
 !! Attributes are put in a scalar integer variable.
@@ -892,19 +937,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = ug_add_coordmapping(ncid, crs)
 
    ! Nodes
-   ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, meshids%id_nodedim, meshids%id_nodex)
-   ierr = nf90_def_var(ncid, prefix//'_node_y', nf90_double, meshids%id_nodedim, meshids%id_nodey)
-   ierr = ug_addcoordatts(ncid, meshids%id_nodex, meshids%id_nodey, crs)
-   ierr = nf90_put_att(ncid, meshids%id_nodex, 'mesh', trim(meshName))
-   ierr = nf90_put_att(ncid, meshids%id_nodey, 'mesh', trim(meshName))
-   ierr = nf90_put_att(ncid, meshids%id_nodex, 'location', 'node')
-   ierr = nf90_put_att(ncid, meshids%id_nodey, 'location', 'node')
-   ierr = nf90_put_att(ncid, meshids%id_nodex, 'long_name',    'x-coordinate of mesh nodes')
-   ierr = nf90_put_att(ncid, meshids%id_nodey, 'long_name',    'y-coordinate of mesh nodes')
-
-   ! Add mandatory lon/lat coords too (only if jsferic==0)
-   ! TODO: AvD ierr = ug_add_lonlat_vars(inetfile, 'NetNode', '', (/ id_netnodedim /), id_netnodelon, id_netnodelat, jsferic)
-
+   ierr = ug_addcoordvars(ncid, meshids%id_nodex, meshids%id_nodey, (/ meshids%id_nodedim /), prefix//'_node_x', prefix//'_node_y', &
+                          'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', crs)
    ierr = ug_def_var(ncid, meshids, meshids%id_nodez, (/ meshids%id_nodedim /), nf90_double, UG_LOC_NODE, &
                      meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
    ! ierr = nf90_put_att(ncid, meshids%id_nodez, 'positive',       'up') ! Not allowed for non-coordinate variables.
@@ -920,29 +954,13 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, '_FillValue',  imiss)
    end if
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
-      ierr = nf90_def_var(ncid, prefix//'_edge_x', nf90_double, meshids%id_edgedim, meshids%id_edgex)
-      ierr = nf90_def_var(ncid, prefix//'_edge_y', nf90_double, meshids%id_edgedim, meshids%id_edgey)
-      ierr = ug_addcoordatts(ncid, meshids%id_edgex, meshids%id_edgey, crs)
-      ierr = nf90_put_att(ncid, meshids%id_edgex, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_edgey, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_edgex, 'location', 'edge')
-      ierr = nf90_put_att(ncid, meshids%id_edgey, 'location', 'edge')
-      ierr = nf90_put_att(ncid, meshids%id_edgex, 'long_name',    'characteristic x-coordinate of the mesh edge (e.g., midpoint)')
-      ierr = nf90_put_att(ncid, meshids%id_edgey, 'long_name',    'characteristic y-coordinate of the mesh edge (e.g., midpoint)')
-
+      ierr = ug_addcoordvars(ncid, meshids%id_edgex, meshids%id_edgey, (/ meshids%id_edgedim /), prefix//'_edge_x', prefix//'_edge_y', &
+                             'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', crs)
       ierr = nf90_put_att(ncid, meshids%id_edgex, 'bounds',    prefix//'_edge_x_bnd')
       ierr = nf90_put_att(ncid, meshids%id_edgey, 'bounds',    prefix//'_edge_y_bnd')
-
-      ierr = nf90_def_var(ncid, prefix//'_edge_x_bnd', nf90_double, (/ id_twodim, meshids%id_edgedim /), meshids%id_edgexbnd)
-      ierr = nf90_def_var(ncid, prefix//'_edge_y_bnd', nf90_double, (/ id_twodim, meshids%id_edgedim /), meshids%id_edgeybnd)
-      ierr = ug_addcoordatts(ncid, meshids%id_edgexbnd, meshids%id_edgeybnd, crs)
-      ierr = nf90_put_att(ncid, meshids%id_edgexbnd, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_edgeybnd, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_edgexbnd, 'location', 'edge')
-      ierr = nf90_put_att(ncid, meshids%id_edgeybnd, 'location', 'edge')
-      ierr = nf90_put_att(ncid, meshids%id_edgexbnd, 'long_name',    'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)')
-      ierr = nf90_put_att(ncid, meshids%id_edgeybnd, 'long_name',    'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)')
-
+      ! Add bounds.
+      ierr = ug_addcoordvars(ncid, meshids%id_edgexbnd, meshids%id_edgeybnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
+                             'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
    end if
 
    !ierr = ug_def_var(ncid, meshids, meshName, prefix//'_u1', nf90_double, UG_LOC_EDGE, 'mean', (/ id_nodedim /), id_nodez)
@@ -996,30 +1014,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
    end if
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
-      ierr = nf90_def_var(ncid, prefix//'_face_x', nf90_double, meshids%id_facedim, meshids%id_facex)
-      ierr = nf90_def_var(ncid, prefix//'_face_y', nf90_double, meshids%id_facedim, meshids%id_facey)
-      ierr = ug_addcoordatts(ncid, meshids%id_facex, meshids%id_facey, crs)
-      ierr = nf90_put_att(ncid, meshids%id_facex, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_facey, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_facex, 'location', 'face')
-      ierr = nf90_put_att(ncid, meshids%id_facey, 'location', 'face')
-      ierr = nf90_put_att(ncid, meshids%id_facex, 'long_name',    'Characteristic x-coordinate of mesh face')
-      ierr = nf90_put_att(ncid, meshids%id_facey, 'long_name',    'Characteristic y-coordinate of mesh face')
+      ierr = ug_addcoordvars(ncid, meshids%id_facex, meshids%id_facey, (/ meshids%id_facedim /), prefix//'_face_x', prefix//'_face_y', &
+                             'Characteristic x-coordinate of mesh face', 'Characteristic y-coordinate of mesh face', trim(meshName), 'face', crs)
       ierr = nf90_put_att(ncid, meshids%id_facex, 'bounds',    prefix//'_face_x_bnd')
       ierr = nf90_put_att(ncid, meshids%id_facey, 'bounds',    prefix//'_face_y_bnd')
-
-      ierr = nf90_def_var(ncid, prefix//'_face_x_bnd', nf90_double, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /), meshids%id_facexbnd)
-      ierr = nf90_def_var(ncid, prefix//'_face_y_bnd', nf90_double, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /), meshids%id_faceybnd)
-      ierr = ug_addcoordatts(ncid, meshids%id_facexbnd, meshids%id_faceybnd, crs)
-      ierr = nf90_put_att(ncid, meshids%id_facexbnd, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_faceybnd, 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%id_facexbnd, 'location', 'face')
-      ierr = nf90_put_att(ncid, meshids%id_faceybnd, 'location', 'face')
-      ierr = nf90_put_att(ncid, meshids%id_facexbnd, 'long_name',    'x-coordinate bounds of 2D mesh face (i.e. corner coordinates)')
-      ierr = nf90_put_att(ncid, meshids%id_faceybnd, 'long_name',    'y-coordinate bounds of 2D mesh face (i.e. corner coordinates)')
+      ! Add bounds.
+      ierr = ug_addcoordvars(ncid, meshids%id_facexbnd, meshids%id_faceybnd, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /), prefix//'_face_x_bnd', prefix//'_face_y_bnd', &
+                             'x-coordinate bounds of 2D mesh face (i.e. corner coordinates)', 'y-coordinate bounds of 2D mesh face (i.e. corner coordinates)', trim(meshName), 'face', crs)
       ierr = nf90_put_att(ncid, meshids%id_facexbnd, '_FillValue',  dmiss)
       ierr = nf90_put_att(ncid, meshids%id_faceybnd, '_FillValue',  dmiss)
-
    end if
 
    ! Layers
