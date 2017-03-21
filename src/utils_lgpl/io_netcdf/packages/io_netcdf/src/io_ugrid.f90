@@ -120,14 +120,27 @@ type t_ug_meshids
    integer :: id_nodex           = -1 !< Coordinate variable ID for node x-coordinate.
    integer :: id_nodey           = -1 !< Coordinate variable ID for node y-coordinate.
    integer :: id_nodez           = -1 !< Data       variable ID for node z-coordinate.
+   integer :: id_nodelon         = -1 !< Coordinate variable ID for node longitude coordinate.
+   integer :: id_nodelat         = -1 !< Coordinate variable ID for node latitude coordinate.
+
    integer :: id_edgex           = -1 !< Coordinate variable ID for edge x-coordinate.
    integer :: id_edgey           = -1 !< Coordinate variable ID for edge y-coordinate.
    integer :: id_edgexbnd        = -1 !<            variable ID for edge boundaries' x-coordinate.
    integer :: id_edgeybnd        = -1 !<            variable ID for edge boundaries' y-coordinate.
+   integer :: id_edgelon         = -1 !< Coordinate variable ID for edge longitude coordinate.
+   integer :: id_edgelat         = -1 !< Coordinate variable ID for edge latitude coordinate.
+   integer :: id_edgelonbnd      = -1 !<            variable ID for edge boundaries' longitude coordinate.
+   integer :: id_edgelatbnd      = -1 !<            variable ID for edge boundaries' latitude coordinate.
+
    integer :: id_facex           = -1 !< Coordinate variable ID for face x-coordinate.
    integer :: id_facey           = -1 !< Coordinate variable ID for face y-coordinate.
    integer :: id_facexbnd        = -1 !<            variable ID for face boundaries' x-coordinate.
    integer :: id_faceybnd        = -1 !<            variable ID for face boundaries' y-coordinate.
+   integer :: id_facelon         = -1 !< Coordinate variable ID for face longitude coordinate.
+   integer :: id_facelat         = -1 !< Coordinate variable ID for face latitude coordinate.
+   integer :: id_facelonbnd      = -1 !<            variable ID for face boundaries' longitude coordinate.
+   integer :: id_facelatbnd      = -1 !<            variable ID for face boundaries' latitude coordinate.
+
    integer :: id_layer_zs        = -1 !< Coordinate variable ID for fixed z/sigma layer center vertical coordinate (either z or sigma).
    integer :: id_interface_zs    = -1 !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).
 
@@ -429,11 +442,35 @@ function ug_addcoordvars(ncid, id_varx, id_vary, id_dimension, name_varx, name_v
    ierr = nf90_put_att(ncid, id_vary, 'location',  location)
    ierr = nf90_put_att(ncid, id_varx, 'long_name', longname_varx)
    ierr = nf90_put_att(ncid, id_vary, 'long_name', longname_vary)
-
-   ! Add mandatory lon/lat coords too (only if jsferic==0)
-   ! TODO: AvD ierr = ug_add_lonlat_vars(inetfile, 'NetNode', '', (/ id_netnodedim /), id_netnodelon, id_netnodelat, jsferic)
-
 end function ug_addcoordvars
+
+!> Adds WGS84 coordinate variables according to CF conventions.
+!! Non-standard attributes (such as bounds) should be set elsewhere.
+function ug_addlonlatcoordvars(ncid, id_varlon, id_varlat, id_dimension, name_varlon, name_varlat, longname_varlon, longname_varlat, mesh, location) result(ierr)
+   integer,               intent(in)    :: ncid            !< NetCDF dataset id
+   integer,               intent(inout) :: id_varlon       !< NetCDF 'lon' variable id
+   integer,               intent(inout) :: id_varlat       !< NetCDF 'lat' variable id
+   integer, dimension(:), intent(in)    :: id_dimension    !< NetCDF dimension id
+   character(len=*),      intent(in)    :: name_varlon     !< NetCDF 'lon' variable name
+   character(len=*),      intent(in)    :: name_varlat     !< NetCDF 'lat' variable name
+   character(len=*),      intent(in)    :: longname_varlon !< NetCDF 'lon' variable long name
+   character(len=*),      intent(in)    :: longname_varlat !< NetCDF 'lat' variable long name
+   character(len=*),      intent(in)    :: mesh            !< Name of the mesh that contains the coordinate variables to add
+   character(len=*),      intent(in)    :: location        !< location on the mesh of the coordinate variables to add
+   integer                              :: ierr            !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   ierr = UG_NOERR
+
+   ierr = nf90_def_var(ncid, name_varlon, nf90_double, id_dimension, id_varlon)
+   ierr = nf90_def_var(ncid, name_varlat, nf90_double, id_dimension, id_varlat)
+   ierr = ug_addlonlatcoordatts(ncid, id_varlon, id_varlat)
+   ierr = nf90_put_att(ncid, id_varlon, 'mesh',      mesh)
+   ierr = nf90_put_att(ncid, id_varlat, 'mesh',      mesh)
+   ierr = nf90_put_att(ncid, id_varlon, 'location',  location)
+   ierr = nf90_put_att(ncid, id_varlat, 'location',  location)
+   ierr = nf90_put_att(ncid, id_varlon, 'long_name', longname_varlon)
+   ierr = nf90_put_att(ncid, id_varlat, 'long_name', longname_varlat)
+end function ug_addlonlatcoordvars
 
 !> Adds coordinate attributes according to CF conventions, based on given coordinate projection type.
 !! Non-standard attributes (such as long_name) should be set elsewhere.
@@ -458,7 +495,7 @@ function ug_addcoordatts(ncid, id_varx, id_vary, crs) result(ierr)
    end if
 end function ug_addcoordatts
 
-!> Adds coordinate attributes according to CF conventions for WGS84 system.
+!> Adds WGS84 coordinate attributes according to CF conventions.
 function ug_addlonlatcoordatts(ncid, id_varlon, id_varlat) result(ierr)
    integer, intent(in) :: ncid      !< NetCDF dataset id
    integer, intent(in) :: id_varlon !< NetCDF 'longitude' variable id
@@ -937,8 +974,14 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = ug_add_coordmapping(ncid, crs)
 
    ! Nodes
+   ! node x,y coordinates.
    ierr = ug_addcoordvars(ncid, meshids%id_nodex, meshids%id_nodey, (/ meshids%id_nodedim /), prefix//'_node_x', prefix//'_node_y', &
                           'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', crs)
+   if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      ierr = ug_addlonlatcoordvars(ncid, meshids%id_nodelon, meshids%id_nodelat, (/ meshids%id_nodedim /), prefix//'_node_lon', prefix//'_node_lat', &
+                                   'longitude coordinate of mesh nodes', 'latitude coordinate of mesh nodes', trim(meshName), 'node')
+   end if
+
    ierr = ug_def_var(ncid, meshids, meshids%id_nodez, (/ meshids%id_nodedim /), nf90_double, UG_LOC_NODE, &
                      meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
    ! ierr = nf90_put_att(ncid, meshids%id_nodez, 'positive',       'up') ! Not allowed for non-coordinate variables.
@@ -954,6 +997,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, '_FillValue',  imiss)
    end if
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
+      ! edge x,y coordinates.
       ierr = ug_addcoordvars(ncid, meshids%id_edgex, meshids%id_edgey, (/ meshids%id_edgedim /), prefix//'_edge_x', prefix//'_edge_y', &
                              'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', crs)
       ierr = nf90_put_att(ncid, meshids%id_edgex, 'bounds',    prefix//'_edge_x_bnd')
@@ -961,6 +1005,16 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ! Add bounds.
       ierr = ug_addcoordvars(ncid, meshids%id_edgexbnd, meshids%id_edgeybnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
                              'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
+
+      if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+         ierr = ug_addlonlatcoordvars(ncid, meshids%id_edgelon, meshids%id_edgelat, (/ meshids%id_edgedim /), prefix//'_edge_lon', prefix//'_edge_lat', &
+                                      'characteristic longitude coordinate of the mesh edge (e.g. midpoint)', 'characteristic latitude coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge')
+         ierr = nf90_put_att(ncid, meshids%id_edgelon, 'bounds',    prefix//'_edge_lon_bnd')
+         ierr = nf90_put_att(ncid, meshids%id_edgelat, 'bounds',    prefix//'_edge_lat_bnd')
+         ! Add bounds.
+         ierr = ug_addlonlatcoordvars(ncid, meshids%id_edgelonbnd, meshids%id_edgelatbnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_lon_bnd', prefix//'_edge_lat_bnd', &
+                                      'longitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'latitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge')
+      end if
    end if
 
    !ierr = ug_def_var(ncid, meshids, meshName, prefix//'_u1', nf90_double, UG_LOC_EDGE, 'mean', (/ id_nodedim /), id_nodez)
@@ -1014,6 +1068,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
    end if
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
+      ! face x,y coordinates.
       ierr = ug_addcoordvars(ncid, meshids%id_facex, meshids%id_facey, (/ meshids%id_facedim /), prefix//'_face_x', prefix//'_face_y', &
                              'Characteristic x-coordinate of mesh face', 'Characteristic y-coordinate of mesh face', trim(meshName), 'face', crs)
       ierr = nf90_put_att(ncid, meshids%id_facex, 'bounds',    prefix//'_face_x_bnd')
@@ -1023,6 +1078,18 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                              'x-coordinate bounds of 2D mesh face (i.e. corner coordinates)', 'y-coordinate bounds of 2D mesh face (i.e. corner coordinates)', trim(meshName), 'face', crs)
       ierr = nf90_put_att(ncid, meshids%id_facexbnd, '_FillValue',  dmiss)
       ierr = nf90_put_att(ncid, meshids%id_faceybnd, '_FillValue',  dmiss)
+
+      if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+         ierr = ug_addlonlatcoordvars(ncid, meshids%id_facelon, meshids%id_facelat, (/ meshids%id_facedim /), prefix//'_face_lon', prefix//'_face_lat', &
+                                      'Characteristic longitude coordinate of mesh face', 'Characteristic latitude coordinate of mesh face', trim(meshName), 'face')
+         ierr = nf90_put_att(ncid, meshids%id_facelon, 'bounds',    prefix//'_face_lon_bnd')
+         ierr = nf90_put_att(ncid, meshids%id_facelat, 'bounds',    prefix//'_face_lat_bnd')
+         ! Add bounds.
+         ierr = ug_addlonlatcoordvars(ncid, meshids%id_facelonbnd, meshids%id_facelatbnd, (/ meshids%id_maxfacenodesdim, meshids%id_facedim /), prefix//'_face_lon_bnd', prefix//'_face_lat_bnd', &
+                                      'longitude coordinate bounds of 2D mesh face (i.e. corner coordinates)', 'latitude coordinate bounds of 2D mesh face (i.e. corner coordinates)', trim(meshName), 'face')
+         ierr = nf90_put_att(ncid, meshids%id_facelonbnd, '_FillValue',  dmiss)
+         ierr = nf90_put_att(ncid, meshids%id_facelatbnd, '_FillValue',  dmiss)
+      end if
    end if
 
    ! Layers
