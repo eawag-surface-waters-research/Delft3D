@@ -2687,7 +2687,7 @@ subroutine DioPltRewind(plt)
 #else
             ! Unix keeps original content, so remove file and reopen
             close (plt % ds % outStream % lun, status='delete')
-            open (plt % ds % outStream % lun, form = plt % ds % outStream % form, &
+            open (newunit=plt % ds % outStream % lun, form = plt % ds % outStream % form, &
                      file = plt % ds % outStream % name, action='write')
             ! write(*,*) 'Deleted/Opened ', plt % ds % outStream % name
 #endif

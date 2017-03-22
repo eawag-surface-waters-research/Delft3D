@@ -639,15 +639,6 @@ function D3S_PutDischarges(currTimeStep, discharges) result(success)
 
     real, dimension(:), allocatable :: values
 
-    ! body
-!    integer ini, i
-!    data ini /0/
-!    if (ini .eq. 0) then
-!       open (204,file = 'sbk-discharges.tek')
-!       ini = 1
-!    endif
-
-
 
     success = .false.
     if ( D3S_CheckTimeStep(currTimeStep) ) then

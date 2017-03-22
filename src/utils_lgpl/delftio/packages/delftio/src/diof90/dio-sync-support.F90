@@ -84,9 +84,10 @@ subroutine DioSyncSetItemAvailable(stream, itemName, availType)
 
     ! locals
     
-    character(Len=DioMaxStreamLen):: dsBaseName ! base name of dataset
-    character(Len=DioMaxStreamLen):: fname      ! vars to open file
-    integer                       :: ierr
+    character(Len=DioMaxStreamLen) :: dsBaseName ! base name of dataset
+    character(Len=DioMaxStreamLen) :: fname      ! vars to open file
+    integer                        :: ierr
+    integer                        :: iunit
 
     ! body
 
@@ -97,14 +98,14 @@ subroutine DioSyncSetItemAvailable(stream, itemName, availType)
         call DioStreamDelay
         fname = trim(stream % name) // '_' // trim(dsBaseName) // availType
 #if (defined(WIN32))
-        open(dioStartLun - 1,file=fname,status='new', action= 'write', iostat=ierr, share='DENYRW')
+        open(newunit=iunit,file=fname,status='new', action= 'write', iostat=ierr, share='DENYRW')
 #else
-        open(dioStartLun - 1,file=fname,status='new', action= 'write', iostat=ierr)
+        open(newunit=iunit,file=fname,status='new', action= 'write', iostat=ierr)
 #endif
         if (ierr.gt.0) then
             call DioStreamError(901, 'Could not set available:', fname)
         else
-            close(dioStartLun - 1)
+            close(iunit)
         endif
         call DioStreamDelay
     endif
@@ -134,11 +135,12 @@ function DioSyncGetItemAvailable(stream, itemName, availType) result(retVal)
 
     ! locals
     
-    character(Len=DioMaxStreamLen):: dsBaseName ! base name of dataset
-    character(Len=DioMaxStreamLen):: fname      ! vars to open file
-    integer                       :: ierr
-    logical                       :: exists
-    integer                       :: timeWaited
+    character(Len=DioMaxStreamLen) :: dsBaseName ! base name of dataset
+    character(Len=DioMaxStreamLen) :: fname      ! vars to open file
+    integer                        :: ierr
+    logical                        :: exists
+    integer                        :: timeWaited
+    integer                        :: iunit
 
     ! body
     
@@ -155,9 +157,9 @@ function DioSyncGetItemAvailable(stream, itemName, availType) result(retVal)
         inquire(file=fname,exist=exists)
         if (exists) then
 #if (defined(WIN32))
-            open(dioStartLun - 2,file=fname,status='old', iostat=ierr, share='DENYRW')
+            open(newunit=iunit,file=fname,status='old', iostat=ierr, share='DENYRW')
 #else
-            open(dioStartLun - 2,file=fname,status='old', iostat=ierr)
+            open(newunit=iunit,file=fname,status='old', iostat=ierr)
 #endif
             if (ierr.gt.0) then
                 if (DioStreamSleep(timeWaited)) then
@@ -166,7 +168,7 @@ function DioSyncGetItemAvailable(stream, itemName, availType) result(retVal)
                     retVal =.false.
                 endif
             endif
-            close(dioStartLun - 2)
+            close(iunit)
         else
             if (DioStreamSleep(timeWaited)) then
                 goto 10
@@ -194,9 +196,10 @@ subroutine DioSyncSetItemReceived(stream, itemName, availType)
 
     ! locals
     
-    character(Len=DioMaxStreamLen):: dsBaseName ! base name of dataset
-    character(Len=DioMaxStreamLen):: fname      ! vars to open file
-    integer                       :: ierr
+    character(Len=DioMaxStreamLen) :: dsBaseName ! base name of dataset
+    character(Len=DioMaxStreamLen) :: fname      ! vars to open file
+    integer                        :: ierr
+    integer                        :: iunit
 
     ! body
     
@@ -206,21 +209,21 @@ subroutine DioSyncSetItemReceived(stream, itemName, availType)
 
         call DioStreamDelay
         fname = trim(stream % name) // '_' // trim(dsBaseName) // availType
-        open(dioStartLun - 4,file=fname,status='old', iostat=ierr)
+        open(newunit=iunit,file=fname,status='old', iostat=ierr)
         if (ierr.gt.0) then
             call DioStreamError(902, 'Could not open ', trim(fname), ' for deletion')
         else
-            close(dioStartLun - 4,status='delete')
+            close(iunit,status='delete')
             !
             ! clean up stream
             !
             if ( availType .ne. '.stream' .and. DioStreamUsesLun(stream)) then
                 fname = stream % name
-                open(dioStartLun - 4,file=fname,status='old', iostat=ierr)
+                open(newunit=iunit,file=fname,status='old', iostat=ierr)
                 if (ierr.gt.0) then
                     call DioStreamError(903, 'Could not open ', trim(fname), ' for deletion')
                 else
-                    close(dioStartLun - 4,status='delete')
+                    close(iunit,status='delete')
                 endif
             endif
         endif

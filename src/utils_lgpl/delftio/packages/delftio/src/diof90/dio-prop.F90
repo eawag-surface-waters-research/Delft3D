@@ -294,13 +294,10 @@ contains
 
       retVal = .false.
 
-      lu = DioNewLun()
-      if ( lu > 0 ) then
-          open( lu, file = filename, status = 'old', iostat=ierror)
-          if ( ierror == 0 ) then
-              retVal = prop_file_by_lu(lu)
-              close( lu )
-          endif
+      open(newunit=lu, file = filename, status = 'old', iostat=ierror)
+      if ( ierror == 0 ) then
+          retVal = prop_file_by_lu(lu)
+          close( lu )
       endif
 
       end function prop_file_by_name
@@ -713,7 +710,7 @@ function StringsEqual(mode, str1, str2) result(retVal)
     endif
 end function StringsEqual
 
-
+! When all open-statements use the newunit-specifier this function can be removed
 function DioNewLun() result(retVal)
 
     ! return value

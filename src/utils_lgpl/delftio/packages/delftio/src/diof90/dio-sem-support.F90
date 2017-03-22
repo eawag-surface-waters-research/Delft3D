@@ -63,6 +63,8 @@ subroutine DioSemGetLock(name)
     logical                       :: exists
     integer                       :: timeWaited
     logical                       :: succes
+    
+    integer                       :: iunit
 
     ! body
     
@@ -80,9 +82,9 @@ subroutine DioSemGetLock(name)
         endif
     else
 #if (defined(WIN32))
-        open(dioStartLun - 6,file=fname,status='new', iostat=ierr, share='DENYRW')
+        open(newunit=iunit,file=fname,status='new', iostat=ierr, share='DENYRW')
 #else
-        open(dioStartLun - 6,file=fname,status='new', iostat=ierr)
+        open(newunit=iunit,file=fname,status='new', iostat=ierr)
 #endif
         if (ierr.gt.0) then
             if (DioStreamSleep(timeWaited)) then
@@ -91,7 +93,7 @@ subroutine DioSemGetLock(name)
                 succes =.false.
             endif
         endif
-        close(dioStartLun - 6)
+        close(iunit)
     endif
 
 end subroutine DioSemGetLock
@@ -111,15 +113,16 @@ subroutine DioSemReleaseLock(name)
     
     character(Len=DioMaxStreamLen):: fname  ! vars to check file existence
     integer                       :: ierr
+    integer                       :: iunit  
 
     ! body
     
     fname = trim(name) // '.lock'
-    open(dioStartLun - 7,file=fname,status='old', iostat=ierr)
+    open(newunit=iunit,file=fname,status='old', iostat=ierr)
     if (ierr.gt.0) then
         call DioStreamError(991, 'Could not open sem-file', trim(fname), ' for deletion')
     else
-        close(dioStartLun - 7,status='delete')
+        close(iunit,status='delete')
     endif
 
 end subroutine DioSemReleaseLock

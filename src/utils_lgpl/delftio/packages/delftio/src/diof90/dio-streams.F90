@@ -304,11 +304,10 @@ subroutine DioStreamError(nr, text)
     character(Len=DioMaxStreamLen) :: errFile  ! name of errorFile
     integer                        :: ierr     ! open status
     if (logMsgToFile) then
-        lun = dioStartLun - 3
         call GetArg(0, exePath)
         call DioConfGetExeName(exePath, errFile)
         errFile = 'dio-' // trim(errFile) // '-errors.txt'
-        open(lun, file=errFile, position = 'append', iostat=ierr)
+        open(newunit=lun, file=errFile, position = 'append', iostat=ierr)
         if ( ierr == 0 ) then
             write(lun, '(A,I5,A,A)') 'DioError ', nr, ': ', trim(text)
             close(lun)
@@ -521,40 +520,35 @@ function DioStreamConnect(stream, alsoForAsync) result(retVal)
         ierr = -1
         retVal = .false.
         openNefis = .false.
-        stream % lun = dioNewLun()
         if ( stream % mode .eq. 'r') then
             if ( stream % streamType .eq. dio_Nefis_Stream ) then
                 openNefis = .true.
             else if ( DioStreamUsesLun(stream)) then
-                if (stream % lun .gt. 0) then
 #if (defined(WIN32))
-                    open (stream%lun, file=stream % name, action='read', &
-                              shared, status='old', form= stream % form, iostat=ierr)
+                 open (newunit=stream%lun, file=stream % name, action='read', &
+                       shared, status='old', form= stream % form, iostat=ierr)
 #elif (defined(salford32))
-                    open (stream%lun, file=stream % name, action='read', &
-          access='transparent', share='DENYWR', status='old', form= stream % form, iostat=ierr)
+                 open (newunit=stream%lun, file=stream % name, action='read', &
+                       access='transparent', share='DENYWR', status='old', form= stream % form, iostat=ierr)
 #else
-                    open (stream%lun, file=stream % name, action='read', &
-                              status='old', form= stream % form, iostat=ierr)
+                 open (newunit=stream%lun, file=stream % name, action='read', &
+                       status='old', form= stream % form, iostat=ierr)
 #endif
-                endif
             endif
         else
             if ( stream % streamType .eq. dio_Nefis_Stream ) then
                 openNefis = .true.
             else if ( DioStreamUsesLun(stream)) then
-                if (stream % lun .gt. 0) then
 #if (defined(WIN32))
-                    open (stream%lun, file=stream % name, action='write', &
-                              shared, form= stream % form, iostat=ierr)
+                 open (newunit=stream%lun, file=stream % name, action='write', &
+                       shared, form= stream % form, iostat=ierr)
 #elif (defined(salford32))
-                    open (stream%lun, file=stream % name, action='write', &
-          access='transparent', share='DENYWR', form= stream % form, iostat=ierr)
+                 open (newunit=stream%lun, file=stream % name, action='write', &
+                       access='transparent', share='DENYWR', form= stream % form, iostat=ierr)
 #else
-                    open (stream%lun, file=stream % name, action='write', &
-                              form= stream % form, iostat=ierr)
+                 open (newunit=stream%lun, file=stream % name, action='write', &
+                       form= stream % form, iostat=ierr)
 #endif
-                endif
             endif
         endif
         
