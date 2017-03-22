@@ -762,6 +762,7 @@ module m_ec_elementSet
                 elementSetPtr%ofType == elmSetType_cartesian_equidistant .or. &
                 elementSetPtr%ofType == elmSetType_spheric .or. &
                 elementSetPtr%ofType == elmSetType_spheric_equidistant .or. &
+                elementSetPtr%ofType == elmSetType_polytim .or. &
                 elementSetPtr%ofType == elmSetType_Grib .or. &
                 elementSetPtr%ofType == elmSetType_scalar .or. &
                 elementSetPtr%ofType == elmSetType_Ids .or. &
