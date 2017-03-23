@@ -46,7 +46,7 @@ FMODULES += \
 #Sources
 libIONetcdf_la_SOURCES = \
          io_netcdf_version.F90 \
-         coordinate_reference_system.f90 \
+         coordinate_reference_system.F90 \
          io_ugrid.f90 \
          io_netcdf.f90 \
          io_netcdf_api.F90
