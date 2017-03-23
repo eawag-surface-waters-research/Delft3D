@@ -6337,9 +6337,6 @@ src/utils_lgpl/nefis/doc/NEFIS5_structure_definition.txt -text
 src/utils_lgpl/nefis/doc/NL[!!-~]Memo[!!-~]061020.doc -text
 src/utils_lgpl/nefis/doc/nefis5_testen.xls -text
 src/utils_lgpl/nefis/nefis5.dsw -text
-src/utils_lgpl/nefis/nefis_vs2010.sln -text
-src/utils_lgpl/nefis/nefis_vs2012.sln -text
-src/utils_lgpl/nefis/nefis_vs2013.sln -text
 src/utils_lgpl/nefis/packages/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/include/btps.h -text
@@ -6354,6 +6351,7 @@ src/utils_lgpl/nefis/packages/nefis/include/nef-tag.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nef-xdr.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis_version.h.svn -text
+src/utils_lgpl/nefis/packages/nefis/include/nefis_version.rc -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis_version.rc.svn -text
 src/utils_lgpl/nefis/packages/nefis/include/oc.h -text
 src/utils_lgpl/nefis/packages/nefis/include/pt.h -text
