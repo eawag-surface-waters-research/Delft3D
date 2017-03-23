@@ -30,6 +30,8 @@
 
 !> Module for utility types and functions for working with coordinates in different coordinate systems.
 module coordinate_reference_system
+   use messagehandling
+
    implicit none
 
    !> Container for information for a NetCDF attribute. Used inside t_crs.
@@ -62,12 +64,12 @@ module coordinate_reference_system
 
       implicit none
 
-      character(len=*),            intent(in)  :: src_proj_string !< proj4 string describing source coordinate system.
-      character(len=*),            intent(in)  :: dst_proj_string !< proj4 string describing destination coordinate system.
-      real(kind=dp), dimension(:), intent(in)  :: src_x !< x coordinates to transform.
-      real(kind=dp), dimension(:), intent(in)  :: src_y !< y coordinates to transform.
-      real(kind=dp), dimension(:), intent(out) :: dst_x !< transformed x coordinates.
-      real(kind=dp), dimension(:), intent(out) :: dst_y !< transformed y coordinates.
+      character(len=*),                      intent(in)  :: src_proj_string !< proj4 string describing source coordinate system.
+      character(len=*),                      intent(in)  :: dst_proj_string !< proj4 string describing destination coordinate system.
+      real(kind=kind(1.0d00)), dimension(:), intent(in)  :: src_x           !< x coordinates to transform.
+      real(kind=kind(1.0d00)), dimension(:), intent(in)  :: src_y           !< y coordinates to transform.
+      real(kind=kind(1.0d00)), dimension(:), intent(out) :: dst_x           !< transformed x coordinates.
+      real(kind=kind(1.0d00)), dimension(:), intent(out) :: dst_y           !< transformed y coordinates.
 
       type(pj_object) :: src_projection !< source coordinate system object.
       type(pj_object) :: dst_projection !< destination coordinate system object.
