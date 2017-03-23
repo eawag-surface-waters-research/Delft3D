@@ -6352,7 +6352,6 @@ src/utils_lgpl/nefis/packages/nefis/include/nef-tag.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nef-xdr.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis_version.h.svn -text
-src/utils_lgpl/nefis/packages/nefis/include/nefis_version.rc -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis_version.rc.svn -text
 src/utils_lgpl/nefis/packages/nefis/include/oc.h -text
 src/utils_lgpl/nefis/packages/nefis/include/pt.h -text
