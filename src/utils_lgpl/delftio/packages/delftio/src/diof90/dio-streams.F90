@@ -57,6 +57,9 @@ integer, parameter :: DIO_HANDLE_INVALID = -1
 integer, parameter :: DioDayToSec = 86400
 
 
+integer            :: maxStreamUnit = -214748300
+integer            :: minStreamUnit = 214748300
+
 !!
 !! Definition of external data types
 !!
@@ -552,6 +555,9 @@ function DioStreamConnect(stream, alsoForAsync) result(retVal)
             endif
         endif
         
+        maxStreamUnit = max(stream%lun, maxStreamUnit)
+        minStreamUnit = min(stream%lun, minStreamUnit)
+        
         if ( openNefis ) then
 
 #if (defined(DIO_NEFIS_INCLUDED))
@@ -874,6 +880,32 @@ subroutine DioStreamClose(stream)
     stream % nefFileHandle = DIO_HANDLE_INVALID
 
 end subroutine DioStreamClose
+
+
+subroutine DioStreamCloseAllUnits()
+
+   ! Used to free all connected files during finalize
+
+   integer             :: iunit
+   logical             :: isOpened
+
+   if (maxStreamUnit >= minStreamUnit) then
+   
+      do iunit = minStreamUnit, maxStreamUnit
+
+         inquire(iunit, opened=isOpened)
+         if (isOpened) then
+            close(iunit)
+         endif
+      
+      enddo
+      
+   endif
+   
+   maxStreamUnit = -214748300
+   minStreamUnit = 214748300
+
+end subroutine DioStreamCloseAllUnits
 
 
 !
