@@ -609,16 +609,14 @@ module string_module
       integer,          intent(in)                                 ::  npc
       character(len=*), intent(in)                                 ::  tgt
       character(len=*), intent(inout), dimension(:), allocatable   ::  pcs
-      character(len=:), allocatable    ::  pce, tmp
-      allocate(tmp,source=tgt)
+      character(len=:), allocatable    ::  pce !, tmp
+      character(len=len(tgt))          ::  tmp
+      integer                          ::  ndx
+!     allocate(tmp,source=tgt)
       allocate(character(len=len(pcs))::pce)
       tmp=adjustl(tgt)
-      read(tmp,*) pce
-      if (tgt(1:1)=="'" .or. tgt(1:1)=='"') then
-         tmp = tmp(len_trim(pce)+3:len_trim(tmp))
-      else
-         tmp = tmp(len_trim(pce)+1:len_trim(tmp))
-      endif
+      ndx = get_first_substring(tmp,pce)
+      tmp = tmp(ndx:len_trim(tmp))
       tmp=adjustl(tmp)
       if (len_trim(tmp)>0) then
          call strsplit(tmp, pcs, npc+1)
@@ -626,8 +624,32 @@ module string_module
          allocate(pcs(npc))
       endif
       pcs(npc) = pce                       ! fill array of strings from end to begin
-      deallocate(tmp)
+!     deallocate(tmp)
       deallocate(pce)
       end subroutine strsplit
+
+
+      function get_first_substring(tgt,pce) result (ndx)
+      implicit none
+      character(len=*), intent(in)      ::  tgt
+      character(len=*), intent(out)     ::  pce
+      integer           :: ndx, ltrim
+      logical           :: single_quoted
+      logical           :: double_quoted
+      single_quoted = .false.
+      double_quoted = .false.
+      do ndx=1,len(tgt)
+         if (.not.(single_quoted .or. double_quoted)) then
+            if (is_whitespace(tgt(ndx:ndx))) exit
+         endif
+         if (tgt(ndx:ndx)=='"') double_quoted = .not.double_quoted
+         if (tgt(ndx:ndx)=="'") single_quoted = .not.single_quoted
+      enddo
+      pce = tgt(1:ndx-1)
+      ltrim = len_trim(pce)
+      if (pce(1:1)=='"' .or. pce(1:1)=='"') pce=pce(2:ltrim)
+      ltrim = len_trim(pce)
+      if (pce(ltrim:ltrim)=="'" .or. pce(ltrim:ltrim)=='"') pce=pce(1:ltrim-1)
+      end function get_first_substring
 
 end module string_module
