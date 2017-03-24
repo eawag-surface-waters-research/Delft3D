@@ -291,6 +291,7 @@ src/autogen.sh -text
 src/build.cmd -text
 src/build.sh -text
 src/build32.cmd -text
+src/build32vs15if17.cmd -text
 src/build_gnu.sh -text
 src/build_h5.sh -text
 src/build_ubuntu.16.04LT.readme -text
