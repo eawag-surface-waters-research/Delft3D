@@ -602,54 +602,50 @@ module string_module
          
       end function splitstr
 
+      subroutine get_substr_ndx(tgt,ndx0,ndx)
+         implicit none
+         character(len=*), intent(in)   ::  tgt
+         integer, intent(inout)         ::  ndx0
+         integer, intent(inout)         ::  ndx
+         integer           :: ltrim
+         logical           :: single_quoted
+         logical           :: double_quoted
+         single_quoted = .false.
+         double_quoted = .false.
+         ltrim = len_trim(tgt)
+         do while(is_whitespace(tgt(ndx0:ndx0)) .and. (ndx0<=ltrim))
+            ndx0 = ndx0 + 1
+         enddo
+         ndx = ndx0
+         do while(ndx<=ltrim)
+            if (.not.(single_quoted .or. double_quoted)) then
+               if (is_whitespace(tgt(ndx:ndx))) exit
+            endif
+            if (tgt(ndx:ndx)=='"') double_quoted = .not.double_quoted
+            if (tgt(ndx:ndx)=="'") single_quoted = .not.single_quoted
+           ndx = ndx + 1
+         enddo
+      end subroutine get_substr_ndx
+
       !> Fill allocatable string array with elements of a space-delimited string
       !> The incoming string array must be unallocated
-      recursive subroutine strsplit(tgt, pcs, npc)
-      implicit none
-      integer,          intent(in)                                 ::  npc
-      character(len=*), intent(in)                                 ::  tgt
-      character(len=*), intent(inout), dimension(:), allocatable   ::  pcs
-      character(len=:), allocatable    ::  pce !, tmp
-      character(len=len(tgt))          ::  tmp
-      integer                          ::  ndx
-!     allocate(tmp,source=tgt)
-      allocate(character(len=len(pcs))::pce)
-      tmp=adjustl(tgt)
-      ndx = get_first_substring(tmp,pce)
-      tmp = tmp(ndx:len_trim(tmp))
-      tmp=adjustl(tmp)
-      if (len_trim(tmp)>0) then
-         call strsplit(tmp, pcs, npc+1)
-      else
-         allocate(pcs(npc))
-      endif
-      pcs(npc) = pce                       ! fill array of strings from end to begin
-!     deallocate(tmp)
-      deallocate(pce)
-      end subroutine strsplit
-
-
-      function get_first_substring(tgt,pce) result (ndx)
-      implicit none
-      character(len=*), intent(in)      ::  tgt
-      character(len=*), intent(out)     ::  pce
-      integer           :: ndx, ltrim
-      logical           :: single_quoted
-      logical           :: double_quoted
-      single_quoted = .false.
-      double_quoted = .false.
-      do ndx=1,len(tgt)
-         if (.not.(single_quoted .or. double_quoted)) then
-            if (is_whitespace(tgt(ndx:ndx))) exit
+      recursive subroutine strsplit(tgt, ndx0, pcs, npc)
+         implicit none
+         integer,          intent(in)                                 ::  npc
+         character(len=*), intent(inout)                              ::  tgt
+         integer, intent(in)                                          ::  ndx0
+         character(len=*), intent(inout), dimension(:), allocatable   ::  pcs
+         integer                          ::  ndx, ndx1
+         ndx1 = ndx0
+         call get_substr_ndx(tgt,ndx1,ndx)
+         if (ndx<=len_trim(tgt)) then
+            call strsplit(tgt, ndx, pcs, npc+1)
+         else
+            allocate(pcs(npc))
          endif
-         if (tgt(ndx:ndx)=='"') double_quoted = .not.double_quoted
-         if (tgt(ndx:ndx)=="'") single_quoted = .not.single_quoted
-      enddo
-      pce = tgt(1:ndx-1)
-      ltrim = len_trim(pce)
-      if (pce(1:1)=='"' .or. pce(1:1)=='"') pce=pce(2:ltrim)
-      ltrim = len_trim(pce)
-      if (pce(ltrim:ltrim)=="'" .or. pce(ltrim:ltrim)=='"') pce=pce(1:ltrim-1)
-      end function get_first_substring
+         if (tgt(ndx1:ndx1)=='"' .or. tgt(ndx1:ndx1)=="'") ndx1 = ndx1 + 1
+         if (tgt(ndx-1:ndx-1)=='"' .or. tgt(ndx:ndx)=="'") ndx = ndx - 1
+         pcs(npc) = tgt(ndx1:ndx-1)
+      end subroutine strsplit
 
 end module string_module
