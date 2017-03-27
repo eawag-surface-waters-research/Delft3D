@@ -892,6 +892,11 @@ end function ug_write_mesh_struct
 function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, numEdge, numFace, maxNumNodesPerFace, &
                               edge_nodes, face_nodes, edge_faces, face_edges, face_links, xn, yn, xe, ye, xf, yf, &
                               crs, imiss, dmiss, numLayer, layerType, layer_zs, interface_zs) result(ierr)
+
+   use m_alloc
+
+   implicit none
+
    integer,          intent(in) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_meshids), intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*), intent(in) :: meshName !< Name for the mesh variable, also used as prefix for all related entities.
@@ -921,6 +926,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    integer :: id_twodim
 
    real(kind=dp), allocatable :: edgexbnd(:,:), edgeybnd(:,:), facexbnd(:,:), faceybnd(:,:)
+   real(kind=dp), allocatable :: lonn(:), latn(:) !< lon,lat-coordinates of the mesh nodes.
+   real(kind=dp), allocatable :: lone(:), late(:) !< representative lon,lat-coordinates of the mesh edges.
+   real(kind=dp), allocatable :: lonf(:), latf(:) !< representative lon,lat-coordinates of the mesh faces.
+   real(kind=dp), allocatable :: edgelonbnd(:,:), edgelatbnd(:,:), facelonbnd(:,:), facelatbnd(:,:)
    integer :: maxnv, k, n
    character(len=len_trim(meshName)) :: prefix
    integer :: wasInDefine
@@ -977,10 +986,12 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! node x,y coordinates.
    ierr = ug_addcoordvars(ncid, meshids%id_nodex, meshids%id_nodey, (/ meshids%id_nodedim /), prefix//'_node_x', prefix//'_node_y', &
                           'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', crs)
+#ifdef HAVE_PROJ
    if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
       ierr = ug_addlonlatcoordvars(ncid, meshids%id_nodelon, meshids%id_nodelat, (/ meshids%id_nodedim /), prefix//'_node_lon', prefix//'_node_lat', &
                                    'longitude coordinate of mesh nodes', 'latitude coordinate of mesh nodes', trim(meshName), 'node')
    end if
+#endif
 
    ierr = ug_def_var(ncid, meshids, meshids%id_nodez, (/ meshids%id_nodedim /), nf90_double, UG_LOC_NODE, &
                      meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
@@ -1006,6 +1017,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = ug_addcoordvars(ncid, meshids%id_edgexbnd, meshids%id_edgeybnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
                              'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
 
+#ifdef HAVE_PROJ
       if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ierr = ug_addlonlatcoordvars(ncid, meshids%id_edgelon, meshids%id_edgelat, (/ meshids%id_edgedim /), prefix//'_edge_lon', prefix//'_edge_lat', &
                                       'characteristic longitude coordinate of the mesh edge (e.g. midpoint)', 'characteristic latitude coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge')
@@ -1015,6 +1027,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = ug_addlonlatcoordvars(ncid, meshids%id_edgelonbnd, meshids%id_edgelatbnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_lon_bnd', prefix//'_edge_lat_bnd', &
                                       'longitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'latitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge')
       end if
+#endif
    end if
 
    !ierr = ug_def_var(ncid, meshids, meshName, prefix//'_u1', nf90_double, UG_LOC_EDGE, 'mean', (/ id_nodedim /), id_nodez)
@@ -1079,6 +1092,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%id_facexbnd, '_FillValue',  dmiss)
       ierr = nf90_put_att(ncid, meshids%id_faceybnd, '_FillValue',  dmiss)
 
+#ifdef HAVE_PROJ
       if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ierr = ug_addlonlatcoordvars(ncid, meshids%id_facelon, meshids%id_facelat, (/ meshids%id_facedim /), prefix//'_face_lon', prefix//'_face_lat', &
                                       'Characteristic longitude coordinate of mesh face', 'Characteristic latitude coordinate of mesh face', trim(meshName), 'face')
@@ -1090,6 +1104,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%id_facelonbnd, '_FillValue',  dmiss)
          ierr = nf90_put_att(ncid, meshids%id_facelatbnd, '_FillValue',  dmiss)
       end if
+#endif
    end if
 
    ! Layers
@@ -1142,6 +1157,16 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = nf90_put_var(ncid, meshids%id_nodex,    xn(1:numNode))
    ierr = nf90_put_var(ncid, meshids%id_nodey,    yn(1:numNode))
 !   ierr = nf90_put_var(ncid, meshids%id_nodez,    zn(1:numNode))
+#ifdef HAVE_PROJ
+   if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      call realloc(lonn, size(xn), fill=dmiss, keepExisting=.false.)
+      call realloc(latn, size(yn), fill=dmiss, keepExisting=.false.)
+      !TODO proj strings
+      call transform_coordinates('+proj=latlong +datum=WGS84', '+proj=latlong +datum=WGS84', xn, yn, lonn, latn)
+      ierr = nf90_put_var(ncid, meshids%id_nodelon, lonn(1:numNode))
+      ierr = nf90_put_var(ncid, meshids%id_nodelat, latn(1:numNode))
+   end if
+#endif
 
    ! Edges:
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
@@ -1164,6 +1189,30 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_var(ncid, meshids%id_edgeybnd, edgeybnd)
       deallocate(edgexbnd, edgeybnd)
 
+#ifdef HAVE_PROJ
+      if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+         call realloc(lone, size(xe), fill=dmiss, keepExisting=.false.)
+         call realloc(late, size(ye), fill=dmiss, keepExisting=.false.)
+         !TODO proj strings
+         call transform_coordinates('+proj=latlong +datum=WGS84', '+proj=latlong +datum=WGS84', xe, ye, lone, late)
+         ierr = nf90_put_var(ncid, meshids%id_edgelon, lone(1:numEdge))
+         ierr = nf90_put_var(ncid, meshids%id_edgelat, late(1:numEdge))
+         deallocate(lone)
+         deallocate(late)
+
+         ! end point coordinates:
+         allocate(edgelonbnd(2, numEdge), edgelatbnd(2, numEdge))
+         edgelonbnd = dmiss
+         edgelatbnd = dmiss
+         do n=1,numEdge
+            edgelonbnd(1:2, n) = lonn(edge_nodes(1:2, n))
+            edgelatbnd(1:2, n) = latn(edge_nodes(1:2, n))
+         end do
+         ierr = nf90_put_var(ncid, meshids%id_edgelonbnd, edgelonbnd)
+         ierr = nf90_put_var(ncid, meshids%id_edgelatbnd, edgelatbnd)
+         deallocate(edgelonbnd, edgelatbnd)
+      end if
+#endif
    end if
 
    ! Faces:
@@ -1202,12 +1251,51 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_var(ncid, meshids%id_facexbnd, facexbnd)
       ierr = nf90_put_var(ncid, meshids%id_faceybnd, faceybnd)
       deallocate(facexbnd, faceybnd)
+
+#ifdef HAVE_PROJ
+      if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+         ! corner point coordinates:
+         allocate(facelonbnd(maxnv, numFace), facelatbnd(maxnv, numFace))
+         facelonbnd = dmiss
+         facelatbnd = dmiss
+
+         do n=1,numFace
+            do k=1,maxnv
+               if (face_nodes(k, n) == imiss) then
+                  exit ! This face has less corners than maxnv, we're done for this one.
+               end if
+
+               facelonbnd(k, n) = lonn(face_nodes(k, n))
+               facelatbnd(k, n) = latn(face_nodes(k, n))
+            end do
+         end do
+         ierr = nf90_put_var(ncid, meshids%id_facelonbnd, facelonbnd)
+         ierr = nf90_put_var(ncid, meshids%id_facelatbnd, facelatbnd)
+         deallocate(facelonbnd, facelatbnd)
+      end if
+#endif
    end if
    
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ierr = nf90_put_var(ncid, meshids%id_facex,    xf(1:numFace))
       ierr = nf90_put_var(ncid, meshids%id_facey,    yf(1:numFace))
+
+#ifdef HAVE_PROJ
+      if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+         call realloc(lonf, size(xf), fill=dmiss, keepExisting=.false.)
+         call realloc(latf, size(yf), fill=dmiss, keepExisting=.false.)
+         !TODO proj strings
+         call transform_coordinates('+proj=latlong +datum=WGS84', '+proj=latlong +datum=WGS84', xf, yf, lonf, latf)
+         ierr = nf90_put_var(ncid, meshids%id_facelon, lonf(1:numFace))
+         ierr = nf90_put_var(ncid, meshids%id_facelat, latf(1:numFace))
+         deallocate(lonf)
+         deallocate(latf)
+      end if
+#endif
    end if
+
+   if (allocated(lonn)) deallocate(lonn)
+   if (allocated(latn)) deallocate(latn)
 
    ! Layers
    if (add_layers) then
