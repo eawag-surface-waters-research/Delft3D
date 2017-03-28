@@ -1161,8 +1161,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
       call realloc(lonn, size(xn), fill=dmiss, keepExisting=.false.)
       call realloc(latn, size(yn), fill=dmiss, keepExisting=.false.)
-      !TODO proj strings
-      call transform_coordinates('+proj=latlong +datum=WGS84', '+proj=latlong +datum=WGS84', xn, yn, lonn, latn)
+      call transform_coordinates(RIJKSDRIEHOEK_PROJ_STRING, WGS84_PROJ_STRING, xn, yn, lonn, latn)
       ierr = nf90_put_var(ncid, meshids%id_nodelon, lonn(1:numNode))
       ierr = nf90_put_var(ncid, meshids%id_nodelat, latn(1:numNode))
    end if
@@ -1193,8 +1192,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          call realloc(lone, size(xe), fill=dmiss, keepExisting=.false.)
          call realloc(late, size(ye), fill=dmiss, keepExisting=.false.)
-         !TODO proj strings
-         call transform_coordinates('+proj=latlong +datum=WGS84', '+proj=latlong +datum=WGS84', xe, ye, lone, late)
+         call transform_coordinates(RIJKSDRIEHOEK_PROJ_STRING, WGS84_PROJ_STRING, xe, ye, lone, late)
          ierr = nf90_put_var(ncid, meshids%id_edgelon, lone(1:numEdge))
          ierr = nf90_put_var(ncid, meshids%id_edgelat, late(1:numEdge))
          deallocate(lone)
@@ -1284,8 +1282,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          call realloc(lonf, size(xf), fill=dmiss, keepExisting=.false.)
          call realloc(latf, size(yf), fill=dmiss, keepExisting=.false.)
-         !TODO proj strings
-         call transform_coordinates('+proj=latlong +datum=WGS84', '+proj=latlong +datum=WGS84', xf, yf, lonf, latf)
+         call transform_coordinates(RIJKSDRIEHOEK_PROJ_STRING, WGS84_PROJ_STRING, xf, yf, lonf, latf)
          ierr = nf90_put_var(ncid, meshids%id_facelon, lonf(1:numFace))
          ierr = nf90_put_var(ncid, meshids%id_facelat, latf(1:numFace))
          deallocate(lonf)
