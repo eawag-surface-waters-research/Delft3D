@@ -746,7 +746,7 @@ module m_ec_converter
             a1 = 0.0d0
          case (timeint_rainfall)  ! constant rainfall intensity from time-integrated amount
             a0 = 0.0d0
-            a1 = 1.d0/(t1-t0)
+            a1 = 1.d0/(t1-t0)*3600.*24
          case default
             ! invalid interpolation method  
             return
