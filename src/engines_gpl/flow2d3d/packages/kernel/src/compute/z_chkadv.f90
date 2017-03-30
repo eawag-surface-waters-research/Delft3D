@@ -197,7 +197,7 @@ subroutine z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
                       cflumax     = timestep * u0(nm,k)/gvu(nm)
                       nm_cflumax  = nm
                       k_cflumax   = k
-                      u_cflumax   = u0(nm,k)
+                      u_cflumax   = abs(u0(nm,k))
                       !frac_dz_u   = frac_dz
                    endif
                    !kenm    = max(1, kfvz0(nm, k) + kfvz0(ndm, k) + kfvz0(ndmu, k) + kfvz0(nmu, k))
@@ -220,7 +220,7 @@ subroutine z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
                       cflumax    = -timestep * u0(nm,k)/gvu(nm)
                       nm_cflumax = nm
                       k_cflumax  = k
-                      u_cflumax  = u0(nm,k)
+                      u_cflumax  = abs(u0(nm,k))
                       !frac_dz_u  = frac_dz
                    endif
                    !kenm    = max(1, kfvz0(nm, k) + kfvz0(ndm, k) + kfvz0(ndmu, k) + kfvz0(nmu, k))

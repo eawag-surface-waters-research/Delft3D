@@ -167,7 +167,7 @@ subroutine chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
                 cflvmax    = hdt * abs(vvv/guu(nm))
                 nm_cflvmax = nm
                 k_cflvmax  = k
-                v_cflvmax  = vvv
+                v_cflvmax  = abs(vvv)
              endif
           enddo
        endif
