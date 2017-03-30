@@ -312,19 +312,20 @@
       subroutine timdump ( afile )
 
       integer(4)    i                          !   loop accross timer handles
+      integer       iunit
       character*(*) afile
 
-      open  ( 912, file=afile, recl=100+maxlvl*5 )
-      write ( 912, '(a,98(a ))' ) ' nr.     times     cpu time      cpu    wall clock      wc', &
+      open  ( newunit=iunit, file=afile, recl=100+maxlvl*5 )
+      write ( iunit, '(a,98(a ))' ) ' nr.     times     cpu time      cpu    wall clock      wc', &
                                   '  level',('     ',i=3,maxlvl),' routine name'
-      write ( 912, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %', &
+      write ( iunit, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %', &
                                   ( i, i=2,maxlvl)
       do i = 1, nohandl
          if ( level(i) .eq. -1 ) cycle
          call timline ( i )
       enddo
 
-      close ( 912 )
+      close ( iunit )
 
       return
       end subroutine timdump

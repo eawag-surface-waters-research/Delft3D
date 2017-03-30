@@ -34,6 +34,8 @@ function newunit( )
 !              of this function has been changed from newlun_nogdp
 !              to newunit to match the newunit keyword supported
 !              by Fortran 2008 in the OPEN call.
+!           
+!    TODO: This function can be removed when all open-statemants are using 'newunit'.
 !
 ! Method used:
 !

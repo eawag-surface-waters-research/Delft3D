@@ -81,8 +81,7 @@ subroutine read_qndep_single(lundia    ,error     ,fildep    ,fmttmp    ,array  
 ! 
     error = .false.
     ! 
-    luntmp = newunit() 
-    open (luntmp, file = fildep, form = fmttmp, status = 'old') 
+    open (newunit=luntmp, file = fildep, form = fmttmp, status = 'old') 
     ! 
     if (fmttmp(1:2) == 'un') then 
        ! 
@@ -202,8 +201,7 @@ subroutine read_qndep_double(lundia    ,error     ,fildep    ,fmttmp    ,array  
 ! 
     error = .false.
     ! 
-    luntmp = newunit() 
-    open (luntmp, file = fildep, form = fmttmp, status = 'old') 
+    open (newunit=luntmp, file = fildep, form = fmttmp, status = 'old') 
     ! 
     if (fmttmp(1:2) == 'un') then 
        ! 

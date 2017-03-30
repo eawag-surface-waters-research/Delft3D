@@ -146,31 +146,17 @@ subroutine prop_inifile(filename , tree, error, japreproc)
     !
     ! Local variables
     !
-    integer               :: lu, iostat
-    logical               :: opened
-    integer               :: maxunit = 500 
+    integer               :: lu
 
-    lu = -1 
+    lu = 0
     if (present(japreproc)) then            ! If preprocessor was requested
        if (japreproc) then 
           lu = preprocINI(filename, error)  ! do preprocessing 
        endif 
     endif 
-    if (lu<0) then                          ! if lu has not been assigned a valid unit number 
-       do lu=10,maxunit
-          inquire(lu, opened=opened)
-          if (.not.opened) then 
-             exit
-          endif 
-       enddo 
-       if (lu>maxunit) then 
-          lu = -1
-          error = -35                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
-          return
-       endif 
-       
+    if (lu == 0) then                          ! if lu has not been assigned a valid unit number 
 !      open existing file only       
-       open(lu,file=filename,iostat=error,status='old')
+       open(newunit=lu,file=filename,iostat=error,status='old')
        if (error/=0) then
           return
        endif
@@ -178,6 +164,7 @@ subroutine prop_inifile(filename , tree, error, japreproc)
 
     call prop_inifile_pointer(lu, tree)
     close (lu)
+    error = 0
     return
 end subroutine prop_inifile
 
@@ -197,8 +184,6 @@ subroutine prop_inifile_pointer(lu, tree)
     integer               :: eqpos, valend
     integer               :: k, k2, i
     integer               :: lend, lcend, num_bs
-    integer               :: iostatus
-    logical               :: filestatus
     logical               :: multiple_lines
     character(max_length) :: key
     character(max_length) :: line
@@ -393,24 +378,9 @@ subroutine prop_tekalfile(filename , tree, error)
     !
     ! Local variables
     !
-    integer               :: lu, iostat
-    logical               :: opened 
-    integer               :: maxunit = 500
+    integer               :: lu
 
-    do lu=10,maxunit
-       inquire(lu, opened=opened)
-       if (.not.opened) then 
-          exit
-       endif 
-    enddo 
-    if (lu>maxunit) then 
-       lu = -1
-       error = -35                                !        ERROR CODE -35 : Running out of free filenumbers (1-99) for ini-file to be opened 
-       return
-    endif 
-
-
-    open(lu,file=filename,iostat=error)
+    open(newunit=lu,file=filename,iostat=error)
     if (error/=0) then
        return
     endif
@@ -434,10 +404,8 @@ subroutine prop_tekalfile_pointer(lu, tree)
     !
     integer               :: eof
     integer               :: k
-    integer               :: iostatus
     integer, dimension(2) :: blockdims
     real   , dimension(:),allocatable :: arow
-    logical               :: filestatus
     character(max_length) :: line
     type(tree_data), pointer  :: atekalblock
     type(tree_data), pointer  :: anode
@@ -637,37 +605,24 @@ integer function preprocINI(infilename, error, outfilename) result (outfilenumbe
     character(50)     :: defstrings(100)       
     integer           :: ndef
     integer           :: iostat
-    logical           :: opened
-    integer           :: maxunit = 500 
 
     !
     !! executable statements -------------------------------------------------------
     !
     error = 0
     ndef = 0
-    do outfilenumber=10,maxunit
-       inquire(outfilenumber, opened=opened)
-       if (.not.opened) then 
-          exit
-       endif 
-    enddo 
-    if (outfilenumber>maxunit) then 
-       outfilenumber = -1
-       error = -33                                !        ERROR CODE -33 : Running out of free filenumbers (1-99) for ini-file to be opened 
-       return
-    endif 
 
     if (present(outfilename)) then 
-       open(outfilenumber,file=trim(outfilename),iostat=iostat)
+       open(newunit=outfilenumber,file=trim(outfilename),iostat=iostat)
        if (iostat/=0) then
-          outfilenumber = -1
+          outfilenumber = 0
           error = iostat                          !       ERROR : Intermediate ini-file could not be written.
           return
        endif
     else 
-       open (outfilenumber, status='SCRATCH', IOSTAT=iostat)
+       open (newunit=outfilenumber, status='SCRATCH', IOSTAT=iostat)
        if (iostat/=0) then 
-          outfilenumber = -1
+          outfilenumber = 0
           error = iostat
           return
        endif 
@@ -676,7 +631,7 @@ integer function preprocINI(infilename, error, outfilename) result (outfilenumbe
     error = parse_directives(trim(infilename), outfilenumber, defnames, defstrings, ndef, 1)
     if (error/=0) then                ! either something went wrong ...
        close(outfilenumber)           ! close the file 
-       outfilenumber = -1             ! return -1 as a filenumber 
+       outfilenumber = 0              ! return 0 as a filenumber 
     else                              ! ... or we're all clear  ....
        rewind(outfilenumber)          ! rewind the file just written and return the number to caller 
     endif 
@@ -730,13 +685,10 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
     character(len=50)  :: defstring 
     integer            :: writing 
     integer            :: idef 
-    integer            :: ilvl
     integer            :: infilenumber 
     integer            :: iostat
     logical            :: opened 
     logical            :: exist
-    integer            :: maxunit = 500
-    character(len=100) :: infostr 
 
     !
     !! executable statements
@@ -752,19 +704,7 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
        return
     endif  
 
-    do infilenumber=10,maxunit
-       inquire(infilenumber, opened=opened)
-       if (.not.opened) then 
-          exit
-       endif 
-    enddo 
-    if (infilenumber>maxunit) then 
-       infilenumber = -1
-       error = -33                 ! ERROR CODE -33 : Running out of free filenumbers (1-99) for ini-file to be opened 
-       return
-    endif 
-
-    open(infilenumber,file=trim(infilename),iostat=iostat)
+    open(newunit=infilenumber,file=trim(infilename),iostat=iostat)
     if (iostat/=0) then
        error = iostat              ! ERROR : file was encountered, but for some reason cannot be opened .... 
        return
@@ -867,7 +807,6 @@ subroutine leaf_keylength( tree, data, stop)
     logical,                          intent(inout) :: stop
 
     character(len=1), dimension(:),pointer :: data_ptr
-    character(len=max_length)              :: string
     character(len=40)                      :: type_string
     integer                                :: keylen
 
