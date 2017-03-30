@@ -95,6 +95,7 @@ subroutine usrbrl2d(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
     integer      :: nm     ! Loop counter over NMMAX 
     integer      :: nmu    ! NM+ICX 
     real(fp)     :: avolk  ! help constant in computation of qvolk
+    real(fp)     :: absvbov! absolute value of vbov
     real(fp)     :: d1     ! Distance between crest and downstream depth 
     real(fp)     :: dd     ! Downstream depth 
     real(fp)     :: dte0   ! Local backup of DTEU value 
@@ -209,9 +210,10 @@ subroutine usrbrl2d(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
           !
           dteu(nm) = (1.0_fp - thetaw)*dteu(nm) + thetaw*dte0
           if (toest=='volk') vbov = qvolk/max(hu(nm), 1E-6_fp)
-          if (vbov>eps) then
+          absvbov = abs(vbov)
+          if (absvbov>eps) then
              do k = 1, kmax
-                bbk(nm, k) = bbk(nm, k) + (ag*dteu(nm)/vbov)*ubrlsu(nm, k)      &
+                bbk(nm, k) = bbk(nm, k) + (ag*dteu(nm)/absvbov)*ubrlsu(nm, k)      &
                            & /(gvu(nm)*thick(k))
              enddo
           endif
