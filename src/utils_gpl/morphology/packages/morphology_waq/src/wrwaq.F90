@@ -180,7 +180,7 @@
 !
 !! executable statements -------------------------------------------------------
 !
-      call newfil(lunatr, trim(filename))
+      open(newunit=lunatr, file=trim(filename))
       write ( lunatr , '(a)' )  '         ; DELWAQ_COMPLETE_ATTRIBUTES'
       write ( lunatr , '(a)' )  '    2    ; two blocks with input     '
       write ( lunatr , '(a)' )  '    1    ; number of attributes, they are :'
