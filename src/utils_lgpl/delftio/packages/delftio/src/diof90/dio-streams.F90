@@ -639,11 +639,12 @@ subroutine DioStreamDisconnect(stream, alsoForAsync)
     if ( stream % synched .or. alsoForAsync ) then
         if ( stream % connected ) then
             if ( DioStreamUsesLun(stream) ) then
-                if ( stream % lun .ge. 0 ) then
+                if ( stream % lun .ne. 0 ) then
                     ! call flush(stream % lun)   ! Flush before close seems senseless
                                                  ! but avoids the nfs problem: file is there,
                                                  ! content not yet.
                     close( stream%lun )
+                    stream%lun = 0
                 endif
             else if(stream % streamType .eq. dio_Nefis_stream) then
 #if (defined(DIO_NEFIS_INCLUDED))
