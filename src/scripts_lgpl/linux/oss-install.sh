@@ -54,6 +54,7 @@ function install_all () {
     vs
     nesthd1
     nesthd2
+    shared
 
     return
 }
@@ -500,6 +501,32 @@ function nesthd2 () {
     cp -u `$gatherScript $prefix/bin/nesthd2 | eval grep -v $gatherExcludeFilter` $dest_bin
 
     # chrpath -r \$ORIGIN $dest_bin/nesthd2
+
+    return
+}
+
+
+
+
+
+# =======================
+# === INSTALL_SHARED ====
+# =======================
+function shared () {
+    echo "installing shared . . ."
+
+    dest_bin="$dest_main/lnx64/shared"
+
+    mkdir -p $dest_bin
+
+    # This seems to be the most complete set of shared libraries
+    copyFile "$dest_main/lnx64/flow2d3d/bin/lib*"    $dest_bin
+    # Remove the flow2d3d specific libraries
+    rm -f $dest_bin/libDelftOnline.*
+    rm -f $dest_bin/libflow2d3d.*
+    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/linux/oss-install.sh >$dest_bin/readme.txt
+    echo This script is executed via "make ds-install" ->install.sh  >>$dest_bin/readme.txt
+    echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>$dest_bin/readme.txt
 
     return
 }
