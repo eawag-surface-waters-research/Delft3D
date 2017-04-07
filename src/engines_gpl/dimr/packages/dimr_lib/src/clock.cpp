@@ -66,7 +66,7 @@ Clock::Epoch (
 	//return ((Timestamp) OSTime->tm_sec + OSTime->tm_min * 100 + OSTime->tm_hour * 10000 + OSTime->tm_yday * 1000000);
     SYSTEMTIME tv;
     GetSystemTime(&tv);     // ToDo: Check return code for errors
-    return ((Timestamp) tv.wSecond * 1000000) + tv.wMilliseconds;
+    return (((((Timestamp) tv.wDay * 24 + (Timestamp) tv.wHour) * 60 + (Timestamp) tv.wMinute) * 60 + (Timestamp) tv.wSecond) * 1000000) + tv.wMilliseconds;
 
 #else
     struct timeval  tv;

@@ -46,6 +46,7 @@
 #endif
 #include <expat.h>
 #include <limits.h>
+#include <time.h>
 
 
 #if defined (MEMCHECK)
@@ -154,6 +155,8 @@ DllExport int initialize(const char * configfile) {
     //
     // Build connection with dlls
     thisDimr->connectLibs();
+    // Init the timers before calling the dllInitialize routines!
+    thisDimr->timersInit();
     //
     // Initialize the components in the first controlBlock only
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
@@ -172,13 +175,14 @@ DllExport int initialize(const char * configfile) {
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
         thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
         nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->settings);
+        thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
         thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
+        thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
         nParamsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->parameters );
         (thisDimr->control->subBlocks[0].unit.component->dllGetStartTime) (&thisDimr->control->subBlocks[0].tStart);
         (thisDimr->control->subBlocks[0].unit.component->dllGetEndTime) (&thisDimr->control->subBlocks[0].tEnd);
         (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
-
     }
 	// all ok (no exceptions)
 	return 0;
@@ -194,7 +198,9 @@ DllExport void update (double tStep) {
         // Start block
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
         thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
+        thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
         (thisDimr->control->subBlocks[0].unit.component->dllUpdate) (tStep);
+        thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
     }
 }
@@ -210,9 +216,12 @@ DllExport void finalize (void) {
         // Start block
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
         thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "%s.Finalize()", thisDimr->control->subBlocks[0].unit.component->name);
+        thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
         (thisDimr->control->subBlocks[0].unit.component->dllFinalize) ();
+        thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
         fflush(stdout);
     }
+    thisDimr->timersFinish();
     for (int i = 1 ; i < thisDimr->control->numSubBlocks ; i++) {
         thisDimr->runControlBlock(&(thisDimr->control->subBlocks[i]),999999999.0, GLOBAL_PHASE_FINISH);
     }
@@ -490,16 +499,22 @@ void Dimr::runStartBlock (dimr_control_block * cb, double tStep, int phase) {
     chdir(cb->unit.component->workingDir);
     if (phase == GLOBAL_PHASE_FINISH) {
         this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
+        this->timerStart(cb->unit.component);
         cb->unit.component->result = (cb->unit.component->dllInitialize) (cb->unit.component->inputFile);
+        this->timerEnd(cb->unit.component);
         (cb->unit.component->dllGetStartTime) (&cb->tStart);
         (cb->unit.component->dllGetEndTime) (&cb->tEnd);
     }
     cb->tStep = tStep;
     this->log->Write (Log::MAJOR, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
+    this->timerStart(cb->unit.component);
     (cb->unit.component->dllUpdate) (cb->tStep);
+    this->timerEnd(cb->unit.component);
     if (phase == GLOBAL_PHASE_FINISH) {
         this->log->Write (Log::MAJOR, my_rank, "%s.Finalize()", cb->unit.component->name);
+        this->timerStart(cb->unit.component);
         (cb->unit.component->dllFinalize) ();
+        this->timerEnd(cb->unit.component);
     }
     fflush(stdout);
 }
@@ -562,7 +577,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
     if (masterComponent->onThisRank) {
         chdir(masterComponent->workingDir);
         this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
+        this->timerStart(masterComponent);
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
+        this->timerEnd(masterComponent);
         (masterComponent->dllGetStartTime) (&cb->subBlocks[cb->masterSubBlockId].tStart);
         (masterComponent->dllGetEndTime) (&cb->subBlocks[cb->masterSubBlockId].tEnd);
         (masterComponent->dllGetTimeStep) (&cb->subBlocks[cb->masterSubBlockId].tStep);
@@ -593,7 +610,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 
                         chdir(thisComponent->workingDir);
                         this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
+                        this->timerStart(thisComponent);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
+                        this->timerEnd(thisComponent);
                     }
                 }
             }
@@ -760,7 +779,9 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                 // masterComponent
                 chdir(masterComponent->unit.component->workingDir);
                 this->log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
+                this->timerStart(masterComponent->unit.component);
                 (masterComponent->unit.component->dllUpdate) (tStep);
+                this->timerEnd(masterComponent->unit.component);
                 *currentTime = *currentTime + tStep;
             } else {
                 // CT_STARTGROUP
@@ -793,7 +814,9 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             // Update
                             chdir(thisComponent->workingDir);
                             this->log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
+                            this->timerStart(thisComponent);
                             (thisComponent->dllUpdate) (tUpdate);
+                            this->timerEnd(thisComponent);
                         } else {
                             // Coupler
                             dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
@@ -991,7 +1014,9 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
             }
             chdir(cb->subBlocks[i].unit.component->workingDir);
             this->log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
+            this->timerStart(cb->subBlocks[i].unit.component);
             (cb->subBlocks[i].unit.component->dllFinalize) ();
+            this->timerEnd(cb->subBlocks[i].unit.component);
 
             if (use_mpi && cb->subBlocks[i].unit.component->mpiComm != NULL) {
                 MPI_Group mpiGroupComp;
@@ -1008,7 +1033,9 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                     }
                     chdir(cb->subBlocks[i].subBlocks[j].unit.component->workingDir);
                     this->log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
+                    this->timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
                     (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
+                    this->timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
                     }
             }
         }
@@ -1586,6 +1613,46 @@ void Dimr::processWaitFile (void) {
     }
     this->ready = 1;
  }
+
+
+
+//------------------------------------------------------------------------------
+void Dimr::timersInit (void) {
+    for (int i = 0 ; i < thisDimr->componentsList.numComponents ; i++) {
+        this->componentsList.components[i].timerSum   =  0;
+        this->componentsList.components[i].timerStart =  0;
+    }
+}
+
+
+
+//------------------------------------------------------------------------------
+void Dimr::timerStart (dimr_component * thisComponent) {
+    thisComponent->timerStart = this->clock->Epoch();
+}
+
+
+
+//------------------------------------------------------------------------------
+void Dimr::timerEnd (dimr_component * thisComponent) {
+    Clock::Timestamp curtime = this->clock->Epoch();
+    thisComponent->timerSum   =  curtime - thisComponent->timerStart + thisComponent->timerSum;
+    thisComponent->timerStart =  0;
+}
+
+
+
+//------------------------------------------------------------------------------
+void Dimr::timersFinish (void) {
+    this->log->Write (Log::MAJOR, my_rank, "TIMER INFO:\n");
+    for (int i = 0 ; i < thisDimr->componentsList.numComponents ; i++) {
+        this->componentsList.components[i].timerStart = 0;
+        this->log->Write (Log::MAJOR, my_rank, "%s\t: %d.%d sec", this->componentsList.components[i].name, 
+                          this->componentsList.components[i].timerSum/1000000,
+                          this->componentsList.components[i].timerSum%1000000);
+        this->componentsList.components[i].timerSum   =  0.0;
+    }
+}
 
 
 

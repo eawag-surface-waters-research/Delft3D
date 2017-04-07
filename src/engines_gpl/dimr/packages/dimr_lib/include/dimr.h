@@ -55,6 +55,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "clock.h"
+#include <ctime>
 #if HAVE_CONFIG_H
 #   include <sys/wait.h>
 #   include <unistd.h>
@@ -181,6 +183,8 @@ struct dimr_component {
 	keyValueLL      *   settings;	      // list of settings
 	keyValueLL      *   parameters;	      // list of parameters
 	int					dllSetKeyVals(keyValueLL * kv);   // pass parameters/settings to the component
+    Clock::Timestamp  timerStart;
+    Clock::Timestamp  timerSum;
 };
 // Array of all components
 typedef struct DIMR_COMPONENTS {
@@ -265,6 +269,10 @@ class Dimr {
         void		   runControlBlock  (dimr_control_block *, double, int);
         void		   runParallelInit  (dimr_control_block *);
         void		   runParallelFinish(dimr_control_block *);
+        void           timersInit(void);
+        void           timerStart(dimr_component *);
+        void           timerEnd(dimr_component *);
+        void           timersFinish(void);
         double *       send             (const char *, int, BMI_GETVAR, double **, int *, int, int);
         void           receive          (const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, const void *);
 
