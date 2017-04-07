@@ -708,7 +708,7 @@ rem =====================
 :io_netcdf
     echo "installing io_netcdf . . ."
 
-    set dest_bin="!dest_main!\win64\shared\bin"
+    set dest_bin="!dest_main!\win64\shared"
 
     call :makeDir !dest_bin!
 
