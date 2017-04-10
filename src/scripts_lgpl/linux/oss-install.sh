@@ -116,13 +116,16 @@ function dimr () {
 
     dest_bin="$dest_main/lnx64/dimr/bin"
     dest_menu="$dest_main/lnx64/menu/bin"
+    dest_scripts="$dest_main/lnx64/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_menu
+    mkdir -p $dest_scripts
 
     copyFile "$prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe"    $dest_bin
     copyFile "$prefix/lib/libdimr.so"                                       $dest_bin
     copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
+    copyFile "$srcdir/engines_gpl/dimr/scripts/generic/lnx64/*.*"           $dest_scripts
 
     echo "Gathering libraries for dimr..."
     cp -u `$gatherScript $prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe $prefix/lib/libdimr.so | eval grep -v $gatherExcludeFilter` $dest_bin
