@@ -1190,6 +1190,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
 
     } else {
         // No <process> specified, default: only run on rank #0.
+        this->log->Write (Log::MAJOR, my_rank, "WARNING: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
         newComp->numProcesses = 1;
         char *defaultProc = "0";
         char_to_ints(defaultProc, &(newComp->processes), &(newComp->numProcesses));
@@ -1527,7 +1528,9 @@ void Dimr::connectLibs (void) {
 
         delete [] lib;
     }
-    this->printComponentVersionStrings(Log::MAJOR);			// List component version to log 
+    if (my_rank == 0) {
+        this->printComponentVersionStrings(Log::MAJOR);			// List component version to log 
+    }
 }
 
 //void Dimr::printComponentVersionStrings (Log::Mask my_mask) {
