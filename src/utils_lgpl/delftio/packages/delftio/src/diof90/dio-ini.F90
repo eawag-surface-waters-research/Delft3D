@@ -156,7 +156,7 @@ subroutine DioIniFileClose(iniFile)
     ! - If lun opened, close it.
     ! - Reset iniFile info
 
-    if ( iniFile % lun > 0 ) then
+    if ( iniFile % lun .ne. 0 ) then
         inquire( iniFile % lun, opened = opend )
         if ( opend ) then
             close(iniFile % lun)
@@ -186,9 +186,11 @@ subroutine DioIniFileCloseAndDelete(iniFile)
     ! - If lun opened, close and delete it.
     ! - Reset iniFile info
 
-    if ( iniFile % lun > 0 ) then
+    if ( iniFile % lun .ne. 0 ) then
         inquire( iniFile % lun, opened = opend )
-        if ( opend ) close(iniFile % lun, status='delete')
+        if ( opend ) then
+           close(iniFile % lun, status='delete')
+        endif
     endif
     iniFile % name     = ''
     iniFile % mode     = ''
