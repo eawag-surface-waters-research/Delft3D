@@ -49,10 +49,9 @@ subroutine inittrachy(gdp       )
     nullify(gdp%gdtrachy%ittaru)
     nullify(gdp%gdtrachy%ittarv)
     nullify(gdp%gdtrachy%ittdef)
+    nullify(gdp%gdtrachy%itrt_list)
     !
-    nullify(gdp%gdtrachy%vegh2d)
-    nullify(gdp%gdtrachy%vden2d)
-    !
+    nullify(gdp%gdtrachy%fraccu_list)
     nullify(gdp%gdtrachy%rgcalu)
     nullify(gdp%gdtrachy%rgcalv)
     nullify(gdp%gdtrachy%rttaru)
@@ -60,6 +59,9 @@ subroutine inittrachy(gdp       )
     nullify(gdp%gdtrachy%rttdef)
     nullify(gdp%gdtrachy%rttfu)
     nullify(gdp%gdtrachy%rttfv)
+    !
+    nullify(gdp%gdtrachy%vegh2d)
+    nullify(gdp%gdtrachy%vden2d)
     !
     gdp%gdtrachy%flsedprop_rqrd = .false. 
 end subroutine inittrachy
