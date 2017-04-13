@@ -445,16 +445,22 @@ subroutine wrihis(lundia    ,error     ,filename  ,selhis    ,simdat    , &
                     & ierror, lundia, ibuff2, 'MNSTAT', station, mergedim=2)
              deallocate(ibuff2, stat=istat)
              if (ierror/=0) goto 9999
-             !
-             ! element 'XYSTAT'
-             !
+          endif
+          !
+          ! element 'XYSTAT': filling of XYSTAT should also be done in case of
+          !                   NetCDF output since this array will otherwise
+          !                   never be filled for stationary observation points
+          !
+          do k = 1, nostat
+             m              = mnstat(1,k)
+             n              = mnstat(2,k)
+             xystat(1,k)    = xz(n,m)
+             xystat(2,k)    = yz(n,m)
+          enddo
+          if (filetype == FTYPE_NEFIS) then ! for NetCDF just store the time-dependent version
              allocate(rbuff2(2, nostat), stat=istat)
              do k = 1, nostat
-                m              = mnstat(1,k)
-                n              = mnstat(2,k)
-                xystat(1,k)    = xz(n,m)
-                xystat(2,k)    = yz(n,m)
-                rbuff2(1:2,k)  = (/xz(n,m), yz(n,m)/)
+                rbuff2(1:2,k)  = (/xystat(1,k), xystat(2,k)/)
              enddo
              call wrtarray_n(fds, filename, filetype, grnam2, &
                     & 1, nostat, nostatto, nostatgl, order_sta, gdp, &
