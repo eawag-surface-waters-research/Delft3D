@@ -198,7 +198,8 @@ typedef struct dimr_couple_item dimr_couple_item;
 struct dimr_couple_item {
     const char * sourceName;         // as written in config.xml
     const char * targetName;         // idem
-    int          sourceProcess;
+    int          sourceProcess;      // id of Process that can deliver this item; should be exactly one
+    int          targetProcess;      // id of first Process that can accept this item; can be more than one
     double     * sourceVarPtr;       // Pointer to the related variable inside the component instance (result of getVar)
     double     * targetVarPtr;       // idem
 };
@@ -274,7 +275,7 @@ class Dimr {
         void           timerEnd(dimr_component *);
         void           timersFinish(void);
         double *       send             (const char *, int, BMI_GETVAR, double **, int *, int, int);
-        void           receive          (const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, const void *);
+        void           receive          (const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
 
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run

@@ -55,7 +55,7 @@ set rrexedir=%D3D_HOME%\%ARCH%\rr\bin
 set rtctoolsexedir=%D3D_HOME%\%ARCH%\rtctools\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
-set thirdpartydir=%D3D_HOME%\%ARCH%\third_party
+set shareddir=%D3D_HOME%\%ARCH%\shared
 set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
 
 
@@ -64,9 +64,9 @@ set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
     rem
 
     rem Run
-set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%thirdpartydir%
+set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
     rem With debug info: "%dhydroexedir%\d_hydro.exe" -d 0xFFFFFFFF %argfile%
-"%thirdpartydir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" %argfile%
+"%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d 0xFFFFFFFF %argfile%
 
 goto end
 

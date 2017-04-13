@@ -381,6 +381,7 @@ DllExport void set_var (const char * key, const void * value) {
                                targetVarPtr,
                                compPtr->processes,
                                compPtr->numProcesses,
+                               -1,
                                value);
     }
     delete[] componentName;
@@ -647,7 +648,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                                     }
                                 }
                             }
-                            // Do not call MPI_Allreduce when the number of partitions is 1. It will cause a crash on free(gcsource)
+                            // Do not call MPI_Allreduce when the number of partitions is 1. It will cause a crash on free(gsources)
                             if (numranks > 1) {
                                 int ierr = MPI_Allreduce(sources, gsources, thisCoupler->sourceComponent->numProcesses, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
                             } else {
@@ -683,12 +684,52 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 							thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D) {
                             // nothing
                         } else {
+                            // Target variable
+                            // autodetect which (possibly multiple!) partition(s) will accept this target var
+                            int *  targets = (int *)malloc(thisCoupler->targetComponent->numProcesses * sizeof(int));
+                            int * gtargets = (int *)malloc(thisCoupler->targetComponent->numProcesses * sizeof(int));
                             for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses; m++) {
+                                targets[m] = 0;
                                 if (my_rank == thisCoupler->targetComponent->processes[m]) {
                                         this->log->Write (Log::MINOR, my_rank, "%s.getVar(%s)", thisCoupler->targetComponentName, thisCoupler->items[k].targetName);
                                         (thisCoupler->targetComponent->dllGetVar) (thisCoupler->items[k].targetName, (void**)(&thisCoupler->items[k].targetVarPtr));
+                                        if (thisCoupler->items[k].targetVarPtr != NULL) {
+                                            // Yes, this partition can accept the target var
+                                            targets[m] = 1;
+                                        }
                                 }
                             }
+                            // Do not call MPI_Allreduce when the number of partitions is 1. It will cause a crash on free(gtargets)
+                            if (numranks > 1) {
+                                int ierr = MPI_Allreduce(targets, gtargets, thisCoupler->targetComponent->numProcesses, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+                            } else {
+                                for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses ; m++) {
+                                    gtargets[m] = targets[m];
+                                }
+                            }
+                            thisCoupler->items[k].targetProcess = -1;
+                            for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses ; m++) {
+                                if (gtargets[m] == 1) {
+                                    if (thisCoupler->items[k].targetProcess == -1) {
+                                        // First partition that can accept the target var
+                                        thisCoupler->items[k].targetProcess = m;
+                                    } else {
+                                        // Second/Third/... partition that can accept the target var
+                                        // Produce a warning
+                                        // The "if (my_rank == m)" avoids multiple identical messages
+                                        if (my_rank == m) {
+                                            this->log->Write(Log::WARN, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered to multiple partitions: %d and %d.",
+                                                thisCoupler->name, k, thisCoupler->items[k].targetName, thisCoupler->items[k].targetProcess, m);
+                                        }
+                                    }
+                                }
+                            }
+                            if (thisCoupler->items[k].targetProcess == -1) {
+                                throw new Exception (true, "Coupler %s: item %d: \"%s\" is not accepted by any of the partitions.",
+                                    thisCoupler->name, k, thisCoupler->items[k].targetName);
+                            }
+                            free(targets);
+                            free(gtargets);
                         }
                     }
                 }
@@ -848,6 +889,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                                thisCoupler->items[k].targetVarPtr,
                                                thisCoupler->targetComponent->processes,
                                                thisCoupler->targetComponent->numProcesses,
+                                               thisCoupler->items[k].targetProcess,
                                                transferValuePtr);
                             }
                         }
@@ -942,6 +984,7 @@ void Dimr::receive (const char * name,
                     double     * targetVarPtr,
                     int        * processes,
                     int          nProc,
+                    int          targetProcess,
                     const void * transferValuePtr) {
     // Assumption: transferValuePtr points to a (scalar) double
     // TODO: allow more types of pointers
@@ -990,9 +1033,14 @@ void Dimr::receive (const char * name,
                                         0);
                     }
                     if (targetVarPtr == NULL) {
-                        throw new Exception (true, "ABORT: Dimr::receive: get_var function not defined while processing %s", name);
+                        if (targetProcess == -1 || targetProcess == my_rank) {
+                            // targetProcess=-1: no process can accept this item
+                            // targetProcess=my_rank: this process is registered to be able to accept this item but something goes wrong
+                            throw new Exception (true, "ABORT: Dimr::receive: get_var function not defined while processing %s", name);
+                        }
+                    } else {
+        				*(targetVarPtr) = *(double*)(transferValuePtr);
                     }
-    				*(targetVarPtr) = *(double*)(transferValuePtr);
                 }
             }
         }

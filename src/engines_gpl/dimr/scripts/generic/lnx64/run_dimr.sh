@@ -139,7 +139,7 @@ rrexedir=$D3D_HOME/$ARCH/rr/bin
 rtcexedir=$D3D_HOME/$ARCH/rtctools/bin
 swanexedir=$D3D_HOME/$ARCH/swan/bin
 swanbatdir=$D3D_HOME/$ARCH/swan/scripts
-thirdpartydir=$D3D_HOME/$ARCH/third_party
+shareddir=$D3D_HOME/$ARCH/shared
 waveexedir=$D3D_HOME/$ARCH/wave/bin
 
 
@@ -148,9 +148,9 @@ waveexedir=$D3D_HOME/$ARCH/wave/bin
     #
 
     # Run
-export LD_LIBRARY_PATH=$dimrexedir:$dflowfmexedir:$flow1d2dexedir:$delwaqexedir:$rtcexedir:$rrexedir:$waveexedir:$swanbatdir:$swanexedir:$esmfbatdir:$esmfexedir:$thirdpartydir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$dimrexedir:$dflowfmexedir:$flow1d2dexedir:$delwaqexedir:$rtcexedir:$rrexedir:$waveexedir:$swanbatdir:$swanexedir:$esmfbatdir:$esmfexedir:$shareddir:$LD_LIBRARY_PATH
 export PATH=$swanbatdir:$esmfbatdir:$PATH
-export LD_PRELOAD=$thirdpartydir/libmkl_core.so
+export LD_PRELOAD=$shareddir/libmkl_core.so
 
     echo "=== LD_LIBRARY_PATH ======================================"
     echo $LD_LIBRARY_PATH
