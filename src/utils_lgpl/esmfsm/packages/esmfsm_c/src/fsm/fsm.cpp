@@ -288,12 +288,13 @@ FSM_MakePointer (
 #endif
     ) {
 
-    int len = 0;
+    size_t len = 0;
     int kindex;
     KeyTable * key = NULL;
     pointer ptr = (pointer) NULL;
     pointer return_value = NULL;
     int thid = -999;
+    size_t nbytes;
 
     GETTHREADLOCK (thid, "FSM_MakePointer", NULL)
     FSM_DEBUG ((output, "Entering FSM_MakePointer (name=\"%s\", length=%d, type=%d, eltsize=%d)", name, *length, *type, *eltsize))
@@ -352,7 +353,7 @@ FSM_MakePointer (
         }
 
     // The key does not exist yet; create it.
-	size_t nbytes = (size_t)(*length) * (size_t)(*eltsize);
+	nbytes = (size_t)(*length) * (size_t)(*eltsize);
     ptr = (pointer) ESM_Alloc (FSM.Threads[thid].contextid, name, nbytes);
     if (ptr == NULL) {
         SetError (thid, "FSM_MakePointer cannot allocate key: %s", ESM_Error ());
@@ -409,7 +410,7 @@ FSM_GetPointer (
 #endif
     ) {
 
-    int len = 0;
+    size_t len = 0;
     int kindex;
     pointer return_value = NULL;
     int thid = -999;
@@ -476,7 +477,7 @@ FSM_ReleasePointer (
 #endif
     ) {
 
-    int len = 0;
+    size_t len = 0;
     int kindex;
     pointer ptr = NULL;
     pointer return_value = NULL;
