@@ -106,7 +106,7 @@ void *
 ESM_Alloc (
     int     contextid,
     char *  name,
-    int     size
+    size_t  size
     );
 
 int

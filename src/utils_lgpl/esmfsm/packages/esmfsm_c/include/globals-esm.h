@@ -180,7 +180,7 @@ ESM_Local_Alloc (
     int ci,
     int contextid,
     char * name,
-    int size
+    size_t size
     );
 
 int
@@ -218,7 +218,7 @@ ESM_Shared_Alloc (
     int ci,
     int contextid,
     char * name,
-    int size
+    size_t size
     );
 
 int

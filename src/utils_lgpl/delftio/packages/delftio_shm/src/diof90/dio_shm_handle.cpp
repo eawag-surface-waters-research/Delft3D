@@ -162,12 +162,12 @@ DioShmHandle::DioShmHandle(
                 {
                     int sleepTime = 100;
                     DIOSYNCcSLEEP(&sleepTime);
-                    this->mmfHandle = ESM_Alloc(cId, name, 0);
+                    this->mmfHandle = ESM_Alloc(cId, name, (size_t)(0));
                 }
             }
             else
             {
-                this->mmfHandle = ESM_Alloc(cId, name, iSize);
+                this->mmfHandle = ESM_Alloc(cId, name, (size_t)(iSize));
             }
 
             if (this->mmfHandle != NULL)

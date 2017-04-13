@@ -385,7 +385,7 @@ ESM_Shared_Alloc (
     int     ci,
     int     contextid,
     char *  name,
-    int     size
+    size_t  size
     ) {
 
     // If the context is not attached to the current process, attach it

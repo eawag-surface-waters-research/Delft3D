@@ -521,7 +521,7 @@ int D3dFlowContext::AttachContextVar(
     }
     else
     {
-        ptr = ESM_Alloc ( aContextId, name, 0 );
+        ptr = ESM_Alloc ( aContextId, name, (size_t)(0) );
         if ( ptr == NULL )
         {
             throw new Exception (true, "Var (%s) not attached to Context (%d)", name, aContextId);

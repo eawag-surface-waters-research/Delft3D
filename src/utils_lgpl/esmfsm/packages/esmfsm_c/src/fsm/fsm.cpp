@@ -234,7 +234,7 @@ FSM_Init (
     // The first thread to call this routine will actually create the region;
     // subsequent calls will return a pointer to the existing region.
 
-    ktab = (KeyTable *) ESM_Alloc (cid, "FSM_KeyTable", 0);
+    ktab = (KeyTable *) ESM_Alloc (cid, "FSM_KeyTable", (size_t)(0));
     if (ktab == NULL) {
         ktab = (KeyTable *) ESM_Alloc (cid, "FSM_KeyTable", FSM_MAX_REGIONS * sizeof (KeyTable));
         if (ktab == NULL) {
@@ -352,8 +352,8 @@ FSM_MakePointer (
         }
 
     // The key does not exist yet; create it.
-
-    ptr = (pointer) ESM_Alloc (FSM.Threads[thid].contextid, name, (*length * *eltsize));
+	size_t nbytes = (size_t)(*length) * (size_t)(*eltsize);
+    ptr = (pointer) ESM_Alloc (FSM.Threads[thid].contextid, name, nbytes);
     if (ptr == NULL) {
         SetError (thid, "FSM_MakePointer cannot allocate key: %s", ESM_Error ());
         UNLOCK (NULL)
@@ -439,7 +439,7 @@ FSM_GetPointer (
     if ((kindex = LookupKey (FSM.Threads[thid].keytable, name)) >= 0) {
         *type = FSM.Threads[thid].keytable[kindex].type;
         if (FSM.Pointer[kindex] == NULL) {
-            FSM.Pointer[kindex] = (pointer) ESM_Alloc (FSM.Threads[thid].contextid, name, 0);
+            FSM.Pointer[kindex] = (pointer) ESM_Alloc (FSM.Threads[thid].contextid, name, (size_t)(0));
             if (FSM.Pointer[kindex] == NULL) {
                 SetError (thid, "ESM_Alloc does not know \"%s\" in FSM_GetPointer (%s)", name, ESM_Error ());
                 }
