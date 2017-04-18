@@ -108,6 +108,7 @@
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <LargeAddressAware>true</LargeAddressAware>
+      <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd d_hydro
@@ -137,6 +138,8 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd d_hydro
@@ -170,6 +173,8 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <LargeAddressAware>true</LargeAddressAware>
+      <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd d_hydro ..\bin
@@ -201,6 +206,8 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LargeAddressAware>true</LargeAddressAware>
+      <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd d_hydro ..\bin</Command>
