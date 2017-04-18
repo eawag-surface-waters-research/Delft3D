@@ -331,7 +331,7 @@ recursive subroutine SetMessage(level, string)
         end if
      endif
 
-     if (lunMess > 0) then
+     if (lunMess .ne. 0) then
         if (level >= thresholdLvl_file) then
            write (lunMess, '(a)') level_prefix(levelact)//trim(string)
         end if
@@ -353,7 +353,7 @@ recursive subroutine SetMessage(level, string)
         write (*, '(a)') trim(string)
      endif
 
-     if (lunMess > 0) then
+     if (lunMess .ne. 0) then
         write (lunMess, '(a)') trim(string)
      end if
 
