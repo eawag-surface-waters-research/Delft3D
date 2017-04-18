@@ -1023,15 +1023,20 @@ void Dimr::receive (const char * name,
                 } else {
                     // target is a component that uses direct pointer access to the actual variable
                     // When doing a dllSetVar, targetVarPtr is not defined. First do a "send" to get it defined.
-                    if (targetVarPtr == NULL) {
-                        thisDimr->send (name, 
-                                        compType,
-                                        dllGetVar, 
-                                        &targetVarPtr,
-                                        processes,
-                                        nProc,
-                                        0);
-                    }
+                    // WARNING: the test "if (targetVarPtr == NULL)" is not allowed:
+                    //          When target is defined for 1 partition and undefined for the other partitions,
+                    //          send will be called for all but 1 partitions. This screws the MPI administration,
+                    //          resulting in a crash.
+                    //          If the test "if (targetVarPtr == NULL)" is prefered, a more detailed administration is needed.
+                    //   if (targetVarPtr == NULL) {
+                    thisDimr->send (name, 
+                                    compType,
+                                    dllGetVar, 
+                                    &targetVarPtr,
+                                    processes,
+                                    nProc,
+                                    0);
+                    //  }
                     if (targetVarPtr == NULL) {
                         if (targetProcess == -1 || targetProcess == my_rank) {
                             // targetProcess=-1: no process can accept this item
