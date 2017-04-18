@@ -580,6 +580,10 @@ srcdir=`pwd`
 
 $project
 
+# Set executable bit
+cd $dest_main/lnx64
+chmod a+x `find . -type f -exec file {} \; | grep executable | grep -v "\.svn" | cut -d ":" -f 1 | xargs`
+
 cd $srcdir
 
 
