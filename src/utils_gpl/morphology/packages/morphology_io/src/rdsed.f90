@@ -872,8 +872,7 @@ subroutine opensedfil(lundia    ,error     ,filsed    ,luninp    ,version  )
     version = 0
     !
     call remove_leading_spaces(filsed)
-    luninp = newunit()
-    open (luninp, file = filsed, form = 'formatted', status = 'old',            &
+    open (newunit = luninp, file = filsed, form = 'formatted', status = 'old',            &
         & iostat = iocond)
     if (iocond /= 0) then
        errmsg = ERROR_FILE_OPEN // trim(filsed)

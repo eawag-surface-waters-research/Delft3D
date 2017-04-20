@@ -117,8 +117,7 @@ subroutine osmom(hrms      ,depth     ,tp        ,g         ,cr        , &
           write (*, '(a)') "ERROR: Directory ""default"" not found"
           call throwexception()
        endif
-       utab = newunit()
-       open (utab, file = trim(pathd) // 'tabmom', status='old', action='read', iostat=ierr)
+       open (newunit = utab, file = trim(pathd) // 'tabmom', status='old', action='read', iostat=ierr)
        if (ierr /= 0) then
           write (*, '(3a)') "ERROR: File """,trim(pathd) // 'tabmom', """ not found"
           call throwexception()

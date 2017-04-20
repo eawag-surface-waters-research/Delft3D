@@ -113,8 +113,7 @@ subroutine merge (inputfile, workdir, runid)
    ! Output initialization
    !
    write(filnam,'(3a)') 'mormerge_', trim(runid), '.log'
-   lundia = newunit()
-   open(lundia, file=trim(filnam), status='replace', action='write')
+   open(newunit = lundia, file=trim(filnam), status='replace', action='write')
    write(lundia,'( a)') trim(version_full(5:))
    write(lundia,'( a)') ' '
    write(lundia,'( a)') 'COMMAND LINE ARGUMENTS'
@@ -201,8 +200,7 @@ subroutine merge (inputfile, workdir, runid)
    write(mmsyncfilnam,'(6a)') trim(workdir), slash, 'sync', slash, &
                                & 'merge', trim(runid)
    !write(*,*)'mmsyncfilnam:',trim(mmsyncfilnam)
-   lunfil = newunit()
-   open (lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
+   open (newunit = lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
    if (istat /= 0) then
       write(*,*)' *** WARNING: unable to write in file ',trim(mmsyncfilnam)
    else
@@ -292,8 +290,7 @@ subroutine merge (inputfile, workdir, runid)
       ! Synchronisation
       !
       if (mod(loopcount,10) == 0) then
-         lunfil = newunit()
-         open (lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
+         open (newunit = lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
          if (istat /= 0) then
             write(*,*)' *** WARNING: unable to write in file ',trim(mmsyncfilnam)
          else

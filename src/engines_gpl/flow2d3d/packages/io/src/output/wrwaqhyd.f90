@@ -110,12 +110,10 @@
 !
 !! executable statements -------------------------------------------------------
 !
-      lunout1 = newunit()
       file1 = trim(filnam)//'.hyd'
-      open  ( lunout1 , file=trim(file1) )
-      lunout2 = newunit()
+      open  ( newunit = lunout1 , file=trim(file1) )
       file2 = trim(filnam)//'_unstructured.hyd'
-      open  ( lunout2 , file=trim(file2) )
+      open  ( newunit = lunout2 , file=trim(file2) )
 
       version_full  = ' '
       call getfullversionstring_flow2d3d(version_full)

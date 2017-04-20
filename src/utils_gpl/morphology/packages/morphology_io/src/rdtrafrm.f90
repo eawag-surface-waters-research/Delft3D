@@ -521,8 +521,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
        else
           write (lundia, '(a)') '    File in traditional MOR-format.'
           !
-          inp = newunit()
-          open (inp, file = flname(1:lfile),status = 'old', iostat = iost)
+          open (newunit = inp, file = flname(1:lfile),status = 'old', iostat = iost)
           if (iost/=0) then
              errmsg = FILE_NOT_FOUND // flname(1:lfile)
              call write_error(errmsg, unit=lundia)

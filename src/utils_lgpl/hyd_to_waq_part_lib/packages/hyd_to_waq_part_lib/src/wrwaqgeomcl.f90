@@ -466,9 +466,8 @@ contains
     !   
     ! Write the boundary file
     ! 
-    lunbnd = newunit()
     bndfilename = trim(meta%modelname) // '.bnd'
-    open(lunbnd, file= trim(bndfilename))
+    open(newunit = lunbnd, file= trim(bndfilename))
 
     if (nto > 0) then
         write(lunbnd, '(i0.0)') nto

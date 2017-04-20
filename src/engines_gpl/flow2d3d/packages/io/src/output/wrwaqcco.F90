@@ -66,11 +66,11 @@
          return
       endif
 !
-      lunout = newunit()
+
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'cco' , form = 'binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'cco' , form = 'binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'cco' , form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'cco' , form = 'unformatted', access='stream')
 #endif
       x = xcor(1,1)
       y = ycor(1,1)

@@ -819,9 +819,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        inquire (file = filmor(1:lfile), exist = ex)
        if (ex) then
-          ilun = newunit()
-          open (ilun, file = filmor(1:lfile), form = 'formatted',               &
-              & status = 'old')
+          open (newunit=ilun, file = filmor(1:lfile), form = 'formatted',               &
+             & status = 'old')
           !
           version = 0
           lenc    = 999

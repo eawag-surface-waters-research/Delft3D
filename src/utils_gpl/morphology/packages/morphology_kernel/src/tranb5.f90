@@ -119,8 +119,7 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
     if (first) then
        inquire (file = 'coef.inp', exist = exist)
        if (exist) then
-          ilun = newunit()
-          open (ilun, file = 'coef.inp')
+          open (newunit=ilun, file = 'coef.inp')
           read (ilun, *) faca
           read (ilun, *) facu
           read (ilun, *) epssl

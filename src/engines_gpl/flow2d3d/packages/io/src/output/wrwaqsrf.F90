@@ -90,7 +90,6 @@
 !! executable statements -------------------------------------------------------
 !
 
-      lunout = newunit()
       nolay  = ilaggr(kmax)
       nosegl = noseg / nolay
       nobndl = nobnd / nolay
@@ -129,18 +128,18 @@
       enddo
 !
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'srfold', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'srfold', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'srfold', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'srfold', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) nmax, mmax, nosegl, nosegl, nosegl, 0.0
       write ( lunout ) cc  (1:nosegl)
       close ( lunout )
       
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'srf', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'srf', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'srf', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'srf', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) 0.0
       write ( lunout ) (cc  (1:nosegl), i=1, nolay)
@@ -149,9 +148,9 @@
 ! write depth at cell centra (depth at zeta point (dps))
 !      
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'dps', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'dps', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'dps', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'dps', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) nmax, mmax, nosegl, nosegl, nosegl, 0.0
       write ( lunout ) dd  (1:nosegl)
@@ -172,9 +171,9 @@
             dd(k) = dd(k) / surf(k)
          enddo
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'chz', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'chz', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'chz', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'chz', form = 'unformatted', access='stream')
 #endif
          write ( lunout ) kmax, nmax, mmax, noseg, noq1, noq2, noq3
          write ( lunout ) cc(1:nosegl), dd(1:nosegl)
@@ -191,9 +190,9 @@
          enddo
       enddo
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'wdt', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'wdt', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'wdt', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'wdt', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) nmax, mmax, nosegl, noq1, noq2, nolay
       write ( lunout ) cc  (1:noq1/nolay), dd(1:noq2/nolay)
@@ -203,9 +202,9 @@
 
 !           Open file
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'len', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'len', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'len', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'len', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) noq1+noq2+noq3        ! number of exchanges
 !

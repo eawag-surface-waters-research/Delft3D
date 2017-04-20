@@ -411,102 +411,76 @@
 ! This part is copied for binary and unformatted
 #ifdef HAVE_FC_FORM_BINARY
 
-         lunvol    = newunit()
-         open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' , SHARED )
-         lunare    = newunit()
-         open  ( lunare , file=trim(filnam)//'are' , form = 'binary' , SHARED )
-         lunflo    = newunit()
-         open  ( lunflo , file=trim(filnam)//'flo' , form = 'binary' , SHARED )
+         open  ( newunit = lunvol , file=trim(filnam)//'vol' , form = 'binary' , SHARED )
+         open  ( newunit = lunare , file=trim(filnam)//'are' , form = 'binary' , SHARED )
+         open  ( newunit = lunflo , file=trim(filnam)//'flo' , form = 'binary' , SHARED )
          if ( lsal .gt. 0 ) then
-            lunsal    = newunit()
-            open  ( lunsal , file=trim(filnam)//'sal' , form = 'binary' , SHARED )
+            open  ( newunit = lunsal , file=trim(filnam)//'sal' , form = 'binary' , SHARED )
          endif
          if ( ltem .gt. 0 ) then
-            luntem    = newunit()
-            open  ( luntem , file=trim(filnam)//'tem' , form = 'binary' , SHARED )
+            open  ( newunit = luntem , file=trim(filnam)//'tem' , form = 'binary' , SHARED )
          endif
          do l = 1, lsed
-            lunsed(l) = newunit()
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
-            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' , SHARED )
+            open  ( newunit = lunsed(l), file=trim(filnam)//sf  , form = 'binary' , SHARED )
             ! sedimentation
-            lunsedflx(l,1) = newunit()
             ssrff = "sedflx00"
             write( ssrff(7:8), '(i2.2)' ) l
-            open  ( lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'binary' , SHARED )
+            open  ( newunit = lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'binary' , SHARED )
             ! resuspension
-            lunsedflx(l,2) = newunit()
             ssrff = "resflx00"
             write( ssrff(7:8), '(i2.2)' ) l
-            open  ( lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'binary' , SHARED )
+            open  ( newunit = lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'binary' , SHARED )
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
-            lunvdf    = newunit()
-            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'binary' , SHARED )
+            open  ( newunit = lunvdf , file=trim(filnam)//'vdf' , form = 'binary' , SHARED )
          endif
-         luntau    = newunit()
-         open  ( luntau , file=trim(filnam)//'tau' , form = 'binary' , SHARED )
+         open  ( newunit = luntau , file=trim(filnam)//'tau' , form = 'binary' , SHARED )
  !       lunfmap   = newunit()
  !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'binary' )
          if ( nsrc .gt. 0 ) then
-            lunsrctmp = newunit()
-            open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' , SHARED )
+            open  ( newunit = lunsrctmp , file='TMP_'//trim(filnam)//'src' , SHARED )
             if ( nowalk .gt. 0 ) then
-               lunwlk    = newunit()
-               open  ( lunwlk , file=trim(filnam)//'wlk' )
+               open  ( newunit = lunwlk , file=trim(filnam)//'wlk' )
             endif
-            lunsrc    = newunit()
-            open  ( lunsrc , file=trim(filnam)//'src' )    ! final file
+            open  ( newunit = lunsrc , file=trim(filnam)//'src' )    ! final file
          endif
 #else
-         lunvol    = newunit()
-         open  ( lunvol , file=trim(filnam)//'vol' , form = 'unformatted', access='stream')
-         lunare    = newunit()
-         open  ( lunare , file=trim(filnam)//'are' , form = 'unformatted', access='stream')
-         lunflo    = newunit()
-         open  ( lunflo , file=trim(filnam)//'flo' , form = 'unformatted', access='stream')
+         open  ( newunit = lunvol , file=trim(filnam)//'vol' , form = 'unformatted', access='stream')
+         open  ( newunit = lunare , file=trim(filnam)//'are' , form = 'unformatted', access='stream')
+         open  ( newunit = lunflo , file=trim(filnam)//'flo' , form = 'unformatted', access='stream')
          if ( lsal .gt. 0 ) then
-            lunsal    = newunit()
-            open  ( lunsal , file=trim(filnam)//'sal' , form = 'unformatted', access='stream')
+            open  ( newunit = lunsal , file=trim(filnam)//'sal' , form = 'unformatted', access='stream')
          endif
          if ( ltem .gt. 0 ) then
-            luntem    = newunit()
-            open  ( luntem , file=trim(filnam)//'tem' , form = 'unformatted', access='stream')
+            open  ( newunit = luntem , file=trim(filnam)//'tem' , form = 'unformatted', access='stream')
          endif
          do l = 1, lsed
-            lunsed(l) = newunit()
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
-            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'unformatted', access='stream')
+            open  ( newunit = lunsed(l), file=trim(filnam)//sf  , form = 'unformatted', access='stream')
             ! sedimentation
-            lunsedflx(l,1) = newunit()
             ssrff = "sedflx00"
             write( ssrff(7:8), '(i2.2)' ) l
-            open  ( lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
+            open  ( newunit = lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
             ! resuspension
-            lunsedflx(l,2) = newunit()
             ssrff = "resflx00"
             write( ssrff(7:8), '(i2.2)' ) l
-            open  ( lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
+            open  ( newunit = lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
-            lunvdf    = newunit()
-            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'unformatted', access='stream')
+            open  ( newunit = lunvdf , file=trim(filnam)//'vdf' , form = 'unformatted', access='stream')
          endif
-         luntau    = newunit()
-         open  ( luntau , file=trim(filnam)//'tau' , form = 'unformatted', access='stream')
+         open  ( newunit = luntau , file=trim(filnam)//'tau' , form = 'unformatted', access='stream')
  !       lunfmap   = newunit()
  !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'unformatted', access='stream')
          if ( nsrc .gt. 0 ) then
-            lunsrctmp = newunit()
-            open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' )
+            open  ( newunit = lunsrctmp , file='TMP_'//trim(filnam)//'src' )
             if ( nowalk .gt. 0 ) then
-               lunwlk    = newunit()
-               open  ( lunwlk , file=trim(filnam)//'wlk' )
+               open  ( newunit = lunwlk , file=trim(filnam)//'wlk' )
             endif
-            lunsrc    = newunit()
-            open  ( lunsrc , file=trim(filnam)//'src' )    ! final file
+            open  ( newunit = lunsrc , file=trim(filnam)//'src' )    ! final file
          endif
 #endif
 
