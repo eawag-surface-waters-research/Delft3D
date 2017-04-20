@@ -123,7 +123,12 @@ function dimr () {
     mkdir -p $dest_scripts
 
     copyFile "$prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe"    $dest_bin
-    copyFile "$prefix/lib/libdimr.so"                                       $dest_bin
+    # copy libdimr.so does not work: ldd will show dependency on $srcdir/lib/libdimr.so
+    # => When build on TeamCity it may not work, when removing $srcdir/lib it may not work anymore
+    # Therefore "copy libdimr.so" is replaced by "libtool install" and "libtool finish"
+    # It might be enough to just copy libdimr.la (and libdimr.a) too?
+    libtool --mode=install install -c $srcdir/engines_gpl/dimr/packages/dimr_lib/src/libdimr.la $dest_bin/libdimr.la
+    libtool --finish $dest_bin/libdimr.la
     copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
     copyFile "$srcdir/engines_gpl/dimr/scripts/generic/lnx64/*.*"           $dest_scripts
 

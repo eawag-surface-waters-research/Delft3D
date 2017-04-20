@@ -18,6 +18,9 @@ AM_CPPFLAGS = \
     -I$(STANDARD_C_INCLUDES) \
     -I../include
 
+AM_CFLAGS += -fPIC
+AM_CXXFLAGS += -fPIC
+
 #-------------------------------------------------------------------------------
 #Sources
 libdimr_la_SOURCES = \
