@@ -74,6 +74,8 @@ program waves_main
    character(256)                               :: mdw_file     ! filename mdw file
    character(256), dimension(:), pointer        :: meteotypes
    character(500)                               :: message
+   character(80)                                :: txtfil
+   character(256)                               :: version_full ! Version nr. of the module of the current package
    type(wave_data_type),target                  :: wavedata
    !
    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -112,11 +114,16 @@ program waves_main
    do i=1,256
       if (ichar(mdw_file(i:i)) == 0) mdw_file(i:i) = ' '
    enddo
-   call checklicense(success)
-   if ( .not. success ) then
-      write(*,'(a)') '*** ERROR: No authorization'
-      stop
-   endif
+   !
+   txtfil        = '--------------------------------------------------------------------------------'
+   version_full  = ' '
+   call getfullversionstring_WAVE(version_full)
+   write (*, '(a)') txtfil
+   write (*, '(a)') '-  Delft3D'
+   write (*, '(2a)') '-  ', trim(version_full)
+   write (*, '(a)') '-  Open source'
+   write (*, '(a)') '-'
+   write (*, '(a)') txtfil
    !
    call initialize_wavedata(wavedata)
    call setmode(wavedata, mode_in)

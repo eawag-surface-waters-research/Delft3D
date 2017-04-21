@@ -30,7 +30,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 wave_exe_SOURCES = \
-         checklicense.f90 \
          usage.f90 \
          wave_version.F90 \
          wave.f90

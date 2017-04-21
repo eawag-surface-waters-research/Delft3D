@@ -2542,7 +2542,6 @@ src/engines_gpl/wave/packages/wave/Makefile.am -text
 src/engines_gpl/wave/packages/wave/include/version_number.ini -text
 src/engines_gpl/wave/packages/wave/resource/wl.ico -text
 src/engines_gpl/wave/packages/wave/src/Makefile.am -text
-src/engines_gpl/wave/packages/wave/src/checklicense.f90 -text
 src/engines_gpl/wave/packages/wave/src/usage.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_version.F90.svn -text

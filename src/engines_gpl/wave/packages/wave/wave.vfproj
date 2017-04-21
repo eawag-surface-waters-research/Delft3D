@@ -48,7 +48,6 @@
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		<File RelativePath=".\resource\wl.ico"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\checklicense.f90"/>
 		<File RelativePath=".\src\usage.f90"/>
 		<File RelativePath=".\src\wave.f90"/>
 		<File RelativePath=".\src\wave_version.F90"/></Filter></Files>
