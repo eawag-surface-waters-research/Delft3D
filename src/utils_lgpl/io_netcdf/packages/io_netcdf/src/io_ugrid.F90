@@ -107,13 +107,22 @@ type t_ug_meshids
    !
    ! Dimensions:
    !
-   integer :: id_nodedim         = -1 !< Dimension ID for nodes.
-   integer :: id_edgedim         = -1 !< Dimension ID for edges.
-   integer :: id_facedim         = -1 !< Dimension ID for faces.
-   integer :: id_maxfacenodesdim = -1 !< Dimension ID for max nr of nodes per face.
-   integer :: id_layerdim        = -1 !< Dimension ID for layer centers.
-   integer :: id_interfacedim    = -1 !< Dimension ID for layer interfaces.
-
+   integer :: id_nodedim          = -1 !< Dimension ID for nodes.
+   integer :: id_edgedim          = -1 !< Dimension ID for edges.
+   integer :: id_facedim          = -1 !< Dimension ID for faces.
+   integer :: id_maxfacenodesdim  = -1 !< Dimension ID for max nr of nodes per face.
+   integer :: id_layerdim         = -1 !< Dimension ID for layer centers.
+   integer :: id_interfacedim     = -1 !< Dimension ID for layer interfaces.
+   integer :: id_twodim           = -1 !< Dimension ID for fixed dimension length 2.
+   ! 1d network dimensions
+   integer :: id_1dmeshpoints           = -1 !< Dimension ID for 1d mesh points.
+   integer :: id_1dbranchesdim          = -1 !< Dimension ID for 1d network branches.
+   integer :: id_1dnodesdim             = -1 !< Dimension ID for 1d network nodes.   
+   integer :: id_1dgeopointsdim         = -1 !< Dimension ID for 1d network geometry points.
+   integer :: id_1didstrlength          = -1 !< Dimension ID for 1d ids characters arrays.
+   integer :: id_1dlongstrlength        = -1 !< Dimension ID for 1d longnames characters arrays.
+   integer :: id_1dedgenodesdim         = -1 !< Dimension ID for 1d sourcetargets arrays.
+         
    !
    ! Coordinate variables
    !
@@ -143,17 +152,36 @@ type t_ug_meshids
 
    integer :: id_layer_zs        = -1 !< Coordinate variable ID for fixed z/sigma layer center vertical coordinate (either z or sigma).
    integer :: id_interface_zs    = -1 !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).
-
+   
+   ! 1d network dimensions
+   integer :: id_1dnodIds               = -1 !< Coordinate variable ID for node ids.
+   integer :: id_1dnodlongnames         = -1 !< Coordinate variable ID for node longnames.
+   integer :: id_1dnodex                = -1 !< Coordinate variable ID for node x coordinate.
+   integer :: id_1dnodey                = -1 !< Coordinate variable ID for node y coordinate.
+   integer :: id_1dgeox                 = -1 !< Coordinate variable ID for geopoints x coordinate.
+   integer :: id_1dgeoy                 = -1 !< Coordinate variable ID for geopoints y coordinate.
+   integer :: id_1doffset               = -1 !< Coordinate variable ID for mesh offsets.
+   integer :: id_1dgeopointsperbranch   = -1 !< Coordinate variable ID for geopoints per branch.
+   integer :: id_1dbranchlengths        = -1 !< Coordinate variable ID for branch lengths.
+   
    !
    ! Topology variables
    !
-   integer :: id_meshtopo        = -1 !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
-   integer :: id_edgenodes       = -1 !< Variable ID for edge-to-node mapping table.
-   integer :: id_facenodes       = -1 !< Variable ID for face-to-node mapping table.
-   integer :: id_edgefaces       = -1 !< Variable ID for edge-to-face mapping table (optional, can be -1).
-   integer :: id_faceedges       = -1 !< Variable ID for face-to-edge mapping table (optional, can be -1).
-   integer :: id_facelinks       = -1 !< Variable ID for face-to-face mapping table (optional, can be -1).
-
+   integer :: id_meshtopo           = -1 !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
+   integer :: id_edgenodes          = -1 !< Variable ID for edge-to-node mapping table.
+   integer :: id_facenodes          = -1 !< Variable ID for face-to-node mapping table.
+   integer :: id_edgefaces          = -1 !< Variable ID for edge-to-face mapping table (optional, can be -1).
+   integer :: id_faceedges          = -1 !< Variable ID for face-to-edge mapping table (optional, can be -1).
+   integer :: id_facelinks          = -1 !< Variable ID for face-to-face mapping table (optional, can be -1).
+   ! 1d network topology variables
+   integer :: id_1dtopo             = -1 !< Top-level variable for 1d network topology.
+   integer :: id_1dedgenodes        = -1 !< Variable ID for start and end node of each branch.
+   integer :: id_1dgeometry         = -1 !< Variable ID for geometry points.
+   integer :: id_1dmeshtobranch     = -1 !< Variable ID for branchid of each mesh point.
+   integer :: id_1dbranchids        = -1 !< Variable ID for branch ids.
+   integer :: id_1dbranchlongnames  = -1 !< Variable ID for branch long names.
+   integer :: id_1dmeshtopo         = -1 !< Variable ID for 1d mesh topology.
+   
 end type t_ug_meshids
 !> Structure for storing an entire mesh geometry (topology and coordinates and more).
 type t_ug_meshgeom
@@ -732,7 +760,7 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_e
    ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'node_coordinates', prefix//'_node_x '//prefix//'_node_y')
    ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'node_dimension', 'n'//prefix//'_node')
    ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'max_face_nodes_dimension', 'max_n'//prefix//'_face_nodes') ! non ugrid standard!
-
+   
    ! 1D: required, 2D: optionally required if data there
    if (dim == 1 .or. ug_checklocation(dataLocsCode, UG_LOC_EDGE)) then
       ierr = nf90_put_att(ncid, meshids%id_meshtopo, 'edge_node_connectivity', prefix//'_edge_nodes')
@@ -922,9 +950,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    real(kind=dp), optional, intent(in) :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma). Optional, only used if numLayer >= 1.
    real(kind=dp), optional, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
    integer                      :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-
-   integer :: id_twodim
-
+      
    real(kind=dp), allocatable :: edgexbnd(:,:), edgeybnd(:,:), facexbnd(:,:), faceybnd(:,:)
    real(kind=dp), allocatable :: lonn(:), latn(:) !< lon,lat-coordinates of the mesh nodes.
    real(kind=dp), allocatable :: lone(:), late(:) !< representative lon,lat-coordinates of the mesh edges.
@@ -957,19 +983,20 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (ierr /= UG_NOERR) then
       goto 888
    end if
-
+   
 
    ! Dimensions
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_node',        numNode,   meshids%id_nodedim)
    ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%id_edgedim)
    !ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes',        maxNumNodesPerFace,   meshids%id_maxfacenodesdim)
-   ierr = nf90_def_dim(ncid, 'n'//prefix//'_Two',                         2,       id_twodim)
+   ierr = nf90_def_dim(ncid, 'n'//prefix//'_Two',                         2,  meshids%id_twodim)
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ! TODO: AvD: the new maxNumNodesPerFace dummy variable overlaps with this nv here, but they may be different. Remove one.
       maxnv = size(face_nodes, 1)
-      ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',        numFace,   meshids%id_facedim)
+      ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',         numFace,   meshids%id_facedim)
       ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes', maxnv,   meshids%id_maxfacenodesdim)
    end if
+ 
    if (add_layers) then
       if (dim >= 3) then
          ! Only 1D and 2D mesh topologies can be layered.
@@ -999,7 +1026,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    ! Edges
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
-      ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ id_twodim, meshids%id_edgedim /) , meshids%id_edgenodes)
+      ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%id_twodim, meshids%id_edgedim /) , meshids%id_edgenodes)
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'cf_role',   'edge_node_connectivity')
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'mesh', trim(meshName))
       ierr = nf90_put_att(ncid, meshids%id_edgenodes, 'location', 'edge')
@@ -1014,7 +1041,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%id_edgex, 'bounds',    prefix//'_edge_x_bnd')
       ierr = nf90_put_att(ncid, meshids%id_edgey, 'bounds',    prefix//'_edge_y_bnd')
       ! Add bounds.
-      ierr = ug_addcoordvars(ncid, meshids%id_edgexbnd, meshids%id_edgeybnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
+      ierr = ug_addcoordvars(ncid, meshids%id_edgexbnd, meshids%id_edgeybnd, (/ meshids%id_twodim, meshids%id_edgedim /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
                              'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
 
 #ifdef HAVE_PROJ
@@ -1024,7 +1051,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%id_edgelon, 'bounds',    prefix//'_edge_lon_bnd')
          ierr = nf90_put_att(ncid, meshids%id_edgelat, 'bounds',    prefix//'_edge_lat_bnd')
          ! Add bounds.
-         ierr = ug_addlonlatcoordvars(ncid, meshids%id_edgelonbnd, meshids%id_edgelatbnd, (/ id_twodim, meshids%id_edgedim /), prefix//'_edge_lon_bnd', prefix//'_edge_lat_bnd', &
+         ierr = ug_addlonlatcoordvars(ncid, meshids%id_edgelonbnd, meshids%id_edgelatbnd, (/ meshids%id_twodim, meshids%id_edgedim /), prefix//'_edge_lon_bnd', prefix//'_edge_lat_bnd', &
                                       'longitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'latitude coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge')
       end if
 #endif
@@ -1073,7 +1100,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ! Edge face connectivity.
       ! Note that edge_face_connectivity is not officially part of the UGRID conventions, however it is very similar to e.g. face_edge_connectivity, which is part of the UGRID conventions.
       if (add_edge_face_connectivity) then
-         ierr = nf90_def_var(ncid, prefix//'_edge_faces', nf90_int, (/ id_twodim, meshids%id_edgedim /) , meshids%id_edgefaces)
+         ierr = nf90_def_var(ncid, prefix//'_edge_faces', nf90_int, (/ meshids%id_twodim, meshids%id_edgedim /) , meshids%id_edgefaces)
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'cf_role',     'edge_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'long_name',   'Mapping from every edge to the two faces that it separates')
          ierr = nf90_put_att(ncid, meshids%id_edgefaces, 'start_index', 1)
@@ -1151,7 +1178,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ierr = nf90_enddef(ncid)
 
 ! -- end of header --
-   
+      
    ! Write the actual data
    ! Nodes:
    ierr = nf90_put_var(ncid, meshids%id_nodex,    xn(1:numNode))
@@ -2288,6 +2315,404 @@ function ug_write_map_ugrid(filename) result(ierr)
     ierr = nf90_close(ncid)
         
 end function ug_write_map_ugrid
+
+! UGRID mesh and network1d functions 
+
+!> This function creates a 1d network accordingly to the new 1d format. 
+!! To be called only if the network 1d is defined using the new rules (a preliminary check is required)
+function ug_create_1d_network(ncid,meshids,networkName, nNodes, nBranches,nGeometry) result(ierr)
+
+   integer, intent(in)               :: ncid 
+   character(len=*), intent(in)      :: networkName
+   integer, intent(in)               :: nNodes,nBranches,nGeometry
+   integer                           :: ierr, wasInDefine
+   type(t_ug_meshids)                :: meshids
+      
+   ierr = UG_SOMEERR
+   wasInDefine = 0
+   ierr = nf90_redef(ncid) !open NetCDF in define mode
+    
+   ierr  = nf90_def_dim(ncid, 'nNetworkBranches', nBranches, meshids%id_1dbranchesdim)
+   ierr  = nf90_def_dim(ncid, 'nNetworkNodes'   , nNodes,    meshids%id_1dnodesdim)
+   ierr  = nf90_def_dim(ncid, 'nGeometryNodes'  , nGeometry, meshids%id_1dgeopointsdim)
+   ierr  = nf90_def_dim( ncid,'idstrlength'     , 30, meshids%id_1didstrlength) 
+   ierr  = nf90_def_dim( ncid,'longstrlength'   , 80, meshids%id_1dlongstrlength) 
+   ierr  = nf90_def_dim( ncid,'network1D_edge_nodes_dim', nBranches * 2, meshids%id_1dedgenodesdim) 
+
+   !Variable declarations: Network1d
+   !1. Network1D
+   ierr = nf90_def_var(ncid, networkName, nf90_int, meshids%id_1dtopo)
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'cf_role', 'mesh_topology')
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'topology_dimension', 1)
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'edge_dimension', 'nNetworkBranches')
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'edge_node_connectivity', 'network1D_edge_nodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'edge_geometry', 'network1D_geometry')
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'node_dimension', 'nNetworkNodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dtopo, 'node_coordinates', 'network1D_nodes_x network1D_nodes_y')
+
+   !2. Branch: the start and the end nodes of each branch
+   ierr = nf90_def_var(ncid, 'network1D_edge_nodes', nf90_int, meshids%id_1dedgenodesdim, meshids%id_1dedgenodes)
+   ierr = nf90_put_att(ncid, meshids%id_1dedgenodes, 'cf_role', 'edge_node_connectivity')
+   ierr = nf90_put_att(ncid, meshids%id_1dedgenodes, 'long_name', 'start and end nodes of each branch in the network')
+   !2. Branch: the branch ids
+   ierr = nf90_def_var(ncid, 'network1D_branches_ids', nf90_char, (/ meshids%id_1didstrlength, meshids%id_1dbranchesdim /) , meshids%id_1dbranchids)
+   ierr = nf90_put_att(ncid, meshids%id_1dbranchids, 'long_name', 'ids of the branches')
+   !2. Branch: the long names of the branches
+   ierr = nf90_def_var(ncid, 'network1D_branches_long_name', nf90_char, (/ meshids%id_1dlongstrlength, meshids%id_1dbranchesdim /) , meshids%id_1dbranchlongnames)
+   ierr = nf90_put_att(ncid, meshids%id_1dbranchlongnames, 'long_name', 'the branches long names')
+   !2. Branch: the branch lengths
+   ierr = nf90_def_var(ncid, 'network1D_branches_lengths', nf90_double, (/ meshids%id_1dbranchesdim /) , meshids%id_1dbranchlengths)
+   ierr = nf90_put_att(ncid, meshids%id_1dbranchlengths, 'long_name', 'the branch lengths')
+ 
+
+   !3. Nodes: the ids of the nodes
+   ierr = nf90_def_var(ncid, 'network1D_node_ids', nf90_char, (/ meshids%id_1didstrlength, meshids%id_1dnodesdim /) , meshids%id_1dnodIds)
+   ierr = nf90_put_att(ncid, meshids%id_1dnodIds, 'long_name', 'ids of the network connection nodes')
+   !3. Nodes: the long names of the nodes
+   ierr = nf90_def_var(ncid, 'network1D_nodes_long_names', nf90_char, (/ meshids%id_1dlongstrlength, meshids%id_1dnodesdim /) , meshids%id_1dnodlongnames)
+   ierr = nf90_put_att(ncid, meshids%id_1dnodlongnames, 'long_name', 'long names of the network connection nodes')
+   !3. Nodes: x coord
+   ierr = nf90_def_var(ncid, 'network1D_nodes_x', nf90_double, (/ meshids%id_1dnodesdim /) , meshids%id_1dnodex)
+   ierr = nf90_put_att(ncid, meshids%id_1dnodex, 'standard_name', 'projection_x_coordinate')
+   ierr = nf90_put_att(ncid, meshids%id_1dnodex, 'long_name', 'x coordinates of the network connection nodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dnodex, 'units', 'm')
+   !3. Nodes: y coord
+   ierr = nf90_def_var(ncid, 'network1D_nodes_y', nf90_double, (/ meshids%id_1dnodesdim /) , meshids%id_1dnodey)
+   ierr = nf90_put_att(ncid, meshids%id_1dnodey, 'standard_name', 'projection_x_coordinate')
+   ierr = nf90_put_att(ncid, meshids%id_1dnodey, 'long_name', 'y coordinates of the network connection nodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dnodey, 'units', 'm')
+
+   !4. Geometry
+   ierr = nf90_def_var(ncid, 'network1D_geometry', nf90_int, meshids%id_1dgeometry)
+   ierr = nf90_put_att(ncid, meshids%id_1dgeometry, 'geometry_type', 'multiline')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeometry, 'node_count', 'nGeometryNodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeometry, 'part_node_count', 'network1D_part_node_count')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeometry, 'node_coordinates', 'network1D_geom_x network1D_geom_y')
+   !4. Geometry: number of geometry points per each branch
+   ierr = nf90_def_var(ncid, 'network1D_part_node_count', nf90_int, (/ meshids%id_1dbranchesdim /) , meshids%id_1dgeopointsperbranch)
+   ierr = nf90_put_att(ncid, meshids%id_1dgeopointsperbranch, 'long_name', 'number of geometry nodes per branch')
+   !4. Geometry points x coordinates
+   ierr = nf90_def_var(ncid, 'network1D_geom_x', nf90_double, (/ meshids%id_1dgeopointsdim /) , meshids%id_1dgeox)
+   ierr = nf90_put_att(ncid, meshids%id_1dgeox, 'standard_name', 'projection_x_coordinate')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeox, 'long_name', 'x coordinates of the branch geometries')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeox, 'units', 'm')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeox, 'cf_role', 'geometry_x_node')
+   !4. Geometry points y coordinates
+   ierr = nf90_def_var(ncid, 'network1D_geom_y', nf90_double, (/ meshids%id_1dgeopointsdim /) , meshids%id_1dgeoy)
+   ierr = nf90_put_att(ncid, meshids%id_1dgeoy, 'standard_name', 'projection_y_coordinate')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeoy, 'long_name', 'y coordinates of the branch geometries')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeoy, 'units', 'm')
+   ierr = nf90_put_att(ncid, meshids%id_1dgeoy, 'cf_role', 'geometry_y_node')
+
+   ierr = nf90_enddef(ncid)
+   
+end function ug_create_1d_network
+
+!> This function creates a 1d mesh accordingly to the new 1d format. 
+!! To be called only if the network 1d is defined using the new rules (a preliminary check is required)
+function ug_create_1d_mesh(ncid,meshids,nmeshpoints) result(ierr)
+   
+   integer, intent(in)               :: nmeshpoints
+   type(t_ug_meshids), intent(inout) :: meshids   
+   integer                           :: ierr,ncid
+
+   ierr = UG_SOMEERR
+   ierr = nf90_redef(ncid) !open NetCDF in define mode
+   
+   !define dim
+   ierr  = nf90_def_dim(ncid, 'nMeshNodes', nmeshpoints, meshids%id_1dmeshpoints)
+   
+   !define mesh1d accordingly to the UGRID format
+   ierr = nf90_def_var(ncid, 'mesh1D', nf90_int, meshids%id_1dmeshtopo)
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'cf_role','mesh_topology')
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'topology_dimension', 1)
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'coordinate_space', 'network1D') 
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'edge_dimension','nMeshEdges')
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'edge_node_connectivity','mesh1D_edge_nodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'node_dimension','nMeshNodes')
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtopo, 'node_coordinates','mesh1D_nodes_branch_id mesh1D_nodes_branch_offset')
+   
+   ! 1. mesh1D :assign the branch number to each node
+   ierr = nf90_def_var(ncid, 'mesh1D_nodes_branch_id', nf90_int, (/ meshids%id_1dnodesdim /) , meshids%id_1dmeshtobranch)
+   ierr = nf90_put_att(ncid, meshids%id_1dmeshtobranch, 'long_name', 'Number of the branch on which the node is located')
+   ! 1. mesh1D :assign the the offset from the starting node
+   ierr = nf90_def_var(ncid, 'mesh1D_nodes_branch_offset', nf90_double, (/ meshids%id_1dnodesdim /) , meshids%id_1doffset)
+   ierr = nf90_put_att(ncid, meshids%id_1doffset, 'long_name', 'Offset along the branch at which the node is located')
+
+   ierr = nf90_enddef(ncid)
+
+end function ug_create_1d_mesh
+
+!> This function writes the nodes of the 1d network
+function ug_write_1d_network_nodes(ncid,meshids, nodesX, nodesY, nodeIds, nodeLongnames) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_meshids), intent(in)    :: meshids !< Set of NetCDF-ids for all mesh geometry arrays
+   integer                           :: ierr
+   character(len=*), intent(in)      :: nodeIds(:),nodeLongnames(:)
+   double precision, intent(in)      :: nodesX(:), nodesY(:)
+   
+   
+   ierr = UG_SOMEERR
+   !Put the NetCDF in write mode
+   ierr = nf90_enddef(ncid)
+   
+   ierr = nf90_put_var(ncid, meshids%id_1dnodex, nodesX)
+   ierr = nf90_put_var(ncid, meshids%id_1dnodey, nodesY)
+   ierr = nf90_put_var(ncid, meshids%id_1dnodIds, nodeIds) 
+   ierr = nf90_put_var(ncid, meshids%id_1dnodLongNames, nodeLongnames)
+
+end function ug_write_1d_network_nodes
+
+!> This function writes the branches information
+function ug_write_1d_network_branches(ncid,meshids, sourceNodeId,targetNodeId, branchIds, branchlengths, branchlongnames, nbranchgeometrynodes,nBranches) result(ierr)
+
+   integer, intent(in)               ::ncid, nBranches
+   type(t_ug_meshids), intent(in)    ::meshids !< Set of NetCDF-ids for all mesh geometry arrays
+   integer,           intent(in)     ::sourceNodeId(:),targetNodeId(:)
+   integer,           allocatable    ::sourcestargets(:)
+   character(len=*),  intent(in)     ::branchIds(:)
+   double precision,  intent(in)     ::branchlengths(:) 
+   character(len=*),  intent(in)     ::branchlongnames(:)
+   integer,           intent(in)     ::nbranchgeometrynodes(:)
+   integer                           ::ierr, wasInDefine, n, k
+   
+   ierr = UG_SOMEERR
+   ierr = nf90_enddef(ncid)
+   
+   allocate(sourcestargets(nBranches*2))
+   k = 0
+   do n=1,nBranches
+       k = k + 1
+       sourcestargets(k)=sourceNodeId(n) 
+       k = k + 1
+       sourcestargets(k)=targetNodeId(n)
+   end do
+   
+   ierr = nf90_put_var(ncid, meshids%id_1dedgenodes, sourcestargets)
+   ierr = nf90_put_var(ncid, meshids%id_1dbranchids, branchIds(1:nBranches))  
+   ierr = nf90_put_var(ncid, meshids%id_1dbranchlongnames, branchLongnames(1:nBranches)) 
+   ierr = nf90_put_var(ncid, meshids%id_1dbranchlengths, branchlengths(1:nBranches)) 
+   ierr = nf90_put_var(ncid, meshids%id_1dgeopointsperbranch, nbranchgeometrynodes(1:nBranches)) 
+  
+end function ug_write_1d_network_branches
+
+!> This function writes the geometry points
+function ug_write_1d_network_branches_geometry(ncid,meshids, geopointsX, geopointsY, ngeometry)  result(ierr)
+
+   integer, intent(in)               :: ncid, ngeometry
+   type(t_ug_meshids), intent(in)    :: meshids 
+   double precision,  intent(in)     :: geopointsX(:), geopointsY(:) 
+   integer                           :: ierr
+   
+   ierr = UG_SOMEERR
+   ierr = nf90_enddef(ncid)
+   
+   ierr = nf90_put_var(ncid, meshids%id_1dgeox, geopointsX(1:ngeometry))
+   ierr = nf90_put_var(ncid, meshids%id_1dgeoy, geopointsY(1:ngeometry))
+   
+end function ug_write_1d_network_branches_geometry
+
+!> This function writes the mesh points
+function ug_write_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset) result(ierr)
+
+   integer, intent(in)                :: ncid, branchidx(:)
+   double precision, intent(in)       :: offset(:)
+   type(t_ug_meshids), intent(in)     :: meshids 
+   integer                            :: ierr,nmeshpoints
+
+   ierr = UG_SOMEERR
+   ierr = nf90_enddef(ncid)
+   
+   ierr = nf90_inquire_dimension(ncid, meshids%id_1dmeshpoints, len=nmeshpoints)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch dimension')
+   end if 
+   
+   ierr = nf90_put_var(ncid, meshids%id_1dmeshtobranch, branchidx)
+   ierr = nf90_put_var(ncid, meshids%id_1doffset, offset)
+
+end function ug_write_1d_mesh_discretisation_points
+
+!> This function gets the number of network nodes
+function ug_get_1d_network_nodes_count(ncid,meshids, nNodes) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_meshids), intent(in)    :: meshids 
+   integer, intent(out)              :: nNodes
+   integer                           :: ierr
+   
+  ierr = nf90_inquire_dimension(ncid, meshids%id_1dnodesdim, len=nNodes)
+  if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the 1d nodes count')
+  end if 
+   
+end function ug_get_1d_network_nodes_count
+
+!> This function gets the number of branches
+function ug_get_1d_network_branches_count(ncid,meshids, nbranches) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_meshids), intent(in)    :: meshids 
+   integer, intent(out)              :: nbranches
+   integer                           :: ierr
+   
+  ierr = nf90_inquire_dimension(ncid, meshids%id_1dbranchesdim, len=nbranches)
+  if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the 1d number of branches')
+  end if 
+   
+end function ug_get_1d_network_branches_count
+
+!> This function gets the number of geometry points
+function ug_get_1d_network_branches_geometry_coordinate_count(ncid,meshids, ngeometry) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_meshids), intent(in)    :: meshids 
+   integer, intent(out)              :: ngeometry
+   integer                           :: ierr
+   
+  ierr = nf90_inquire_dimension(ncid, meshids%id_1dgeopointsdim, len=ngeometry)
+    if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the 1d number of geometry points')
+  end if 
+
+end function ug_get_1d_network_branches_geometry_coordinate_count
+
+!> This function gets the coordinates of the network nodes
+function ug_read_1d_network_nodes(ncid, meshids, nodesX, nodesY, nodeids, nodelongnames) result(ierr)
+
+   integer, intent(in)             :: ncid
+   type(t_ug_meshids), intent(in)  :: meshids 
+   double precision,intent(out)    :: nodesX(:), nodesY(:) 
+   character(len=*),intent(out)    :: nodeids(:), nodelongnames(:)
+   integer                         :: ierr
+ 
+   ierr = nf90_get_var(ncid, meshids%id_1dnodex, nodesX)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read x coordinates of 1d network')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dnodey, nodesY)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read x coordinates of 1d network')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dnodIds, nodeids)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read nodeids of 1d network')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dnodlongnames, nodelongnames)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read nodelongnames of 1d network')
+   end if 
+
+end function ug_read_1d_network_nodes
+
+!> This function reads the network branches
+function ug_read_1d_network_branches(ncid, meshids, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints) result(ierr)
+
+   integer, intent(in)              :: ncid
+   type(t_ug_meshids), intent(in)   :: meshids 
+   integer,intent(out)              :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
+   real(kind=dp),intent(out)        :: branchlengths(:)
+   character(len=*),intent(out)     :: branchid(:),branchlongnames(:)
+   integer                          :: ierr,n, nbranches, k
+   integer,allocatable              :: sourcestargets(:)
+   
+   nbranches = size(sourceNodeId,1)
+   allocate(sourcestargets(nbranches * 2))
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dedgenodes, sourcestargets)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the source and targets nodes of each branch in 1d network')
+   end if 
+   k = 0
+   do n=1,nBranches
+       k = k + 1
+       sourceNodeId(n)=sourcestargets(k)
+       k = k + 1
+       targetNodeId(n)=sourcestargets(k)
+   end do
+
+   ierr = nf90_get_var(ncid, meshids%id_1dbranchids, branchId)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch ids of 1d network')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dbranchlengths, branchlengths)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch lengths of 1d network')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dbranchlongnames, branchlongnames)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch longnames of 1d network')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dgeopointsperbranch, nbranchgeometrypoints)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the geometry points of each branch in 1d network')
+   end if 
+   
+end function ug_read_1d_network_branches
+
+!> This function reads the coordinates of the geometry points
+function ug_read_1d_network_branches_geometry(ncid, meshids, geopointsX, geopointsY) result(ierr)
+
+   integer, intent(in)                      :: ncid
+   type(t_ug_meshids), intent(in)           :: meshids 
+   real(kind=dp), intent(out)               :: geopointsX(:), geopointsY(:)
+   integer                                  :: ierr
+         
+   ierr = nf90_get_var(ncid, meshids%id_1dgeox, geopointsX)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the x coordinates of the geometry points')
+   end if 
+   
+   ierr = nf90_get_var(ncid, meshids%id_1dgeoy, geopointsY)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the y coordinates of the geometry points')
+   end if 
+
+end function ug_read_1d_network_branches_geometry
+
+!> This function gets the number of mesh points
+function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_meshids), intent(in)    :: meshids 
+   integer, intent(out)              :: nmeshpoints
+   integer                           :: ierr
+   
+   ierr = nf90_inquire_dimension(ncid, meshids%id_1dmeshpoints, len=nmeshpoints)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the number of mesh points')
+   end if 
+   
+end function ug_get_1d_mesh_discretisation_points_count
+
+!> This function reads the geometry information for the mesh points
+function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset) result(ierr)
+
+   integer, intent(in)                      :: ncid
+   type(t_ug_meshids), intent(in)           :: meshids 
+   real(kind=dp),   intent(out)             :: offset(:)
+   integer,intent(out)                      :: branchidx(:)
+   integer                                  :: ierr
+         
+   ierr = nf90_get_var(ncid, meshids%id_1dmeshtobranch, branchidx)
+   !define dim
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch ids')
+   end if 
+   ierr = nf90_get_var(ncid, meshids%id_1doffset, offset)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch offsets')
+   end if 
+    
+end function  ug_read_1d_mesh_discretisation_points
 
 
 end module io_ugrid

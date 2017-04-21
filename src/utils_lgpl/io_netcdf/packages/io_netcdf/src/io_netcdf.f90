@@ -92,6 +92,21 @@ public :: ionc_write_geom_ugrid
 public :: ionc_write_mesh_struct
 public :: ionc_write_map_ugrid
 public :: ionc_initialize
+!network 1d functions
+public :: ionc_create_1d_network_ugrid
+public :: ionc_write_1d_network_nodes_ugrid
+public :: ionc_write_1d_network_branches_ugrid
+public :: ionc_write_1d_network_branches_geometry_ugrid
+public :: ionc_get_1d_network_nodes_count_ugrid
+public :: ionc_get_1d_network_branches_count_ugrid
+public :: ionc_get_1d_network_branches_geometry_coordinate_count_ugrid
+public :: ionc_read_1d_network_nodes_ugrid
+public :: ionc_read_1d_network_branches_ugrid
+public :: ionc_read_1d_network_branches_geometry_ugrid
+public :: ionc_create_1d_mesh_ugrid
+public :: ionc_write_1d_mesh_discretisation_points_ugrid
+public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
+public :: ionc_get_1d_mesh_discretisation_points_ugrid
 
 private
 
@@ -938,5 +953,175 @@ subroutine netcdfError(errorLevel, message)
         !call closeall()
     endif
 end subroutine netcdfError
+!
+! Network and mesh1d functions
+!
+function ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nBranches, nGeometry) result(ierr)
+
+   integer, intent(in)                :: ioncid
+   integer, intent(inout)             :: networkid
+   character(len=*), intent(in)       :: networkName !< File name for netCDF dataset to be opened.
+   integer, intent(in)                :: nNodes, nBranches, nGeometry
+   integer                            :: ierr 
+   
+   !here i need to find where the 1d mesh is
+   ierr = ug_create_1d_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), networkName, nNodes, nBranches, nGeometry)
+   
+end function ionc_create_1d_network_ugrid
+
+function ionc_write_1d_network_nodes_ugrid(ioncid, networkid, nodesX, nodesY, nodeIds, nodeLongnames) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid  
+   double precision,    intent(in)    :: nodesX(:) 
+   double precision,    intent(in)    :: nodesY(:) 
+   character(len=*), intent(in)       :: nodeIds(:),nodeLongnames(:) !< File name for netCDF dataset to be opened.
+   integer                            :: ierr 
+      
+   ierr = ug_write_1d_network_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), nodesX, nodesY, nodeIds, &
+       nodeLongnames)
+   
+end function ionc_write_1d_network_nodes_ugrid
+
+function ionc_write_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchids, branchlengths, branchlongnames, &
+    nbranchgeometrypoints, nBranches) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkId, nBranches 
+   integer, intent(in)                :: sourcenodeid(:), targetnodeid(:), nbranchgeometrypoints(:)
+   character(len=*),intent(in)        :: branchids(:),branchlongnames(:)
+   double precision, intent(in)       :: branchlengths(:)
+   integer                            :: ierr
+   
+   ierr = ug_write_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid),sourcenodeid,targetnodeid, &
+       branchIds, branchlengths, branchlongnames, nbranchgeometrypoints,nBranches) 
+   
+end function ionc_write_1d_network_branches_ugrid
+
+function ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY, nGeometry) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid, ngeometry 
+   double precision, intent(in)       :: geopointsX(:),geopointsY(:)
+   integer                            :: ierr
+   
+   ierr = ug_write_1d_network_branches_geometry(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), geopointsX, &
+       geopointsY, ngeometry)
+
+end function ionc_write_1d_network_branches_geometry_ugrid
+
+function ionc_get_1d_network_nodes_count_ugrid(ioncid, networkid, nNodes) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid 
+   integer, intent(out)               :: nNodes 
+   integer                            :: ierr
+   
+   ierr = ug_get_1d_network_nodes_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid),nNodes)
+
+end function ionc_get_1d_network_nodes_count_ugrid
+
+function ionc_get_1d_network_branches_count_ugrid(ioncid, networkid, nBranches)  result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid 
+   integer, intent(out)               :: nBranches 
+   integer                            :: ierr
+   
+   ierr = ug_get_1d_network_branches_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid),nBranches)
+
+end function ionc_get_1d_network_branches_count_ugrid
+
+function  ionc_get_1d_network_branches_geometry_coordinate_count_ugrid(ioncid, networkid, ngeometrypoints)  result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid 
+   integer, intent(out)               :: ngeometrypoints 
+   integer                            :: ierr
+   
+   ierr = ug_get_1d_network_branches_geometry_coordinate_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), & 
+       ngeometrypoints)
+   
+end function ionc_get_1d_network_branches_geometry_coordinate_count_ugrid
+
+function  ionc_read_1d_network_nodes_ugrid(ioncid, networkid, nodesX, nodesY, nodeids, nodelongnames) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid 
+   double precision,intent(out)       :: nodesX(:), nodesY(:)  
+   character(len=*),intent(out)       :: nodeids(:), nodelongnames(:)  
+   integer                            :: ierr
+   
+   ierr = ug_read_1d_network_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), nodesX, nodesY, nodeids, nodelongnames)
+
+end function ionc_read_1d_network_nodes_ugrid
+
+function  ionc_read_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid 
+   integer,intent(out)                :: sourcenodeid(:), targetnodeid(:), nbranchgeometrypoints(:)  
+   character(len=*), intent(out)      :: branchid(:), branchlongnames(:)  
+   double precision, intent(out)      :: branchlengths(:)
+   integer                            :: ierr
+   
+   ierr = ug_read_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), sourcenodeid, & 
+       targetnodeid,branchid,branchlengths,branchlongnames,nbranchgeometrypoints )
+
+end function ionc_read_1d_network_branches_ugrid
+
+function  ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY) result(ierr)
+
+   integer, intent(in)                :: ioncid, networkid  
+   double precision, intent(out)      :: geopointsX(:), geopointsY(:)
+   integer                            :: ierr
+
+   ierr = ug_read_1d_network_branches_geometry(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), geopointsX, geopointsY)
+
+end function ionc_read_1d_network_branches_geometry_ugrid
+
+
+function ionc_create_1d_mesh_ugrid(ioncid, networkid, nmeshpoints) result(ierr)
+
+   integer, intent(in)     :: ioncid, networkid, nmeshpoints
+   integer                 :: ierr
+     
+   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), nmeshpoints)
+  
+end function ionc_create_1d_mesh_ugrid
+
+function ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
+
+  integer, intent(in)         :: ioncid, networkid  
+  integer, intent(in)         :: branchidx(:)
+  double precision,intent(in) ::offset(:)
+  integer                     :: ierr
+  
+  ierr=ug_write_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset)  
+  
+end function ionc_write_1d_mesh_discretisation_points_ugrid
+
+function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, nmeshpoints) result(ierr) 
+
+   integer, intent(in)    :: ioncid, networkid 
+   integer, intent(out)   :: nmeshpoints
+   integer                :: ierr
+   
+   ierr = ug_get_1d_mesh_discretisation_points_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), nmeshpoints)
+   
+end function ionc_get_1d_mesh_discretisation_points_count_ugrid
+
+
+function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
+
+  integer, intent(in)         :: ioncid, networkid  
+  integer, intent(out)        :: branchidx(:)
+  double precision,intent(out):: offset(:)
+  integer                     :: ierr
+  
+  ierr = ug_read_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset)
+   
+end function ionc_get_1d_mesh_discretisation_points_ugrid
+
 
 end module io_netcdf
