@@ -5,6 +5,7 @@ Copyright (C)  Stichting Deltares, 2013
 '''
 
 import os, re, sys, glob, ntpath
+from shutil import copyfile
 
 def usage():
     print "Usage:"
@@ -30,7 +31,6 @@ def platformArtifacts(platform):
             for afile in sharefiles_withpath:
                 if str(afile).find(".txt") == -1:
                     sharefiles.append(ntpath.basename(afile))
-            del sharefiles_withpath[:]
             print "sharefiles:" + str(sharefiles)
             for (path, dirs, files) in os.walk(pltdir):
                 if str(path).find(sharedir) == -1:
@@ -39,7 +39,17 @@ def platformArtifacts(platform):
                         if any(afile in asharefile for asharefile in sharefiles):
                             print "      To be removed: " + os.path.join(path,afile)
                             os.remove(os.path.join(path,afile))
-                            
+            for afile in sharefiles_withpath:
+               if str(afile).find("libexpat.dll") != -1:
+                   copyfile(afile, os.path.join('dimr','bin', 'libexpat.dll'))
+               if str(afile).find("io_netcdf.dll") != -1:
+                   copyfile(afile, os.path.join('dimr', 'bin', 'io_netcdf.dll'))
+               if  str(afile).find("libexpat.dll") != -1:
+                   copyfile(afile, os.path.join('dimr', 'bin', 'mscrt100.dll'))
+               if str(afile).find("libexpat.dll") != -1:
+                   copyfile(afile, os.path.join('dimr', 'bin', 'pthreadVC2.dll'))
+
+            del sharefiles_withpath[:]
         else:
             print "  Share directory not found"
         os.chdir(root)
