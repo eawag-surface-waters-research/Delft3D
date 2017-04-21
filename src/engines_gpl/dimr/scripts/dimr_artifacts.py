@@ -46,7 +46,7 @@ def platformArtifacts(platform):
                    copyfile(afile, os.path.join('dimr', 'bin', 'io_netcdf.dll'))
                if  str(afile).find("libexpat.dll") != -1:
                    copyfile(afile, os.path.join('dimr', 'bin', 'mscrt100.dll'))
-               if str(afile).find("libexpat.dll") != -1:
+               if str(afile).find("pthreadVC2.dll") != -1:
                    copyfile(afile, os.path.join('dimr', 'bin', 'pthreadVC2.dll'))
 
             del sharefiles_withpath[:]
