@@ -39,7 +39,9 @@ def platformArtifacts(platform):
                         if any(afile in asharefile for asharefile in sharefiles):
                             print "      To be removed: " + os.path.join(path,afile)
                             os.remove(os.path.join(path,afile))
+            # copy dll's to dimr directory
             for afile in sharefiles_withpath:
+                # libraries needed at local PC (L01694 JanM)
                if str(afile).find("libexpat.dll") != -1:
                    copyfile(afile, os.path.join('dimr','bin', 'libexpat.dll'))
                if str(afile).find("io_netcdf.dll") != -1:
@@ -48,6 +50,9 @@ def platformArtifacts(platform):
                    copyfile(afile, os.path.join('dimr', 'bin', 'mscrt100.dll'))
                if str(afile).find("pthreadVC2.dll") != -1:
                    copyfile(afile, os.path.join('dimr', 'bin', 'pthreadVC2.dll'))
+                # libraries needed at teamcity agent 
+               if str(afile).find("libifcoremd.dll") != -1:
+                   copyfile(afile, os.path.join('dimr','bin', 'libifcoremd.dll'))
 
             del sharefiles_withpath[:]
         else:
