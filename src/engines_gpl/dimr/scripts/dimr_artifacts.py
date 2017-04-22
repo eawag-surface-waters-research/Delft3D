@@ -53,6 +53,13 @@ def platformArtifacts(platform):
                 # libraries needed at teamcity agent 
                if str(afile).find("libifcoremd.dll") != -1:
                    copyfile(afile, os.path.join('dimr','bin', 'libifcoremd.dll'))
+               if str(afile).find("libifportmd.dll") != -1:
+                   copyfile(afile, os.path.join('dimr','bin', 'libifportmd.dll'))
+               if str(afile).find("libmmd.dll") != -1:
+                   copyfile(afile, os.path.join('dimr','bin', 'libmmd.dll'))
+               if str(afile).find("svml_dispmd.dll") != -1:
+                   copyfile(afile, os.path.join('dimr','bin', 'svml_dispmd.dll'))
+                
 
             del sharefiles_withpath[:]
         else:
