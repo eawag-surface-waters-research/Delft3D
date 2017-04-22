@@ -41,25 +41,8 @@ def platformArtifacts(platform):
                             os.remove(os.path.join(path,afile))
             # copy dll's to dimr directory
             for afile in sharefiles_withpath:
-                # libraries needed at local PC (L01694 JanM)
-               if str(afile).find("libexpat.dll") != -1:
-                   copyfile(afile, os.path.join('dimr','bin', 'libexpat.dll'))
-               if str(afile).find("io_netcdf.dll") != -1:
-                   copyfile(afile, os.path.join('dimr', 'bin', 'io_netcdf.dll'))
-               if  str(afile).find("mscrt100.dll") != -1:
-                   copyfile(afile, os.path.join('dimr', 'bin', 'mscrt100.dll'))
-               if str(afile).find("pthreadVC2.dll") != -1:
-                   copyfile(afile, os.path.join('dimr', 'bin', 'pthreadVC2.dll'))
-                # libraries needed at teamcity agent 
-               if str(afile).find("libifcoremd.dll") != -1:
-                   copyfile(afile, os.path.join('dimr','bin', 'libifcoremd.dll'))
-               if str(afile).find("libifportmd.dll") != -1:
-                   copyfile(afile, os.path.join('dimr','bin', 'libifportmd.dll'))
-               if str(afile).find("libmmd.dll") != -1:
-                   copyfile(afile, os.path.join('dimr','bin', 'libmmd.dll'))
-               if str(afile).find("svml_dispmd.dll") != -1:
-                   copyfile(afile, os.path.join('dimr','bin', 'svml_dispmd.dll'))
-                
+                dir, file = os.path.split(afile)
+                copyfile(afile, os.path.join('dimr','bin', file))
 
             del sharefiles_withpath[:]
         else:
