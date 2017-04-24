@@ -40,7 +40,7 @@ public echomor
 contains
 
 subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
-               & lsed      ,nmaxus    ,nto       , &
+               & lsed      ,nmaxus    ,nto       ,lfbedfrm  , &
                & nambnd    ,julday    ,mor_ptr   ,sedpar    ,morpar    , &
                & fwfac     ,morlyr    ,griddim   )
 !!--description-----------------------------------------------------------------
@@ -149,6 +149,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                        , intent(in)  :: lsec
     integer                        , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
     integer                        , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    logical                        , intent(in)  :: lfbedfrm    
     logical                        , intent(out) :: error
     character(*)                                 :: filmor
     character(20) , dimension(nto)               :: nambnd  !  Description and declaration in esm_alloc_char.f90
@@ -943,7 +944,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     endif
     !
     call rdmorlyr (lundia    ,error     ,filmor    , &
-                 & nmaxus    ,nto       , &
+                 & nmaxus    ,nto       ,lfbedfrm  , &
                  & nambnd    ,version   ,lsedtot   ,namsed    , &
                  & morpar    ,morlyr    ,sedpar    ,mor_ptr   , &
                  & griddim   )

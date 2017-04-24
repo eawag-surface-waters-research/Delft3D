@@ -59,7 +59,7 @@ end type stmtype
 
 contains
 
-subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur, lsec, julrefday, nambnd, error)
+subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur, lsec, lfbedfrm, julrefday, nambnd, error)
 !!--description-----------------------------------------------------------------
 !
 ! Read sediment transport and morphology data from filsed, filemor and filtrn
@@ -83,6 +83,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     integer                     , intent(in)  :: ltem
     integer                     , intent(in)  :: ltur
     integer                     , intent(in)  :: lsec
+    logical                     , intent(in)  :: lfbedfrm
     integer                     , intent(in)  :: julrefday
     character(20) , dimension(:), intent(in)  :: nambnd
     logical                     , intent(out) :: error
@@ -176,7 +177,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     ! fwfac set by rdmor
     !
     call rdmor  (lundia, error, filmor, lsec, stm%lsedtot, &
-               & stm%lsedsus, nmaxus, nto, nambnd, julrefday, morfil_tree, &
+               & stm%lsedsus, nmaxus, nto, lfbedfrm, nambnd, julrefday, morfil_tree, &
                & stm%sedpar, stm%morpar, stm%fwfac, stm%morlyr, &
                & griddim)
     !

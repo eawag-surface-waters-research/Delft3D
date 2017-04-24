@@ -32,7 +32,7 @@ module m_rdmorlyr
 contains
 
 subroutine rdmorlyr(lundia    ,error     ,filmor    , &
-                  & nmaxus    ,nto       ,nambnd    ,version   , &
+                  & nmaxus    ,nto       ,lfbedfrm  ,nambnd    ,version   , &
                   & lsedtot   ,namsed    ,morpar    ,morlyr    ,sedpar    , &
                   & mor_ptr   ,griddim   )
 !!--description-----------------------------------------------------------------
@@ -57,6 +57,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     integer                                         , intent(in)  :: nmaxus
     integer                                         , intent(in)  :: nto
     integer                                         , intent(in)  :: version
+    logical                                         , intent(in)  :: lfbedfrm    
     logical                                         , intent(out) :: error
     character(*)                                                  :: filmor
     character(20)             , dimension(nto)                    :: nambnd   !  Description and declaration in esm_alloc_char.f90
@@ -94,7 +95,7 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     !
     logical                             , pointer :: exchlyr
     !logical                             , pointer :: lfbedfrm
-    logical                                       :: lfbedfrm = .false.
+    !logical                                       :: lfbedfrm = .false.
     real(fp)                            , pointer :: bed
     real(fp)                            , pointer :: minmass
     real(fp)                            , pointer :: theulyr
