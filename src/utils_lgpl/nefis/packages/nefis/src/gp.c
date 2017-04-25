@@ -1808,7 +1808,7 @@ BInt4 GP_variable_pointer ( BInt4    set        ,
         nefis_errcnt += 1;
         nefis_errno   = 6030;
         sprintf(error_text,
-           "On reading variable pointer table, table %ld", j);
+           "On writing variable pointer table, table %ld", j);
         return nefis_errno;
       }
       start_table = end_file;
