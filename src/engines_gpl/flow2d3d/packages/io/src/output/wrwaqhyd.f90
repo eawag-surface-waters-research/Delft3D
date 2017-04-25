@@ -179,8 +179,8 @@
       write ( lunout2 , '(a,i8,a )' ) 'conversion-ref-time      ''',itdate,'000000'''
       timsec = itwqff*dt*60.0
       call timdat( julday, timsec, idate, itime )
-      write ( lunout1 , '(a,i8,a )' ) 'conversion-start-time    ''',idate,'000000'''
-      write ( lunout2 , '(a,i8,a )' ) 'conversion-start-time    ''',idate,'000000'''
+      write ( lunout1 , '(a,i8,i6.6,a)') 'conversion-start-time     ''',idate,itime,''''
+      write ( lunout2 , '(a,i8,i6.6,a)') 'conversion-start-time     ''',idate,itime,''''
       timsec = itwqfl*dt*60.0
       call timdat( julday, timsec, idate, itime )
       write ( lunout1 , '(a,i8,i6.6,a)') 'conversion-stop-time     ''',idate,itime,''''
