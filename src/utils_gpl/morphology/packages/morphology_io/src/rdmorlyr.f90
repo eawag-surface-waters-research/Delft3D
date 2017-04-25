@@ -94,8 +94,6 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
     character(MAXTABLECLENGTH), dimension(:), allocatable         :: parnames
     !
     logical                             , pointer :: exchlyr
-    !logical                             , pointer :: lfbedfrm
-    !logical                                       :: lfbedfrm = .false.
     real(fp)                            , pointer :: bed
     real(fp)                            , pointer :: minmass
     real(fp)                            , pointer :: theulyr
