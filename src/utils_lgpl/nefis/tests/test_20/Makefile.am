@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 #
 #   Jan.Mooiman@deltares.nl
-#   24 Aug 2012
+#   26 April 2017
 #
 #   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
@@ -9,14 +9,13 @@ include $(top_srcdir)/common.am
 bin_PROGRAMS = test_20
 
 #-------------------------------------------------------------------------------
-
-AM_CFLAGS += -DPTR8
-
 #Includes
+INCLUDES = -I../../packages/nefis/include
 
 test_20_SOURCES = \
-	main.c
+	test_20.c
 
 test_20_LDADD = \
+	../../packages/nefis/src/libnefis.la \
 	$(FCLIBS)
 
