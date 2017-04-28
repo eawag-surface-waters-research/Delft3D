@@ -16,6 +16,6 @@ test_20_SOURCES = \
 	test_20.c
 
 test_20_LDADD = \
-	../../packages/nefis/src/libnefis.la \
+	../../packages/nefis/src/libNefis.la \
 	$(FCLIBS)
 
