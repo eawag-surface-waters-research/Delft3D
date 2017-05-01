@@ -1888,7 +1888,7 @@ contains
          real(hp),     dimension(15),      intent(in)  :: v     !< Help var. to calculate V0U()
          real(hp),     dimension(25),      intent(in)  :: f     !< Help var. to calculate FR()
          !
-         integer  :: ia1   !< 
+         integer  :: ia1, jawearetolerant = 1  !< 
          integer  :: ia2   !< 
          integer  :: iar   !< 
          integer  :: ie1   !< 
@@ -1903,6 +1903,7 @@ contains
          integer  :: mp1   !< 
          integer  :: ms    !< 
          integer  :: mt    !< 
+         integer  :: ierr  !< error (1) or not (0)
          real(hp) :: dhalf !< Value for 0.5 in SIGN function
          real(hp) :: pix2  !< 
          real(hp) :: s1    !< 
@@ -1913,9 +1914,11 @@ contains
          ! loop over given components
          do ikomp = 1, kcmp
             ! loop over the elements of kompbes
+            ierr = 1
             do j = 1, mxkc
                ! test on name of present component
                if (inaam == knaam(j)) then
+                  ierr = 0
                   ! compute angular velocity
                   mt = jnaam(16*j - 15)
                   ms = jnaam(16*j - 14)
@@ -1963,12 +1966,18 @@ contains
                   endif
                   exit
                endif
-               if (j >= mxkc) then
-                  ierrs = ierrs + 1
-                  call setECMessage("unknown component '"//trim(inaam)//"' ")
-                  exit
-               endif
             enddo
+            if ( ierr.ne.0 ) then
+               ierrs = ierrs + 1
+               call setECMessage("unknown astronomic component '"//trim(inaam)//"' ")        ! this message goes to limbo
+               if (jawearetolerant == 1) then 
+                  call message('unknown component '//trim(inaam), ' amplitude set to 0 ', ' ')  ! so we use this now
+                  fr(1) = 0d0
+               else
+                  call message('unknown component '//trim(inaam), ' ', ' ')  ! so we use this now
+                  stop
+               endif   
+            endif
          enddo
       end subroutine bewvuf
       
