@@ -291,12 +291,12 @@ src/autogen.sh -text
 src/build.cmd -text
 src/build.sh -text
 src/build32.cmd -text
-src/build32vs15if17.cmd -text
+src/build32vs15.cmd -text
 src/build_gnu.sh -text
 src/build_h5.sh -text
 src/build_ubuntu.16.04LT.readme -text
 src/build_ubuntu1604.sh -text
-src/buildvs15if17.cmd -text
+src/buildvs15.cmd -text
 src/clean.cmd -text
 src/clean.sh -text
 src/common.am -text
