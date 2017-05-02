@@ -106,7 +106,7 @@ public :: ionc_read_1d_network_branches_geometry_ugrid
 public :: ionc_create_1d_mesh_ugrid
 public :: ionc_write_1d_mesh_discretisation_points_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
-public :: ionc_get_1d_mesh_discretisation_points_ugrid
+public :: ionc_read_1d_mesh_discretisation_points_ugrid
 
 private
 
@@ -263,7 +263,6 @@ function ionc_open(netCDFFile, mode, ioncid, iconvtype, convversion, chunksize) 
    end if
 
    ierr = add_dataset(ncid, netCDFFile, ioncid)
-
    if (ierr /= ionc_noerr) then
       ierr = IONC_ENOPEN
       goto 999
@@ -956,15 +955,18 @@ end subroutine netcdfError
 !
 ! Network and mesh1d functions
 !
+!> This function creates a 1d mesh accordingly to the new 1d format.
 function ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nBranches, nGeometry) result(ierr)
 
    integer, intent(in)                :: ioncid
    integer, intent(inout)             :: networkid
    character(len=*), intent(in)       :: networkName !< File name for netCDF dataset to be opened.
    integer, intent(in)                :: nNodes, nBranches, nGeometry
-   integer                            :: ierr 
-   
-   !here i need to find where the 1d mesh is
+   integer                            :: ierr, dum
+      
+   ! first add a mesh
+   ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
+   ! add a 1d network
    ierr = ug_create_1d_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), networkName, nNodes, nBranches, nGeometry)
    
 end function ionc_create_1d_network_ugrid
@@ -998,15 +1000,15 @@ function ionc_write_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, t
    
 end function ionc_write_1d_network_branches_ugrid
 
-function ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY, nGeometry) result(ierr)
+function ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY) result(ierr)
 
    integer, intent(in)                :: ioncid   
-   integer, intent(in)                :: networkid, ngeometry 
+   integer, intent(in)                :: networkid 
    double precision, intent(in)       :: geopointsX(:),geopointsY(:)
    integer                            :: ierr
    
    ierr = ug_write_1d_network_branches_geometry(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), geopointsX, &
-       geopointsY, ngeometry)
+       geopointsY)
 
 end function ionc_write_1d_network_branches_geometry_ugrid
 
@@ -1081,12 +1083,13 @@ function  ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopoi
 end function ionc_read_1d_network_branches_geometry_ugrid
 
 
-function ionc_create_1d_mesh_ugrid(ioncid, networkid, nmeshpoints) result(ierr)
+function ionc_create_1d_mesh_ugrid(ioncid, networkid, meshname, nmeshpoints, nmeshedges) result(ierr)
 
-   integer, intent(in)     :: ioncid, networkid, nmeshpoints
-   integer                 :: ierr
+   integer, intent(in)         :: ioncid, networkid, nmeshpoints, nmeshedges
+   character(len=*),intent(in) :: meshname 
+   integer                     :: ierr
      
-   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), nmeshpoints)
+   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), meshname, nmeshpoints, nmeshedges)
   
 end function ionc_create_1d_mesh_ugrid
 
@@ -1094,7 +1097,7 @@ function ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branc
 
   integer, intent(in)         :: ioncid, networkid  
   integer, intent(in)         :: branchidx(:)
-  double precision,intent(in) ::offset(:)
+  double precision,intent(in) :: offset(:)
   integer                     :: ierr
   
   ierr=ug_write_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset)  
@@ -1112,7 +1115,7 @@ function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, n
 end function ionc_get_1d_mesh_discretisation_points_count_ugrid
 
 
-function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
+function ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
 
   integer, intent(in)         :: ioncid, networkid  
   integer, intent(out)        :: branchidx(:)
@@ -1121,7 +1124,7 @@ function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchi
   
   ierr = ug_read_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset)
    
-end function ionc_get_1d_mesh_discretisation_points_ugrid
+end function ionc_read_1d_mesh_discretisation_points_ugrid
 
 
 end module io_netcdf

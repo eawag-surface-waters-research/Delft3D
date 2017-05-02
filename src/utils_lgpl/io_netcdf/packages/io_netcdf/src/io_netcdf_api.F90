@@ -46,7 +46,14 @@
 module io_netcdf_api
 use io_netcdf
 use iso_c_binding
+
 implicit none
+
+type interop_charinfo  
+    sequence
+character(len=30) :: ids
+character(len=80) :: longnames
+end type interop_charinfo
 
 !-------------------------------------------------------------------------------
 contains
@@ -58,7 +65,7 @@ function ionc_create_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, n
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_dll
     character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
     integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
-    integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+    integer(kind=c_int),           intent(out)    :: ioncid   !< inout The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
     integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
     integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
 
@@ -492,48 +499,58 @@ function ionc_create_1d_network_dll(ioncid, networkid, c_networkName, nNodes, nB
    integer                            :: ierr
    character(len=MAXSTRLEN)           :: networkName
 
+   ! Store the name
+   networkName = char_array_to_string(c_networkName, strlen(c_networkName))   
    ierr = ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nBranches, nGeometry)
    
 end function ionc_create_1d_network_dll
 
-function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, c_nodeids, c_nodeLongnames, nNodes) result(ierr) bind(C, name="ionc_write_1d_network_nodes")
+
+function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, nodeinfo, nNodes) result(ierr) bind(C, name="ionc_write_1d_network_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_nodes_dll
    
-   integer(kind=c_int), intent(in)    :: ioncid,networkid, nNodes
-   type(c_ptr),         intent(in)    :: c_nodesX, c_nodesY, c_nodeids, c_nodeLongnames 
-   double precision, pointer          :: nodesX(:), nodesY(:)
-   character(len=MAXSTRLEN),pointer   :: nodeids(:), nodeLongnames(:)
-   integer                            :: ierr
-
+   integer(kind=c_int),     intent(in)    :: ioncid,networkid, nNodes
+   type(c_ptr),             intent(in)    :: c_nodesX, c_nodesY 
+   type(interop_charinfo),  intent(in)    :: nodeinfo(nNodes)
+   double precision, pointer              :: nodesX(:), nodesY(:)
+   integer                                :: ierr, i 
+   character(len=30)                      :: nodeids(nNodes)
+   character(len=80)                      :: nodeLongnames(nNodes)
+   
+   
    call c_f_pointer(c_nodesX, nodesX, (/ nNodes /))
    call c_f_pointer(c_nodesY, nodesY, (/ nNodes /))
-   call c_f_pointer(c_nodeids, nodeids, (/ nNodes /))
-   call c_f_pointer(c_nodeids, nodeLongnames, (/ nNodes /))
+   do i=1,nNodes
+       nodeids(i)       = nodeinfo(i)%ids
+       nodeLongnames(i) = nodeinfo(i)%longnames
+   end do
    
    ierr = ionc_write_1d_network_nodes_ugrid(ioncid, networkId, nodesX, nodesY, nodeids, nodeLongnames)
-   
+      
 end function ionc_write_1d_network_nodes_dll
 
-function ionc_write_1d_network_branches_dll(ioncid,networkid, c_sourcenodeid, c_targetnodeid, c_branchids, c_branchlengths, c_branchlongnames, c_nbranchgeometrypoints, nBranches) result(ierr) bind(C, name="ionc_write_1d_network_branches")
+function ionc_write_1d_network_branches_dll(ioncid,networkid, c_sourcenodeid, c_targetnodeid, branchinfo, c_branchlengths, c_nbranchgeometrypoints, nBranches) result(ierr) bind(C, name="ionc_write_1d_network_branches")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_branches_dll
   
   integer(kind=c_int), intent(in)    :: ioncid, networkid 
-  type(c_ptr),intent(in)             :: c_sourcenodeid, c_targetnodeid,c_nbranchgeometrypoints
-  type(c_ptr),intent(in)             :: c_branchids,c_branchlongnames,c_branchlengths
-
+  type(c_ptr),intent(in)             :: c_sourcenodeid, c_targetnodeid,c_nbranchgeometrypoints,c_branchlengths
+  type(interop_charinfo),  intent(in):: branchinfo(nBranches)
   integer(kind=c_int), intent(in)    :: nBranches
   integer, pointer                   :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:)
-  character(len=MAXSTRLEN),pointer   :: branchids(:),branchlongnames(:)
   double precision, pointer          :: branchlengths(:)
-  integer ::ierr
+  character(len=30)                  :: branchids(nBranches)
+  character(len=80)                  :: branchlongnames(nBranches)
+  integer ::ierr,i
   
   call c_f_pointer(c_sourcenodeid, sourcenodeid, (/ nBranches /))
   call c_f_pointer(c_targetnodeid, targetnodeid, (/ nBranches /))
   call c_f_pointer(c_nbranchgeometrypoints, nbranchgeometrypoints, (/ nBranches /))
   call c_f_pointer(c_branchlengths, branchlengths, (/ nBranches /))
-    
-  call c_f_pointer(c_branchids, branchids, (/ nBranches /))
-  call c_f_pointer(c_branchlongnames, branchlongnames, (/ nBranches /))
+
+  do i=1,nBranches
+       branchids(i)       = branchinfo(i)%ids
+       branchlongnames(i) = branchinfo(i)%longnames
+   end do
 
   ierr = ionc_write_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchids, branchlengths, branchlongnames, nbranchgeometrypoints, nBranches)
   
@@ -551,7 +568,7 @@ function ionc_write_1d_network_branches_geometry_dll(ioncid, networkid, c_geopoi
   call c_f_pointer(c_geopointsX, geopointsX, (/ nGeometry /))
   call c_f_pointer(c_geopointsY, geopointsY, (/ nGeometry /))
     
-  ierr = ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY, nGeometry)
+  ierr = ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY)
   
 end function ionc_write_1d_network_branches_geometry_dll
 
@@ -589,81 +606,94 @@ function ionc_get_1d_network_branches_geometry_coordinate_count_dll(ioncid, netw
   
 end function ionc_get_1d_network_branches_geometry_coordinate_count_dll
     
-function ionc_read_1d_network_nodes_dll(ioncid, networkid, c_nodesX, c_nodesY, c_nodeids, c_nodelongnames, nNodes) result(ierr) bind(C, name="ionc_read_1d_network_nodes")
+function ionc_read_1d_network_nodes_dll(ioncid, networkid, c_nodesX, c_nodesY, nodeinfo, nNodes) result(ierr) bind(C, name="ionc_read_1d_network_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_network_nodes_dll
   
   integer(kind=c_int), intent(in)    :: ioncid, networkid, nNodes !< The dataset where i do want to create the dataset.
-  type(c_ptr),         intent(out)   :: c_nodesX, c_nodesY, c_nodeids, c_nodelongnames
+  type(interop_charinfo),  intent(inout):: nodeinfo(nNodes)
+  type(c_ptr),         intent(inout)    :: c_nodesX, c_nodesY
   double precision,    pointer       :: nodesX(:),  nodesY(:)      
-  character(len=MAXSTRLEN),pointer   :: nodeids(:), nodelongnames(:)
-  integer                            :: ierr
+  character(len=30)                  :: nodeids(nNodes)
+  character(len=80)                  :: nodelongnames(nNodes)
+  integer                            :: ierr,i
   
   call c_f_pointer(c_nodesX, nodesX, (/ nNodes /))
   call c_f_pointer(c_nodesY, nodesY, (/ nNodes /))
-  call c_f_pointer(c_nodesX, nodeids, (/ nNodes /))
-  call c_f_pointer(c_nodesY, nodelongnames, (/ nNodes /))
   
   ierr = ionc_read_1d_network_nodes_ugrid(ioncid, networkid, nodesX, nodesY, nodeids, nodelongnames)
   
+  do i=1,nNodes
+       nodeinfo(i)%ids = nodeids(i)        
+       nodeinfo(i)%longnames = nodelongnames(i)
+  end do
+  
 end function ionc_read_1d_network_nodes_dll
     
-function ionc_read_1d_network_branches_dll(ioncid, networkid, c_sourcenodeid, c_targetnodeid, c_branchids, c_branchlengths, c_branchlongnames, c_nbranchgeometrypoints)  result(ierr) bind(C, name="ionc_read_1d_network_branches")
+function ionc_read_1d_network_branches_dll(ioncid, networkid, c_sourcenodeid, c_targetnodeid, c_branchlengths, branchinfo, c_nbranchgeometrypoints, nBranches)  result(ierr) bind(C, name="ionc_read_1d_network_branches")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_network_branches_dll
   
-  integer(kind=c_int), intent(in)  :: ioncid, networkid  !< The dataset where i do want to create the dataset.
-  
-  type(c_ptr),intent(out)         :: c_sourcenodeid, c_targetnodeid, c_nbranchgeometrypoints
-  type(c_ptr),intent(out)         :: c_branchids, c_branchlongnames
-  type(c_ptr),intent(out)         :: c_branchlengths 
-  integer,pointer                 :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:)
-  character(len=MAXSTRLEN),pointer:: branchids(:),branchlongnames(:)
-  double precision,pointer        :: branchlengths(:)
-  integer                         :: ierr, nBranches
+  integer(kind=c_int), intent(in)       :: ioncid, networkid  !< The dataset where i do want to create the dataset.
+  type(c_ptr),intent(inout)             :: c_sourcenodeid, c_targetnodeid, c_nbranchgeometrypoints,c_branchlengths 
+  type(interop_charinfo),  intent(inout):: branchinfo(nBranches)
+  integer,pointer                       :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
+  character(len=30)                     :: branchids(nBranches)
+  character(len=80)                     :: branchlongnames(nBranches)
+  double precision ,pointer             ::branchlengths(:)
+  integer                               :: ierr, i, nBranches
   
   call c_f_pointer(c_sourcenodeid, sourcenodeid, (/ nBranches /))
   call c_f_pointer(c_targetnodeid, targetnodeid, (/ nBranches /))
   call c_f_pointer(c_nbranchgeometrypoints, nbranchgeometrypoints, (/ nBranches /))
-  call c_f_pointer(c_branchids, branchids, (/ nBranches /))
-  call c_f_pointer(c_branchlongnames, branchlongnames, (/ nBranches /))
   call c_f_pointer(c_branchlengths, branchlengths, (/ nBranches /))
   
   ierr = ionc_read_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchids, branchlengths, branchlongnames, nbranchgeometrypoints)
 
+  do i=1,nBranches
+    branchinfo(i)%ids = branchids(i)        
+    branchinfo(i)%longnames = branchlongnames(i)
+  end do
+    
 end function ionc_read_1d_network_branches_dll
 
-function ionc_read_1d_network_branches_geometry_dll(ioncid, networkid, c_geopointsX, c_geopointsY, nNodes) result(ierr) bind(C, name="ionc_read_1d_network_branches_geometry")
+function ionc_read_1d_network_branches_geometry_dll(ioncid, networkid, c_geopointsX, c_geopointsY, ngeometrypoints) result(ierr) bind(C, name="ionc_read_1d_network_branches_geometry")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_network_branches_geometry_dll
   integer(kind=c_int), intent(in)    :: ioncid, networkid  
-  type(c_ptr), intent(out)           :: c_geopointsX, c_geopointsY
+  type(c_ptr), intent(inout)         :: c_geopointsX, c_geopointsY
   double precision,pointer           :: geopointsX(:),geopointsY(:)
-  integer                            :: ierr, nNodes
+  integer                            :: ierr, ngeometrypoints
 
-  call c_f_pointer(c_geopointsX, geopointsX, (/ nNodes /))
-  call c_f_pointer(c_geopointsY, geopointsY, (/ nNodes /))
+  call c_f_pointer(c_geopointsX, geopointsX, (/ ngeometrypoints /))
+  call c_f_pointer(c_geopointsY, geopointsY, (/ ngeometrypoints /))
   
   ierr = ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY)
 
 end function ionc_read_1d_network_branches_geometry_dll
 
-function ionc_create_1d_mesh_dll(ioncid, networkid, nmeshpoints) result(ierr) bind(C, name="ionc_create_1d_mesh")
+function ionc_create_1d_mesh_dll(ioncid, networkid, c_meshname, nmeshpoints, nmeshedges) result(ierr) bind(C, name="ionc_create_1d_mesh")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_1d_mesh_dll
-  integer(kind=c_int), intent(in)     :: ioncid, networkid,nmeshpoints 
+  integer(kind=c_int)   , intent(in) :: ioncid, networkid,nmeshpoints, nmeshedges
+  character(kind=c_char), intent(in) :: c_meshname(MAXSTRLEN)
   integer ::ierr
-  ierr = ionc_create_1d_mesh_ugrid(ioncid, networkid, nmeshpoints) 
+  character(len=MAXSTRLEN)           :: meshname
+  
+  ! Store the name
+  meshname = char_array_to_string(c_meshName, strlen(c_meshname))  
+   
+  ierr = ionc_create_1d_mesh_ugrid(ioncid, networkid, meshname, nmeshpoints, nmeshedges) 
   
 end function ionc_create_1d_mesh_dll
 
 
-function ionc_write_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branchidx, c_offset, nBranches) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
+function ionc_write_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branchidx, c_offset, nmeshpoints) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_mesh_discretisation_points_dll
-  integer(kind=c_int), intent(in)     :: ioncid, networkid, nBranches  
+  integer(kind=c_int), intent(in)     :: ioncid, networkid, nmeshpoints  
   type(c_ptr), intent(in)             :: c_branchidx,c_offset
   integer,pointer                     :: branchidx(:)
   double precision,pointer            :: offset(:)
   integer ::ierr
   
-  call c_f_pointer(c_branchidx, branchidx, (/ nBranches /))
-  call c_f_pointer(c_offset, offset, (/ nBranches /))
+  call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
+  call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
   
   ierr = ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) 
   
@@ -672,8 +702,8 @@ end function ionc_write_1d_mesh_discretisation_points_dll
 
 function ionc_get_1d_mesh_discretisation_points_count_dll(ioncid, networkid, nmeshpoints) result(ierr) bind(C, name="ionc_get_1d_mesh_discretisation_points_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_discretisation_points_count_dll
-  integer(kind=c_int), intent(in)  :: ioncid, networkid
-  integer(kind=c_int), intent(out) :: nmeshpoints 
+  integer(kind=c_int), intent(in)    :: ioncid, networkid
+  integer(kind=c_int), intent(inout) :: nmeshpoints 
   integer ::ierr
   
   ierr = ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, nmeshpoints)   
@@ -681,18 +711,18 @@ function ionc_get_1d_mesh_discretisation_points_count_dll(ioncid, networkid, nme
 end function ionc_get_1d_mesh_discretisation_points_count_dll
 
 
-function ionc_read_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branchidx, c_offset,nBranches) result(ierr) bind(C, name="ionc_read_1d_mesh_discretisation_points")
+function ionc_read_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branchidx, c_offset,nmeshpoints) result(ierr) bind(C, name="ionc_read_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_mesh_discretisation_points_dll
-  integer(kind=c_int), intent(in) :: ioncid, networkid, nBranches 
-  type(c_ptr), intent(out)        :: c_branchidx, c_offset
-  double precision,pointer        :: offset(:)
-  integer,pointer                 :: branchidx(:)
-  integer ::ierr
+  integer(kind=c_int), intent(in)   :: ioncid, networkid, nmeshpoints 
+  type(c_ptr), intent(inout)        :: c_branchidx, c_offset
+  double precision,pointer          :: offset(:)
+  integer,pointer                   :: branchidx(:)
+  integer                           :: ierr
   
-  call c_f_pointer(c_branchidx, offset, (/ nBranches /))
-  call c_f_pointer(c_offset, branchidx, (/ nBranches /))
+  call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
+  call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
   
-  ierr = ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset)
+  ierr = ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset)
   
 end function ionc_read_1d_mesh_discretisation_points_dll
 
