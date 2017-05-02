@@ -1888,7 +1888,7 @@ contains
          real(hp),     dimension(15),      intent(in)  :: v     !< Help var. to calculate V0U()
          real(hp),     dimension(25),      intent(in)  :: f     !< Help var. to calculate FR()
          !
-         integer  :: ia1, jawearetolerant = 1  !< 
+         integer  :: ia1   !< 
          integer  :: ia2   !< 
          integer  :: iar   !< 
          integer  :: ie1   !< 
@@ -1967,16 +1967,11 @@ contains
                   exit
                endif
             enddo
-            if ( ierr.ne.0 ) then
+            if ( ierr /= 0 ) then
                ierrs = ierrs + 1
                call setECMessage("unknown astronomic component '"//trim(inaam)//"' ")        ! this message goes to limbo
-               if (jawearetolerant == 1) then 
                   call message('unknown component '//trim(inaam), ' amplitude set to 0 ', ' ')  ! so we use this now
                   fr(1) = 0d0
-               else
-                  call message('unknown component '//trim(inaam), ' ', ' ')  ! so we use this now
-                  stop
-               endif   
             endif
          enddo
       end subroutine bewvuf
