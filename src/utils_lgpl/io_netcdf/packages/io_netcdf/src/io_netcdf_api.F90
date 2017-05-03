@@ -49,10 +49,10 @@ use iso_c_binding
 
 implicit none
 
-type interop_charinfo  
-    sequence
-character(len=30) :: ids
-character(len=80) :: longnames
+type, BIND(C) :: interop_charinfo  
+!   sequence
+    character(len=30) :: ids
+    character(len=80) :: longnames
 end type interop_charinfo
 
 !-------------------------------------------------------------------------------
