@@ -89,7 +89,7 @@
 !     Assert that both Veloc1 and Veloc2 are spatial
 !
       if (increm(7) /= increm(8)) then
-         call throwexception()
+         stop
       endif
 !
       allocate(a_nx_nx(noseg), a_nx_ny(noseg), a_ny_ny(noseg), f_nx(noseg), f_ny(noseg), cuma(noseg))

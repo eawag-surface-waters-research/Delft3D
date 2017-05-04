@@ -39,7 +39,7 @@
       
       if (increm>0) then
          write(*,'(A,A)') itemname,' must be a constant, but it isn''t. Program stops.'
-         call throwexception()
+         stop
       endif
 
       end subroutine failconst
