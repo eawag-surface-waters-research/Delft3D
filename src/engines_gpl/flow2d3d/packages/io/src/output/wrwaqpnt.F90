@@ -273,9 +273,9 @@
 
 !            write the aggregated lgrid tabel with zero's and bounds
 #ifdef HAVE_FC_FORM_BINARY
-      open  ( lunout , file=trim(filnam)//'lga', form='binary' )
+      open  ( newunit = lunout , file=trim(filnam)//'lga', form='binary' )
 #else
-      open  ( lunout , file=trim(filnam)//'lga', form = 'unformatted', access='stream')
+      open  ( newunit = lunout , file=trim(filnam)//'lga', form = 'unformatted', access='stream')
 #endif
       write ( lunout ) nmax, mmax, nosegl, ilaggr(kmax), noq1, noq2, noq3
       write ( lunout ) iapnt(1:mnmax)
@@ -283,7 +283,7 @@
 
 !            write the attribute file
 
-      open  ( lunout, file=trim(filnam)//'atr', recl=max(min(nmax*2+8,1008),202) )
+      open  ( newunit = lunout, file=trim(filnam)//'atr', recl=max(min(nmax*2+8,1008),202) )
       write ( lunout , '(a)' )  '         ; DELWAQ_COMPLETE_ATTRIBUTES'
       write ( lunout , '(a)' )  '    2    ; two blocks with input     '
       write ( lunout , '(a)' )  '    1    ; number of attributes, they are :'
