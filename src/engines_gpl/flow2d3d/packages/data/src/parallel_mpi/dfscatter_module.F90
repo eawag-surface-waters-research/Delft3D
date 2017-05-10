@@ -1257,7 +1257,6 @@ integer                                      :: n
 !
 !! executable statements -------------------------------------------------------
 !
-ouparr = -999
 do n = 1, nmaxgl
    do m = 1, mmaxgl
       ouparr(n+noff,m+moff) = inparr(n,m)
@@ -1300,7 +1299,6 @@ integer                                      :: kl
 !
 kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
-ouparr = -999
 do k = kf, kl
    do n = 1, nmaxgl
       do m = 1, mmaxgl
@@ -1339,7 +1337,6 @@ integer                                      :: n
 !
 !! executable statements -------------------------------------------------------
 !
-ouparr = -999.0_sp
 do n = 1, nmaxgl
    do m = 1, mmaxgl
       ouparr(n+noff,m+moff) = inparr(n,m)
@@ -1377,7 +1374,6 @@ integer                                      :: n
 !
 !! executable statements -------------------------------------------------------
 !
-ouparr = -999.0_sp
 do n = 1, nmaxgl
    do m = 1, mmaxgl
       ouparr(n+noff,m+moff) = real(inparr(n,m),sp)
@@ -1415,7 +1411,6 @@ integer                                      :: n
 !
 !! executable statements -------------------------------------------------------
 !
-ouparr = -999.0_hp
 do n = 1, nmaxgl
    do m = 1, mmaxgl
       ouparr(n+noff,m+moff) = inparr(n,m)
@@ -1458,7 +1453,6 @@ integer                                      :: kl
 !
 kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
-ouparr = -999.0_sp
 do k = kf, kl
    do n = 1, nmaxgl
       do m = 1, mmaxgl
@@ -1503,7 +1497,6 @@ integer                                      :: kl
 !
 kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
-ouparr = -999.0_sp
 do k = kf, kl
    do n = 1, nmaxgl
       do m = 1, mmaxgl
@@ -1548,7 +1541,6 @@ integer                                      :: kl
 !
 kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
-ouparr = -999.0_hp
 do k = kf, kl
    do n = 1, nmaxgl
       do m = 1, mmaxgl
@@ -1598,7 +1590,7 @@ kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
 lf = lbound(ouparr,4)
 ll = ubound(ouparr,4)
-ouparr = -999.0_sp
+
 do l = lf, ll
    do k = kf, kl
       do n = 1, nmaxgl
@@ -1650,7 +1642,7 @@ kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
 lf = lbound(ouparr,4)
 ll = ubound(ouparr,4)
-ouparr = -999.0_sp
+
 do l = lf, ll
    do k = kf, kl
       do n = 1, nmaxgl
@@ -1702,7 +1694,7 @@ kf = lbound(ouparr,3)
 kl = ubound(ouparr,3)
 lf = lbound(ouparr,4)
 ll = ubound(ouparr,4)
-ouparr = -999.0_hp
+
 do l = lf, ll
    do k = kf, kl
       do n = 1, nmaxgl
