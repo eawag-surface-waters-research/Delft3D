@@ -28,8 +28,8 @@ function print_usage_info {
     echo "       dimr configuration filename, default dimr_config.xml"
     echo "    --D3D_HOME <path>"
     echo "       path to binaries and scripts"
-    echo "    --NSLOTS <N>"
-    echo "       number of slots=NHOSTS*CoresPerNode, default 1 (not parallel)"
+    echo "    --NNODES <N>"
+    echo "       number of slots=NNODES*CoresPerNode, default 1 (not parallel)"
     exit 1
 }
 
@@ -46,7 +46,8 @@ debuglevel=0
 configfile=dimr_config.xml
 D3D_HOME=
 runscript_extraopts=
-NHOSTS=1
+NNODES=1
+ulimit -s unlimited
 
 
 #
@@ -77,6 +78,10 @@ case $key in
     D3D_HOME="$1"
     shift
     ;;
+	--NNODES)
+    NNODES="$1"
+    shift
+    ;;
     --)
     echo "-- sign detected, remained options are going to be passed to dimr"
     runscript_extraopts="$runscript_extraopts $*"
@@ -96,15 +101,10 @@ if [ ! -f $configfile ]; then
     print_usage_info
 fi
 
-
-
 export OMP_NUM_THREADS=1
-export NSLOTS=`expr $NHOSTS \* $corespernode` 
-
+export NSLOTS=`expr $NNODES \* $corespernode` 
 
 workdir=`pwd`
-
-
 
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
@@ -134,6 +134,7 @@ dflowfmexedir=$D3D_HOME/$ARCH/dflowfm/lib
 dimrexedir=$D3D_HOME/$ARCH/dimr/bin
 esmfexedir=$D3D_HOME/$ARCH/esmf/bin
 esmfbatdir=$D3D_HOME/$ARCH/esmf/scripts
+flow1dexedir=$D3D_HOME/$ARCH/flow1d/bin
 flow1d2dexedir=$D3D_HOME/$ARCH/flow1d2d/bin
 rrexedir=$D3D_HOME/$ARCH/rr/bin
 rtcexedir=$D3D_HOME/$ARCH/rtctools/bin
@@ -148,18 +149,29 @@ waveexedir=$D3D_HOME/$ARCH/wave/bin
     #
 
     # Run
-export LD_LIBRARY_PATH=$dimrexedir:$dflowfmexedir:$flow1d2dexedir:$delwaqexedir:$rtcexedir:$rrexedir:$waveexedir:$swanbatdir:$swanexedir:$esmfbatdir:$esmfexedir:$shareddir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$shareddir:$dimrexedir:$dflowfmexedir:$flow1dexedir:$flow1d2dexedir:$delwaqexedir:$rtcexedir:$rrexedir:$waveexedir:$swanbatdir:$swanexedir:$esmfbatdir:$esmfexedir
 export PATH=$swanbatdir:$esmfbatdir:$PATH
 export LD_PRELOAD=$shareddir/libmkl_core.so
 
-    echo "=== LD_LIBRARY_PATH ======================================"
-    echo $LD_LIBRARY_PATH
-    echo "=============================================="
-
-    echo "=== ldd ======================================"
-    ldd $rtcexedir/libRTCTools_BMI.so
-    echo "=============================================="
-
+echo === LD_LIBRARY_PATH =========================================
+echo $LD_LIBRARY_PATH
+echo =========================================================
+echo " "
+echo === ldd DFlowFM =========================================
+ldd $dflowfmexedir/libdflowfm.so
+echo =========================================================
+echo " "
+echo ===  DFlowFM -v =========================================
+$dflowfmexedir/../bin/dflowfm -v
+echo =========================================================
+echo " "
+echo ===  ldd Dimr =========================================
+ldd $dimrexedir/dimr.exe
+echo ========================================================
+echo " "
+echo ===  ldd libDimr =======================================
+ldd $dimrexedir/libdimr.so
+echo =========================================================
 
 if [ $NSLOTS -eq 1 ]; then
     echo "executing:"
@@ -183,7 +195,7 @@ else
     cat $(pwd)/machinefile
     echo ----------------------------------------------------------------------
 
-    #if [ $NHOSTS -eq 1 ]; then
+    #if [ $NNODES -eq 1 ]; then
     #    echo "Starting mpd..."
     #    mpd &
     #fi
@@ -193,9 +205,16 @@ else
        node_number=`expr $node_number - 1`
        ln -s /dev/null log$node_number.irlog
     done
-    
+
     echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel"
-    /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel
+          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel
+# ok       /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dflowfmexedir/../bin/dflowfm -v
+# ok       /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS ldd $dflowfmexedir/libdflowfm.so
+# ok1: cd dflowfm
+# ok2:    /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dflowfmexedir/../bin/dflowfm --autostartstop HW1995.mdu
+#          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe -?
+
+
     rm -f log*.irlog
 fi
 

@@ -131,7 +131,7 @@ scriptdir=`dirname $scriptdirname`
 D3D_HOME=$scriptdir/../..
 RUNSCRIPT=$scriptdir/run_dimr.sh
 
-runscript_opts="-m ${configfile} -d ${debuglevel} -c $corespernode --D3D_HOME ${D3D_HOME}"
+runscript_opts="-m ${configfile} -d ${debuglevel} -c $corespernode --NNODES $numnode --D3D_HOME ${D3D_HOME}"
 runscript_opts="$runscript_opts $runscript_extraopts"
 if [[ $do_mpi -eq 0 ]]; then
     echo "qsub -q $queue -N ${JOBNAME} ${RUNSCRIPT} ${runscript_opts}"
