@@ -208,11 +208,6 @@ else
 
     echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel"
           /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel
-# ok       /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dflowfmexedir/../bin/dflowfm -v
-# ok       /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS ldd $dflowfmexedir/libdflowfm.so
-# ok1: cd dflowfm
-# ok2:    /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dflowfmexedir/../bin/dflowfm --autostartstop HW1995.mdu
-#          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe -?
 
 
     rm -f log*.irlog
