@@ -178,11 +178,11 @@ struct dimr_component {
     BMI_GETCURRENTTIME dllGetCurrentTime; // entry point in dll
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
-    BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll
+	BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll
     int                result;            // return value when calling an entry point in dll
-    keyValueLL      *   settings;          // list of settings
-    keyValueLL      *   parameters;          // list of parameters
-    int                    dllSetKeyVals(keyValueLL * kv);   // pass parameters/settings to the component
+	keyValueLL      *  settings;	      // list of settings
+	keyValueLL      *  parameters;	      // list of parameters
+	int                dllSetKeyVals(keyValueLL * kv);   // pass parameters/settings to the component
     Clock::Timestamp  timerStart;
     Clock::Timestamp  timerSum;
 };
@@ -260,42 +260,41 @@ class Dimr {
     public:
         Dimr (void);
         ~Dimr (void);
-        void      scanConfigFile(void);
-        void      connectLibs(void);
+        void           scanConfigFile(void);
+        void           connectLibs(void);
 
-        void      printComponentVersionStrings(unsigned int);
+		void           printComponentVersionStrings (unsigned int);
 
-        void      freeLibs(void);
-        void      processWaitFile(void);
-        void      runControlBlock  (dimr_control_block *, double, int);
-        void      runParallelInit  (dimr_control_block *);
-        void      runParallelFinish(dimr_control_block *);
-        void      timersInit(void);
-        void      timerStart(dimr_component *);
-        void      timerEnd  (dimr_component *);
-        void      timersFinish(void);
-        void      receive   (const char * name, int compType, BMI_SETVAR dllSetVar, BMI_GETVAR dllGetVar, double * targetVarPtr, int * processes, int nProc, int targetProcess, const void * transferValuePtr);
-        void      getAddress(const char * name, int compType, BMI_GETVAR dllGetVar, double ** sourceVarPtr);
-        double *  setValue  (const char * name, int compType, BMI_GETVAR dllGetVar, double ** sourceVarPtr, int nProc, int* processes, int sourceProcess);
+        void           freeLibs(void);
+        void           processWaitFile(void);
+        void           runControlBlock  (dimr_control_block *, double, int);
+        void           runParallelInit  (dimr_control_block *);
+        void           runParallelFinish(dimr_control_block *);
+        void           timersInit(void);
+        void           timerStart(dimr_component *);
+        void           timerEnd(dimr_component *);
+        void           timersFinish(void);
+        double *       send(const char *, int, BMI_GETVAR, double **, int *, int, int, bool setValue = true);
+        void           receive(const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
 
     public:
-        bool                 ready;          // true means constructor succeeded and DH ready to run
-        char *               exePath;        // name of running dimr executable (argv[0])
-        char *               exeName;        // short name of executable
-        Clock *              clock;          // timing facility
-        Log *                log;            // logging facility
-        XmlTree *            config;         // top of entire XML configuration tree
-        char *               mainArgs;       // reassembled command-line arguments (argv[1...])
-        char *               slaveArg;       // command-line argument for slave mode
+        bool               ready;          // true means constructor succeeded and DH ready to run
+        char *             exePath;        // name of running dimr executable (argv[0])
+        char *             exeName;        // short name of executable
+        Clock *            clock;          // timing facility
+        Log *              log;            // logging facility
+        XmlTree *          config;         // top of entire XML configuration tree
+        char *             mainArgs;       // reassembled command-line arguments (argv[1...])
+        char *             slaveArg;       // command-line argument for slave mode
         dimr_control_block * control;        // structure containing all information from the control block in the config.xml file
-        dimr_components      componentsList; // Array of all components
-        dimr_couplers        couplersList;   // Array of all couplers
-        bool                 use_mpi;        // Whether MPI-mode is active for this run.
-        int                  my_rank;        // Rank# of current process
-        int                  numranks;       // Total nr of MPI processes for dimr main.
-        unsigned int         logMask;
-        const char *         configfile;     // name of configuration file
-        bool                 done;           // set to true when it's time to stop
+        dimr_components    componentsList; // Array of all components
+        dimr_couplers      couplersList;   // Array of all couplers
+        bool               use_mpi;        // Whether MPI-mode is active for this run.
+        int                my_rank;        // Rank# of current process
+        int                numranks;       // Total nr of MPI processes for dimr main.
+        unsigned int       logMask;
+        const char *       configfile;     // name of configuration file
+        bool               done;           // set to true when it's time to stop
 
 
         enum {
@@ -305,27 +304,27 @@ class Dimr {
         // String constants; initialized below, outside class definition
 
     private:
-        double           transferValue;
+        double         transferValue;
 
         // Additional destructor routine
-        void             deleteControlBlock(dimr_control_block);
+        void           deleteControlBlock(dimr_control_block);
 
         // Additional run routines
-        void             runStartBlock    (dimr_control_block *, double, int);
-        void             runParallelUpdate(dimr_control_block *, double);
+        void           runStartBlock    (dimr_control_block *, double, int);
+        void           runParallelUpdate(dimr_control_block *, double);
 
 
-        void             scanControl      (XmlTree *, dimr_control_block *);
+        void           scanControl      (XmlTree *, dimr_control_block *);
 
-        void             scanUnits        (XmlTree *);
-        void             scanComponent    (XmlTree *, dimr_component *);
-        void             scanCoupler      (XmlTree *, dimr_coupler *);
+        void           scanUnits        (XmlTree *);
+        void           scanComponent    (XmlTree *, dimr_component *);
+        void           scanCoupler      (XmlTree *, dimr_coupler *);
 
         dimr_component * getComponent   (const char *);
 
         dimr_coupler *   getCoupler     (const char *);
 
-        void             char_to_ints     (char *, int **, int *);
+        void           char_to_ints     (char *, int **, int *);
     };
 
 

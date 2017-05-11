@@ -310,21 +310,14 @@ DllExport void get_var (const char * key, void ** ref) {
     if (compPtr == NULL) {
         throw new Exception(true, "dimr::get_var: Unrecognized component \"%s\". Expecting \"componentName/parameterName\"\n", componentName);
     }
-
-	// Get the pointer to the variable being asked 
-	thisDimr->getAddress(sourceName, 
-		compPtr->type, 
-		compPtr->dllGetVar,
-		&sourceVarPtr);
-	// Assign *ref to the variable address
-	*ref = thisDimr->setValue(sourceName,
-		compPtr->type, 
-		compPtr->dllGetVar, 
-		&sourceVarPtr, 
-		compPtr->numProcesses,
-		compPtr->processes, 
-		sourceProcess);
-
+    // Get the pointer to the variable being asked for and put it in argument "ref"
+    *ref = thisDimr->send (sourceName, 
+                           compPtr->type,
+                           compPtr->dllGetVar, 
+                           &sourceVarPtr,
+                           compPtr->processes,
+                           compPtr->numProcesses,
+                           sourceProcess);
     delete[] componentName;
 }
 
@@ -876,21 +869,14 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                 // transferring data, possibly inbetween different partitions
                                 // TODO: This does not work for arrays (yet), only scalar double
                                 //
-								// get the address
-								thisDimr->getAddress(thisCoupler->items[k].sourceName,
-									thisCoupler->sourceComponent->type,
-									thisCoupler->sourceComponent->dllGetVar,
-									&(thisCoupler->items[k].sourceVarPtr));
-								// set the value retrived from getAddress and return a pointer to the value set in this class
-								// actually we do not need to do return it 
-								transferValuePtr = thisDimr->setValue(thisCoupler->items[k].sourceName,
-									thisCoupler->sourceComponent->type,
-									thisCoupler->sourceComponent->dllGetVar,
-									&(thisCoupler->items[k].sourceVarPtr),
-									thisCoupler->sourceComponent->numProcesses,
-									thisCoupler->sourceComponent->processes,
-									thisCoupler->items[k].sourceProcess);
-
+                                // Getting data:
+                                transferValuePtr = this->send (thisCoupler->items[k].sourceName, 
+                                                         thisCoupler->sourceComponent->type,
+                                                         thisCoupler->sourceComponent->dllGetVar, 
+                                                         &(thisCoupler->items[k].sourceVarPtr),
+                                                         thisCoupler->sourceComponent->processes,
+                                                         thisCoupler->sourceComponent->numProcesses,
+                                                         thisCoupler->items[k].sourceProcess);
                                 // Optional TODO: assuming one source(partition):
                                 //    if there is only one target (partition), and all partitions can act as source partition:
                                 //        choose the target partition to act as source partition
@@ -921,100 +907,80 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
     }
 }
 
-//------------------------------------------------------------------------------
-// This function gets the address from the components. 
-// Does not do any transfer of the values stored in the addresses. 
 
-void Dimr::getAddress(
-	const char * name,
-	int          compType,
-	BMI_GETVAR   dllGetVar,
-	double    ** sourceVarPtr)
-{
-	log->Write(Log::DETAIL, my_rank, "Send(%s)", name);
-	
-	if (dllGetVar == NULL) 
-	{
-		throw new Exception(true, "ABORT: get_var function not defined while processing %s", name);
-	}
-
-	if (compType == COMP_TYPE_RTC || compType == COMP_TYPE_RR || compType == COMP_TYPE_FLOW1D || compType == COMP_TYPE_FLOW1D2D
-		|| *sourceVarPtr == NULL)
-	{
-		// These components only returns a new pointer to a copy of the double value, so call it each time.
-		// sourceVarPtr=NULL: getVar not yet called for this parameter, probably because "send" is being called
-		//                    via the toplevel "get_var"
-		//we get the adress were to set the value
-		(dllGetVar)(name, (void**)(sourceVarPtr));
-		//we need to set the value so 
-	}
-	else if (compType == COMP_TYPE_WANDA)
-	{
-		// Wanda does not use pointers to internal structures:
-		// - Use the DIMR-transfer array
-		// - Note the missing & in the dllGetVar call, when comparing with the dllGetVar call above
-		*sourceVarPtr = &transferValue;		
-	} 
-	else
-	{
-		// Other components already have direct pointer access to the actual variable.
-	}
-}
 
 //------------------------------------------------------------------------------
-// This function sets the value in the transfer array. In parallel runs the transfer array is also broadcasted. 
-// The first value of the transfer array is copied in the class member transferValue. 
+double * Dimr::send (const char * name, 
+                     int          compType, 
+                     BMI_GETVAR   dllGetVar, 
+                     double    ** sourceVarPtr,    // Output parameter! Needed when doing a dllSetVar via "get_var, var=value". See "send" call in Dimr::receive
+                     int        * processes,
+                     int          nProc,
+                     int          sourceProcess,
+					 bool         setValue) {
+    // Array "transfer" is used to collect a scalar double from all partitions
+    // For now: The resulting scalar double is stored in the class parameter "transferValeu"
+    // TODO: Point to variable in related kernel? How when running in parallel?
+    double * transfer = (double *)malloc(nProc * sizeof(double));
+    if(setValue)
+    {
+       this->transferValue = -999.0;
+    }
+    //
+    // put data to be transferred from this partitions source location into the transfer array
+    for (int m = 0 ; m < nProc; m++) {
+        if (my_rank == processes[m]) {
+            this->log->Write (Log::DETAIL, my_rank, "Send(%s)", name);
+			if (    compType == COMP_TYPE_RTC
+				|| compType == COMP_TYPE_RR
+				|| compType == COMP_TYPE_FLOW1D
+				|| compType == COMP_TYPE_FLOW1D2D
+                || *sourceVarPtr == NULL          ) {
+                // These components only returns a new pointer to a copy of the double value, so call it each time.
+                // sourceVarPtr=NULL: getVar not yet called for this parameter, probably because "send" is being called
+                //                    via the toplevel "get_var"
+                if (dllGetVar == NULL) {
+                    throw new Exception (true, "ABORT: get_var function not defined while processing %s", name);
+                }
+                (dllGetVar) (name, (void**)(sourceVarPtr));
+            } else if (compType == COMP_TYPE_WANDA) {
+                if (dllGetVar == NULL) {
+                    throw new Exception (true, "ABORT: get_var function not defined while processing %s", name);
+                }
+                // Wanda does not use pointers to internal structures:
+                // - Use the DIMR-transfer array
+                // - Note the missing & in the dllGetVar call, when comparing with the dllGetVar call above
+                *sourceVarPtr = transfer;
+                (dllGetVar) (name, (void**)(*sourceVarPtr));
+            } else {
+                // Other components already have direct pointer access to the actual variable.
+            }
+            // The sourceVarPtr may be NULL for my_rank
+            // Wanda: the value is already in the transfer array
+            if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) {
+                transfer[m] = *(*sourceVarPtr);
+            }
+        } else {
+            // source provider component not available on this rank.
+            // Define a missing value that's useful while debugging
+            transfer[m] = -999.0 -1000.0*my_rank;
+        }
+    }
 
-double * Dimr::setValue(
-	const char * name,
-	int compType,
-	BMI_GETVAR dllGetVar,
-	double ** sourceVarPtr,
-	int nProc,
-	int* processes,
-	int sourceProcess)
-{
-
-	if (compType == COMP_TYPE_WANDA)
-	{
-		// Wanda does not use pointers to internal structures:
-		// - Use the DIMR-transfer array
-		// - Note the missing & in the dllGetVar call, when comparing with the dllGetVar call above
-		(dllGetVar)(name, (void**)(*sourceVarPtr));
-		transferValue = **sourceVarPtr;
-		return &transferValue;
-	}
-	
-	//
-	// The compType below is not Wanda
-	//
-	// Allocate the transfer array
-	double * transfer = (double *)malloc(nProc * sizeof(double));
-
-	// put data to be transferred from this partitions source location into the transfer array
-
-	for (int m = 0; m < nProc; m++)
-	{
-		// default value for source provider component not available
-		transfer[m] = -999.0 - 1000.0*my_rank;
-		if (my_rank == processes[m] && * sourceVarPtr != NULL)
-		{
-			transfer[m] = *(*sourceVarPtr);
-		}
-	}
-
-	// Do not call MPI_Bcast when the number of partitions is 1. Big chance that it will cause a crash
-	if (numranks > 1)
-	{
-		// NOTE: multiple sources not yet supported, so below only use transfer[0], i.e., with size 1
-		int ierr = MPI_Bcast(transfer, 1, MPI_DOUBLE, sourceProcess, MPI_COMM_WORLD);
-	}
-
-	// Return the transfer value
-	transferValue = transfer[0];
-	free(transfer);
-	return &transferValue;
+    // Do not call MPI_Bcast when the number of partitions is 1. Big chance that it will cause a crash
+    if (numranks > 1) {
+        // NOTE: multiple sources not yet supported, so below only use transfer[0], i.e., with size 1
+        int ierr = MPI_Bcast( transfer, 1, MPI_DOUBLE, sourceProcess, MPI_COMM_WORLD);
+    }
+    if (setValue)
+    {
+       this->transferValue = transfer[0];
+    }
+    free(transfer);
+    return &(this->transferValue);
 }
+
+
 
 //------------------------------------------------------------------------------
 // set "value" in the comopnents target location
@@ -1063,17 +1029,20 @@ void Dimr::receive (const char * name,
 					}
                 } else {
                     // target is a component that uses direct pointer access to the actual variable
-                    // When doing a dllSetVar, targetVarPtr is not defined. First do a "getAddress" to get it defined.
+                    // When doing a dllSetVar, targetVarPtr is not defined. First do a "send" to get it defined.
                     // WARNING: the test "if (targetVarPtr == NULL)" is not allowed:
                     //          When target is defined for 1 partition and undefined for the other partitions,
                     //          send will be called for all but 1 partitions. This screws the MPI administration,
                     //          resulting in a crash.
                     //          If the test "if (targetVarPtr == NULL)" is prefered, a more detailed administration is needed.
                     //   if (targetVarPtr == NULL) {
-					thisDimr->getAddress(name,
-						compType,
-						dllGetVar,
-						&targetVarPtr);
+                    thisDimr->send (name, 
+                                    compType,
+                                    dllGetVar, 
+                                    &targetVarPtr,
+                                    processes,
+                                    nProc,
+                                    0,false);
                     //  }
                     if (targetVarPtr == NULL) {
                         if (targetProcess == -1 || targetProcess == my_rank) {
@@ -1083,9 +1052,6 @@ void Dimr::receive (const char * name,
                         }
                     } else {
         				*(targetVarPtr) = *(double*)(transferValuePtr);
-						// Do not use setValue for the setting this->transferValue.
-						// In this case this->transferValue should be assigned to *(double*)(transferValuePtr).
-						this->transferValue = *(double*)(transferValuePtr);
                     }
                 }
             }
