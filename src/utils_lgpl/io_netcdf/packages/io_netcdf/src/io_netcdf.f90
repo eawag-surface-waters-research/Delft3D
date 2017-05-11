@@ -671,10 +671,17 @@ end function ionc_write_map_ugrid
 
 
 !> Add the global attributes to a NetCDF file 
-function ionc_add_global_attributes(ioncid, meta) result(ierr)
+function ionc_add_global_attributes(ioncid,institution,source,references,version,modelname) result(ierr)
    integer,         intent(in) :: ioncid  !< The IONC data set id.
-   type(t_ug_meta), intent(in) :: meta
    integer                     :: ierr    !< Result status, ionc_noerr if successful.
+   character(len=*), intent(in):: institution, source, references, version, modelname
+   type(t_ug_meta) :: meta
+   
+   meta%institution = institution
+   meta%source = source
+   meta%references = references
+   meta%version = version
+   meta%modelname = modelname
 
    ierr = ug_addglobalatts(datasets(ioncid)%ncid, meta)
 end function ionc_add_global_attributes
@@ -916,7 +923,7 @@ function add_dataset(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
 
    select case (datasets(ioncid)%iconvtype)
    !
-   ! UGRID initialization
+   ! UGRID initialization: If the case is not executed the meshidid structure will not be createtd
    !
    case (IONC_CONV_UGRID)
       allocate(datasets(ioncid)%ug_file)

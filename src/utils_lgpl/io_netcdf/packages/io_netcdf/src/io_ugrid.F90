@@ -1611,18 +1611,21 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: varid        !< NetCDF variable id
    logical                     :: is_mesh_topo !< Return value
 
-   integer :: cfrole, geomesh, geomeshid
+   integer :: cfrole, geomesh, geomeshid, edgecoord
    character(len=13) :: buffer
 
    is_mesh_topo = .false.
 
    buffer = ' '
-   cfrole = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   geomesh = nf90_get_att(ncid, varid, 'coordinate_space', geomeshid)
-   if (cfrole == nf90_noerr .and. geomesh == nf90_noerr) then
-      if (trim(buffer) == 'mesh_topology') then
-         is_mesh_topo = .true.
-      end if
+   cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
+   geomesh   = nf90_get_att(ncid, varid, 'coordinate_space', geomeshid)
+   if (cfrole == nf90_noerr .and. geomesh == nf90_noerr .and. trim(buffer) == 'mesh_topology') then
+         is_mesh_topo = .true. !new ugrid format detected
+   else if (cfrole == nf90_noerr .and. trim(buffer) == 'mesh_topology') then
+         edgecoord = nf90_get_att(ncid, varid, 'edge_coordinates', buffer)
+         if (edgecoord == nf90_noerr) then 
+            is_mesh_topo = .true. !old format detected, based on the existence of the edge_coordinates variable
+         end if
    end if
 end function ug_is_mesh_topology
 

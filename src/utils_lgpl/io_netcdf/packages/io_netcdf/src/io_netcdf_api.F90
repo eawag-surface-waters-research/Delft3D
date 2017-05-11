@@ -50,10 +50,17 @@ use iso_c_binding
 implicit none
 
 type, BIND(C) :: interop_charinfo  
-!   sequence
     character(len=30) :: ids
     character(len=80) :: longnames
 end type interop_charinfo
+
+type, BIND(C) :: interop_metadata
+   character(len=100) :: institution
+   character(len=100) :: source
+   character(len=100) :: references
+   character(len=100) :: version
+   character(len=100) :: modelname
+end type interop_metadata
 
 !-------------------------------------------------------------------------------
 contains
@@ -424,14 +431,26 @@ end function ionc_put_var_1D_EightByteReal_dll
 
 ! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
 !> Add the global attributes to a NetCDF file 
-!function ionc_add_global_attributes_dll(ioncid, meta) result(ierr)  bind(C, name="ionc_add_global_attributes")
-!!DEC$ ATTRIBUTES DLLEXPORT :: ionc_add_global_attributes_dll
-!   integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
-!   type (t_ug_meta), intent (in) :: meta
-!   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.!
-!
-!   ierr = ionc_add_global_attributes(ioncid, meta)
-!end function ionc_add_global_attributes
+function ionc_add_global_attributes_dll(ioncid, meta) result(ierr)  bind(C, name="ionc_add_global_attributes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_add_global_attributes_dll
+   integer(kind=c_int),    intent(in)    :: ioncid  !< The IONC data set id.
+   type (interop_metadata), intent (in)  :: meta
+   integer(kind=c_int)                   :: ierr        !< Result status, ionc_noerr if successful.! 
+   character(len=100)                    :: institution !< variables to be passed to io_netcdf for construction of the metadata structure 
+   character(len=100)                    :: source
+   character(len=100)                    :: references
+   character(len=100)                    :: version
+   character(len=100)                    :: modelname
+   
+   institution = meta%institution
+   source      = meta%source
+   references  = meta%references
+   version     = meta%version
+   modelname   = meta%modelname
+
+   ierr = ionc_add_global_attributes(ioncid, institution,source,references,version,modelname)
+   
+end function ionc_add_global_attributes_dll
 
 
 ! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
@@ -517,7 +536,6 @@ function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, n
    character(len=30)                      :: nodeids(nNodes)
    character(len=80)                      :: nodeLongnames(nNodes)
    
-   
    call c_f_pointer(c_nodesX, nodesX, (/ nNodes /))
    call c_f_pointer(c_nodesY, nodesY, (/ nNodes /))
    do i=1,nNodes
@@ -528,6 +546,29 @@ function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, n
    ierr = ionc_write_1d_network_nodes_ugrid(ioncid, networkId, nodesX, nodesY, nodeids, nodeLongnames)
       
 end function ionc_write_1d_network_nodes_dll
+
+
+!function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, nodeinfo, nNodes) result(ierr) bind(C, name="ionc_write_1d_network_nodes")
+!!DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_nodes_dll
+!   
+!   integer(kind=c_int),     intent(in)    :: ioncid,networkid, nNodes
+!   type(c_ptr),             intent(in)    :: c_nodesX, c_nodesY 
+!   type(interop_charinfo),  intent(in)    :: nodeinfo(nNodes)
+!   double precision, pointer              :: nodesX(:), nodesY(:)
+!   integer                                :: ierr, i
+!   character(:),allocatable               :: nodeids(nNodes), nodeLongnames(nNodes)
+!   
+!   
+!   call c_f_pointer(c_nodesX, nodesX, (/ nNodes /))
+!   call c_f_pointer(c_nodesY, nodesY, (/ nNodes /))
+!   do i=1,nNodes
+!       nodeids(i)       = trim(nodeinfo(i)%ids)
+!       nodeLongnames(i) = trim(nodeinfo(i)%longnames)
+!   end do
+!   
+!   ierr = ionc_write_1d_network_nodes_ugrid(ioncid, networkId, nodesX, nodesY, nodeids, nodeLongnames)
+!      
+!end function ionc_write_1d_network_nodes_dll
 
 function ionc_write_1d_network_branches_dll(ioncid,networkid, c_sourcenodeid, c_targetnodeid, branchinfo, c_branchlengths, c_nbranchgeometrypoints, nBranches) result(ierr) bind(C, name="ionc_write_1d_network_branches")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_branches_dll
