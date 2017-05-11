@@ -208,9 +208,13 @@ rem ===================
 
     set dest_bin="!dest_main!\win32\dimr\bin"
     set dest_menu="!dest_main!\win32\menu\bin"
+    set dest_scripts="!dest_main!\win32\scripts"
+    set dest_shared="!dest_main!\win32\shared"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
+    call :makeDir !dest_scripts!
+    call :makeDir !dest_shared!
 
     call :copyFile engines_gpl\dimr\bin\Release\dimr.exe                   !dest_bin!
     call :copyFile engines_gpl\dimr\bin\Release\dimr_dll.dll               !dest_bin!
@@ -218,7 +222,26 @@ rem ===================
     call :copyFile "third_party_open\mpich2\bin\*.exe"                     !dest_bin!
     call :copyFile "third_party_open\mpich2\lib\*.dll"                     !dest_bin!
     call :copyFile "third_party_open\pthreads\bin\win32\*.dll"             !dest_bin!
+
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl       !dest_menu!
+
+    call :copyFile "engines_gpl\dimr\scripts\generic\win32\*.*"         !dest_scripts!
+
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC100.CRT\*.dll"             !dest_shared!
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC110.CRT\*.dll"             !dest_shared!
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC120.CRT\*.dll"             !dest_shared!
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC140.CRT\*.dll"             !dest_shared!
+    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"                      !dest_shared!
+    call :copyFile "third_party_open\netcdf\lib\win32\Release\ifort17\*.dll"             !dest_shared!
+    call :copyFile "third_party_open\netcdf\bin\win32\ncdump.exe"                        !dest_shared!
+    call :copyFile "third_party_open\mpich2\lib\*.dll"                                   !dest_shared!
+    call :copyFile "third_party_open\mpich2\bin\mpiexec.exe"                             !dest_shared!
+    call :copyFile "third_party_open\mpich2\bin\smpd.exe"                                !dest_shared!
+    call :copyFile "third_party_open\expat\win32\bin\Release\*.dll"                      !dest_shared!
+    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                           !dest_shared!
+    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win32/oss-install.cmd >!dest_shared!\readme.txt
+    echo This script is executed via a post-build event of https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj >>!dest_shared!\readme.txt
+    echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_shared!\readme.txt
 goto :endproc
 
 
