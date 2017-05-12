@@ -722,6 +722,21 @@ goto :endproc
 
 
 
+rem =====================
+rem === INSTALL IO_NETCDF
+rem =====================
+:io_netcdf
+    echo "installing io_netcdf . . ."
+
+    set dest_bin="!dest_main!\win32\shared"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "utils_lgpl\io_netcdf\packages\io_netcdf\dll\Release\io_netcdf.dll"                  !dest_bin!
+goto :endproc
+
+
+
 :end
 if NOT %globalErrorLevel% EQU 0 (
     rem
