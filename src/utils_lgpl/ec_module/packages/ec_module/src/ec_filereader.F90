@@ -200,6 +200,7 @@ module m_ec_filereader
          character(len=255)      :: qname 
          integer                 :: nv, nl, iitem
          integer                 :: from, thru
+         integer                 :: nmissing, kcmp
          real(hp), dimension(:), allocatable    :: values
          type(tEcItem), pointer  :: itemPtr
          
@@ -260,6 +261,7 @@ module m_ec_filereader
                   success = .true.
                case (BC_FUNC_ASTRO)
                   success = ecTimeFrameRealHpTimestepsToDateTime(fileReaderPtr%tframe, timesteps, yyyymmdd, hhmmss)
+                  if (.not.ecFileReaderLookupAstroComponents(fileReaderPtr)) return
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(2)%ptr%sourceT1FieldPtr%arr1d(i)
@@ -268,7 +270,8 @@ module m_ec_filereader
                      call asc( fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i), &
                                fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i), &
                                fileReaderPtr%items(3)%ptr%sourceT0FieldPtr%arr1d(i), &
-                               fileReaderPtr%bc%quantity%astro_component(i), yyyymmdd, hhmmss, istat)
+                               fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(i),   &
+                               yyyymmdd, hhmmss, istat)
                   end do
                   ! Shift time interval with dtnodal
                   do i=1, fileReaderPtr%nItems
@@ -339,16 +342,17 @@ module m_ec_filereader
             case (provFile_fourier)
                if(allocated(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components)) then ! Astronomical case
                   success = ecTimeFrameRealHpTimestepsToDateTime(fileReaderPtr%tframe, timesteps, yyyymmdd, hhmmss)
+                  if (.not.ecFileReaderLookupAstroComponents(fileReaderPtr)) return
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
-                  
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(2)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(3)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(3)%ptr%sourceT1FieldPtr%arr1d(i)
                      
+                     print *,'calling asc'
                      call asc( fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i),            &
                                fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i),            &
                                fileReaderPtr%items(3)%ptr%sourceT0FieldPtr%arr1d(i),            &
-                               fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(i), &
+                               fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(i),   &
                                yyyymmdd, hhmmss, istat)
                   end do
                   ! Shift time interval with dtnodal
@@ -552,6 +556,36 @@ module m_ec_filereader
             success = .true.
          end if
       end function ecFileReaderAddItem
+      
+      function ecFileReaderLookupAstroComponents(fileReaderPtr) result (success)
+         implicit none
+         logical                               :: success       !< function status
+         type(tEcFileReader), pointer          :: fileReaderPtr !< FileReader corresponding to fileReaderId
+         integer :: kcmp, icmp
+         integer :: nmissing
+         logical, parameter :: jawearetolerant = .True.         !< Hard-wired set success value upon invalid component
+
+         kcmp = size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
+         if (.not.allocated(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber)) then
+            allocate (fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(kcmp))
+            nmissing = asc_map_components(kcmp, fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components, fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber)
+            if (nmissing>0) then 
+               do icmp=1, kcmp
+                  if (fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(icmp)<0) then
+                     call message('unknown component '     &
+                                 // trim(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(icmp)),                      &
+                                      ' amplitude set to 0 ', ' ')
+                     call setECMessage('unknown component '     &
+                                 // trim(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(icmp)),                      &
+                                      ' amplitude set to 0 ')
+                  end if
+               end do
+            end if
+         end if
+         success = (jawearetolerant .or. (nmissing==0))
+      end function ecFileReaderLookupAstroComponents
+      
+      
 !!!!!!
 !!!!!!
 !!!!!!

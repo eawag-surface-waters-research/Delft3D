@@ -85,6 +85,7 @@ module m_ec_typedefs
         character(len=8), allocatable  :: astro_component(:)     !< original component label read 
         real(hp), allocatable          :: astro_amplitude(:)     !< original amplitude read 
         real(hp), allocatable          :: astro_phase(:)         !< original phase read  
+        integer, allocatable           :: astro_kbnumber(:)      !< number of astrocomponent in the KompBes table
     end type tEcBCQuantity
 
    
@@ -259,7 +260,8 @@ module m_ec_typedefs
       real(hp), dimension(:),     allocatable :: arr1d              !< 1-dim array field
       real(hp)                                :: x_spw_eye          !< x-coordinate of spiderweb eye
       real(hp)                                :: y_spw_eye          !< y-coordinate of spiderweb eye
-      character(len=8), allocatable           :: astro_components(:)!< astronomical components for astro bc's
+      character(len=8), allocatable           :: astro_components(:)!< astronomical components labels
+      integer, allocatable                    :: astro_kbnumber(:)  !< astronomical components KompBes numbers
    end type tEcField
    
    type tEcFieldPtr

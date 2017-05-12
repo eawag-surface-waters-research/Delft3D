@@ -66,9 +66,16 @@ module m_ec_filereader_read
    public :: ecSampleReadAll
    public :: ecParseARCinfoMask
    public :: asc
+   public :: asc_map_components
    
-contains
-      
+   ! Related to astronomic components
+   integer, parameter                      :: kcmp = 1       !< 
+   integer, parameter                      :: mxkc = 234     !< 
+   integer,           dimension(16*mxkc)   :: kb_values      !< Help var.
+   character(len=8),  dimension(mxkc)      :: kb_keys = ''   !< Array with the names of all components
+
+   contains
+  
       ! =======================================================================
       
       !> Read the first line from a uni* file.
@@ -1375,23 +1382,34 @@ contains
 
       ! =======================================================================
 
+      subroutine read_kompbes
+         integer                               :: ik, il, i, j
+         character(len=80), dimension(mxkc)    :: kombes !< Array with tidal components
+         call kompbs(kombes)
+         !
+         ik = -15
+         do i = 1, mxkc
+            ik = ik + 16
+            il = ik + 15
+            read (kombes(i), '(a8,10i3,3(i1,i2))') kb_keys(i), (kb_values(j), j = ik, il)
+         enddo
+      end subroutine read_kompbes
+      
       
       !> Determination of FR and V0+U.
       !! 'stripped' VERSION OF MAIN (ASCON)
       !! meteo1 : asc
-      subroutine asc(omeg, ampl, phas, component, idate, itime, ierrs)
+      subroutine asc(omeg, ampl, phas, compnr, idate, itime, ierrs)
          real(hp),         intent(out)   :: omeg      !< period [minute]
          real(hp),         intent(inout) :: ampl      !< amplitude [m]
          real(hp),         intent(inout) :: phas      !< phase [degree]
-         character(len=8), intent(in)    :: component !< component name
+         integer,          intent(in)    :: compnr    !< component number in the KompBes table
          integer,          intent(in)    :: idate     !< date integer yyyymmdd
          integer,          intent(in)    :: itime     !< time integer hhmmss
          integer,          intent(out)   :: ierrs     !< number of errors
          !
          ! local
          !
-         integer, parameter    :: kcmp = 1   !< 
-         integer, parameter    :: mxkc = 234 !< 
          integer, dimension(6) :: jdatum     !< Date and time
 
          real(hp), dimension(kcmp) :: fr  !< Amplitude factors for the referenced components
@@ -1414,7 +1432,7 @@ contains
          !! executable statements -------------------------------------------------------
          !
          
-         if (index(component, 'A0') /= 0) then
+         if (compnr == 0) then         ! A0
             omeg = 0.0_hp
             phas = 0.0_hp
             ierrs = 0
@@ -1428,21 +1446,15 @@ contains
          jdatum(5) = itime/100 - 100*(itime/10000)
          jdatum(6) = itime - 100*(itime/100)
          
-         call kompbs(kombes)
-         !
-         ik = -15
-         do i = 1, mxkc
-            ik = ik + 16
-            il = ik + 15
-            read (kombes(i), '(a8,10i3,3(i1,i2))') knaam(i), (jnaam(j), j = ik, il)
-         enddo
-         !
          jaar = jdatum(1)
          !
          call datumi(jaar, jdatum, t)
          call hulpgr(jaar      ,t         ,v         ,f         )
-         call bewvuf(ierrs     ,kcmp      ,mxkc      ,component ,knaam     , &
-                   & jnaam     ,w         ,v0u       ,fr        ,v         , &
+!         call bewvuf(ierrs     ,kcmp      ,mxkc      ,component ,kb_keys   , &
+!                   & kb_values ,w         ,v0u       ,fr        ,v         , &
+!                   & f         )
+         call bewvuf_by_number(ierrs     ,kcmp      ,mxkc      ,(/compnr/)  , &
+                   & kb_values ,w         ,v0u       ,fr        ,v      , &
                    & f         )
     
 !         omeg = (2.0_hp*pi*60.0_hp)/w(1) ! [minute]
@@ -1969,14 +1981,131 @@ contains
             enddo
             if ( ierr /= 0 ) then
                ierrs = ierrs + 1
-               call setECMessage("unknown astronomic component '"//trim(inaam)//"' ")        ! this message goes to limbo
-                  call message('unknown component '//trim(inaam), ' amplitude set to 0 ', ' ')  ! so we use this now
-                  fr(1) = 0d0
+               fr(1) = 0d0
             endif
          enddo
       end subroutine bewvuf
       
+      function asc_map_components(kcmp, inaam, knum) result (nmissing)
+         integer                                         :: nmissing
+         integer,                            intent(in)  :: kcmp        !< 
+         character(len=8), dimension(kcmp),  intent(in)  :: inaam       !< Name of the referenced components
+         integer,          dimension(kcmp),  intent(out) :: knum        !< If valid component, Kompbes number, else -1
+         integer	:: i,j
+         nmissing = 0
+         knum = -1
+         if (len_trim(kb_keys(1))==0) then
+            call read_kompbes
+         end if
+         do i = 1, kcmp 			   	! loop over given components
+            if (trim(inaam(i))=='A0') then
+               knum(i) = 0
+            endif
+            do j = 1, mxkc 				! loop over the elements of kompbes
+               if (trim(inaam(i)) == trim(kb_keys(j))) then
+                  knum(i) = j 	      ! maps every used labelled component 
+               endif
+            enddo
+            if (knum(i)<0) then
+               nmissing = nmissing + 1
+            endif
+         enddo
+      end function asc_map_components
       ! =======================================================================
+
+      
+      subroutine bewvuf_by_number (ierrs     ,kcmp      ,mxkc      ,knum      , &
+                      & jnaam     ,w         ,v0u       ,fr        ,v         , f)
+         integer,                          intent(out) :: ierrs !<  Number of error messages
+         integer,                          intent(in)  :: kcmp  !< 
+         integer,                          intent(in)  :: mxkc  !< 
+         integer,      dimension(kcmp),    intent(in)  :: knum  !< Kompbes number of the referenced component
+         integer,      dimension(mxkc*16), intent(in)  :: jnaam !< Help var.
+         real(hp),     dimension(kcmp)                 :: w     !< Angular velocity of the referenced components
+         real(hp),     dimension(kcmp)                 :: v0u   !< Astronomical arguments of the  referenced components [rad]
+         real(hp),     dimension(kcmp)                 :: fr    !< Amplitude factors for the referenced components
+         real(hp),     dimension(15),      intent(in)  :: v     !< Help var. to calculate V0U()
+         real(hp),     dimension(25),      intent(in)  :: f     !< Help var. to calculate FR()
+         !
+         integer  :: ia1   !< 
+         integer  :: ia2   !< 
+         integer  :: iar   !< 
+         integer  :: ie1   !< 
+         integer  :: ie2   !< 
+         integer  :: iex   !< 
+         integer  :: ikomp !< 
+         integer  :: j     !< 
+         integer  :: kw    !< 
+         integer  :: kx    !< 
+         integer  :: mh    !< 
+         integer  :: mp    !< 
+         integer  :: mp1   !< 
+         integer  :: ms    !< 
+         integer  :: mt    !< 
+         integer  :: ierr  !< error (1) or not (0)
+         real(hp) :: dhalf !< Value for 0.5 in SIGN function
+         real(hp) :: pix2  !< 
+         real(hp) :: s1    !< 
+         real(hp) :: s2    !< 
+         !
+         ierrs = 0         ! status variable to be used later. no longer needed for invalid component labels
+         pix2 = pi * 2.0_hp
+         dhalf = 0.5_hp
+         ! loop over given components
+         do ikomp = 1, kcmp
+            j = knum(ikomp)
+            if (j<0) then              ! Component number<0: component was unknown, set amplitude to zero
+               fr(1) = 0d0               
+               return
+            endif
+            ! compute angular velocity
+            mt = jnaam(16*j - 15)
+            ms = jnaam(16*j - 14)
+            mp = jnaam(16*j - 13)
+            mh = jnaam(16*j - 12)
+            mp1 = jnaam(16*j - 11)
+            w(ikomp) = mt*15.0_hp + ms*0.54901653_hp + mp*0.0046418333_hp &
+                                & + mh*0.04106864_hp + mp1*0.0000019610393_hp
+            w(ikomp) = (w(ikomp)*pix2)/360.0_hp
+            ! compute v0+u
+            v0u(ikomp) = (jnaam(16*j - 8)*pix2)/4.0_hp
+            do kw = 1, 7
+               kx = 16*j - 16 + kw
+               v0u(ikomp) = v0u(ikomp) + v(kw)*jnaam(kx)
+            enddo
+            ie1 = jnaam(16*j - 7)
+            if (ie1 /= 0) then
+               ia1 = abs(ie1)
+               s1 = real(ie1/ia1, fp)
+               v0u(ikomp) = v0u(ikomp) + s1*v(ia1)
+               ie2 = jnaam(16*j - 6)
+               if (ie2 /= 0) then
+                  ia2 = abs(ie2)
+                  s2 = real(ie2/ia2, fp)
+                  v0u(ikomp) = v0u(ikomp) + s2*v(ia2)
+               endif
+            endif
+            v0u(ikomp) = mod(v0u(ikomp), pix2) - pix2*(sign(dhalf, v0u(ikomp)) - dhalf)
+            ! compute f
+            fr(ikomp) = 1.0_hp
+            iex = jnaam(16*j - 5)
+            if (iex /= 0) then
+               iar = jnaam(16*j - 4)
+               fr(ikomp) = (f(iar))**iex
+               iex = jnaam(16*j - 3)
+               if (iex /= 0) then
+                  iar = jnaam(16*j - 2)
+                  fr(ikomp) = fr(ikomp)*(f(iar))**iex
+                  iex = jnaam(16*j - 1)
+                  if (iex /= 0) then
+                     iar = jnaam(16*j)
+                     fr(ikomp) = fr(ikomp)*(f(iar))**iex
+                  endif
+               endif
+            endif
+         enddo
+      end subroutine bewvuf_by_number      
+      
       
 !!==============================================================================
 !
