@@ -916,20 +916,21 @@ double * Dimr::send (const char * name,
                      double    ** sourceVarPtr,    // Output parameter! Needed when doing a dllSetVar via "get_var, var=value". See "send" call in Dimr::receive
                      int        * processes,
                      int          nProc,
-                     int          sourceProcess,
-					 bool         setValue) {
+                     int          sourceProcess) {
     // Array "transfer" is used to collect a scalar double from all partitions
     // For now: The resulting scalar double is stored in the class parameter "transferValeu"
     // TODO: Point to variable in related kernel? How when running in parallel?
-    double * transfer = (double *)malloc(nProc * sizeof(double));
-    if(setValue)
-    {
-       this->transferValue = -999.0;
-    }
-    //
+    double * transfer       = (double *)malloc(nProc * sizeof(double));   
+    double * reducedTransfer = (double *)malloc(nProc * sizeof(double));
     // put data to be transferred from this partitions source location into the transfer array
-    for (int m = 0 ; m < nProc; m++) {
-        if (my_rank == processes[m]) {
+    for (int m = 0 ; m < nProc; m++) 
+	{
+		// source provider component not available on this rank.
+		// Define a missing value (large negative number for later reduction operations)
+		transfer[m] = -999000.0;
+
+        if (my_rank == processes[m]) 
+		{
             this->log->Write (Log::DETAIL, my_rank, "Send(%s)", name);
 			if (    compType == COMP_TYPE_RTC
 				|| compType == COMP_TYPE_RR
@@ -957,27 +958,36 @@ double * Dimr::send (const char * name,
             }
             // The sourceVarPtr may be NULL for my_rank
             // Wanda: the value is already in the transfer array
-            if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) {
+            if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA)
+			{
                 transfer[m] = *(*sourceVarPtr);
             }
-        } else {
-            // source provider component not available on this rank.
-            // Define a missing value that's useful while debugging
-            transfer[m] = -999.0 -1000.0*my_rank;
-        }
+        } 
     }
 
-    // Do not call MPI_Bcast when the number of partitions is 1. Big chance that it will cause a crash
-    if (numranks > 1) {
-        // NOTE: multiple sources not yet supported, so below only use transfer[0], i.e., with size 1
-        int ierr = MPI_Bcast( transfer, 1, MPI_DOUBLE, sourceProcess, MPI_COMM_WORLD);
+	double maxValue = -999000.0;
+	// Do not call MPI_Allreduce when the number of partitions is 1. Big chance that it will cause a crash
+	if (numranks > 1) 
+	{
+		// NOTE: here the transfer array has a defined value only at position==my_rank and if *sourceVarPtr != NULL.
+		// We perform a reduction operation to collect the maximum values at each position and afterwards take the maximum of all values.
+		// We could also use only one double.instead of a transfer array and perform the reduction on a single scalar (so avoiding the loop below) 
+		int ierr = MPI_Allreduce(transfer, reducedTransfer, nProc, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+		
+		for (int m = 0; m < nProc; m++)
+		{
+			if (reducedTransfer[m]> maxValue) maxValue = reducedTransfer[m];
+		}
     }
-    if (setValue)
-    {
-       this->transferValue = transfer[0];
-    }
+	else
+	{
+		maxValue = transfer[0];
+	}
+	
+	transferValue = maxValue;
     free(transfer);
-    return &(this->transferValue);
+	free(reducedTransfer);
+	return &(transferValue);
 }
 
 
@@ -1036,29 +1046,37 @@ void Dimr::receive (const char * name,
                     //          resulting in a crash.
                     //          If the test "if (targetVarPtr == NULL)" is prefered, a more detailed administration is needed.
                     //   if (targetVarPtr == NULL) {
-                    thisDimr->send (name, 
+
+					// transferValuePtr contains the value calculated by RTCTools. 
+					// Here we already know transferValuePtr is not null.
+					double * valueToTransfer = ( double *)transferValuePtr;
+					thisDimr->send(name,
                                     compType,
-                                    dllGetVar, 
-                                    &targetVarPtr,
-                                    processes,
-                                    nProc,
-                                    0,false);
+					                dllGetVar, 
+									&valueToTransfer,
+					                processes,
+					                nProc,
+					                0);
                     //  }
-                    if (targetVarPtr == NULL) {
+                    if (targetVarPtr == NULL) 
+					   {
                         if (targetProcess == -1 || targetProcess == my_rank) {
                             // targetProcess=-1: no process can accept this item
                             // targetProcess=my_rank: this process is registered to be able to accept this item but something goes wrong
                             throw new Exception (true, "ABORT: Dimr::receive: get_var function not defined while processing %s", name);
                         }
-                    } else {
-        				*(targetVarPtr) = *(double*)(transferValuePtr);
+                    } 
+					else 
+					{
+						// Here writes the RTC value in FM (direct access to memory using a pointer). 
+						// Here we already know targetVarPtr is not null. 
+						*(targetVarPtr) = transferValue;
                     }
                 }
             }
         }
     }
 }
-
 
 
 //------------------------------------------------------------------------------

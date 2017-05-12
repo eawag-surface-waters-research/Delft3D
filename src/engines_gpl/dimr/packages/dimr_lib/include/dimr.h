@@ -274,7 +274,7 @@ class Dimr {
         void           timerStart(dimr_component *);
         void           timerEnd(dimr_component *);
         void           timersFinish(void);
-        double *       send(const char *, int, BMI_GETVAR, double **, int *, int, int, bool setValue = true);
+        double *       send(const char *, int, BMI_GETVAR, double **, int *, int, int);
         void           receive(const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
 
     public:
