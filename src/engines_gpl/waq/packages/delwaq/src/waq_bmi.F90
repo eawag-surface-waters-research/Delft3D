@@ -41,7 +41,7 @@ module bmi
 contains
 
   integer(c_int) function set_var(c_key, xptr) bind(C, name="set_var")
-    !DEC$ ATTRIBUTES DLLEXPORT::SET_VAR
+    !DEC$ ATTRIBUTES DLLEXPORT::set_var
     use iso_c_binding, only: c_char, c_ptr
     use iso_c_utils
     use delwaq2_global_data
@@ -106,7 +106,7 @@ contains
   !! a configuration file. This function should perform all tasks
   !! that are to take place before entering the model's time loop.
   integer(c_int) function initialize(c_config_file) bind(C, name="initialize")
-    !DEC$ ATTRIBUTES DLLEXPORT::INITIALIZE
+    !DEC$ ATTRIBUTES DLLEXPORT::initialize
     use iso_c_binding, only: c_char
     use iso_c_utils
     use delwaq2_global_data
@@ -225,6 +225,10 @@ end subroutine get_attribute
     include 'actions.inc'
 
     update_steps = nint(dt * dlwqd%tscale) / idt
+    if(intsrt == 2) then
+       ! Correct update_steps for delwaq scheme 2, which does a double time step every call
+       update_steps = (update_steps + 1) / 2
+    end if
     do step = 1, update_steps
       call dlwqmain( ACTION_SINGLESTEP, 0, argv_dummy, dlwqd )
     enddo
