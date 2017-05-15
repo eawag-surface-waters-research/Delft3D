@@ -51,6 +51,7 @@ subroutine del_temp_files(n_swan_grids)
     integer           :: i
     integer           :: igrid
     integer           :: inest
+    integer           :: istat
     integer           :: itide
     integer           :: fillun
     integer, external :: new_lun
@@ -70,8 +71,8 @@ subroutine del_temp_files(n_swan_grids)
        ! Remove temporary swan grid files
        !
        filnam = swan_grids(igrid)%tmp_name
-       inquire (file = trim(filnam), exist = ex)
-       if (ex) then
+       inquire (file = trim(filnam), exist = ex, iostat = istat)
+       if (istat==0 .and. ex) then
           fillun = new_lun()
           open (fillun, file=trim(filnam), status='unknown')
           close(fillun, status='delete')
@@ -83,8 +84,8 @@ subroutine del_temp_files(n_swan_grids)
        ! 
        do i=1,numtempgrid
           write (filnam,'(a,i3.3)') trim(tmpfiles(i)), igrid
-          inquire (file = trim(filnam), exist = ex)
-          if (ex) then
+          inquire (file = trim(filnam), exist = ex, iostat = istat)
+          if (istat==0 .and. ex) then
              fillun = new_lun()
              open (fillun, file=trim(filnam), status='unknown')
              close(fillun, status='delete')
@@ -101,8 +102,8 @@ subroutine del_temp_files(n_swan_grids)
     else
        do igrid = 1, n_swan_grids
           write (filnam,'(a,i0,2a)') 'hot_', igrid, '_', trim(swan_run%writehottime)
-          inquire (file = trim(filnam), exist = ex)
-          if (ex) then
+          inquire (file = trim(filnam), exist = ex, iostat = istat)
+          if (istat==0 .and. ex) then
              fillun = new_lun()
              open (fillun, file = trim(filnam))
              close (fillun, status = 'delete')
@@ -121,8 +122,8 @@ subroutine del_temp_files(n_swan_grids)
     tmpfiles(7) = 'MUDNOW'
     do i=1,numtemp
        filnam = tmpfiles(i)
-       inquire (file = trim(filnam), exist = ex)
-       if (ex) then
+       inquire (file = trim(filnam), exist = ex, iostat = istat)
+       if (istat==0 .and. ex) then
          fillun = new_lun()
          open (fillun, file=trim(filnam), status='unknown')
          close(fillun, status='delete')
