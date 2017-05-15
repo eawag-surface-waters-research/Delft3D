@@ -1450,9 +1450,6 @@ module m_ec_filereader_read
          !
          call datumi(jaar, jdatum, t)
          call hulpgr(jaar      ,t         ,v         ,f         )
-!         call bewvuf(ierrs     ,kcmp      ,mxkc      ,component ,kb_keys   , &
-!                   & kb_values ,w         ,v0u       ,fr        ,v         , &
-!                   & f         )
          call bewvuf_by_number(ierrs     ,kcmp      ,mxkc      ,(/compnr/)  , &
                    & kb_values ,w         ,v0u       ,fr        ,v      , &
                    & f         )
@@ -1995,7 +1992,7 @@ module m_ec_filereader_read
          nmissing = 0
          knum = -1
          if (len_trim(kb_keys(1))==0) then
-            call read_kompbes
+            call read_kompbes()
          end if
          do i = 1, kcmp 			   	! loop over given components
             if (trim(inaam(i))=='A0') then
