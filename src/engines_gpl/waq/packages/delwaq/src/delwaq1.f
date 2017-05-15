@@ -545,10 +545,11 @@
 ! Close all open LUN files
 !
       do i = 1, nlun
-          inquire (unit=lun(i), opened=unitop)
+          inquire (unit=lun(i), opened=unitop, err=950)
           if (unitop) then
               close (unit = lun(i))
           endif
+ 950      continue
       end do
 
       if ( timon ) then
