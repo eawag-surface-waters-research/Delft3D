@@ -262,7 +262,7 @@ subroutine z_vermom_finvol(nmmax     ,kmax      ,icx       ,icy       ,u0       
                 ! Horizontal viscosity
                 !
                 viscow     =   (rxz(nm,k)-rxz(nmd,k)) / (0.5_fp*(gvv(nm)+gvv(ndm)))   &
-                           & + (ryz(nm,k)-ryz(ndm,k)) / (0.5_fp*(guu(nm)+gvv(nmd)))
+                           & + (ryz(nm,k)-ryz(ndm,k)) / (0.5_fp*(guu(nm)+guu(nmd)))
                 !                
                 ddk(nm,k)  = ddk(nm,k) + viscow
                 !
