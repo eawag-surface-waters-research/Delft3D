@@ -252,8 +252,6 @@
       IF (FIRST) THEN
          ALLOCATE(MNCWQID1(NOTOT,2) , MNCWQID2(NOVAR,2))
          FIRST = .FALSE.
-
-         CALL ZOEKNS( 'LocalDepth', NOVAR, OUNAM, l0, IDEPTH )
       ENDIF
 !
 !     Evaluate standard DELWAQ output timers
@@ -592,7 +590,7 @@
      +                      ITIME    , MONAME   , NOSEG    , 0      ,
      +                      CONC     , SYNAME   , SYSNM, SYUNI, SYDSC, MNCWQID1 , NRVAR  ,
      +                      RIOBUF   , OUNAM(K1), OUSNM(K1), OUUNI(K1), OUDSC(K1), MNCWQID2 ,
-     +                      IDEPTH   , IKNMRK   , LUN(19))
+     +                      VOLUME   , IKNMRK   , LUN(19))
 !
             ELSEIF ( ISRTOU .EQ. IBAL ) THEN
 !
