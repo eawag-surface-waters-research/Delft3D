@@ -99,6 +99,7 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
        !
        ! Check if the first required timestep is in core.
        !
+       ierr=0
        if (ntimwa/=ifcore(1) .and. ntimwa/=ifcore(2)) then
           !
           ! Read the first timestep from file.
