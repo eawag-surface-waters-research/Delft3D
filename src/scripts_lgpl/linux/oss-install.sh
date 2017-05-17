@@ -533,6 +533,7 @@ function shared () {
     # Remove the flow2d3d specific libraries
     rm -f $dest_bin/libDelftOnline.*
     rm -f $dest_bin/libflow2d3d.*
+    copyFile "$srcdir/third_party_open/lnxredist/*"    $dest_bin
     echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/linux/oss-install.sh >$dest_bin/readme.txt
     echo This script is executed via "make ds-install" , install.sh  >>$dest_bin/readme.txt
     echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>$dest_bin/readme.txt
