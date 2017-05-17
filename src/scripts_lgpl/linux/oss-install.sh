@@ -129,8 +129,9 @@ function dimr () {
     # It might be enough to just copy libdimr.la (and libdimr.a) too?
     libtool --mode=install install -c $srcdir/engines_gpl/dimr/packages/dimr_lib/src/libdimr.la $dest_bin/libdimr.la
     libtool --finish $dest_bin/libdimr.la
-    copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
-    copyFile "$srcdir/engines_gpl/dimr/scripts/generic/lnx64/*.*"           $dest_scripts
+    copyFile "$prefix/engines_gpl/dimr/packages/dimr_lib/src/.libs/libdimr.lai"    $dest_bin
+    copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"           $dest_menu
+    copyFile "$srcdir/engines_gpl/dimr/scripts/generic/lnx64/*"                    $dest_scripts
 
     echo "Gathering libraries for dimr..."
     cp -u `$gatherScript $prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe $prefix/lib/libdimr.so | eval grep -v $gatherExcludeFilter` $dest_bin
