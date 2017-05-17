@@ -565,6 +565,7 @@ module m_ec_filereader
          integer :: kcmp, icmp
          integer :: nmissing
 
+         nmissing = 0
          kcmp = size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
          if (.not.allocated(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber)) then
             allocate (fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(kcmp))
