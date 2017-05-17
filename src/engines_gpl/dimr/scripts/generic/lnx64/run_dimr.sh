@@ -129,19 +129,19 @@ echo
     #
 export ARCH=lnx64
 
-delwaqexedir=$D3D_HOME/$ARCH/delwaq/bin
+delwaqexedir=$D3D_HOME/$ARCH/dwaq/bin
 dflowfmexedir=$D3D_HOME/$ARCH/dflowfm/lib
 dimrexedir=$D3D_HOME/$ARCH/dimr/bin
 esmfexedir=$D3D_HOME/$ARCH/esmf/bin
 esmfbatdir=$D3D_HOME/$ARCH/esmf/scripts
-flow1dexedir=$D3D_HOME/$ARCH/flow1d/bin
-flow1d2dexedir=$D3D_HOME/$ARCH/flow1d2d/bin
-rrexedir=$D3D_HOME/$ARCH/rr/bin
-rtcexedir=$D3D_HOME/$ARCH/rtctools/bin
+flow1dexedir=$D3D_HOME/$ARCH/dflow1d/bin
+flow1d2dexedir=$D3D_HOME/$ARCH/dflow1d2d/bin
+rrexedir=$D3D_HOME/$ARCH/drr/bin
+rtcexedir=$D3D_HOME/$ARCH/dfbc/bin
 swanexedir=$D3D_HOME/$ARCH/swan/bin
 swanbatdir=$D3D_HOME/$ARCH/swan/scripts
 shareddir=$D3D_HOME/$ARCH/shared
-waveexedir=$D3D_HOME/$ARCH/wave/bin
+waveexedir=$D3D_HOME/$ARCH/dwaves/bin
 
 
     #

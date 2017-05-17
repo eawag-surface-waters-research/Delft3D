@@ -45,18 +45,19 @@ set D3D_HOME=%~dp0..\..
 
 
 
-set delwaqexedir=%D3D_HOME%\%ARCH%\delwaq\bin
+set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
 set dflowfmexedir=%D3D_HOME%\%ARCH%\dflowfm\bin
 set dimrexedir=%D3D_HOME%\%ARCH%\dimr\bin
 set esmfexedir=%D3D_HOME%\%ARCH%\esmf\bin
 set esmfbatdir=%D3D_HOME%\%ARCH%\esmf\scripts
-set flow1d2dexedir=%D3D_HOME%\%ARCH%\flow1d2d\bin
-set rrexedir=%D3D_HOME%\%ARCH%\rr\bin
-set rtctoolsexedir=%D3D_HOME%\%ARCH%\rtctools\bin
+set flow1dexedir=%D3D_HOME%\%ARCH%\dflow1d\bin
+set flow1d2dexedir=%D3D_HOME%\%ARCH%\dflow1d2d\bin
+set rrexedir=%D3D_HOME%\%ARCH%\drr\bin
+set rtctoolsexedir=%D3D_HOME%\%ARCH%\dfbc\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
 set shareddir=%D3D_HOME%\%ARCH%\shared
-set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
+set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
 
     rem
@@ -64,7 +65,7 @@ set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
     rem
 
     rem Run
-set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
+set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
     rem With debug info: "%dhydroexedir%\d_hydro.exe" -d 0xFFFFFFFF %argfile%
 "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d 0xFFFFFFFF %argfile%
 
