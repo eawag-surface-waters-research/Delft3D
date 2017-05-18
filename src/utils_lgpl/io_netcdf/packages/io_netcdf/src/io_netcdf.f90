@@ -59,6 +59,11 @@ public :: IONC_ENOTAVAILABLE
 ! Types
 !
 public :: t_ionc
+public :: t_ug_charinfo
+public :: ug_idsLen
+public :: ug_idsLongNamesLen
+public :: t_ug_meta
+public :: ug_strLenMeta
 
 !
 ! Subroutines
@@ -107,6 +112,11 @@ public :: ionc_create_1d_mesh_ugrid
 public :: ionc_write_1d_mesh_discretisation_points_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
 public :: ionc_read_1d_mesh_discretisation_points_ugrid
+!links functions
+public :: ionc_def_mesh_contact_ugrid
+public :: ionc_get_link_count_ugrid
+public :: ionc_put_mesh_contact_ugrid
+public :: ionc_get_mesh_contact_ugrid
 
 private
 
@@ -672,10 +682,11 @@ end function ionc_write_map_ugrid
 
 !> Add the global attributes to a NetCDF file 
 function ionc_add_global_attributes(ioncid,institution,source,references,version,modelname) result(ierr)
+
    integer,         intent(in) :: ioncid  !< The IONC data set id.
    integer                     :: ierr    !< Result status, ionc_noerr if successful.
    character(len=*), intent(in):: institution, source, references, version, modelname
-   type(t_ug_meta) :: meta
+   type(t_ug_meta)             :: meta
    
    meta%institution = institution
    meta%source = source
@@ -923,7 +934,7 @@ function add_dataset(ncid, netCDFFile, ioncid, iconvtype) result(ierr)
 
    select case (datasets(ioncid)%iconvtype)
    !
-   ! UGRID initialization: If the case is not executed the meshidid structure will not be createtd
+   ! UGRID initialization: If the case is not executed the meshidid structure will not be created
    !
    case (IONC_CONV_UGRID)
       allocate(datasets(ioncid)%ug_file)
@@ -1133,5 +1144,55 @@ function ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branch
    
 end function ionc_read_1d_mesh_discretisation_points_ugrid
 
+!
+! create mesh links
+!
+
+function ionc_def_mesh_contact_ugrid(ioncid, linkmesh, linkmeshname, nlinks, idmesh1, idmesh2, locationType1Id, locationType2Id) result(ierr) 
+
+   integer, intent(in)                :: ioncid, nlinks, idmesh1, idmesh2,locationType1Id,locationType2Id   
+   integer, intent(inout)             :: linkmesh
+   character(len=*), intent(in)       :: linkmeshname 
+   integer                            :: ierr
+  
+  ! first add an ug datastructure
+  ierr = ug_add_links(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, linkmesh)
+  
+  ! create the variables and attributes
+  ierr = ug_def_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%linksids(linkmesh), linkmeshname, nlinks, idmesh1, idmesh2, locationType1Id, locationType2Id)
+   
+end function ionc_def_mesh_contact_ugrid
+
+function ionc_get_link_count_ugrid(ioncid, link, nlinks) result(ierr) 
+
+   integer, intent(in)      :: ioncid, link
+   integer, intent(inout)   :: nlinks
+   integer                  :: ierr
+   
+   ierr = ug_get_link_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%linksids(link), nlinks) 
+   
+end function ionc_get_link_count_ugrid
+
+function ionc_put_mesh_contact_ugrid(ioncid, linkmesh, mesh1indexes, mesh2indexes, linksids, linkslongnames)  result(ierr) 
+
+   integer, intent(in)                :: ioncid, linkmesh 
+   integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:)
+   character(len=*), intent(in)       :: linksids(:), linkslongnames(:)  
+   integer                            :: ierr
+
+   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%linksids(linkmesh), mesh1indexes, mesh2indexes, linksids, linkslongnames) 
+
+end function ionc_put_mesh_contact_ugrid
+
+function ionc_get_mesh_contact_ugrid(ioncid, linkmesh, mesh1indexes, mesh2indexes, linksids, linkslongnames)  result(ierr) 
+
+   integer, intent(in)                :: ioncid, linkmesh 
+   integer, intent(inout)             :: mesh1indexes(:),mesh2indexes(:)
+   character(len=*), intent(inout)    :: linksids(:), linkslongnames(:)  
+   integer                            :: ierr
+
+   ierr = ug_get_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%linksids(linkmesh), mesh1indexes, mesh2indexes, linksids, linkslongnames) 
+
+end function ionc_get_mesh_contact_ugrid
 
 end module io_netcdf
