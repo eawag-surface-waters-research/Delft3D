@@ -111,6 +111,7 @@
 
 !        sloppy way of output
 
+      ITER = 0
       IERR = 0
       IF (FIRST) THEN
          FIRST = .FALSE.
@@ -190,7 +191,6 @@
       ENDIF
       IF ( RESID .LT. TOL ) GOTO 70
 
-      ITER = 0
 
 
 !     Main GMRES iteration loop
