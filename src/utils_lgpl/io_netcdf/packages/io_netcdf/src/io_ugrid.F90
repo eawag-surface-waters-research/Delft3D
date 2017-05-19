@@ -57,7 +57,7 @@ type, BIND(C) ::t_ug_meta
 end type t_ug_meta
 
 !! Meta data for string info 
-integer, parameter :: ug_idsLen          = 30
+integer, parameter :: ug_idsLen          = 40
 integer, parameter :: ug_idsLongNamesLen = 80
 type, BIND(C) :: t_ug_charinfo  
     character(len=ug_idsLen)            :: ids
@@ -3065,5 +3065,6 @@ function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset)
    end if 
     
 end function  ug_read_1d_mesh_discretisation_points
+
 
 end module io_ugrid
