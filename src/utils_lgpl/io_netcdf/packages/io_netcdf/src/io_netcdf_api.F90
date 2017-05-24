@@ -55,12 +55,11 @@ contains
 
 
 !> Tries to create a NetCDF file and initialize based on its specified conventions.
-function ionc_create_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, name="ionc_create")
+function ionc_create_dll(c_path, mode, ioncid) result(ierr) bind(C, name="ionc_create")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_dll
     character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
     integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
-    integer(kind=c_int),           intent(out)    :: ioncid   !< inout The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-    integer(kind=c_int),           intent(inout) :: iconvtype !< The detected conventions in the file.
+    integer(kind=c_int),           intent(out)   :: ioncid   !< inout The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
     integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
 
     character(len=MAXSTRLEN) :: path
@@ -68,7 +67,9 @@ function ionc_create_dll(c_path, mode, ioncid, iconvtype) result(ierr) bind(C, n
     ! Store the name
     path = char_array_to_string(c_path, strlen(c_path))
 
-    ierr = ionc_create(path, mode, ioncid, iconvtype)
+
+    ! We always create ugrid files
+    ierr = ionc_create(path, mode, ioncid, IONC_CONV_UGRID)
 end function ionc_create_dll
 
 
@@ -800,5 +801,29 @@ function ionc_get_mesh_contact_dll(ioncid, linkmesh, c_mesh1indexes, c_mesh2inde
    end do
    
 end function ionc_get_mesh_contact_dll
+
+!
+! Clone functions
+!
+
+function ionc_clone_mesh_definition_dll( ncidin, ncidout, meshidin, meshidout )  result(ierr) bind(C, name="ionc_clone_mesh_definition")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_clone_mesh_definition_dll
+   integer, intent(in)    :: ncidin, ncidout, meshidin
+   integer, intent(inout)    :: meshidout
+   integer                :: ierr
+
+   ierr = ionc_clone_mesh_definition_ugrid( ncidin, ncidout, meshidin, meshidout )
+
+end function ionc_clone_mesh_definition_dll
+
+function ionc_clone_mesh_data_dll( ncidin, ncidout, meshidin, meshidout )  result(ierr) bind(C, name="ionc_clone_mesh_data")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_clone_mesh_data_dll
+   integer, intent(in)    :: ncidin, ncidout, meshidin
+   integer, intent(in)    :: meshidout
+   integer                :: ierr
+
+   ierr = ionc_clone_mesh_data_ugrid( ncidin, ncidout, meshidin, meshidout )
+
+end function ionc_clone_mesh_data_dll
 
 end module io_netcdf_api
