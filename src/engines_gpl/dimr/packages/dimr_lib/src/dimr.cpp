@@ -311,13 +311,12 @@ DllExport void get_var (const char * key, void ** ref) {
         throw new Exception(true, "dimr::get_var: Unrecognized component \"%s\". Expecting \"componentName/parameterName\"\n", componentName);
     }
     // Get the pointer to the variable being asked for and put it in argument "ref"
-    *ref = thisDimr->send (sourceName, 
-                           compPtr->type,
-                           compPtr->dllGetVar, 
-                           &sourceVarPtr,
-                           compPtr->processes,
-                           compPtr->numProcesses,
-                           sourceProcess);
+    double * transfer = new double [compPtr->numProcesses];
+
+    thisDimr->getAddress(sourceName, compPtr->type, compPtr->dllGetVar, &sourceVarPtr, compPtr->processes, compPtr->numProcesses, transfer);
+    *ref = thisDimr->send(sourceName, compPtr->type, sourceVarPtr, compPtr->processes, compPtr->numProcesses, transfer);
+    
+    delete[] transfer;
     delete[] componentName;
 }
 
@@ -870,27 +869,31 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                 // TODO: This does not work for arrays (yet), only scalar double
                                 //
                                 // Getting data:
-                                transferValuePtr = this->send (thisCoupler->items[k].sourceName, 
-                                                         thisCoupler->sourceComponent->type,
-                                                         thisCoupler->sourceComponent->dllGetVar, 
-                                                         &(thisCoupler->items[k].sourceVarPtr),
-                                                         thisCoupler->sourceComponent->processes,
-                                                         thisCoupler->sourceComponent->numProcesses,
-                                                         thisCoupler->items[k].sourceProcess);
+                                double * transfer = new double [thisCoupler->sourceComponent->numProcesses];
+
+                                // addresses eventually updated
+                                getAddress(thisCoupler->items[k].sourceName, thisCoupler->sourceComponent->type, thisCoupler->sourceComponent->dllGetVar, &(thisCoupler->items[k].sourceVarPtr), 
+                                   thisCoupler->sourceComponent->processes, thisCoupler->sourceComponent->numProcesses, transfer);
+                                // the value of sourceVarPtr is sent here to all MPI processes
+                                transferValuePtr = send(thisCoupler->items[k].sourceName, thisCoupler->sourceComponent->type, thisCoupler->items[k].sourceVarPtr, 
+                                   thisCoupler->sourceComponent->processes, thisCoupler->sourceComponent->numProcesses, transfer);
+
+                                delete[] transfer;
+
                                 // Optional TODO: assuming one source(partition):
                                 //    if there is only one target (partition), and all partitions can act as source partition:
                                 //        choose the target partition to act as source partition
                                 //        no MPI_Bcast needed
                                 //
-                                this->receive (thisCoupler->items[k].targetName,
-                                               thisCoupler->targetComponent->type,
-                                               thisCoupler->targetComponent->dllSetVar,
-                                               thisCoupler->targetComponent->dllGetVar,
-                                               thisCoupler->items[k].targetVarPtr,
-                                               thisCoupler->targetComponent->processes,
-                                               thisCoupler->targetComponent->numProcesses,
-                                               thisCoupler->items[k].targetProcess,
-                                               transferValuePtr);
+                                receive (thisCoupler->items[k].targetName,
+                                         thisCoupler->targetComponent->type,
+                                         thisCoupler->targetComponent->dllSetVar,
+                                         thisCoupler->targetComponent->dllGetVar,
+                                         thisCoupler->items[k].targetVarPtr,
+                                         thisCoupler->targetComponent->processes,
+                                         thisCoupler->targetComponent->numProcesses,
+                                         thisCoupler->items[k].targetProcess,
+                                         transferValuePtr);
                             }
                         }
                     }
@@ -907,175 +910,188 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
     }
 }
 
-
-
 //------------------------------------------------------------------------------
-double * Dimr::send (const char * name, 
-                     int          compType, 
-                     BMI_GETVAR   dllGetVar, 
-                     double    ** sourceVarPtr,    // Output parameter! Needed when doing a dllSetVar via "get_var, var=value". See "send" call in Dimr::receive
-                     int        * processes,
-                     int          nProc,
-                     int          sourceProcess) {
-    // Array "transfer" is used to collect a scalar double from all partitions
-    // For now: The resulting scalar double is stored in the class parameter "transferValeu"
-    // TODO: Point to variable in related kernel? How when running in parallel?
-    double * transfer       = (double *)malloc(nProc * sizeof(double));   
-    double * reducedTransfer = (double *)malloc(nProc * sizeof(double));
-    // put data to be transferred from this partitions source location into the transfer array
-    for (int m = 0 ; m < nProc; m++) 
-	{
-		// source provider component not available on this rank.
-		// Define a missing value (large negative number for later reduction operations)
-		transfer[m] = -999000.0;
-
-        if (my_rank == processes[m]) 
-		{
-            this->log->Write (Log::DETAIL, my_rank, "Send(%s)", name);
-			if (    compType == COMP_TYPE_RTC
-				|| compType == COMP_TYPE_RR
-				|| compType == COMP_TYPE_FLOW1D
-				|| compType == COMP_TYPE_FLOW1D2D
-                || *sourceVarPtr == NULL          ) {
-                // These components only returns a new pointer to a copy of the double value, so call it each time.
-                // sourceVarPtr=NULL: getVar not yet called for this parameter, probably because "send" is being called
-                //                    via the toplevel "get_var"
-                if (dllGetVar == NULL) {
-                    throw new Exception (true, "ABORT: get_var function not defined while processing %s", name);
-                }
-                (dllGetVar) (name, (void**)(sourceVarPtr));
-            } else if (compType == COMP_TYPE_WANDA) {
-                if (dllGetVar == NULL) {
-                    throw new Exception (true, "ABORT: get_var function not defined while processing %s", name);
-                }
-                // Wanda does not use pointers to internal structures:
-                // - Use the DIMR-transfer array
-                // - Note the missing & in the dllGetVar call, when comparing with the dllGetVar call above
-                *sourceVarPtr = transfer;
-                (dllGetVar) (name, (void**)(*sourceVarPtr));
-            } else {
-                // Other components already have direct pointer access to the actual variable.
+// set "value" in the component target location
+void Dimr::receive(const char * name,
+   int          compType,
+   BMI_SETVAR   dllSetVar,
+   BMI_GETVAR   dllGetVar,
+   double     * targetVarPtr,
+   int        * processes,
+   int          nProc,
+   int          targetProcess,
+   const void * transferValuePtr) {
+   // Assumption: transferValuePtr points to a (scalar) double
+   // TODO: allow more types of pointers
+   //
+   // NaN check:
+   if (*(double*)(transferValuePtr) == *(double*)(transferValuePtr)) {
+      for (int m = 0; m < nProc; m++) {
+         if (my_rank == processes[m]) {
+            this->log->Write(Log::DETAIL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
+            if (compType == COMP_TYPE_RTC
+               || compType == COMP_TYPE_RR
+               || compType == COMP_TYPE_FLOW1D
+               || compType == COMP_TYPE_FLOW1D2D
+               || compType == COMP_TYPE_WANDA) {
+               if (dllSetVar == NULL) {
+                  throw new Exception(true, "ABORT: Dimr::receive: set_var function not defined while processing %s", name);
+               }
+               (dllSetVar)(name, (const void *)transferValuePtr);
+               if (compType == COMP_TYPE_RTC) {
+                  // target = rtc
+                  // SetVar(name, value) sets variable named "name" to "value" at the current time (t = n)
+                  // But, in case of IMPLICIT method, this should be the next time (t = n + 1)
+                  // Clean solution: do not use IMPLICIT method in RTCTools (To Do for Stef Hummel)
+                  // Shortcut hack:
+                  // 1. Set value at current time (t=n)
+                  // AND 2. Set also value at next time (t=n+1),
+                  // by adding a * at the end of the targetName. This is a signal to RTCTools that this
+                  // value belongs to t=n+1
+                  // This "shortcut hack" is identical to what currently is used in Delta Shell via the
+                  // OpenMI interface with RTCTools
+                  char *targetName = new char[strlen(name) + 2];
+                  sprintf(targetName, "%s*\0", name);
+                  (dllSetVar)(targetName, (const void *)transferValuePtr);
+                  delete[] targetName;
+               }
             }
-            // The sourceVarPtr may be NULL for my_rank
-            // Wanda: the value is already in the transfer array
-            if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA)
-			{
-                transfer[m] = *(*sourceVarPtr);
-            }
-        } 
-    }
+            else {
+               // target is a component that uses direct pointer access to the actual variable
+               // When doing a dllSetVar, targetVarPtr is not defined. First do a "getAddress" to get it defined
+               // NOTE: transferValuePtr contains the value calculated by RTCTools: it has been already communicated 
+               // to all processes by a previous send call. 
 
-	double maxValue = -999000.0;
-	// Do not call MPI_Allreduce when the number of partitions is 1. Big chance that it will cause a crash
-	if (numranks > 1) 
-	{
-		// NOTE: here the transfer array has a defined value only at position==my_rank and if *sourceVarPtr != NULL.
-		// We perform a reduction operation to collect the maximum values at each position and afterwards take the maximum of all values.
-		// We could also use only one double.instead of a transfer array and perform the reduction on a single scalar (so avoiding the loop below) 
-		int ierr = MPI_Allreduce(transfer, reducedTransfer, nProc, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-		
-		for (int m = 0; m < nProc; m++)
-		{
-			if (reducedTransfer[m]> maxValue) maxValue = reducedTransfer[m];
-		}
-    }
-	else
-	{
-		maxValue = transfer[0];
-	}
-	
-	transferValue = maxValue;
-    free(transfer);
-	free(reducedTransfer);
-	return &(transferValue);
+               if (targetVarPtr == NULL)
+               {
+                  double * transfer = new double[nProc];
+                  //here we get the address (e.g. weir levels)
+                  getAddress(name, compType, dllGetVar, &targetVarPtr, processes, nProc, transfer);
+                  delete[] transfer;
+               }
+ 
+               //  }
+               // Know we know the location, we need to set it in targetVarPtr
+               //here we do the check
+               if (targetVarPtr == NULL)
+               {
+                  if (targetProcess == -1 || targetProcess == my_rank) 
+                  {
+                     // targetProcess=-1: no process can accept this item
+                     // targetProcess=my_rank: this process is registered to be able to accept this item but something goes wrong
+                     throw new Exception(true, "ABORT: Dimr::receive: get_var function not defined while processing %s", name);
+                  }
+               }
+               else
+               {
+                  // Here write the RTC value in FM (direct access to memory using a pointer). 
+                  // Here we already know targetVarPtr is not null. 
+                     *(targetVarPtr) = *(double *)transferValuePtr;
+               }
+            }
+         }
+      }
+   }
 }
 
+//------------------------------------------------------------------------------
+// This function gets the address from the components. 
+// Does not do any transfer of the values stored in sourceVarPtr. 
 
+void Dimr::getAddress(
+   const char * name,
+   int          compType,
+   BMI_GETVAR   dllGetVar,
+   double    ** sourceVarPtr,
+   int        * processes,
+   int          nProc,
+   double     * transfer)
+{
+   for (int m = 0; m < nProc; m++) {
+      if (my_rank == processes[m]) {
+         this->log->Write(Log::DETAIL, my_rank, "Dimr::getAddress (%s)", name);
+         if (compType == COMP_TYPE_RTC
+            || compType == COMP_TYPE_RR
+            || compType == COMP_TYPE_FLOW1D
+            || compType == COMP_TYPE_FLOW1D2D
+            || *sourceVarPtr == NULL) {
+            // These components only returns a new pointer to a copy of the double value, so call it each time.
+            // sourceVarPtr=NULL: getVar not yet called for this parameter, probably because "send" is being called
+            //                    via the toplevel "get_var"
+            if (dllGetVar == NULL) {
+               throw new Exception(true, "ABORT: get_var function not defined while processing %s", name);
+            }
+            (dllGetVar)(name, (void**)(sourceVarPtr));
+         }
+         else if (compType == COMP_TYPE_WANDA) {
+            if (dllGetVar == NULL) {
+               throw new Exception(true, "ABORT: get_var function not defined while processing %s", name);
+            }
+            // Wanda does not use pointers to internal structures:
+            // - Use the DIMR-transfer array
+            // - Note the missing & in the dllGetVar call, when comparing with the dllGetVar call above
+            *sourceVarPtr = transfer;
+            (dllGetVar)(name, (void**)(*sourceVarPtr));
+         }
+         else 
+         {
+            // Other components already have direct pointer access to the actual variable.
+         }
+      }
+   }
+}
 
 //------------------------------------------------------------------------------
-// set "value" in the comopnents target location
-void Dimr::receive (const char * name,
-                    int          compType,
-                    BMI_SETVAR   dllSetVar,
-                    BMI_GETVAR   dllGetVar, 
-                    double     * targetVarPtr,
-                    int        * processes,
-                    int          nProc,
-                    int          targetProcess,
-                    const void * transferValuePtr) {
-    // Assumption: transferValuePtr points to a (scalar) double
-    // TODO: allow more types of pointers
-    //
-    // NaN check:
-    if (*(double*)(transferValuePtr) == *(double*)(transferValuePtr)) {
-        for (int m = 0 ; m < nProc; m++) {
-            if (my_rank == processes[m]) {
-                this->log->Write (Log::DETAIL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
-				if (   compType == COMP_TYPE_RTC 
-                    || compType == COMP_TYPE_RR 
-                    || compType == COMP_TYPE_FLOW1D 
-					|| compType == COMP_TYPE_FLOW1D2D
-                    || compType == COMP_TYPE_WANDA   ) {
-                    if (dllSetVar == NULL) {
-                        throw new Exception (true, "ABORT: Dimr::receive: set_var function not defined while processing %s", name);
-                    }
-                    (dllSetVar) (name,(const void *)transferValuePtr);
-					if (compType == COMP_TYPE_RTC) {
-						// target = rtc
-						// SetVar(name, value) sets variable named "name" to "value" at the current time (t = n)
-						// But, in case of IMPLICIT method, this should be the next time (t = n + 1)
-						// Clean solution: do not use IMPLICIT method in RTCTools (To Do for Stef Hummel)
-						// Shortcut hack:
-						// 1. Set value at current time (t=n)
-						// AND 2. Set also value at next time (t=n+1),
-						// by adding a * at the end of the targetName. This is a signal to RTCTools that this
-						// value belongs to t=n+1
-						// This "shortcut hack" is identical to what currently is used in Delta Shell via the
-						// OpenMI interface with RTCTools
-						char *targetName = new char[strlen(name) + 2];
-						sprintf(targetName, "%s*\0", name);
-						(dllSetVar) (targetName, (const void *)transferValuePtr);
-						delete[] targetName;
-					}
-                } else {
-                    // target is a component that uses direct pointer access to the actual variable
-                    // When doing a dllSetVar, targetVarPtr is not defined. First do a "send" to get it defined.
-                    // WARNING: the test "if (targetVarPtr == NULL)" is not allowed:
-                    //          When target is defined for 1 partition and undefined for the other partitions,
-                    //          send will be called for all but 1 partitions. This screws the MPI administration,
-                    //          resulting in a crash.
-                    //          If the test "if (targetVarPtr == NULL)" is prefered, a more detailed administration is needed.
-                    //   if (targetVarPtr == NULL) {
+// This function sends the sourceVarPtr value to all processes 
+double* Dimr::send(
+   const char * name,
+   int          compType,
+   double     * sourceVarPtr,
+   int        * processes,
+   int          nProc,
+   double     * transfer)
+{
+   double * reducedTransfer = new double[nProc];
 
-					// transferValuePtr contains the value calculated by RTCTools. 
-					// Here we already know transferValuePtr is not null.
-					double * valueToTransfer = ( double *)transferValuePtr;
-					thisDimr->send(name,
-                                    compType,
-					                dllGetVar, 
-									&valueToTransfer,
-					                processes,
-					                nProc,
-					                0);
-                    //  }
-                    if (targetVarPtr == NULL) 
-					   {
-                        if (targetProcess == -1 || targetProcess == my_rank) {
-                            // targetProcess=-1: no process can accept this item
-                            // targetProcess=my_rank: this process is registered to be able to accept this item but something goes wrong
-                            throw new Exception (true, "ABORT: Dimr::receive: get_var function not defined while processing %s", name);
-                        }
-                    } 
-					else 
-					{
-						// Here writes the RTC value in FM (direct access to memory using a pointer). 
-						// Here we already know targetVarPtr is not null. 
-						*(targetVarPtr) = transferValue;
-                    }
-                }
-            }
-        }
-    }
+   for (int m = 0; m < nProc; m++) 
+   {
+      transfer[m] = -999000.0;
+      if (my_rank == processes[m]) 
+      {
+         this->log->Write(Log::DETAIL, my_rank, "Dimr::send (%s)", name);
+         if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) 
+         {
+            transfer[m] = *sourceVarPtr;
+         }
+      }
+   }
+
+   //now you have all source values in the transfer array, we can reduce them
+   double maxValue = -999000.0;
+   // Do not call MPI_Allreduce when the number of partitions is 1. 
+   if (numranks > 1)
+   {
+      // NOTE: here the transfer array has a defined value only at position==my_rank and if *sourceVarPtr != NULL.
+      // We perform a reduction operation to collect the maximum values at each position and afterwards take the maximum of all values.
+      // We could also use only one double instead of a transfer array and perform the reduction on a single scalar (so avoiding the loop below) 
+      int ierr = MPI_Allreduce(transfer, reducedTransfer, nProc, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
+      for (int m = 0; m < nProc; m++)
+      {
+         if (reducedTransfer[m] > maxValue) 
+            maxValue = reducedTransfer[m];
+      }
+   }
+   else
+   {
+      maxValue = transfer[0];
+   }
+
+   delete [] reducedTransfer;
+
+   //the reduced value now is set and return to all ranks
+   transferValue = maxValue;
+   return &(transferValue);
 }
 
 

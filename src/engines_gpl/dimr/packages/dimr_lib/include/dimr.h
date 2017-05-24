@@ -274,8 +274,9 @@ class Dimr {
         void           timerStart(dimr_component *);
         void           timerEnd(dimr_component *);
         void           timersFinish(void);
-        double *       send(const char *, int, BMI_GETVAR, double **, int *, int, int);
         void           receive(const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
+        void           getAddress(const char * name, int compType, BMI_GETVAR dllGetVar, double ** sourceVarPtr, int * processes, int nProc, double * transfer);
+        double *       send(const char * name, int compType, double* sourceVarPtr, int* processes, int nProc, double* transfer);
 
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run
