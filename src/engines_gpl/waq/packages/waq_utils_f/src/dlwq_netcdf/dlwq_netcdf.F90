@@ -470,7 +470,7 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
     character(len=*), intent(in)      :: attribute
     integer, intent(in), dimension(:) :: dimsizes
     logical, intent(in), optional     :: use_attrib
-    
+
     integer                               :: dlwqnc_result
 
     integer                               :: ierror
@@ -1060,6 +1060,12 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     do i = 1,len_trim(name)
         if ( name(i:i) == ' ' ) then
             name(i:i) = '_'
+        endif
+    enddo
+
+    do i = 1,len_trim(name2d)
+        if ( name2d(i:i) == ' ' ) then
+            name2d(i:i) = '_'
         endif
     enddo
 
