@@ -287,7 +287,7 @@ class Dimr {
         XmlTree *          config;         // top of entire XML configuration tree
         char *             mainArgs;       // reassembled command-line arguments (argv[1...])
         char *             slaveArg;       // command-line argument for slave mode
-        dimr_control_block * control;        // structure containing all information from the control block in the config.xml file
+        dimr_control_block * control;      // structure containing all information from the control block in the config.xml file
         dimr_components    componentsList; // Array of all components
         dimr_couplers      couplersList;   // Array of all couplers
         bool               use_mpi;        // Whether MPI-mode is active for this run.
@@ -296,6 +296,8 @@ class Dimr {
         unsigned int       logMask;
         const char *       configfile;     // name of configuration file
         bool               done;           // set to true when it's time to stop
+        char *             redirectFile;   // Name of file to redirect stdout/stderr to
+                                           // Default: Off when started via dimr-exe, On otherwise
 
 
         enum {

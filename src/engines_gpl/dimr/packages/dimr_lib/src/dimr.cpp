@@ -96,6 +96,12 @@ Dimr::Dimr(void) {
     this->numranks = 1;
     this->configfile = NULL;
     this->done = false;
+    // Initialize redirectFile. Default: switched On (!=NULL)
+    const char * filename = "dimr_redirected_stdout_stderr.log";
+    int len = strlen(filename);
+    this->redirectFile = (char *) malloc((len+1)*sizeof(char));
+    strncpy(this->redirectFile, (const char*)filename, len);
+    this->redirectFile[len] = '\0';
 }
 
 
@@ -123,7 +129,17 @@ DllExport int initialize(const char * configfile) {
     if (thisDimr == NULL) {
         thisDimr = new Dimr();
     }
-	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
+    if (thisDimr->redirectFile != NULL) {
+        printf("stdout and stderr are redirected to file \"%s\"\n", thisDimr->redirectFile);
+        freopen (thisDimr->redirectFile,"w",stdout);
+        freopen (thisDimr->redirectFile,"w",stderr);
+        // Sometimes stderr overwrites stdout messages at the beginning of redirectFile
+        // Add some empty lines at the start of the file
+        printf("\n\n\n\n\n");
+        fflush(stdout);
+    }
+
+    thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
 	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
     //
     //
@@ -348,6 +364,22 @@ DllExport void set_var (const char * key, const void * value) {
     } else if (strcmp(key, "debugLevel") == 0) {
         thisDimr->logMask = *(Log::Mask *)value;
         thisDimr->log->SetMask(thisDimr->logMask);
+    } else if (strcmp(key, "redirectFile") == 0) {
+        // value is a char*
+        // Special value: "stdout/stderr" => switch off redirection to file by setting to NULL
+        // Else: value is the name of the file to redirect to
+        if (strcmp((const char*)value,"stdout/stderr") == 0 && thisDimr->redirectFile != NULL) {
+            free(thisDimr->redirectFile);
+            thisDimr->redirectFile = NULL;
+        } else {
+            if (thisDimr->redirectFile != NULL) {
+                free(thisDimr->redirectFile);
+            }
+            int len = strlen((const char*)value);
+            thisDimr->redirectFile = (char *) malloc((len+1)*sizeof(char));
+            strncpy(thisDimr->redirectFile, (const char*)value, len);
+            thisDimr->redirectFile[len] = '\0';
+        }
     } else {
         // Assumption: "key" has the structure "componentName/group/id/parameter"
         if (slash == NULL) {

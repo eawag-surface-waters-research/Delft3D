@@ -196,6 +196,9 @@ void DimrExe::lib_initialize(void)
     double tStep;
     double tCurrent;
 
+    // Disable redirecting stdout/stderr to file (default switched on)
+    this->log->Write(Log::MINOR, my_rank, "%s.SetVar(redirectFile,stdout/stderr)", this->library, use_mpi);
+    (this->dllSetVar) ("redirectFile", "stdout/stderr");
     this->log->Write(Log::MINOR, my_rank, "%s.SetVar(useMPI,%d)", this->library, use_mpi);
     (this->dllSetVar) ("useMPI", &use_mpi);
     this->log->Write (Log::MINOR, my_rank, "%s.SetVar(numRanks,%d)", this->library, numranks);
