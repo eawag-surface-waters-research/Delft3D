@@ -87,7 +87,7 @@ contains
 !           Local variables
 !
     type(t_crs), target                 :: crs
-    type(t_ug_meshids)                  :: meshids               !< Set of NetCDF-ids for all mesh geometry arrays.
+    integer                             :: meshids(m_ids_end)    !< Set of NetCDF-ids for all mesh geometry arrays.
     type(t_ug_meshgeom)                 :: meshgeom              !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_meshgeom)                 :: aggregated_meshgeom   !< Mesh geometry to be written to the NetCDF file.
                                         
