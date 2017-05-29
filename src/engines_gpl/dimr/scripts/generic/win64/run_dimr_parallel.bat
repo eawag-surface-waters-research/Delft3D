@@ -40,9 +40,14 @@ echo Working directory: %workdir%
     rem
     rem Set the directories containing the binaries
     rem
-set ARCH=win64
 set D3D_HOME=%~dp0..\..
 
+rem Two possibilities for %ARCH% are suitable (win64 and x64)
+if exist %D3D_HOME%win64 (
+    set ARCH=win64
+) else (
+    set ARCH=x64
+)
 
 
 set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
