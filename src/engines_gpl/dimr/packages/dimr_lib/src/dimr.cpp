@@ -79,29 +79,29 @@ static Dimr * thisDimr = NULL;     // global pointer to single object instance
 
 Dimr::Dimr(void) {
     FILE *      logFile = stdout;
-    this->ready = false;
-    this->exePath = NULL;
-    this->exeName = NULL;
-    this->clock = new Clock ();
-    this->logMask = Log::MAJOR;
-    this->log = new Log (logFile, this->clock, this->logMask);
-    this->config = NULL;
-    this->mainArgs = NULL;
-    this->slaveArg = NULL;
-    this->control = NULL;
-    this->componentsList.numComponents = 0;
-    this->couplersList.numCouplers = 0;
-    this->use_mpi = false;
-    this->my_rank = 0;
-    this->numranks = 1;
-    this->configfile = NULL;
-    this->done = false;
+    ready = false;
+    exePath = NULL;
+    exeName = NULL;
+    clock = new Clock ();
+    logMask = Log::MAJOR;
+    log = new Log (logFile, clock, logMask);
+    config = NULL;
+    mainArgs = NULL;
+    slaveArg = NULL;
+    control = NULL;
+    componentsList.numComponents = 0;
+    couplersList.numCouplers = 0;
+    use_mpi = false;
+    my_rank = 0;
+    numranks = 1;
+    configfile = NULL;
+    done = false;
     // Initialize redirectFile. Default: switched On (!=NULL)
     const char * filename = "dimr_redirected_stdout_stderr.log";
     int len = strlen(filename);
-    this->redirectFile = (char *) malloc((len+1)*sizeof(char));
-    strncpy(this->redirectFile, (const char*)filename, len);
-    this->redirectFile[len] = '\0';
+    redirectFile = (char *) malloc((len+1)*sizeof(char));
+    strncpy(redirectFile, (const char*)filename, len);
+    redirectFile[len] = '\0';
 }
 
 
@@ -427,11 +427,11 @@ int dimr_component::dllSetKeyVals (keyValueLL * kv) {
 		// Pass parameters for the first controll block's component: parameters
 		int count = 0;
 	    while(kv){
-			if (this->dllSetVar!=NULL){
-		       (this->dllSetVar) (kv->key,(void*)kv->val);
+			if (dllSetVar!=NULL){
+		       (dllSetVar) (kv->key,(void*)kv->val);
 			} else {
-			   if (this->dllGetVar!=NULL){
-		          (this->dllGetVar) (kv->key,(void**)kv->val);
+			   if (dllGetVar!=NULL){
+		          (dllGetVar) (kv->key,(void**)kv->val);
 			   }
 			}
            kv = kv->nextkv;
@@ -446,36 +446,36 @@ int dimr_component::dllSetKeyVals (keyValueLL * kv) {
 //  Destructor
 Dimr::~Dimr (void) {
 
-    if (this->done)
+    if (done)
         return;
 
     // to do:  (void) FreeLibrary(handle);
     freeLibs();
 
-    this->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr shutting down normally");
+    log->Write (Log::MAJOR, thisDimr->my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
-    free (this->exeName);
+    free (exeName);
 #else
-    delete [] this->exeName;
+    delete [] exeName;
 #endif
 
-    delete this->clock;
-    delete this->config;
-    free (this->exePath);
-    delete this->log;
-    delete [] this->mainArgs;
+    delete clock;
+    delete config;
+    free (exePath);
+    delete log;
+    delete [] mainArgs;
     // componentsList
-    delete [] this->componentsList.components;
+    delete [] componentsList.components;
     // couplersList
-    for (int i = 0 ; i < this->couplersList.numCouplers ; i++) {
-        delete [] this->couplersList.couplers[i].items;
+    for (int i = 0 ; i < couplersList.numCouplers ; i++) {
+        delete [] couplersList.couplers[i].items;
     }
-    delete [] this->couplersList.couplers;
+    delete [] couplersList.couplers;
     // control
-    deleteControlBlock(*(this->control));
-    free(this->control);
-    this->done = true;
+    deleteControlBlock(*(control));
+    free(control);
+    done = true;
 }
 
 
@@ -499,7 +499,7 @@ void Dimr::deleteControlBlock (dimr_control_block cb) {
 //------------------------------------------------------------------------------
 void Dimr::runControlBlock (dimr_control_block * cb, double tStep, int phase) {
     if (cb->type == CT_PARALLEL) {
-        this->log->Write (Log::MAJOR, my_rank, "PARALLEL:");
+        log->Write (Log::MAJOR, my_rank, "PARALLEL:");
         //
         //
         // Initialize loop
@@ -526,27 +526,27 @@ void Dimr::runControlBlock (dimr_control_block * cb, double tStep, int phase) {
 
 //------------------------------------------------------------------------------
 void Dimr::runStartBlock (dimr_control_block * cb, double tStep, int phase) {
-    this->log->Write (Log::MAJOR, my_rank, "START:");
+    log->Write (Log::MAJOR, my_rank, "START:");
 
     chdir(cb->unit.component->workingDir);
     if (phase == GLOBAL_PHASE_FINISH) {
-        this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
-        this->timerStart(cb->unit.component);
+        log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
+        timerStart(cb->unit.component);
         cb->unit.component->result = (cb->unit.component->dllInitialize) (cb->unit.component->inputFile);
-        this->timerEnd(cb->unit.component);
+        timerEnd(cb->unit.component);
         (cb->unit.component->dllGetStartTime) (&cb->tStart);
         (cb->unit.component->dllGetEndTime) (&cb->tEnd);
     }
     cb->tStep = tStep;
-    this->log->Write (Log::MAJOR, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
-    this->timerStart(cb->unit.component);
+    log->Write (Log::MAJOR, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
+    timerStart(cb->unit.component);
     (cb->unit.component->dllUpdate) (cb->tStep);
-    this->timerEnd(cb->unit.component);
+    timerEnd(cb->unit.component);
     if (phase == GLOBAL_PHASE_FINISH) {
-        this->log->Write (Log::MAJOR, my_rank, "%s.Finalize()", cb->unit.component->name);
-        this->timerStart(cb->unit.component);
+        log->Write (Log::MAJOR, my_rank, "%s.Finalize()", cb->unit.component->name);
+        timerStart(cb->unit.component);
         (cb->unit.component->dllFinalize) ();
-        this->timerEnd(cb->unit.component);
+        timerEnd(cb->unit.component);
     }
     fflush(stdout);
 }
@@ -571,7 +571,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
         if (cb->subBlocks[i].type == CT_START) {
             if (cb->masterSubBlockId == -1) {
                 cb->masterSubBlockId = i;
-                this->log->Write (Log::MINOR, my_rank, "Master: %s", cb->subBlocks[cb->masterSubBlockId].unit.component->name);
+                log->Write (Log::MINOR, my_rank, "Master: %s", cb->subBlocks[cb->masterSubBlockId].unit.component->name);
             } else {
                 throw new Exception (true, "runParallelInit: a parallel block cannot have more than one start element.");
             }
@@ -608,10 +608,10 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
     }
     if (masterComponent->onThisRank) {
         chdir(masterComponent->workingDir);
-        this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
-        this->timerStart(masterComponent);
+        log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
+        timerStart(masterComponent);
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
-        this->timerEnd(masterComponent);
+        timerEnd(masterComponent);
         (masterComponent->dllGetStartTime) (&cb->subBlocks[cb->masterSubBlockId].tStart);
         (masterComponent->dllGetEndTime) (&cb->subBlocks[cb->masterSubBlockId].tEnd);
         (masterComponent->dllGetTimeStep) (&cb->subBlocks[cb->masterSubBlockId].tStep);
@@ -641,10 +641,10 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         }
 
                         chdir(thisComponent->workingDir);
-                        this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
-                        this->timerStart(thisComponent);
+                        log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
+                        timerStart(thisComponent);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
-                        this->timerEnd(thisComponent);
+                        timerEnd(thisComponent);
                     }
                 }
             }
@@ -671,7 +671,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                                 sources[m] = 0;
                                 if (my_rank == thisCoupler->sourceComponent->processes[m]) {
                                     // Also for RTCTools_BMI: this is a dummy getvar call, just to check whether it works for this partition
-                                    this->log->Write (Log::MINOR, my_rank, "%s.getVar(%s)", thisCoupler->sourceComponentName, thisCoupler->items[k].sourceName);
+                                    log->Write (Log::MINOR, my_rank, "%s.getVar(%s)", thisCoupler->sourceComponentName, thisCoupler->items[k].sourceName);
                                     (thisCoupler->sourceComponent->dllGetVar) (thisCoupler->items[k].sourceName, (void**)(&thisCoupler->items[k].sourceVarPtr));
                                     if (thisCoupler->items[k].sourceVarPtr != NULL) {
                                         // Yes, this partition can deliver the source var
@@ -698,7 +698,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                                         // Produce a warning
                                         // The "if (my_rank == m)" avoids multiple identical messages
                                         if (my_rank == m) {
-                                            this->log->Write(Log::WARN, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered by partition %d. Ignoring deliverance by partition %d",
+                                            log->Write(Log::WARN, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered by partition %d. Ignoring deliverance by partition %d",
                                                 thisCoupler->name, k, thisCoupler->items[k].sourceName, thisCoupler->items[k].sourceProcess, m);
                                         }
                                     }
@@ -722,7 +722,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                             for (int m = 0 ; m < thisCoupler->targetComponent->numProcesses; m++) {
                                 targets[m] = 0;
                                 if (my_rank == thisCoupler->targetComponent->processes[m]) {
-                                        this->log->Write (Log::MINOR, my_rank, "%s.getVar(%s)", thisCoupler->targetComponentName, thisCoupler->items[k].targetName);
+                                        log->Write (Log::MINOR, my_rank, "%s.getVar(%s)", thisCoupler->targetComponentName, thisCoupler->items[k].targetName);
                                         (thisCoupler->targetComponent->dllGetVar) (thisCoupler->items[k].targetName, (void**)(&thisCoupler->items[k].targetVarPtr));
                                         if (thisCoupler->items[k].targetVarPtr != NULL) {
                                             // Yes, this partition can accept the target var
@@ -749,7 +749,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                                         // Produce a warning
                                         // The "if (my_rank == m)" avoids multiple identical messages
                                         if (my_rank == m) {
-                                            this->log->Write(Log::WARN, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered to multiple partitions: %d and %d.",
+                                            log->Write(Log::WARN, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered to multiple partitions: %d and %d.",
                                                 thisCoupler->name, k, thisCoupler->items[k].targetName, thisCoupler->items[k].targetProcess, m);
                                         }
                                     }
@@ -850,10 +850,10 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
             if (i == cb->masterSubBlockId) {
                 // masterComponent
                 chdir(masterComponent->unit.component->workingDir);
-                this->log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
-                this->timerStart(masterComponent->unit.component);
+                log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
+                timerStart(masterComponent->unit.component);
                 (masterComponent->unit.component->dllUpdate) (tStep);
-                this->timerEnd(masterComponent->unit.component);
+                timerEnd(masterComponent->unit.component);
                 *currentTime = *currentTime + tStep;
             } else {
                 // CT_STARTGROUP
@@ -885,17 +885,17 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             }
                             // Update
                             chdir(thisComponent->workingDir);
-                            this->log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
-                            this->timerStart(thisComponent);
+                            log->Write (Log::MAJOR, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
+                            timerStart(thisComponent);
                             (thisComponent->dllUpdate) (tUpdate);
-                            this->timerEnd(thisComponent);
+                            timerEnd(thisComponent);
                         } else {
                             // Coupler
                             dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                             double * transferValuePtr;
-                            this->log->Write (Log::MINOR, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
+                            log->Write (Log::MINOR, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
                             for (int k = 0 ; k < thisCoupler->numItems ; k++) {
-                                this->log->Write (Log::DETAIL, my_rank, "    %s -> %s", thisCoupler->items[k].sourceName, thisCoupler->items[k].targetName);
+                                log->Write (Log::DETAIL, my_rank, "    %s -> %s", thisCoupler->items[k].sourceName, thisCoupler->items[k].targetName);
                                 // Getting and Setting of data is split to enable
                                 // transferring data, possibly inbetween different partitions
                                 // TODO: This does not work for arrays (yet), only scalar double
@@ -960,7 +960,7 @@ void Dimr::receive(const char * name,
    if (*(double*)(transferValuePtr) == *(double*)(transferValuePtr)) {
       for (int m = 0; m < nProc; m++) {
          if (my_rank == processes[m]) {
-            this->log->Write(Log::DETAIL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
+            log->Write(Log::DETAIL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
             if (compType == COMP_TYPE_RTC
                || compType == COMP_TYPE_RR
                || compType == COMP_TYPE_FLOW1D
@@ -1041,7 +1041,7 @@ void Dimr::getAddress(
 {
    for (int m = 0; m < nProc; m++) {
       if (my_rank == processes[m]) {
-         this->log->Write(Log::DETAIL, my_rank, "Dimr::getAddress (%s)", name);
+         log->Write(Log::DETAIL, my_rank, "Dimr::getAddress (%s)", name);
          if (compType == COMP_TYPE_RTC
             || compType == COMP_TYPE_RR
             || compType == COMP_TYPE_FLOW1D
@@ -1090,7 +1090,7 @@ double* Dimr::send(
       transfer[m] = -999000.0;
       if (my_rank == processes[m]) 
       {
-         this->log->Write(Log::DETAIL, my_rank, "Dimr::send (%s)", name);
+         log->Write(Log::DETAIL, my_rank, "Dimr::send (%s)", name);
          if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) 
          {
             transfer[m] = *sourceVarPtr;
@@ -1139,10 +1139,10 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                 continue;
             }
             chdir(cb->subBlocks[i].unit.component->workingDir);
-            this->log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
-            this->timerStart(cb->subBlocks[i].unit.component);
+            log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
+            timerStart(cb->subBlocks[i].unit.component);
             (cb->subBlocks[i].unit.component->dllFinalize) ();
-            this->timerEnd(cb->subBlocks[i].unit.component);
+            timerEnd(cb->subBlocks[i].unit.component);
 
             if (use_mpi && cb->subBlocks[i].unit.component->mpiComm != NULL) {
                 MPI_Group mpiGroupComp;
@@ -1158,10 +1158,10 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                         continue;
                     }
                     chdir(cb->subBlocks[i].subBlocks[j].unit.component->workingDir);
-                    this->log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
-                    this->timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
+                    log->Write (Log::MAJOR, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
+                    timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
                     (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
-                    this->timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
+                    timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
                     }
             }
         }
@@ -1173,35 +1173,35 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
 //------------------------------------------------------------------------------
 void Dimr::scanConfigFile (void) {
 
-	XmlTree * rootXml     = this->config->Lookup ("/dimrConfig");
+	XmlTree * rootXml     = config->Lookup ("/dimrConfig");
     if (rootXml == NULL)
-        throw new Exception (true, "Configuration file \"%s\" does not have a <dimrConfig> root element", this->configfile);
+        throw new Exception (true, "Configuration file \"%s\" does not have a <dimrConfig> root element", configfile);
     XmlTree * fileversion = rootXml->Lookup ("documentation/fileVersion");
     if (fileversion == NULL)
-        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro documentation->fileVersion element", this->configfile);
+        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro documentation->fileVersion element", configfile);
 
 	// Check version number
     const char * versionnr = fileversion->charData;
     float versionnumber;
     int intRead = sscanf(versionnr, "%f", &versionnumber);
     if (intRead != 1)
-        throw new Exception (true, "Configuration file \"%s\" does not have a version number", this->configfile);
+        throw new Exception (true, "Configuration file \"%s\" does not have a version number", configfile);
     if ((int)floor(versionnumber) != 1)
-        throw new Exception (true, "Configuration file \"%s\": Version number (%3.2f) must have main version 2", this->configfile,versionnumber);
+        throw new Exception (true, "Configuration file \"%s\": Version number (%3.2f) must have main version 2", configfile,versionnumber);
 
 	XmlTree * controlXml  = rootXml->Lookup ("control");
     if (controlXml == NULL)
-        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro control element", this->configfile);
+        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro control element", configfile);
     // Allocate the control structure and check its size
-    this->control = (dimr_control_block *) malloc(sizeof(dimr_control_block));
-    this->control->numSubBlocks = 0;
-    this->control->subBlocks    = NULL;
-    this->control->masterSubBlockId = -1;
+    control = (dimr_control_block *) malloc(sizeof(dimr_control_block));
+    control->numSubBlocks = 0;
+    control->subBlocks    = NULL;
+    control->masterSubBlockId = -1;
     // First scan the config file for all components and couplers (= units)
     scanUnits(rootXml);
     // Then scan the control part
     // References are added to the list of components/couplers
-    scanControl(controlXml, this->control);
+    scanControl(controlXml, control);
 }
 
 
@@ -1209,36 +1209,36 @@ void Dimr::scanConfigFile (void) {
 //------------------------------------------------------------------------------
 void Dimr::scanUnits(XmlTree * rootXml) {
     // Init
-    this->componentsList.numComponents = 0;
-    this->componentsList.components    = NULL;
-    this->couplersList.numCouplers     = 0;
-    this->couplersList.couplers        = NULL;
+    componentsList.numComponents = 0;
+    componentsList.components    = NULL;
+    couplersList.numCouplers     = 0;
+    couplersList.couplers        = NULL;
     // Scan
     for (int i = 0 ; i < rootXml->numChildren ; i++) {
         if (strcmp(rootXml->children[i]->name, "component") == 0) {
-            this->componentsList.numComponents++;
-            if (this->componentsList.components == NULL) {
-                this->componentsList.components = (dimr_component*)malloc(this->componentsList.numComponents * sizeof(dimr_component));
+            componentsList.numComponents++;
+            if (componentsList.components == NULL) {
+                componentsList.components = (dimr_component*)malloc(componentsList.numComponents * sizeof(dimr_component));
             } else {
-                this->componentsList.components = (dimr_component*)realloc(this->componentsList.components, 
-                                                                          this->componentsList.numComponents * sizeof(dimr_component));
-                if (this->componentsList.components == NULL) {
+                componentsList.components = (dimr_component*)realloc(componentsList.components, 
+                                                                          componentsList.numComponents * sizeof(dimr_component));
+                if (componentsList.components == NULL) {
                     throw new Exception (true, "Allocation error in scanUnits (component)");
                 }
             }
-            scanComponent(rootXml->children[i], &(this->componentsList.components[this->componentsList.numComponents - 1]));
+            scanComponent(rootXml->children[i], &(componentsList.components[componentsList.numComponents - 1]));
         }
         if (strcmp(rootXml->children[i]->name, "coupler") == 0) {
-            this->couplersList.numCouplers++;
-            if (this->couplersList.couplers == NULL) {
-                this->couplersList.couplers = (dimr_coupler*)malloc(this->couplersList.numCouplers * sizeof(dimr_coupler));
+            couplersList.numCouplers++;
+            if (couplersList.couplers == NULL) {
+                couplersList.couplers = (dimr_coupler*)malloc(couplersList.numCouplers * sizeof(dimr_coupler));
             } else {
-                this->couplersList.couplers = (dimr_coupler*)realloc(this->couplersList.couplers, this->couplersList.numCouplers * sizeof(dimr_coupler));
-                if (this->couplersList.couplers == NULL) {
+                couplersList.couplers = (dimr_coupler*)realloc(couplersList.couplers, couplersList.numCouplers * sizeof(dimr_coupler));
+                if (couplersList.couplers == NULL) {
                     throw new Exception (true, "Allocation error in scanUnits (coupler)");
                 }
             }
-            scanCoupler(rootXml->children[i], &(this->couplersList.couplers[this->couplersList.numCouplers - 1]));
+            scanCoupler(rootXml->children[i], &(couplersList.couplers[couplersList.numCouplers - 1]));
         }
     }
 }
@@ -1316,7 +1316,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
 
     } else {
         // No <process> specified, default: only run on rank #0.
-        this->log->Write (Log::MAJOR, my_rank, "WARNING: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
+        log->Write (Log::MAJOR, my_rank, "WARNING: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
         newComp->numProcesses = 1;
         char *defaultProc = "0";
         char_to_ints(defaultProc, &(newComp->processes), &(newComp->numProcesses));
@@ -1340,7 +1340,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     // Element inputFile (optional?)
     XmlTree * inputFileElement = xmlComponent->Lookup ("inputFile");
     if (inputFileElement == NULL) {
-        this->log->Write (Log::MAJOR, my_rank, "WARNING: No inputFile specified for component %s.", newComp->name);
+        log->Write (Log::MAJOR, my_rank, "WARNING: No inputFile specified for component %s.", newComp->name);
         }
     else {
         newComp->inputFile = inputFileElement->charData;
@@ -1349,8 +1349,8 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     XmlTree * workingDirElement = xmlComponent->Lookup ("workingDir");
     if (workingDirElement == NULL) {
         newComp->workingDir = (char *) &curPath;
-        this->log->Write (Log::MAJOR, my_rank, "WARNING: No workingDir specified for component %s.", newComp->name);
-        this->log->Write (Log::MAJOR, my_rank, "         workingDir is set to %s", newComp->workingDir);
+        log->Write (Log::MAJOR, my_rank, "WARNING: No workingDir specified for component %s.", newComp->name);
+        log->Write (Log::MAJOR, my_rank, "         workingDir is set to %s", newComp->workingDir);
         }
     else {
         newComp->workingDir = workingDirElement->charData;
@@ -1392,14 +1392,14 @@ void Dimr::scanCoupler(XmlTree * xmlCoupler, dimr_coupler * newCoup) {
         throw new Exception (true, "The coupler \"%s\" does not contain a sourceComponent element", newCoup->name);
     newCoup->sourceComponentName = sourceComponent->charData;
     // Add reference to the actual component acting as source
-    newCoup->sourceComponent = this->getComponent(newCoup->sourceComponentName);
+    newCoup->sourceComponent = getComponent(newCoup->sourceComponentName);
     // Element targetComponent
     XmlTree * targetComponent = xmlCoupler->Lookup ("targetComponent");
     if (targetComponent == NULL)
         throw new Exception (true, "The coupler \"%s\" does not contain a targetComponent element", newCoup->name);
     newCoup->targetComponentName = targetComponent->charData;
     // Add reference to the actual component acting as target
-    newCoup->targetComponent = this->getComponent(newCoup->targetComponentName);
+    newCoup->targetComponent = getComponent(newCoup->targetComponentName);
     // Items
     newCoup->numItems = 0;
     newCoup->items    = NULL;
@@ -1449,7 +1449,7 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dimr_control_block * controlBl
         controlBlock->type = CT_PARALLEL;
     } else if (strcmp(controlBlockXml->name, "start") == 0) {
         controlBlock->type = CT_START;
-        controlBlock->unit.component = this->getComponent(controlBlockXml->GetAttrib("name"));
+        controlBlock->unit.component = getComponent(controlBlockXml->GetAttrib("name"));
         controlBlock->unit.coupler = NULL;
     } else if (strcmp(controlBlockXml->name, "startGroup") == 0) {
         controlBlock->type = CT_STARTGROUP;
@@ -1462,7 +1462,7 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dimr_control_block * controlBl
     } else if (strcmp(controlBlockXml->name, "coupler") == 0) {
         controlBlock->type = CT_COUPLER;
         controlBlock->unit.component = NULL;
-        controlBlock->unit.coupler = this->getCoupler(controlBlockXml->GetAttrib("name"));
+        controlBlock->unit.coupler = getCoupler(controlBlockXml->GetAttrib("name"));
     }
     controlBlock->numSubBlocks = 0;
     controlBlock->subBlocks    = NULL;
@@ -1481,7 +1481,7 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dimr_control_block * controlBl
                     throw new Exception (true, "Allocation error in scanControl");
                 }
             }
-            this->scanControl(controlBlockXml->children[i], &(controlBlock->subBlocks[controlBlock->numSubBlocks - 1]));
+            scanControl(controlBlockXml->children[i], &(controlBlock->subBlocks[controlBlock->numSubBlocks - 1]));
         }
         fflush(stdout);
     }
@@ -1492,9 +1492,9 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dimr_control_block * controlBl
 //------------------------------------------------------------------------------
 // Search for a named component in the list of components
 dimr_component * Dimr::getComponent(const char * compName) {
-    for (int i = 0 ; i < this->componentsList.numComponents ; i++) {
-        if (strcmp(this->componentsList.components[i].name, compName) == 0) {
-            return &(this->componentsList.components[i]);
+    for (int i = 0 ; i < componentsList.numComponents ; i++) {
+        if (strcmp(componentsList.components[i].name, compName) == 0) {
+            return &(componentsList.components[i]);
         }
     }
 }
@@ -1504,9 +1504,9 @@ dimr_component * Dimr::getComponent(const char * compName) {
 //------------------------------------------------------------------------------
 // Search for a named coupler in the list of couplers
 dimr_coupler * Dimr::getCoupler(const char * coupName) {
-    for (int i = 0 ; i < this->couplersList.numCouplers ; i++) {
-        if (strcmp(this->couplersList.couplers[i].name, coupName) == 0) {
-            return &(this->couplersList.couplers[i]);
+    for (int i = 0 ; i < couplersList.numCouplers ; i++) {
+        if (strcmp(couplersList.couplers[i].name, coupName) == 0) {
+            return &(couplersList.couplers[i]);
         }
     }
 }
@@ -1522,50 +1522,50 @@ void Dimr::connectLibs (void) {
 
 #if defined (OSX)
     // Macintosh:VERY SIMILAR TO LINUX
-    throw new Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
+    throw new Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
 #endif
 #if defined (HAVE_CONFIG_H)
     char *err;
 #endif
 
     // do for all libraries
-    for (int i = 0 ; i < this->componentsList.numComponents ; i++) {
-        if (!this->componentsList.components[i].onThisRank) {
-            this->log->Write (Log::DETAIL, my_rank, "Not necessary to load component library \"%s\" on this rank.", this->componentsList.components[i].library);
+    for (int i = 0 ; i < componentsList.numComponents ; i++) {
+        if (!componentsList.components[i].onThisRank) {
+            log->Write (Log::DETAIL, my_rank, "Not necessary to load component library \"%s\" on this rank.", componentsList.components[i].library);
             continue;
         }
 
 #if defined (HAVE_CONFIG_H)
-        char * lib = new char[strlen (this->componentsList.components[i].library) + 3+3+1];
-        sprintf (lib, "lib%s%s", this->componentsList.components[i].library, D3D_PLUGIN_EXT);
-        if (   strchr (this->componentsList.components[i].library, '/' ) != NULL 
-            || strchr (this->componentsList.components[i].library, '\\') != NULL 
-            || strchr (this->componentsList.components[i].library, '.' ) != NULL) {
+        char * lib = new char[strlen (componentsList.components[i].library) + 3+3+1];
+        sprintf (lib, "lib%s%s", componentsList.components[i].library, D3D_PLUGIN_EXT);
+        if (   strchr (componentsList.components[i].library, '/' ) != NULL 
+            || strchr (componentsList.components[i].library, '\\') != NULL 
+            || strchr (componentsList.components[i].library, '.' ) != NULL) {
             throw new Exception (true, "Invalid component library name \"%s\"\n", lib, -1);
         }
 #else
-        char * lib = new char[strlen (this->componentsList.components[i].library) + 4+1];
-        sprintf (lib, "%s.dll", this->componentsList.components[i].library);
-        if (   strchr (this->componentsList.components[i].library, '/' ) != NULL 
-            || strchr (this->componentsList.components[i].library, '\\') != NULL 
-            || strchr (this->componentsList.components[i].library, '.' ) != NULL) {
+        char * lib = new char[strlen (componentsList.components[i].library) + 4+1];
+        sprintf (lib, "%s.dll", componentsList.components[i].library);
+        if (   strchr (componentsList.components[i].library, '/' ) != NULL 
+            || strchr (componentsList.components[i].library, '\\') != NULL 
+            || strchr (componentsList.components[i].library, '.' ) != NULL) {
             throw new Exception (true, "Invalid component library name \"%s\"\n", lib, -1);
         }
 #endif
 
-        this->log->Write (Log::DETAIL, my_rank, "Loading library \"%s\"", lib);
+        log->Write (Log::DETAIL, my_rank, "Loading library \"%s\"", lib);
 
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
         void * dllhandle = dlopen (lib, RTLD_LAZY);
-        this->componentsList.components[i].libHandle = dllhandle;
+        componentsList.components[i].libHandle = dllhandle;
         #define GETPROCADDRESS dlsym
         #define GetLastError dlerror
         #define Sleep sleep
 #else
         SetLastError(0); /* clear error code */
         HINSTANCE dllhandle = LoadLibrary (LPCSTR(lib));
-        this->componentsList.components[i].libHandle = dllhandle;
+        componentsList.components[i].libHandle = dllhandle;
         #define GETPROCADDRESS GetProcAddress
 #endif
 
@@ -1583,71 +1583,71 @@ void Dimr::connectLibs (void) {
         }
 
         // Collect BMI entry points
-        this->componentsList.components[i].dllInitialize = (BMI_INITIALIZE) GETPROCADDRESS (dllhandle, BmiInitializeEntryPoint);
-        if (this->componentsList.components[i].dllInitialize == NULL) {
+        componentsList.components[i].dllInitialize = (BMI_INITIALIZE) GETPROCADDRESS (dllhandle, BmiInitializeEntryPoint);
+        if (componentsList.components[i].dllInitialize == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiInitializeEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllUpdate = (BMI_UPDATE) GETPROCADDRESS (dllhandle, BmiUpdateEntryPoint);
-        if (this->componentsList.components[i].dllUpdate == NULL) {
+        componentsList.components[i].dllUpdate = (BMI_UPDATE) GETPROCADDRESS (dllhandle, BmiUpdateEntryPoint);
+        if (componentsList.components[i].dllUpdate == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiUpdateEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllFinalize = (BMI_FINALIZE) GETPROCADDRESS (dllhandle, BmiFinalizeEntryPoint);
-        if (this->componentsList.components[i].dllFinalize == NULL) {
+        componentsList.components[i].dllFinalize = (BMI_FINALIZE) GETPROCADDRESS (dllhandle, BmiFinalizeEntryPoint);
+        if (componentsList.components[i].dllFinalize == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiFinalizeEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllGetStartTime = (BMI_GETSTARTTIME) GETPROCADDRESS (dllhandle, BmiGetStartTimeEntryPoint);
-        if (this->componentsList.components[i].dllGetStartTime == NULL) {
+        componentsList.components[i].dllGetStartTime = (BMI_GETSTARTTIME) GETPROCADDRESS (dllhandle, BmiGetStartTimeEntryPoint);
+        if (componentsList.components[i].dllGetStartTime == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetStartTimeEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllGetEndTime = (BMI_GETENDTIME) GETPROCADDRESS (dllhandle, BmiGetEndTimeEntryPoint);
-        if (this->componentsList.components[i].dllGetEndTime == NULL) {
+        componentsList.components[i].dllGetEndTime = (BMI_GETENDTIME) GETPROCADDRESS (dllhandle, BmiGetEndTimeEntryPoint);
+        if (componentsList.components[i].dllGetEndTime == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetEndTimeEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllGetTimeStep = (BMI_GETTIMESTEP) GETPROCADDRESS (dllhandle, BmiGetTimeStepEntryPoint);
-        if (this->componentsList.components[i].dllGetStartTime == NULL) {
+        componentsList.components[i].dllGetTimeStep = (BMI_GETTIMESTEP) GETPROCADDRESS (dllhandle, BmiGetTimeStepEntryPoint);
+        if (componentsList.components[i].dllGetStartTime == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetStartTimeEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllGetCurrentTime = (BMI_GETCURRENTTIME) GETPROCADDRESS (dllhandle, BmiGetCurrentTimeEntryPoint);
-        if (this->componentsList.components[i].dllGetCurrentTime == NULL) {
+        componentsList.components[i].dllGetCurrentTime = (BMI_GETCURRENTTIME) GETPROCADDRESS (dllhandle, BmiGetCurrentTimeEntryPoint);
+        if (componentsList.components[i].dllGetCurrentTime == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetCurrentTimeEntryPoint, lib, GetLastError());
         }
 
-        this->componentsList.components[i].dllGetAttribute = (BMI_GETATTRIBUTE) GETPROCADDRESS (dllhandle, BmiGetAttributeEntryPoint);
-        if (this->componentsList.components[i].dllGetAttribute == NULL) {
-            this->log->Write (Log::DETAIL, my_rank, "No GetAttribute entry point in %s !", this->componentsList.components[i].library);
+        componentsList.components[i].dllGetAttribute = (BMI_GETATTRIBUTE) GETPROCADDRESS (dllhandle, BmiGetAttributeEntryPoint);
+        if (componentsList.components[i].dllGetAttribute == NULL) {
+            log->Write (Log::DETAIL, my_rank, "No GetAttribute entry point in %s !", componentsList.components[i].library);
 		}	
 //      If GetAttribute is optional in a lib, no need to throw an exception
-//      if (this->componentsList.components[i].dllGetStartTime == NULL) {
+//      if (componentsList.components[i].dllGetStartTime == NULL) {
 //          throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
 //        }
 
-        if (   this->componentsList.components[i].type == COMP_TYPE_FM
-            || this->componentsList.components[i].type == COMP_TYPE_RTC 
-            || this->componentsList.components[i].type == COMP_TYPE_RR 
-            || this->componentsList.components[i].type == COMP_TYPE_FLOW1D 
-            || this->componentsList.components[i].type == COMP_TYPE_FLOW1D2D
-            || this->componentsList.components[i].type == COMP_TYPE_DELWAQ
-            || this->componentsList.components[i].type == COMP_TYPE_TEST
-            || this->componentsList.components[i].type == COMP_TYPE_WANDA) {
+        if (   componentsList.components[i].type == COMP_TYPE_FM
+            || componentsList.components[i].type == COMP_TYPE_RTC 
+            || componentsList.components[i].type == COMP_TYPE_RR 
+            || componentsList.components[i].type == COMP_TYPE_FLOW1D 
+            || componentsList.components[i].type == COMP_TYPE_FLOW1D2D
+            || componentsList.components[i].type == COMP_TYPE_DELWAQ
+            || componentsList.components[i].type == COMP_TYPE_TEST
+            || componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
-            this->componentsList.components[i].dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);
-            if (this->componentsList.components[i].dllSetVar == NULL) {
+            componentsList.components[i].dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);
+            if (componentsList.components[i].dllSetVar == NULL) {
                 throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetVarEntryPoint, lib, GetLastError());
             }
         } else {
-            this->componentsList.components[i].dllSetVar = NULL;
+            componentsList.components[i].dllSetVar = NULL;
 		}
 
         // Not implemented yet in Delwaq:
-        if (this->componentsList.components[i].type != COMP_TYPE_DELWAQ) { 
-            this->componentsList.components[i].dllGetVar = (BMI_GETVAR) GETPROCADDRESS (dllhandle, BmiGetVarEntryPoint);
-            if (this->componentsList.components[i].dllGetVar == NULL) {
+        if (componentsList.components[i].type != COMP_TYPE_DELWAQ) { 
+            componentsList.components[i].dllGetVar = (BMI_GETVAR) GETPROCADDRESS (dllhandle, BmiGetVarEntryPoint);
+            if (componentsList.components[i].dllGetVar == NULL) {
                 throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarEntryPoint, lib, GetLastError());
             }
         }
@@ -1655,7 +1655,7 @@ void Dimr::connectLibs (void) {
         delete [] lib;
     }
     if (my_rank == 0) {
-        this->printComponentVersionStrings(Log::MAJOR);			// List component version to log 
+        printComponentVersionStrings(Log::MAJOR);			// List component version to log 
     }
 }
 
@@ -1663,21 +1663,21 @@ void Dimr::connectLibs (void) {
 void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     const char * version = "version";
 	char * versionstr = new char[thisDimr->MAXSTRING];
-    this->log->Write (my_mask, my_rank, "");
-    this->log->Write (my_mask, my_rank, "Version Information of Components");
-    this->log->Write (my_mask, my_rank, "=================================");
-	for (int i=0;i<this->componentsList.numComponents;i++){
+    log->Write (my_mask, my_rank, "");
+    log->Write (my_mask, my_rank, "Version Information of Components");
+    log->Write (my_mask, my_rank, "=================================");
+	for (int i=0;i<componentsList.numComponents;i++){
 	   strcpy(versionstr,"");
-	   if (this->componentsList.components[i].dllGetAttribute!=NULL){
-          this->componentsList.components[i].dllGetAttribute(version, versionstr);
+	   if (componentsList.components[i].dllGetAttribute!=NULL){
+          componentsList.components[i].dllGetAttribute(version, versionstr);
 	   } 
 	   if (strlen(versionstr)==0){
 	      strcpy(versionstr,"Unknown");
 	   }
-       this->log->Write (my_mask, my_rank, "%-35s: %s", this->componentsList.components[i].library, versionstr);
+       log->Write (my_mask, my_rank, "%-35s: %s", componentsList.components[i].library, versionstr);
 	}
-    this->log->Write (my_mask, my_rank, "---------------------------------");
-    this->log->Write (my_mask, my_rank, "");
+    log->Write (my_mask, my_rank, "---------------------------------");
+    log->Write (my_mask, my_rank, "");
     delete[] versionstr;
 }
 
@@ -1690,31 +1690,31 @@ void Dimr::freeLibs (void) {
 
 #if defined (OSX)
     // Macintosh:VERY SIMILAR TO LINUX
-    throw new Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
+    throw new Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
 #endif
 #if defined (HAVE_CONFIG_H)
     char *err;
 #endif
 
     // do for all libraries
-    for (int i = 0 ; i < this->componentsList.numComponents ; i++) {
-        if (!this->componentsList.components[i].onThisRank) {
+    for (int i = 0 ; i < componentsList.numComponents ; i++) {
+        if (!componentsList.components[i].onThisRank) {
             continue;
         }
 
-        this->log->Write (Log::DETAIL, my_rank, "Freeing library \"%s\"", this->componentsList.components[i].library);
+        log->Write (Log::DETAIL, my_rank, "Freeing library \"%s\"", componentsList.components[i].library);
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
-        int ierr = dlclose(this->componentsList.components[i].libHandle);
+        int ierr = dlclose(componentsList.components[i].libHandle);
         if ((err = dlerror()) != NULL) {
-            throw new Exception (true, "Cannot free component library \"%s\". Error: %s\n",  this->componentsList.components[i].library, err);
+            throw new Exception (true, "Cannot free component library \"%s\". Error: %s\n",  componentsList.components[i].library, err);
         }
 #else
         DWORD ierr;
         SetLastError(0); /* clear error code */
-        bool success = FreeLibrary(this->componentsList.components[i].libHandle);
+        bool success = FreeLibrary(componentsList.components[i].libHandle);
         if ((ierr = GetLastError()) != 0) {
-            throw new Exception (true, "Cannot free component library \"%s\". Return code: %d.", this->componentsList.components[i].library, ierr);
+            throw new Exception (true, "Cannot free component library \"%s\". Return code: %d.", componentsList.components[i].library, ierr);
         }
 #endif
 
@@ -1727,20 +1727,20 @@ void Dimr::processWaitFile (void) {
     // The following waitFile code is introduced for
     // debugging parallel runs. It should NOT be used for any other purpose!
 
-    XmlTree * rootXml     = this->config->Lookup ("/dimrConfig");
+    XmlTree * rootXml     = config->Lookup ("/dimrConfig");
     const char * waitFile = rootXml->GetElement ("waitFile");
     if (waitFile != NULL) {
-        this->log->Write (Log::MAJOR, my_rank, "Waiting for file \"%s\" to appear...", waitFile);
+        log->Write (Log::MAJOR, my_rank, "Waiting for file \"%s\" to appear...", waitFile);
         fflush (stdout);
         FILE * f;
         do {
             f = fopen (waitFile, "r");
             Sleep (1000);
         } while (f == NULL);
-        this->log->Write (Log::MAJOR, my_rank, "Found waitfile \"%s\".", waitFile);
+        log->Write (Log::MAJOR, my_rank, "Found waitfile \"%s\".", waitFile);
         fclose (f);
     }
-    this->ready = 1;
+    ready = 1;
  }
 
 
@@ -1748,8 +1748,8 @@ void Dimr::processWaitFile (void) {
 //------------------------------------------------------------------------------
 void Dimr::timersInit (void) {
     for (int i = 0 ; i < thisDimr->componentsList.numComponents ; i++) {
-        this->componentsList.components[i].timerSum   =  0;
-        this->componentsList.components[i].timerStart =  0;
+        componentsList.components[i].timerSum   =  0;
+        componentsList.components[i].timerStart =  0;
     }
 }
 
@@ -1757,14 +1757,14 @@ void Dimr::timersInit (void) {
 
 //------------------------------------------------------------------------------
 void Dimr::timerStart (dimr_component * thisComponent) {
-    thisComponent->timerStart = this->clock->Epoch();
+    thisComponent->timerStart = clock->Epoch();
 }
 
 
 
 //------------------------------------------------------------------------------
 void Dimr::timerEnd (dimr_component * thisComponent) {
-    Clock::Timestamp curtime = this->clock->Epoch();
+    Clock::Timestamp curtime = clock->Epoch();
     thisComponent->timerSum   =  curtime - thisComponent->timerStart + thisComponent->timerSum;
     thisComponent->timerStart =  0;
 }
@@ -1773,13 +1773,13 @@ void Dimr::timerEnd (dimr_component * thisComponent) {
 
 //------------------------------------------------------------------------------
 void Dimr::timersFinish (void) {
-    this->log->Write (Log::MAJOR, my_rank, "TIMER INFO:\n");
+    log->Write (Log::MAJOR, my_rank, "TIMER INFO:\n");
     for (int i = 0 ; i < thisDimr->componentsList.numComponents ; i++) {
-        this->componentsList.components[i].timerStart = 0;
-        this->log->Write (Log::MAJOR, my_rank, "%s\t: %d.%d sec", this->componentsList.components[i].name, 
-                          this->componentsList.components[i].timerSum/1000000,
-                          this->componentsList.components[i].timerSum%1000000);
-        this->componentsList.components[i].timerSum   =  0.0;
+        componentsList.components[i].timerStart = 0;
+        log->Write (Log::MAJOR, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
+                          componentsList.components[i].timerSum/1000000,
+                          componentsList.components[i].timerSum%1000000);
+        componentsList.components[i].timerSum   =  0.0;
     }
 }
 
