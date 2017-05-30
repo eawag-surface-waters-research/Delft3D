@@ -87,7 +87,7 @@ contains
 !           Local variables
 !
     type(t_crs), target                 :: crs
-    integer                             :: meshids(m_ids_end)    !< Set of NetCDF-ids for all mesh geometry arrays.
+    type(t_ug_mesh)                     :: meshids               !< Set of NetCDF-ids for all mesh geometry arrays.
     type(t_ug_meshgeom)                 :: meshgeom              !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_meshgeom)                 :: aggregated_meshgeom   !< Mesh geometry to be written to the NetCDF file.
                                         
@@ -557,6 +557,12 @@ contains
     !
     ! Write mesh as UGRID
     !
+
+    ! Allocate meshids
+    allocate(meshids%dimids(mdim_end))
+    allocate(meshids%varids(mid_end))
+    meshids%dimids=-1
+    meshids%varids=-1
     ierr = ug_write_mesh_struct(igeomfile, meshids, meshgeom)
     call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
     !
