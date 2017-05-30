@@ -57,10 +57,10 @@ contains
 !> Tries to create a NetCDF file and initialize based on its specified conventions.
 function ionc_create_dll(c_path, mode, ioncid) result(ierr) bind(C, name="ionc_create")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_dll
-    character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
-    integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
-    integer(kind=c_int),           intent(out)   :: ioncid   !< inout The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
-    integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
+    character(kind=c_char), intent(in) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
+    integer(kind=c_int),    intent(in) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
+    integer(kind=c_int),    intent(out):: ioncid   !< inout The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
+    integer(kind=c_int)                :: ierr      !< Result status (IONC_NOERR if successful).
 
     character(len=MAXSTRLEN) :: path
 
@@ -307,8 +307,8 @@ end function ionc_write_geom_ugrid_dll
 function ionc_write_map_ugrid_dll(filename) result(ierr) bind(C, name="ionc_write_map_ugrid")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_map_ugrid_dll
    character(kind=c_char), intent(in   ) :: filename(MAXSTRLEN)      !< File name for netCDF dataset to be created.
-   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
-   character(len=MAXSTRLEN) :: file
+   integer(kind=c_int)                   :: ierr    !< Result status, ionc_noerr if successful.
+   character(len=MAXSTRLEN)              :: file
   
    ! Store the name
    file = char_array_to_string(filename, strlen(filename))
@@ -732,72 +732,72 @@ end function ionc_read_1d_mesh_discretisation_points_dll
 ! mesh links
 !
 
-function ionc_def_mesh_contact_dll(ioncid, linkmesh, c_linkmeshname, nlinks, idmesh1, idmesh2, locationType1Id, locationType2Id) result(ierr) bind(C, name="ionc_def_mesh_contact")
+function ionc_def_mesh_contact_dll(ioncid, contactsmesh, c_contactmeshname, ncontacts, idmesh1, idmesh2, locationType1Id, locationType2Id) result(ierr) bind(C, name="ionc_def_mesh_contact")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_def_mesh_contact_dll
 
-   integer, intent(in)                :: ioncid, nlinks, idmesh1, idmesh2,locationType1Id,locationType2Id   
-   character(kind=c_char), intent(in) :: c_linkmeshname(MAXSTRLEN)
-   character(len=MAXSTRLEN)           :: linkmeshname 
-   integer, intent(inout)             :: linkmesh
+   integer, intent(in)                :: ioncid, ncontacts, idmesh1, idmesh2,locationType1Id,locationType2Id   
+   character(kind=c_char), intent(in) :: c_contactmeshname(MAXSTRLEN)
+   character(len=MAXSTRLEN)           :: contactmeshname 
+   integer, intent(inout)             :: contactsmesh
    integer                            :: ierr 
    
    ! Store the name
-   linkmeshname = char_array_to_string(c_linkmeshname, strlen(c_linkmeshname))  
+   contactmeshname = char_array_to_string(c_contactmeshname, strlen(c_contactmeshname))  
   
-   ierr = ionc_def_mesh_contact_ugrid(ioncid, linkmesh, linkmeshname, nlinks, idmesh1, idmesh2, locationType1Id, locationType2Id)
+   ierr = ionc_def_mesh_contact_ugrid(ioncid, contactsmesh, contactmeshname, ncontacts, idmesh1, idmesh2, locationType1Id, locationType2Id)
 
 end function ionc_def_mesh_contact_dll 
 
-function ionc_get_link_count_dll(ioncid, linkmesh, nlinks) result(ierr) bind(C, name="ionc_get_link_count")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_link_count_dll
-   integer, intent(in)                :: ioncid, linkmesh
-   integer, intent(inout)             :: nlinks
+function ionc_get_contacts_count_dll(ioncid, contactsmesh, ncontacts) result(ierr) bind(C, name="ionc_get_contacts_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_contacts_count_dll
+   integer, intent(in)                :: ioncid, contactsmesh
+   integer, intent(inout)             :: ncontacts
    integer                            :: ierr
    
-   ierr = ionc_get_link_count_ugrid(ioncid, linkmesh, nlinks) 
+   ierr = ionc_get_contacts_count_ugrid(ioncid, contactsmesh, ncontacts) 
    
-end function ionc_get_link_count_dll
+end function ionc_get_contacts_count_dll
 
-function ionc_put_mesh_contact_dll(ioncid, linkmesh, c_mesh1indexes, c_mesh2indexes, linksinfo, nlinks) result(ierr) bind(C, name="ionc_put_mesh_contact")
+function ionc_put_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, contactsinfo, ncontacts) result(ierr) bind(C, name="ionc_put_mesh_contact")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_mesh_contact_dll
-   integer, intent(in)                   :: ioncid, linkmesh, nlinks
+   integer, intent(in)                   :: ioncid, contactsmesh, ncontacts
    type(c_ptr), intent(in)               :: c_mesh1indexes, c_mesh2indexes
-   type(t_ug_charinfo),  intent(in)      :: linksinfo(nlinks)
+   type(t_ug_charinfo),  intent(in)      :: contactsinfo(ncontacts)
    integer,pointer                       :: mesh1indexes(:), mesh2indexes(:)
-   character(len=ug_idsLen)              :: linksids(nlinks)
-   character(len=ug_idsLongNamesLen)     :: linkslongnames(nlinks)
+   character(len=ug_idsLen)              :: contactsids(ncontacts)
+   character(len=ug_idsLongNamesLen)     :: contactslongnames(ncontacts)
    integer                               :: ierr,i
    
-   call c_f_pointer(c_mesh1indexes, mesh1indexes, (/ nlinks /))
-   call c_f_pointer(c_mesh2indexes, mesh2indexes, (/ nlinks /))
+   call c_f_pointer(c_mesh1indexes, mesh1indexes, (/ ncontacts /))
+   call c_f_pointer(c_mesh2indexes, mesh2indexes, (/ ncontacts /))
 
-   do i=1,nlinks
-      linksids(i) = linksinfo(i)%ids        
-      linkslongnames(i) = linksinfo(i)%longnames
+   do i=1,ncontacts
+      contactsids(i) = contactsinfo(i)%ids        
+      contactslongnames(i) = contactsinfo(i)%longnames
    end do
    
-   ierr = ionc_put_mesh_contact_ugrid(ioncid, linkmesh, mesh1indexes, mesh2indexes, linksids, linkslongnames) 
+   ierr = ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames) 
    
 end function ionc_put_mesh_contact_dll
 
-function ionc_get_mesh_contact_dll(ioncid, linkmesh, c_mesh1indexes, c_mesh2indexes, linksinfo, nlinks) result(ierr) bind(C, name="ionc_get_mesh_contact")
+function ionc_get_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, contactsinfo, ncontacts) result(ierr) bind(C, name="ionc_get_mesh_contact")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_contact_dll
-   integer, intent(in)                   :: ioncid, linkmesh, nlinks
+   integer, intent(in)                   :: ioncid, contactsmesh, ncontacts
    type(c_ptr), intent(inout)            :: c_mesh1indexes, c_mesh2indexes
    integer,    pointer                   :: mesh1indexes(:), mesh2indexes(:)  
-   character(len=ug_idsLen)              :: linksids(nlinks)
-   character(len=ug_idsLongNamesLen)     :: linkslongnames(nlinks)
-   type(t_ug_charinfo),  intent(inout)   :: linksinfo(nlinks)
+   character(len=ug_idsLen)              :: contactsids(ncontacts)
+   character(len=ug_idsLongNamesLen)     :: contactslongnames(ncontacts)
+   type(t_ug_charinfo),  intent(inout)   :: contactsinfo(ncontacts)
    integer                               :: ierr, i
    
-   call c_f_pointer(c_mesh1indexes, mesh1indexes, (/ nlinks /))
-   call c_f_pointer(c_mesh2indexes, mesh2indexes, (/ nlinks /))
+   call c_f_pointer(c_mesh1indexes, mesh1indexes, (/ ncontacts /))
+   call c_f_pointer(c_mesh2indexes, mesh2indexes, (/ ncontacts /))
       
-   ierr = ionc_get_mesh_contact_ugrid(ioncid, linkmesh, mesh1indexes, mesh2indexes, linksids, linkslongnames) 
+   ierr = ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames) 
    
-   do i=1,nlinks
-     linksinfo(i)%ids = linksids(i)        
-     linksinfo(i)%longnames = linkslongnames(i)
+   do i=1,ncontacts
+     contactsinfo(i)%ids = contactsids(i)        
+     contactsinfo(i)%longnames = contactslongnames(i)
    end do
    
 end function ionc_get_mesh_contact_dll
