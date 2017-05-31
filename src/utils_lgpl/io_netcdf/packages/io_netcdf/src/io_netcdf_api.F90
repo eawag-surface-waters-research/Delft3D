@@ -101,7 +101,7 @@ end function ionc_adheresto_conventions_dll
 !> Tries to open a NetCDF file and initialize based on its specified conventions.
 function ionc_open_dll(c_path, mode, ioncid, iconvtype, convversion) result(ierr) bind(C, name="ionc_open")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_open_dll
-  use iso_c_binding
+   use iso_c_binding
    character(kind=c_char), intent(in   ) :: c_path(MAXSTRLEN)      !< File name for netCDF dataset to be opened.
    integer(kind=c_int),           intent(in   ) :: mode      !< NetCDF open mode, e.g. NF90_NOWRITE.
    integer(kind=c_int),           intent(  out) :: ioncid    !< The io_netcdf dataset id (this is not the NetCDF ncid, which is stored in datasets(ioncid)%ncid.
@@ -110,13 +110,13 @@ function ionc_open_dll(c_path, mode, ioncid, iconvtype, convversion) result(ierr
 !   integer(kind=c_int), optional, intent(inout) :: chunksize !< (optional) NetCDF chunksize parameter.
    integer(kind=c_int)                          :: ierr      !< Result status (IONC_NOERR if successful).
 
-  character(len=MAXSTRLEN) :: path
-  !character(len=strlen(c_path)) :: nc_file
+   character(len=MAXSTRLEN) :: path
+   !character(len=strlen(c_path)) :: nc_file
   
-  ! Store the name
-  path = char_array_to_string(c_path, strlen(c_path))
+   ! Store the name
+   path = char_array_to_string(c_path, strlen(c_path)) 
 
-  ierr = ionc_open(path, mode, ioncid, iconvtype, convversion)
+   ierr = ionc_open(path, mode, ioncid, iconvtype, convversion)
 end function ionc_open_dll
 
 
@@ -262,20 +262,21 @@ end function ionc_get_edge_nodes_dll
 
 !> Gets the face-node connectvit table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
-function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfacenodes) result(ierr) bind(C, name="ionc_get_face_nodes")
+function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfacenodes, fillvalue) result(ierr) bind(C, name="ionc_get_face_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_face_nodes_dll
    integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
    integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
    type(c_ptr),         intent(  out) :: c_face_nodes_ptr !< Pointer to array for the face-node connectivity table.
    integer(kind=c_int), intent(in)    :: nface  !< The number of faces in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
    integer(kind=c_int), intent(in)    :: nmaxfacenodes  !< The maximum number of nodes per face in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int)                :: fillvalue    !< Scalar for getting the fill value parameter for the requested variable.
    integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
 
    integer, pointer :: face_nodes(:,:)
 
    call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
    
-   ierr = ionc_get_face_nodes(ioncid, meshid, face_nodes)
+   ierr = ionc_get_face_nodes(ioncid, meshid, face_nodes, fillvalue)
 end function ionc_get_face_nodes_dll
 
 
@@ -825,5 +826,19 @@ function ionc_clone_mesh_data_dll( ncidin, ncidout, meshidin, meshidout )  resul
    ierr = ionc_clone_mesh_data_ugrid( ncidin, ncidout, meshidin, meshidout )
 
 end function ionc_clone_mesh_data_dll
+
+function ionc_get_lib_versionversion_dll( ncidin, c_version_string)  result(ierr) bind(C, name="ionc_get_lib_fullversion")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_lib_versionversion_dll
+   integer, intent(in)    :: ncidin
+   character(kind=c_char), intent(out) :: c_version_string(MAXSTRLEN)      !< String to contain the full version string of this io_netcdf library.
+   integer                :: ierr
+   
+   character(len=MAXSTRLEN) :: version_string
+   
+   version_string = ' '
+   ierr = ionc_getfullversionstring_io_netcdf(version_string)
+   c_version_string= string_to_char_array(version_string, len_trim(version_string))
+    
+end function ionc_get_lib_versionversion_dll
 
 end module io_netcdf_api

@@ -1930,11 +1930,11 @@ end function ug_get_mesh_name
 
 !> Gets the size/count of items for the specified topological location.
 !! Use this to get the number of nodes/edges/faces/volumes.
-function ug_inquire_dimension(ncid, meshids, idimtype, len) result(ierr)
+function ug_inquire_dimension(ncid, meshids, idimtype, nitems) result(ierr)
    integer,            intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
    type(t_ug_mesh), intent(in)       :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,            intent(in)    :: idimtype !< The location type to count (one of UG_LOC_NODE, UG_LOC_EDGE, UG_LOC_FACE, UG_LOC_VOL).
-   integer,            intent(  out) :: len      !< The number of items for that location.
+   integer,            intent(  out) :: nitems   !< The number of items for that location.
    integer                           :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
    integer :: idim
@@ -1953,7 +1953,7 @@ function ug_inquire_dimension(ncid, meshids, idimtype, len) result(ierr)
       goto 999
    end select
    
-   ierr = nf90_inquire_dimension(ncid, idim, len=len)
+   ierr = nf90_inquire_dimension(ncid, idim, len=nitems)
 
    ! Success
    return
@@ -2097,16 +2097,17 @@ end function ug_get_edge_nodes
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
-function ug_get_face_nodes(ncid, meshids, face_nodes) result(ierr)
-   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh), intent(in)  :: meshids!< Set of NetCDF-ids for all mesh geometry arrays.
-   integer,            intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
-   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERRif successful).
+function ug_get_face_nodes(ncid, meshids, face_nodes, ifill) result(ierr)
+   integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,           intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
+   integer, optional, intent(out) :: ifill           !< (Optional) Integer fill value.
+   integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facenodes), face_nodes)
-   ! TODO: AvD: some more careful error handling
-   
-   ! TODO: AvD: also introduce 0-/1-based indexing handling.
+   if (present(ifill)) then
+      ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes), '_FillValue'   , ifill)
+   end if
 
 end function ug_get_face_nodes
 

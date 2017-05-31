@@ -121,6 +121,8 @@ public :: ionc_get_mesh_contact_ugrid
 public :: ionc_clone_mesh_definition_ugrid
 public :: ionc_clone_mesh_data_ugrid
 
+public :: ionc_getfullversionstring_io_netcdf
+
 private
 
 !
@@ -517,13 +519,14 @@ end function ionc_get_edge_nodes
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
-function ionc_get_face_nodes(ioncid, meshid, face_nodes) result(ierr)
-   integer,             intent(in)    :: ioncid  !< The IONC data set id.
-   integer,             intent(in)    :: meshid  !< The mesh id in the specified data set.
-   integer,             intent(  out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
-   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+function ionc_get_face_nodes(ioncid, meshid, face_nodes, fillvalue) result(ierr)
+   integer, intent(in)    :: ioncid  !< The IONC data set id.
+   integer, intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer, intent(  out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
+   integer, intent(  out) :: fillvalue !< Scalar for getting the fill value parameter for the requested variable.
+   integer                :: ierr    !< Result status, ionc_noerr if successful.
 
-   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes)
+   ierr = ug_get_face_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_nodes, fillvalue)
 end function ionc_get_face_nodes
 
 !> Gets the coordinate system from a data set.
@@ -1225,5 +1228,16 @@ function ionc_clone_mesh_data_ugrid( ncidin, ncidout, meshidin, meshidout ) resu
    ierr = ug_clone_mesh_data( datasets(ncidin)%ncid, datasets(ncidout)%ncid,datasets(ncidin)%ug_file%meshids(meshidin), datasets(ncidout)%ug_file%meshids(meshidout))
 
 end function ionc_clone_mesh_data_ugrid
+
+function ionc_getfullversionstring_io_netcdf( version_string )  result(ierr)
+   use io_netcdf_version_module
+   
+   character(len=*), intent(inout) :: version_string !< String to contain the full version string of this io_netcdf library.
+   integer                :: ierr
+   
+   call getfullversionstring_io_netcdf(version_string)
+   ierr = 0
+    
+end function ionc_getfullversionstring_io_netcdf
 
 end module io_netcdf
