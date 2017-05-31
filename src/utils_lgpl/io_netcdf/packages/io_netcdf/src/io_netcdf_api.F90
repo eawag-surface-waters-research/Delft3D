@@ -67,7 +67,6 @@ function ionc_create_dll(c_path, mode, ioncid) result(ierr) bind(C, name="ionc_c
     ! Store the name
     path = char_array_to_string(c_path, strlen(c_path))
 
-
     ! We always create ugrid files
     ierr = ionc_create(path, mode, ioncid, IONC_CONV_UGRID)
 end function ionc_create_dll
@@ -508,7 +507,6 @@ function ionc_create_1d_network_dll(ioncid, networkid, c_networkName, nNodes, nB
    ierr = ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nBranches, nGeometry)
    
 end function ionc_create_1d_network_dll
-
 
 function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, nodeinfo, nNodes) result(ierr) bind(C, name="ionc_write_1d_network_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_nodes_dll

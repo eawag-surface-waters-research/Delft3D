@@ -237,8 +237,8 @@ end enum
 
 !mesh type, it will expand with the commented componentes to accomodate composite meshes
 type t_ug_mesh
-integer,allocatable::dimids(:)
-integer,allocatable::varids(:)
+integer::dimids(mdim_end) = -1
+integer::varids(mid_end)  = -1
 !t_ug_mesh,allocatable::meshes(:)
 !t_composite:: compositeType
 !integer,allocatable::contacts_idx(:)
@@ -246,8 +246,8 @@ end type t_ug_mesh
 
 !contacts types
 type t_ug_contacts
-integer,allocatable::dimids(:)
-integer,allocatable::varids(:)
+integer::dimids(cdim_end) = -1
+integer::varids(cid_end)  = -1
 end type t_ug_contacts
 
 type t_ug_file
@@ -1426,7 +1426,7 @@ function ug_add_mesh(ncid, ug_file, networkid) result(ierr)
    nmesh = npresentmeshes + 1
    ug_file%nummesh = nmesh
    
-   ierr = ug_allocate_meshids(newmeshids,nmesh)
+   allocate(newmeshids(nmesh), stat=ierr) 
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1434,8 +1434,8 @@ function ug_add_mesh(ncid, ug_file, networkid) result(ierr)
    
    if (npresentmeshes > 0) then
        do i= 1, npresentmeshes
-          newmeshids(i)%dimids(:) = ug_file%meshids(i)%dimids(:)
-          newmeshids(i)%varids(:) = ug_file%meshids(i)%varids(:)
+          newmeshids(i)%dimids = ug_file%meshids(i)%dimids
+          newmeshids(i)%varids = ug_file%meshids(i)%varids
        enddo
    endif
    
@@ -1446,54 +1446,6 @@ function ug_add_mesh(ncid, ug_file, networkid) result(ierr)
 999 continue
     
 end function ug_add_mesh
-
-function ug_allocate_meshids(meshids,nmesh) result(ierr)
-
-   type(t_ug_mesh), allocatable,intent(inout) :: meshids(:) !< UGRID file struct with cached meta information.
-   integer,intent(in)                         :: nmesh
-   integer                                    :: i, ierr
-   
-
-   if (nmesh > 0) then
-      allocate(meshids(nmesh), stat=ierr) 
-      if (ierr /= 0) return
-      do i= 1, nmesh
-         allocate(meshids(i)%dimids(mdim_end),stat=ierr)
-         if (ierr /= 0) return
-         allocate(meshids(i)%varids(mid_end), stat=ierr)
-         if (ierr /= 0) return
-         meshids(i)%dimids = -1
-         meshids(i)%varids = -1
-      enddo
-   endif
-   
-   ierr = 0
-   
-end function ug_allocate_meshids
-
-function ug_allocate_contactids(contactids,ncontacts) result(ierr)
-
-   type(t_ug_contacts), allocatable,intent(inout) :: contactids(:) !< UGRID file struct with cached meta information.
-   integer,intent(in)                             :: ncontacts
-   integer                                        :: i, ierr
-   
-   if (ncontacts > 0) then
-      allocate(contactids(ncontacts), stat=ierr) 
-      if (ierr /= 0) return
-      do i= 1, ncontacts
-         allocate(contactids(i)%dimids(cdim_end),stat=ierr)
-         if (ierr /= 0) return
-         allocate(contactids(i)%varids(cid_end), stat=ierr)
-         if (ierr /= 0) return
-         contactids(i)%dimids = -1
-         contactids(i)%varids = -1
-      enddo
-   endif
-
-   ierr = 0
-   
-end function ug_allocate_contactids
-
 
 !> This function creates new contactsids structure
 function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
@@ -1515,7 +1467,7 @@ function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
    ncontactmeshes = npresentcontactmeshes + 1
    ug_file%numcontacts = ncontactmeshes
    
-   ierr = ug_allocate_contactids(newcontacts,ncontactmeshes)
+   allocate(newcontacts(ncontactmeshes), stat=ierr) 
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1523,8 +1475,8 @@ function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
    
    if (npresentcontactmeshes > 0) then
        do i= 1, npresentcontactmeshes
-          newcontacts(i)%dimids = ug_file%meshids(i)%dimids
-          newcontacts(i)%varids = ug_file%meshids(i)%varids
+          newcontacts(i)%dimids = ug_file%contactids(i)%dimids
+          newcontacts(i)%varids = ug_file%contactids(i)%varids
        enddo
    endif
 
@@ -1553,8 +1505,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    ug_file%nummesh = nmesh
    
    allocate(ug_file%meshnames(nmesh))
-   !allocate space for ids vector and initialize to -1
-   ierr = ug_allocate_meshids(ug_file%meshids,nmesh)
+   allocate(ug_file%meshids(nmesh), stat=ierr) 
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1568,8 +1519,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    ug_file%numcontacts = ncontacts
 
    allocate(ug_file%contactsnames(ncontacts))
-   ! allocate space for ids vector and initialize to -1
-   ierr = ug_allocate_contactids(ug_file%contactids,ncontacts)
+   allocate(ug_file%contactids(ncontacts))
    if (ierr /= 0) then
        ierr = UG_SOMEERR
       goto 999
@@ -1664,8 +1614,10 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       meshids%varids(mid_1dtopo) = coordspaceind
       ierr = att_to_dimid(ncid, 'edge_dimension',  meshids%dimids(mdim_1dbranches),coordspaceind)
       ierr = att_to_dimid(ncid, 'node_dimension',  meshids%dimids(mdim_1dnodes),coordspaceind)
+      !mdim_1dgeopoints
       ierr = att_to_varid(ncid,'edge_geometry'  ,  meshids%varids(mid_1dgeometry),coordspaceind)
       ierr = att_to_dimid(ncid, 'node_count'    ,  meshids%dimids(mdim_1dgeopoints), meshids%varids(mid_1dgeometry))
+      
       !node variables ids
       ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dnodex), meshids%varids(mid_1dnodey), varin = coordspaceind)
       ierr = att_to_varid(ncid,'node_ids'       , meshids%varids(mid_1dnodids), coordspaceind)
@@ -1680,6 +1632,15 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
 	  !geometry x and  y
 	  ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dgeox), meshids%varids(mid_1dgeoy), varin = meshids%varids(mid_1dgeometry))
       ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dmeshtobranch), meshids%varids(mid_1doffset), varin = meshids%varids(mid_meshtopo))
+   
+      !dim variables
+      ierr = nf90_inquire_variable( ncid, meshids%varids(mid_1dedgenodes),dimids = dimids)
+      meshids%dimids(mdim_1dedgenodes) = dimids(1)
+      ierr = nf90_inquire_variable( ncid, meshids%varids(mid_1dbranchids),dimids = dimids)
+      meshids%dimids(mdim_idstring) = dimids(1)
+      ierr = nf90_inquire_variable( ncid, meshids%varids(mid_1dbranchlongnames),dimids = dimids)
+      meshids%dimids(mdim_longnamestring) = dimids(1)
+   
    end if
    
    if (ierr /= nf90_noerr) then
@@ -2551,11 +2512,6 @@ function ug_write_geom_ugrid(filename) result(ierr)
         return
     end if
     
-    allocate(meshids%dimids(mdim_end))
-    allocate(meshids%varids(mid_end))
-    meshids%dimids = -1
-    meshids%varids = -1
-
     ! create mesh geometry
     ierr = ug_create_ugrid_geometry(meshgeom)
 
@@ -2587,10 +2543,6 @@ function ug_write_map_ugrid(filename) result(ierr)
         return
     end if
     
-    allocate(meshids%dimids(mdim_end))
-    allocate(meshids%varids(mid_end))
-    meshids%dimids = -1
-    meshids%varids = -1
     
     ! create mesh geometry
     ierr = ug_create_ugrid_geometry(meshgeom)
@@ -3237,13 +3189,17 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
           !get variable attributes
           ierr = nf90_inquire_variable( ncidin, meshidsin%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
           if ( ierr /= nf90_noerr ) then 
-               return
+              return
           end if 
-          !define the the outdims in the new file
-          do j = 1, ndims
-              outdimids(j)=dimmap(dimids(j))
-          enddo
+          !inquire if the variable is already present
+          outdimids(1:ndims)=dimmap(dimids(1:ndims))
+          ierr = nf90_inquire_variable( ncidout, meshidsout%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
+          if ( ierr == nf90_noerr ) then 
+              !the variable is already present, here we should issue an error 
+              return
+          end if 
           ierr = nf90_def_var( ncidout, trim(name), xtype, outdimids(1:ndims), meshidsout%varids(i) )
+          outdimids = 0
           if ( ierr /= nf90_noerr ) then 
                return
           end if 
@@ -3454,4 +3410,5 @@ function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
     
 end function ug_copy_var_atts
 
+   
 end module io_ugrid
