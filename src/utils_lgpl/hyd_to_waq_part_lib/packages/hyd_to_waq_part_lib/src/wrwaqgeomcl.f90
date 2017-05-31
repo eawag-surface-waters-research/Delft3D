@@ -557,12 +557,6 @@ contains
     !
     ! Write mesh as UGRID
     !
-
-    ! Allocate meshids
-    allocate(meshids%dimids(mdim_end))
-    allocate(meshids%varids(mid_end))
-    meshids%dimids=-1
-    meshids%varids=-1
     ierr = ug_write_mesh_struct(igeomfile, meshids, meshgeom)
     call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
     !
