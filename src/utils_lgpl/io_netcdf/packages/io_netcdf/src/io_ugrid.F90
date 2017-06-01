@@ -3410,5 +3410,98 @@ function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
     
 end function ug_copy_var_atts
 
+!
+! Get mesh ids 
+!
+
+function ug_get_1d_mesh_network_ids(ncid, ug_file, meshid, networkid) result(ierr)
+
+   integer, intent(in)           :: ncid          							  !< ID of already opened data set.
+   integer                       :: i, ierr, attval         !< Result status (UG_NOERR if successful).
+   integer, intent(inout)        :: meshid, networkid
+   character(len=13)  :: attname
+   type(t_ug_file), intent(in)   :: ug_file 
+   
+   meshid         = -1
+   networkid      = -1
+
+   do i=1,size(ug_file%meshids)
+   
+      !Mesh
+	  if (ug_file%meshids(i)%varids(mid_meshtopo)== -1) then
+	     cycle
+	  end if
+	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'cf_role', attname)
+	  if (ierr /= UG_NOERR .or. trim(attname) /= 'mesh_topology') then
+	     cycle
+	  endif
+	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
+	  if ( ierr /= UG_NOERR .or. attval /= 1) then
+	     cycle
+	  end if
+	  
+	  !Associated geometry
+	  if (ug_file%meshids(i)%varids(mid_1dtopo)== -1) then
+	     cycle
+	  end if
+	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_1dtopo),'cf_role', attname)
+	  if (ierr /= UG_NOERR .or. trim(attname) /= 'mesh_topology') then
+	     cycle
+	  endif
+	  
+	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_1dtopo),'topology_dimension', attval)
+	  if (ierr /= UG_NOERR .or. attval /= 1 ) then
+	   cycle
+      endif
+      
+	  ! meshid and network id found, return
+	  meshid = i
+	  networkid = i
+	  return
+      
+   end do
+   
+   ! nothing found, all fields to -1
+   ierr      = -1 
+   meshid    = -1
+   networkid = -1
+   
+end function ug_get_1d_mesh_network_ids
+
+
+function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
+
+   integer, intent(in)           :: ncid, dim        
+   integer                       :: i, ierr, attval    !< Result status (UG_NOERR if successful).
+   integer, intent(inout)        :: meshid
+   character(len=13)             :: attname
+   type(t_ug_file), intent(in)   :: ug_file 
+   
+   meshid         = -1
+   do i=1,size(ug_file%meshids)
+   
+	  if (ug_file%meshids(i)%varids(mid_meshtopo)== -1) then
+	     cycle
+	  end if
+	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'cf_role', attname)
+	  if (ierr /= UG_NOERR .or. trim(attname) /= 'mesh_topology') then
+	     cycle
+	  endif 
+	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
+	  if ( ierr /= UG_NOERR .or. attval /= dim) then
+	     cycle
+      end if
+      
+	  ! meshid found, return
+	  meshid = i
+	  return
+	  
+   end do
+   
+   ! nothing found, all fields to -1
+   ierr      = -1 
+   meshid    = -1
+
+end function ug_get_mesh_id
    
 end module io_ugrid

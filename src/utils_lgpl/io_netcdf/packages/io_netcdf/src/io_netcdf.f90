@@ -120,6 +120,10 @@ public :: ionc_get_mesh_contact_ugrid
 !clone functions
 public :: ionc_clone_mesh_definition_ugrid
 public :: ionc_clone_mesh_data_ugrid
+!get ids functions
+public :: ionc_get_1d_mesh_network_ids_ugrid
+public :: ionc_get_2d_mesh_id_ugrid
+public :: ionc_get_3d_mesh_id_ugrid
 
 public :: ionc_getfullversionstring_io_netcdf
 
@@ -1239,5 +1243,39 @@ function ionc_getfullversionstring_io_netcdf( version_string )  result(ierr)
    ierr = 0
     
 end function ionc_getfullversionstring_io_netcdf
+
+!
+! Get the mesh ids
+!
+
+function ionc_get_1d_mesh_network_ids_ugrid(ioncid, meshid, networkid) result(ierr)
+
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid, networkid
+   integer                :: ierr
+   
+   ierr = ug_get_1d_mesh_network_ids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, networkid)
+
+end function ionc_get_1d_mesh_network_ids_ugrid
+
+function ionc_get_2d_mesh_id_ugrid(ioncid, meshid) result(ierr)
+
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid
+   integer                :: ierr
+   
+   ierr = ug_get_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, 2)
+
+end function ionc_get_2d_mesh_id_ugrid
+
+function ionc_get_3d_mesh_id_ugrid(ioncid, meshid) result(ierr)
+
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid
+   integer                :: ierr
+   
+   ierr = ug_get_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, 3)
+
+end function ionc_get_3d_mesh_id_ugrid
 
 end module io_netcdf

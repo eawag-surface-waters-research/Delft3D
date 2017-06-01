@@ -670,9 +670,9 @@ function ionc_read_1d_network_branches_geometry_dll(ioncid, networkid, c_geopoin
 
 end function ionc_read_1d_network_branches_geometry_dll
 
-function ionc_create_1d_mesh_dll(ioncid, networkid, c_meshname, nmeshpoints, nmeshedges) result(ierr) bind(C, name="ionc_create_1d_mesh")
+function ionc_create_1d_mesh_dll(ioncid, meshid, c_meshname, nmeshpoints, nmeshedges) result(ierr) bind(C, name="ionc_create_1d_mesh")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_create_1d_mesh_dll
-  integer(kind=c_int)   , intent(in) :: ioncid, networkid,nmeshpoints, nmeshedges
+  integer(kind=c_int)   , intent(in) :: ioncid, meshid,nmeshpoints, nmeshedges
   character(kind=c_char), intent(in) :: c_meshname(MAXSTRLEN)
   integer ::ierr
   character(len=MAXSTRLEN)           :: meshname
@@ -680,14 +680,14 @@ function ionc_create_1d_mesh_dll(ioncid, networkid, c_meshname, nmeshpoints, nme
   ! Store the name
   meshname = char_array_to_string(c_meshName, strlen(c_meshname))  
    
-  ierr = ionc_create_1d_mesh_ugrid(ioncid, networkid, meshname, nmeshpoints, nmeshedges) 
+  ierr = ionc_create_1d_mesh_ugrid(ioncid, meshid, meshname, nmeshpoints, nmeshedges) 
   
 end function ionc_create_1d_mesh_dll
 
 
-function ionc_write_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branchidx, c_offset, nmeshpoints) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
+function ionc_write_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, nmeshpoints) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_mesh_discretisation_points_dll
-  integer(kind=c_int), intent(in)     :: ioncid, networkid, nmeshpoints  
+  integer(kind=c_int), intent(in)     :: ioncid, meshid, nmeshpoints  
   type(c_ptr), intent(in)             :: c_branchidx,c_offset
   integer,pointer                     :: branchidx(:)
   double precision,pointer            :: offset(:)
@@ -696,25 +696,25 @@ function ionc_write_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branc
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
   call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
   
-  ierr = ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) 
+  ierr = ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset) 
   
 end function ionc_write_1d_mesh_discretisation_points_dll
 
 
-function ionc_get_1d_mesh_discretisation_points_count_dll(ioncid, networkid, nmeshpoints) result(ierr) bind(C, name="ionc_get_1d_mesh_discretisation_points_count")
+function ionc_get_1d_mesh_discretisation_points_count_dll(ioncid, meshid, nmeshpoints) result(ierr) bind(C, name="ionc_get_1d_mesh_discretisation_points_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_discretisation_points_count_dll
-  integer(kind=c_int), intent(in)    :: ioncid, networkid
+  integer(kind=c_int), intent(in)    :: ioncid, meshid
   integer(kind=c_int), intent(inout) :: nmeshpoints 
   integer ::ierr
   
-  ierr = ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, nmeshpoints)   
+  ierr = ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, meshid, nmeshpoints)   
   
 end function ionc_get_1d_mesh_discretisation_points_count_dll
 
 
-function ionc_read_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branchidx, c_offset,nmeshpoints) result(ierr) bind(C, name="ionc_read_1d_mesh_discretisation_points")
+function ionc_read_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset,nmeshpoints) result(ierr) bind(C, name="ionc_read_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_mesh_discretisation_points_dll
-  integer(kind=c_int), intent(in)   :: ioncid, networkid, nmeshpoints 
+  integer(kind=c_int), intent(in)   :: ioncid, meshid, nmeshpoints 
   type(c_ptr), intent(inout)        :: c_branchidx, c_offset
   double precision,pointer          :: offset(:)
   integer,pointer                   :: branchidx(:)
@@ -723,7 +723,7 @@ function ionc_read_1d_mesh_discretisation_points_dll(ioncid, networkid, c_branch
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
   call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
   
-  ierr = ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset)
+  ierr = ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset)
   
 end function ionc_read_1d_mesh_discretisation_points_dll
 
@@ -838,5 +838,39 @@ function ionc_get_lib_versionversion_dll( ncidin, c_version_string)  result(ierr
    c_version_string= string_to_char_array(version_string, len_trim(version_string))
     
 end function ionc_get_lib_versionversion_dll
+
+!
+! Get the mesh ids
+!
+
+function ionc_get_1d_mesh_network_ids_dll(ioncid, meshid, networkid) result(ierr) bind(C, name="ionc_get_1d_mesh_network_ids")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_network_ids_dll
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid, networkid
+   integer                :: ierr
+   
+   ierr = ionc_get_1d_mesh_network_ids_ugrid(ioncid, meshid, networkid) 
+   
+end function ionc_get_1d_mesh_network_ids_dll
+
+function ionc_get_2d_mesh_id_dll(ioncid, meshid) result(ierr) bind(C, name="ionc_get_2d_mesh_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_2d_mesh_id_dll
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid
+   integer                :: ierr
+   
+   ierr = ionc_get_2d_mesh_id_ugrid(ioncid, meshid)
+   
+end function ionc_get_2d_mesh_id_dll
+
+function ionc_get_3d_mesh_id_dll(ioncid, meshid)  result(ierr) bind(C, name="ionc_get_1d_mesh_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_id_dll
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid
+   integer                :: ierr
+   
+   ierr = ionc_get_3d_mesh_id_ugrid(ioncid, meshid)
+   
+end function ionc_get_3d_mesh_id_dll
 
 end module io_netcdf_api
