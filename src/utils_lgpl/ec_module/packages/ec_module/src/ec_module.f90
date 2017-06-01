@@ -241,7 +241,11 @@ module m_ec_module
    interface ecSetElementSetXyen
       module procedure ecElementSetSetXyen
    end interface ecSetElementSetXyen
-   
+
+   interface ecSetElementSetKbotKtop      
+      module procedure ecElementSetSetKbotKtop
+   end interface ecSetElementSetKbotKtop      
+
    ! Field
    
    interface ecSetFieldMissingValue

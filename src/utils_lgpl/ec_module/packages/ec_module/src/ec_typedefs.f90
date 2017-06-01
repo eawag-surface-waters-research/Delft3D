@@ -156,7 +156,7 @@ module m_ec_typedefs
         character(len=50)                            ::  timeunit        !< netcdf-convention time unit definition 
         integer                                      ::  vptyp = -1      !< vertical coordinate type
         real(hp), allocatable, dimension(:)          ::  vp              !< vertical coordinate (layers)
-   end type 
+   end type tEcNetCDF
 
    type tEcNetCDFPtr
       type(tEcNetCDF), pointer :: ptr => null()
@@ -223,8 +223,10 @@ module m_ec_typedefs
       integer,  dimension(:), pointer     :: mask => null() !< points to a 1-dim array field, stored in maskArray OR in a kernel
       integer,  dimension(:), allocatable :: maskArray      !< value = 0: invalid point; value /= 0: valid point
       integer                             :: nCoordinates   !< number of coordinate pairs
+      integer, dimension(:), pointer      :: kbot, ktop     !< locate beginning and end of a contiguous vertical (z) column in a flat 1-dimensional array    ! 
       integer                             :: n_cols         !< number of columns in a data field
       integer                             :: n_rows         !< number of rows in a data field
+      integer                             :: n_layers = 0   !< number of vertical levels 
       integer                             :: vptyp = -1     !< sigma (0) or z (1)
       real(hp)                            :: x0             !< seed coordinate for equidistant x-coordinates
       real(hp)                            :: y0             !< seed coordinate for equidistant x-coordinates
@@ -255,6 +257,7 @@ module m_ec_typedefs
    type tEcField
       integer                                 :: id                 !< unique Field number, set by ecInstanceCreateField
       real(hp)                                :: timesteps          !< Numer of seconds since tEcTimeFrame%k_refdate.
+      integer                                 :: timesndx = -1      !< index into file: used im general for random access fles (nc) to keep track of position
       real(hp)                                :: missingValue       !< value to use for missing data in the data arrays
       real(hp), dimension(:),     pointer     :: arr1dPtr => null() !< points to a 1-dim array field, stored in arr1d OR in a kernel
       real(hp), dimension(:),     allocatable :: arr1d              !< 1-dim array field

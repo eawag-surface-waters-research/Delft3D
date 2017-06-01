@@ -64,6 +64,8 @@ module m_ec_parameters
    integer, parameter :: elmSetType_scalar                = 9 ! This is a single point, without a location.
    integer, parameter :: elmSetType_polytim               = 10
    integer, parameter :: elmSetType_samples               = 11
+   integer, parameter :: elmSetType_spheric_ortho         = 12! A spherical element set the lat, lon of which are one dimension (no cross-product array)
+   integer, parameter :: elmSetType_Cartesian_ortho       = 13! A carthesian element set the lat, lon of which are one dimension (no cross-product array)
    
    !> Enumeration for tEcItem role
    integer, parameter :: itemType_undefined = 0
@@ -196,10 +198,11 @@ module m_ec_parameters
     ! Vertical position type 
     integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed 
     integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum 
-    integer, parameter :: BC_VPTYP_BEDSURF     = 3   !< bedsurface 
-    integer, parameter :: BC_VPTYP_PERCSURF    = 4   !< percentage from surface 
-    integer, parameter :: BC_VPTYP_ZBED        = 5   !< z from bed 
-    integer, parameter :: BC_VPTYP_ZSURF       = 6   !< z from surface 
+    integer, parameter :: BC_VPTYP_ZDATUM_DOWN = 3   !< z below datum 
+    integer, parameter :: BC_VPTYP_BEDSURF     = 4   !< bedsurface 
+    integer, parameter :: BC_VPTYP_PERCSURF    = 5   !< percentage from surface 
+    integer, parameter :: BC_VPTYP_ZBED        = 6   !< z from bed 
+    integer, parameter :: BC_VPTYP_ZSURF       = 7   !< z from surface 
 
     ! Vertical interpolation type 
     integer, parameter :: BC_VERTINT_LIN       = 1   !< linear

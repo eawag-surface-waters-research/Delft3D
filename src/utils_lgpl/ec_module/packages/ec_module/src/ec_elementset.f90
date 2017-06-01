@@ -68,8 +68,10 @@ module m_ec_elementSet
    public :: ecElementSetSetLocations
    public :: ecElementSetSetRadius
    public :: ecElementSetSetRowsCols
+   public :: ecElementSetSetRowsColsLayers
    public :: ecElementSetSetXyen
    public :: ecElementSetGetAbsZ
+   public :: ecElementSetSetKbotKtop
 
    interface ecElementSetGetAbsZ
       module procedure ecElementSetGetAbsZbyPtr
@@ -295,6 +297,8 @@ module m_ec_elementSet
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
                 elementSetPtr%ofType == elmSetType_spheric .or. &
+                elementSetPtr%ofType == elmSetType_cartesian_ortho .or. &
+                elementSetPtr%ofType == elmSetType_spheric_ortho .or. &
                 elementSetPtr%ofType == elmSetType_polytim .or. &
                 elementSetPtr%ofType == elmSetType_samples) then
                newSize = size(xArray)
@@ -335,6 +339,8 @@ module m_ec_elementSet
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
                 elementSetPtr%ofType == elmSetType_spheric .or. &
+                elementSetPtr%ofType == elmSetType_cartesian_ortho .or. &
+                elementSetPtr%ofType == elmSetType_spheric_ortho .or. &
                 elementSetPtr%ofType == elmSetType_polytim .or. &
                 elementSetPtr%ofType == elmSetType_samples) then
                newSize = size(yArray)
@@ -385,7 +391,10 @@ module m_ec_elementSet
          elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
-               elementSetPtr%ofType == elmSetType_polytim) then
+                elementSetPtr%ofType == elmSetType_cartesian_ortho .or. &               
+                elementSetPtr%ofType == elmSetType_spheric .or. &               
+                elementSetPtr%ofType == elmSetType_spheric_ortho .or. &               
+                elementSetPtr%ofType == elmSetType_polytim) then
                if (present(pzmin)) elementSetPtr%zmin => pzmin
                if (present(pzmax)) elementSetPtr%zmax => pzmax
                if ( Lpointer ) then
@@ -406,6 +415,45 @@ module m_ec_elementSet
             call setECMessage("ERROR: ec_elementSet::ecElementSetSetZArray: Cannot find an ElementSet with the supplied id.")
          end if
       end function ecElementSetSetZArray
+
+      
+      function ecElementSetSetKbotKtop(instancePtr, elementSetId, kbot, ktop, Lpointer_) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: elementSetId !< unique ElementSet id
+         integer, dimension(:),    optional,   pointer :: kbot
+         integer, dimension(:),    optional,   pointer :: ktop
+         logical,                   optional, intent(in):: Lpointer_    !< zArray is pointer to the new z-coordinates of the ElementSet (.true.) or not (.false.)
+         !
+         type(tEcElementSet),    pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
+         integer                         :: newSize       !< size of zArray
+         integer                         :: istat         !< reallocation status
+         integer                         :: i             !< loop counter
+         logical                         :: Lpointer
+
+         Lpointer = .false.
+         if ( present(Lpointer_) ) then
+            Lpointer = Lpointer_
+         end if
+         !
+         success = .false.
+         elementSetPtr => null()
+         !
+         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
+         if (associated(elementSetPtr)) then
+            if ( Lpointer ) then
+               elementSetPtr%kbot => kbot
+               elementSetPtr%ktop => ktop
+            else
+               newSize = max(size(kbot),size(ktop))
+               call reallocP(elementSetPtr%kbot, newSize, stat = istat, keepExisting = .false.)
+               call reallocP(elementSetPtr%ktop, newSize, stat = istat, keepExisting = .false.)
+               elementSetPtr%ktop = ktop
+               elementSetPtr%kbot = kbot
+            end if
+         end if
+         success = .true.
+      end function ecElementSetSetKbotKtop
       
       ! =======================================================================
       
@@ -759,8 +807,10 @@ module m_ec_elementSet
          elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
          if (associated(elementSetPtr)) then
             if (elementSetPtr%ofType == elmSetType_cartesian .or. &
+                elementSetPtr%ofType == elmSetType_cartesian_ortho .or. &
                 elementSetPtr%ofType == elmSetType_cartesian_equidistant .or. &
                 elementSetPtr%ofType == elmSetType_spheric .or. &
+                elementSetPtr%ofType == elmSetType_spheric_ortho .or. &
                 elementSetPtr%ofType == elmSetType_spheric_equidistant .or. &
                 elementSetPtr%ofType == elmSetType_polytim .or. &
                 elementSetPtr%ofType == elmSetType_Grib .or. &
@@ -939,6 +989,32 @@ module m_ec_elementSet
             call setECMessage("ERROR: ec_elementSet::ecElementSetSetrOWSCols: Cannot find an ElementSet with the supplied id.")
          end if
       end function ecElementSetSetRowsCols
+      
+      
+      !> Set the number of rows, columns and layers.
+      function ecElementSetSetRowsColsLayers(instancePtr, elementSetId, n_rows, n_cols, n_layers) result(success)
+         logical                               :: success      !< function status
+         type(tEcInstance), pointer            :: instancePtr  !< intent(in)
+         integer,                   intent(in) :: elementSetId !< unique ElementSet id
+         integer,                   intent(in) :: n_rows       !< number of rows
+         integer,                   intent(in) :: n_cols       !< number of columns
+         integer,                   intent(in) :: n_layers     !< number of layers
+         !
+         type(tEcElementSet), pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
+         !
+         success = .false.
+         elementSetPtr => null()
+         !
+         elementSetPtr => ecSupportFindElementSet(instancePtr, elementSetId)
+         if (associated(elementSetPtr)) then
+            elementSetPtr%n_rows = n_rows
+            elementSetPtr%n_cols = n_cols
+            elementSetPtr%n_layers = n_layers
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_elementSet::ecElementSetSetRowsColsLayers: Cannot find an ElementSet with the supplied id.")
+         end if
+      end function ecElementSetSetRowsColsLayers
       
       ! =======================================================================
       

@@ -344,7 +344,6 @@ module m_ec_filereader
                if(allocated(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components)) then ! Astronomical case
                   success = ecTimeFrameRealHpTimestepsToDateTime(fileReaderPtr%tframe, timesteps, yyyymmdd, hhmmss)
                   n_invalid_components = (ecFileReaderLookupAstroComponents(fileReaderPtr)) 
-
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
                      fileReaderPtr%items(2)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(2)%ptr%sourceT1FieldPtr%arr1d(i)

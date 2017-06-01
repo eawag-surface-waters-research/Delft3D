@@ -296,8 +296,15 @@ module m_ec_provider
                   select case(quantityname)
                      case ("ERA_Interim_Dataset")
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
-                     case ("rainfall","airpressure_windx_windy","windxy","windx","windy","atmosphericpressure",    &
-                                     "dewpoint_airtemperature_cloudiness","dewpoint_airtemperature_cloudiness_solarradiation")
+                     case ("rainfall",                                              &
+                           "airpressure_windx_windy",                               &
+                           "windxy","windx","windy",                                &
+                           "nudge_salinity_temperature",                            &
+                           "atmosphericpressure",                                   &
+                           "humidity_airtemperature_cloudiness",                    &
+                           "humidity_airtemperature_cloudiness_solarradiation",     &
+                           "dewpoint_airtemperature_cloudiness",                    &
+                           "dewpoint_airtemperature_cloudiness_solarradiation")
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
@@ -314,6 +321,7 @@ module m_ec_provider
             case default
                call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unknown file type.")
          end select
+         success = .true.
       end function ecProviderCreateItems
       
       ! =======================================================================
@@ -2316,6 +2324,7 @@ module m_ec_provider
          !
          integer                                                 :: ierror                !< return value of NetCDF function calls
 
+
          integer                                                 :: idvar
          integer                                                 :: n_quantity            !< number of requested variables from the netcdf-file 
          
@@ -2331,11 +2340,16 @@ module m_ec_provider
          integer                                                 :: grid_mapping_id       !< id of the applied grid mapping 
          integer                                                 :: fgd_id                !< var_id for elementset X or latitude
          integer                                                 :: sgd_id                !< var_id for elementset Y or longitude
+         integer                                                 :: tgd_id                !< var_id for elementset Z or depth
          integer                                                 :: fgd_grid_type         !< helper variable for consistency check on grid_type
          integer                                                 :: sgd_grid_type         !< helper variable for consistency check on grid_type
          integer                                                 :: grid_type             !< elmSetType enum
-         integer                                                 :: fgd_size              !< number of grid points in first dimension
-         integer                                                 :: sgd_size              !< number of grid points in second dimension
+         integer                                                 :: fgd_size              !< number of grid points in first grid dimension
+         integer                                                 :: sgd_size              !< number of grid points in second grid dimension
+         integer                                                 :: tgd_size              !< number of grid points in third grid dimension
+         integer                                                 :: vptyp                 !< interpretation of the vertical coordinate
+         character(len=NF90_MAX_NAME)                            :: z_positive            !< which direction of z is positive ? 
+         character(len=NF90_MAX_NAME)                            :: z_standardname            !< which direction of z is positive ? 
          real(hp)                                                :: gnplon,gnplat         !< coordinates of shifted north pole obtained from gridmapping 
          real(hp)                                                :: gsplon,gsplat         !< coordinates of shifted south pole obtained from gridmapping 
          real(hp),                   dimension(:,:), allocatable :: fgd_data              !< coordinate data along first dimension's axis
@@ -2344,6 +2358,7 @@ module m_ec_provider
          real(hp),                   dimension(:,:), allocatable :: sgd_data              !< coordinate data along second dimension's axis
          real(hp),                   dimension(:),   allocatable :: sgd_data_1d           !< coordinate data along second dimension's axis
          real(hp),                   dimension(:),   allocatable :: sgd_data_trans        !< coordinate data along first dimension's axis transformed, rotating pole
+         real(hp),                   dimension(:),   allocatable :: tgd_data_1d           !< coordinate data along third dimension's axis
          real(hp),                   dimension(:),   allocatable :: pdiri                 !< 
          real(hp)                                                :: fdg_miss              !< missing data value in first dimension
          real(hp)                                                :: sdg_miss              !< missing data value in second dimension
@@ -2374,10 +2389,10 @@ module m_ec_provider
          double precision                                        :: PI 
          character(len=NF90_MAX_NAME)                            :: expected_fgd, expected_sgd
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
-         integer                                                 :: x_varid, x_dimid, y_varid, y_dimid
+         integer                                                 :: x_varid, x_dimid, y_varid, y_dimid, z_varid, z_dimid
 
-         integer, dimension(:), allocatable                      :: first_coordinate_dimids, second_coordinate_dimids
-         integer, dimension(:), allocatable                      :: first_coordinate_dimlen, second_coordinate_dimlen
+         integer, dimension(:), allocatable                      :: first_coordinate_dimids, second_coordinate_dimids, third_coordinate_dimids
+         integer, dimension(:), allocatable                      :: first_coordinate_dimlen, second_coordinate_dimlen, third_coordinate_dimlen
          integer                                                 :: timeint
 
          !
@@ -2451,6 +2466,11 @@ module m_ec_provider
             ncstdnames(3) = 'cloud_area_fraction'
             ncvarnames(4) = 'ssr'                            ! outgoing SW radiation at the top-of-the-atmosphere
             ncstdnames(4) = 'surface_net_downward_shortwave_flux'
+         case ('nudge_salinity_temperature')
+            ncvarnames(1) = 'thetao'                        ! temperature
+            ncstdnames(1) = 'sea_water_potential_temperature'
+            ncvarnames(2) = 'so'                            ! salinity
+            ncstdnames(2) = 'sea_water_salinity'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
             ! we have faulty 
             call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
@@ -2463,6 +2483,7 @@ module m_ec_provider
          ! For now not sure yet if we need this call.
          if (.not.ecSupportNCFindCFCoordinates(fileReaderPtr%fileHandle, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
                                                                            x_varid,   x_dimid,   y_varid,   y_dimid,      &
+                                                                           z_varid,   z_dimid,                            &
                                                                          tim_varid, tim_dimid)) then
             ! Exception: inquiry of id's of required coordinate variables failed 
              return
@@ -2504,6 +2525,12 @@ module m_ec_provider
             ! in spherical coordinates they can be lon/lat or lat/lon
             fgd_size = fileReaderPtr%dim_length(dimids(1))                                  ! assume the spatial dimensions of the 
             sgd_size = fileReaderPtr%dim_length(dimids(2))                                  ! var are the first two
+            if (size(dimids)>3) then
+               tgd_size = fileReaderPtr%dim_length(dimids(3))                               ! var are the first two
+            else
+               tgd_size = 0                                                                 ! var are the first two
+            end if
+
             if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
                grid_type = elmSetType_cartesian
                fgd_id = x_varid
@@ -2606,40 +2633,59 @@ module m_ec_provider
                   return
                   ! TODO: error message
                end if
-               !------------------------------------------------------------------------------------- TEST NEW CODE 
                
-               allocate(fgd_data(fgd_size,sgd_size), sgd_data(fgd_size,sgd_size))
-               allocate(fgd_data_1d(fgd_size*sgd_size), sgd_data_1d(fgd_size*sgd_size))
+               
+               if (ndims==2 .or. rotate_pole) then
+                  allocate(fgd_data(fgd_size,sgd_size), sgd_data(fgd_size,sgd_size))
+                  allocate(fgd_data_1d(fgd_size*sgd_size), sgd_data_1d(fgd_size*sgd_size))
+               else 
+                  allocate(fgd_data_1d(fgd_size), sgd_data_1d(sgd_size))
+                  if (grid_type==elmSetType_spheric) grid_type = elmSetType_spheric_ortho
+                  if (grid_type==elmSetType_Cartesian) grid_type = elmSetType_Cartesian_ortho
+               end if
+                  
                if (ndims==2) then 
                   ierror = nf90_get_var(fileReaderPtr%fileHandle, fgd_id, fgd_data, start=(/1,1/), count=(/fgd_size,sgd_size/))
                   ierror = nf90_get_var(fileReaderPtr%fileHandle, sgd_id, sgd_data, start=(/1,1/), count=(/fgd_size,sgd_size/))
+                  fgd_data_1d = reshape(fgd_data, (/fgd_size*sgd_size/)) ! transform fgd and sgd here if necessary 
+                  sgd_data_1d = reshape(sgd_data, (/fgd_size*sgd_size/))
                else if (ndims==1) then 
                   ierror = nf90_get_var(fileReaderPtr%fileHandle, fgd_id, fgd_data_1d(1:fgd_size), start=(/1/), count=(/fgd_size/))
                   ierror = nf90_get_var(fileReaderPtr%fileHandle, sgd_id, sgd_data_1d(1:sgd_size), start=(/1/), count=(/sgd_size/))
                   ! Make a crossproduct array  
-                  do ifgd = 1,fgd_size
-                     do isgd = 1,sgd_size
-                        sgd_data(ifgd,isgd) = sgd_data_1d(isgd)
-                        fgd_data(ifgd,isgd) = fgd_data_1d(ifgd)
-                     enddo
-                  enddo 
+                  if (rotate_pole) then
+                     do ifgd = 1,fgd_size
+                        do isgd = 1,sgd_size
+                           sgd_data(ifgd,isgd) = sgd_data_1d(isgd)
+                           fgd_data(ifgd,isgd) = fgd_data_1d(ifgd)
+                        enddo
+                     enddo 
+                     fgd_data_1d = reshape(fgd_data, (/fgd_size*sgd_size/)) ! transform fgd and sgd here if necessary 
+                     sgd_data_1d = reshape(sgd_data, (/fgd_size*sgd_size/))
+                  end if
                else
                   ! Something wrong with the coordinate dimensions 
                endif 
 
-               ! transform fgd and sgd here if necessary
-               fgd_data_1d = reshape(fgd_data, (/fgd_size*sgd_size/))
-               sgd_data_1d = reshape(sgd_data, (/fgd_size*sgd_size/))
-   
-               if (grid_type == elmSetType_cartesian) then
-                  if (.not. (ecElementSetSetType(instancePtr, elementSetId, grid_type) .and. &
-                             ecElementSetSetXArray(instancePtr, elementSetId, fgd_data_1d) .and. &
-                             ecElementSetSetYArray(instancePtr, elementSetId, sgd_data_1d) .and. &
-                             ecElementSetSetRowsCols(instancePtr, elementSetId, sgd_size, fgd_size) .and. &
-                             ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, fgd_size*sgd_size))) then
+
+               if (.not.ecElementSetSetType(instancePtr, elementSetId, grid_type)) then
+                  return
+               end if
+               if (.not.ecElementSetSetRowsColsLayers(instancePtr, elementSetId, sgd_size, fgd_size, tgd_size)) then
+                  return
+               end if
+               if (.not.ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, fgd_size*sgd_size)) then
+                  return
+               end if
+               if (.not.ecElementSetSetType(instancePtr, elementSetId, grid_type)) then
+                  return
+               end if
+               if (grid_type == elmSetType_cartesian .or. grid_type == elmSetType_cartesian_ortho) then
+                  if (.not. (ecElementSetSetXArray(instancePtr, elementSetId, fgd_data_1d) .and. &
+                             ecElementSetSetYArray(instancePtr, elementSetId, sgd_data_1d))) then
                      return
                   end if
-               else if (grid_type == elmSetType_spheric) then
+               else if (grid_type == elmSetType_spheric .or. grid_type == elmSetType_spheric_ortho) then
                   if (allocated(fgd_data_trans)) deallocate(fgd_data_trans)
                   if (allocated(sgd_data_trans)) deallocate(sgd_data_trans)
                   if (allocated(pdiri)) deallocate(pdiri)
@@ -2676,17 +2722,50 @@ module m_ec_provider
                         return
                      endif 
                   endif 
-                  if (.not.ecElementSetSetRowsCols(instancePtr, elementSetId, sgd_size, fgd_size)) then
-                     call setECMessage("Setting number of rows and columns failed for "//trim(fileReaderPtr%filename)//".")
-                     return
-                  endif 
-                  if (.not.ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, fgd_size*sgd_size)) then
-                     call setECMessage("Setting number of points failed for "//trim(fileReaderPtr%filename)//".")
-                     return
-                  endif 
                 endif
             end if
 
+            ! Dimensions ID's and dimension lengths of the second coordinate variable
+            if (tgd_size>0) then
+               tgd_id = z_varid
+               ierror = nf90_inquire_variable(fileReaderPtr%fileHandle,tgd_id,ndims=ndims)  
+               call realloc(third_coordinate_dimids,ndims)
+               call realloc(third_coordinate_dimlen,ndims)
+               ierror = nf90_inquire_variable(fileReaderPtr%fileHandle,coordids(1),dimids=third_coordinate_dimids)  ! count dimensions of the first coordinate variable
+               do idims=1,ndims
+                     third_coordinate_dimlen(idims)=fileReaderPtr%dim_length(idims) 
+               enddo
+               if (allocated(tgd_data_1d)) deallocate(tgd_data_1d)
+               allocate(tgd_data_1d(tgd_size))
+               ierror = nf90_get_var(fileReaderPtr%fileHandle, tgd_id, tgd_data_1d, start=(/1/), count=(/tgd_size/))
+               z_positive = ''
+               ierror = nf90_get_att(fileReaderPtr%fileHandle, tgd_id, "positive", z_positive)
+               z_standardname=fileReaderPtr%standard_names(z_varid)
+               call str_lower(z_standardname)
+               call str_lower(z_positive)
+               ! Set the vptyp of the elementset
+               select case (z_standardname)
+               case ('depth')                                                          ! absolute depth below geoid
+                  vptyp = BC_VPTYP_ZDATUM
+                  if (z_positive=='down') vptyp = BC_VPTYP_ZDATUM_DOWN
+               case ('ocean_sigma_coordinate','ocean_sigma_z_coordinate')              ! relative vertical coordinate
+                  vptyp = BC_VPTYP_PERCBED
+                  if (z_positive=='down') vptyp = BC_VPTYP_PERCSURF
+               case ('hybrid_height')
+               case default
+                  call setECMessage("Setting Z-array failed for "//trim(fileReaderPtr%filename)//".")
+                  return
+               end select
+               if (.not.ecElementSetSetProperties(instancePtr, elementSetId, vptyp=vptyp)) then
+                  return
+               end if
+               if (.not.ecElementSetSetZArray(instancePtr, elementSetId, tgd_data_1d)) then
+                  call setECMessage("Setting Z-array failed for "//trim(fileReaderPtr%filename)//".")
+                  return
+               endif 
+            end if
+            continue
+            
             ! ===================
             ! Create the Quantity
             ! ===================
@@ -2716,12 +2795,12 @@ module m_ec_provider
             end if
             !
             field0Id = ecInstanceCreateField(instancePtr)
-            if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, fgd_size*sgd_size) .and. &
+            if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, fgd_size*sgd_size*max(tgd_size,1)) .and. &
                        ecFieldSetMissingValue(instancePtr, field0Id, fdg_miss))) then
                   return
             end if
             field1Id = ecInstanceCreateField(instancePtr)
-            if (.not. (ecFieldCreate1dArray(instancePtr, field1Id, fgd_size*sgd_size) .and. &
+            if (.not. (ecFieldCreate1dArray(instancePtr, field1Id, fgd_size*sgd_size*max(tgd_size,1)) .and. &
                        ecFieldSetMissingValue(instancePtr, field1Id, sdg_miss))) then
                   return
             end if

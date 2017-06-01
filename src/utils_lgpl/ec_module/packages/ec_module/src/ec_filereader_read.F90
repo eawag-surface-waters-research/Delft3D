@@ -644,11 +644,11 @@ module m_ec_filereader_read
          integer                                 :: ierror           !< return status of NetCDF method call
          integer                                 :: varid            !< NetCDF id of NetCDF variable
          integer                                 :: ndims            !< NetCDF variable's number of dimensions
-         integer,  dimension(3)                  :: dimids           !< NetCDF variable's dimension ids
+         integer,  dimension(4)                  :: dimids           !< NetCDF variable's dimension ids
          integer                                 :: length           !< size of a NetCDF variable's dimension
          integer                                 :: times_index      !< Index in tEcTimeFrame's times array
          real(hp)                                :: netcdf_timesteps !< seconds since k_refdate
-         integer                                 :: i, j             !< loop counters
+         integer                                 :: i, j, k          !< loop counters
          real(hp), dimension(:,:,:), allocatable :: data_block       !< 2D slice of NetCDF variable's data
          integer                                 :: istat            !< allocation status
          real(hp)                                :: time_window      !< time window between times(i) and times(i+1)
@@ -692,36 +692,6 @@ module m_ec_filereader_read
          else
             call setECMessage("Invalid source Field specified in ecNetcdfReadNextBlock.")
             return
-         end if
-         !
-         ! - 2 - There is no convention in dimension order, so only support scalar, (/x, y, time/) and (/latitude, longitude, time/)
-         !       TODO: This check on dimension length is not infallable. Can be replaced by check on standard_name.
-         if (item%elementSetPtr%nCoordinates > 0) then
-            ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, varid, ndims=ndims)
-            if (ndims == 3) then
-               ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, varid, dimids=dimids)
-               ! x or latitude
-               ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle, dimids(1), len=length)
-               if (length /= item%elementSetPtr%n_cols) then
-                  call setECMessage("NetCDF variable with unsupported dimension ordering in "//trim(fileReaderPtr%filename)//".")
-                  return
-               end if
-               ! y or longitude
-               ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle, dimids(2), len=length)
-               if (length /= item%elementSetPtr%n_rows) then
-                  call setECMessage("NetCDF variable with unsupported dimension ordering in "//trim(fileReaderPtr%filename)//".")
-                  return
-               end if
-               ! time
-               ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle, dimids(3), len=length)
-               if (length /= fileReaderPtr%tframe%nr_timesteps) then
-                  call setECMessage("NetCDF variable with unsupported dimension ordering in "//trim(fileReaderPtr%filename)//".")
-                  return
-               end if
-            else
-               call setECMessage("NetCDF variable with unsupported number of dimensions in "//trim(fileReaderPtr%filename)//".")
-               return
-            end if
          end if
          !
          ! - 3 - Check for the presence of times, indicating the presence of further data blocks.
@@ -782,21 +752,44 @@ module m_ec_filereader_read
                ! - 4 - Read a grid data block.
                valid_field = .False.
                if (item%elementSetPtr%nCoordinates > 0) then
-                  allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1 ), stat = istat)
-                  ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
-                  
-                  ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
-                  do i=1, item%elementSetPtr%n_rows
-                     do j=1, item%elementSetPtr%n_cols
-                        if (data_block(j,i,1) == dmiss_nc) then 
-                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
-                        else                     
-                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1)
-                           valid_field = .True.
-                        endif
+                  if (item%elementSetPtr%n_layers == 0) then                  ! 2D elementset
+                     allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1 ), stat = istat)
+                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
+                     
+                     ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
+                     do i=1, item%elementSetPtr%n_rows
+                        do j=1, item%elementSetPtr%n_cols
+                           if (data_block(j,i,1) == dmiss_nc) then 
+                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
+                           else                     
+                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1)
+                              valid_field = .True.
+                           endif
+                        end do
                      end do
-                  end do
-               end if                                        ! reading 2D data block
+                  else                                                                                                                       
+                     allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, item%elementSetPtr%n_layers), stat = istat)
+                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, item%elementSetPtr%n_layers, 1/))
+                     
+                     ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
+                     do i=1, item%elementSetPtr%n_rows
+                        do j=1, item%elementSetPtr%n_cols
+                           do k=1, item%elementSetPtr%n_layers
+                              if (data_block(j,i,k) == dmiss_nc) then 
+                                 fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
+                                                  + (j-1)*item%elementSetPtr%n_rows                                  &
+                                                  +  i ) = 0d0
+                              else                     
+                                 fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
+                                                  + (j-1)*item%elementSetPtr%n_rows                                  &
+                                                  +  i ) = data_block(j,i,k)
+                                 valid_field = .True.
+                              endif
+                           end do
+                        end do
+                     end do
+                  end if
+               end if
                if (.not.valid_field) then
                   times_index = times_index+1
                end if
@@ -804,6 +797,7 @@ module m_ec_filereader_read
    
             ! - 2 - Update the source Field's timesteps variable.
             fieldPtr%timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, times_index)
+            fieldPtr%timesndx = times_index
          endif
 
          ! - 3 - Apply the scale factor and offset

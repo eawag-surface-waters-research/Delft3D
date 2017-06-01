@@ -948,6 +948,7 @@ end subroutine ecInstanceListSourceItems
       !> Find the CF-compliant longitude and latitude dimensions and associated variables
       function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
                                                     x_varid,   x_dimid,   y_varid,   y_dimid,      &
+                                                    z_varid,   z_dimid,                            &
                                                   tim_varid, tim_dimid) result(success)
       use netcdf
       logical              :: success
@@ -956,11 +957,13 @@ end subroutine ecInstanceListSourceItems
       integer, intent(out) :: lat_varid      !< One dimensional coordinate variable recognized as latitude
       integer, intent(out) ::   x_varid      !< One dimensional coordinate variable recognized as X
       integer, intent(out) ::   y_varid      !< One dimensional coordinate variable recognized as Y
+      integer, intent(out) ::   z_varid      !< One dimensional coordinate variable recognized as Y
       integer, intent(out) :: tim_varid      !< One dimensional coordinate variable recognized as time
       integer, intent(out) :: lon_dimid      !< Longitude dimension
       integer, intent(out) :: lat_dimid      !< Latitude dimension
       integer, intent(out) ::   x_dimid      !< X dimension
       integer, intent(out) ::   y_dimid      !< Y dimension
+      integer, intent(out) ::   z_dimid      !< Y dimension
       integer, intent(out) :: tim_dimid      !< Time dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
       integer :: dimids(1)
@@ -971,11 +974,13 @@ end subroutine ecInstanceListSourceItems
       lat_varid = -1
       x_varid = -1
       y_varid = -1
+      z_varid = -1
       tim_varid = -1
       lon_dimid = -1
       lat_dimid = -1
       x_dimid = -1
       y_dimid = -1
+      z_dimid = -1
       tim_dimid = -1
       ierr = nf90_inquire(ncid, ndim, nvar, nglobatts, unlimdimid)
       do ivar=1,nvar
@@ -1001,6 +1006,10 @@ end subroutine ecInstanceListSourceItems
                   if (strcmpi(axis,'Y')) then
                      y_varid = ivar
                      y_dimid = dimids(1)
+                  end if
+                  if (strcmpi(axis,'Z')) then
+                     z_varid = ivar
+                     z_dimid = dimids(1)
                   end if
                case default
                   ! see if is the time dimension
