@@ -98,7 +98,7 @@ subroutine rdtimw(comfil    ,lundia    ,error     ,ntwav     , &
     ! If not then increase array size.
     !
     if (idummy(1)>size(timwav)) then
-       call reallocP(gdp%gdtricom%timwav,2*size(timwav))
+       call reallocP(gdp%gdtricom%timwav,max(2*size(timwav),idummy(1)))
        timwav => gdp%gdtricom%timwav
     endif
     !
