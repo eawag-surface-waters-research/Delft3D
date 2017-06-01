@@ -84,7 +84,7 @@ subroutine getfield(itim, comfil, grpnam, funam, ierr, fcom, nmaxus, mmax, kmax,
        do m = 1, mmax
           do n = 1, nmaxus
              i = i+1
-             fcom(n, m, k, 1) = sbuff(i)
+             fcom(n, m, k, l) = sbuff(i)
           enddo
        enddo
     enddo
