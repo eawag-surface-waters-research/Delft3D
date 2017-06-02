@@ -36,7 +36,7 @@ echo Working directory: %workdir%
 set D3D_HOME=%~dp0..\..
 
 rem Two possibilities for %ARCH% are suitable (win64 and x64)
-if exist %D3D_HOME%win64 (
+if exist %D3D_HOME%\win64 (
     set ARCH=win64
 ) else (
     set ARCH=x64
