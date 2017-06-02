@@ -9,7 +9,8 @@ title run_dimr
     rem 
     rem
 setlocal enabledelayedexpansion
-
+    rem debuglevel=0:silent 8:major 32:detail
+set debuglevel=8
 
     rem
     rem Set the config file
@@ -19,8 +20,17 @@ if [%1] EQU [] (
 ) else (
     if [%1] EQU [--help] (
         goto usage
+    ) else (
+        if [%1] EQU [-d] (
+            set debuglevel=%2
+            set argfile=%3
+        ) else (
+            set argfile=%1
+            if [%2] EQU [-d] (
+                set debuglevel=%3
+            )
+        )
     )
-    set argfile=%1
 )
 echo Configfile:%argfile%
 if not exist %argfile% (
@@ -43,18 +53,19 @@ if exist %D3D_HOME%\win32 (
 )
 
 
-set delwaqexedir=%D3D_HOME%\%ARCH%\delwaq\bin
+set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
 set dflowfmexedir=%D3D_HOME%\%ARCH%\dflowfm\bin
 set dimrexedir=%D3D_HOME%\%ARCH%\dimr\bin
 set esmfexedir=%D3D_HOME%\%ARCH%\esmf\bin
 set esmfbatdir=%D3D_HOME%\%ARCH%\esmf\scripts
-set flow1d2dexedir=%D3D_HOME%\%ARCH%\flow1d2d\bin
-set rrexedir=%D3D_HOME%\%ARCH%\rr\bin
-set rtctoolsexedir=%D3D_HOME%\%ARCH%\rtctools\bin
+set flow1dexedir=%D3D_HOME%\%ARCH%\dflow1d\bin
+set flow1d2dexedir=%D3D_HOME%\%ARCH%\dflow1d2d\bin
+set rrexedir=%D3D_HOME%\%ARCH%\drr\bin
+set rtctoolsexedir=%D3D_HOME%\%ARCH%\dfbc\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
 set shareddir=%D3D_HOME%\%ARCH%\shared
-set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
+set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
 
     rem
@@ -62,16 +73,17 @@ set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
     rem
 
     rem Run
-set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
-    rem With debug info: "%dhydroexedir%\d_hydro.exe" -d 0xFFFFFFFF %argfile%
-"%dimrexedir%\dimr.exe" %argfile%
+set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
+echo executing: "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
+"%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
 
 goto end
 
 :usage
 echo Usage:
-echo run_dimr.bat [--help] [dimr_config.xml]
+echo run_dimr.bat [--help] [-d debuglevel] [dimr_config.xml]
 echo     --help         : (Optional) show this usage
+echo     -d debuglevel  : (optional) debuglevel=0:silent, 8:major(default), 32:detail
 echo     dimr_config.xml: (Optional) default: dimr_config.xml
 
 :end

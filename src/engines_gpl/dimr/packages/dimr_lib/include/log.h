@@ -36,14 +36,14 @@
 
 #pragma once
 #ifdef WIN32
-	#include "Windows.h"
-	#define STDCALL __stdcall
+    #include "Windows.h"
+    #define STDCALL __stdcall
 #else
 #define STDCALL
 #endif
 
 extern "C" {
-	typedef void(STDCALL * WriteCallback)(char* message);
+    typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
 }
 #include "dimr.h"
 
@@ -82,16 +82,17 @@ class Log {
         static const Mask RESERVED_27       = 1 << 27;  //
         static const Mask RESERVED_28       = 1 << 28;  //
         static const Mask RESERVED_29       = 1 << 29;  //
-        static const Mask RESERVED_30       = 1 << 30;  //
-        static const Mask LOG_DETAIL        = 1 << 31;  // include detailed time, node and iterator info in log messages
+        static const Mask LOG_DETAIL        = 1 << 30;  // include detailed time, node and iterator info in log messages
 
-        static const Mask TRACE         = 0xFFFFFFFF;   // every possible event
+        static const Mask TRACE             = INT_MAX;   // every possible event
+                                                         // Do not use UINT_MAX: differences between masks have to be tested
 
     public:
         Log (
             FILE *  output,
             Clock * clock,
-            Mask    mask = SILENT
+            Mask    mask = SILENT,
+            Mask    feedbackMask = SILENT
             );
 
         ~Log (
@@ -106,6 +107,16 @@ class Log {
         void
         SetMask (
             Mask mask
+            );
+
+        Mask
+        GetFeedbackLevel (
+            void
+            );
+
+        void
+        SetFeedbackLevel (
+            Mask feedbackMask
             );
 
         void
@@ -130,17 +141,18 @@ class Log {
             const char * format,
             ...
             );
-		
-		void
-		SetWriteCallBack(
-			WriteCallback writeCallback
-			);
+        
+        void
+        SetWriteCallBack(
+            WriteCallback writeCallback
+            );
 
     private:
         FILE *      output;
         Clock *     clock;
         Log::Mask   mask;
+        Log::Mask   feedbackMask;
 
         pthread_key_t   thkey;      // contains key for thread-specific log data
-		WriteCallback writeCallback;
+        WriteCallback writeCallback;
     };

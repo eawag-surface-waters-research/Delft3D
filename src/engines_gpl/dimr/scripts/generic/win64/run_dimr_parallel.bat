@@ -9,7 +9,8 @@ title run_dimr_parallel
     rem 
     rem
 setlocal enabledelayedexpansion
-
+    rem debuglevel=0:silent 8:major 32:detail
+set debuglevel=8
 
     rem
     rem Set the config file
@@ -25,7 +26,15 @@ if [%1] EQU [] (
     if [%2] EQU [] (
         set argfile=dimr_config.xml
     ) else (
-        set argfile=%2
+        if [%2] EQU [-d] (
+            set debuglevel=%3
+            set argfile=%4
+        ) else (
+            set argfile=%2
+            if [%3] EQU [-d] (
+                set debuglevel=%4
+            )
+        )
     )
 )
 echo Configfile:%argfile%
@@ -71,17 +80,18 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
     rem Run
 set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
-    rem With debug info: "%dhydroexedir%\d_hydro.exe" -d 0xFFFFFFFF %argfile%
-"%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d 0xFFFFFFFF %argfile%
+echo executing: "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
+"%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
 
 goto end
 
 :usage
 echo Usage:
-echo run_dimr_parallel.bat [--help] [n] [dimr_config.xml]
+echo run_dimr_parallel.bat [--help] [n] [-d debuglevel] [dimr_config.xml]
 echo     --help         : (Optional) show this usage
 echo     n              : (Optional) integer, number of partitions. Must match with the prepared D-Flow FM calculation.
 echo                      Default value: %NUMBER_OF_PROCESSORS%
+echo     -d debuglevel  : (optional) debuglevel=0:silent, 8:major(default), 32:detail
 echo     dimr_config.xml: (Optional) default: dimr_config.xml
 
 :end

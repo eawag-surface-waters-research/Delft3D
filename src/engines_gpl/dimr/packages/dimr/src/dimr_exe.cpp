@@ -119,18 +119,18 @@ int main (int     argc,
         DHE->initialize(argc, argv, envp);
         if (! DHE->ready) return 1;
 
-		DHE->log->Write(Log::MAJOR, my_rank, getfullversionstring_dimr_exe());
+        DHE->log->Write(Log::MAJOR, my_rank, getfullversionstring_dimr_exe());
 
         DHE->openLibrary();
         DHE->lib_initialize();
 
-		doFinalize = true;
+        doFinalize = true;
 
-		DHE->lib_update();
-		
-		doFinalize = false;
+        DHE->lib_update();
+        
+        doFinalize = false;
 
-		DHE->lib_finalize();
+        DHE->lib_finalize();
         delete DHE;
         ireturn = 0;
     }
@@ -207,13 +207,14 @@ void DimrExe::lib_initialize(void)
     (this->dllSetVar) ("myRank", &my_rank);
     this->log->Write (Log::MINOR, my_rank, "%s.SetVar(debugLevel,%d)", this->library, this->logMask);
     (this->dllSetVar) ("debugLevel", &(this->logMask));
+    (this->dllSetVar) ("feedbackLevel", &(this->logMask));
     this->log->Write (Log::MAJOR, my_rank, "%s.Initialize(%s)", this->library, this->configfile);
-	int result = (this->dllInitialize) (this->configfile);
-	if (result != 0) {
-		// Error occurred, but apparently no exception has been thrown.
-		// Throw one now
-		this->log->Write(Log::MAJOR, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
-	}
+    int result = (this->dllInitialize) (this->configfile);
+    if (result != 0) {
+        // Error occurred, but apparently no exception has been thrown.
+        // Throw one now
+        this->log->Write(Log::MAJOR, my_rank, "%s.Initialize(%s) returned error value %d", this->library, this->configfile, result);
+    }
     // Some basic tests
     (this->dllGetStartTime) (&tStart);
     (this->dllGetEndTime) (&tEnd);
@@ -358,7 +359,7 @@ void abort_parallel()
 //  Constructor. Just create the object. Delay initialization actions in
 //  initialization method
 DimrExe::DimrExe (void) {
-	this->ready = false;
+    this->ready = false;
 }
 
 //------------------------------------------------------------------------------
@@ -420,13 +421,12 @@ void DimrExe::initialize (int     argc,
                 break;
             }
 
-			case 'v': {
-				if (sscanf("0x0000001F", "%i", &logMask) != 1)
-					throw new Exception(true, "Invalid log mask (-d option)");
-				break;
-			}
+            case 'v': {
+                logMask=INT_MAX;
+                break;
+            }
 
-			case 'l': {
+            case 'l': {
                 logFile = fopen (optarg, "w");
                 if (logFile == NULL)
                     throw new Exception (true, "Cannot create log file \"%s\"", optarg);
@@ -457,14 +457,15 @@ void DimrExe::initialize (int     argc,
         }
     }
 
-    if (argc - optind != 1)
+    if (argc - optind != 1) {
         throw new Exception (true, "Improper usage.  Execute \"%s -?\" for command-line syntax", this->exeName);
+    }
 
     this->clock = new Clock ();
     this->log = new Log (logFile, this->clock, this->logMask);
     this->configfile = argv[optind];
 
-	this->ready = true;
+    this->ready = true;
 }
 
 
@@ -551,14 +552,14 @@ void DimrExe::openLibrary (void) {
 #endif
         }
 
-		// Get entry point for set_logger
-		BMI_DIMR_SET_LOGGER set_logger_entry = (BMI_DIMR_SET_LOGGER) GETPROCADDRESS(dllhandle, BmiDimrSetLogger);
-		if (set_logger_entry == NULL) {
-			throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiDimrSetLogger, this->library, GetLastError());
-		}
-		(set_logger_entry)(this->log);
+        // Get entry point for set_logger
+        BMI_DIMR_SET_LOGGER set_logger_entry = (BMI_DIMR_SET_LOGGER) GETPROCADDRESS(dllhandle, BmiDimrSetLogger);
+        if (set_logger_entry == NULL) {
+            throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiDimrSetLogger, this->library, GetLastError());
+        }
+        (set_logger_entry)(this->log);
 
-		// Collect BMI entry points
+        // Collect BMI entry points
         this->dllInitialize = (BMI_INITIALIZE) GETPROCADDRESS (dllhandle, BmiInitializeEntryPoint);
         if (this->dllInitialize == NULL) {
             throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiInitializeEntryPoint, this->library, GetLastError());
@@ -648,7 +649,7 @@ static void printAbout (char * exeName) {
 Copyright (C)  Stichting Deltares, 2011-2017. \n\
 GNU General Public License, see <http://www.gnu.org/licenses/>. \n\n\
 sales@deltaressystems.nl \n", getfullversionstring_dimr_exe());
-	printf("%s\n\n", geturlstring_dimr_exe());
+    printf("%s\n\n", geturlstring_dimr_exe());
  }
 
 

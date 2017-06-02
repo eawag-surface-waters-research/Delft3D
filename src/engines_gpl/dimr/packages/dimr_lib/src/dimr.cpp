@@ -78,54 +78,55 @@ using namespace std;
 static Dimr * thisDimr = NULL;     // global pointer to single object instance
 
 Dimr::Dimr(void) {
-    FILE *      logFile = stdout;
-    ready = false;
-    exePath = NULL;
-    exeName = NULL;
-    clock = new Clock ();
-    logMask = Log::MAJOR;
-    log = new Log (logFile, clock, logMask);
-    config = NULL;
-    mainArgs = NULL;
-    slaveArg = NULL;
-    control = NULL;
+    FILE * logFile               = stdout;
+    ready                        = false;
+    exePath                      = NULL;
+    exeName                      = NULL;
+    clock                        = new Clock ();
+    logMask                      = Log::MAJOR;
+    feedbackMask                 = Log::MAJOR;
+    log                          = new Log (logFile, clock, logMask);
+    config                       = NULL;
+    mainArgs                     = NULL;
+    slaveArg                     = NULL;
+    control                      = NULL;
     componentsList.numComponents = 0;
-    couplersList.numCouplers = 0;
-    use_mpi = false;
-    my_rank = 0;
-    numranks = 1;
-    configfile = NULL;
-    done = false;
+    couplersList.numCouplers     = 0;
+    use_mpi                      = false;
+    my_rank                      = 0;
+    numranks                     = 1;
+    configfile                   = NULL;
+    done                         = false;
     // Initialize redirectFile. Default: switched On (!=NULL)
-    const char * filename = "dimr_redirected_stdout_stderr.log";
-    int len = strlen(filename);
-    redirectFile = (char *) malloc((len+1)*sizeof(char));
+    const char * filename        = "dimr_redirected_stdout_stderr.log";
+    int len                      = strlen(filename);
+    redirectFile                 = (char *) malloc((len+1)*sizeof(char));
     strncpy(redirectFile, (const char*)filename, len);
-    redirectFile[len] = '\0';
+    redirectFile[len]            = '\0';
 }
 
 
 extern "C" {
 //------------------------------------------------------------------------------
 DllExport void set_logger_callback(WriteCallback writeCallBack) {
-	if (thisDimr == NULL) {
-		thisDimr = new Dimr();
-	}
-	thisDimr->log->SetWriteCallBack(writeCallBack);
+    if (thisDimr == NULL) {
+        thisDimr = new Dimr();
+    }
+    thisDimr->log->SetWriteCallBack(writeCallBack);
 }
-	
+    
 //------------------------------------------------------------------------------
 DllExport void set_logger(Log * loggerFromDimrExe) {
-	if (thisDimr == NULL) {
-		thisDimr = new Dimr();
-	}
-	thisDimr->log = loggerFromDimrExe;
+    if (thisDimr == NULL) {
+        thisDimr = new Dimr();
+    }
+    thisDimr->log = loggerFromDimrExe;
 }
 
 
 //------------------------------------------------------------------------------
 DllExport int initialize(const char * configfile) {
-	int nSettingsSet, nParamsSet;
+    int nSettingsSet, nParamsSet;
     if (thisDimr == NULL) {
         thisDimr = new Dimr();
     }
@@ -140,7 +141,7 @@ DllExport int initialize(const char * configfile) {
     }
 
     thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
-	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
+    thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
     //
     //
     // Read XML configuration file into tree structure
@@ -150,19 +151,19 @@ DllExport int initialize(const char * configfile) {
         conf = stdin;
     else {
         conf = fopen (thisDimr->configfile, "r");
-		if (conf == NULL){
-			thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
-			throw new Exception(true, "Cannot open configuration file \"%s\"", thisDimr->configfile);
-		}
+        if (conf == NULL){
+            thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
+            throw new Exception(true, "Cannot open configuration file \"%s\"", thisDimr->configfile);
+        }
     }
 
     thisDimr->config = new XmlTree (conf);
-	thisDimr->config->ExpandEnvironmentVariables();
+    thisDimr->config->ExpandEnvironmentVariables();
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
-	thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
-	thisDimr->scanConfigFile();
+    thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
+    thisDimr->scanConfigFile();
     //
     // ToDo: check whether a core dump is requested on abort; if so set global variable for Dimr_CoreDump
     //
@@ -200,8 +201,8 @@ DllExport int initialize(const char * configfile) {
         (thisDimr->control->subBlocks[0].unit.component->dllGetTimeStep) (&thisDimr->control->subBlocks[0].tStep);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
     }
-	// all ok (no exceptions)
-	return 0;
+    // all ok (no exceptions)
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -364,6 +365,9 @@ DllExport void set_var (const char * key, const void * value) {
     } else if (strcmp(key, "debugLevel") == 0) {
         thisDimr->logMask = *(Log::Mask *)value;
         thisDimr->log->SetMask(thisDimr->logMask);
+    } else if (strcmp(key, "feedbackLevel") == 0) {
+        thisDimr->feedbackMask = *(Log::Mask *)value;
+        thisDimr->log->SetFeedbackLevel(thisDimr->feedbackMask);
     } else if (strcmp(key, "redirectFile") == 0) {
         // value is a char*
         // Special value: "stdout/stderr" => switch off redirection to file by setting to NULL
@@ -424,20 +428,20 @@ DllExport void set_var (const char * key, const void * value) {
 
 //------------------------------------------------------------------------------
 int dimr_component::dllSetKeyVals (keyValueLL * kv) {
-		// Pass parameters for the first controll block's component: parameters
-		int count = 0;
-	    while(kv){
-			if (dllSetVar!=NULL){
-		       (dllSetVar) (kv->key,(void*)kv->val);
-			} else {
-			   if (dllGetVar!=NULL){
-		          (dllGetVar) (kv->key,(void**)kv->val);
-			   }
-			}
+        // Pass parameters for the first controll block's component: parameters
+        int count = 0;
+        while(kv){
+            if (dllSetVar!=NULL){
+               (dllSetVar) (kv->key,(void*)kv->val);
+            } else {
+               if (dllGetVar!=NULL){
+                  (dllGetVar) (kv->key,(void**)kv->val);
+               }
+            }
            kv = kv->nextkv;
-		   count++;
+           count++;
         }
-		return count;
+        return count;
 }
 
 
@@ -654,8 +658,8 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                     dimr_coupler   * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                     for (int k = 0 ; k < thisCoupler->numItems ; k++) {
                         if (thisCoupler->sourceComponent->type == COMP_TYPE_RTC   ||
-							thisCoupler->sourceComponent->type == COMP_TYPE_WANDA ||
-							thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D2D) {
+                            thisCoupler->sourceComponent->type == COMP_TYPE_WANDA ||
+                            thisCoupler->sourceComponent->type == COMP_TYPE_FLOW1D2D) {
                             // RTCTools/Wanda: impossible to autodetect which partition will deliver this source var
                             // Assumption: there is only one RTC-partition
                             thisCoupler->items[k].sourceProcess = thisCoupler->sourceComponent->processes[0];
@@ -711,8 +715,8 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         // Target variable
 
                         if (thisCoupler->targetComponent->type == COMP_TYPE_RTC     ||
-							thisCoupler->targetComponent->type == COMP_TYPE_WANDA   ||
-							thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D) {
+                            thisCoupler->targetComponent->type == COMP_TYPE_WANDA   ||
+                            thisCoupler->targetComponent->type == COMP_TYPE_FLOW1D2D) {
                             // nothing
                         } else {
                             // Target variable
@@ -1173,14 +1177,14 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
 //------------------------------------------------------------------------------
 void Dimr::scanConfigFile (void) {
 
-	XmlTree * rootXml     = config->Lookup ("/dimrConfig");
+    XmlTree * rootXml     = config->Lookup ("/dimrConfig");
     if (rootXml == NULL)
         throw new Exception (true, "Configuration file \"%s\" does not have a <dimrConfig> root element", configfile);
     XmlTree * fileversion = rootXml->Lookup ("documentation/fileVersion");
     if (fileversion == NULL)
         throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro documentation->fileVersion element", configfile);
 
-	// Check version number
+    // Check version number
     const char * versionnr = fileversion->charData;
     float versionnumber;
     int intRead = sscanf(versionnr, "%f", &versionnumber);
@@ -1189,7 +1193,7 @@ void Dimr::scanConfigFile (void) {
     if ((int)floor(versionnumber) != 1)
         throw new Exception (true, "Configuration file \"%s\": Version number (%3.2f) must have main version 2", configfile,versionnumber);
 
-	XmlTree * controlXml  = rootXml->Lookup ("control");
+    XmlTree * controlXml  = rootXml->Lookup ("control");
     if (controlXml == NULL)
         throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro control element", configfile);
     // Allocate the control structure and check its size
@@ -1316,7 +1320,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
 
     } else {
         // No <process> specified, default: only run on rank #0.
-        log->Write (Log::MAJOR, my_rank, "WARNING: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
+        log->Write (Log::DETAIL, my_rank, "INFO: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
         newComp->numProcesses = 1;
         char *defaultProc = "0";
         char_to_ints(defaultProc, &(newComp->processes), &(newComp->numProcesses));
@@ -1621,7 +1625,7 @@ void Dimr::connectLibs (void) {
         componentsList.components[i].dllGetAttribute = (BMI_GETATTRIBUTE) GETPROCADDRESS (dllhandle, BmiGetAttributeEntryPoint);
         if (componentsList.components[i].dllGetAttribute == NULL) {
             log->Write (Log::DETAIL, my_rank, "No GetAttribute entry point in %s !", componentsList.components[i].library);
-		}	
+        }    
 //      If GetAttribute is optional in a lib, no need to throw an exception
 //      if (componentsList.components[i].dllGetStartTime == NULL) {
 //          throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
@@ -1642,7 +1646,7 @@ void Dimr::connectLibs (void) {
             }
         } else {
             componentsList.components[i].dllSetVar = NULL;
-		}
+        }
 
         // Not implemented yet in Delwaq:
         if (componentsList.components[i].type != COMP_TYPE_DELWAQ) { 
@@ -1655,27 +1659,27 @@ void Dimr::connectLibs (void) {
         delete [] lib;
     }
     if (my_rank == 0) {
-        printComponentVersionStrings(Log::MAJOR);			// List component version to log 
+        printComponentVersionStrings(Log::MAJOR);            // List component version to log 
     }
 }
 
 //void Dimr::printComponentVersionStrings (Log::Mask my_mask) {
 void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     const char * version = "version";
-	char * versionstr = new char[thisDimr->MAXSTRING];
+    char * versionstr = new char[thisDimr->MAXSTRING];
     log->Write (my_mask, my_rank, "");
     log->Write (my_mask, my_rank, "Version Information of Components");
     log->Write (my_mask, my_rank, "=================================");
-	for (int i=0;i<componentsList.numComponents;i++){
-	   strcpy(versionstr,"");
-	   if (componentsList.components[i].dllGetAttribute!=NULL){
+    for (int i=0;i<componentsList.numComponents;i++){
+       strcpy(versionstr,"");
+       if (componentsList.components[i].dllGetAttribute!=NULL){
           componentsList.components[i].dllGetAttribute(version, versionstr);
-	   } 
-	   if (strlen(versionstr)==0){
-	      strcpy(versionstr,"Unknown");
-	   }
+       } 
+       if (strlen(versionstr)==0){
+          strcpy(versionstr,"Unknown");
+       }
        log->Write (my_mask, my_rank, "%-35s: %s", componentsList.components[i].library, versionstr);
-	}
+    }
     log->Write (my_mask, my_rank, "---------------------------------");
     log->Write (my_mask, my_rank, "");
     delete[] versionstr;

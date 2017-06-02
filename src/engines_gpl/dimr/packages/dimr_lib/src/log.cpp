@@ -48,13 +48,16 @@
 Log::Log (
     FILE *  output,
     Clock * clock,
-    Mask    mask
+    Mask    mask,
+    Mask    feedbackMask
     ) {
 
     this->output        = output;
     this->clock         = clock;
     this->mask          = mask;
-	this->writeCallback = NULL;
+    this->feedbackMask  = feedbackMask;
+
+    this->writeCallback = NULL;
 
     if (pthread_key_create (&this->thkey, NULL) != 0)
         throw new Exception (true, "Pthreads error in Log: Cannot create thread-specific key: %s", strerror (errno));
@@ -66,7 +69,7 @@ Log::Log (
 Log::~Log (
     void
     ) {
-	this->writeCallback = NULL;
+    this->writeCallback = NULL;
     // nothing to do
     }
 
@@ -90,6 +93,24 @@ Log::SetMask (
 
     this->mask = mask;
     this->Write (Log::MAJOR, 0, "Log mask set to 0x%08x", this->mask);
+    }
+
+Log::Mask
+Log::GetFeedbackLevel (
+    void
+    ) {
+
+    return this->feedbackMask;
+    }
+
+
+void
+Log::SetFeedbackLevel (
+    Mask feedbackMask
+    ) {
+
+    this->feedbackMask = feedbackMask;
+    this->Write(Log::MAJOR, 0, "Feedback Level mask set to 0x%08x", this->feedbackMask);
     }
 
 
@@ -134,8 +155,9 @@ Log::Write (
     const char *  format,
     ...
     ) {
-	if ((mask & this->mask) == 0)
+    if ((int)this->mask - (int)mask < 0) {
         return false;
+    }
 
     const int bufsize = 256*1024;
     char * buffer = new char [bufsize]; // really big temporary buffer, just in case
@@ -154,17 +176,21 @@ Log::Write (
     if (threadID == NULL)
         threadID = "<anonymous>";
 
+    // Write to stdout:
     fprintf (this->output, "Dimr [%s] #%d >> %s\n",
                         clock,
                         rank,
                         buffer
                         );
-
     fflush (this->output);
-	if (this->writeCallback){
-		this->writeCallback(buffer);
-	}
-	delete[] buffer;
+
+    // Write to Callback (if registered)
+    // Use separate write Mask
+    if (this->writeCallback && (int)this->feedbackMask - (int)mask >= 0){
+        this->writeCallback(&clock[0], buffer, mask);
+    }
+
+    delete[] buffer;
     return true;
     }
 
@@ -173,7 +199,7 @@ Log::SetWriteCallBack(
 WriteCallback writeCallback
 ) {
 
-	this->writeCallback = writeCallback;
-	this->Write(Log::MAJOR, 0, "WriteCallBack is set");
+    this->writeCallback = writeCallback;
+    this->Write(Log::MAJOR, 0, "WriteCallBack is set");
 }
 

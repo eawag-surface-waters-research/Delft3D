@@ -178,11 +178,11 @@ struct dimr_component {
     BMI_GETCURRENTTIME dllGetCurrentTime; // entry point in dll
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
-	BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll
+    BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll
     int                result;            // return value when calling an entry point in dll
-	keyValueLL      *  settings;	      // list of settings
-	keyValueLL      *  parameters;	      // list of parameters
-	int                dllSetKeyVals(keyValueLL * kv);   // pass parameters/settings to the component
+    keyValueLL      *  settings;          // list of settings
+    keyValueLL      *  parameters;        // list of parameters
+    int                dllSetKeyVals(keyValueLL * kv);   // pass parameters/settings to the component
     Clock::Timestamp  timerStart;
     Clock::Timestamp  timerSum;
 };
@@ -263,7 +263,7 @@ class Dimr {
         void           scanConfigFile(void);
         void           connectLibs(void);
 
-		void           printComponentVersionStrings (unsigned int);
+        void           printComponentVersionStrings (unsigned int);
 
         void           freeLibs(void);
         void           processWaitFile(void);
@@ -294,6 +294,7 @@ class Dimr {
         int                my_rank;        // Rank# of current process
         int                numranks;       // Total nr of MPI processes for dimr main.
         unsigned int       logMask;
+        unsigned int       feedbackMask;
         const char *       configfile;     // name of configuration file
         bool               done;           // set to true when it's time to stop
         char *             redirectFile;   // Name of file to redirect stdout/stderr to
