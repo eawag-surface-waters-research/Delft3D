@@ -6,10 +6,17 @@ rem
 
 set swanexec=%~dp0\..\bin\win32\swan_4072ABCDE_del_w32_i11_omp.exe
 
-
-rem swan40.72AB and newer runs parallel, using the total number of cores on the machine
-rem to force the number of parallel processes, remove the "rem" in front of the following line and adjust the number
-rem set OMP_NUM_THREADS=1
+rem
+set OMP_NUM_THREADS_BACKUP=%OMP_NUM_THREADS%
+rem swan40.72AB and newer runs parallel, using the total number of cores on the machine by default
+rem Two ways to force the number of parallel processes:
+rem 1. Define environment parameter OMP_NUM_THREADS_SWAN with the correct number of processes
+rem 2. Put a number behind the =-sign on the line "set OMP_NUM_THREADS=" below
+if "%OMP_NUM_THREADS_SWAN%" == "" (
+    set OMP_NUM_THREADS=
+) else (
+    set OMP_NUM_THREADS=%OMP_NUM_THREADS_SWAN%
+)
 
 @echo SWAN batchfile executed for Delft3D
 @echo Using swan.bat in directory %~dp0
@@ -39,7 +46,8 @@ goto finish
 @echo     **************************************************************
 @echo                SWAN input file %1.swn does not exist
 @echo     **************************************************************
-pause
+rem No user interaction!
+rem pause
 goto finish
 :error2
 @echo
@@ -47,8 +55,11 @@ goto finish
 @echo                SWAN executable does not exist
 @echo                (%swanexec%)
 @echo     **************************************************************
-pause
+rem No user interaction!
+rem pause
 goto finish
 :finish
+set OMP_NUM_THREADS=%OMP_NUM_THREADS_BACKUP%
+
 @echo on
 rem exit

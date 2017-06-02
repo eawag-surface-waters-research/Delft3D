@@ -2,11 +2,11 @@
 #
 ################################################################################
 ## Example shell script for submitting Delft3D-FLOW/WAVE jobs using           ##
-## parallel SWAN on the H4 linuxcluster by means of MPICH2.                   ##
+## parallel SWAN on the H6 linuxcluster by means of MPICH2.                   ##
 ## Note that for NHOSTS=1 the OpenMP version of SWAN will be started.         ##
 ## Menno.Genseberger@deltares.nl                                              ##
 ## Adri.Mourits@deltares.nl                                                   ##
-## October 2009                                                               ##
+## June 2017                                                                  ##
 ################################################################################
 #
 #
@@ -14,8 +14,8 @@
 ## USAGE examples                                                             ##
 ################################################################################
 #
-# be sure that wave uses this swan.bat file
-#
+# be sure that wave uses this swan.sh file via environment parameters
+# D3D_HOME and ARCH
 #
 #
 ################################################################################
@@ -24,6 +24,7 @@
 #
 ## This script only:
 debug=0
+OMP_NUM_THREADS_BACKUP=$OMP_NUM_THREADS
 
 testpar=$NHOSTS
 # testpar=$NSLOTS
@@ -65,9 +66,15 @@ else
     echo "Error \"uname -m\" does not return x86_64 or i686"
   fi
   #
-  # swan40.72AB and newer runs parallel using OpenMP, using the total number of cores on the machine
-  # To force the number of parallel processes, remove the "#" in front of the following line and adjust the number
-  # export OMP_NUM_THREADS=1
+  # swan40.72AB and newer runs parallel using OpenMP, using the total number of cores on the machine by default
+  # Two ways to force the number of parallel processes:
+  # 1. Define environment parameter OMP_NUM_THREADS_SWAN with the correct number of processes
+  # 2. Put a number behind the =-sign on the line "export OMP_NUM_THREADS=" below
+  if [ -z "$OMP_NUM_THREADS_SWAN" ]; then
+      export OMP_NUM_THREADS=
+  else
+      export OMP_NUM_THREADS=$OMP_NUM_THREADS_SWAN
+  fi
 fi
 #
 #
@@ -106,7 +113,8 @@ ready=0
 if [ "${D3D_HOME:-0}" = "0" ]; then
   echo " "
   echo "***ERROR: Delft3D profile not yet executed; can\'t run SWAN"
-  read dummy
+  # No user interaction!
+  # read dummy
   ready=1
 fi
 #
@@ -116,7 +124,8 @@ if [ "${1:-0}" = "0" ]; then
   echo " "
   echo "***ERROR: No argument added to call"
   echo "          Should be \"swan.bat Run_Id\" "
-  read dummy
+  # No user interaction!
+  # read dummy
   ready=1
 fi
 if [ ${ready} -eq 0 ]; then
@@ -196,14 +205,19 @@ if [ ${ready} -eq 0 ]; then
       echo " "
       echo "*** Error: SWAN input file ${1}.swn does not exist"
       echo " "
-      read dummy
+      # No user interaction!
+      # read dummy
     fi
   else
     echo " "
     echo "*** ERROR: SWAN executable does not exist"
     echo "           ${SWANEXEC}"
-    read dummy
+    # No user interaction!
+    # read dummy
   fi
 fi
+
+export OMP_NUM_THREADS=$OMP_NUM_THREADS_BACKUP
+
 exit
 
