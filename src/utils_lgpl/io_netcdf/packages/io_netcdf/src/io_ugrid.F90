@@ -1078,7 +1078,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    end if
 #endif
 
-   ierr = ug_def_var(ncid, meshids%varids(mid_nodey), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
+   ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
                      meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
 
    ! Edges
@@ -1223,14 +1223,14 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    end if
 
 ! TODO: AvD: add the following (resolution may be difficult)
-!> 		:geospatial_lat_min = 52.9590188916822 ;
-!> 		:geospatial_lat_max = 53.8746171549558 ;
-!> 		:geospatial_lat_units = "degrees_north" ;
-!> 		:geospatial_lat_resolution = "on average     370.50 meters" ;
-!> 		:geospatial_lon_min = 6.37848435307356 ;
-!> 		:geospatial_lon_max = 7.68944972163126 ;
-!> 		:geospatial_lon_units = "degrees_east" ;
-!> 		:geospatial_lon_resolution = "on average     370.50 meters" ;
+!>      :geospatial_lat_min = 52.9590188916822 ;
+!>      :geospatial_lat_max = 53.8746171549558 ;
+!>      :geospatial_lat_units = "degrees_north" ;
+!>      :geospatial_lat_resolution = "on average     370.50 meters" ;
+!>      :geospatial_lon_min = 6.37848435307356 ;
+!>      :geospatial_lon_max = 7.68944972163126 ;
+!>      :geospatial_lon_units = "degrees_east" ;
+!>      :geospatial_lon_resolution = "on average     370.50 meters" ;
 
    ierr = nf90_enddef(ncid)
 
@@ -1590,8 +1590,10 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    character(len=nf90_max_name)      :: varname
    integer                           :: id
    integer                           :: dimids(2)
-   
+   integer                           :: isMappedMesh 
    !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
+   
+   isMappedMesh = -1
    meshids%varids(mid_meshtopo)       = varid              
    !
    ! Dimensions:
@@ -1608,8 +1610,8 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    
    !check here if this is a mapped mesh
    coordspaceind = -1;
-   ierr = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space', coordspaceind)
-   if (ierr == nf90_noerr) then
+   isMappedMesh = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space', coordspaceind)
+   if (isMappedMesh == nf90_noerr) then
       !! the mesh is mapped in another mesh: read the variable ids 
       meshids%varids(mid_1dtopo) = coordspaceind
       ierr = att_to_dimid(ncid, 'edge_dimension',  meshids%dimids(mdim_1dbranches),coordspaceind)
@@ -1622,15 +1624,15 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dnodex), meshids%varids(mid_1dnodey), varin = coordspaceind)
       ierr = att_to_varid(ncid,'node_ids'       , meshids%varids(mid_1dnodids), coordspaceind)
       ierr = att_to_varid(ncid,'node_long_names', meshids%varids(mid_1dnodlongnames), coordspaceind)
-	  !branch variables ids
+      !branch variables ids
       ierr = att_to_varid(ncid,'edge_node_connectivity', meshids%varids(mid_1dedgenodes),coordspaceind)
       ierr = att_to_varid(ncid,'branch_ids'            , meshids%varids(mid_1dbranchids),coordspaceind)
       ierr = att_to_varid(ncid,'branch_long_names'     , meshids%varids(mid_1dbranchlongnames),coordspaceind)
       ierr = att_to_varid(ncid,'branch_lengths'        , meshids%varids(mid_1dbranchlengths),coordspaceind)
-	  !get the number of geometric points for each branch 
-	  ierr = att_to_varid(ncid,'part_node_count', meshids%varids(mid_1dgeopointsperbranch), meshids%varids(mid_1dgeometry))
-	  !geometry x and  y
-	  ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dgeox), meshids%varids(mid_1dgeoy), varin = meshids%varids(mid_1dgeometry))
+      !get the number of geometric points for each branch 
+      ierr = att_to_varid(ncid,'part_node_count', meshids%varids(mid_1dgeopointsperbranch), meshids%varids(mid_1dgeometry))
+      !geometry x and  y
+      ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dgeox), meshids%varids(mid_1dgeoy), varin = meshids%varids(mid_1dgeometry))
       ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dmeshtobranch), meshids%varids(mid_1doffset), varin = meshids%varids(mid_meshtopo))
    
       !dim variables
@@ -1663,7 +1665,9 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    ! Coordinate variables
    !
+   if (isMappedMesh /= nf90_noerr) then
    ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_nodex), meshids%varids(mid_nodey),varin = varid)
+   endif
    ierr = att_to_coordvarids(ncid,'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey),varin = varid)
    ierr = att_to_coordvarids(ncid,'face_coordinates', meshids%varids(mid_facex), meshids%varids(mid_facey),varin = varid)
 
@@ -1753,7 +1757,10 @@ function att_to_varid(ncid, name, id, varin) result(ierr)
    if (ierr /= nf90_noerr) then
       goto 999
    end if
-      ierr = nf90_inq_varid(ncid, trim(varname), id)
+   ierr = nf90_inq_varid(ncid, trim(varname), id)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
    return
 
 999 continue 
@@ -1778,8 +1785,11 @@ function att_to_dimid(ncid, name, id, varin) result(ierr)
       goto 999
    end if
       ierr = nf90_inq_dimid(ncid, trim(varname), id)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
    return 
-	
+    
 999 continue 
     ierr = UG_NOERR  ! we should not return an error if the variable is not defined, it is possible
     id = -1          ! undefined id 
@@ -3044,7 +3054,7 @@ end function ug_read_1d_network_nodes
 function ug_read_1d_network_branches(ncid, meshids, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints) result(ierr)
 
    integer, intent(in)              :: ncid
-   type(t_ug_mesh), intent(in)   :: meshids 
+   type(t_ug_mesh), intent(in)      :: meshids 
    integer,intent(out)              :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
    real(kind=dp),intent(out)        :: branchlengths(:)
    character(len=*),intent(out)     :: branchid(:),branchlongnames(:)
@@ -3150,13 +3160,16 @@ end function  ug_read_1d_mesh_discretisation_points
 
 function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) result(ierr)
     
-    integer, intent(in)               :: ncidin, ncidout
-    type(t_ug_mesh), intent(in)       :: meshidsin  
-    type(t_ug_mesh), intent(inout)    :: meshidsout 
-    integer                           :: i, j, ierr, xtype, ndims, nAtts, dimvalue
+    integer, intent(in)                   :: ncidin, ncidout
+    type(t_ug_mesh), intent(in)           :: meshidsin  
+    type(t_ug_mesh), intent(inout)        :: meshidsout 
+    integer                               :: i, j, ierr, xtype, ndims, nAtts, dimvalue
+    integer                               :: attval
+    logical                               :: isMeshTopo
     integer, dimension(nf90_max_var_dims) :: dimids    
-    character(len=nf90_max_name)      :: name
-    integer, dimension(nf90_max_dims) :: dimmap, outdimids
+    character(len=nf90_max_name)          :: name
+    integer, dimension(nf90_max_dims)     :: dimmap, outdimids
+    character(len=:),allocatable          :: invarname
         
     ierr = UG_SOMEERR
     ierr = nf90_redef(ncidout) !open NetCDF in define mode
@@ -3187,44 +3200,57 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
     do i= mid_start + 1, mid_end - 1
        if (meshidsin%varids(i)/=-1) then
           !get variable attributes
+          dimids =0
+          outdimids = 0
           ierr = nf90_inquire_variable( ncidin, meshidsin%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
-          if ( ierr /= nf90_noerr ) then 
-              return
-          end if 
+          if ( ierr /= nf90_noerr ) then
+             return
+          end if
           !inquire if the variable is already present
           outdimids(1:ndims)=dimmap(dimids(1:ndims))
           ierr = nf90_inquire_variable( ncidout, meshidsout%varids(i), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
-          if ( ierr == nf90_noerr ) then 
-              !the variable is already present, here we should issue an error 
-              return
-          end if 
-          ierr = nf90_def_var( ncidout, trim(name), xtype, outdimids(1:ndims), meshidsout%varids(i) )
-          outdimids = 0
-          if ( ierr /= nf90_noerr ) then 
-               return
-          end if 
-          !copy all attributes of the variable
-          ierr = ug_copy_var_atts( ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i) ) 
-          if ( ierr /= nf90_noerr ) then 
-               return
-          end if 
+          if ( ierr == nf90_noerr ) then
+             !the variable is already present, here we should issue an error
+             return
+          end if
+          if (ndims > 0) then
+             ierr = nf90_def_var( ncidout, trim(name), xtype, outdimids(1:ndims), meshidsout%varids(i) )
+          else
+             ierr = nf90_def_var( ncidout, trim(name), xtype, meshidsout%varids(i) )
+          endif
+          if ( ierr /= nf90_noerr ) then
+             !the variable will not be copied because not present
+             return
+          end if
+
+          ! if is a 1d mesh we need to refer in the coordinate_space to the varid of the network geometry
+          
+         isMeshTopo = ug_is_mesh_topology(ncidin,  meshidsin%varids(i))
+         ierr = nf90_get_att(ncidin, meshidsin%varids(mid_meshtopo),'topology_dimension', attval)
+         if (ierr == nf90_noerr .and. isMeshTopo .and. attval==1) then
+             !we have a 1d mesh topology, we need to put the right index for the coordinate variable.
+             ierr = ug_copy_var_atts_mesh1d( ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), meshidsout%varids(mid_1dtopo))
+          else
+             ierr = ug_copy_var_atts( ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i) )
+          endif
+          if ( ierr /= nf90_noerr ) then
+             return
+          end if
        endif
     end do
-    
+
     !end definition for ncidout
     ierr = nf90_enddef( ncidout )
-    if ( ierr /= nf90_noerr ) return
-        
+
 end function ug_clone_mesh_definition
 
 function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ierr)
 
     integer, intent(in)                   :: ncidin, ncidout
     type(t_ug_mesh), intent(in)           :: meshidsin, meshidsout     
-    integer                               :: i, ierr, xtype, ndims, nAtts, dimvalue
-    integer, dimension(nf90_max_var_dims) :: dimids    
+    integer                               :: i, dim, ierr, xtype, ndims, nAtts, dimvalue
+    integer, dimension(nf90_max_var_dims) :: dimids, dimsizes   
     character(len=nf90_max_name)          :: name
-    integer, dimension(nf90_max_dims)     :: dimsizes 
     
     ! end definition
     ierr = nf90_enddef( ncidout )
@@ -3238,17 +3264,22 @@ function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ier
             if ( ierr /= nf90_noerr ) then
                 return
             end if
-
+            !inquire the variable dimensions
+            dimsizes = 0
+            do dim = 1, ndims
+               ierr = nf90_inquire_dimension(ncidin, dimids(dim), len=dimsizes(dim))
+            enddo
+            
             !get and write the variables
             select case ( xtype )
             case( nf90_int )
-                ierr = ug_copy_int_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimids )
+                ierr = ug_copy_int_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case( nf90_real )
-                ierr = ug_copy_real_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimids )
+                ierr = ug_copy_real_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case( nf90_double )
-                ierr = ug_copy_int_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimids )
+                ierr = ug_copy_int_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case( nf90_char )
-                ierr = ug_copy_char_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimids )
+                ierr = ug_copy_char_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case default
                 ierr = -1
             end select
@@ -3263,9 +3294,9 @@ function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ier
 end function ug_clone_mesh_data
 
 !integer copy function
-function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids )  result(ierr)
+function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)    :: ncidin, ncidout, meshidin, meshidout, ndims, dimids(:)       
+    integer, intent(in)    :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)       
     integer                :: ierr, dim1, dim2
     integer, allocatable   :: value(:), value2d(:,:) 
 
@@ -3276,15 +3307,12 @@ function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids ) 
         ierr = nf90_put_var( ncidout, meshidout, value )
     else if(ndims==1) then
         !vector
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        allocate(value(dim1))
+        allocate(value(dimsizes(1)))
         ierr = nf90_get_var( ncidin, meshidin, value )
         ierr = nf90_put_var( ncidout, meshidout, value )
     else if (ndims==2) then
         !matrix
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        ierr = nf90_inquire_dimension(ncidin, dimids(2), len=dim2)
-        allocate(value2d(dim1,dim2))
+        allocate(value2d(dimsizes(1),dimsizes(2)))
         ierr = nf90_get_var( ncidin, meshidin, value2d )
         ierr = nf90_put_var( ncidout, meshidout, value2d )
     endif
@@ -3292,9 +3320,9 @@ function ug_copy_int_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids ) 
 end function 
 
 !real copy function
-function ug_copy_real_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids )  result(ierr)
+function ug_copy_real_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)     :: ncidin, ncidout, meshidin, meshidout, ndims, dimids(:)       
+    integer, intent(in)     :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)       
     integer                 :: ierr, dim1, dim2
     real, allocatable       :: value(:), value2d(:,:) 
 
@@ -3305,15 +3333,12 @@ function ug_copy_real_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids )
         ierr = nf90_put_var( ncidout, meshidout, value )
     else if(ndims==1) then
         !vector
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        allocate(value(dim1))
+        allocate(value(dimsizes(1)))
         ierr = nf90_get_var( ncidin, meshidin, value )
         ierr = nf90_put_var( ncidout, meshidout, value )
     else if (ndims==2) then
         !matrix
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        ierr = nf90_inquire_dimension(ncidin, dimids(2), len=dim2)
-        allocate(value2d(dim1,dim2))
+        allocate(value2d(dimsizes(1),dimsizes(2)))
         ierr = nf90_get_var( ncidin, meshidin, value2d )
         ierr = nf90_put_var( ncidout, meshidout, value2d )
     endif
@@ -3321,9 +3346,9 @@ function ug_copy_real_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids )
 end function 
 
 !double copy function
-function ug_copy_double_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids )  result(ierr)
+function ug_copy_double_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)                   :: ncidin, ncidout, meshidin, meshidout, ndims, dimids(:)       
+    integer, intent(in)                   :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)       
     integer                               :: ierr, dim1, dim2
     real(kind=kind(1.0d0)), allocatable   :: value(:), value2d(:,:) 
 
@@ -3334,49 +3359,29 @@ function ug_copy_double_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids
         ierr = nf90_put_var( ncidout, meshidout, value )
     else if(ndims==1) then
         !vector
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        allocate(value(dim1))
+        allocate(value(dimsizes(1)))
         ierr = nf90_get_var( ncidin, meshidin, value )
         ierr = nf90_put_var( ncidout, meshidout, value )
     else if (ndims==2) then
         !matrix
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        ierr = nf90_inquire_dimension(ncidin, dimids(2), len=dim2)
-        allocate(value2d(dim1,dim2))
+        allocate(value2d(dimsizes(1),dimsizes(2)))
         ierr = nf90_get_var( ncidin, meshidin, value2d )
         ierr = nf90_put_var( ncidout, meshidout, value2d )
     endif
 
 end function 
 
-!double copy function
-function ug_copy_char_var( ncidin, ncidout, meshidin, meshidout, ndims, dimids )  result(ierr)
+!For characters we always assume size 2
+function ug_copy_char_var( ncidin, ncidout, meshidin, meshidout, ndims, dimsizes )  result(ierr)
 
-    integer, intent(in)                   :: ncidin, ncidout, meshidin, meshidout, ndims, dimids(:)       
+    integer, intent(in)                   :: ncidin, ncidout, meshidin, meshidout, ndims, dimsizes(:)
     integer                               :: ierr, dim1, dim2
-    character, allocatable                :: value(:), value2d(:,:) 
+    character(len=dimsizes(1))            :: value2d(dimsizes(2))
 
-    if (ndims==0) then
-        !scalar
-        allocate(value(1))
-        ierr = nf90_get_var( ncidin , meshidin, value )
-        ierr = nf90_put_var( ncidout, meshidout, value )
-    else if(ndims==1) then
-        !vector
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        allocate(value(dim1))
-        ierr = nf90_get_var( ncidin, meshidin, value )
-        ierr = nf90_put_var( ncidout, meshidout, value )
-    else if (ndims==2) then
-        !matrix
-        ierr = nf90_inquire_dimension(ncidin, dimids(1), len=dim1)
-        ierr = nf90_inquire_dimension(ncidin, dimids(2), len=dim2)
-        allocate(value2d(dim1,dim2))
-        ierr = nf90_get_var( ncidin, meshidin, value2d )
-        ierr = nf90_put_var( ncidout, meshidout, value2d )
-    endif
-
-end function 
+    ierr = nf90_get_var( ncidin, meshidin, value2d )
+    ierr = nf90_put_var( ncidout, meshidout, value2d )
+    
+end function
 
 !copy the variable attributes
 function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
@@ -3386,6 +3391,40 @@ function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
     integer                        :: i
     character(len=nf90_max_name)   :: attname
     integer                        :: natts
+    integer                        :: attvalue
+    
+    ierr = -1
+    ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
+    if ( ierr == nf90_enotvar ) then
+        ierr = nf90_inquire( ncidin, nAttributes=natts )
+    endif
+    if ( ierr /= nf90_noerr ) then
+        return
+    endif
+
+    do i = 1,natts
+        ierr = nf90_inq_attname( ncidin, varidin, i, attname )
+        if ( ierr /= nf90_noerr ) then
+            return
+        endif
+        
+        ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
+        if ( ierr /= nf90_noerr ) then
+            return
+        endif        
+    enddo
+    
+end function ug_copy_var_atts
+
+
+!copy the variable attributes
+function ug_copy_var_atts_mesh1d( ncidin, ncidout, varidin, varidout, coordvarid) result(ierr)
+
+    integer, intent(in)            :: ncidin, ncidout, varidin, varidout,coordvarid
+    integer                        :: ierr
+    integer                        :: i
+    character(len=nf90_max_name)   :: attname
+    integer                        :: natts, attvalue
     
     ierr = -1
     ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
@@ -3402,71 +3441,58 @@ function ug_copy_var_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
             return
         endif
 
+        !is a mapped mesh, we need to put the right variable here
+        if (trim(attname)=='coordinate_space') then
+            ierr = nf90_put_att(ncidout, varidout, 'coordinate_space',  coordvarid)
+          if ( ierr /= nf90_noerr ) then
+            return
+            endif
+          cycle
+        endif
+        
         ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
         if ( ierr /= nf90_noerr ) then
             return
         endif        
     enddo
     
-end function ug_copy_var_atts
+end function ug_copy_var_atts_mesh1d
 
 !
 ! Get mesh ids 
 !
 
-function ug_get_1d_mesh_network_ids(ncid, ug_file, meshid, networkid) result(ierr)
+function ug_get_1d_network_id(ncid, ug_file, networkid) result(ierr)
 
-   integer, intent(in)           :: ncid          							  !< ID of already opened data set.
+   integer, intent(in)           :: ncid                                      !< ID of already opened data set.
    integer                       :: i, ierr, attval         !< Result status (UG_NOERR if successful).
-   integer, intent(inout)        :: meshid, networkid
+   integer, intent(inout)        :: networkid
    character(len=13)  :: attname
    type(t_ug_file), intent(in)   :: ug_file 
    
-   meshid         = -1
    networkid      = -1
-
    do i=1,size(ug_file%meshids)
-   
-      !Mesh
-	  if (ug_file%meshids(i)%varids(mid_meshtopo)== -1) then
-	     cycle
-	  end if
-	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'cf_role', attname)
-	  if (ierr /= UG_NOERR .or. trim(attname) /= 'mesh_topology') then
-	     cycle
-	  endif
-	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
-	  if ( ierr /= UG_NOERR .or. attval /= 1) then
-	     cycle
-	  end if
-	  
-	  !Associated geometry
-	  if (ug_file%meshids(i)%varids(mid_1dtopo)== -1) then
-	     cycle
-	  end if
-	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_1dtopo),'cf_role', attname)
-	  if (ierr /= UG_NOERR .or. trim(attname) /= 'mesh_topology') then
-	     cycle
-	  endif
-	  
-	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_1dtopo),'topology_dimension', attval)
-	  if (ierr /= UG_NOERR .or. attval /= 1 ) then
-	   cycle
+      
+      !check if it has a geometry and its dimension is 1
+      if (ug_file%meshids(i)%varids(mid_1dtopo)== -1) then
+         cycle
+      end if
+      
+      ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_1dtopo),'topology_dimension', attval)
+      if (ierr /= UG_NOERR .or. attval /= 1 ) then
+       cycle
       endif
       
-	  ! meshid and network id found, return
-	  meshid = i
-	  networkid = i
-	  return
+      networkid = i
+      return
       
    end do
    
    ! nothing found, all fields to -1
    ierr      = -1 
-   meshid    = -1
    networkid = -1
    
-end function ug_get_1d_mesh_network_ids
+end function ug_get_1d_network_id
 
 
 function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
@@ -3476,32 +3502,33 @@ function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
    integer, intent(inout)        :: meshid
    character(len=13)             :: attname
    type(t_ug_file), intent(in)   :: ug_file 
+   logical                       :: isMeshTopo     
    
    meshid         = -1
    do i=1,size(ug_file%meshids)
    
-	  if (ug_file%meshids(i)%varids(mid_meshtopo)== -1) then
-	     cycle
-	  end if
-	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'cf_role', attname)
-	  if (ierr /= UG_NOERR .or. trim(attname) /= 'mesh_topology') then
-	     cycle
-	  endif 
-	  ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
-	  if ( ierr /= UG_NOERR .or. attval /= dim) then
-	     cycle
+      if (ug_file%meshids(i)%varids(mid_meshtopo)== -1) then
+         cycle
+      end if
+      isMeshTopo = ug_is_mesh_topology(ncid, ug_file%meshids(i)%varids(mid_meshtopo))
+      if (isMeshTopo==.false.) then
+         cycle
+      endif 
+      ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
+      if ( ierr /= UG_NOERR .or. attval /= dim) then
+         cycle
       end if
       
-	  ! meshid found, return
-	  meshid = i
-	  return
-	  
+      ! meshid found, return
+      meshid = i
+      return
+      
    end do
    
    ! nothing found, all fields to -1
    ierr      = -1 
    meshid    = -1
-
-end function ug_get_mesh_id
+   
+end function ug_get_mesh_id 
    
 end module io_ugrid

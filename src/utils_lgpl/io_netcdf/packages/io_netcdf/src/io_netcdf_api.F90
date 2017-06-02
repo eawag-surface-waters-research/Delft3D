@@ -843,15 +843,27 @@ end function ionc_get_lib_versionversion_dll
 ! Get the mesh ids
 !
 
-function ionc_get_1d_mesh_network_ids_dll(ioncid, meshid, networkid) result(ierr) bind(C, name="ionc_get_1d_mesh_network_ids")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_network_ids_dll
+function ionc_get_1d_network_id_dll(ioncid, networkid) result(ierr) bind(C, name="ionc_get_1d_network_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_network_id_dll
    integer, intent(in)    :: ioncid
-   integer, intent(inout) :: meshid, networkid
+   integer, intent(inout) :: networkid
    integer                :: ierr
    
-   ierr = ionc_get_1d_mesh_network_ids_ugrid(ioncid, meshid, networkid) 
+   ierr = ionc_get_1d_network_id_ugrid(ioncid, networkid) 
    
-end function ionc_get_1d_mesh_network_ids_dll
+end function ionc_get_1d_network_id_dll
+
+
+function ionc_get_1d_mesh_id_dll(ioncid, meshid) result(ierr) bind(C, name="ionc_get_1d_mesh_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_id_dll
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid
+   integer                :: ierr
+   
+   ierr = ionc_get_1d_mesh_id_ugrid(ioncid, meshid)
+   
+end function ionc_get_1d_mesh_id_dll
+
 
 function ionc_get_2d_mesh_id_dll(ioncid, meshid) result(ierr) bind(C, name="ionc_get_2d_mesh_id")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_2d_mesh_id_dll
@@ -863,8 +875,8 @@ function ionc_get_2d_mesh_id_dll(ioncid, meshid) result(ierr) bind(C, name="ionc
    
 end function ionc_get_2d_mesh_id_dll
 
-function ionc_get_3d_mesh_id_dll(ioncid, meshid)  result(ierr) bind(C, name="ionc_get_1d_mesh_id")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_id_dll
+function ionc_get_3d_mesh_id_dll(ioncid, meshid)  result(ierr) bind(C, name="ionc_get_3d_mesh_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_3d_mesh_id_dll
    integer, intent(in)    :: ioncid
    integer, intent(inout) :: meshid
    integer                :: ierr

@@ -121,7 +121,8 @@ public :: ionc_get_mesh_contact_ugrid
 public :: ionc_clone_mesh_definition_ugrid
 public :: ionc_clone_mesh_data_ugrid
 !get ids functions
-public :: ionc_get_1d_mesh_network_ids_ugrid
+public :: ionc_get_1d_network_id_ugrid
+public :: ionc_get_1d_mesh_id_ugrid
 public :: ionc_get_2d_mesh_id_ugrid
 public :: ionc_get_3d_mesh_id_ugrid
 
@@ -993,7 +994,7 @@ function ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nB
    integer, intent(in)                :: nNodes, nBranches, nGeometry
    integer                            :: ierr, dum
       
-   ! first add a mesh
+   ! allocate add a meshids
    ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
    ! add a 1d network
    ierr = ug_create_1d_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), networkName, nNodes, nBranches, nGeometry)
@@ -1248,15 +1249,25 @@ end function ionc_getfullversionstring_io_netcdf
 ! Get the mesh ids
 !
 
-function ionc_get_1d_mesh_network_ids_ugrid(ioncid, meshid, networkid) result(ierr)
+function ionc_get_1d_network_id_ugrid(ioncid, networkid) result(ierr)
 
    integer, intent(in)    :: ioncid
-   integer, intent(inout) :: meshid, networkid
+   integer, intent(inout) :: networkid
    integer                :: ierr
    
-   ierr = ug_get_1d_mesh_network_ids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, networkid)
+   ierr = ug_get_1d_network_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
 
-end function ionc_get_1d_mesh_network_ids_ugrid
+end function ionc_get_1d_network_id_ugrid
+
+function ionc_get_1d_mesh_id_ugrid(ioncid, meshid) result(ierr)
+
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: meshid
+   integer                :: ierr
+   
+   ierr = ug_get_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, 1)
+
+end function ionc_get_1d_mesh_id_ugrid
 
 function ionc_get_2d_mesh_id_ugrid(ioncid, meshid) result(ierr)
 
