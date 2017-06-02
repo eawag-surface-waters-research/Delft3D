@@ -3511,7 +3511,7 @@ function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
          cycle
       end if
       isMeshTopo = ug_is_mesh_topology(ncid, ug_file%meshids(i)%varids(mid_meshtopo))
-      if (isMeshTopo==.false.) then
+      if (.not.isMeshTopo) then
          cycle
       endif 
       ierr = nf90_get_att(ncid, ug_file%meshids(i)%varids(mid_meshtopo),'topology_dimension', attval)
