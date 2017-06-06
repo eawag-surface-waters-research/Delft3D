@@ -138,9 +138,9 @@ subroutine sysini(error     ,runid     ,filmrs    ,prgnm     , &
     !
     call util_getenv('ARCH',txthlp)
     call small(txthlp,message_len)
-    if (txthlp == 'win32' .or. txthlp == 'w32') then
+    if (txthlp == 'win32' .or. txthlp == 'w32' .or. txthlp == 'x86') then
        gdp%arch = 'win32'
-    elseif (txthlp == 'win64') then
+    elseif (txthlp == 'win64' .or. txthlp == 'x64') then
        gdp%arch = 'win64'
     else
        gdp%arch = 'linux'
