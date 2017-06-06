@@ -1602,6 +1602,22 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ierr = att_to_dimid(ncid,'edge_dimension', meshids%dimids(mdim_edge), varid)
    ierr = att_to_dimid(ncid,'face_dimension', meshids%dimids(mdim_face), varid)
    ierr = att_to_dimid(ncid,'max_face_nodes_dimension', meshids%dimids(mdim_maxfacenodes), varid)   
+   if (ierr /= nf90_noerr) then
+      ! The non-UGRID max_face_nodes_dimension was not found. Detect it ourselves.
+      varname = ''
+      ierr = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'face_node_connectivity', varname)
+      id = 0
+      ierr = nf90_inq_varid(ncid, trim(varname), id)
+      ! Get the dimension ids from the face-nodes variable, and select the correct one from that.
+      ierr = nf90_inquire_variable(ncid, id, dimids=dimids)
+      if (ierr == nf90_noerr) then
+         if (dimids(1) == meshids%dimids(mdim_face)) then
+            meshids%dimids(mdim_maxfacenodes) = dimids(2) ! the other
+         else
+            meshids%dimids(mdim_maxfacenodes) = dimids(1)
+         end if
+      end if
+   end if
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
    if ( ierr /= UG_NOERR) then 
@@ -1645,22 +1661,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    
    end if
    
-   if (ierr /= nf90_noerr) then
-      ! The non-UGRID max_face_nodes_dimension was not found. Detect it ourselves.
-      varname = ''
-      ierr = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'face_node_connectivity', varname)
-      id = 0
-      ierr = nf90_inq_varid(ncid, trim(varname), id)
-      ! Get the dimension ids from the face-nodes variable, and select the correct one from that.
-      ierr = nf90_inquire_variable(ncid, id, dimids=dimids)
-      if (ierr == nf90_noerr) then
-         if (dimids(1) == meshids%dimids(mdim_face)) then
-            meshids%dimids(mdim_maxfacenodes) = dimids(2) ! the other
-         else
-            meshids%dimids(mdim_maxfacenodes) = dimids(1)
-         end if
-      end if
-   end if
+   
     
    !
    ! Coordinate variables
@@ -1764,7 +1765,9 @@ function att_to_varid(ncid, name, id, varin) result(ierr)
    return
 
 999 continue 
-   ierr = UG_NOERR ! we should not return an error if the variable is not defined, it is possible
+   ! we should not return an error if the variable is not defined,
+   ! it is possible in ug_init_mesh_topolology
+   ierr = UG_NOERR 
    id = -1         ! undefined id
 end function att_to_varid
 
@@ -1791,8 +1794,8 @@ function att_to_dimid(ncid, name, id, varin) result(ierr)
    return 
     
 999 continue 
-    ierr = UG_NOERR  ! we should not return an error if the variable is not defined, it is possible
-    id = -1          ! undefined id 
+    ! here we should return an error is the variable is undefined, following up actions are taken in ug_init_mesh_topology
+    id = -1           ! undefined id 
 end function att_to_dimid
 
 !> Returns whether a given variable is a mesh topology variable.
@@ -3170,9 +3173,17 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
     character(len=nf90_max_name)          :: name
     integer, dimension(nf90_max_dims)     :: dimmap, outdimids
     character(len=:),allocatable          :: invarname
-        
+    type(t_ug_meta)                       :: meta  !< Meta information on file.
+     
     ierr = UG_SOMEERR
     ierr = nf90_redef(ncidout) !open NetCDF in define mode
+    
+    !first add the global definitions and coventions
+    ! create default meta
+    call ug_create_ugrid_meta(meta)
+    
+    ! Add global attributes to NetCDF file.
+    ierr = ug_addglobalatts(ncidout, meta)
     
     !copy dimensions
     do i= mdim_start + 1, mdim_end - 1
@@ -3251,11 +3262,11 @@ function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ier
     integer                               :: i, dim, ierr, xtype, ndims, nAtts, dimvalue
     integer, dimension(nf90_max_var_dims) :: dimids, dimsizes   
     character(len=nf90_max_name)          :: name
-    
-    ! end definition
-    ierr = nf90_enddef( ncidout )
-    ierr = UG_SOMEERR
 
+    ! end definition
+    ierr = UG_SOMEERR
+    ierr = nf90_enddef( ncidout )
+    
     do i= mid_start + 1, mid_end - 1
         if (meshidsin%varids(i)/=-1) then
 
