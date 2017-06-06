@@ -1667,7 +1667,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ! Coordinate variables
    !
    if (isMappedMesh /= nf90_noerr) then
-   ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_nodex), meshids%varids(mid_nodey),varin = varid)
+      ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_nodex), meshids%varids(mid_nodey),varin = varid)
    endif
    ierr = att_to_coordvarids(ncid,'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey),varin = varid)
    ierr = att_to_coordvarids(ncid,'face_coordinates', meshids%varids(mid_facex), meshids%varids(mid_facey),varin = varid)
@@ -2068,6 +2068,43 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes) result(ierr)
    ! TODO: AvD: also introduce 0-/1-based indexing handling.
 
 end function ug_get_edge_nodes
+
+   
+!> Gets the x,y-coordinates (representative centre) for all faces in the specified mesh.
+!! The output x,y arrays are supposed to be of exact correct length already.
+function ug_get_face_coordinates(ncid, meshids, xf, yf) result(ierr)
+   integer,         intent(in)    :: ncid    !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh), intent(in)    :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   real(kind=dp),   intent(  out) :: xf(:), yf(:) !< Arrays to store x,y-coordinates of the mesh face centres.
+   integer                        :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
+
+   ierr = nf90_get_var(ncid, meshids%varids(mid_facex), xf)
+   if(ierr /= UG_NOERR) then 
+       ! TODO: AvD: low level lib may not throw fatal errors: ! Call SetMessage(LEVEL_FATAL, 'could not read x coordinates')
+   end if 
+   ierr = nf90_get_var(ncid, meshids%varids(mid_facey), yf)
+   ! TODO: AvD: some more careful error handling
+
+end function ug_get_face_coordinates
+
+
+!> Puts the x,y-coordinates (representative centre) for all faces in the specified mesh.
+!! The input x,y arrays are supposed to be of exact correct length already.
+function ug_put_face_coordinates(ncid, meshids, xf, yf) result(ierr)
+   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),    intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   real(kind=dp),      intent(in)  :: xf(:), yf(:) !< Arrays containing the x,y-coordinates of the mesh face centres.
+   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
+
+   ierr = nf90_put_var(ncid, meshids%varids(mid_facex), xf)
+   if(ierr /= NF90_NOERR) then 
+       ! TODO: AvD: low level lib may not throw fatal errors: ! Call SetMessage(LEVEL_FATAL, 'could not put x coordinates')
+   end if 
+   ierr = nf90_put_var(ncid, meshids%varids(mid_facey), yf)
+   ! TODO: AvD: some more careful error handling
+
+end function ug_put_face_coordinates
+
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
