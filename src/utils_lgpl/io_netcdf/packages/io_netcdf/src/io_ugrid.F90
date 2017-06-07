@@ -874,13 +874,13 @@ end function ug_write_meshtopology
 
 !> Defines a new variable in an existing dataset.
 !! Does not write the actual data yet.
-function ug_def_var(ncid, id_var, id_dims, itype, iloc, mesh_name, var_name, standard_name, long_name, &
+function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name, standard_name, long_name, &
                     unit, cell_method, crs, ifill, dfill) result(ierr)
    integer,                 intent(in)    :: ncid          !< NetCDF dataset id
    integer,                 intent(out)   :: id_var        !< Created NetCDF variable id.
-   integer, dimension(:),   intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ 2, id_facedim /) for vector data on faces.
+   integer, dimension(:),   intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ id_twodim, id_facedim /) for vector data on faces.
    integer,                 intent(in)    :: itype         !< The variable type expressed in one of the basic nf90_* types, e.g., nf90_double.
-   integer,                 intent(in)    :: iloc          !< Specifies at which unique mesh location data will be specified.
+   integer,                 intent(in)    :: iloctype      !< Specifies at which unique mesh location data will be specified.
    character(len=*),        intent(in)    :: mesh_name     !< Name for the mesh variable, also used as prefix for all related entities.
    character(len=*),        intent(in)    :: var_name      !< Name for the new data variable.
    character(len=*),        intent(in)    :: standard_name !< Standard name (CF-compliant) for 'standard_name' attribute in this variable.
@@ -900,7 +900,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloc, mesh_name, var_name, sta
    
    ierr = nf90_def_var(ncid, prefix//'_'//trim(var_name), itype, id_dims, id_var)
    ierr = nf90_put_att(ncid, id_var, 'mesh',   trim(mesh_name))
-   select case (iloc)
+   select case (iloctype)
    case (UG_LOC_NODE)
       ierr = nf90_put_att(ncid, id_var, 'location',    'node')
       ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix//'_node_x '//prefix//'_node_y')

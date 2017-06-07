@@ -94,6 +94,7 @@ public :: ionc_get_var_count
 public :: ionc_inq_varids
 public :: ionc_inq_varid
 public :: ionc_inq_varid_by_standard_name
+public :: ionc_def_var
 public :: ionc_get_var_1D_EightByteReal
 public :: ionc_put_var_1D_EightByteReal
 public :: ionc_write_geom_ugrid
@@ -754,6 +755,48 @@ function ionc_add_global_attributes(ioncid,institution,source,references,version
 
    ierr = ug_addglobalatts(datasets(ioncid)%ncid, meta)
 end function ionc_add_global_attributes
+
+
+!> Defines a new variable in an existing IONC dataset and sets up proper meta-attributes.
+!! NOTE: File should still be in define mode.
+!! Does not write the actual data yet.
+function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standard_name, long_name, & ! id_dims, 
+                    unit, cell_method, crs, ifill, dfill) result(ierr)
+   integer,                    intent(in)    :: ioncid    !< The IONC data set id.
+   integer,                    intent(in)    :: meshid    !< The mesh id in the specified data set.
+   integer,                    intent(  out) :: id_var        !< Created NetCDF variable id.
+!   integer, dimension(:),      intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ id_twodim, id_facedim /) for vector data on faces.
+   integer,                    intent(in)    :: itype         !< The variable type expressed in one of the basic nf90_* types, e.g., nf90_double.
+   integer,                    intent(in)    :: iloctype      !< Specifies at which unique mesh location data will be specified.
+   character(len=*),           intent(in)    :: var_name      !< Name for the new data variable.
+   character(len=*),           intent(in)    :: standard_name !< Standard name (CF-compliant) for 'standard_name' attribute in this variable.
+   character(len=*),           intent(in)    :: long_name     !< Long name for 'long_name' attribute in this variable (use empty string if not wanted).
+   character(len=*),           intent(in)    :: unit          !< Unit of this variable (CF-compliant) (use empty string for dimensionless quantities).
+   character(len=*),           intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
+   type(t_crs),      optional, intent(in)    :: crs           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
+   integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
+   double precision, optional, intent(in)    :: dfill         !< (Optional) Double precision fill value.
+   integer                                :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
+
+   integer :: id_dims(1)
+
+   ! TODO: UNST-1548: AvD: refactor some of dflowfm's unc_def_var_map functionality into io_ugrid.
+   ! For now, auto-insert some commonly used spatial dimension ids, such that caller ONLY needs to specify iloctype.
+   ! NOTE: this only supports rank-1 arrays for now then.
+   if      (iloctype == UG_LOC_NODE) then
+      id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_node)
+   else if (iloctype == UG_LOC_EDGE) then
+      id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_edge)
+   else if (iloctype == UG_LOC_FACE) then
+      id_dims(1) = datasets(ioncid)%ug_file%meshids(meshid)%dimids(mdim_face)
+   else
+      ! loc type error is caught in ug_def_var below
+      continue
+   end if
+
+   ierr = ug_def_var(datasets(ioncid)%ncid, id_var, id_dims, itype, iloctype, datasets(ioncid)%ug_file%meshnames(meshid), var_name, standard_name, long_name, &
+                    unit, cell_method, crs, ifill, dfill)
+end function ionc_def_var
 
 
 !> Writes the complete mesh geometry
