@@ -2363,6 +2363,11 @@ function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) 
       end if
    end do
 
+   if (varid == -1) then
+      ierr = UG_VAR_NOTFOUND
+      goto 999
+   end if
+   
    ierr = UG_NOERR
    goto 888 ! Return with success
 
