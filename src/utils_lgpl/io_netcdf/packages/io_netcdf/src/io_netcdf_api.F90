@@ -345,22 +345,67 @@ end function ionc_get_var_count_dll
 !> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
 !! The location type allows to select on specific topological mesh locations
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
-function ionc_inq_varids_dll(ioncid, meshid, iloctype, c_varids_ptr, nvar) result(ierr) bind(C, name="ionc_inq_varids")
+function ionc_inq_varids_dll(ioncid, meshid, iloctype, c_varids_ptr, nmaxvar) result(ierr) bind(C, name="ionc_inq_varids")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_varids_dll
-   integer,             intent(in)    :: ioncid   !< The IONC data set id.
-   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
-   integer,             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
-   type(c_ptr),         intent(  out) :: c_varids_ptr !< Pointer to array for the variable ids.
-   integer,             intent(in)    :: nvar    !< The number of variables in the target array. TODO: AvD: remove this somehow, now only required to call c_f_pointer
-   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+   integer(kind=c_int),             intent(in)    :: ioncid   !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   type(c_ptr),                     intent(  out) :: c_varids_ptr !< Pointer to array for the variable ids.
+   integer(kind=c_int),             intent(in)    :: nmaxvar  !< The number of variables in the target array. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
 
    integer, pointer :: varids(:)
+   integer :: nvar
 
-   call c_f_pointer(c_varids_ptr, varids, (/ nvar /))
+   call c_f_pointer(c_varids_ptr, varids, (/ nmaxvar /))
 
-   ierr = ionc_inq_varids(ioncid, meshid, iloctype, varids)
+   ! TODO: AvD: extend the interface of this DLL routine, such that it ALSO RETURNS the nvar number of variables found.
+   !            Now only the static library does this.
+   ierr = ionc_inq_varids(ioncid, meshid, iloctype, varids, nvar)
 
 end function ionc_inq_varids_dll
+
+
+!> Gets the variable ID for a data variable that is defined in the specified dataset on the specified mesh.
+!! The variable is searched based on variable name (without any "meshnd_" prefix), and which :mesh it is defined on.
+function ionc_inq_varid_dll(ioncid, meshid, c_varname, varid) result(ierr) bind(C, name="ionc_inq_varid")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_varid_dll
+   integer(kind=c_int),             intent(in)    :: ioncid   !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   character(kind=c_char),          intent(in)    :: c_varname(MAXSTRLEN)  !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+   integer(kind=c_int),             intent(  out) :: varid    !< The resulting variable id, if found.
+   integer(kind=c_int)                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   character(len=MAXSTRLEN) :: varname
+   ! Store the name
+   varname = char_array_to_string(c_varname, strlen(c_varname))
+   
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ionc_inq_varid(ioncid, meshid, varname, varid)
+
+end function ionc_inq_varid_dll
+
+
+!> Gets the variable ID for the variable in the specified dataset on the specified mesh,
+!! that also has the specified value for its ':standard_name' attribute, and 
+!! is defined on the specified topological mesh location (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
+function ionc_inq_varid_by_standard_name_dll(ioncid, meshid, iloctype, c_stdname, varid) result(ierr) bind(C, name="ionc_inq_varid_by_standard_name")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_inq_varid_by_standard_name_dll
+   integer(kind=c_int),             intent(in)    :: ioncid   !< The IONC data set id.
+   integer(kind=c_int),             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer(kind=c_int),             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   character(kind=c_char),          intent(in)    :: c_stdname(MAXSTRLEN)  !< The standard_name value that is searched for.
+   integer(kind=c_int),             intent(  out) :: varid    !< The resulting variable id, if found.
+   integer(kind=c_int)                            :: ierr     !< Result status, ionc_noerr if successful.
+
+   character(len=MAXSTRLEN) :: stdname
+   ! Store the name
+   stdname = char_array_to_string(c_stdname, strlen(c_stdname))
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ionc_inq_varid_by_standard_name(ioncid, meshid, iloctype, stdname, varid)
+
+end function ionc_inq_varid_by_standard_name_dll
 
 
 !> Gets the values for a named variable in the specified dataset on the specified mesh.

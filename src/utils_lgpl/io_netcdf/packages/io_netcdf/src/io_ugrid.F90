@@ -72,7 +72,8 @@ integer, parameter :: UG_INVALID_MESHDIMENSION = 12
 integer, parameter :: UG_INVALID_DATALOCATION  = 13
 integer, parameter :: UG_ARRAY_TOOSMALL        = 14 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
 integer, parameter :: UG_VAR_NOTFOUND          = 15 !< Some variable was not found.
-integer, parameter :: UG_INVALID_LAYERS        = 16
+integer, parameter :: UG_VAR_TOOMANYFOUND      = 16 !< Multiple variables were found in an inquiry whereas only one was expected or requested.
+integer, parameter :: UG_INVALID_LAYERS        = 17
 integer, parameter :: UG_INVALID_CRS           = 30 !< Invalid/missing coordinate reference system (using default)
 integer, parameter :: UG_NOTIMPLEMENTED        = 99
 
@@ -2186,15 +2187,16 @@ end function ug_get_var_count
 !> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
 !! The location type allows to select on specific topological mesh locations
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
-function ug_inq_varids(ncid, meshids, iloctype, varids) result(ierr)
+function ug_inq_varids(ncid, meshids, iloctype, varids, nvar) result(ierr)
    use string_module
-   integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
-   integer,             intent(in)    :: iloctype !< The topological location on which to select data variables (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
-   integer,             intent(out)   :: varids(:) !< Array to store the variable ids in.
-   integer                            :: ierr     !< Result status, ug_noerr if successful.
+   integer,          intent(in)    :: ncid      !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),  intent(in)    :: meshids   !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,          intent(in)    :: iloctype  !< The topological location on which to select data variables (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
+   integer,          intent(  out) :: varids(:) !< Array to store the variable ids in.
+   integer,          intent(  out) :: nvar      !< Number of variables found/stored in array.
+   integer                         :: ierr      !< Result status, ug_noerr if successful.
 
-   integer :: numVar, iv, ivarloc, nvar, maxvar
+   integer :: numVar, iv, ivarloc, maxvar
    character(len=255) :: str, meshname
    str = ''
    meshname = ''
@@ -2310,6 +2312,67 @@ function ug_inq_varid(ncid, meshids, varname, varid) result(ierr)
     ! Some error (status was set earlier)
 
 end function ug_inq_varid
+
+
+!> Gets the variable ID for the variable in the specified dataset on the specified mesh,
+!! that also has the specified value for its ':standard_name' attribute, and 
+!! is defined on the specified topological mesh location (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
+function ug_inq_varid_by_standard_name(ncid, meshids, iloctype, stdname, varid) result(ierr)
+   use string_module
+   integer,          intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,          intent(in)    :: iloctype !< The topological location on which to check for the data variable (one of UG_LOC_FACE/EDGE/NODE/ALL2D).
+   character(len=*), intent(in)    :: stdname  !< The standard_name value that is searched for.
+   integer,          intent(  out) :: varid    !< The variable id (when found).
+   integer                         :: ierr     !< Result status, ug_noerr if successful.
+
+   integer, allocatable :: varids(:) !< Array to store the candidate variable ids in.
+   integer :: iv, nvar, maxvar
+   character(len=255) :: str
+   integer :: nlen
+   str = ''
+
+   ! Get all candidate data variables on the right mesh+location
+   ierr = nf90_inquire(ncid, nVariables = maxvar)
+   allocate(varids(maxvar))
+   ierr = ug_inq_varids(ncid, meshids, iloctype, varids, nvar)
+   if (ierr /= ug_noerr) then
+      goto 999
+   end if
+
+   nlen = len_trim(stdname)
+
+   varid = -1 ! dummy
+   do iv=1,nvar
+      str = ''
+      ierr = nf90_get_att(ncid, varids(iv), 'standard_name', str)
+      if (ierr /= nf90_noerr) then
+         ! No CF :standard_name attribute, ignore this var.
+         cycle
+      end if
+
+      if (strcmpi(str,stdname(1:nlen))) then
+         if (varid /= -1) then
+            ! More than one variable matches all criteria, whereas only a single one was intended/requested.
+            ierr = UG_VAR_TOOMANYFOUND
+            goto 999
+         else
+            ! standard_name matches
+            varid = varids(iv)
+         end if
+      end if
+   end do
+
+   ierr = UG_NOERR
+   goto 888 ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+888 continue
+   deallocate(varids)
+    
+end function ug_inq_varid_by_standard_name
 
 
 !> Writes the given edge type variable to the given netcdf file.

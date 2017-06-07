@@ -93,6 +93,7 @@ public :: ionc_get_coordinate_system
 public :: ionc_get_var_count
 public :: ionc_inq_varids
 public :: ionc_inq_varid
+public :: ionc_inq_varid_by_standard_name
 public :: ionc_get_var_1D_EightByteReal
 public :: ionc_put_var_1D_EightByteReal
 public :: ionc_write_geom_ugrid
@@ -592,16 +593,17 @@ end function ionc_get_var_count
 !> Gets a list of variable IDs that are available in the specified dataset on the specified mesh.
 !! The location type allows to select on specific topological mesh locations
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
-function ionc_inq_varids(ioncid, meshid, iloctype, varids) result(ierr)
+function ionc_inq_varids(ioncid, meshid, iloctype, varids, nvar) result(ierr)
    integer,             intent(in)    :: ioncid    !< The IONC data set id.
    integer,             intent(in)    :: meshid    !< The mesh id in the specified data set.
    integer,             intent(in)    :: iloctype  !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
    integer,             intent(  out) :: varids(:) !< Array to store the variable ids in.
+   integer,             intent(  out) :: nvar      !< Number of variables found/stored in array.
    integer                            :: ierr      !< Result status, ionc_noerr if successful.
 
 
    ! TODO: AvD: some error handling if ioncid or meshid is wrong
-   ierr = ug_inq_varids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), iloctype, varids)
+   ierr = ug_inq_varids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), iloctype, varids, nvar)
 
 end function ionc_inq_varids
 
@@ -620,6 +622,24 @@ function ionc_inq_varid(ioncid, meshid, varname, varid) result(ierr)
    ierr = ug_inq_varid(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), varname, varid)
 
 end function ionc_inq_varid
+
+
+!> Gets the variable ID for the variable in the specified dataset on the specified mesh,
+!! that also has the specified value for its ':standard_name' attribute, and 
+!! is defined on the specified topological mesh location (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
+function ionc_inq_varid_by_standard_name(ioncid, meshid, iloctype, stdname, varid) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer,             intent(in)    :: iloctype !< The topological location on which to select data (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D).
+   character(len=*),    intent(in)    :: stdname  !< The standard_name value that is searched for.
+   integer,             intent(  out) :: varid    !< The resulting variable id, if found.
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+
+
+   ! TODO: AvD: some error handling if ioncid or meshid is wrong
+   ierr = ug_inq_varid_by_standard_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), iloctype, stdname, varid)
+
+end function ionc_inq_varid_by_standard_name
 
 
 !> Gets the values for a named variable in the specified dataset on the specified mesh.
