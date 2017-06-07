@@ -1660,9 +1660,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       meshids%dimids(mdim_longnamestring) = dimids(1)
    
    end if
-   
-   
-    
+
    !
    ! Coordinate variables
    !
@@ -3198,6 +3196,7 @@ end function  ug_read_1d_mesh_discretisation_points
 ! Cloning functions
 !
 
+! we assume  global attributes are already present in the file (it is needed to read the file back in later)
 function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) result(ierr)
     
     integer, intent(in)                   :: ncidin, ncidout
@@ -3214,14 +3213,7 @@ function ug_clone_mesh_definition( ncidin, ncidout, meshidsin, meshidsout ) resu
      
     ierr = UG_SOMEERR
     ierr = nf90_redef(ncidout) !open NetCDF in define mode
-    
-    !first add the global definitions and coventions
-    ! create default meta
-    call ug_create_ugrid_meta(meta)
-    
-    ! Add global attributes to NetCDF file.
-    ierr = ug_addglobalatts(ncidout, meta)
-    
+        
     !copy dimensions
     do i= mdim_start + 1, mdim_end - 1
     if (meshidsin%dimids(i)/=-1) then
@@ -3325,7 +3317,7 @@ function ug_clone_mesh_data( ncidin, ncidout, meshidsin, meshidsout ) result(ier
             case( nf90_real )
                 ierr = ug_copy_real_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case( nf90_double )
-                ierr = ug_copy_int_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
+                ierr = ug_copy_double_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case( nf90_char )
                 ierr = ug_copy_char_var(ncidin, ncidout, meshidsin%varids(i), meshidsout%varids(i), ndims, dimsizes)
             case default
