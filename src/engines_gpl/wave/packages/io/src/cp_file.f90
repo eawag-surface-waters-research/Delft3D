@@ -54,26 +54,23 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     integer           :: nr
     integer           :: nrec
     integer, external :: new_lun
-    logical           :: ex        !      Flag for existing file
-    logical           :: opend1    ! Flag to test if file FILNM1 is al-
-    logical           :: opend2    ! ready opened Flag to test if file FILNM2 is al-
+    logical           :: ex        ! Flag for existing file
+    logical           :: opend1    ! Flag to test if file FILNM1 is already opened
+    logical           :: opend2    ! Flag to test if file FILNM2 is already opened
     character(132)    :: rec132
 !
 !! executable statements -------------------------------------------------------
 !
     nuerr = 0
-    lf1 = index(filnm1, ' ')
-    if (lf1==0) lf1 = len(filnm1) + 1
-    lf1 = lf1 - 1
-    opend1 = .false.
-    lf2 = index(filnm2, ' ')
-    if (lf2==0) lf2 = len(filnm2) + 1
-    lf2 = lf2 - 1
-    opend2 = .false.
+    lf1 = len_trim(filnm1)
+    lf2 = len_trim(filnm2)
+    !
+    ! open the source file
+    !
     inquire (file = filnm1(:lf1), exist = ex)
     if (.not.ex) then
        nuerr = 1
-       goto 999
+       return
     endif
     inquire (file = filnm1(:lf1), opened = opend1)
     if (opend1) then
@@ -83,55 +80,41 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
        lunf1 = new_lun()
        open (lunf1, file = filnm1(:lf1), form = 'formatted', status = 'old')
     endif
+    !
+    ! open the target file in replace or append mode
+    !
     inquire (file = filnm2(:lf2), exist = ex)
     if (ex) then
        inquire (file = filnm2(:lf2), opened = opend2)
        if (opend2) then
           inquire (file = filnm2(:lf2), number = lunf2)
-          rewind lunf2
-       else
-          lunf2 = new_lun()
-          open (lunf2, file = filnm2(:lf2), form = 'formatted', status = 'old')
+          close(lunf2)
        endif
-       if (filtype=='append') then
-          nrec = 0
-  100     continue
-          read (lunf2, '(A)', iostat = iocond) rec132
-          if (iocond/=0) then
-             if (iocond<0) then
-                rewind lunf2
-                do nr = 1, nrec
-                   read (lunf2, '(A)') rec132
-                enddo
-                goto 300
-             endif
-             nuerr = 2
-             goto 400
-          endif
-          nrec = nrec + 1
-          goto 100
-       endif
+    endif
+    lunf2 = new_lun()
+    if (filtype=='append') then
+        open (lunf2, file = filnm2(:lf2), form = 'formatted', position = 'append')
+    elseif (filtype=='copy') then
+        open (lunf2, file = filnm2(:lf2), form = 'formatted', status = 'replace')
     else
-       lunf2 = new_lun()
-       open (lunf2, file = filnm2(:lf2), form = 'formatted', status = 'new')
+        nuerr = 2
+        return
     endif
-  300 continue
-    rec132 = ' '
-    read (lunf1, '(A)', iostat = iocond) rec132
-    if (iocond/=0) then
-       if (iocond>0) nuerr = 3
-       goto 400
-    endif
-    lrec = 132
-  310 continue
-    if (rec132(lrec:lrec)==' ') then
-       lrec = lrec - 1
-       if (lrec>70) goto 310
-    endif
-    write (lunf2, '(A)') rec132(:lrec)
-    goto 300
-  400 continue
+    !
+    ! copy the lines
+    !
+    do
+        rec132 = ' '
+        read (lunf1, '(A)', iostat = iocond) rec132
+        if (iocond/=0) then
+           if (iocond>0) nuerr = 3
+           exit
+        endif
+        write (lunf2, '(A)') trim(rec132)
+    enddo
+    !
+    ! close both files
+    !
     close (lunf1)
     close (lunf2)
-  999 continue
 end subroutine cp_file
