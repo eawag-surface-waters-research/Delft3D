@@ -42,3 +42,13 @@ src/engines_gpl/waq/packages/delwaq2_openda_lib/obj
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
 src/tools_lgpl/matlab/quickplot/progsrc/tekal_map.m
+src/utils_lgpl/gridgeom/packages/gridgeom/*.aps
+src/utils_lgpl/gridgeom/packages/gridgeom/*.eto
+src/utils_lgpl/gridgeom/packages/gridgeom/*.user
+src/utils_lgpl/gridgeom/packages/gridgeom/ClientBin
+src/utils_lgpl/gridgeom/packages/gridgeom/GeneratedArtifacts
+src/utils_lgpl/gridgeom/packages/gridgeom/[Bb]in
+src/utils_lgpl/gridgeom/packages/gridgeom/[Dd]ebug
+src/utils_lgpl/gridgeom/packages/gridgeom/[Rr]elease
+src/utils_lgpl/gridgeom/packages/gridgeom/_Pvt_Extensions
+src/utils_lgpl/gridgeom/packages/gridgeom/obj
