@@ -88,6 +88,7 @@ public :: ionc_put_node_coordinates
 public :: ionc_get_edge_nodes
 public :: ionc_get_face_coordinates
 public :: ionc_put_face_coordinates
+public :: ionc_get_face_edges
 public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
 public :: ionc_get_var_count
@@ -548,6 +549,19 @@ function ionc_put_face_coordinates(ioncid, meshid, xarr, yarr) result(ierr)
 
    ierr = ug_put_face_coordinates(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), xarr, yarr)
 end function ionc_put_face_coordinates
+
+
+!> Gets the face-edge connectivity table for all faces in the specified mesh.
+!! The output face_edges array is supposed to be of exact correct size already.
+function ionc_get_face_edges(ioncid, meshid, face_edges, fillvalue) result(ierr)
+   integer, intent(in)    :: ioncid  !< The IONC data set id.
+   integer, intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer, intent(  out) :: face_edges(:,:) !< Array to the face-node connectivity table.
+   integer, intent(  out) :: fillvalue !< Scalar for getting the fill value parameter for the requested variable.
+   integer                :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = ug_get_face_edges(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), face_edges, fillvalue)
+end function ionc_get_face_edges
 
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.

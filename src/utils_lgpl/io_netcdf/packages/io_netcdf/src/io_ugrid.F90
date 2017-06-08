@@ -2105,6 +2105,23 @@ function ug_put_face_coordinates(ncid, meshids, xf, yf) result(ierr)
 end function ug_put_face_coordinates
 
 
+!> Gets the face-edge connectivity table for all faces in the specified mesh.
+!! The output face_edges array is supposed to be of exact correct size already.
+function ug_get_face_edges(ncid, meshids, face_edges, ifill) result(ierr)
+   integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,           intent(out) :: face_edges(:,:) !< Array to the face-node connectivity table.
+   integer, optional, intent(out) :: ifill           !< (Optional) Integer fill value.
+   integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
+
+   ierr = nf90_get_var(ncid, meshids%varids(mid_faceedges), face_edges)
+   if (present(ifill)) then
+      ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges), '_FillValue', ifill)
+   end if
+
+end function ug_get_face_edges
+
+
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
 function ug_get_face_nodes(ncid, meshids, face_nodes, ifill) result(ierr)
@@ -2116,7 +2133,7 @@ function ug_get_face_nodes(ncid, meshids, face_nodes, ifill) result(ierr)
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facenodes), face_nodes)
    if (present(ifill)) then
-      ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes), '_FillValue'   , ifill)
+      ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes), '_FillValue', ifill)
    end if
 
 end function ug_get_face_nodes
