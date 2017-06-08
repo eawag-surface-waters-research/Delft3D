@@ -2269,27 +2269,31 @@ module m_ec_converter
                               a_s = -1.0_hp
                               b_s = 0.0_hp
                            end select 
+
+                           ! scale source coordinates with factors of target
+                           zsrc = (a_s*sourceElementSet%z + b_s - b_t)/a_t 
                            
+                           ! initialize upper layer kp                           
                            kp = 2
                            
+                           ! dkp: increase direction of (scaled) source z-coordinate zsrc, i.e. zrsc(kp) > zsrc(kp-dkp)
                            if (zsrc(2)-zsrc(1)>0) then
                               dkp = 1
                            else
                               dkp = -1
-                           end if
+                           end if      ! write source vertical coordinate in terms of target system
 
-                           
-                           zsrc = (a_s*sourceElementSet%z + b_s - b_t)/a_t       ! write source vertical coordinate in terms of target system
-
-                           ! assume target z-coordinate increases with k
                            do k = kbot, ktop
                               ztgt = targetElementSet%z(k)
+                              
+                              ! get search direction in zsrc
                               if (dkp*(ztgt-zsrc(kp))>0) then
                                  k_inc = 1
                               else 
                                  k_inc = -1
                               end if
                               
+                              ! get new upper layer kp               
                               do while ((zsrc(kp-dkp)>ztgt) .or. (zsrc(kp)<=ztgt))
                                  kp = kp + k_inc
                                  if (kp > n_layers .or. kp < 1) exit
@@ -2301,48 +2305,36 @@ module m_ec_converter
                                  kp = min(max(kp,1),n_layers-1)
                               end if
                               
-                              !ztar = a_t*targetElementSet%z(k)+b_t 
-                              !zsor = a_s*sourceElementSet%z(nn)+b_s 
-                              !do while ( zsor.lt.ztar .and. nn.lt. ... .and. nn.gt.1 )
-                              !   zsor =a_s*sourceElementSet%z(nn)+b_s
-                              !   nn = nn+nnd
-                              !end do
-                              !nn = max(nn-1,1)
-                              !nn = maxloc(a_s*sourceElementSet%z+b_s, mask=( a_s*sourceElementSet%z+b_s <= a_t*targetElementSet%z(k)+b_t ))
-                              !kp = nn(1)
-                              
-                              ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
-                              !
+!                             horizontal interpolation of upper (kp) and lower layer (kp-dkp)                            
                               up_old = 0.0
                               down_old = 0.0
                               up_new = 0.0
                               down_new = 0.0
-                                 up_old          =  indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows* kp) + &
-                                                    indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows* kp) + &
-                                                    indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows* kp) + &
-                                                    indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp   +n_cols* np        + n_cols*n_rows* kp)
-                                 up_new          =  indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows* kp) + &
-                                                    indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows* kp) + &
-                                                    indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows* kp) + &
-                                                    indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp   +n_cols* np        + n_cols*n_rows* kp)
-                                 down_old        =  indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp)) + &
-                                                    indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp)) + &
-                                                    indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows*(kp-dkp)) + &
-                                                    indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp   +n_cols* np        + n_cols*n_rows*(kp-dkp))
-                                 down_new        =  indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp)) + &
-                                                    indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp)) + &
-                                                    indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows*(kp-dkp)) + &
-                                                    indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp   +n_cols* np        + n_cols*n_rows*(kp-dkp))
+                              up_old          =  indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
+                                                 indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
+                                                 indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows* (kp-1)) + &
+                                                 indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp   +n_cols* np        + n_cols*n_rows* (kp-1))
+                              up_new          =  indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
+                                                 indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
+                                                 indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows* (kp-1)) + &
+                                                 indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp   +n_cols* np        + n_cols*n_rows* (kp-1))
+                              down_old        =  indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
+                                                 indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
+                                                 indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows*(kp-dkp-1)) + &
+                                                 indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp   +n_cols* np        + n_cols*n_rows*(kp-dkp-1))
+                              down_new        =  indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
+                                                 indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
+                                                 indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows*(kp-dkp-1)) + &
+                                                 indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp   +n_cols* np        + n_cols*n_rows*(kp-dkp-1))
 
-                              
-                              
-                                 z0 = (ztgt - zsrc(kp))/(zsrc(kp)-zsrc(kp-dkp))
-                                 z0 = min(max(z0,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
-                                 z1 = (1.0_hp - z0)
+                              ! get weights for vertical interpolation
+                              z0 = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
+                              z0 = min(max(z0,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
+                              z1 = (1.0_hp - z0)
    
                               ! interpolating between times and between vertical layers
                               targetValues(k) = targetValues(k) + a0*(z1*up_old+z0*down_old) + a1*(z1*up_new+z0*down_new)
-                              write(666,'(15e15.5)') ztgt, zsrc(kp-dkp), zsrc(kp), zsrc(1), zsrc(n_layers)                   ! RL666
+!                              write(666,'(15e15.5)') ztgt, zsrc(kp-dkp), zsrc(kp), zsrc(1), zsrc(n_layers)                   ! RL666
                            end do
                         else
                            targetValues(kbot:ktop) = 0.0_hp
