@@ -243,6 +243,24 @@ function ionc_put_node_coordinates_dll(ioncid, meshid, c_xptr, c_yptr, nnode) re
 end function ionc_put_node_coordinates_dll
 
 
+!> Gets the edge-facee connectivity table for all edges in the specified mesh.
+function ionc_get_edge_faces_dll(ioncid, meshid, c_edge_faces_ptr, nedge, fillvalue) result(ierr) bind(C, name="ionc_get_edge_faces")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_nodes_dll
+   integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
+   type(c_ptr),         intent(  out) :: c_edge_faces_ptr !< Pointer to array for the edge-node connectivity table.
+   integer(kind=c_int), intent(in)    :: nedge   !< The number of edges in the mesh.    
+   integer(kind=c_int)                :: fillvalue    !< Scalar for getting the fill value parameter for the requested variable.
+   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
+
+   integer, pointer :: edge_faces(:,:)
+
+   call c_f_pointer(c_edge_faces_ptr, edge_faces, (/ 2 , nedge /))
+   
+   ierr = ionc_get_edge_faces(ioncid, meshid, edge_faces, fillvalue)
+end function ionc_get_edge_faces_dll
+
+
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
 function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result(ierr) bind(C, name="ionc_get_edge_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_nodes_dll

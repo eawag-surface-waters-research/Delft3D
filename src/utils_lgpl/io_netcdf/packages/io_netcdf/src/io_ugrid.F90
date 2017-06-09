@@ -2053,19 +2053,34 @@ function ug_put_node_coordinates(ncid, meshids, xn, yn) result(ierr)
 end function ug_put_node_coordinates
 
 
+
+!> Gets the edge-face connectivity table for all edges in the specified mesh.
+!! The output edge_faces array is supposed to be of exact correct size already.
+function ug_get_edge_faces(ncid, meshids, edge_faces, ifill) result(ierr)
+   integer,           intent(in)  :: ncid             !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),   intent(in)  :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,           intent(out) :: edge_faces(:,:)  !< Array to the edge-node connectivity table.
+   integer, optional, intent(out) :: ifill            !< (Optional) Integer fill value.
+   integer                        :: ierr             !< Result status (UG_NOERR==NF90_NOERRif successful).
+
+   ierr = nf90_get_var(ncid, meshids%varids(mid_edgefaces), edge_faces)
+   if (present(ifill)) then
+      ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces), '_FillValue', ifill)
+   end if
+
+end function ug_get_edge_faces
+
+
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
 !! The output edge_nodes array is supposed to be of exact correct size already.
 function ug_get_edge_nodes(ncid, meshids, edge_nodes) result(ierr)
-   integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh), intent(in)     :: meshids!< Set of NetCDF-ids for all mesh geometry arrays.
-   integer,            intent(out) :: edge_nodes(:,:) !< Array to the edge-node connectivity table.
-   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERRif successful).
+   integer,           intent(in)  :: ncid             !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),   intent(in)  :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,           intent(out) :: edge_nodes(:,:)  !< Array to the edge-node connectivity table.
+   integer                        :: ierr             !< Result status (UG_NOERR==NF90_NOERRif successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
-   ! TODO: AvD: some more careful error handling
-   
-   ! TODO: AvD: also introduce 0-/1-based indexing handling.
-
+   ! Getting fillvalue is unnecessary because each edge should have a begin- and end-point
 end function ug_get_edge_nodes
 
    
