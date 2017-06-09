@@ -2176,6 +2176,12 @@ module m_ec_converter
          real(hp)                :: ztgt
          double precision        :: PI, phi, xtmp
          integer                 :: time_interpolation
+         
+         real(hp), dimension(2,2) :: val
+         real(hp)                 :: weight
+         integer                  :: ii, jj, kk
+         integer                  :: jamissing
+         
          !
          PI = datan(1.d0)*4.d0
          success = .false.
@@ -2235,6 +2241,11 @@ module m_ec_converter
                   
                   if (n_layers>0 .and. associated(targetElementSet%z) .and. associated(sourceElementSet%z)) then 
                      do j=1, n_points
+                     
+                        if ( j.eq.22503 ) then
+                           continue
+                        end if
+                     
                         kbot = targetElementSet%kbot(j)
                         ktop = targetElementSet%ktop(j)
                         if (connection%converterPtr%operandType==operand_replace) then
@@ -2305,39 +2316,52 @@ module m_ec_converter
                                  kp = min(max(kp,1),n_layers-1)
                               end if
                               
-!                             horizontal interpolation of upper (kp) and lower layer (kp-dkp)                            
-                              up_old = 0.0
-                              down_old = 0.0
-                              up_new = 0.0
-                              down_new = 0.0
-                              up_old          =  indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
-                                                 indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
-                                                 indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows* (kp-1)) + &
-                                                 indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp   +n_cols* np        + n_cols*n_rows* (kp-1))
-                              up_new          =  indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
-                                                 indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows* (kp-1)) + &
-                                                 indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows* (kp-1)) + &
-                                                 indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp   +n_cols* np        + n_cols*n_rows* (kp-1))
-                              down_old        =  indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
-                                                 indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
-                                                 indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows*(kp-dkp-1)) + &
-                                                 indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp   +n_cols* np        + n_cols*n_rows*(kp-dkp-1))
-                              down_new        =  indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp   +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
-                                                 indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1 +n_cols*(np-1)     + n_cols*n_rows*(kp-dkp-1)) + &
-                                                 indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1 +n_cols* np        + n_cols*n_rows*(kp-dkp-1)) + &
-                                                 indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp   +n_cols* np        + n_cols*n_rows*(kp-dkp-1))
-
-                              ! get weights for vertical interpolation
-                              z0 = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
-                              z0 = min(max(z0,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
-                              z1 = (1.0_hp - z0)
-   
-                              ! interpolating between times and between vertical layers
-                              targetValues(k) = targetValues(k) + a0*(z1*up_old+z0*down_old) + a1*(z1*up_new+z0*down_new)
-!                              write(666,'(15e15.5)') ztgt, zsrc(kp-dkp), zsrc(kp), zsrc(1), zsrc(n_layers)                   ! RL666
+!                             check missing values
+                              jamissing = 0
+                       kloop: do kk=0,dkp,dkp
+                                 do jj=0,1
+                                    do ii=0,1
+                                       if ( sourceT0Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-kk-1)).eq.EC_MISSING_VALUE .or.   &
+                                            sourceT1Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-kk-1)).eq.EC_MISSING_VALUE ) then
+                                          jamissing = 1
+                                          exit kloop
+                                       end if
+                                    end do
+                                 end do
+                              end do kloop
+                              
+                              if ( jamissing.eq.1 ) then
+                                 targetValues(k) = ec_undef_hp
+                              else
+                              
+!                                horizontal interpolation 
+                                 val = 0d0   ! (down-up,old-new)
+                                 do jj=0,1
+                                    do ii=0,1
+                                        weight = indexWeight%weightFactors(1+ii+2*jj,j)
+                                        
+                                        val(1,1) = val(1,1) + weight*sourceT0Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-dkp-1))
+                                        val(2,1) = val(2,1) + weight*sourceT0Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-1))
+                                        
+                                        val(1,2) = val(1,2) + weight*sourceT1Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-dkp-1))
+                                        val(2,2) = val(2,2) + weight*sourceT1Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-1))
+                                    end do
+                                 end do
+                                 
+                                 ! get weights for vertical interpolation
+                                 z0 = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
+                                 z0 = min(max(z0,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
+                                 z1 = (1.0_hp - z0)
+                                 
+                                 ! interpolating between times and between vertical layers
+!                                 targetValues(k) = targetValues(k) + a0*(z1*up_old+z0*down_old) + a1*(z1*up_new+z0*down_new)
+                                 targetValues(k) = targetValues(k) + a0*(z0*val(1,1) + z1*val(2,1)) + a1*(z0*val(1,2) + z1*val(2,2))
+                                 
+!                                 write(666,'(15e15.5)') ztgt, zsrc(kp-dkp), zsrc(kp), zsrc(1), zsrc(n_layers)                   ! RL666
+                              end if
                            end do
                         else
-                           targetValues(kbot:ktop) = 0.0_hp
+                           targetValues(kbot:ktop) = ec_undef_hp   ! 0.0_hp
                         end if
                      end do
                   else
