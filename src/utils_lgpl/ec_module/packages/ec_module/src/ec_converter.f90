@@ -2162,6 +2162,8 @@ module m_ec_converter
          type(tEcField), pointer :: targetField   !< Converter's result goes in here
          type(tEcField), pointer :: sourceT0Field !< helper pointer
          type(tEcField), pointer :: sourceT1Field !< helper pointer
+         real(hp), dimension(:,:,:), pointer :: s3D_T0, s3D_T1   !< 3D representation of linearly indexed array arr1D
+         real(hp), dimension(:,:),   pointer :: s2D_T0, s2D_T1   !< 2D representation of linearly indexed array arr1D
          real(hp)                :: up_old, down_old !< source values on upper and lower level at T0
          real(hp)                :: up_new, down_new !< source values on upper and lower level at T1
          type(tEcIndexWeight), pointer :: indexWeight !< helper pointer, saved index weights
@@ -2235,6 +2237,10 @@ module m_ec_converter
                   n_rows = sourceElementSet%n_rows
                   n_layers = sourceElementSet%n_layers
                   allocate(zsrc(n_layers))
+
+                  s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
+                  s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
+                  
                   t0 = sourceT0Field%timesteps
                   t1 = sourceT1Field%timesteps
                   call time_weight_factors(a0, a1, timesteps, t0, t1, timeint=time_interpolation)
@@ -2321,8 +2327,8 @@ module m_ec_converter
                        kloop: do kk=0,dkp,dkp
                                  do jj=0,1
                                     do ii=0,1
-                                       if ( sourceT0Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-kk-1)).eq.EC_MISSING_VALUE .or.   &
-                                            sourceT1Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-kk-1)).eq.EC_MISSING_VALUE ) then
+                                       if ( s3D_T0(mp+ii, np+jj, kp-kk ) .eq. EC_MISSING_VALUE .or.   &
+                                            s3D_T0(mp+ii, np+jj, kp-kk ) .eq. EC_MISSING_VALUE ) then
                                           jamissing = 1
                                           exit kloop
                                        end if
@@ -2339,12 +2345,10 @@ module m_ec_converter
                                  do jj=0,1
                                     do ii=0,1
                                         weight = indexWeight%weightFactors(1+ii+2*jj,j)
-                                        
-                                        val(1,1) = val(1,1) + weight*sourceT0Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-dkp-1))
-                                        val(2,1) = val(2,1) + weight*sourceT0Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-1))
-                                        
-                                        val(1,2) = val(1,2) + weight*sourceT1Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-dkp-1))
-                                        val(2,2) = val(2,2) + weight*sourceT1Field%arr1d(mp+ii + n_cols*(np+jj-1) + n_cols*n_rows* (kp-1))
+                                        val(1,1) = val(1,1) + weight * s3D_T0(mp+ii, np+jj, kp-dkp)
+                                        val(2,1) = val(2,1) + weight * s3D_T0(mp+ii, np+jj, kp    )
+                                        val(1,2) = val(1,2) + weight * s3D_T1(mp+ii, np+jj, kp-dkp)
+                                        val(2,2) = val(2,2) + weight * s3D_T1(mp+ii, np+jj, kp    )
                                     end do
                                  end do
                                  
