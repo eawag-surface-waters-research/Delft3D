@@ -759,12 +759,12 @@ module m_ec_filereader_read
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do i=1, item%elementSetPtr%n_rows
                         do j=1, item%elementSetPtr%n_cols
-                           if (data_block(j,i,1) == dmiss_nc) then 
-                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
-                           else                     
+!                           if (data_block(j,i,1) == dmiss_nc) then 
+!                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
+!                           else                     
                               fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1)
                               valid_field = .True.
-                           endif
+!                           endif
                         end do
                      end do
                   else                                                                                                                       
@@ -772,19 +772,19 @@ module m_ec_filereader_read
                      ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, item%elementSetPtr%n_layers, 1/))
                      
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
-                     do i=1, item%elementSetPtr%n_rows
-                        do j=1, item%elementSetPtr%n_cols
-                           do k=1, item%elementSetPtr%n_layers
-                              if (data_block(j,i,k) == dmiss_nc) then 
+                     do k=1, item%elementSetPtr%n_layers
+                        do i=1, item%elementSetPtr%n_rows
+                           do j=1, item%elementSetPtr%n_cols
+!                              if (data_block(j,i,k) == dmiss_nc) then 
+!                                 fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
+!                                                  + (i-1)*item%elementSetPtr%n_cols                              &
+!                                                  +  j ) = 0d0
+!                              else                     
                                  fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
-                                                  + (j-1)*item%elementSetPtr%n_rows                                  &
-                                                  +  i ) = 0d0
-                              else                     
-                                 fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
-                                                  + (j-1)*item%elementSetPtr%n_rows                                  &
-                                                  +  i ) = data_block(j,i,k)
+                                                  + (i-1)*item%elementSetPtr%n_cols                                &
+                                                  +  j ) = data_block(j,i,k)
                                  valid_field = .True.
-                              endif
+!                              endif
                            end do
                         end do
                      end do
@@ -801,7 +801,15 @@ module m_ec_filereader_read
          endif
 
          ! - 3 - Apply the scale factor and offset
-         fieldPtr%arr1dPtr = fieldPtr%arr1dPtr * item%quantityPtr%factor + item%quantityPtr%offset       
+         !fieldPtr%arr1dPtr = fieldPtr%arr1dPtr * item%quantityPtr%factor + item%quantityPtr%offset       
+         
+         do i=1, item%elementSetPtr%n_rows * item%elementSetPtr%n_cols * item%elementSetPtr%n_layers
+            if ( fieldPtr%arr1dPtr(i).ne.dmiss_nc ) then
+               fieldPtr%arr1dPtr(i) = fieldPtr%arr1dPtr(i) * item%quantityPtr%factor + item%quantityPtr%offset    
+            else
+               fieldPtr%arr1dPtr(i) = ec_undef_hp
+            end if
+         end do
 
          ! Deallocate temporary datablock
          if (allocated(data_block)) deallocate(data_block, stat = istat)

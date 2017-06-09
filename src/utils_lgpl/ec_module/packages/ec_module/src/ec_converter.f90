@@ -2327,8 +2327,8 @@ module m_ec_converter
                        kloop: do kk=0,dkp,dkp
                                  do jj=0,1
                                     do ii=0,1
-                                       if ( s3D_T0(mp+ii, np+jj, kp-kk ) .eq. EC_MISSING_VALUE .or.   &
-                                            s3D_T0(mp+ii, np+jj, kp-kk ) .eq. EC_MISSING_VALUE ) then
+                                       if ( s3D_T0(mp+ii, np+jj, kp-kk ) .eq. ec_undef_hp .or.   &
+                                            s3D_T0(mp+ii, np+jj, kp-kk ) .eq. ec_undef_hp ) then
                                           jamissing = 1
                                           exit kloop
                                        end if
@@ -2337,7 +2337,7 @@ module m_ec_converter
                               end do kloop
                               
                               if ( jamissing.eq.1 ) then
-                                 targetValues(k) = ec_undef_hp
+                                 targetValues(k) = -999d0
                               else
                               
 !                                horizontal interpolation 
@@ -2365,7 +2365,7 @@ module m_ec_converter
                               end if
                            end do
                         else
-                           targetValues(kbot:ktop) = ec_undef_hp   ! 0.0_hp
+                           targetValues(kbot:ktop) = -999d0   ! 0.0_hp
                         end if
                      end do
                   else
