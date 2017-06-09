@@ -2160,6 +2160,7 @@ module m_ec_converter
          real(hp)                :: sourceValueT0 !< source value at t0
          real(hp)                :: sourceValueT1 !< source value at t1
          type(tEcField), pointer :: targetField   !< Converter's result goes in here
+         real(hp)                :: targetMissing !< Target side missing value 
          type(tEcField), pointer :: sourceT0Field !< helper pointer
          type(tEcField), pointer :: sourceT1Field !< helper pointer
          real(hp), dimension(:,:,:), pointer :: s3D_T0, s3D_T1   !< 3D representation of linearly indexed array arr1D
@@ -2232,6 +2233,7 @@ module m_ec_converter
                   targetElementSet => connection%targetItemsPtr(i)%ptr%elementSetPtr
                   n_points = connection%targetItemsPtr(i)%ptr%elementSetPtr%nCoordinates
                   targetValues => connection%targetItemsPtr(i)%ptr%targetFieldPtr%arr1dPtr
+                  targetMissing = connection%targetItemsPtr(i)%ptr%targetFieldPtr%MISSINGVALUE
 
                   n_cols = sourceElementSet%n_cols
                   n_rows = sourceElementSet%n_rows
@@ -2337,7 +2339,7 @@ module m_ec_converter
                               end do kloop
                               
                               if ( jamissing.eq.1 ) then
-                                 targetValues(k) = -999d0
+                                 targetValues(k) = targetMissing
                               else
                               
 !                                horizontal interpolation 
@@ -2365,7 +2367,7 @@ module m_ec_converter
                               end if
                            end do
                         else
-                           targetValues(kbot:ktop) = -999d0   ! 0.0_hp
+                           targetValues(kbot:ktop) = targetMissing   ! 0.0_hp
                         end if
                      end do
                   else
