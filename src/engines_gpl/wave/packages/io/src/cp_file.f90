@@ -46,6 +46,7 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
 ! Local variables
 !
     integer           :: iocond    ! IO status return code
+    integer           :: iter      ! indicates the number of attempts to query a file
     integer           :: lf1       ! > 0 Error; < 0 End-Of-File Actual length of string FILNM1
     integer           :: lf2       ! Actual length of string FILNM2
     integer           :: lrec      ! Actual length of string REC132
@@ -67,15 +68,22 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     !
     ! open the source file
     !
-    inquire (file = filnm1(:lf1), exist = ex)
+    iocond = -1
+    iter = 0
+    do while (iocond/=0 .and. iter<10)
+       inquire (file = filnm1(:lf1), exist = ex, opened = opend1, number = lunf1, iostat = iocond)
+       iter = iter+1
+       if (iocond/=0) call cutil_sleep(100)
+    enddo
+    if (iocond/=0) then
+       nuerr = 4
+       return
+    endif
     if (.not.ex) then
        nuerr = 1
        return
-    endif
-    inquire (file = filnm1(:lf1), opened = opend1)
-    if (opend1) then
-       inquire (file = filnm1(:lf1), number = lunf1)
-       rewind lunf1
+    elseif (opend1) then
+       rewind (lunf1)
     else
        lunf1 = new_lun()
        open (lunf1, file = filnm1(:lf1), form = 'formatted', status = 'old')
@@ -83,13 +91,19 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     !
     ! open the target file in replace or append mode
     !
-    inquire (file = filnm2(:lf2), exist = ex)
-    if (ex) then
-       inquire (file = filnm2(:lf2), opened = opend2)
-       if (opend2) then
-          inquire (file = filnm2(:lf2), number = lunf2)
-          close(lunf2)
-       endif
+    iocond = -1
+    iter = 0
+    do while (iocond/=0 .and. iter<10)
+       inquire (file = filnm2(:lf2), exist = ex, opened = opend2, number = lunf2, iostat = iocond)
+       iter = iter+1
+       if (iocond/=0) call cutil_sleep(100)
+    enddo
+    if (iocond/=0) then
+       nuerr = 5
+       return
+    endif
+    if (ex .and. opend2) then
+       close(lunf2)
     endif
     lunf2 = new_lun()
     if (filtype=='append') then

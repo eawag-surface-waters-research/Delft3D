@@ -125,7 +125,7 @@ subroutine run_swan (casl)
     append       = 'append'
     call cp_file(prints     ,string    ,append    ,nuerr             )
     if (nuerr > 0) then
-       write (*, '(a,i3)') '*** ERROR: While appending PRINT to diag file'
+       write (*, '(a,i3)') '*** ERROR: While appending PRINT to diag file: ', nuerr
     endif
     !
     ! Remove SWAN input/output/tmp files (except SWANOUT output data file)

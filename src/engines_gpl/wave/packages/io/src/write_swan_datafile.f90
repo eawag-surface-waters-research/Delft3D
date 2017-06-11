@@ -201,9 +201,10 @@ subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
                 ! If the closestPoint is covered by invalid source grid points
                 ! then covered == -1 and the value at i,j is not changed
                 !
-                if (covered(i, j) == 0 .and. &
-                  & covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) == 1) then
-                   var1(i, j) = var1(closestPoint(i, j, iindex), closestPoint(i, j, jindex))
+                if (covered(i, j) == 0 .and. closestPoint(i, j, iindex)>0) then
+                   if (covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) == 1) then
+                      var1(i, j) = var1(closestPoint(i, j, iindex), closestPoint(i, j, jindex))
+                   endif
                 endif
              enddo
           enddo
@@ -216,9 +217,10 @@ subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
                 ! If the closestPoint is covered by invalid source grid points
                 ! then covered == -1 and the value at i,j is not changed
                 !
-                if (covered(i, j) == 0 .and. &
-                  & covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) == 1) then
-                   var2(i, j) = var2(closestPoint(i, j, iindex), closestPoint(i, j, jindex))
+                if (covered(i, j) == 0 .and. closestPoint(i, j, iindex)>0) then
+                   if (covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) == 1) then
+                      var2(i, j) = var2(closestPoint(i, j, iindex), closestPoint(i, j, jindex))
+                   endif
                 endif
              enddo
           enddo
