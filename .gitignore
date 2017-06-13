@@ -52,3 +52,13 @@ src/utils_lgpl/gridgeom/packages/gridgeom/[Dd]ebug
 src/utils_lgpl/gridgeom/packages/gridgeom/[Rr]elease
 src/utils_lgpl/gridgeom/packages/gridgeom/_Pvt_Extensions
 src/utils_lgpl/gridgeom/packages/gridgeom/obj
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/*.aps
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/*.eto
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/*.user
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/ClientBin
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/GeneratedArtifacts
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/[Bb]in
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/[Dd]ebug
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/[Rr]elease
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/_Pvt_Extensions
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/obj

@@ -6450,7 +6450,15 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_api.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_version.F90.svn -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_ugrid.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_matlab/test_io_netcfd_matlab.m -text
+src/utils_lgpl/io_netcdf/packages/test_data/Custom_Ugrid.nc -text
+src/utils_lgpl/io_netcdf/packages/test_data/Custom_Ugrid_map.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/hex7_ugrid_net.nc -text
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/LibDetails.cs -text
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/LibWrapper.cs -text
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/Properties/AssemblyInfo.cs -text
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGrid.tests.csproj -text
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGridTests.cs -text
+src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/packages.config -text
 src/utils_lgpl/nefis/AUTHORS -text
 src/utils_lgpl/nefis/COPYING -text
 src/utils_lgpl/nefis/ChangeLog -text
