@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\src\gridgeom_version.F90 .\ .\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="rem call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\src\gridgeom_version.F90 .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|Win32" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" PreprocessorDefinitions="WIN32" RuntimeLibrary="rtMultiThreadedDLL"/>
@@ -23,13 +23,13 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\src\gridgeom_version.F90 .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Debug|x64" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" PreprocessorDefinitions="WIN64" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFFortranCompilerTool" AdditionalOptions="-check bounds" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" PreprocessorDefinitions="WIN64" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\src\gridgeom_version.F90 .\ .\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="rem call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\src\gridgeom_version.F90 .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|x64" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Optimization="optimizeDisabled" PreprocessorDefinitions="WIN64" LocalVariableStorage="localStorageAutomatic" RuntimeLibrary="rtMultiThreadedDLL"/>
@@ -45,5 +45,5 @@
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\gridgeom.F90"/>
-		<File RelativePath=".\src\network1D.F90"/></Filter></Files>
+		<File RelativePath=".\src\odugrid.F90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

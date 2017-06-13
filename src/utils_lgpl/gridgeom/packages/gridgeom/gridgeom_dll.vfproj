@@ -6,12 +6,12 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="dll\$(ConfigurationName)" IntermediateDirectory="dll\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(OSS_UCRTLIBDIR)" GenerateManifest="false" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true" AdditionalDependencies="gridgeom.lib"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateManifest="false" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="rem call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="dll\$(ConfigurationName)" IntermediateDirectory="dll\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
@@ -25,13 +25,13 @@
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd gridgeom ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="dll\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="dll\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(OSS_UCRTLIBDIR)" GenerateManifest="false" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true" AdditionalDependencies="gridgeom.lib"/>
+				<Tool Name="VFFortranCompilerTool" AdditionalOptions="-check bounds" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateManifest="false" GenerateDebugInformation="true" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="rem call $(SolutionDir)scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="dll\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="dll\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">

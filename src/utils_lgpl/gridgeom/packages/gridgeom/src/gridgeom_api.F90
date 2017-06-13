@@ -32,12 +32,43 @@
 !! Basic API for gridgeom routines.
 
 module gridgeom_api
-!use gridgeom
+
+use gridgeom
+use iso_c_binding
 
 implicit none
 
 !-------------------------------------------------------------------------------
-contains
+   contains
 !-------------------------------------------------------------------------------
+
+!> Gets the x,y coordinates from UGRID
+function ggeo_get_xy_coordinates_dll(c_branchids, c_branchoffsets, c_geopointsX, c_geopointsY, c_nbranchgeometrynodes, c_branchlengths, c_meshXCoords, c_meshYCoords, nbranches, ngeopoints, nmeshnodes) result(ierr) bind(C, name="ggeo_get_xy_coordinates")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_xy_coordinates_dll
+
+   integer(kind=c_int), intent(in)   :: nbranches, ngeopoints, nmeshnodes
+   type(c_ptr), intent(in)           :: c_branchids
+   type(c_ptr), intent(in)           :: c_branchoffsets, c_geopointsX, c_geopointsY, c_nbranchgeometrynodes, c_branchlengths
+   type(c_ptr), intent(inout)        :: c_meshXCoords, c_meshYCoords
+   
+   !fortran pointers
+   integer, pointer                  :: branchids(:), nbranchgeometrynodes(:)
+   double precision, pointer         :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)
+   double precision, pointer         :: meshXCoords(:), meshYCoords(:)
+   
+   integer                           :: ierr
+
+   call c_f_pointer(c_branchids, branchids, (/ nmeshnodes /))
+   call c_f_pointer(c_branchoffsets, branchoffsets, (/ nmeshnodes /))
+   call c_f_pointer(c_geopointsX, geopointsX, (/ ngeopoints /))
+   call c_f_pointer(c_geopointsY, geopointsY, (/ ngeopoints /))
+   call c_f_pointer(c_nbranchgeometrynodes, nbranchgeometrynodes, (/ nbranches /))
+   call c_f_pointer(c_branchlengths, branchlengths, (/ nbranches /))
+   call c_f_pointer(c_meshXCoords, meshXCoords, (/ nmeshnodes /))
+   call c_f_pointer(c_meshYCoords, meshYCoords, (/ nmeshnodes /))
+
+   ierr = ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords)
+   
+end function ggeo_get_xy_coordinates_dll
 
 end module gridgeom_api

@@ -31,6 +31,27 @@
 !> Module for grid operations.
 
 module gridgeom
-!use xxx
+
+use odugrid
+
 implicit none
+!
+! Subroutines
+!
+public :: ggeo_get_xy_coordinates
+
+   contains
+   
+function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords) result(ierr)
+
+   integer, intent(in)               :: branchids(:),nbranchgeometrynodes(:)
+   double precision, intent(in)      :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)
+   double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
+   
+   integer                           :: ierr
+
+   ierr = odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords)
+
+end function ggeo_get_xy_coordinates
+
 end module gridgeom
