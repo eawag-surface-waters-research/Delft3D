@@ -132,6 +132,7 @@ DllExport int initialize(const char * configfile) {
     }
     if (thisDimr->redirectFile != NULL) {
         printf("stdout and stderr are redirected to file \"%s\"\n", thisDimr->redirectFile);
+        fflush(stdout);
         freopen (thisDimr->redirectFile,"w",stdout);
         freopen (thisDimr->redirectFile,"w",stderr);
         // Sometimes stderr overwrites stdout messages at the beginning of redirectFile
@@ -241,6 +242,17 @@ DllExport void finalize (void) {
     thisDimr->timersFinish();
     for (int i = 1 ; i < thisDimr->control->numSubBlocks ; i++) {
         thisDimr->runControlBlock(&(thisDimr->control->subBlocks[i]),999999999.0, GLOBAL_PHASE_FINISH);
+    }
+
+    if (thisDimr->redirectFile != NULL) {
+        // Stop redirecting stdout/stderr to file now
+        // This is the "last" statement in dimr.dll and redirection blocks manipulations of the resulting file
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file \"%s\"\n", thisDimr->redirectFile);
+        // Redirection to CONOUT$ probably only works on Windows, but the redirection to file will only be used on Windows
+        freopen("CONOUT$", "a", stdout);
+        // Not very nice to redirect stderr to CONOUT$ too, but CONERR$ does not exist
+        freopen("CONOUT$", "a", stderr);
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file \"%s\"\n", thisDimr->redirectFile);
     }
 }
 
