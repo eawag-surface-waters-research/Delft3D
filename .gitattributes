@@ -301,6 +301,12 @@ src/clean.cmd -text
 src/clean.sh -text
 src/common.am -text
 src/configure.ac -text
+src/csharp/utils/utils.Tests/NativeLibrary.cs -text
+src/csharp/utils/utils.Tests/Properties/AssemblyInfo.cs -text
+src/csharp/utils/utils.Tests/TestHelper.cs -text
+src/csharp/utils/utils.Tests/packages.config -text
+src/csharp/utils/utils.Tests/utils.Tests.csproj -text
+src/csharp/utils/utils.Tests/utils.Tests.csproj.user -text
 src/doxyfile_delft3d -text
 src/doxyfile_delwaq -text
 src/engines_gpl/Makefile.am -text
