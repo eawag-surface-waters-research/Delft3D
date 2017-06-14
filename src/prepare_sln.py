@@ -149,7 +149,7 @@ platformtoolset[2013] = "    <PlatformToolset>v120</PlatformToolset>"
 platformtoolset[2014] = "    <PlatformToolset>v120</PlatformToolset>"
 platformtoolset[2015] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2016] = "    <PlatformToolset>v140</PlatformToolset>"
-platformtoolset[2017] = "    <PlatformToolset>v140</PlatformToolset>"
+platformtoolset[2017] = "    <PlatformToolset>v141</PlatformToolset>"
 
 #
 #
@@ -189,7 +189,7 @@ def process_solution_file(sln, slntemplate):
     sln = os.path.join(topdir, sln)
 
     # source template file:
-    slntemplate = os.path.join(topdir, "scripts_lgpl", "win64", slntemplate)
+    slntemplate = os.path.join(topdir, slntemplate)
 
     shutil.copyfile(slntemplate, sln)
 
@@ -484,11 +484,11 @@ def do_work():
     # Needed for VS2015 and higher:
     getUCRTVersionNumber()
 
-    process_solution_file("delft3d_open.sln", "delft3d_open_template.sln")
+    process_solution_file("delft3d_open.sln", os.path.join("scripts_lgpl", "win64", "delft3d_open_template.sln"))
 
     # TODO: Consider making this optional via cmdline args:
-    process_solution_file("io_netcdf.sln",    "io_netcdf_template.sln")
-    process_solution_file("nefis.sln", "nefis_template.sln")
+    process_solution_file("io_netcdf.sln",    os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
+    process_solution_file("nefis.sln",        os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
 
     # Force reading GUI parameters next run
     vs = -999
