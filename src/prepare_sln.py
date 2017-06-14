@@ -129,6 +129,18 @@ toolsversion[2017] = "14.0"
 
 #
 #
+# frameworkversion specifies the .Net frameworknumber
+frameworkversion = {}
+frameworkversion[2010] = "4.0"
+frameworkversion[2012] = "4.5"
+frameworkversion[2013] = "4.5"
+frameworkversion[2014] = "4.5"
+frameworkversion[2015] = "4.6"
+frameworkversion[2016] = "4.6"
+frameworkversion[2017] = "4.6"
+
+#
+#
 # platformtoolset specifies the vs platformtoolset version number
 platformtoolset = {}
 platformtoolset[2010] = ""
@@ -165,6 +177,7 @@ def process_solution_file(sln, slntemplate):
     global libdir
     global redistdir
     global toolsversion
+    global frameworkversion
     global platformtoolset
 
     # Copy the solution template file to the solution file
@@ -193,7 +206,7 @@ def process_solution_file(sln, slntemplate):
             # Search for project file references
             pp = line.split('"')
             for subline in pp:
-                if max(subline.find(".vfproj"), subline.find(".vcxproj"), subline.find(".vcproj")) != -1:
+                if max(subline.find(".vfproj"), subline.find(".vcxproj"), subline.find(".vcproj"), subline.find(".csproj")) != -1:
                     projectfiles.append(subline)
             # Changes to the sln file based on VS version
             startpos = line.find("Microsoft Visual Studio Solution File, Format Version")
@@ -256,6 +269,7 @@ def process_project_file(pfile):
     global libdir
     global redistdir
     global toolsversion
+    global frameworkversion
     global platformtoolset
     global ucrtlibdir
     # Type (F/C/C#) and related flags are set based on the file extension
@@ -273,7 +287,7 @@ def process_project_file(pfile):
         config_tag = "ItemDefinitionGroup Condition="
         config_val32 = "Win32"
         config_val64 = "x64"
-    elif pfile.find("vcproj") != -1:
+    elif (pfile.find("vcproj") != -1 or pfile.find("csproj") != -1):
         ptype = "csharp"
         config_tag = "PropertyGroup Condition="
         config_val32 = "x86"
@@ -300,6 +314,13 @@ def process_project_file(pfile):
                             parts[i+1] = toolsversion[vs]
                         i += 1
                     line = '"'.join(parts)
+            #
+            # FrameworkVersion
+            # Skip this change when vs=0
+            if vs != 0:
+                startpos = line.find("<TargetFrameworkVersion>")
+                if startpos != -1:
+                    line = line[:startpos+25] + frameworkversion[vs] + line[startpos+28:]
             #
             # PlatformToolSet:
             # Skip this change when vs=0
