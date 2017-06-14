@@ -72,7 +72,7 @@
 !           loop over non-zero entries of row(i) and multiply
 
          do j = idiag(i-1)+1 , idiag(i)
-            yvec(i) = yvec(i) + amat(j) * xvec( imat(j) )
+            if ( imat(j) > 0.0 ) yvec(i) = yvec(i) + amat(j) * xvec( imat(j) )
          enddo
 
 !           add diagonal element
