@@ -6147,8 +6147,6 @@ src/utils_lgpl/deltares_common/packages/deltares_common_c/include/so_fortran_api
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/stream.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/throwexception.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/include/util_mf.h -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/include/win32/pthread.h -text
-src/utils_lgpl/deltares_common/packages/deltares_common_c/include/win32/sched.h -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/Makefile.am -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/bmi_shared_lib_fortran_api.c -text
 src/utils_lgpl/deltares_common/packages/deltares_common_c/src/cpuinfo.cpp -text
@@ -6292,8 +6290,6 @@ src/utils_lgpl/esmfsm/doc/index.html -text
 src/utils_lgpl/esmfsm/include/Makefile.am -text
 src/utils_lgpl/esmfsm/include/esm.h -text
 src/utils_lgpl/esmfsm/include/fsm.i -text
-src/utils_lgpl/esmfsm/include/win32/pthread.h -text
-src/utils_lgpl/esmfsm/include/win32/sched.h -text
 src/utils_lgpl/esmfsm/include/win32/shm.h -text
 src/utils_lgpl/esmfsm/packages/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm/Makefile.am -text

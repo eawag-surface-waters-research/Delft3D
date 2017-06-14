@@ -89,7 +89,7 @@
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include/win32;../../../../third_party_open/expat/lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;../../../../utils_lgpl/d_hydro_lib/include;../../../../third_party_open/expat/lib;%(AdditionalIncludeDirectories);../../../../third_party_open/pthreads/include/$(PlatformName)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -122,7 +122,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\pthreads\include\x64;include;..\..\..\..\utils_lgpl\d_hydro_lib\include;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat\x64\x64\release;..\..\..\..\utils_lgpl\delftonline\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;..\..\..\..\utils_lgpl\d_hydro_lib\include;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat\x64\x64\release;..\..\..\..\utils_lgpl\delftonline\include;%(AdditionalIncludeDirectories);../../../../third_party_open/pthreads/include/$(PlatformName)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -154,7 +154,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>include;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include/win32;../../../../third_party_open/expat/lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;../../../../utils_lgpl/d_hydro_lib/include;../../../../third_party_open/expat/lib;%(AdditionalIncludeDirectories);../../../../third_party_open/pthreads/include/$(PlatformName)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -188,7 +188,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\pthreads\include\x64;include;..\..\..\..\utils_lgpl\d_hydro_lib\include;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat\x64\x64\release;..\..\..\..\utils_lgpl\delftonline\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\pthreads\include\x64;include;..\..\..\..\utils_lgpl\d_hydro_lib\include;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat\x64\x64\release;..\..\..\..\utils_lgpl\delftonline\include;%(AdditionalIncludeDirectories);../../../../third_party_open/pthreads/include/$(PlatformName)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
