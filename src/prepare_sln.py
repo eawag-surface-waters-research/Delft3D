@@ -16,12 +16,11 @@ else:
 
 #
 # This script can be used to convert the VisualStudio solution and project files
-# to the proper version. It is only intended to be used for:
-# https://svn.oss.deltares.nl/repos/delft3d
+# to the proper version.
 # Adapt and use it for your own purpose.
 #
 # adri.mourits@deltares.nl
-# 12 Feb 2016
+# 14 Jun 2017
 #
 # Usage:
 # 1. Install Python on your machine https://www.python.org/downloads/
