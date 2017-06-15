@@ -15,25 +15,26 @@ else:
 
 
 #
-# This script can be used to convert the VisualStudio solution and project files
-# to the proper version.
+# This script can be used to create/convert the VisualStudio solution and project files
+# for the version you are using.
 # Adapt and use it for your own purpose.
 #
 # adri.mourits@deltares.nl
-# 14 Jun 2017
+# 15 Jun 2017
 #
 # Usage:
 # 1. Install Python on your machine https://www.python.org/downloads/
-#    In case Python does not work: check that the path to "python.exe" is added to your environment parameter "PATH"
-# 2. Execute "prepare_sln.py" (double-clicking it in your file browser will do). A window will pop-up in which you can select the
-#    VisualStudio version you are using and the Intel Fortran compiler version
+#    Version 2.7.* is most commonly used
+# 2. Execute "prepare_sln.cmd" (double-clicking it in your file browser will do). A window will pop-up in which you can select the
+#    VisualStudio version you are using and the Intel Fortran compiler version.
 #    Optional usage without pop-up window:
 #    python prepare_sln.py -vs 2013 -ifort 15
-# 3. Click the "Apply" button
-#    Solution file "delft3d_open.sln" will be created,
-#    All project files it refers to will be updated
-# 4. Open the sln file in VisualStudio and "Build Solution"
-# 5. If this script does not behave as expected: Please report the problem and help to improve this script.
+# 3. Click the "Apply" button.
+#    Solution file(s) will be created,
+#    All project files it refers to will be updated.
+# 4. Click the "Exit" button.
+# 5. Open the sln file in VisualStudio and "Build Solution"
+# 6. If this script does not behave as expected: Please report the problem and help to improve this script.
 #
 
 chooseIfort = 1
