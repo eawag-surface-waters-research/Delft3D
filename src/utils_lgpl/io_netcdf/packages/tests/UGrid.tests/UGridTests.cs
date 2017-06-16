@@ -1,9 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using NUnit.Framework;
 using utils.Tests;
+
+// The build of this test is disable by default because it requires NUnit.
+// If you decide to build the test make sure to install Nunit in your solution.
 
 namespace UGrid.tests
 {
@@ -95,7 +99,7 @@ namespace UGrid.tests
         private double[,] mesh2d_face_nodes = {{1, 2, 5, -999}, {2, 3, 4, 5}};
 
         //function to check mesh1d data
-        private void check1dmesh(int ioncid, int networkid, ref LibWrapper wrapper)
+        private void check1dnetwork(int ioncid, int networkid, ref LibWrapper wrapper)
         {
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
@@ -105,10 +109,6 @@ namespace UGrid.tests
             IntPtr c_nbranchgeometrypoints = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
-            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
-            IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
-            IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
-            IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             try
             {
                 //1. Get the node count
@@ -193,22 +193,46 @@ namespace UGrid.tests
                     Assert.That(rc_geopointsY[i], Is.EqualTo(geopointsY[i]));
                 }
 
-                //7. Get the mesh name
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(c_nodesX);
+                Marshal.FreeCoTaskMem(c_nodesY);
+                Marshal.FreeCoTaskMem(c_sourcenodeid);
+                Marshal.FreeCoTaskMem(c_targetnodeid);
+                Marshal.FreeCoTaskMem(c_branchlengths);
+                Marshal.FreeCoTaskMem(c_nbranchgeometrypoints);
+                Marshal.FreeCoTaskMem(c_geopointsX);
+                Marshal.FreeCoTaskMem(c_geopointsY);
+            }
+        }
+
+        //function to check mesh1d data
+        private void check1dmesh(int ioncid, int meshid, ref LibWrapper wrapper)
+        {
+            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
+            IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
+            try
+            {
+                //1. Get the mesh name
+                int ierr = -1;
                 var rnetworkName = new StringBuilder(LibDetails.MAXSTRLEN);
-                ierr = wrapper.ionc_get_mesh_name(ref ioncid, ref networkid, rnetworkName);
+                ierr = wrapper.ionc_get_mesh_name(ref ioncid, ref meshid, rnetworkName);
                 Assert.That(ierr, Is.EqualTo(0));
                 Assert.That(rnetworkName.ToString().Trim(), Is.EqualTo(meshname));
 
-                //8. Get the number of mesh points
+                //2. Get the number of mesh points
                 int rnmeshpoints = -1;
                 ierr =
-                    wrapper.ionc_get_1d_mesh_discretisation_points_count(ref ioncid, ref networkid,
+                    wrapper.ionc_get_1d_mesh_discretisation_points_count(ref ioncid, ref meshid,
                         ref rnmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
                 Assert.That(rnmeshpoints, Is.EqualTo(nmeshpoints));
 
-                //9. Get the coordinates of the mesh points
-                ierr = wrapper.ionc_read_1d_mesh_discretisation_points(ref ioncid, ref networkid, ref c_branchidx,
+                //3. Get the coordinates of the mesh points
+                ierr = wrapper.ionc_read_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
                     ref c_offset, ref rnmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
                 int[] rc_branchidx = new int[rnmeshpoints];
@@ -221,7 +245,7 @@ namespace UGrid.tests
                     Assert.That(rc_offset[i], Is.EqualTo(offset[i]));
                 }
 
-                //10. Get the number of links. 
+                //4. Get the number of links. 
                 int linkmesh = 1;
                 int r_nlinks = -1;
                 ierr = wrapper.ionc_get_contacts_count(ref ioncid, ref linkmesh, ref r_nlinks);
@@ -229,7 +253,7 @@ namespace UGrid.tests
                 Assert.That(r_nlinks, Is.EqualTo(nlinks));
                 LibWrapper.interop_charinfo[] linksinfo = new LibWrapper.interop_charinfo[nlinks];
 
-                //11. Get the links values
+                //5. Get the links values
                 ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
                     linksinfo, ref nlinks);
                 Assert.That(ierr, Is.EqualTo(0));
@@ -249,14 +273,6 @@ namespace UGrid.tests
             }
             finally
             {
-                Marshal.FreeCoTaskMem(c_nodesX);
-                Marshal.FreeCoTaskMem(c_nodesY);
-                Marshal.FreeCoTaskMem(c_sourcenodeid);
-                Marshal.FreeCoTaskMem(c_targetnodeid);
-                Marshal.FreeCoTaskMem(c_branchlengths);
-                Marshal.FreeCoTaskMem(c_nbranchgeometrypoints);
-                Marshal.FreeCoTaskMem(c_geopointsX);
-                Marshal.FreeCoTaskMem(c_geopointsY);
                 Marshal.FreeCoTaskMem(c_branchidx);
                 Marshal.FreeCoTaskMem(c_offset);
                 Marshal.FreeCoTaskMem(c_mesh1indexes);
@@ -334,7 +350,66 @@ namespace UGrid.tests
             }
         }
 
-        private void write1dnetworkandmesh(int ioncid, int networkid, ref LibWrapper wrapper)
+        private void write1dmesh(int ioncid, int networkid, ref LibWrapper wrapper)
+        {
+            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            // Links variables
+            IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
+            IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
+            try
+            {
+                int ierr = -1;
+                string tmpstring;
+                //4. Write the 1d mesh topology.
+                //Assume mesh and network are saved in the same table 
+                int meshid = -1;
+                ierr = wrapper.ionc_create_1d_mesh(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints,
+                    ref nmeshedges);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                //5. Write the 1d mesh geometry
+                Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+                Marshal.Copy(offset, 0, c_offset, nmeshpoints);
+                ierr = wrapper.ionc_write_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
+                    ref c_offset, ref nmeshpoints);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                //6. Write links attributes
+                Marshal.Copy(mesh1indexes, 0, c_mesh1indexes, nlinks);
+                Marshal.Copy(mesh2indexes, 0, c_mesh2indexes, nlinks);
+                int linkmesh = -1;
+                ierr = wrapper.ionc_def_mesh_contact(ref ioncid, ref linkmesh, linkmeshname, ref nlinks, ref linkmesh1,
+                    ref linkmesh2, ref locationType1, ref locationType2);
+                Assert.That(ierr, Is.EqualTo(0));
+                LibWrapper.interop_charinfo[] linksinfo = new LibWrapper.interop_charinfo[nlinks];
+
+                for (int i = 0; i < nlinks; i++)
+                {
+                    tmpstring = linksids[i];
+                    tmpstring = tmpstring.PadRight(LibWrapper.idssize, ' ');
+                    linksinfo[i].ids = tmpstring.ToCharArray();
+                    tmpstring = linkslongnames[i];
+                    tmpstring = tmpstring.PadRight(LibWrapper.longnamessize, ' ');
+                    linksinfo[i].longnames = tmpstring.ToCharArray();
+                }
+
+                //7. Write the mesh links
+                ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
+                    linksinfo, ref nlinks);
+                Assert.That(ierr, Is.EqualTo(0));
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(c_branchidx);
+                Marshal.FreeCoTaskMem(c_offset);
+                Marshal.FreeCoTaskMem(c_mesh1indexes);
+                Marshal.FreeCoTaskMem(c_mesh2indexes);
+            }
+
+        }
+
+        private void write1dnetwork(int ioncid, int networkid, ref LibWrapper wrapper)
         {
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
@@ -344,14 +419,8 @@ namespace UGrid.tests
             IntPtr c_nbranchgeometrypoints = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
-            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
-            IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
-            // Links variables
-            IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
-            IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             try
             {
-
                 int ierr = -1;
                 string tmpstring;
                 //1. Write 1d network network nodes
@@ -396,44 +465,6 @@ namespace UGrid.tests
                 ierr = wrapper.ionc_write_1d_network_branches_geometry(ref ioncid, ref networkid, ref c_geopointsX,
                     ref c_geopointsY, ref nGeometry);
                 Assert.That(ierr, Is.EqualTo(0));
-
-                //4. Write the 1d mesh topology.
-                //Assume mesh and network are saved in the same table 
-                int meshid = networkid;
-                ierr = wrapper.ionc_create_1d_mesh(ref ioncid, ref meshid, meshname, ref nmeshpoints,
-                    ref nmeshedges);
-                Assert.That(ierr, Is.EqualTo(0));
-
-                //5. Write the 1d mesh geometry
-                Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
-                Marshal.Copy(offset, 0, c_offset, nmeshpoints);
-                ierr = wrapper.ionc_write_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
-                    ref c_offset, ref nmeshpoints);
-                Assert.That(ierr, Is.EqualTo(0));
-
-                //6. Write links attributes
-                Marshal.Copy(mesh1indexes, 0, c_mesh1indexes, nlinks);
-                Marshal.Copy(mesh2indexes, 0, c_mesh2indexes, nlinks);
-                int linkmesh = -1;
-                ierr = wrapper.ionc_def_mesh_contact(ref ioncid, ref linkmesh, linkmeshname, ref nlinks, ref linkmesh1,
-                    ref linkmesh2, ref locationType1, ref locationType2);
-                Assert.That(ierr, Is.EqualTo(0));
-                LibWrapper.interop_charinfo[] linksinfo = new LibWrapper.interop_charinfo[nlinks];
-
-                for (int i = 0; i < nlinks; i++)
-                {
-                    tmpstring = linksids[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.idssize, ' ');
-                    linksinfo[i].ids = tmpstring.ToCharArray();
-                    tmpstring = linkslongnames[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.longnamessize, ' ');
-                    linksinfo[i].longnames = tmpstring.ToCharArray();
-                }
-
-                //7. Write the mesh links
-                ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
-                    linksinfo, ref nlinks);
-                Assert.That(ierr, Is.EqualTo(0));
             }
             finally
             {
@@ -445,10 +476,6 @@ namespace UGrid.tests
                 Marshal.FreeCoTaskMem(c_nbranchgeometrypoints);
                 Marshal.FreeCoTaskMem(c_geopointsX);
                 Marshal.FreeCoTaskMem(c_geopointsY);
-                Marshal.FreeCoTaskMem(c_branchidx);
-                Marshal.FreeCoTaskMem(c_offset);
-                Marshal.FreeCoTaskMem(c_mesh1indexes);
-                Marshal.FreeCoTaskMem(c_mesh2indexes);
             }
         }
 
@@ -475,12 +502,43 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
         }
 
+        private void getNetworkid(int ioncid, ref int networkid, ref LibWrapper wrapper)
+        {
+            //get the number of networks
+            int nnumNetworks = -1;
+            int ierr = wrapper.ionc_get_number_of_networks(ref ioncid, ref nnumNetworks);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.That(nnumNetworks, Is.EqualTo(1));
+            // get the networks ids 
+            IntPtr c_networksids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nnumNetworks);
+            ierr = wrapper.ionc_get_network_ids(ref ioncid, ref c_networksids, ref nnumNetworks);
+            Assert.That(ierr, Is.EqualTo(0));
+            int[] rc_networksids = new int[nnumNetworks];
+            Marshal.Copy(c_networksids, rc_networksids, 0, nnumNetworks);
+            networkid = rc_networksids[0];
+        }
+
+        private void getMeshid(int ioncid, ref int meshid, int meshType, ref LibWrapper wrapper)
+        {
+            // get the number meshes 
+            int numMeshes = -1;
+            int ierr = wrapper.ionc_get_number_of_meshes(ref ioncid, ref meshType, ref numMeshes);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.That(numMeshes, Is.EqualTo(1));
+            // get the mesh id
+            IntPtr c_meshids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * numMeshes);
+            ierr = wrapper.ionc_ug_get_mesh_ids(ref ioncid, ref meshType, ref c_meshids, ref numMeshes);
+            Assert.That(ierr, Is.EqualTo(0));
+            int[] rc_meshids = new int[numMeshes];
+            Marshal.Copy(c_meshids, rc_meshids, 0, numMeshes);
+            meshid = rc_meshids[0];
+        }
+
         // Create the netcdf files
         [Test]
         [NUnit.Framework.Category("UGRIDTests")]
-        public void create1dUGRIDNetcdf()
+        public void create1dUGridNetworkAndMeshNetcdf()
         {
-
             //1. Create a netcdf file 
             int ioncid = 0; //file variable 
             int mode = 1; //create in write mode
@@ -506,8 +564,9 @@ namespace UGrid.tests
                 ref nBranches, ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //5. Write the 1d network and mesh
-            write1dnetworkandmesh(ioncid, networkid, ref wrapper);
+            //5. Write 1d network and mesh
+            write1dnetwork(ioncid, networkid, ref wrapper);
+            write1dmesh(ioncid, networkid, ref wrapper);
 
             //6. Close the file
             ierr = wrapper.ionc_close(ref ioncid);
@@ -529,17 +588,24 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //2. Get the 1D network and mesh ids
+            // network
             int networkid = -1;
-            ierr = wrapper.ionc_get_1d_network_id(ref ioncid, ref networkid);
-            Assert.That(ierr, Is.EqualTo(0));
+            getNetworkid(ioncid, ref networkid, ref wrapper);
             Assert.That(networkid, Is.EqualTo(1));
+
+            // 1d mesh mesh
+            int meshType = 1;
             int meshid = -1;
+            getMeshid(ioncid, ref meshid, meshType, ref wrapper);
+            Assert.That(meshid, Is.EqualTo(1));
+
             ierr = wrapper.ionc_get_1d_mesh_id(ref ioncid, ref meshid);
             Assert.That(ierr, Is.EqualTo(0));
             Assert.That(meshid, Is.EqualTo(1));
 
             //3. Check if all 1d data written in the file are correct
-            check1dmesh(ioncid, networkid, ref wrapper);
+            check1dnetwork(ioncid, networkid, ref wrapper);
+            check1dmesh(ioncid, meshid, ref wrapper);
 
             //4. Close the file
             ierr = wrapper.ionc_close(ref ioncid);
@@ -579,9 +645,9 @@ namespace UGrid.tests
             addglobalattributes(targetioncid, ref wrapper);
 
             //5. Get the id of the 2d mesh in the RGF grid file (Custom_Ugrid.nc)
+            int meshType = 2;
             int sourcemesh2d = -1;
-            ierr = wrapper.ionc_get_2d_mesh_id(ref sourcetwodioncid, ref sourcemesh2d);
-            Assert.That(ierr, Is.EqualTo(0));
+            getMeshid(sourcetwodioncid, ref sourcemesh2d, meshType, ref wrapper);
             Assert.That(sourcemesh2d, Is.EqualTo(1));
 
             //6. Create 1d geometry and mesh in the new file (target.nc)
@@ -591,7 +657,8 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //6. Write the 1d data in the new file (1d geometry, mesh and links)
-            write1dnetworkandmesh(targetioncid, networkid, ref wrapper);
+            write1dnetwork(targetioncid, networkid, ref wrapper);
+            write1dmesh(targetioncid, networkid, ref wrapper);
 
             //7. Clone the 2d mesh definitions in the new file
             int target2dmesh = -1;
@@ -622,27 +689,102 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
             Assert.That(nmesh, Is.EqualTo(2));
 
-            //12. Get the mesh ids
+            //12. Get the mesh  and network ids
+            // network
             int source1dnetwork = -1;
-            ierr = wrapper.ionc_get_1d_network_id(ref targetioncid, ref source1dnetwork);
-            Assert.That(ierr, Is.EqualTo(0));
-            Assert.That(source1dnetwork, Is.EqualTo(1));
+            getNetworkid(targetioncid, ref source1dnetwork, ref wrapper);
+            Assert.That(networkid, Is.EqualTo(1));
+
+            // 1d mesh mesh
+            meshType = 1;
             int source1dmesh = -1;
-            ierr = wrapper.ionc_get_1d_mesh_id(ref targetioncid, ref source1dmesh);
-            Assert.That(ierr, Is.EqualTo(0));
+            getMeshid(targetioncid, ref source1dmesh, meshType, ref wrapper);
             Assert.That(source1dmesh, Is.EqualTo(1));
-            sourcemesh2d = -1;
-            ierr = wrapper.ionc_get_2d_mesh_id(ref targetioncid, ref sourcemesh2d);
-            Assert.That(ierr, Is.EqualTo(0));
-            Assert.That(sourcemesh2d, Is.EqualTo(2));
+
+            // 2d mesh mesh
+            meshType = 2;
+            int source2dmesh = -1;
+            getMeshid(targetioncid, ref source2dmesh, meshType, ref wrapper);
+            Assert.That(source2dmesh, Is.EqualTo(2));
 
             //13. Check all 1d and 2d data
-            check1dmesh(targetioncid, source1dnetwork, ref wrapper);
-            check2dmesh(targetioncid, sourcemesh2d, ref wrapper);
+            check1dnetwork(targetioncid, source1dnetwork, ref wrapper);
+            check1dmesh(targetioncid, source1dmesh, ref wrapper);
+            check2dmesh(targetioncid, source2dmesh, ref wrapper);
 
             //14. Close the file
             ierr = wrapper.ionc_close(ref targetioncid);
             Assert.That(ierr, Is.EqualTo(0));
+        }
+
+        // Create a standalone network
+        [Test]
+        [NUnit.Framework.Category("UGRIDTests")]
+        public void create1dNetwork()
+        {
+            //1. Create a netcdf file 
+            int ioncid = 0; //file variable 
+            int mode = 1; //create in write mode
+            var ierr = -1;
+            string tmpstring; //temporary string for several operations
+            string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
+            TestHelper.DeleteIfExists(c_path);
+            Assert.IsFalse(File.Exists(c_path));
+            var wrapper = new LibWrapper();
+
+            //2. Create the file, will not add any dataset 
+            ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.IsTrue(File.Exists(c_path));
+
+            //3. For reading the grid later on we need to add metadata to the netcdf file. 
+            //   The function ionc_add_global_attributes adds to the netCDF file the UGRID convention
+            addglobalattributes(ioncid, ref wrapper);
+
+            //4. Create a 1d network
+            int networkid = -1;
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref nNodes,
+                ref nBranches, ref nGeometry);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //5. Write 1d network and mesh
+            write1dnetwork(ioncid, networkid, ref wrapper);
+
+            //6. Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+        }
+
+        // read the standalone network
+        [Test]
+        [NUnit.Framework.Category("UGRIDTests")]
+        public void read1dNetwork()
+        {
+            //1. Open a netcdf file 
+            string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0; //create in read mode
+            var wrapper = new LibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. Get the 1D network and mesh ids
+            int networkid = -1;
+            ierr = wrapper.ionc_get_1d_network_id(ref ioncid, ref networkid);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.That(networkid, Is.EqualTo(1));
+            int meshid = -1;
+            ierr = wrapper.ionc_get_1d_mesh_id(ref ioncid, ref meshid);
+            // Mesh should not be found!
+            Assert.That(ierr, Is.EqualTo(-1));
+            Assert.That(meshid, Is.EqualTo(-1));
+
+            //3. Check if all 1d data written in the file are correct
+            check1dnetwork(ioncid, networkid, ref wrapper);
+
+            //4. Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
         }
     }
 }

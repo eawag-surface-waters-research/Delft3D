@@ -327,12 +327,13 @@ namespace UGrid.tests
         /// </summary>
         /// <param name="ioncid">The netCDF file id (in)</param>
         /// <param name="networkid">The network id (in)</param>
+        /// <param name="meshid">The mesh id (out)</param>
         /// <param name="meshname">The mesh name (in)</param>
         /// <param name="nmeshpoints">The number of mesh points (in)</param>
         /// <param name="nmeshedges">The number of mesh edges (in)</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_create_1d_mesh", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_create_1d_mesh_dll([In] ref int ioncid, [In] ref int networkid, string meshname, [In] ref int nmeshpoints, [In] ref int nmeshedges);
+        private static extern int ionc_create_1d_mesh_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref int meshid, string meshname, [In] ref int nmeshpoints, [In] ref int nmeshedges);
 
         /// <summary>
         /// Writes the mesh coordinates points 
@@ -512,9 +513,49 @@ namespace UGrid.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_clone_mesh_data", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_clone_mesh_data_dll([In] ref int ncidin, [In] ref int ncidout, [In] ref int meshidin, [In] ref int meshidout);
 
+        /// <summary>
+        /// Gets the number of networks
+        /// </summary>
+        /// <param name="ncidin"></param>
+        /// <param name="nnumNetworks"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_number_of_networks", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_number_of_networks_dll([In] ref int ncidin, [In, Out] ref int nnumNetworks);
+        
+        /// <summary>
+        /// Gets the number of meshes
+        /// </summary>
+        /// <param name="ncidin"></param>
+        /// <param name="meshType"> Mesh type: 0 = any type, 1 = 1D mesh, 2 = 2D mesh, 3 = 3D mesh </param>
+        /// <param name="numMeshes"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_number_of_meshes", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_number_of_meshes_dll([In] ref int ncidin, [In] ref int meshType, [In, Out] ref int numMeshes);
+
+        /// <summary>
+        /// Get the network ids
+        /// </summary>
+        /// <param name="ncidin"></param>
+        /// <param name="c_networkids"></param>
+        /// <param name="nnumNetworks"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_network_ids", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_network_ids_dll([In] ref int ncidin, [In, Out] ref IntPtr c_networkids,[In] ref int nnumNetworks);
+
+        /// <summary>
+        /// Gets the mesh ids
+        /// </summary>
+        /// <param name="ncidin"></param>
+        /// <param name="meshType"></param>
+        /// <param name="c_meshids"></param>
+        /// <param name="nnumNetworks"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_ug_get_mesh_ids", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_ug_get_mesh_ids_dll([In] ref int ncidin, [In] ref int meshType, [In, Out] ref IntPtr c_meshids, [In] ref int nnumNetworks);
+
         #endregion
 
-        #region Implementation of IGridWrapper
+        #region Implementation of LibWrapper
 
         public bool ionc_adheresto_conventions(ref int ioncid, ref int iconvtype)
         {
@@ -679,9 +720,9 @@ namespace UGrid.tests
             return ionc_write_1d_network_branches_geometry_dll(ref ioncid, ref networkid, ref c_geopointsX, ref c_geopointsY, ref nGeometry);
         }
 
-        public int ionc_create_1d_mesh(ref int ioncid, ref int networkid, string meshname, ref int nmeshpoints, ref int nmeshedges)
+        public int ionc_create_1d_mesh(ref int ioncid, ref int networkid, ref int meshid, string meshname, ref int nmeshpoints, ref int nmeshedges)
         {
-            return ionc_create_1d_mesh_dll(ref ioncid, ref networkid, meshname, ref nmeshpoints, ref nmeshedges);
+            return ionc_create_1d_mesh_dll(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints, ref nmeshedges);
         }
 
         public int ionc_write_1d_mesh_discretisation_points(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,
@@ -769,6 +810,27 @@ namespace UGrid.tests
         {
             return ionc_clone_mesh_data_dll(ref ncidin, ref ncidout, ref meshidin, ref meshidout);
         }
+
+        public int ionc_get_number_of_networks(ref int ncidin, ref int nnumNetworks)
+        {
+            return ionc_get_number_of_networks_dll(ref ncidin, ref nnumNetworks);
+        }
+
+        public int ionc_get_number_of_meshes(ref int ncidin, ref int meshType, ref int numMeshes)
+        {
+            return ionc_get_number_of_meshes_dll(ref ncidin, ref meshType, ref numMeshes);
+        }
+
+        public int ionc_get_network_ids(ref int ncidin, ref IntPtr c_networkids, ref int nnumNetworks)
+        {
+            return ionc_get_network_ids_dll(ref ncidin, ref c_networkids, ref nnumNetworks);
+        }
+
+        public int ionc_ug_get_mesh_ids(ref int ncidin, ref int meshType, ref IntPtr c_meshids, ref int nnumNetworks)
+        {
+            return ionc_ug_get_mesh_ids_dll(ref ncidin, ref meshType, ref c_meshids, ref nnumNetworks);
+        }
+
         #endregion
     }
 }
